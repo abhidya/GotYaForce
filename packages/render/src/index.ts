@@ -3,6 +3,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone as cloneSkinnedObject } from "three/examples/jsm/utils/SkeletonUtils.js";
 
+// Source-owned camera layer (1:1 port of HSD CObj + COBJ animation + zz_00059b8_ view-setup).
+export * from "./camera/sourceCamera.js";
+
 export interface ThreeViewportOptions {
   backend?: "webgl";
   antialias?: boolean;

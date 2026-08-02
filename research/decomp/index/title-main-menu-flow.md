@@ -1,5 +1,14 @@
 # Title And Global Menu Mode Flow
 
+> **2026-08-01 source correction:** `0x801dca30` is an actor-viewer/customization
+> scene, not the title/main-menu controller. Consequently, `DAT_80390ad0` rows
+> 30..37 are not proven physical-menu mode mappings. The verified title-intro
+> owner is `0x801c795c`: it selects stage `0x11` (`stff`), loads `tdc00..09` and
+> `tl00_mdl.arc`, seeds G RED/Sasuke, and creates the ten `stff` title props. The
+> physical desk controller is the global-state-2 chain beginning at `0x800bf8d4`;
+> its `FUN_801cd90c` widgets are now rendered from the recovered `stff` drawable table
+> (`DAT_8038a760`) rather than from native-capture backgrounds.
+
 This note links the reviewed Ghidra decompile, the copied filesystem tree, and the UI/UX research for the title/main-menu path.
 
 ## Dispatcher
@@ -30,25 +39,54 @@ The dispatch table at `PTR_FUN_802da780` has 11 reviewed entries. The copied tre
 | 9 | `0x8008d5d0` | `global_menu_mode_09_title_menu_render` |
 | 10 | `0x8008d64c` | `global_menu_mode_10_frontend_transition_render` |
 
-## Title/Main Menu Scene
+## Title/Main Menu Ownership Status
 
-The dispatcher does not own the title scene or UI state by itself. It only selects a render recipe. The title/main-menu scene lives in the front-end menu cluster:
+The dispatcher selects render recipes but does not prove which high-level controller owns
+the physical desk menu. Earlier labels attached that ownership to `0x801dca30`; reviewing
+its actor allocation, camera orbit, and widget callbacks shows that cluster belongs to an
+actor viewer/customization scene instead. Its `set_global_menu_mode(9)` call proves only
+the render recipe it uses.
 
-| address | reviewed name | role |
+The verified boot dispatcher is `0x80017918`, whose table at `0x802c4a00` enters the title
+task through `0x800179e8 -> 0x801c7908`. The title task's own two-entry table is stored at
+`0x80435a88`: `0x801c795c` initializes it and `0x801c7b68` ticks it. When the script ends,
+`0x800179e8` sets the global dispatcher at `0x802d2e48` to state 2, whose entry is
+`0x800bf8d4`. That controller recreates stage `0x11`, calls `0x801cd90c` to instantiate
+the physical-menu widgets from `DAT_8038a720`, and routes its seven selection indices
+through `PTR_FUN_802cfdc4` at `0x802cfdc4`. Index 1 dispatches directly to the recovered
+Challenge controller at `0x80195f2c`.
+
+## Physical Menu Drawables
+
+`FUN_801cd90c` walks 15 four-byte descriptors at `DAT_8038a720`: seven kind-0 entry
+objects (indices 0..6), one kind-1 cursor, and seven kind-2 label objects (indices 0..6).
+The kind handlers are selected by four byte-verified function tables:
+
+| table | address | entries |
 | --- | --- | --- |
-| `0x801dca30` | `title_main_menu_scene_enter` | enters the title/main-menu scene, loads scene/camera/model state, sets mode 9, spawns widgets, starts fade |
-| `0x801dcf7c` | `title_main_menu_scene_tick` | wrapper around the per-frame title/main-menu update/draw |
-| `0x801dcfa0` | `title_main_menu_scene_update_draw` | handles title/menu camera input, updates widgets/layers, draws menu UI passes |
-| `0x801dd63c` | `title_menu_reset_camera` | resets menu camera state |
-| `0x801dd6b0` | `title_menu_update_orbit_camera` | updates the orbiting menu camera |
-| `0x801dd7d4` | `title_menu_spawn_base_widgets` | walks the base widget descriptor table |
-| `0x801dd820` | `title_menu_spawn_base_widget` | allocates one title/menu widget and installs update/draw callbacks |
-| `0x801dd8d8` | `title_menu_widget_update_dispatch` | dispatches per-widget update callbacks |
-| `0x801de9e0` | `title_menu_widget_draw` | draws title/menu widgets |
+| task state | `0x8038a79c` | `0x801cd9e4`, `0x801cda40`, `0x801cda7c`, `0x801cda90` |
+| init by kind | `0x8038a7ac` | `0x801cdaec`, `0x801cde60`, `0x801ce01c` |
+| update by kind | `0x8038a7b8` | `0x801cdbe0`, `0x801cdf08`, `0x801ce084` |
+| draw by kind | `0x8038a7c4` | `0x801cde10`, `0x801cdf84`, `0x801ce0dc` |
 
-`0x801dca30` calls `set_global_menu_mode(9)`, so mode 9 is the render side used by the title/main menu. `0x8008d5d0` performs a three-pass render using `PTR_DAT_80433930[0x34]` and render helpers such as `zz_008c440_`.
+Kind 0 indexes the three-u16 rows at `DAT_8038a760`. The first two models form the
+entry/selection pair and the third is the corresponding kind-2 label:
 
-`0x801f5bd4 frontend_menu_branch_load_transition` later calls `set_global_menu_mode(10)`, making mode 10 the front-end transition/render branch.
+| menu index | base | selection | label |
+| ---: | ---: | ---: | ---: |
+| 0 | 41 | 61 | 40 |
+| 1 | 43 | 62 | 42 |
+| 2 | 35 | 63 | 44 |
+| 3 | 39 | 59 | 36 |
+| 4 | 45 | 64 | 46 |
+| 5 | 37 | 60 | 38 |
+| 6 | 66 | 67 | 68 |
+
+All are authored models in `stff_mdl.arc`. `FUN_801cde60` loads cursor model `0x38`
+(56) and `zz_01cdf08_` copies the selected kind-0 entry position into it. The seven
+signed BAM rotation increments at `DAT_8038a78c` are all `0x0200` (512); the cursor advances by
+literal `0x400` BAM per frame. The browser renderer consumes these generated values and
+uses the authored `stff` camera/lights and retained GLB transforms.
 
 ## Desk Intro Script
 
@@ -62,7 +100,7 @@ The 3D desk/title intro is also driven by an earlier front-end script cluster:
 | `0x801c8128` | `FUN_801c8128` | script opcode `0x0b`; waits for/attaches the preloaded desk scene archives via `zz_0042954_` and `zz_0042b20_` |
 | `0x801c81a0` | `FUN_801c81a0` | script opcode `0x0d`; controls borg actor slots and starts actor animations through `zz_0057ff8_` |
 
-The front-end preload at `0x80042a58 zz_0042a58_` loads archive ids `0xa86..0xa8f` plus `0xaa6`. In the copied AFS rebuild table, `0xaa6` is `tl00_mdl.arc` (the desk diorama scene), and `0xa86..0xa8f` are `tdc00..tdc09.arc` — 10 bare HSD DATs (root name `scene_data`, 1.3–1.8 KB each, no geometry, dense float transform tracks) holding the desk-intro animation/pose banks for the 7 script anim ids across the 2 actor slots. `FUN_801c795c` also seeds the actor descriptor table at `PTR_DAT_80433934+0x10` from `DAT_8038a4ec`; that block is a FLAT array of 6 big-endian u16 borg ids (proven at chunk_0006.c:7055 `Battle_SpawnActiveBorgFromSlotTables` and chunk_0046.c:1176-1192's stride-2/6-slot layout): `[0]=0x0615` (G-Red pl0615), `[1]=0x000a` (Sasuke pl000a — Kakeru's partner borg), `[2..5]=0xffff` (empty). The variant lives in a separate `+0xa0` byte table seeded elsewhere, not in this block.
+The front-end preload at `0x80042a58 zz_0042a58_` loads archive ids `0xa86..0xa8f` plus `0xaa6`. In the copied AFS rebuild table, `0xaa6` is `tl00_mdl.arc` (the desk diorama scene), and `0xa86..0xa8f` are `tdc00..tdc09.arc` — 10 bare HSD DATs (root name `scene_data`, 1.3–1.8 KB each, no geometry, dense float tracks) attached as scene assets by opcode `0x0b`. They are **not** the actor motion banks: the actor commands select each borg's own family group-5 stream, which maps into that borg's g0 motion file. `FUN_801c795c` also seeds the actor descriptor table at `PTR_DAT_80433934+0x10` from `DAT_8038a4ec`; that block is a FLAT array of 6 big-endian u16 borg ids (proven at chunk_0006.c:7055 `Battle_SpawnActiveBorgFromSlotTables` and chunk_0046.c:1176-1192's stride-2/6-slot layout): `[0]=0x0615` (G-Red pl0615), `[1]=0x000a` (Sasuke pl000a — Kakeru's partner borg), `[2..5]=0xffff` (empty). The variant lives in a separate `+0xa0` byte table seeded elsewhere, not in this block.
 
 Runtime trace `user-data/dolphin-trace/traces/input-bridge-action-only/gdb-trace-2026-07-02T21-06-13-352Z.json` confirms `sndSeqContinue` executing with `state+0x20 = 0x8038a3ec`. The captured bytes begin:
 
@@ -104,32 +142,41 @@ zz_0057ff8_((&DAT_803c4e84)[slot], 5, anim_id);
 zz_004beb8_(rate, actor, 0xf, action_group, anim_id, -1, -1);
 ```
 
-So the G-Red/second-borg "run onto the desk/table" beats are most likely these scripted `0x0d` actor commands. The exact visual name for each animation id still needs confirmation against the exported `pl0615mot.bin`/`pl0000mot.bin` motion-bank labels or a frame-stepped runtime capture.
+The recovered family streams establish the exact source mapping used by the port: script ids `0..5` and `7` select the same-numbered g0 animations, while script id `6` selects g0 animation `9` for both intro actors. Root translation from those baked clips is retained, so the `0x0d` commands — not synthetic movement constants — drive their choreography. The playback-rate operand carried by id `3` is recovered as `30`, but its engine unit remains unpinned; the port therefore leaves that clip at its baked rate instead of inventing a conversion.
+
+### Camera timeline correction (2026-08-01)
+
+Raw PPC for opcode `0x08` proves it is `waitForSceneFrame`, not a fade setter. Opcode
+`0x07` installs a selected COBJ animation timeline and calls `zz_00088a4_`; the per-frame
+tick advances that HSD camera frame, while `0x08` blocks until the requested frame (or
+the `0xff` completion sentinel). The ten tdc end frames are 39, 23, 60, 49, 49, 80, 31,
+49, 29, and 29. Their camera/eye/target FOBJ tracks are exported to
+`apps/game/public/ui/scenes/tl00/tdc-camera-anims.json` and sampled by the renderer.
+Opcode `0x01`, not `0x07`, owns full-screen color. With these waits restored, the
+fixed-frame script reaches Press Start at frame 1222.
 
 ## Main Menu Handoff
 
-The later menu handoff is:
+The verified handoff is:
 
 ```text
-front-end selection flow
-  -> 0x801dc8e8 zz_01dc8e8_(scene_index, input_index, list_kind, borg_entry)
-  -> 0x801dc970 zz_01dc970_()
-  -> 0x801dca30 title_main_menu_scene_enter
-  -> set_global_menu_mode(9)
-  -> title_menu_reset_camera
-  -> title_menu_spawn_base_widgets
+0x800179e8 (title reports end)
+  -> global dispatcher state 2
+  -> 0x800bf8d4 physical-menu controller
+  -> DAT_80301cf0 seven-row directional graph
+  -> selected index 1
+  -> PTR_FUN_802cfdc4[1] = 0x80195f2c dispatch_challenge_flow_state
 ```
 
-`zz_01dc8e8_` stores the selected scene/resource index in `DAT_80436398[0x14]`, the input/player index in `DAT_80436398[0x15]`, and copies the selected borg id/variant through `zz_01dd5d4_`. `title_main_menu_scene_enter` then creates the active actor, positions it, switches to global menu mode `9`, and spawns the menu option widgets.
+`0x801dc8e8 -> 0x801dca30` remains an actor-viewer/customization handoff and must not be
+used as the desk-menu transition.
 
 ## UI/UX Evidence
 
-The web/UI research describes the visible title/main-menu as a 3D desk diorama with selectable menu items and a red gear cursor. That matches the decomp cluster:
-
-- `DAT_80390ad0` is a 98-row base widget descriptor table consumed by `title_menu_spawn_base_widgets`.
-- `PTR_FUN_8039131c` is the base widget update callback table.
-- `DAT_80435b88` and `PTR_FUN_803a13b8` cover optional extra widget descriptors/callbacks.
-- The scene assets are exported as `tl00` and `optn00` in `apps/game/public/ui/scenes/manifest.json`.
-- `apps/game/UI-FIDELITY-SPEC.md` and `apps/game/src/ui/screens/MainMenu.ts` hold the current recreated UI/UX target notes.
+The web/UI research describes a 3D desk diorama with selectable menu items and a red
+gear cursor. The scene assets are exported as `tl00` and `optn00`, and native captures
+remain useful visual evidence. They do not establish controller ownership. In particular,
+`DAT_80390ad0` and its callback tables belong to the actor-viewer/customization cluster
+and cannot be treated as physical-menu option mappings.
 
 Important correction: `titles.tpl` is the Sofdec/ADX boot splash. It is not the 3D desk title/main-menu scene.

@@ -2,6 +2,8 @@ export interface LoopHandle {
   stop(): void;
 }
 
+export * from "./gcRuntime.js";
+
 export interface Destroyable {
   destroy(): void;
 }

@@ -10,7 +10,26 @@ export const TITLE_INTRO_SCRIPT_SOURCE = {
     "script": "0x8038a3ec",
     "actorDescriptors": "0x8038a4ec",
     "opcodeHandlers": "0x8038a4f8",
-    "widgetDescriptors": "0x8038a570"
+    "widgetDescriptors": "0x8038a570",
+    "propMotionRows": "0x8038a5b4",
+    "propTaskStateHandlers": "0x8038a674",
+    "propInitHandlers": "0x8038a684",
+    "propPostInitHandlers": "0x8038a690",
+    "propUpdateHandlers": "0x8038a69c",
+    "propWobbleFrames": "0x8038a6a8",
+    "propZero": "0x8043bcf8",
+    "radiansToBam": "0x8043bcfc",
+    "overlayInitialOpacity": "0x8043bd08",
+    "overlayOpacityStep": "0x8043bd0c",
+    "physicalMenuWidgetDescriptors": "0x8038a720",
+    "physicalMenuModelTriplets": "0x8038a760",
+    "physicalMenuAngularSteps": "0x8038a78c",
+    "physicalMenuTaskStateHandlers": "0x8038a79c",
+    "physicalMenuInitHandlers": "0x8038a7ac",
+    "physicalMenuUpdateHandlers": "0x8038a7b8",
+    "physicalMenuDrawHandlers": "0x8038a7c4",
+    "physicalMenuDirectionTable": "0x80301cf0",
+    "physicalMenuModeDispatch": "0x802cfdc4"
   },
   "generatedBy": "gen-title-intro-script.mjs"
 } as const;
@@ -425,6 +444,509 @@ export const TITLE_INTRO_WIDGET_DESCRIPTORS = [
   }
 ] as const;
 
+export const TITLE_INTRO_PROP_MOTION_ROWS = [
+  {
+    "variant": 0,
+    "waitFrames": 0,
+    "soundId": -1,
+    "angularAccelerationBam": -8192,
+    "angularVelocityBam": 0,
+    "velocity": 1000,
+    "acceleration": -8,
+    "accelerationStep": -1.5,
+    "terminalVelocity": 60
+  },
+  {
+    "variant": 1,
+    "waitFrames": 24,
+    "soundId": -1,
+    "angularAccelerationBam": -8192,
+    "angularVelocityBam": 0,
+    "velocity": 1000,
+    "acceleration": -8,
+    "accelerationStep": -1.5,
+    "terminalVelocity": 60
+  },
+  {
+    "variant": 2,
+    "waitFrames": 16,
+    "soundId": -1,
+    "angularAccelerationBam": -8192,
+    "angularVelocityBam": 0,
+    "velocity": 1000,
+    "acceleration": -8,
+    "accelerationStep": -1.5,
+    "terminalVelocity": 60
+  },
+  {
+    "variant": 3,
+    "waitFrames": 8,
+    "soundId": -1,
+    "angularAccelerationBam": -8192,
+    "angularVelocityBam": 0,
+    "velocity": 1000,
+    "acceleration": -8,
+    "accelerationStep": -1.5,
+    "terminalVelocity": 60
+  },
+  {
+    "variant": 4,
+    "waitFrames": 20,
+    "soundId": 379,
+    "angularAccelerationBam": -8192,
+    "angularVelocityBam": -4096,
+    "velocity": 1000,
+    "acceleration": -40,
+    "accelerationStep": -8,
+    "terminalVelocity": 0
+  },
+  {
+    "variant": 5,
+    "waitFrames": 20,
+    "soundId": -1,
+    "angularAccelerationBam": 0,
+    "angularVelocityBam": 0,
+    "velocity": 1000,
+    "acceleration": -40,
+    "accelerationStep": -8,
+    "terminalVelocity": 0
+  },
+  {
+    "variant": 6,
+    "waitFrames": 30,
+    "soundId": 379,
+    "angularAccelerationBam": 8192,
+    "angularVelocityBam": 4096,
+    "velocity": 1000,
+    "acceleration": -40,
+    "accelerationStep": -8,
+    "terminalVelocity": 0
+  },
+  {
+    "variant": 7,
+    "waitFrames": 30,
+    "soundId": -1,
+    "angularAccelerationBam": 0,
+    "angularVelocityBam": 0,
+    "velocity": 1000,
+    "acceleration": -40,
+    "accelerationStep": -8,
+    "terminalVelocity": 0
+  }
+] as const;
+
+export const TITLE_INTRO_PROP_DISPATCH = {
+  "taskState": [
+    {
+      "index": 0,
+      "address": "0x801c8590"
+    },
+    {
+      "index": 1,
+      "address": "0x801c860c"
+    },
+    {
+      "index": 2,
+      "address": "0x801c8648"
+    },
+    {
+      "index": 3,
+      "address": "0x801c865c"
+    }
+  ],
+  "initByKind": [
+    {
+      "index": 0,
+      "address": "0x801c86b8"
+    },
+    {
+      "index": 1,
+      "address": "0x801c87dc"
+    },
+    {
+      "index": 2,
+      "address": "0x801c8cf0"
+    }
+  ],
+  "postInitByKind": [
+    {
+      "index": 0,
+      "address": "0x801c8700"
+    },
+    {
+      "index": 1,
+      "address": "0x801c892c"
+    },
+    {
+      "index": 2,
+      "address": "0x801c8d3c"
+    }
+  ],
+  "updateByKind": [
+    {
+      "index": 0,
+      "address": "0x801c87b4"
+    },
+    {
+      "index": 1,
+      "address": "0x801c8cb0"
+    },
+    {
+      "index": 2,
+      "address": "0x801c8e04"
+    }
+  ]
+} as const;
+
+export const TITLE_INTRO_PROP_WOBBLE_FRAMES = [
+  -40,
+  40,
+  -20,
+  20,
+  -10,
+  10,
+  0,
+  0
+] as const;
+
+export const TITLE_INTRO_PROP_SCALAR_CONSTANTS = {
+  "zero": 0,
+  "radiansToBam": 10430.3779296875,
+  "overlayInitialOpacity": 1,
+  "overlayOpacityStep": 0.10000000149011612
+} as const;
+
+export const PHYSICAL_MENU_WIDGET_DESCRIPTORS = [
+  {
+    "index": 0,
+    "kind": 0,
+    "menuIndex": 0,
+    "layer": 0,
+    "priority": 2
+  },
+  {
+    "index": 1,
+    "kind": 0,
+    "menuIndex": 1,
+    "layer": 0,
+    "priority": 2
+  },
+  {
+    "index": 2,
+    "kind": 0,
+    "menuIndex": 2,
+    "layer": 0,
+    "priority": 2
+  },
+  {
+    "index": 3,
+    "kind": 0,
+    "menuIndex": 3,
+    "layer": 0,
+    "priority": 2
+  },
+  {
+    "index": 4,
+    "kind": 0,
+    "menuIndex": 4,
+    "layer": 0,
+    "priority": 2
+  },
+  {
+    "index": 5,
+    "kind": 0,
+    "menuIndex": 5,
+    "layer": 0,
+    "priority": 2
+  },
+  {
+    "index": 6,
+    "kind": 0,
+    "menuIndex": 6,
+    "layer": 0,
+    "priority": 2
+  },
+  {
+    "index": 7,
+    "kind": 1,
+    "menuIndex": 0,
+    "layer": 0,
+    "priority": 1
+  },
+  {
+    "index": 8,
+    "kind": 2,
+    "menuIndex": 0,
+    "layer": 0,
+    "priority": 1
+  },
+  {
+    "index": 9,
+    "kind": 2,
+    "menuIndex": 1,
+    "layer": 0,
+    "priority": 1
+  },
+  {
+    "index": 10,
+    "kind": 2,
+    "menuIndex": 2,
+    "layer": 0,
+    "priority": 1
+  },
+  {
+    "index": 11,
+    "kind": 2,
+    "menuIndex": 3,
+    "layer": 0,
+    "priority": 1
+  },
+  {
+    "index": 12,
+    "kind": 2,
+    "menuIndex": 4,
+    "layer": 0,
+    "priority": 1
+  },
+  {
+    "index": 13,
+    "kind": 2,
+    "menuIndex": 5,
+    "layer": 0,
+    "priority": 1
+  },
+  {
+    "index": 14,
+    "kind": 2,
+    "menuIndex": 6,
+    "layer": 0,
+    "priority": 1
+  }
+] as const;
+
+export const PHYSICAL_MENU_MODEL_TRIPLETS = [
+  {
+    "menuIndex": 0,
+    "baseModelId": 41,
+    "selectionModelId": 61,
+    "labelModelId": 40
+  },
+  {
+    "menuIndex": 1,
+    "baseModelId": 43,
+    "selectionModelId": 62,
+    "labelModelId": 42
+  },
+  {
+    "menuIndex": 2,
+    "baseModelId": 35,
+    "selectionModelId": 63,
+    "labelModelId": 44
+  },
+  {
+    "menuIndex": 3,
+    "baseModelId": 39,
+    "selectionModelId": 59,
+    "labelModelId": 36
+  },
+  {
+    "menuIndex": 4,
+    "baseModelId": 45,
+    "selectionModelId": 64,
+    "labelModelId": 46
+  },
+  {
+    "menuIndex": 5,
+    "baseModelId": 37,
+    "selectionModelId": 60,
+    "labelModelId": 38
+  },
+  {
+    "menuIndex": 6,
+    "baseModelId": 66,
+    "selectionModelId": 67,
+    "labelModelId": 68
+  }
+] as const;
+
+export const PHYSICAL_MENU_ANGULAR_STEPS = [
+  {
+    "menuIndex": 0,
+    "bamStep": 512
+  },
+  {
+    "menuIndex": 1,
+    "bamStep": 512
+  },
+  {
+    "menuIndex": 2,
+    "bamStep": 512
+  },
+  {
+    "menuIndex": 3,
+    "bamStep": 512
+  },
+  {
+    "menuIndex": 4,
+    "bamStep": 512
+  },
+  {
+    "menuIndex": 5,
+    "bamStep": 512
+  },
+  {
+    "menuIndex": 6,
+    "bamStep": 512
+  }
+] as const;
+
+export const PHYSICAL_MENU_HANDLERS = {
+  "taskState": [
+    {
+      "index": 0,
+      "address": "0x801cd9e4"
+    },
+    {
+      "index": 1,
+      "address": "0x801cda40"
+    },
+    {
+      "index": 2,
+      "address": "0x801cda7c"
+    },
+    {
+      "index": 3,
+      "address": "0x801cda90"
+    }
+  ],
+  "initByKind": [
+    {
+      "index": 0,
+      "address": "0x801cdaec"
+    },
+    {
+      "index": 1,
+      "address": "0x801cde60"
+    },
+    {
+      "index": 2,
+      "address": "0x801ce01c"
+    }
+  ],
+  "updateByKind": [
+    {
+      "index": 0,
+      "address": "0x801cdbe0"
+    },
+    {
+      "index": 1,
+      "address": "0x801cdf08"
+    },
+    {
+      "index": 2,
+      "address": "0x801ce084"
+    }
+  ],
+  "drawByKind": [
+    {
+      "index": 0,
+      "address": "0x801cde10"
+    },
+    {
+      "index": 1,
+      "address": "0x801cdf84"
+    },
+    {
+      "index": 2,
+      "address": "0x801ce0dc"
+    }
+  ]
+} as const;
+
+export const PHYSICAL_MENU_CURSOR_MODEL_ID = 0x38 as const;
+export const PHYSICAL_MENU_DIRECTION_TABLE = [
+  {
+    "menuIndex": 0,
+    "up": 1,
+    "down": 0,
+    "left": 2,
+    "right": 3
+  },
+  {
+    "menuIndex": 1,
+    "up": 1,
+    "down": 0,
+    "left": 4,
+    "right": 5
+  },
+  {
+    "menuIndex": 2,
+    "up": 4,
+    "down": 2,
+    "left": 6,
+    "right": 0
+  },
+  {
+    "menuIndex": 3,
+    "up": 5,
+    "down": 0,
+    "left": 1,
+    "right": 3
+  },
+  {
+    "menuIndex": 4,
+    "up": 4,
+    "down": 2,
+    "left": 6,
+    "right": 1
+  },
+  {
+    "menuIndex": 5,
+    "up": 5,
+    "down": 3,
+    "left": 1,
+    "right": 5
+  },
+  {
+    "menuIndex": 6,
+    "up": 6,
+    "down": 2,
+    "left": 6,
+    "right": 4
+  }
+] as const;
+
+export const PHYSICAL_MENU_MODE_DISPATCH = [
+  {
+    "index": 0,
+    "address": "0x8017ad60"
+  },
+  {
+    "index": 1,
+    "address": "0x80195f2c"
+  },
+  {
+    "index": 2,
+    "address": "0x801fda5c"
+  },
+  {
+    "index": 3,
+    "address": "0x801ba474"
+  },
+  {
+    "index": 4,
+    "address": "0x800936c0"
+  },
+  {
+    "index": 5,
+    "address": "0x800ff618"
+  },
+  {
+    "index": 6,
+    "address": "0x801ec7c4"
+  }
+] as const;
+
 export const TITLE_INTRO_COMMANDS = [
   {
     "offset": 0,
@@ -450,7 +972,7 @@ export const TITLE_INTRO_COMMANDS = [
     "offset": 4,
     "frame": 0,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -543,7 +1065,7 @@ export const TITLE_INTRO_COMMANDS = [
     "offset": 27,
     "frame": 120,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -575,7 +1097,7 @@ export const TITLE_INTRO_COMMANDS = [
     "offset": 35,
     "frame": 120,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       3
@@ -583,7 +1105,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 37,
-    "frame": 120,
+    "frame": 180,
     "opcode": 6,
     "name": "selectWidgetOrEffect",
     "handler": "0x801c7fc0",
@@ -593,9 +1115,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 39,
-    "frame": 120,
+    "frame": 180,
     "opcode": 12,
-    "name": "setAudioCue",
+    "name": "setSceneAuxMode",
     "handler": "0x801c8168",
     "payload": [
       1
@@ -603,9 +1125,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 41,
-    "frame": 120,
+    "frame": 180,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -615,9 +1137,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 45,
-    "frame": 120,
+    "frame": 180,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       0
@@ -625,7 +1147,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 47,
-    "frame": 120,
+    "frame": 180,
     "opcode": 21,
     "name": "playSound",
     "handler": "0x801c846c",
@@ -636,7 +1158,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 50,
-    "frame": 120,
+    "frame": 180,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -648,7 +1170,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 53,
-    "frame": 150,
+    "frame": 210,
     "opcode": 0,
     "name": "setSceneStep",
     "handler": "0x801c7e64",
@@ -658,7 +1180,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 55,
-    "frame": 150,
+    "frame": 210,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -676,7 +1198,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 59,
-    "frame": 150,
+    "frame": 210,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -694,7 +1216,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 63,
-    "frame": 150,
+    "frame": 210,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -712,7 +1234,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 67,
-    "frame": 150,
+    "frame": 210,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -730,7 +1252,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 71,
-    "frame": 150,
+    "frame": 210,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -748,7 +1270,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 75,
-    "frame": 150,
+    "frame": 210,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -759,16 +1281,16 @@ export const TITLE_INTRO_COMMANDS = [
     ],
     "actor": {
       "mode": 2,
-      "slot": 0,
-      "value": 1,
+      "slot": 1,
+      "value": 0,
       "action": "setPoseFlag"
     }
   },
   {
     "offset": 79,
-    "frame": 150,
+    "frame": 210,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -778,7 +1300,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 83,
-    "frame": 150,
+    "frame": 210,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -790,7 +1312,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 86,
-    "frame": 170,
+    "frame": 230,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -808,7 +1330,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 90,
-    "frame": 170,
+    "frame": 230,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -820,7 +1342,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 93,
-    "frame": 174,
+    "frame": 234,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -831,16 +1353,16 @@ export const TITLE_INTRO_COMMANDS = [
     ],
     "actor": {
       "mode": 2,
-      "slot": 1,
-      "value": 0,
+      "slot": 0,
+      "value": 1,
       "action": "setPoseFlag"
     }
   },
   {
     "offset": 97,
-    "frame": 174,
+    "frame": 234,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       255
@@ -848,7 +1370,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 99,
-    "frame": 174,
+    "frame": 250,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -866,7 +1388,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 103,
-    "frame": 174,
+    "frame": 250,
     "opcode": 16,
     "name": "copyOverlayTransform",
     "handler": "0x801c8328",
@@ -874,7 +1396,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 104,
-    "frame": 174,
+    "frame": 250,
     "opcode": 15,
     "name": "toggleOverlay",
     "handler": "0x801c82b0",
@@ -884,7 +1406,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 106,
-    "frame": 174,
+    "frame": 250,
     "opcode": 6,
     "name": "selectWidgetOrEffect",
     "handler": "0x801c7fc0",
@@ -894,9 +1416,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 108,
-    "frame": 174,
+    "frame": 250,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -906,9 +1428,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 112,
-    "frame": 174,
+    "frame": 250,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       255
@@ -916,7 +1438,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 114,
-    "frame": 174,
+    "frame": 282,
     "opcode": 17,
     "name": "rampOverlay",
     "handler": "0x801c835c",
@@ -927,7 +1449,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 117,
-    "frame": 174,
+    "frame": 282,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -939,7 +1461,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 120,
-    "frame": 189,
+    "frame": 297,
     "opcode": 15,
     "name": "toggleOverlay",
     "handler": "0x801c82b0",
@@ -949,7 +1471,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 122,
-    "frame": 189,
+    "frame": 297,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -967,7 +1489,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 126,
-    "frame": 189,
+    "frame": 297,
     "opcode": 16,
     "name": "copyOverlayTransform",
     "handler": "0x801c8328",
@@ -975,7 +1497,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 127,
-    "frame": 189,
+    "frame": 297,
     "opcode": 15,
     "name": "toggleOverlay",
     "handler": "0x801c82b0",
@@ -985,7 +1507,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 129,
-    "frame": 189,
+    "frame": 297,
     "opcode": 6,
     "name": "selectWidgetOrEffect",
     "handler": "0x801c7fc0",
@@ -995,9 +1517,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 131,
-    "frame": 189,
+    "frame": 297,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -1007,9 +1529,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 135,
-    "frame": 189,
+    "frame": 297,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       255
@@ -1017,7 +1539,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 137,
-    "frame": 189,
+    "frame": 321,
     "opcode": 17,
     "name": "rampOverlay",
     "handler": "0x801c835c",
@@ -1028,7 +1550,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 140,
-    "frame": 189,
+    "frame": 321,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -1040,7 +1562,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 143,
-    "frame": 199,
+    "frame": 331,
     "opcode": 15,
     "name": "toggleOverlay",
     "handler": "0x801c82b0",
@@ -1050,7 +1572,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 145,
-    "frame": 199,
+    "frame": 331,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -1068,7 +1590,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 149,
-    "frame": 199,
+    "frame": 331,
     "opcode": 6,
     "name": "selectWidgetOrEffect",
     "handler": "0x801c7fc0",
@@ -1078,9 +1600,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 151,
-    "frame": 199,
+    "frame": 331,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -1090,9 +1612,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 155,
-    "frame": 199,
+    "frame": 331,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       255
@@ -1100,7 +1622,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 157,
-    "frame": 199,
+    "frame": 361,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -1118,7 +1640,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 161,
-    "frame": 199,
+    "frame": 361,
     "opcode": 6,
     "name": "selectWidgetOrEffect",
     "handler": "0x801c7fc0",
@@ -1128,9 +1650,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 163,
-    "frame": 199,
+    "frame": 361,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -1140,9 +1662,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 167,
-    "frame": 199,
+    "frame": 361,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       255
@@ -1150,7 +1672,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 169,
-    "frame": 199,
+    "frame": 391,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -1168,7 +1690,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 173,
-    "frame": 199,
+    "frame": 391,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -1186,7 +1708,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 177,
-    "frame": 199,
+    "frame": 391,
     "opcode": 6,
     "name": "selectWidgetOrEffect",
     "handler": "0x801c7fc0",
@@ -1196,9 +1718,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 179,
-    "frame": 199,
+    "frame": 391,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       2,
@@ -1208,9 +1730,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 183,
-    "frame": 199,
+    "frame": 391,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       255
@@ -1218,7 +1740,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 185,
-    "frame": 199,
+    "frame": 411,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -1236,7 +1758,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 189,
-    "frame": 199,
+    "frame": 411,
     "opcode": 6,
     "name": "selectWidgetOrEffect",
     "handler": "0x801c7fc0",
@@ -1246,9 +1768,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 191,
-    "frame": 199,
+    "frame": 411,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -1258,9 +1780,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 195,
-    "frame": 199,
+    "frame": 411,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       255
@@ -1268,7 +1790,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 197,
-    "frame": 199,
+    "frame": 461,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -1286,7 +1808,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 201,
-    "frame": 199,
+    "frame": 461,
     "opcode": 6,
     "name": "selectWidgetOrEffect",
     "handler": "0x801c7fc0",
@@ -1296,9 +1818,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 203,
-    "frame": 199,
+    "frame": 461,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -1308,9 +1830,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 207,
-    "frame": 199,
+    "frame": 461,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       255
@@ -1318,7 +1840,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 209,
-    "frame": 199,
+    "frame": 511,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -1336,7 +1858,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 213,
-    "frame": 199,
+    "frame": 511,
     "opcode": 13,
     "name": "actorControl",
     "handler": "0x801c81a0",
@@ -1354,7 +1876,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 217,
-    "frame": 199,
+    "frame": 511,
     "opcode": 6,
     "name": "selectWidgetOrEffect",
     "handler": "0x801c7fc0",
@@ -1364,9 +1886,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 219,
-    "frame": 199,
+    "frame": 511,
     "opcode": 7,
-    "name": "fade",
+    "name": "animateSelectedScene",
     "handler": "0x801c7ffc",
     "payload": [
       0,
@@ -1376,9 +1898,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 223,
-    "frame": 199,
+    "frame": 511,
     "opcode": 8,
-    "name": "setFadeTarget",
+    "name": "waitForSceneFrame",
     "handler": "0x801c809c",
     "payload": [
       255
@@ -1386,7 +1908,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 225,
-    "frame": 199,
+    "frame": 592,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -1398,7 +1920,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 228,
-    "frame": 259,
+    "frame": 652,
     "opcode": 0,
     "name": "setSceneStep",
     "handler": "0x801c7e64",
@@ -1408,7 +1930,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 230,
-    "frame": 259,
+    "frame": 652,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -1420,7 +1942,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 233,
-    "frame": 319,
+    "frame": 712,
     "opcode": 0,
     "name": "setSceneStep",
     "handler": "0x801c7e64",
@@ -1430,7 +1952,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 235,
-    "frame": 319,
+    "frame": 712,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -1442,7 +1964,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 238,
-    "frame": 379,
+    "frame": 772,
     "opcode": 0,
     "name": "setSceneStep",
     "handler": "0x801c7e64",
@@ -1452,7 +1974,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 240,
-    "frame": 379,
+    "frame": 772,
     "opcode": 18,
     "name": "titleLightBar",
     "handler": "0x801c83b8",
@@ -1460,7 +1982,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 241,
-    "frame": 379,
+    "frame": 772,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -1472,7 +1994,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 244,
-    "frame": 529,
+    "frame": 922,
     "opcode": 0,
     "name": "setSceneStep",
     "handler": "0x801c7e64",
@@ -1482,7 +2004,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 246,
-    "frame": 529,
+    "frame": 922,
     "opcode": 19,
     "name": "spawnTitleWidget",
     "handler": "0x801c83e4",
@@ -1493,7 +2015,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 249,
-    "frame": 529,
+    "frame": 922,
     "opcode": 5,
     "name": "waitFrames",
     "handler": "0x801c7f70",
@@ -1505,9 +2027,9 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 252,
-    "frame": 829,
+    "frame": 1222,
     "opcode": 12,
-    "name": "setAudioCue",
+    "name": "setSceneAuxMode",
     "handler": "0x801c8168",
     "payload": [
       0
@@ -1515,7 +2037,7 @@ export const TITLE_INTRO_COMMANDS = [
   },
   {
     "offset": 254,
-    "frame": 829,
+    "frame": 1222,
     "opcode": 4,
     "name": "end",
     "handler": "0x801c7f4c",
@@ -1525,7 +2047,7 @@ export const TITLE_INTRO_COMMANDS = [
 
 export const TITLE_INTRO_ACTOR_EVENTS = [
   {
-    "frame": 150,
+    "frame": 210,
     "offset": 63,
     "slot": 0,
     "actionGroup": 5,
@@ -1536,7 +2058,7 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
     "file": "anim_g00_s00_idle.json"
   },
   {
-    "frame": 150,
+    "frame": 210,
     "offset": 67,
     "slot": 1,
     "actionGroup": 5,
@@ -1547,7 +2069,7 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
     "file": "anim_g00_s00_idle.json"
   },
   {
-    "frame": 174,
+    "frame": 250,
     "offset": 99,
     "slot": 0,
     "actionGroup": 5,
@@ -1558,7 +2080,7 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
     "file": "anim_g00_s01_move.json"
   },
   {
-    "frame": 189,
+    "frame": 297,
     "offset": 122,
     "slot": 1,
     "actionGroup": 5,
@@ -1569,29 +2091,29 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
     "file": "anim_g00_s01_move.json"
   },
   {
-    "frame": 199,
+    "frame": 331,
     "offset": 145,
     "slot": 0,
     "actionGroup": 5,
     "animId": 6,
     "assetGroup": 0,
-    "assetSlot": 6,
-    "label": "jump_takeoff",
-    "file": "anim_g00_s06_jump_takeoff.json"
+    "assetSlot": 9,
+    "label": "fly_transition",
+    "file": "anim_g00_s09_fly_transition.json"
   },
   {
-    "frame": 199,
+    "frame": 361,
     "offset": 157,
     "slot": 1,
     "actionGroup": 5,
     "animId": 6,
     "assetGroup": 0,
-    "assetSlot": 6,
-    "label": "jump_takeoff",
-    "file": "anim_g00_s06_jump_takeoff.json"
+    "assetSlot": 9,
+    "label": "fly_transition",
+    "file": "anim_g00_s09_fly_transition.json"
   },
   {
-    "frame": 199,
+    "frame": 391,
     "offset": 169,
     "slot": 0,
     "actionGroup": 5,
@@ -1602,7 +2124,7 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
     "file": "anim_g00_s03_dash_back.json"
   },
   {
-    "frame": 199,
+    "frame": 391,
     "offset": 173,
     "slot": 1,
     "actionGroup": 5,
@@ -1613,7 +2135,7 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
     "file": "anim_g00_s03_dash_back.json"
   },
   {
-    "frame": 199,
+    "frame": 411,
     "offset": 185,
     "slot": 1,
     "actionGroup": 5,
@@ -1624,7 +2146,7 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
     "file": "anim_g00_s04_dash_left.json"
   },
   {
-    "frame": 199,
+    "frame": 461,
     "offset": 197,
     "slot": 0,
     "actionGroup": 5,
@@ -1635,7 +2157,7 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
     "file": "anim_g00_s04_dash_left.json"
   },
   {
-    "frame": 199,
+    "frame": 511,
     "offset": 209,
     "slot": 0,
     "actionGroup": 5,
@@ -1646,7 +2168,7 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
     "file": "anim_g00_s07_jump_land.json"
   },
   {
-    "frame": 199,
+    "frame": 511,
     "offset": 213,
     "slot": 1,
     "actionGroup": 5,
@@ -1658,4 +2180,4 @@ export const TITLE_INTRO_ACTOR_EVENTS = [
   }
 ] as const;
 
-export const TITLE_INTRO_TOTAL_FRAMES = 829 as const;
+export const TITLE_INTRO_TOTAL_FRAMES = 1222 as const;

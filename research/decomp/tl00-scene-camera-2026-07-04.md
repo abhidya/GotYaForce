@@ -18,11 +18,9 @@ root 'scene_data' size=16
 - The 37 exported tl00 GLBs carry **world-space vertices** (e.g. model_05 spans
   x −4941..−3969 / z 5053..6004); full scene extent min(−4995, −1530, −1438) /
   max(5163, 3818, 8701). Mounting all 37 at identity reconstructs the authored room.
-- Handedness: the authored camera looks toward −Z but the exported content sits at +Z —
-  the exporter's GX→glTF conversion is the standard **180° Y-rotation** (x→−x, z→−z), so
-  the camera converts to eye (−5, 3557.153, 3145.1) → target (−5, 3557.153, 12625).
-  (Convention assumption labeled in TitleIntro.ts; a mirrored result would indicate a
-  Z-negate instead.)
+- Handedness correction (2026-08-01): the exported GLBs and recovered COBJ records share
+  the same world convention. Applying the earlier assumed 180° Y rotation mirrors the
+  room. The renderer consumes the raw authored eye/target values directly.
 - Earlier negative result stands: the DOL menu cameras (zz_008c88c_ eye (0,0,100)→(0,0,−100),
   zz_008c9d4_ (0,0,0)→(0,0,−10)) are flat UI-plane cameras, not the desk framing.
 - Authored lights (probe extended with HSD_LOBJ walk):
@@ -34,9 +32,9 @@ root 'scene_data' size=16
   — a linear fog whose 1,000,000..2,000,000 range sits far beyond the 32768 far clip:
   **authored OFF**. No fog is rendered (DERIVED negative).
 
-Wired in apps/game/src/ui/screens/TitleIntro.ts (3D desk backdrop layer over the captured
-PNG, which remains the instant paint + failure fallback).
+Wired in `apps/game/src/ui/screens/TitleIntro.ts`; the captured-PNG fallback has been
+removed. The montage switches from this base camera to recovered tdc00..09 tracks.
 
 This resolves the "per-model desk framing needs the scene's object-placement tables
 decoded" blocker in title-main-menu-flow.md — the placement was in the scene all along;
-the intro-flow byte-code's camera cues (if any) remain undecoded.
+the intro-flow byte-code's camera cues are now decoded.

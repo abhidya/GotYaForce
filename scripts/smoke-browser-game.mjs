@@ -116,5 +116,12 @@ try {
   if (!resolved.startsWith(`${ownedRoot}${path.sep}`)) {
     throw new Error(`refusing to remove non-owned browser profile: ${resolved}`);
   }
-  fs.rmSync(resolved, { recursive: true, force: true });
+  // Chrome can keep Windows profile handles alive after its headless parent exits. A
+  // cleanup race must not replace the actual runtime assertion with a false test failure.
+  try {
+    fs.rmSync(resolved, { recursive: true, force: true, maxRetries: 10, retryDelay: 250 });
+  } catch (error) {
+    if (error?.code !== "EPERM") throw error;
+    process.stderr.write(`Browser smoke cleanup deferred (profile still locked): ${resolved}\n`);
+  }
 }

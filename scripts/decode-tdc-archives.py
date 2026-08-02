@@ -100,16 +100,20 @@ def decode_bank(name):
         print(f"      rel=0x{t:x} trackType={tt}({kind}) next=0x{w[0]:x} kfptr=0x{w[2]:x}")
     # Float census (how much of the payload is plausible f32 transform values).
     plausible = 0
+    integer_floats = []
     total = dat.data_size // 4
     for i in range(total):
         v = struct.unpack(">f", dat.raw[dat.ds + i * 4: dat.ds + i * 4 + 4])[0]
         if -100000.0 < v < 100000.0 and v != 0.0 and (abs(v) > 1e-6 or v == 0.0):
             plausible += 1
+        if 1.0 <= v <= 1000.0 and v.is_integer():
+            integer_floats.append((i * 4, v))
     print(f"    float census: {plausible}/{total} words are plausible f32 ({100*plausible//max(1,total)}%)")
+    print(f"    integer floats 1..1000: {[(hex(off), value) for off, value in integer_floats]}")
 
 
 if __name__ == "__main__":
-    for nm in ["tdc00.arc", "tdc03.arc", "tdc06.arc", "tdc09.arc"]:
+    for nm in [f"tdc{i:02}.arc" for i in range(10)]:
         try:
             decode_bank(nm)
         except Exception as e:

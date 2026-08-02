@@ -108,6 +108,23 @@ COMBAT_IDS = {
     0xF2: ("dash / boost / deploy-warp launch", "start_forced_move_to_point + FUN_8005e868 spawn state (chunk_0007.c:5446)"),
 }
 
+# Title-intro one-shots recovered from the stff prop controller and bytecode VM.
+# They use the same literal global sound-id dispatcher and resolve through snd_com03.
+TITLE_IDS = {
+    0x17A: (
+        "title screw-settle impact",
+        "FUN_801c8cb0 variant-0 settle branch (title prop task cluster)",
+    ),
+    0x17B: (
+        "title nut/washer drop impact",
+        "DAT_8038a5b4 motion rows 4 and 6 consumed by FUN_801c8cb0",
+    ),
+    0x17C: (
+        "title reveal stinger",
+        "title opcode 0x15 -> zz_00f036c_(0, 0x017c) at source frame 120",
+    ),
+}
+
 
 def be16(data: bytes, off: int) -> int:
     return struct.unpack_from(">H", data, off)[0]
@@ -318,6 +335,7 @@ def main() -> None:
         banks[name] = (chd, tsb, dpk)
 
     all_ids = dict(COMBAT_IDS)
+    all_ids.update(TITLE_IDS)
     for sound_id in extra_ids:
         if sound_id not in all_ids:
             all_ids[sound_id] = (STREAM_ID_EVENT, STREAM_ID_EVIDENCE)

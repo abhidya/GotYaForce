@@ -106,10 +106,11 @@ Extracting the final translation would need either:
 
 Both are deeper HSD scene-graph work — disproportionate for a presentation constant.
 
-**The port's TUNED `stageBaseForSlot` (`TitleIntro.ts`: ±240 X, +700 Z forward of the
-authored camera, y=3557) stays**, honestly labeled. Every *gameplay/data* aspect of the
-intro VM is runtime-confirmed across five independent boots; this is a visual-placement
-constant only.
+The old tuned `stageBaseForSlot` placement has been removed. Static decode of the paired
+close-up resources now supplies stronger anchors: tdc08 targets `(-1800,-1300,2000)` and
+tdc09 targets `(1800,-1300,2000)`; both camera eyes use Y `-1450`. The port roots the two
+figures at `(-1800,-1450,2000)` / `(1800,-1450,2000)`. This remains source-derived rather
+than a captured final JOBJ world matrix, so the placement is not labeled runtime-exact.
 
 ## Net
 

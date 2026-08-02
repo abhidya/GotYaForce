@@ -376,14 +376,6 @@
 }
 /* Native captured title/desk frame (reference/captures/title-main-menu.png) — cover-fit,
  * slightly dimmed so the G-Red actor layer and PRESS START read on top. */
-.gf-title-intro-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background-size: cover;
-  background-position: center;
-  filter: brightness(0.9);
-}
 /* Real tl00 3D desk scene through its authored HSD camera — sits over the capture
  * (which stays as instant paint + load-failure fallback) and under the actor layer. */
 .gf-title-intro-desk {
@@ -492,7 +484,7 @@
 
 /* ============================ MAIN MENU ============================ */
 .gf-mainmenu {
-  background: #6eb6d7;
+  background: #2ac4bc;
 }
 .gf-mainmenu-frame {
   position: absolute;
@@ -503,44 +495,18 @@
   aspect-ratio: 4 / 3;
   transform: translate(-50%, -50%);
   overflow: hidden;
-  background: #58a9ca;
+  background: #2ac4bc;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
 }
-.gf-mainmenu-scene {
-  opacity: 0;
-  transform: scale(1.02);
-  transition: opacity var(--gf-native-tween-ms, 167ms) linear;
-}
-.gf-mainmenu[data-native-capture="false"][data-menu-scene="hub"] .gf-mainmenu-hub-scene {
-  opacity: 0.32;
-}
-.gf-mainmenu[data-native-capture="false"][data-menu-scene="option"] .gf-mainmenu-option-scene {
-  opacity: 0.42;
-  transform: scale(1.08);
-  filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.34));
-}
-.gf-mainmenu-desk {
+.gf-mainmenu-source-scene {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  image-rendering: pixelated;
-  transition:
-    opacity var(--gf-native-tween-ms, 167ms) linear,
-    filter var(--gf-native-tween-ms, 167ms) linear;
 }
-.gf-mainmenu[data-native-capture="false"] .gf-mainmenu-desk {
-  opacity: 0.88;
-  filter: saturate(0.96) brightness(0.94);
-}
-.gf-mainmenu-desk::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.1));
-  pointer-events: none;
+.gf-mainmenu-source-scene .gf-ui-scene-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .gf-mainmenu-ring {
   position: absolute;
@@ -557,6 +523,9 @@
   opacity: 0;
   outline: none;
 }
+.gf-source-menu-hit {
+  border-radius: 50%;
+}
 .gf-menu-item:focus-visible {
   opacity: 1;
   border-radius: 50%;
@@ -564,92 +533,6 @@
 }
 .gf-menu-item.gf-selected:focus-visible {
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.92), 0 0 0 9px rgba(232, 35, 27, 0.72);
-}
-.gf-menu-cursor {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  border-radius: 50%;
-  opacity: 0;
-  transition:
-    left var(--gf-native-tween-ms, 167ms) cubic-bezier(0.2, 0.76, 0.22, 1),
-    top var(--gf-native-tween-ms, 167ms) cubic-bezier(0.2, 0.76, 0.22, 1),
-    width var(--gf-native-tween-ms, 167ms) cubic-bezier(0.2, 0.76, 0.22, 1),
-    height var(--gf-native-tween-ms, 167ms) cubic-bezier(0.2, 0.76, 0.22, 1),
-    opacity var(--gf-native-tween-ms, 167ms) linear;
-}
-.gf-mainmenu[data-native-capture="false"] .gf-menu-cursor {
-  opacity: 0.9;
-}
-.gf-menu-cursor::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(124px, 84%);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background:
-    conic-gradient(from 11deg, #7e160f 0 8deg, transparent 8deg 22deg),
-    radial-gradient(circle at 35% 30%, #ff8a4a, var(--gf-red));
-  box-shadow:
-    inset 0 -4px 0 rgba(0, 0, 0, 0.38),
-    inset 0 0 0 11px rgba(255, 255, 255, 0.22),
-    0 0 0 5px rgba(255, 255, 255, 0.86),
-    0 0 0 12px rgba(232, 35, 27, 0.9),
-    0 8px 10px rgba(0, 0, 0, 0.42);
-  animation: gf-gear-spin 6s linear infinite;
-}
-@keyframes gf-gear-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
-.gf-mainmenu-selected-proxy {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  opacity: 0;
-  transition:
-    left var(--gf-native-tween-ms, 167ms) cubic-bezier(0.2, 0.76, 0.22, 1),
-    top var(--gf-native-tween-ms, 167ms) cubic-bezier(0.2, 0.76, 0.22, 1),
-    width var(--gf-native-tween-ms, 167ms) cubic-bezier(0.2, 0.76, 0.22, 1),
-    height var(--gf-native-tween-ms, 167ms) cubic-bezier(0.2, 0.76, 0.22, 1),
-    opacity var(--gf-native-tween-ms, 167ms) linear,
-    transform var(--gf-native-tween-ms, 167ms) cubic-bezier(0.2, 0.76, 0.22, 1);
-}
-.gf-mainmenu[data-native-capture="false"] .gf-mainmenu-selected-proxy {
-  opacity: 1;
-}
-.gf-mainmenu[data-transitioning="true"] .gf-mainmenu-selected-proxy {
-  transform: translate(-50%, -50%) scale(1.08);
-}
-.gf-mainmenu-selected-label {
-  position: relative;
-  z-index: 2;
-  color: var(--gf-yellow);
-  font-size: clamp(22px, 4vw, 58px);
-  line-height: 0.86;
-  letter-spacing: 0;
-  white-space: nowrap;
-  -webkit-text-stroke: clamp(2px, 0.32vw, 5px) #071126;
-  paint-order: stroke fill;
-  text-shadow:
-    0 3px 0 #ffffff,
-    0 7px 0 rgba(0, 0, 0, 0.52);
-}
-.gf-mainmenu-option-texture {
-  position: absolute;
-  right: 3%;
-  top: 3%;
-  width: min(24%, 300px);
-  image-rendering: pixelated;
-  opacity: 0;
-  pointer-events: none;
-  filter: drop-shadow(0 5px 0 rgba(0, 0, 0, 0.35));
-  transition: opacity var(--gf-native-tween-ms, 167ms) linear;
-}
-.gf-mainmenu[data-mode="option"] .gf-mainmenu-option-texture {
-  opacity: 0.88;
 }
 
 /* ============================ LOAD BOX DATA ============================ */

@@ -38,13 +38,10 @@ const OPCODE_LENGTHS: readonly number[] = TITLE_INTRO_OPCODE_LENGTHS;
 /** The bytecode itself (DAT_8038a3ec). PC indexes into this. */
 const SCRIPT: readonly number[] = TITLE_INTRO_SCRIPT_BYTES;
 
-/** ROM DAT_8038a3d0 lookup table used by fade opcodes 0x07/0x08. Probed straight from
- *  boot.dol (16 BE f32): the table is 7 real entries; index 7+ reads as denormal floats
- *  (0x00000007 etc. = a different adjacent data struct), so the fade args only ever index
- *  0..6. These are FRAME-COUNT durations/accumulators, not alpha lerps — the tick
- *  (zz_01c7ba0_) does `current += step` until `current >= target`, then the renderer
- *  derives the fade alpha from the ratio. */
-const FADE_FLOAT_TABLE: readonly number[] = [0.0, 1.0, 30.0, 59.0, 399.0, 729.0, 789.0];
+/** ROM DAT_8038a3d0 lookup table used by scene-animation opcodes 0x07/0x08. Probed
+ *  straight from boot.dol. These are HSD camera-animation frame values: opcode 0x07
+ *  installs current/target/step, and zz_01c7ba0_ applies current to the selected COBJ. */
+const SCENE_FRAME_TABLE: readonly number[] = [0.0, 1.0, 30.0, 59.0, 399.0, 729.0, 789.0];
 
 /** A desk-intro actor slot (port of the DAT_803c4e84 entries — each is a full actor
  *  object in the ROM; here we carry only the fields the VM + a renderer need). */
@@ -61,6 +58,10 @@ export interface TitleActor {
 /** Engine-effect boundary: the VM calls these where the ROM calls into GX/HSD/audio.
  *  The TitleIntro renderer implements this to map VM state onto three.js + Web Audio. */
 export interface TitleEffectSink {
+  /** Opcode 0x02 polls `zz_0027adc_`; false yields without advancing the PC. */
+  isArchiveReady(): boolean;
+  /** Opcode 0x0a polls `zz_000a3c4_`; false yields without advancing the PC. */
+  isCameraReady(): boolean;
   /** Opcode 0x0b (FUN_801c8128): `zz_00412c4_(0,0)`+`zz_00412c4_(1,0)`+`zz_0042954_`+
    *  `zz_0042b20_` — preload + attach the desk scene archives (tl00_mdl.arc + tdc0X.arc). */
   attachDeskArchives(): void;
@@ -70,11 +71,16 @@ export interface TitleEffectSink {
   /** Opcode 0x06 (FUN_801c7fc0): selectWidgetOrEffect — render-state pointer lookup into
    *  the 0x803cb470/0x803cb32c effect tables. `effectIndex` is PC[1] (0xff = default). */
   selectWidgetOrEffect(effectIndex: number): void;
+  /** `zz_0008a1c_`: return the selected COBJ animation's end frame. */
+  getSelectedSceneEndFrame(): number;
+  /** `zz_00088a4_`: apply one animation frame to the selected scene COBJ. */
+  applySelectedSceneFrame(frame: number): void;
   /** Opcode 0x09 (FUN_801c80ec): setCameraMode — state[0x3e]=mode; the renderer maps the
    *  mode byte to a camera cue (authored vs orbit vs menu). */
   setCameraMode(mode: number): void;
-  /** Opcode 0x0c (FUN_801c8168): setAudioCue — state[0x3d]=cue; `zz_0005984_(cue)`. */
-  setAudioCue(cue: number): void;
+  /** Opcode 0x0c: set +0x3d and call `zz_0005984_`. The per-frame consumer updates
+   *  a shared scene/explodable value; this is not an audio command (0x15 owns sound). */
+  setSceneAuxMode(mode: number): void;
   /** Opcode 0x0d mode 0 (FUN_801c81a0 → zz_0057ff8_): start actor anim. */
   actorPlayAnim(slot: number, groupSel: number, animId: number): void;
   /** Opcode 0x0d mode 1 (FUN_801c81a0 → zz_0058044_): reset/dealloc actor. */
@@ -103,20 +109,17 @@ export interface TitleEffectSink {
 export interface TitleVmState {
   pc: number; // +0x20 — program counter (index into SCRIPT)
   borgIds: number[]; // +0x10..0x1a — 6 flat u16 (slot -> borgId, 0xffff = empty)
-  inputConsumed: number; // +0x2d — set by upstream input; cleared by dispatcher after advance
+  inputConsumed: number; // +0x2d — opcode/scheduler latch; cleared after command advance
   sceneStep: number; // via DAT_803d5d94 (separate global, but driven by opcode 0)
   endRequested: number; // +0x18 — set by opcode 4 (end)
   cameraMode: number; // +0x3e — set by opcode 9
-  audioCue: number; // +0x3d — set by opcode 0x0c
-  /** +0x30/+0x34/+0x38/+0x3c — fade current/target/step/direction. Opcode 0x07 seeds;
-   *  the front-end tick (zz_01c7ba0_) integrates current toward target by step each
-   *  frame while +0x3c != 0. */
-  fade: { current: number; target: number; step: number; active: number };
+  sceneAuxMode: number; // +0x3d — set by opcode 0x0c
+  /** +0x30/+0x34/+0x38/+0x3c — selected COBJ animation current/target/step/latch. */
+  sceneTimeline: { current: number; target: number; step: number; active: number };
   /** +0x3f/+0x48/+0x60/+0x64 — overlay/lightbar ramp. Opcode 0x0f toggles +0x3f;
    *  opcode 0x11 sets the rate at +0x64; the tick integrates +0x48 toward +0x60. */
   overlay: { on: number; current: number; target: number; rate: number };
-  fadeTargetFrames: number; // opcode 0x08 scratch (PC[1] when !=0xff)
-  waitFrameCount: number; // opcode 0x05 phase-1 latch (stored PC[1])
+  waitFrameCount: number; // +0x2e scheduler delay installed by opcode 0x05
   actors: TitleActor[]; // port of DAT_803c4e84 (6 slots; 0/1 populated for the desk intro)
 }
 
@@ -125,9 +128,6 @@ export interface TitleVm {
   /** Run the per-frame dispatcher (port of zz_01c7de4_). Executes opcodes until a
    *  handler yields (returns 0), then returns. Call once per fixed frame. */
   tick(): void;
-  /** Upstream input edge (e.g. a "press start" keydown). Sets state.inputConsumed=1,
-   *  which the end/wait opcodes test. Mirrors the ROM input path writing +0x2d. */
-  notifyInput(): void;
 }
 
 /** Port of `FUN_801c795c`'s descriptor-seed loop (chunk_0055.c:2253-2279): copy the 6
@@ -151,10 +151,9 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
     sceneStep: 0,
     endRequested: 0,
     cameraMode: 0,
-    audioCue: 0,
-    fade: { current: 0, target: 0, step: 0, active: 0 },
+    sceneAuxMode: 0,
+    sceneTimeline: { current: 0, target: 0, step: 0, active: 0 },
     overlay: { on: 0, current: 0, target: 0, rate: 0 },
-    fadeTargetFrames: 0,
     waitFrameCount: 0,
     actors: seedActors(),
   };
@@ -167,8 +166,7 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
   const b = (offset: number): number => SCRIPT[state.pc + offset] ?? 0;
   // Read a big-endian u16 from PC+offset (opcodes 0x05/0x11/0x13/0x15 pack a short).
   const bShort = (offset: number): number => (b(offset) << 8) | b(offset + 1);
-  // Safe FADE_FLOAT_TABLE lookup (noUncheckedIndexedAccess guard).
-  const fft = (index: number): number => FADE_FLOAT_TABLE[index] ?? 0;
+  const sceneFrame = (index: number): number => SCENE_FRAME_TABLE[index] ?? 0;
 
   // ===== opcode handlers (port of PTR_FUN_8038a4f8). Each returns 1 = advance PC by
   // OPCODE_LENGTHS[opcode]+1, or 0 = yield (re-run next frame). =====================
@@ -187,9 +185,8 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
   };
 
   // op 0x02 waitForArchive — FUN_801c7f00 (chunk_0055.c:2541). Polls zz_0027adc_();
-  // returns 0 until the archive attach completes, then 1. We treat the attach as
-  // synchronous (the sink loads archives before the first tick), so this always advances.
-  const op_waitForArchive = (): number => 1;
+  // returns 0 until the archive load completes, then 1.
+  const op_waitForArchive = (): number => (sink.isArchiveReady() ? 1 : 0);
 
   // op 0x03 clearArchiveWait — FUN_801c7f28 (chunk_0055.c:2556): zz_0027c1c_().
   const op_clearArchiveWait = (): number => 1;
@@ -205,10 +202,10 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
     return 0; // li r3,0; blr — yield forever (sequence ended; waits on input upstream)
   };
 
-  // op 0x05 waitFrames — 0x801c7f70 (decoded from PPC). Two-phase: phase 1 (inputConsumed
-  // ==0) stores PC[1] to state[0x2e], sets inputConsumed=1, yields; phase 2 (==1)
-  // advances. Net effect: yield exactly one frame, then continue. The stored count is
-  // retained for any consumer of state[0x2e] (none observed in this script).
+  // op 0x05 waitFrames — 0x801c7f70 (decoded from PPC). Phase 1 installs the
+  // big-endian u16 delay in the task scheduler field +0x2e, latches +0x2d, and yields.
+  // The scheduler counts +0x2e down without invoking sndSeqContinue. Once it reaches
+  // zero the handler runs again, sees the latch, and advances. `tick` ports that gate.
   const op_waitFrames = (): number => {
     if (state.inputConsumed !== 0) return 1; // bne 0x801c7fa0 -> li r3,1; blr
     state.inputConsumed = 1; // stb r0,[0x2d]
@@ -224,32 +221,26 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
     return 1;
   };
 
-  // op 0x07 fade — FUN_801c7ffc (chunk_0055.c:2567). Sets fade.current=table[arg1],
-  // fade.step=table[arg3], fade.active=0xff; fade.target = (arg2==0xff) ?
-  // zz_0008a1c_(current) : table[arg2].
-  const op_fade = (): number => {
-    state.fade.current = fft(b(1));
-    state.fade.step = fft(b(3));
-    state.fade.active = 0xff;
+  // op 0x07 animateSelectedScene — FUN_801c7ffc. Seeds the selected COBJ animation,
+  // applies its initial frame through zz_00088a4_, then resolves the target from either
+  // zz_0008a1c_ (0xff sentinel) or DAT_8038a3d0.
+  const op_animateSelectedScene = (): number => {
+    state.sceneTimeline.current = sceneFrame(b(1));
+    state.sceneTimeline.step = sceneFrame(b(3));
+    state.sceneTimeline.active = 0xff;
+    sink.applySelectedSceneFrame(state.sceneTimeline.current);
     const targetArg = b(2);
-    state.fade.target =
-      targetArg === 0xff
-        ? state.fade.current // ROM calls zz_0008a1c_(current) — a derive-from-current helper;
-        : // the title script always pairs a known target, so we mirror current as the
-          // honest placeholder until that helper is decoded.
-          fft(targetArg);
+    state.sceneTimeline.target =
+      targetArg === 0xff ? sink.getSelectedSceneEndFrame() : sceneFrame(targetArg);
     return 1;
   };
 
-  // op 0x08 setFadeTarget — 0x801c809c (decoded from PPC). lwz r4,[0x20]; lbz r0,1(r4);
-  // cmplwi r0,0xff; bne ->compute-rate; else bclr early. The compute-rate path mirrors
-  // FUN_801c835c's (state[0x64] = (target-current)/frames). We store the raw arg; the
-  // sink integrates the ramp.
-  const op_setFadeTarget = (): number => {
+  // op 0x08 waitForSceneFrame — 0x801c809c (decoded from raw PPC). The 0xff sentinel
+  // waits for +0x3c to clear; other operands wait for +0x30 to equal DAT_8038a3d0[arg].
+  const op_waitForSceneFrame = (): number => {
     const arg = b(1);
-    if (arg === 0xff) return 1; // early blr — no-op sentinel
-    state.fadeTargetFrames = arg;
-    return 1;
+    if (arg === 0xff) return state.sceneTimeline.active === 0 ? 1 : 0;
+    return state.sceneTimeline.current === sceneFrame(arg) ? 1 : 0;
   };
 
   // op 0x09 setCameraMode — 0x801c80ec (decoded from PPC). lbz r0,1(PC); stb r0,[0x3e];
@@ -261,8 +252,8 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
   };
 
   // op 0x0a waitForCamera — FUN_801c8100 (chunk_0055.c:2600). Polls zz_000a3c4_();
-  // returns 0 until the camera move completes. Synchronous in the port (advances).
-  const op_waitForCamera = (): number => 1;
+  // returns 0 until the camera move completes.
+  const op_waitForCamera = (): number => (sink.isCameraReady() ? 1 : 0);
 
   // op 0x0b attachDeskArchives — FUN_801c8128 (chunk_0055.c:2615). zz_00412c4_(0,0);
   // zz_00412c4_(1,0); zz_0042954_; zz_0042b20_.
@@ -271,22 +262,23 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
     return 1;
   };
 
-  // op 0x0c setAudioCue — FUN_801c8168 (chunk_0055.c:2641). state[0x3d]=PC[1];
+  // op 0x0c setSceneAuxMode — FUN_801c8168. state[0x3d]=PC[1];
   // zz_0005984_(arg).
-  const op_setAudioCue = (): number => {
-    state.audioCue = b(1);
-    sink.setAudioCue(state.audioCue);
+  const op_setSceneAuxMode = (): number => {
+    state.sceneAuxMode = b(1);
+    sink.setSceneAuxMode(state.sceneAuxMode);
     return 1;
   };
 
-  // op 0x0d actorControl — FUN_801c81a0 (chunk_0055.c:2653). mode=PC[1], slot=PC[2],
-  // value=PC[3]. mode 0 -> zz_0057ff8_(actor, 5, animId); mode 1 -> zz_0058044_(actor);
-  // mode 2/3 -> toggle actor+0x82 visibility (on if PC[2]==1).
+  // op 0x0d actorControl — FUN_801c81a0 (chunk_0055.c:2653).
+  // Modes 0/1 use PC[2] as the actor slot. Mode 2 reverses those operands:
+  // PC[2] is the visibility flag and PC[3] is the actor slot.
   const op_actorControl = (): number => {
     const mode = b(1);
-    const slot = b(2);
-    const value = b(3);
+    const operand2 = b(2);
+    const operand3 = b(3);
     if (mode === 1) {
+      const slot = operand2;
       sink.actorReset(slot);
       const actor = actorAt(slot);
       if (actor) {
@@ -294,15 +286,17 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
         actor.anim = null;
       }
     } else if (mode === 0) {
-      sink.actorPlayAnim(slot, 5, value); // zz_0057ff8_(actor, 5, animId)
+      const slot = operand2;
+      sink.actorPlayAnim(slot, 5, operand3); // zz_0057ff8_(actor, 5, animId)
       const actor = actorAt(slot);
       if (actor) {
         actor.visible = true;
-        actor.anim = { groupSel: 5, animId: value };
+        actor.anim = { groupSel: 5, animId: operand3 };
       }
     } else if (mode < 3) {
       // ROM: actor[+0x82] = (PC[2]==1) ? actor[+0x96]+'A' : 0 — a render-visibility byte.
-      const visible = value === 1;
+      const visible = operand2 === 1;
+      const slot = operand3;
       sink.actorSetVisible(slot, visible);
       const actor = actorAt(slot);
       if (actor) actor.visible = visible;
@@ -374,12 +368,12 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
     op_end, // 0x04
     op_waitFrames, // 0x05
     op_selectWidgetOrEffect, // 0x06
-    op_fade, // 0x07
-    op_setFadeTarget, // 0x08
+    op_animateSelectedScene, // 0x07
+    op_waitForSceneFrame, // 0x08
     op_setCameraMode, // 0x09
     op_waitForCamera, // 0x0a
     op_attachDeskArchives, // 0x0b
-    op_setAudioCue, // 0x0c
+    op_setSceneAuxMode, // 0x0c
     op_actorControl, // 0x0d
     op_unknown0e, // 0x0e
     op_toggleOverlay, // 0x0f
@@ -392,15 +386,22 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
   ];
 
   /** Port of `zz_01c7de4_` @0x801c7de4 (chunk_0055.c:2490), followed by the per-frame
-   *  fade + overlay integration from `zz_01c7ba0_` @0x801c7ba0 (chunk_0055.c:2368-2397)
+   *  COBJ-animation + overlay integration from `zz_01c7ba0_` @0x801c7ba0
    *  which also runs every frame as part of sndSeqContinue. */
   const integrate = (): void => {
-    // fade: state[0x30] += state[0x38] until state[0x34] <= state[0x30]; then clamp + clear.
-    if (state.fade.active !== 0) {
-      state.fade.current += state.fade.step;
-      if (state.fade.target <= state.fade.current) {
-        state.fade.current = state.fade.target;
-        state.fade.active = 0;
+    const timeline = state.sceneTimeline;
+    if (timeline.active !== 0) {
+      // The ROM writes 0xff in opcode 0x07; signed-byte `< 0` turns it into 1 on the
+      // first integration tick without advancing or reapplying the COBJ animation.
+      if (timeline.active >= 0x80) {
+        timeline.active = 1;
+      } else {
+        timeline.current += timeline.step;
+        if (timeline.target <= timeline.current) {
+          timeline.current = timeline.target;
+          timeline.active = 0;
+        }
+        sink.applySelectedSceneFrame(timeline.current);
       }
     }
     // overlay: state[0x48] += state[0x64] (rate) toward state[0x60] (target); clamp + reset rate.
@@ -414,6 +415,13 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
   };
 
   const tick = (): void => {
+    if (state.waitFrameCount > 0) {
+      state.waitFrameCount -= 1;
+      if (state.waitFrameCount > 0) {
+        integrate();
+        return;
+      }
+    }
     for (;;) {
       const opcode = SCRIPT[state.pc];
       if (opcode === undefined) break;
@@ -426,11 +434,5 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
     integrate();
   };
 
-  return {
-    state,
-    tick,
-    notifyInput: () => {
-      state.inputConsumed = 1;
-    },
-  };
+  return { state, tick };
 }

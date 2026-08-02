@@ -7,6 +7,7 @@
   "types": "src/index.ts",
   "scripts": {
     "build": "tsc -b",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "selfcheck:gc": "node dist/gcRuntime.selfcheck.js"
   }
 }

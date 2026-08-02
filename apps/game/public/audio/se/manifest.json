@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-04",
+  "generated": "2026-08-01",
   "source": "Gotcha Force (GG4E) afs_data.afs snd_com01/02/03 soundbanks - GC DSP-ADPCM decoded by scripts/export-combat-se.py",
   "format": "OGG Vorbis",
   "idScheme": "key = se_<soundId hex, 3 digits>; soundId = bank<<7 | sample (dispatcher zz_00efb3c_ @ 0x800efb3c)",
@@ -33,7 +33,7 @@
           "pan": 64
         }
       ],
-      "sha1": "fe30af19cb1a9fc23a0c511a4097625a504f5e82"
+      "sha1": "59b2cf4e9b78de0afb032200e819e9ba06c4d833"
     },
     {
       "key": "se_005",
@@ -63,7 +63,7 @@
           "pan": 64
         }
       ],
-      "sha1": "bf95af4a3c95df2d15f7576b68bdf26a3d9648a5"
+      "sha1": "319ec83d2624f98b6d126847b68aa2745937bdef"
     },
     {
       "key": "se_008",
@@ -93,7 +93,7 @@
           "pan": 64
         }
       ],
-      "sha1": "75619b3bfca08ea1e051744aab2d1f38eb0f32f5"
+      "sha1": "e62be51ae8fd4ba4ae36957ad7205a47cd60379f"
     },
     {
       "key": "se_009",
@@ -123,7 +123,7 @@
           "pan": 64
         }
       ],
-      "sha1": "505d25cbcb42ac251128366c7cc6912bd69d902d"
+      "sha1": "f0b5c86702648661f9a6bd2b5c1d4eee81bf182a"
     },
     {
       "key": "se_00a",
@@ -153,7 +153,7 @@
           "pan": 64
         }
       ],
-      "sha1": "85956c9a5e96197939a4b86208e6967be48d0fae"
+      "sha1": "39de0c391b9c68b2b6fc17da497e6a3e4b52bb4d"
     },
     {
       "key": "se_00b",
@@ -183,7 +183,7 @@
           "pan": 64
         }
       ],
-      "sha1": "e9df8334b992f61d89529d8a865584dc042093b8"
+      "sha1": "4410efef62b6591bfec0f2133b646c75f5947de2"
     },
     {
       "key": "se_00c",
@@ -213,7 +213,7 @@
           "pan": 64
         }
       ],
-      "sha1": "d9cde3cb67f410c0b9a8c3091534d2467d284650"
+      "sha1": "b705d3e0033b05278d35db5a0784e905108cbc64"
     },
     {
       "key": "se_00f",
@@ -243,7 +243,7 @@
           "pan": 64
         }
       ],
-      "sha1": "f6478e17393948af2d025dfe3343b86e6a29b4ab"
+      "sha1": "3f72a6b7879ec1cfa116dac86b8b318260c9b060"
     },
     {
       "key": "se_010",
@@ -273,7 +273,7 @@
           "pan": 64
         }
       ],
-      "sha1": "b42cab20d2c2a5178ff2e4c28fec886acce81c14"
+      "sha1": "8e438d630909484415343166d25f2a8ec1aa20e3"
     },
     {
       "key": "se_012",
@@ -303,7 +303,7 @@
           "pan": 64
         }
       ],
-      "sha1": "a7aba884cb14da891998bded9fc2ef7009e8fc9c"
+      "sha1": "0f6e86ce35b3b9d061a489936379e9d7c7d53940"
     },
     {
       "key": "se_013",
@@ -333,7 +333,7 @@
           "pan": 64
         }
       ],
-      "sha1": "7babb472253af13ba338a311f3cb70a810b58ba9"
+      "sha1": "e944a69fb3e765c5b55c2fa51944040c99039165"
     },
     {
       "key": "se_01e",
@@ -363,7 +363,7 @@
           "pan": 64
         }
       ],
-      "sha1": "ec52c21f02c7d6cccacef5406e3f32642f9f0e62"
+      "sha1": "8a88b07283e599e5117dd451c804547b6818baa2"
     },
     {
       "key": "se_020",
@@ -393,7 +393,7 @@
           "pan": 64
         }
       ],
-      "sha1": "2751d396bcb6d2b3310ebe50b6fd823c82bcff58"
+      "sha1": "ab1a6cbf624dbe63426aece31b5cd053b7514f57"
     },
     {
       "key": "se_024",
@@ -423,7 +423,7 @@
           "pan": 64
         }
       ],
-      "sha1": "3bada4589a267bdd5943971f70202eed94502f85"
+      "sha1": "bfc32c923e46e1ddbad6ae139bca449c0ed94c4e"
     },
     {
       "key": "se_025",
@@ -453,7 +453,7 @@
           "pan": 64
         }
       ],
-      "sha1": "e997b5a1e7657a5d1d6f75b3831004ada9c85296"
+      "sha1": "d5ac8a4ce0f50811e3be4fe4bb2ded266d6e2d77"
     },
     {
       "key": "se_026",
@@ -483,7 +483,7 @@
           "pan": 64
         }
       ],
-      "sha1": "443be849d1de4534fc2b111b4966f71c0a05e1a5"
+      "sha1": "c10069bbdcd162d55e62e2eb0e2318a95da24a86"
     },
     {
       "key": "se_067",
@@ -513,7 +513,7 @@
           "pan": 64
         }
       ],
-      "sha1": "fb80e91a344b33e276d781e67a8ba5fa6c261bcb"
+      "sha1": "e9bde956b78950cf154d827de99c08b682aba606"
     },
     {
       "key": "se_06a",
@@ -543,7 +543,7 @@
           "pan": 64
         }
       ],
-      "sha1": "8c6b6b09dda3a45b1f68300436b841a37b812365"
+      "sha1": "6d89757c07d0548068ac3863b0015c185e086e5d"
     },
     {
       "key": "se_09b",
@@ -581,7 +581,7 @@
           "pan": 127
         }
       ],
-      "sha1": "d2ef877ae2103780a3237d8195ceedb4e29002e6"
+      "sha1": "eecb438d89cb93a455f0ee425a04409a2323b379"
     },
     {
       "key": "se_0ac",
@@ -611,7 +611,7 @@
           "pan": 64
         }
       ],
-      "sha1": "0f567bf5d2b0beefe43139b03ed08548b4ca0ae0"
+      "sha1": "fbbafd5c427f1a62a1affe182b40f5eb7df5c34c"
     },
     {
       "key": "se_0dd",
@@ -641,7 +641,7 @@
           "pan": 64
         }
       ],
-      "sha1": "3e510015303a4e4795ee01100526a344c55777e8"
+      "sha1": "5b182634c276da6be2179795c167821e72d7678f"
     },
     {
       "key": "se_0e6",
@@ -671,7 +671,7 @@
           "pan": 64
         }
       ],
-      "sha1": "8db24fcc38cbbbedbe2ee5d4d6807cdba4929582"
+      "sha1": "36cb224d2a62e86bae1c0830b94e17bfaf61183a"
     },
     {
       "key": "se_0f2",
@@ -701,7 +701,97 @@
           "pan": 64
         }
       ],
-      "sha1": "f48db443d573829e662a88af4782f55d2b3dfda8"
+      "sha1": "c647db0f673b528a04b20cc454dabba6a14905fd"
+    },
+    {
+      "key": "se_17a",
+      "type": "sfx",
+      "path": "audio/se/se_17a.ogg",
+      "durationSec": 0.466,
+      "loop": false,
+      "soundId": 378,
+      "bank": 2,
+      "sample": 122,
+      "event": "title screw-settle impact",
+      "callerEvidence": "FUN_801c8cb0 variant-0 settle branch (title prop task cluster)",
+      "sourceBank": "snd_com03",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2845,
+        "chd": 2846,
+        "dpk": 2847
+      },
+      "layers": [
+        {
+          "tsbEntry": 122,
+          "dpkOffset": 1126944,
+          "numSamples": 20560,
+          "sampleRate": 44100,
+          "gain": 0.7087,
+          "pan": 64
+        }
+      ],
+      "sha1": "add4b9a71451a264a565cb73783b5d9e3bce5cd6"
+    },
+    {
+      "key": "se_17b",
+      "type": "sfx",
+      "path": "audio/se/se_17b.ogg",
+      "durationSec": 0.865,
+      "loop": false,
+      "soundId": 379,
+      "bank": 2,
+      "sample": 123,
+      "event": "title nut/washer drop impact",
+      "callerEvidence": "DAT_8038a5b4 motion rows 4 and 6 consumed by FUN_801c8cb0",
+      "sourceBank": "snd_com03",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2845,
+        "chd": 2846,
+        "dpk": 2847
+      },
+      "layers": [
+        {
+          "tsbEntry": 123,
+          "dpkOffset": 1138720,
+          "numSamples": 38143,
+          "sampleRate": 44100,
+          "gain": 0.8661,
+          "pan": 64
+        }
+      ],
+      "sha1": "c9e9d024bdde95aa028ab082c4089c02313b8e6f"
+    },
+    {
+      "key": "se_17c",
+      "type": "sfx",
+      "path": "audio/se/se_17c.ogg",
+      "durationSec": 2.726,
+      "loop": false,
+      "soundId": 380,
+      "bank": 2,
+      "sample": 124,
+      "event": "title reveal stinger",
+      "callerEvidence": "title opcode 0x15 -> zz_00f036c_(0, 0x017c) at source frame 120",
+      "sourceBank": "snd_com03",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2845,
+        "chd": 2846,
+        "dpk": 2847
+      },
+      "layers": [
+        {
+          "tsbEntry": 124,
+          "dpkOffset": 1365600,
+          "numSamples": 120235,
+          "sampleRate": 44100,
+          "gain": 1.0,
+          "pan": 64
+        }
+      ],
+      "sha1": "8342a5cec7916c0ded6520a7ebb086513a4f87fd"
     }
   ]
 }
