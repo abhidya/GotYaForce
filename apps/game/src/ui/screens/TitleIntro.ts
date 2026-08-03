@@ -19,12 +19,17 @@
  */
 
 import * as THREE from "three";
-import { createSourceCamera, createThreeAssetLoader, prepareImportedModel } from "@gf/render";
+import { applySourceCameraToThree, createSourceCamera, createThreeAssetLoader, prepareImportedModel } from "@gf/render";
 import type { SourceCamera } from "@gf/render";
 
 import { createTitleVm } from "../intro/titleVm.js";
 import type { TitleEffectSink, TitleVm } from "../intro/titleVm.js";
 import { createTitlePropController } from "../intro/titlePropController.js";
+import {
+  applyTdcFog,
+  applyTdcLights,
+  type TdcSceneState,
+} from "../intro/tdcSceneEnvironment.js";
 import { createUiSceneHost } from "../sceneModel.js";
 import { el } from "../dom.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
@@ -56,17 +61,6 @@ export interface TitleIntroOptions {
 export interface TitleIntroHandle extends MenuInputTarget {
   destroy: () => void;
 }
-
-type TdcSceneState = {
-  archive: string;
-  resourceSlot: number;
-  eye: readonly [number, number, number];
-  target: readonly [number, number, number];
-  fov: number;
-  endFrame: number;
-  lightProfile: "base" | "character-base" | "character";
-  fog: boolean;
-};
 
 type TdcCameraFrame = {
   eye: [number, number, number];
@@ -111,17 +105,6 @@ const TL00_BASE_SCENE_STATE: TdcSceneState = {
   lightProfile: "base",
   fog: false,
 };
-
-const BASE_DIRECTIONS = [
-  { color: [128, 128, 128] as const, position: [-2.7812777, 1.9665543, 1.140989] as const },
-  { color: [128, 128, 128] as const, position: [0.9624716, 2.0371425, -0.698656] as const },
-  { color: [255, 255, 255] as const, position: [1, 1, 1] as const },
-  { color: [153, 153, 153] as const, position: [-1, -1, -1] as const },
-] as const;
-const CHARACTER_DIRECTIONS = [
-  { color: [255, 255, 255] as const, position: [0.5, 1, 1] as const },
-  { color: [128, 128, 153] as const, position: [-0.5, -1, -1] as const },
-] as const;
 
 /**
  * The paired character close-ups encode their subject anchors directly: tdc08 targets
@@ -477,26 +460,6 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       }
       const cameraAnimations = (await cameraAnimationsResponse.json()) as TdcCameraAnimation[];
 
-      const setTdcLights = (state: TdcSceneState): void => {
-        lightRig.clear();
-        lightRig.add(
-          new THREE.AmbientLight(new THREE.Color(152 / 255, 140 / 255, 178 / 255), 1),
-        );
-        const directions =
-          state.lightProfile === "base"
-            ? BASE_DIRECTIONS
-            : state.lightProfile === "character"
-              ? CHARACTER_DIRECTIONS
-              : [...CHARACTER_DIRECTIONS, ...BASE_DIRECTIONS];
-        for (const source of directions) {
-          const [r, g, b] = source.color;
-          const [x, y, z] = source.position;
-          const light = new THREE.DirectionalLight(new THREE.Color(r / 255, g / 255, b / 255), 1);
-          light.position.set(x, y, z);
-          lightRig.add(light);
-        }
-      };
-
       applyTdcFrame = (index, frame): void => {
         const state = index < 0 ? TL00_BASE_SCENE_STATE : TDC_SCENE_STATES[index];
         if (!state) return;
@@ -559,7 +522,8 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
           applyInlineCamera();
         }
 
-        setTdcLights(state);
+        applyTdcLights(lightRig, state);
+        applyTdcFog(scene3, state);
         sceneHost.dataset["gfIntroTdc"] = state.archive;
         sceneHost.dataset["gfIntroTdcSlot"] = String(state.resourceSlot);
         sceneHost.dataset["gfIntroFog"] = state.fog ? "1" : "0";
@@ -727,7 +691,12 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
           frameAccumulator -= FIXED_FRAME_SECONDS;
         }
         syncFxLayers();
-        camera.lookAt(cameraTarget);
+        try {
+          applySourceCameraToThree(titleSourceCamera, camera);
+        } catch (err) {
+          console.warn("[title] applySourceCameraToThree failed; falling back to lookAt:", err);
+          camera.lookAt(cameraTarget);
+        }
         camera.rotateZ(cameraRoll);
         renderer.render(scene3, camera);
         sceneFrame = requestAnimationFrame(render);

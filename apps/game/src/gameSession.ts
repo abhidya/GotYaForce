@@ -29,7 +29,11 @@ import {
   type ChallengeFlowEffectSink,
   type ChallengeFlowVm,
 } from "./ui/intro/challengeFlowVm.js";
-import { ROM_MODE_TO_GAME_SCREEN } from "./ui/intro/globalMenuDispatcher.js";
+import {
+  createGlobalMenuDispatcher,
+  ROM_MODE_TO_GAME_SCREEN,
+  type GlobalMenuEffectSink,
+} from "./ui/intro/globalMenuDispatcher.js";
 
 export type GameScreen =
   | "loading"
@@ -284,6 +288,23 @@ function createSessionChallengeSink(deps: {
   };
 }
 
+/** No-effect sink for the session's render-state mirror dispatcher. The
+ *  authoritative per-frame dispatcher is hosted by main.ts (per
+ *  globalMenuDispatcher.ts integration spec); this session-local instance is
+ *  constructed purely so `getRenderState()` can be consumed at front-end
+ *  transitions for debugging + future rendering. The draw-recipe accumulator
+ *  records the mode's recipe regardless of sink (proven by the dispatcher's
+ *  own no-op-sink self-test), so an empty sink is sufficient. */
+const NOOP_GLOBAL_MENU_SINK: GlobalMenuEffectSink = {
+  drawScene3D() {},
+  drawScene3DCameraVariant() {},
+  drawOverlay() {},
+  drawHud() {},
+  commitOverlayBatch() {},
+  syncRenderOrder() {},
+  commitFrame() {},
+};
+
 /** Challenge navigation/progression module. Browser and battle-runtime work stay at its seam. */
 export function createGameSession<TStageRenderState>(
   dependencies: GameSessionDependencies<TStageRenderState>,
@@ -304,6 +325,10 @@ export function createGameSession<TStageRenderState>(
   // Stage selection stashed by the VM sink's rerollStage (mutated, not replaced,
   // so the sink and builder share one reference); read by buildBattleConfigFromVmSetup.
   let challengeStageState: SessionChallengeStageState = { stageByte: 0xff, stageSubtable: 0, stageVariant: 0 };
+  // Session-local global-menu dispatcher mirror, used only to query
+  // `getRenderState()` at front-end screen transitions. main.ts hosts the
+  // authoritative per-frame dispatcher; this one is never rendered through.
+  const globalMenuDispatcher = createGlobalMenuDispatcher(NOOP_GLOBAL_MENU_SINK);
 
   function render(next: GameScreen): readonly GameSessionEffect[] {
     screen = next;
@@ -554,7 +579,32 @@ export function createGameSession<TStageRenderState>(
       }
       console.warn(`[global-menu] no ROM mode maps to "${fallback}"; using hardcoded fallback`);
     }
+    captureGlobalMenuRenderState(fallback);
     return fallback;
+  }
+
+  /** Query the dispatcher's current renderState (scene preset, HUD mode) for
+   *  the front-end screen being entered. Consumption-only — does not alter the
+   *  screen decision. Set+tick the mirror dispatcher to the screen's ROM mode
+   *  so getRenderState() reflects that mode's draw recipe, then log it. */
+  function captureGlobalMenuRenderState(screenName: GameScreen): void {
+    const mode = ROM_MODE_TO_GAME_SCREEN.indexOf(screenName);
+    if (mode < 0) return;
+    try {
+      globalMenuDispatcher.setMode(mode);
+      globalMenuDispatcher.tick();
+      const rs = globalMenuDispatcher.getRenderState();
+      console.info(
+        `[global-menu] screen "${screenName}" -> mode ${mode}: ` +
+          `scene3d=${rs.scene3d.length}, scene3dCam=${rs.scene3dCam.length}, ` +
+          `overlays=${rs.overlays.length}, hud=${rs.hud.length}, ` +
+          `overlayBatchCommits=${rs.overlayBatchCommits}, ` +
+          `renderOrderSynced=${rs.renderOrderSynced}, committed=${rs.committed}`,
+      );
+    } catch (error) {
+      if (GF_SOURCE_STRICT) throw error;
+      console.warn(`[global-menu] render-state capture failed for screen "${screenName}"`, error);
+    }
   }
 
   return {

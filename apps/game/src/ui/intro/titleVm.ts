@@ -102,6 +102,17 @@ export interface TitleEffectSink {
   setTitleWidgetMode(mode: number): void;
   /** Opcode 0x15 (FUN_801c846c): playSound — `zz_00f036c_(0, cue)`. */
   playSound(cue: number): void;
+  /** Per-frame consumer (chunk_0055.c:2355-2357, inside zz_01c7ba0_): when
+   *  state[+0x3e] (cameraMode) != 0 the ROM runs `zz_0057ad0_` -> `zz_0057b0c_`
+   *  per actor slot (state-machine dispatch + physics). The host advances actor
+   *  mixers / applies per-actor physics here. Optional: a renderer that drives
+   *  actor ticks from its own fixed-step loop may omit it. */
+  onActorTick?(): void;
+  /** Per-frame consumer (chunk_0055.c:2399-2404, inside zz_01c7ba0_): when
+   *  state[+0x3d] (sceneAuxMode) != 0 the ROM writes
+   *  `SidelineExplodableManager__GetNumExplodables_` to a scene global via
+   *  `zz_000598c_(0)`. The host may log it or update a scene parameter. Optional. */
+  onSceneAuxUpdate?(mode: number): void;
 }
 
 /** The front-end global state block (port of PTR_DAT_80433934, relevant slice). Offsets
@@ -389,6 +400,13 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
    *  COBJ-animation + overlay integration from `zz_01c7ba0_` @0x801c7ba0
    *  which also runs every frame as part of sndSeqContinue. */
   const integrate = (): void => {
+    // chunk_0055.c:2355-2357 — if (state[+0x3e] != 0) { zz_0057ad0_(); }
+    // zz_0057ad0_ runs zz_0057b0c_ per actor slot (state dispatch + physics).
+    // setCameraMode (opcode 0x09) latches +0x3e at script offset 25 (~frame 120),
+    // so this fires every frame from then on. Host advances actor state here.
+    if (state.cameraMode !== 0) {
+      sink.onActorTick?.();
+    }
     const timeline = state.sceneTimeline;
     if (timeline.active !== 0) {
       // The ROM writes 0xff in opcode 0x07; signed-byte `< 0` turns it into 1 on the
@@ -411,6 +429,12 @@ export function createTitleVm(sink: TitleEffectSink): TitleVm {
         state.overlay.current = state.overlay.target;
         state.overlay.rate = 0;
       }
+    }
+    // chunk_0055.c:2399-2404 — if (state[+0x3d] != 0) { *pfVar2 = *pfVar2 = SidelineExplodableManager__GetNumExplodables_(); }
+    // pfVar2 = zz_000598c_(0). ROM writes a scene/explodable count to a global;
+    // host can log it or update a scene parameter.
+    if (state.sceneAuxMode !== 0) {
+      sink.onSceneAuxUpdate?.(state.sceneAuxMode);
     }
   };
 

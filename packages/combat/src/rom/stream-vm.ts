@@ -343,10 +343,34 @@ function dispatchOp(
       }
       return;
     }
-    case 0x0e: // playSound — unused on GG4E (zero corpus); port for completeness
+    case 0x0e: { // playSound — FUN_8004c97c @ chunk_0006.c:1826-1859
+      // [op, b1=part, b2=mode, b3=soundId]. ROM gates on partMask & (1<<b1); the JS port
+      // walks each active part separately, so the gate is implicit in the walker. Modes:
+      // 0 = plain zz_00f036c_(actor, id); 1 = anim-rate pitch variant (id-1/id/id+1 by
+      // thresholds 0.7 / 2.0); 2/3 = listener-lerped positional (same id, same hook);
+      // >=4 = no-op (the `(b2 != 4) && (b2 < 4)` guard at chunk_0006.c:1854).
+      if (b2 >= 4) return;
+      let cueId = b3;
+      if (b2 === 1) {
+        const rate = (part as RomPartState & { rate?: number }).rate ?? -1.0;
+        if (rate < 0.7) cueId = (b3 - 1) & 0xff;
+        else if (rate > 2.0) cueId = (b3 + 1) & 0xff;
+      }
+      ctx.onPlayCue?.(actor, cueId);
       return;
-    case 0x0f: // table-driven voice — host wires via the existing voice-cue presentation
+    }
+    case 0x0f: { // table-driven voice — FUN_8004ca3c @ chunk_0006.c:1865-1877
+      // [op, b1=part, b2=0, b3=unused]. ROM guards on *(b2)==0 then calls zz_00b2190_(actor,2)
+      // (FX helper) and zz_00f07e8_(actor) (chunk_0026.c:972-987). zz_00f07e8_ looks up
+      // PTR_DAT_8031b7f4[*(actor+0x3e8)][*(actor+0x3e9)] -> s16 DAT_80434410[v & 0x7f] and
+      // calls zz_00f036c_(actor, voiceId). The voice id is NOT in the stream operand — it
+      // rides the per-borg voice table (not yet decoded). Surface a -1 sentinel so hosts
+      // can distinguish the table-driven voice path from op 0x0e literal ids and either
+      // resolve the table themselves or no-op. Without this fire the cue is silently dropped.
+      if (b2 !== 0) return;
+      ctx.onPlayCue?.(actor, -1);
       return;
+    }
     case 0x10: { // per-part toggle: b2 mode, b3 value → +0x1b04/+0x1b44 (per-part flags)
       const partFlag = actor.parts[partIndex] as RomPartState & { toggle?: number };
       const cur = partFlag.toggle ?? 0;
