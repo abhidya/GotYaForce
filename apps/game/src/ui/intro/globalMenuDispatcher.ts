@@ -284,6 +284,54 @@ export interface GlobalMenuEffectSink {
   commitFrame(): void;
 }
 
+/**
+ * One accumulated draw call captured during a tick. zz_008c440_ (scene3d),
+ * zz_008c62c_ (scene3dCam), and zz_008c88c_ (overlay) share the same
+ * (slot, sceneObjIndex, lightPreset, matPreset) signature, so one shape covers
+ * all three; `kind` distinguishes which ROM primitive produced it.
+ */
+export interface GlobalMenuSceneDraw {
+  readonly kind: "scene3d" | "scene3dCam" | "overlay";
+  readonly slot: number;
+  readonly sceneObjIndex: number;
+  readonly lightPreset: number;
+  readonly matPreset: number;
+}
+
+/** One accumulated HUD layer draw (zz_008c9d4_(slot, layer, matPreset)). */
+export interface GlobalMenuHudDraw {
+  readonly slot: number;
+  readonly layer: number;
+  readonly matPreset: number;
+}
+
+/**
+ * Per-frame draw-recipe snapshot. The dispatcher accumulates this internally as
+ * the mode handler runs (in parallel with delegating to the injected sink), and
+ * `getRenderState()` returns the frozen snapshot after `tick()`. gameSession.ts
+ * / main.ts read this to drive the three.js render for each front-end screen —
+ * the dispatcher selects WHAT to draw (scene preset, HUD mode, overlays); the
+ * host render engine draws it. The dispatcher never touches three.js.
+ */
+export interface GlobalMenuRenderState {
+  /** Mode (PTR_FUN_802da780 index) whose handler produced this frame's recipe. */
+  readonly mode: number;
+  /** zz_008c440_ 3D scene draws in call order. */
+  readonly scene3d: readonly GlobalMenuSceneDraw[];
+  /** zz_008c62c_ camera-variant 3D draws in call order (used only by mode 4). */
+  readonly scene3dCam: readonly GlobalMenuSceneDraw[];
+  /** zz_008c88c_ overlay/widget draws in call order. */
+  readonly overlays: readonly GlobalMenuSceneDraw[];
+  /** zz_008c9d4_ HUD layer draws in call order. */
+  readonly hud: readonly GlobalMenuHudDraw[];
+  /** Number of zz_002ab70_ overlay-batch commits this frame (usually 0 or 1). */
+  readonly overlayBatchCommits: number;
+  /** True if zz_008c3f0_ (render-order sync) was called at least once. */
+  readonly renderOrderSynced: boolean;
+  /** True once zz_009752c_ (frame commit) has run for this frame. */
+  readonly committed: boolean;
+}
+
 export interface GlobalMenuDispatcher {
   readonly state: GlobalMenuDispatcherState;
   /** Port of set_global_menu_mode @0x8008c3a0: writes PTR_DAT_80433930[0x3e]. */
@@ -291,9 +339,17 @@ export interface GlobalMenuDispatcher {
   /** Port of dispatch_global_menu_mode @0x8008c3ac: reads mode, calls
    *  PTR_FUN_802da780[mode](), then zz_009752c_(). Call once per fixed frame. */
   tick(): void;
+  /**
+   * Snapshot of the current frame's accumulated draw recipe — what the last
+   * tick's mode handler drew (scene presets, HUD layers, overlays). Recorded
+   * internally as the handler runs, in parallel with sink delegation, so a host
+   * without a three-mapping sink can still query what to render. Returns fresh
+   * array copies each call (mutating the result does not affect the dispatcher).
+   */
+  getRenderState(): GlobalMenuRenderState;
 }
 
-export function createGlobalMenuDispatcher(sink: GlobalMenuEffectSink): GlobalMenuDispatcher {
+export function createGlobalMenuDispatcher(userSink: GlobalMenuEffectSink): GlobalMenuDispatcher {
   const state: GlobalMenuDispatcherState = {
     mode: 0, // PTR_DAT_80433930[0x3e]; ROM boots into mode 0
     activeRenderSlot: 0, // [0x34]
@@ -301,6 +357,79 @@ export function createGlobalMenuDispatcher(sink: GlobalMenuEffectSink): GlobalMe
     transitionDimFlag: 0, // [0x33]
     animCounter: 0, // [0x31]
     sceneAuxMode: 0, // [0x3d]
+  };
+
+  // ------------------------------------------------------------------------
+  // Per-frame draw-recipe accumulator. Reset at the start of each tick; the
+  // wrapping sink (below) records into it as the mode handlers call draw
+  // primitives, IN PARALLEL with delegating to the user-supplied sink. This is
+  // how a host queries what the frame drew (getRenderState) without injecting a
+  // recording sink — the dispatcher owns its recipe snapshot, the sink remains
+  // the engine-effect boundary, and the dispatcher never touches three.js.
+  // ------------------------------------------------------------------------
+  const frame: {
+    mode: number;
+    scene3d: GlobalMenuSceneDraw[];
+    scene3dCam: GlobalMenuSceneDraw[];
+    overlays: GlobalMenuSceneDraw[];
+    hud: GlobalMenuHudDraw[];
+    overlayBatchCommits: number;
+    renderOrderSynced: boolean;
+    committed: boolean;
+  } = {
+    mode: 0,
+    scene3d: [],
+    scene3dCam: [],
+    overlays: [],
+    hud: [],
+    overlayBatchCommits: 0,
+    renderOrderSynced: false,
+    committed: false,
+  };
+
+  const resetFrame = (mode: number): void => {
+    frame.mode = mode;
+    frame.scene3d.length = 0;
+    frame.scene3dCam.length = 0;
+    frame.overlays.length = 0;
+    frame.hud.length = 0;
+    frame.overlayBatchCommits = 0;
+    frame.renderOrderSynced = false;
+    frame.committed = false;
+  };
+
+  // Wrapping sink: every primitive is recorded into `frame` AND forwarded to
+  // the user sink. Existing call sites below keep using the name `sink`, so
+  // they now hit this wrapper (records + delegates) automatically.
+  const sink: GlobalMenuEffectSink = {
+    drawScene3D(slot, sceneObjIndex, lightPreset, matPreset) {
+      frame.scene3d.push({ kind: "scene3d", slot, sceneObjIndex, lightPreset, matPreset });
+      userSink.drawScene3D(slot, sceneObjIndex, lightPreset, matPreset);
+    },
+    drawScene3DCameraVariant(slot, sceneObjIndex, lightPreset, matPreset) {
+      frame.scene3dCam.push({ kind: "scene3dCam", slot, sceneObjIndex, lightPreset, matPreset });
+      userSink.drawScene3DCameraVariant(slot, sceneObjIndex, lightPreset, matPreset);
+    },
+    drawOverlay(slot, sceneObjIndex, lightPreset, matPreset) {
+      frame.overlays.push({ kind: "overlay", slot, sceneObjIndex, lightPreset, matPreset });
+      userSink.drawOverlay(slot, sceneObjIndex, lightPreset, matPreset);
+    },
+    drawHud(slot, layer, matPreset) {
+      frame.hud.push({ slot, layer, matPreset });
+      userSink.drawHud(slot, layer, matPreset);
+    },
+    commitOverlayBatch() {
+      frame.overlayBatchCommits += 1;
+      userSink.commitOverlayBatch();
+    },
+    syncRenderOrder() {
+      frame.renderOrderSynced = true;
+      userSink.syncRenderOrder();
+    },
+    commitFrame() {
+      frame.committed = true;
+      userSink.commitFrame();
+    },
   };
 
   // Draw helpers: each writes [0x34] (faithful global write) then delegates to
@@ -614,11 +743,23 @@ export function createGlobalMenuDispatcher(sink: GlobalMenuEffectSink): GlobalMe
     if (handler === undefined) {
       throw new RangeError(`global menu mode ${mode} is outside the 11-entry PTR_FUN_802da780 table`);
     }
+    resetFrame(mode); // start a fresh recipe snapshot for this frame
     handler();
-    sink.commitFrame(); // zz_009752c_()
+    sink.commitFrame(); // zz_009752c_()  (wrapping sink marks frame.committed)
   };
 
-  return { state, setMode, tick };
+  const getRenderState = (): GlobalMenuRenderState => ({
+    mode: frame.mode,
+    scene3d: frame.scene3d.slice(),
+    scene3dCam: frame.scene3dCam.slice(),
+    overlays: frame.overlays.slice(),
+    hud: frame.hud.slice(),
+    overlayBatchCommits: frame.overlayBatchCommits,
+    renderOrderSynced: frame.renderOrderSynced,
+    committed: frame.committed,
+  });
+
+  return { state, setMode, tick, getRenderState };
 }
 
 // ---------------------------------------------------------------------------
@@ -985,5 +1126,109 @@ export function runGlobalMenuDispatcherSelfTests(assert: GlobalMenuAssertFn): vo
     // every entry has a unique ROM address
     const addrs = new Set(GLOBAL_MENU_MODE_TABLE.map((e) => e.address));
     assert(addrs.size === 11, "all 11 mode entries have distinct ROM addresses");
+  }
+
+  // --- getRenderState: dispatcher accumulates the recipe the handler drew. ---
+  // The sink still receives every call (engine boundary); the dispatcher also
+  // records internally so a host can query what to render without a recording sink.
+  {
+    // Fresh dispatcher (no tick yet): committed === false, all arrays empty.
+    const sink = createRecordingSink();
+    const d = createGlobalMenuDispatcher(sink);
+    const rs0 = d.getRenderState();
+    assert(rs0.committed === false, "getRenderState: fresh dispatcher is not committed");
+    assert(rs0.scene3d.length === 0 && rs0.hud.length === 0, "getRenderState: fresh dispatcher has empty arrays");
+  }
+  // mode 0: 1 scene3d + 1 overlay + renderOrderSynced + 2 hud, committed.
+  {
+    const sink = createRecordingSink();
+    const d = createGlobalMenuDispatcher(sink);
+    d.setMode(0);
+    d.tick();
+    const rs = d.getRenderState();
+    assert(rs.mode === 0, "getRenderState: mode 0 snapshot carries mode=0");
+    assert(rs.scene3d.length === 1, "getRenderState: mode 0 records 1 scene3d draw");
+    assert(rs.overlays.length === 1, "getRenderState: mode 0 records 1 overlay");
+    assert(rs.hud.length === 2, "getRenderState: mode 0 records 2 hud layers");
+    assert(rs.renderOrderSynced === true, "getRenderState: mode 0 synced render order");
+    assert(rs.overlayBatchCommits === 0, "getRenderState: mode 0 has no overlay-batch commit");
+    assert(rs.committed === true, "getRenderState: mode 0 frame is committed");
+    assert(
+      rs.scene3d[0]?.sceneObjIndex === 0 && rs.scene3d[0]?.lightPreset === 0 && rs.scene3d[0]?.matPreset === 0,
+      "getRenderState: mode 0 first scene3d is (obj0 light0 mat0)",
+    );
+    assert(rs.hud[0]?.layer === 3, "getRenderState: mode 0 first hud layer=3");
+  }
+  // mode 9 (title): 3 scene3d, no hud/overlay.
+  {
+    const sink = createRecordingSink();
+    const d = createGlobalMenuDispatcher(sink);
+    d.setMode(9);
+    d.tick();
+    const rs = d.getRenderState();
+    assert(rs.scene3d.length === 3 && rs.hud.length === 0 && rs.overlays.length === 0, "getRenderState: mode 9 title draws 3 scene objects, no hud/overlay");
+    assert(rs.scene3dCam.length === 0, "getRenderState: mode 9 has no camera-variant draw");
+  }
+  // mode 4 (detail close-up): exactly one camera-variant draw.
+  {
+    const sink = createRecordingSink();
+    const d = createGlobalMenuDispatcher(sink);
+    d.setMode(4);
+    d.tick();
+    const rs = d.getRenderState();
+    assert(rs.scene3dCam.length === 1, "getRenderState: mode 4 records 1 camera-variant draw");
+    assert(
+      rs.scene3dCam[0]?.sceneObjIndex === 2 && rs.scene3dCam[0]?.lightPreset === 7,
+      "getRenderState: mode 4 camera variant (obj2 light7)",
+    );
+  }
+  // mode 1 + selectionIndex 2 even: composite commits one overlay batch.
+  {
+    const sink = createRecordingSink();
+    const d = createGlobalMenuDispatcher(sink);
+    d.state.selectionIndex = 2;
+    d.state.transitionDimFlag = 0;
+    d.state.animCounter = 0;
+    d.setMode(1);
+    d.tick();
+    const rs = d.getRenderState();
+    assert(rs.overlayBatchCommits === 1, "getRenderState: composite si==2 even commits one overlay batch");
+    assert(rs.scene3d.length === 2, "getRenderState: composite si==2 even draws 2 scene objects");
+  }
+  // Snapshot independence: each call returns fresh array instances, so hosts can
+  // hold a snapshot without it mutating under them when the next tick runs.
+  {
+    const sink = createRecordingSink();
+    const d = createGlobalMenuDispatcher(sink);
+    d.setMode(0);
+    d.tick();
+    const rsA = d.getRenderState();
+    const rsB = d.getRenderState();
+    assert(rsA.hud !== rsB.hud, "getRenderState: returns fresh arrays per call (snapshot identity is unique)");
+    assert(rsA.hud.length === rsB.hud.length, "getRenderState: consecutive snapshots agree on contents");
+    // A second tick reuses the internal buffers in place, so the OLD snapshot's
+    // arrays are now stale but the NEW getRenderState() reflects the new frame.
+    d.setMode(9);
+    d.tick();
+    const rsC = d.getRenderState();
+    assert(rsC.scene3d.length === 3 && rsC.hud.length === 0, "getRenderState: after a second tick, reflects the new frame's recipe");
+  }
+  // getRenderState stays accurate even with a no-op (empty) sink — the dispatcher
+  // owns its recipe snapshot, so a host that injects a no-op sink still sees what to render.
+  {
+    const noopSink: GlobalMenuEffectSink = {
+      drawScene3D() {},
+      drawScene3DCameraVariant() {},
+      drawOverlay() {},
+      drawHud() {},
+      commitOverlayBatch() {},
+      syncRenderOrder() {},
+      commitFrame() {},
+    };
+    const d = createGlobalMenuDispatcher(noopSink);
+    d.setMode(2); // desk overview: 5 scene3d + 5 overlays
+    d.tick();
+    const rs = d.getRenderState();
+    assert(rs.scene3d.length === 5 && rs.overlays.length === 5 && rs.committed === true, "getRenderState: accurate even with a no-op sink (host queries recipe without a recording sink)");
   }
 }

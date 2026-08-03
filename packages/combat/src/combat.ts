@@ -736,13 +736,13 @@ export interface DamageRuntimeContext {
    */
   cpuHalvingEnabled?: boolean | undefined;
   /**
-   * Per-frame counter that opts the slice INTO the source-owned collision pipeline
-   * (sourceCollision.ts's three hit-pair passes). When present AND GF_SOURCE_STRICT is set,
-   * `stepSourceCollision` runs once per frame (deduped on this value) as the PRIMARY hit
-   * path — forming + resolving every pair through the ROM-faithful pipeline and syncing HP
-   * back onto BorgRuntime — and `applyHit` defers (returns 0) so damage is not double-
-   * applied. Absent (the default today) keeps the existing applyHit path primary bit-for-bit;
-   * battle.ts adoption is the documented wiring target (see stepSourceCollision's header).
+   * Per-frame counter. When supplied, dedupes stepSourceCollision to one run per frame
+   * value (skip if already ran for that exact frame). The source-collision pipeline runs
+   * by DEFAULT whenever stepSourceCollision is called (once per frame from stepProjectiles)
+   * — this field is no longer required to ENABLE the path. Pair-aware defer
+   * (`__sourceCollisionDeferHandled`) + applyHit-already-damaged tracking
+   * (`__applyHitAlreadyDamaged`) are the authoritative mechanisms that work without
+   * frameNumber (the default today; battle.ts adoption is a future wiring target).
    */
   frameNumber?: number | undefined;
 }
@@ -1098,15 +1098,31 @@ function runSourceDeathPath(
 // invocation covers melee + special + projectile pairs because the active list is built
 // from ALL attacking borgs + in-flight projectiles).
 //
-// OPT-IN CONTRACT (mirrors the existing GF_SOURCE_STRICT fidelity flag at line SOURCE_STRICT):
-// source-primary hit detection activates ONLY when BOTH GF_SOURCE_STRICT is set AND the
-// caller passes `damageContext.frameNumber`. Under that opt-in the passes form + resolve
-// every pair through the ROM-faithful pipeline, HP is synced back onto BorgRuntime, and
-// `applyHit` defers (returns 0) for that exact frame so damage is not double-applied.
-// Without the opt-in, stepSourceCollision is a no-op and the existing applyHit path stays
-// primary bit-for-bit (today's behavior). On a source-pipeline throw under STRICT, the
-// error re-throws (visible failure); under non-STRICT it console.warns and applyHit runs
-// as the documented fallback.
+// SOURCE-PRIMARY DEFAULT: the three hit-pair passes run by DEFAULT whenever
+// stepSourceCollision is called (i.e. once per frame from stepProjectiles) — NOT gated
+// behind GF_SOURCE_STRICT or a frameNumber opt-in. GF_SOURCE_STRICT gates only the
+// throw-on-failure behavior (a source-pipeline error re-throws under STRICT, console.warns
+// otherwise); it no longer gates whether the path runs at all. A provided frameNumber adds
+// dedup (skip if already ran for that exact frame); without it the passes simply run every
+// call (stepProjectiles is called once per frame, so that is the natural cadence).
+//
+// DEFER CONTRACT (pair-aware, no frameNumber required): stepSourceCollision populates
+// `__sourceCollisionDeferHandled` with the uids of every victim whose HP it synced back.
+// applyHit checks that set and returns 0 (defers) for those victims, so damage is not
+// double-applied. Victims NOT in a resolved pair (source-collision miss, shape-query
+// forced off, attacker not in the active list) fall through to applyHit as the documented
+// fallback. The existing applyHit path is source-primary internally (sourceDamage.ts
+// computeBaseDamage + applyHpDamage, sourceKnockback.ts, sourceDeath.ts) — so even the
+// fallback is source-owned, with damageFormula/gauges/physics paths as throw-on-error
+// fallbacks under the SAME GF_SOURCE_STRICT contract.
+//
+// LOOP ORDER DOUBLE-APPLICATION GATE: stepAttacks (Loop 1) runs BEFORE stepProjectiles
+// (Loop 2). applyHit tracks every victim it damages in `__applyHitAlreadyDamaged`;
+// stepSourceCollision SKIPS HP sync for those victims (applyHit's damage already landed
+// — the source-collision adapter would otherwise build from the reduced HP and sync back
+// a doubly-reduced value). This keeps melee/special pairs on the applyHit source-primary
+// path (correct: stepSourceCollision has not run yet when stepAttacks fires) while letting
+// stepSourceCollision be authoritative for projectile pairs (where it runs first).
 //
 // Honest partial port (cited per sourceCollision.ts's own integration spec):
 //  - The +0x28 descriptor / +0x58 shape / +0x98 pos-mirror fields are NOT yet on
@@ -1119,13 +1135,29 @@ function runSourceDeathPath(
 //  - Only HP is synced back onto BorgRuntime. The resolver's per-pair effect-bookkeeping
 //    body (status flags, gauge deltas, reaction-anim selection — sourceCollision.ts:927-
 //    931) is NOT ported; knockback velocity + status + gauge application stay on the
-//    existing applyHit path as documented gaps under the source-primary opt-in.
+//    existing applyHit path as documented gaps under source-primary.
 // ---------------------------------------------------------------------------------------
 
-/** The frame number stepSourceCollision last successfully ran for (null = never). applyHit
- *  defers only when the caller's frameNumber matches this exact value, so the defer flag
- *  can never go stale across frame boundaries. */
+/** The frame number stepSourceCollision last successfully ran for (null = never). Used
+ *  for dedup when the caller supplies frameNumber; the pair-aware sets below are the
+ *  authoritative defer/skip mechanism that works WITHOUT frameNumber (the default). */
 let __sourceCollisionFrame: number | null = null;
+
+/** Victim uids that stepSourceCollision resolved a pair for in its most recent run
+ *  (HP synced back onto BorgRuntime). applyHit defers for these victims so damage is
+ *  not double-applied. Pair-aware — a victim NOT in a resolved pair lets applyHit run
+ *  as the documented fallback. Cleared at the start of each stepSourceCollision run
+ *  and at the end of stepProjectiles (frame boundary). */
+let __sourceCollisionDeferHandled: Set<string> = new Set();
+
+/** Victim uids that applyHit already damaged THIS frame (in stepAttacks Loop 1 or any
+ *  direct applyHit caller). stepSourceCollision SKIPS HP sync for these victims to
+ *  prevent double-application: applyHit's damage stands (it already uses source-primary
+ *  computeBaseDamage internally). Without this, stepSourceCollision — which runs in
+ *  stepProjectiles (Loop 2, AFTER stepAttacks) — would build adapters from the already-
+ *  reduced HP, apply source damage on top, and sync back a doubly-reduced value.
+ *  Cleared at the end of stepProjectiles (frame boundary). */
+let __applyHitAlreadyDamaged: Set<string> = new Set();
 
 /** borgNumber (u16, family high byte | variant low byte) from a "pl####" borgId. Mirrors
  *  sourceDamage's borgNumberFromBorgId for the collision-actor adapter. */
@@ -1329,29 +1361,40 @@ function runSourceCollisionPasses(
   collisionHitPairPassActiveVsSecondary(activeList, [], ctx);
 
   // Sync resolved-pair HP back onto BorgRuntime (the resolver mutated the adapter actors).
+  // SKIP victims that applyHit already damaged this frame (Loop 1 stepAttacks runs before
+  // stepProjectiles): applyHit's source-primary computeBaseDamage already landed, so
+  // syncing the source-collision adapter's further-reduced HP would double-subtract. The
+  // pair is NOT added to the defer set, so the per-projectile applyHit loop still runs for
+  // these victims if a separate projectile hit is pending (applyHit is the fallback for
+  // pairs source-collision did not authoritatively settle).
   for (const pair of pairs) {
     const targetBorg = backRef.get(pair.target.actor);
-    if (targetBorg && targetBorg.hp !== pair.target.actor.hp) {
+    if (!targetBorg) continue;
+    if (__applyHitAlreadyDamaged.has(targetBorg.uid)) continue;
+    if (targetBorg.hp !== pair.target.actor.hp) {
       targetBorg.hp = pair.target.actor.hp;
     }
+    __sourceCollisionDeferHandled.add(targetBorg.uid);
   }
   return pairs;
 }
 
 /**
- * Per-frame entry point for the source-owned collision pipeline. Dedupes to one run per
- * `damageContext.frameNumber` (the opt-in counter), projects resolved-pair HP mutations
- * back onto BorgRuntime, and stamps `__sourceCollisionFrame` so applyHit defers for that
- * exact frame. OPT-IN: activates only under GF_SOURCE_STRICT + a provided frameNumber;
- * otherwise returns [] without running (existing applyHit path stays primary). On a
- * source-pipeline throw under STRICT, re-throws (visible failure); under non-STRICT,
- * console.warns and returns [] (existing applyHit path = documented fallback).
+ * Per-frame entry point for the source-owned collision pipeline. SOURCE-PRIMARY DEFAULT:
+ * the three ROM hit-pair passes run whenever this is called (once per frame from
+ * stepProjectiles) — NOT gated behind GF_SOURCE_STRICT or a frameNumber opt-in. Projects
+ * resolved-pair HP mutations back onto BorgRuntime and stamps `__sourceCollisionDeferHandled`
+ * so applyHit defers for those victims. On a source-pipeline throw under STRICT, re-throws
+ * (visible failure); under non-STRICT, console.warns and returns [] (existing applyHit
+ * path = documented fallback).
  *
- * battle.ts is the wiring target: call stepSourceCollision once per frame (passing
- * `frameNumber` in DamageRuntimeContext) so the source pipeline runs BEFORE the per-borg
- * stepAttacks applyHit loop. combat.ts also invokes it from stepProjectiles (which has the
- * full projectiles list) to exercise the pipeline structurally and to run source-primary
- * resolution for projectile pairs when the opt-in is active.
+ * When `damageContext.frameNumber` IS provided, it dedupes to one run per frame value
+ * (skip if already ran for that exact frame). Without frameNumber the passes run every
+ * call — stepProjectiles is called once per frame, so that is the natural cadence.
+ *
+ * combat.ts invokes stepSourceCollision from stepProjectiles (which has the full
+ * projectiles list); the single invocation covers melee + special + projectile pairs
+ * because the active list is built from ALL attacking borgs + in-flight projectiles.
  */
 export function stepSourceCollision(
   all: readonly BorgRuntime[],
@@ -1360,12 +1403,12 @@ export function stepSourceCollision(
   projectiles: readonly Projectile[] = [],
 ): CollisionHitPair[] {
   const frame = damageContext.frameNumber;
-  if (frame === undefined) return []; // legacy: no opt-in → existing applyHit path primary.
-  if (!SOURCE_STRICT) return []; // source pipeline exercised only under the STRICT fidelity flag.
-  if (frame === __sourceCollisionFrame) return []; // already ran this frame.
+  if (frame !== undefined && frame === __sourceCollisionFrame) return []; // dedup.
+  // Reset the defer set for this run (cleared again at the end of stepProjectiles).
+  __sourceCollisionDeferHandled = new Set();
   try {
     const pairs = runSourceCollisionPasses(all, profiles, damageContext, projectiles);
-    __sourceCollisionFrame = frame;
+    if (frame !== undefined) __sourceCollisionFrame = frame;
     return pairs;
   } catch (err) {
     if (SOURCE_STRICT) throw err;
@@ -1402,13 +1445,14 @@ export function applyHit(
 ): number {
   if (!isTargetable(victim) || isInvincible(victim)) return 0;
 
-  // Source-collision defer gate (GF_SOURCE_STRICT + frameNumber opt-in): when the source
-  // pipeline already resolved this pair this frame (HP synced back via stepSourceCollision),
-  // defer to it so damage is not double-applied. Only fires when the caller's frameNumber
-  // matches the exact frame stepSourceCollision ran for — the defer flag can never go stale
-  // across frame boundaries. Today's melee/special/projectile applyHit calls are the
-  // documented FALLBACK; they run unchanged when the opt-in is off (the default).
-  if (damageContext?.frameNumber !== undefined && damageContext.frameNumber === __sourceCollisionFrame) {
+  // Source-collision defer gate (SOURCE-PRIMARY DEFAULT): when the source pipeline already
+  // resolved a pair for this victim this frame (HP synced back via stepSourceCollision),
+  // defer to it so damage is not double-applied. PAIR-AWARE — checks
+  // `__sourceCollisionDeferHandled` (populated by stepSourceCollision for every victim whose
+  // HP it synced). A victim NOT in that set (source-collision miss, shape-query forced off,
+  // or stepSourceCollision hasn't run yet this frame) lets applyHit run as the documented
+  // fallback. No frameNumber opt-in required — works under the default path.
+  if (__sourceCollisionDeferHandled.has(victim.uid)) {
     return 0;
   }
 
@@ -1507,6 +1551,11 @@ export function applyHit(
   if (!hpAppliedViaSource) {
     victim.hp -= dmg;
   }
+  // Track that applyHit damaged this victim THIS frame so stepSourceCollision (which runs
+  // in stepProjectiles, AFTER stepAttacks) SKIPS HP sync for this victim — its adapter
+  // would otherwise build from the already-reduced HP and sync back a doubly-reduced
+  // value. Cleared at the end of stepProjectiles (frame boundary).
+  __applyHitAlreadyDamaged.add(victim.uid);
 
   // Vampire lifesteal STEAL (ATK-019, behavior-notes (ay)): a vampire (ids 0x702/0x70a) banks
   // half of every damage point it deals and drains it into its own HP, capped at max. The ROM
@@ -3350,12 +3399,15 @@ export function stepProjectiles(
   damageContext: DamageRuntimeContext = {},
 ): Projectile[] {
   // Source-owned collision pipeline invocation (sourceCollision.ts integration spec). This
-  // is combat.ts's per-frame call into the three ROM hit-pair passes — the only hit-
-  // detection site that has the full projectiles list, so the single invocation covers
-  // melee + special + projectile pairs (the active list is built from ALL attacking borgs
-  // + in-flight projectiles). No-op unless GF_SOURCE_STRICT + damageContext.frameNumber
-  // (the source-primary opt-in); otherwise the existing per-projectile applyHit loop below
-  // stays primary bit-for-bit. See stepSourceCollision's header for the full contract.
+  // is combat.ts's per-frame call into the three ROM hit-pair passes — SOURCE-PRIMARY
+  // DEFAULT: runs every frame (not gated behind GF_SOURCE_STRICT or frameNumber). The
+  // single invocation covers melee + special + projectile pairs (the active list is built
+  // from ALL attacking borgs + in-flight projectiles). Resolved-pair HP is synced onto
+  // BorgRuntime and `__sourceCollisionDeferHandled` is populated so the per-projectile
+  // applyHit loop below defers for those victims (no double-application). Pairs whose
+  // victim applyHit already damaged this frame (stepAttacks Loop 1 ran first) are SKIPPED
+  // in the sync — applyHit's source-primary computeBaseDamage stands. See
+  // stepSourceCollision's header for the full contract.
   stepSourceCollision(all, profiles, damageContext, projectiles);
 
   const survivors: Projectile[] = [];
@@ -3501,6 +3553,13 @@ export function stepProjectiles(
     // above can drop them); the counter above already governs re-hit pacing.
     if (persistent || !consumed) survivors.push(pr);
   }
+  // Frame boundary: clear the source-collision / applyHit defer-tracking sets so they
+  // never go stale across frame boundaries. stepSourceCollision ran at the top of this
+  // call (populating __sourceCollisionDeferHandled for the per-projectile loop above);
+  // __applyHitAlreadyDamaged was populated by stepAttacks (Loop 1) earlier this frame.
+  // Both are fresh-built again next frame.
+  __sourceCollisionDeferHandled = new Set();
+  __applyHitAlreadyDamaged = new Set();
   return survivors;
 }
 

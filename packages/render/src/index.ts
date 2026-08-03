@@ -4,7 +4,11 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone as cloneSkinnedObject } from "three/examples/jsm/utils/SkeletonUtils.js";
 
 // Source-owned camera layer (1:1 port of HSD CObj + COBJ animation + zz_00059b8_ view-setup).
+// sourceCamera.ts stays THREE-free (preserves @gf/combat's no-three runtime contract);
+// the THREE-aware adapters (mtx34ToThreeMatrix4 / applySourceCameraToThree) live in the
+// sibling sourceCameraThree.ts and are re-exported here for three-aware hosts (TitleIntro).
 export * from "./camera/sourceCamera.js";
+export * from "./camera/sourceCameraThree.js";
 
 export interface ThreeViewportOptions {
   backend?: "webgl";

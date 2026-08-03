@@ -62,6 +62,16 @@
 // (research/decomp/behavior-notes.md §1: section 9 → runtime 0x802b01a0..0x802bae60,
 // file offset 0x2ad1a0..0x2b7e60; section 12 → runtime 0x80436a20..0x8043d500).
 
+// NOTE on the three.js helpers: toThreeMatrix4 / applyToCamera live in the
+// sibling sourceCameraThree.ts (not here) so this module stays THREE-free at
+// runtime. @gf/combat imports createSourceCamera + setupView from this file
+// (bootGlobals.ts:10) under a documented no-three runtime contract; pulling
+// `three` in here would force it into combat's graph. Hosts that drive a
+// THREE.PerspectiveCamera (e.g. TitleIntro.ts) import the helpers from
+// sourceCameraThree.ts instead. This file still exposes the pure-TS primitive
+// mtx34ToColumnMajor4x4 (below) that the THREE helpers build on, and that any
+// no-three consumer can use to build its own upload.
+
 /** 3-component single-precision vector (HSD CObj uses float fields throughout). */
 export interface Vec3 {
   x: number;
@@ -357,6 +367,39 @@ export function cMtxLookAt(cam: Vec3, up: Vec3, target: Vec3): Mtx34 {
   ];
 }
 
+/**
+ * Pure-TS rows→columns transpose of a C_MTXLookAt Mtx34 into the 16-element
+ * column-major layout THREE.Matrix4.elements uses. THREE-free (no runtime
+ * import) so any consumer — including @gf/combat, which keeps a no-three
+ * runtime contract — can build its own upload without pulling in three.js.
+ *
+ * C_MTXLookAt Mtx (row-major 3x4)         THREE.Matrix4.elements (column-major 4x4):
+ *   row 0 = [rx,ry,rz,tx]  (right)          col 0 = (rx,ux,lx,0)
+ *   row 1 = [ux,uy,uz,tu]  (up)             col 1 = (ry,uy,ly,0)
+ *   row 2 = [lx,ly,lz,tl]  (look/forward)   col 2 = (rz,uz,lz,0)
+ *                                           col 3 = (tx,tu,tl,1)
+ *
+ * This is the structural mapping the THREE-aware helpers in sourceCameraThree.ts
+ * (mtx34ToThreeMatrix4 / applySourceCameraToThree) build on. It is a direct
+ * (faithful) transpose of the GC view matrix into THREE's column-major layout;
+ * any coordinate-system reconciliation with three.js's right-handed camera
+ * space is a host/asset-pipeline concern, not baked in here.
+ */
+export function mtx34ToColumnMajor4x4(mtx: Mtx34): readonly [
+  number, number, number, number,
+  number, number, number, number,
+  number, number, number, number,
+  number, number, number, number,
+] {
+  const [rx, ry, rz, tx, ux, uy, uz, tu, lx, ly, lz, tl] = mtx;
+  return [
+    rx, ux, lx, 0,
+    ry, uy, ly, 0,
+    rz, uz, lz, 0,
+    tx, tu, tl, 1,
+  ];
+}
+
 // --- internals -----------------------------------------------------------------------------
 
 function vec3(src: { x: number; y: number; z: number } | readonly [number, number, number]): Vec3 {
@@ -519,6 +562,34 @@ export function runSourceCameraSelfTests(assert: SourceCameraAssert): void {
     assert(frames === 40, `stepFrame completes in exactly 40 frames (589->549), got ${frames}`);
     assert(approx(cam.state.timeline.current, 449), "stepFrame completion clamps current to 449 [FLOAT_80438608]");
     assert(cam.state.timeline.active === 0, "stepFrame completion clears the active latch");
+  }
+
+  // -- mtx34ToColumnMajor4x4: faithful rows→columns transpose of the boot view. --
+  // Pure-TS helper (THREE-free); the three.js Matrix4 variant (mtx34ToThreeMatrix4)
+  // is the same mapping wrapped in makeBasis/setPosition and is exercised at
+  // runtime by TitleIntro.ts. Boot Mtx = [-1,0,0,0, 0,1,0,0, 0,0,-1,10]:
+  //   col0=(rx,ux,lx,0)=(-1,0,0,0)  col1=(ry,uy,ly,0)=(0,1,0,0)
+  //   col2=(rz,uz,lz,0)=(0,0,-1,0)  col3=(tx,tu,tl,1)=(0,0,10,1)
+  {
+    const cam = createSourceCamera();
+    const m = sourceCameraBootViewSetup(cam);
+    const cm = mtx34ToColumnMajor4x4(m);
+    assert(
+      approx(cm[0]!, -1) && approx(cm[1]!, 0) && approx(cm[2]!, 0) && approx(cm[3]!, 0),
+      "column-major col 0 = (-1,0,0,0) [right row transposed]",
+    );
+    assert(
+      approx(cm[4]!, 0) && approx(cm[5]!, 1) && approx(cm[6]!, 0) && approx(cm[7]!, 0),
+      "column-major col 1 = (0,1,0,0) [up row transposed]",
+    );
+    assert(
+      approx(cm[8]!, 0) && approx(cm[9]!, 0) && approx(cm[10]!, -1) && approx(cm[11]!, 0),
+      "column-major col 2 = (0,0,-1,0) [look row transposed]",
+    );
+    assert(
+      approx(cm[12]!, 0) && approx(cm[13]!, 0) && approx(cm[14]!, 10) && approx(cm[15]!, 1),
+      "column-major col 3 = (0,0,10,1) [translation]",
+    );
   }
 }
 

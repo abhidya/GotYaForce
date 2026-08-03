@@ -30,6 +30,8 @@ import {
   decayHSpeed,
   accumulateGravity,
   floorSnap8030,
+  clampHSpeedBand,
+  applyVerticalClampBand,
 } from "./physicsExtras.js";
 
 // Re-export the integrator variants + ground/collision probes physicsExtras owns, so the
@@ -106,6 +108,18 @@ export function projectZ(bam: number): number {
  *  6. hSpeed += hDecel × +0x5f4 (clamp >= H_SPEED_FLOOR)
  *  7. yVel += +0x5f4 × (gravityCoeff × gravity); clamp to [maxFall, maxRise] (or
  *     FLY_FALL when the actor is a flyer / has the no-clamp flag at +0x741/+0x6cb)
+ *
+ * FULL-CLAMP DEFAULT (zz_0067458_ @ chunk_0008.c:3836): when the actor carries POPULATED
+ * ROM speed-clamp fields (maxHSpeed +0x678 > 0 AND maxRise +0x67c > 0), this integrator
+ * ALSO applies the upper band clamps the FULL-clamp variant layers on top of FUN_80067310
+ * (clampHSpeedBand + applyVerticalClampBand). The six documented full-clamp family
+ * consumers (kung-fu-master, death-borg-chi, cosmic-dragon, cyber-dragon, dragon,
+ * phoenix-dragon) call integratePhysics directly — this gate gives them the speed cap by
+ * DEFAULT without needing to wire each handler to integratePhysicsFullClamp explicitly.
+ * Actors without populated band fields (createRomActor defaults them to 0) keep the
+ * lower-only FUN_80067310 tail (clampVertical) — the upper clamp would incorrectly zero
+ * positive yVel when maxRise is unset. integratePhysicsFullClamp (physicsExtras) wraps
+ * this function + re-applies the same idempotent band clamps; the redundancy is harmless.
  */
 export function integratePhysics(gravity: number, actor: RomActor, yaw: number): void {
   // Delegated to physicsExtras' shared sub-steps so FUN_80067310, FUN_80067524 (no-clamp),
@@ -116,7 +130,14 @@ export function integratePhysics(gravity: number, actor: RomActor, yaw: number):
   groundClamp(actor);
   decayHSpeed(actor);
   accumulateGravity(gravity, actor);
-  clampVertical(actor);
+  // Full-clamp tail when the actor has populated speed-clamp fields (zz_0067458_'s upper
+  // band clamps); otherwise the lower-only FUN_80067310 tail. See the header above.
+  if (actor.maxHSpeed > 0 && actor.maxRise > 0) {
+    clampHSpeedBand(actor);
+    applyVerticalClampBand(actor);
+  } else {
+    clampVertical(actor);
+  }
 }
 
 /** Port of the vertical-clamp tail of FUN_80067310 (lines 3815-3828): the +0x741/+0x6cb
