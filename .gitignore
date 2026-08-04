@@ -71,3 +71,6 @@ research/decomp/generated/finish-game-port/
 # Local extraction/build scratch.
 .tmp/
 .pnpm-store/
+
+# Unsloth (LLM fine-tuning) compiled cache — local ML artifact, not source.
+unsloth_compiled_cache/

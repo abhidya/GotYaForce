@@ -11,8 +11,8 @@
    "DEATH BORG DELTA"
   ],
   "borgCount": 14,
-  "shapeCount": 59,
-  "instrs": 4343
+  "shapeCount": 13,
+  "instrs": 990
  },
  {
   "labels": [
@@ -26,8 +26,8 @@
    "DEATH BORG OMEGA II"
   ],
   "borgCount": 14,
-  "shapeCount": 59,
-  "instrs": 3745
+  "shapeCount": 38,
+  "instrs": 2436
  },
  {
   "labels": [
@@ -39,8 +39,8 @@
    "DEATH BORG ZETA"
   ],
   "borgCount": 13,
-  "shapeCount": 47,
-  "instrs": 2832
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
@@ -53,8 +53,8 @@
    "IMPERIAL KNIGHT"
   ],
   "borgCount": 12,
-  "shapeCount": 104,
-  "instrs": 6333
+  "shapeCount": 79,
+  "instrs": 4169
  },
  {
   "labels": [
@@ -66,8 +66,8 @@
    "DEATH BORG SIGMA"
   ],
   "borgCount": 11,
-  "shapeCount": 51,
-  "instrs": 2984
+  "shapeCount": 38,
+  "instrs": 1785
  },
  {
   "labels": [
@@ -80,24 +80,24 @@
    "SLOW VALKRIE"
   ],
   "borgCount": 8,
-  "shapeCount": 15,
-  "instrs": 960
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "FLAME DRAGON"
   ],
   "borgCount": 6,
-  "shapeCount": 14,
-  "instrs": 507
+  "shapeCount": 1,
+  "instrs": 59
  },
  {
   "labels": [
    "CYBER DEATH DRAGON"
   ],
   "borgCount": 6,
-  "shapeCount": 17,
-  "instrs": 757
+  "shapeCount": 8,
+  "instrs": 413
  },
  {
   "labels": [
@@ -106,8 +106,8 @@
    "DEATH BORG ALPHA"
   ],
   "borgCount": 5,
-  "shapeCount": 34,
-  "instrs": 2115
+  "shapeCount": 46,
+  "instrs": 2343
  },
  {
   "labels": [
@@ -116,8 +116,8 @@
    "DEATH BORG BETA II"
   ],
   "borgCount": 5,
-  "shapeCount": 41,
-  "instrs": 2335
+  "shapeCount": 52,
+  "instrs": 2300
  },
  {
   "labels": [
@@ -127,8 +127,8 @@
    "METAL HERO"
   ],
   "borgCount": 5,
-  "shapeCount": 71,
-  "instrs": 4806
+  "shapeCount": 62,
+  "instrs": 3877
  },
  {
   "labels": [
@@ -137,32 +137,32 @@
    "BASTET WITCH"
   ],
   "borgCount": 5,
-  "shapeCount": 53,
-  "instrs": 3069
+  "shapeCount": 139,
+  "instrs": 7209
  },
  {
   "labels": [
    "ALIEN WORM"
   ],
   "borgCount": 4,
-  "shapeCount": 16,
-  "instrs": 770
+  "shapeCount": 18,
+  "instrs": 810
  },
  {
   "labels": [
    "MACHINE RED"
   ],
   "borgCount": 4,
-  "shapeCount": 33,
-  "instrs": 2094
+  "shapeCount": 29,
+  "instrs": 1977
  },
  {
   "labels": [
    "MACHINE BLUE"
   ],
   "borgCount": 4,
-  "shapeCount": 10,
-  "instrs": 737
+  "shapeCount": 9,
+  "instrs": 724
  },
  {
   "labels": [
@@ -177,8 +177,8 @@
    "VICTORY KING"
   ],
   "borgCount": 4,
-  "shapeCount": 6,
-  "instrs": 578
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
@@ -186,96 +186,96 @@
    "DEATH EYE"
   ],
   "borgCount": 4,
-  "shapeCount": 4,
-  "instrs": 216
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "WIRE GUNNER"
   ],
   "borgCount": 3,
-  "shapeCount": 27,
-  "instrs": 1674
+  "shapeCount": 29,
+  "instrs": 1698
  },
  {
   "labels": [
    "G RED"
   ],
   "borgCount": 3,
-  "shapeCount": 18,
-  "instrs": 1229
+  "shapeCount": 9,
+  "instrs": 393
  },
  {
   "labels": [
    "JELLY DIVER"
   ],
   "borgCount": 3,
-  "shapeCount": 32,
-  "instrs": 1738
+  "shapeCount": 35,
+  "instrs": 1761
  },
  {
   "labels": [
    "COPY MAN"
   ],
   "borgCount": 3,
-  "shapeCount": 3,
-  "instrs": 208
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "ANGEL NURSE"
   ],
   "borgCount": 3,
-  "shapeCount": 36,
-  "instrs": 2328
+  "shapeCount": 45,
+  "instrs": 2685
  },
  {
   "labels": [
    "ARROW NINJA"
   ],
   "borgCount": 2,
-  "shapeCount": 18,
-  "instrs": 1063
+  "shapeCount": 14,
+  "instrs": 670
  },
  {
   "labels": [
    "TELEPORT NINJA"
   ],
   "borgCount": 2,
-  "shapeCount": 28,
-  "instrs": 1831
+  "shapeCount": 18,
+  "instrs": 1022
  },
  {
   "labels": [
    "ELEMENTAL KNIGHT"
   ],
   "borgCount": 2,
-  "shapeCount": 35,
-  "instrs": 1889
+  "shapeCount": 33,
+  "instrs": 1764
  },
  {
   "labels": [
    "PHOENIX DRAGON"
   ],
   "borgCount": 2,
-  "shapeCount": 9,
-  "instrs": 446
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "COSMIC DRAGON"
   ],
   "borgCount": 2,
-  "shapeCount": 26,
-  "instrs": 1112
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "EAGLE ROBOT"
   ],
   "borgCount": 2,
-  "shapeCount": 13,
-  "instrs": 879
+  "shapeCount": 7,
+  "instrs": 353
  },
  {
   "labels": [
@@ -283,32 +283,32 @@
    "TAO MASTER"
   ],
   "borgCount": 2,
-  "shapeCount": 42,
-  "instrs": 2817
+  "shapeCount": 17,
+  "instrs": 764
  },
  {
   "labels": [
    "GUARD WITCH"
   ],
   "borgCount": 2,
-  "shapeCount": 36,
-  "instrs": 2057
+  "shapeCount": 40,
+  "instrs": 2061
  },
  {
   "labels": [
    "DEATH BORG THETA"
   ],
   "borgCount": 2,
-  "shapeCount": 30,
-  "instrs": 2198
+  "shapeCount": 38,
+  "instrs": 2548
  },
  {
   "labels": [
    "NORMAL TANK"
   ],
   "borgCount": 2,
-  "shapeCount": 10,
-  "instrs": 430
+  "shapeCount": 8,
+  "instrs": 333
  },
  {
   "labels": [
@@ -316,104 +316,104 @@
    "ORANGE FIGHTER"
   ],
   "borgCount": 2,
-  "shapeCount": 5,
-  "instrs": 216
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "SIRIUS"
   ],
   "borgCount": 2,
-  "shapeCount": 10,
-  "instrs": 557
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "SHURIKEN NINJA"
   ],
   "borgCount": 1,
-  "shapeCount": 22,
-  "instrs": 1269
+  "shapeCount": 14,
+  "instrs": 497
  },
  {
   "labels": [
    "ACCELERATION NINJA"
   ],
   "borgCount": 1,
-  "shapeCount": 9,
-  "instrs": 617
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "FLAME NINJA"
   ],
   "borgCount": 1,
-  "shapeCount": 36,
-  "instrs": 2196
+  "shapeCount": 31,
+  "instrs": 1677
  },
  {
   "labels": [
    "CYBER NINJA"
   ],
   "borgCount": 1,
-  "shapeCount": 28,
-  "instrs": 1951
+  "shapeCount": 20,
+  "instrs": 1055
  },
  {
   "labels": [
    "GATLING GUNNER"
   ],
   "borgCount": 1,
-  "shapeCount": 18,
-  "instrs": 716
+  "shapeCount": 14,
+  "instrs": 506
  },
  {
   "labels": [
    "BEAM GUNNER"
   ],
   "borgCount": 1,
-  "shapeCount": 34,
-  "instrs": 2001
+  "shapeCount": 31,
+  "instrs": 1671
  },
  {
   "labels": [
    "CHAINSAW KNIGHT"
   ],
   "borgCount": 1,
-  "shapeCount": 10,
-  "instrs": 580
+  "shapeCount": 7,
+  "instrs": 439
  },
  {
   "labels": [
    "DARK KNIGHT"
   ],
   "borgCount": 1,
-  "shapeCount": 8,
-  "instrs": 527
+  "shapeCount": 2,
+  "instrs": 99
  },
  {
   "labels": [
    "VICTORY JET"
   ],
   "borgCount": 1,
-  "shapeCount": 4,
-  "instrs": 155
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "BEAM SAMURAI"
   ],
   "borgCount": 1,
-  "shapeCount": 15,
-  "instrs": 993
+  "shapeCount": 9,
+  "instrs": 440
  },
  {
   "labels": [
    "GOLD HERO"
   ],
   "borgCount": 1,
-  "shapeCount": 27,
-  "instrs": 1586
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
@@ -428,40 +428,40 @@
    "POP HONEY"
   ],
   "borgCount": 1,
-  "shapeCount": 29,
-  "instrs": 2213
+  "shapeCount": 37,
+  "instrs": 2570
  },
  {
   "labels": [
    "GATLING TANK"
   ],
   "borgCount": 1,
-  "shapeCount": 9,
-  "instrs": 285
+  "shapeCount": 20,
+  "instrs": 499
  },
  {
   "labels": [
    "BEAM TANK"
   ],
   "borgCount": 1,
-  "shapeCount": 11,
-  "instrs": 658
+  "shapeCount": 21,
+  "instrs": 837
  },
  {
   "labels": [
    "ULTIMATE CANNON"
   ],
   "borgCount": 1,
-  "shapeCount": 17,
-  "instrs": 637
+  "shapeCount": 24,
+  "instrs": 800
  },
  {
   "labels": [
    "ICBM TANK"
   ],
   "borgCount": 1,
-  "shapeCount": 11,
-  "instrs": 490
+  "shapeCount": 18,
+  "instrs": 705
  },
  {
   "labels": [
@@ -476,55 +476,55 @@
    "FLYING SAUCER"
   ],
   "borgCount": 1,
-  "shapeCount": 5,
-  "instrs": 216
+  "shapeCount": 6,
+  "instrs": 194
  },
  {
   "labels": [
    "BEAM SATELLITE"
   ],
   "borgCount": 1,
-  "shapeCount": 5,
-  "instrs": 87
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "DEATH SAUCER"
   ],
   "borgCount": 1,
-  "shapeCount": 5,
-  "instrs": 211
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "ANTARES"
   ],
   "borgCount": 1,
-  "shapeCount": 6,
-  "instrs": 184
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "DEATH BORG MU"
   ],
   "borgCount": 1,
-  "shapeCount": 4,
-  "instrs": 78
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "DEATH BORG CHI"
   ],
   "borgCount": 1,
-  "shapeCount": 3,
-  "instrs": 204
+  "shapeCount": 0,
+  "instrs": 0
  },
  {
   "labels": [
    "ROACH"
   ],
   "borgCount": 1,
-  "shapeCount": 3,
-  "instrs": 46
+  "shapeCount": 0,
+  "instrs": 0
  }
 ]

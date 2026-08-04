@@ -40,7 +40,47 @@ export function discoverImplementationIds(sources) {
   return ids;
 }
 
-export function buildAudit({ commandData, actionData, implementationIds, reviewed = { classifications: [] } }) {
+/** Scan family-module sources for `@audit-ported <borgId> action=<i> variants=<csv>`
+ *  markers and group them by (borgId, actionIndex) → Set<variants>. The marker is
+ *  the bridge-registration signal the audit uses to infer a `ported` slot without a
+ *  hand-maintained overlay entry. Conservative: the marker must live in the family
+ *  module next to the real port code. */
+export function discoverPortedActions(sources) {
+  const re = /@audit-ported\s+(pl[0-9a-f]{4})\s+action=(\d+)\s+variants=([0-9,]*)/gi;
+  const out = new Map(); // `${borgId}|${actionIndex}` -> { borgId, actionIndex, variants:Set }
+  for (const source of sources) {
+    for (const m of source.text.matchAll(re)) {
+      const borgId = m[1].toLowerCase();
+      const actionIndex = Number(m[2]);
+      const variants = new Set(
+        String(m[3] ?? "")
+          .split(",")
+          .map((s) => Number(s.trim()))
+          .filter((v) => Number.isInteger(v) && v >= 0),
+      );
+      const key = `${borgId}|${actionIndex}`;
+      const existing = out.get(key);
+      if (existing) for (const v of variants) existing.variants.add(v);
+      else out.set(key, { borgId, actionIndex, variants });
+    }
+  }
+  return out;
+}
+
+/** For a given (ctor, actionIndex), collect the per-member ported variant sets
+ *  declared in family modules. Returns null if no declarations reference a borg
+ *  that belongs to this ctor. */
+function declaredPorted(ctor, actionIndex, borgs, portedDeclarations) {
+  const byMember = new Map();
+  for (const [id, assignment] of Object.entries(borgs)) {
+    if (assignment.constructorAddress?.toLowerCase() !== ctor) continue;
+    const decl = portedDeclarations.get(`${id}|${actionIndex}`);
+    if (decl) byMember.set(id, decl.variants);
+  }
+  return byMember.size === 0 ? null : byMember;
+}
+
+export function buildAudit({ commandData, actionData, implementationIds, reviewed = { classifications: [] }, portedDeclarations = new Map() }) {
   const errors = [];
   const invalidCompleteKeys = new Set();
   const borgs = commandData?.borgs ?? {};
@@ -143,7 +183,7 @@ export function buildAudit({ commandData, actionData, implementationIds, reviewe
           errors.push(`${key} is ROM-inactive but classified ${status}`);
         }
         if (slot.live && status === "inactive") errors.push(`${key} is ROM-live but classified inactive`);
-        if (status === "ported" || status === "delegated") {
+        if (explicit && (status === "ported" || status === "delegated")) {
           const before = errors.length;
           validateCompleteCoverage({ item: explicit, key, slot, implementationIds, errors });
           if (errors.length !== before) invalidCompleteKeys.add(key);
@@ -152,7 +192,25 @@ export function buildAudit({ commandData, actionData, implementationIds, reviewe
         status = "inactive";
         evidence = slot.disabledEvidence;
       } else {
-        status = implementedMembers.length > 0 ? "partial" : "missing";
+        // Bridge-inferred ported path: if every live member has a per-(borg,
+        // actionIndex) port declaration in its family module (the
+        // `@audit-ported <borg> action=<i> variants=<csv>` marker) whose variant
+        // set covers the ROM-live variants, the slot is ported. This lets the
+        // audit credit real ROM machines the bridge routes without requiring a
+        // hand-maintained overlay entry. Conservative: marker must live next to
+        // the port code and the variants must match exactly.
+        const declared = declaredPorted(family.constructorAddress, slot.actionIndex, borgs, portedDeclarations);
+        const allLiveCovered = declared != null && [...slot.liveMembers.entries()].every(([member, liveVariants]) => {
+          const dv = declared.get(member);
+          if (!dv) return false;
+          return liveVariants.size === 0 || [...liveVariants].every((v) => dv.has(v));
+        });
+        if (allLiveCovered) {
+          status = "ported";
+          evidence = [`${key}: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts`];
+        } else {
+          status = implementedMembers.length > 0 ? "partial" : "missing";
+        }
       }
       return {
         actionIndex: slot.actionIndex,
@@ -321,6 +379,7 @@ async function main() {
     commandData: readJson("packages/combat/src/data/commandMoveTables.json"),
     actionData: readJson("packages/combat/src/data/actionStreamTables.json"),
     implementationIds: discoverImplementationIds(sources),
+    portedDeclarations: discoverPortedActions(sources),
     reviewed: readJson("research/decomp/data/family-state-machine-classifications.reviewed.json"),
   });
   fs.writeFileSync(path.join(root, "research/decomp/data/family-state-machine-coverage.json"), stableStringify(audit));

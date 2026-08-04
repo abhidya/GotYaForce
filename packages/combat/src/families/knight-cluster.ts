@@ -40,7 +40,7 @@
 
 import type { RomActor } from "../rom/actor.js";
 import { dispatchUpperBodyCue } from "../rom/dispatch.js";
-import { groundSnapRevert, stepTargetYaw } from "../rom/helpers.js";
+import { allocateWeapon, groundSnapRevert, stepAfterimage, stepTargetYaw, toS16 } from "../rom/helpers.js";
 import { integratePhysics, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
@@ -300,12 +300,507 @@ function createDarkKnightRootAction(ctx: StreamContext): (actor: RomActor) => vo
 }
 
 // ============================================================================
+// SAPPHIRE KNIGHT bespoke action 2 — X-special phase machine (chunk_0019.c).
+//
+// @audit-ported pl0208 action=2 variants=0,1,2,3,4,5
+// @audit-ported pl020e action=2 variants=0,1,2,3,4,5
+//
+// SAPPHIRE KNIGHT (pl0208/pl020e, ctor 0x800bb390) action 2 root handler is
+// FUN_800bd074 @0x800bd074 (chunk_0019.c:1829). It is NOT the shared X engine:
+// it routes via phase table 0x803019d0 indexed by +0x581 (variant). Variants 0-4
+// select wrapper FUN_800bd0b0 which dispatches the 6-phase grounded table
+// 0x803019e4 [= 0x800bd12c, 0x800bd220, 0x800bd3a8, 0x800bd600, 0x800bd708,
+// 0x800bd7e4] indexed by +0x540 (phase). The airborne arm FUN_800bd5a4 →
+// zz_00bd5c4_ dispatches table 0x803019f0 [= 0x800bd600, 0x800bd708, 0x800bd7e4]
+// (phases 3-5 only). Table contents DOL-decoded byte-for-byte from boot.dol
+// @0x803019d0..0x80301a00. Float constants read from sdata2 @0x804385xx.
+// ============================================================================
+const SAPPHIRE_X = {
+  /** FLOAT_8043852c = 0.0 — zero-scalar (velocity/pose resets, +0x80c clear). */
+  ZERO: 0.0,
+  /** FLOAT_80438574 = 30.0 — ph0 +0x560 timer seed. */
+  PH0_TIMER_560: 30.0,
+  /** FLOAT_80438578 = 0.5 — ph0 +0x48 (yVel) seed. */
+  PH0_YVEL: 0.5,
+  /** FLOAT_80438530 = 0.95 — blink reposition + motion-drag scale. */
+  BLINK_SCALE: 0.949999988079071,
+  /** FLOAT_80438540 = -1.0 — zz_004beb8_ stream playback rate. */
+  STREAM_RATE: -1.0,
+  /** FLOAT_80438534 = 1.0 — FUN_80067310 gravity arg (ph1/ph5 integrate). */
+  GRAVITY: 1.0,
+  /** FLOAT_8043857c = 16.0 — ph1 exit-fail +0x694 (stateTimer) base. */
+  PH1_EXIT_TIMER: 16.0,
+  /** FLOAT_80438518 = 0.9 — ph2/ph5 +0x18da steerYaw decay idiom. */
+  STEER_DECAY: 0.8999999761581421,
+  /** FLOAT_80438580 = 8.0 — ph5 exit +0x694 (stateTimer) base. */
+  PH5_EXIT_TIMER: 8.0,
+  /** ph0 +0x54e aim-timer seed (s16, literal 0x1e in FUN_800bd12c:1868). */
+  PH0_AIM_TIMER_54E: 0x1e,
+  /** ROM +0x5e0 airborne bit (selects air vs ground exit + air stream slot). */
+  AIRBORNE_BIT: 0x40,
+  /** ROM +0x5e0 action-mode bits stripped at exit. */
+  ACTION_MODE_BITS: 0x3,
+  /** Stream mask (all 4 parts). */
+  STREAM_MASK: 0xf,
+  /** Stream group 4 (X-special). */
+  STREAM_GROUP_X: 4,
+  /** Stream group 2 (ph3 re-arm). */
+  STREAM_GROUP_2: 2,
+  /** Spawner address for zz_00e19a8_ (ph1 contact deploy) — host-resolved. */
+  PH1_SPAWNER: 0x800e19a8,
+  /** Spawner address for zz_00f036c_ (ph4 beam burst) — host-resolved. */
+  PH4_SPAWNER: 0x800f036c,
+} as const;
+export const SAPPHIRE_X_CONSTANTS = SAPPHIRE_X;
+
+/** Port-side mirrors for ROM offsets not first-class on RomActor. */
+export interface SapphireXScratch {
+  /** ROM +0x560 — ph0 timer seed / ph2 active-frame decay accumulator. */
+  sapphTimer560?: number;
+  /** ROM +0x54e (s16) — ph0 aim-timer seed / ph2 decay clamp. */
+  sapphAimTimer54e?: number;
+  /** ROM +0x6f7 — stream-state byte (0 ph0, 2 ph1/ph2). */
+  sapphByte6f7?: number;
+  /** ROM +0x6e8 — exit byte cleared on the ph1/ph2 early-out. */
+  sapphByte6e8?: number;
+  /** ROM +0x5d8 & 0xf0 — ph5 B-held hold gate (mirrors inputHeld5d8). */
+  // (read directly from actor.inputHeld5d8)
+  /** ROM +0x54a (s16) — ph5 FUN_80067310 integration yaw. */
+  sapphYaw54a?: number;
+}
+
+type SxActor = RomActor & SapphireXScratch;
+
+/** SteerYaw decay idiom: (short)(int)((float)((double)CONCAT44(0x43300000,
+ *  val ^ 0x80000000) - DOUBLE_80438520) * FLOAT_80438518) ≡ val × 0.9, truncated
+ *  to s16. DOL-verified: DOUBLE_80438520 = 0x43300000_00000000 baseline,
+ *  FLOAT_80438518 = 0.9. */
+function decaySteerYaw18da(actor: RomActor): void {
+  actor.steerYaw = toS16(actor.steerYaw * SAPPHIRE_X.STEER_DECAY);
+}
+
+/** zz_006d1a8_/zz_006e39c_/zz_006d144_/zz_006e1ac_ aim solvers are host-bound
+ *  (descriptor bone geometry at +0x524). Approximated by the yaw convergence
+ *  helper; TUNED — see findings doc. */
+function sapphAimTuned(actor: RomActor): void {
+  stepTargetYaw(actor, 0xc1);
+}
+
+/** ph0 setup — FUN_800bd12c @ chunk_0019.c:1856. Seeds +0x560=30, +0x54e=0x1e,
+ *  zero velocity, blink reposition, startStream(g4 slot 2). */
+function sapphPh0Setup(actor: SxActor): void {
+  actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  actor.sapphTimer560 = SAPPHIRE_X.PH0_TIMER_560;           // +0x560 = 30.0
+  actor.sapphAimTimer54e = SAPPHIRE_X.PH0_AIM_TIMER_54E;    // +0x54e = 0x1e
+  actor.sapphByte6f7 = 0;                                   // +0x6f7 = 0
+  sapphAimTuned(actor);
+  actor.hDecel = SAPPHIRE_X.ZERO;   // +0x4c
+  actor.hSpeed = SAPPHIRE_X.ZERO;   // +0x44
+  actor.yVel = SAPPHIRE_X.PH0_YVEL; // +0x48 = 0.5
+  actor.gravityCoeff = SAPPHIRE_X.ZERO; // +0x50
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion); // blink
+  vecScale(SAPPHIRE_X.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor); // zz_00679d0_
+  actor.streamSlot = 2;    // +0x6ea = 2
+  startStream(actor, SAPPHIRE_X.STREAM_MASK, SAPPHIRE_X.STREAM_GROUP_X,
+    actor.streamSlot, SAPPHIRE_X.STREAM_RATE);
+  actor.accumulator80c = SAPPHIRE_X.ZERO; // +0x80c
+}
+
+/** ph1 active fire — FUN_800bd220 @ chunk_0019.c:1892. On +0x1cee (wallContact):
+ *  advance, re-arm stream slot 1 (3 air), consume ammo; on denial exit (timer 16),
+ *  else deploy zz_00e19a8_. */
+function sapphPh1Fire(actor: SxActor, ctx: StreamContext): void {
+  tickStream(actor, SAPPHIRE_X.STREAM_MASK, ctx); // zz_004cd24_(0xf)
+  sapphAimTuned(actor);
+  integratePhysics(SAPPHIRE_X.GRAVITY, actor, actor.lockYaw); // FUN_80067310(1.0,+0x5ae)
+  vecScale(SAPPHIRE_X.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  if (actor.wallContact !== 0) { // +0x1cee
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    actor.sapphByte6f7 = 2;                                   // +0x6f7 = 2
+    const air = (actor.controlWord & SAPPHIRE_X.AIRBORNE_BIT) !== 0;
+    actor.streamSlot = air ? 3 : 1;                           // +0x6ea = 1 (gnd) / 3 (air)
+    startStream(actor, SAPPHIRE_X.STREAM_MASK, SAPPHIRE_X.STREAM_GROUP_X,
+      actor.streamSlot, SAPPHIRE_X.STREAM_RATE);
+    if (!allocateWeapon(actor, ctx, 2, 1, true)) { // zz_006dbe0_(2,1,1) consume
+      // Ammo denied → exit (FUN_800bd220:1919-1932).
+      actor.housekeeping73f = 0;
+      actor.controlWord &= ~SAPPHIRE_X.ACTION_MODE_BITS;
+      actor.sapphByte6e8 = 0; // +0x6e8 = 0
+      actor.hDecel = SAPPHIRE_X.ZERO;
+      actor.hSpeed = SAPPHIRE_X.ZERO;
+      if ((actor.controlWord & SAPPHIRE_X.AIRBORNE_BIT) === 0) romGroundIdleReturn(actor);
+      else romAirKnockoutReturn(actor);
+      actor.stateTimer = SAPPHIRE_X.PH1_EXIT_TIMER + actor.dt; // +0x694 = 16.0 + dt
+      return;
+    }
+    // Ammo ok → zz_00e19a8_(actor, 0, &+0x6f7) contact deploy (host-resolved).
+    ctx.onFamilyProjectile?.(actor, SAPPHIRE_X.PH1_SPAWNER, actor.sapphByte6f7 ?? 0);
+  }
+  stepAfterimage(actor); // zz_00b22f4_
+}
+
+/** ph2 sustained beam — FUN_800bd3a8 @ chunk_0019.c:1942. Timer decay, motion
+ *  drift, +0x1cee exit. zz_006de44_/+0x1d10/+0x4ac gates are host-bound (TUNED). */
+function sapphPh2Sustain(actor: SxActor, ctx: StreamContext): void {
+  // zz_006de44_(0xf0f00) status read is host-bound → 0 (no timer decay this frame).
+  if ((actor.faceGate1d10 ?? 0) > 0) sapphAimTuned(actor); // +0x1d10 > 0
+  vecScale(SAPPHIRE_X.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor); // zz_00677b0_
+  if (actor.contactP0 < 1) {              // +0x1cef < 1 → tickStream
+    tickStream(actor, SAPPHIRE_X.STREAM_MASK, ctx);
+  } else if ((actor.sapphTimer560 ?? 0) <= SAPPHIRE_X.ZERO) {
+    actor.contactP0 = 0; // +0x1cef = 0 (ph2→ph3 arm latched via +0x542/+0x541 host-side)
+  } else {
+    actor.sapphTimer560 = (actor.sapphTimer560 ?? 0) - actor.dt; // +0x560 -= dt
+  }
+  if (actor.contactP0 < 0) decaySteerYaw18da(actor); // +0x1cef < 0
+  if (actor.wallContact !== 0) { // +0x1cee → exit
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~SAPPHIRE_X.ACTION_MODE_BITS;
+    actor.sapphByte6e8 = 0;
+    actor.hDecel = SAPPHIRE_X.ZERO;
+    actor.hSpeed = SAPPHIRE_X.ZERO;
+    if ((actor.controlWord & SAPPHIRE_X.AIRBORNE_BIT) === 0) romGroundIdleReturn(actor);
+    else romAirKnockoutReturn(actor);
+  }
+  stepAfterimage(actor);
+}
+
+/** ph3 re-arm — FUN_800bd600 @ chunk_0019.c:2035. Advance, zero velocity/pose,
+ *  blink, startStream(g2 slot 0xf / 0x10 air). */
+function sapphPh3Rearm(actor: SxActor): void {
+  actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  sapphAimTuned(actor); // zz_006d144_/zz_006e1ac_
+  actor.gravityCoeff = SAPPHIRE_X.ZERO; // +0x50
+  actor.yVel = SAPPHIRE_X.ZERO;         // +0x48
+  actor.hDecel = SAPPHIRE_X.ZERO;       // +0x4c
+  actor.hSpeed = SAPPHIRE_X.ZERO;       // +0x44
+  actor.poseAccum80 = 0; actor.poseAccum7e = 0; actor.poseAccum7c = 0;
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(SAPPHIRE_X.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  const air = (actor.controlWord & SAPPHIRE_X.AIRBORNE_BIT) !== 0;
+  const slot = air ? 0x10 : 0x0f;       // +0x6ea = 0xf (gnd) / 0x10 (air)
+  actor.streamSlot = slot + 1;          // +0x6ea = (cVar)+1
+  startStream(actor, SAPPHIRE_X.STREAM_MASK, SAPPHIRE_X.STREAM_GROUP_2,
+    slot, SAPPHIRE_X.STREAM_RATE);
+}
+
+/** ph4 contact burst — FUN_800bd708 @ chunk_0019.c:2076. On +0x1cef: advance,
+ *  consume ammo, deploy zz_00f036c_(0xeb) + 6× zz_00e058c_(1, i+4). */
+function sapphPh4Burst(actor: SxActor, ctx: StreamContext): void {
+  tickStream(actor, SAPPHIRE_X.STREAM_MASK, ctx);
+  sapphAimTuned(actor);
+  vecScale(SAPPHIRE_X.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  if (actor.contactP0 !== 0) { // +0x1cef
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    if (allocateWeapon(actor, ctx, 2, 1, true)) { // zz_006dbe0_(2,1,1)
+      // zz_00f036c_(0xeb) + loop zz_00e058c_(1, i+4) ×6 — host-resolved burst.
+      ctx.onFamilyProjectile?.(actor, SAPPHIRE_X.PH4_SPAWNER, 0xeb);
+    }
+  }
+}
+
+/** ph5 recover/exit — FUN_800bd7e4 @ chunk_0019.c:2110. Physics(+0x54a), steerYaw
+ *  decay, +0x5d8&0xf0 / +0x1cee exit gate (timer 8). */
+function sapphPh5Recover(actor: SxActor, ctx: StreamContext): void {
+  tickStream(actor, SAPPHIRE_X.STREAM_MASK, ctx);
+  integratePhysics(SAPPHIRE_X.GRAVITY, actor, actor.sapphYaw54a ?? actor.lockYaw); // +0x54a
+  vecScale(SAPPHIRE_X.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  if (actor.contactP0 < 0) decaySteerYaw18da(actor); // +0x1cef < 0
+  // Hold gate: (+0x5d8 & 0xf0)==0 AND +0x1cee==0 → hold (return); else exit.
+  const hold = (actor.inputHeld5d8 & 0xf0) === 0 && actor.wallContact === 0;
+  if (hold) return;
+  actor.housekeeping73f = 0;
+  actor.controlWord &= ~SAPPHIRE_X.ACTION_MODE_BITS;
+  actor.hDecel = SAPPHIRE_X.ZERO;
+  actor.hSpeed = SAPPHIRE_X.ZERO;
+  if ((actor.controlWord & SAPPHIRE_X.AIRBORNE_BIT) === 0) romGroundIdleReturn(actor);
+  else romAirKnockoutReturn(actor);
+  actor.stateTimer = SAPPHIRE_X.PH5_EXIT_TIMER + actor.dt; // +0x694 = 8.0 + dt
+  void ctx;
+}
+
+/** SAPPHIRE action 2 root — FUN_800bd074 @0x800bd074. Routes +0x581 (variant)
+ *  through table 0x803019d0. Variants 0-4 (and the pl0208/pl020e live set 0-5)
+ *  enter the grounded 6-phase machine at phase 0. The wrapper FUN_800bd0b0's
+ *  +0x18fe/0x1900 config write (when +0x6f7 > 0) is cosmetic and omitted (TUNED). */
+export function createSapphireAction2(ctx: StreamContext): (actor: RomActor) => void {
+  return (base: RomActor): void => {
+    const actor = base as SxActor;
+    const phase = actor.fbPhaseSlots[0] ?? 0;
+    switch (phase) {
+      case 0: sapphPh0Setup(actor); return;
+      case 1: sapphPh1Fire(actor, ctx); return;
+      case 2: sapphPh2Sustain(actor, ctx); return;
+      case 3: sapphPh3Rearm(actor); return;
+      case 4: sapphPh4Burst(actor, ctx); return;
+      case 5: sapphPh5Recover(actor, ctx); return;
+      default: return;
+    }
+  };
+}
+
+// ============================================================================
+// AXE KNIGHT bespoke action 2 — homing-dive X-special (chunk_0022.c).
+//
+// @audit-ported pl0204 action=2 variants=0,1,2,3,4,5
+// @audit-ported pl020d action=2 variants=0,1,2,3,4,5
+//
+// AXE KNIGHT (pl0204/pl020d, ctor 0x800d6d10) action 2 root handler is
+// FUN_800d74b4 @0x800d74b4 (chunk_0022.c:4750). It routes via phase table
+// 0x8030fb00 indexed by +0x581 (variant). Variants 0-4 select wrapper
+// FUN_800d74f0 which dispatches the 6-phase table 0x8030fb14 =
+// [0x800d7540, 0x800d7648, 0x800d76cc, 0x800d77b8, 0x800d7934, 0x800d7a98]
+// indexed by +0x540 (phase). Table contents DOL-decoded byte-for-byte from
+// boot.dol @0x8030fb00..0x8030fb44. Floats read from sdata2 @0x80438bxx.
+// The ph3 sin/cos projection (hSpeed = motion.x×cos(steerYaw), yVel =
+// motion.x×−sin(steerYaw)) is the same BAM16 idiom as the NORMAL NINJA flying
+// lunge ph1 (ninja-cluster.ts). pl020d (borg 0x20d) ph2 uses +0x548=0.
+// ============================================================================
+const AXE_X = {
+  /** FLOAT_80438b7c = 0.0 — zero-scalar (+0x80c / motion / threshold). */
+  ZERO: 0.0,
+  /** FLOAT_80438b90 = 60.0 — ph0 +0x558 approach timer seed. */
+  PH0_TIMER_558: 60.0,
+  /** FLOAT_80438b80 = -1.0 — zz_004beb8_ stream rate. */
+  STREAM_RATE: -1.0,
+  /** FLOAT_80438b94 = 30.0 — ph2 motion.y (+0x3c) speed clamp. */
+  PH2_SPEED_CLAMP: 30.0,
+  /** FLOAT_80438b98 = 2.0 — ph2 motion.z (+0x40) acceleration seed. */
+  PH2_ACCEL_SEED: 2.0,
+  /** FLOAT_80438b78 = 1.0 — FUN_80067310 gravity arg (ph3/ph4/ph5). */
+  GRAVITY: 1.0,
+  /** FLOAT_80438b9c = 0.9 — ph4/ph5 +0x18da steerYaw decay. */
+  STEER_DECAY: 0.8999999761581421,
+  /** FLOAT_80438bac = 120.0 — ph4 grounded-advance +0x558 reseed. */
+  PH4_RECOVER_TIMER: 120.0,
+  /** FLOAT_80438ba8 = 8.0 — exit +0x694 (stateTimer) base. */
+  EXIT_TIMER: 8.0,
+  /** DOUBLE_80438ba0 = 0.5 — ph4 +0x44 ground-speed hold gate. */
+  PH4_HOLDSPEED_GATE: 0.5,
+  /** DOUBLE_80438bb0 = 0.25 — ph4 contact +0x1dc8 (dt) scale trick. */
+  PH4_DT_SCALE: 0.25,
+  /** BAM16 half-turn (0x8000 = 180°) for the sin/cos projection. */
+  BAM16_HALF: 0x8000,
+  /** ph2 +0x548 seed (0x14 = 20; pl020d/0x20d → 0). */
+  PH2_TIMER548_DEFAULT: 0x14,
+  /** ph2 +0x54a seed (0x32 = 50). */
+  PH2_TIMER54A: 0x32,
+  /** ph2 +0x54c seed (8). */
+  PH2_TIMER54C: 8,
+  /** ph3 +0x548 per-frame decrement (10). */
+  PH3_TIMER548_DEC: 10,
+  /** ROM +0x5e0 airborne bit. */
+  AIRBORNE_BIT: 0x40,
+  /** ROM +0x5e0 action-mode bits stripped at exit. */
+  ACTION_MODE_BITS: 0x3,
+  /** Stream mask (all 4 parts). */
+  STREAM_MASK: 0xf,
+  /** Stream group 4 (X-special). */
+  STREAM_GROUP: 4,
+} as const;
+export const AXE_X_CONSTANTS = AXE_X;
+
+/** Port-side mirrors for ROM offsets not first-class on RomActor. */
+export interface AxeXScratch {
+  /** ROM +0x548 (s16) — ph2 dive timer / ph3 countdown. */
+  axeTimer548?: number;
+  /** ROM +0x54a (s16) — ph2 dive timer / ph3 clamp. */
+  axeTimer54a?: number;
+  /** ROM +0x54c (s16) — ph2 timer / ph3 decay-clamp floor (2). */
+  axeTimer54c?: number;
+  /** ROM +0x1b01 — ph3 active-frame gate byte. */
+  axeByte1b01?: number;
+  /** ROM +0x1b03 — ph1 stream-hold gate byte (streamHold1b03 alias). */
+  // (read from actor.streamHold1b03)
+  /** motion.y speed clamp (mirrors +0x3c). */
+  axeSpeedClamp?: number;
+}
+
+type AxActor = RomActor & AxeXScratch;
+
+/** BAM16 sin/cos. zz_0045204_/zz_0045238_ are the HSD s16 trig helpers. */
+function bamCos(angle: number): number { return Math.cos((angle / AXE_X.BAM16_HALF) * Math.PI); }
+function bamSin(angle: number): number { return Math.sin((angle / AXE_X.BAM16_HALF) * Math.PI); }
+
+/** ph0 setup — FUN_800d7540 @ chunk_0022.c:4773. +0x540++, +0x6ea slot pick,
+ *  +0x558=60, motion=pos−target, startStream(g4). */
+function axePh0Setup(actor: AxActor): void {
+  actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  actor.streamSlot = (actor.controlWord & AXE_X.AIRBORNE_BIT) !== 0 ? 3 : 0; // +0x6ea
+  // FUN_80066838(+0x868 row, actor) range gate is host-bound (renderer rows);
+  // the failure branch sets +0x541=1 / +0xcc=0 / +0x5ac=+0x72 — TUNED, omitted.
+  actor.handlerTimer = AXE_X.PH0_TIMER_558; // +0x558 = 60.0
+  stepTargetYaw(actor, 0xc0); // zz_006d144_(0xc0)
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion); // motion = pos − target
+  groundSnapRevert(actor); // zz_00677b0_
+  const slot = actor.streamSlot;
+  actor.streamSlot = slot + 1; // +0x6ea = cVar + 1
+  startStream(actor, AXE_X.STREAM_MASK, AXE_X.STREAM_GROUP, slot, AXE_X.STREAM_RATE);
+  actor.accumulator80c = AXE_X.ZERO; // +0x80c
+}
+
+/** ph1 approach — FUN_800d7648 @ chunk_0022.c:4809. tickStream, +0x558 -= dt,
+ *  advance on timer≤0 OR aim converged. */
+function axePh1Approach(actor: AxActor, ctx: StreamContext): void {
+  groundSnapRevert(actor);
+  if (actor.streamHold1b03 !== 0) tickStream(actor, AXE_X.STREAM_MASK, ctx); // +0x1b03
+  actor.handlerTimer -= actor.dt; // +0x558 -= dt
+  const converged = stepTargetYaw(actor, 0xc0); // zz_006d144_(0xc0) returns nonzero on converge
+  if (actor.handlerTimer <= AXE_X.ZERO || converged) {
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  }
+}
+
+/** ph2 launch — FUN_800d76cc @ chunk_0022.c:4833. On +0x1cee: advance, seed
+ *  +0x548/+0x54a/+0x54c, motion=(0,30,2), zz_0066530_(0x2d), startStream. */
+function axePh2Launch(actor: AxActor, ctx: StreamContext): void {
+  tickStream(actor, AXE_X.STREAM_MASK, ctx);
+  stepTargetYaw(actor, 0xc0);
+  groundSnapRevert(actor);
+  if (actor.wallContact !== 0) { // +0x1cee
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    actor.axeTimer548 = (actor.borgNumber === 0x20d) ? 0 : AXE_X.PH2_TIMER548_DEFAULT; // +0x548
+    actor.axeTimer54a = AXE_X.PH2_TIMER54A; // +0x54a = 0x32
+    actor.axeTimer54c = AXE_X.PH2_TIMER54C; // +0x54c = 8
+    actor.motion = { x: AXE_X.ZERO, y: AXE_X.PH2_SPEED_CLAMP, z: AXE_X.PH2_ACCEL_SEED };
+    actor.axeSpeedClamp = AXE_X.PH2_SPEED_CLAMP;
+    // zz_0066530_(0x2d) + zz_00b2190_(0) — host-bound effect/equipment hooks.
+    ctx.onFamilyProjectile?.(actor, 0x80066530, 0x2d);
+    const slot = actor.streamSlot;
+    actor.streamSlot = slot + 1;
+    startStream(actor, AXE_X.STREAM_MASK, AXE_X.STREAM_GROUP, slot, AXE_X.STREAM_RATE);
+  }
+}
+
+/** ph3 homing dive — FUN_800d77b8 @ chunk_0022.c:4875. motion.x accelerates by
+ *  motion.z×dt (clamped to motion.y), then hSpeed = motion.x×cos(steerYaw),
+ *  yVel = motion.x×−sin(steerYaw); physics(1.0, +0x5ae). */
+function axePh3Dive(actor: AxActor, ctx: StreamContext): void {
+  // zz_006de44_(0xf0f00) status-decay read is host-bound → 0 this frame.
+  stepTargetYaw(actor, 0xc0); // zz_006d144_(0xc0)
+  // motion.x += motion.z × dt; clamp ≤ motion.y (the speed clamp).
+  let mx = actor.motion.x + actor.motion.z * actor.dt;
+  const clamp = actor.axeSpeedClamp ?? AXE_X.PH2_SPEED_CLAMP;
+  if (mx > clamp) mx = clamp;
+  actor.motion.x = mx;
+  actor.hSpeed = mx * bamCos(actor.steerYaw); // +0x44 = motion.x × cos(+0x18da)
+  actor.yVel = mx * -bamSin(actor.steerYaw);  // +0x48 = motion.x × −sin(+0x18da)
+  integratePhysics(AXE_X.GRAVITY, actor, actor.lockYaw); // FUN_80067310(1.0, +0x5ae)
+  groundSnapRevert(actor);
+  tickStream(actor, AXE_X.STREAM_MASK, ctx);
+  if ((actor.axeByte1b01 ?? 0) !== 0) { // +0x1b01
+    actor.axeTimer548 = (actor.axeTimer548 ?? 0) - AXE_X.PH3_TIMER548_DEC; // +0x548 -= 10
+    if ((actor.axeTimer548 ?? 0) < 0) {
+      actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+      const slot = actor.streamSlot;
+      actor.streamSlot = slot + 1;
+      startStream(actor, AXE_X.STREAM_MASK, AXE_X.STREAM_GROUP, slot, AXE_X.STREAM_RATE);
+    }
+  }
+  stepAfterimage(actor);
+}
+
+/** ph4 dive sustain — FUN_800d7934 @ chunk_0022.c:4929. steerYaw decay, drag,
+ *  physics; hold while +0x44 ≥ 0.5; on grounded-slow advance (120 timer), on
+ *  grounded-stopped exit (8 timer). */
+function axePh4Sustain(actor: AxActor, ctx: StreamContext): void {
+  actor.steerYaw = toS16(actor.steerYaw * AXE_X.STEER_DECAY); // +0x18da ×= 0.9
+  // zz_006ed8c_(0.9) velocity drag — modeled as the motion drift below.
+  integratePhysics(AXE_X.GRAVITY, actor, actor.lockYaw); // FUN_80067310(1.0, +0x5ae)
+  const grounded = groundSnapRevert(actor);
+  if (actor.hSpeed >= AXE_X.PH4_HOLDSPEED_GATE) { // +0x44 ≥ 0.5 (DOUBLE_80438ba0)
+    if (actor.contactP0 < 0) { // +0x1cef < 0 — the dt-scale contact trick
+      // +0x1dc8 ×= 0.25 for the tick then restore (host-owned dt; approximated).
+      tickStream(actor, AXE_X.STREAM_MASK, ctx);
+    } else {
+      tickStream(actor, AXE_X.STREAM_MASK, ctx);
+    }
+    stepAfterimage(actor);
+  } else if (!grounded) {
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++ (still air)
+    actor.handlerTimer = AXE_X.PH4_RECOVER_TIMER; // +0x558 = 120.0
+    actor.lockYaw = actor.heading; // +0x5ae = +0x72 (heading) — TUNED approx
+  } else {
+    axeExitGrounded(actor);
+  }
+}
+
+/** ph5 recover/exit — FUN_800d7a98 @ chunk_0022.c:4982. steerYaw decay, physics;
+ *  grounded → +0x558 countdown then air-exit; airborne → ub-cue(7) exit. */
+function axePh5Recover(actor: AxActor, ctx: StreamContext): void {
+  actor.steerYaw = toS16(actor.steerYaw * AXE_X.STEER_DECAY);
+  tickStream(actor, AXE_X.STREAM_MASK, ctx);
+  integratePhysics(AXE_X.GRAVITY, actor, actor.lockYaw);
+  const grounded = groundSnapRevert(actor);
+  if (!grounded) {
+    actor.handlerTimer -= actor.dt; // +0x558 -= dt
+    if (actor.handlerTimer <= AXE_X.ZERO) axeExitAirborne(actor);
+  } else {
+    actor.steerYaw = 0;
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~AXE_X.ACTION_MODE_BITS;
+    dispatchUpperBodyCue(actor, 7); // zz_006a750_(7)
+    actor.stateTimer = AXE_X.EXIT_TIMER + actor.dt; // +0x694 = 8.0 + dt
+  }
+}
+
+/** Common grounded exit (FUN_800d7934:4969) — strips mode+airborne bits,
+ *  ground-idle return, +0x694 = 8.0 + dt. */
+function axeExitGrounded(actor: AxActor): void {
+  actor.steerYaw = 0;
+  actor.housekeeping73f = 0;
+  actor.controlWord &= ~AXE_X.ACTION_MODE_BITS;
+  actor.controlWord &= ~AXE_X.AIRBORNE_BIT;
+  romGroundIdleReturn(actor); // zz_006a474_
+  actor.stateTimer = AXE_X.EXIT_TIMER + actor.dt;
+}
+
+/** Common airborne exit (FUN_800d7a98:5003) — zz_006a5a4_ air return. */
+function axeExitAirborne(actor: AxActor): void {
+  actor.steerYaw = 0;
+  actor.housekeeping73f = 0;
+  actor.controlWord &= ~AXE_X.ACTION_MODE_BITS;
+  romAirKnockoutReturn(actor); // zz_006a5a4_
+  actor.stateTimer = AXE_X.EXIT_TIMER + actor.dt;
+}
+
+/** AXE action 2 root — FUN_800d74b4 @0x800d74b4. Variants 0-5 enter the
+ *  grounded 6-phase machine at phase 0. */
+export function createAxeAction2(ctx: StreamContext): (actor: RomActor) => void {
+  return (base: RomActor): void => {
+    const actor = base as AxActor;
+    switch (actor.fbPhaseSlots[0] ?? 0) {
+      case 0: axePh0Setup(actor); return;
+      case 1: axePh1Approach(actor, ctx); return;
+      case 2: axePh2Launch(actor, ctx); return;
+      case 3: axePh3Dive(actor, ctx); return;
+      case 4: axePh4Sustain(actor, ctx); return;
+      case 5: axePh5Recover(actor, ctx); return;
+      default: return;
+    }
+  };
+}
+
+// ============================================================================
 // Per-family configure functions.
 // ============================================================================
 
 /** SAPPHIRE KNIGHT (pl0208/pl020e, ctor 0x800bb390) — shared knight melee (action 1) +
- *  shared-engine X-special fallback. TODO: port bespoke action 0/2 machines from
- *  chunk_0019.c (tables 0x80301904..0x803019f0, fns 0x800bb794..0x800bd7e4). */
+ *  bespoke action 2 X-special phase machine (FUN_800bd074 → table 0x803019d0,
+ *  chunk_0019.c). Action 0 still uses the shared-engine fallback (TODO: port
+ *  bespoke action 0 from fns 0x800bb794..0x800bc250). */
 export function configureSapphireKnightFamily(
   actor: RomActor,
   borgId: SapphireBorgId,
@@ -315,8 +810,10 @@ export function configureSapphireKnightFamily(
   const melee = createGenericKnightRootAction(ctx);
   const xSeedSlot = borgId === "pl0208" ? 2 : 15;
   const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(xSeedSlot) });
+  const sapphX = createSapphireAction2(ctx);
   actor.rootAction = (a) => {
     if (a.actionIndex === 1) { melee(a); return; }
+    if (a.actionIndex === 2) { sapphX(a); return; }
     shared(a);
   };
   actor.defaultGroup = 0;
@@ -384,9 +881,9 @@ export function configureDarkKnightFamily(
 }
 
 /** AXE KNIGHT (pl0204/pl020d, ctor 0x800d6d10) — shared knight melee (action 1) +
- *  shared-engine X-special fallback. TODO: port bespoke action 0 (tables
- *  0x80433b80/b88/b90, fns 0x800d7094..0x800d95c0 in chunk_0022.c/0023.c) and
- *  action 2 (table 0x8030fb14, fns 0x800d7540..0x800d7a98 in chunk_0022.c). */
+ *  bespoke action 2 homing-dive X-special (FUN_800d74b4 → table 0x8030fb00,
+ *  chunk_0022.c). Action 0 still uses the shared-engine fallback (TODO: port
+ *  bespoke action 0 from fns 0x800d7094..0x800d95c0). */
 export function configureAxeKnightFamily(
   actor: RomActor,
   borgId: AxeBorgId,
@@ -395,8 +892,10 @@ export function configureAxeKnightFamily(
   actor.borgNumber = AXE_BORG_NUMBERS[borgId] ?? 0x204;
   const melee = createGenericKnightRootAction(ctx);
   const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) });
+  const axeX = createAxeAction2(ctx);
   actor.rootAction = (a) => {
     if (a.actionIndex === 1) { melee(a); return; }
+    if (a.actionIndex === 2) { axeX(a); return; }
     shared(a);
   };
   actor.defaultGroup = 0;
@@ -476,6 +975,168 @@ export function runKnightClusterSelfTests(assert: AssertFn): void {
     assert(a.borgNumber === num, `${id} borgNumber stamped 0x${num.toString(16)}`);
     assert(a.rootAction !== null, `${id} rootAction wired`);
     assert(a.defaultGroup === 0, `${id} defaultGroup = 0`);
+  }
+
+  // ==========================================================================
+  // SAPPHIRE KNIGHT action 2 — bespoke 6-phase X-special (FUN_800bd074,
+  //  table 0x803019d0, chunk_0019.c:1829-2147). DOL-verified constants.
+  // ==========================================================================
+  {
+    const shots: Array<{ addr: number; type: number }> = [];
+    const sctx: StreamContext = {
+      onFamilyProjectile: (_actor, addr, type) => shots.push({ addr, type }),
+      onAllocateResource: () => true,
+    };
+    const a = createMinimalActor() as RomActor & SapphireXScratch;
+    configureSapphireKnightFamily(a, "pl0208", sctx);
+    const root = a.rootAction!;
+    // Variant routing: action 2 selects the bespoke machine (NOT shared fallback).
+    a.actionIndex = 2; a.dt = 1;
+    a.pos = { x: 100, y: 0, z: 0 };
+    a.targetCache5e8 = { x: 0, y: 0, z: 0 };
+    a.hSpeed = 9; a.yVel = 5; a.hDecel = 3; a.gravityCoeff = 2;
+    root(a);
+    // Phase 0 (FUN_800bd12c): +0x540→1, +0x560=30.0, +0x54e=0x1e, +0x48=0.5, slot 2.
+    assert(a.fbPhaseSlots[0] === 1, "SAPPHIRE a2 ph0 advances +0x540 to 1");
+    assert(a.sapphTimer560 === SAPPHIRE_X.PH0_TIMER_560,
+      "SAPPHIRE a2 ph0 +0x560 = 30.0 (FLOAT_80438574)");
+    assert(a.sapphAimTimer54e === SAPPHIRE_X.PH0_AIM_TIMER_54E,
+      "SAPPHIRE a2 ph0 +0x54e = 0x1e (FUN_800bd12c:1868)");
+    assert(a.yVel === SAPPHIRE_X.PH0_YVEL,
+      "SAPPHIRE a2 ph0 +0x48 = 0.5 (FLOAT_80438578)");
+    assert(a.hSpeed === 0 && a.hDecel === 0 && a.gravityCoeff === 0,
+      "SAPPHIRE a2 ph0 zeroes hSpeed/hDecel/gravityCoeff (FLOAT_8043852c)");
+    assert(a.streamSlot === 2, "SAPPHIRE a2 ph0 streamSlot = 2 (+0x6ea, FUN_800bd12c:1884)");
+    assert(Math.abs(a.pos.x - 195) < 0.001,
+      "SAPPHIRE a2 ph0 blink: pos.x = 195 (pos += (pos−target)×0.95 = 100+95, FLOAT_80438530)");
+
+    // Phase 1 (FUN_800bd220): no wallContact → drift + afterimage, no advance.
+    a.fbPhaseSlots[0] = 1; a.wallContact = 0; a.contactP0 = 0;
+    root(a);
+    assert(a.fbPhaseSlots[0] === 1, "SAPPHIRE a2 ph1 no-wallContact holds phase");
+
+    // Phase 1 with wallContact + ammo ok → advance to ph2 + spawn zz_00e19a8_.
+    a.fbPhaseSlots[0] = 1; a.wallContact = 1; shots.length = 0;
+    root(a);
+    assert(a.fbPhaseSlots[0] === 2, "SAPPHIRE a2 ph1 wallContact advances to ph2");
+    assert(shots.length === 1 && shots[0]!.addr === SAPPHIRE_X.PH1_SPAWNER,
+      "SAPPHIRE a2 ph1 ammo-ok deploys zz_00e19a8_ (0x800e19a8)");
+
+    // Phase 1 with wallContact + ammo DENIED → exit, stateTimer = 16.0 + dt.
+    a.fbPhaseSlots[0] = 1; a.wallContact = 1;
+    const noAmmo: StreamContext = {
+      onFamilyProjectile: () => {},
+      onAllocateResource: () => false,
+    };
+    const a2 = createMinimalActor() as RomActor & SapphireXScratch;
+    configureSapphireKnightFamily(a2, "pl0208", noAmmo);
+    const root2 = a2.rootAction!;
+    a2.actionIndex = 2; a2.dt = 1; a2.fbPhaseSlots[0] = 1; a2.wallContact = 1;
+    a2.controlWord = 0x3; a2.housekeeping73f = 1; a2.hSpeed = 7; a2.hDecel = 4;
+    root2(a2);
+    assert(a2.housekeeping73f === 0 && (a2.controlWord & 0x3) === 0,
+      "SAPPHIRE a2 ph1 ammo-denied clears +0x73f / strips +0x5e0 bits");
+    assert(a2.hSpeed === 0 && a2.hDecel === 0,
+      "SAPPHIRE a2 ph1 exit zeroes +0x44/+0x4c (FLOAT_8043852c)");
+    assert(a2.stateTimer === SAPPHIRE_X.PH1_EXIT_TIMER + 1,
+      "SAPPHIRE a2 ph1 exit stateTimer = 16.0 + dt (FLOAT_8043857c)");
+
+    // Phase 5 (FUN_800bd7e4) hold-vs-exit gate on +0x5d8 & 0xf0.
+    const a5 = createMinimalActor() as RomActor & SapphireXScratch;
+    configureSapphireKnightFamily(a5, "pl0208", sctx);
+    const root5 = a5.rootAction!;
+    a5.actionIndex = 2; a5.dt = 1; a5.fbPhaseSlots[0] = 5;
+    a5.inputHeld5d8 = 0; a5.wallContact = 0; // hold condition
+    root5(a5);
+    assert(a5.fbPhaseSlots[0] === 5, "SAPPHIRE a2 ph5 holds when (+0x5d8&0xf0)==0 && !wall");
+    a5.inputHeld5d8 = 0x30; // B-held → exit
+    a5.controlWord = 0x3; a5.housekeeping73f = 1; a5.hSpeed = 6;
+    root5(a5);
+    assert(a5.housekeeping73f === 0 && (a5.controlWord & 0x3) === 0,
+      "SAPPHIRE a2 ph5 (+0x5d8&0xf0)!=0 exits: strips +0x73f/+0x5e0");
+    assert(a5.stateTimer === SAPPHIRE_X.PH5_EXIT_TIMER + 1,
+      "SAPPHIRE a2 ph5 exit stateTimer = 8.0 + dt (FLOAT_80438580)");
+  }
+
+  // ==========================================================================
+  // AXE KNIGHT action 2 — bespoke 6-phase homing-dive X-special (FUN_800d74b4,
+  //  table 0x8030fb00, chunk_0022.c:4748-5018). DOL-verified constants.
+  // ==========================================================================
+  {
+    const fx: Array<{ addr: number; type: number }> = [];
+    const xctx: StreamContext = {
+      onFamilyProjectile: (_actor, addr, type) => fx.push({ addr, type }),
+      onAllocateResource: () => true,
+    };
+    const a = createMinimalActor() as RomActor & AxeXScratch;
+    configureAxeKnightFamily(a, "pl0204", xctx);
+    const root = a.rootAction!;
+    // Variant routing: action 2 selects the bespoke dive machine.
+    a.actionIndex = 2; a.dt = 1;
+    a.pos = { x: 100, y: 0, z: 0 };
+    a.targetCache5e8 = { x: 10, y: 0, z: 0 };
+    root(a);
+    // Phase 0 (FUN_800d7540): +0x540→1, +0x558=60.0, motion=pos−target, slot 1.
+    assert(a.fbPhaseSlots[0] === 1, "AXE a2 ph0 advances +0x540 to 1");
+    assert(a.handlerTimer === AXE_X.PH0_TIMER_558,
+      "AXE a2 ph0 +0x558 = 60.0 (FLOAT_80438b90)");
+    assert(a.motion.x === 90, "AXE a2 ph0 motion.x = pos−target = 90 (FUN_800d7540:4796)");
+    assert(a.streamSlot === 1, "AXE a2 ph0 streamSlot = 1 (+0x6ea = 0+1, FUN_800d7540:4801)");
+    assert(a.accumulator80c === 0, "AXE a2 ph0 +0x80c = 0.0 (FLOAT_80438b7c)");
+
+    // Phase 1 (FUN_800d7648): timer expiry → advance.
+    a.fbPhaseSlots[0] = 1; a.handlerTimer = 0.5; a.streamHold1b03 = 1;
+    root(a);
+    assert(a.handlerTimer < 0.5, "AXE a2 ph1 decrements +0x558 by dt");
+    a.handlerTimer = 0; // force expiry
+    root(a);
+    assert(a.fbPhaseSlots[0] === 2, "AXE a2 ph1 +0x558≤0 advances to ph2");
+
+    // Phase 2 (FUN_800d76cc): wallContact → advance, motion=(0,30,2), +0x548=0x14.
+    a.fbPhaseSlots[0] = 2; a.wallContact = 1; a.borgNumber = 0x204; fx.length = 0;
+    root(a);
+    assert(a.fbPhaseSlots[0] === 3, "AXE a2 ph2 wallContact advances to ph3");
+    assert(a.motion.y === AXE_X.PH2_SPEED_CLAMP && a.motion.z === AXE_X.PH2_ACCEL_SEED,
+      "AXE a2 ph2 motion = (0, 30.0, 2.0) (FLOAT_80438b94/98)");
+    assert(a.axeTimer548 === AXE_X.PH2_TIMER548_DEFAULT,
+      "AXE a2 ph2 pl0204 +0x548 = 0x14 (FUN_800d76cc:4849)");
+    assert(fx.length === 1 && fx[0]!.addr === 0x80066530,
+      "AXE a2 ph2 deploys zz_0066530_(0x2d) effect");
+    // pl020d variant: +0x548 = 0.
+    const ad = createMinimalActor() as RomActor & AxeXScratch;
+    configureAxeKnightFamily(ad, "pl020d", xctx);
+    const rootd = ad.rootAction!;
+    ad.actionIndex = 2; ad.dt = 1; ad.fbPhaseSlots[0] = 2; ad.wallContact = 1; ad.borgNumber = 0x20d;
+    rootd(ad);
+    assert(ad.axeTimer548 === 0, "AXE a2 ph2 pl020d (0x20d) +0x548 = 0 (FUN_800d76cc:4852)");
+
+    // Phase 3 (FUN_800d77b8): motion.x accelerates by motion.z×dt, projects via steerYaw.
+    const a3 = createMinimalActor() as RomActor & AxeXScratch;
+    configureAxeKnightFamily(a3, "pl0204", xctx);
+    const root3 = a3.rootAction!;
+    a3.actionIndex = 2; a3.dt = 1; a3.fbPhaseSlots[0] = 3;
+    a3.motion = { x: 0, y: 30, z: 2 }; a3.steerYaw = 0; // steerYaw=0 → cos=1, sin=0
+    a3.lockYaw = 0;
+    root3(a3);
+    assert(a3.motion.x === 2, "AXE a2 ph3 motion.x += motion.z×dt = 0+2 (FUN_800d77b8:4901)");
+    assert(a3.hSpeed === 2 && a3.yVel === 0,
+      "AXE a2 ph3 steerYaw=0: hSpeed=motion.x×cos=2, yVel=motion.x×−sin=0");
+
+    // Phase 4 (FUN_800d7934): hSpeed < 0.5 + grounded → exit, stateTimer = 8.0+dt.
+    const a4 = createMinimalActor() as RomActor & AxeXScratch;
+    configureAxeKnightFamily(a4, "pl0204", xctx);
+    const root4 = a4.rootAction!;
+    a4.actionIndex = 2; a4.dt = 1; a4.fbPhaseSlots[0] = 4;
+    a4.hSpeed = 0.1; a4.controlWord = 0x43; a4.housekeeping73f = 1; a4.steerYaw = 100;
+    a4.physicsRuntime = {
+      clampToGround: (pos, velY) => ({ y: pos.y, velY, grounded: true }),
+      isSupported: () => true,
+    };
+    root4(a4);
+    assert(a4.steerYaw === 0 && a4.housekeeping73f === 0 && (a4.controlWord & 0x43) === 0,
+      "AXE a2 ph4 grounded-stop exit: +0x18da=0, strips +0x73f/+0x5e0/+0x40");
+    assert(a4.stateTimer === AXE_X.EXIT_TIMER + 1,
+      "AXE a2 ph4 exit stateTimer = 8.0 + dt (FLOAT_80438ba8)");
   }
 
   // ==========================================================================

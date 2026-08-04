@@ -32,7 +32,7 @@ import { ninjaXOnHit, NINJA_X } from "./ninja.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
 import { integratePhysics, vecSubtract, vecScale, vecAdd } from "../rom/physics.js";
-import { allocateWeapon } from "../rom/helpers.js";
+import { allocateWeapon, stepTargetYaw } from "../rom/helpers.js";
 import { romGroundIdleReturn, romAirKnockoutReturn } from "./shared-idle-return.js";
 
 // ============================================================================
@@ -118,6 +118,12 @@ export interface NinjaClusterScratch {
   speedScalar760?: number;
   /** +0x764 dash-speed floor (action-1 lunge hSpeed min). */
   speedScalar764?: number;
+  /** +0x54e part-pitch BAM (flying-lunge ph1 homing dive angle). */
+  flyingPitch54e?: number;
+  /** +0x745 charged latch (flying-lunge SASUKE bounce + exit hold gate). */
+  flyingCharged745?: number;
+  /** +0x1d9 input latch (flying-lunge SASUKE bounce trigger, & 0x30). Host-set. */
+  flyingBounce1d9?: number;
 }
 
 type NcActor = RomActor & NinjaClusterScratch;
@@ -343,6 +349,160 @@ function normalLeap(actor: NcActor, ctx: StreamContext): void {
   }
 }
 
+/** Action 1 v3 — FLYING LUNGE (zz_00710d8_ @0x800710d8, phase table @0x802d3c3c =
+ *  [zz_0071128_/zz_0071288_/zz_00713e0_], 3 phases). A homing air dive with a SASUKE
+ *  bounce. Source: chunk_0009.c:5091-5269. Variant routing v3→0x800710d8 (both pl0000
+ *  @0x802d3bd4[3] and SASUKE @0x802d3be8[3]) and the phase table @0x802d3c3c are
+ *  DOL-verified this pass (see oghidra-ninja-flying-lunge-port-findings-2026-08-03.md).
+ *
+ *  Host-bound gates (marked TUNED in the findings doc): the ph0 +0x86c speed gate
+ *  (FUN_80066838, runtime-populated rows) and the ph0 leap-redirect pitch gate
+ *  (FUN_800667a0 + descriptor geometry) are approximated from live target geometry;
+ *  the ph1 aim target uses descriptor bone anchors (+0x4b0+0x10*0x30+0x8e0/8f0/900,
+ *  partAimAnchors) when present, else lockTarget; the ph2 SASUKE bounce input latch
+ *  (+0x1d9 & 0x30) is host-set via flyingBounce1d9. Speed projection, phase
+ *  transitions, drag, and exit routing are ROM-faithful. */
+const NINJA_FLYING_LUNGE = {
+  ZERO: 0.0,            // FLOAT_804376e4 — threshold / zero scalar
+  INTEGRATE: 1.0,       // FLOAT_804376e8 — FUN_80067310 rate + ph2 +0x694 exit seed
+  SPEED: 30.0,          // FLOAT_80437708 — ph1 hSpeed/yVel magnitude
+  PH0_TIMER: 20.0,      // FLOAT_8043774c — ph0 +0x558 seed
+  PH1_RESEED: 120.0,    // FLOAT_80437730 — ph1→ph2 +0x558 reseed
+  RANGE_GATE: 250.0,    // FLOAT_80437760 — FUN_800668cc advance gate / steep-below delta
+  SASUKE_HSPEED: 8.0,   // FLOAT_80437764 — SASUKE bounce +0x44
+  SASUKE_YVEL: 20.0,    // FLOAT_8043774c — SASUKE bounce +0x48 (same 20.0 const)
+  DRAG: 0.95,           // FLOAT_80437744 — zz_006ed8c_ velocity drag
+  NORMAL_SLOT: 8,       // +0x6ea seed (NORMAL)
+  SASUKE_SLOT: 9,       // +0x6ea seed (SASUKE 0x00a)
+  LEAP_VARIANT: 4,      // +0x581 redirect target
+} as const;
+
+/** zz_006e6c4_(actor, 0xc0, &+0x54e, &aimTarget) approximation: BAM16 pitch from the
+ *  actor aim origin toward the target point (drives the ph1 cos/sin projection). */
+function flyingLungePitch(actor: NcActor, tx: number, ty: number, tz: number): number {
+  const dx = tx - actor.pos.x;
+  const dy = ty - actor.pos.y;
+  const dz = tz - actor.pos.z;
+  const horiz = Math.hypot(dx, dz);
+  let bam = Math.round(Math.atan2(dy, horiz) / (Math.PI * 2) * 0x10000) & 0xffff;
+  if (bam >= 0x8000) bam -= 0x10000;
+  return bam;
+}
+
+function normalFlyingLunge(actor: NcActor, ctx: StreamContext): void {
+  // Handler zz_00710d8_: clear +0xcc when the +0x541 invalidation latch is set.
+  if ((actor.fbPhaseSlots[1] ?? 0) !== 0) actor.visibilityTarget = null;
+  switch (actor.fbPhaseSlots[0] ?? 0) {
+    case 0: { // zz_0071128_ — setup
+      // TUNED: FUN_80066838(+0x86c row) speed gate is host-bound (rows runtime-populated);
+      // its slow branch (+0x541=1/+0xcc=0/+0x5ae/+0x5ac=+0x72) is cosmetic visibility and
+      // is omitted. Leap-redirect pitch gate FUN_800667a0 is host-bound (descriptor bone
+      // geometry); approximated by a steep-below target Y delta (>250 below → leap).
+      const t = actor.lockTarget;
+      if (t && (t.y - actor.pos.y) < -NINJA_FLYING_LUNGE.RANGE_GATE) {
+        actor.variantIndex = NINJA_FLYING_LUNGE.LEAP_VARIANT; // +0x581 = 4
+        normalLeap(actor, ctx); // zz_0070698_ (leap wrapper; ROM sets +0x581=4 then calls it)
+        return;
+      }
+      actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+      actor.flyingCharged745 = 0;                              // +0x745 = 0
+      actor.gravityCoeff = NINJA_FLYING_LUNGE.ZERO;            // +0x50
+      actor.yVel = NINJA_FLYING_LUNGE.ZERO;                    // +0x48
+      actor.hDecel = NINJA_FLYING_LUNGE.ZERO;                  // +0x4c
+      actor.hSpeed = NINJA_FLYING_LUNGE.ZERO;                  // +0x44
+      actor.poseAccum80 = 0; actor.poseAccum7e = 0; actor.poseAccum7c = 0;
+      actor.handlerTimer = NINJA_FLYING_LUNGE.PH0_TIMER;       // +0x558 = 20.0
+      actor.flyingPitch54e = 0;                                // +0x54e = 0
+      // zz_0092dcc_(actor, 0) — VFX spawn; host-owned, no-op.
+      actor.streamSlot = actor.borgNumber === 0x00a
+        ? NINJA_FLYING_LUNGE.SASUKE_SLOT
+        : NINJA_FLYING_LUNGE.NORMAL_SLOT;                      // +0x6ea = 8 (or 9 SASUKE)
+      const slot = actor.streamSlot;
+      actor.streamSlot = slot + 1;                             // +0x6ea++
+      startStream(actor, 0xf, 3, slot, NINJA_FLOATS.NEG_ONE);   // zz_004beb8_(-1, actor, 0xf, 3, slot, -1, -1)
+      return;
+    }
+    case 1: { // zz_0071288_ — homing dive
+      stepTargetYaw(actor, 0xc0, 0, true);                     // zz_006d144_(0xc0)
+      // Aim target: descriptor bone anchor (partAimAnchors[mainHandBone]) scaled by
+      // (FLOAT_8043775c=100 × +0xb4 modelScale) toward pos. TUNED when anchor absent →
+      // the host lock target (same fallback the port uses elsewhere for unsurfaced bones).
+      const anchor = actor.partAimAnchors[actor.descriptor?.mainHandBone ?? 0];
+      let tx: number, ty: number, tz: number;
+      if (anchor) {
+        const s = 100.0 * actor.modelScale;                    // FLOAT_8043775c * +0xb4
+        tx = actor.pos.x + (anchor.x - actor.pos.x) * s;
+        ty = actor.pos.y + (anchor.y - actor.pos.y) * s;
+        tz = actor.pos.z + (anchor.z - actor.pos.z) * s;
+      } else {
+        const tt = actor.lockTarget ?? actor.targetCache5e8;
+        tx = tt.x; ty = tt.y; tz = tt.z;
+      }
+      const pitch = flyingLungePitch(actor, tx, ty, tz);       // zz_006e6c4_ → +0x54e
+      actor.flyingPitch54e = pitch;
+      const r = (pitch & 0xffff) * Math.PI * 2 / 0x10000;
+      actor.hSpeed = NINJA_FLYING_LUNGE.SPEED * Math.cos(r);   // +0x44 = 30 * cos(+0x54e)
+      actor.yVel = NINJA_FLYING_LUNGE.SPEED * -Math.sin(r);    // +0x48 = 30 * -sin(+0x54e)
+      integratePhysics(NINJA_FLYING_LUNGE.INTEGRATE, actor, actor.activeYaw); // FUN_80067310(1.0, +0x5ac)
+      if (actor.contactP0 === 0) tickStream(actor, 0xf, ctx);  // +0x1cef == 0 → zz_004cd24_(0xf)
+      actor.handlerTimer -= actor.dt;                          // +0x558 -= +0x1dc8
+      // Advance when timer drained OR FUN_800668cc(250, actor) > 0 (host range gate).
+      const d = targetDist(actor);
+      if (actor.handlerTimer <= NINJA_FLYING_LUNGE.ZERO ||
+          (d !== null && d <= NINJA_FLYING_LUNGE.RANGE_GATE)) {
+        actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+        actor.handlerTimer = NINJA_FLYING_LUNGE.PH1_RESEED;   // +0x558 = 120.0
+      }
+      return;
+    }
+    case 2: { // zz_00713e0_ — recover/exit (+ SASUKE bounce)
+      // SASUKE bounce: borg 0x00a AND (+0x1d9 & 0x30).
+      if (actor.borgNumber === 0x00a && ((actor.flyingBounce1d9 ?? 0) & 0x30) !== 0) {
+        actor.hSpeed = NINJA_FLYING_LUNGE.SASUKE_HSPEED;       // +0x44 = 8.0
+        actor.hDecel = NINJA_FLYING_LUNGE.ZERO;                // +0x4c = 0
+        actor.yVel = NINJA_FLYING_LUNGE.SASUKE_YVEL;           // +0x48 = 20.0
+        actor.gravityCoeff = actor.descriptor?.handlerData6c ?? 0; // +0x50 = desc+0x6c
+        actor.flyingCharged745 = 1;                            // +0x745 = 1
+        actor.lockYaw = (actor.lockYaw - 0x8000) & 0xffff;     // +0x5ae -= 0x8000
+        actor.faceGate1d10 = 0;                                // +0x1d10 = 0
+      }
+      tickStream(actor, 0xf, ctx);                             // zz_004cd24_(0xf)
+      if (actor.faceGate1d10 !== 0) stepTargetYaw(actor, 0xc0, 0, true); // +0x1d10 != 0
+      if (actor.dashStrength1d0f < 0) {                        // +0x1d0f < 0
+        actor.dashStrength1d0f = 0;                            // +0x1d0f = 0
+        if (actor.yVel > NINJA_FLYING_LUNGE.ZERO) actor.yVel = NINJA_FLYING_LUNGE.ZERO;
+        actor.gravityCoeff = actor.descriptor?.handlerData6c ?? 0; // +0x50 = desc+0x6c
+      }
+      actor.hSpeed *= NINJA_FLYING_LUNGE.DRAG;                 // zz_006ed8c_(0.95)
+      actor.yVel *= NINJA_FLYING_LUNGE.DRAG;
+      integratePhysics(NINJA_FLYING_LUNGE.INTEGRATE, actor, actor.activeYaw);
+      const grounded = actor.grounded === true;                // zz_00677b0_ result
+      if (!grounded || actor.contactP0 >= 0) {                 // iVar3==0 OR +0x1cef >= 0
+        actor.handlerTimer -= actor.dt;
+        if (actor.handlerTimer > NINJA_FLYING_LUNGE.ZERO) {
+          if ((actor.flyingCharged745 ?? 0) !== 0) return;     // +0x745 != 0 → hold
+          if (actor.wallContact === 0) return;                 // +0x1cee == 0 → hold
+        }
+        // Exit (air-variant): clear + strip + zz_006a5a4_ + +0x694 = 1.0 + dt.
+        actor.housekeeping73f = 0;
+        actor.controlWord &= ~0x3;
+        romAirKnockoutReturn(actor);                           // zz_006a5a4_
+        actor.stateTimer = NINJA_FLYING_LUNGE.INTEGRATE + actor.dt;
+      } else {
+        // Grounded AND stream complete: gravity + clear + strip + zz_006a750_(7) + 1.0+dt.
+        actor.gravityCoeff = actor.descriptor?.handlerData6c ?? 0;
+        actor.housekeeping73f = 0;
+        actor.controlWord &= ~0x3;
+        dispatchUpperBodyCue(actor, 7);                        // zz_006a750_(actor, 7)
+        actor.stateTimer = NINJA_FLYING_LUNGE.INTEGRATE + actor.dt;
+      }
+      return;
+    }
+    default:
+      return;
+  }
+}
+
 /** Action 1 v1/v2 (SASUKE) — BIG-SHURIKEN TOSS (zz_0071b10_/c50_/d78, table
  *  @0x802d3c90). Ported 1:1 from chunk_0009.c:5516 + chunk_0010.c:1. */
 function normalBigShurikenToss(actor: NcActor, ctx: StreamContext): void {
@@ -429,8 +589,10 @@ function createNormalNinjaRootAction(ctx: StreamContext): (actor: RomActor) => v
       normalBigShurikenToss(actor, ctx);
     } else if (v === 4) {
       normalLeap(actor, ctx);
+    } else if (v === 3) {
+      normalFlyingLunge(actor, ctx); // zz_00710d8_ @0x802d3c3c (DOL-verified this pass)
     } else {
-      lunge(actor); // v0/v1 (+ v3 flying-lunge approximation, zz_00710d8_ unported)
+      lunge(actor); // v0/v1 shared melee lunge
     }
   };
 
@@ -1083,6 +1245,110 @@ export function runNinjaClusterSelfTests(assert: AssertFn): void {
     root(a);
     assert(a.fbPhaseSlots[0] === 1, "NORMAL action1 v0 → shared lunge ph0 (aim)");
     assert(a.streamSlot === NINJA_LUNGE_CONFIG.slotBase + 1, "NORMAL action1 lunge stream cursor = slotBase+1");
+  }
+
+  // ==========================================================================
+  // NORMAL NINJA — action 1 v3 FLYING LUNGE (zz_00710d8_ @0x802d3c3c, ported this pass).
+  // ==========================================================================
+
+  // --- v3 ph0 setup: zeroes scalars, +0x558=20.0, +0x6ea=8 then ++ (NORMAL). ---
+  {
+    const a = createRomActor() as NcActor;
+    configureNormalNinjaFamily(a, "pl0000", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 3; a.dt = 1;
+    root(a); // ph0
+    assert(a.fbPhaseSlots[0] === 1, "NORMAL action1 v3 ph0 → ph1");
+    assert(a.handlerTimer === NINJA_FLYING_LUNGE.PH0_TIMER, "NORMAL v3 ph0 +0x558 = 20.0 (FLOAT_8043774c)");
+    assert(a.hSpeed === 0 && a.yVel === 0 && a.hDecel === 0 && a.gravityCoeff === 0,
+      "NORMAL v3 ph0 zeroes +0x44/48/4c/50 (FLOAT_804376e4)");
+    assert(a.streamSlot === NINJA_FLYING_LUNGE.NORMAL_SLOT + 1, "NORMAL v3 ph0 streamSlot 8→9 (g3 slot 8)");
+  }
+
+  // --- SASUKE v3 ph0: +0x6ea seed = 9 → streamSlot 10. ---
+  {
+    const a = createRomActor() as NcActor;
+    configureNormalNinjaFamily(a, "pl000a", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 3; a.dt = 1;
+    root(a);
+    assert(a.streamSlot === NINJA_FLYING_LUNGE.SASUKE_SLOT + 1, "SASUKE v3 ph0 streamSlot 9→10 (g3 slot 9)");
+  }
+
+  // --- v3 ph0 steep-below target → leap redirect (+0x581=4, jump 33.333). ---
+  {
+    const a = createRomActor() as NcActor;
+    configureNormalNinjaFamily(a, "pl0000", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 3; a.dt = 1;
+    a.pos = { x: 0, y: 0, z: 0 };
+    a.lockTarget = { x: 0, y: -300, z: 0 }; // dy = -300 < -250 → leap
+    root(a); // ph0 redirect → normalLeap ph0
+    assert(a.variantIndex === NINJA_FLYING_LUNGE.LEAP_VARIANT, "NORMAL v3 ph0 steep-below → +0x581 = 4 (leap)");
+    assert(Math.abs(a.yVel - 33.333) < 0.01, "NORMAL v3 ph0 redirect runs leap (yVel = 33.333)");
+    assert(a.fbPhaseSlots[0] === 1, "NORMAL v3 ph0 redirect → leap ph0 → ph1");
+  }
+
+  // --- v3 ph1 homing dive: level target → pitch 0 → hSpeed = 30, yVel = 0. ---
+  {
+    const a = createRomActor() as NcActor;
+    configureNormalNinjaFamily(a, "pl0000", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 3; a.dt = 1;
+    a.fbPhaseSlots[0] = 1; a.handlerTimer = NINJA_FLYING_LUNGE.PH0_TIMER;
+    a.pos = { x: 0, y: 0, z: 0 }; a.lockTarget = { x: 300, y: 0, z: 0 }; // level, dist 300 > 250
+    root(a); // ph1
+    assert(Math.abs(a.hSpeed - NINJA_FLYING_LUNGE.SPEED) < 1e-6, "NORMAL v3 ph1 level: hSpeed = 30 (FLOAT_80437708)");
+    assert(a.yVel === 0, "NORMAL v3 ph1 level: yVel = 0 (sin 0)");
+    assert(a.fbPhaseSlots[0] === 1, "NORMAL v3 ph1 holds (timer 19 > 0, dist 300 > 250)");
+  }
+
+  // --- v3 ph1 advance on range gate (dist ≤ 250) → ph2, +0x558 = 120.0. ---
+  {
+    const a = createRomActor() as NcActor;
+    configureNormalNinjaFamily(a, "pl0000", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 3; a.dt = 1;
+    a.fbPhaseSlots[0] = 1; a.handlerTimer = NINJA_FLYING_LUNGE.PH0_TIMER;
+    a.pos = { x: 0, y: 0, z: 0 }; a.lockTarget = { x: 100, y: 0, z: 0 }; // dist 100 ≤ 250
+    root(a); // ph1
+    assert(a.fbPhaseSlots[0] === 2, "NORMAL v3 ph1 range gate (≤250) → ph2");
+    assert(a.handlerTimer === NINJA_FLYING_LUNGE.PH1_RESEED, "NORMAL v3 ph1→ph2 +0x558 = 120.0 (FLOAT_80437730)");
+  }
+
+  // --- v3 ph2 SASUKE bounce: hSpeed 8→×0.95, yVel 20→×0.95, lockYaw flips 0x8000. ---
+  {
+    const a = createRomActor() as NcActor;
+    configureNormalNinjaFamily(a, "pl000a", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 3; a.dt = 1;
+    a.fbPhaseSlots[0] = 2; a.handlerTimer = 10; a.lockYaw = 0x1000;
+    a.flyingBounce1d9 = 0x30; a.contactP0 = 1; a.grounded = false; a.wallContact = 0;
+    (a as unknown as { descriptor: { handlerData6c: number } | null }).descriptor = { handlerData6c: 0.5 };
+    root(a); // ph2 (bounce + hold)
+    assert(Math.abs(a.hSpeed - NINJA_FLYING_LUNGE.SASUKE_HSPEED * NINJA_FLYING_LUNGE.DRAG) < 1e-6,
+      "SASUKE v3 ph2 bounce: hSpeed = 8×0.95 (FLOAT_80437764 then drag)");
+    assert(a.lockYaw === ((0x1000 - 0x8000) & 0xffff), "SASUKE v3 ph2 bounce: lockYaw -= 0x8000");
+    assert((a.flyingCharged745 ?? 0) === 1, "SASUKE v3 ph2 bounce: +0x745 = 1 (hold gate armed)");
+    assert(a.fbPhaseSlots[0] === 2, "SASUKE v3 ph2 charged hold (no exit while +0x745 set)");
+  }
+
+  // --- v3 ph2 grounded + stream-complete exit: cue 7 + stateTimer 1.0+dt, control cleared. ---
+  {
+    const a = createRomActor() as NcActor;
+    configureNormalNinjaFamily(a, "pl0000", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 3; a.dt = 1;
+    a.fbPhaseSlots[0] = 2; a.handlerTimer = 10;
+    a.contactP0 = -1; a.grounded = true; a.wallContact = 0; // grounded AND stream complete
+    (a as unknown as { descriptor: { handlerData6c: number } | null }).descriptor = { handlerData6c: 0.3 };
+    root(a); // ph2 → grounded exit
+    assert((a.controlWord & 0x3) === 0, "NORMAL v3 ph2 grounded exit: +0x5e0 &= ~3");
+    assert(a.housekeeping73f === 0, "NORMAL v3 ph2 grounded exit: +0x73f = 0");
+    assert(a.stateTimer === NINJA_FLYING_LUNGE.INTEGRATE + a.dt, "NORMAL v3 ph2 grounded exit: +0x694 = 1.0 + dt");
+    assert(a.gravityCoeff === 0.3, "NORMAL v3 ph2 grounded exit: +0x50 = desc+0x6c");
+    // dispatchUpperBodyCue(7) is a no-op without a cueTable (test harness); the grounded
+    // branch is proven by controlWord/stateTimer/gravityCoeff above.
   }
 
   // --- action 2 X compose: phase-0 blink + on-contact backflip (SASUKE shuriken 3). ---

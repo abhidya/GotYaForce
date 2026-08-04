@@ -386,9 +386,10 @@ export function createNinjaRootAction(ctx: NinjaFamilyCtx): (actor: RomActor) =>
   // Action 1 — contextual B: BORG-SWITCHED variant tables (FUN_80070604):
   //   pl0000 @0x802d3bd4: [lunge, lunge, spinSlash, flyingLunge*, leap]
   //   SASUKE @0x802d3be8: [lunge, bigShuriken, bigShuriken, flyingLunge*, leap]
-  // (*flying lunge v3 (zz_00710d8_) is NOT ported this pass — its bone-matrix steering
-  // + SASUKE bounce needs the +0x86c row semantics; falls through to the shared lunge
-  // as the closest ported motion, labeled approximation.)
+  // (*flying lunge v3 (zz_00710d8_) is ported in ninja-cluster.ts as
+  // normalFlyingLunge — DOL-verified 2026-08-03; this superseded module still falls
+  // through to the shared lunge for v3 because its configureNinjaFamily is no longer
+  // the live registration target. See configureNormalNinjaFamily.)
   const contextualB = (actor: RomActor): void => {
     const v = actor.variantIndex;
     const isSasuke = actor.borgNumber === 0x00a;

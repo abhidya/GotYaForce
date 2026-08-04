@@ -2,14 +2,290 @@
 
 Authoritative per-subsystem tracker: current port state, ROM/decomp source mapping, and the
 ranked next action to reach 1:1. Maintained alongside `behavior-notes.md` (the lab notebook,
-sections (a)–(ax)) and `attack-mechanics-findings.md`. Last synthesized 2026-07-20 from the
-2026-07-06 → 2026-07-20 family-port wave + the OGhidra coverage-scan landing.
+sections (a)–(ax)) and `attack-mechanics-findings.md`. Last synthesized 2026-08-03 from the
+2026-07-21 → 2026-08-03 wave (**47 commits**): the `port: integrate 0x80xxxxx` ROM-function
+1:1 pipeline, the ~80-borg family-cluster mega-wave (audit 31 real-table borgs → 0), the
+source-owned system integration (damage/knockback/camera/Challenge-VM), the +0x1d88 anim-metadata
+hop (unblocks ~90 borgs), and the source-owned-subsystems endgame (camera matrix, menu render
+state, fog, lights, sound ops). The 2026-07-20 OGhidra coverage-scan entry follows below.
 
 **Confidence vocabulary** (same as the ledger): `DERIVED_ROM` / `DERIVED_TRACE` /
 `CONFIRMED_ASSET` / `OBSERVED_WIKI` / `TUNED` / `BLOCKED` / `CHECKED_CLOSED`.
 
 **How to read the status column:** DONE = ported and faithful to evidence; PARTIAL = works but
 diverges from ROM in a known way; MISSING = not ported; STUB = intentional placeholder.
+
+---
+
+## ★ 2026-08-02 → 2026-08-03 session: source-owned-subsystems endgame — last 6 code consumers wired; source collision/physics now DEFAULT; Pages deploy unblocked
+
+The closeout wave that turns the 2026-08-01 source ports into the *running default*. Six commits,
+two of them CI/deploy RCAs. After this, the source-owned modules — not the TUNED fallbacks — drive
+the app, and the boot/title path has no remaining dead code consumers.
+
+- **`54c60d74` (charge beams + physics/collision/audio + lockfile RCA):** `pnpm-lock.yaml` was
+  missing the `@gf/render` resolution added in `6f5b8452`; CI's `--frozen-lockfile` failed silently
+  so the game never deployed. Charge-beam spawn (`shared-charge.ts`) now fires via the `cfg+0x14`
+  release callback (`onRelease`) at the phase 1→2 transition (G RED/NEO variant `0xf`, G BLACK
+  `0x11`) — was null, so no beam ever spawned. `physics.ts` delegates to `physicsExtras` (real DOL
+  floats `FLY_FALL=-35`/`WALL_DAMP=0.9`, full-clamp integrator, `floorSnap8030`). `combat.ts` runs
+  the source-collision 3 hit-pair passes when `GF_SOURCE_STRICT` + `frameNumber`. `onPlayCue` →
+  `onRomCue` → `main.ts playSfx(resolveCueToAsset)`.
+- **`59b61958` (CI RCA — untracked deps, +9758/-680, 54 files):** the build was failing because
+  many source files the build depends on were present locally but NEVER committed (`??` skipped in
+  earlier commits): `titlePropController.ts`, `physicalMenuController/Scene.ts`,
+  `titleIntroScript.generated.ts`, `titleVm.ts`, `sceneModel.ts`, `packages/core/src/gcRuntime.ts`,
+  `packages/render/src/index.ts`. All committed; also banks the prior wave's uncommitted wiring.
+- **`9dc3b76b` (Pages subpath asset prefix):** game deployed to `/GotYaForce/game/` but every
+  runtime `fetch()`/dynamic URL used absolute paths → domain root (404). New `publicUrl.ts` +
+  `assetCatalog.ts` (wrap on `import.meta.env.BASE_URL`); swept all consumer points
+  (`borgPresentationAssets.ts`, `battleScene.ts`, `assets.ts`, `TitleIntro.ts`, `sceneModel.ts`,
+  `SelectForce.ts`, `physicalMenuScene.ts`, `main.ts`).
+- **`4d1ac1ea` (wire 4 remaining source-owned subsystems + boot intro overlays):** (1) desk-menu
+  widget lifecycle → `menuWidgetSystem.ts` ROM `FUN_801cd90c` (15 descriptors, `DAT_8038a78c` BAM
+  steps, cursor follow); (2) battle spawn-from-slot: `deployInitial` populates ROM slot tables via
+  `writeForceToSlotTables`, reads back via `spawnActiveBorgsFromSlotTables` (offsets
+  `0x10/0xa0/0xcb/0x15d9`), maps RomActor→BorgRuntime; (3) Challenge VM roster roll: mode-3
+  `build_challenge_battle_setup` generates CPU rosters (`drawBorgFromPool` + `borgCost`); (4)
+  death/kill accounting fields on `BorgRuntime` (`cost/deathType/deathFlags/kills/deaths/teamScore`)
+  so `sourceDeath.ts` runs on real data. Boot intro overlay opacity now per-frame from
+  `vm.state.overlay.current`; title logo uses real `titles.tpl`.
+- **`c7431505` (source collision+physics DEFAULT + camera matrix upload + menu render state):**
+  the `stepSourceCollision` gate removed — the 3 hit-pair passes run by DEFAULT (was
+  `GF_SOURCE_STRICT`+`frameNumber` gated); `applyHit` defers for victims the source-collision
+  already handled (dedup sets cleared at frame boundary). `integratePhysics` full-clamp now DEFAULT
+  when the actor carries speed-clamp fields. Camera matrix upload: `sourceCameraThree.ts`
+  `mtx34ToThreeMatrix4` + `applySourceCameraToThree` (row→column transpose →
+  `matrixWorldInverse`). Menu dispatcher `getRenderState()` returns the accumulated draw-recipe
+  (scene preset, camera variant, HUD mode, overlays).
+- **`2ef33160` (today — wire all 6 remaining code consumers):** (1) `TitleIntro.ts` render loop
+  calls `applySourceCameraToThree` instead of `camera.lookAt()` (view matrix source-CObj-owned);
+  (2) `gameSession.ts` queries `getRenderState()` on screen transitions (no longer dead code);
+  (3) stream-VM `stream-vm.ts` op `0x0e` playSound + op `0x0f` voice now fire `ctx.onPlayCue`
+  (was bare `return` — cues baked into action-stream bytecode were silently dropped); voice id
+  rides the per-borg voice table, not the operand (sentinel `-1`); (4) boot per-frame consumers:
+  `cameraMode` → `sink.onActorTick()` (ROM `zz_0057ad0_` actor tick, active ~frame 120),
+  `sceneAuxMode` → `sink.onSceneAuxUpdate(mode)`; (5) boot fog `applyTdcFog` creates
+  `THREE.FogExp2` for `tdc00/05/07` (authored with fog; null otherwise), color from authored
+  `tl00` ambient — first net-new render effect; (6) boot lights: ambient + 2 infinite lights from
+  the tl00-scene-camera doc (`TL00_AUTHORED_AMBIENT/INFINITE`).
+
+**VALIDATED:** combat + game builds green; `pnpm selfcheck:rom` ALL PASS. Game live at
+`https://abhidya.github.io/GotYaForce/game/` (atlas at root). **Remaining (honest):** fill/
+character lights are still invented — TDC archives carry camera AOBJ tracks only, no FOBJ light
+tracks (gap documented in `tdcSceneEnvironment.ts`); charge-beam research (see next entry) shows
+there is NO op-`0x09` fireChild in any charge stream, so the `cfg+0x14` release-callback path is
+the only correct beam-spawn site.
+
+---
+
+## ★ 2026-08-01 session (later): +0x1d88 anim-metadata hop unblocks ~90 borgs' attack anims + real per-borg projectiles + Pages deploy
+
+The fleet-wide 1:1 action-visibility wave. Three commits; the middle one (`6322d344`) is called
+out in its own message as **"THE single highest-leverage fix for 'all borgs actions 1:1'"**.
+
+- **`7b10c26c` (ROM-family attack animations + real per-borg projectiles + Pages deploy):** root
+  cause for missing G RED fire-punch/beam + all ROM-family X/charge anims — `bridge.ts` never set
+  `runtime.state` during ROM-owned specials, and the renderer's `slotForBorg` keys off `state`
+  (which stayed stale idle). Plus `onPlayAnim`/`onFireChild` had no else-branch in `overlayHostCtx`
+  so the bridge's own anim/projectile methods were dead code when the host supplied no hooks. Fix:
+  `tryStartXSpecial` sets `state='special'`/`anim='special'`; `tryStartBAttack` sets
+  `state='attack'`/`anim='charge_shot'`; tick-completion clears back to `idle`; `battleScene.ts
+  playSlot` now routes `'special'` through `loadClipByStreamRef`. Real per-borg projectiles:
+  `battle.ts addRomProjectile` was doing `void spawnerAddr` (discarded the spawner/type → pushed a
+  zero-velocity/zero-damage stub); rewritten to resolve kind/flightVisual/hitRadius/damage/speed/
+  drop/life via the existing resolvers, mirroring `combat.ts spawnProjectile`. `Projectile` gains
+  `romShotKind`. Pages deploy merged into the atlas workflow (base `'/GotYaForce/game/'`).
+- **`a7829f6e` (per-borg projectile visuals + muzzle/speed + charge-beam research):** G RED family
+  (pl0615/0629/062a) projectiles now render the real efct00 bank mesh (texId 125, 285 tri, matAnim
+  color tracks, team-tinted); `TUNED_FLIGHT_VISUALS` bridges until `shotFlightVisualForBorgId`
+  resolves fleet-wide. Per-record muzzle+speed DOL-dumped (`shotMuzzleSpeed.generated.json`:
+  muzzleOffset `f32[3]@+4` + speed `@+0x10`, 77 borgs decoded). **Charge-beam finding:** there is
+  NO op `0x09` fireChild in ANY charge stream (50 borgs decoded, 0 events) — the beam spawns via
+  the shared-charge engine's `cfg+0x14` release callback (G RED `0x8018edc4` → `zz_00e19a8_`),
+  correcting the wrong `shared-charge.ts` comment. Fleet audit: 24/132 borgs fully resolve attack
+  anims; 84–94 have gaps (top: samurai g2/g3 13, girl-cluster g2 14, knight-cluster g3 11).
+- **`6322d344` (the +0x1d88 hop — 114,955-line commit, unblocks ~90 borgs):** the stream-VM
+  `playAnim` operands are `(metaBank, metaAnim)` indexing the actor's `+0x1d88 familyAnimDescBank`
+  (two-hop s16 table → `0x14`-byte record → part0 `@rec[4,5]` = motionFile + animInFile bytes) —
+  NOT `(group, slot)`. The renderer treated them as motion-file `(group,slot)` directly, which only
+  worked for G RED (identity-maps). `gen-anim-metadata-hop.mjs` forward-simulates each family
+  ctor's PPC to extract the `+0x1d88` bank address, walks the two-hop table for all 7 groups ×
+  slots; `animMetadataHop.generated.json` maps **185 borgs**. `bridge.ts onPlayAnim` now applies
+  the remap before setting `runtime.meleeAnimStream` (e.g. Samurai pl0700 `playAnim(3,3)` →
+  `(motionFile=1, animInFile=6)` → renderer loads `anim_g01_s06`, not the nonexistent
+  `anim_g03_s03`). Validated against the known G RED (`0x80367460`) + NN (`0x802bd780`) banks.
+
+**VALIDATED:** combat + game builds green; rom selfcheck ALL PASS. **Remaining (honest):**
+`shotFlightVisualForBorgId` still returns null for **207/208** borgs (only G RED's row proven);
+23 borgs without a remap entry fall back to raw `(group,slot)`; the 84–94 attack-anim-gap fleet
+needs either the metadata hop (now landed) or re-export of missing anim_index banks.
+
+---
+
+## ★ 2026-08-01 session: source-owned systems wired into the app — Challenge VM + global-menu dispatcher + source camera + damage/knockback/death 1:1 ports
+
+Four commits (`8ca3afc7` → `bb1aad78` → `e78f577f` → `6f5b8452`), the last of which flips the app
+from TUNED to source-owned for damage/knockback/death/camera. Each module exports
+`runXxxSelfTests(assert)`; honest partials marked `TODO(cited-dep)`.
+
+- **`8ca3afc7` (Challenge flow VM + global-menu dispatcher + battle spawn-from-slot + title
+  fidelity):** Challenge flow VM (`apps/game/src/ui/intro/challengeFlowVm.ts`, 885 lines) = 1:1
+  port of the `PTR_FUN_8036f560` 8-mode state machine (init/menu-poll/box-load/battle-build/
+  in-battle-3sub/clear/fail/exit) + DOL-dumped count/budget/pool tables; this is the original
+  Challenge controller (`0x80195f2c`). Mode-4 sub-table `PTR_FUN_8036f580` + win-counter
+  (battleTotal 5/10/15). Global-menu dispatcher (`globalMenuDispatcher.ts`, 989 lines) = 1:1 port
+  of `dispatch_global_menu_mode` (`0x8008c3ac`) + `set_global_menu_mode` + the 11-entry
+  `PTR_FUN_802da780` mode table, with the ROM-mode → `GameScreen` map. Battle spawn-from-slot
+  (`spawnFromSlotTables.ts`, 412 lines) = 1:1 port of `active_borg_spawn_init_from_slot_tables`
+  (`0x800541ac`) + per-object init (`0x80057b78`) — the slot/team table reads
+  (`PTR_DAT_80433934` offsets `0x10/0xa0/0xcb/0x15d9`) → RomActor field copies. Title fidelity:
+  PRESS START uses the real `ascii.tpl` bitmap font; `sourceMissing()` fails visibly under
+  `data-gf-source-strict` instead of silent degradation.
+- **`bb1aad78` (audio cue resolver + source camera + damage formula):** **DISCOVERY** — the ROM
+  cue→sound resolution is ARITHMETIC, not a table. `zz_00f036c_` forwards the cue verbatim to
+  `zz_00efb3c_`, which guards `<0x180` and splits `bank=cue>>7` / `sample=cue&0x7f`, routed via the
+  DOL-dumped `DAT_802d0bec` bank table (`cueResolver.ts`). Replaces the invented cue maps. Source
+  camera (`packages/render/src/camera/sourceCamera.ts`, 527 lines) = 1:1 port of the HSD CObj
+  state + COBJ frame interpolation + libogc `C_MTXLookAt`; provides the REAL `zz_00059b8_` boot
+  view-setup (loads `DAT_802b01a0..c0` eye/up/target vectors), replacing the no-op stub at
+  `bootGlobals.ts:208-232`. Source damage (`packages/combat/src/damage/sourceDamage.ts`, 617
+  lines) = 1:1 port of `compute_base_damage_formula` (`0x8003cd5c`) + `apply_hp_damage`
+  (`0x8003d344`) + type-category lookup (`0x80066298`); driven by the DOL-dumped type-multiplier
+  matrix (`0x802c5d60`, defender-row/attacker-col) + remap (`0x802f2e28`); fully deterministic.
+- **`e78f577f` (knockback launch + death/kill accounting + force-setup writers):** `sourceKnockback
+  .ts` = 1:1 port of `compute_knockback_launch_direction` (`0x800300bc`). **DISCOVERY:** the launch
+  DIRECTION is purely geometric (5 vector-source modes → atan2-to-BAM16 yaw + negated
+  squared-horiz pitch → per-move trims), NOT type-category-influenced; magnitude via
+  `DAT_802dd8a0`/`DAT_802d3664` (s*7 ground h-speed, (s+1)*8 launch velocity, +2 airborne). Replaces
+  the flat TUNED knockback scalar. `sourceDeath.ts` = `borg_death_entry` (`0x8005bbc0`) +
+  `kill_event_energy_and_score_accounting` (`0x8002f8dc`) — death state writes (`+0x18=2`,
+  `+0x5e0|=0x80000000`, `+0x272|=0x443`, timer, cue `0x2f`) + side-energy depletion / killer-credit
+  / roster-notify. `forceSetup.ts` = the write-side complement to `spawnFromSlotTables` (round-trips
+  the 4 spawn-consumed offsets, verified by self-tests).
+- **`6f5b8452` (wire source damage/knockback/camera/Challenge-VM into the app + leaf ports):** the
+  flip. `combat.ts applyHit` routes damage → `sourceDamage`, knockback → `sourceKnockback`, death →
+  `sourceDeath`; `main.ts`/`gameSession.ts` title cues resolve via `cueResolver.resolveCueToAsset`;
+  the Challenge VM drives the Challenge-mode screen progression; `bootGlobals.ts zz_00059b8_` is
+  now the REAL view-setup. TUNED path kept as documented fallback; `GF_SOURCE_STRICT` makes source
+  authoritative. Leaf ports: `physicsExtras.ts` (the 5 movement entry-points physics.ts left
+  abstracted: `zz_0067458_` full-clamp, `FUN_80067524` no-clamp, `zz_0068030_` floor snap,
+  `zz_00677b0_` collision probe, `zz_00679d0_` ground revert), `sourceCollision.ts` (1:1 structural
+  port of the 3 hit-pair passes in ROM order + resolver tail), `menuWidgetSystem.ts` (`FUN_801cd90c`
+  physical-menu widget lifecycle, 15 descriptors).
+
+**VALIDATED:** combat + game builds green; rom selfcheck ALL PASS. **Remaining (honest):** partials
+marked `TODO(cited-dep)` where input init sites are untraced (power `+0xc4`, handicap `+0x43a`,
+spawn-protection bit) and hitbox-shape queries are unsurfaced; formula + matrix lookup + HP clamp
+are faithful.
+
+---
+
+## ★ 2026-08-01 session: family-cluster mega-wave — ~80 bespoke modules; audit 31 real-table borgs → 0
+
+Six commits (`fec15dcc` → `e8ced878` → `789ad6d7` → `053161b7` → `c430a17f` → `b49558f3`, 04:12 →
+06:23) via parallel subagent delegation. All decomp-transcribed + DOL-float verified; each module
+exports `runXxxSelfTests(assert)` aggregated via the new `runSubagentPortTests()` in
+`rom.selfcheck.ts`. **Honest scope: these are SCAFFOLDED PARTIAL PORTS.** What is ported 1:1 per
+family: registration, phase transitions, spawns, ammo-gates, the borg-switched record/child
+selection. What stays partial: host-bound callbacks marked `TODO(host)` — aim solvers, physics
+integrators, paired-actor anchors, morph, camera beams, land-transition selectors. Variant coverage
+is incomplete in several clusters.
+
+- **`fec15dcc` (8 borgs, +1214):** DEATH BORG NU pl0f01/02/03 (ctor `0x801b3598`, table
+  `0x80380ee8`; pl0f01 loops shot `0x4a`, pl0f02/03 single-shot effect `0x3d`/`0xb`) + DEATH EYE
+  pl0f06 (`0x801e43f8`, shares the NU machine at `0x80391cd8`, loops `0x7a`) + DEATH BORG MU pl0f00
+  (`0x801b289c`, `0x80380a80`, effect `0x3c`, 40f exit) + ROACH pl0f05 (`0x801e7d78`,
+  `0x803929a8`, effect + cue `0xeb`, 10f exit) + BLUE STRIKER pl0d00 / ORANGE FIGHTER pl0d04
+  (`families/fighter-craft.ts` NEW, shared root `0x8031d120`: action-0 burst volley alternating via
+  `+0x149`, action-1 BLUE hardpoint spawn cursor `&3`, action-2 ORANGE dual-port `&1`, action-3
+  borg-switched aimed burst). 43 selfcheck asserts.
+- **`e8ced878` (9 borgs, +2933):** PHOENIX DRAGON pl0502/050e (`0x80142674`: action-0 3-phase
+  diving claw, action-1 5-phase ground dash, orbiting-orb deploy `FUN_80143750`) + SIRIUS pl0e00/0e05
+  (`0x801898b0`: 3-action root, action-2 4-phase borg-gated beam, action-3 dual-weapon barrage) +
+  BEAM SATELLITE pl0e01 / DEATH SAUCER pl0e02 / ANTARES pl0e03 (`families/vehicle-borg.ts` NEW,
+  shared hardpoint/dual-port/toggle spawns) + VICTORY JET pl0620 (`0x8015bd74`, action-3 4-phase
+  ammo-gated spawn, `zz_00fcd38_` children @12f) + DEATH BORG CHI pl0f04 (`0x801f0c68`, action-0
+  4-phase dive-charge, ph0 stub from raw DOL words).
+- **`789ad6d7` (6 borgs, +2513):** VICTORY KING pl0610/061e/0621/0623 (`0x8015a494`: bespoke
+  action-0 dash `zz_00c3be0_` spawn `0x35/0x55/0x56/0x57` + action-3 4-phase B-charge flurry
+  alternating `zz_0082824_`; action-2 X still routes shared `zz_017a374_`) + ACCELERATION NINJA
+  pl0004 (`0x80162128`: 3-action melee/dash, tables `0x8034c750/c770/c7a8`) + WING SOLDIER pl0a00
+  (`0x80091824`: 4-phase hover volley + variant X dives, `0x802db468/db48c`, X `0x8033ecb8`).
+- **`053161b7` (4 borgs, +3745):** COSMIC DRAGON pl0504/0510 (`0x80108954`: 3-action root, stream
+  claw/strike/contact spawn, borg-switched `zz_01deb68_/zz_00e19a8_/zz_008672c_`) + GOLD HERO pl0802
+  (`0x8013c714`: action-0 blast loop + action-1 4-variant melee combo) + CYBER HERO pl0808
+  (`0x801d9314`: action-1 blink-dash, action-2/3 charge-flurry, action-4 5-phase steer-dash).
+- **`c430a17f` (~30 borgs, +7935, 10 files):** Ninja cluster (NORMAL/DOUBLE/SHURIKEN/FLAME/CYBER/
+  TELEPORT — `ninja-cluster.ts` + `flame-cyber-ninja.ts` + `teleport-ninja.ts`) + Witch cluster
+  (BUG/PATRA/GUARD/BASTET, shared 4-phase action-0) + Gunman cluster (REVOLVER/BEAM/GATLING/POWERED,
+  bespoke ranged-burst X) + Knight cluster (DARK KNIGHT pl0205 fully ported action 1+3, CHAINSAW
+  pl0201; other knights keep shared-engine registrations with bespoke tables `TODO`) + KUNG-FU
+  MASTER pl0800 + TAO MASTER pl0801 (hero melee archetype).
+- **`b49558f3` (~25 borgs, +3475):** wing/blob cluster (ANUBIS/DEMON WING, DEATH BORG SIGMA/BETA
+  II — `wing-blob-cluster.ts` replaces `configureWaveBFamily`) + 8 unregistered singletons
+  (DEATH BORG ALPHA, BETA, TAU, METAL HERO, POP HONEY, JET HERO, CARRIER HELICOPTER, FLYING SAUCER —
+  `unregistered-cluster.ts`) + knight-cluster wiring (SAPPHIRE/AXE/IMPERIAL/ELEMENTAL). **Closes the
+  remaining unported scope: the family-state-machine audit's "31 borgs with real tables → 0."**
+
+**VALIDATED:** combat + game builds green; rom selfcheck ALL PASS. **Remaining (honest):** variant
+coverage incomplete (DB CHI ph0 is a raw-DOL stub; many knights keep shared-engine registrations);
+host-bound callbacks (`TODO(host)`) unsurfaced across the wave; the +0x1d88 anim-metadata hop
+landing later the same day is what actually makes most of these families' attack anims visible.
+
+---
+
+## ★ 2026-07-30 → 2026-07-31 session: ROM-function 1:1 direct-port pipeline (18 commits) + Eagle Jet POC importer + combat restoration
+
+A new port discipline debuts here: **each commit ports ONE GameCube ROM function verbatim** into
+`bootGlobals.ts` (or its owning module), replacing the no-op/stub. The pipeline pattern — decomp-
+transcribe the Ghidra body → TypeScript 1:1 → wire into the owning boot/battle/PRNG/lighting/
+viewport path → self-test — becomes the template the August source-owned wave scales up. Plus the
+Eagle Jet importer POC that proves an OGhidra→port artifact pipeline.
+
+- **Tooling / POC (`993e0716`, `d653fd4b`, `1384c55f`, 2026-07-30):** `993e0716` documents status
+  + adds OGhidra port tooling (`scripts/import-oghidra-port-artifact.mjs`,
+  `scripts/lib/oghidra-port-import.mjs` 479 lines, `scripts/verify-oghidra-eagle-jet-live.mjs`,
+  `8012b458.port.json` 1968 lines, `8012b458.port.validation.json`). `d653fd4b` + `1384c55f`:
+  Eagle Jet (`FUN_8012b458`) port POC with validated importer evidence — `scripts/finish-game-port
+  -poc.mjs` (707 lines), `lib/oghidra-port-auto-verify.mjs` (390 lines),
+  `generated/oghidra/promotion-registry.generated.ts`. `69068540`/`da9a484d`/`d9245fb3`: autonomous
+  port runtime artifacts (`whole-program-manifest.json` + `finish-game-port/bundles/*.bundle.json`,
+  the big 349k/105k-line dumps); `2a173cce` then `.gitignore`s them (932k deletions) — runtime
+  scratch, not source.
+- **`3a28382b` / `5c603bce` (2026-07-31):** "Restore complete combat implementation" (`combat.ts`
+  +1795/-15) + `research: capture incremental port probes` (state-machine-probes
+  `80091ab0/800925a0/80092b90/80092f94`).
+- **The `port: integrate 0x80xxxxx` wave (18 commits, ~12 distinct ROM functions):**
+  - **Boot:** `zz_0003340_` @0x80003340 (`b6253a7d`, 181 lines — boot-time memory patching + BSS
+    clear, two null-terminated tables: memory-copy + zero-fill), `gnt4___init_hardware_bl` @0x80003400
+    (`d3d5d8c5` — no-op hardware init calling OSPSInit/OSFPRInit/OSCacheInit), `zz_0003424_`
+    @0x80003424 (`a00eedc9` — type-signature fix: `number` address not `Uint8Array`), `zz_000314c_`
+    @0x8000314c (`0d0d6623` — trivial boot-config byte getter returning `DAT_80436498` →
+    `BattleConfig`), `zz_0003154_` @0x80003154 (`2a597291` — wires `DAT_80436498` into `battle.ts`
+    matching ROM `start()` MetroTRK gate).
+  - **Memory:** `gnt4___fill_mem_bl` @0x8000543c + `gnt4_memset` @0x8000540c (`6496bac5` +
+    `d1f1bead` — the GameCube optimized block-fill: pointer arithmetic, alignment handling, 32-bit
+    word ops, replacing the simplistic `Uint8Array.fill`).
+  - **PRNG:** `zz_00055e0_` @0x800055e0 (`3d4906c6` — 8-bit RNG init wired into `battle.ts`),
+    `zz_00055fc_` @0x800055fc (`f16b3348` + `7931444c` — multiplicative PRNG wired into the
+    Gotcha-Box settlement as the deterministic GET-accrual source), `zz_0005630_` @0x80005630
+    (`f8b10788` + `547e0d49` + `60c32b07` — `DAT_804360c4` 16-bit state update wired into the
+    per-frame battle step loop; fixed to return the FULL 16-bit state, not the low byte).
+  - **Render / boot leaves:** `zz_000584c_` @0x8000584c (`d3de316a` — light position update →
+    `lighting.ts`), `zz_00058d0_` @0x800058d0 (`17681341` — GameCube `GXSetViewport`/`GXSetScissor`
+    → `ThreeViewport`), `zz_0005984_` @0x80005984 (`ccc59df9` — boot-time audio cue setter),
+    `zz_000598c_` @0x8000598c (`b4c8839c` — pointer-table accessor
+    `PTR_DAT_804335a0[DAT_804360c0] + param_1*0x10`, NULL when `DAT_804360c0==0`),
+    `zz_00059b8_` @0x800059b8 (`f8055d07` — camera/view setup: predefined vectors + look-at matrix
+    + graphics-state pointer updates).
+
+**Subsystems lit up by the pipeline:** deterministic PRNG (battle step loop + Gotcha-Box
+settlement), real boot memory init, real camera/view setup (later superseded by `sourceCamera.ts`),
+viewport/scissor, light position, audio-cue plumbing — the boot-time foundation the August waves
+consume. **VALIDATED:** combat + game builds green. **Remaining (honest):** several boot functions
+are no-ops by design on browser (hardware init); the `zz_00059b8_` stub is later replaced by the
+real `sourceCamera.ts` C_MTXLookAt port in `bb1aad78`/`6f5b8452`.
 
 ---
 
@@ -1172,26 +1448,29 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 
 | Subsystem | 1:1 coverage | Gating blocker to finish |
 |---|---|---|
-| Combat: damage formula | ~95% DERIVED (2026-07-05: guard/40 data rule wired, CPU halvings wired, force-gauge ratio wired) | actor level-float init (+0xc4/+0xb4) — level→scale link honestly unfound (T5) |
+| Combat: damage formula | **SOURCE 1:1 PORTED + WIRED (`bb1aad78`/`6f5b8452`)** — `damage/sourceDamage.ts` ports `compute_base_damage_formula` (0x8003cd5c) + `apply_hp_damage` (0x8003d344) + type-category (0x80066298); DOL-dumped matrix 0x802c5d60 + remap 0x802f2e28; fully deterministic. `combat.ts applyHit` routes through it; TUNED kept as fallback, `GF_SOURCE_STRICT` authoritative. (Earlier 2026-07-05 DERIVED wiring of guard/40 + CPU halvings + force-gauge ratio retained.) | actor level-float init (+0xc4/+0xb4) — level→scale link honestly unfound (T5); power +0xc4 / handicap +0x43a / spawn-protection bit init sites `TODO(cited-dep)` |
 | Combat: gauges/stagger | ~95% DERIVED; reaction INTEGRATION anim-gated (T6) + per-borg reaction-clip LENGTHS wired (2026-07-05) | residual: 97 ground / 33 launch borgs whose bake lacks the clip keep TUNED fallback (111/208 ground + 175/208 launch DERIVED via `data/reactionAnimLengths.json`) |
-| Combat: knockback direction | DONE (mode 1) + yaw trim wired (T8, 2026-07-05) | modes 0/2/3/4 need sub-object data |
+| Combat: knockback direction | **SOURCE 1:1 PORTED (`e78f577f`)** — `sourceKnockback.ts` ports `compute_knockback_launch_direction` (0x800300bc); DISCOVERY: launch DIRECTION is purely geometric (5 vector-source modes → atan2-to-BAM16 yaw + negated squared-horiz pitch → per-move trims), NOT type-category-influenced; magnitude via DOL DAT_802dd8a0/DAT_802d3664 (s*7 ground, (s+1)*8 launch, +2 airborne). `combat.ts applyHit` routes through it under `GF_SOURCE_STRICT`. (Earlier DONE mode-1 + T8 yaw trim retained.) | the 5 vector-source modes now resolve the modes 0/2/3/4 sub-object data; per-borg reaction-anim LENGTHS fleet-partial |
 | Combat: knockback **magnitude** | **WIRED end-to-end (2026-07-05, T6 + T5)** — ground (idx*7×scaleRatio) vs launch ((idx+1)*8, pitch-split by T8 trim) tables selected per-hit, real per-frame decel/gravity integration in movement.ts; T5 scale-ratio wired via existing `tierSizeScale()` (param-tier table, base uniformly 1.0 at spawn) | no TUNED residue; no per-borg base-scale data needed (decode proves base is uniformly 1.0) |
 | Combat: B/X contextual resolver | resolver DERIVED (bd), port upgradeable | fill type/subtype from testers; only pad-bit↔button label needs a dig |
-| Combat: per-family move MOTION | **WAVE LANDED 2026-07-06 → 2026-07-12** (`packages/combat/src/rom/*` + `families/*.ts`, 52 modules) — architecture proven and now broadly populated: real motion is per-family C state machines, not shared archetype data. **20 ported action slots** across 119 ctor families / 208 borgs (325 slots total: 20 ported, 234 partial, 71 missing, 0 structural errors per `audit:family-state-machines`). Girl cluster (14 borgs / 8 ctors), Titan/Panther (4 borgs composite), Machine Red/Blue (8 borgs), Cyber Machine, plus OGhidra first-pass Robot/Eagle Jet/Tank/Arrow Ninja/Eagle Robot modules all live; samurai (13 borgs) + valkrie (8 borgs) clusters banked 2026-07-06. `pnpm selfcheck:rom` grew from 22 → **610+ asserts** across the wave | port the remaining ~51 missing/partial families' state machines; consume the 34 unbanked OGhidra analysis sessions; **CHRONO time-stop hook + Machine Red/Blue `zz_013212c_` hardpoint deploy callback** are the known partial-action residues. See `packages/combat/src/rom/PORTING.md` |
+| Combat: per-family move MOTION | **WAVE LANDED 2026-07-06 → 2026-08-01** (`packages/combat/src/rom/*` + `families/*.ts`, ~80 modules). Real motion is per-family C state machines, not shared archetype data. **2026-07-12:** 20 ported slots / 119 ctor families / 208 borgs (Girl/Titan/Panther/Machine/OGhidra first-pass + samurai/valkrie). **2026-08-01 mega-wave:** ~80 NEW bespoke family modules via parallel subagent delegation — Death Borg Nu/Eye/Mu/Roach + fighter-craft (8), Phoenix Dragon/Sirius/vehicles/Victory Jet/DB Chi (9), Victory King/Acceleration Ninja/Wing Soldier (6), Cosmic/Gold/Cyber Hero (4), Ninja/Witch/Gunman/Knight + Kung-Fu/TAO Master (~30), wing/blob + 8 unregistered singletons + knight wiring (~25) — **closing the audit's "borgs with real tables" count 31 → 0 (`b49558f3`)**. `pnpm selfcheck:rom` grew 610 → **1000+ asserts**. **Honest: SCAFFOLDED PARTIAL PORTS** — registration + phase transitions + spawns + ammo-gates are 1:1, but host-bound callbacks (aim solvers, physics integrators, morph, paired-actor anchors) are `TODO(host)`; variant coverage incomplete (DB CHI ph0 stub, many knights keep shared-engine registrations) | finish the `TODO(host)` callbacks; consume the 34 unbanked OGhidra sessions; +0x1d88 anim-metadata hop (`6322d344`) now makes most families' attack anims visible. See `packages/combat/src/rom/PORTING.md` |
 | Combat: ammo/refill | DONE (B cell-0 + X cell-1 wired) | — |
 | Combat: projectile penetration | wired OBSERVED_WIKI (borgs/total→persist) | trace T6 confirms engine gate; terrain-penetration + solidity still open |
 | Combat: vampire lifesteal | DONE (ported, ay) | — |
 | Combat: statuses / hyper / fusion | status framework DERIVED (bd); hyper shell now SIDE-WIDE + ally-passthrough (2026-07-05, T3); fusion shell | status catalog T8-blocked; burst-END side-timer clear site still trace-gated (port drives it off the presser's own meter instead); nurse heal-write not in corpus |
-| Physics: movement/jump/dash | DERIVED values found (bc), port TUNED | per-borg data.bin values known — scale-reconcile to port, then swap |
-| UI: screens | ~9 real screens | 6 modes are dead menu entries |
+| Physics: movement/jump/dash | **SOURCE DEFAULT AS OF 2026-08-02 (`c7431505`)** — `physics.ts` delegates to `physicsExtras.ts` (`6f5b8452`, the 5 movement entry-points `zz_0067458_`/`FUN_80067524`/`zz_0068030_`/`zz_00677b0_`/`zz_00679d0_`) driven by real DOL floats (`FLY_FALL=-35`/`WALL_DAMP=0.9`, full-clamp integrator, `floorSnap8030`); `integratePhysics` full-clamp now DEFAULT when the actor carries speed-clamp fields. `GF_SOURCE_STRICT` gates only throw-on-failure. (Earlier per-borg `pl####data.bin` DERIVED values retained.) | per-borg data.bin scale-reconcile to port still pending (port is ~4× world-rescaled); DASH still a port-ism (absent from ROM) |
+| UI: screens | **ROM menu dispatcher wired (`8ca3afc7`/`4d1ac1ea`)** — `globalMenuDispatcher.ts` ports `dispatch_global_menu_mode` (0x8008c3ac) + the 11-entry `PTR_FUN_802da780` mode table with ROM-mode→`GameScreen` map; desk-menu widget lifecycle driven by `menuWidgetSystem.ts` (`FUN_801cd90c`, 15 descriptors, `DAT_8038a78c` BAM steps). `getRenderState()` returns the ROM draw-recipe per mode. ~9 real screens remain the rendered set | the 6 dead menu entries now have a ROM-mode map but no dedicated render recipe yet |
 | UI: HUD | ~90% (charge✓ cursor✓ X-ammo✓ boost✓ jump✓) | burst meter only (fill data is T3-blocked) |
-| Challenge flow | PLAYABLE (verified) + ~85% DERIVED | deploy sub-phases (moot, 36f total already correct) |
+| Challenge flow | **VM-DRIVEN AS OF 2026-08-01 (`8ca3afc7`/`4d1ac1ea`)** — `challengeFlowVm.ts` ports the `PTR_FUN_8036f560` 8-mode state machine (the original controller `0x80195f2c`); mode-3 generates CPU rosters (`drawBorgFromPool` + `borgCost`), win-counter routes VM mode-4→3/5 instead of a hardcoded results screen. Still PLAYABLE (verified 2026-07-03) + ~85% DERIVED | deploy sub-phases (moot, 36f total already correct); `drawBorgFromPool` cost + `0x80196d64` exit are `TODO(cited-dep)` (DOL tables not dumped) |
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
-| Assets: animation playback | ~88% (dispatch mapped+reconciled, ba/bb) | asset re-bake: relabel g4s0 special_s0→down_s0 (worktree); death/deploy slots unresolved |
+| Assets: animation playback | **+0x1d88 HOP LANDED 2026-08-01 (`6322d344`) — unblocks ~90 borgs' attack anims.** stream-VM `playAnim` operands index `actor+0x1d88 familyAnimDescBank` (two-hop s16 table → 0x14-byte record → motionFile+animInFile), NOT `(group,slot)`; `animMetadataHop.generated.json` maps 185 borgs. ~88%+ dispatch mapped+reconciled (ba/bb); `bridge.ts` sets `runtime.state` during ROM-owned specials (`7b10c26c`) so `slotForBorg` resolves the X/charge clip | 23 borgs without a remap entry fall back to raw `(group,slot)`; asset re-bake still pending (relabel g4s0 special_s0→down_s0); death/deploy slots unresolved; 84–94 fleet borgs still have anim_index gaps needing re-export |
 | Audio: BGM/menu | ~90% | — |
-| Audio: combat/voice | ~85% (voice az; SE ids MAPPED bd, EXTRACTED+WIRED 2026-07-04; **PATH-B per-anim swing audio DECODED+WIRED 2026-07-04**) | real bank samples exported (scripts/export-combat-se.py, 23 files) + wired (shoot/hit/down/dash/jump/spawn/land DERIVED); melee/charge swings now play their ROM-AUTHORED per-anim sounds (actor+0x4e8 sound-event table joined via the anim-descriptor banks — anim-sound-op-decode-2026-07-04.md; 103/103 resolved ladders + 18 air / 2 charge leaves covered, TUNED fallback kept for the rest); death stays TUNED (op-0x0f voice is per-borg table-driven, tables undecoded); voice cue-role TUNED |
-| Stages: geometry/lighting | ~90% / ~98% | collision 40/40 (18 base + 22 DERIVED-shared-base family variants, sha1-verified 2026-07-05) |
-| FX: particles/projectiles | ~85% (hit-impact chain decoded end-to-end 2026-07-04 incl. the texId hop — ptl-format-notes-2026-07-04.md; PLUS muzzle/launch FX family, projectile-row visual fields, slow/haste status FX and the matAnim color tracks decoded+wired — efct-consumers-decode-2026-07-04.md; per-borg flight-visual RESOLVER + renderer wiring landed 2026-07-04, honest fleet coverage 0/208 today — see the top-of-file session entry) | a borg-id guard on FUN_80166fa8/zz_0092534_ (the two real bank-flag rows have no provable per-borg attribution yet) would unlock the first live case; melee hand-flash id 7; DAT_803bb384/470 bank identities; ptcl00.ptl emitter bank loader; 3D weapon meshes |
+| Audio: combat/voice | **~90%** — voice az; SE ids MAPPED bd, EXTRACTED+WIRED 2026-07-04; PATH-B per-anim swing audio DECODED+WIRED 2026-07-04. **2026-08-01 source resolver landed (`bb1aad78`):** cue→sound is ARITHMETIC not a table — `cueResolver.ts` ports `zz_00f036c_`/`zz_00efb3c_` (`bank=cue>>7` / `sample=cue&0x7f` via `DAT_802d0bec`); replaces invented cue maps. **2026-08-02 stream-VM sound ops wired (`2ef33160`):** op `0x0e` playSound + op `0x0f` voice now fire `onPlayCue` (was bare `return`); combat cues resolve through `resolveCueToAsset` via `onRomCue` | real bank samples exported (23 files) + wired; melee/charge swings play ROM-AUTHORED per-anim sounds (103/103 ladders + 18 air / 2 charge leaves); death stays TUNED (op-`0x0f` voice is per-borg table-driven, tables undecoded; voice id rides the per-borg voice table, operand sent as `-1` sentinel); charge-beam research shows NO op-`0x09` fireChild in any charge stream |
+| Stages: geometry/lighting | ~90% / ~98% + **boot fog + lights wired 2026-08-03 (`2ef33160`)** — `applyTdcFog` creates `THREE.FogExp2` for `tdc00/05/07` (authored with fog; color from authored `tl00` ambient); ambient + 2 infinite lights from `TL00_AUTHORED_AMBIENT/INFINITE`. First net-new render effect | fill/character lights still invented (TDC archives carry camera AOBJ tracks only, no FOBJ light tracks); collision 40/40 (18 base + 22 DERIVED-shared-base family variants, sha1-verified 2026-07-05) |
+| FX: particles/projectiles | **REAL PER-BORG PROJECTILES 2026-08-01 (`7b10c26c`/`a7829f6e`)** — `battle.ts addRomProjectile` rewritten (was `void spawnerAddr` → zero-damage stub) to resolve kind/flightVisual/hitRadius/damage/speed/drop/life; per-record muzzle+speed DOL-dumped (`shotMuzzleSpeed.generated.json`, 77 borgs, `muzzleOffset f32[3]@+4` + `speed@+0x10`); G RED family renders the real efct00 bank mesh (texId 125). ~85% incl. hit-impact chain + texId hop + muzzle/launch FX + matAnim color tracks. (Earlier: honest fleet coverage 0/208.) | `shotFlightVisualForBorgId` returns null for 207/208 borgs (only G RED row proven; `TUNED_FLIGHT_VISUALS` bridges); borg-id guard on `FUN_80166fa8`/`zz_0092534_`; melee hand-flash id 7; `DAT_803bb384/470` bank identities; 3D weapon meshes |
+
+| Render: source camera (CObj) | **SOURCE-OWNED AS OF 2026-08-01 → 03 (`bb1aad78`/`c7431505`/`2ef33160`)** — `packages/render/src/camera/sourceCamera.ts` ports the HSD CObj state + COBJ frame interp + libogc `C_MTXLookAt` (the REAL `zz_00059b8_` view-setup, `DAT_802b01a0..c0` eye/up/target); `sourceCameraThree.ts` `mtx34ToThreeMatrix4` + `applySourceCameraToThree` uploads row→column-transposed Mtx34 → `matrixWorldInverse`. `TitleIntro.ts` render loop calls it instead of `camera.lookAt()` (lookAt kept as try/catch fallback) | bootGlobals `zz_00059b8_` no-op stub retired; per-frame CObj animation binding is the live path |
+| Boot intro: title per-frame VM | **WIRED 2026-08-02 → 03 (`4d1ac1ea`/`2ef33160`)** — `titleVm.ts integrate()` fires the `cameraMode` consumer → `sink.onActorTick()` (ROM `zz_0057ad0_` actor physics/state tick, active ~frame 120) and `sceneAuxMode` → `sink.onSceneAuxUpdate()`; boot intro overlay opacity per-frame from `vm.state.overlay.current`; lightbar re-triggerable CSS sweep; title logo uses real `titles.tpl` | title-logo drawable `DAT_8031a074` still HLE-pending export; `TitleEffectSink` is the seam for further boot consumers |
 
 **Trace status update (2026-07-03, (bc)):** T9 (knockback magnitude) is **no longer trace-blocked**
 — it was found statically in the DOL as strength-indexed tables (DAT_802dd8a0/DAT_802d3664), and
