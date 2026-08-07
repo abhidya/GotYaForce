@@ -1,5 +1,9 @@
 # Next-session prompt — port driver Phase 0/1 + OMR pre-run fixes
 
+> **STATUS 2026-08-06 evening: Tasks 1–4 DONE** (Phases 0–2 + monitor backoff
+> shipped and live; see `port-driver-implementation-2026-08-06.md`). The OMR
+> owner track below remains untouched and is still the owner's to do.
+
 Copy everything below the line into a fresh Claude Code session started in `D:\GotYaForce`.
 
 ---
