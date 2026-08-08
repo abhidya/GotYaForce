@@ -1,7 +1,11 @@
 # Design: Port Supervisor Fix (post-mortem + rebuild) — 2026-08-08
 
-Status: **awaiting owner sign-off; no supervisor code written yet.** A stopgap
-`finish-port --drive --until-blocked` driver is running loose (see §7).
+Status: **IMPLEMENTED + DEPLOYED 2026-08-08 ~17:13 ET** — Fixes A/B/C plus the
+§4b adversarial additions are live in `palworld-oghidra-monitor.ps1`; the
+scheduled task is running and has adopted the stopgap driver (§7 note). A
+versioned snapshot of the fixed script lives beside this doc
+(`port-supervisor/palworld-oghidra-monitor.ps1`); the live copy at
+`D:\Palworld_Server_Setup\monitor\` is not under git.
 
 Incident: **~23 h of zero progress, 2026-08-07T18:03 → 2026-08-08T16:43.** No units
 integrated, no commits. The port pipeline was healthy the whole time; nothing launched it.
@@ -110,6 +114,42 @@ Claims re-checked in code rather than assumed. Three came back different:
 - **Residual risk:** none of this addresses §2.4. If a future change keys supervision off
   `run-state.json` mid-flight it will misread. Fix the two-writer split separately.
 
+### 4b. Second adversarial pass (pre-implementation) — four gaps found, all fixed
+
+1. **The `completed` guard latched forever.** Nothing cleared it when new work arrived
+   (ledger reset/extension), so the next quiet outage was built in. Fixed: relaunch once
+   when `port-ledger.json`'s mtime is newer than `run-state.json`'s (driver writes ledger
+   first, state last, so at rest ledger ≤ state; file mtimes avoid timezone parsing).
+   Worst case is one harmless exit-0 probe.
+2. **"Dying in seconds really is a crash" was false.** Exits 0/2/3/4/5 are all healthy
+   fast exits even under `--until-blocked` — and exit 5 (lock held) would have fired the
+   day the fixed monitor was installed next to the stopgap. Fixed: the monitor now keeps
+   the `-PassThru` handle (`$null = $process.Handle` to cache it), reads `.ExitCode`, and
+   only counts short runs with unknown/unexpected codes toward the crash block. Exit 5
+   with no visible driver gets its own counter → block → recheck cadence.
+3. **The telemetry swallow was in the wrong layer.** `Write-JsonAtomic` also writes
+   `control.json` (protection-adjacent), so it retries then *throws*; only
+   `Write-MonitorState` swallows. `Protect-Gameplay` wraps its control write and Unsloth
+   unload in try/catch so nothing can abort the force-kill.
+4. **NEW DEFECT D — the stopgap driver was invisible to protection.** `Get-OGhidraProcesses`
+   required the absolute `main.py` path in the command line; the stopgap was launched with
+   a relative `main.py`, so `Get-OGhidraRoots` returned nothing — player-join protection
+   could not have killed it. §7's "bypasses protection" was more literal than this doc
+   knew. Fixed: match `python.exe` + `main.py` + `finish-port` regardless of path form.
+
+Implementation traps hit and verified by test (not assumption):
+- `[IO.File]::Replace($tmp,$dst,$null)` fails on PS 5.1 — PowerShell binds `$null` to `""`
+  for string parameters and Replace rejects an empty backup path ("path is not of a legal
+  form"). Must pass `[NullString]::Value`. Caught by an 800-write stress test against a
+  concurrent reader loop (800/800 succeeded after the fix, 0/800 before it).
+- `$process.ExitCode` after `-PassThru` was verified readable post-exit on this host;
+  handle caching kept anyway as belt-and-braces.
+- Driver stdout/err logs rotate at 5 MB before each launch (a long-lived
+  `--until-blocked` run can grow them; rotation preserves the crash-tail evidence the
+  block message reports).
+- Iteration failures in the main loop log + count and only kill the monitor after 10
+  consecutive failures (scheduled task remains the restart backstop).
+
 ---
 
 ## 5. Alternatives considered
@@ -158,12 +198,15 @@ Not "rewrite the same 535-line design in a nicer language."
 
 ---
 
-## 7. Current stopgap (in effect now)
+## 7. Current stopgap (RESOLVED 2026-08-08 17:14 ET)
 
 `finish-port --drive --until-blocked` launched directly, logging to
 `monitor\oghidra-manual-drive.out.log`; porting `challenge_menu_objects` on 35B UD-Q4_K_XL.
-**It bypasses palworld gameplay protection** — safe only while the server is empty (it is;
-0 players). Retire it as soon as a fixed supervisor is installed.
+~~It bypasses palworld gameplay protection~~ **The fixed monitor now sees it** (defect D
+fix, §4b.4) and has adopted it: state.json shows `mode: running, oghidra_pids: [4608]`.
+Player-join now cooperatively signals, force-kills, and liveness-resets it like any
+monitor-launched driver. No manual retirement needed — when it exits, the monitor
+relaunches its own `--until-blocked` driver with exit-code-aware supervision.
 
 Model state settled 2026-08-07: 35B **UD-Q4_K_XL @ 131 072** loaded via
 `POST /api/inference/load`; 27B UD-Q4_K_XL downloaded to
@@ -173,8 +216,13 @@ Model state settled 2026-08-07: 35B **UD-Q4_K_XL @ 131 072** loaded via
 
 ## 8. Open questions for the owner
 
-1. Implement A+B+C in the existing PS monitor now (fastest return to protected operation), or
-   go straight to §6 option 1+3 (driver self-supervises + small Python watchdog)?
-2. Split the `run-state.json` writers (§2.4) as part of this, or track separately?
+1. ~~PS monitor now vs §6 option 1+3?~~ **Resolved 2026-08-08: A+B+C+§4b implemented in
+   the existing PS monitor** for fastest return to protected operation. §6 option 1+3
+   (driver self-supervises + thin Python watchdog) remains the strategic direction —
+   note §4b's added requirement that the watchdog also owns force-kill + VRAM unload
+   (`Invoke-UnslothUnload -Force`) and inherits Unsloth bring-up, the chat-contract
+   preflight, and embeddings sync from `Enable-HeavyWorkflow`; the "thin remainder" is
+   thicker than option 1's original wording implied.
+2. Split the `run-state.json` writers (§2.4) — still open, track separately.
 3. Restore `omr-sweep` to GPU priority 1 when the port pipeline is stable (it is temporarily
    at 3; oghidra temporarily at 1).
