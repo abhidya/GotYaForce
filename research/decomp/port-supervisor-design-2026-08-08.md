@@ -216,13 +216,22 @@ Model state settled 2026-08-07: 35B **UD-Q4_K_XL @ 131 072** loaded via
 
 ## 8. Open questions for the owner
 
-1. ~~PS monitor now vs §6 option 1+3?~~ **Resolved 2026-08-08: A+B+C+§4b implemented in
-   the existing PS monitor** for fastest return to protected operation. §6 option 1+3
-   (driver self-supervises + thin Python watchdog) remains the strategic direction —
-   note §4b's added requirement that the watchdog also owns force-kill + VRAM unload
-   (`Invoke-UnslothUnload -Force`) and inherits Unsloth bring-up, the chat-contract
-   preflight, and embeddings sync from `Enable-HeavyWorkflow`; the "thin remainder" is
-   thicker than option 1's original wording implied.
-2. Split the `run-state.json` writers (§2.4) — still open, track separately.
+1. ~~PS monitor now vs §6 option 1+3?~~ **Both, sequentially — ALL IMPLEMENTED 2026-08-08.**
+   The patched PS monitor restored protection at 17:13; the §6 option 1+3 Python watchdog
+   (`src/palworld_watchdog.py` on the OGhidra checkout, commit f9fa8c2, 9 unit tests)
+   replaced it the same evening: scheduled task "Palworld - Python watchdog (port
+   supervisor)" is live, the PS task is disabled (kept as rollback). The watchdog owns
+   force-kill + forced VRAM unload, Unsloth bring-up with the settled UD-Q4_K_XL @ 131072
+   config (the PS helper still encoded stale ud-iq3_s @ 262144 — config drift the rewrite
+   caught), the tool_choice-object preflight, and embeddings sync.
+2. ~~Split the `run-state.json` writers (§2.4)~~ — **DONE 2026-08-08** (OGhidra commit
+   b27d6d5): the unit workflow writes `unit-state.json`; the driver is the sole
+   `run-state.json` writer and now includes chunk/unit on analyzing/porting writes, so
+   the rig dashboard keeps its detail with no collector change.
 3. Restore `omr-sweep` to GPU priority 1 when the port pipeline is stable (it is temporarily
-   at 3; oghidra temporarily at 1).
+   at 3; oghidra temporarily at 1). — still open.
+
+Also closed 2026-08-08: reachability gate hardened (block-comment mentions no longer
+count as use sites; regression tests for the multiline-import false positive) — OGhidra
+commit cb25ab4. Combat-family priority chunks moved into driver code with startup ledger
+reconcile — commit 2b1b459.
