@@ -1,0 +1,50 @@
+{
+  "unit": "damage-core",
+  "run_id": "wasm-units-acceptance-20260810",
+  "generated_at": "2026-08-10T04:31:42.320288Z",
+  "extractions": [
+    {
+      "file": "research/decomp/ghidra-export/chunk_0004.c",
+      "start": 6667,
+      "end": 6828,
+      "sha256": "58e9d755657278c72ff7f55e3f81ba70276a67acffdab2b2f74e45ff84c8ea48"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0004.c",
+      "start": 6832,
+      "end": 6860,
+      "sha256": "a0648f6dd315cff99c8feaa13e2feb104ee511b621d8b1165caeb8aedbf51423"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0008.c",
+      "start": 2976,
+      "end": 2982,
+      "sha256": "27041c8a8e244a5c53aaa1777c1da6f2dc5013e3aacf57cd8eff949a687a60d4"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0004.c",
+      "start": 197,
+      "end": 231,
+      "sha256": "e427d0e3596c0549425b59250e494fb9154d1814117943fc84d3973a568c8260"
+    }
+  ],
+  "extracted_sha256": "0c18cf7ed1f9fd054e61f4ca6fea278a08a8fd41bb2ddcaaa54d47e631be8c84",
+  "exported_functions": [
+    "zz_003cd5c_",
+    "zz_003d344_",
+    "zz_0066298_",
+    "FUN_80031634"
+  ],
+  "compile_iterations": 1,
+  "model": null,
+  "model_requests": 0,
+  "oracle": {
+    "command": [
+      "node",
+      "harness.mjs",
+      "20000"
+    ],
+    "cwd": "research/decomp/poc/wasm-port-poc",
+    "summary": "19998/20000, 232/232, 4000/4000, 2000/2000"
+  }
+}
