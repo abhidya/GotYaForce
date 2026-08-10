@@ -1,0 +1,22 @@
+{
+  "tag": "27b",
+  "model": "unsloth/Qwen3.6-27B-MTP-GGUF",
+  "iterations": [
+    {
+      "i": 1,
+      "result": "patched",
+      "errors_head": "unit_poc.c:7:1: error: unknown type name 'bool'\n    7 | bool FUN_80031634(int param_1,int param_2,float *param_3,int *param_4);\n      | ^\nunit_poc.c:216:1: error: unknown type name 'bool'\n  216 | bool FUN_80031634(int param_1,int param_2,float *param_3,int *param_4)\n      | ^\nunit_poc.c:219:3: error: use of undeclared identifier 'bool'\n  219 |   bool bVar1;\n      |   ^~~~\nunit_poc.c:239:3: error: use of undeclared identifier 'bVar1'\n  239 |   bVar1 = dVar3 <= (double)*(float *)(param_2 + 0x30);\n      |   ^~~~~\nunit_poc.c:240:7: error: use of undeclared identifier 'bVar1'\n  240 |   if (bVar1) {"
+    },
+    {
+      "i": 2,
+      "result": "patched",
+      "errors_head": "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: ABS\n(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)"
+    },
+    {
+      "i": 3,
+      "result": "linked"
+    }
+  ],
+  "linked": true,
+  "wall_seconds": 6992.8
+}
