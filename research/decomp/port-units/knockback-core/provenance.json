@@ -1,0 +1,36 @@
+{
+  "unit": "knockback-core",
+  "run_id": "wasm-units-acceptance-20260810",
+  "generated_at": "2026-08-10T04:31:47.828058Z",
+  "extractions": [
+    {
+      "file": "research/decomp/ghidra-export/chunk_0005.c",
+      "start": 2191,
+      "end": 2204,
+      "sha256": "f3ac2fe965789745d2befcee4cbb5aa6be14509970979a171115848b88180e9c"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0007.c",
+      "start": 5544,
+      "end": 5574,
+      "sha256": "409711707e792403fd2cfe39eb1fda7c07ef13f0bfc16b54456814aca1d8c510"
+    }
+  ],
+  "extracted_sha256": "40982802027482d77d3b0aae410a3e6f1377c458895ace0321f0a654d8e3e080",
+  "exported_functions": [
+    "FUN_800452a0",
+    "zz_005ec20_"
+  ],
+  "compile_iterations": 1,
+  "model": null,
+  "model_requests": 0,
+  "oracle": {
+    "command": [
+      "node",
+      "harness-knockback.mjs",
+      "20000"
+    ],
+    "cwd": "research/decomp/poc/wasm-port-poc",
+    "summary": "16/16, 2000/2000, 4000/4000, 4000/4000"
+  }
+}
