@@ -1,0 +1,1 @@
+{"segments": [{"addr": 2151903080, "b64": "AAAAAA==", "note": "const f@0x80436f68=0.0 (0.0 deferred-nudge |v|^2 epsilon gate)"}, {"addr": 2151903100, "b64": "AAAAPw==", "note": "const f@0x80436f7c=0.5 (0.5 deferred-nudge half-scale)"}, {"addr": 2151903128, "b64": "ILy+TQ==", "note": "const f@0x80436f98=400000000.0 (deferred-search initial best-distance sentinel)"}]}

@@ -1,0 +1,87 @@
+{
+  "queue_schema": 1,
+  "note": "Ordered wasm-unit port queue (OGHIDRA_PORT_MODE=wasm_units). Extractions are VERBATIM 1-based inclusive line ranges from research/decomp/ghidra-export; the driver never edits the C, only the scaffold header. Oracle commands run from repo-root-relative cwd with {wasm} substituted.",
+  "units": [
+    {
+      "name": "damage-core",
+      "extractions": [
+        { "file": "research/decomp/ghidra-export/chunk_0004.c", "start": 6667, "end": 6828 },
+        { "file": "research/decomp/ghidra-export/chunk_0004.c", "start": 6832, "end": 6860 },
+        { "file": "research/decomp/ghidra-export/chunk_0008.c", "start": 2976, "end": 2982 },
+        { "file": "research/decomp/ghidra-export/chunk_0004.c", "start": 197, "end": 231 }
+      ],
+      "prelude": [
+        "/* stage-2 generated prototypes (design: prototypes for all functions from _index.tsv) */",
+        "int zz_003cd5c_(ushort *param_1,int param_2,char *param_3);",
+        "uint zz_003d344_(int param_1,short param_2);",
+        "int zz_0066298_(char *param_1);",
+        "bool FUN_80031634(int param_1,int param_2,float *param_3,int *param_4);"
+      ],
+      "exported_functions": ["zz_003cd5c_", "zz_003d344_", "zz_0066298_", "FUN_80031634"],
+      "header_seed": "research/decomp/poc/wasm-port-poc/gnt4_shim.h",
+      "oracle": {
+        "command": ["node", "harness.mjs", "20000"],
+        "cwd": "research/decomp/poc/wasm-port-poc",
+        "env": { "POC_WASM": "{wasm}" },
+        "success_patterns": [
+          "UNEXPLAINED\\s+:\\s+0\\b",
+          "type category \\(zz_0066298_\\): 232/232 exact",
+          "hp subtract\\+clamp \\(zz_003d344_\\): 4000/4000 exact",
+          "exact match \\(bool \\+ out-vec bytes\\): 2000/2000"
+        ]
+      }
+    },
+    {
+      "name": "knockback-core",
+      "note": "sourceKnockback.ts cites zz_00300bc_ (chunk_0003.c:8540-8627, launch direction), its atan2->BAM16 helper FUN_800452a0 (chunk_0005.c:2191-2204), and the strength-indexed magnitude selects zz_005ec20_ (chunk_0007.c:5544-5574) / FUN_8005ed38 (chunk_0007.c:5601-5640). TWO EXCLUSIONS, both decompiler-artifact limits of verbatim porting (2026-08-10): (1) zz_00300bc_ passes &local_38 as a vec3 base and reads local_34/local_30 — adjacent PPC stack slots that clang does NOT keep adjacent at -O1 or -O0 (measured: oracle red both ways); needs the export to recover the local as float[3]. (2) FUN_8005ed38's trig helpers zz_0045204_/zz_0045238_ decompile to the (longlong)x * 0x3ff0000000000000 artifact, which no header-only fix can make semantically correct. harness-knockback.mjs keeps the full direction oracle and self-skips it until zz_00300bc_ is exported.",
+      "extractions": [
+        { "file": "research/decomp/ghidra-export/chunk_0005.c", "start": 2191, "end": 2204 },
+        { "file": "research/decomp/ghidra-export/chunk_0007.c", "start": 5544, "end": 5574 }
+      ],
+      "prelude": [
+        "/* stage-2 generated prototypes */",
+        "int FUN_800452a0(double param_1,double param_2);",
+        "void zz_005ec20_(int param_1);"
+      ],
+      "exported_functions": ["FUN_800452a0", "zz_005ec20_"],
+      "header_seed": "research/decomp/poc/wasm-port-poc/gnt4_shim_knockback.h",
+      "oracle": {
+        "command": ["node", "harness-knockback.mjs", "20000"],
+        "cwd": "research/decomp/poc/wasm-port-poc",
+        "env": { "POC_WASM": "{wasm}" },
+        "success_patterns": ["KNOCKBACK ORACLE: PASS"]
+      }
+    },
+    {
+      "name": "collision-core",
+      "note": "STRUCTURAL oracle of the three collision hit-pair passes cited by sourceCollision.ts: collision_hit_pair_pass_active_vs_borgs (chunk_0003.c:7026-7164), _active_vs_secondary (7168-7306), _object_lists (7310-7426). SCOPED OUT, with reasons: (1) resolve_hitbox_target_effects_and_damage @0x8002e2a8 (7473-8195) — its 7519-7944 effect-bookkeeping body is unported in TS (TS ports only the delegation tail), so the verbatim body has no oracle, AND it calls zz_00300bc_ unconditionally, which the knockback-core unit already proved verbatim-unportable (local-vec3 stack aliasing); (2) the four hitbox-shape functions zz_002fd7c_/zz_0039f6c_/zz_0030348_/zz_0030490_ — undecompiled/unsurfaced (sourceCollision.ts injects them as hooks); (3) battle_frame_target_action_dispatch — call-order only. The shape quartet + resolver are stubbed IDENTICALLY on both sides (header stubs <-> harness TS hooks + pair log at GC 0x80630000), so the oracle gates the verbatim filter chains, immediate-vs-deferred, sentinel closest-target search, deferred nudge, and delegation order/identity/contact. CORPUS CONSTRAINTS (TS-vs-ROM deltas found 2026-08-10, kept out of the corpus and flagged for TS follow-up): (a) flagsA bit 0x800 skip exists only in pass 1 in the ROM, but TS runPassCore applies it to all passes — 0x800 is generated only for pass-1 actives; (b) pairOwnersAdmissible's per-side owner-link clear is an OR chain in the ROM (ownerFlag==0 || otherFamily==0x0e || linked!=other, chunk_0003.c:7087-7090) but (A||B)&&C in TS — the corpus installs exclusion cells only where both forms agree (unique same-team-borg counterpart). Local verdict 2026-08-10: 20000/20000 pair sequences exact, 28121/32153 post-state exact + 4032 f32-explained, 0 unexplained.",
+      "extractions": [
+        { "file": "research/decomp/ghidra-export/chunk_0003.c", "start": 7026, "end": 7164 },
+        { "file": "research/decomp/ghidra-export/chunk_0003.c", "start": 7168, "end": 7306 },
+        { "file": "research/decomp/ghidra-export/chunk_0003.c", "start": 7310, "end": 7426 }
+      ],
+      "prelude": [
+        "/* stage-2 generated prototypes */",
+        "void collision_hit_pair_pass_active_vs_borgs(void);",
+        "void collision_hit_pair_pass_active_vs_secondary(void);",
+        "void collision_hit_pair_pass_object_lists(void);"
+      ],
+      "exported_functions": [
+        "collision_hit_pair_pass_active_vs_borgs",
+        "collision_hit_pair_pass_active_vs_secondary",
+        "collision_hit_pair_pass_object_lists"
+      ],
+      "header_seed": "research/decomp/poc/wasm-port-poc/gnt4_shim_collision.h",
+      "oracle": {
+        "command": ["node", "harness-collision.mjs", "20000"],
+        "cwd": "research/decomp/poc/wasm-port-poc",
+        "env": { "POC_WASM": "{wasm}" },
+        "success_patterns": [
+          "pair sequences exact \\(identity\\+order\\+contact\\): 20000/20000",
+          "UNEXPLAINED : 0",
+          "COLLISION ORACLE: PASS"
+        ]
+      }
+    }
+  ]
+}
