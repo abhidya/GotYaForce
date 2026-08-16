@@ -1,5 +1,7 @@
 // Shared-engine MORPH/TRANSFORM X-special machine — 1:1 port of `zz_017a374_`
 // @0x8017a374 and its 2-entry phase table @0x804347b0 = [0x8017a3ac, 0x8017a4a8].
+// @audit-ported pl0604 action=2 variants=0
+// @audit-ported pl0613 action=2 variants=0
 // Third shared machine after zz_00ff2bc_ (shared-x-special.ts) and zz_00fed6c_
 // (shared-melee-lunge.ts).
 //
