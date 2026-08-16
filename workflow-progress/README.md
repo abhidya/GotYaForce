@@ -1,25 +1,27 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-16T12:14:34.777346Z - machine-written, do not edit.*
+*Generated 2026-08-16T12:18:39.792453Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 2/1520 settled (2 green, 0 staged) |
 | **Retries outstanding** | 19 |
 | **Untouched** | 1498 |
-| **Last transition** | 2026-08-16T12:14:34.777346Z |
+| **Last transition** | 2026-08-16T12:18:39.792453Z |
 | **Last green** | never (`-`) |
 | **Last product commit** | `-` |
-| **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ ? ctx |
-| **Driver** | stopped |
+| **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ 32768 ctx |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-16T12:18:39.792453Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
+| 2026-08-16T12:18:39.831453Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T12:14:34.777346Z | `-` | starting | machine | 0 | Manual pause lifted; re-arming the empty grace. |
 | 2026-08-16T12:14:17.811259Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-16T12:13:17.673994Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |

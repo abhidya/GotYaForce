@@ -2,8 +2,8 @@
   "schema": 1,
   "unit": "auto-c0000-001",
   "unit_id": "auto-c0000-001",
-  "timestamp": "2026-08-16T12:13:17.673994Z",
-  "run_id": "2026-08-16T12:13:17.617994Z",
+  "timestamp": "2026-08-16T12:18:39.792453Z",
+  "run_id": "2026-08-16T12:18:39.722456Z",
   "result": "deferred",
   "stage": "port",
   "attempt": 0,
@@ -31,6 +31,14 @@
     },
     {
       "timestamp": "2026-08-16T12:13:17.673994Z",
+      "result": "deferred",
+      "stage": "port",
+      "attempt": 0,
+      "detail": "interrupted before a verdict; requeued",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-16T12:18:39.792453Z",
       "result": "deferred",
       "stage": "port",
       "attempt": 0,
