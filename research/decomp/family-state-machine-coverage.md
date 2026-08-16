@@ -5,7 +5,7 @@ Deterministic audit of the GG4E constructor roster, ROM command/root tables, bri
 - Constructor families: 119
 - Borg roster entries: 208
 - Action slots: 325
-- Ported: 224; delegated: 0; inactive: 0; partial: 101; missing: 0
+- Ported: 226; delegated: 0; inactive: 0; partial: 99; missing: 0
 - Structural errors: 0
 
 Default mode checks structural validity. Strict mode additionally fails while partial or missing live slots remain. See `data/family-state-machine-coverage.json` for slot evidence.

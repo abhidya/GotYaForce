@@ -17556,7 +17556,9 @@
       "actions": [
         {
           "actionIndex": 0,
-          "evidence": [],
+          "evidence": [
+            "0x80126e00:0: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0619",
@@ -17596,7 +17598,7 @@
             "pl0619: command 0x803307cc (user-data/GG4E/disc/sys/boot.dol:0x80126e00 copies actor+0x4ec root via 0x80126f14 and actor+0x4b0 via 0x80126f1c)",
             "pl0619: root 0x80127174, action table 0x80330380, handler 0x801271b0"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 3,
@@ -22566,7 +22568,9 @@
       "actions": [
         {
           "actionIndex": 0,
-          "evidence": [],
+          "evidence": [
+            "0x8015b420:0: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl061f",
@@ -22641,7 +22645,7 @@
             "pl0625: command 0x8034614c (user-data/GG4E/disc/sys/boot.dol:0x8015b420 copies actor+0x4ec root via 0x8015b4a8 and actor+0x4b0 via 0x8015b554)",
             "pl0625: root 0x8015b7a0, action table 0x80345be8, handler 0x8015b7dc"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 2,
@@ -32380,8 +32384,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 101,
-      "ported": 224
+      "partial": 99,
+      "ported": 226
     }
   }
 }

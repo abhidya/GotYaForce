@@ -138,6 +138,7 @@ import { runBeamTankSelfTests } from "../families/beam-tank.js";
 import { runIcbmTankSelfTests } from "../families/icbm-tank.js";
 import { runUltimateCannonSelfTests } from "../families/ultimate-cannon.js";
 import { runGatlingTankSelfTests } from "../families/gatling-tank.js";
+import { runSharedGunXSelfTests } from "../families/shared-gun-x.js";
 import { runDeathBorgChiSelfTests } from "../families/death-borg-chi.js";
 import type { BorgRuntime } from "../types.js";
 import {
@@ -3885,6 +3886,7 @@ function runSubagentPortTests(): void {
   runIcbmTankSelfTests(assert);
   runUltimateCannonSelfTests(assert);
   runGatlingTankSelfTests(assert);
+  runSharedGunXSelfTests(assert);
 }
 
 function runGirlClusterTests(): void {

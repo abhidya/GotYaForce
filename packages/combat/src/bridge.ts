@@ -34,6 +34,7 @@ import { configureClawRobotFamily, configureDeathBorgOmegaFamily } from "./famil
 import { configureSamuraiClusterFamily, type SamuraiClusterBorgId } from "./families/samurai.js";
 import { configureGirlClusterFamily, type GirlClusterBorgId } from "./families/girl-cluster.js";
 import { createFamily1Charge3Action, createFamily2Charge3Action } from "./families/shared-charge3.js";
+import { createFamily1GunXAction, createFamily2GunXAction } from "./families/shared-gun-x.js";
 import {
   createSharedAimedShotX,
   TITAN_ROBOT_X_CONFIG,
@@ -371,25 +372,26 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // config) + X (shared lance flight zz_0149708_; SONIC/SHOGUN bespoke tables).
       ...samuraiClusterRegistrations(),
       // Charge-3 release engine zz_0177a3c_ + morph engine zz_017a374_ composites:
+      // plus the shared GUN volley (action 0, zz_0177634_) for the tank line.
       pl0619: makeSimpleRegistration("pl0619", (a, ctx) => {
         a.borgNumber = 0x619;
-        a.rootAction = composeActionTable([null, null, null, createFamily1Charge3Action(ctx), null]);
+        a.rootAction = composeActionTable([createFamily1GunXAction(ctx), null, null, createFamily1Charge3Action(ctx), null]);
         a.defaultGroup = 0;
         a.streamSlot = 0;
       }),
       pl061f: makeSimpleRegistration("pl061f", (a, ctx) => {
-        // VICTORY TANK: charge3 at [3]; its morph branch is a DEAD borg branch (verified) —
-        // action 2 keeps the generic fallback.
+        // VICTORY TANK: gun volley at [0] + charge3 at [3]; its morph branch is a DEAD
+        // borg branch (verified) — action 2 keeps the generic fallback.
         a.borgNumber = 0x61f;
-        a.rootAction = composeActionTable([null, null, null, createFamily2Charge3Action(ctx), null]);
+        a.rootAction = composeActionTable([createFamily2GunXAction(ctx), null, null, createFamily2Charge3Action(ctx), null]);
         a.defaultGroup = 0;
         a.streamSlot = 0;
       }),
       pl0625: makeSimpleRegistration("pl0625", (a, ctx) => {
-        // VICTORY MACHINE: morph at [2] + charge3 at [3].
+        // VICTORY MACHINE: gun volley at [0] + morph at [2] + charge3 at [3].
         a.borgNumber = 0x625;
         a.rootAction = composeActionTable([
-          null, null,
+          createFamily2GunXAction(ctx), null,
           createSharedMorphXSpecial(VICTORY_MACHINE_MORPH_CONFIG, ctx, {}),
           createFamily2Charge3Action(ctx),
           null,
