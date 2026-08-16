@@ -2,8 +2,8 @@
   "schema": 1,
   "unit": "auto-c0000-001",
   "unit_id": "auto-c0000-001",
-  "timestamp": "2026-08-16T12:18:39.792453Z",
-  "run_id": "2026-08-16T12:18:39.722456Z",
+  "timestamp": "2026-08-16T12:48:38.478014Z",
+  "run_id": "2026-08-16T12:48:38.374500Z",
   "result": "deferred",
   "stage": "port",
   "attempt": 0,
@@ -18,7 +18,8 @@
   "driver_record": {
     "status": "deferred",
     "attempts": 0,
-    "error": "interrupted before a verdict (driver killed or crashed)"
+    "error": "interrupted before a verdict (driver killed or crashed)",
+    "interruptions": 1
   },
   "history": [
     {
@@ -39,6 +40,14 @@
     },
     {
       "timestamp": "2026-08-16T12:18:39.792453Z",
+      "result": "deferred",
+      "stage": "port",
+      "attempt": 0,
+      "detail": "interrupted before a verdict; requeued",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-16T12:48:38.478014Z",
       "result": "deferred",
       "stage": "port",
       "attempt": 0,

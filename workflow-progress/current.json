@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "timestamp": "2026-08-16T12:18:39.792453Z",
-  "run_id": "2026-08-16T12:18:39.722456Z",
+  "timestamp": "2026-08-16T12:48:38.478014Z",
+  "run_id": "2026-08-16T12:48:38.374500Z",
   "port_mode": "wasm_units",
   "workflow_state": "running",
   "current_unit": null,
@@ -14,7 +14,7 @@
   "context_length": 32768,
   "driver_status": "running",
   "driver_running": true,
-  "last_transition": "2026-08-16T12:18:39.792453Z",
+  "last_transition": "2026-08-16T12:48:38.478014Z",
   "last_green": null,
   "last_product_commit": null,
   "block_reason": null,
