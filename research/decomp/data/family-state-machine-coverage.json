@@ -20634,7 +20634,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x801456d4:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0005",
@@ -20691,7 +20693,7 @@
             "pl0009: command 0x8033ead4 (user-data/GG4E/disc/sys/boot.dol:0x801456d4 copies actor+0x4ec root via 0x801457ec and actor+0x4b0 via 0x801457e4)",
             "pl0009: root 0x80145924, action table 0x8033e4f4, handler 0x80146d5c"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 3,
@@ -32358,8 +32360,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 112,
-      "ported": 213
+      "partial": 111,
+      "ported": 214
     }
   }
 }

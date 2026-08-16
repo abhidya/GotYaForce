@@ -3,6 +3,8 @@
 // @audit-ported pl0009 action=0 variants=0,1,2,3,4
 // @audit-ported pl0005 action=1 variants=0,1,2,3
 // @audit-ported pl0009 action=1 variants=0,1,2,3
+// @audit-ported pl0005 action=2 variants=0,1,2,3,4
+// @audit-ported pl0009 action=2 variants=0,1,2,3,4
 // @audit-ported pl0005 action=3 variants=0,1,2,3,4
 // Covers pl0005 (TELEPORT NINJA, borg 0x005) and pl0009 (SWITCHING NINJA, borg 0x009).
 // The ctor wires both borgs to the SAME vtable/anim banks/tables (only the +0x4b0
@@ -14,15 +16,15 @@
 //   action 0 table @0x8033e518 (3 sub-tables 0x8033e518/524/530, phase via +0x540)
 //   action 1 table @0x8033e568/574 (teleport-strike melee, v0/v1 shared lunge +
 //                                  v2 table A + v3/v4 table B) — PORTED HERE
-//   action 2 table @0x8033e584/594 (X-special) — shared-engine approximation
+//   action 2 table @0x8033e584/594 (X-special, borg-switched) — PORTED HERE
 //   action 3 table @0x8033e5b4 (B-charge teleport-dash, 5 fns) — PORTED HERE
 //
 // This pass ports ACTION 0 (the teleport-approach + B-held combo loop) faithfully from
 // FUN_801459f0/FUN_80145b00/FUN_80145bd8 (chunk_0037.c/0038.c), ACTION 1 (the
-// teleport-strike melee) from FUN_80146560..FUN_80146c54 (chunk_0038.c), and ACTION 3
-// (the B-charge teleport-dash) from FUN_801474b4..FUN_80147924 (chunk_0038.c). Action 2
-// routes through the shared X-special engine. Floats read from boot.dol (sdata2
-// @0x8043a2xx).
+// teleport-strike melee) from FUN_80146560..FUN_80146c54 (chunk_0038.c), ACTION 2
+// (the borg-switched X-special) from FUN_80146dcc..FUN_8014734c (chunk_0038.c), and
+// ACTION 3 (the B-charge teleport-dash) from FUN_801474b4..FUN_80147924 (chunk_0038.c).
+// Floats read from boot.dol (sdata2 @0x8043a2xx).
 //
 // Float constants (v2f-resolved from user-data/GG4E/disc/sys/boot.dol):
 //   FLOAT_8043a2b8 = 0.0   zero-scalar (velocity/pose resets, accumulator80c clear)
@@ -763,17 +765,208 @@ function tnBChargeHandler(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
 }
 
 // ----------------------------------------------------------------------------
-// Root action dispatcher — FUN_80145924 indexes PTR_FUN_8033e4f4[+0x580]. action 0 is
-// ported bespoke; action 2 routes through the shared-engine X-special approximation;
-// action 3 (B-charge teleport-dash) is ported bespoke; action 1 keeps the shared-engine
-// fallback with a cited TODO for the bespoke tables.
+// ACTION 2 — X-special (borg-switched: borg 0x005 → table @0x8033e584,
+// borg 0x009 → table @0x8033e594). PORTED from chunk_0038.c:754-999.
+// Dispatcher: root PTR_FUN_8033e4f4[2] = FUN_80146d5c → borg switch →
+//   pl0005 (0x005) → zz_0146d90_ → PTR_FUN_8033e584[+0x540]
+//      [0x80146dcc, 0x80146ed8, 0x80146f6c, 0x80147094]  (4 phases)
+//   pl0009 (0x009) → zz_0147130_ → PTR_FUN_8033e594[+0x540]
+//      [0x80147180, 0x80147280, 0x8014734c]             (3 phases)
+//
+// pl0005 (TELEPORT NINJA) X — a blink-deploy: ph0 repositions (50.0 far /
+// 800·scale aimed), ammo-gates slot 2, spawns the FX child; ph1/2 drift to
+// the repositioned point (+0x82 anim arm, +0x272 flags); ph3 exits.
+// pl0009 (SWITCHING NINJA) X — a ranged dash: ph0 faces + blinks, stream g4
+// slot 4/5; ph1 contact (+0x1cef) ammo-gates slot 2 + borg-0x009-only child
+// spawn (zz_01e29fc_); ph2 gravity + exit.
+// ----------------------------------------------------------------------------
+
+/** pl0005 X ph0 — FUN_80146dcc @ chunk_0038.c:754. Blink-deploy setup. */
+function tnXTeleportPhase0(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  const s = actor as TnActor;
+  actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  actor.handlerTimer = TELEPORT_NINJA.A2_SETUP_TIMER;       // +0x558 = 4.0
+  s.tnXAirLatch54a = actor.controlWord & TELEPORT_NINJA.AIRBORNE_BIT; // +0x54a = +0x5e0 & 0x40
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  const deployBlocked = (s.tnChild144 ?? 0) <= TELEPORT_NINJA.ZERO || actor.visibilityTarget === null;
+  if (deployBlocked) {
+    // Far blink: motion ×= FLOAT_8043a2f8 (50.0); pos += motion.
+    vecScale(TELEPORT_NINJA.A2_BLINK_FAR, actor.motion, actor.motion);
+    vecAdd(actor.pos, actor.motion, actor.pos);
+  } else {
+    // Aimed blink: motion = +0x518 − pos; normalize; ×= (FLOAT_8043a2f4 × +0xb4);
+    // pos += motion; +0x54a = 0x40 (forced air).
+    vecSubtract(actor.aimOrigin518, actor.pos, actor.motion);
+    const mag = Math.hypot(actor.motion.x, actor.motion.y, actor.motion.z);
+    if (mag > 1e-6) {
+      actor.motion.x /= mag; actor.motion.y /= mag; actor.motion.z /= mag;
+    }
+    vecScale(TELEPORT_NINJA.A2_REPOSITION * actor.modelScale, actor.motion, actor.motion);
+    vecAdd(actor.pos, actor.motion, actor.pos);
+    s.tnXAirLatch54a = TELEPORT_NINJA.AIRBORNE_BIT;
+  }
+  // zz_0066530_(0x2d) — host anim/event hook (no-op).
+  if (allocateWeapon(actor, ctx, 2, 1, true)) { // zz_006dbe0_(2,1,1)
+    ctx.onFamilyProjectile?.(actor, 0x80146ed8, 0); // zz_0146ed8_ — deploy child
+  }
+}
+
+/** pl0005 X ph1 — zz_0146ed8_ @ chunk_0038.c:788. Drift + stream. */
+function tnXTeleportPhase1(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  const s = actor as TnActor;
+  s.tnFlag272 = (s.tnFlag272 ?? 0) | TELEPORT_NINJA.FLAG272_BIT1;
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  actor.handlerTimer -= actor.dt;
+  if (actor.handlerTimer <= TELEPORT_NINJA.ZERO) {
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    actor.handlerTimer = TELEPORT_NINJA.EXIT_GROUND_STATE_TIMER; // +0x558 = 16.0
+    ctx.onPlayCue?.(actor, TELEPORT_NINJA.LAUNCH_CUE); // zz_00f036c_(0xf2)
+  }
+}
+
+/** pl0005 X ph2 — FUN_80146f6c @ chunk_0038.c:815. Aimed move + stream arm. */
+function tnXTeleportPhase2(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  const s = actor as TnActor;
+  s.tnFlag272 = (s.tnFlag272 ?? 0) | TELEPORT_NINJA.FLAG272_BIT1;
+  s.tnAnim82 = 0;
+  // zz_0046588_(FLOAT_8043a300 × dt, +0x9c, pos, pos) — move toward +0x9c.
+  const rate = TELEPORT_NINJA.LAUNCH_PROGRESS_STEP * actor.dt;
+  actor.pos.x += (actor.motion.x - actor.pos.x) * rate;
+  actor.pos.y += (actor.motion.y - actor.pos.y) * rate;
+  actor.pos.z += (actor.motion.z - actor.pos.z) * rate;
+  groundSnapRevert(actor);
+  actor.handlerTimer -= actor.dt;
+  if (actor.handlerTimer <= TELEPORT_NINJA.ZERO) {
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    actor.handlerTimer = TELEPORT_NINJA.LAUNCH_PROGRESS_RESET; // +0x558 = 2.0
+    actor.hDecel = TELEPORT_NINJA.ZERO;
+    actor.hSpeed = TELEPORT_NINJA.ZERO;
+    actor.yVel = TELEPORT_NINJA.ZERO;
+    if (actor.descriptor) actor.gravityCoeff = actor.descriptor.handlerData6c;
+    s.tnAnim82 = actor.carriedSlot96 + 0x41; // +0x82 = +0x96 + 'A'
+    const slot = (s.tnXAirLatch54a ?? 0) === 0 ? 0 : 0xd; // +0x54a == 0 → g0 s0, else g0 s0xd
+    startStream(actor, TELEPORT_NINJA.STREAM_MASK, 0, slot, TELEPORT_NINJA.STREAM_RATE);
+    ctx.onPlayCue?.(actor, TELEPORT_NINJA.LAUNCH_CUE);
+  }
+}
+
+/** pl0005 X ph3 — FUN_80147094 @ chunk_0038.c:857. Exit. */
+function tnXTeleportPhase3(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  const s = actor as TnActor;
+  s.tnFlag272 = (s.tnFlag272 ?? 0) | TELEPORT_NINJA.FLAG272_BIT1;
+  tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  actor.handlerTimer -= actor.dt;
+  if (actor.handlerTimer <= TELEPORT_NINJA.ZERO) {
+    s.tnFlag272 = (s.tnFlag272 ?? 0) & ~TELEPORT_NINJA.FLAG272_BIT1;
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~0x3;
+    if ((actor.controlWord & TELEPORT_NINJA.AIRBORNE_BIT) === 0) {
+      romGroundIdleReturn(actor); // zz_006a474_
+    } else {
+      romAirKnockoutReturn(actor); // zz_006a5a4_
+    }
+  }
+}
+
+/** pl0009 X ph0 — FUN_80147180 @ chunk_0038.c:900. Ranged-dash setup. */
+function tnXSwitchPhase0(actor: TnActor): void {
+  actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  if (actor.visibilityTarget === null) actor.activeYaw = actor.heading; // +0xcc == 0
+  stepTargetYaw(actor, 0xc1); // zz_006d144_(0xc1)
+  actor.gravityCoeff = TELEPORT_NINJA.ZERO;
+  actor.yVel = TELEPORT_NINJA.ZERO;
+  actor.hDecel = TELEPORT_NINJA.ZERO;
+  actor.hSpeed = TELEPORT_NINJA.ZERO;
+  resetPoseHousekeeping(actor);
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(TELEPORT_NINJA.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  actor.streamSlot = (actor.controlWord & TELEPORT_NINJA.AIRBORNE_BIT) !== 0 ? 5 : 4;
+  const slot = actor.streamSlot;
+  actor.streamSlot = slot + 1;
+  startStream(actor, TELEPORT_NINJA.STREAM_MASK, TELEPORT_NINJA.ACTION3_STREAM_GROUP, slot,
+    TELEPORT_NINJA.STREAM_RATE);
+  actor.accumulator80c = TELEPORT_NINJA.ZERO;
+}
+
+/** pl0009 X ph1 — FUN_80147280 @ chunk_0038.c:941. Approach + contact spawn. */
+function tnXSwitchPhase1(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  stepTargetYaw(actor, 0xc1);
+  vecScale(TELEPORT_NINJA.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  if (actor.contactP0 > 0) { // +0x1cef > 0
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    if (allocateWeapon(actor, ctx, 2, 1, true)) { // zz_006dbe0_(2,1,1)
+      if (actor.borgNumber === 0x009) {
+        ctx.onFamilyProjectile?.(actor, 0x801e29fc, 0); // zz_01e29fc_(0) — borg 0x009 child
+      }
+    }
+  }
+  if (Math.hypot(actor.motion.x, actor.motion.y, actor.motion.z) > TELEPORT_NINJA.AFTERIMAGE_GATE) {
+    stepAfterimage(actor); // zz_00b22f4_
+  }
+}
+
+/** pl0009 X ph2 — FUN_8014734c @ chunk_0038.c:970. Gravity + exit. */
+function tnXSwitchPhase2(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  integratePhysics(TELEPORT_NINJA.GRAVITY, actor, actor.lockYaw); // FUN_80067310(1.0)
+  const grounded = groundSnapRevert(actor);
+  if (grounded && actor.contactP0 < 0) { // +0x1cef < 0
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~0x3;
+    dispatchUpperBodyCue(actor, 7); // zz_006a750_(7)
+    actor.stateTimer = TELEPORT_NINJA.EXIT_STATE_TIMER + actor.dt; // +0x694 = 8+dt
+    return;
+  }
+  if (actor.wallContact !== 0) { // +0x1cee
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~0x3;
+    if (!grounded) romAirKnockoutReturn(actor);
+    else romGroundIdleReturn(actor);
+    actor.stateTimer = TELEPORT_NINJA.EXIT_STATE_TIMER + actor.dt;
+  }
+}
+
+/** Action-2 root — FUN_80146d5c → borg-switched phase table. */
+function tnXSpecialHandler(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  if (actor.borgNumber === 0x009) {
+    // zz_0147130_ → PTR_FUN_8033e594[+0x540] (3 phases).
+    if (actor.fbPhaseSlots[1] !== 0) actor.visibilityTarget = null;
+    switch (phase) {
+      case 0: tnXSwitchPhase0(actor); break;
+      case 1: tnXSwitchPhase1(actor, ctx); break;
+      case 2: tnXSwitchPhase2(actor, ctx); break;
+      default: break;
+    }
+    return;
+  }
+  // zz_0146d90_ → PTR_FUN_8033e584[+0x540] (4 phases).
+  switch (phase) {
+    case 0: tnXTeleportPhase0(actor, ctx); break;
+    case 1: tnXTeleportPhase1(actor, ctx); break;
+    case 2: tnXTeleportPhase2(actor, ctx); break;
+    case 3: tnXTeleportPhase3(actor, ctx); break;
+    default: break;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Root action dispatcher — FUN_80145924 indexes PTR_FUN_8033e4f4[+0x580]. All four
+// player-command actions (0..3) are ported bespoke (or via the shared lunge for
+// action-1 v0/v1); no action falls through to the generic layer.
 // ----------------------------------------------------------------------------
 export function createTeleportNinjaRootAction(
   ctx: TeleportNinjaFamilyCtx,
 ): (actor: RomActor) => void {
-  // action 2 (X-special) — shared-engine approximation. TELEPORT NINJA's bespoke X
-  // tables are @0x8033e584/594 (fns 0x80146dcc..0x80147464); their deep port is TODO.
+  // action 2 (X-special) — borg-switched bespoke tables @0x8033e584/594 (ported).
   const sharedX = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) });
+  void sharedX;
   // action 1 v0/v1 — shared lunge zz_00fed6c_ (config @0x8033e550).
   const sharedLunge = createSharedMeleeLunge(TELEPORT_LUNGE_CONFIG, ctx);
 
@@ -791,7 +984,7 @@ export function createTeleportNinjaRootAction(
         tnStrikeHandler(actor, ctx, sharedLunge);
         return;
       case 2:
-        sharedX(actor);
+        tnXSpecialHandler(actor, ctx);
         return;
       case 3:
         tnBChargeHandler(actor, ctx);
@@ -1202,5 +1395,62 @@ export function runTeleportNinjaSelfTests(assert: AssertFn): void {
     assert(a.steerYaw === 0, "action3 ph4 wall exit zeroes +0x18da");
     assert(a.stateTimer === TELEPORT_NINJA.EXIT_STATE_TIMER + 1,
       "action3 ph4 wall exit seeds +0x694 = 8.0 + dt (FLOAT_8043a2d8)");
+  }
+
+  // ============================================================================
+  // ACTION 2 — X-special (borg-switched).
+  // ============================================================================
+
+  // --- pl0005 X ph0: setup — +0x540++, +0x558=4.0, +0x54a latch, ammo gate. ---
+  {
+    const spawned: Array<[number, number]> = [];
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx({
+      onFamilyProjectile: (_ac, addr, type) => spawned.push([addr, type]),
+    }));
+    const root = a.rootAction!;
+    a.actionIndex = 2; a.dt = 1;
+    a.pos = { x: 100, y: 0, z: 0 };
+    a.targetCache5e8 = { x: 0, y: 0, z: 0 };
+    a.tnChild144 = 0; // +0x144 <= 0 → far blink
+    root(a); // ph0
+    assert(a.fbPhaseSlots[0] === 1, "action2 pl0005 ph0 advances +0x540");
+    assert(a.handlerTimer === TELEPORT_NINJA.A2_SETUP_TIMER,
+      "action2 pl0005 ph0 seeds +0x558 = 4.0 (FLOAT_8043a2f0)");
+    assert(a.pos.x === 100 + 50 * 100, "action2 pl0005 ph0 far blink: pos.x += (100−0)×50 = 5100");
+    assert(spawned.length >= 1, "action2 pl0005 ph0 ammo gate deploys the FX child");
+  }
+
+  // --- pl0009 X ph0: setup — +0x540++, +0x6ea=4/5, stream g4. ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0009", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 2; a.dt = 1;
+    a.pos = { x: 100, y: 0, z: 0 };
+    a.targetCache5e8 = { x: 0, y: 0, z: 0 };
+    a.streamSlot = 0;
+    root(a); // ph0
+    assert(a.fbPhaseSlots[0] === 1, "action2 pl0009 ph0 advances +0x540");
+    assert(a.streamSlot === 5, "action2 pl0009 ph0 +0x6ea = 4 then ++ → 5");
+    assert(a.pos.x === 195, "action2 pl0009 ph0 blink pos.x → 195");
+  }
+
+  // --- pl0009 X ph1: contact (+0x1cef > 0) → advance + ammo-gated child spawn. ---
+  {
+    const spawned: Array<[number, number]> = [];
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0009", makeCtx({
+      onFamilyProjectile: (_ac, addr, type) => spawned.push([addr, type]),
+    }));
+    const root = a.rootAction!;
+    a.actionIndex = 2; a.dt = 1;
+    a.fbPhaseSlots[0] = 1;
+    a.contactP0 = 1; // +0x1cef > 0
+    a.motion = { x: 10, y: 0, z: 0 };
+    root(a);
+    assert(a.fbPhaseSlots[0] === 2, "action2 pl0009 ph1 contact advances to ph2");
+    assert(spawned.length === 1 && spawned[0]![0] === 0x801e29fc,
+      `action2 pl0009 ph1 spawns zz_01e29fc_(0) (got ${JSON.stringify(spawned)})`);
   }
 }
