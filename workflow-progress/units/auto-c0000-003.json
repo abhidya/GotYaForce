@@ -2,8 +2,8 @@
   "schema": 1,
   "unit": "auto-c0000-003",
   "unit_id": "auto-c0000-003",
-  "timestamp": "2026-08-16T14:18:21.644947Z",
-  "run_id": "2026-08-16T13:15:34.263233Z",
+  "timestamp": "2026-08-16T15:03:59.762414Z",
+  "run_id": "2026-08-16T14:22:33.573773Z",
   "result": "deferred",
   "stage": "compile-fix",
   "attempt": 0,
@@ -40,6 +40,14 @@
     },
     {
       "timestamp": "2026-08-16T14:18:21.644947Z",
+      "result": "deferred",
+      "stage": "compile-fix",
+      "attempt": 0,
+      "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=0, completion_tokens=0)",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-16T15:03:59.762414Z",
       "result": "deferred",
       "stage": "compile-fix",
       "attempt": 0,
