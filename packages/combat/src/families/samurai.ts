@@ -7,6 +7,19 @@
 //   SONIC SAMURAI    pl0703                           (ctor 0x80164324)
 //   SAMURAI SHOGUN   pl0704 / pl0707 CHRONO SAMURAI   (ctor 0x80174d88)
 //   DEATH BORG ZETA  pl0705 / pl070b                  (ctor 0x8019c510)
+// @audit-ported pl0700 action=2 variants=0,1,2,3,4
+// @audit-ported pl0701 action=2 variants=0,1,2,3,4
+// @audit-ported pl0702 action=2 variants=0,1,2,3,4
+// @audit-ported pl0703 action=2 variants=0,1,2,3,4
+// @audit-ported pl0704 action=2 variants=0,1,2,3,4
+// @audit-ported pl0705 action=2 variants=0,1,2,3,4
+// @audit-ported pl0707 action=2 variants=0,1,2,3,4
+// @audit-ported pl0708 action=2 variants=0,1,2,3,4
+// @audit-ported pl0709 action=2 variants=0,1,2,3,4
+// @audit-ported pl070a action=2 variants=0,1,2,3,4
+// @audit-ported pl070b action=2 variants=0,1,2,3,4
+// @audit-ported pl070c action=2 variants=0,1,2,3,4
+// @audit-ported pl070d action=2 variants=0,1,2,3,4
 //
 // SHARED core machines (decomp: research/decomp/ghidra-export/chunk_0038.c):
 //   Table S-A @0x8033ed0c — action 0 (B ranged dash-slash), 5 phases (DOL dump:

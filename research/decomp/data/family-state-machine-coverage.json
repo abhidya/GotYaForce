@@ -7129,7 +7129,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x800c7c80:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0700",
@@ -7168,7 +7170,7 @@
             "pl0709: command 0x80308354 (user-data/GG4E/disc/sys/boot.dol:0x800c7c80 copies actor+0x4ec root via 0x800c7d08 and actor+0x4b0 via 0x800c7d54)",
             "pl0709: root 0x800c7fac, action table 0x80307fec, handler 0x800c84fc"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x800c7c80",
@@ -16818,7 +16820,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x801223c0:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0701",
@@ -16891,7 +16895,7 @@
             "pl070d: command 0x8032d5c4 (research/decomp/ghidra-export/chunk_0033.c:970-977)",
             "pl070d: root 0x80122c74, action table 0x8032c784, handler 0x80123390"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x801223c0",
@@ -20448,7 +20452,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x80143b7c:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0702",
@@ -20487,7 +20493,7 @@
             "pl070a: command 0x8033c6ac (user-data/GG4E/disc/sys/boot.dol:0x80143b7c copies actor+0x4ec root via 0x80143c04 and actor+0x4b0 via 0x80143c50)",
             "pl070a: root 0x80143f70, action table 0x8033c34c, handler 0x801444c8"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x80143b7c",
@@ -24398,7 +24404,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x80164324:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0703",
@@ -24420,7 +24428,7 @@
             "pl0703: command 0x8034d88c (user-data/GG4E/disc/sys/boot.dol:0x80164324 copies actor+0x4ec root via 0x801643ac and actor+0x4b0 via 0x801643f8)",
             "pl0703: root 0x80164628, action table 0x8034d538, handler 0x80164b10"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x80164324",
@@ -24933,7 +24941,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x80174d88:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0704",
@@ -25008,7 +25018,7 @@
             "pl0707: command 0x80351c5c (user-data/GG4E/disc/sys/boot.dol:0x80174d88 copies actor+0x4ec root via 0x80174e10 and actor+0x4b0 via 0x80174e5c)",
             "pl0707: root 0x80175148, action table 0x803518d4, handler 0x80175e70"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x80174d88",
@@ -28113,7 +28123,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x8019c510:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0705",
@@ -28152,7 +28164,7 @@
             "pl070b: command 0x80373b24 (user-data/GG4E/disc/sys/boot.dol:0x8019c510 copies actor+0x4ec root via 0x8019c598 and actor+0x4b0 via 0x8019c5e4)",
             "pl070b: root 0x8019ca28, action table 0x803737bc, handler 0x8019cf78"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x8019c510",
@@ -32344,8 +32356,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 119,
-      "ported": 206
+      "partial": 113,
+      "ported": 212
     }
   }
 }
