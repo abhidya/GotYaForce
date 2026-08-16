@@ -1,4 +1,6 @@
 // ARROW NINJA / SHIJIMA (pl0002/pl000b), constructor 0x800cfe9c.
+// @audit-ported pl0002 action=1 variants=0,1,2,3,4
+// @audit-ported pl000b action=1 variants=0,1,2,3,4
 // Action 1 variant routing at 0x8030de28:
 //   v0 -> shared zz_00fed6c_ (config 0x8030de3c)
 //   v1/v2 -> FUN_800d0d14, phase table 0x8030de54
