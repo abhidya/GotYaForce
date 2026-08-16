@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-16T23:43:30.536469Z - machine-written, do not edit.*
+*Generated 2026-08-16T23:43:38.821886Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 2/1520 settled (2 green, 0 staged) |
 | **Retries outstanding** | 22 |
 | **Untouched** | 1495 |
-| **Last transition** | 2026-08-16T23:43:30.536469Z |
-| **Last green** | never (`-`) |
-| **Last product commit** | `-` |
+| **Last transition** | 2026-08-16T23:43:38.821886Z |
+| **Last green** | 2026-08-16T23:43:38.821886Z (`auto-c0001-007`) |
+| **Last product commit** | `35ce70d3058a4ed10047d39db34097cfdcc27358` |
 | **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ 32768 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-16T23:43:38.821886Z | `auto-c0001-007` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-16T23:43:30.536469Z | `auto-c0001-006` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T23:43:30.601468Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T23:17:29.796816Z | `auto-c0001-005` | gate_failed | wasm-link | 1 | not linked: /bin/bash: line 1: cygpath: command not found /bin/bash: line 1: cygpath: command not found /bin/b |
