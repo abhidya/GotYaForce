@@ -26055,7 +26055,9 @@
       "actions": [
         {
           "actionIndex": 0,
-          "evidence": [],
+          "evidence": [
+            "0x8018bb6c:0: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0628",
@@ -26095,11 +26097,13 @@
             "pl0628: command 0x80364ce4 (user-data/GG4E/disc/sys/boot.dol:0x8018bb6c copies actor+0x4ec root via 0x8018bc80 and actor+0x4b0 via 0x8018bc88)",
             "pl0628: root 0x8018bec4, action table 0x803653f0, handler 0x8018bf00"
           ],
-          "status": "missing"
+          "status": "ported"
         },
         {
           "actionIndex": 3,
-          "evidence": [],
+          "evidence": [
+            "0x8018bb6c:3: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0628",
@@ -26139,11 +26143,13 @@
             "pl0628: command 0x80364d5c (user-data/GG4E/disc/sys/boot.dol:0x8018bb6c copies actor+0x4ec root via 0x8018bc80 and actor+0x4b0 via 0x8018bc88)",
             "pl0628: root 0x8018bec4, action table 0x803653f0, handler 0x8018c138"
           ],
-          "status": "missing"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x8018bb6c",
-      "implementationMembers": [],
+      "implementationMembers": [
+        "pl0628"
+      ],
       "members": [
         "pl0628"
       ]
@@ -32315,9 +32321,9 @@
     "counts": {
       "delegated": 0,
       "inactive": 0,
-      "missing": 2,
+      "missing": 0,
       "partial": 130,
-      "ported": 193
+      "ported": 195
     }
   }
 }

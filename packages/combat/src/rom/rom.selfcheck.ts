@@ -133,6 +133,7 @@ import { runKungFuMasterSelfTests } from "../families/kung-fu-master.js";
 import { runTaoMasterSelfTests } from "../families/tao-master.js";
 import { runWingBlobClusterSelfTests } from "../families/wing-blob-cluster.js";
 import { runUnregisteredClusterSelfTests } from "../families/unregistered-cluster.js";
+import { runPantherVehicleSelfTests } from "../families/panther-vehicle.js";
 import { runDeathBorgChiSelfTests } from "../families/death-borg-chi.js";
 import type { BorgRuntime } from "../types.js";
 import {
@@ -3875,6 +3876,7 @@ function runSubagentPortTests(): void {
   runTaoMasterSelfTests(assert);
   runWingBlobClusterSelfTests(assert);
   runUnregisteredClusterSelfTests(assert);
+  runPantherVehicleSelfTests(assert);
 }
 
 function runGirlClusterTests(): void {

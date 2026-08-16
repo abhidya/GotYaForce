@@ -94,6 +94,7 @@ import { configureSiriusFamily } from "./families/sirius.js";
 import { configureVehicleFamily } from "./families/vehicle-borg.js";
 import { configureVictoryJetFamily } from "./families/victory-jet.js";
 import { configureVictoryKingFamily } from "./families/victory-king.js";
+import { configurePantherVehicleFamily } from "./families/panther-vehicle.js";
 import { configureAccelerationNinjaFamily } from "./families/acceleration-ninja.js";
 import { configureWingSoldierFamily } from "./families/wing-soldier.js";
 import { configureCosmicDragonFamily } from "./families/cosmic-dragon.js";
@@ -397,6 +398,10 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0618: makeMorphAimedComposite("pl0618", 0x618, "titan", TITAN_MORPH_CONFIG, TITAN_ROBOT_X_CONFIG, false),
       pl0613: makeMorphAimedComposite("pl0613", 0x613, "panther", PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG, true),
       pl0627: makeMorphAimedComposite("pl0627", 0x627, "panther", PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG, false),
+      // PANTHER VEHICLE (pl0628, ctor 0x8018bb6c) — bespoke action-0 volley + action-3
+      // charge machines (families/panther-vehicle.ts). Actions 1/2 are morph-back paths,
+      // not player command slots; they keep the generic fallback.
+      pl0628: makeSimpleRegistration("pl0628", (a, ctx) => configurePantherVehicleFamily(a, "pl0628", ctx)),
 // Eagle Robot / Proto Eagle bespoke action 0; pl0606 composes its shared morph X.
 pl0606: makeSimpleRegistration("pl0606", (a, ctx) => configureEagleRobotFamily(a, "pl0606", ctx)),
 pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a, "pl061a", ctx)),
