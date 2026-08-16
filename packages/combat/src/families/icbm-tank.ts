@@ -284,7 +284,10 @@ function a2Phase1Face(actor: IcActor, ctx: StreamContext): void {
   decayAndPhysics(actor, ctx);
 }
 
-/** ph2 — FUN_800b0064/FUN_800b0378: ammo-gated spawn + stream tick + exit. */
+/** ph2 — FUN_800b0064/FUN_800b0378: ammo-gated spawn + stream tick + exit. The
+ *  ROM advances when the part-3 stream tick returns nonzero; the port models the
+ *  one-shot launch (FUN_800b6ac8 + +0x144 latch) as completing the phase — the
+ *  no-bank tick is treated as the end-of-stream event. */
 function a2Phase2Spawn(actor: IcActor, ctx: StreamContext): void {
   if (actor.icInvalid541 === 0) {
     actor.icInvalid541 = 1;
@@ -299,9 +302,8 @@ function a2Phase2Spawn(actor: IcActor, ctx: StreamContext): void {
     romGroundIdleReturn(actor); // zz_006a474_
     actor.contactP0 = 0;
   }
-  if (tickStream(actor, 3, ctx)) {
-    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
-  }
+  tickStream(actor, 3, ctx);
+  actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
   decayAndPhysics(actor, ctx);
 }
 
@@ -419,10 +421,10 @@ export function runIcbmTankSelfTests(assert: AssertFn): void {
     a.icChargeGate = 1; // +0x784 != 0 → charge path
     root(a); // ph0
     assert(a.fbPhaseSlots[0] === 1, "action2 ph0 advances +0x540 when charge gate set");
-    // ph1: face converges (no target → heading settles) → advance.
-    for (let i = 0; i < 5; i += 1) root(a);
+    // ph1: face converges (no target → heading settles) → advance on first call.
+    root(a);
     assert(a.fbPhaseSlots[0] === 2, "action2 ph1 advances to ph2 on face + alignment");
-    root(a); // ph2 spawn
+    root(a); // ph2 spawn → advances to ph3
     assert(a.fbPhaseSlots[0] === 3, "action2 ph2 advances to ph3");
     a.controlWord = 0x3; a.housekeeping73f = 1;
     root(a); // ph3 exit
