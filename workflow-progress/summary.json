@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-16T15:07:53.761090Z",
-  "run_id": "2026-08-16T15:07:53.663088Z",
+  "generated_at": "2026-08-16T16:13:18.119238Z",
+  "run_id": "2026-08-16T16:13:17.711235Z",
   "total_units": 1520,
   "green": 2,
   "staged": 0,
@@ -11,21 +11,21 @@
   "structural_ineligible": 0,
   "active": 1,
   "total_attempts": 22,
-  "transitions_last_hour": 2,
+  "transitions_last_hour": 0,
   "greens_last_hour": 0,
   "last_green_at": null,
   "last_green_unit": null,
   "last_product_commit": null,
   "repeated_failure_classes": [],
-  "health": "active_no_green",
+  "health": "idle",
   "machine": {
-    "workflow_state": "running",
-    "driver_status": "running",
+    "workflow_state": "palworld_protected",
+    "driver_status": "stopped",
     "manual_paused": false,
     "block_reason": null,
-    "active_model": "unsloth/Qwen3.6-27B-MTP-GGUF",
-    "context_length": 32768,
+    "active_model": null,
+    "context_length": null,
     "configured_model": "unsloth/Qwen3.6-27B-MTP-GGUF",
-    "detail": "Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx."
+    "detail": "1 Palworld player(s) connected."
   }
 }
