@@ -82,6 +82,7 @@ import { configureNurseFamily } from "./families/nurse-wizard-idol.js";
 import { configureTankFamily } from "./families/tank-borg.js";
 import { configureBeamTankFamily } from "./families/beam-tank.js";
 import { configureIcbmTankFamily } from "./families/icbm-tank.js";
+import { configureUltimateCannonFamily } from "./families/ultimate-cannon.js";
 import { configureArrowNinjaFamily } from "./families/arrow-ninja.js";
 import { configureFortressFamily } from "./families/fortress-borg.js";
 import {
@@ -540,7 +541,9 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // BEAM TANK (pl0c02, ctor 0x80105144) — bespoke 3-action port
       // (families/beam-tank.ts): B volley + B charge + X-special.
       pl0c02: makeSimpleRegistration("pl0c02", (a, ctx) => configureBeamTankFamily(a, ctx)),
-      pl0c04: makeSimpleRegistration("pl0c04", (a, ctx) => configureTankFamily(a, "pl0c04", ctx)),
+      // ULTIMATE CANNON (pl0c04, ctor 0x800b05b4) — bespoke 3-action port
+      // (families/ultimate-cannon.ts): B volley + X-special + B-charge launch.
+      pl0c04: makeSimpleRegistration("pl0c04", (a, ctx) => configureUltimateCannonFamily(a, ctx)),
       // ICBM TANK (pl0c05, ctor 0x800af538) — bespoke 2-action port
       // (families/icbm-tank.ts): B volley + X-special.
       pl0c05: makeSimpleRegistration("pl0c05", (a, ctx) => configureIcbmTankFamily(a, ctx)),

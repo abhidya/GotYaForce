@@ -4645,7 +4645,9 @@
       "actions": [
         {
           "actionIndex": 0,
-          "evidence": [],
+          "evidence": [
+            "0x800b05b4:0: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0c04",
@@ -4706,11 +4708,13 @@
             "pl0c04: command 0x802fc274 (user-data/GG4E/disc/sys/boot.dol:0x800b05b4 copies actor+0x4ec root via 0x800b063c and actor+0x4b0 via 0x800b0688)",
             "pl0c04: root 0x800b085c, action table 0x802fc420, handler 0x800b0898"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x800b05b4:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0c04",
@@ -4747,11 +4751,13 @@
             "pl0c04: command 0x802fc2d4 (user-data/GG4E/disc/sys/boot.dol:0x800b05b4 copies actor+0x4ec root via 0x800b063c and actor+0x4b0 via 0x800b0688)",
             "pl0c04: root 0x800b085c, action table 0x802fc420, handler 0x800b0c20"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 3,
-          "evidence": [],
+          "evidence": [
+            "0x800b05b4:3: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0c04",
@@ -4788,7 +4794,7 @@
             "pl0c04: command 0x802fc334 (user-data/GG4E/disc/sys/boot.dol:0x800b05b4 copies actor+0x4ec root via 0x800b063c and actor+0x4b0 via 0x800b0688)",
             "pl0c04: root 0x800b085c, action table 0x802fc420, handler 0x800b0f18"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x800b05b4",
@@ -32370,8 +32376,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 106,
-      "ported": 219
+      "partial": 103,
+      "ported": 222
     }
   }
 }
