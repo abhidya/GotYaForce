@@ -20500,7 +20500,9 @@
       "actions": [
         {
           "actionIndex": 0,
-          "evidence": [],
+          "evidence": [
+            "0x801456d4:0: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0005",
@@ -20575,7 +20577,7 @@
             "pl0009: command 0x8033e99c (user-data/GG4E/disc/sys/boot.dol:0x801456d4 copies actor+0x4ec root via 0x801457ec and actor+0x4b0 via 0x801457e4)",
             "pl0009: root 0x80145924, action table 0x8033e4f4, handler 0x80145960"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
@@ -20681,7 +20683,9 @@
         },
         {
           "actionIndex": 3,
-          "evidence": [],
+          "evidence": [
+            "0x801456d4:3: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0005",
@@ -20703,7 +20707,7 @@
             "pl0005: command 0x8033ea2c (user-data/GG4E/disc/sys/boot.dol:0x801456d4 copies actor+0x4ec root via 0x8014575c and actor+0x4b0 via 0x801457a8)",
             "pl0005: root 0x80145924, action table 0x8033e4f4, handler 0x80147428"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x801456d4",
@@ -32326,8 +32330,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 128,
-      "ported": 197
+      "partial": 126,
+      "ported": 199
     }
   }
 }

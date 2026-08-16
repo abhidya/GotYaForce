@@ -1,4 +1,7 @@
 // TELEPORT NINJA family (ctor 0x801456d4) — ROM-faithful port.
+// @audit-ported pl0005 action=0 variants=0,1,2,3,4
+// @audit-ported pl0009 action=0 variants=0,1,2,3,4
+// @audit-ported pl0005 action=3 variants=0,1,2,3,4
 // Covers pl0005 (TELEPORT NINJA, borg 0x005) and pl0009 (SWITCHING NINJA, borg 0x009).
 // The ctor wires both borgs to the SAME vtable/anim banks/tables (only the +0x4b0
 // descriptor differs), so one family module covers both.
@@ -9,12 +12,14 @@
 //   action 0 table @0x8033e518 (3 sub-tables 0x8033e518/524/530, phase via +0x540)
 //   action 1 table @0x8033e568 (2 sub-tables 0x8033e568/574) — TODO bespoke port
 //   action 2 table @0x8033e584/594 (X-special) — shared-engine approximation
-//   action 3 table @0x8033e5b4 (B-charge teleport-dash, 5 fns) — TODO bespoke port
+//   action 3 table @0x8033e5b4 (B-charge teleport-dash, 5 fns) — PORTED HERE
 //
 // This pass ports ACTION 0 (the teleport-approach + B-held combo loop) faithfully from
-// FUN_801459f0/FUN_80145b00/FUN_80145bd8 (chunk_0037.c/0038.c). Actions 1/3 fall back to
-// the shared-engine approximation with cited TODOs; action 2 routes through the shared
-// X-special engine. Floats read from boot.dol this session (sdata2 @0x8043a2xx).
+// FUN_801459f0/FUN_80145b00/FUN_80145bd8 (chunk_0037.c/0038.c) AND ACTION 3 (the
+// B-charge teleport-dash) from FUN_801474b4/FUN_801475f8/FUN_801476b0/FUN_801477e4/
+// FUN_80147924 (chunk_0038.c). Action 2 routes through the shared X-special engine;
+// action 1 keeps the shared-engine fallback with a cited TODO. Floats read from
+// boot.dol this session (sdata2 @0x8043a2xx).
 //
 // Float constants (v2f-resolved from user-data/GG4E/disc/sys/boot.dol):
 //   FLOAT_8043a2b8 = 0.0   zero-scalar (velocity/pose resets, accumulator80c clear)
@@ -26,11 +31,11 @@
 //   FLOAT_8043a2dc = 60.0  action-3 ph0 +0x558 seed (FUN_801474b4 B-charge window)
 
 import { createRomActor, type RomActor } from "../rom/actor.js";
-import { allocateWeapon, groundSnapRevert, stepAfterimage, stepTargetYaw } from "../rom/helpers.js";
-import { dispatchFullBodyCue } from "../rom/dispatch.js";
-import { vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
+import { allocateWeapon, groundSnapRevert, resetPoseHousekeeping, stepAfterimage, stepPartTargetPitch, stepTargetYaw, toS16 } from "../rom/helpers.js";
+import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
+import { integratePhysics, projectX, projectZ, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
-import { romGroundIdleReturn } from "./shared-idle-return.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./shared-engine.js";
 
 /** Borg numbers for the TELEPORT NINJA family. */
@@ -67,8 +72,36 @@ export const TELEPORT_NINJA = {
   AFTERIMAGE_GATE: 3.0,
   /** FLOAT_8043a2cc = 20.0 — action-0 ph0 slot-2 aim timer seed (FUN_80145e98). */
   SLOT2_AIM_TIMER: 20.0,
-  /** FLOAT_8043a2dc = 60.0 — action-3 ph0 +0x558 seed (FUN_801474b4 B-charge). */
+  /** FLOAT_8043a2d0 = 1.0 — action-3 ph3 gravity (FUN_80067310) + +0x55c re-seed. */
+  GRAVITY: 1.0,
+  /** FLOAT_8043a2d8 = 8.0 — action-3 exit +0x694 seed (air/ground). */
+  EXIT_STATE_TIMER: 8.0,
+  /** FLOAT_8043a2dc = 60.0 — action-3 ph0 +0x558 seed (FUN_801474b4 B-charge window). */
   BCHARGE_WINDOW: 60.0,
+  /** FLOAT_8043a2e0 = 0.9 — action-3 ph4 +0x18da steerYaw decay (× 0.9). */
+  STEER_DECAY: 0.9,
+  /** FLOAT_8043a2e4 = 150.0 — action-1 proximity (not used by action 3). */
+  A1_PROXIMITY: 150.0,
+  /** FLOAT_8043a2e8 = 40.0 — action-3 ph3 +0x44 launch seed (B-charge dash speed). */
+  LAUNCH_SPEED: 40.0,
+  /** FLOAT_8043a2ec = 10.0 — action-3 ph2 +0x558 seed (post-contact window). */
+  POST_CONTACT_WINDOW: 10.0,
+  /** FLOAT_8043a2f0 = 4.0 — action-3 ph0 +0x558 init seed (FUN_80146dcc X-special). */
+  A2_SETUP_TIMER: 4.0,
+  /** FLOAT_8043a2f4 = 800.0 — action-3 ph0 X-special reposition scale (FUN_80146dcc). */
+  A2_REPOSITION: 800.0,
+  /** FLOAT_8043a2f8 = 50.0 — action-3 ph0 X-special far-target blink scale. */
+  A2_BLINK_FAR: 50.0,
+  /** FLOAT_8043a2fc = 16.0 — action-3 ph4 +0x694 seed (grounded exit). */
+  EXIT_GROUND_STATE_TIMER: 16.0,
+  /** FLOAT_8043a300 = 0.1 — action-3 ph3 +0x560 launch-progress step (FUN_80146f6c). */
+  LAUNCH_PROGRESS_STEP: 0.1,
+  /** FLOAT_8043a304 = 2.0 — action-3 ph3 +0x560 launch-progress re-seed (FUN_80146f6c). */
+  LAUNCH_PROGRESS_RESET: 2.0,
+  /** FLOAT_8043a308 = 15.0 — action-3 ph2 +0x560 launch-progress seed. */
+  LAUNCH_PROGRESS_SEED: 15.0,
+  /** FLOAT_8043a30c = 100.0 — action-3 ph2 launch speed coefficient. */
+  LAUNCH_SPEED_COEFF: 100.0,
   /** +0x5e0 bits cleared at action-0 ph0 setup (FUN_801459f0: ~0xb0 mask). */
   PH0_CLEAR_MASK: 0xb0,
   /** +0x5e0 airborne/position-frozen bit (0x40). */
@@ -81,9 +114,19 @@ export const TELEPORT_NINJA = {
   ACTION3_STREAM_GROUP: 4,
   /** all-parts stream mask. */
   STREAM_MASK: 0xf,
+  /** +0x272 action-3 flag bit 1 — hitbox-presentation arm (FUN_800061a8 host hook). */
+  FLAG272_BIT1: 0x2,
+  /** +0x272 action-3 flag bit 2 — launch commit (post-contact). */
+  FLAG272_BIT2: 0x4,
+  /** zz_00f036c_ SFX cue played at the action-3 launch commit (0xf2). */
+  LAUNCH_CUE: 0xf2,
 } as const;
 
-export interface TeleportNinjaFamilyCtx extends StreamContext {}
+export interface TeleportNinjaFamilyCtx extends StreamContext {
+  /** FUN_80066838 / FUN_800668cc — target-in-range gate (range rows @ +0x868). Host
+   *  hook; default true (no host → treat as in range) so the machine advances. */
+  onRangeCheck?: (actor: RomActor, distance: number) => boolean;
+}
 
 /** Scratch mirrors for ROM offsets not first-class on RomActor. */
 export interface TeleportNinjaScratch {
@@ -97,6 +140,21 @@ export interface TeleportNinjaScratch {
   tnSlotBase6ee?: number;
   /** +0x560: action-0 ph1 approach sub-timer (FLOAT_8043a2bc seed). */
   tnApproachTimer560?: number;
+  /** +0x272: action-3 hitbox-presentation flag word (bits 1/2 armed by the machine). */
+  tnFlag272?: number;
+  /** +0x55c: action-3 ph3 launch-progress timer (FLOAT_8043a2d0 seed; drained by dt). */
+  tnLaunchTimer55c?: number;
+  /** +0x560 (action-3): launch-progress value fed to FUN_8016c810 as its child-life
+   *  param. Initialised to FLOAT_8043a308 (15.0), stepped −FLOAT_8043a2d0 per shot. */
+  tnLaunchProgress?: number;
+  /** +0x54a: action-3 ph2 X-special airborne latch (bit 0x40 = forced air slot). */
+  tnXAirLatch54a?: number;
+  /** +0x82: action-3 anim/slot byte (the ph0 stream-slot + 0x41 write). */
+  tnAnim82?: number;
+  /** +0x1d9: action-3 part hit-react byte (& 0x10 gates the exit-pose despawn). */
+  tnPart1d9?: number;
+  /** +0x1cf0: part-1 contact byte (action-3 ph3 arm gate). */
+  tnContactP1?: number;
 }
 
 type TnActor = RomActor & TeleportNinjaScratch;
@@ -250,9 +308,195 @@ function action0Phase2Active(actor: TnActor, ctx: StreamContext): void {
 }
 
 // ----------------------------------------------------------------------------
+// ACTION 3 — B-charge teleport-dash (table @0x8033e5b4, 5 fns). PORTED from
+// chunk_0038.c:1028-1233. Dispatcher: root PTR_FUN_8033e4f4[3] = FUN_80147428 →
+// PTR_FUN_8033e5a0[+0x581] (all 5 variants route to FUN_80147464) →
+// PTR_FUN_8033e5b4[+0x540]. Phase cursor = fbPhaseSlots[0].
+//   ph0 0x801474b4 setup — range gate, face, blink, stream slot 0 (ground) / 2 (air)
+//   ph1 0x801475f8 approach — drift + stream tick + pitch seek; advance on timer/face
+//   ph2 0x801476b0 contact — arm hitbox (+0x272|=2) on +0x1cf0; on +0x1cee commit
+//       launch: +0x558=10, +0x55c=1, +0x560=15, hSpeed=100·cos(steerYaw),
+//       yVel=100·−sin(steerYaw) (zz_0045238_/zz_0045204_ = projectZ/projectX),
+//       +0x272|=4, afterimage, +0x80c=0, +0x82=0, SFX 0xf2
+//   ph3 0x801477e4 flurry — velocity drag 0.95, gravity 1.0, +0x55c drain → spawn
+//       (FUN_8016c810 child, type 3), +0x560 step; +0x558 drain → exit anim arm
+//   ph4 0x80147924 exit — +0x18da ×0.9 decay, +0x1d9&0x10 despawn, grounded/air exit
+// ----------------------------------------------------------------------------
+
+function tnXRangeGate(actor: TnActor, ctx: TeleportNinjaFamilyCtx): boolean {
+  // FUN_80066838(range, actor): -1 no lock, 0 beyond, 1 in range. Rows at +0x868 are
+  // the descriptor speed/range rows (cmdButton % 3). The port exposes the in-range
+  // result through the same host hook cyber-hero uses; default true (no host → treat
+  // as in range) so the machine advances deterministically in unit tests.
+  const row = actor.actionSpeedRows[(actor.cmdButton ?? 0) % 3] ?? 0;
+  if (ctx.onRangeCheck) return ctx.onRangeCheck(actor, row);
+  return true;
+}
+
+/** ph0 — FUN_801474b4 @ chunk_0038.c:1028. */
+function tnBChargePhase0(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  actor.handlerTimer = TELEPORT_NINJA.BCHARGE_WINDOW;       // +0x558 = 60.0
+  // +0x6ea = 0; if (+0x5e0 & 0x40) +0x6ea = 2 (air stream slot).
+  actor.streamSlot = (actor.controlWord & TELEPORT_NINJA.AIRBORNE_BIT) !== 0 ? 2 : 0;
+  // FUN_80066838(range row) < 1 → +0x541 = 1; +0xcc = 0; +0x5ac = +0x72.
+  if (!tnXRangeGate(actor, ctx)) {
+    actor.fbPhaseSlots[1] = 1;
+    actor.visibilityTarget = null;
+    actor.activeYaw = actor.heading;
+  }
+  stepTargetYaw(actor, 0xc0); // zz_006d144_(0xc0)
+  actor.gravityCoeff = TELEPORT_NINJA.ZERO;
+  actor.yVel = TELEPORT_NINJA.ZERO;
+  actor.hDecel = TELEPORT_NINJA.ZERO;
+  actor.hSpeed = TELEPORT_NINJA.ZERO;
+  resetPoseHousekeeping(actor);
+  // Blink: motion = pos − targetCache5e8; motion ×= 0.95; pos += motion.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(TELEPORT_NINJA.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor); // zz_00677b0_
+  // +0x6ea++ (post-increment), then stream group 4, slot (old), args (6, 1).
+  const slot = actor.streamSlot;
+  actor.streamSlot = slot + 1;
+  startStream(actor, TELEPORT_NINJA.STREAM_MASK, TELEPORT_NINJA.ACTION3_STREAM_GROUP, slot,
+    TELEPORT_NINJA.STREAM_RATE);
+}
+
+/** ph1 — FUN_801475f8 @ chunk_0038.c:1075. */
+function tnBChargePhase1(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  // Drift: motion ×= 0.95; pos += motion; ground snap.
+  vecScale(TELEPORT_NINJA.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  if (actor.streamHold1b03 !== 0) {
+    tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx); // zz_004cd24_(0xf)
+  }
+  stepPartTargetPitch(actor, 0xc0); // zz_006e1ac_(0xc0, 1)
+  actor.handlerTimer -= actor.dt;    // +0x558 -= dt
+  const faced = stepTargetYaw(actor, 0xc0); // zz_006d144_(0xc0) != 0
+  if (actor.handlerTimer <= TELEPORT_NINJA.ZERO || faced) {
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  }
+}
+
+/** ph2 — FUN_801476b0 @ chunk_0038.c:1102. */
+function tnBChargePhase2(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  stepTargetYaw(actor, 0xc0);      // zz_006d144_(0xc0)
+  stepPartTargetPitch(actor, 0xc0); // zz_006e1ac_(0xc0, 1)
+  vecScale(TELEPORT_NINJA.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  const s = actor as TnActor;
+  if ((s.tnContactP1 ?? 0) !== 0) { // +0x1cf0 != 0
+    s.tnFlag272 = (s.tnFlag272 ?? 0) | TELEPORT_NINJA.FLAG272_BIT1;
+    // FUN_800061a8(actor, 9) — host hitbox-presentation hook (flame-ninja convention: no-op).
+  }
+  if (actor.wallContact !== 0) { // +0x1cee != 0 → launch commit
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    actor.handlerTimer = TELEPORT_NINJA.POST_CONTACT_WINDOW;  // +0x558 = 10.0
+    s.tnLaunchTimer55c = TELEPORT_NINJA.GRAVITY;              // +0x55c = 1.0
+    s.tnLaunchProgress = TELEPORT_NINJA.LAUNCH_PROGRESS_SEED; // +0x560 = 15.0
+    const yaw = actor.steerYaw; // +0x18da
+    actor.hSpeed = TELEPORT_NINJA.LAUNCH_SPEED_COEFF * projectZ(yaw); // 100·cos
+    actor.yVel = TELEPORT_NINJA.LAUNCH_SPEED_COEFF * -projectX(yaw); // 100·−sin
+    actor.hDecel = TELEPORT_NINJA.ZERO;
+    actor.gravityCoeff = TELEPORT_NINJA.ZERO;
+    s.tnFlag272 = (s.tnFlag272 ?? 0) | TELEPORT_NINJA.FLAG272_BIT2;
+    stepAfterimage(actor); // zz_00b2190_(0)
+    actor.accumulator80c = TELEPORT_NINJA.ZERO;
+    s.tnAnim82 = 0;
+    ctx.onPlayCue?.(actor, TELEPORT_NINJA.LAUNCH_CUE); // zz_00f036c_(0xf2)
+  }
+}
+
+/** ph3 — FUN_801477e4 @ chunk_0038.c:1148. */
+function tnBChargePhase3(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  const s = actor as TnActor;
+  s.tnFlag272 = (s.tnFlag272 ?? 0) | TELEPORT_NINJA.FLAG272_BIT1;
+  s.tnAnim82 = 0;
+  // zz_006ed8c_(0.95) — velocity drag.
+  actor.hSpeed *= TELEPORT_NINJA.BLINK_SCALE;
+  actor.yVel *= TELEPORT_NINJA.BLINK_SCALE;
+  integratePhysics(TELEPORT_NINJA.GRAVITY, actor, actor.lockYaw); // FUN_80067310(1.0, +0x5ae)
+  groundSnapRevert(actor);
+  // +0x55c drain → spawn child (FUN_8016c810, type 3); +0x560 step.
+  s.tnLaunchTimer55c = (s.tnLaunchTimer55c ?? 0) - actor.dt;
+  if ((s.tnLaunchTimer55c ?? 0) <= TELEPORT_NINJA.ZERO) {
+    // FUN_8016c810(+0x560, actor, 3, 0) — spawns the teleport-dash child.
+    ctx.onFamilyProjectile?.(actor, 0x8016c810, 3);
+    s.tnLaunchTimer55c = TELEPORT_NINJA.GRAVITY;
+    s.tnLaunchProgress = (s.tnLaunchProgress ?? 0) - TELEPORT_NINJA.GRAVITY;
+  }
+  actor.handlerTimer -= actor.dt; // +0x558 -= dt
+  if (actor.handlerTimer <= TELEPORT_NINJA.ZERO) {
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    actor.hDecel = TELEPORT_NINJA.ZERO;
+    actor.hSpeed = TELEPORT_NINJA.ZERO;
+    actor.yVel = TELEPORT_NINJA.ZERO;
+    if (actor.descriptor) actor.gravityCoeff = actor.descriptor.handlerData6c; // +0x50
+    s.tnFlag272 = 0;
+    const slot = actor.streamSlot; // +0x6ea++
+    actor.streamSlot = slot + 1;
+    startStream(actor, TELEPORT_NINJA.STREAM_MASK, TELEPORT_NINJA.ACTION3_STREAM_GROUP, slot,
+      TELEPORT_NINJA.STREAM_RATE);
+    s.tnAnim82 = actor.carriedSlot96 + 0x41; // +0x82 = +0x96 + 'A'
+    // FUN_800061a8(actor, 10) — host hitbox-presentation hook (no-op).
+    ctx.onPlayCue?.(actor, TELEPORT_NINJA.LAUNCH_CUE); // zz_00f036c_(0xf2)
+  }
+}
+
+/** ph4 — FUN_80147924 @ chunk_0038.c:1196. */
+function tnBChargePhase4(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  const s = actor as TnActor;
+  // +0x18da = (short)((float)+0x18da × FLOAT_8043a2e0 (0.9)) — steerYaw decay.
+  actor.steerYaw = Math.trunc(toS16(actor.steerYaw) * TELEPORT_NINJA.STEER_DECAY);
+  if (((s.tnPart1d9 ?? 0) & 0x10) !== 0) {
+    // zz_00107a0_(actor, 0x10) — hitbox despawn (host hook; no-op).
+  }
+  tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  integratePhysics(TELEPORT_NINJA.GRAVITY, actor, actor.lockYaw); // FUN_80067310(1.0, +0x5ae)
+  const grounded = groundSnapRevert(actor); // zz_00677b0_
+  if (grounded && actor.contactP0 < 0) { // +0x1cef < 0 → grounded exit
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~0x3;
+    dispatchUpperBodyCue(actor, 7); // zz_006a750_(7)
+    actor.stateTimer = TELEPORT_NINJA.EXIT_GROUND_STATE_TIMER + actor.dt; // +0x694 = 16+dt
+    return;
+  }
+  if (actor.wallContact !== 0) { // +0x1cee != 0 → air/ground exit
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~0x3;
+    actor.steerYaw = 0;
+    if (grounded) {
+      romGroundIdleReturn(actor); // zz_006a474_
+    } else {
+      romAirKnockoutReturn(actor); // zz_006a5a4_
+    }
+    actor.stateTimer = TELEPORT_NINJA.EXIT_STATE_TIMER + actor.dt; // +0x694 = 8+dt
+  }
+}
+
+/** Action-3 root handler — FUN_80147428 → PTR_FUN_8033e5a0[variant] → FUN_80147464 →
+ *  PTR_FUN_8033e5b4[+0x540]. All 5 variants route to the same phase machine. */
+function tnBChargeHandler(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  switch (phase) {
+    case 0: tnBChargePhase0(actor, ctx); return;
+    case 1: tnBChargePhase1(actor, ctx); return;
+    case 2: tnBChargePhase2(actor, ctx); return;
+    case 3: tnBChargePhase3(actor, ctx); return;
+    case 4: tnBChargePhase4(actor, ctx); return;
+    default: return;
+  }
+}
+
+// ----------------------------------------------------------------------------
 // Root action dispatcher — FUN_80145924 indexes PTR_FUN_8033e4f4[+0x580]. action 0 is
 // ported bespoke; action 2 routes through the shared-engine X-special approximation;
-// actions 1/3 fall back to the shared engine with cited TODOs for the bespoke tables.
+// action 3 (B-charge teleport-dash) is ported bespoke; action 1 keeps the shared-engine
+// fallback with a cited TODO for the bespoke tables.
 // ----------------------------------------------------------------------------
 export function createTeleportNinjaRootAction(
   ctx: TeleportNinjaFamilyCtx,
@@ -280,9 +524,7 @@ export function createTeleportNinjaRootAction(
         sharedX(actor);
         return;
       case 3:
-        // TODO(rom): port action-3 B-charge table @0x8033e5b4
-        // (FUN_801474b4 setup → 0x801475f8/0x801476b0/0x801477e4/0x80147924, chunk_0038.c)
-        // — the teleport-dash flurry. Falls through for now.
+        tnBChargeHandler(actor, ctx);
         return;
       default:
         return;
@@ -313,6 +555,8 @@ export type AssertFn = (cond: boolean, msg: string) => void;
 function makeCtx(opts: {
   onAllocateResource?: () => boolean;
   onRefreshTargetVisibility?: () => void;
+  onPlayCue?: () => void;
+  onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
 } = {}): TeleportNinjaFamilyCtx {
   const ctx: TeleportNinjaFamilyCtx = {};
   if (opts.onAllocateResource) ctx.onAllocateResource = () => opts.onAllocateResource!();
@@ -320,6 +564,8 @@ function makeCtx(opts: {
     const sink = opts.onRefreshTargetVisibility;
     ctx.onRefreshTargetVisibility = () => sink();
   }
+  if (opts.onPlayCue) ctx.onPlayCue = () => opts.onPlayCue!();
+  if (opts.onFamilyProjectile) ctx.onFamilyProjectile = opts.onFamilyProjectile;
   return ctx;
 }
 
@@ -449,5 +695,153 @@ export function runTeleportNinjaSelfTests(assert: AssertFn): void {
     a.fbPhaseSlots[0] = 0;
     root(a);
     assert(a.fbPhaseSlots[0] === 0, "action1 bespoke TODO falls through (no phase advance)");
+  }
+
+  // ============================================================================
+  // ACTION 3 — B-charge teleport-dash (table @0x8033e5b4).
+  // ============================================================================
+
+  // --- ph0 setup: range gate + face + blink + stream slot 0/2 + +0x6ea++. ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 3; a.dt = 1;
+    a.pos = { x: 100, y: 0, z: 0 };
+    a.targetCache5e8 = { x: 0, y: 0, z: 0 };
+    a.streamSlot = 0;
+    root(a); // ph0
+    assert(a.fbPhaseSlots[0] === 1, "action3 ph0 advances +0x540");
+    assert(a.handlerTimer === TELEPORT_NINJA.BCHARGE_WINDOW,
+      "action3 ph0 seeds +0x558 = 60.0 (FLOAT_8043a2dc)");
+    assert(a.streamSlot === 1, "action3 ph0 +0x6ea++ (ground slot 0 → 1)");
+    assert(a.pos.x === 100 + 95, "action3 ph0 blink: pos.x += (100−0)×0.95 = 95 → 195");
+    assert(a.motion.x === 95, "action3 ph0 motion.x = (pos−target)×0.95 = 95");
+    assert(a.hSpeed === 0 && a.hDecel === 0 && a.yVel === 0 && a.gravityCoeff === 0,
+      "action3 ph0 zeroes all four velocity scalars");
+  }
+
+  // --- ph0 airborne: stream slot starts at 2 (+0x5e0 & 0x40). ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 3; a.dt = 1;
+    a.controlWord = TELEPORT_NINJA.AIRBORNE_BIT;
+    a.streamSlot = 0;
+    root(a);
+    assert(a.streamSlot === 3, "action3 ph0 airborne starts slot 2 → +0x6ea++ = 3");
+  }
+
+  // --- ph1 approach: drift + face convergence advances. ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 3; a.dt = 1;
+    a.fbPhaseSlots[0] = 1;
+    a.handlerTimer = 1.0; // drains to 0 this tick
+    a.motion = { x: 10, y: 0, z: 0 };
+    root(a);
+    assert(a.fbPhaseSlots[0] === 2, "action3 ph1 timer ≤ 0 advances to ph2");
+    assert(a.motion.x === 9.5, "action3 ph1 drift: motion.x *= 0.95 (FLOAT_8043a2c4)");
+  }
+
+  // --- ph2 contact: +0x1cf0 arms +0x272 bit 1; +0x1cee commits the launch. ---
+  {
+    let cued = 0;
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx({ onPlayCue: () => { cued += 1; } }));
+    const root = a.rootAction!;
+    a.actionIndex = 3; a.dt = 1;
+    a.fbPhaseSlots[0] = 2;
+    a.steerYaw = 0; // cos(0)=1, sin(0)=0
+    a.tnContactP1 = 1; // +0x1cf0
+    root(a);
+    assert((a.tnFlag272 ?? 0) === TELEPORT_NINJA.FLAG272_BIT1,
+      "action3 ph2 +0x1cf0 arms +0x272 bit 1");
+    a.wallContact = 1; // +0x1cee → launch commit
+    root(a);
+    assert(a.fbPhaseSlots[0] === 3, "action3 ph2 +0x1cee advances to ph3");
+    assert(a.handlerTimer === TELEPORT_NINJA.POST_CONTACT_WINDOW,
+      "action3 ph2 re-seeds +0x558 = 10.0 (FLOAT_8043a2ec)");
+    assert(a.tnLaunchTimer55c === TELEPORT_NINJA.GRAVITY,
+      "action3 ph2 seeds +0x55c = 1.0 (FLOAT_8043a2d0)");
+    assert(a.tnLaunchProgress === TELEPORT_NINJA.LAUNCH_PROGRESS_SEED,
+      "action3 ph2 seeds +0x560 = 15.0 (FLOAT_8043a308)");
+    assert(a.hSpeed === TELEPORT_NINJA.LAUNCH_SPEED_COEFF, "action3 ph2 hSpeed = 100·cos(0)");
+    assert(a.yVel === 0, "action3 ph2 yVel = 100·−sin(0) = 0");
+    assert((a.tnFlag272 ?? 0) === (TELEPORT_NINJA.FLAG272_BIT1 | TELEPORT_NINJA.FLAG272_BIT2),
+      "action3 ph2 commit sets +0x272 bits 1|2");
+    assert(cued === 1, "action3 ph2 commit plays SFX 0xf2 (zz_00f036c_)");
+  }
+
+  // --- ph3 flurry: +0x55c drain spawns child type 3, +0x558 drain arms exit anim. ---
+  {
+    const spawned: Array<[number, number]> = [];
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx({
+      onFamilyProjectile: (_ac, addr, type) => spawned.push([addr, type]),
+    }));
+    const root = a.rootAction!;
+    a.actionIndex = 3; a.dt = 1;
+    a.fbPhaseSlots[0] = 3;
+    a.handlerTimer = 1.0;   // drains to 0 → exit-anim arm
+    a.tnLaunchTimer55c = 1.0; // drains to 0 → spawn child
+    a.tnLaunchProgress = 15.0;
+    a.streamSlot = 0;
+    root(a);
+    assert(spawned.length === 1 && spawned[0]![0] === 0x8016c810 && spawned[0]![1] === 3,
+      `action3 ph3 spawns FUN_8016c810 child type 3 (got ${JSON.stringify(spawned)})`);
+    assert(a.tnLaunchTimer55c === TELEPORT_NINJA.GRAVITY,
+      "action3 ph3 re-seeds +0x55c = 1.0 after spawn");
+    assert(a.tnLaunchProgress === 14.0, "action3 ph3 steps +0x560 −= 1.0");
+    assert(a.fbPhaseSlots[0] === 4, "action3 ph3 +0x558 ≤ 0 advances to ph4");
+    assert(a.hSpeed === 0 && a.hDecel === 0 && a.yVel === 0,
+      "action3 ph3 exit-anim arm zeroes velocity scalars");
+    assert((a.tnAnim82 ?? 0) === a.carriedSlot96 + 0x41,
+      "action3 ph3 sets +0x82 = +0x96 + 'A'");
+  }
+
+  // --- ph4 exit: grounded + +0x1cef < 0 → upper cue 7 + +0x694 = 16 + dt. ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 3; a.dt = 1;
+    a.fbPhaseSlots[0] = 4;
+    a.contactP0 = -1; // +0x1cef < 0
+    a.wallContact = 0;
+    a.steerYaw = 100;
+    a.controlWord = 0x3; a.housekeeping73f = 1;
+    (a as RomActor & { grounded?: boolean }).grounded = true; // zz_00677b0_ grounded
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[7 * 2 + 1] = 61; // upper-body row 7 → state 61
+    root(a);
+    assert(a.steerYaw === 90, "action3 ph4 decays +0x18da × 0.9 (100 → 90)");
+    assert(a.housekeeping73f === 0 && (a.controlWord & 0x3) === 0,
+      "action3 ph4 grounded exit clears +0x73f / strips +0x5e0");
+    assert(a.ubState === 61, "action3 ph4 grounded exit dispatches upper cue 7");
+    assert(a.stateTimer === TELEPORT_NINJA.EXIT_GROUND_STATE_TIMER + 1,
+      "action3 ph4 grounded exit seeds +0x694 = 16.0 + dt (FLOAT_8043a2fc)");
+  }
+
+  // --- ph4 exit: airborne + wallContact → air knockout + +0x694 = 8 + dt. ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 3; a.dt = 1;
+    a.fbPhaseSlots[0] = 4;
+    a.contactP0 = 0;
+    a.wallContact = 1; // +0x1cee
+    a.controlWord = 0x3; a.housekeeping73f = 1;
+    a.steerYaw = 10;
+    root(a);
+    assert(a.housekeeping73f === 0 && (a.controlWord & 0x3) === 0,
+      "action3 ph4 wall exit clears +0x73f / strips +0x5e0");
+    assert(a.steerYaw === 0, "action3 ph4 wall exit zeroes +0x18da");
+    assert(a.stateTimer === TELEPORT_NINJA.EXIT_STATE_TIMER + 1,
+      "action3 ph4 wall exit seeds +0x694 = 8.0 + dt (FLOAT_8043a2d8)");
   }
 }
