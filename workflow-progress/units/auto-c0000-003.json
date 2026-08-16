@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0000-003",
   "unit_id": "auto-c0000-003",
-  "timestamp": "2026-08-16T15:03:59.762414Z",
-  "run_id": "2026-08-16T14:22:33.573773Z",
+  "timestamp": "2026-08-16T16:26:47.713366Z",
+  "run_id": "2026-08-16T16:26:47.668368Z",
   "result": "deferred",
   "stage": "compile-fix",
   "attempt": 0,
-  "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=0, completion_tokens=0)",
+  "detail": "interrupted before a verdict; requeued",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -16,10 +16,12 @@
   "model": "unsloth/Qwen3.6-27B-MTP-GGUF",
   "tier": null,
   "driver_record": {
-    "status": "pending",
+    "status": "deferred",
     "attempts": 0,
-    "error": "provider unavailable: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=0, completion_tokens=0)",
-    "last_stage": "compile-fix"
+    "error": "interrupted before a verdict (driver killed or crashed)",
+    "last_stage": "compile-fix",
+    "model_requests": 4,
+    "interruptions": 1
   },
   "history": [
     {
@@ -52,6 +54,14 @@
       "stage": "compile-fix",
       "attempt": 0,
       "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=0, completion_tokens=0)",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-16T16:26:47.713366Z",
+      "result": "deferred",
+      "stage": "compile-fix",
+      "attempt": 0,
+      "detail": "interrupted before a verdict; requeued",
       "product_commit": null
     }
   ]
