@@ -1,2 +1,3 @@
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-16T11:40:07.991906Z", "run_id": "2026-08-16T11:40:07.991906Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-16T11:41:50.392030Z", "run_id": "2026-08-16T11:41:50.392030Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
+{"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-16T11:48:46.885886Z", "run_id": "2026-08-16T11:48:46.884886Z", "result": "starting", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
