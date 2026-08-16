@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-16T11:51:12.769635Z - machine-written, do not edit.*
+*Generated 2026-08-16T12:13:17.673994Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 2/1520 settled (2 green, 0 staged) |
 | **Retries outstanding** | 19 |
 | **Untouched** | 1498 |
-| **Last transition** | 2026-08-16T11:51:12.769635Z |
+| **Last transition** | 2026-08-16T12:13:17.673994Z |
 | **Last green** | never (`-`) |
 | **Last product commit** | `-` |
 | **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ 32768 ctx |
@@ -20,6 +20,8 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-16T12:13:17.673994Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
+| 2026-08-16T12:13:17.727516Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T11:51:12.769635Z | `auto-c0001-004` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T11:51:07.610912Z | `auto-c0000-015` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T11:51:05.004615Z | `auto-c0000-012` | deferred | port | 0 | interrupted before a verdict; requeued |

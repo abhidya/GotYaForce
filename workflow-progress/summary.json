@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-16T11:51:12.846108Z",
-  "run_id": "2026-08-16T11:50:56.028542Z",
+  "generated_at": "2026-08-16T12:13:17.797025Z",
+  "run_id": "2026-08-16T12:13:17.617994Z",
   "total_units": 1520,
   "green": 2,
   "staged": 0,
@@ -11,7 +11,7 @@
   "structural_ineligible": 0,
   "active": 0,
   "total_attempts": 21,
-  "transitions_last_hour": 6,
+  "transitions_last_hour": 7,
   "greens_last_hour": 0,
   "last_green_at": null,
   "last_green_unit": null,
