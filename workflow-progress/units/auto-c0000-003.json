@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0000-003",
   "unit_id": "auto-c0000-003",
-  "timestamp": "2026-08-16T11:50:58.791077Z",
-  "run_id": "2026-08-16T11:50:56.028542Z",
+  "timestamp": "2026-08-16T13:09:56.179240Z",
+  "run_id": "2026-08-16T12:48:38.374500Z",
   "result": "deferred",
-  "stage": "port",
+  "stage": "compile-fix",
   "attempt": 0,
-  "detail": "interrupted before a verdict; requeued",
+  "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -16,9 +16,10 @@
   "model": "unsloth/Qwen3.6-27B-MTP-GGUF",
   "tier": null,
   "driver_record": {
-    "status": "deferred",
+    "status": "pending",
     "attempts": 0,
-    "error": "interrupted before a verdict (driver killed or crashed)"
+    "error": "provider unavailable: Custom API returned no assistant content or tool-call arguments",
+    "last_stage": "compile-fix"
   },
   "history": [
     {
@@ -27,6 +28,14 @@
       "stage": "port",
       "attempt": 0,
       "detail": "interrupted before a verdict; requeued",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-16T13:09:56.179240Z",
+      "result": "deferred",
+      "stage": "compile-fix",
+      "attempt": 0,
+      "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments",
       "product_commit": null
     }
   ]
