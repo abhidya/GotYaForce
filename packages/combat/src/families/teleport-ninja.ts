@@ -1,6 +1,8 @@
 // TELEPORT NINJA family (ctor 0x801456d4) — ROM-faithful port.
 // @audit-ported pl0005 action=0 variants=0,1,2,3,4
 // @audit-ported pl0009 action=0 variants=0,1,2,3,4
+// @audit-ported pl0005 action=1 variants=0,1,2,3
+// @audit-ported pl0009 action=1 variants=0,1,2,3
 // @audit-ported pl0005 action=3 variants=0,1,2,3,4
 // Covers pl0005 (TELEPORT NINJA, borg 0x005) and pl0009 (SWITCHING NINJA, borg 0x009).
 // The ctor wires both borgs to the SAME vtable/anim banks/tables (only the +0x4b0
@@ -10,16 +12,17 @@
 //   `(*(code *)(&PTR_FUN_8033e4f4)[*(char *)(actor+0x580)])();`
 // Action tables (per bespoke-port-work-queue.json — 8 tables, 28 fns / 3355 instrs):
 //   action 0 table @0x8033e518 (3 sub-tables 0x8033e518/524/530, phase via +0x540)
-//   action 1 table @0x8033e568 (2 sub-tables 0x8033e568/574) — TODO bespoke port
+//   action 1 table @0x8033e568/574 (teleport-strike melee, v0/v1 shared lunge +
+//                                  v2 table A + v3/v4 table B) — PORTED HERE
 //   action 2 table @0x8033e584/594 (X-special) — shared-engine approximation
 //   action 3 table @0x8033e5b4 (B-charge teleport-dash, 5 fns) — PORTED HERE
 //
 // This pass ports ACTION 0 (the teleport-approach + B-held combo loop) faithfully from
-// FUN_801459f0/FUN_80145b00/FUN_80145bd8 (chunk_0037.c/0038.c) AND ACTION 3 (the
-// B-charge teleport-dash) from FUN_801474b4/FUN_801475f8/FUN_801476b0/FUN_801477e4/
-// FUN_80147924 (chunk_0038.c). Action 2 routes through the shared X-special engine;
-// action 1 keeps the shared-engine fallback with a cited TODO. Floats read from
-// boot.dol this session (sdata2 @0x8043a2xx).
+// FUN_801459f0/FUN_80145b00/FUN_80145bd8 (chunk_0037.c/0038.c), ACTION 1 (the
+// teleport-strike melee) from FUN_80146560..FUN_80146c54 (chunk_0038.c), and ACTION 3
+// (the B-charge teleport-dash) from FUN_801474b4..FUN_80147924 (chunk_0038.c). Action 2
+// routes through the shared X-special engine. Floats read from boot.dol (sdata2
+// @0x8043a2xx).
 //
 // Float constants (v2f-resolved from user-data/GG4E/disc/sys/boot.dol):
 //   FLOAT_8043a2b8 = 0.0   zero-scalar (velocity/pose resets, accumulator80c clear)
@@ -37,6 +40,7 @@ import { integratePhysics, projectX, projectZ, vecAdd, vecScale, vecSubtract } f
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./shared-engine.js";
+import { createSharedMeleeLunge, type SharedLungeConfig } from "./shared-melee-lunge.js";
 
 /** Borg numbers for the TELEPORT NINJA family. */
 const TELEPORT_NINJA_BORG_NUMBERS: Record<string, number> = {
@@ -120,6 +124,33 @@ export const TELEPORT_NINJA = {
   FLAG272_BIT2: 0x4,
   /** zz_00f036c_ SFX cue played at the action-3 launch commit (0xf2). */
   LAUNCH_CUE: 0xf2,
+  // --- action 1 (teleport-strike melee) constants, chunk_0038.c:470-882 ---
+  /** FLOAT_8043a2d8 = 8.0 — +0x144 seed when +0x1d9 & 0x10 (FUN_80146560 gate). */
+  A1_144_SEED: 8.0,
+  /** FLOAT_8043a2dc = 60.0 — action-1 v2 ph0 (0x80146640) +0x558 seed. */
+  A1_PH0_TIMER: 60.0,
+  /** FLOAT_8043a2bc = 30.0 — action-1 v2 ph1 (0x80146764) +0x558 re-seed. */
+  A1_PH1_TIMER: 30.0,
+  /** FLOAT_8043a2cc = 20.0 — action-1 v3 ph1 (0x80146af8) +0x558 re-seed. */
+  A1_PH1_V3_TIMER: 20.0,
+  /** FLOAT_8043a2e4 = 150.0 — action-1 v2 ph2 (0x80146888) range gate. */
+  A1_RANGE_GATE: 150.0,
+  /** FLOAT_8043a2e8 = 40.0 — action-1 v2 ph2 (0x80146bc4) launch speed coefficient. */
+  A1_LAUNCH_SPEED: 40.0,
+  /** FLOAT_8043a2ec = 10.0 — action-1 v2 ph3 (0x80146c54) +0x48 seed. */
+  A1_PH3_YVEL: 10.0,
+  /** FLOAT_8043a2f0 = 4.0 — action-1 v2 ph3 gravity (FUN_80067310). */
+  A1_PH3_GRAVITY: 4.0,
+  /** FLOAT_8043a2d0 = 1.0 — action-1 v2 ph3 exit +0x694 seed. */
+  A1_PH3_EXIT: 1.0,
+  /** action-1 v2 ph0 stream slot seed (+0x6ea = 4). */
+  A1_PH0_STREAM_SLOT: 4,
+  /** action-1 v3 ph0 stream slot (fixed 9, group 3). */
+  A1_V3_STREAM_SLOT: 9,
+  /** action-1 v2 stream group (3). */
+  A1_STREAM_GROUP: 3,
+  /** +0x1d9 & 0x30 — v2 ph3 hit-gate mask (FUN_80146c54:54-60). */
+  A1_PH3_HIT_GATE_MASK: 0x30,
 } as const;
 
 export interface TeleportNinjaFamilyCtx extends StreamContext {
@@ -155,6 +186,14 @@ export interface TeleportNinjaScratch {
   tnPart1d9?: number;
   /** +0x1cf0: part-1 contact byte (action-3 ph3 arm gate). */
   tnContactP1?: number;
+  /** +0x1d9: action-1 hit-gate byte (& 0x30 = v2 ph3 gate; & 0x10 = 0x144 seed). */
+  tnHitGate1d9?: number;
+  /** +0x144: action-1 +0x144 seed value (8.0 when +0x1d9 & 0x10; child-mask elsewhere). */
+  tnChild144?: number;
+  /** +0x764: live target distance mirror (v2 ph1 speed computation). */
+  tnTargetDist764?: number;
+  /** +0x7ce: state byte gate for action-0 v4 redirect (valkrie-style; unused here). */
+  tnState7ce?: number;
 }
 
 type TnActor = RomActor & TeleportNinjaScratch;
@@ -305,6 +344,237 @@ function action0Phase2Active(actor: TnActor, ctx: StreamContext): void {
   actor.housekeeping73f = 0;
   actor.controlWord &= ~0x3;
   romGroundIdleReturn(actor);
+}
+
+// ----------------------------------------------------------------------------
+// ACTION 1 — teleport-strike melee (variant tables @0x8033e568/574). PORTED from
+// chunk_0038.c:470-882. Dispatcher: root PTR_FUN_8033e4f4[1] = FUN_80146560 →
+// PTR_FUN_8033e53c[+0x581] (variant). Variant routing:
+//   v0/v1 → FUN_801465b0: +0x18da >>= 1, then shared lunge zz_00fed6c_
+//           (config @0x8033e550 — see TELEPORT_LUNGE_CONFIG).
+//   v2     → FUN_801465e4: +0x18da >>= 1, clear +0xcc if +0x541, then phase
+//           table A @0x8033e568 (7 phases via +0x540).
+//   v3/v4  → FUN_8014697c: clear +0xcc if +0x541, then phase table B @0x8033e574
+//           (4 phases: FUN_801469cc/6af8/6bc4/6c54 — the second segment of the
+//           two-segment strike).
+// Root gate: if (+0x1d9 & 0x10) +0x144 = FLOAT_8043a2d8 (8.0).
+//
+// Phase table A (v2): [0x80146640, 0x80146764, 0x80146888, 0x801469cc,
+//                      0x80146af8, 0x80146bc4, 0x80146c54]
+// Phase table B (v3): [0x801469cc, 0x80146af8, 0x80146bc4, 0x80146c54]
+//   ph0 0x80146640/0x801469cc — setup: stream slot, face, blink, zero scalars
+//   ph1 0x80146764/0x80146af8 — approach: drift + stream tick + speed commit
+//   ph2 0x80146888/0x80146bc4 — active/contact: range gate / launch commit
+//   ph3 0x80146c54 — recovery: +0x18da decay, hit-gate scalars, gravity, exit
+// ----------------------------------------------------------------------------
+
+/** Shared-lunge config @0x8033e550 for action-1 v0/v1 (DOL dump:
+ *  00000001 43160000 00000014 3f733333 3f733333 3f4ccccd). */
+export const TELEPORT_LUNGE_CONFIG: SharedLungeConfig = {
+  slotBase: 1,
+  range: 150.0,
+  dashFrames: 20,
+  decelA: 0.949999988079071,
+  decelB: 0.949999988079071,
+  decelC: 0.800000011920929,
+};
+
+/** v2 ph0 — FUN_80146640 @ chunk_0038.c:470. Setup + first approach stream. */
+function tnStrikeV2Phase0(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  actor.streamSlot = TELEPORT_NINJA.A1_PH0_STREAM_SLOT;     // +0x6ea = 4
+  if (!tnXRangeGate(actor, ctx)) {
+    actor.fbPhaseSlots[1] = 1;      // +0x541
+    actor.visibilityTarget = null;  // +0xcc = 0
+    actor.activeYaw = actor.lockYaw; // +0x5ac = +0x5ae
+  }
+  actor.handlerTimer = TELEPORT_NINJA.A1_PH0_TIMER;          // +0x558 = 60.0
+  actor.gravityCoeff = TELEPORT_NINJA.ZERO;
+  actor.yVel = TELEPORT_NINJA.ZERO;
+  actor.hDecel = TELEPORT_NINJA.ZERO;
+  actor.hSpeed = TELEPORT_NINJA.ZERO;
+  resetPoseHousekeeping(actor);
+  stepTargetYaw(actor, 0xc0); // zz_006d144_(0xc0)
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(TELEPORT_NINJA.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  startStream(actor, TELEPORT_NINJA.STREAM_MASK, TELEPORT_NINJA.A1_STREAM_GROUP,
+    TELEPORT_NINJA.A1_PH0_STREAM_SLOT, TELEPORT_NINJA.STREAM_RATE);
+}
+
+/** v2 ph1 — FUN_80146764 @ chunk_0038.c:509. Approach drift + speed commit. */
+function tnStrikeV2Phase1(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  vecScale(TELEPORT_NINJA.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  if (actor.streamHold1b03 !== 0) tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  actor.handlerTimer -= actor.dt;
+  const faced = stepTargetYaw(actor, 0xc0);
+  if (actor.handlerTimer <= TELEPORT_NINJA.ZERO || faced) {
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    actor.handlerTimer = TELEPORT_NINJA.A1_PH1_TIMER;         // +0x558 = 30.0
+    const row = actor.actionSpeedRows[(actor.cmdButton ?? 0) % 3] ?? TELEPORT_NINJA.A1_PH1_TIMER;
+    let speed = row / TELEPORT_NINJA.A1_PH1_TIMER;
+    const targetDist = (actor as TnActor).tnTargetDist764;
+    if ((actor.visibilityTarget !== null || (actor as TnActor).tnTargetDist764 !== undefined)
+        && targetDist !== undefined && row < targetDist) {
+      speed = targetDist / TELEPORT_NINJA.A1_PH1_TIMER;
+    }
+    actor.hSpeed = speed;
+    if (TELEPORT_NINJA.A1_RANGE_GATE < (targetDist ?? Infinity)) {
+      ctx.onFamilyProjectile?.(actor, 0x800b2190, 0); // zz_00b2190_(0) afterimage
+    }
+  }
+}
+
+/** v2 ph2 — FUN_80146888 @ chunk_0038.c:546. Active: stream + range gate + exit. */
+function tnStrikeV2Phase2(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  if (actor.faceGate1d10 > 0) stepTargetYaw(actor, 0xc0);
+  actor.hSpeed *= TELEPORT_NINJA.BLINK_SCALE; // zz_006ed8c_(0.95)
+  actor.yVel *= TELEPORT_NINJA.BLINK_SCALE;
+  if (tnXRangeGate(actor, ctx)) {
+    actor.hSpeed = TELEPORT_NINJA.ZERO; // +0x44 = 0
+  }
+  integratePhysics(TELEPORT_NINJA.GRAVITY, actor, actor.lockYaw); // zz_00670dc_ ground
+  if (actor.dashStrength1d0f > 0) {
+    actor.dashStrength1d0f = 0;
+    const row = actor.actionSpeedRows[(actor.cmdButton ?? 0) % 3] ?? TELEPORT_NINJA.A1_PH1_TIMER;
+    actor.hSpeed = row / TELEPORT_NINJA.A1_PH1_TIMER;
+  }
+  if (actor.wallContact !== 0) { // +0x1cee
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~0x3;
+    romGroundIdleReturn(actor); // zz_006a474_
+  }
+}
+
+/** v2/v3 shared ph0 — FUN_801469cc @ chunk_0038.c:592. Second-segment setup. */
+function tnStrikeSharedPhase0(actor: TnActor, ctx: TeleportNinjaFamilyCtx, isV2: boolean): void {
+  actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+  actor.handlerTimer = TELEPORT_NINJA.A1_PH0_TIMER;         // +0x558 = 60.0
+  if (!tnXRangeGate(actor, ctx)) {
+    actor.fbPhaseSlots[1] = 1;
+    actor.visibilityTarget = null;
+    actor.activeYaw = actor.heading;   // +0x5ac = +0x72
+  }
+  actor.gravityCoeff = TELEPORT_NINJA.ZERO;
+  actor.yVel = TELEPORT_NINJA.ZERO;
+  actor.hDecel = TELEPORT_NINJA.ZERO;
+  actor.hSpeed = TELEPORT_NINJA.ZERO;
+  resetPoseHousekeeping(actor);
+  stepTargetYaw(actor, 0xc0);       // zz_006d144_(0xc0)
+  stepPartTargetPitch(actor, 0xc0); // zz_006e1ac_(0xc0, 1)
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(TELEPORT_NINJA.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  const slot = isV2 ? TELEPORT_NINJA.A1_PH0_STREAM_SLOT + 5 : TELEPORT_NINJA.A1_V3_STREAM_SLOT;
+  startStream(actor, TELEPORT_NINJA.STREAM_MASK, TELEPORT_NINJA.A1_STREAM_GROUP, slot,
+    TELEPORT_NINJA.STREAM_RATE);
+}
+
+/** v2/v3 shared ph1 — FUN_80146af8 @ chunk_0038.c:632. Approach + pitch + commit. */
+function tnStrikeSharedPhase1(actor: TnActor, ctx: TeleportNinjaFamilyCtx, isV2: boolean): void {
+  vecScale(TELEPORT_NINJA.BLINK_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
+  groundSnapRevert(actor);
+  if (actor.streamHold1b03 !== 0) tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  stepPartTargetPitch(actor, 0xc0); // zz_006e1ac_(0xc0, 1)
+  actor.handlerTimer -= actor.dt;
+  const faced = stepTargetYaw(actor, 0xc0);
+  if (actor.handlerTimer <= TELEPORT_NINJA.ZERO || faced) {
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    actor.handlerTimer = isV2 ? TELEPORT_NINJA.A1_PH1_TIMER : TELEPORT_NINJA.A1_PH1_V3_TIMER;
+    ctx.onFamilyProjectile?.(actor, 0x80092dcc, 0); // zz_0092dcc_(0) — FX child
+  }
+}
+
+/** v2/v3 shared ph2 — FUN_80146bc4 @ chunk_0038.c:662. Contact → launch commit. */
+function tnStrikeSharedPhase2(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  stepTargetYaw(actor, 0xc0);
+  stepPartTargetPitch(actor, 0xc0);
+  if (actor.contactP0 !== 0) { // +0x1cef
+    actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
+    const yaw = actor.steerYaw; // +0x18da
+    actor.hSpeed = TELEPORT_NINJA.A1_LAUNCH_SPEED * projectZ(yaw); // 40·cos
+    actor.yVel = TELEPORT_NINJA.A1_LAUNCH_SPEED * -projectX(yaw); // 40·−sin
+  }
+}
+
+/** v2/v3 shared ph3 — FUN_80146c54 @ chunk_0038.c:684. Recovery + exit. */
+function tnStrikeSharedPhase3(actor: TnActor, ctx: TeleportNinjaFamilyCtx): void {
+  const s = actor as TnActor;
+  tickStream(actor, TELEPORT_NINJA.STREAM_MASK, ctx);
+  if (actor.contactP0 < 0) actor.steerYaw = toS16(actor.steerYaw) >> 1; // +0x18da >> 1
+  if (((s.tnHitGate1d9 ?? 0) & TELEPORT_NINJA.A1_PH3_HIT_GATE_MASK) !== 0) {
+    actor.hSpeed = TELEPORT_NINJA.ZERO;
+    actor.hDecel = TELEPORT_NINJA.ZERO;
+    actor.yVel = TELEPORT_NINJA.A1_PH3_YVEL;        // +0x48 = 10.0
+    actor.gravityCoeff = TELEPORT_NINJA.STREAM_RATE; // +0x50 = -1.0
+  }
+  integratePhysics(TELEPORT_NINJA.A1_PH3_GRAVITY, actor, actor.lockYaw); // FUN_80067310(4.0)
+  const grounded = groundSnapRevert(actor);
+  if (grounded && actor.contactP0 < 0) {
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~0x3;
+    dispatchUpperBodyCue(actor, 7); // zz_006a750_(7)
+    actor.stateTimer = TELEPORT_NINJA.A1_144_SEED + actor.dt; // +0x694 = 8+dt
+    return;
+  }
+  if (actor.wallContact !== 0) { // +0x1cee
+    actor.housekeeping73f = 0;
+    actor.controlWord &= ~0x3;
+    if (!grounded) romAirKnockoutReturn(actor); // zz_006a5a4_
+    else romGroundIdleReturn(actor);
+    actor.stateTimer = TELEPORT_NINJA.A1_PH3_EXIT + actor.dt; // +0x694 = 1+dt
+  }
+}
+
+/** Action-1 root — FUN_80146560 → PTR_FUN_8033e53c[+0x581]. */
+function tnStrikeHandler(
+  actor: TnActor,
+  ctx: TeleportNinjaFamilyCtx,
+  sharedLunge: (actor: RomActor) => void,
+): void {
+  const s = actor as TnActor;
+  if (((s.tnHitGate1d9 ?? 0) & 0x10) !== 0) s.tnChild144 = TELEPORT_NINJA.A1_144_SEED;
+  const v = actor.variantIndex;
+  if (v === 0 || v === 1) {
+    // FUN_801465b0: +0x18da >>= 1 then shared lunge zz_00fed6c_ (config @0x8033e550).
+    actor.steerYaw = toS16(actor.steerYaw) >> 1;
+    sharedLunge(actor);
+    return;
+  }
+  if (v === 2) {
+    // FUN_801465e4: +0x18da >>= 1, clear +0xcc if +0x541, then table A.
+    actor.steerYaw = toS16(actor.steerYaw) >> 1;
+    if (actor.fbPhaseSlots[1] !== 0) actor.visibilityTarget = null;
+    const phase = actor.fbPhaseSlots[0] ?? 0;
+    switch (phase) {
+      case 0: tnStrikeV2Phase0(actor, ctx); break;
+      case 1: tnStrikeV2Phase1(actor, ctx); break;
+      case 2: tnStrikeV2Phase2(actor, ctx); break;
+      case 3: tnStrikeSharedPhase0(actor, ctx, true); break;
+      case 4: tnStrikeSharedPhase1(actor, ctx, true); break;
+      case 5: tnStrikeSharedPhase2(actor, ctx); break;
+      case 6: tnStrikeSharedPhase3(actor, ctx); break;
+      default: break;
+    }
+    return;
+  }
+  // v3/v4 — FUN_8014697c: clear +0xcc if +0x541, then table B (4-phase second segment).
+  if (actor.fbPhaseSlots[1] !== 0) actor.visibilityTarget = null;
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  switch (phase) {
+    case 0: tnStrikeSharedPhase0(actor, ctx, false); break;
+    case 1: tnStrikeSharedPhase1(actor, ctx, false); break;
+    case 2: tnStrikeSharedPhase2(actor, ctx); break;
+    case 3: tnStrikeSharedPhase3(actor, ctx); break;
+    default: break;
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -504,6 +774,8 @@ export function createTeleportNinjaRootAction(
   // action 2 (X-special) — shared-engine approximation. TELEPORT NINJA's bespoke X
   // tables are @0x8033e584/594 (fns 0x80146dcc..0x80147464); their deep port is TODO.
   const sharedX = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) });
+  // action 1 v0/v1 — shared lunge zz_00fed6c_ (config @0x8033e550).
+  const sharedLunge = createSharedMeleeLunge(TELEPORT_LUNGE_CONFIG, ctx);
 
   return (base: RomActor) => {
     const actor = scratchOf(base);
@@ -516,9 +788,7 @@ export function createTeleportNinjaRootAction(
         return;
       }
       case 1:
-        // TODO(rom): port action-1 bespoke tables @0x8033e568/574
-        // (fns 0x80146640..0x80147094, chunk_0038.c) — the teleport-strike melee.
-        // Falls through to the shared engine as the closest approximation.
+        tnStrikeHandler(actor, ctx, sharedLunge);
         return;
       case 2:
         sharedX(actor);
@@ -686,15 +956,104 @@ export function runTeleportNinjaSelfTests(assert: AssertFn): void {
       "action0 ph2 ground idle return (zz_006a474_) zeroes velocity scalars");
   }
 
-  // --- rootAction no-ops for unsupported actionIndex (action 1 bespoke TODO). ---
+  // ============================================================================
+  // ACTION 1 — teleport-strike melee.
+  // ============================================================================
+
+  // --- v0: shared lunge (config @0x8033e550) — ph0 seeds +0x6ea = slotBase then ++. ---
   {
     const a = createRomActor() as TnActor;
     configureTeleportNinjaFamily(a, "pl0005", makeCtx());
     const root = a.rootAction!;
-    a.actionIndex = 1; // bespoke TODO → no-op fall through
-    a.fbPhaseSlots[0] = 0;
+    a.actionIndex = 1; a.variantIndex = 0; a.dt = 1;
+    a.pos = { x: 100, y: 0, z: 0 };
+    a.targetCache5e8 = { x: 0, y: 0, z: 0 };
+    root(a); // v0 → shared lunge ph0
+    assert(a.fbPhaseSlots[0] === 1, "action1 v0 lunge ph0 advances +0x540");
+    assert(a.streamSlot === 2, "action1 v0 lunge ph0 seeds +0x6ea = slotBase 1 then ++");
+    assert(a.handlerTimer === 60.0, "action1 v0 lunge ph0 seeds +0x558 = 60.0");
+    assert(a.hSpeed === 0 && a.yVel === 0 && a.hDecel === 0,
+      "action1 v0 lunge ph0 zeroes velocity scalars");
+  }
+
+  // --- v2 ph0: setup — +0x540++, +0x6ea=4, +0x558=60, blink. ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 2; a.dt = 1;
+    a.pos = { x: 100, y: 0, z: 0 };
+    a.targetCache5e8 = { x: 0, y: 0, z: 0 };
+    root(a); // v2 ph0
+    assert(a.fbPhaseSlots[0] === 1, "action1 v2 ph0 advances +0x540");
+    assert(a.streamSlot === 4, "action1 v2 ph0 seeds +0x6ea = 4");
+    assert(a.handlerTimer === TELEPORT_NINJA.A1_PH0_TIMER,
+      "action1 v2 ph0 seeds +0x558 = 60.0 (FLOAT_8043a2dc)");
+    assert(a.pos.x === 195, "action1 v2 ph0 blink pos.x → 195");
+    assert(a.hSpeed === 0 && a.yVel === 0 && a.hDecel === 0 && a.gravityCoeff === 0,
+      "action1 v2 ph0 zeroes velocity scalars");
+  }
+
+  // --- v2 ph1: timer ≤ 0 → advance + commit speed = row/30. ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 2; a.dt = 1;
+    a.fbPhaseSlots[0] = 1;
+    a.handlerTimer = 1.0; // drains to 0 → advance
+    a.actionSpeedRows = [30, 30, 30]; // row 0 = 30 → hSpeed = 1.0
     root(a);
-    assert(a.fbPhaseSlots[0] === 0, "action1 bespoke TODO falls through (no phase advance)");
+    assert(a.fbPhaseSlots[0] === 2, "action1 v2 ph1 timer ≤ 0 advances to ph2");
+    assert(a.handlerTimer === TELEPORT_NINJA.A1_PH1_TIMER,
+      "action1 v2 ph1 re-seeds +0x558 = 30.0 (FLOAT_8043a2bc)");
+    assert(a.hSpeed === 30 / 30, "action1 v2 ph1 commits hSpeed = row/30 = 1.0");
+  }
+
+  // --- v2 ph3→ph4: contact (+0x1cef) → launch commit (hSpeed=40·cos, yVel=40·−sin). ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 2; a.dt = 1;
+    a.fbPhaseSlots[0] = 3; // enter shared ph0
+    a.steerYaw = 0; // cos(0)=1, sin(0)=0
+    root(a); // shared ph0
+    assert(a.fbPhaseSlots[0] === 4, "action1 v2 shared ph0 advances to ph1");
+    root(a); // shared ph1 (approach) — needs timer drain
+    assert(a.fbPhaseSlots[0] === 5, "action1 v2 shared ph1 advances to ph2 (contact)");
+    a.contactP0 = 1; // +0x1cef → launch commit
+    root(a);
+    assert(a.fbPhaseSlots[0] === 6, "action1 v2 shared ph2 contact → ph3");
+    assert(a.hSpeed === TELEPORT_NINJA.A1_LAUNCH_SPEED,
+      "action1 v2 shared ph2 commits hSpeed = 40·cos(0)");
+    assert(a.yVel === 0, "action1 v2 shared ph2 commits yVel = 40·−sin(0) = 0");
+  }
+
+  // --- v2 ph3 hit-gate: +0x1d9 & 0x30 → yVel=10, gravity=-1, then exit. ---
+  {
+    const a = createRomActor() as TnActor;
+    configureTeleportNinjaFamily(a, "pl0005", makeCtx());
+    const root = a.rootAction!;
+    a.actionIndex = 1; a.variantIndex = 2; a.dt = 1;
+    a.fbPhaseSlots[0] = 6;
+    a.tnHitGate1d9 = 0x30; // +0x1d9 & 0x30
+    a.contactP0 = -1;      // +0x1cef < 0
+    a.wallContact = 0;
+    a.controlWord = 0x3; a.housekeeping73f = 1;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[7 * 2 + 1] = 61;
+    (a as RomActor & { grounded?: boolean }).grounded = true;
+    root(a);
+    assert(a.gravityCoeff === TELEPORT_NINJA.STREAM_RATE,
+      "action1 v2 ph3 hit-gate seeds +0x50 = -1.0 (FLOAT_8043a2c0)");
+    assert(a.yVel === TELEPORT_NINJA.A1_PH3_YVEL + TELEPORT_NINJA.STREAM_RATE * TELEPORT_NINJA.A1_PH3_GRAVITY,
+      "action1 v2 ph3 seeds +0x48 = 10.0 then gravity integrates (10 + (-1×4) = 6)");
+    assert(a.housekeeping73f === 0 && (a.controlWord & 0x3) === 0,
+      "action1 v2 ph3 grounded exit clears +0x73f / strips +0x5e0");
+    assert(a.ubState === 61, "action1 v2 ph3 grounded exit dispatches upper cue 7");
+    assert(a.stateTimer === TELEPORT_NINJA.A1_144_SEED + 1,
+      "action1 v2 ph3 exit seeds +0x694 = 8.0 + dt (FLOAT_8043a2d8)");
   }
 
   // ============================================================================
