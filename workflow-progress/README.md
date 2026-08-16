@@ -1,25 +1,26 @@
-# Port workflow: RUNNING
+# Port workflow: IDLE
 
-*Generated 2026-08-16T16:26:47.713366Z - machine-written, do not edit.*
+*Generated 2026-08-16T16:29:38.141609Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 2/1520 settled (2 green, 0 staged) |
 | **Retries outstanding** | 19 |
 | **Untouched** | 1498 |
-| **Last transition** | 2026-08-16T16:26:47.713366Z |
+| **Last transition** | 2026-08-16T16:29:38.141609Z |
 | **Last green** | never (`-`) |
 | **Last product commit** | `-` |
-| **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ 32768 ctx |
-| **Driver** | running |
+| **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ ? ctx |
+| **Driver** | stopped |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-16T16:29:38.141609Z | `-` | palworld_protected | machine | 0 | 1 Palworld player(s) connected. |
 | 2026-08-16T16:26:47.713366Z | `auto-c0000-003` | deferred | compile-fix | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T16:26:47.779367Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T16:13:17.711235Z | `-` | palworld_protected | machine | 0 | 1 Palworld player(s) connected. |
