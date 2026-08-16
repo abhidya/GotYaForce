@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "generated_at": "2026-08-16T11:40:08.033876Z",
+  "run_id": "2026-08-16T11:40:07.991906Z",
+  "total_units": 1520,
+  "green": 2,
+  "staged": 0,
+  "retryable": 19,
+  "untouched": 1493,
+  "deferred": 0,
+  "structural_ineligible": 0,
+  "active": 6,
+  "total_attempts": 27,
+  "transitions_last_hour": 0,
+  "greens_last_hour": 0,
+  "last_green_at": null,
+  "last_green_unit": null,
+  "last_product_commit": null,
+  "repeated_failure_classes": [],
+  "health": "manual_paused",
+  "machine": {
+    "workflow_state": "manual_paused",
+    "driver_status": "stopped",
+    "manual_paused": true,
+    "block_reason": null,
+    "active_model": null,
+    "context_length": null,
+    "configured_model": "unsloth/Qwen3.6-27B-MTP-GGUF",
+    "detail": "Manually paused by owner (rig gate)."
+  }
+}
