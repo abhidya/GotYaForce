@@ -13509,7 +13509,9 @@
       "actions": [
         {
           "actionIndex": 0,
-          "evidence": [],
+          "evidence": [
+            "0x80105144:0: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0c02",
@@ -13546,11 +13548,13 @@
             "pl0c02: command 0x80321e5c (research/decomp/ghidra-export/chunk_0029.c:589-592)",
             "pl0c02: root 0x801052c8, action table 0x80321fa8, handler 0x80105304"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
-          "evidence": [],
+          "evidence": [
+            "0x80105144:1: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0c02",
@@ -13568,11 +13572,13 @@
             "pl0c02: command 0x80321e74 (research/decomp/ghidra-export/chunk_0029.c:589-592)",
             "pl0c02: root 0x801052c8, action table 0x80321fa8, handler 0x801055ec"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x80105144:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0c02",
@@ -13609,7 +13615,7 @@
             "pl0c02: command 0x80321ed4 (research/decomp/ghidra-export/chunk_0029.c:589-592)",
             "pl0c02: root 0x801052c8, action table 0x80321fa8, handler 0x80105f30"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x80105144",
@@ -32360,8 +32366,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 111,
-      "ported": 214
+      "partial": 108,
+      "ported": 217
     }
   }
 }

@@ -80,6 +80,7 @@ import { createMeleeSamurai, SAMURAI_MELEE_DEFAULT_CONFIG } from "./families/mel
 import { configureValkrieFamily } from "./families/valkrie.js";
 import { configureNurseFamily } from "./families/nurse-wizard-idol.js";
 import { configureTankFamily } from "./families/tank-borg.js";
+import { configureBeamTankFamily } from "./families/beam-tank.js";
 import { configureArrowNinjaFamily } from "./families/arrow-ninja.js";
 import { configureFortressFamily } from "./families/fortress-borg.js";
 import {
@@ -535,7 +536,9 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // NORMAL TANK / LEOPARD family (ctor 0x8007ca5c) — shared-X engine (group 4 seed 0).
       pl0c00: makeSimpleRegistration("pl0c00", (a, ctx) => configureTankFamily(a, "pl0c00", ctx)),
       pl0c01: makeSimpleRegistration("pl0c01", (a, ctx) => configureTankFamily(a, "pl0c01", ctx)),
-      pl0c02: makeSimpleRegistration("pl0c02", (a, ctx) => configureTankFamily(a, "pl0c02", ctx)),
+      // BEAM TANK (pl0c02, ctor 0x80105144) — bespoke 3-action port
+      // (families/beam-tank.ts): B volley + B charge + X-special.
+      pl0c02: makeSimpleRegistration("pl0c02", (a, ctx) => configureBeamTankFamily(a, ctx)),
       pl0c04: makeSimpleRegistration("pl0c04", (a, ctx) => configureTankFamily(a, "pl0c04", ctx)),
       pl0c05: makeSimpleRegistration("pl0c05", (a, ctx) => configureTankFamily(a, "pl0c05", ctx)),
       pl0c06: makeSimpleRegistration("pl0c06", (a, ctx) => configureTankFamily(a, "pl0c06", ctx)),
