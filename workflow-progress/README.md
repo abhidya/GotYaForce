@@ -1,6 +1,6 @@
 # Port workflow: PAUSED
 
-*Generated 2026-08-16T13:09:56.179240Z - machine-written, do not edit.*
+*Generated 2026-08-16T13:10:39.165851Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,16 +10,17 @@
 | **Queue progress** | 2/1520 settled (2 green, 0 staged) |
 | **Retries outstanding** | 19 |
 | **Untouched** | 1499 |
-| **Last transition** | 2026-08-16T13:09:56.179240Z |
+| **Last transition** | 2026-08-16T13:10:39.165851Z |
 | **Last green** | never (`-`) |
 | **Last product commit** | `-` |
-| **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ 32768 ctx |
-| **Driver** | running |
+| **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ ? ctx |
+| **Driver** | stopped |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-16T13:10:39.165851Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-16T13:09:56.179240Z | `auto-c0000-003` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments |
 | 2026-08-16T12:48:38.478014Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T12:18:39.792453Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
