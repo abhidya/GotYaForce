@@ -81,6 +81,7 @@ import { configureValkrieFamily } from "./families/valkrie.js";
 import { configureNurseFamily } from "./families/nurse-wizard-idol.js";
 import { configureTankFamily } from "./families/tank-borg.js";
 import { configureBeamTankFamily } from "./families/beam-tank.js";
+import { configureIcbmTankFamily } from "./families/icbm-tank.js";
 import { configureArrowNinjaFamily } from "./families/arrow-ninja.js";
 import { configureFortressFamily } from "./families/fortress-borg.js";
 import {
@@ -540,7 +541,9 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // (families/beam-tank.ts): B volley + B charge + X-special.
       pl0c02: makeSimpleRegistration("pl0c02", (a, ctx) => configureBeamTankFamily(a, ctx)),
       pl0c04: makeSimpleRegistration("pl0c04", (a, ctx) => configureTankFamily(a, "pl0c04", ctx)),
-      pl0c05: makeSimpleRegistration("pl0c05", (a, ctx) => configureTankFamily(a, "pl0c05", ctx)),
+      // ICBM TANK (pl0c05, ctor 0x800af538) — bespoke 2-action port
+      // (families/icbm-tank.ts): B volley + X-special.
+      pl0c05: makeSimpleRegistration("pl0c05", (a, ctx) => configureIcbmTankFamily(a, ctx)),
       pl0c06: makeSimpleRegistration("pl0c06", (a, ctx) => configureTankFamily(a, "pl0c06", ctx)),
       // SAPPHIRE KNIGHT / RUBY KNIGHT family (ctor 0x800bb390) — knight-cluster port
       // (bespoke action 0/2 tables pending; action 1 shared melee + shared-engine X).

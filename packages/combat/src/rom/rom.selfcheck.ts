@@ -135,6 +135,7 @@ import { runWingBlobClusterSelfTests } from "../families/wing-blob-cluster.js";
 import { runUnregisteredClusterSelfTests } from "../families/unregistered-cluster.js";
 import { runPantherVehicleSelfTests } from "../families/panther-vehicle.js";
 import { runBeamTankSelfTests } from "../families/beam-tank.js";
+import { runIcbmTankSelfTests } from "../families/icbm-tank.js";
 import { runDeathBorgChiSelfTests } from "../families/death-borg-chi.js";
 import type { BorgRuntime } from "../types.js";
 import {
@@ -3879,6 +3880,7 @@ function runSubagentPortTests(): void {
   runUnregisteredClusterSelfTests(assert);
   runPantherVehicleSelfTests(assert);
   runBeamTankSelfTests(assert);
+  runIcbmTankSelfTests(assert);
 }
 
 function runGirlClusterTests(): void {
