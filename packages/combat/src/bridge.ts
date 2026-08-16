@@ -83,6 +83,7 @@ import { configureTankFamily } from "./families/tank-borg.js";
 import { configureBeamTankFamily } from "./families/beam-tank.js";
 import { configureIcbmTankFamily } from "./families/icbm-tank.js";
 import { configureUltimateCannonFamily } from "./families/ultimate-cannon.js";
+import { configureGatlingTankFamily } from "./families/gatling-tank.js";
 import { configureArrowNinjaFamily } from "./families/arrow-ninja.js";
 import { configureFortressFamily } from "./families/fortress-borg.js";
 import {
@@ -537,7 +538,9 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // rootAction stays null so the generic combat layer owns the X press.
       // NORMAL TANK / LEOPARD family (ctor 0x8007ca5c) — shared-X engine (group 4 seed 0).
       pl0c00: makeSimpleRegistration("pl0c00", (a, ctx) => configureTankFamily(a, "pl0c00", ctx)),
-      pl0c01: makeSimpleRegistration("pl0c01", (a, ctx) => configureTankFamily(a, "pl0c01", ctx)),
+      // GATLING TANK (pl0c01, ctor 0x800ad7cc) — bespoke 2-action port
+      // (families/gatling-tank.ts): B volley + X-special.
+      pl0c01: makeSimpleRegistration("pl0c01", (a, ctx) => configureGatlingTankFamily(a, ctx)),
       // BEAM TANK (pl0c02, ctor 0x80105144) — bespoke 3-action port
       // (families/beam-tank.ts): B volley + B charge + X-special.
       pl0c02: makeSimpleRegistration("pl0c02", (a, ctx) => configureBeamTankFamily(a, ctx)),

@@ -4407,7 +4407,9 @@
       "actions": [
         {
           "actionIndex": 0,
-          "evidence": [],
+          "evidence": [
+            "0x800ad7cc:0: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0c01",
@@ -4468,11 +4470,13 @@
             "pl0c01: command 0x802fa3dc (user-data/GG4E/disc/sys/boot.dol:0x800ad7cc copies actor+0x4ec root via 0x800ad854 and actor+0x4b0 via 0x800ad8a0)",
             "pl0c01: root 0x800ada28, action table 0x802fa1a8, handler 0x800ada64"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x800ad7cc:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0c01",
@@ -4509,7 +4513,7 @@
             "pl0c01: command 0x802fa43c (user-data/GG4E/disc/sys/boot.dol:0x800ad7cc copies actor+0x4ec root via 0x800ad854 and actor+0x4b0 via 0x800ad8a0)",
             "pl0c01: root 0x800ada28, action table 0x802fa1a8, handler 0x800ade9c"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x800ad7cc",
@@ -32376,8 +32380,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 103,
-      "ported": 222
+      "partial": 101,
+      "ported": 224
     }
   }
 }
