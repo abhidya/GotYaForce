@@ -7,6 +7,12 @@
 //   RING VALKRIE    pl0b04 (ctor 0x80160ffc)
 //   SLOW VALKRIE    pl0b06 (ctor 0x801a51cc)
 //   DEATH BORG LAMBDA / LAMBDA II pl0b05 + pl0b07 (ctor 0x8019e414; tables A-C only)
+// @audit-ported pl0b00 action=2 variants=0,1,2,3,4
+// @audit-ported pl0b01 action=2 variants=0,1,2,3,4
+// @audit-ported pl0b02 action=2 variants=0,1,2,3,4
+// @audit-ported pl0b03 action=2 variants=0,1,2,3,4
+// @audit-ported pl0b04 action=2 variants=0,1,2,3,4
+// @audit-ported pl0b06 action=2 variants=0,1,2,3,4
 //
 // Machines (decomp: research/decomp/ghidra-export/chunk_0038.c unless noted):
 //   Table A @0x8033ed68 — action 0 (B ranged volley), engine zz_014a200_ (:2754):

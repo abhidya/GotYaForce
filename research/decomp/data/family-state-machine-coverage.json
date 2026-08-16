@@ -10786,7 +10786,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x800de190:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0b00",
@@ -10826,7 +10828,7 @@
             "pl0b00: command 0x8031370c (user-data/GG4E/disc/sys/boot.dol:0x800de190 copies actor+0x4ec root via 0x800de218 and actor+0x4b0 via 0x800de264)",
             "pl0b00: root 0x800de418, action table 0x80313458, handler 0x800de580"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x800de190",
@@ -23100,7 +23102,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x8015d288:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0b01",
@@ -23140,7 +23144,7 @@
             "pl0b01: command 0x80346c84 (user-data/GG4E/disc/sys/boot.dol:0x8015d288 copies actor+0x4ec root via 0x8015d310 and actor+0x4b0 via 0x8015d35c)",
             "pl0b01: root 0x8015d4e8, action table 0x803469d4, handler 0x8015d650"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x8015d288",
@@ -23573,7 +23577,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x80160820:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0b02",
@@ -23613,7 +23619,7 @@
             "pl0b02: command 0x80348f7c (user-data/GG4E/disc/sys/boot.dol:0x80160820 copies actor+0x4ec root via 0x801608a8 and actor+0x4b0 via 0x801608f4)",
             "pl0b02: root 0x80160a58, action table 0x80348cc8, handler 0x80160bc0"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x80160820",
@@ -23768,7 +23774,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x80160be4:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0b03",
@@ -23808,7 +23816,7 @@
             "pl0b03: command 0x8034935c (user-data/GG4E/disc/sys/boot.dol:0x80160be4 copies actor+0x4ec root via 0x80160c6c and actor+0x4b0 via 0x80160cb8)",
             "pl0b03: root 0x80160e70, action table 0x803490a8, handler 0x80160fd8"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x80160be4",
@@ -23963,7 +23971,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x80160ffc:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0b04",
@@ -24003,7 +24013,7 @@
             "pl0b04: command 0x80349724 (user-data/GG4E/disc/sys/boot.dol:0x80160ffc copies actor+0x4ec root via 0x80161084 and actor+0x4b0 via 0x801610d0)",
             "pl0b04: root 0x80161248, action table 0x80349470, handler 0x801613d8"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x80160ffc",
@@ -29376,7 +29386,9 @@
         },
         {
           "actionIndex": 2,
-          "evidence": [],
+          "evidence": [
+            "0x801a51cc:2: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0b06",
@@ -29416,7 +29428,7 @@
             "pl0b06: command 0x80379694 (research/decomp/ghidra-export/chunk_0050.c:2424-2427)",
             "pl0b06: root 0x801a5454, action table 0x803793e0, handler 0x801a55bc"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x801a51cc",
@@ -32332,8 +32344,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 125,
-      "ported": 200
+      "partial": 119,
+      "ported": 206
     }
   }
 }
