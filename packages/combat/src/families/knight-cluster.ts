@@ -1,4 +1,6 @@
 // KNIGHT CLUSTER — 7-family bespoke port covering 14 borgs.
+// @audit-ported pl0204 action=1 variants=0,1,2,3,4
+// @audit-ported pl020d action=1 variants=0,1,2,3,4
 //
 // All seven families share the knight melee/lunge machinery (tables 0x80343c00 /
 // 0x80343c14 / 0x80343c28 in chunk_0040.c, already ported in shared-knight-melee.ts).
@@ -44,7 +46,7 @@ import { allocateWeapon, groundSnapRevert, stepAfterimage, stepTargetYaw, toS16 
 import { integratePhysics, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
-import { createGenericKnightRootAction } from "./shared-knight-melee.js";
+import { createGenericKnightRootAction, knightMeleeEntry00, knightMeleeEntry14, knightMeleeEntry28, createKnightMeleeTable00, createKnightMeleeTable14, createKnightMeleeTable28 } from "./shared-knight-melee.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./shared-engine.js";
 import { configureKnightFamily, type KnightFamilyCtx } from "./knight-family.js";
 
@@ -883,14 +885,39 @@ export function configureDarkKnightFamily(
 /** AXE KNIGHT (pl0204/pl020d, ctor 0x800d6d10) — shared knight melee (action 1) +
  *  bespoke action 2 homing-dive X-special (FUN_800d74b4 → table 0x8030fb00,
  *  chunk_0022.c). Action 0 still uses the shared-engine fallback (TODO: port
- *  bespoke action 0 from fns 0x800d7094..0x800d95c0). */
+ *  bespoke action 0 from fns 0x800d7094..0x800d95c0).
+ *
+ *  ACTION 1 routing (FUN_800d73d0 → PTR_FUN_8030faec[+0x581], chunk_0022.c:4691):
+ *    v0 -> FUN_800d7424 -> zz_015809c_(0)   = knightMeleeEntry00 + table00 (slot 0)
+ *    v1 -> FUN_800d7448 -> zz_0158688_(3)   = knightMeleeEntry14 + table14 (slot 3)
+ *    v2 -> FUN_800d746c -> zz_0158688_(4)   = knightMeleeEntry14 + table14 (slot 4)
+ *    v3 -> FUN_800d7490 -> zz_0158a94_      = knightMeleeEntry28 + table28
+ *    v4 -> FUN_800d7490 -> zz_0158a94_      = knightMeleeEntry28 + table28
+ *  The generic router runs v0 through entry14 (mismatch) — this bespoke router
+ *  reproduces the ROM's per-variant entry+table selection exactly. */
+export function createAxeKnightAction1(ctx: StreamContext): (actor: RomActor) => void {
+  const table00 = createKnightMeleeTable00(ctx, 0);
+  const table14Slot3 = createKnightMeleeTable14(ctx, 3);
+  const table14Slot4 = createKnightMeleeTable14(ctx, 4);
+  const table28 = createKnightMeleeTable28(ctx);
+  return (actor: RomActor) => {
+    // FUN_800d73d0 prologue: halve +0x18da (steerYaw) AND +0x18dc.
+    actor.steerYaw = toS16(actor.steerYaw) >> 1;
+    const v = actor.variantIndex;
+    if (v === 0) knightMeleeEntry00(actor, table00);
+    else if (v === 1) knightMeleeEntry14(actor, table14Slot3);
+    else if (v === 2) knightMeleeEntry14(actor, table14Slot4);
+    else knightMeleeEntry28(actor, table28); // v3/v4
+  };
+}
+
 export function configureAxeKnightFamily(
   actor: RomActor,
   borgId: AxeBorgId,
   ctx: StreamContext,
 ): void {
   actor.borgNumber = AXE_BORG_NUMBERS[borgId] ?? 0x204;
-  const melee = createGenericKnightRootAction(ctx);
+  const melee = createAxeKnightAction1(ctx);
   const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) });
   const axeX = createAxeAction2(ctx);
   actor.rootAction = (a) => {
