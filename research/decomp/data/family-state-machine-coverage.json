@@ -6016,6 +6016,176 @@
         },
         {
           "actionIndex": 4,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "borgSwitch": [
+                  "cyber-dragon.ts: +0x3e8 switch iVar5 base (0/4/8/0xc) + child form uVar1 (0/1)"
+                ],
+                "bridgeWiring": [
+                  "bridge.ts: cyberDragon actionTable[4]"
+                ],
+                "childSpawn": [
+                  "cyber-dragon.ts: zz_0184588_ kind-0x33 spawn (CYBER_DRAGON_CHILD_SPAWNER 0x80184588)"
+                ],
+                "constants": [
+                  "chunk_0018.c:4425-4481: FLOAT_804384cc (20.0) +0x694 exit seed"
+                ],
+                "exitHelper": [
+                  "cyber-dragon.ts: zz_006a668_(kind 1) + +0x694 = 20.0 + dt"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck Cyber Dragon action-4 shim"
+                ],
+                "phaseTransitions": [
+                  "cyber-dragon.ts: single-phase shim (spawn + exit, no +0x540 machine)"
+                ],
+                "rootDispatch": [
+                  "cyber-dragon.ts: FUN_800b9d2c family-init shim dispatches actionIndex 4"
+                ],
+                "streamBehavior": [
+                  "none (shim exits immediately after the child spawn)"
+                ],
+                "variantDispatch": [
+                  "cyber-dragon.ts: actionTable[4] routes all variants to cyberDragonAction4"
+                ]
+              },
+              "member": "pl0503",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "borgSwitch": [
+                  "cyber-dragon.ts: +0x3e8 switch iVar5 base (0/4/8/0xc) + child form uVar1 (0/1)"
+                ],
+                "bridgeWiring": [
+                  "bridge.ts: cyberDragon actionTable[4]"
+                ],
+                "childSpawn": [
+                  "cyber-dragon.ts: zz_0184588_ kind-0x33 spawn (CYBER_DRAGON_CHILD_SPAWNER 0x80184588)"
+                ],
+                "constants": [
+                  "chunk_0018.c:4425-4481: FLOAT_804384cc (20.0) +0x694 exit seed"
+                ],
+                "exitHelper": [
+                  "cyber-dragon.ts: zz_006a668_(kind 1) + +0x694 = 20.0 + dt"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck Cyber Dragon action-4 shim"
+                ],
+                "phaseTransitions": [
+                  "cyber-dragon.ts: single-phase shim (spawn + exit, no +0x540 machine)"
+                ],
+                "rootDispatch": [
+                  "cyber-dragon.ts: FUN_800b9d2c family-init shim dispatches actionIndex 4"
+                ],
+                "streamBehavior": [
+                  "none (shim exits immediately after the child spawn)"
+                ],
+                "variantDispatch": [
+                  "cyber-dragon.ts: actionTable[4] routes all variants to cyberDragonAction4"
+                ]
+              },
+              "member": "pl0506",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "borgSwitch": [
+                  "cyber-dragon.ts: +0x3e8 switch iVar5 base (0/4/8/0xc) + child form uVar1 (0/1)"
+                ],
+                "bridgeWiring": [
+                  "bridge.ts: cyberDragon actionTable[4]"
+                ],
+                "childSpawn": [
+                  "cyber-dragon.ts: zz_0184588_ kind-0x33 spawn (CYBER_DRAGON_CHILD_SPAWNER 0x80184588)"
+                ],
+                "constants": [
+                  "chunk_0018.c:4425-4481: FLOAT_804384cc (20.0) +0x694 exit seed"
+                ],
+                "exitHelper": [
+                  "cyber-dragon.ts: zz_006a668_(kind 1) + +0x694 = 20.0 + dt"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck Cyber Dragon action-4 shim"
+                ],
+                "phaseTransitions": [
+                  "cyber-dragon.ts: single-phase shim (spawn + exit, no +0x540 machine)"
+                ],
+                "rootDispatch": [
+                  "cyber-dragon.ts: FUN_800b9d2c family-init shim dispatches actionIndex 4"
+                ],
+                "streamBehavior": [
+                  "none (shim exits immediately after the child spawn)"
+                ],
+                "variantDispatch": [
+                  "cyber-dragon.ts: actionTable[4] routes all variants to cyberDragonAction4"
+                ]
+              },
+              "member": "pl050f",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "borgSwitch": [
+                  "cyber-dragon.ts: +0x3e8 switch iVar5 base (0/4/8/0xc) + child form uVar1 (0/1)"
+                ],
+                "bridgeWiring": [
+                  "bridge.ts: cyberDragon actionTable[4]"
+                ],
+                "childSpawn": [
+                  "cyber-dragon.ts: zz_0184588_ kind-0x33 spawn (CYBER_DRAGON_CHILD_SPAWNER 0x80184588)"
+                ],
+                "constants": [
+                  "chunk_0018.c:4425-4481: FLOAT_804384cc (20.0) +0x694 exit seed"
+                ],
+                "exitHelper": [
+                  "cyber-dragon.ts: zz_006a668_(kind 1) + +0x694 = 20.0 + dt"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck Cyber Dragon action-4 shim"
+                ],
+                "phaseTransitions": [
+                  "cyber-dragon.ts: single-phase shim (spawn + exit, no +0x540 machine)"
+                ],
+                "rootDispatch": [
+                  "cyber-dragon.ts: FUN_800b9d2c family-init shim dispatches actionIndex 4"
+                ],
+                "streamBehavior": [
+                  "none (shim exits immediately after the child spawn)"
+                ],
+                "variantDispatch": [
+                  "cyber-dragon.ts: actionTable[4] routes all variants to cyberDragonAction4"
+                ]
+              },
+              "member": "pl0512",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -6161,7 +6331,7 @@
             "pl0512: command 0x802feebc (user-data/GG4E/disc/sys/boot.dol:0x800b8188 copies actor+0x4ec root via 0x800b8344 and actor+0x4b0 via 0x800b8334)",
             "pl0512: root 0x800b8a94, action table 0x802ff2fc, handler 0x800b9d2c"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x800b8188",
@@ -32386,8 +32556,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 98,
-      "ported": 227
+      "partial": 97,
+      "ported": 228
     }
   }
 }

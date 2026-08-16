@@ -33,7 +33,7 @@
 //   FLOAT_804384c8 = -1.0  (stream rate)    FLOAT_804384c4 = 0.95  (v1 velocity drag)
 //   FLOAT_804384bc = 1.0   (physics gravity)
 
-import type { RomActor, Vec3 } from "../rom/actor.js";
+import { createRomActor, type RomActor, type Vec3 } from "../rom/actor.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
@@ -76,6 +76,44 @@ export interface CyberDragonFamilyCtx extends StreamContext {
   onGroundSnap?: (actor: RomActor) => void;
 }
 
+/** Port of zz_0184588_ @ chunk_0045.c:6242 — the family child spawner. Builds a
+ *  kind-0x33 child (+0x10 = 0x33, +0x11 = uVar1, +0x13 = subIdx). Borg-gated to the
+ *  6 cyber-dragon ids. Called from the action-4 init shim. */
+export const CYBER_DRAGON_CHILD_SPAWNER = 0x80184588;
+
+/** Action 4 — FUN_800b9d2c @ chunk_0018.c:4425, the family-init shim. Borg-switched
+ *  base subIdx + child form, then scan the +0x18c byte's low nibble for the first
+ *  set bit and spawn one child, then exit via zz_006a668_(kind 1). The ROM passes
+ *  uVar1 (the child +0x11 form id; 0 for 4 of the 6 arms) and subIdx (+0x13,
+ *  iVar5 + bit) — the port surfaces subIdx as the spawner hook's record type, the
+ *  distinguishing per-borg child record. */
+function cyberDragonAction4(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  let iVar5 = 0;
+  let uVar1 = 0;
+  switch (actor.borgNumber) {
+    case 0x506: iVar5 = 4; uVar1 = 0; break;
+    case 0x508: iVar5 = 0; uVar1 = 1; break;
+    case 0x50f: iVar5 = 8; uVar1 = 0; break;
+    case 0x512: iVar5 = 0xc; uVar1 = 0; break;
+    case 0x514: iVar5 = 8; uVar1 = 1; break;
+    default: iVar5 = 0; uVar1 = 0; break;
+  }
+  void uVar1;
+  const mask = (actor as RomActor & CyberDragonScratch).cdInitMask18c ?? 0;
+  for (let bit = 0; bit < 4; bit += 1) {
+    if ((mask & (1 << bit)) !== 0) {
+      ctx.onFamilyProjectile?.(actor, CYBER_DRAGON_CHILD_SPAWNER, iVar5 + bit);
+      break;
+    }
+  }
+  actor.housekeeping73f = 0; // +0x73f = 0
+  actor.controlWord &= ~0x3; // +0x5e0 &= ~3
+  actor.shotScalar1d9c = 0;
+  actor.shotByte1db2 = 0;
+  actor.shotByte1db3 = 0;
+  actor.stateTimer = 20.0 + actor.dt; // +0x694 = FLOAT_804384cc (20.0) + dt
+}
+
 /** Port of zz_00b9c68_ @ chunk_0018.c:4394 — per-frame contact bookkeeping shared by
  *  all three breath variants. Sets the stream-state byte, ticks the stream, and on a
  *  part-0 contact (+0x1cef) calls zz_0098dbc_(actor, 0, 6) — a shared kind-6 attack
@@ -111,6 +149,8 @@ interface CyberDragonScratch {
   moveTimer: number;
   /** +0x6eb: B-shot permutation cursor (byte). */
   permCursor: number;
+  /** +0x18c: family-init child-ownership mask (low nibble scanned by action 4). */
+  cdInitMask18c: number;
   /** +0x73f: B-shot state byte. */
   bShotState: number;
   /** +0x746: B-shot spawn gate (byte). */
@@ -572,7 +612,7 @@ export function createCyberDragonRootAction(ctx: CyberDragonFamilyCtx): (actor: 
     null,                                        // 1: — (null in ROM)
     (actor) => cyberDragonXSpecial(actor, ctx),  // 2: X-special (bespoke 3-variant breath)
     (actor) => runBShotEngine(actor, ctx),        // 3: B-shot (FUN_800b8ad0 → zz_00b8af0_)
-    null,                                        // 4: family-init shim (FUN_800b9d2c) — dead data
+    (actor) => cyberDragonAction4(actor, ctx),    // 4: family-init shim (FUN_800b9d2c)
   ];
   return (actor: RomActor) => {
     const fn = actionTable[actor.actionIndex];
@@ -603,4 +643,53 @@ export function configureCyberDragonFamily(
   // entry "0x800b8188", cue table @0x802fec20). Defaults matching power-on state:
   actor.defaultGroup = 0;
   actor.streamSlot = 0;
+}
+
+// ============================================================================
+// Self-tests — action-4 family-init shim (mirror the tank-module style).
+// ============================================================================
+
+type AssertFn = (cond: boolean, msg: string) => void;
+
+export function runCyberDragonAction4SelfTests(assert: AssertFn): void {
+  console.log("\n[cyber-dragon.selfcheck] action 4 — family-init shim (FUN_800b9d2c):");
+
+  {
+    const shots: Array<{ addr: number; type: number }> = [];
+    const ctx: CyberDragonFamilyCtx = {
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+      onAllocateResource: () => true,
+    };
+    const a = createRomActor() as RomActor & CyberDragonScratch;
+    a.actionIndex = 4;
+    a.borgNumber = 0x503; // default arm: iVar5 0, uVar1 0
+    a.controlWord = 0x3;
+    a.dt = 1;
+    a.cdInitMask18c = 0x1; // first bit set → spawn subIdx iVar5 + 0 = 0
+    configureCyberDragonFamily(a, "pl0503", ctx);
+    assert(a.rootAction !== null, "configureCyberDragonFamily wires rootAction");
+    a.rootAction?.(a);
+    assert(shots.length === 1 && shots[0]!.addr === CYBER_DRAGON_CHILD_SPAWNER && shots[0]!.type === 0,
+      "a4 default arm spawns subIdx 0 (iVar5 0 + bit 0)");
+    assert((a.controlWord & 0x3) === 0, "a4 strips action-mode bits");
+    assert(a.stateTimer === 21.0, "a4 seeds +0x694 = 20.0 + dt");
+  }
+
+  {
+    const shots: Array<{ addr: number; type: number }> = [];
+    const ctx: CyberDragonFamilyCtx = {
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+      onAllocateResource: () => true,
+    };
+    const a = createRomActor() as RomActor & CyberDragonScratch;
+    a.actionIndex = 4;
+    a.borgNumber = 0x512; // iVar5 0xc, uVar1 0
+    a.controlWord = 0x3;
+    a.dt = 1;
+    a.cdInitMask18c = 0x2; // second bit set → spawn subIdx iVar5 + 1 = 0xd
+    configureCyberDragonFamily(a, "pl0512", ctx);
+    a.rootAction?.(a);
+    assert(shots.length === 1 && shots[0]!.addr === CYBER_DRAGON_CHILD_SPAWNER && shots[0]!.type === 0xd,
+      "a4 0x512 arm spawns subIdx 0xd (iVar5 0xc + bit 1)");
+  }
 }

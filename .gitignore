@@ -72,5 +72,9 @@ research/decomp/generated/finish-game-port/
 .tmp/
 .pnpm-store/
 
+# Secrets / local env — never commit.
+.env
+.env.local
+
 # Unsloth (LLM fine-tuning) compiled cache — local ML artifact, not source.
 unsloth_compiled_cache/
