@@ -13028,6 +13028,46 @@
           }
         }
       ]
+    },
+    {
+      "constructorAddress": "0x80100ef4",
+      "actionIndex": 2,
+      "status": "ported",
+      "coverage": [
+        {
+          "member": "pl0a01",
+          "variants": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "evidence": {
+            "rootDispatch": [
+              "unregistered-cluster.ts: FUN_80102800 -> zz_0148384_ dispatches actionIndex 2"
+            ],
+            "variantDispatch": [
+              "unregistered-cluster.ts: actionTable routes all variants to jetA2"
+            ],
+            "phaseTransitions": [
+              "unregistered-cluster.ts: 2-phase table @0x804346a0 (FUN_801483d0/FUN_801484c0)"
+            ],
+            "constants": [
+              "chunk_0038.c:1629-1726: FLOAT_8043a330/c/a350/a32c"
+            ],
+            "streamBehavior": [
+              "group 4 slot pre-increment (unregistered-cluster.ts jetA2)"
+            ],
+            "bridgeWiring": [
+              "bridge.ts: configureJetHeroFamily wires actionTable[2]"
+            ],
+            "focusedTests": [
+              "rom.selfcheck JET HERO a2 X-special"
+            ]
+          }
+        }
+      ]
     }
   ]
 }

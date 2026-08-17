@@ -13438,6 +13438,41 @@
         },
         {
           "actionIndex": 2,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: configureJetHeroFamily wires actionTable[2]"
+                ],
+                "constants": [
+                  "chunk_0038.c:1629-1726: FLOAT_8043a330/c/a350/a32c"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck JET HERO a2 X-special"
+                ],
+                "phaseTransitions": [
+                  "unregistered-cluster.ts: 2-phase table @0x804346a0 (FUN_801483d0/FUN_801484c0)"
+                ],
+                "rootDispatch": [
+                  "unregistered-cluster.ts: FUN_80102800 -> zz_0148384_ dispatches actionIndex 2"
+                ],
+                "streamBehavior": [
+                  "group 4 slot pre-increment (unregistered-cluster.ts jetA2)"
+                ],
+                "variantDispatch": [
+                  "unregistered-cluster.ts: actionTable routes all variants to jetA2"
+                ]
+              },
+              "member": "pl0a01",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -13478,7 +13513,7 @@
             "pl0a01: command 0x803203cc (user-data/GG4E/disc/sys/boot.dol:0x80100ef4 copies actor+0x4ec root via 0x80100f7c and actor+0x4b0 via 0x80100fc8)",
             "pl0a01: root 0x80101180, action table 0x803204fc, handler 0x80102800"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x80100ef4",
@@ -32560,8 +32595,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 95,
-      "ported": 230
+      "partial": 94,
+      "ported": 231
     }
   }
 }

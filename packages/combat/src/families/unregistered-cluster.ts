@@ -222,6 +222,8 @@ export interface UnregScratch {
   flag71c?: number;
   hit1d9?: number;
   statusWord5bc?: number;
+  /** +0x5e8 lock target (aimed-shot machines). */
+  lockTarget?: { x: number; y: number; z: number } | null;
 }
 type UA = RomActor & UnregScratch;
 
@@ -1339,7 +1341,80 @@ function createJetRootAction(ctx: UnregFamilyCtx): (actor: RomActor) => void {
     const a = scratchOf(base);
     if (a.actionIndex === 0) jetA0(a, ctx);
     else if (a.actionIndex === 1) jetA1(a, ctx);
+    else if (a.actionIndex === 2) jetA2(a, ctx);
   };
+}
+
+/** zz_0085638_ @0x80085638 — JET-family shot spawner. Kind-3 child (+0x10 = 3,
+ *  +0x11 = subIdx). ACTION-2's ph1 borg switch spawns subIdx 0 for 0xa01 (pl0a01). */
+export const JET_SHOT_SPAWNER = 0x80085638;
+
+/** JET HERO action-2 (X-special) — FUN_80102800 → zz_0148384_ (chunk_0038.c:1629),
+ *  2-phase table @0x804346a0 = [0x801483d0, 0x801484c0]:
+ *    ph0 (0x801483d0) setup: +0x540++, face 0xc1, zero scalars/turn-rates,
+ *        reposition ×0.95 + ground snap, group-4 stream (slot from +0x6ea,
+ *        pre-increment — the wrapper's param2 slot).
+ *    ph1 (0x801484c0) contact+exit: on +0x1cef contact clear + borg-switched
+ *        spawn (0xa01 → zz_0085638_(0); 0xa03/0xa06 → zz_0085638_(1); 0xa02 →
+ *        zz_0154e28_), then face + reposition; on +0x1cee wall contact exit
+ *        (zero speeds, air idle zz_006a4f4_ / air fall zz_006a5a4_).
+ */
+function jetA2(a: UA, ctx: UnregFamilyCtx): void {
+  const ph = a.fbPhaseSlots[0] ?? 0;
+  if (ph === 0) {
+    a.fbPhaseSlots[0] = 1; // +0x540++
+    a.unregSlot6ea = 0;    // wrapper param2 slot (0 for the action-2 binding)
+    if (!a.lockTarget) a.activeYaw = a.heading; // +0xcc == 0 → +0x5ac = +0x72
+    stepTargetYaw(a, 0xc1); // zz_006d144_(actor, 0xc1)
+    a.gravityCoeff = JET_HERO.ZERO;
+    a.yVel = JET_HERO.ZERO;
+    a.hDecel = JET_HERO.ZERO;
+    a.hSpeed = JET_HERO.ZERO;
+    a.poseAccum7c = 0;
+    a.poseAccum7e = 0;
+    a.poseAccum80 = 0;
+    if (a.lockTarget) {
+      vecSubtract(a.pos, a.lockTarget, a.motion);
+      vecScale(0.949999988079071, a.motion, a.motion); // FLOAT_8043a350
+      vecAdd(a.pos, a.motion, a.pos);
+    }
+    groundSnapRevert(a); // zz_0067a28_
+    const slot = a.unregSlot6ea ?? 0;
+    a.unregSlot6ea = slot + 1;
+    startStream(a, 0xf, 4, slot, JET_HERO.STREAM_RATE); // zz_004beb8_(-1, mask 0xf, group 4)
+    return;
+  }
+  if (ph === 1) {
+    tickStream(a, 0xf, ctx);
+    if (a.contactP0 !== undefined && a.contactP0 >= 1) {
+      a.contactP0 = 0;
+      if (a.borgNumber === 0xa01) {
+        ctx.onFamilyProjectile?.(a, JET_SHOT_SPAWNER, 0);
+      } else if (a.borgNumber === 0xa03 || a.borgNumber === 0xa06) {
+        ctx.onFamilyProjectile?.(a, JET_SHOT_SPAWNER, 1);
+      }
+      // 0xa02 arm: zz_0154e28_ (bespoke — not reached by this binding; kept for
+      // the borg switch's fidelity).
+    }
+    stepTargetYaw(a, 0xc1); // zz_006d144_(actor, 0xc1)
+    if (a.lockTarget) {
+      vecScale(0.949999988079071, a.motion, a.motion);
+      vecAdd(a.pos, a.motion, a.pos);
+    }
+    groundSnapRevert(a); // zz_0067a28_
+    if (a.wallContact !== 0) {
+      a.housekeeping73f = 0;
+      a.controlWord &= ~JET_HERO.ACTION_MODE_BITS;
+      a.hDecel = JET_HERO.ZERO;
+      a.hSpeed = JET_HERO.ZERO;
+      if ((a.controlWord & 0x40) === 0) {
+        romAirIdleReturn(a); // zz_006a4f4_
+      } else {
+        romAirKnockoutReturn(a); // zz_006a5a4_
+      }
+    }
+    return;
+  }
 }
 export function configureJetHeroFamily(actor: RomActor, ctx: StreamContext): void {
   actor.borgNumber = UNREG_BORG_NUMBERS.pl0a01 ?? 0xa01;
@@ -1788,6 +1863,33 @@ export function runUnregisteredClusterSelfTests(assert: AssertFn): void {
     root(a); // ph0 setup
     assert(a.fbPhaseSlots[0] === 1, "jet a1 ph0 advances to ph1");
     assert(approxEq(a.handlerTimer, JET_HERO.A1_PH0_TIMER), "+0x558 = 60 (FLOAT_8043935c)");
+  }
+
+  // ========================================================================
+  console.log("\n[unregistered-cluster] JET HERO (pl0a01) — a2 X-special (FUN_80102800):");
+  {
+    const shots: Array<{ addr: number; type: number }> = [];
+    const a = createRomActor() as UA;
+    configureJetHeroFamily(a, shotCtx(true, shots));
+    const root = a.rootAction!;
+    a.actionIndex = 2; a.dt = 1;
+    a.controlWord = 0x3;
+    a.pos = { x: 0, y: 0, z: 0 };
+    a.lockTarget = { x: 0, y: 0, z: 100 };
+    root(a); // ph0 setup
+    assert(a.fbPhaseSlots[0] === 1, "jet a2 ph0 advances to ph1");
+    assert(a.unregSlot6ea === 1, "jet a2 ph0 seeds +0x6ea = 0 then pre-increments to 1");
+    // ph1: contact → borg-switched spawn (0xa01 → subIdx 0).
+    a.contactP0 = 1;
+    root(a);
+    assert(shots.length === 1 && shots[0]!.addr === JET_SHOT_SPAWNER && shots[0]!.type === 0,
+      "jet a2 contact spawns zz_0085638_ subIdx 0 for 0xa01");
+    // ph1 wall-contact exit: air idle (controlWord airborne bit 0x40 == 0).
+    a.wallContact = 1;
+    a.contactP0 = 0;
+    root(a);
+    assert((a.controlWord & JET_HERO.ACTION_MODE_BITS) === 0,
+      "jet a2 wall exit strips action-mode bits");
   }
 
   // ========================================================================
