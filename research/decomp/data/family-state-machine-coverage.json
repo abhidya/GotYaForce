@@ -29694,7 +29694,9 @@
       "actions": [
         {
           "actionIndex": 0,
-          "evidence": [],
+          "evidence": [
+            "0x801ae30c:0: bridge-inferred ported via @audit-ported declarations in packages/combat/src/families/*.ts"
+          ],
           "liveCoverage": [
             {
               "member": "pl0d07",
@@ -29730,7 +29732,7 @@
             "pl0d07: command 0x8037c35c (user-data/GG4E/disc/sys/boot.dol:0x801ae30c copies actor+0x4ec root via 0x801ae394 and actor+0x4b0 via 0x801ae408)",
             "pl0d07: root 0x801ae7f4, action table null, handler null"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x801ae30c",
@@ -32595,8 +32597,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 0,
-      "partial": 94,
-      "ported": 231
+      "partial": 93,
+      "ported": 232
     }
   }
 }

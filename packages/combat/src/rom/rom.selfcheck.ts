@@ -142,6 +142,7 @@ import { runArrowNinjaAction2SelfTests } from "../families/arrow-ninja.js";
 import { runSharedGunXSelfTests } from "../families/shared-gun-x.js";
 import { runCyberDragonAction4SelfTests } from "../families/cyber-dragon.js";
 import { runEagleJetAction0SelfTests } from "../families/eagle-jet.js";
+import { runDeathBombSelfTests } from "../families/wave-b-catch-all.js";
 import { runDeathBorgChiSelfTests } from "../families/death-borg-chi.js";
 import type { BorgRuntime } from "../types.js";
 import {
@@ -3893,6 +3894,7 @@ function runSubagentPortTests(): void {
   runSharedGunXSelfTests(assert);
   runCyberDragonAction4SelfTests(assert);
   runEagleJetAction0SelfTests(assert);
+  runDeathBombSelfTests(assert);
 }
 
 function runGirlClusterTests(): void {
