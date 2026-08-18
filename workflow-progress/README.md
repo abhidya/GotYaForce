@@ -1,6 +1,6 @@
 # Port workflow: PAUSED
 
-*Generated 2026-08-17T06:30:21.356839Z - machine-written, do not edit.*
+*Generated 2026-08-18T22:49:21.218893Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 3/1520 settled (2 green, 1 staged) |
 | **Retries outstanding** | 22 |
 | **Untouched** | 1494 |
-| **Last transition** | 2026-08-17T06:30:21.356839Z |
+| **Last transition** | 2026-08-18T22:49:21.218893Z |
 | **Last green** | 2026-08-16T23:43:38.821886Z (`auto-c0001-007`) |
 | **Last product commit** | `35ce70d3058a4ed10047d39db34097cfdcc27358` |
 | **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ ? ctx |
@@ -22,6 +22,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-18T22:49:21.218893Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-17T06:30:21.356839Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-16T23:48:22.669559Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-16T23:45:59.952896Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |

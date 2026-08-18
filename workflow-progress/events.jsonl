@@ -43,3 +43,4 @@
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-16T23:45:59.952896Z", "run_id": "2026-08-16T23:45:59.952896Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-16T23:48:22.669559Z", "run_id": "2026-08-16T23:48:22.669559Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-17T06:30:21.356839Z", "run_id": "2026-08-17T06:30:21.356839Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
+{"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-18T22:49:21.218893Z", "run_id": "2026-08-18T22:49:21.217893Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
