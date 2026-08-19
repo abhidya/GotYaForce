@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-19T21:56:31.848903Z",
-  "run_id": "2026-08-19T21:56:31.739621Z",
+  "generated_at": "2026-08-19T21:59:06.759741Z",
+  "run_id": "2026-08-19T21:59:06.645075Z",
   "total_units": 1520,
   "green": 3,
   "staged": 6,
@@ -17,15 +17,15 @@
   "last_green_unit": "auto-c0000-008",
   "last_product_commit": "d72a33e403787f6f498aebf7f4b0bf429048251b",
   "repeated_failure_classes": [],
-  "health": "provider_paused",
+  "health": "active_no_green",
   "machine": {
-    "workflow_state": "provider_paused",
-    "driver_status": "stopped",
+    "workflow_state": "running",
+    "driver_status": "running",
     "manual_paused": false,
     "block_reason": null,
-    "active_model": null,
-    "context_length": null,
+    "active_model": "unsloth/Qwen3.8-27B-GGUF",
+    "context_length": 262144,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Provider paused; model released until it answers."
+    "detail": "Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx."
   }
 }
