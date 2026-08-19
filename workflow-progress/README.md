@@ -1,25 +1,27 @@
-# Port workflow: PAUSED
+# Port workflow: RUNNING
 
-*Generated 2026-08-19T02:55:30.044009Z - machine-written, do not edit.*
+*Generated 2026-08-19T02:58:02.302302Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `PAUSED` (provider_paused) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 4/1520 settled (2 green, 2 staged) |
 | **Retries outstanding** | 22 |
 | **Untouched** | 1494 |
-| **Last transition** | 2026-08-19T02:55:30.044009Z |
+| **Last transition** | 2026-08-19T02:58:02.302302Z |
 | **Last green** | 2026-08-19T01:31:06.753430Z (`auto-c0001-010`) |
 | **Last product commit** | `a7dc1768053be1bde4d44dedf3d205204ff68955` |
-| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
-| **Driver** | stopped |
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T02:58:02.302302Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
+| 2026-08-19T02:58:02.317938Z | `auto-c0001-011` | retryable | port | 1 | unexpected fault: [WinError 5] Access is denied: 'D:\\GotYaForce\\research\\decomp\\generated\\finish-game-por |
 | 2026-08-19T02:55:30.044009Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T02:55:12.975917Z | `auto-c0001-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-19T02:33:12.020547Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
@@ -68,5 +70,3 @@
 | 2026-08-16T12:14:34.777346Z | `-` | starting | machine | 0 | Manual pause lifted; re-arming the empty grace. |
 | 2026-08-16T12:14:17.811259Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-16T12:13:17.673994Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-16T12:13:17.727516Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
-| 2026-08-16T11:51:12.769635Z | `auto-c0001-004` | deferred | port | 0 | interrupted before a verdict; requeued |
