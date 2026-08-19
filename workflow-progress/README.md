@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-19T02:58:02.302302Z - machine-written, do not edit.*
+*Generated 2026-08-19T03:34:49.740030Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 4/1520 settled (2 green, 2 staged) |
-| **Retries outstanding** | 22 |
-| **Untouched** | 1494 |
-| **Last transition** | 2026-08-19T02:58:02.302302Z |
-| **Last green** | 2026-08-19T01:31:06.753430Z (`auto-c0001-010`) |
-| **Last product commit** | `a7dc1768053be1bde4d44dedf3d205204ff68955` |
+| **Retries outstanding** | 23 |
+| **Untouched** | 1492 |
+| **Last transition** | 2026-08-19T03:34:49.740030Z |
+| **Last green** | 2026-08-19T03:34:49.740030Z (`auto-c0001-012`) |
+| **Last product commit** | `88296acdb07b8e0fd0f5a11d23e8a87ba12fddcf` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T03:34:49.740030Z | `auto-c0001-012` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T02:58:02.302302Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T02:58:02.317938Z | `auto-c0001-011` | retryable | port | 1 | unexpected fault: [WinError 5] Access is denied: 'D:\\GotYaForce\\research\\decomp\\generated\\finish-game-por |
 | 2026-08-19T02:55:30.044009Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
@@ -69,4 +70,3 @@
 | 2026-08-16T12:18:39.831453Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T12:14:34.777346Z | `-` | starting | machine | 0 | Manual pause lifted; re-arming the empty grace. |
 | 2026-08-16T12:14:17.811259Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-16T12:13:17.673994Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
