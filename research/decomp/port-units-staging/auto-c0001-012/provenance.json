@@ -1,0 +1,88 @@
+{
+  "unit": "auto-c0001-012",
+  "run_id": "2026-08-19T02:58:02.251906Z",
+  "generated_at": "2026-08-19T03:34:46.041495Z",
+  "extractions": [
+    {
+      "file": "research/decomp/ghidra-export/chunk_0001.c",
+      "start": 5360,
+      "end": 5389,
+      "sha256": "2d79f48f57def459743bd3ddcb668bd528b16bbb6937caf54c7e301d30bcb9b6"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0001.c",
+      "start": 5393,
+      "end": 5515,
+      "sha256": "4133b6049a8ba079b6cbfa9e6e85844fc0e45e085b102d0801f204c1a8cc824d"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0001.c",
+      "start": 5519,
+      "end": 5528,
+      "sha256": "bfdcc1da6a30871982e12427096d789e4edf22149abd815db02bb1777e655b52"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0001.c",
+      "start": 5532,
+      "end": 5712,
+      "sha256": "6ca063b63fc7da9465c1db6881047580a69d71c9838ff0499374185c667b971e"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0001.c",
+      "start": 5716,
+      "end": 5760,
+      "sha256": "22dacceb6487ca71ce9fc963432fd7e65db2e87e6b037c4046bc0c7dc7872a2e"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0001.c",
+      "start": 5764,
+      "end": 5809,
+      "sha256": "7819bdcddbb0429d21bd58d051be01db6cb57a79fe803b18643b057912fd8380"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0001.c",
+      "start": 5813,
+      "end": 5821,
+      "sha256": "9e0ee910411655f384cdb20081e23983b9f4c3e6f1d1b52fba10891e2ffcb26c"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0001.c",
+      "start": 5825,
+      "end": 5837,
+      "sha256": "0a9f526229d1282aefe20c0a04a0f9107f7454675a51f7f8862cb566e8c7b1ee"
+    }
+  ],
+  "extracted_sha256": "8193e9e1ddbcd4d0068c38503ac9da8edea08e35736046e1c1a47bcebf69264f",
+  "exported_functions": [
+    "zz_0013608_",
+    "zz_0013690_",
+    "zz_00139e0_",
+    "zz_0013a28_",
+    "zz_0013d80_",
+    "zz_0013e54_",
+    "zz_0013f3c_",
+    "zz_0013f80_"
+  ],
+  "compile_iterations": 3,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "model_requests": 2,
+  "verified": false,
+  "tier": "compile_only",
+  "allowed_extra_imports": [
+    "zz_0006fb4_",
+    "zz_00076d0_",
+    "zz_0007834_",
+    "zz_0007c30_",
+    "zz_0007e74_",
+    "zz_00086b8_",
+    "zz_0009958_",
+    "zz_0010514_",
+    "zz_0011ce0_",
+    "zz_0013fb4_",
+    "zz_0089100_"
+  ],
+  "oracle": {
+    "type": "compile_only",
+    "summary": "compile-only (UNVERIFIED)"
+  }
+}
