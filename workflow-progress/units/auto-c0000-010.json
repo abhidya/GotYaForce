@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0000-010",
   "unit_id": "auto-c0000-010",
-  "timestamp": "2026-08-19T14:17:12.817172Z",
-  "run_id": "2026-08-19T12:52:06.716717Z",
+  "timestamp": "2026-08-19T17:00:16.611438Z",
+  "run_id": "2026-08-19T14:20:10.933658Z",
   "result": "deferred",
   "stage": "compile-fix",
   "attempt": 0,
-  "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=4333, completion_tokens=0)",
+  "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=796, completion_tokens=0)",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -18,8 +18,8 @@
   "driver_record": {
     "status": "pending",
     "attempts": 0,
-    "error": "provider unavailable: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=4333, completion_tokens=0)",
-    "model_requests": 3,
+    "error": "provider unavailable: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=796, completion_tokens=0)",
+    "model_requests": 9,
     "last_stage": "compile-fix"
   },
   "history": [
@@ -29,6 +29,14 @@
       "stage": "compile-fix",
       "attempt": 0,
       "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=4333, completion_tokens=0)",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-19T17:00:16.611438Z",
+      "result": "deferred",
+      "stage": "compile-fix",
+      "attempt": 0,
+      "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=796, completion_tokens=0)",
       "product_commit": null
     }
   ]
