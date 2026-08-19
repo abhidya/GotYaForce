@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "unit": "auto-c0000-007",
+  "unit_id": "auto-c0000-007",
+  "timestamp": "2026-08-19T12:28:58.879769Z",
+  "run_id": "2026-08-19T10:57:55.871517Z",
+  "result": "gate_failed",
+  "stage": "wasm-link",
+  "attempt": 1,
+  "detail": "not linked: unit.c:70:87: error: incompatible pointer types passing 'undefined **' (aka 'unsigned char **') to parameter of type 'char **' [-Wincompatible-pointer-types]\nunit.c:99:14: warning: assigning to 'undefined *' (aka 'unsigned char *') from 'char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]\nunit.c:105:14: warning: assigning to 'undefined *' (aka 'unsigned char *') from 'char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "error": "not linked: unit.c:70:87: error: incompatible pointer types passing 'undefined **' (aka 'unsigned char **') to parameter of type 'char **' [-Wincompatible-pointer-types]\nunit.c:99:14: warning: assigning to 'undefined *' (aka 'unsigned char *') from 'char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]\nunit.c:105:14: warning: assigning to 'undefined *' (aka 'unsigned char *') from 'char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]",
+    "model_requests": 7,
+    "last_stage": "wasm-link"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-19T12:28:58.879769Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 1,
+      "detail": "not linked: unit.c:70:87: error: incompatible pointer types passing 'undefined **' (aka 'unsigned char **') to parameter of type 'char **' [-Wincompatible-pointer-types]\nunit.c:99:14: warning: assigning to 'undefined *' (aka 'unsigned char *') from 'char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]\nunit.c:105:14: w",
+      "product_commit": null
+    }
+  ]
+}
