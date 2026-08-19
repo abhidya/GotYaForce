@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "unit": "auto-c0000-005",
+  "unit_id": "auto-c0000-005",
+  "timestamp": "2026-08-19T10:45:21.646761Z",
+  "run_id": "2026-08-19T08:28:40.161868Z",
+  "result": "gate_failed",
+  "stage": "wasm-link",
+  "attempt": 1,
+  "detail": "not linked: ...ed.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_5ihtyosx\\unit.o'' failed (returned 1)\n",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "error": "not linked: ...ed.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_5ihtyosx\\unit.o'' failed (returned 1)\n",
+    "model_requests": 7,
+    "last_stage": "wasm-link"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-19T10:45:21.646761Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 1,
+      "detail": "not linked: ...ed.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compa",
+      "product_commit": null
+    }
+  ]
+}
