@@ -1,6 +1,6 @@
 # Port workflow: PAUSED
 
-*Generated 2026-08-19T17:49:36.281522Z - machine-written, do not edit.*
+*Generated 2026-08-19T20:31:39.087455Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 9/1520 settled (3 green, 6 staged) |
 | **Retries outstanding** | 6 |
 | **Untouched** | 1504 |
-| **Last transition** | 2026-08-19T17:49:36.281522Z |
+| **Last transition** | 2026-08-19T20:31:39.087455Z |
 | **Last green** | 2026-08-19T12:51:42.040810Z (`auto-c0000-008`) |
 | **Last product commit** | `d72a33e403787f6f498aebf7f4b0bf429048251b` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
@@ -22,6 +22,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T20:31:39.087455Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-19T17:49:36.281522Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-19T17:03:11.975572Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T17:00:38.029650Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
@@ -71,4 +72,3 @@
 | 2026-08-16T23:43:30.601468Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T23:17:29.796816Z | `auto-c0001-005` | gate_failed | wasm-link | 1 | not linked: /bin/bash: line 1: cygpath: command not found /bin/bash: line 1: cygpath: command not found /bin/b |
 | 2026-08-16T21:29:50.696861Z | `auto-c0001-004` | gate_failed | wasm-link | 1 | not linked: /bin/bash: line 1: cygpath: command not found /bin/bash: line 1: cygpath: command not found /bin/b |
-| 2026-08-16T19:55:31.079161Z | `auto-c0000-015` | gate_failed | wasm-link | 1 | not linked: /bin/bash: line 1: cygpath: command not found /bin/bash: line 1: cygpath: command not found /bin/b |
