@@ -1,0 +1,46 @@
+{
+  "unit": "collision-core",
+  "run_id": "2026-08-19T05:00:48.782191Z",
+  "generated_at": "2026-08-19T05:00:59.494204Z",
+  "extractions": [
+    {
+      "file": "research/decomp/ghidra-export/chunk_0003.c",
+      "start": 7026,
+      "end": 7164,
+      "sha256": "13fc5fb19da34415ebac8163c1f73f8b1da14537feee5863cb04dbab82a620d8"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0003.c",
+      "start": 7168,
+      "end": 7306,
+      "sha256": "3b1cabafe3095c2a14265f27d2835ffa3de3a11d93e10f52fc211e959a4d4e1c"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0003.c",
+      "start": 7310,
+      "end": 7426,
+      "sha256": "ca9c7bab5c42eff35cde8f5bc319570fb7c6f2aa7b4f8f36aaa27376f9ecded8"
+    }
+  ],
+  "extracted_sha256": "7740980e306784d92c3cf18049ba20c46f88f9a7d7ab9c7b7a469001c676f0a8",
+  "exported_functions": [
+    "collision_hit_pair_pass_active_vs_borgs",
+    "collision_hit_pair_pass_active_vs_secondary",
+    "collision_hit_pair_pass_object_lists"
+  ],
+  "compile_iterations": 1,
+  "model": null,
+  "model_requests": 0,
+  "verified": true,
+  "tier": "oracle_green",
+  "allowed_extra_imports": [],
+  "oracle": {
+    "command": [
+      "node",
+      "harness-collision.mjs",
+      "20000"
+    ],
+    "cwd": "research/decomp/poc/wasm-port-poc",
+    "summary": "20000/20000, 28121/32153"
+  }
+}
