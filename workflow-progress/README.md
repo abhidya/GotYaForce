@@ -1,16 +1,16 @@
-# Port workflow: RUNNING
+# Port workflow: PAUSED
 
-*Generated 2026-08-19T02:33:12.020547Z - machine-written, do not edit.*
+*Generated 2026-08-19T02:55:12.975917Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `PAUSED` (provider_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 4/1520 settled (2 green, 2 staged) |
 | **Retries outstanding** | 22 |
 | **Untouched** | 1494 |
-| **Last transition** | 2026-08-19T02:33:12.020547Z |
+| **Last transition** | 2026-08-19T02:55:12.975917Z |
 | **Last green** | 2026-08-19T01:31:06.753430Z (`auto-c0001-010`) |
 | **Last product commit** | `a7dc1768053be1bde4d44dedf3d205204ff68955` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T02:55:12.975917Z | `auto-c0001-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-19T02:33:12.020547Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T02:29:47.625283Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T02:29:29.476910Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
@@ -69,4 +70,3 @@
 | 2026-08-16T12:13:17.727516Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T11:51:12.769635Z | `auto-c0001-004` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T11:51:07.610912Z | `auto-c0000-015` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-16T11:51:05.004615Z | `auto-c0000-012` | deferred | port | 0 | interrupted before a verdict; requeued |
