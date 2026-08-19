@@ -1,25 +1,27 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-19T20:31:52.183732Z - machine-written, do not edit.*
+*Generated 2026-08-19T20:32:41.622752Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 9/1520 settled (3 green, 6 staged) |
 | **Retries outstanding** | 6 |
 | **Untouched** | 1504 |
-| **Last transition** | 2026-08-19T20:31:52.183732Z |
+| **Last transition** | 2026-08-19T20:32:41.622752Z |
 | **Last green** | 2026-08-19T12:51:42.040810Z (`auto-c0000-008`) |
 | **Last product commit** | `d72a33e403787f6f498aebf7f4b0bf429048251b` |
-| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
-| **Driver** | stopped |
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T20:32:41.622752Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
+| 2026-08-19T20:32:41.635785Z | `auto-c0000-010` | deferred | compile-fix | 0 | interrupted before a verdict; requeued |
 | 2026-08-19T20:31:52.183732Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-19T20:31:39.087455Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-19T17:49:36.281522Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -68,5 +70,3 @@
 | 2026-08-16T23:45:59.952896Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-16T23:43:38.821886Z | `auto-c0001-007` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-16T23:43:30.536469Z | `auto-c0001-006` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-16T23:43:30.601468Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
-| 2026-08-16T23:17:29.796816Z | `auto-c0001-005` | gate_failed | wasm-link | 1 | not linked: /bin/bash: line 1: cygpath: command not found /bin/bash: line 1: cygpath: command not found /bin/b |
