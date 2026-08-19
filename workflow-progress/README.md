@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-19T06:24:13.531584Z - machine-written, do not edit.*
+*Generated 2026-08-19T08:28:11.839516Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 6/1520 settled (3 green, 3 staged) |
-| **Retries outstanding** | 3 |
-| **Untouched** | 1511 |
-| **Last transition** | 2026-08-19T06:24:13.531584Z |
+| **Retries outstanding** | 4 |
+| **Untouched** | 1510 |
+| **Last transition** | 2026-08-19T08:28:11.839516Z |
 | **Last green** | 2026-08-19T05:01:02.791780Z (`collision-core`) |
 | **Last product commit** | `f6b8b65d202671ac397c104d3ed13f1bccbfbb52` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T08:28:11.839516Z | `auto-c0000-002` | gate_failed | wasm-link | 1 | not linked: Setting up EMSDK environment (suppress these messages with EMSDK_QUIET=1) Adding directories to PA |
 | 2026-08-19T06:24:13.531584Z | `auto-c0000-000` | gate_failed | wasm-link | 1 | not linked: Setting up EMSDK environment (suppress these messages with EMSDK_QUIET=1) Adding directories to PA |
 | 2026-08-19T05:01:02.791780Z | `collision-core` | green | commit | 1 | oracle green: 20000/20000, 28121/32153 |
 | 2026-08-19T05:00:48.792410Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
@@ -69,4 +70,3 @@
 | 2026-08-16T14:22:33.672800Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T14:19:03.458590Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-16T14:18:21.644947Z | `auto-c0000-003` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
-| 2026-08-16T13:15:34.365231Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
