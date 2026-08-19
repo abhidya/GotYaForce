@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-19T05:00:48.792410Z - machine-written, do not edit.*
+*Generated 2026-08-19T05:01:02.791780Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 5/1520 settled (2 green, 3 staged) |
 | **Retries outstanding** | 2 |
-| **Untouched** | 1513 |
-| **Last transition** | 2026-08-19T05:00:48.792410Z |
-| **Last green** | 2026-08-19T03:34:49.740030Z (`auto-c0001-012`) |
-| **Last product commit** | `88296acdb07b8e0fd0f5a11d23e8a87ba12fddcf` |
+| **Untouched** | 1512 |
+| **Last transition** | 2026-08-19T05:01:02.791780Z |
+| **Last green** | 2026-08-19T05:01:02.791780Z (`collision-core`) |
+| **Last product commit** | `f6b8b65d202671ac397c104d3ed13f1bccbfbb52` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T05:01:02.791780Z | `collision-core` | green | commit | 1 | oracle green: 20000/20000, 28121/32153 |
 | 2026-08-19T05:00:48.792410Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T04:58:56.085640Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-19T04:50:57.775646Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -69,4 +70,3 @@
 | 2026-08-16T14:18:21.644947Z | `auto-c0000-003` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-16T13:15:34.365231Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T13:10:39.165851Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
-| 2026-08-16T13:09:56.179240Z | `auto-c0000-003` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments |
