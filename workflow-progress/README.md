@@ -1,25 +1,26 @@
-# Port workflow: RUNNING
+# Port workflow: IDLE
 
-*Generated 2026-08-19T12:51:42.040810Z - machine-written, do not edit.*
+*Generated 2026-08-19T12:51:44.893788Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 8/1520 settled (3 green, 5 staged) |
+| **Queue progress** | 9/1520 settled (3 green, 6 staged) |
 | **Retries outstanding** | 6 |
 | **Untouched** | 1505 |
-| **Last transition** | 2026-08-19T12:51:42.040810Z |
+| **Last transition** | 2026-08-19T12:51:44.893788Z |
 | **Last green** | 2026-08-19T12:51:42.040810Z (`auto-c0000-008`) |
 | **Last product commit** | `d72a33e403787f6f498aebf7f4b0bf429048251b` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
-| **Driver** | running |
+| **Driver** | stopped |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T12:51:44.893788Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-19T12:51:42.040810Z | `auto-c0000-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T12:28:58.879769Z | `auto-c0000-007` | gate_failed | wasm-link | 1 | not linked: unit.c:70:87: error: incompatible pointer types passing 'undefined **' (aka 'unsigned char **') to |
 | 2026-08-19T10:57:33.205941Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -69,4 +70,3 @@
 | 2026-08-16T17:08:36.537184Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T16:29:38.141609Z | `-` | palworld_protected | machine | 0 | 1 Palworld player(s) connected. |
 | 2026-08-16T16:26:47.713366Z | `auto-c0000-003` | deferred | compile-fix | 0 | interrupted before a verdict; requeued |
-| 2026-08-16T16:26:47.779367Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
