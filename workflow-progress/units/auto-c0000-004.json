@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "unit": "auto-c0000-004",
+  "unit_id": "auto-c0000-004",
+  "timestamp": "2026-08-19T08:28:48.229801Z",
+  "run_id": "2026-08-19T08:28:40.161868Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 1,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "88552abe98f581aa70103922003f0a08044df254",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
+  "product_commit_failed": false,
+  "oracle_summary": "compile-only (UNVERIFIED)",
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": "compile_only",
+  "driver_record": {
+    "status": "porting",
+    "attempts": 1,
+    "error": "requeued 2026-08-19: previous failure was infrastructure (compile-fix LLM: 400 Client Error: Bad Request for url: http://127.0.0.1:8888/v1/chat/comp)"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-19T08:28:48.229801Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 1,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "88552abe98f581aa70103922003f0a08044df254"
+    }
+  ]
+}

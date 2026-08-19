@@ -1,25 +1,26 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-19T08:28:14.884268Z - machine-written, do not edit.*
+*Generated 2026-08-19T08:28:48.229801Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 6/1520 settled (3 green, 3 staged) |
 | **Retries outstanding** | 4 |
-| **Untouched** | 1510 |
-| **Last transition** | 2026-08-19T08:28:14.884268Z |
-| **Last green** | 2026-08-19T05:01:02.791780Z (`collision-core`) |
-| **Last product commit** | `f6b8b65d202671ac397c104d3ed13f1bccbfbb52` |
+| **Untouched** | 1509 |
+| **Last transition** | 2026-08-19T08:28:48.229801Z |
+| **Last green** | 2026-08-19T08:28:48.229801Z (`auto-c0000-004`) |
+| **Last product commit** | `88552abe98f581aa70103922003f0a08044df254` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T08:28:48.229801Z | `auto-c0000-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T08:28:14.884268Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-19T08:28:11.839516Z | `auto-c0000-002` | gate_failed | wasm-link | 1 | not linked: Setting up EMSDK environment (suppress these messages with EMSDK_QUIET=1) Adding directories to PA |
 | 2026-08-19T06:24:13.531584Z | `auto-c0000-000` | gate_failed | wasm-link | 1 | not linked: Setting up EMSDK environment (suppress these messages with EMSDK_QUIET=1) Adding directories to PA |
@@ -69,4 +70,3 @@
 | 2026-08-16T15:04:31.439256Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-16T15:03:59.762414Z | `auto-c0000-003` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-16T14:22:33.672800Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
-| 2026-08-16T14:19:03.458590Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
