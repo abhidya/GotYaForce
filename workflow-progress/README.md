@@ -1,25 +1,26 @@
-# Port workflow: PAUSED
+# Port workflow: RUNNING
 
-*Generated 2026-08-19T14:17:33.415996Z - machine-written, do not edit.*
+*Generated 2026-08-19T14:20:11.003240Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `PAUSED` (provider_paused) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 9/1520 settled (3 green, 6 staged) |
 | **Retries outstanding** | 6 |
-| **Untouched** | 1505 |
-| **Last transition** | 2026-08-19T14:17:33.415996Z |
+| **Untouched** | 1504 |
+| **Last transition** | 2026-08-19T14:20:11.003240Z |
 | **Last green** | 2026-08-19T12:51:42.040810Z (`auto-c0000-008`) |
 | **Last product commit** | `d72a33e403787f6f498aebf7f4b0bf429048251b` |
-| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
-| **Driver** | stopped |
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T14:20:11.003240Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T14:17:33.415996Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T14:17:12.817172Z | `auto-c0000-010` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-19T12:51:44.893788Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -69,4 +70,3 @@
 | 2026-08-16T18:20:10.295491Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T17:45:48.175663Z | `-` | palworld_protected | machine | 0 | 1 Palworld player(s) connected. |
 | 2026-08-16T17:08:36.498164Z | `auto-c0000-009` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-16T17:08:36.537184Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
