@@ -1,25 +1,28 @@
-# Port workflow: IDLE
+# Port workflow: PAUSED
 
-*Generated 2026-08-19T04:50:47.275223Z - machine-written, do not edit.*
+*Generated 2026-08-19T04:50:57.775646Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 5/1520 settled (2 green, 3 staged) |
 | **Retries outstanding** | 24 |
 | **Untouched** | 1491 |
-| **Last transition** | 2026-08-19T04:50:47.275223Z |
+| **Last transition** | 2026-08-19T04:50:57.775646Z |
 | **Last green** | 2026-08-19T03:34:49.740030Z (`auto-c0001-012`) |
 | **Last product commit** | `88296acdb07b8e0fd0f5a11d23e8a87ba12fddcf` |
-| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
 | **Driver** | stopped |
+
+> **Manually paused by the owner** (rig gate). No heavy work runs.
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T04:50:57.775646Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-19T04:50:47.275223Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-19T04:50:44.410966Z | `auto-c0001-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-19T03:34:49.740030Z | `auto-c0001-012` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +72,3 @@
 | 2026-08-16T13:09:56.179240Z | `auto-c0000-003` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments |
 | 2026-08-16T12:48:38.478014Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T12:18:39.792453Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-16T12:18:39.831453Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
