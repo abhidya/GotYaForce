@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-19T10:45:21.646761Z - machine-written, do not edit.*
+*Generated 2026-08-19T10:57:30.475654Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 7/1520 settled (3 green, 4 staged) |
 | **Retries outstanding** | 5 |
-| **Untouched** | 1508 |
-| **Last transition** | 2026-08-19T10:45:21.646761Z |
-| **Last green** | 2026-08-19T08:28:48.229801Z (`auto-c0000-004`) |
-| **Last product commit** | `88552abe98f581aa70103922003f0a08044df254` |
+| **Untouched** | 1507 |
+| **Last transition** | 2026-08-19T10:57:30.475654Z |
+| **Last green** | 2026-08-19T10:57:30.475654Z (`auto-c0000-006`) |
+| **Last product commit** | `25cf2f22214941f3489c1d23ae6fb96568223248` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T10:57:30.475654Z | `auto-c0000-006` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T10:45:21.646761Z | `auto-c0000-005` | gate_failed | wasm-link | 1 | not linked: ...ed. emcc: error: ''D:\GotYaForce\research\tools\emsdk/upstream/bin\clang.exe' -target wasm32-un |
 | 2026-08-19T08:28:48.229801Z | `auto-c0000-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T08:28:14.884268Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -69,4 +70,3 @@
 | 2026-08-16T16:13:17.711235Z | `-` | palworld_protected | machine | 0 | 1 Palworld player(s) connected. |
 | 2026-08-16T15:07:53.664088Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T15:04:31.439256Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
-| 2026-08-16T15:03:59.762414Z | `auto-c0000-003` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
