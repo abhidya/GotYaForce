@@ -1,16 +1,16 @@
-# Port workflow: RUNNING
+# Port workflow: PAUSED
 
-*Generated 2026-08-19T01:31:06.753430Z - machine-written, do not edit.*
+*Generated 2026-08-19T01:53:07.779693Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `PAUSED` (provider_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 3/1520 settled (2 green, 1 staged) |
+| **Queue progress** | 4/1520 settled (2 green, 2 staged) |
 | **Retries outstanding** | 22 |
 | **Untouched** | 1494 |
-| **Last transition** | 2026-08-19T01:31:06.753430Z |
+| **Last transition** | 2026-08-19T01:53:07.779693Z |
 | **Last green** | 2026-08-19T01:31:06.753430Z (`auto-c0001-010`) |
 | **Last product commit** | `a7dc1768053be1bde4d44dedf3d205204ff68955` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T01:53:07.779693Z | `auto-c0001-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-19T01:31:06.753430Z | `auto-c0001-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T01:30:49.624847Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T01:30:49.682400Z | `auto-c0001-009` | deferred | port | 0 | interrupted before a verdict; requeued |
@@ -69,4 +70,3 @@
 | 2026-08-16T11:50:58.791077Z | `auto-c0000-003` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T11:50:56.131648Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T11:50:56.076647Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-16T11:50:56.131648Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
