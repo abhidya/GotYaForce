@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-18T23:36:48.222295Z - machine-written, do not edit.*
+*Generated 2026-08-19T01:30:49.624847Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,16 +10,18 @@
 | **Queue progress** | 3/1520 settled (2 green, 1 staged) |
 | **Retries outstanding** | 22 |
 | **Untouched** | 1494 |
-| **Last transition** | 2026-08-18T23:36:48.222295Z |
+| **Last transition** | 2026-08-19T01:30:49.624847Z |
 | **Last green** | 2026-08-16T23:43:38.821886Z (`auto-c0001-007`) |
 | **Last product commit** | `35ce70d3058a4ed10047d39db34097cfdcc27358` |
-| **Current model** | `unsloth/Qwen3.6-27B-MTP-GGUF` @ 32768 ctx |
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
 | **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T01:30:49.624847Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
+| 2026-08-19T01:30:49.682400Z | `auto-c0001-009` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-18T23:36:48.222295Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-18T23:36:48.245266Z | `auto-c0001-008` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-18T23:33:20.003789Z | `-` | starting | machine | 0 | Manual pause lifted; re-arming the empty grace. |
@@ -68,5 +70,3 @@
 | 2026-08-16T11:50:56.076647Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T11:50:56.131648Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T11:48:46.885886Z | `-` | starting | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-16T11:41:50.392030Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-16T11:40:07.991906Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
