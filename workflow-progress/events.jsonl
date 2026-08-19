@@ -85,3 +85,4 @@
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-19T17:03:11.975572Z", "run_id": "2026-08-19T17:03:11.975572Z", "result": "running", "stage": "machine", "attempt": 0, "detail": "Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx."}
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-19T17:49:36.281522Z", "run_id": "2026-08-19T17:49:36.281522Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-19T20:31:39.087455Z", "run_id": "2026-08-19T20:31:39.087455Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
+{"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-19T20:31:52.183732Z", "run_id": "2026-08-19T20:31:52.183732Z", "result": "starting", "stage": "machine", "attempt": 0, "detail": "Manual pause lifted; resuming heavy work."}
