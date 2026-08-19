@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "unit": "auto-c0001-010",
+  "unit_id": "auto-c0001-010",
+  "timestamp": "2026-08-19T01:31:06.753430Z",
+  "run_id": "2026-08-19T01:30:49.627945Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 1,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "a7dc1768053be1bde4d44dedf3d205204ff68955",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
+  "product_commit_failed": false,
+  "oracle_summary": "compile-only (UNVERIFIED)",
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": "compile_only",
+  "driver_record": {
+    "status": "porting",
+    "attempts": 1
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-19T01:31:06.753430Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 1,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "a7dc1768053be1bde4d44dedf3d205204ff68955"
+    }
+  ]
+}

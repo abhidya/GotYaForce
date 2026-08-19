@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-19T01:30:49.624847Z - machine-written, do not edit.*
+*Generated 2026-08-19T01:31:06.753430Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 3/1520 settled (2 green, 1 staged) |
 | **Retries outstanding** | 22 |
 | **Untouched** | 1494 |
-| **Last transition** | 2026-08-19T01:30:49.624847Z |
-| **Last green** | 2026-08-16T23:43:38.821886Z (`auto-c0001-007`) |
-| **Last product commit** | `35ce70d3058a4ed10047d39db34097cfdcc27358` |
+| **Last transition** | 2026-08-19T01:31:06.753430Z |
+| **Last green** | 2026-08-19T01:31:06.753430Z (`auto-c0001-010`) |
+| **Last product commit** | `a7dc1768053be1bde4d44dedf3d205204ff68955` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 32768 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-19T01:31:06.753430Z | `auto-c0001-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T01:30:49.624847Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T01:30:49.682400Z | `auto-c0001-009` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-18T23:36:48.222295Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
@@ -69,4 +70,3 @@
 | 2026-08-16T11:50:56.131648Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-16T11:50:56.076647Z | `auto-c0000-001` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-16T11:50:56.131648Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
-| 2026-08-16T11:48:46.885886Z | `-` | starting | machine | 0 | Manually paused by owner (rig gate). |
