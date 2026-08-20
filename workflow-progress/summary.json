@@ -1,17 +1,17 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-19T21:59:06.759741Z",
-  "run_id": "2026-08-19T21:59:06.645075Z",
+  "generated_at": "2026-08-20T00:34:11.913856Z",
+  "run_id": "2026-08-19T21:59:06.580095Z",
   "total_units": 1520,
   "green": 3,
   "staged": 6,
-  "retryable": 6,
-  "untouched": 1505,
+  "retryable": 7,
+  "untouched": 1504,
   "deferred": 0,
   "structural_ineligible": 0,
   "active": 0,
-  "total_attempts": 15,
-  "transitions_last_hour": 2,
+  "total_attempts": 16,
+  "transitions_last_hour": 1,
   "greens_last_hour": 0,
   "last_green_at": "2026-08-19T12:51:42.040810Z",
   "last_green_unit": "auto-c0000-008",
@@ -26,6 +26,6 @@
     "active_model": "unsloth/Qwen3.8-27B-GGUF",
     "context_length": 262144,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx."
+    "detail": ""
   }
 }

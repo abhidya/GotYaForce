@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0000-011",
   "unit_id": "auto-c0000-011",
-  "timestamp": "2026-08-19T21:53:16.464142Z",
-  "run_id": "2026-08-19T20:32:41.586631Z",
-  "result": "deferred",
-  "stage": "compile-fix",
-  "attempt": 0,
-  "detail": "provider unavailable, unit not blamed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (read timeout=1200)",
+  "timestamp": "2026-08-20T00:34:11.804492Z",
+  "run_id": "2026-08-19T21:59:06.580095Z",
+  "result": "gate_failed",
+  "stage": "wasm-link",
+  "attempt": 1,
+  "detail": "not linked: /usr/bin/bash: -c: line 1: syntax error near unexpected token `('\n/usr/bin/bash: -c: line 1: `source \"/d/GotYaForce/research/tools/emsdk/emsdk_env.sh\" >/dev/null || { echo 'emsdk_env.sh failed to load' >&2; exit 127; }; command -v emcc >/dev/null || { echo 'emcc not on PATH after sourcing emsdk_env.sh' >&2; exit 127; }; cd \"/d/GotYaForce/research/decomp/generated/finish-game-port/wasm-units/auto-c0000-011\" && emcc unit.c -O1 -fno-strict-aliasing --no-entry -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -sERROR_ON_UNDEFINED_SYMBOLS=0 -sINITIAL_MEMORY=2155479040 -sALLOW_MEMORY_GROWTH=0 -sEXPORTED_FUNCTIONS=_zz_0008744_,_zz_00087d4_,_zz_00088a4_,_zz_0008924_,_zz_0008948_,_zz_0008970_,_cCameraManager::HasCamera(cBaseCamera,_zz_00089c0_ -o unit.wasm'",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -16,10 +16,11 @@
   "model": "unsloth/Qwen3.8-27B-GGUF",
   "tier": null,
   "driver_record": {
-    "status": "pending",
-    "attempts": 0,
-    "error": "provider unavailable: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (read timeout=1200)",
-    "last_stage": "compile-fix"
+    "status": "red_retryable",
+    "attempts": 1,
+    "error": "not linked: /usr/bin/bash: -c: line 1: syntax error near unexpected token `('\n/usr/bin/bash: -c: line 1: `source \"/d/GotYaForce/research/tools/emsdk/emsdk_env.sh\" >/dev/null || { echo 'emsdk_env.sh failed to load' >&2; exit 127; }; command -v emcc >/dev/null || { echo 'emcc not on PATH after sourcing emsdk_env.sh' >&2; exit 127; }; cd \"/d/GotYaForce/research/decomp/generated/finish-game-port/wasm-units/auto-c0000-011\" && emcc unit.c -O1 -fno-strict-aliasing --no-entry -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -sERROR_ON_UNDEFINED_SYMBOLS=0 -sINITIAL_MEMORY=2155479040 -sALLOW_MEMORY_GROWTH=0 -sEXPORTED_FUNCTIONS=_zz_0008744_,_zz_00087d4_,_zz_00088a4_,_zz_0008924_,_zz_0008948_,_zz_0008970_,_cCameraManager::HasCamera(cBaseCamera,_zz_00089c0_ -o unit.wasm'",
+    "last_stage": "wasm-link",
+    "model_requests": 7
   },
   "history": [
     {
@@ -28,6 +29,14 @@
       "stage": "compile-fix",
       "attempt": 0,
       "detail": "provider unavailable, unit not blamed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (read timeout=1200)",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-20T00:34:11.804492Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 1,
+      "detail": "not linked: /usr/bin/bash: -c: line 1: syntax error near unexpected token `('\n/usr/bin/bash: -c: line 1: `source \"/d/GotYaForce/research/tools/emsdk/emsdk_env.sh\" >/dev/null || { echo 'emsdk_env.sh failed to load' >&2; exit 127; }; command -v emcc >/dev/null || { echo 'emcc not on PATH after sourcing emsdk_env.sh' >&2; exit 127; }; cd \"/d/GotYaForce/research/decomp/generated/finish-game-port/wasm-",
       "product_commit": null
     }
   ]
