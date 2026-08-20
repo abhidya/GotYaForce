@@ -2,23 +2,23 @@
   "schema": 1,
   "unit": "auto-c0000-015",
   "unit_id": "auto-c0000-015",
-  "timestamp": "2026-08-16T19:55:31.079161Z",
-  "run_id": "2026-08-16T18:20:10.184491Z",
-  "result": "gate_failed",
-  "stage": "wasm-link",
+  "timestamp": "2026-08-20T03:50:51.066902Z",
+  "run_id": "2026-08-20T03:50:48.272643Z",
+  "result": "structural_ineligible",
+  "stage": "extract",
   "attempt": 1,
-  "detail": "not linked: /bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: emcc: command not found\n",
+  "detail": "verbatim .c is self-contradictory: zz_0009a14_ declared void but their results are assigned; no header edit can reconcile this",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
   "product_commit_failed": false,
   "oracle_summary": null,
-  "model": "unsloth/Qwen3.6-27B-MTP-GGUF",
+  "model": "unsloth/Qwen3.8-27B-GGUF",
   "tier": null,
   "driver_record": {
-    "status": "red_retryable",
+    "status": "porting",
     "attempts": 1,
-    "error": "not linked: /bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: emcc: command not found\n",
+    "error": "requeued 2026-08-19: previous failure was infrastructure (not linked: /bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: cygpath: comm)",
     "model_requests": 7,
     "last_stage": "wasm-link"
   },
@@ -37,6 +37,14 @@
       "stage": "wasm-link",
       "attempt": 1,
       "detail": "not linked: /bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: emcc: command not found\n",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-20T03:50:51.066902Z",
+      "result": "structural_ineligible",
+      "stage": "extract",
+      "attempt": 1,
+      "detail": "verbatim .c is self-contradictory: zz_0009a14_ declared void but their results are assigned; no header edit can reconcile this",
       "product_commit": null
     }
   ]
