@@ -1,0 +1,226 @@
+{
+ "note": "Queue regeneration verdict migration: settled verdicts carry only onto a new unit with the IDENTICAL exported-function set; otherwise the new units stay pending and the old verdict is recorded here.",
+ "migrated_at": "2026-08-20T23:31:32.849802+00:00",
+ "summary": {
+  "old_units": 1520,
+  "new_units": 1396,
+  "carried": 15,
+  "dropped_set_changed": 6,
+  "reset_unsettled": 14
+ },
+ "entries": [
+  {
+   "old_unit": "damage-core",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "damage-core"
+  },
+  {
+   "old_unit": "knockback-core",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "knockback-core"
+  },
+  {
+   "old_unit": "collision-core",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "collision-core"
+  },
+  {
+   "old_unit": "auto-c0000-000",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0000-002",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0000-004",
+   "verdict": "green",
+   "disposition": "dropped_set_changed",
+   "new_units_overlapping": [
+    "auto-c0000-003",
+    "auto-c0000-004"
+   ]
+  },
+  {
+   "old_unit": "auto-c0000-005",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0000-006",
+   "verdict": "green",
+   "disposition": "dropped_set_changed",
+   "new_units_overlapping": [
+    "auto-c0000-005",
+    "auto-c0000-006"
+   ]
+  },
+  {
+   "old_unit": "auto-c0000-007",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0000-008",
+   "verdict": "green",
+   "disposition": "dropped_set_changed",
+   "new_units_overlapping": [
+    "auto-c0000-007",
+    "auto-c0000-008"
+   ]
+  },
+  {
+   "old_unit": "auto-c0000-011",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0000-013",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0000-014",
+   "verdict": "structural_ineligible",
+   "disposition": "dropped_set_changed",
+   "new_units_overlapping": [
+    "auto-c0000-013",
+    "auto-c0000-014"
+   ]
+  },
+  {
+   "old_unit": "auto-c0000-015",
+   "verdict": "structural_ineligible",
+   "disposition": "dropped_set_changed",
+   "new_units_overlapping": [
+    "auto-c0000-014",
+    "auto-c0000-015"
+   ]
+  },
+  {
+   "old_unit": "auto-c0000-016",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0000-017",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0000-018",
+   "verdict": "green",
+   "disposition": "dropped_set_changed",
+   "new_units_overlapping": [
+    "auto-c0000-017"
+   ]
+  },
+  {
+   "old_unit": "auto-c0001-000",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0001-001",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0001-002",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0001-003",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-003"
+  },
+  {
+   "old_unit": "auto-c0001-004",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-004"
+  },
+  {
+   "old_unit": "auto-c0001-005",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-005"
+  },
+  {
+   "old_unit": "auto-c0001-007",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-007"
+  },
+  {
+   "old_unit": "auto-c0001-010",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-010"
+  },
+  {
+   "old_unit": "auto-c0001-011",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-011"
+  },
+  {
+   "old_unit": "auto-c0001-012",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-012"
+  },
+  {
+   "old_unit": "auto-c0001-013",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0001-014",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-014"
+  },
+  {
+   "old_unit": "auto-c0001-015",
+   "verdict": "structural_ineligible",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-015"
+  },
+  {
+   "old_unit": "auto-c0001-016",
+   "verdict": "red_retryable",
+   "disposition": "reset_unsettled"
+  },
+  {
+   "old_unit": "auto-c0001-017",
+   "verdict": "structural_ineligible",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-017"
+  },
+  {
+   "old_unit": "auto-c0001-018",
+   "verdict": "structural_ineligible",
+   "disposition": "carried",
+   "new_unit": "auto-c0001-018"
+  },
+  {
+   "old_unit": "auto-c0002-001",
+   "verdict": "green",
+   "disposition": "carried",
+   "new_unit": "auto-c0002-001"
+  },
+  {
+   "old_unit": "auto-c0002-002",
+   "verdict": "porting",
+   "disposition": "reset_unsettled"
+  }
+ ]
+}

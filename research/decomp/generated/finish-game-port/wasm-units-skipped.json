@@ -1,0 +1,5140 @@
+{
+ "note": "Functions excluded from wasm-units.json at generation time (port_queue_fill). sdk_prefix: gnt4_*/gnt4-* SDK seam, never ported by design. non_c_identifier: emcc EXPORTED_FUNCTIONS cannot export the name (truncated demangled C++ etc.).",
+ "skipped_by_chunk": {
+  "chunk_0000": [
+   {
+    "name": "gnt4-__init_hardware-bl",
+    "addr": "80003400",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-memset",
+    "addr": "8000540c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__fill_mem-bl",
+    "addr": "8000543c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-memcpy",
+    "addr": "800054f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "glxCopyMatrix(float",
+    "addr": "800061cc",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "cCameraManager::HasCamera(cBaseCamera",
+    "addr": "80008998",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "SidelineExplodableManager::GetNumExplodables(void)",
+    "addr": "80008a70",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0002": [
+   {
+    "name": "PlatAudio::IsSFXPlaying(unsigned",
+    "addr": "80018c58",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0006": [
+   {
+    "name": "Wiper::CutHasOccured(",
+    "addr": "80052da8",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0012": [
+   {
+    "name": "LooseBallAnims::GetDesperationInfo(unsigned",
+    "addr": "80087f24",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0045": [
+   {
+    "name": "systemCallbackFunc(MCCSysEvent)",
+    "addr": "801819fc",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "glxSwapWaitDrawDone(void)",
+    "addr": "80181db0",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0050": [
+   {
+    "name": "nlQSort<20AnimAudioEventLookup>(AnimAudioEventLookup",
+    "addr": "801a7640",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0054": [
+   {
+    "name": "AsyncImage::FreeLoadBuffer(void)",
+    "addr": "801bfd7c",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0062": [
+   {
+    "name": "gnt4-PPCMfmsr",
+    "addr": "801fe9dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCMtmsr",
+    "addr": "801fe9e4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCMfhid0",
+    "addr": "801fe9ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCMfl2cr",
+    "addr": "801fe9fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCMtl2cr",
+    "addr": "801fea04",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCMtdec",
+    "addr": "801fea0c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCSync",
+    "addr": "801fea14",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCHalt",
+    "addr": "801fea1c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCMffpscr",
+    "addr": "801fea60",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCMtfpscr",
+    "addr": "801fea80",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCMfhid2",
+    "addr": "801feaa8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PPCMthid2",
+    "addr": "801feab0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSFPRInit-bl",
+    "addr": "801feaf0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetConsoleType-bl",
+    "addr": "801fec18",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-InquiryCallback-bl",
+    "addr": "801fed68",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSExceptionInit-bl",
+    "addr": "801ff17c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSDBIntegrator",
+    "addr": "801ff3fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSDBJump-bl",
+    "addr": "801ff420",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSSetExceptionHandler-bl",
+    "addr": "801ff424",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSGetExceptionHandler-bl",
+    "addr": "801ff440",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSExceptionVector-bl",
+    "addr": "801ff454",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSDefaultExceptionHandler-bl",
+    "addr": "801ff4f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSPSInit-bl",
+    "addr": "801ff548",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSGetDIConfig-bl",
+    "addr": "801ff59c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSRegisterVersion-bl",
+    "addr": "801ff5b0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSInitAlarm",
+    "addr": "801ff5dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSCreateAlarm-bl",
+    "addr": "801ff628",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-InsertAlarm-bl",
+    "addr": "801ff638",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetAlarm-bl",
+    "addr": "801ff888",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSCancelAlarm-bl",
+    "addr": "801ff8f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DecrementerExceptionCallback-bl",
+    "addr": "801ffa0c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DecrementerExceptionHandler-bl",
+    "addr": "801ffc3c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DLInsert-bl",
+    "addr": "801ffc8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSAllocFromHeap-bl",
+    "addr": "801ffd38",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSFreeToHeap-bl",
+    "addr": "801ffe34",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetCurrentHeap-bl",
+    "addr": "801ffeb0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSInitAlloc-bl",
+    "addr": "801ffec0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSCreateHeap-bl",
+    "addr": "801fff30",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSDestroyHeap-bl",
+    "addr": "801fff9c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSCheckHeap-bl",
+    "addr": "801fffb0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetArenaHi-bl",
+    "addr": "80200310",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetArenaLo-bl",
+    "addr": "80200318",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetArenaHi-bl",
+    "addr": "80200320",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetArenaLo-bl",
+    "addr": "80200328",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSAllocFromArenaLo-bl",
+    "addr": "80200330",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSInitAudioSystem-bl",
+    "addr": "8020035c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSStopAudioSystem-bl",
+    "addr": "80200518",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DCEnable-bl",
+    "addr": "802005f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DCInvalidateRange-bl",
+    "addr": "80200604",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DCFlushRange-bl",
+    "addr": "80200630",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DCStoreRange-bl",
+    "addr": "80200660",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DCFlushRangeNoSync-bl",
+    "addr": "80200690",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ICInvalidateRange-bl",
+    "addr": "802006bc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ICFlashInvalidate-bl",
+    "addr": "802006f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ICEnable-bl",
+    "addr": "80200700",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-LCDisable-bl",
+    "addr": "80200714",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-L2GlobalInvalidate-bl",
+    "addr": "8020073c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DMAErrorHandler-bl",
+    "addr": "802007d4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSCacheInit-bl",
+    "addr": "80200934",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSLoadFPUContext-bl",
+    "addr": "80200a28",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSSaveFPUContext-bl",
+    "addr": "80200b4c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSaveFPUContext-bl",
+    "addr": "80200c74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetCurrentContext-bl",
+    "addr": "80200c7c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetCurrentContext-bl",
+    "addr": "80200cd8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSaveContext-bl",
+    "addr": "80200ce4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSLoadContext-bl",
+    "addr": "80200d64",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetStackPointer-bl",
+    "addr": "80200e3c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSClearContext-bl",
+    "addr": "80200e74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSInitContext-bl",
+    "addr": "80200e98",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSDumpContext-bl",
+    "addr": "80200f54",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SwitchFPUContext-bl",
+    "addr": "802011fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSContextInit-bl",
+    "addr": "80201280",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSFillFPUContext-bl",
+    "addr": "802012c8",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0063": [
+   {
+    "name": "gnt4-OSReport-bl",
+    "addr": "802013f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSPanic",
+    "addr": "80201474",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetErrorHandler-bl",
+    "addr": "802015a0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSUnhandledException-bl",
+    "addr": "802017b8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSDisableInterrupts-bl",
+    "addr": "802037b4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSEnableInterrupts-bl",
+    "addr": "802037c8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSRestoreInterrupts-bl",
+    "addr": "802037dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSSetInterruptHandler-bl",
+    "addr": "80203800",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSGetInterruptHandler-bl",
+    "addr": "8020381c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSInterruptInit-bl",
+    "addr": "80203830",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SetInterruptMask-bl",
+    "addr": "802038a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSMaskInterrupts-bl",
+    "addr": "80203b7c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSUnmaskInterrupts-bl",
+    "addr": "80203c04",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSDispatchInterrupt-bl",
+    "addr": "80203c8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ExternalInterruptHandler-bl",
+    "addr": "80203fd0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSModuleInit-bl",
+    "addr": "80204020",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetPhysicalMemSize-bl",
+    "addr": "80204038",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OnReset__-bl",
+    "addr": "80204044",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MEMIntrruptHandler-bl",
+    "addr": "80204080",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-Config24MB-bl",
+    "addr": "802040ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-Config48MB-bl",
+    "addr": "8020416c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-RealMode-bl",
+    "addr": "802041ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSInitMemoryProtection-bl",
+    "addr": "80204204",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSUnlockAllMutex-bl",
+    "addr": "8020431c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSRegisterResetFunction-bl",
+    "addr": "802046e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-Reset-bl",
+    "addr": "80204800",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSDoHotReset-bl",
+    "addr": "80204870",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSResetSWInterruptHandler-bl",
+    "addr": "80204ba0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetResetButtonState-bl",
+    "addr": "80204c94",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-WriteSramCallback-bl",
+    "addr": "80204f2c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-WriteSram-bl",
+    "addr": "80204f8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSInitSram-bl",
+    "addr": "802050a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSLockSram-bl",
+    "addr": "802051e0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSLockSramEx-bl",
+    "addr": "8020523c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-UnlockSram-bl",
+    "addr": "80205298",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSUnlockSram-bl",
+    "addr": "802055d4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSUnlockSramEx-bl",
+    "addr": "802055f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSSyncSram-bl",
+    "addr": "8020561c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSReadROM-bl",
+    "addr": "8020562c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetSoundMode-bl",
+    "addr": "80205750",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetSoundMode-bl",
+    "addr": "802057d0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetProgressiveMode-bl",
+    "addr": "80205874",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetProgressiveMode-bl",
+    "addr": "802058e4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetWirelessID-bl",
+    "addr": "802059f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetWirelessID-bl",
+    "addr": "80205a78",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetGbsMode-bl",
+    "addr": "80205b24",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSetGbsMode-bl",
+    "addr": "80205b94",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SystemCallVector-bl",
+    "addr": "80205d24",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSInitSystemCall-bl",
+    "addr": "80205d44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DefaultSwitchThreadCallback-bl",
+    "addr": "80205da8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSThreadInit-bl",
+    "addr": "80205dac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSInitThreadQueue-bl",
+    "addr": "80205f04",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetCurrentThread-bl",
+    "addr": "80205f14",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSDisableScheduler-bl",
+    "addr": "80205f20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSEnableScheduler-bl",
+    "addr": "80205f60",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-UnsetRun-bl",
+    "addr": "80205fa0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSGetEffectivePriority-bl",
+    "addr": "80206008",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SetEffectivePriority-bl",
+    "addr": "80206044",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SelectThread-bl",
+    "addr": "80206204",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSReschedule-bl",
+    "addr": "8020642c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSCreateThread-bl",
+    "addr": "8020645c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSExitThread-bl",
+    "addr": "80206644",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSCancelThread-bl",
+    "addr": "80206728",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSResumeThread-bl",
+    "addr": "802068e4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSuspendThread-bl",
+    "addr": "80206b6c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSSleepThread-bl",
+    "addr": "80206cdc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSWakeupThread-bl",
+    "addr": "80206dc8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSClearStack-bl",
+    "addr": "80206f94",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetTime-bl",
+    "addr": "80207040",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSGetTick-bl",
+    "addr": "80207058",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__OSGetSystemTime-bl",
+    "addr": "80207060",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GetDates-bl",
+    "addr": "802070c4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-OSTicksToCalendarTime-bl",
+    "addr": "80207260",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__init_user-bl",
+    "addr": "80207464",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__init_cpp-bl",
+    "addr": "80207484",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_ExitProcess-bl",
+    "addr": "802074d8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SetExiInterruptMask",
+    "addr": "802074f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-EXIImm-bl",
+    "addr": "802075ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-EXIImmEx",
+    "addr": "80207848",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-EXIDma-bl",
+    "addr": "802078e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-EXISync",
+    "addr": "802079d4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-EXIClearInterrupts",
+    "addr": "80207c20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__EXIProbe",
+    "addr": "80207ce4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-EXISelect-bl",
+    "addr": "80208154",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-EXIDeselect",
+    "addr": "80208280",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-EXILock-bl",
+    "addr": "80208914",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-EXIUnlock-bl",
+    "addr": "80208a08",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIIsChanBusy",
+    "addr": "802094c8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIEnablePollingInterrupt",
+    "addr": "80209b44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIRegisterPollingHandler-bl",
+    "addr": "80209bdc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIUnregisterPollingHandler",
+    "addr": "80209ca8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__SITransfer",
+    "addr": "80209e50",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIGetStatus",
+    "addr": "8020a05c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SISetCommand",
+    "addr": "8020a0d8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SITransferCommands",
+    "addr": "8020a0ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIEnablePolling",
+    "addr": "8020a168",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIDisablePolling",
+    "addr": "8020a204",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIGetResponse",
+    "addr": "8020a344",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SITransfer-bl",
+    "addr": "8020a494",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GetTypeCallback-bl",
+    "addr": "8020a600",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIGetType",
+    "addr": "8020a898",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SIGetTypeAsync",
+    "addr": "8020aa5c",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0064": [
+   {
+    "name": "gnt4-__DBIsExceptionMarked",
+    "addr": "8020ae90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DBPrintf",
+    "addr": "8020aeac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXIdentity-bl",
+    "addr": "8020aefc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXCopy-bl",
+    "addr": "8020af28",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXConcat-bl",
+    "addr": "8020af5c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXTranspose-bl",
+    "addr": "8020b028",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXInverse-bl",
+    "addr": "8020b078",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXInvXpose-bl",
+    "addr": "8020b170",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXRotRad-bl",
+    "addr": "8020b238",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXRotTrig-bl",
+    "addr": "8020b2a8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__PSMTXRotAxisRadInternal-bl",
+    "addr": "8020b358",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXRotAxisRad-bl",
+    "addr": "8020b408",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXTrans-bl",
+    "addr": "8020b478",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXScale-bl",
+    "addr": "8020b4f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXQuat-bl",
+    "addr": "8020b578",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-C_MTXLookAt-bl",
+    "addr": "8020b61c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXMultVec-bl",
+    "addr": "8020b7a8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSMTXMultVecSR-bl",
+    "addr": "8020b7fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-C_MTXFrustum-bl",
+    "addr": "8020b850",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-C_MTXPerspective-bl",
+    "addr": "8020b8ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-C_MTXOrtho-bl",
+    "addr": "8020b9bc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSVECAdd-bl",
+    "addr": "8020ba54",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSVECSubtract-bl",
+    "addr": "8020ba78",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSQUATScale-bl",
+    "addr": "8020ba9c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSVECNormalize-bl",
+    "addr": "8020bab8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSVECSquareMag-bl",
+    "addr": "8020bafc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSVECMag-bl",
+    "addr": "8020bb14",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSQUATDotProduct-bl",
+    "addr": "8020bb58",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSVECCrossProduct-bl",
+    "addr": "8020bb78",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PSVECSquareDistance-bl",
+    "addr": "8020bc88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDInitWA-bl",
+    "addr": "8020c07c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDInterruptHandler-bl",
+    "addr": "8020c0bc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-AlarmHandler_-bl",
+    "addr": "8020c39c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-AlarmHandlerForTimeout-bl",
+    "addr": "8020c420",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-Read-bl",
+    "addr": "8020c490",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SeekTwiceBeforeRead-bl",
+    "addr": "8020c5a0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowRead-bl",
+    "addr": "8020c620",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowSeek-bl",
+    "addr": "8020c8b8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowWaitCoverClose-bl",
+    "addr": "8020c94c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowReadDiskID",
+    "addr": "8020c978",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowStopMotor-bl",
+    "addr": "8020ca1c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowRequestError-bl",
+    "addr": "8020caa8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowInquiry-bl",
+    "addr": "8020cb34",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowAudioStream-bl",
+    "addr": "8020cbd0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowRequestAudioStatus-bl",
+    "addr": "8020cc68",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowAudioBufferConfig-bl",
+    "addr": "8020ccf4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowReset-bl",
+    "addr": "8020cd90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowBreak-bl",
+    "addr": "8020ce4c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDLowClearCallback-bl",
+    "addr": "8020ce60",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDLowSetWAType-bl",
+    "addr": "8020ce7c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDFSInit-bl",
+    "addr": "8020cec0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDConvertPathToEntrynum-bl",
+    "addr": "8020cef8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDOpen-bl",
+    "addr": "8020d1ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDClose-bl",
+    "addr": "8020d2b4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-entryToPath-bl",
+    "addr": "8020d2d8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDGetCurrentDir-bl",
+    "addr": "8020d438",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDReadAsyncPrio-bl",
+    "addr": "8020d4fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForReadAsync-bl",
+    "addr": "8020d5bc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDReadPrio-bl",
+    "addr": "8020d5ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForReadSync-bl",
+    "addr": "8020d704",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-defaultOptionalCommandChecker-bl",
+    "addr": "8020d794",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDInit-bl",
+    "addr": "8020d798",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateReadingFST-bl",
+    "addr": "8020d864",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateReadingFST-bl",
+    "addr": "8020d8f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateError-bl",
+    "addr": "8020d984",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateTimeout-bl",
+    "addr": "8020da30",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateGettingError-bl",
+    "addr": "8020da64",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-CategorizeError-bl",
+    "addr": "8020da8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateGettingError-bl",
+    "addr": "8020db40",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForUnrecoveredError-bl",
+    "addr": "8020ddd4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForUnrecoveredErrorRetry-bl",
+    "addr": "8020de3c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateGoToRetry-bl",
+    "addr": "8020ded4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateGoToRetry-bl",
+    "addr": "8020defc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateCheckID-bl",
+    "addr": "8020e054",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateCheckID3-bl",
+    "addr": "8020e134",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateCheckID2a-bl",
+    "addr": "8020e168",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateCheckID2a-bl",
+    "addr": "8020e19c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateCheckID2-bl",
+    "addr": "8020e210",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateCheckID1-bl",
+    "addr": "8020e248",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateCheckID2-bl",
+    "addr": "8020e35c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateCheckID3-bl",
+    "addr": "8020e440",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-AlarmHandler__-bl",
+    "addr": "8020e53c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateCoverClosed-bl",
+    "addr": "8020e580",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateCoverClosed_CMD-bl",
+    "addr": "8020e64c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateCoverClosed-bl",
+    "addr": "8020e67c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateMotorStopped-bl",
+    "addr": "8020e6ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateMotorStopped-bl",
+    "addr": "8020e714",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateReady-bl",
+    "addr": "8020e7f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-stateBusy-bl",
+    "addr": "8020ea28",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForStateBusy-bl",
+    "addr": "8020ed48",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDReadAbsAsyncPrio-bl",
+    "addr": "8020f380",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDReadAbsAsyncForBS-bl",
+    "addr": "8020f45c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDReadDiskID-bl",
+    "addr": "8020f52c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForGetStreamErrorStatusSync-bl",
+    "addr": "8020f600",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDInquiryAsync-bl",
+    "addr": "8020f6bc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDReset-bl",
+    "addr": "8020f78c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDGetCommandBlockStatus-bl",
+    "addr": "8020f7d0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDGetDriveStatus-bl",
+    "addr": "8020f81c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDSetAutoInvalidation",
+    "addr": "8020f8c8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDResume-bl",
+    "addr": "8020f8d8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDCancelAsync-bl",
+    "addr": "8020f928",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDCancel-bl",
+    "addr": "8020fba4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cbForCancelSync-bl",
+    "addr": "8020fc50",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDGetCurrentDiskID-bl",
+    "addr": "8020fc74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDCheckDisk-bl",
+    "addr": "8020fc7c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDPrepareResetAsync-bl",
+    "addr": "8020fd74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDClearWaitingQueue-bl",
+    "addr": "8020fe90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDPushWaitingQueue-bl",
+    "addr": "8020fec8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDPopWaitingQueue-bl",
+    "addr": "8020ff30",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDCheckWaitingQueue-bl",
+    "addr": "8020ffd0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDDequeueWaitingQueue-bl",
+    "addr": "80210028",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ErrorCode2Num-bl",
+    "addr": "80210088",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDStoreErrorCode-bl",
+    "addr": "802101a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DVDCompareDiskID-bl",
+    "addr": "80210220",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__DVDPrintFatalMessage-bl",
+    "addr": "80210414",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cb-bl",
+    "addr": "80210444",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__fstLoad-bl",
+    "addr": "8021051c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-VISetPreRetraceCallback",
+    "addr": "802108f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-VISetPostRetraceCallback",
+    "addr": "8021093c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-getTiming",
+    "addr": "80210980",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__VIInit",
+    "addr": "80210a20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-VIInit-bl",
+    "addr": "80210c20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-VIWaitForRetrace",
+    "addr": "802110d0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-setFbbRegs",
+    "addr": "80211124",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-setVerticalRegs",
+    "addr": "802113f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-VIConfigure-bl",
+    "addr": "80211598",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-VIFlush-bl",
+    "addr": "80212154",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-VISetNextFrameBuffer",
+    "addr": "80212284",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-VISetBlack",
+    "addr": "802122f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GetCurrentDisplayPosition",
+    "addr": "80212374",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-VIGetNextField-bl",
+    "addr": "80212418",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0065": [
+   {
+    "name": "gnt4-VIGetTvFormat",
+    "addr": "8021254c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-UpdateOrigin-bl",
+    "addr": "80212b20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PADOriginCallback-bl",
+    "addr": "80212cc4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PADOriginUpdateCallback-bl",
+    "addr": "80212d88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PADProbeCallback-bl",
+    "addr": "80212e48",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PADTypeAndStatusCallback-bl",
+    "addr": "80212f20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PADReceiveCheckCallback-bl",
+    "addr": "8021324c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PADReset-bl",
+    "addr": "80213380",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PADRecalibrate-bl",
+    "addr": "80213480",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PADControlMotor-bl",
+    "addr": "80213b48",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SPEC0_MakeStatus-bl",
+    "addr": "80213c4c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SPEC1_MakeStatus-bl",
+    "addr": "80213dc0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SPEC2_MakeStatus-bl",
+    "addr": "80213f34",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SamplingHandler-bl",
+    "addr": "802144c0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PADSetSamplingCallback-bl",
+    "addr": "80214520",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__PADDisableRecalibration-bl",
+    "addr": "80214574",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ARRegisterDMACallback",
+    "addr": "80214ebc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ARStartDMA",
+    "addr": "80214f00",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ARQServiceQueueLo-bl",
+    "addr": "802169fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ARQCallbackHack-bl",
+    "addr": "80216afc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ARQInterruptServiceRoutine-bl",
+    "addr": "80216b00",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ARQInit-bl",
+    "addr": "80216bcc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ARQPostRequest-bl",
+    "addr": "80216c3c",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0066": [
+   {
+    "name": "gnt4-__GXDefaultTexRegionCallback-bl",
+    "addr": "80223de4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXDefaultTlutRegionCallback-bl",
+    "addr": "80223ee0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXShutdown-bl",
+    "addr": "80223f04",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXInitGX-bl",
+    "addr": "80224824",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXCPInterruptHandler-bl",
+    "addr": "8022515c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitFifoBase-bl",
+    "addr": "80225290",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitFifoPtrs-bl",
+    "addr": "802252fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitFifoLimits-bl",
+    "addr": "8022536c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetCPUFifo-bl",
+    "addr": "80225378",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetGPFifo-bl",
+    "addr": "802254a0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetBreakPtCallback-bl",
+    "addr": "80225618",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXFifoInit-bl",
+    "addr": "8022565c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXFifoReadEnable-bl",
+    "addr": "802256a8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXFifoReadDisable-bl",
+    "addr": "802256cc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXFifoLink-bl",
+    "addr": "802256f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXWriteFifoIntEnable-bl",
+    "addr": "80225724",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXWriteFifoIntReset-bl",
+    "addr": "80225754",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXGetGPFifo-bl",
+    "addr": "8022588c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetVtxDesc-bl",
+    "addr": "80225894",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetVCD-bl",
+    "addr": "80225d88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXCalculateVLim-bl",
+    "addr": "80225e44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXClearVtxDesc-bl",
+    "addr": "802261ac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetVtxAttrFmt-bl",
+    "addr": "802261e4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetVtxAttrFmtv-bl",
+    "addr": "80226440",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetVAT",
+    "addr": "802266c0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetArray",
+    "addr": "80226a50",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInvalidateVtxCache-bl",
+    "addr": "80226adc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTexCoordGen2-bl",
+    "addr": "80226aec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetNumTexGens-bl",
+    "addr": "80226d6c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetMisc-bl",
+    "addr": "80226da8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXFlush",
+    "addr": "80226e3c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXAbort-bl",
+    "addr": "80226e98",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXWaitDrawDone-bl",
+    "addr": "80227174",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXDrawDone-bl",
+    "addr": "802271c0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXPixModeSync-bl",
+    "addr": "80227240",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXPokeAlphaMode-bl",
+    "addr": "80227264",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXPokeAlphaRead-bl",
+    "addr": "80227278",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXPokeAlphaUpdate-bl",
+    "addr": "80227298",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXPokeBlendMode-bl",
+    "addr": "802272b0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXPokeColorUpdate-bl",
+    "addr": "80227314",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXPokeDstAlpha-bl",
+    "addr": "8022732c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXPokeDither-bl",
+    "addr": "80227350",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXPokeZMode-bl",
+    "addr": "80227368",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetDrawSyncCallback-bl",
+    "addr": "80227388",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXTokenInterruptHandler-bl",
+    "addr": "802273cc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetDrawDoneCallback-bl",
+    "addr": "80227454",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXFinishInterruptHandler-bl",
+    "addr": "80227498",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXPEInit-bl",
+    "addr": "80227518",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetDirtyState-bl",
+    "addr": "8022758c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXBegin-bl",
+    "addr": "8022760c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSendFlushPrim-bl",
+    "addr": "802276dc",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0067": [
+   {
+    "name": "gnt4-GXSetLineWidth-bl",
+    "addr": "80227764",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetPointSize-bl",
+    "addr": "802277a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXEnableTexOffsets-bl",
+    "addr": "802277e4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetCullMode-bl",
+    "addr": "8022782c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetCoPlanar-bl",
+    "addr": "80227870",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetGenMode-bl",
+    "addr": "802278a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetDispCopySrc-bl",
+    "addr": "802279e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTexCopySrc-bl",
+    "addr": "80227a64",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetDispCopyDst-bl",
+    "addr": "80227ae0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTexCopyDst-bl",
+    "addr": "80227b14",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetDispCopyFrame2Field-bl",
+    "addr": "80227c44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetCopyClamp-bl",
+    "addr": "80227c68",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetDispCopyYScale-bl",
+    "addr": "80227cc0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetCopyClear-bl",
+    "addr": "80227d8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetCopyFilter-bl",
+    "addr": "80227e04",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetDispCopyGamma-bl",
+    "addr": "8022800c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXCopyDisp-bl",
+    "addr": "80228020",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXCopyTex-bl",
+    "addr": "80228188",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXClearBoundingBox-bl",
+    "addr": "80228314",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitLightAttn-bl",
+    "addr": "8022834c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitLightSpot-bl",
+    "addr": "80228368",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitLightDistAttn-bl",
+    "addr": "802284f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitLightPos-bl",
+    "addr": "802285c8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitLightDir-bl",
+    "addr": "802285d8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitLightColor-bl",
+    "addr": "802285f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXLoadLightObjImm-bl",
+    "addr": "80228600",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetChanAmbColor-bl",
+    "addr": "8022867c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetChanAmbColor-bl",
+    "addr": "80228738",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetChanMatColor-bl",
+    "addr": "8022876c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetChanMatColor-bl",
+    "addr": "80228828",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetNumChans-bl",
+    "addr": "8022885c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetChanCtrl-bl",
+    "addr": "80228898",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXGetTexBufferSize-bl",
+    "addr": "80228950",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GetImageTileCount-bl",
+    "addr": "80228aac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitTexObj-bl",
+    "addr": "80228b74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitTexObjCI-bl",
+    "addr": "80228dc0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitTexObjLOD-bl",
+    "addr": "80228e08",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXGetTexObjFmt-bl",
+    "addr": "80228f6c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXGetTexObjMipMap-bl",
+    "addr": "80228f74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXLoadTexObjPreLoaded-bl",
+    "addr": "80228f8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXLoadTexObj-bl",
+    "addr": "80229108",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitTlutObj-bl",
+    "addr": "8022915c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXLoadTlut-bl",
+    "addr": "80229194",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitTexCacheRegion-bl",
+    "addr": "8022922c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitTlutRegion-bl",
+    "addr": "80229320",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInvalidateTexAll-bl",
+    "addr": "80229358",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTexRegionCallback-bl",
+    "addr": "802293a0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTlutRegionCallback-bl",
+    "addr": "802293b4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__SetSURegs-bl",
+    "addr": "802293c8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetSUTexRegs-bl",
+    "addr": "80229468",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetTmemConfig-bl",
+    "addr": "802295e4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevIndirect-bl",
+    "addr": "80229938",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetIndTexCoordScale-bl",
+    "addr": "802299a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetNumIndStages-bl",
+    "addr": "80229ae8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevDirect-bl",
+    "addr": "80229b0c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXUpdateBPMask-bl",
+    "addr": "80229b54",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetIndirectMask-bl",
+    "addr": "80229b58",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXFlushTextureState-bl",
+    "addr": "80229b88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevOp-bl",
+    "addr": "80229bac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevColorIn-bl",
+    "addr": "80229c38",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevAlphaIn-bl",
+    "addr": "80229c7c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevColorOp-bl",
+    "addr": "80229cc0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevAlphaOp-bl",
+    "addr": "80229d28",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevColor-bl",
+    "addr": "80229d90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevColorS10-bl",
+    "addr": "80229e0c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevKColor-bl",
+    "addr": "80229e88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevKColorSel-bl",
+    "addr": "80229efc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevKAlphaSel-bl",
+    "addr": "80229f58",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevSwapMode-bl",
+    "addr": "80229fb4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevSwapModeTable-bl",
+    "addr": "80229ffc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetAlphaCompare-bl",
+    "addr": "8022a07c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetZTexture-bl",
+    "addr": "8022a0c0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetTevOrder-bl",
+    "addr": "8022a14c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetNumTevStages-bl",
+    "addr": "8022a2e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetFog-bl",
+    "addr": "8022a310",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXInitFogAdjTable-bl",
+    "addr": "8022a534",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetFogRangeAdj-bl",
+    "addr": "8022a6e4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetBlendMode-bl",
+    "addr": "8022a808",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetColorUpdate-bl",
+    "addr": "8022a85c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetAlphaUpdate-bl",
+    "addr": "8022a888",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetZMode-bl",
+    "addr": "8022a8b4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetZCompLoc-bl",
+    "addr": "8022a8e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetPixelFmt-bl",
+    "addr": "8022a91c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetDither-bl",
+    "addr": "8022a9f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetDstAlpha-bl",
+    "addr": "8022aa1c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetFieldMask-bl",
+    "addr": "8022aa58",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetFieldMode-bl",
+    "addr": "8022aa90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXCallDisplayList-bl",
+    "addr": "8022bb04",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXProject-bl",
+    "addr": "8022bb74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetProjection-bl",
+    "addr": "8022bce8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetProjectionv-bl",
+    "addr": "8022bd8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXGetProjectionv-bl",
+    "addr": "8022be18",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXLoadPosMtxImm-bl",
+    "addr": "8022be60",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXLoadNrmMtxImm-bl",
+    "addr": "8022beb0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetCurrentMtx-bl",
+    "addr": "8022bf00",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXLoadTexMtxImm-bl",
+    "addr": "8022bf34",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetViewport-bl",
+    "addr": "8022bfe8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetViewportJitter-bl",
+    "addr": "8022c078",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetViewport-bl",
+    "addr": "8022c0d0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXGetViewportv-bl",
+    "addr": "8022c118",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetScissor-bl",
+    "addr": "8022c13c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetScissorBoxOffset-bl",
+    "addr": "8022c1b4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetClipMode-bl",
+    "addr": "8022c1f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__GXSetMatrixIndex-bl",
+    "addr": "8022c21c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXSetGPMetric-bl",
+    "addr": "8022c2a0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GXClearGPMetric-bl",
+    "addr": "8022cae8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "cPoseAccumulator::GetNodeMatrix(",
+    "addr": "8022caf8",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0068": [
+   {
+    "name": "SaveLoad::DidGameIDChange(void)",
+    "addr": "80231c70",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "gnt4-__cvt_fp2unsigned-bl",
+    "addr": "80232980",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__save_gpr",
+    "addr": "80232a74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_savegpr_19-bl",
+    "addr": "80232a88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_savegpr_20-bl",
+    "addr": "80232a8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_savegpr_22-bl",
+    "addr": "80232a94",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_savegpr_23-bl",
+    "addr": "80232a98",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_savegpr_24-bl",
+    "addr": "80232a9c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_savegpr_25-bl",
+    "addr": "80232aa0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_savegpr_26-bl",
+    "addr": "80232aa4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_savegpr_27-bl",
+    "addr": "80232aa8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__restore_gpr",
+    "addr": "80232ac0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_restgpr_19-bl",
+    "addr": "80232ad4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_restgpr_20-bl",
+    "addr": "80232ad8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_restgpr_22-bl",
+    "addr": "80232ae0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_restgpr_23-bl",
+    "addr": "80232ae4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_restgpr_24-bl",
+    "addr": "80232ae8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_restgpr_25-bl",
+    "addr": "80232aec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_restgpr_26-bl",
+    "addr": "80232af0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_restgpr_27-bl",
+    "addr": "80232af4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__div2i",
+    "addr": "80232bf8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__mod2i",
+    "addr": "80232e14",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__shl2i",
+    "addr": "80232f20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__shr2u",
+    "addr": "80232f44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__shr2i",
+    "addr": "80232f68",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0069": [
+   {
+    "name": "gnt4-tolower",
+    "addr": "802358d8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-memcmp",
+    "addr": "802363e0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-memmove-bl",
+    "addr": "80236484",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__copy_longs_rev_unaligned",
+    "addr": "80236550",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__copy_longs_unaligned",
+    "addr": "802365fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__copy_longs_rev_aligned",
+    "addr": "802366bc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__copy_longs_aligned",
+    "addr": "80236764",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-vprintf",
+    "addr": "80236988",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-strncmp",
+    "addr": "80238adc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-strcmp",
+    "addr": "80238b1c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ieee754_acos",
+    "addr": "80239410",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ieee754_asin",
+    "addr": "80239720",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ieee754_atan2",
+    "addr": "80239984",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ieee754_exp",
+    "addr": "80239c14",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ieee754_fmod",
+    "addr": "80239e38",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ieee754_log",
+    "addr": "8023a174",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ieee754_pow",
+    "addr": "8023a3f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__ieee754_rem_pio2-bl",
+    "addr": "8023aca4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__kernel_cos",
+    "addr": "8023b044",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__kernel_rem_pio2",
+    "addr": "8023b138",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__kernel_sin",
+    "addr": "8023bf8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__kernel_tan",
+    "addr": "8023c02c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-atan",
+    "addr": "8023c240",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cos-bl",
+    "addr": "8023c480",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-sin-bl",
+    "addr": "8023c9e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-tan-bl",
+    "addr": "8023cac0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-acos-bl",
+    "addr": "8023cb38",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-asin-bl",
+    "addr": "8023cb58",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-atan2-bl",
+    "addr": "8023cb78",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-exp-bl",
+    "addr": "8023cb98",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-fmod-bl",
+    "addr": "8023cbb8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-log-bl",
+    "addr": "8023cbd8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-pow-bl",
+    "addr": "8023cbf8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-tanf",
+    "addr": "8023cc20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-sinf",
+    "addr": "8023cc44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-cosf",
+    "addr": "8023cc68",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjSetCurrent-bl",
+    "addr": "8023d768",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjSetFlags-bl",
+    "addr": "8023d770",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjClearFlags-bl",
+    "addr": "8023d788",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjAddAnimAll-bl",
+    "addr": "8023d838",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjReqAnimAllByFlags-bl",
+    "addr": "8023d8e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjAnimAll-bl",
+    "addr": "8023d968",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DObjLoad-bl",
+    "addr": "8023d9d4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjLoadDesc-bl",
+    "addr": "8023dae4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjRemoveAll-bl",
+    "addr": "8023db7c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjAlloc-bl",
+    "addr": "8023dbf0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjResolveRefsAll-bl",
+    "addr": "8023dc4c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DObjDisp-bl",
+    "addr": "8023dcb8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DObjRelease-bl",
+    "addr": "8023dd78",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DObjAmnesia-bl",
+    "addr": "8023ddd4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-DObjInfoInit-bl",
+    "addr": "8023de1c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjAddAnim-bl",
+    "addr": "8023defc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjReqAnimAllByFlags-bl",
+    "addr": "8023e050",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-TObjUpdateFunc-bl",
+    "addr": "8023e0c4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjAnimAll-bl",
+    "addr": "8023e690",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-TObjLoad-bl",
+    "addr": "8023e6ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjLoadDesc-bl",
+    "addr": "8023e814",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TlutLoadDesc-bl",
+    "addr": "8023e8ac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjTevLoadDesc-bl",
+    "addr": "8023e8f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_TObjGetCurrentByType-bl",
+    "addr": "8023e944",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TexMapID2PTTexMtx-bl",
+    "addr": "8023e980",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MakeTextureMtx-bl",
+    "addr": "8023ea14",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-TObjSetupMtx-bl",
+    "addr": "8023ebe8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjSetupTextureCoordGen-bl",
+    "addr": "8023eed0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjSetupVolatileTev-bl",
+    "addr": "8023f160",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MakeColorGenTExp-bl",
+    "addr": "8023f280",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-TObjMakeTExp-bl",
+    "addr": "8023fb48",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjAssignResources-bl",
+    "addr": "802401b0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjSetup-bl",
+    "addr": "80240410",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TGTex2Index-bl",
+    "addr": "802406ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TexCoordID2TexGenSrc-bl",
+    "addr": "80240780",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TexCoord2Index-bl",
+    "addr": "80240808",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Index2TexCoord-bl",
+    "addr": "80240898",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TexMtx2Index-bl",
+    "addr": "80240928",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Index2TexMtx-bl",
+    "addr": "802409d8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Index2TexMap-bl",
+    "addr": "80240a94",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TexMap2Index-bl",
+    "addr": "80240b24",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjRemoveAll-bl",
+    "addr": "80240bb4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjAlloc-bl",
+    "addr": "80240c40",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TlutAlloc-bl",
+    "addr": "80240c9c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TlutFree-bl",
+    "addr": "80240cf4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TObjTevAlloc-bl",
+    "addr": "80240d20",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0070": [
+   {
+    "name": "gnt4-TObjInit-bl",
+    "addr": "80240d78",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-TObjRelease-bl",
+    "addr": "80240dd0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-TObjAmnesia-bl",
+    "addr": "80240e8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-TObjInfoInit-bl",
+    "addr": "80240eec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SetupChannelMode-bl",
+    "addr": "80240f90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SetupRenderModeWithCustomPE-bl",
+    "addr": "802411cc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SetMaterialColor-bl",
+    "addr": "8024139c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SetMaterialShininess-bl",
+    "addr": "80241410",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetCullMode-bl",
+    "addr": "80241420",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetBlendMode-bl",
+    "addr": "8024145c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetZMode-bl",
+    "addr": "802414fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetAlphaCompare-bl",
+    "addr": "8024158c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetColorUpdate-bl",
+    "addr": "8024163c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetAlphaUpdate-bl",
+    "addr": "80241684",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetDstAlpha-bl",
+    "addr": "802416cc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetZCompLoc-bl",
+    "addr": "80241738",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetDither-bl",
+    "addr": "80241780",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_StateInvalidatePrimitive-bl",
+    "addr": "802417c8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_StateInvalidateVtxAttr-bl",
+    "addr": "802417e4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_StateInvalidateRenderMode-bl",
+    "addr": "80241804",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateInvalidate-bl",
+    "addr": "8024185c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RenderInitAllocData-bl",
+    "addr": "802418bc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SetupChannel-bl",
+    "addr": "80241918",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DisableChannelLighting-bl",
+    "addr": "80241cbc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetNumChans-bl",
+    "addr": "80241db4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateRegisterTexGen-bl",
+    "addr": "80241df4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetNumTexGens-bl",
+    "addr": "80241e24",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateInitTev",
+    "addr": "80241e54",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateGetNumTevStages",
+    "addr": "80241e60",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateAssignTev-bl",
+    "addr": "80241e68",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StateSetNumTevStages-bl",
+    "addr": "80241e94",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SetupTevStage-bl",
+    "addr": "80241ec4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Index2TevStage-bl",
+    "addr": "80241fbc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SetTevRegAll-bl",
+    "addr": "8024208c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TexCoordID2Num-bl",
+    "addr": "8024214c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_StateInvalidateColorChannel-bl",
+    "addr": "80242214",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_StateInvalidateTevStage",
+    "addr": "8024226c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_StateInvalidateTevRegister",
+    "addr": "80242278",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_StateInvalidateTexCoordGen",
+    "addr": "80242298",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjSetCurrent-bl",
+    "addr": "802422a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjSetFlags-bl",
+    "addr": "802422ac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjAddAnim-bl",
+    "addr": "8024233c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjReqAnimByFlags-bl",
+    "addr": "802423a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MObjUpdateFunc-bl",
+    "addr": "80242408",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjAnim-bl",
+    "addr": "802428a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MObjLoad-bl",
+    "addr": "802428ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjLoadDesc-bl",
+    "addr": "802429fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MObjMakeTExp-bl",
+    "addr": "80242a9c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjCompileTev-bl",
+    "addr": "80243468",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MObjSetupTev-bl",
+    "addr": "80243588",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjSetup-bl",
+    "addr": "80243600",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjUnset-bl",
+    "addr": "80243744",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjGetTObj-bl",
+    "addr": "802437e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjRemove-bl",
+    "addr": "80243800",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MObjAlloc-bl",
+    "addr": "80243850",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MaterialAlloc-bl",
+    "addr": "802438ac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MObjRelease-bl",
+    "addr": "8024390c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MObjAmnesia-bl",
+    "addr": "802439a8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-MObjInfoInit-bl",
+    "addr": "80243a0c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjInitAllocData",
+    "addr": "80243abc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjInitEndCallBack",
+    "addr": "80243b24",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjInvokeCallBacks",
+    "addr": "80243b34",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjReqAnim",
+    "addr": "80243b90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjInterpretAnim",
+    "addr": "80243bd0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjLoadDesc",
+    "addr": "80243d88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjRemove",
+    "addr": "80243eb0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjAlloc",
+    "addr": "80243f20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjFree",
+    "addr": "80243f8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjSetRewindFrame",
+    "addr": "80243fd0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AObjSetEndFrame",
+    "addr": "80243fe0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetLightMaskDiffuse-bl",
+    "addr": "80243ffc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetLightMaskAlpha-bl",
+    "addr": "80244004",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetLightMaskSpecular-bl",
+    "addr": "8024400c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetNbActive-bl",
+    "addr": "80244014",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetActiveByID-bl",
+    "addr": "8024401c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetActiveByIndex-bl",
+    "addr": "80244064",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-LObjUpdateFunc-bl",
+    "addr": "80244090",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetLightVector-bl",
+    "addr": "802442dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjSetup-bl",
+    "addr": "80244400",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjSetupSpecularInit-bl",
+    "addr": "80244564",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjSetupInit-bl",
+    "addr": "802447dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetCurrentByType-bl",
+    "addr": "802456d8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LightID2Index-bl",
+    "addr": "8024570c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Index2LightID-bl",
+    "addr": "802457f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjRemoveAll-bl",
+    "addr": "80245868",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjSetColor",
+    "addr": "80245a74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetPosition-bl",
+    "addr": "80245a8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjGetInterest-bl",
+    "addr": "80245acc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-LObjLoad-bl",
+    "addr": "80245b0c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_LObjLoadDesc-bl",
+    "addr": "80245f20",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-LObjRelease-bl",
+    "addr": "80246010",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-LObjAmnesia-bl",
+    "addr": "80246174",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-LObjInfoInit-bl",
+    "addr": "802461d4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-CObjUpdateFunc-bl",
+    "addr": "80246398",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-setupTopHalfCamera-bl",
+    "addr": "80246588",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-setupBottomHalfCamera-bl",
+    "addr": "802467ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetupViewingMtx-bl",
+    "addr": "80246ab8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetCurrent-bl",
+    "addr": "80246b84",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjEndCurrent-bl",
+    "addr": "80247088",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetInterestWObj-bl",
+    "addr": "802470ac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetEyePositionWObj-bl",
+    "addr": "802470ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetInterest-bl",
+    "addr": "8024712c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetInterest-bl",
+    "addr": "80247198",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetEyePosition-bl",
+    "addr": "80247204",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetEyePosition-bl",
+    "addr": "80247270",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-upvec2roll-bl",
+    "addr": "802472dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-roll2upvec-bl",
+    "addr": "802474c4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetUpVector-bl",
+    "addr": "802477a8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetUpVector-bl",
+    "addr": "80247810",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetMtxDirty-bl",
+    "addr": "80247b0c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjMtxIsDirty-bl",
+    "addr": "80247b1c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetViewingMtx-bl",
+    "addr": "80247b68",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetInvViewingMtxPtrDirect-bl",
+    "addr": "80247b9c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetViewingMtxPtr-bl",
+    "addr": "80247c00",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetRoll-bl",
+    "addr": "80247c30",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetFov-bl",
+    "addr": "80248058",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetFov-bl",
+    "addr": "8024807c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetNear-bl",
+    "addr": "8024809c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetNear-bl",
+    "addr": "802480b4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetFar-bl",
+    "addr": "802480c4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetFar-bl",
+    "addr": "802480dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetScissorx4-bl",
+    "addr": "802480ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetViewportfx4-bl",
+    "addr": "80248108",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetPerspective-bl",
+    "addr": "80248124",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetOrtho-bl",
+    "addr": "80248140",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjSetFlags-bl",
+    "addr": "80248164",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjClearFlags-bl",
+    "addr": "8024817c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetCurrent",
+    "addr": "80248194",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjAlloc-bl",
+    "addr": "8024819c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-CObjLoad-bl",
+    "addr": "802481f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-CObjInit-bl",
+    "addr": "80248458",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0071": [
+   {
+    "name": "gnt4-CObjRelease-bl",
+    "addr": "802484cc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-CObjAmnesia-bl",
+    "addr": "80248650",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-CObjInfoInit-bl",
+    "addr": "802486b0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjInitAllocData",
+    "addr": "8024873c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjRemove",
+    "addr": "8024876c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjRemoveAll",
+    "addr": "80248794",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjReqAnimAll",
+    "addr": "802488b8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjStopAnimAll",
+    "addr": "8024895c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-FObjLoadData",
+    "addr": "802489f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjInterpretAnim-bl",
+    "addr": "80249ac4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjInterpretAnimAll",
+    "addr": "8024a198",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjLoadDesc",
+    "addr": "8024a208",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjAlloc",
+    "addr": "8024a430",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FObjFree",
+    "addr": "8024a48c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PObjRemoveAnimAll-bl",
+    "addr": "8024a55c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PObjReqAnimAllByFlags-bl",
+    "addr": "8024a5ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PObjUpdateFunc-bl",
+    "addr": "8024a660",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PObjAnimAll-bl",
+    "addr": "8024a6ac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PObjLoad-bl",
+    "addr": "8024a708",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PObjLoadDesc-bl",
+    "addr": "8024a944",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PObjRemoveAll-bl",
+    "addr": "8024a9dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PObjAlloc-bl",
+    "addr": "8024aa50",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PObjResolveRefsAll-bl",
+    "addr": "8024aaac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ClearVtxDesc-bl",
+    "addr": "8024ac80",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-get_shape_vertex_xyz-bl",
+    "addr": "8024acac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-get_shape_normal_xyz-bl",
+    "addr": "8024b038",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-get_shape_nbt_xyz-bl",
+    "addr": "8024b3c4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-interpretShapeAnimDisplayList-bl",
+    "addr": "8024b7cc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-drawShapeAnim-bl",
+    "addr": "8024baf0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PObjClearMtxMark-bl",
+    "addr": "8024c22c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SetupRigidModelMtx-bl",
+    "addr": "8024c244",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SetupSharedVtxModelMtx-bl",
+    "addr": "8024c4c4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SetupEnvelopeModelMtx-bl",
+    "addr": "8024c844",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PObjDisp-bl",
+    "addr": "8024cad8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-PObjInfoInit-bl",
+    "addr": "8024cf98",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjCheckDepend",
+    "addr": "8024d030",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjMtxIsDirty",
+    "addr": "8024d15c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjSetMtxDirty",
+    "addr": "8024d1b4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjMakeMatrix",
+    "addr": "8024d224",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjReqAnimByFlags",
+    "addr": "8024d838",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjReqAnimAllByFlags",
+    "addr": "8024d8c0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjReqAnimAll",
+    "addr": "8024db88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-JObjSortAnim",
+    "addr": "8024dbac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjAddAnim",
+    "addr": "8024dc04",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjAddAnimAll",
+    "addr": "8024dd44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-JObjUpdateFunc",
+    "addr": "8024e120",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjAnim",
+    "addr": "8024ea64",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-JObjAnimAll",
+    "addr": "8024ebc8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjAnimAll",
+    "addr": "8024ef10",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-setupInstanceMtx",
+    "addr": "8024ef4c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjDispAll",
+    "addr": "8024f07c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_CObjGetViewingMtxPtrDirect-bl",
+    "addr": "8024f5c0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjSetupMatrix_",
+    "addr": "8024f5c8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-JObjLoad",
+    "addr": "8024f638",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjLoadJoint",
+    "addr": "8024f834",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjResolveRefs",
+    "addr": "8024f8dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjResolveRefsAll",
+    "addr": "8024f9d4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjRef",
+    "addr": "8024fca8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_IDGetData",
+    "addr": "8024fcfc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-ref_INC",
+    "addr": "8024fd28",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjUnref",
+    "addr": "8024fd74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjUnrefThis",
+    "addr": "8024febc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjAddChild",
+    "addr": "8024ff64",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjGetPrev",
+    "addr": "8025020c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjGetDObj",
+    "addr": "80250298",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjSetFlags",
+    "addr": "802502dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjSetFlagsAll",
+    "addr": "80250378",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjClearFlags",
+    "addr": "80250650",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjClearFlagsAll",
+    "addr": "802506ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjAlloc",
+    "addr": "802509c8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjSetCurrent",
+    "addr": "80250a24",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjGetCurrent",
+    "addr": "80250bb4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-resolveIKJoint1-bl",
+    "addr": "80250bbc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-resolveIKJoint2-bl",
+    "addr": "802513ac",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjSetupMatrixSub-bl",
+    "addr": "80251908",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjSetMtxDirtySub-bl",
+    "addr": "80251b80",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-JObjInit-bl",
+    "addr": "80251eb4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-JObjReleaseChild-bl",
+    "addr": "80251f18",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-JObjRelease-bl",
+    "addr": "802523ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-JObjAmnesia-bl",
+    "addr": "80252484",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-JObjInfoInit-bl",
+    "addr": "802524e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ZListInitAllocData-bl",
+    "addr": "802525a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-mkVBillBoardMtx-bl",
+    "addr": "802525d4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-mkHBillBoardMtx-bl",
+    "addr": "802528b0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-mkBillBoardMtx-bl",
+    "addr": "80252bf4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-mkRBillBoardMtx",
+    "addr": "80252f8c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjMakePositionMtx-bl",
+    "addr": "80253174",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_mkEnvelopeModelNodeMtx-bl",
+    "addr": "80253274",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjDispSub-bl",
+    "addr": "80253380",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjDispDObj-bl",
+    "addr": "80253450",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-zlist_sort-bl",
+    "addr": "80253658",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_ZListSort-bl",
+    "addr": "802537c4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_ZListDisp-bl",
+    "addr": "80253814",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_ZListClear-bl",
+    "addr": "802538dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SetZSortMode-bl",
+    "addr": "8025397c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_JObjDisp-bl",
+    "addr": "80253988",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_DVDInit",
+    "addr": "80253bbc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AllocateXFB-bl",
+    "addr": "80253bc0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_AllocateFIFO-bl",
+    "addr": "80253cf4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_GXInit-bl",
+    "addr": "80253d44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_OSInit-bl",
+    "addr": "80253df0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_MemAllocDefaultCB-bl",
+    "addr": "80253f94",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_MemFreeDefaultCB-bl",
+    "addr": "80253ff4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_MemGetRemainDefaultCB-bl",
+    "addr": "80254028",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_MemClearDefaultCB-bl",
+    "addr": "8025404c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_MemCheckOwnDefaultCB-bl",
+    "addr": "802540b0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_GetHeap-bl",
+    "addr": "802540d8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SetCurrentRenderPass-bl",
+    "addr": "802541c4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_StartRender-bl",
+    "addr": "802541cc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_NeedCacheInvalidate-bl",
+    "addr": "80254278",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ObjInit-bl",
+    "addr": "80254288",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VISetUserPostRetraceCallback-bl",
+    "addr": "802542cc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VIPreRetraceCB-bl",
+    "addr": "80254320",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VIPostRetraceCB-bl",
+    "addr": "80254590",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VIGXDrawDoneCB-bl",
+    "addr": "8025479c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VIGetDrawDoneWaitingFlag-bl",
+    "addr": "802547e0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VICopyEFB2XFBPtr-bl",
+    "addr": "802547f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VICopyXFBASync-bl",
+    "addr": "80254a48",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VISetXFBDrawDone-bl",
+    "addr": "80254bc4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VISetConfigure-bl",
+    "addr": "80254d88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VISetBlack-bl",
+    "addr": "80254e10",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VIInit-bl",
+    "addr": "80254e28",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-splGetHelmite-bl",
+    "addr": "80255050",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-splGetSplinePoint-bl",
+    "addr": "802550b0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-splArcLength-bl",
+    "addr": "80255540",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-splArcLengthGetParameter-bl",
+    "addr": "80255848",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-splArcLengthPoint-bl",
+    "addr": "80255a48",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MtxInverseConcat-bl",
+    "addr": "80255a90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MtxGetRotation-bl",
+    "addr": "80255ec0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MtxGetTranslate-bl",
+    "addr": "802561e0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MtxGetScale-bl",
+    "addr": "802561fc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MkRotationMtx-bl",
+    "addr": "802566d4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MtxSRT-bl",
+    "addr": "80256810",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MtxSRTQuat-bl",
+    "addr": "80256ae8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MtxScaledAdd-bl",
+    "addr": "80256c94",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VecAlloc-bl",
+    "addr": "80256d58",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VecFree-bl",
+    "addr": "80256da4",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0072": [
+   {
+    "name": "gnt4-HSD_MtxAlloc-bl",
+    "addr": "80256dd8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MtxFree-bl",
+    "addr": "80256e24",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_VecInitAllocData-bl",
+    "addr": "80256e58",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MtxInitAllocData-bl",
+    "addr": "80256e88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_MulColor-bl",
+    "addr": "80256eb8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_GetNbBits-bl",
+    "addr": "80256f24",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Index2PosNrmMtx-bl",
+    "addr": "80256fe4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ObjSetHeap",
+    "addr": "80257084",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ObjAllocAddFree",
+    "addr": "802570a0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ObjAlloc",
+    "addr": "802572f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ObjFree",
+    "addr": "80257440",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ObjAllocInit-bl",
+    "addr": "80257468",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjInitAllocData-bl",
+    "addr": "80257598",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjGetByType-bl",
+    "addr": "802575dc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-RObjUpdateFunc-bl",
+    "addr": "80257634",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjAnimAll-bl",
+    "addr": "80257678",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjReqAnimAllByFlags-bl",
+    "addr": "802577d0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjReqAnimAll-bl",
+    "addr": "80257854",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjAddAnimAll-bl",
+    "addr": "802578c0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjGetGlobalPosition-bl",
+    "addr": "80257950",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-resolveCnsDirUp-bl",
+    "addr": "80257b04",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-resolveLimits-bl",
+    "addr": "802580ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjUpdateAll-bl",
+    "addr": "802582f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjResolveRefsAll-bl",
+    "addr": "80258778",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjLoadDesc-bl",
+    "addr": "8025888c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjRemoveAll-bl",
+    "addr": "80258d00",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjAlloc-bl",
+    "addr": "80258d9c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RObjFree-bl",
+    "addr": "80258df8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-expEvaluate-bl",
+    "addr": "80258e24",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RvalueRemoveAll-bl",
+    "addr": "802592c8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-expLoadDesc-bl",
+    "addr": "80259338",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-bcexpLoadDesc-bl",
+    "addr": "8025942c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_RvalueResolveRefsAll-bl",
+    "addr": "80259524",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_IDInitAllocData-bl",
+    "addr": "80259644",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_IDSetup-bl",
+    "addr": "80259674",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_IDInsertToTable-bl",
+    "addr": "802596a4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_IDRemoveByIDFromTable-bl",
+    "addr": "80259790",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_IDGetDataFromTable-bl",
+    "addr": "8025983c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjReqAnim-bl",
+    "addr": "80259938",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjAddAnim-bl",
+    "addr": "80259984",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-WObjUpdateFunc-bl",
+    "addr": "802599ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjInterpretAnim-bl",
+    "addr": "80259b30",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-WObjLoad-bl",
+    "addr": "80259b78",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjInit-bl",
+    "addr": "80259be0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjLoadDesc-bl",
+    "addr": "80259c54",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjSetPosition-bl",
+    "addr": "80259cec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjSetPositionX-bl",
+    "addr": "80259d34",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjSetPositionY-bl",
+    "addr": "80259e08",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjSetPositionZ-bl",
+    "addr": "80259edc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjGetPosition-bl",
+    "addr": "80259fb0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_WObjAlloc-bl",
+    "addr": "8025a098",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-WObjRelease-bl",
+    "addr": "8025a0f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-WObjAmnesia-bl",
+    "addr": "8025a148",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-WObjInfoInit-bl",
+    "addr": "8025a190",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FogSet-bl",
+    "addr": "8025a210",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FogLoadDesc-bl",
+    "addr": "8025a4cc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FogInit-bl",
+    "addr": "8025a55c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FogAdjLoadDesc-bl",
+    "addr": "8025a5e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FogAdjInit-bl",
+    "addr": "8025a664",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_FogAdjGetFlags-bl",
+    "addr": "8025a6e0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-FogUpdateFunc-bl",
+    "addr": "8025a6f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-FogRelease-bl",
+    "addr": "8025a928",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-FogInfoInit-bl",
+    "addr": "8025a9f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-FogAdjInfoInit-bl",
+    "addr": "8025aa58",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_PerfCountEnvelopeBlending-bl",
+    "addr": "8025aa9c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ListInitAllocData-bl",
+    "addr": "8025aaf8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SListAlloc-bl",
+    "addr": "8025ab3c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SListPrepend-bl",
+    "addr": "8025ab98",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SListPrependList-bl",
+    "addr": "8025ac18",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SListRemove-bl",
+    "addr": "8025ac68",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_MemSetCallbacks-bl",
+    "addr": "8025ae44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_MemAlloc-bl",
+    "addr": "8025aeb8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_MemGetRemain-bl",
+    "addr": "8025aee4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_HSD_MemCheckOwn-bl",
+    "addr": "8025af44",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Free-bl",
+    "addr": "8025af74",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Alloc-bl",
+    "addr": "8025afa4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ShadowInitAllocData-bl",
+    "addr": "8025afdc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ArchiveParse-bl",
+    "addr": "8025b00c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ArchiveGetPublicAddress-bl",
+    "addr": "8025b1b0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ArchiveFree-bl",
+    "addr": "8025b254",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Randf-bl",
+    "addr": "8025b2f4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Randi-bl",
+    "addr": "8025b34c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_ByteCodeEval-bl",
+    "addr": "8025b3bc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-hsdInitClassInfo-bl",
+    "addr": "8025c984",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-GetMemoryEntry-bl",
+    "addr": "8025ca6c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-hsdAllocMemPiece-bl",
+    "addr": "8025ccd0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-hsdFreeMemPiece-bl",
+    "addr": "8025ce98",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_hsdClassAlloc-bl",
+    "addr": "8025cef0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_hsdClassInit-bl",
+    "addr": "8025cf48",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_hsdClassRelease-bl",
+    "addr": "8025cf50",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_hsdClassDestroy-bl",
+    "addr": "8025cf54",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_hsdClassAmnesia-bl",
+    "addr": "8025cfc0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-_hsdClassInfoInit-bl",
+    "addr": "8025cfec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-hsdNew-bl",
+    "addr": "8025d088",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-hsdSearchClassInfo-bl",
+    "addr": "8025d4e8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_HashSearch-bl",
+    "addr": "8025d528",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpGetType-bl",
+    "addr": "8025d628",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpRef-bl",
+    "addr": "8025d664",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpUnref-bl",
+    "addr": "8025d6ec",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpFreeList-bl",
+    "addr": "8025dc68",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpTev-bl",
+    "addr": "8025df88",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpCnst-bl",
+    "addr": "8025e048",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpColorOp-bl",
+    "addr": "8025e168",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpAlphaOp-bl",
+    "addr": "8025e250",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpColorInSub-bl",
+    "addr": "8025e338",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpColorIn-bl",
+    "addr": "8025e8f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpAlphaInSub-bl",
+    "addr": "8025e9f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpAlphaIn-bl",
+    "addr": "8025edf0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpOrder-bl",
+    "addr": "8025eef8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-AssignColorReg-bl",
+    "addr": "8025efbc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-AssignColorKonst-bl",
+    "addr": "8025f134",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-AssignAlphaKonst-bl",
+    "addr": "8025f360",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-TExpAssignReg-bl",
+    "addr": "8025f4c4",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-TExp2TevDesc-bl",
+    "addr": "8025fb90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpSetReg-bl",
+    "addr": "8025ff90",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpSetupTev-bl",
+    "addr": "8026048c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpCompile-bl",
+    "addr": "802604f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpFreeTevDesc-bl",
+    "addr": "802607a0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-assign_reg-bl",
+    "addr": "802607e0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-order_dag-bl",
+    "addr": "80260990",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-CalcDistance-bl",
+    "addr": "80260bc8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpMakeDag-bl",
+    "addr": "80261000",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpSchedule-bl",
+    "addr": "802614b0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SimplifySrc-bl",
+    "addr": "80261818",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SimplifyThis-bl",
+    "addr": "80261cb0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-SimplifyByMerge-bl",
+    "addr": "802624f0",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-CalcTevRange-bl",
+    "addr": "80263cb8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpSimplify-bl",
+    "addr": "80263f6c",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_TExpSimplify2-bl",
+    "addr": "80263ffc",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_SaveContext-bl",
+    "addr": "802641f8",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-__assert-bl",
+    "addr": "80264290",
+    "reason": "sdk_prefix"
+   },
+   {
+    "name": "gnt4-HSD_Panic-bl",
+    "addr": "802642ec",
+    "reason": "sdk_prefix"
+   }
+  ],
+  "chunk_0076": [
+   {
+    "name": "Bowser::DrawShadow(cPoseAccumulator",
+    "addr": "8027c0b8",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "cPlayer::ClearSwapControllerTimer(void)",
+    "addr": "802807ac",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0077": [
+   {
+    "name": "InstallCallStackDumper(void)",
+    "addr": "8029aa70",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "GameInfoManager::SetUserSelectedCupSidekick(eSidekickID)",
+    "addr": "802a0bc0",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "DrawableCharacter::GetAnimController(",
+    "addr": "802a0bcc",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0078": [
+   {
+    "name": "cTeam::GetPlayer(int)",
+    "addr": "802a3938",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "glGetCurrentTextureState(void)",
+    "addr": "802a9640",
+    "reason": "non_c_identifier"
+   }
+  ],
+  "chunk_0079": [
+   {
+    "name": "cCharacter::UpdateBlinking(float)",
+    "addr": "802aa124",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "GetOneTimerLeadGroundContactAnims(void)",
+    "addr": "802ae100",
+    "reason": "non_c_identifier"
+   },
+   {
+    "name": "nlDLRingGetStart<11cBaseCamera>(cBaseCamera",
+    "addr": "802af478",
+    "reason": "non_c_identifier"
+   }
+  ]
+ },
+ "total_skipped": 1018
+}
