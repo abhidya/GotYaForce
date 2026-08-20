@@ -1,25 +1,26 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-20T03:49:26.221492Z - machine-written, do not edit.*
+*Generated 2026-08-20T03:50:48.343301Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 9/1520 settled (3 green, 6 staged) |
 | **Retries outstanding** | 8 |
-| **Untouched** | 1503 |
-| **Last transition** | 2026-08-20T03:49:26.221492Z |
+| **Untouched** | 1502 |
+| **Last transition** | 2026-08-20T03:50:48.343301Z |
 | **Last green** | 2026-08-19T12:51:42.040810Z (`auto-c0000-008`) |
 | **Last product commit** | `d72a33e403787f6f498aebf7f4b0bf429048251b` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T03:50:48.343301Z | `auto-c0000-014` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0009598_ declared void but their results are assigned; no header edit ca |
 | 2026-08-20T03:49:26.221492Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T03:49:23.375646Z | `auto-c0000-013` | gate_failed | wasm-link | 1 | not linked: unit.c:6:6: error: conflicting types for 'zz_0008f18_' unit.c:7:6: error: conflicting types for 'z |
 | 2026-08-20T00:34:14.800588Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -69,4 +70,3 @@
 | 2026-08-19T01:53:07.779693Z | `auto-c0001-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-19T01:31:06.753430Z | `auto-c0001-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T01:30:49.624847Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
-| 2026-08-19T01:30:49.682400Z | `auto-c0001-009` | deferred | port | 0 | interrupted before a verdict; requeued |

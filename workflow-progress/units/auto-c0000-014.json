@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "unit": "auto-c0000-014",
+  "unit_id": "auto-c0000-014",
+  "timestamp": "2026-08-20T03:50:48.343301Z",
+  "run_id": "2026-08-20T03:50:48.272643Z",
+  "result": "structural_ineligible",
+  "stage": "extract",
+  "attempt": 1,
+  "detail": "verbatim .c is self-contradictory: zz_0009598_ declared void but their results are assigned; no header edit can reconcile this",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "driver_record": {
+    "status": "porting",
+    "attempts": 1,
+    "error": "requeued 2026-08-19: previous failure was infrastructure (compile-fix LLM: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (read ti)"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-20T03:50:48.343301Z",
+      "result": "structural_ineligible",
+      "stage": "extract",
+      "attempt": 1,
+      "detail": "verbatim .c is self-contradictory: zz_0009598_ declared void but their results are assigned; no header edit can reconcile this",
+      "product_commit": null
+    }
+  ]
+}
