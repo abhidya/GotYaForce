@@ -1,25 +1,26 @@
-# Port workflow: RUNNING
+# Port workflow: IDLE
 
-*Generated 2026-08-20T00:34:11.804492Z - machine-written, do not edit.*
+*Generated 2026-08-20T00:34:14.800588Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 9/1520 settled (3 green, 6 staged) |
 | **Retries outstanding** | 7 |
 | **Untouched** | 1504 |
-| **Last transition** | 2026-08-20T00:34:11.804492Z |
+| **Last transition** | 2026-08-20T00:34:14.800588Z |
 | **Last green** | 2026-08-19T12:51:42.040810Z (`auto-c0000-008`) |
 | **Last product commit** | `d72a33e403787f6f498aebf7f4b0bf429048251b` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | running |
+| **Driver** | stopped |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T00:34:14.800588Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T00:34:11.804492Z | `auto-c0000-011` | gate_failed | wasm-link | 1 | not linked: /usr/bin/bash: -c: line 1: syntax error near unexpected token `(' /usr/bin/bash: -c: line 1: `sour |
 | 2026-08-19T21:59:06.645075Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
 | 2026-08-19T21:56:31.739621Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
@@ -69,4 +70,3 @@
 | 2026-08-19T01:30:49.682400Z | `auto-c0001-009` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-18T23:36:48.222295Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.6-27B-MTP-GGUF @ 32768 ctx. |
 | 2026-08-18T23:36:48.245266Z | `auto-c0001-008` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-18T23:33:20.003789Z | `-` | starting | machine | 0 | Manual pause lifted; re-arming the empty grace. |
