@@ -1,25 +1,26 @@
-# Port workflow: RUNNING
+# Port workflow: IDLE
 
-*Generated 2026-08-20T05:23:16.752439Z - machine-written, do not edit.*
+*Generated 2026-08-20T05:23:19.375532Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 10/1520 settled (3 green, 7 staged) |
 | **Retries outstanding** | 11 |
 | **Untouched** | 1497 |
-| **Last transition** | 2026-08-20T05:23:16.752439Z |
+| **Last transition** | 2026-08-20T05:23:19.375532Z |
 | **Last green** | 2026-08-20T04:34:56.600038Z (`auto-c0000-018`) |
 | **Last product commit** | `64687897243b882e925bbb234e9997a850cac683` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | running |
+| **Driver** | stopped |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T05:23:19.375532Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T05:23:16.752439Z | `auto-c0001-002` | retryable | compile-fix | 1 | compile-fix returned no code block: len=6645 fences=1 head='```c\n/* gnt4_shim.h — POC stage-2 "header + arena |
 | 2026-08-20T05:01:00.658558Z | `auto-c0001-001` | retryable | compile-fix | 1 | compile-fix returned no code block: len=7466 fences=1 head='```c\n/* gnt4_shim.h — POC stage-2 "header + arena |
 | 2026-08-20T04:34:59.447192Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -69,4 +70,3 @@
 | 2026-08-19T02:58:02.317938Z | `auto-c0001-011` | retryable | port | 1 | unexpected fault: [WinError 5] Access is denied: 'D:\\GotYaForce\\research\\decomp\\generated\\finish-game-por |
 | 2026-08-19T02:55:30.044009Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T02:55:12.975917Z | `auto-c0001-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
-| 2026-08-19T02:33:12.020547Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
