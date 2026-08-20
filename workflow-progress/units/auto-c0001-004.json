@@ -2,23 +2,23 @@
   "schema": 1,
   "unit": "auto-c0001-004",
   "unit_id": "auto-c0001-004",
-  "timestamp": "2026-08-16T21:29:50.696861Z",
-  "run_id": "2026-08-16T18:20:10.184491Z",
-  "result": "gate_failed",
-  "stage": "wasm-link",
+  "timestamp": "2026-08-20T05:48:06.303774Z",
+  "run_id": "2026-08-20T05:24:17.261180Z",
+  "result": "staged",
+  "stage": "commit",
   "attempt": 1,
-  "detail": "not linked: /bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: emcc: command not found\n",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "92613026ca0d27c570ce8a3159fbc086e253cddc",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
-  "model": "unsloth/Qwen3.6-27B-MTP-GGUF",
-  "tier": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": "compile_only",
   "driver_record": {
-    "status": "red_retryable",
+    "status": "porting",
     "attempts": 1,
-    "error": "not linked: /bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: emcc: command not found\n",
+    "error": "requeued 2026-08-19: previous failure was infrastructure (not linked: /bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: cygpath: comm)",
     "model_requests": 7,
     "last_stage": "wasm-link"
   },
@@ -38,6 +38,14 @@
       "attempt": 1,
       "detail": "not linked: /bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: emcc: command not found\n",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-20T05:48:06.303774Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 1,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "92613026ca0d27c570ce8a3159fbc086e253cddc"
     }
   ]
 }
