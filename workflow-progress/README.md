@@ -1,25 +1,26 @@
-# Port workflow: RUNNING
+# Port workflow: IDLE
 
-*Generated 2026-08-20T04:34:56.600038Z - machine-written, do not edit.*
+*Generated 2026-08-20T04:34:59.447192Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 9/1520 settled (3 green, 6 staged) |
+| **Queue progress** | 10/1520 settled (3 green, 7 staged) |
 | **Retries outstanding** | 9 |
 | **Untouched** | 1499 |
-| **Last transition** | 2026-08-20T04:34:56.600038Z |
+| **Last transition** | 2026-08-20T04:34:59.447192Z |
 | **Last green** | 2026-08-20T04:34:56.600038Z (`auto-c0000-018`) |
 | **Last product commit** | `64687897243b882e925bbb234e9997a850cac683` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | running |
+| **Driver** | stopped |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T04:34:59.447192Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T04:34:56.600038Z | `auto-c0000-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T04:10:38.024144Z | `auto-c0000-016` | retryable | compile-fix | 1 | compile-fix returned no code block |
 | 2026-08-20T03:50:51.066902Z | `auto-c0000-015` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0009a14_ declared void but their results are assigned; no header edit ca |
@@ -69,4 +70,3 @@
 | 2026-08-19T02:33:12.020547Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T02:29:47.625283Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T02:29:29.476910Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
-| 2026-08-19T01:53:19.137019Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
