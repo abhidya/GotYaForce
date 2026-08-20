@@ -105,6 +105,15 @@ these automatically on release; prefer letting it.
 - Dashboard: `http://127.0.0.1:7800/`. State: `D:\rig\state\supervisor-state.json`,
   unit state: `wasm-units-state.json`, events: `events.jsonl` (same dir).
 
+## No ad-hoc orchestration scripts
+
+Operate the machine through its documented controls directly -- the manual gate
+file, the scheduled-task cmdlets, the sweep's own launch command, the admin API.
+Do not write one-off orchestration scripts that chain these steps; they encode
+stale assumptions, race the real controllers, and pile up. If a sequence is
+needed repeatedly, it belongs in the rig or pipeline repo as reviewed, tested
+code -- not in a scratchpad.
+
 ## Toolchain traps on this machine
 
 - **PowerShell/bash heredocs corrupt backslashed paths** (`D:\rig` → `D:` + CR).
