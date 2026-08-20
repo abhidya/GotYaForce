@@ -1,25 +1,26 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-20T16:40:58.854179Z - machine-written, do not edit.*
+*Generated 2026-08-20T21:28:57.255507Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 15/1520 settled (3 green, 12 staged) |
 | **Retries outstanding** | 13 |
-| **Untouched** | 1489 |
-| **Last transition** | 2026-08-20T16:40:58.854179Z |
+| **Untouched** | 1487 |
+| **Last transition** | 2026-08-20T21:28:57.255507Z |
 | **Last green** | 2026-08-20T11:37:45.493210Z (`auto-c0001-014`) |
 | **Last product commit** | `bc51a24126960023854f7664d10806c6efed3483` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T21:28:57.255507Z | `auto-c0001-018` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0017380_ declared void but their results are assigned; no header edit ca |
 | 2026-08-20T16:40:58.854179Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T16:40:55.928569Z | `auto-c0001-016` | gate_failed | wasm-link | 1 | not linked: unit.c:64:11: warning: cast to smaller integer type 'byte' (aka 'unsigned char') from 'float *' [- |
 | 2026-08-20T11:37:48.143618Z | `auto-c0001-015` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_00156cc_ declared void but their results are assigned; no header edit ca |
@@ -69,4 +70,3 @@
 | 2026-08-19T08:28:48.229801Z | `auto-c0000-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T08:28:14.884268Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-19T08:28:11.839516Z | `auto-c0000-002` | gate_failed | wasm-link | 1 | not linked: Setting up EMSDK environment (suppress these messages with EMSDK_QUIET=1) Adding directories to PA |
-| 2026-08-19T06:24:13.531584Z | `auto-c0000-000` | gate_failed | wasm-link | 1 | not linked: Setting up EMSDK environment (suppress these messages with EMSDK_QUIET=1) Adding directories to PA |
