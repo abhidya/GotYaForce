@@ -1,25 +1,26 @@
-# Port workflow: RUNNING
+# Port workflow: IDLE
 
-*Generated 2026-08-20T11:06:06.055666Z - machine-written, do not edit.*
+*Generated 2026-08-20T11:06:09.012032Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 14/1520 settled (3 green, 11 staged) |
 | **Retries outstanding** | 12 |
 | **Untouched** | 1492 |
-| **Last transition** | 2026-08-20T11:06:06.055666Z |
+| **Last transition** | 2026-08-20T11:06:09.012032Z |
 | **Last green** | 2026-08-20T08:06:00.010464Z (`auto-c0001-011`) |
 | **Last product commit** | `71814287ef3b6c0b426bb444581131f1a9019a8c` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | running |
+| **Driver** | stopped |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T11:06:09.012032Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T11:06:06.055666Z | `auto-c0001-013` | gate_failed | wasm-link | 1 | not linked: unit.c:421:30: error: pointer cannot be cast to type 'float'   421 \|       dVar7 = (double)(float |
 | 2026-08-20T08:06:03.039975Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T08:06:00.010464Z | `auto-c0001-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-19T05:00:48.792410Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T04:58:56.085640Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-19T04:50:57.775646Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-19T04:50:47.275223Z | `-` | stopped_at_boundary | machine | 0 |  |
