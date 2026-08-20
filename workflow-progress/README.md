@@ -1,25 +1,26 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-20T05:23:19.375532Z - machine-written, do not edit.*
+*Generated 2026-08-20T05:47:59.551235Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 10/1520 settled (3 green, 7 staged) |
 | **Retries outstanding** | 11 |
-| **Untouched** | 1497 |
-| **Last transition** | 2026-08-20T05:23:19.375532Z |
-| **Last green** | 2026-08-20T04:34:56.600038Z (`auto-c0000-018`) |
-| **Last product commit** | `64687897243b882e925bbb234e9997a850cac683` |
+| **Untouched** | 1496 |
+| **Last transition** | 2026-08-20T05:47:59.551235Z |
+| **Last green** | 2026-08-20T05:47:59.551235Z (`auto-c0001-003`) |
+| **Last product commit** | `ee19a284a2b7036960121b897ac10b00001b4e6d` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T05:47:59.551235Z | `auto-c0001-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T05:23:19.375532Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T05:23:16.752439Z | `auto-c0001-002` | retryable | compile-fix | 1 | compile-fix returned no code block: len=6645 fences=1 head='```c\n/* gnt4_shim.h — POC stage-2 "header + arena |
 | 2026-08-20T05:01:00.658558Z | `auto-c0001-001` | retryable | compile-fix | 1 | compile-fix returned no code block: len=7466 fences=1 head='```c\n/* gnt4_shim.h — POC stage-2 "header + arena |
@@ -69,4 +70,3 @@
 | 2026-08-19T02:58:02.302302Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T02:58:02.317938Z | `auto-c0001-011` | retryable | port | 1 | unexpected fault: [WinError 5] Access is denied: 'D:\\GotYaForce\\research\\decomp\\generated\\finish-game-por |
 | 2026-08-19T02:55:30.044009Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
-| 2026-08-19T02:55:12.975917Z | `auto-c0001-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
