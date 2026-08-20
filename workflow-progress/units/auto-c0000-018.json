@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "unit": "auto-c0000-018",
+  "unit_id": "auto-c0000-018",
+  "timestamp": "2026-08-20T04:34:56.600038Z",
+  "run_id": "2026-08-20T03:50:48.272643Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 1,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "64687897243b882e925bbb234e9997a850cac683",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
+  "product_commit_failed": false,
+  "oracle_summary": "compile-only (UNVERIFIED)",
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": "compile_only",
+  "driver_record": {
+    "status": "porting",
+    "attempts": 1,
+    "error": "requeued 2026-08-19: previous failure was infrastructure (compile-fix LLM: Custom API returned no assistant content or tool-call arguments)",
+    "model_requests": 1
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-20T04:34:56.600038Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 1,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "64687897243b882e925bbb234e9997a850cac683"
+    }
+  ]
+}

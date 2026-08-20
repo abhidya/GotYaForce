@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-20T04:10:38.024144Z - machine-written, do not edit.*
+*Generated 2026-08-20T04:34:56.600038Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 9/1520 settled (3 green, 6 staged) |
 | **Retries outstanding** | 9 |
-| **Untouched** | 1500 |
-| **Last transition** | 2026-08-20T04:10:38.024144Z |
-| **Last green** | 2026-08-19T12:51:42.040810Z (`auto-c0000-008`) |
-| **Last product commit** | `d72a33e403787f6f498aebf7f4b0bf429048251b` |
+| **Untouched** | 1499 |
+| **Last transition** | 2026-08-20T04:34:56.600038Z |
+| **Last green** | 2026-08-20T04:34:56.600038Z (`auto-c0000-018`) |
+| **Last product commit** | `64687897243b882e925bbb234e9997a850cac683` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T04:34:56.600038Z | `auto-c0000-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T04:10:38.024144Z | `auto-c0000-016` | retryable | compile-fix | 1 | compile-fix returned no code block |
 | 2026-08-20T03:50:51.066902Z | `auto-c0000-015` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0009a14_ declared void but their results are assigned; no header edit ca |
 | 2026-08-20T03:50:48.343301Z | `auto-c0000-014` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0009598_ declared void but their results are assigned; no header edit ca |
@@ -69,4 +70,3 @@
 | 2026-08-19T02:29:47.625283Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T02:29:29.476910Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-19T01:53:19.137019Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-19T01:53:07.779693Z | `auto-c0001-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
