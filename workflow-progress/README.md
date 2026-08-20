@@ -1,25 +1,28 @@
-# Port workflow: RUNNING
+# Port workflow: PAUSED
 
-*Generated 2026-08-20T21:28:57.255507Z - machine-written, do not edit.*
+*Generated 2026-08-20T21:36:28.874503Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 15/1520 settled (3 green, 12 staged) |
 | **Retries outstanding** | 13 |
-| **Untouched** | 1487 |
-| **Last transition** | 2026-08-20T21:28:57.255507Z |
+| **Untouched** | 1486 |
+| **Last transition** | 2026-08-20T21:36:28.874503Z |
 | **Last green** | 2026-08-20T11:37:45.493210Z (`auto-c0001-014`) |
 | **Last product commit** | `bc51a24126960023854f7664d10806c6efed3483` |
-| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | running |
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
+| **Driver** | stopped |
+
+> **Manually paused by the owner** (rig gate). No heavy work runs.
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T21:36:28.874503Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-20T21:28:57.255507Z | `auto-c0001-018` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0017380_ declared void but their results are assigned; no header edit ca |
 | 2026-08-20T16:40:58.854179Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T16:40:55.928569Z | `auto-c0001-016` | gate_failed | wasm-link | 1 | not linked: unit.c:64:11: warning: cast to smaller integer type 'byte' (aka 'unsigned char') from 'float *' [- |
@@ -69,4 +72,3 @@
 | 2026-08-19T10:45:21.646761Z | `auto-c0000-005` | gate_failed | wasm-link | 1 | not linked: ...ed. emcc: error: ''D:\GotYaForce\research\tools\emsdk/upstream/bin\clang.exe' -target wasm32-un |
 | 2026-08-19T08:28:48.229801Z | `auto-c0000-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T08:28:14.884268Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-19T08:28:11.839516Z | `auto-c0000-002` | gate_failed | wasm-link | 1 | not linked: Setting up EMSDK environment (suppress these messages with EMSDK_QUIET=1) Adding directories to PA |
