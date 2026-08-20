@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "unit": "auto-c0000-013",
+  "unit_id": "auto-c0000-013",
+  "timestamp": "2026-08-20T03:49:23.375646Z",
+  "run_id": "2026-08-20T00:35:17.117628Z",
+  "result": "gate_failed",
+  "stage": "wasm-link",
+  "attempt": 1,
+  "detail": "not linked: unit.c:6:6: error: conflicting types for 'zz_0008f18_'\nunit.c:7:6: error: conflicting types for 'zz_0009068_'\nunit.c:118:6: error: conflicting types for 'zz_0008f18_'\nunit.c:199:6: error: conflicting types for 'zz_0009068_'",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "error": "not linked: unit.c:6:6: error: conflicting types for 'zz_0008f18_'\nunit.c:7:6: error: conflicting types for 'zz_0009068_'\nunit.c:118:6: error: conflicting types for 'zz_0008f18_'\nunit.c:199:6: error: conflicting types for 'zz_0009068_'",
+    "model_requests": 7,
+    "last_stage": "wasm-link"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-20T03:49:23.375646Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 1,
+      "detail": "not linked: unit.c:6:6: error: conflicting types for 'zz_0008f18_'\nunit.c:7:6: error: conflicting types for 'zz_0009068_'\nunit.c:118:6: error: conflicting types for 'zz_0008f18_'\nunit.c:199:6: error: conflicting types for 'zz_0009068_'",
+      "product_commit": null
+    }
+  ]
+}
