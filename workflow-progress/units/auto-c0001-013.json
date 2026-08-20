@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0001-013",
   "unit_id": "auto-c0001-013",
-  "timestamp": "2026-08-19T04:50:44.410966Z",
-  "run_id": "2026-08-19T02:58:02.251906Z",
-  "result": "retryable",
-  "stage": "compile-fix",
+  "timestamp": "2026-08-20T11:06:06.055666Z",
+  "run_id": "2026-08-20T08:06:25.698643Z",
+  "result": "gate_failed",
+  "stage": "wasm-link",
   "attempt": 1,
-  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: {\"error\":{\"message\":\"Failed to load model: llama.cpp is updating; try again in a moment.\",\"type\":\"api_error\",\"param\":null,\"code\":null}}",
+  "detail": "not linked: unit.c:421:30: error: pointer cannot be cast to type 'float'\n  421 |       dVar7 = (double)(float)(&PTR_DAT_802c3c58)[iVar2 * 3];\n      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_e3_1vgl2\\unit.o'' failed (returned 1)",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -18,9 +18,9 @@
   "driver_record": {
     "status": "red_retryable",
     "attempts": 1,
-    "model_requests": 1,
-    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: {\"error\":{\"message\":\"Failed to load model: llama.cpp is updating; try again in a moment.\",\"type\":\"api_error\",\"param\":null,\"code\":null}}",
-    "last_stage": "compile-fix"
+    "model_requests": 8,
+    "error": "not linked: unit.c:421:30: error: pointer cannot be cast to type 'float'\n  421 |       dVar7 = (double)(float)(&PTR_DAT_802c3c58)[iVar2 * 3];\n      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_e3_1vgl2\\unit.o'' failed (returned 1)",
+    "last_stage": "wasm-link"
   },
   "history": [
     {
@@ -29,6 +29,14 @@
       "stage": "compile-fix",
       "attempt": 1,
       "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: {\"error\":{\"message\":\"Failed to load model: llama.cpp is updating; try again in a moment.\",\"type\":\"api_error\",\"param\":null,\"code\":null}}",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-20T11:06:06.055666Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 1,
+      "detail": "not linked: unit.c:421:30: error: pointer cannot be cast to type 'float'\n  421 |       dVar7 = (double)(float)(&PTR_DAT_802c3c58)[iVar2 * 3];\n      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=fals",
       "product_commit": null
     }
   ]

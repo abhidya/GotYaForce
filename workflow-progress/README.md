@@ -1,25 +1,26 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-20T08:06:03.039975Z - machine-written, do not edit.*
+*Generated 2026-08-20T11:06:06.055666Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 14/1520 settled (3 green, 11 staged) |
-| **Retries outstanding** | 11 |
-| **Untouched** | 1493 |
-| **Last transition** | 2026-08-20T08:06:03.039975Z |
+| **Retries outstanding** | 12 |
+| **Untouched** | 1492 |
+| **Last transition** | 2026-08-20T11:06:06.055666Z |
 | **Last green** | 2026-08-20T08:06:00.010464Z (`auto-c0001-011`) |
 | **Last product commit** | `71814287ef3b6c0b426bb444581131f1a9019a8c` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T11:06:06.055666Z | `auto-c0001-013` | gate_failed | wasm-link | 1 | not linked: unit.c:421:30: error: pointer cannot be cast to type 'float'   421 \|       dVar7 = (double)(float |
 | 2026-08-20T08:06:03.039975Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T08:06:00.010464Z | `auto-c0001-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T06:15:12.193225Z | `auto-c0001-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-19T04:58:56.085640Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-19T04:50:57.775646Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-19T04:50:47.275223Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-19T04:50:44.410966Z | `auto-c0001-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
