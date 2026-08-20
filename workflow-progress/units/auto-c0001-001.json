@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "unit": "auto-c0001-001",
+  "unit_id": "auto-c0001-001",
+  "timestamp": "2026-08-20T05:01:00.658558Z",
+  "run_id": "2026-08-20T04:35:22.454009Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix returned no code block: len=7466 fences=1 head='```c\\n/* gnt4_shim.h \u2014 POC stage-2 \"header + arena\" scaffold (HANDOFF-2026-08-09 \u00a74).\\n *\\n * Deterministically generated support header. The ported .c bodies are verbatim\\n * sed-extractions from researc' tail='z_0045238_(short s);\\nextern double zz_004526c_(short s);\\nextern void   zz_00453fc_(char c, float *a, float *b, short s);'",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "error": "compile-fix returned no code block: len=7466 fences=1 head='```c\\n/* gnt4_shim.h \u2014 POC stage-2 \"header + arena\" scaffold (HANDOFF-2026-08-09 \u00a74).\\n *\\n * Deterministically generated support header. The ported .c bodies are verbatim\\n * sed-extractions from researc' tail='z_0045238_(short s);\\nextern double zz_004526c_(short s);\\nextern void   zz_00453fc_(char c, float *a, float *b, short s);'",
+    "model_requests": 1,
+    "last_stage": "compile-fix"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-20T05:01:00.658558Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix returned no code block: len=7466 fences=1 head='```c\\n/* gnt4_shim.h \u2014 POC stage-2 \"header + arena\" scaffold (HANDOFF-2026-08-09 \u00a74).\\n *\\n * Deterministically generated support header. The ported .c bodies are verbatim\\n * sed-extractions from researc' tail='z_0045238_(short s);\\nextern double zz_004526c_(short s);\\nextern void   zz_00453fc_(char c, float *a, float *b, short s);'",
+      "product_commit": null
+    }
+  ]
+}
