@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-20T05:01:00.658558Z - machine-written, do not edit.*
+*Generated 2026-08-20T05:23:16.752439Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 10/1520 settled (3 green, 7 staged) |
-| **Retries outstanding** | 10 |
-| **Untouched** | 1498 |
-| **Last transition** | 2026-08-20T05:01:00.658558Z |
+| **Retries outstanding** | 11 |
+| **Untouched** | 1497 |
+| **Last transition** | 2026-08-20T05:23:16.752439Z |
 | **Last green** | 2026-08-20T04:34:56.600038Z (`auto-c0000-018`) |
 | **Last product commit** | `64687897243b882e925bbb234e9997a850cac683` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T05:23:16.752439Z | `auto-c0001-002` | retryable | compile-fix | 1 | compile-fix returned no code block: len=6645 fences=1 head='```c\n/* gnt4_shim.h — POC stage-2 "header + arena |
 | 2026-08-20T05:01:00.658558Z | `auto-c0001-001` | retryable | compile-fix | 1 | compile-fix returned no code block: len=7466 fences=1 head='```c\n/* gnt4_shim.h — POC stage-2 "header + arena |
 | 2026-08-20T04:34:59.447192Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T04:34:56.600038Z | `auto-c0000-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-19T02:55:30.044009Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T02:55:12.975917Z | `auto-c0001-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-19T02:33:12.020547Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
-| 2026-08-19T02:29:47.625283Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
