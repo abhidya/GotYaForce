@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-20T06:15:12.193225Z - machine-written, do not edit.*
+*Generated 2026-08-20T08:06:00.010464Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 12/1520 settled (3 green, 9 staged) |
+| **Queue progress** | 13/1520 settled (3 green, 10 staged) |
 | **Retries outstanding** | 11 |
-| **Untouched** | 1494 |
-| **Last transition** | 2026-08-20T06:15:12.193225Z |
-| **Last green** | 2026-08-20T06:15:12.193225Z (`auto-c0001-005`) |
-| **Last product commit** | `9b453c674421043bcbe24909933e5c79d6f179ac` |
+| **Untouched** | 1493 |
+| **Last transition** | 2026-08-20T08:06:00.010464Z |
+| **Last green** | 2026-08-20T08:06:00.010464Z (`auto-c0001-011`) |
+| **Last product commit** | `71814287ef3b6c0b426bb444581131f1a9019a8c` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-20T08:06:00.010464Z | `auto-c0001-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T06:15:12.193225Z | `auto-c0001-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T05:48:06.303774Z | `auto-c0001-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T05:47:59.551235Z | `auto-c0001-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-19T04:50:47.275223Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-19T04:50:44.410966Z | `auto-c0001-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-19T03:34:49.740030Z | `auto-c0001-012` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-19T02:58:02.302302Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |

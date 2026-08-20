@@ -2,24 +2,25 @@
   "schema": 1,
   "unit": "auto-c0001-011",
   "unit_id": "auto-c0001-011",
-  "timestamp": "2026-08-19T02:55:12.975917Z",
-  "run_id": "2026-08-19T02:33:12.055573Z",
-  "result": "deferred",
-  "stage": "compile-fix",
-  "attempt": 0,
-  "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=0, completion_tokens=0)",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "timestamp": "2026-08-20T08:06:00.010464Z",
+  "run_id": "2026-08-20T05:24:17.261180Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 1,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "71814287ef3b6c0b426bb444581131f1a9019a8c",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": null,
+  "tier": "compile_only",
   "driver_record": {
-    "status": "pending",
-    "attempts": 0,
-    "error": "provider unavailable: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=0, completion_tokens=0)",
-    "last_stage": "compile-fix"
+    "status": "porting",
+    "attempts": 1,
+    "error": "requeued 2026-08-19: previous failure was infrastructure (unexpected fault: [WinError 5] Access is denied: 'D:\\\\GotYaForce\\\\research\\\\decomp\\\\genera)",
+    "last_stage": "port",
+    "model_requests": 4
   },
   "history": [
     {
@@ -37,6 +38,14 @@
       "attempt": 0,
       "detail": "provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish_reason='stop', choices=1, reasoning_chars=0, prompt_tokens=0, completion_tokens=0)",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-20T08:06:00.010464Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 1,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "71814287ef3b6c0b426bb444581131f1a9019a8c"
     }
   ]
 }
