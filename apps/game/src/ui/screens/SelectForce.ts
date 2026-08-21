@@ -28,6 +28,7 @@ import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import { createGameAssetCatalog } from "../../assetCatalog.js";
+import { publicUrl } from "../../publicUrl.js";
 import type { ForceBorg } from "./ForceBuilder.js";
 
 const SELECT_FORCE_LAYOUT = UI_SCENE_LAYOUTS.entry00.semantics.selectForce;
@@ -227,7 +228,7 @@ export function createSelectForce(
     const token = leadModelToken;
     clear(platform);
     if (lead === "pl0615") {
-      mountLeadModel("/models/pl0615/model_00.glb");
+      mountLeadModel(publicUrl("/models/pl0615/model_00.glb"));
     } else if (lead) {
       // Any lead with an exported library model renders as its real 3D model;
       // otherwise fall back to the extracted name plate, then plain text, so a
