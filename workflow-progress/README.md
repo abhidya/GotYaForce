@@ -1,6 +1,6 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-21T13:29:37.507648Z - machine-written, do not edit.*
+*Generated 2026-08-21T13:29:50.123303Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,9 +10,9 @@
 | **Queue progress** | 16/1396 settled (3 green, 13 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1375 |
-| **Last transition** | 2026-08-21T13:29:37.507648Z |
-| **Last green** | 2026-08-21T13:29:37.507648Z (`auto-c0011-010`) |
-| **Last product commit** | `76e5d1b4edbbf3db3ec1e2c790eb8f0bef8bd8d0` |
+| **Last transition** | 2026-08-21T13:29:50.123303Z |
+| **Last green** | 2026-08-21T13:29:50.123303Z (`auto-c0029-015`) |
+| **Last product commit** | `a30627115bf755ed01159f12b7a66ece8f724020` |
 | **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | stopped |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T13:29:50.123303Z | `auto-c0029-015` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:29:37.507648Z | `auto-c0011-010` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:29:26.223078Z | `auto-c0011-009` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:29:15.938781Z | `auto-c0011-008` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
@@ -70,4 +71,3 @@
 | 2026-08-21T06:18:39.137531Z | `auto-c0029-001` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-21T06:17:50.709687Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T06:11:19.918797Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-21T06:03:21.957050Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
