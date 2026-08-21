@@ -1,25 +1,26 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-21T05:05:46.845122Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:06:12.498587Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 33/1396 settled (3 green, 30 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1359 |
-| **Last transition** | 2026-08-21T05:05:46.845122Z |
-| **Last green** | 2026-08-21T04:21:07.638815Z (`auto-c0019-002`) |
-| **Last product commit** | `848cfe8a3fc02ea1e66379824d94852082d931b3` |
+| **Untouched** | 1358 |
+| **Last transition** | 2026-08-21T05:06:12.498587Z |
+| **Last green** | 2026-08-21T05:06:12.498587Z (`auto-c0028-013`) |
+| **Last product commit** | `fe4bc7a4a6d6104dc316854d826a6f8d0310f09a` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:06:12.498587Z | `auto-c0028-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:05:46.845122Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T05:05:44.024948Z | `auto-c0019-003` | gate_failed | wasm-link | 1 | not linked: unit.c:137:43: error: too many arguments to function call, expected 0, have 2   137 \|   (*(code * |
 | 2026-08-21T04:21:07.638815Z | `auto-c0019-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-20T06:15:12.193225Z | `auto-c0001-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T05:48:06.303774Z | `auto-c0001-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T05:47:59.551235Z | `auto-c0001-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-20T05:23:19.375532Z | `-` | stopped_at_boundary | machine | 0 |  |
