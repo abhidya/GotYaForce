@@ -2,25 +2,41 @@
   "schema": 1,
   "unit": "auto-c0001-004",
   "unit_id": "auto-c0001-004",
-  "timestamp": "2026-08-20T05:48:06.303774Z",
-  "run_id": "2026-08-20T05:24:17.261180Z",
-  "result": "staged",
-  "stage": "commit",
+  "timestamp": "2026-08-21T05:32:14.024387Z",
+  "run_id": "2026-08-21T05:26:39.191526Z",
+  "result": "deferred",
+  "stage": "d5-migrate",
   "attempt": 1,
-  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
-  "product_commit": "92613026ca0d27c570ce8a3159fbc086e253cddc",
-  "product_pushed": true,
-  "product_effect": "durable product commit",
+  "detail": "verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
   "product_commit_failed": false,
-  "oracle_summary": "compile-only (UNVERIFIED)",
+  "oracle_summary": null,
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": "compile_only",
+  "tier": null,
+  "extra": {
+    "revoked_via": "d5-migrate",
+    "previous_status": "green",
+    "world_version": {
+      "config_hash": "f85869d4ffe85044cb01574074c195c6d30c3cdf5a79aa8bfc823e9e75d9455b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "5a5968441843fc9298569eb563da82cb33f80726",
+      "prompt_version": "3",
+      "registry_version": "22"
+    },
+    "transform_sites": 1
+  },
   "driver_record": {
-    "status": "porting",
+    "status": "green",
     "attempts": 1,
-    "error": "requeued 2026-08-19: previous failure was infrastructure (not linked: /bin/bash: line 1: cygpath: command not found\n/bin/bash: line 1: cygpath: comm)",
+    "error": null,
     "model_requests": 7,
-    "last_stage": "wasm-link"
+    "last_stage": "commit",
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "92613026ca0d27c570ce8a3159fbc086e253cddc",
+    "pushed": true,
+    "tier": "compile_only"
   },
   "history": [
     {
@@ -46,6 +62,14 @@
       "attempt": 1,
       "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
       "product_commit": "92613026ca0d27c570ce8a3159fbc086e253cddc"
+    },
+    {
+      "timestamp": "2026-08-21T05:32:14.024387Z",
+      "result": "deferred",
+      "stage": "d5-migrate",
+      "attempt": 1,
+      "detail": "verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
+      "product_commit": null
     }
   ]
 }
