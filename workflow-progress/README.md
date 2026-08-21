@@ -1,6 +1,6 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-21T13:29:15.938781Z - machine-written, do not edit.*
+*Generated 2026-08-21T13:29:26.223078Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,9 +10,9 @@
 | **Queue progress** | 16/1396 settled (3 green, 13 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1375 |
-| **Last transition** | 2026-08-21T13:29:15.938781Z |
-| **Last green** | 2026-08-21T13:29:15.938781Z (`auto-c0011-008`) |
-| **Last product commit** | `f6b101367d355ec68772e72b72f66d3a2856e599` |
+| **Last transition** | 2026-08-21T13:29:26.223078Z |
+| **Last green** | 2026-08-21T13:29:26.223078Z (`auto-c0011-009`) |
+| **Last product commit** | `235d5b183c2513ac34d2149543694e1ef09e7d69` |
 | **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | stopped |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T13:29:26.223078Z | `auto-c0011-009` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:29:15.938781Z | `auto-c0011-008` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:29:04.816702Z | `auto-c0011-007` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:28:53.986587Z | `auto-c0011-006` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
@@ -70,4 +71,3 @@
 | 2026-08-21T06:11:19.918797Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T06:03:21.957050Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
 | 2026-08-21T06:03:22.023149Z | `auto-c0029-000` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-21T06:02:29.449906Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |

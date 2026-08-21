@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0011-009",
   "unit_id": "auto-c0011-009",
-  "timestamp": "2026-08-21T04:20:04.674340Z",
-  "run_id": "2026-08-21T04:18:31.026140Z",
+  "timestamp": "2026-08-21T13:29:26.223078Z",
+  "run_id": "2026-08-21T13:29:25.418910Z",
   "result": "staged",
-  "stage": "commit",
+  "stage": "artifact-digest-backfill",
   "attempt": 1,
-  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "detail": "legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote publication and full artifact inventory reviewed",
   "product_commit": "235d5b183c2513ac34d2149543694e1ef09e7d69",
   "product_pushed": true,
   "product_effect": "durable product commit",
@@ -15,8 +15,68 @@
   "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
   "tier": "compile_only",
+  "extra": {
+    "binding": "legacy-git-tree",
+    "artifact_sha256": "03a1785d035f9a7f6258370b0436a54f1a844f298b580cf4aeb097c6127a0cdd",
+    "commit": "235d5b183c2513ac34d2149543694e1ef09e7d69",
+    "publication_ref": "refs/heads/port-staging",
+    "publication_sha": "b96586649c8ca84c2d7a220c2aecb0eca017ebcc",
+    "path": "research/decomp/port-units-staging/auto-c0011-009",
+    "tree_entry_count": 4,
+    "tree_sha256": "756cd3ae465cf8828268d5758db48c6c5264dcbf4af23289dc5c8259bc80f20e",
+    "file_inventory": [
+      {
+        "path": "gnt4_shim.h",
+        "size": 6893,
+        "sha256": "582eb2e9f58be26105c895066f2b4df229d70378093049260cfeaa690306b2d0"
+      },
+      {
+        "path": "oracle.log",
+        "size": 110,
+        "sha256": "878390b55bbc62d3c90e8af34eeb887fb3cff20f72ea43169079ed4612b5c97f"
+      },
+      {
+        "path": "provenance.json",
+        "size": 2724,
+        "sha256": "80e365f357c52d9a865f43d52942f85c830aa3e8b2b6739cbf2e74057a24a75f"
+      },
+      {
+        "path": "unit.c",
+        "size": 8276,
+        "sha256": "b0245e4e74be4203a89a4c3b0ff4351df33359e549c296776838277da7c2faa6"
+      },
+      {
+        "path": "unit.wasm",
+        "size": 2720,
+        "sha256": "525c530fa2cf42274a7f79171cb978f6d6a54ced99d7c259234926c7c0ad9160"
+      }
+    ],
+    "uncommitted_files": [
+      "oracle.log"
+    ],
+    "uncommitted_directories": [],
+    "ignored_extra_evidence": [
+      {
+        "path": "oracle.log",
+        "repo_path": "research/decomp/port-units-staging/auto-c0011-009/oracle.log",
+        "classification": "allowed-ignored-evidence",
+        "allowlist_entry": "oracle.log",
+        "git_check_ignore": ".gitignore:8:*.log\tresearch/decomp/port-units-staging/auto-c0011-009/oracle.log"
+      }
+    ],
+    "required_committed_files": [
+      "gnt4_shim.h",
+      "provenance.json",
+      "unit.c",
+      "unit.wasm"
+    ],
+    "via": "backfill-artifact-digest",
+    "reason": "one-time canonical digest binding for surviving pre-digest green; remote publication and full artifact inventory reviewed",
+    "canonical_state_sha256": "94e9de68cc3668b75ee793834dc1da468354beda52c13d92450fe2fe162aed7e",
+    "transition_id": "artifact-digest-backfill-87fe9b6d4541424b17f47df75fa59469b858c9040a32515539a295eaa0d917c8"
+  },
   "driver_record": {
-    "status": "porting",
+    "status": "green",
     "attempts": 1,
     "symbol_set": [
       "FUN_80066838",
@@ -53,7 +113,74 @@
     "prompt_version": 2,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 10
+    "registry_version_used": 10,
+    "error": null,
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "235d5b183c2513ac34d2149543694e1ef09e7d69",
+    "pushed": true,
+    "tier": "compile_only",
+    "last_stage": "commit",
+    "candidate_sha256": "03a1785d035f9a7f6258370b0436a54f1a844f298b580cf4aeb097c6127a0cdd",
+    "artifact_digest_backfill": {
+      "binding": "legacy-git-tree",
+      "artifact_sha256": "03a1785d035f9a7f6258370b0436a54f1a844f298b580cf4aeb097c6127a0cdd",
+      "commit": "235d5b183c2513ac34d2149543694e1ef09e7d69",
+      "publication_ref": "refs/heads/port-staging",
+      "publication_sha": "b96586649c8ca84c2d7a220c2aecb0eca017ebcc",
+      "path": "research/decomp/port-units-staging/auto-c0011-009",
+      "tree_entry_count": 4,
+      "tree_sha256": "756cd3ae465cf8828268d5758db48c6c5264dcbf4af23289dc5c8259bc80f20e",
+      "file_inventory": [
+        {
+          "path": "gnt4_shim.h",
+          "size": 6893,
+          "sha256": "582eb2e9f58be26105c895066f2b4df229d70378093049260cfeaa690306b2d0"
+        },
+        {
+          "path": "oracle.log",
+          "size": 110,
+          "sha256": "878390b55bbc62d3c90e8af34eeb887fb3cff20f72ea43169079ed4612b5c97f"
+        },
+        {
+          "path": "provenance.json",
+          "size": 2724,
+          "sha256": "80e365f357c52d9a865f43d52942f85c830aa3e8b2b6739cbf2e74057a24a75f"
+        },
+        {
+          "path": "unit.c",
+          "size": 8276,
+          "sha256": "b0245e4e74be4203a89a4c3b0ff4351df33359e549c296776838277da7c2faa6"
+        },
+        {
+          "path": "unit.wasm",
+          "size": 2720,
+          "sha256": "525c530fa2cf42274a7f79171cb978f6d6a54ced99d7c259234926c7c0ad9160"
+        }
+      ],
+      "uncommitted_files": [
+        "oracle.log"
+      ],
+      "uncommitted_directories": [],
+      "ignored_extra_evidence": [
+        {
+          "path": "oracle.log",
+          "repo_path": "research/decomp/port-units-staging/auto-c0011-009/oracle.log",
+          "classification": "allowed-ignored-evidence",
+          "allowlist_entry": "oracle.log",
+          "git_check_ignore": ".gitignore:8:*.log\tresearch/decomp/port-units-staging/auto-c0011-009/oracle.log"
+        }
+      ],
+      "required_committed_files": [
+        "gnt4_shim.h",
+        "provenance.json",
+        "unit.c",
+        "unit.wasm"
+      ],
+      "via": "backfill-artifact-digest",
+      "reason": "one-time canonical digest binding for surviving pre-digest green; remote publication and full artifact inventory reviewed",
+      "canonical_state_sha256": "94e9de68cc3668b75ee793834dc1da468354beda52c13d92450fe2fe162aed7e",
+      "transition_id": "artifact-digest-backfill-87fe9b6d4541424b17f47df75fa59469b858c9040a32515539a295eaa0d917c8"
+    }
   },
   "history": [
     {
@@ -62,6 +189,14 @@
       "stage": "commit",
       "attempt": 1,
       "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "235d5b183c2513ac34d2149543694e1ef09e7d69"
+    },
+    {
+      "timestamp": "2026-08-21T13:29:26.223078Z",
+      "result": "staged",
+      "stage": "artifact-digest-backfill",
+      "attempt": 1,
+      "detail": "legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote publication and full artifact inventory reviewed",
       "product_commit": "235d5b183c2513ac34d2149543694e1ef09e7d69"
     }
   ]
