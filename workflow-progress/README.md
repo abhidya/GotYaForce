@@ -1,16 +1,16 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T05:32:22.372064Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:32:24.926916Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 34/1396 settled (3 green, 31 staged) |
+| **Queue progress** | 33/1396 settled (3 green, 30 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1357 |
-| **Last transition** | 2026-08-21T05:32:22.372064Z |
+| **Untouched** | 1358 |
+| **Last transition** | 2026-08-21T05:32:24.926916Z |
 | **Last green** | 2026-08-21T05:06:54.849862Z (`auto-c0028-017`) |
 | **Last product commit** | `5c923c5d696385455c850141a744c57da68f5bb2` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:32:24.926916Z | `auto-c0001-012` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 7 |
 | 2026-08-21T05:32:22.372064Z | `auto-c0001-011` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:19.701274Z | `auto-c0001-010` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:18.421572Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -69,4 +70,3 @@
 | 2026-08-20T22:40:49.292661Z | `auto-c0002-000` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-20T21:36:28.874503Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-20T21:28:57.255507Z | `auto-c0001-018` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0017380_ declared void but their results are assigned; no header edit ca |
-| 2026-08-20T16:40:58.854179Z | `-` | stopped_at_boundary | machine | 0 |  |
