@@ -1,26 +1,28 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-21T15:15:38.205887Z - machine-written, do not edit.*
+*Generated 2026-08-21T15:16:28.119037Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 16/1396 settled (3 green, 13 staged) |
 | **Retries outstanding** | 2 |
 | **Untouched** | 1374 |
-| **Last transition** | 2026-08-21T15:15:38.205887Z |
+| **Last transition** | 2026-08-21T15:16:28.119037Z |
 | **Last green** | 2026-08-21T13:30:55.951566Z (`collision-core`) |
 | **Last product commit** | `f6b8b65d202671ac397c104d3ed13f1bccbfbb52` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T15:16:28.119037Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
+| 2026-08-21T15:16:28.154914Z | `auto-c0029-013` | deferred | manual-revoke | 1 | interrupted before a verdict; requeued |
 | 2026-08-21T15:15:38.205887Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T15:14:25.343118Z | `auto-c0035-002` | deferred | diagnosis-invalidate | 3 | diagnosis invalidated: control-plane misroute: attempt 3 passed build+assembly; terminal stage artifact-instal |
 | 2026-08-21T13:36:57.057687Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -69,5 +71,3 @@
 | 2026-08-21T08:31:03.783917Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1: |
 | 2026-08-21T07:12:44.407214Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T07:12:26.010755Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1: |
-| 2026-08-21T07:11:40.555467Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
-| 2026-08-21T07:04:30.565961Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
