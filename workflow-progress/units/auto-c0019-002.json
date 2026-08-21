@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "unit": "auto-c0019-002",
+  "unit_id": "auto-c0019-002",
+  "timestamp": "2026-08-21T04:21:07.638815Z",
+  "run_id": "2026-08-21T04:18:31.026140Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 1,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "848cfe8a3fc02ea1e66379824d94852082d931b3",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
+  "product_commit_failed": false,
+  "oracle_summary": "compile-only (UNVERIFIED)",
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": "compile_only",
+  "driver_record": {
+    "status": "porting",
+    "attempts": 1,
+    "symbol_set": [
+      "DAT_80433ae0",
+      "FUN_800452a0",
+      "FUN_800bae68",
+      "FUN_800bb004",
+      "FUN_800bb040",
+      "FUN_800bb064",
+      "FUN_800bb088",
+      "FUN_800bb0ac",
+      "FUN_800bb0d0",
+      "FUN_800bb10c",
+      "FUN_801177d0",
+      "byte",
+      "code",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "zz_0046698_",
+      "zz_0046dd4_",
+      "zz_006dbe0_",
+      "zz_015809c_",
+      "zz_0158688_",
+      "zz_0158a94_"
+    ],
+    "prompt_version": 2,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 16
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-21T04:21:07.638815Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 1,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "848cfe8a3fc02ea1e66379824d94852082d931b3"
+    }
+  ]
+}
