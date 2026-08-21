@@ -208,3 +208,4 @@
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-21T08:43:31.339185Z", "run_id": "2026-08-21T08:43:31.339185Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-21T08:44:00.797387Z", "run_id": "2026-08-21T08:44:00.797387Z", "result": "starting", "stage": "machine", "attempt": 0, "detail": "Manual pause lifted; resuming heavy work."}
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-21T08:45:45.758222Z", "run_id": "2026-08-21T08:45:45.758222Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
+{"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-21T08:55:01.924134Z", "run_id": "2026-08-21T08:55:01.924134Z", "result": "starting", "stage": "machine", "attempt": 0, "detail": "Manual pause lifted; resuming heavy work."}
