@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T04:19:41.058572Z - machine-written, do not edit.*
+*Generated 2026-08-21T04:19:53.034319Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 24/1396 settled (3 green, 21 staged) |
+| **Queue progress** | 25/1396 settled (3 green, 22 staged) |
 | **Retries outstanding** | 0 |
-| **Untouched** | 1368 |
-| **Last transition** | 2026-08-21T04:19:41.058572Z |
-| **Last green** | 2026-08-21T04:19:41.058572Z (`auto-c0011-007`) |
-| **Last product commit** | `165e006485694a30b112631b15776daeb39a943b` |
+| **Untouched** | 1367 |
+| **Last transition** | 2026-08-21T04:19:53.034319Z |
+| **Last green** | 2026-08-21T04:19:53.034319Z (`auto-c0011-008`) |
+| **Last product commit** | `f6b101367d355ec68772e72b72f66d3a2856e599` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T04:19:53.034319Z | `auto-c0011-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:19:41.058572Z | `auto-c0011-007` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:19:28.928472Z | `auto-c0011-006` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:19:19.371941Z | `auto-c0011-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-20T03:50:48.343301Z | `auto-c0000-014` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0009598_ declared void but their results are assigned; no header edit ca |
 | 2026-08-20T03:49:26.221492Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T03:49:23.375646Z | `auto-c0000-013` | gate_failed | wasm-link | 1 | not linked: unit.c:6:6: error: conflicting types for 'zz_0008f18_' unit.c:7:6: error: conflicting types for 'z |
-| 2026-08-20T00:34:14.800588Z | `-` | stopped_at_boundary | machine | 0 |  |
