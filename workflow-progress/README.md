@@ -1,16 +1,16 @@
-# Port workflow: BLOCKED
+# Port workflow: PAUSED
 
-*Generated 2026-08-21T08:31:27.450905Z - machine-written, do not edit.*
+*Generated 2026-08-21T08:39:06.722394Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `BLOCKED` (blocked) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T08:31:27.450905Z |
+| **Last transition** | 2026-08-21T08:39:06.722394Z |
 | **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
 | **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
@@ -18,10 +18,13 @@
 
 > **Blocked:** serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1:8888/api/inference/load
 
+> **Manually paused by the owner** (rig gate). No heavy work runs.
+
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T08:39:06.722394Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:31:27.450905Z | `-` | running | machine | 0 | Driver running. |
 | 2026-08-21T08:31:03.783917Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1: |
 | 2026-08-21T07:12:44.407214Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -71,4 +74,3 @@
 | 2026-08-21T05:06:31.944737Z | `auto-c0028-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:21.902337Z | `auto-c0028-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:12.498587Z | `auto-c0028-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T05:05:46.845122Z | `-` | stopped_at_boundary | machine | 0 |  |
