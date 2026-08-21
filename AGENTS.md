@@ -62,12 +62,26 @@ A unit grinding an unfixable contradiction is a design failure signal — kill i
 and fix the design, but kill it properly:
 
 1. Pause the gate; wait for `driver_pid: null`.
-2. Back up `research/decomp/generated/finish-game-port/wasm-units-state.json`,
-   then set the unit's `status` to `"structural_ineligible"` with an `error`
-   stating the *proof* (file:line of the contradiction in the verbatim .c).
+2. Settle it **through the journal** (design section 2.9 [V4-9] —
+   settle-through-journal rule). **Hand-editing `wasm-units-state.json` is
+   forbidden**: the 2026-08-20 migration wrote 15 verdicts straight into the
+   state file with no journal event, and `events.jsonl` has disagreed with
+   live state ever since. Any operation that settles, carries, or unsettles a
+   verdict MUST go through a code path that emits the corresponding journal
+   event. The sanctioned path (backs up the state file, edits, emits the
+   journal checkpoint + `verdict_settled` event, saves atomically):
+
+   ```
+   cd research/tools/OGhidra
+   .venv\Scripts\python.exe -m src.port_wasm_units settle-unit \
+     --unit <name> --status structural_ineligible \
+     --reason "<proof: file:line of the contradiction in the verbatim .c>"
+   ```
+
    Only do this for provable contradictions — the status is permanent.
-3. Unpause. Never edit the state file while a driver is alive (`WinError 5`
-   races and lost updates are proven failure modes here).
+3. Unpause. The settle CLI takes the driver lock, so it refuses to run while
+   a driver is alive (`WinError 5` races and lost updates are proven failure
+   modes here).
 
 ## Zombie generation on the serving slot
 
