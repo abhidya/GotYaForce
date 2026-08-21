@@ -27,6 +27,13 @@ test("POC invokes the maintained strict production-browser route", () => {
   assert.match(result.readiness, /battle HUD/);
 });
 
+test("POC gate rejects a nonzero maintained smoke exit", () => {
+  assert.throws(
+    () => runMaintainedProductionBrowserSmoke(() => ({ command: "pnpm smoke:browser", exitCode: 7 })),
+    /exited 7/,
+  );
+});
+
 test("POC gate cannot regress to the obsolete loaded-only readiness contract", () => {
   const poc = fs.readFileSync(path.join(root, "scripts", "finish-game-port-poc.mjs"), "utf8");
   const smoke = fs.readFileSync(path.join(root, "scripts", "smoke-browser-game.mjs"), "utf8");

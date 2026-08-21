@@ -61,7 +61,7 @@
     "atlas:preview": "pnpm --filter gotcha-force-atlas preview",
     "test:repo-policy": "node --test scripts/repository-policy.test.mjs",
     "test:oracle": "node research/decomp/oracle-harness/tests/run-oracle-tests.mjs",
-    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
+    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm selfcheck:browser-poc-gate && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
     "verify:docs": "pnpm atlas:build"
   },
   "devDependencies": {
