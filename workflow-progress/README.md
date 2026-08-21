@@ -1,16 +1,16 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T05:32:16.900246Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:32:19.701274Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 36/1396 settled (3 green, 33 staged) |
+| **Queue progress** | 35/1396 settled (3 green, 32 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1355 |
-| **Last transition** | 2026-08-21T05:32:16.900246Z |
+| **Untouched** | 1356 |
+| **Last transition** | 2026-08-21T05:32:19.701274Z |
 | **Last green** | 2026-08-21T05:06:54.849862Z (`auto-c0028-017`) |
 | **Last product commit** | `5c923c5d696385455c850141a744c57da68f5bb2` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
@@ -20,6 +20,8 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:32:19.701274Z | `auto-c0001-010` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
+| 2026-08-21T05:32:18.421572Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T05:32:16.900246Z | `auto-c0001-007` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:14.024387Z | `auto-c0001-004` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:11.218690Z | `auto-c0001-003` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 6 |
@@ -68,5 +70,3 @@
 | 2026-08-20T21:28:57.255507Z | `auto-c0001-018` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0017380_ declared void but their results are assigned; no header edit ca |
 | 2026-08-20T16:40:58.854179Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T16:40:55.928569Z | `auto-c0001-016` | gate_failed | wasm-link | 1 | not linked: unit.c:64:11: warning: cast to smaller integer type 'byte' (aka 'unsigned char') from 'float *' [- |
-| 2026-08-20T11:37:48.143618Z | `auto-c0001-015` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_00156cc_ declared void but their results are assigned; no header edit ca |
-| 2026-08-20T11:37:45.493210Z | `auto-c0001-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
