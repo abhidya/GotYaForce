@@ -1,0 +1,800 @@
+{
+ "generated_by": "research/decomp/oracle-harness/gen_actor_field_map.py",
+ "map_schema": 1,
+ "source": "packages/combat/src/rom/actor.ts",
+ "source_sha256": "ee17e82015d7aaba3b0f949fa35305d3b94c7bd53414a7183b5f3b07a660c2dd",
+ "interfaces": {
+  "RomActor": {
+   "fields": [
+    {
+     "kind": "port_side",
+     "tsField": "physicsRuntime"
+    },
+    {
+     "offset": 32,
+     "kind": "vec3",
+     "width": 12,
+     "tsField": "pos"
+    },
+    {
+     "offset": 56,
+     "kind": "vec3",
+     "width": 12,
+     "tsField": "motion"
+    },
+    {
+     "offset": 1512,
+     "kind": "vec3",
+     "width": 12,
+     "tsField": "targetCache5e8"
+    },
+    {
+     "offset": 1304,
+     "kind": "vec3",
+     "width": 12,
+     "tsField": "aimOrigin518"
+    },
+    {
+     "kind": "struct",
+     "offset": 2272,
+     "stride": 48,
+     "count": 4,
+     "elem": "bytes[0x30]",
+     "elem_width": 48,
+     "tsField": "partAimAnchors"
+    },
+    {
+     "offset": 68,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "hSpeed"
+    },
+    {
+     "offset": 72,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "yVel"
+    },
+    {
+     "offset": 76,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "hDecel"
+    },
+    {
+     "offset": 80,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "gravityCoeff"
+    },
+    {
+     "offset": 114,
+     "kind": "bam16",
+     "width": 2,
+     "tsField": "heading"
+    },
+    {
+     "offset": 1454,
+     "kind": "bam16",
+     "width": 2,
+     "tsField": "lockYaw"
+    },
+    {
+     "offset": 1452,
+     "kind": "bam16",
+     "width": 2,
+     "tsField": "activeYaw"
+    },
+    {
+     "offset": 1450,
+     "kind": "bam16",
+     "width": 2,
+     "tsField": "turnErrorYaw"
+    },
+    {
+     "offset": 6362,
+     "kind": "bam16",
+     "width": 2,
+     "tsField": "steerYaw"
+    },
+    {
+     "offset": 112,
+     "kind": "bam16",
+     "width": 2,
+     "tsField": "bodyPitch"
+    },
+    {
+     "offset": 1896,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "aimRateScale"
+    },
+    {
+     "kind": "tuple",
+     "elems": [
+      {
+       "offset": 2152,
+       "kind": "f32",
+       "width": 4
+      },
+      {
+       "offset": 2164,
+       "kind": "f32",
+       "width": 4
+      },
+      {
+       "offset": 2176,
+       "kind": "f32",
+       "width": 4
+      }
+     ],
+     "tsField": "actionSpeedRows"
+    },
+    {
+     "offset": 44,
+     "kind": "vec3",
+     "width": 12,
+     "tsField": "savedGroundPos"
+    },
+    {
+     "offset": 1855,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "housekeeping73f"
+    },
+    {
+     "offset": 2060,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "accumulator80c"
+    },
+    {
+     "offset": 124,
+     "kind": "s16",
+     "width": 2,
+     "tsField": "poseAccum7c"
+    },
+    {
+     "offset": 126,
+     "kind": "s16",
+     "width": 2,
+     "tsField": "poseAccum7e"
+    },
+    {
+     "offset": 128,
+     "kind": "s16",
+     "width": 2,
+     "tsField": "poseAccum80"
+    },
+    {
+     "offset": 2048,
+     "kind": "vec3",
+     "width": 12,
+     "tsField": "afterimageSamplePos"
+    },
+    {
+     "offset": 180,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "modelScale"
+    },
+    {
+     "offset": 2044,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "sizeScale"
+    },
+    {
+     "kind": "port_side",
+     "tsField": "afterimageSerial"
+    },
+    {
+     "offset": 1401,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "weaponPartMask"
+    },
+    {
+     "offset": 7578,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "weaponAnimationActiveMask"
+    },
+    {
+     "kind": "struct",
+     "offset": 6915,
+     "stride": 64,
+     "count": 4,
+     "elem": "u8",
+     "elem_width": 1,
+     "tsField": "weaponAnimationState"
+    },
+    {
+     "kind": "struct",
+     "offset": 6944,
+     "stride": 0,
+     "count": 1,
+     "elem": "RomWeaponAnimationParams",
+     "tsField": "weaponAnimationParams"
+    },
+    {
+     "kind": "struct",
+     "offset": 7124,
+     "stride": 64,
+     "count": 4,
+     "elem": "bytes[0x38]",
+     "elem_width": 56,
+     "tsField": "weaponAnimationBlocks"
+    },
+    {
+     "kind": "struct",
+     "offset": 6892,
+     "stride": 64,
+     "count": 4,
+     "elem": "RomWeaponAnimationTiming",
+     "tsField": "weaponAnimationTiming"
+    },
+    {
+     "offset": 997,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "visibilityBit"
+    },
+    {
+     "offset": 204,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "visibilityTarget"
+    },
+    {
+     "kind": "port_side",
+     "tsField": "visibilityRoster"
+    },
+    {
+     "offset": 148,
+     "kind": "u16be",
+     "width": 2,
+     "tsField": "borgMirror94"
+    },
+    {
+     "offset": 150,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "carriedSlot96"
+    },
+    {
+     "offset": 151,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "carriedVariant97"
+    },
+    {
+     "offset": 999,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "identityVariant"
+    },
+    {
+     "offset": 1000,
+     "kind": "u16be",
+     "width": 2,
+     "tsField": "borgNumber"
+    },
+    {
+     "offset": 996,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "slot"
+    },
+    {
+     "offset": 136,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "team"
+    },
+    {
+     "offset": 1344,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "fbPhase"
+    },
+    {
+     "kind": "tuple",
+     "elems": [
+      {
+       "offset": 1348,
+       "kind": "u8",
+       "width": 1
+      },
+      {
+       "offset": 1349,
+       "kind": "u8",
+       "width": 1
+      },
+      {
+       "offset": 1350,
+       "kind": "u8",
+       "width": 1
+      },
+      {
+       "offset": 1351,
+       "kind": "u8",
+       "width": 1
+      }
+     ],
+     "tsField": "fbPhaseSlots"
+    },
+    {
+     "offset": 1498,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "fbState"
+    },
+    {
+     "offset": 1499,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "ubState"
+    },
+    {
+     "offset": 1500,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "prevFbState"
+    },
+    {
+     "offset": 1501,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "prevUbState"
+    },
+    {
+     "offset": 1508,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "ubCue"
+    },
+    {
+     "offset": 1509,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "fbCue"
+    },
+    {
+     "offset": 1504,
+     "kind": "u32",
+     "width": 4,
+     "tsField": "controlWord"
+    },
+    {
+     "offset": 1408,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "actionIndex"
+    },
+    {
+     "offset": 1409,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "variantIndex"
+    },
+    {
+     "offset": 1412,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "prevActionIndex"
+    },
+    {
+     "offset": 1413,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "cmdButton"
+    },
+    {
+     "offset": 1414,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "cmdSubtype"
+    },
+    {
+     "offset": 1415,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "cmdChargedRanged"
+    },
+    {
+     "offset": 1204,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "rootAction"
+    },
+    {
+     "kind": "port_side",
+     "tsField": "hasBCharge"
+    },
+    {
+     "offset": 1208,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "upperBody"
+    },
+    {
+     "offset": 1212,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "preState"
+    },
+    {
+     "offset": 1216,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "postState"
+    },
+    {
+     "offset": 1200,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "descriptor"
+    },
+    {
+     "offset": 1260,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "commandTable"
+    },
+    {
+     "offset": 1264,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "cueTable"
+    },
+    {
+     "offset": 7552,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "familyStreamBank"
+    },
+    {
+     "offset": 7556,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "sharedStreamBank"
+    },
+    {
+     "offset": 7560,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "familyAnimDescBank"
+    },
+    {
+     "offset": 7564,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "sharedAnimDescBank"
+    },
+    {
+     "offset": 1256,
+     "kind": "ptr",
+     "width": 4,
+     "tsField": "soundEventTable"
+    },
+    {
+     "offset": 1410,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "defaultGroup"
+    },
+    {
+     "offset": 1770,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "streamSlot"
+    },
+    {
+     "kind": "struct",
+     "offset": 7380,
+     "stride": 32,
+     "count": 4,
+     "elem": "RomPartState",
+     "tsField": "parts"
+    },
+    {
+     "offset": 1660,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "maxRise"
+    },
+    {
+     "offset": 1664,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "maxFall"
+    },
+    {
+     "offset": 1656,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "maxHSpeed"
+    },
+    {
+     "offset": 1744,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "stepHeight"
+    },
+    {
+     "offset": 1524,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "timescale"
+    },
+    {
+     "offset": 1528,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "tierScale"
+    },
+    {
+     "offset": 7624,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "dt"
+    },
+    {
+     "offset": 7407,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "contactP0"
+    },
+    {
+     "offset": 7406,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "wallContact"
+    },
+    {
+     "offset": 324,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "childMask144"
+    },
+    {
+     "kind": "tuple",
+     "elems": [
+      {
+       "offset": 332,
+       "kind": "u8",
+       "width": 1
+      },
+      {
+       "offset": 333,
+       "kind": "u8",
+       "width": 1
+      },
+      {
+       "offset": 334,
+       "kind": "u8",
+       "width": 1
+      },
+      {
+       "offset": 335,
+       "kind": "u8",
+       "width": 1
+      }
+     ],
+     "tsField": "attachmentFlags14c"
+    },
+    {
+     "offset": 7408,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "contactP1"
+    },
+    {
+     "offset": 7439,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "dashStrength1d0f"
+    },
+    {
+     "offset": 7440,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "faceGate1d10"
+    },
+    {
+     "offset": 6915,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "streamHold1b03"
+    },
+    {
+     "offset": 1771,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "streamCounter6eb"
+    },
+    {
+     "offset": 1460,
+     "kind": "u32",
+     "width": 4,
+     "tsField": "statusWord5b4"
+    },
+    {
+     "offset": 1492,
+     "kind": "u32",
+     "width": 4,
+     "tsField": "inputEdge5d4"
+    },
+    {
+     "offset": 1496,
+     "kind": "u32",
+     "width": 4,
+     "tsField": "inputHeld5d8"
+    },
+    {
+     "offset": 1684,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "stateTimer"
+    },
+    {
+     "offset": 7580,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "shotScalar1d9c"
+    },
+    {
+     "offset": 7602,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "shotByte1db2"
+    },
+    {
+     "offset": 7603,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "shotByte1db3"
+    },
+    {
+     "offset": 1368,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "handlerTimer"
+    }
+   ]
+  },
+  "RomPartState": {
+   "fields": [
+    {
+     "offset": 0,
+     "kind": "s32",
+     "width": 4,
+     "tsField": "streamPtr"
+    },
+    {
+     "offset": 4,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "frameClock"
+    },
+    {
+     "offset": 8,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "prevTarget"
+    },
+    {
+     "offset": 12,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "curTarget"
+    },
+    {
+     "offset": 16,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "animTime"
+    },
+    {
+     "offset": 26,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "active"
+    },
+    {
+     "offset": 27,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "stateByte"
+    },
+    {
+     "tsField": "ownershipFlags",
+     "kind": "unmapped"
+    }
+   ]
+  },
+  "RomWeaponAnimationParams": {
+   "fields": [
+    {
+     "offset": 6944,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "baseRate"
+    },
+    {
+     "offset": 6952,
+     "kind": "u32",
+     "width": 4,
+     "tsField": "descriptorWord"
+    },
+    {
+     "offset": 6956,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "endFrame"
+    },
+    {
+     "tsField": "startFrame",
+     "kind": "unmapped"
+    },
+    {
+     "offset": 6972,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "group"
+    },
+    {
+     "offset": 6973,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "slot"
+    },
+    {
+     "offset": 6979,
+     "kind": "s8",
+     "width": 1,
+     "tsField": "durationAdjust"
+    },
+    {
+     "offset": 6980,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "toggle"
+    },
+    {
+     "offset": 6981,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "tailByte"
+    },
+    {
+     "kind": "port_side",
+     "tsField": "descriptor"
+    }
+   ]
+  },
+  "RomWeaponAnimationTiming": {
+   "fields": [
+    {
+     "offset": 6892,
+     "kind": "s32",
+     "width": 4,
+     "tsField": "duration"
+    },
+    {
+     "offset": 6896,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "dt"
+    },
+    {
+     "offset": 6900,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "rate"
+    }
+   ]
+  }
+ }
+}

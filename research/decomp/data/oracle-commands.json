@@ -1,0 +1,28 @@
+{
+ "generated_by": "research/decomp/oracle-harness/ (hand-authored specs, validated by research/tools/OGhidra/tests/test_oracle_commands_sidecar.py)",
+ "spec_schema": 1,
+ "notes": [
+  "Oracle-spec sidecar (oracle-workstream-plan.md §3.4 D-4, [CF-2.14] pattern).",
+  "exports_sha256 = sha256 of '\\n'.join(sorted(exported_functions)) — bound to the STAGED artifact's provenance.json for reverify, to the queue unit's export set for the overlay (I-9).",
+  "Pattern discipline (S3/I-5): first pattern is the anchored total line with the (?m) inline flag; one per-function pattern per exported function; any ^ or $ must be (?m)-prefixed because the driver's _run_oracle calls re.search with no flags on a multi-line log.",
+  "The driver overlay that consumes this file is Phase 2; until it lands, entries here are inert and exercised only by the sidecar validation test and Phase 1's driver dry-run."
+ ],
+ "units": {
+  "damage-core": {
+   "exports_sha256": "297dd41b8ec72b3c666425211d8d5519bd85285bae509dcb388ffdea00d9ae4b",
+   "oracle": {
+    "command": ["node", "run-unit.mjs", "--unit", "damage-core"],
+    "cwd": "research/decomp/oracle-harness",
+    "env": {"ORACLE_WASM": "{wasm}"},
+    "success_patterns": [
+     "(?m)^ORACLE TOTAL functions=4/4 cases=26232 UNEXPLAINED: 0 VERDICT: PASS$",
+     "(?m)^\\[zz_003cd5c_\\] cases=20000 exact=19998 rounding_explained=2 unexplained=0 verdict: pass$",
+     "(?m)^\\[zz_0066298_\\] cases=232 exact=232 rounding_explained=0 unexplained=0 verdict: pass$",
+     "(?m)^\\[zz_003d344_\\] cases=4000 exact=4000 rounding_explained=0 unexplained=0 verdict: pass$",
+     "(?m)^\\[FUN_80031634\\] cases=2000 exact=2000 rounding_explained=0 unexplained=0 verdict: pass$",
+     "(?m)^coverage: offsets_read_unwritten=0 sentinel_reads=none stray_writes=0 class_mismatches=0$"
+    ]
+   }
+  }
+ }
+}

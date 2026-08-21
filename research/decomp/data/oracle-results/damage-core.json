@@ -1,0 +1,564 @@
+{
+ "result_schema": 1,
+ "unit": "damage-core",
+ "generated_at": "2026-08-21T02:34:42.726Z",
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-unit.mjs",
+  "git_rev": "f492e661c71f7468d663fca7baa10ffff17f0a8c"
+ },
+ "wasm": {
+  "path": "D:\\GotYaForce\\research\\decomp\\port-units\\damage-core\\unit.wasm",
+  "sha256": "3de9a52a61ecfcd416fd89dae049e9e42f214100bca51b31ef0cafdbcb1e25f5"
+ },
+ "corpus": {
+  "mode": "replay",
+  "file": "research/decomp/oracle-harness/corpora/damage-core-poc.jsonl",
+  "sha256": "5ac6664ef51adde118488a53d8d3be2470cef13b83e891808ab4df7a36c87417",
+  "n": 26232
+ },
+ "spec_sha256": "f4eb0db08d53f2943986a9db8bfa5672a2e302f792fb85a1db7a17beacb42cac",
+ "reference_kind": "ts_port",
+ "references": [
+  "packages/combat/src/damage/sourceDamage.ts (via research/decomp/poc/wasm-port-poc/oracle.mjs esbuild bundle)"
+ ],
+ "functions": [
+  {
+   "name": "zz_003cd5c_",
+   "cases": 20000,
+   "exact": 7767,
+   "rounding_explained": 1,
+   "unexplained": 12232,
+   "verdict": "fail"
+  },
+  {
+   "name": "zz_0066298_",
+   "cases": 232,
+   "exact": 232,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "verdict": "pass"
+  },
+  {
+   "name": "zz_003d344_",
+   "cases": 4000,
+   "exact": 4000,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "verdict": "pass"
+  },
+  {
+   "name": "FUN_80031634",
+   "cases": 2000,
+   "exact": 2000,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "verdict": "pass"
+  }
+ ],
+ "coverage": {
+  "offsets_read_unwritten": 0,
+  "sentinel_reads_detected": false,
+  "stray_writes": [],
+  "class_mismatches": [
+   {
+    "n": 1,
+    "fixture": "exact",
+    "replay": "unexplained"
+   },
+   {
+    "n": 2,
+    "fixture": "exact",
+    "replay": "unexplained"
+   },
+   {
+    "n": 3,
+    "fixture": "exact",
+    "replay": "unexplained"
+   },
+   {
+    "n": 4,
+    "fixture": "exact",
+    "replay": "unexplained"
+   },
+   {
+    "n": 5,
+    "fixture": "exact",
+    "replay": "unexplained"
+   },
+   {
+    "n": 7,
+    "fixture": "exact",
+    "replay": "unexplained"
+   },
+   {
+    "n": 9,
+    "fixture": "exact",
+    "replay": "unexplained"
+   },
+   {
+    "n": 10,
+    "fixture": "exact",
+    "replay": "unexplained"
+   }
+  ]
+ },
+ "unexplained_cases": [
+  {
+   "fn": "zz_003cd5c_",
+   "n": 1,
+   "wasm": 15197,
+   "oracle": 79,
+   "o32": 79,
+   "case": {
+    "att": {
+     "borgNumber": 2063,
+     "team": 1,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 1,
+     "maxHp": 351,
+     "hp": 298,
+     "handicap": 1,
+     "comboRank": 11,
+     "forceRatioIndex": 31,
+     "sideRank": 7,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 0
+    },
+    "def": {
+     "borgNumber": 2308,
+     "team": 1,
+     "heroFlag": 1,
+     "pairAttack": 0,
+     "power": 0.5,
+     "maxHp": 393,
+     "hp": 230,
+     "handicap": 4,
+     "comboRank": 2,
+     "forceRatioIndex": 31,
+     "sideRank": 7,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 1
+    },
+    "basePower": 430,
+    "ctx": {
+     "flagsA": 0,
+     "flagsB": 16384,
+     "attackerHpCurveIndex": 5,
+     "attackerForceCurveIndex": 1,
+     "defenderDefenseCurveSelectors": [
+      6,
+      2,
+      3
+     ],
+     "victimStatusImmune": false,
+     "victimResistanceMask": 4096,
+     "victimSpawnProtection": false,
+     "cpuHalvingEnabled": true
+    }
+   }
+  },
+  {
+   "fn": "zz_003cd5c_",
+   "n": 2,
+   "wasm": 1,
+   "oracle": 58,
+   "o32": 58,
+   "case": {
+    "att": {
+     "borgNumber": 1026,
+     "team": 2,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 0.5,
+     "maxHp": 318,
+     "hp": 131,
+     "handicap": 2,
+     "comboRank": 3,
+     "forceRatioIndex": 9,
+     "sideRank": 3,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 0
+    },
+    "def": {
+     "borgNumber": 262,
+     "team": 2,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 1,
+     "maxHp": 448,
+     "hp": 38,
+     "handicap": 1,
+     "comboRank": 14,
+     "forceRatioIndex": 9,
+     "sideRank": 3,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 1
+    },
+    "basePower": 340,
+    "ctx": {
+     "flagsA": 0,
+     "flagsB": 16384,
+     "attackerHpCurveIndex": 3,
+     "attackerForceCurveIndex": 4,
+     "defenderDefenseCurveSelectors": [
+      0,
+      3,
+      3
+     ],
+     "victimStatusImmune": false,
+     "victimResistanceMask": 0,
+     "victimSpawnProtection": false,
+     "cpuHalvingEnabled": true
+    }
+   }
+  },
+  {
+   "fn": "zz_003cd5c_",
+   "n": 3,
+   "wasm": 662,
+   "oracle": 414,
+   "o32": 414,
+   "case": {
+    "att": {
+     "borgNumber": 4,
+     "team": 1,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 1.5,
+     "maxHp": 277,
+     "hp": 88,
+     "handicap": 4,
+     "comboRank": 8,
+     "forceRatioIndex": 5,
+     "sideRank": 17,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 0
+    },
+    "def": {
+     "borgNumber": 3333,
+     "team": 2,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 1.5,
+     "maxHp": 108,
+     "hp": 45,
+     "handicap": 0,
+     "comboRank": 9,
+     "forceRatioIndex": 15,
+     "sideRank": 9,
+     "isBorg": true,
+     "isActive": false,
+     "slot": 1
+    },
+    "basePower": 313,
+    "ctx": {
+     "flagsA": 0,
+     "flagsB": 0,
+     "attackerHpCurveIndex": 2,
+     "attackerForceCurveIndex": 2,
+     "defenderDefenseCurveSelectors": [
+      1,
+      5,
+      0
+     ],
+     "victimStatusImmune": false,
+     "victimResistanceMask": 0,
+     "victimSpawnProtection": false,
+     "cpuHalvingEnabled": false
+    }
+   }
+  },
+  {
+   "fn": "zz_003cd5c_",
+   "n": 4,
+   "wasm": 2355,
+   "oracle": 1180,
+   "o32": 1180,
+   "case": {
+    "att": {
+     "borgNumber": 2569,
+     "team": 0,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 2,
+     "maxHp": 341,
+     "hp": 193,
+     "handicap": 2,
+     "comboRank": 13,
+     "forceRatioIndex": 13,
+     "sideRank": 26,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 0
+    },
+    "def": {
+     "borgNumber": 2821,
+     "team": 1,
+     "heroFlag": 0,
+     "pairAttack": 1,
+     "power": 0.5,
+     "maxHp": 143,
+     "hp": 137,
+     "handicap": 4,
+     "comboRank": 6,
+     "forceRatioIndex": 10,
+     "sideRank": 28,
+     "isBorg": false,
+     "isActive": true,
+     "slot": 1
+    },
+    "basePower": 772,
+    "ctx": {
+     "flagsA": 0,
+     "flagsB": 0,
+     "attackerHpCurveIndex": 0,
+     "attackerForceCurveIndex": 6,
+     "defenderDefenseCurveSelectors": [
+      6,
+      1,
+      7
+     ],
+     "victimStatusImmune": false,
+     "victimResistanceMask": 0,
+     "victimSpawnProtection": false,
+     "cpuHalvingEnabled": false
+    }
+   }
+  },
+  {
+   "fn": "zz_003cd5c_",
+   "n": 5,
+   "wasm": 52,
+   "oracle": 84,
+   "o32": 84,
+   "case": {
+    "att": {
+     "borgNumber": 3584,
+     "team": 2,
+     "heroFlag": 1,
+     "pairAttack": 0,
+     "power": 1,
+     "maxHp": 390,
+     "hp": 211,
+     "handicap": 2,
+     "comboRank": 7,
+     "forceRatioIndex": 9,
+     "sideRank": 21,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 0
+    },
+    "def": {
+     "borgNumber": 2312,
+     "team": 1,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 1.5,
+     "maxHp": 392,
+     "hp": 39,
+     "handicap": 3,
+     "comboRank": 1,
+     "forceRatioIndex": 10,
+     "sideRank": 17,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 1
+    },
+    "basePower": 196,
+    "ctx": {
+     "flagsA": 4096,
+     "flagsB": 0,
+     "attackerHpCurveIndex": 1,
+     "attackerForceCurveIndex": 3,
+     "defenderDefenseCurveSelectors": [
+      0,
+      0,
+      5
+     ],
+     "victimStatusImmune": false,
+     "victimResistanceMask": 0,
+     "victimSpawnProtection": false,
+     "cpuHalvingEnabled": false
+    }
+   }
+  },
+  {
+   "fn": "zz_003cd5c_",
+   "n": 7,
+   "wasm": 3,
+   "oracle": 7,
+   "o32": 7,
+   "case": {
+    "att": {
+     "borgNumber": 3588,
+     "team": 1,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 1,
+     "maxHp": 125,
+     "hp": 5,
+     "handicap": 3,
+     "comboRank": 12,
+     "forceRatioIndex": 25,
+     "sideRank": 15,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 0
+    },
+    "def": {
+     "borgNumber": 5,
+     "team": 2,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 2,
+     "maxHp": 256,
+     "hp": 218,
+     "handicap": 0,
+     "comboRank": 1,
+     "forceRatioIndex": 0,
+     "sideRank": 14,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 1
+    },
+    "basePower": 438,
+    "ctx": {
+     "flagsA": 4096,
+     "flagsB": 0,
+     "attackerHpCurveIndex": 6,
+     "attackerForceCurveIndex": 0,
+     "defenderDefenseCurveSelectors": [
+      3,
+      1,
+      5
+     ],
+     "victimStatusImmune": false,
+     "victimResistanceMask": 4096,
+     "victimSpawnProtection": false,
+     "cpuHalvingEnabled": false
+    }
+   }
+  },
+  {
+   "fn": "zz_003cd5c_",
+   "n": 9,
+   "wasm": 83,
+   "oracle": 104,
+   "o32": 104,
+   "case": {
+    "att": {
+     "borgNumber": 3074,
+     "team": 0,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 1.5,
+     "maxHp": 214,
+     "hp": 205,
+     "handicap": 6,
+     "comboRank": 4,
+     "forceRatioIndex": 27,
+     "sideRank": 9,
+     "isBorg": false,
+     "isActive": true,
+     "slot": 0
+    },
+    "def": {
+     "borgNumber": 1574,
+     "team": 3,
+     "heroFlag": 0,
+     "pairAttack": 0,
+     "power": 2,
+     "maxHp": 385,
+     "hp": 241,
+     "handicap": 6,
+     "comboRank": 1,
+     "forceRatioIndex": 1,
+     "sideRank": 15,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 1
+    },
+    "basePower": 193,
+    "ctx": {
+     "flagsA": 0,
+     "flagsB": 0,
+     "attackerHpCurveIndex": 7,
+     "attackerForceCurveIndex": 0,
+     "defenderDefenseCurveSelectors": [
+      5,
+      7,
+      3
+     ],
+     "victimStatusImmune": false,
+     "victimResistanceMask": 4096,
+     "victimSpawnProtection": false,
+     "cpuHalvingEnabled": true
+    }
+   }
+  },
+  {
+   "fn": "zz_003cd5c_",
+   "n": 10,
+   "wasm": 28,
+   "oracle": 4,
+   "o32": 4,
+   "case": {
+    "att": {
+     "borgNumber": 2060,
+     "team": 0,
+     "heroFlag": 1,
+     "pairAttack": 1,
+     "power": 1.5,
+     "maxHp": 392,
+     "hp": 370,
+     "handicap": 2,
+     "comboRank": 10,
+     "forceRatioIndex": 25,
+     "sideRank": 1,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 0
+    },
+    "def": {
+     "borgNumber": 2561,
+     "team": 1,
+     "heroFlag": 1,
+     "pairAttack": 1,
+     "power": 1,
+     "maxHp": 243,
+     "hp": 167,
+     "handicap": 1,
+     "comboRank": 2,
+     "forceRatioIndex": 7,
+     "sideRank": 12,
+     "isBorg": true,
+     "isActive": true,
+     "slot": 1
+    },
+    "basePower": 395,
+    "ctx": {
+     "flagsA": 4096,
+     "flagsB": 16384,
+     "attackerHpCurveIndex": 4,
+     "attackerForceCurveIndex": 0,
+     "defenderDefenseCurveSelectors": [
+      7,
+      0,
+      1
+     ],
+     "victimStatusImmune": false,
+     "victimResistanceMask": 4096,
+     "victimSpawnProtection": false,
+     "cpuHalvingEnabled": false
+    }
+   }
+  }
+ ],
+ "verdict": "fail"
+}
