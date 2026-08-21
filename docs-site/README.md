@@ -5,6 +5,11 @@ Static site (VitePress + Vue) deployed to GitHub Pages at
 
 All data is curated from `research/` source files — no hand-written JSON.
 
+Contributor-facing setup, verification, porting, asset, and troubleshooting
+workflows are published under [`contributing/`](contributing/index.md). This
+file documents atlas maintenance details; the contributor pages are the
+browsable entry point.
+
 ## Local dev
 
 ```bash

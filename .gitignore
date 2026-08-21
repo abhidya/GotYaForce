@@ -80,6 +80,13 @@ research/decomp/generated/finish-game-port/*
 .tmp/
 .pnpm-store/
 
+# Private review/audit drafts. Durable conclusions belong in contributor or
+# design documentation, not in machine-generated review transcripts.
+/.superpowers/*.md
+
+# Installers are fetched from their publisher, never vendored at repo root.
+/python-manager-*.msix
+
 # Secrets / local env — never commit.
 .env
 .env.local

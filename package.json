@@ -57,7 +57,10 @@
     "atlas:curate": "node docs-site/scripts/curate-data.mjs",
     "atlas:dev": "pnpm atlas:curate && pnpm --filter gotcha-force-atlas dev",
     "atlas:build": "pnpm atlas:curate && pnpm --filter gotcha-force-atlas build",
-    "atlas:preview": "pnpm --filter gotcha-force-atlas preview"
+    "atlas:preview": "pnpm --filter gotcha-force-atlas preview",
+    "test:repo-policy": "node --test scripts/repository-policy.test.mjs",
+    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
+    "verify:docs": "pnpm atlas:build"
   },
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.2",
