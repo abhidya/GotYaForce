@@ -1,16 +1,16 @@
-# Port workflow: PAUSED
+# Port workflow: BLOCKED
 
-*Generated 2026-08-21T07:12:44.407214Z - machine-written, do not edit.*
+*Generated 2026-08-21T08:31:03.783917Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `PAUSED` (manual_paused) |
+| **State** | `BLOCKED` (blocked) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T07:12:44.407214Z |
+| **Last transition** | 2026-08-21T08:31:03.783917Z |
 | **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
 | **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
@@ -18,12 +18,11 @@
 
 > **Blocked:** serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1:8888/api/inference/load
 
-> **Manually paused by the owner** (rig gate). No heavy work runs.
-
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T08:31:03.783917Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1: |
 | 2026-08-21T07:12:44.407214Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T07:12:26.010755Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1: |
 | 2026-08-21T07:11:40.555467Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
@@ -73,4 +72,3 @@
 | 2026-08-21T05:06:12.498587Z | `auto-c0028-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:05:46.845122Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T05:05:44.024948Z | `auto-c0019-003` | gate_failed | wasm-link | 1 | not linked: unit.c:137:43: error: too many arguments to function call, expected 0, have 2   137 \|   (*(code * |
-| 2026-08-21T04:21:07.638815Z | `auto-c0019-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
