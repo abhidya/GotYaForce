@@ -2,19 +2,26 @@
 
 import fs from "node:fs";
 import http from "node:http";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { spawn } from "node:child_process";
-import { fileURLToPath } from "node:url";
-import WebSocket from "../apps/game/node_modules/ws/wrapper.mjs";
+import { createRequire } from "node:module";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { CdpClient } from "./lib/cdp-client.mjs";
+import { isExpectedMediaCancellation } from "./lib/network-gate.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const gameRoot = path.join(root, "apps", "game");
+const gameRequire = createRequire(new URL("../apps/game/package.json", import.meta.url));
+let WebSocket;
+try {
+  WebSocket = gameRequire("ws");
+} catch (error) {
+  throw new Error("browser smoke requires installed apps/game dependencies; run pnpm install", { cause: error });
+}
 const publicBase = "/GotYaForce/game/";
 const ownedRoot = path.resolve(root, ".tmp", "game-browser-smoke");
-
-function tail(text, length = 8000) {
-  return text.length <= length ? text : text.slice(-length);
-}
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -34,47 +41,21 @@ function contentType(file) {
   }[path.extname(file).toLowerCase()] ?? "application/octet-stream";
 }
 
-async function run(command, args, timeoutMs) {
-  return await new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd: root,
-      windowsHide: true,
-      // Windows cannot execute pnpm.cmd directly through CreateProcess.
-      shell: process.platform === "win32" && command.toLowerCase().endsWith(".cmd"),
-    });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.on("data", (chunk) => { stdout += chunk.toString(); });
-    child.stderr.on("data", (chunk) => { stderr += chunk.toString(); });
-    const timer = setTimeout(() => {
-      child.kill();
-      reject(new Error(`${command} timed out after ${timeoutMs}ms\n${tail(stderr)}`));
-    }, timeoutMs);
-    child.once("error", (error) => {
-      clearTimeout(timer);
-      reject(error);
-    });
-    child.once("close", (code) => {
-      clearTimeout(timer);
-      if (code === 0) resolve({ stdout, stderr });
-      else reject(new Error(`${command} exited ${code}\n${tail(stdout)}\n${tail(stderr)}`));
-    });
-  });
-}
-
 async function buildProduction(buildDir) {
-  const pnpmScript = process.env.npm_execpath;
-  const pnpmIsScript = Boolean(pnpmScript && /\.(?:c|m)?js$/i.test(pnpmScript));
-  const pnpm = pnpmIsScript
-    ? process.execPath
-    : (pnpmScript ?? (process.platform === "win32" ? "pnpm.cmd" : "pnpm"));
-  const prefix = pnpmIsScript ? [pnpmScript] : [];
-  await run(pnpm, [...prefix, "--filter", "game", "typecheck"], 120_000);
-  return await run(
-    pnpm,
-    [...prefix, "--filter", "game", "exec", "vite", "build", "--outDir", buildDir],
-    180_000,
-  );
+  // Build in-process: a timed-out package-manager child can leave Vite/esbuild
+  // descendants behind. The smoke has no build subprocess to orphan.
+  let viteEntry;
+  try {
+    viteEntry = gameRequire.resolve("vite");
+  } catch (error) {
+    throw new Error("browser smoke requires Vite from apps/game; run pnpm install", { cause: error });
+  }
+  const viteEsmEntry = path.join(path.dirname(viteEntry), "dist", "node", "index.js");
+  const { build } = await import(pathToFileURL(viteEsmEntry).href);
+  await build({
+    root: gameRoot,
+    build: { outDir: buildDir },
+  });
 }
 
 function startStaticServer(dist) {
@@ -114,27 +95,76 @@ function startStaticServer(dist) {
   });
 }
 
+function isFile(candidate) {
+  try {
+    return Boolean(candidate) && fs.statSync(candidate).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function executableOnPath(names) {
+  for (const directory of (process.env.PATH ?? "").split(path.delimiter)) {
+    if (!directory) continue;
+    for (const name of names) {
+      const candidate = path.join(directory, name);
+      if (isFile(candidate)) return candidate;
+    }
+  }
+  return null;
+}
+
 function findBrowser() {
-  const candidates = process.platform === "win32"
-    ? [
-      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-      "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
-    ]
-    : ["/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser"];
-  return candidates.find((candidate) => fs.existsSync(candidate)) ?? null;
+  const override = process.env.GF_BROWSER_PATH ?? process.env.BROWSER_PATH;
+  if (override) {
+    const resolved = path.resolve(override);
+    if (!isFile(resolved)) throw new Error(`browser override does not exist: ${resolved}`);
+    return resolved;
+  }
+
+  let candidates;
+  let pathNames;
+  if (process.platform === "win32") {
+    candidates = [
+      process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, "Google", "Chrome", "Application", "chrome.exe"),
+      process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, "Microsoft", "Edge", "Application", "msedge.exe"),
+      process.env.ProgramFiles && path.join(process.env.ProgramFiles, "Google", "Chrome", "Application", "chrome.exe"),
+      process.env.ProgramFiles && path.join(process.env.ProgramFiles, "Microsoft", "Edge", "Application", "msedge.exe"),
+      process.env["ProgramFiles(x86)"] && path.join(process.env["ProgramFiles(x86)"], "Google", "Chrome", "Application", "chrome.exe"),
+      process.env["ProgramFiles(x86)"] && path.join(process.env["ProgramFiles(x86)"], "Microsoft", "Edge", "Application", "msedge.exe"),
+    ];
+    pathNames = ["chrome.exe", "msedge.exe", "chromium.exe"];
+  } else if (process.platform === "darwin") {
+    candidates = [
+      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "/Applications/Chromium.app/Contents/MacOS/Chromium",
+      path.join(os.homedir(), "Applications", "Google Chrome.app", "Contents", "MacOS", "Google Chrome"),
+      path.join(os.homedir(), "Applications", "Microsoft Edge.app", "Contents", "MacOS", "Microsoft Edge"),
+    ];
+    pathNames = ["google-chrome", "chromium", "microsoft-edge"];
+  } else {
+    candidates = ["/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/microsoft-edge"];
+    pathNames = ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "microsoft-edge"];
+  }
+  return candidates.find(isFile) ?? executableOnPath(pathNames);
 }
 
 async function waitForDevtools(profile, browserProcess, timeoutMs = 20_000) {
   const activePortFile = path.join(profile, "DevToolsActivePort");
   const deadline = Date.now() + timeoutMs;
+  let spawnError = null;
+  browserProcess.once("error", (error) => { spawnError = error; });
   while (Date.now() < deadline) {
+    if (spawnError) throw spawnError;
     if (browserProcess.exitCode !== null) throw new Error(`browser exited before DevTools became ready (${browserProcess.exitCode})`);
     if (fs.existsSync(activePortFile)) {
       const [port] = fs.readFileSync(activePortFile, "utf8").trim().split(/\r?\n/);
       if (port) {
         try {
-          const response = await fetch(`http://127.0.0.1:${port}/json/list`);
+          const response = await fetch(`http://127.0.0.1:${port}/json/list`, {
+            signal: AbortSignal.timeout(1000),
+          });
           if (response.ok) {
             const pages = await response.json();
             const page = pages.find((entry) => entry.type === "page");
@@ -148,54 +178,6 @@ async function waitForDevtools(profile, browserProcess, timeoutMs = 20_000) {
     await delay(50);
   }
   throw new Error("timed out waiting for Chrome DevTools endpoint");
-}
-
-class CdpClient {
-  constructor(socket) {
-    this.socket = socket;
-    this.nextId = 1;
-    this.pending = new Map();
-    this.listeners = new Map();
-    socket.on("message", (data) => {
-      const message = JSON.parse(data.toString());
-      if (message.id) {
-        const pending = this.pending.get(message.id);
-        if (!pending) return;
-        this.pending.delete(message.id);
-        if (message.error) pending.reject(new Error(`${pending.method}: ${message.error.message}`));
-        else pending.resolve(message.result ?? {});
-        return;
-      }
-      for (const listener of this.listeners.get(message.method) ?? []) listener(message.params ?? {});
-    });
-  }
-
-  static async connect(url) {
-    const socket = new WebSocket(url);
-    await new Promise((resolve, reject) => {
-      socket.once("open", resolve);
-      socket.once("error", reject);
-    });
-    return new CdpClient(socket);
-  }
-
-  on(method, listener) {
-    const listeners = this.listeners.get(method) ?? [];
-    listeners.push(listener);
-    this.listeners.set(method, listeners);
-  }
-
-  send(method, params = {}) {
-    const id = this.nextId++;
-    return new Promise((resolve, reject) => {
-      this.pending.set(id, { method, resolve, reject });
-      this.socket.send(JSON.stringify({ id, method, params }));
-    });
-  }
-
-  close() {
-    this.socket.terminate();
-  }
 }
 
 async function evaluate(cdp, expression) {
@@ -250,9 +232,23 @@ function remoteValue(value) {
   return value.description ?? value.type ?? "unknown";
 }
 
+async function waitForNetworkIdle(pendingRequests, lastActivity, idleMs = 750, timeoutMs = 20_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (pendingRequests.size === 0 && Date.now() - lastActivity.value >= idleMs) return;
+    await delay(50);
+  }
+  const pending = [...pendingRequests.values()].slice(0, 10);
+  throw new Error(`network did not become idle; pending requests: ${JSON.stringify(pending)}`);
+}
+
 async function drivePlayableRoute(cdp, url) {
   const errors = [];
   const networkErrors = [];
+  const expectedMediaCancellations = [];
+  const pendingRequests = new Map();
+  const lastNetworkActivity = { value: Date.now() };
+  const touchNetwork = () => { lastNetworkActivity.value = Date.now(); };
   cdp.on("Runtime.consoleAPICalled", (event) => {
     if (event.type === "error") errors.push(`console.error: ${event.args.map(remoteValue).join(" ")}`);
   });
@@ -266,6 +262,31 @@ async function drivePlayableRoute(cdp, url) {
   });
   cdp.on("Network.responseReceived", (event) => {
     if (event.response?.status >= 400) networkErrors.push(`${event.response.status} ${event.response.url}`);
+  });
+  cdp.on("Network.requestWillBeSent", (event) => {
+    pendingRequests.set(event.requestId, event.request?.url ?? event.requestId);
+    touchNetwork();
+  });
+  cdp.on("Network.loadingFinished", (event) => {
+    pendingRequests.delete(event.requestId);
+    touchNetwork();
+  });
+  cdp.on("Network.loadingFailed", (event) => {
+    const request = pendingRequests.get(event.requestId) ?? event.requestId;
+    pendingRequests.delete(event.requestId);
+    touchNetwork();
+    // HTMLAudioElement intentionally aborts its current fetch when screen/BGM
+    // routing replaces a sound. Permit only that explicit cancellation shape;
+    // resets, timeouts, blocked requests, and every non-media failure stay fatal.
+    if (isExpectedMediaCancellation(event, request, url)) {
+      expectedMediaCancellations.push(request);
+      return;
+    }
+    networkErrors.push(
+      `${event.errorText ?? "loading failed"} ${request}` +
+      `${event.blockedReason ? ` blocked=${event.blockedReason}` : ""}` +
+      `${event.canceled ? " canceled=true" : ""}`,
+    );
   });
 
   await Promise.all([
@@ -324,7 +345,9 @@ async function drivePlayableRoute(cdp, url) {
   // handoff. This reproduces the historical pause-edge leak.
   await enterKey(cdp, "keyDown");
   await waitFor(cdp, `window.__gf?.navigation?.screen === "battle" && document.querySelector(".gf-hud")`, "battle HUD", 60_000);
-  await delay(500);
+  // Several 60 Hz polls are enough to prove the held Intro key is consumed;
+  // pause promptly so a very short deterministic battle cannot resolve first.
+  await delay(75);
   const battleState = await evaluate(cdp, `(() => {
     const hud = document.querySelector(".gf-hud");
     const rect = hud?.getBoundingClientRect();
@@ -341,14 +364,61 @@ async function drivePlayableRoute(cdp, url) {
   if (battleState.screen !== "battle" || battleState.paused !== false || battleState.pauseOverlay || !battleState.hudVisible) {
     throw new Error(`battle did not reach a visible, unpaused HUD: ${JSON.stringify(battleState)}`);
   }
+
+  // A fresh press must still pause after the consumed briefing edge.
+  await delay(50);
+  await tapEnter(cdp);
+  await waitFor(
+    cdp,
+    `window.__gf?.session?.paused === true && Boolean(document.querySelector(".gf-pause-overlay"))`,
+    "first post-entry pause",
+  );
+
+  // Resume while Enter remains held. resumeBattle() must consume that edge so
+  // the fixed-step poll cannot immediately reopen Pause.
+  await enterKey(cdp, "keyDown");
+  await waitFor(
+    cdp,
+    `window.__gf?.session?.paused === false && !document.querySelector(".gf-pause-overlay")`,
+    "pause resume",
+  );
+  await delay(75);
+  const resumeState = await evaluate(cdp, `({
+    paused: window.__gf?.session?.paused,
+    pauseOverlay: Boolean(document.querySelector(".gf-pause-overlay"))
+  })`);
+  await enterKey(cdp, "keyUp");
+  if (resumeState.paused !== false || resumeState.pauseOverlay) {
+    throw new Error(`held resume input reopened Pause: ${JSON.stringify(resumeState)}`);
+  }
+
+  // Release must re-arm the latch: one more fresh press pauses again.
+  await delay(50);
+  await tapEnter(cdp);
+  await waitFor(
+    cdp,
+    `window.__gf?.session?.paused === true && Boolean(document.querySelector(".gf-pause-overlay"))`,
+    "second post-resume pause",
+  );
+  const pauseCycle = await evaluate(cdp, `({
+    paused: window.__gf?.session?.paused,
+    pauseOverlay: Boolean(document.querySelector(".gf-pause-overlay"))
+  })`);
+
+  await waitForNetworkIdle(pendingRequests, lastNetworkActivity);
   if (errors.length > 0 || networkErrors.length > 0) {
     throw new Error(`browser emitted runtime errors:\n${[...errors, ...networkErrors.map((error) => `network: ${error}`)].join("\n")}`);
   }
-  return battleState;
+  return {
+    battle: battleState,
+    resumed: resumeState,
+    repaused: pauseCycle,
+    expectedMediaCancellations: expectedMediaCancellations.length,
+  };
 }
 
 const browser = findBrowser();
-if (!browser) throw new Error("Chrome/Edge not found for browser smoke");
+if (!browser) throw new Error("Chrome/Edge/Chromium not found; set GF_BROWSER_PATH to its executable");
 fs.mkdirSync(ownedRoot, { recursive: true });
 const buildDir = fs.mkdtempSync(path.join(ownedRoot, "build-"));
 const profile = fs.mkdtempSync(path.join(ownedRoot, "profile-"));
@@ -357,7 +427,7 @@ let browserProcess;
 let cdp;
 
 try {
-  const build = await buildProduction(buildDir);
+  await buildProduction(buildDir);
   const started = await startStaticServer(buildDir);
   server = started.server;
   browserProcess = spawn(browser, [
@@ -376,12 +446,11 @@ try {
     "about:blank",
   ], { cwd: root, windowsHide: true, stdio: "ignore" });
   const debuggerUrl = await waitForDevtools(profile, browserProcess);
-  cdp = await CdpClient.connect(debuggerUrl);
+  cdp = await CdpClient.connect(debuggerUrl, WebSocket);
   const state = await drivePlayableRoute(cdp, started.url);
   process.stdout.write(
     `Browser smoke PASS: ${path.basename(browser)} production title -> Challenge -> Normal -> 1P -> box -> force -> briefing -> unpaused battle HUD ${JSON.stringify(state)}\n`,
   );
-  if (build.stderr.trim()) process.stderr.write(tail(build.stderr));
 } finally {
   if (cdp) {
     try { await cdp.send("Browser.close"); } catch { /* browser may already be gone */ }
