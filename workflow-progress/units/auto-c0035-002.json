@@ -2,47 +2,43 @@
   "schema": 1,
   "unit": "auto-c0035-002",
   "unit_id": "auto-c0035-002",
-  "timestamp": "2026-08-21T15:14:25.343118Z",
-  "run_id": "2026-08-21T15:14:25.290729Z",
-  "result": "deferred",
-  "stage": "diagnosis-invalidate",
-  "attempt": 3,
-  "detail": "diagnosis invalidated: control-plane misroute: attempt 3 passed build+assembly; terminal stage artifact-install (events.jsonl:1968-1971), so source STRUCTURAL diagnosis is invalid",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "timestamp": "2026-08-21T15:16:34.667615Z",
+  "run_id": "2026-08-21T15:16:28.029761Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 4,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "c494e58b797a4258693d994f320048b9c23ec4e4",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": null,
+  "tier": "compile_only",
   "extra": {
-    "via": "invalidate-diagnosis",
-    "reason": "control-plane misroute: attempt 3 passed build+assembly; terminal stage artifact-install (events.jsonl:1968-1971), so source STRUCTURAL diagnosis is invalid",
-    "previous_record_sha256": "adb7c89705297a77db45fea27b1f3f01e379aa850b8c4e4e6079da508d858ac3",
-    "transition_id": "diagnosis-invalidate-42707cfb02944c5b7195ea08288527355672b61dad91c802d17cb5201feb749a",
-    "invalidated_stage": "artifact-install",
-    "invalidated_source_failure_id": null,
-    "removed_keys": [
-      "diagnosis",
-      "f4_nominated"
-    ]
+    "transition_id": "afcb1d6f99f34f4db55f39843bb97840",
+    "transition_timestamp": "2026-08-21T15:16:34.667615Z",
+    "transition_run_id": "2026-08-21T15:16:28.029761Z",
+    "promotion_transaction_id": "23f6486b83344cd985e6694786579fee",
+    "candidate_sha256": "ce21afde255cf3f7cd19d9772aa698efcd10e3ee05647b45fe3e9203fee9474d",
+    "replacement_evidence": {
+      "schema": 1,
+      "transaction_id": "23f6486b83344cd985e6694786579fee",
+      "revocation_transition_id": "verdict-revoke-56d1c25c1f4a2e2b3f0e45bf33edc3cb15f00f0896abf40cf29b8657834a6475",
+      "previous_commit": "1022b6c9e89de91270dfe201d2aeec76a2123a09",
+      "preimage_sha256": "9c35ac37e0953d03fdcbb384a7a1b716f286a042c75e2910df46bfa422f92606",
+      "preimage_inventory_sha256": "5f6a149b21b8d73817614599ed9c15bf02871b8bb76736eaaf738a6135b0240e",
+      "preimage_inventory_entries": 5,
+      "proof_binding": "legacy-git-tree",
+      "proof_sha256": "d663916d31d857fa2843c96129556e211a64b6e38919b731c360698bd0ae58b6",
+      "candidate_sha256": "ce21afde255cf3f7cd19d9772aa698efcd10e3ee05647b45fe3e9203fee9474d"
+    }
   },
   "driver_record": {
-    "status": "red_retryable",
-    "attempts": 3,
-    "error": "artifact install refused after assembly pass: artifact destination already exists with a different preimage: D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-002",
-    "last_stage": "artifact-install",
-    "revoked": {
-      "via": "revoke-unit",
-      "at": "2026-08-21T13:27:37.157132Z",
-      "reason": "assembly eligibility audit: events.jsonl:1877-1878; timestamp=2026-08-21T05:36:22.210489Z; stage=merge; n=5; window=auto-c0028-014,auto-c0028-015,auto-c0028-016,auto-c0028-017,auto-c0035-002; conflicts=collision_stub:FUN_80103428,collision_stub:zz_01033f8_",
-      "previous_status": "green",
-      "previous_tier": "compile_only",
-      "previous_commit": "1022b6c9e89de91270dfe201d2aeec76a2123a09",
-      "previous_oracle_summary": "compile-only (UNVERIFIED)",
-      "previous_record_sha256": "36beda54e3170379119a94edd40bb3cc26c53f3427a216cdd447d35a6845bc4f",
-      "transition_id": "verdict-revoke-56d1c25c1f4a2e2b3f0e45bf33edc3cb15f00f0896abf40cf29b8657834a6475"
-    },
+    "status": "green",
+    "attempts": 4,
+    "error": null,
+    "last_stage": "commit",
     "symbol_set": [
       "CONCAT44",
       "FUN_80131634",
@@ -211,7 +207,7 @@
         }
       }
     },
-    "candidate_sha256": "076cc6e16b5dde217f6e74f04c7e3bd845a6cd294d7b70f21889006a434240e4",
+    "candidate_sha256": "ce21afde255cf3f7cd19d9772aa698efcd10e3ee05647b45fe3e9203fee9474d",
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
@@ -220,13 +216,23 @@
       "registry_version": "42"
     },
     "model_requests": 1,
-    "diagnosis_invalidation": {
-      "via": "invalidate-diagnosis",
-      "reason": "control-plane misroute: attempt 3 passed build+assembly; terminal stage artifact-install (events.jsonl:1968-1971), so source STRUCTURAL diagnosis is invalid",
-      "previous_record_sha256": "adb7c89705297a77db45fea27b1f3f01e379aa850b8c4e4e6079da508d858ac3",
-      "transition_id": "diagnosis-invalidate-42707cfb02944c5b7195ea08288527355672b61dad91c802d17cb5201feb749a",
-      "invalidated_stage": "artifact-install",
-      "invalidated_source_failure_id": null
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "c494e58b797a4258693d994f320048b9c23ec4e4",
+    "pushed": true,
+    "tier": "compile_only",
+    "promotion_transaction_id": "23f6486b83344cd985e6694786579fee",
+    "promotion_transition_id": "afcb1d6f99f34f4db55f39843bb97840",
+    "replacement_evidence": {
+      "schema": 1,
+      "transaction_id": "23f6486b83344cd985e6694786579fee",
+      "revocation_transition_id": "verdict-revoke-56d1c25c1f4a2e2b3f0e45bf33edc3cb15f00f0896abf40cf29b8657834a6475",
+      "previous_commit": "1022b6c9e89de91270dfe201d2aeec76a2123a09",
+      "preimage_sha256": "9c35ac37e0953d03fdcbb384a7a1b716f286a042c75e2910df46bfa422f92606",
+      "preimage_inventory_sha256": "5f6a149b21b8d73817614599ed9c15bf02871b8bb76736eaaf738a6135b0240e",
+      "preimage_inventory_entries": 5,
+      "proof_binding": "legacy-git-tree",
+      "proof_sha256": "d663916d31d857fa2843c96129556e211a64b6e38919b731c360698bd0ae58b6",
+      "candidate_sha256": "ce21afde255cf3f7cd19d9772aa698efcd10e3ee05647b45fe3e9203fee9474d"
     }
   },
   "history": [
@@ -277,6 +283,14 @@
       "attempt": 3,
       "detail": "diagnosis invalidated: control-plane misroute: attempt 3 passed build+assembly; terminal stage artifact-install (events.jsonl:1968-1971), so source STRUCTURAL diagnosis is invalid",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-21T15:16:34.667615Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 4,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "c494e58b797a4258693d994f320048b9c23ec4e4"
     }
   ]
 }
