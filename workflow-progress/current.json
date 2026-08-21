@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "timestamp": "2026-08-21T20:26:53.076657Z",
-  "run_id": "2026-08-21T20:26:53.076657Z",
+  "timestamp": "2026-08-21T20:28:45.140310Z",
+  "run_id": "2026-08-21T20:28:45.140310Z",
   "port_mode": "wasm_units",
   "workflow_state": "manual_paused",
   "current_unit": null,
@@ -14,7 +14,7 @@
   "context_length": null,
   "driver_status": "stopped",
   "driver_running": false,
-  "last_transition": "2026-08-21T20:26:53.076657Z",
+  "last_transition": "2026-08-21T20:28:45.140310Z",
   "last_green": "2026-08-21T16:20:45.850788Z",
   "last_product_commit": "0901d3cd24820364d3e0649b848757eb3bccb5e0",
   "block_reason": null,
