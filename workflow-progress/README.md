@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T00:10:41.677199Z - machine-written, do not edit.*
+*Generated 2026-08-21T00:10:49.092310Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (possibly_stuck) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 12/1396 settled (3 green, 9 staged) |
 | **Retries outstanding** | 0 |
-| **Untouched** | 1381 |
-| **Last transition** | 2026-08-21T00:10:41.677199Z |
-| **Last green** | 2026-08-20T22:41:00.850847Z (`auto-c0002-001`) |
-| **Last product commit** | `fd9dc36e98ade9faf6c1a6b67777476b231e6eb3` |
+| **Untouched** | 1380 |
+| **Last transition** | 2026-08-21T00:10:49.092310Z |
+| **Last green** | 2026-08-21T00:10:49.092310Z (`auto-c0035-002`) |
+| **Last product commit** | `1873aa326eadf98a4b62c57221ece69c228fb3eb` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T00:10:49.092310Z | `auto-c0035-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T00:10:41.677199Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
 | 2026-08-20T23:14:14.902202Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-20T22:41:00.850847Z | `auto-c0002-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-19T14:17:12.817172Z | `auto-c0000-010` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-19T12:51:44.893788Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-19T12:51:42.040810Z | `auto-c0000-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-19T12:28:58.879769Z | `auto-c0000-007` | gate_failed | wasm-link | 1 | not linked: unit.c:70:87: error: incompatible pointer types passing 'undefined **' (aka 'unsigned char **') to |
