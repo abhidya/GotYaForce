@@ -1,25 +1,26 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-21T04:18:08.317289Z - machine-written, do not edit.*
+*Generated 2026-08-21T04:19:09.971776Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 21/1396 settled (3 green, 18 staged) |
-| **Retries outstanding** | 1 |
+| **Retries outstanding** | 0 |
 | **Untouched** | 1371 |
-| **Last transition** | 2026-08-21T04:18:08.317289Z |
-| **Last green** | 2026-08-21T04:18:02.807350Z (`auto-c0018-018`) |
-| **Last product commit** | `d833565b51d3c5af6c89b83003221642ad61c04d` |
+| **Last transition** | 2026-08-21T04:19:09.971776Z |
+| **Last green** | 2026-08-21T04:19:09.971776Z (`auto-c0035-006`) |
+| **Last product commit** | `a77a5e969e7d72b42a01225a89bd402937607ced` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T04:19:09.971776Z | `auto-c0035-006` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:18:08.317289Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T04:18:02.807350Z | `auto-c0018-018` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T03:02:18.947843Z | `auto-c0053-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-20T00:34:11.804492Z | `auto-c0000-011` | gate_failed | wasm-link | 1 | not linked: /usr/bin/bash: -c: line 1: syntax error near unexpected token `(' /usr/bin/bash: -c: line 1: `sour |
 | 2026-08-19T21:59:06.645075Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
 | 2026-08-19T21:56:31.739621Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
-| 2026-08-19T21:56:08.979119Z | `auto-c0000-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: 1 validation error for BridgeConfig custom_api.timeout   Input should b |
