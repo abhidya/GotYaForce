@@ -2,34 +2,42 @@
   "schema": 1,
   "unit": "auto-c0035-002",
   "unit_id": "auto-c0035-002",
-  "timestamp": "2026-08-21T05:36:19.438496Z",
-  "run_id": "2026-08-21T05:36:11.560992Z",
-  "result": "staged",
-  "stage": "commit",
+  "timestamp": "2026-08-21T13:27:37.209776Z",
+  "run_id": "2026-08-21T13:27:37.123650Z",
+  "result": "deferred",
+  "stage": "manual-revoke",
   "attempt": 2,
-  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
-  "product_commit": "1022b6c9e89de91270dfe201d2aeec76a2123a09",
-  "product_pushed": true,
-  "product_effect": "durable product commit",
+  "detail": "verdict revoked and requeued: assembly eligibility audit: events.jsonl:1877-1878; timestamp=2026-08-21T05:36:22.210489Z; stage=merge; n=5; window=auto-c0028-014,auto-c0028-015,auto-c0028-016,auto-c0028-017,auto-c0035-002; conflicts=collision_stub:FUN_80103428,collision_stub:zz_01033f8_",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
   "product_commit_failed": false,
-  "oracle_summary": "compile-only (UNVERIFIED)",
+  "oracle_summary": null,
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": "compile_only",
+  "tier": null,
+  "extra": {
+    "revoked_via": "revoke-unit",
+    "previous_status": "green",
+    "previous_tier": "compile_only",
+    "previous_commit": "1022b6c9e89de91270dfe201d2aeec76a2123a09",
+    "previous_record_sha256": "36beda54e3170379119a94edd40bb3cc26c53f3427a216cdd447d35a6845bc4f",
+    "transition_id": "verdict-revoke-56d1c25c1f4a2e2b3f0e45bf33edc3cb15f00f0896abf40cf29b8657834a6475"
+  },
   "driver_record": {
-    "status": "porting",
+    "status": "pending",
     "attempts": 2,
     "error": null,
-    "oracle_summary": "compile-only (UNVERIFIED)",
-    "commit": "1873aa326eadf98a4b62c57221ece69c228fb3eb",
-    "pushed": true,
-    "last_stage": "d5-migrate",
+    "last_stage": "manual-revoke",
     "revoked": {
-      "via": "d5-migrate",
-      "at": "2026-08-21T05:32:46.836485Z",
-      "reason": "D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 3 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
+      "via": "revoke-unit",
+      "at": "2026-08-21T13:27:37.157132Z",
+      "reason": "assembly eligibility audit: events.jsonl:1877-1878; timestamp=2026-08-21T05:36:22.210489Z; stage=merge; n=5; window=auto-c0028-014,auto-c0028-015,auto-c0028-016,auto-c0028-017,auto-c0035-002; conflicts=collision_stub:FUN_80103428,collision_stub:zz_01033f8_",
       "previous_status": "green",
       "previous_tier": "compile_only",
-      "transform_sites": 3
+      "previous_commit": "1022b6c9e89de91270dfe201d2aeec76a2123a09",
+      "previous_oracle_summary": "compile-only (UNVERIFIED)",
+      "previous_record_sha256": "36beda54e3170379119a94edd40bb3cc26c53f3427a216cdd447d35a6845bc4f",
+      "transition_id": "verdict-revoke-56d1c25c1f4a2e2b3f0e45bf33edc3cb15f00f0896abf40cf29b8657834a6475"
     },
     "symbol_set": [
       "CONCAT44",
@@ -94,6 +102,14 @@
       "attempt": 2,
       "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
       "product_commit": "1022b6c9e89de91270dfe201d2aeec76a2123a09"
+    },
+    {
+      "timestamp": "2026-08-21T13:27:37.209776Z",
+      "result": "deferred",
+      "stage": "manual-revoke",
+      "attempt": 2,
+      "detail": "verdict revoked and requeued: assembly eligibility audit: events.jsonl:1877-1878; timestamp=2026-08-21T05:36:22.210489Z; stage=merge; n=5; window=auto-c0028-014,auto-c0028-015,auto-c0028-016,auto-c0028-017,auto-c0035-002; conflicts=collision_stub:FUN_80103428,collision_stub:zz_01033f8_",
+      "product_commit": null
     }
   ]
 }

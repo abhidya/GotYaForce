@@ -1,16 +1,16 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-21T13:27:24.217425Z - machine-written, do not edit.*
+*Generated 2026-08-21T13:27:37.209776Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 18/1396 settled (3 green, 15 staged) |
+| **Queue progress** | 17/1396 settled (3 green, 14 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1373 |
-| **Last transition** | 2026-08-21T13:27:24.217425Z |
+| **Untouched** | 1374 |
+| **Last transition** | 2026-08-21T13:27:37.209776Z |
 | **Last green** | 2026-08-21T08:57:34.711639Z (`auto-c0029-014`) |
 | **Last product commit** | `b96586649c8ca84c2d7a220c2aecb0eca017ebcc` |
 | **Active model** | `-` @ - ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T13:27:37.209776Z | `auto-c0035-002` | deferred | manual-revoke | 2 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1877-1878; timestamp=2026-08-21T05:36:2 |
 | 2026-08-21T13:27:24.217425Z | `auto-c0029-013` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1595-1596; timestamp=2026-08-21T01:57:3 |
 | 2026-08-21T13:27:12.064014Z | `auto-c0028-017` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1843-1844; timestamp=2026-08-21T05:06:5 |
 | 2026-08-21T13:27:00.646271Z | `auto-c0028-016` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1833-1834; timestamp=2026-08-21T05:06:4 |
@@ -70,4 +71,3 @@
 | 2026-08-21T05:36:19.438496Z | `auto-c0035-002` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:36:11.624972Z | `auto-c0028-018` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-21T05:36:11.633601Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
-| 2026-08-21T05:35:19.940452Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
