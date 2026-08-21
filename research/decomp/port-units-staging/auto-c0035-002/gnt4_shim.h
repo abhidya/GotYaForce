@@ -135,3 +135,13 @@ extern int zz_00fe668_();
 extern int zz_013a954_();
 extern int zz_01618ac_();
 extern int zz_0161d7c_();
+
+/* PPC lfd-of-assembled-bits: reinterpret a u64 bit pattern as an IEEE754
+ * double. The extraction transform (D5) rewrites Ghidra's reinterpretation
+ * casts `(double)CONCAT44(...)` to this helper; a bare (double) cast on an
+ * integer in unit.c is then always a genuine value conversion. */
+static inline double __gnt4_bitcast_f64(unsigned long long __u) {
+  union { unsigned long long u; double d; } __b;
+  __b.u = __u;
+  return __b.d;
+}

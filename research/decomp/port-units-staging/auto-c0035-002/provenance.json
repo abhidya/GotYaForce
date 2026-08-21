@@ -1,7 +1,7 @@
 {
   "unit": "auto-c0035-002",
-  "run_id": "2026-08-21T00:10:41.652527Z",
-  "generated_at": "2026-08-21T00:10:46.112579Z",
+  "run_id": "2026-08-21T05:36:11.560992Z",
+  "generated_at": "2026-08-21T05:36:15.985140Z",
   "extractions": [
     {
       "file": "research/decomp/ghidra-export/chunk_0035.c",
@@ -53,6 +53,23 @@
     }
   ],
   "extracted_sha256": "ba97c1c0e1bc4745990a9365a2f241f2b8c1a161fb19417f02d94a3f9f66b6a4",
+  "transform": {
+    "name": "d5-fp-reinterpret",
+    "version": 1,
+    "sites": 3,
+    "sites_per_block": [
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    "transformed_sha256": "3801748f9b8c3ca931c8a2819f1ae94386f9ca1ee911c57f22b58eb309194844",
+    "d5_residual_risk": 0
+  },
   "exported_functions": [
     "FUN_80131634",
     "FUN_80131664",
@@ -82,6 +99,12 @@
     "zz_01618ac_",
     "zz_0161d7c_"
   ],
+  "registry": {
+    "version_used": 27,
+    "holdout": false,
+    "authoritative_injected": [],
+    "advisory_injected": 0
+  },
   "oracle": {
     "type": "compile_only",
     "summary": "compile-only (UNVERIFIED)"
