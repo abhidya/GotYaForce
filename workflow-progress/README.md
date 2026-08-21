@@ -1,25 +1,26 @@
-# Port workflow: RUNNING
+# Port workflow: IDLE
 
-*Generated 2026-08-21T01:58:18.512173Z - machine-written, do not edit.*
+*Generated 2026-08-21T01:58:25.770912Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 17/1396 settled (3 green, 14 staged) |
+| **Queue progress** | 18/1396 settled (3 green, 15 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1374 |
-| **Last transition** | 2026-08-21T01:58:18.512173Z |
+| **Last transition** | 2026-08-21T01:58:25.770912Z |
 | **Last green** | 2026-08-21T01:58:18.512173Z (`auto-c0035-005`) |
 | **Last product commit** | `43655461c6f3a72e18518e7d8664b659baffb5ed` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | running |
+| **Driver** | stopped |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T01:58:25.770912Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T01:58:18.512173Z | `auto-c0035-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T01:58:06.366051Z | `auto-c0029-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T01:57:39.076057Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -69,4 +70,3 @@
 | 2026-08-19T20:32:41.635785Z | `auto-c0000-010` | deferred | compile-fix | 0 | interrupted before a verdict; requeued |
 | 2026-08-19T20:31:52.183732Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-19T20:31:39.087455Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-19T17:49:36.281522Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
