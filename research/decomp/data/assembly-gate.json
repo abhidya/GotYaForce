@@ -2,7 +2,7 @@
   "schema": 1,
   "created_at": "2026-08-21T00:44:31.833113Z",
   "largest_n_passed": 5,
-  "runs_total": 7,
+  "runs_total": 8,
   "conflicts": {
     "undefined8_fork|undefined8|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core": {
       "symbol": "undefined8",
@@ -1047,22 +1047,54 @@
       "first_seen": "2026-08-21T01:57:36.348690Z",
       "times_seen": 1,
       "last_seen": "2026-08-21T01:57:36.348690Z"
+    },
+    "collision_stub|zz_0099e70_|auto-c0018-018,auto-c0053-009": {
+      "symbol": "zz_0099e70_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0018-018",
+        "auto-c0053-009"
+      ],
+      "variants": {
+        "auto-c0053-009": "int zz_0099e70_();",
+        "auto-c0018-018": "void zz_0099e70_(int,int);"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0099e70_",
+      "first_seen": "2026-08-21T04:18:05.917038Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T04:18:05.917038Z"
+    },
+    "collision_stub|zz_0137540_|auto-c0018-018,auto-c0053-009": {
+      "symbol": "zz_0137540_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0018-018",
+        "auto-c0053-009"
+      ],
+      "variants": {
+        "auto-c0053-009": "int zz_0137540_();",
+        "auto-c0018-018": "void zz_0137540_(int,int);"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0137540_",
+      "first_seen": "2026-08-21T04:18:05.917038Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T04:18:05.917038Z"
     }
   },
   "last_run": {
-    "checked_at": "2026-08-21T03:02:21.819216Z",
+    "checked_at": "2026-08-21T04:18:05.866682Z",
     "n": 5,
     "units": [
-      "auto-c0029-013",
       "auto-c0029-015",
       "auto-c0035-005",
       "auto-c0053-009",
-      "auto-c0053-010"
+      "auto-c0053-010",
+      "auto-c0018-018"
     ],
-    "passed": true,
-    "stage": "pass",
-    "conflict_count": 0,
-    "detail": "5 unit(s) linked and instantiated together"
+    "passed": false,
+    "stage": "merge",
+    "conflict_count": 2,
+    "detail": "header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)"
   },
-  "updated_at": "2026-08-21T03:02:23.726717Z"
+  "updated_at": "2026-08-21T04:18:05.917038Z"
 }
