@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T16:19:40.835252Z - machine-written, do not edit.*
+*Generated 2026-08-21T16:19:48.574372Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 18/1396 settled (3 green, 15 staged) |
+| **Queue progress** | 19/1396 settled (3 green, 16 staged) |
 | **Retries outstanding** | 3 |
-| **Untouched** | 1372 |
-| **Last transition** | 2026-08-21T16:19:40.835252Z |
-| **Last green** | 2026-08-21T15:58:44.998526Z (`auto-c0029-013`) |
-| **Last product commit** | `90eaf9e2f3b4f94f7f9bfed0d58afba66a4c9c53` |
+| **Untouched** | 1371 |
+| **Last transition** | 2026-08-21T16:19:48.574372Z |
+| **Last green** | 2026-08-21T16:19:48.574372Z (`auto-c0033-006`) |
+| **Last product commit** | `1eefc7cf0870b3d99e6c8e1118bb100f3e7a138c` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T16:19:48.574372Z | `auto-c0033-006` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T16:19:40.835252Z | `auto-c0035-006` | gate_failed | assembly | 4 | assembly gate link failed before promotion: m_asm --export-if-defined=__start_em_lib_deps --export-if-defined= |
 | 2026-08-21T16:19:12.855874Z | `auto-c0018-018` | gate_failed | assembly | 3 | assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner i |
 | 2026-08-21T15:58:44.998526Z | `auto-c0029-013` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-21T09:28:06.851661Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:57:34.711639Z | `auto-c0029-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T08:56:57.296370Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
-| 2026-08-21T08:56:57.111838Z | `auto-c0029-012` | deferred | port | 0 | interrupted before a verdict; requeued |
