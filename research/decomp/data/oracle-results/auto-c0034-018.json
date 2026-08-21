@@ -1,10 +1,10 @@
 {
  "result_schema": 1,
  "unit": "auto-c0034-018",
- "generated_at": "2026-08-21T03:55:29.801Z",
+ "generated_at": "2026-08-21T04:07:46.360Z",
  "harness": {
   "entry": "research/decomp/oracle-harness/run-unit.mjs",
-  "git_rev": "04b3a551d9c55591ec08d28d073b18c85c73d082"
+  "git_rev": "d7c673ba6b15d9a723610c5fa06ffc7d036677f9"
  },
  "wasm": {
   "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0034-018\\unit.wasm",
@@ -13,9 +13,9 @@
  "corpus": {
   "mode": "generate",
   "seed": 3407896,
-  "n": 5
+  "n": 7
  },
- "spec_sha256": "cfb07134af5fd85a190213afb9d72f3bc38b9b8027c281143e25f815e13daca5",
+ "spec_sha256": "fec21db1c8ffac3e4c85b700e1737ddb34181f6b3a71e8184105a5b51302c392",
  "reference_kind": "ts_port",
  "references": [
   "packages/combat/src/families/wire-gunner.ts (createWireGunnerRootAction, via refs/wire-gunner-ref.mjs seam-spy bundle)"
@@ -23,11 +23,12 @@
  "functions": [
   {
    "name": "FUN_80130788",
-   "cases": 5,
-   "exact": 5,
+   "cases": 7,
+   "exact": 7,
    "rounding_explained": 0,
    "unexplained": 0,
    "reference": "wire-gunner.ts:158-172 createWireGunnerRootAction — dispatch rule actionTable[actor.actionIndex]",
+   "note": "root action dispatcher; differential = invoked ROM table row == actionIndex; includes negative dispatch control",
    "verdict": "pass"
   }
  ],

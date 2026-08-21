@@ -238,12 +238,19 @@ async function main() {
     totalCases += s.cases;
     totalUnexplained += s.unexplained;
     const roundingFrac = s.cases > 0 ? s.rounding_explained / s.cases : 0;
+    // Zero-case guard (P2 pilot review P1): without a minimum-case floor, a spec
+    // listing every export but routing 0 cases to some would satisfy the coverage
+    // self-audit and print PASS — a function that ran no cases proved nothing.
+    // Floor: spec-declared min_cases, default 1; below it the function fails
+    // regardless of its (vacuous) counts, so --n shrink attacks fail too.
+    const minCases = f.min_cases ?? 1;
     let verdict = "pass";
-    if (s.unexplained > 0) verdict = "fail";
+    if (s.cases < minCases) verdict = "fail_min_cases";
+    else if (s.unexplained > 0) verdict = "fail";
     else if (roundingFrac > s.rounding_bound) verdict = "fail_rounding_bound";
     fnResults.push({ name: s.name, cases: s.cases, exact: s.exact,
       rounding_explained: s.rounding_explained, unexplained: s.unexplained,
-      reference: f.reference ?? null, verdict });
+      reference: f.reference ?? null, note: f.note ?? null, verdict });
   }
   const coverageClean = coverage.offsets_read_unwritten === 0
     && !coverage.sentinel_reads_detected && coverage.stray_writes.length === 0;

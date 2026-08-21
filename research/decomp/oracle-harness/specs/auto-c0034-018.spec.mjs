@@ -79,13 +79,16 @@ export const meta = {
   ],
   arena: "arena-wire-gunner.json",
   wasmDefault: "../port-units-staging/auto-c0034-018/unit.wasm",
+  // n counts the exhaustive dispatch cases; generateCorpus always appends the two
+  // dispatch-control cases (review P3) on top, so the default run is 7 cases.
   corpus: { mode: "generate", seed: 0x340018, n: ROWS },
   // F-5: rounding_bound 0 — pure table dispatch, no float path anywhere in the
   // covered function; there is no legitimate f32-vs-f64 divergence channel.
+  // min_cases (review P1): 5 exhaustive rows + 2 controls; fewer proves nothing.
   functions: [
-    { name: "FUN_80130788", rounding_bound: 0,
+    { name: "FUN_80130788", rounding_bound: 0, min_cases: ROWS + 2,
       reference: "wire-gunner.ts:158-172 createWireGunnerRootAction — dispatch rule actionTable[actor.actionIndex]",
-      note: "root action dispatcher; differential = invoked ROM table row == actionIndex" },
+      note: "root action dispatcher; differential = invoked ROM table row == actionIndex; includes negative dispatch control" },
   ],
   uncovered_exports: [
     "FUN_80130154", "FUN_80130330", "FUN_801304b8", "FUN_801307c4", "FUN_80130844",
@@ -120,6 +123,14 @@ export function generateCorpus({ n }) {
   // the domain is fully enumerated; --n repeats the cycle).
   const recs = [];
   for (let i = 0; i < n; i++) recs.push({ kind: "dispatch", n: i, k: i % ROWS });
+  // Dispatch controls (review P3) — committed proof that the spy observable really
+  // discriminates rows, i.e. a hit means "the dispatcher read cell k", not "the
+  // spy is reachable from anywhere":
+  //   negctl: actionIndex=0 with the spy at cell 2 — the dispatcher must NOT reach
+  //           the spy; the expected outcome is a trap at cell 0's invalid index.
+  //   posctl: actionIndex=2 with the spy at cell 2 — must hit (the aimed twin).
+  recs.push({ kind: "dispctl", n: n, k: 0, aim: 2, expect: "trap" });
+  recs.push({ kind: "dispctl", n: n + 1, k: 2, aim: 2, expect: "hit" });
   return recs;
 }
 
@@ -137,12 +148,16 @@ export function createRunner({ ex }) {
   return {
     unit: meta.unit,
     handleRecord(codec, rec) {
-      if (rec.kind !== "dispatch") throw new Error(`unknown record kind ${rec.kind}`);
+      if (rec.kind !== "dispatch" && rec.kind !== "dispctl") throw new Error(`unknown record kind ${rec.kind}`);
       const k = rec.k;
+      // dispatch: spy at the reference-predicted cell k. dispctl: spy at rec.aim,
+      // which for the negative control is NOT the driven index — a spy hit there
+      // would mean the observable does not discriminate rows.
+      const aimed = rec.kind === "dispctl" ? rec.aim : k;
       codec.beginCase();
       codec.encodeField(ACT, "actionIndex", k); // +0x580 via the extracted field map
-      // Instrumented dispatch window: only the reference-predicted row is callable.
-      for (let j = 0; j < ROWS; j++) codec.wU32(DISP + 4 * j, j === k ? SPY_SLOT : INVALID);
+      // Instrumented dispatch window: only the aimed row is callable.
+      for (let j = 0; j < ROWS; j++) codec.wU32(DISP + 4 * j, j === aimed ? SPY_SLOT : INVALID);
       const audit = codec.auditReads({
         mustWrite: [[ACT + 0x580, 1], [DISP, ROWS * 4]],
         arenaOk: [],
@@ -164,10 +179,12 @@ export function createRunner({ ex }) {
       try { ex.FUN_80130788(ACT); }
       catch (e) { trap = String(e && e.message || e); }
       const post = codec.diffPostState([]); // the dispatcher writes nothing
-      const ok = trap == null && spyHits === 1;
+      const ok = rec.expect === "trap"
+        ? trap != null && spyHits === 0   // negctl: wrong-cell read must trap, spy untouched
+        : trap == null && spyHits === 1;  // dispatch/posctl: exactly one spy hit
       return {
         fn: "FUN_80130788", n: rec.n, cls: ok ? "exact" : "unexplained", audit, post,
-        dump: ok ? null : { n: rec.n, actionIndex: k, spyHits, trap, refRowRan },
+        dump: ok ? null : { n: rec.n, kind: rec.kind, actionIndex: k, aimed, expect: rec.expect ?? "hit", spyHits, trap, refRowRan },
       };
     },
   };

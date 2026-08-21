@@ -49,7 +49,11 @@
 // staged unit is as valuable as a green one):
 //   D1. +0x694 air cooldown: ROM computes dt + (s16(+0x1af8) - f32(+0x1ae0));
 //       the TS port documents this as "approximated" by stateTimer = dt
-//       (wire-gunner.ts:98-102).
+//       (wire-gunner.ts:98-102). NOTE: this channel has TWO independent causes —
+//       the air branch's s16(+0x1af8) reconstruction in the staged wasm uses the
+//       SAME mis-lowered (double)CONCAT44 idiom as D5 (unit.c:87-90), so the wasm
+//       stores a ~4.8e18 f32 where the ROM stores dt + (s16 - f32). Fixing the TS
+//       cooldown model alone would still leave this wasm red on air-fire cases.
 //   D2. Fire-branch cues: the TS port dispatches ub/fb idle cues the ROM function
 //       does not call at this boundary (wire-gunner.ts:103-105,135-137).
 //   D3. +0x540 on air-fire: the ROM advances the phase byte to 1 BEFORE branching;
@@ -59,8 +63,9 @@
 //   D5. +0x1900 (wrapper): the staged wasm's PPC int->double idiom is mis-lowered
 //       (integer CONCAT44 + arithmetic u64->f64 conversion instead of bit
 //       reinterpretation, then saturating trunc), so the wasm stores -1 regardless
-//       of input where the ROM stores (short)(int)(0.96 * s16). Probed 2026-08-20:
-//       input 100 -> ROM 96, wasm -1. This is a STAGED-UNIT defect, not a spec bug.
+//       of input where the ROM stores (short)(int)(0.96 * s16) — fctiwz truncates,
+//       so input 100 -> ROM 95 (100 * 0.9599999785... = 95.99998, truncated), wasm
+//       -1 (probed 2026-08-20). This is a STAGED-UNIT defect, not a spec bug.
 //
 // Corpus (generate mode, I-2): mulberry32-seeded; alternating "phase" (zz_01316e0_
 // direct) and "wrap" (FUN_80131688) records; default n=20000 => 10,000 per function
@@ -110,13 +115,16 @@ export const meta = {
   // compared (+0x694) is predicted by the reference's own f32 value, so there is
   // no legitimate f32-vs-f64 divergence channel to explain. Any mismatch is a
   // genuine behavioral divergence (see D1-D5 above), never rounding.
+  // min_cases (review P1): a run that routed fewer cases than this to either
+  // function proves nothing and must fail (fail_min_cases), so an --n shrink can
+  // never turn this spec into a vacuous pass.
   functions: [
-    { name: "zz_01316e0_", rounding_bound: 0,
+    { name: "zz_01316e0_", rounding_bound: 0, min_cases: 1000,
       reference: "wire-gunner.ts:85-149 wireGunnerXPhase0/Phase1 (via wireGunnerXHandler; port-grade citations :64/:73)",
-      note: "X-special phase machine; expected divergences D1-D4" },
-    { name: "FUN_80131688", rounding_bound: 0,
+      note: "X-special phase machine; expected divergences D1-D4. D1's air channel is double-caused: TS cooldown approximation AND the wasm's mis-lowered (double)CONCAT44 idiom in the +0x694 computation (see D1/D5 header notes)" },
+    { name: "FUN_80131688", rounding_bound: 0, min_cases: 1000,
       reference: "wire-gunner.ts:145-149 wireGunnerXHandler (wrapper; weak-grade citation :144 — the +0x1900 timer math is unmodeled by the port)",
-      note: "wrapper; expected divergences D1-D5" },
+      note: "wrapper; expected divergences D1-D5. D5: mis-lowered int->double idiom saturates +0x1900 to -1 where ROM fctiwz gives (short)trunc(0.96*s16), e.g. 100 -> 95" },
   ],
   uncovered_exports: [
     "FUN_80131634", "FUN_80131664", "FUN_80131834", "FUN_801318a8", "FUN_801318f8", "FUN_80131a00",

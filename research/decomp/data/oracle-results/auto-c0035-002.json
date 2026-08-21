@@ -1,10 +1,10 @@
 {
  "result_schema": 1,
  "unit": "auto-c0035-002",
- "generated_at": "2026-08-21T03:55:37.930Z",
+ "generated_at": "2026-08-21T04:07:54.550Z",
  "harness": {
   "entry": "research/decomp/oracle-harness/run-unit.mjs",
-  "git_rev": "04b3a551d9c55591ec08d28d073b18c85c73d082"
+  "git_rev": "d7c673ba6b15d9a723610c5fa06ffc7d036677f9"
  },
  "wasm": {
   "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-002\\unit.wasm",
@@ -15,7 +15,7 @@
   "seed": 3473410,
   "n": 20000
  },
- "spec_sha256": "cb1a3d480b9af9f72a9a35c49eb58e99471aebac9754cf664d724bf52987ba75",
+ "spec_sha256": "8c3df7dff4ad631ae9ffb72519f0ea07d049e2920374b6a3bca93d25548dad68",
  "reference_kind": "ts_port",
  "references": [
   "packages/combat/src/families/wire-gunner.ts (X-special phase machine via createWireGunnerRootAction, refs/wire-gunner-ref.mjs seam-spy bundle)"
@@ -28,6 +28,7 @@
    "rounding_explained": 0,
    "unexplained": 3750,
    "reference": "wire-gunner.ts:85-149 wireGunnerXPhase0/Phase1 (via wireGunnerXHandler; port-grade citations :64/:73)",
+   "note": "X-special phase machine; expected divergences D1-D4. D1's air channel is double-caused: TS cooldown approximation AND the wasm's mis-lowered (double)CONCAT44 idiom in the +0x694 computation (see D1/D5 header notes)",
    "verdict": "fail"
   },
   {
@@ -37,6 +38,7 @@
    "rounding_explained": 0,
    "unexplained": 10000,
    "reference": "wire-gunner.ts:145-149 wireGunnerXHandler (wrapper; weak-grade citation :144 — the +0x1900 timer math is unmodeled by the port)",
+   "note": "wrapper; expected divergences D1-D5. D5: mis-lowered int->double idiom saturates +0x1900 to -1 where ROM fctiwz gives (short)trunc(0.96*s16), e.g. 100 -> 95",
    "verdict": "fail"
   }
  ],
