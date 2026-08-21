@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T05:06:31.944737Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:06:41.378483Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 35/1396 settled (3 green, 32 staged) |
+| **Queue progress** | 36/1396 settled (3 green, 33 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1356 |
-| **Last transition** | 2026-08-21T05:06:31.944737Z |
-| **Last green** | 2026-08-21T05:06:31.944737Z (`auto-c0028-015`) |
-| **Last product commit** | `04ee080cf55a322d436c465c1106b25810a233d3` |
+| **Untouched** | 1355 |
+| **Last transition** | 2026-08-21T05:06:41.378483Z |
+| **Last green** | 2026-08-21T05:06:41.378483Z (`auto-c0028-016`) |
+| **Last product commit** | `f9710bae23bca09461472474ddb28db1da77bb5a` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:06:41.378483Z | `auto-c0028-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:31.944737Z | `auto-c0028-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:21.902337Z | `auto-c0028-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:12.498587Z | `auto-c0028-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-20T11:06:06.055666Z | `auto-c0001-013` | gate_failed | wasm-link | 1 | not linked: unit.c:421:30: error: pointer cannot be cast to type 'float'   421 \|       dVar7 = (double)(float |
 | 2026-08-20T08:06:03.039975Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T08:06:00.010464Z | `auto-c0001-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-20T06:15:12.193225Z | `auto-c0001-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
