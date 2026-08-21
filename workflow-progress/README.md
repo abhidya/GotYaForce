@@ -1,28 +1,27 @@
-# Port workflow: PAUSED
+# Port workflow: IDLE
 
-*Generated 2026-08-21T20:28:45.140310Z - machine-written, do not edit.*
+*Generated 2026-08-21T20:44:18.827648Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `PAUSED` (manual_paused) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 23/1396 settled (3 green, 20 staged) |
 | **Retries outstanding** | 2 |
 | **Untouched** | 1367 |
-| **Last transition** | 2026-08-21T20:28:45.140310Z |
+| **Last transition** | 2026-08-21T20:44:18.827648Z |
 | **Last green** | 2026-08-21T16:20:45.850788Z (`auto-c0033-010`) |
 | **Last product commit** | `0901d3cd24820364d3e0649b848757eb3bccb5e0` |
 | **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | stopped |
 
-> **Manually paused by the owner** (rig gate). No heavy work runs.
-
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T20:44:18.827648Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T20:28:45.140310Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T20:26:53.076657Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T20:26:18.786459Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
@@ -72,4 +71,3 @@
 | 2026-08-21T13:27:00.646271Z | `auto-c0028-016` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1833-1834; timestamp=2026-08-21T05:06:4 |
 | 2026-08-21T13:26:45.200769Z | `auto-c0028-015` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1823-1824; timestamp=2026-08-21T05:06:3 |
 | 2026-08-21T13:26:26.032246Z | `auto-c0028-014` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1813-1814; timestamp=2026-08-21T05:06:2 |
-| 2026-08-21T13:26:09.583673Z | `auto-c0028-013` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1803-1804; timestamp=2026-08-21T05:06:1 |
