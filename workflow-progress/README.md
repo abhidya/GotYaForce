@@ -1,27 +1,26 @@
-# Port workflow: PAUSED
+# Port workflow: RUNNING
 
-*Generated 2026-08-20T23:14:14.902202Z - machine-written, do not edit.*
+*Generated 2026-08-21T00:10:41.677199Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `PAUSED` (manual_paused) |
+| **State** | `RUNNING` (possibly_stuck) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 16/1520 settled (3 green, 13 staged) |
-| **Retries outstanding** | 13 |
-| **Untouched** | 1485 |
-| **Last transition** | 2026-08-20T23:14:14.902202Z |
+| **Queue progress** | 12/1396 settled (3 green, 9 staged) |
+| **Retries outstanding** | 0 |
+| **Untouched** | 1381 |
+| **Last transition** | 2026-08-21T00:10:41.677199Z |
 | **Last green** | 2026-08-20T22:41:00.850847Z (`auto-c0002-001`) |
 | **Last product commit** | `fd9dc36e98ade9faf6c1a6b67777476b231e6eb3` |
-| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
-| **Driver** | stopped |
-
-> **Manually paused by the owner** (rig gate). No heavy work runs.
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T00:10:41.677199Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
 | 2026-08-20T23:14:14.902202Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-20T22:41:00.850847Z | `auto-c0002-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T22:40:49.277067Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
@@ -71,4 +70,3 @@
 | 2026-08-19T12:51:44.893788Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-19T12:51:42.040810Z | `auto-c0000-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-19T12:28:58.879769Z | `auto-c0000-007` | gate_failed | wasm-link | 1 | not linked: unit.c:70:87: error: incompatible pointer types passing 'undefined **' (aka 'unsigned char **') to |
-| 2026-08-19T10:57:33.205941Z | `-` | stopped_at_boundary | machine | 0 |  |
