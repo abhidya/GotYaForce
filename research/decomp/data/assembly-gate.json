@@ -2,7 +2,7 @@
   "schema": 1,
   "created_at": "2026-08-21T00:44:31.833113Z",
   "largest_n_passed": 5,
-  "runs_total": 19,
+  "runs_total": 20,
   "conflicts": {
     "undefined8_fork|undefined8|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core": {
       "symbol": "undefined8",
@@ -1141,8 +1141,8 @@
       },
       "detail": "header extern vs unit.c prelude prototype diverge for zz_007c800_; under a merged header this is a conflicting-types compile error",
       "first_seen": "2026-08-21T04:20:41.127350Z",
-      "times_seen": 3,
-      "last_seen": "2026-08-21T04:21:00.611010Z"
+      "times_seen": 4,
+      "last_seen": "2026-08-21T04:21:10.358070Z"
     },
     "collision_stub|zz_007c844_|auto-c0011-011,auto-c0011-012": {
       "symbol": "zz_007c844_",
@@ -1157,8 +1157,8 @@
       },
       "detail": "header extern vs unit.c prelude prototype diverge for zz_007c844_; under a merged header this is a conflicting-types compile error",
       "first_seen": "2026-08-21T04:20:41.127350Z",
-      "times_seen": 3,
-      "last_seen": "2026-08-21T04:21:00.611010Z"
+      "times_seen": 4,
+      "last_seen": "2026-08-21T04:21:10.358070Z"
     },
     "collision_stub|zz_007c9ac_|auto-c0011-011,auto-c0011-012": {
       "symbol": "zz_007c9ac_",
@@ -1173,8 +1173,8 @@
       },
       "detail": "header extern vs unit.c prelude prototype diverge for zz_007c9ac_; under a merged header this is a conflicting-types compile error",
       "first_seen": "2026-08-21T04:20:41.127350Z",
-      "times_seen": 3,
-      "last_seen": "2026-08-21T04:21:00.611010Z"
+      "times_seen": 4,
+      "last_seen": "2026-08-21T04:21:10.358070Z"
     },
     "collision_stub|FUN_800bae3c|auto-c0019-000,auto-c0019-001": {
       "symbol": "FUN_800bae3c",
@@ -1189,24 +1189,42 @@
       },
       "detail": "header extern vs unit.c prelude prototype diverge for FUN_800bae3c; under a merged header this is a conflicting-types compile error",
       "first_seen": "2026-08-21T04:21:00.611010Z",
+      "times_seen": 2,
+      "last_seen": "2026-08-21T04:21:10.358070Z"
+    },
+    "collision_stub|FUN_800bae68|auto-c0019-000,auto-c0019-001,auto-c0019-002": {
+      "symbol": "FUN_800bae68",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0019-000",
+        "auto-c0019-001",
+        "auto-c0019-002"
+      ],
+      "variants": {
+        "auto-c0019-000": "header: int FUN_800bae68();",
+        "auto-c0019-002": "prelude: void FUN_800bae68(int);",
+        "auto-c0019-001": "header: int FUN_800bae68();"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for FUN_800bae68; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T04:21:10.358070Z",
       "times_seen": 1,
-      "last_seen": "2026-08-21T04:21:00.611010Z"
+      "last_seen": "2026-08-21T04:21:10.358070Z"
     }
   },
   "last_run": {
-    "checked_at": "2026-08-21T04:21:00.593803Z",
+    "checked_at": "2026-08-21T04:21:10.332416Z",
     "n": 5,
     "units": [
-      "auto-c0011-010",
       "auto-c0011-011",
       "auto-c0011-012",
       "auto-c0019-000",
-      "auto-c0019-001"
+      "auto-c0019-001",
+      "auto-c0019-002"
     ],
     "passed": false,
     "stage": "merge",
-    "conflict_count": 4,
-    "detail": "header merge refused: 4 contested conflict(s); no silent winner is picked (section 2.11 precedence)"
+    "conflict_count": 5,
+    "detail": "header merge refused: 5 contested conflict(s); no silent winner is picked (section 2.11 precedence)"
   },
-  "updated_at": "2026-08-21T04:21:00.611010Z"
+  "updated_at": "2026-08-21T04:21:10.358070Z"
 }
