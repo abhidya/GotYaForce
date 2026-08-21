@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-21T06:32:16.419152Z",
-  "run_id": "2026-08-21T06:32:16.292260Z",
+  "generated_at": "2026-08-21T06:36:15.335802Z",
+  "run_id": "2026-08-21T06:36:15.218821Z",
   "total_units": 1396,
   "green": 3,
   "staged": 24,
@@ -11,7 +11,7 @@
   "structural_ineligible": 3,
   "active": 1,
   "total_attempts": 48,
-  "transitions_last_hour": 18,
+  "transitions_last_hour": 5,
   "greens_last_hour": 3,
   "last_green_at": "2026-08-21T05:37:17.022664Z",
   "last_green_unit": "auto-c0035-006",
@@ -19,13 +19,13 @@
   "repeated_failure_classes": [],
   "health": "blocked",
   "machine": {
-    "workflow_state": "starting",
+    "workflow_state": "blocked",
     "driver_status": "stopped",
     "manual_paused": false,
-    "block_reason": "chat contract preflight failed: {\"error\":{\"message\":\"Lost connection to the model server. It may have crashed -- try reloading the model.\",\"type\":\"api_error\",\"param\":null,\"code\":null}}",
+    "block_reason": "serving slot not ready: load request failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Manual pause lifted; resuming heavy work."
+    "detail": "Blocked: serving slot not ready: load request failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load"
   }
 }

@@ -1,6 +1,6 @@
 # Port workflow: BLOCKED
 
-*Generated 2026-08-21T06:32:16.292260Z - machine-written, do not edit.*
+*Generated 2026-08-21T06:36:15.218821Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,18 +10,19 @@
 | **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T06:32:16.292260Z |
+| **Last transition** | 2026-08-21T06:36:15.218821Z |
 | **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
 | **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
 | **Driver** | stopped |
 
-> **Blocked:** chat contract preflight failed: {"error":{"message":"Lost connection to the model server. It may have crashed -- try reloading the model.","type":"api_error","param":null,"code":null}}
+> **Blocked:** serving slot not ready: load request failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T06:36:15.218821Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: 409 Client Error: Conflict for url: http://127.0.0.1:888 |
 | 2026-08-21T06:32:16.292260Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T06:31:32.810041Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T06:31:14.210535Z | `-` | blocked | machine | 0 | Blocked: chat contract preflight failed: {"error":{"message":"Lost connection to the model server. It may have |
@@ -71,4 +72,3 @@
 | 2026-08-21T04:20:26.832974Z | `auto-c0011-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:20:15.791271Z | `auto-c0011-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:20:04.674340Z | `auto-c0011-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T04:19:53.034319Z | `auto-c0011-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
