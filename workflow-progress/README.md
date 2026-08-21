@@ -1,25 +1,28 @@
-# Port workflow: IDLE
+# Port workflow: PAUSED
 
-*Generated 2026-08-21T08:44:00.797387Z - machine-written, do not edit.*
+*Generated 2026-08-21T08:45:45.758222Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T08:44:00.797387Z |
+| **Last transition** | 2026-08-21T08:45:45.758222Z |
 | **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
 | **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
 | **Driver** | stopped |
 
+> **Manually paused by the owner** (rig gate). No heavy work runs.
+
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T08:45:45.758222Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:44:00.797387Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T08:43:31.339185Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:39:06.722394Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -69,4 +72,3 @@
 | 2026-08-21T05:32:11.218690Z | `auto-c0001-003` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 6 |
 | 2026-08-21T05:06:54.849862Z | `auto-c0028-017` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:41.378483Z | `auto-c0028-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T05:06:31.944737Z | `auto-c0028-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |

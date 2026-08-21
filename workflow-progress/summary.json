@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-21T08:44:00.914932Z",
-  "run_id": "2026-08-21T08:44:00.797387Z",
+  "generated_at": "2026-08-21T08:45:45.876036Z",
+  "run_id": "2026-08-21T08:45:45.758222Z",
   "total_units": 1396,
   "green": 3,
   "staged": 24,
@@ -17,15 +17,15 @@
   "last_green_unit": "auto-c0035-006",
   "last_product_commit": "5f124e6c2c27b51e33707835954aa1138a56197e",
   "repeated_failure_classes": [],
-  "health": "idle",
+  "health": "manual_paused",
   "machine": {
-    "workflow_state": "starting",
+    "workflow_state": "manual_paused",
     "driver_status": "stopped",
-    "manual_paused": false,
+    "manual_paused": true,
     "block_reason": null,
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Manual pause lifted; resuming heavy work."
+    "detail": "Manually paused by owner (rig gate)."
   }
 }
