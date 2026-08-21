@@ -1,8 +1,8 @@
 {
   "registry_schema": 1,
   "program": "gnt4",
-  "version": 13,
-  "updated_at": "2026-08-21T04:20:24.166860Z",
+  "version": 14,
+  "updated_at": "2026-08-21T04:20:35.460247Z",
   "entries": {
     "fn:FUN_8010858c": {
       "kind": "prototype",
@@ -1863,6 +1863,142 @@
       "declaration": "void FUN_8007c414(int);;",
       "derivation": "definition",
       "updated_version": 13
+    },
+    "fn:FUN_8007c4b8": {
+      "kind": "prototype",
+      "symbol": "FUN_8007c4b8",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0011-012"
+      ],
+      "source_tiers": {
+        "auto-c0011-012": "compile_only"
+      },
+      "harvested_at": "2026-08-21T04:20:35.444634Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_8007c4b8(int);;",
+      "derivation": "definition",
+      "updated_version": 14
+    },
+    "fn:FUN_8007c6b0": {
+      "kind": "prototype",
+      "symbol": "FUN_8007c6b0",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0011-012"
+      ],
+      "source_tiers": {
+        "auto-c0011-012": "compile_only"
+      },
+      "harvested_at": "2026-08-21T04:20:35.444634Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_8007c6b0(int);;",
+      "derivation": "definition",
+      "updated_version": 14
+    },
+    "fn:FUN_8007c7a4": {
+      "kind": "prototype",
+      "symbol": "FUN_8007c7a4",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0011-012"
+      ],
+      "source_tiers": {
+        "auto-c0011-012": "compile_only"
+      },
+      "harvested_at": "2026-08-21T04:20:35.444634Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_8007c7a4(int);;",
+      "derivation": "definition",
+      "updated_version": 14
+    },
+    "fn:FUN_8007cb58": {
+      "kind": "prototype",
+      "symbol": "FUN_8007cb58",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0011-012"
+      ],
+      "source_tiers": {
+        "auto-c0011-012": "compile_only"
+      },
+      "harvested_at": "2026-08-21T04:20:35.444634Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_8007cb58(int);;",
+      "derivation": "definition",
+      "updated_version": 14
+    },
+    "fn:FUN_8007cba4": {
+      "kind": "prototype",
+      "symbol": "FUN_8007cba4",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0011-012"
+      ],
+      "source_tiers": {
+        "auto-c0011-012": "compile_only"
+      },
+      "harvested_at": "2026-08-21T04:20:35.444634Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_8007cba4(int);;",
+      "derivation": "definition",
+      "updated_version": 14
+    },
+    "fn:zz_007c800_": {
+      "kind": "prototype",
+      "symbol": "zz_007c800_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0011-012"
+      ],
+      "source_tiers": {
+        "auto-c0011-012": "compile_only"
+      },
+      "harvested_at": "2026-08-21T04:20:35.444634Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_007c800_(int,uint);;",
+      "derivation": "definition",
+      "updated_version": 14
+    },
+    "fn:zz_007c844_": {
+      "kind": "prototype",
+      "symbol": "zz_007c844_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0011-012"
+      ],
+      "source_tiers": {
+        "auto-c0011-012": "compile_only"
+      },
+      "harvested_at": "2026-08-21T04:20:35.444634Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_007c844_(int);;",
+      "derivation": "definition",
+      "updated_version": 14
+    },
+    "fn:zz_007c9ac_": {
+      "kind": "prototype",
+      "symbol": "zz_007c9ac_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0011-012"
+      ],
+      "source_tiers": {
+        "auto-c0011-012": "compile_only"
+      },
+      "harvested_at": "2026-08-21T04:20:35.444634Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_007c9ac_(int);;",
+      "derivation": "definition",
+      "updated_version": 14
     }
   }
 }
