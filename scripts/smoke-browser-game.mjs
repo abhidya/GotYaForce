@@ -22,6 +22,17 @@ try {
 }
 const publicBase = "/GotYaForce/game/";
 const ownedRoot = path.resolve(root, ".tmp", "game-browser-smoke");
+// Use the real BOX DATA persistence seam, but give the edge regression enough
+// deterministic reserves that combat cannot resolve during its first input polls.
+// Repeated ids are valid force entries and deploy as distinct runtime actors.
+const battleInputFixture = Object.freeze({
+  slotNo: 1,
+  name: "INPUT EDGE FIXTURE",
+  randomSeed: 0x47f0c3a5,
+  // A full reserve bench of the lowest-cost basic borg cannot exhaust or wipe
+  // the fixed-seed opponent during the handful of input polls under test.
+  borgIds: Object.freeze(Array.from({ length: 30 }, () => "pl0008")),
+});
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -200,6 +211,45 @@ async function waitFor(cdp, expression, label, timeoutMs = 30_000) {
   throw new Error(`timed out waiting for ${label}: ${JSON.stringify(snapshot)}`);
 }
 
+async function waitForBattle(cdp, expression, label, timeoutMs = 30_000) {
+  return await waitFor(cdp, `(() => {
+    const screen = window.__gf?.navigation?.screen;
+    if (screen !== "battle") throw new Error("left battle while waiting for ${label}: " + screen);
+    return Boolean(${expression});
+  })()`, label, timeoutMs);
+}
+
+async function capturePauseState(cdp, label) {
+  const state = await evaluate(cdp, `({
+    screen: window.__gf?.navigation?.screen,
+    paused: window.__gf?.session?.paused,
+    pauseOverlay: Boolean(document.querySelector(".gf-pause-overlay"))
+  })`);
+  if (state.screen !== "battle") {
+    throw new Error(`left battle while capturing ${label}: ${JSON.stringify(state)}`);
+  }
+  return state;
+}
+
+async function captureBattleFrame(cdp, label) {
+  const state = await evaluate(cdp, `({
+    screen: window.__gf?.navigation?.screen,
+    frame: window.__gf?.session?.battle?.observe()?.frame
+  })`);
+  if (state.screen !== "battle" || !Number.isInteger(state.frame)) {
+    throw new Error(`cannot capture battle frame for ${label}: ${JSON.stringify(state)}`);
+  }
+  return state.frame;
+}
+
+async function waitForBattleFrames(cdp, fromFrame, count, label) {
+  await waitForBattle(
+    cdp,
+    `window.__gf?.session?.battle?.observe()?.frame >= ${fromFrame + count}`,
+    label,
+  );
+}
+
 async function click(cdp, selector) {
   await evaluate(cdp, `(() => {
     const node = document.querySelector(${JSON.stringify(selector)});
@@ -298,7 +348,14 @@ async function drivePlayableRoute(cdp, url) {
   await cdp.send("Page.addScriptToEvaluateOnNewDocument", {
     source: `
       localStorage.clear();
-      let gfSeed = 0x47f0c3a5;
+      localStorage.setItem("gf-force-slots-v1", ${JSON.stringify(JSON.stringify([
+        {
+          no: battleInputFixture.slotNo,
+          name: battleInputFixture.name,
+          borgIds: battleInputFixture.borgIds,
+        },
+      ]))});
+      let gfSeed = ${battleInputFixture.randomSeed};
       Math.random = () => {
         gfSeed |= 0;
         gfSeed = (gfSeed + 0x6d2b79f5) | 0;
@@ -345,65 +402,82 @@ async function drivePlayableRoute(cdp, url) {
   // handoff. This reproduces the historical pause-edge leak.
   await enterKey(cdp, "keyDown");
   await waitFor(cdp, `window.__gf?.navigation?.screen === "battle" && document.querySelector(".gf-hud")`, "battle HUD", 60_000);
-  // Several 60 Hz polls are enough to prove the held Intro key is consumed;
-  // pause promptly so a very short deterministic battle cannot resolve first.
-  await delay(75);
+  // Hold through actual fixed-step boundaries rather than guessing how long a
+  // busy browser needs to schedule requestAnimationFrame.
+  const introHoldFrame = await captureBattleFrame(cdp, "held briefing confirmation");
+  await waitForBattleFrames(cdp, introHoldFrame, 2, "held briefing confirmation polls");
   const battleState = await evaluate(cdp, `(() => {
     const hud = document.querySelector(".gf-hud");
     const rect = hud?.getBoundingClientRect();
     const style = hud ? getComputedStyle(hud) : null;
+    const playerForce = window.__gf?.session?.config?.forces?.find(
+      (force) => force.team === "player" && force.ownerPlayer === 0
+    );
     return {
       screen: window.__gf?.navigation?.screen,
       paused: window.__gf?.session?.paused,
       pauseOverlay: Boolean(document.querySelector(".gf-pause-overlay")),
       hudVisible: Boolean(hud && rect && rect.width > 0 && rect.height > 0 && style?.display !== "none" && style?.visibility !== "hidden"),
+      battleResult: window.__gf?.session?.battle?.observe()?.result,
+      playerRoster: playerForce?.borgIds ?? null,
     };
   })()`);
   await enterKey(cdp, "keyUp");
 
-  if (battleState.screen !== "battle" || battleState.paused !== false || battleState.pauseOverlay || !battleState.hudVisible) {
+  const fixtureRosterMatches =
+    JSON.stringify(battleState.playerRoster) === JSON.stringify(battleInputFixture.borgIds);
+  if (
+    battleState.screen !== "battle" ||
+    battleState.paused !== false ||
+    battleState.pauseOverlay ||
+    !battleState.hudVisible ||
+    battleState.battleResult !== "ongoing" ||
+    !fixtureRosterMatches
+  ) {
     throw new Error(`battle did not reach a visible, unpaused HUD: ${JSON.stringify(battleState)}`);
   }
 
-  // A fresh press must still pause after the consumed briefing edge.
-  await delay(50);
-  await tapEnter(cdp);
-  await waitFor(
+  // The release must be observed by real fixed steps before the fresh press.
+  const introReleaseFrame = await captureBattleFrame(cdp, "briefing confirmation release");
+  await waitForBattleFrames(cdp, introReleaseFrame, 2, "briefing confirmation release polls");
+
+  // A fresh press must still pause after the consumed briefing edge. Keep it
+  // down until Pause opens so a delayed animation frame cannot miss the edge.
+  await enterKey(cdp, "keyDown");
+  await waitForBattle(
     cdp,
     `window.__gf?.session?.paused === true && Boolean(document.querySelector(".gf-pause-overlay"))`,
     "first post-entry pause",
   );
+  await enterKey(cdp, "keyUp");
 
   // Resume while Enter remains held. resumeBattle() must consume that edge so
   // the fixed-step poll cannot immediately reopen Pause.
   await enterKey(cdp, "keyDown");
-  await waitFor(
+  await waitForBattle(
     cdp,
     `window.__gf?.session?.paused === false && !document.querySelector(".gf-pause-overlay")`,
     "pause resume",
   );
-  await delay(75);
-  const resumeState = await evaluate(cdp, `({
-    paused: window.__gf?.session?.paused,
-    pauseOverlay: Boolean(document.querySelector(".gf-pause-overlay"))
-  })`);
+  const resumeHoldFrame = await captureBattleFrame(cdp, "held-input resume");
+  await waitForBattleFrames(cdp, resumeHoldFrame, 2, "held-input resume polls");
+  const resumeState = await capturePauseState(cdp, "held-input resume");
   await enterKey(cdp, "keyUp");
   if (resumeState.paused !== false || resumeState.pauseOverlay) {
     throw new Error(`held resume input reopened Pause: ${JSON.stringify(resumeState)}`);
   }
 
   // Release must re-arm the latch: one more fresh press pauses again.
-  await delay(50);
-  await tapEnter(cdp);
-  await waitFor(
+  const resumeReleaseFrame = await captureBattleFrame(cdp, "resume release");
+  await waitForBattleFrames(cdp, resumeReleaseFrame, 2, "resume release polls");
+  await enterKey(cdp, "keyDown");
+  await waitForBattle(
     cdp,
     `window.__gf?.session?.paused === true && Boolean(document.querySelector(".gf-pause-overlay"))`,
     "second post-resume pause",
   );
-  const pauseCycle = await evaluate(cdp, `({
-    paused: window.__gf?.session?.paused,
-    pauseOverlay: Boolean(document.querySelector(".gf-pause-overlay"))
-  })`);
+  const pauseCycle = await capturePauseState(cdp, "second post-resume pause");
+  await enterKey(cdp, "keyUp");
 
   await waitForNetworkIdle(pendingRequests, lastNetworkActivity);
   if (errors.length > 0 || networkErrors.length > 0) {
