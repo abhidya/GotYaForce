@@ -1,0 +1,92 @@
+{
+  "unit": "auto-c0011-008",
+  "run_id": "2026-08-21T04:18:31.026140Z",
+  "generated_at": "2026-08-21T04:19:50.135854Z",
+  "extractions": [
+    {
+      "file": "research/decomp/ghidra-export/chunk_0011.c",
+      "start": 2072,
+      "end": 2079,
+      "sha256": "1e8de130633d03a71bbc5a3c88d98b3a031483cc036938810d6de998116f49e1"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0011.c",
+      "start": 2083,
+      "end": 2093,
+      "sha256": "a12c9d715aa4f0261c4264ee2450fc010dece9ade5262b9bdc61ec75ca2ef81e"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0011.c",
+      "start": 2097,
+      "end": 2124,
+      "sha256": "7ec548bdb287fb5b835de1e4a68c0751fbe3d12f2fc1654f2916b501950f2ccd"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0011.c",
+      "start": 2128,
+      "end": 2158,
+      "sha256": "8738c9b8328ac7d6e00734fd5a10f7c026c9dc6b6b03da31bd64d02cfc5af5e9"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0011.c",
+      "start": 2162,
+      "end": 2199,
+      "sha256": "94e04c193a4c560c9c79bc357e4c7666d2c4c876b09f28ebadb633633941c172"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0011.c",
+      "start": 2203,
+      "end": 2260,
+      "sha256": "b8bf87109fc1ea495d973cdf4a13e1bd91dcd731c10b65477ecd2192cf847fac"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0011.c",
+      "start": 2264,
+      "end": 2322,
+      "sha256": "6d90fa715d9c1126d75b2828b7fdde113ffdc8c9af90a04b31291a17cf727083"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0011.c",
+      "start": 2326,
+      "end": 2335,
+      "sha256": "ef357cabf18d741f707f7e8962f584ba91b0ba28bd6a0a73ec72e21ed25648cb"
+    }
+  ],
+  "extracted_sha256": "d933f8755b93428624d4fb1f395f709095d925afca7277a112e089a8a7e1af91",
+  "exported_functions": [
+    "FUN_8007a530",
+    "FUN_8007a56c",
+    "FUN_8007a5bc",
+    "FUN_8007a678",
+    "FUN_8007a790",
+    "FUN_8007a890",
+    "FUN_8007aa38",
+    "FUN_8007abf4"
+  ],
+  "compile_iterations": 1,
+  "model": null,
+  "model_requests": 0,
+  "verified": false,
+  "tier": "compile_only",
+  "allowed_extra_imports": [
+    "FUN_80066838",
+    "zz_004beb8_",
+    "zz_004cd24_",
+    "zz_00670dc_",
+    "zz_00677b0_",
+    "zz_006a474_",
+    "zz_006d144_",
+    "zz_00b2190_",
+    "zz_00b22f4_"
+  ],
+  "registry": {
+    "version_used": 9,
+    "holdout": false,
+    "authoritative_injected": [],
+    "advisory_injected": 0
+  },
+  "oracle": {
+    "type": "compile_only",
+    "summary": "compile-only (UNVERIFIED)"
+  }
+}
