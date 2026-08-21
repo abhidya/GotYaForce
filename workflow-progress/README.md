@@ -1,26 +1,29 @@
-# Port workflow: RUNNING
+# Port workflow: PAUSED
 
-*Generated 2026-08-21T16:20:45.850788Z - machine-written, do not edit.*
+*Generated 2026-08-21T16:21:20.036764Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 23/1396 settled (3 green, 20 staged) |
 | **Retries outstanding** | 3 |
-| **Untouched** | 1367 |
-| **Last transition** | 2026-08-21T16:20:45.850788Z |
+| **Untouched** | 1366 |
+| **Last transition** | 2026-08-21T16:21:20.036764Z |
 | **Last green** | 2026-08-21T16:20:45.850788Z (`auto-c0033-010`) |
 | **Last product commit** | `0901d3cd24820364d3e0649b848757eb3bccb5e0` |
-| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
+| **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | running |
+| **Driver** | stopped |
+
+> **Manually paused by the owner** (rig gate). No heavy work runs.
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T16:21:20.036764Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T16:20:45.850788Z | `auto-c0033-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T16:20:31.989206Z | `auto-c0033-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T16:20:15.842453Z | `auto-c0033-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +73,3 @@
 | 2026-08-21T13:25:46.596394Z | `auto-c0019-001` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1770-1771; timestamp=2026-08-21T04:21:0 |
 | 2026-08-21T13:25:27.887467Z | `auto-c0018-018` | deferred | manual-revoke | 2 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1661-1662; timestamp=2026-08-21T04:18:0 |
 | 2026-08-21T12:09:44.045851Z | `auto-c0029-014` | deferred | manual-revoke | 1 | verdict revoked and requeued: Legacy pre-transaction promotion b96586649c8ca84c2d7a220c2aecb0eca017ebcc was pu |
-| 2026-08-21T11:42:19.166344Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
