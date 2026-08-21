@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T04:20:48.109112Z - machine-written, do not edit.*
+*Generated 2026-08-21T04:20:57.937597Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 30/1396 settled (3 green, 27 staged) |
+| **Queue progress** | 31/1396 settled (3 green, 28 staged) |
 | **Retries outstanding** | 0 |
-| **Untouched** | 1362 |
-| **Last transition** | 2026-08-21T04:20:48.109112Z |
-| **Last green** | 2026-08-21T04:20:48.109112Z (`auto-c0019-000`) |
-| **Last product commit** | `8b9f6982677707504dee8d90ea41c2a932f1f680` |
+| **Untouched** | 1361 |
+| **Last transition** | 2026-08-21T04:20:57.937597Z |
+| **Last green** | 2026-08-21T04:20:57.937597Z (`auto-c0019-001`) |
+| **Last product commit** | `f16b753e5cb8c4bc235d9430918d1ffe7d83715c` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T04:20:57.937597Z | `auto-c0019-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:20:48.109112Z | `auto-c0019-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:20:38.215999Z | `auto-c0011-012` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:20:26.832974Z | `auto-c0011-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-20T05:23:16.752439Z | `auto-c0001-002` | retryable | compile-fix | 1 | compile-fix returned no code block: len=6645 fences=1 head='```c\n/* gnt4_shim.h — POC stage-2 "header + arena |
 | 2026-08-20T05:01:00.658558Z | `auto-c0001-001` | retryable | compile-fix | 1 | compile-fix returned no code block: len=7466 fences=1 head='```c\n/* gnt4_shim.h — POC stage-2 "header + arena |
 | 2026-08-20T04:34:59.447192Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-20T04:34:56.600038Z | `auto-c0000-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
