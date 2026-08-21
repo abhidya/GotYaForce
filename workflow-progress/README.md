@@ -1,26 +1,28 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-21T21:57:43.919978Z - machine-written, do not edit.*
+*Generated 2026-08-21T22:00:29.212518Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 23/1396 settled (3 green, 20 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1368 |
-| **Last transition** | 2026-08-21T21:57:43.919978Z |
+| **Last transition** | 2026-08-21T22:00:29.212518Z |
 | **Last green** | 2026-08-21T16:20:45.850788Z (`auto-c0033-010`) |
 | **Last product commit** | `0901d3cd24820364d3e0649b848757eb3bccb5e0` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T22:00:29.212518Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
+| 2026-08-21T22:00:29.288948Z | `auto-c0035-006` | deferred | assembly | 4 | interrupted before a verdict; requeued |
 | 2026-08-21T21:57:43.919978Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T20:50:34.558550Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T20:45:52.410452Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
@@ -69,5 +71,3 @@
 | 2026-08-21T13:28:31.613924Z | `auto-c0002-001` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:28:19.134620Z | `auto-c0001-005` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:27:48.635216Z | `auto-c0035-006` | deferred | manual-revoke | 3 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1898-1899; timestamp=2026-08-21T05:37:2 |
-| 2026-08-21T13:27:37.209776Z | `auto-c0035-002` | deferred | manual-revoke | 2 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1877-1878; timestamp=2026-08-21T05:36:2 |
-| 2026-08-21T13:27:24.217425Z | `auto-c0029-013` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1595-1596; timestamp=2026-08-21T01:57:3 |
