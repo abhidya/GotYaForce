@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "unit": "auto-c0028-018",
+  "unit_id": "auto-c0028-018",
+  "timestamp": "2026-08-21T05:36:11.624972Z",
+  "run_id": "2026-08-21T05:36:11.560992Z",
+  "result": "deferred",
+  "stage": "port",
+  "attempt": 0,
+  "detail": "interrupted before a verdict; requeued",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "driver_record": {
+    "status": "deferred",
+    "attempts": 0,
+    "symbol_set": [
+      "FUN_801041b0",
+      "FUN_80104204",
+      "FUN_80104330",
+      "FUN_80104350",
+      "code",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006f98_",
+      "zz_0007030_",
+      "zz_00076d0_",
+      "zz_0007c54_",
+      "zz_0007cac_",
+      "zz_00097b4_",
+      "zz_00660e8_",
+      "zz_0088aa0_",
+      "zz_0088e50_",
+      "zz_0089100_",
+      "zz_01040c4_",
+      "zz_0104310_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 22,
+    "model_requests": 1,
+    "error": "interrupted before a verdict (driver killed or crashed)",
+    "interruptions": 1
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-21T05:36:11.624972Z",
+      "result": "deferred",
+      "stage": "port",
+      "attempt": 0,
+      "detail": "interrupted before a verdict; requeued",
+      "product_commit": null
+    }
+  ]
+}
