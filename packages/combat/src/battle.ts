@@ -27,6 +27,7 @@ import {
 } from "./burst.js";
 import {
   activeSourceTargetUid,
+  enterDeath,
   findVariantByKind,
   isBusy,
   projectileVisualKindForProfile,
@@ -1121,6 +1122,21 @@ class BattleImpl implements Battle {
       const lockPos = activeTargetUid ? this.byUid.get(activeTargetUid)?.pos ?? null : null;
       const ctx: MoveContext = { lockTargetPos: lockPos, bounds: this.bounds, collision: this.collision };
 
+      // Lethal/death lifecycle is host-owned and outranks any family action module. A ROM
+      // special can own movement and attacks, but it must not consume the frame that advances
+      // death, force accounting, deployment, and result settlement. interrupt() is idempotent,
+      // so an already-entered death also cancels ownership before the bridge can restore idle.
+      if (b.hp <= 0 || b.state === "death") {
+        b.romDriver?.interrupt();
+        if (b.state !== "death") enterDeath(b);
+        b.stateTime += 1;
+        const r = stepActionState(b);
+        if (r.died) {
+          this.spawnPlanned.add(this.forceIndexOfUid(b.uid));
+        }
+        continue;
+      }
+
       // ROM-family driver (1:1 ported state machine) — when active, owns the borg's
       // motion + attacks for this frame; skip the generic stepMovement/stepAttacks.
       // See packages/combat/src/bridge.ts. Borgs without a ported family are unaffected.
@@ -1392,6 +1408,10 @@ class BattleImpl implements Battle {
 
   private evaluateResult(): void {
     if (this.state.result !== "ongoing") return;
+    // Force energy is removed at the kill event, but the battle cannot freeze while an
+    // on-field actor is still advancing its death animation. Battle.step stops once a result
+    // settles, so judging earlier would leave the final defeated actor alive forever.
+    if (this.state.borgs.some((b) => b.alive && (b.hp <= 0 || b.state === "death"))) return;
     // Winner-mask judge (behavior-notes (ae), zz_00297c8_ @0x800297c8). A side is "destroyed"
     // when its remaining force reaches 0 — the ROM tests count byte OR energy s32 (rule-flag
     // selectable, chunk_0003.c:4519-4529); here count and energy are coupled (recomputeEnergy
