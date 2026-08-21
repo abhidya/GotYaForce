@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0035-002",
   "unit_id": "auto-c0035-002",
-  "timestamp": "2026-08-21T13:27:37.209776Z",
-  "run_id": "2026-08-21T13:27:37.123650Z",
-  "result": "deferred",
-  "stage": "manual-revoke",
-  "attempt": 2,
-  "detail": "verdict revoked and requeued: assembly eligibility audit: events.jsonl:1877-1878; timestamp=2026-08-21T05:36:22.210489Z; stage=merge; n=5; window=auto-c0028-014,auto-c0028-015,auto-c0028-016,auto-c0028-017,auto-c0035-002; conflicts=collision_stub:FUN_80103428,collision_stub:zz_01033f8_",
+  "timestamp": "2026-08-21T13:35:16.971877Z",
+  "run_id": "2026-08-21T13:35:10.325469Z",
+  "result": "gate_failed",
+  "stage": "artifact-install",
+  "attempt": 3,
+  "detail": "artifact install refused after assembly pass: artifact destination already exists with a different preimage: D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-002",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -16,18 +16,150 @@
   "model": "unsloth/Qwen3.8-27B-GGUF",
   "tier": null,
   "extra": {
-    "revoked_via": "revoke-unit",
-    "previous_status": "green",
-    "previous_tier": "compile_only",
-    "previous_commit": "1022b6c9e89de91270dfe201d2aeec76a2123a09",
-    "previous_record_sha256": "36beda54e3170379119a94edd40bb3cc26c53f3427a216cdd447d35a6845bc4f",
-    "transition_id": "verdict-revoke-56d1c25c1f4a2e2b3f0e45bf33edc3cb15f00f0896abf40cf29b8657834a6475"
+    "rounds": [],
+    "assembly_gate": {
+      "n": 5,
+      "units": [
+        "auto-c0011-008",
+        "auto-c0011-009",
+        "auto-c0011-010",
+        "auto-c0034-018",
+        "auto-c0035-002"
+      ],
+      "checked_at": "2026-08-21T13:35:13.182858Z",
+      "conflicts": [],
+      "passed": true,
+      "stage": "pass",
+      "detail": "5 unit(s) linked and instantiated together",
+      "candidate": {
+        "name": "auto-c0035-002",
+        "sha256": "076cc6e16b5dde217f6e74f04c7e3bd845a6cd294d7b70f21889006a434240e4"
+      },
+      "selection": {
+        "canonical_state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+        "eligible": [
+          {
+            "name": "auto-c0011-008",
+            "artifact_sha256": "a5090aea1793f86ff76b4fd064215a43e644c8197d7cf93bfe3890fe6f9d5ed4",
+            "status": "green",
+            "tier": "compile_only",
+            "commit": "f6b101367d355ec68772e72b72f66d3a2856e599",
+            "pushed": true,
+            "promotion_transaction_id": null,
+            "promotion_transition_id": null,
+            "state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+            "stale_revocation_ignored": false,
+            "artifact_binding": {
+              "binding": "canonical-digest",
+              "artifact_sha256": "a5090aea1793f86ff76b4fd064215a43e644c8197d7cf93bfe3890fe6f9d5ed4",
+              "commit": "f6b101367d355ec68772e72b72f66d3a2856e599"
+            }
+          },
+          {
+            "name": "auto-c0011-009",
+            "artifact_sha256": "03a1785d035f9a7f6258370b0436a54f1a844f298b580cf4aeb097c6127a0cdd",
+            "status": "green",
+            "tier": "compile_only",
+            "commit": "235d5b183c2513ac34d2149543694e1ef09e7d69",
+            "pushed": true,
+            "promotion_transaction_id": null,
+            "promotion_transition_id": null,
+            "state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+            "stale_revocation_ignored": false,
+            "artifact_binding": {
+              "binding": "canonical-digest",
+              "artifact_sha256": "03a1785d035f9a7f6258370b0436a54f1a844f298b580cf4aeb097c6127a0cdd",
+              "commit": "235d5b183c2513ac34d2149543694e1ef09e7d69"
+            }
+          },
+          {
+            "name": "auto-c0011-010",
+            "artifact_sha256": "d8334db79f66ee5784541d15ae6dbbc51dcdead864bddaf5afb81a6d2545ba9e",
+            "status": "green",
+            "tier": "compile_only",
+            "commit": "76e5d1b4edbbf3db3ec1e2c790eb8f0bef8bd8d0",
+            "pushed": true,
+            "promotion_transaction_id": null,
+            "promotion_transition_id": null,
+            "state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+            "stale_revocation_ignored": false,
+            "artifact_binding": {
+              "binding": "canonical-digest",
+              "artifact_sha256": "d8334db79f66ee5784541d15ae6dbbc51dcdead864bddaf5afb81a6d2545ba9e",
+              "commit": "76e5d1b4edbbf3db3ec1e2c790eb8f0bef8bd8d0"
+            }
+          },
+          {
+            "name": "auto-c0034-018",
+            "artifact_sha256": "947e84936ae7c7c0bb28e1433263fcdb1a27a46aaa1e27ccdbe42bb7ded0e2e2",
+            "status": "green",
+            "tier": "compile_only",
+            "commit": "cb4f28fcf2fd834a4ff2ad19b1b75f7eff6df31d",
+            "pushed": true,
+            "promotion_transaction_id": null,
+            "promotion_transition_id": null,
+            "state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+            "stale_revocation_ignored": true,
+            "artifact_binding": {
+              "binding": "canonical-digest",
+              "artifact_sha256": "947e84936ae7c7c0bb28e1433263fcdb1a27a46aaa1e27ccdbe42bb7ded0e2e2",
+              "commit": "cb4f28fcf2fd834a4ff2ad19b1b75f7eff6df31d"
+            }
+          }
+        ],
+        "excluded": {
+          "damage-core": "canonical-tier:missing",
+          "knockback-core": "canonical-tier:missing",
+          "auto-c0000-004": "canonical-status:pending",
+          "auto-c0000-006": "canonical-status:pending",
+          "auto-c0000-008": "canonical-status:pending",
+          "auto-c0000-018": "missing-canonical-record",
+          "auto-c0001-003": "canonical-status:pending",
+          "auto-c0001-004": "canonical-status:pending",
+          "auto-c0001-007": "canonical-status:pending",
+          "auto-c0001-010": "canonical-status:pending",
+          "auto-c0001-011": "canonical-status:pending",
+          "auto-c0001-012": "canonical-status:pending",
+          "auto-c0001-014": "canonical-status:pending",
+          "auto-c0011-004": "canonical-status:pending",
+          "auto-c0011-011": "canonical-status:pending",
+          "auto-c0011-012": "canonical-status:pending",
+          "auto-c0018-018": "canonical-status:pending",
+          "auto-c0019-000": "canonical-status:pending",
+          "auto-c0019-001": "canonical-status:pending",
+          "auto-c0019-002": "canonical-status:pending",
+          "auto-c0028-013": "canonical-status:pending",
+          "auto-c0028-014": "canonical-status:pending",
+          "auto-c0028-015": "canonical-status:pending",
+          "auto-c0028-016": "canonical-status:pending",
+          "auto-c0028-017": "canonical-status:pending",
+          "auto-c0029-013": "canonical-status:pending",
+          "auto-c0029-014": "canonical-status:pending",
+          "auto-c0035-002": "canonical-status:porting",
+          "auto-c0035-006": "canonical-status:pending"
+        },
+        "candidate": {
+          "name": "auto-c0035-002",
+          "artifact_sha256": "076cc6e16b5dde217f6e74f04c7e3bd845a6cd294d7b70f21889006a434240e4",
+          "tier": "compile_only",
+          "authority": "private-explicit-candidate"
+        }
+      }
+    },
+    "candidate_sha256": "076cc6e16b5dde217f6e74f04c7e3bd845a6cd294d7b70f21889006a434240e4",
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "e192488eb0ff0639ee4dc6db495910020b8072fb",
+      "prompt_version": "3",
+      "registry_version": "42"
+    }
   },
   "driver_record": {
-    "status": "pending",
-    "attempts": 2,
-    "error": null,
-    "last_stage": "manual-revoke",
+    "status": "red_retryable",
+    "attempts": 3,
+    "error": "artifact install refused after assembly pass: artifact destination already exists with a different preimage: D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-002",
+    "last_stage": "artifact-install",
     "revoked": {
       "via": "revoke-unit",
       "at": "2026-08-21T13:27:37.157132Z",
@@ -76,7 +208,145 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 27
+    "registry_version_used": 42,
+    "rounds": [],
+    "assembly_gate": {
+      "n": 5,
+      "units": [
+        "auto-c0011-008",
+        "auto-c0011-009",
+        "auto-c0011-010",
+        "auto-c0034-018",
+        "auto-c0035-002"
+      ],
+      "checked_at": "2026-08-21T13:35:13.182858Z",
+      "conflicts": [],
+      "passed": true,
+      "stage": "pass",
+      "detail": "5 unit(s) linked and instantiated together",
+      "candidate": {
+        "name": "auto-c0035-002",
+        "sha256": "076cc6e16b5dde217f6e74f04c7e3bd845a6cd294d7b70f21889006a434240e4"
+      },
+      "selection": {
+        "canonical_state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+        "eligible": [
+          {
+            "name": "auto-c0011-008",
+            "artifact_sha256": "a5090aea1793f86ff76b4fd064215a43e644c8197d7cf93bfe3890fe6f9d5ed4",
+            "status": "green",
+            "tier": "compile_only",
+            "commit": "f6b101367d355ec68772e72b72f66d3a2856e599",
+            "pushed": true,
+            "promotion_transaction_id": null,
+            "promotion_transition_id": null,
+            "state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+            "stale_revocation_ignored": false,
+            "artifact_binding": {
+              "binding": "canonical-digest",
+              "artifact_sha256": "a5090aea1793f86ff76b4fd064215a43e644c8197d7cf93bfe3890fe6f9d5ed4",
+              "commit": "f6b101367d355ec68772e72b72f66d3a2856e599"
+            }
+          },
+          {
+            "name": "auto-c0011-009",
+            "artifact_sha256": "03a1785d035f9a7f6258370b0436a54f1a844f298b580cf4aeb097c6127a0cdd",
+            "status": "green",
+            "tier": "compile_only",
+            "commit": "235d5b183c2513ac34d2149543694e1ef09e7d69",
+            "pushed": true,
+            "promotion_transaction_id": null,
+            "promotion_transition_id": null,
+            "state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+            "stale_revocation_ignored": false,
+            "artifact_binding": {
+              "binding": "canonical-digest",
+              "artifact_sha256": "03a1785d035f9a7f6258370b0436a54f1a844f298b580cf4aeb097c6127a0cdd",
+              "commit": "235d5b183c2513ac34d2149543694e1ef09e7d69"
+            }
+          },
+          {
+            "name": "auto-c0011-010",
+            "artifact_sha256": "d8334db79f66ee5784541d15ae6dbbc51dcdead864bddaf5afb81a6d2545ba9e",
+            "status": "green",
+            "tier": "compile_only",
+            "commit": "76e5d1b4edbbf3db3ec1e2c790eb8f0bef8bd8d0",
+            "pushed": true,
+            "promotion_transaction_id": null,
+            "promotion_transition_id": null,
+            "state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+            "stale_revocation_ignored": false,
+            "artifact_binding": {
+              "binding": "canonical-digest",
+              "artifact_sha256": "d8334db79f66ee5784541d15ae6dbbc51dcdead864bddaf5afb81a6d2545ba9e",
+              "commit": "76e5d1b4edbbf3db3ec1e2c790eb8f0bef8bd8d0"
+            }
+          },
+          {
+            "name": "auto-c0034-018",
+            "artifact_sha256": "947e84936ae7c7c0bb28e1433263fcdb1a27a46aaa1e27ccdbe42bb7ded0e2e2",
+            "status": "green",
+            "tier": "compile_only",
+            "commit": "cb4f28fcf2fd834a4ff2ad19b1b75f7eff6df31d",
+            "pushed": true,
+            "promotion_transaction_id": null,
+            "promotion_transition_id": null,
+            "state_sha256": "9cc63c235f74e73662068308b7a886ccd39bb00cd6509c37b5a61b4b758f5a07",
+            "stale_revocation_ignored": true,
+            "artifact_binding": {
+              "binding": "canonical-digest",
+              "artifact_sha256": "947e84936ae7c7c0bb28e1433263fcdb1a27a46aaa1e27ccdbe42bb7ded0e2e2",
+              "commit": "cb4f28fcf2fd834a4ff2ad19b1b75f7eff6df31d"
+            }
+          }
+        ],
+        "excluded": {
+          "damage-core": "canonical-tier:missing",
+          "knockback-core": "canonical-tier:missing",
+          "auto-c0000-004": "canonical-status:pending",
+          "auto-c0000-006": "canonical-status:pending",
+          "auto-c0000-008": "canonical-status:pending",
+          "auto-c0000-018": "missing-canonical-record",
+          "auto-c0001-003": "canonical-status:pending",
+          "auto-c0001-004": "canonical-status:pending",
+          "auto-c0001-007": "canonical-status:pending",
+          "auto-c0001-010": "canonical-status:pending",
+          "auto-c0001-011": "canonical-status:pending",
+          "auto-c0001-012": "canonical-status:pending",
+          "auto-c0001-014": "canonical-status:pending",
+          "auto-c0011-004": "canonical-status:pending",
+          "auto-c0011-011": "canonical-status:pending",
+          "auto-c0011-012": "canonical-status:pending",
+          "auto-c0018-018": "canonical-status:pending",
+          "auto-c0019-000": "canonical-status:pending",
+          "auto-c0019-001": "canonical-status:pending",
+          "auto-c0019-002": "canonical-status:pending",
+          "auto-c0028-013": "canonical-status:pending",
+          "auto-c0028-014": "canonical-status:pending",
+          "auto-c0028-015": "canonical-status:pending",
+          "auto-c0028-016": "canonical-status:pending",
+          "auto-c0028-017": "canonical-status:pending",
+          "auto-c0029-013": "canonical-status:pending",
+          "auto-c0029-014": "canonical-status:pending",
+          "auto-c0035-002": "canonical-status:porting",
+          "auto-c0035-006": "canonical-status:pending"
+        },
+        "candidate": {
+          "name": "auto-c0035-002",
+          "artifact_sha256": "076cc6e16b5dde217f6e74f04c7e3bd845a6cd294d7b70f21889006a434240e4",
+          "tier": "compile_only",
+          "authority": "private-explicit-candidate"
+        }
+      }
+    },
+    "candidate_sha256": "076cc6e16b5dde217f6e74f04c7e3bd845a6cd294d7b70f21889006a434240e4",
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "e192488eb0ff0639ee4dc6db495910020b8072fb",
+      "prompt_version": "3",
+      "registry_version": "42"
+    }
   },
   "history": [
     {
@@ -109,6 +379,14 @@
       "stage": "manual-revoke",
       "attempt": 2,
       "detail": "verdict revoked and requeued: assembly eligibility audit: events.jsonl:1877-1878; timestamp=2026-08-21T05:36:22.210489Z; stage=merge; n=5; window=auto-c0028-014,auto-c0028-015,auto-c0028-016,auto-c0028-017,auto-c0035-002; conflicts=collision_stub:FUN_80103428,collision_stub:zz_01033f8_",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-21T13:35:16.971877Z",
+      "result": "gate_failed",
+      "stage": "artifact-install",
+      "attempt": 3,
+      "detail": "artifact install refused after assembly pass: artifact destination already exists with a different preimage: D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-002",
       "product_commit": null
     }
   ]
