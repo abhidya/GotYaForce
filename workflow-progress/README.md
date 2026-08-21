@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T16:19:12.855874Z - machine-written, do not edit.*
+*Generated 2026-08-21T16:19:40.835252Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 18/1396 settled (3 green, 15 staged) |
-| **Retries outstanding** | 2 |
-| **Untouched** | 1373 |
-| **Last transition** | 2026-08-21T16:19:12.855874Z |
+| **Retries outstanding** | 3 |
+| **Untouched** | 1372 |
+| **Last transition** | 2026-08-21T16:19:40.835252Z |
 | **Last green** | 2026-08-21T15:58:44.998526Z (`auto-c0029-013`) |
 | **Last product commit** | `90eaf9e2f3b4f94f7f9bfed0d58afba66a4c9c53` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T16:19:40.835252Z | `auto-c0035-006` | gate_failed | assembly | 4 | assembly gate link failed before promotion: m_asm --export-if-defined=__start_em_lib_deps --export-if-defined= |
 | 2026-08-21T16:19:12.855874Z | `auto-c0018-018` | gate_failed | assembly | 3 | assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner i |
 | 2026-08-21T15:58:44.998526Z | `auto-c0029-013` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T15:44:29.191111Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
@@ -70,4 +71,3 @@
 | 2026-08-21T08:57:34.711639Z | `auto-c0029-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T08:56:57.296370Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T08:56:57.111838Z | `auto-c0029-012` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-21T08:55:01.924134Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
