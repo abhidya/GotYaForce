@@ -1,27 +1,26 @@
-# Port workflow: PAUSED
+# Port workflow: IDLE
 
-*Generated 2026-08-21T08:43:31.339185Z - machine-written, do not edit.*
+*Generated 2026-08-21T08:44:00.797387Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `PAUSED` (manual_paused) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T08:43:31.339185Z |
+| **Last transition** | 2026-08-21T08:44:00.797387Z |
 | **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
 | **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
 | **Driver** | stopped |
 
-> **Manually paused by the owner** (rig gate). No heavy work runs.
-
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T08:44:00.797387Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T08:43:31.339185Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:39:06.722394Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:31:27.450905Z | `-` | running | machine | 0 | Driver running. |
@@ -71,4 +70,3 @@
 | 2026-08-21T05:06:54.849862Z | `auto-c0028-017` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:41.378483Z | `auto-c0028-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:31.944737Z | `auto-c0028-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T05:06:21.902337Z | `auto-c0028-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |

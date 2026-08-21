@@ -206,3 +206,4 @@
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-21T08:31:27.450905Z", "run_id": "2026-08-21T08:31:27.450905Z", "result": "running", "stage": "machine", "attempt": 0, "detail": "Driver running."}
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-21T08:39:06.722394Z", "run_id": "2026-08-21T08:39:06.722394Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
 {"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-21T08:43:31.339185Z", "run_id": "2026-08-21T08:43:31.339185Z", "result": "manual_paused", "stage": "machine", "attempt": 0, "detail": "Manually paused by owner (rig gate)."}
+{"schema": 1, "unit": null, "unit_id": null, "timestamp": "2026-08-21T08:44:00.797387Z", "run_id": "2026-08-21T08:44:00.797387Z", "result": "starting", "stage": "machine", "attempt": 0, "detail": "Manual pause lifted; resuming heavy work."}
