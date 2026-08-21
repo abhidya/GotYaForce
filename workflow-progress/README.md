@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T04:20:26.832974Z - machine-written, do not edit.*
+*Generated 2026-08-21T04:20:38.215999Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 28/1396 settled (3 green, 25 staged) |
+| **Queue progress** | 29/1396 settled (3 green, 26 staged) |
 | **Retries outstanding** | 0 |
-| **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T04:20:26.832974Z |
-| **Last green** | 2026-08-21T04:20:26.832974Z (`auto-c0011-011`) |
-| **Last product commit** | `c2fe2413006bda64d8942d7d78d99c6a45563af9` |
+| **Untouched** | 1363 |
+| **Last transition** | 2026-08-21T04:20:38.215999Z |
+| **Last green** | 2026-08-21T04:20:38.215999Z (`auto-c0011-012`) |
+| **Last product commit** | `8eaaf8108f26868028c0aaa7e4784a5a0b4273c6` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T04:20:38.215999Z | `auto-c0011-012` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:20:26.832974Z | `auto-c0011-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:20:15.791271Z | `auto-c0011-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:20:04.674340Z | `auto-c0011-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-20T04:34:59.447192Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T04:34:56.600038Z | `auto-c0000-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T04:10:38.024144Z | `auto-c0000-016` | retryable | compile-fix | 1 | compile-fix returned no code block |
-| 2026-08-20T03:50:51.066902Z | `auto-c0000-015` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0009a14_ declared void but their results are assigned; no header edit ca |
