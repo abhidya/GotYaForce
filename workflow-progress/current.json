@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "timestamp": "2026-08-21T00:10:49.092310Z",
+  "timestamp": "2026-08-21T00:10:58.153178Z",
   "run_id": "2026-08-21T00:10:41.652527Z",
   "port_mode": "wasm_units",
   "workflow_state": "running",
   "current_unit": null,
-  "previous_unit": null,
-  "previous_result": null,
+  "previous_unit": "auto-c0035-002",
+  "previous_result": "staged",
   "current_stage": null,
   "current_attempt": 0,
   "active_model": "unsloth/Qwen3.8-27B-GGUF",
@@ -14,17 +14,17 @@
   "context_length": 262144,
   "driver_status": "running",
   "driver_running": true,
-  "last_transition": "2026-08-21T00:10:49.092310Z",
-  "last_green": "2026-08-21T00:10:49.092310Z",
-  "last_product_commit": "1873aa326eadf98a4b62c57221ece69c228fb3eb",
+  "last_transition": "2026-08-21T00:10:58.153178Z",
+  "last_green": "2026-08-21T00:10:58.153178Z",
+  "last_product_commit": "897004e53c00fbe6025eba6fe1e7bbca6fc7f3e0",
   "block_reason": null,
   "manual_paused": false,
   "queue": {
     "total": 1396,
     "green": 3,
-    "staged": 9,
+    "staged": 10,
     "retryable": 0,
-    "untouched": 1380,
+    "untouched": 1379,
     "active": 1
   }
 }

@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T00:10:49.092310Z - machine-written, do not edit.*
+*Generated 2026-08-21T00:10:58.153178Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 12/1396 settled (3 green, 9 staged) |
+| **Queue progress** | 13/1396 settled (3 green, 10 staged) |
 | **Retries outstanding** | 0 |
-| **Untouched** | 1380 |
-| **Last transition** | 2026-08-21T00:10:49.092310Z |
-| **Last green** | 2026-08-21T00:10:49.092310Z (`auto-c0035-002`) |
-| **Last product commit** | `1873aa326eadf98a4b62c57221ece69c228fb3eb` |
+| **Untouched** | 1379 |
+| **Last transition** | 2026-08-21T00:10:58.153178Z |
+| **Last green** | 2026-08-21T00:10:58.153178Z (`auto-c0034-018`) |
+| **Last product commit** | `897004e53c00fbe6025eba6fe1e7bbca6fc7f3e0` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T00:10:58.153178Z | `auto-c0034-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T00:10:49.092310Z | `auto-c0035-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T00:10:41.677199Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
 | 2026-08-20T23:14:14.902202Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -69,4 +70,3 @@
 | 2026-08-19T14:17:33.415996Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T14:17:12.817172Z | `auto-c0000-010` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
 | 2026-08-19T12:51:44.893788Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-19T12:51:42.040810Z | `auto-c0000-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
