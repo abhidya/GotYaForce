@@ -7,11 +7,15 @@
   "types": "src/index.ts",
   "scripts": {
     "build": "tsc -b",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "test:lifecycle": "node scripts/run-lifecycle-tests.mjs"
   },
   "dependencies": {
     "@gf/physics": "workspace:*",
     "@gf/render": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.5"
   },
   "module": "src/index.ts"
 }
