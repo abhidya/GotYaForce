@@ -1,6 +1,6 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-21T13:28:19.134620Z - machine-written, do not edit.*
+*Generated 2026-08-21T13:28:31.613924Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,9 +10,9 @@
 | **Queue progress** | 16/1396 settled (3 green, 13 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1375 |
-| **Last transition** | 2026-08-21T13:28:19.134620Z |
-| **Last green** | 2026-08-21T13:28:19.134620Z (`auto-c0001-005`) |
-| **Last product commit** | `9b453c674421043bcbe24909933e5c79d6f179ac` |
+| **Last transition** | 2026-08-21T13:28:31.613924Z |
+| **Last green** | 2026-08-21T13:28:31.613924Z (`auto-c0002-001`) |
+| **Last product commit** | `fd9dc36e98ade9faf6c1a6b67777476b231e6eb3` |
 | **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | stopped |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T13:28:31.613924Z | `auto-c0002-001` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:28:19.134620Z | `auto-c0001-005` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:27:48.635216Z | `auto-c0035-006` | deferred | manual-revoke | 3 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1898-1899; timestamp=2026-08-21T05:37:2 |
 | 2026-08-21T13:27:37.209776Z | `auto-c0035-002` | deferred | manual-revoke | 2 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1877-1878; timestamp=2026-08-21T05:36:2 |
@@ -70,4 +71,3 @@
 | 2026-08-21T06:01:37.664052Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T05:37:17.022664Z | `auto-c0035-006` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:36:29.101246Z | `auto-c0034-018` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T05:36:19.438496Z | `auto-c0035-002` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
