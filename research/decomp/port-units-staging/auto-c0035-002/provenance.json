@@ -1,7 +1,7 @@
 {
   "unit": "auto-c0035-002",
-  "run_id": "2026-08-21T05:36:11.560992Z",
-  "generated_at": "2026-08-21T05:36:15.985140Z",
+  "run_id": "2026-08-21T15:16:28.029761Z",
+  "generated_at": "2026-08-21T15:16:30.677177Z",
   "extractions": [
     {
       "file": "research/decomp/ghidra-export/chunk_0035.c",
@@ -82,7 +82,7 @@
   ],
   "compile_iterations": 1,
   "model": null,
-  "model_requests": 0,
+  "model_requests": 1,
   "verified": false,
   "tier": "compile_only",
   "allowed_extra_imports": [
@@ -100,7 +100,7 @@
     "zz_0161d7c_"
   ],
   "registry": {
-    "version_used": 27,
+    "version_used": 42,
     "holdout": false,
     "authoritative_injected": [],
     "advisory_injected": 0
