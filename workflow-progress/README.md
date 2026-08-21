@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T04:19:09.971776Z - machine-written, do not edit.*
+*Generated 2026-08-21T04:19:19.371941Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 21/1396 settled (3 green, 18 staged) |
+| **Queue progress** | 22/1396 settled (3 green, 19 staged) |
 | **Retries outstanding** | 0 |
-| **Untouched** | 1371 |
-| **Last transition** | 2026-08-21T04:19:09.971776Z |
-| **Last green** | 2026-08-21T04:19:09.971776Z (`auto-c0035-006`) |
-| **Last product commit** | `a77a5e969e7d72b42a01225a89bd402937607ced` |
+| **Untouched** | 1370 |
+| **Last transition** | 2026-08-21T04:19:19.371941Z |
+| **Last green** | 2026-08-21T04:19:19.371941Z (`auto-c0011-004`) |
+| **Last product commit** | `0d343c079fd33bfa015bd70b5698b31240c247f6` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T04:19:19.371941Z | `auto-c0011-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:19:09.971776Z | `auto-c0035-006` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T04:18:08.317289Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T04:18:02.807350Z | `auto-c0018-018` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-20T00:34:14.800588Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T00:34:11.804492Z | `auto-c0000-011` | gate_failed | wasm-link | 1 | not linked: /usr/bin/bash: -c: line 1: syntax error near unexpected token `(' /usr/bin/bash: -c: line 1: `sour |
 | 2026-08-19T21:59:06.645075Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
-| 2026-08-19T21:56:31.739621Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
