@@ -62,12 +62,22 @@ export const meta = {
   // truncating integer formula (integer-formula class ≈ 0.1%); the PoC baseline is
   // 2/20,000 = 0.01%, each satisfying the oracle32 witness. The other three
   // functions expect no rounding divergence and get none for free (default 0).
+  // Per-function reference annotation (review F5): three functions diff against the
+  // reviewed TS port; FUN_80031634's reference is the spec-embedded jsRef mirror.
+  // CAVEAT (F5): jsRef reads the SAME arena bytes as the wasm (DAT_802cffc8 corner
+  // table) and the same B1/B2/B3 images, so a corrupted input byte corrupts both
+  // sides identically — sentinel-blind for that channel; the full-range mustWrite
+  // audit on B1/B2/B3/B4 is the covering mechanism.
   functions: [
     { name: "zz_003cd5c_", rounding_bound: 0.001,
+      reference: "sourceDamage.ts computeBaseDamage (oracle.mjs bundle)",
       note: "integer damage formula; PoC baseline 2/20000 f32-rounding-explained" },
-    { name: "zz_0066298_", rounding_bound: 0 },
-    { name: "zz_003d344_", rounding_bound: 0 },
-    { name: "FUN_80031634", rounding_bound: 0 },
+    { name: "zz_0066298_", rounding_bound: 0,
+      reference: "sourceDamage.ts lookupTypeCategory (oracle.mjs bundle)" },
+    { name: "zz_003d344_", rounding_bound: 0,
+      reference: "sourceDamage.ts applyHpDamage (oracle.mjs bundle)" },
+    { name: "FUN_80031634", rounding_bound: 0,
+      reference: "spec-embedded jsRef (JS mirror of the verbatim C; shares arena/input reads with the wasm — see caveat above)" },
   ],
   regions: [
     { name: "REC", base: REC, size: 0x20 },

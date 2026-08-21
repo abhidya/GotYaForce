@@ -9,9 +9,17 @@
 //   node run-unit.mjs --unit damage-core [--n 20000] [--replay <fixture>]
 // Env:
 //   ORACLE_WASM             override the unit wasm path (driver substitutes {wasm})
+//   ORACLE_RESULTS_DIR      override the result-artifact directory (tests/rehearsals
+//                           point this at a scratch dir so the tracked artifact under
+//                           research/decomp/data/oracle-results/ is never clobbered
+//                           by a non-verification run)
 //   ORACLE_FLIP_ARENA_BYTE  hex address whose arena byte is XOR'd 0xff — the
-//                           deliberate-red rehearsal knob (gate term 6); never set
-//                           in a real verification run.
+//                           deliberate-red rehearsal knob (gate term 6). A rehearsal
+//                           run NEVER passes: the verdict is forced to "fail", the
+//                           exit code is nonzero, and the result JSON is stamped
+//                           with a `rehearsal` block, so a rehearsal artifact can
+//                           never be mistaken for (or committed as) a real verdict —
+//                           even if the flipped byte happened to be unread.
 //
 // Exit-code contract (§3.2, closes F-2): exit 0 iff verdict == "pass" AND the result
 // file was written; any exception, malformed spec/fixture, coverage violation, or
@@ -56,9 +64,15 @@ try {
   process.exit(1);
 }
 
+function resultsDir() {
+  return process.env.ORACLE_RESULTS_DIR
+    ? path.resolve(process.env.ORACLE_RESULTS_DIR)
+    : path.join(root, "research", "decomp", "data", "oracle-results");
+}
+
 function writeResultStub(verdict, detail) {
   try {
-    const outDir = path.join(root, "research", "decomp", "data", "oracle-results");
+    const outDir = resultsDir();
     fs.mkdirSync(outDir, { recursive: true });
     fs.writeFileSync(path.join(outDir, `${unitName}.json`),
       JSON.stringify({ result_schema: 1, unit: unitName, generated_at: new Date().toISOString(), verdict, detail }, null, 1) + "\n");
@@ -86,6 +100,14 @@ async function main() {
 
   const fieldMapPath = path.join(here, "actor-field-map.json");
   const fieldMap = loadFieldMap(fieldMapPath);
+  // F4: the field map must describe the actor.ts that exists NOW. Hash with
+  // normalized line endings (CRLF checkouts must not defeat the binding) and
+  // refuse to run against a drifted source.
+  const actorTsPath = path.join(root, "packages", "combat", "src", "rom", "actor.ts");
+  const actorNormalized = fs.readFileSync(actorTsPath).toString("utf8").replace(/\r\n/g, "\n");
+  if (sha256(Buffer.from(actorNormalized, "utf8")) !== fieldMap.raw.source_sha256) {
+    fail("actor-field-map.json is stale: source_sha256 does not match packages/combat/src/rom/actor.ts — regenerate with gen_actor_field_map.py");
+  }
 
   // ---- fixture load + integrity binding (§6 Phase 1 / [R2]) ----
   const fixtureRaw = fs.readFileSync(fixturePath);
@@ -184,11 +206,14 @@ async function main() {
     if (s.unexplained > 0) verdict = "fail";
     else if (roundingFrac > s.rounding_bound) verdict = "fail_rounding_bound";
     fnResults.push({ name: s.name, cases: s.cases, exact: s.exact,
-      rounding_explained: s.rounding_explained, unexplained: s.unexplained, verdict });
+      rounding_explained: s.rounding_explained, unexplained: s.unexplained,
+      reference: f.reference ?? null, verdict });
   }
   const coverageClean = coverage.offsets_read_unwritten === 0
     && !coverage.sentinel_reads_detected && coverage.stray_writes.length === 0;
-  const allPass = fnResults.every((f) => f.verdict === "pass") && coverageClean && classMismatches.length === 0;
+  // F2: a rehearsal run can NEVER pass — even if the flipped byte was unread.
+  const allPass = fnResults.every((f) => f.verdict === "pass") && coverageClean
+    && classMismatches.length === 0 && flipByte == null;
 
   // ---- log (per-function lines + coverage + anchored total, I-5) ----
   for (const f of fnResults) {
@@ -216,6 +241,8 @@ async function main() {
     spec_sha256: sha256(fs.readFileSync(specPath)),
     reference_kind: meta.reference_kind,
     references: meta.references,
+    // F5: per-function reference annotation — fnResults carry each function's own
+    // reference (see spec meta.functions[].reference), not just the unit-level kind.
     functions: fnResults,
     coverage: {
       offsets_read_unwritten: coverage.offsets_read_unwritten,
@@ -226,7 +253,11 @@ async function main() {
     unexplained_cases: unexplainedDumps,
     verdict: allPass ? "pass" : "fail",
   };
-  const outDir = path.join(root, "research", "decomp", "data", "oracle-results");
+  // F2: a rehearsal artifact is stamped as such — never mistakable for a real verdict.
+  if (flipByte != null) {
+    result.rehearsal = { flip_arena_byte: "0x" + flipByte.toString(16), note: "deliberate-red rehearsal — verdict forced to fail; not a verification run" };
+  }
+  const outDir = resultsDir();
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, `${unitName}.json`), JSON.stringify(result, null, 1) + "\n");
   process.exitCode = allPass ? 0 : 1;

@@ -154,6 +154,9 @@ def extract_interface(src, name):
 def main():
     with open(ACTOR_TS, "rb") as f:
         raw = f.read()
+    # Normalize line endings before hashing: the binding must survive CRLF
+    # checkouts (run-unit.mjs verifies this sha at harness load and refuses drift).
+    raw = raw.replace(b"\r\n", b"\n")
     src = raw.decode("utf-8")
     out = {
         "generated_by": "research/decomp/oracle-harness/gen_actor_field_map.py",
