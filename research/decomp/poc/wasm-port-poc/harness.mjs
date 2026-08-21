@@ -6,7 +6,20 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 import * as oracle from "./oracle.mjs";
+
+// POC_DUMP_CORPUS=<path> — one-time audited corpus-dump hook (oracle-workstream-plan.md
+// §6 Phase 1, invariant I-7's sole sanctioned PoC amendment). When set, every generated
+// input (and the classification outcome per main-corpus case) is serialized to <path>
+// as JSONL, with a fixture header record binding the dump to this file, the wasm, the
+// arena, and the committed damage-core oracle.log. The hook is append-only observation:
+// it consumes no PRNG draws, writes nothing to stdout, and touches no generation logic.
+// Non-interference proof: an instrumented run must reproduce the committed oracle.log
+// byte-for-byte before the dump is trusted.
+const dumpPath = process.env.POC_DUMP_CORPUS ?? null;
+const dumpRecords = dumpPath ? [] : null;
+const dump = (r) => { if (dumpRecords) dumpRecords.push(JSON.stringify(r)); };
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..", "..", "..", "..");
@@ -277,9 +290,12 @@ for (let i = 0; i < N; i++) {
   encodeCase(c);
   const w = ex.zz_003cd5c_(REC, ATT, DEF) | 0;
   const o = oracle.computeBaseDamage(c.att, c.def, c.basePower, c.ctx);
-  if (w === o) match++;
-  else if (oracle32(c) === w) roundingExplained++;
-  else if (unexplained.length < 8) unexplained.push({ n: i, wasm: w, oracle: o, o32: oracle32(c), case: c });
+  let cls; // dump-only classification mirror; oracle32 is pure (no PRNG), so the extra call cannot perturb generation
+  if (w === o) { match++; cls = "exact"; }
+  else if (oracle32(c) === w) { roundingExplained++; cls = "rounding"; }
+  else { if (unexplained.length < 8) unexplained.push({ n: i, wasm: w, oracle: o, o32: oracle32(c), case: c }); cls = "unexplained"; }
+  dump({ kind: "case", n: i, att: c.att, def: c.def, basePower: c.basePower, ctx: c.ctx });
+  dump({ kind: "class", n: i, class: cls });
 }
 console.log(`\nUnit A [zz_003cd5c_ damage formula]  corpus=${N}`);
 console.log(`  exact match vs f64 oracle          : ${match}/${N} (${((match / N) * 100).toFixed(3)}%)`);
@@ -294,6 +310,7 @@ for (let family = 0; family < 16; family++) {
   const row = Array.isArray(remapRows) ? remapRows[family] : [];
   for (let variant = 0; variant < (row?.length ?? 0); variant++) {
     wU8(CAT, family); wU8(CAT + 1, variant);
+    dump({ kind: "cat", family, variant });
     const w = ex.zz_0066298_(CAT) | 0;
     const o = oracle.lookupTypeCategory((family << 8) | variant);
     catTotal++; if (w === o) catMatch++;
@@ -307,6 +324,7 @@ let hpMatch = 0;
 const HPN = 4000;
 for (let i = 0; i < HPN; i++) {
   const maxHp = 1 + ri(500), hp = ri(maxHp + 50), amount = ri(600) - 100;
+  dump({ kind: "hp", n: i, maxHp, hp, amount });
   u8.fill(0, DEF, DEF + 0x800);
   wU16(DEF + 0x1c4, maxHp); wI16(DEF + 0x1c6, hp); wU8(DEF + 0x83, 0); wU8(DEF + 0x4a0, 0);
   wU8(STRUCT34 + 0x1f, 0);
@@ -353,6 +371,12 @@ for (let i = 0; i < BN; i++) {
   for (let k = 0; k < 24; k += 4) wF32(B3 + k, (rnd() - 0.5) * 100);
   const idx = ri(6);
   wI32(B4, idx);
+  dump({
+    kind: "unitb", n: i, idx,
+    b1: Buffer.from(mem.buffer, B1 >>> 0, 0x200).toString("base64"),
+    b2_30: Buffer.from(mem.buffer, (B2 + 0x30) >>> 0, 4).toString("base64"),
+    b3: Buffer.from(mem.buffer, B3 >>> 0, 24).toString("base64"),
+  });
   const refOut = jsRef(B1, B2, B3, idx); // reference FIRST (wasm writes DAT_803b0720)
   const hit = ex.FUN_80031634(B1, B2, B3, B4) & 1;
   let ok = hit === (refOut.hit ? 1 : 0);
@@ -376,3 +400,22 @@ for (let i = 0; i < 32; i++) {
 }
 fs.writeFileSync(path.join(here, "browser-expectations.json"), JSON.stringify(expectations));
 console.log(`\nbrowser-expectations.json: 32 cases snapshotted`);
+
+// POC_DUMP_CORPUS fixture write (see hook note at top). Header record first: binds the
+// dump to the instrumented harness, wasm, arena, and the committed oracle.log the replay
+// must reproduce. Written after all logging so nothing here can precede or reorder stdout.
+if (dumpPath) {
+  const sha = (buf) => createHash("sha256").update(buf).digest("hex");
+  const header = {
+    kind: "header",
+    fixture_schema: 1,
+    unit: "damage-core",
+    dumped_at: new Date().toISOString(),
+    harness_sha256: sha(fs.readFileSync(fileURLToPath(import.meta.url))),
+    wasm_sha256: sha(wasmBytes),
+    arena_sha256: sha(fs.readFileSync(path.join(here, "arena.json"))),
+    oracle_log_sha256: sha(fs.readFileSync(path.join(root, "research", "decomp", "port-units", "damage-core", "oracle.log"))),
+    counts: { case: N, cat: catTotal, hp: HPN, unitb: BN },
+  };
+  fs.writeFileSync(dumpPath, [JSON.stringify(header), ...dumpRecords, ""].join("\n"));
+}
