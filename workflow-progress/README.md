@@ -1,25 +1,26 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-21T02:40:35.565882Z - machine-written, do not edit.*
+*Generated 2026-08-21T03:01:44.434678Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 18/1396 settled (3 green, 15 staged) |
 | **Retries outstanding** | 2 |
-| **Untouched** | 1373 |
-| **Last transition** | 2026-08-21T02:40:35.565882Z |
-| **Last green** | 2026-08-21T01:58:18.512173Z (`auto-c0035-005`) |
-| **Last product commit** | `43655461c6f3a72e18518e7d8664b659baffb5ed` |
+| **Untouched** | 1372 |
+| **Last transition** | 2026-08-21T03:01:44.434678Z |
+| **Last green** | 2026-08-21T03:01:44.434678Z (`auto-c0053-009`) |
+| **Last product commit** | `5510f5e6b8f62002422dbdfc09970886f765843d` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T03:01:44.434678Z | `auto-c0053-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T02:40:35.565882Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T02:40:29.857487Z | `auto-c0035-006` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
 | 2026-08-21T01:58:25.770912Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -69,4 +70,3 @@
 | 2026-08-19T21:53:34.380587Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T21:53:16.464142Z | `auto-c0000-011` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (read  |
 | 2026-08-19T20:32:41.622752Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
-| 2026-08-19T20:32:41.635785Z | `auto-c0000-010` | deferred | compile-fix | 0 | interrupted before a verdict; requeued |
