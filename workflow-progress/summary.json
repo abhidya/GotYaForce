@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-21T06:30:05.390715Z",
-  "run_id": "2026-08-21T06:30:05.278129Z",
+  "generated_at": "2026-08-21T06:31:14.337107Z",
+  "run_id": "2026-08-21T06:31:14.210535Z",
   "total_units": 1396,
   "green": 3,
   "staged": 24,
@@ -17,15 +17,15 @@
   "last_green_unit": "auto-c0035-006",
   "last_product_commit": "5f124e6c2c27b51e33707835954aa1138a56197e",
   "repeated_failure_classes": [],
-  "health": "idle",
+  "health": "blocked",
   "machine": {
-    "workflow_state": "starting",
+    "workflow_state": "blocked",
     "driver_status": "stopped",
     "manual_paused": false,
-    "block_reason": null,
+    "block_reason": "chat contract preflight failed: {\"error\":{\"message\":\"Lost connection to the model server. It may have crashed -- try reloading the model.\",\"type\":\"api_error\",\"param\":null,\"code\":null}}",
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Manual pause lifted; resuming heavy work."
+    "detail": "Blocked: chat contract preflight failed: {\"error\":{\"message\":\"Lost connection to the model server. It may have crashed -- try reloading the model.\",\"type\":\"api_error\",\"param\":null,\"code\":null}}"
   }
 }
