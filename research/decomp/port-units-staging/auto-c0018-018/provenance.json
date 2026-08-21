@@ -1,0 +1,74 @@
+{
+  "unit": "auto-c0018-018",
+  "run_id": "2026-08-21T03:02:14.269032Z",
+  "generated_at": "2026-08-21T04:17:59.556888Z",
+  "extractions": [
+    {
+      "file": "research/decomp/ghidra-export/chunk_0018.c",
+      "start": 4499,
+      "end": 4618,
+      "sha256": "32fb0fa88c1196534059b087e4b0e9d38bfcd033739859e3c788586ac7769060"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0018.c",
+      "start": 4622,
+      "end": 4631,
+      "sha256": "e0d9e84ca485940f44123ada5fb5f69c7810f5637e8eb693d97ddaecf606f1ed"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0018.c",
+      "start": 4635,
+      "end": 4645,
+      "sha256": "746d567f59b9341c1dfd34a9d78a2c45fc87ad2649963a55724cd0741dd3c63c"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0018.c",
+      "start": 4649,
+      "end": 4656,
+      "sha256": "6d5da3311ff66cc312430d7683e195e9af8bf633736a4ea762e290b22380da4d"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0018.c",
+      "start": 4660,
+      "end": 4667,
+      "sha256": "92fcbd4c609ac955f637f9e2dde9d09d5b8703656ab6ba57552e62b0ed6872e8"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0018.c",
+      "start": 4671,
+      "end": 4678,
+      "sha256": "6b1a5a8601cf46030f4f64fd8262987b94a4f822ebd5033c2cbc3fcd78625eea"
+    }
+  ],
+  "extracted_sha256": "ba5d9f829a8ab649b992aeebad9c26f7fc4ffa493e3b58b4e0c4500c4551327a",
+  "exported_functions": [
+    "zz_00b9e60_",
+    "FUN_800ba240",
+    "FUN_800ba2c4",
+    "FUN_800ba324",
+    "FUN_800ba364",
+    "FUN_800ba390"
+  ],
+  "compile_iterations": 4,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "model_requests": 6,
+  "verified": false,
+  "tier": "compile_only",
+  "allowed_extra_imports": [
+    "zz_0099e70_",
+    "zz_00b9e30_",
+    "zz_00cbe9c_",
+    "zz_00f0104_",
+    "zz_0137540_"
+  ],
+  "registry": {
+    "version_used": 4,
+    "holdout": false,
+    "authoritative_injected": [],
+    "advisory_injected": 0
+  },
+  "oracle": {
+    "type": "compile_only",
+    "summary": "compile-only (UNVERIFIED)"
+  }
+}
