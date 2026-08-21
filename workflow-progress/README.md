@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T16:20:15.842453Z - machine-written, do not edit.*
+*Generated 2026-08-21T16:20:31.989206Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 21/1396 settled (3 green, 18 staged) |
+| **Queue progress** | 22/1396 settled (3 green, 19 staged) |
 | **Retries outstanding** | 3 |
-| **Untouched** | 1369 |
-| **Last transition** | 2026-08-21T16:20:15.842453Z |
-| **Last green** | 2026-08-21T16:20:15.842453Z (`auto-c0033-008`) |
-| **Last product commit** | `cf80ceeab4565ba7b56e2f20b74f70bc25bde336` |
+| **Untouched** | 1368 |
+| **Last transition** | 2026-08-21T16:20:31.989206Z |
+| **Last green** | 2026-08-21T16:20:31.989206Z (`auto-c0033-009`) |
+| **Last product commit** | `e78099696d6ddce6111c737c56fe3481dac50274` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T16:20:31.989206Z | `auto-c0033-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T16:20:15.842453Z | `auto-c0033-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T16:20:02.384641Z | `auto-c0033-007` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T16:19:48.574372Z | `auto-c0033-006` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-21T12:09:44.045851Z | `auto-c0029-014` | deferred | manual-revoke | 1 | verdict revoked and requeued: Legacy pre-transaction promotion b96586649c8ca84c2d7a220c2aecb0eca017ebcc was pu |
 | 2026-08-21T11:42:19.166344Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T11:25:19.650124Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-21T09:28:06.851661Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
