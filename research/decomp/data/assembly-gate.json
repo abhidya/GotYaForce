@@ -1,0 +1,1068 @@
+{
+  "schema": 1,
+  "created_at": "2026-08-21T00:44:31.833113Z",
+  "largest_n_passed": 0,
+  "runs_total": 3,
+  "conflicts": {
+    "undefined8_fork|undefined8|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core": {
+      "symbol": "undefined8",
+      "class": "undefined8_fork",
+      "units": [
+        "auto-c0000-004",
+        "auto-c0000-006",
+        "auto-c0000-008",
+        "auto-c0000-018",
+        "auto-c0001-003",
+        "auto-c0001-004",
+        "auto-c0001-005",
+        "auto-c0001-007",
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014",
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0034-018",
+        "auto-c0035-002",
+        "collision-core",
+        "damage-core",
+        "knockback-core"
+      ],
+      "variants": {
+        "damage-core": "typedef double undefined8;",
+        "knockback-core": "typedef double undefined8;",
+        "auto-c0001-007": "typedef double undefined8;",
+        "auto-c0001-010": "typedef double undefined8;",
+        "auto-c0001-012": "typedef double undefined8;",
+        "collision-core": "typedef double undefined8;",
+        "auto-c0000-004": "typedef double undefined8;",
+        "auto-c0000-006": "typedef double undefined8;",
+        "auto-c0000-008": "typedef double undefined8;",
+        "auto-c0001-004": "typedef double undefined8;",
+        "auto-c0002-001": "typedef double undefined8;",
+        "auto-c0000-018": "typedef unsigned long long undefined8;",
+        "auto-c0001-003": "typedef unsigned long long undefined8;",
+        "auto-c0001-005": "typedef unsigned long long undefined8;",
+        "auto-c0001-011": "typedef unsigned long long undefined8;",
+        "auto-c0001-014": "typedef unsigned long long undefined8;",
+        "auto-c0035-002": "typedef unsigned long long undefined8;",
+        "auto-c0034-018": "typedef unsigned long long undefined8;",
+        "auto-c0011-005": "typedef unsigned long long undefined8;"
+      },
+      "detail": "2 divergent typedef declarations of undefined8",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "undefined8_fork|CONCAT44|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core": {
+      "symbol": "CONCAT44",
+      "class": "undefined8_fork",
+      "units": [
+        "auto-c0000-004",
+        "auto-c0000-006",
+        "auto-c0000-008",
+        "auto-c0000-018",
+        "auto-c0001-003",
+        "auto-c0001-004",
+        "auto-c0001-005",
+        "auto-c0001-007",
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014",
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0034-018",
+        "auto-c0035-002",
+        "collision-core",
+        "damage-core",
+        "knockback-core"
+      ],
+      "variants": {
+        "damage-core": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "knockback-core": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0001-007": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0001-010": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0001-012": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "collision-core": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0000-004": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0000-006": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0000-008": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0000-018": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0001-003": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0001-004": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0001-005": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0002-001": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0001-011": "#define CONCAT44(hi, lo) ((unsigned long long)((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0001-014": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0035-002": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0034-018": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0011-005": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))"
+      },
+      "detail": "3 divergent macro declarations of CONCAT44",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "declaration_divergence|ABS|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core": {
+      "symbol": "ABS",
+      "class": "declaration_divergence",
+      "units": [
+        "auto-c0000-004",
+        "auto-c0000-006",
+        "auto-c0000-008",
+        "auto-c0000-018",
+        "auto-c0001-003",
+        "auto-c0001-004",
+        "auto-c0001-005",
+        "auto-c0001-007",
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014",
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0034-018",
+        "auto-c0035-002",
+        "collision-core",
+        "damage-core",
+        "knockback-core"
+      ],
+      "variants": {
+        "damage-core": "#define ABS(x) __builtin_fabs(x)",
+        "knockback-core": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0001-007": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0001-010": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0001-012": "#define ABS(x) __builtin_fabs(x)",
+        "collision-core": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0000-004": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0000-006": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0000-008": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0000-018": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0001-004": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0001-005": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0001-011": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0001-014": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0002-001": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0035-002": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0034-018": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0011-005": "#define ABS(x) __builtin_fabs(x)",
+        "auto-c0001-003": "#define ABS(x) fabs((double)(x))"
+      },
+      "detail": "2 divergent macro declarations of ABS",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "dat_width_divergence|DAT_803b0720|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core": {
+      "symbol": "DAT_803b0720",
+      "class": "dat_width_divergence",
+      "units": [
+        "auto-c0000-004",
+        "auto-c0000-006",
+        "auto-c0000-008",
+        "auto-c0000-018",
+        "auto-c0001-003",
+        "auto-c0001-004",
+        "auto-c0001-005",
+        "auto-c0001-007",
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014",
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0034-018",
+        "auto-c0035-002",
+        "collision-core",
+        "damage-core"
+      ],
+      "variants": {
+        "damage-core": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0001-007": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0001-010": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0001-012": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0000-004": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0000-006": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0000-008": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0000-018": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0001-003": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0001-004": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0001-005": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0001-011": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0001-014": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0002-001": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0035-002": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0034-018": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "auto-c0011-005": "#define DAT_803b0720 GC_F32(0x803b0720)",
+        "collision-core": "#define DAT_803b0720 GC_U32(0x803b0720)"
+      },
+      "detail": "2 divergent macro declarations of DAT_803b0720",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|gnt4_PSVECSubtract_bl|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core": {
+      "symbol": "gnt4_PSVECSubtract_bl",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0000-004",
+        "auto-c0000-006",
+        "auto-c0000-008",
+        "auto-c0000-018",
+        "auto-c0001-003",
+        "auto-c0001-004",
+        "auto-c0001-005",
+        "auto-c0001-007",
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014",
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0034-018",
+        "auto-c0035-002",
+        "collision-core",
+        "damage-core",
+        "knockback-core"
+      ],
+      "variants": {
+        "damage-core": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "knockback-core": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0001-007": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0001-010": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0001-012": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "collision-core": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0000-004": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0000-006": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0000-008": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0000-018": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0001-003": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0001-004": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0001-005": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0001-014": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0002-001": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0035-002": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0034-018": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0011-005": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+        "auto-c0001-011": "undefined8 gnt4_PSVECSubtract_bl(float*,float*,float*);"
+      },
+      "detail": "2 divergent function_decl declarations of gnt4_PSVECSubtract_bl",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|gnt4_PSVECAdd_bl|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core": {
+      "symbol": "gnt4_PSVECAdd_bl",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0000-004",
+        "auto-c0000-006",
+        "auto-c0000-008",
+        "auto-c0000-018",
+        "auto-c0001-003",
+        "auto-c0001-004",
+        "auto-c0001-005",
+        "auto-c0001-007",
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014",
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0034-018",
+        "auto-c0035-002",
+        "collision-core",
+        "damage-core",
+        "knockback-core"
+      ],
+      "variants": {
+        "damage-core": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "knockback-core": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0001-007": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0001-010": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0001-012": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "collision-core": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0000-004": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0000-006": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0000-008": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0000-018": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0001-003": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0001-004": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0001-005": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0001-014": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0002-001": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0035-002": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0034-018": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0011-005": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+        "auto-c0001-011": "undefined8 gnt4_PSVECAdd_bl(float*,float*,float*);"
+      },
+      "detail": "2 divergent function_decl declarations of gnt4_PSVECAdd_bl",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "declaration_divergence|code|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core": {
+      "symbol": "code",
+      "class": "declaration_divergence",
+      "units": [
+        "auto-c0000-004",
+        "auto-c0000-006",
+        "auto-c0000-008",
+        "auto-c0000-018",
+        "auto-c0001-003",
+        "auto-c0001-004",
+        "auto-c0001-005",
+        "auto-c0001-007",
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014",
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0034-018",
+        "auto-c0035-002",
+        "collision-core"
+      ],
+      "variants": {
+        "auto-c0001-007": "typedef void (code)();",
+        "auto-c0001-010": "typedef void (code)();",
+        "auto-c0001-012": "typedef void (code)();",
+        "auto-c0000-004": "typedef void (code)();",
+        "auto-c0000-006": "typedef void (code)();",
+        "auto-c0000-008": "typedef void (code)();",
+        "auto-c0000-018": "typedef void (code)();",
+        "auto-c0001-003": "typedef void (code)();",
+        "auto-c0001-004": "typedef void (code)();",
+        "auto-c0001-005": "typedef void (code)();",
+        "auto-c0001-011": "typedef void (code)();",
+        "auto-c0001-014": "typedef void (code)();",
+        "auto-c0002-001": "typedef void (code)();",
+        "auto-c0035-002": "typedef void (code)();",
+        "auto-c0034-018": "typedef void (code)();",
+        "auto-c0011-005": "typedef void (code)();",
+        "collision-core": "typedef void code();"
+      },
+      "detail": "2 divergent typedef declarations of code",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "dat_width_divergence|DAT_803c4e84|auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012": {
+      "symbol": "DAT_803c4e84",
+      "class": "dat_width_divergence",
+      "units": [
+        "auto-c0001-005",
+        "auto-c0001-007",
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-007": "#define DAT_803c4e84 GC_U8(0x803c4e84)",
+        "auto-c0001-010": "#define DAT_803c4e84 GC_U8(0x803c4e84)",
+        "auto-c0001-005": "#define DAT_803c4e84 GC_U8(0x803c4e84)",
+        "auto-c0001-011": "#define DAT_803c4e84 GC_U8(0x803c4e84)",
+        "auto-c0001-012": "#define DAT_803c4e84 GC_IPTR(0x803c4e84)"
+      },
+      "detail": "2 divergent macro declarations of DAT_803c4e84",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "dat_width_divergence|DAT_804361fc|auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014": {
+      "symbol": "DAT_804361fc",
+      "class": "dat_width_divergence",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014"
+      ],
+      "variants": {
+        "auto-c0001-010": "#define DAT_804361fc GC_U8(0x804361fc)",
+        "auto-c0001-012": "#define DAT_804361fc GC_U8(0x804361fc)",
+        "auto-c0001-011": "#define DAT_804361fc GC_IPTR(0x804361fc)",
+        "auto-c0001-014": "#define DAT_804361fc GC_IPTR(0x804361fc)"
+      },
+      "detail": "2 divergent macro declarations of DAT_804361fc",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|FUN_80047aa4|auto-c0001-010,auto-c0001-011": {
+      "symbol": "FUN_80047aa4",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011"
+      ],
+      "variants": {
+        "auto-c0001-010": "int FUN_80047aa4();",
+        "auto-c0001-011": "void FUN_80047aa4(int);"
+      },
+      "detail": "2 divergent function_decl declarations of FUN_80047aa4",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0006fb4_|auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014": {
+      "symbol": "zz_0006fb4_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014"
+      ],
+      "variants": {
+        "auto-c0001-010": "int zz_0006fb4_();",
+        "auto-c0001-012": "int zz_0006fb4_();",
+        "auto-c0001-011": "undefined8 zz_0006fb4_(double,double,double,double,double,double,double,double,int,int,int,int,int,int,int,int);",
+        "auto-c0001-014": "undefined8 zz_0006fb4_(undefined8,double,double,double,double,double,double,double,int,int,int,short*,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "3 divergent function_decl declarations of zz_0006fb4_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0007cd0_|auto-c0001-010,auto-c0001-011,auto-c0001-014": {
+      "symbol": "zz_0007cd0_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-014"
+      ],
+      "variants": {
+        "auto-c0001-010": "int zz_0007cd0_();",
+        "auto-c0001-011": "void zz_0007cd0_(int,int,int,int);",
+        "auto-c0001-014": "void zz_0007cd0_(int,int,char*,int);"
+      },
+      "detail": "3 divergent function_decl declarations of zz_0007cd0_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0089100_|auto-c0001-010,auto-c0001-011,auto-c0001-012": {
+      "symbol": "zz_0089100_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-010": "int zz_0089100_();",
+        "auto-c0001-012": "int zz_0089100_();",
+        "auto-c0001-011": "void zz_0089100_(int,int,int);"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0089100_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|gnt4_PSMTXConcat_bl|auto-c0001-011,auto-c0001-012": {
+      "symbol": "gnt4_PSMTXConcat_bl",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-011",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-012": "double gnt4_PSMTXConcat_bl(float*,float*,float*);",
+        "auto-c0001-011": "undefined8 gnt4_PSMTXConcat_bl(float*,float*,float*);"
+      },
+      "detail": "2 divergent function_decl declarations of gnt4_PSMTXConcat_bl",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|gnt4_PSMTXTrans_bl|auto-c0001-011,auto-c0001-012": {
+      "symbol": "gnt4_PSMTXTrans_bl",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-011",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-012": "void gnt4_PSMTXTrans_bl(double,double,double,float*);",
+        "auto-c0001-011": "undefined8 gnt4_PSMTXTrans_bl(double,double,double,float*);"
+      },
+      "detail": "2 divergent function_decl declarations of gnt4_PSMTXTrans_bl",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "dat_width_divergence|DAT_803c7422|auto-c0001-011,auto-c0001-012": {
+      "symbol": "DAT_803c7422",
+      "class": "dat_width_divergence",
+      "units": [
+        "auto-c0001-011",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-012": "#define DAT_803c7422 GC_IPTR(0x803c7422)",
+        "auto-c0001-011": "#define DAT_803c7422 GC_U8(0x803c7422)"
+      },
+      "detail": "2 divergent macro declarations of DAT_803c7422",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_00076d0_|auto-c0001-011,auto-c0001-012,auto-c0034-018": {
+      "symbol": "zz_00076d0_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0034-018"
+      ],
+      "variants": {
+        "auto-c0001-012": "int zz_00076d0_();",
+        "auto-c0034-018": "int zz_00076d0_();",
+        "auto-c0001-011": "undefined8 zz_00076d0_(undefined8,double,double,double,double,double,double,double,int,float*,undefined*,undefined4,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "2 divergent function_decl declarations of zz_00076d0_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0007834_|auto-c0001-011,auto-c0001-012,auto-c0001-014": {
+      "symbol": "zz_0007834_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014"
+      ],
+      "variants": {
+        "auto-c0001-012": "int zz_0007834_();",
+        "auto-c0001-011": "undefined8 zz_0007834_(undefined8,double,double,double,double,double,double,double,int,float*,char*,undefined*,undefined4,undefined4,undefined4,undefined4);",
+        "auto-c0001-014": "undefined8 zz_0007834_(undefined8,double,double,double,double,double,double,double,int,float*,char*,int,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "3 divergent function_decl declarations of zz_0007834_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0007c30_|auto-c0000-006,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0034-018": {
+      "symbol": "zz_0007c30_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0000-006",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014",
+        "auto-c0034-018"
+      ],
+      "variants": {
+        "auto-c0001-012": "int zz_0007c30_();",
+        "auto-c0000-006": "int zz_0007c30_();",
+        "auto-c0034-018": "int zz_0007c30_();",
+        "auto-c0001-011": "undefined8 zz_0007c30_(undefined8,double,double,double,double,double,double,double,int,undefined4,float*,uint,undefined4,undefined4,undefined4,undefined4);",
+        "auto-c0001-014": "undefined8 zz_0007c30_(undefined8,double,double,double,double,double,double,double,int,undefined4,float*,short*,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "3 divergent function_decl declarations of zz_0007c30_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_00086b8_|auto-c0000-006,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0034-018": {
+      "symbol": "zz_00086b8_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0000-006",
+        "auto-c0001-011",
+        "auto-c0001-012",
+        "auto-c0001-014",
+        "auto-c0034-018"
+      ],
+      "variants": {
+        "auto-c0001-012": "int zz_00086b8_();",
+        "auto-c0000-006": "int zz_00086b8_();",
+        "auto-c0034-018": "int zz_00086b8_();",
+        "auto-c0001-011": "undefined8 zz_00086b8_(double,double,double,double,double,double,double,double,int,int,float*,uint,undefined4,undefined4,undefined4,undefined4);",
+        "auto-c0001-014": "undefined8 zz_00086b8_(double,double,double,double,double,double,double,double,int,int,float*,short*,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "3 divergent function_decl declarations of zz_00086b8_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0009958_|auto-c0001-011,auto-c0001-012": {
+      "symbol": "zz_0009958_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-011",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-012": "int zz_0009958_();",
+        "auto-c0001-011": "void zz_0009958_(int,int);"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0009958_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0011ce0_|auto-c0001-011,auto-c0001-012": {
+      "symbol": "zz_0011ce0_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-011",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-012": "int zz_0011ce0_();",
+        "auto-c0001-011": "int zz_0011ce0_(int);"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0011ce0_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "declaration_divergence|SQRT|auto-c0001-003,auto-c0001-005": {
+      "symbol": "SQRT",
+      "class": "declaration_divergence",
+      "units": [
+        "auto-c0001-003",
+        "auto-c0001-005"
+      ],
+      "variants": {
+        "auto-c0001-003": "#define SQRT(x) (sqrt((double)(x)))",
+        "auto-c0001-005": "#define SQRT(x) sqrt(x)"
+      },
+      "detail": "2 divergent macro declarations of SQRT",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0010664_|auto-c0001-003,auto-c0001-004": {
+      "symbol": "zz_0010664_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-003",
+        "auto-c0001-004"
+      ],
+      "variants": {
+        "auto-c0001-003": "void zz_0010664_(int);",
+        "auto-c0001-004": "int zz_0010664_();"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0010664_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|FUN_801fe050|auto-c0001-004,auto-c0001-005": {
+      "symbol": "FUN_801fe050",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-004",
+        "auto-c0001-005"
+      ],
+      "variants": {
+        "auto-c0001-004": "int FUN_801fe050();",
+        "auto-c0001-005": "void FUN_801fe050(int);"
+      },
+      "detail": "2 divergent function_decl declarations of FUN_801fe050",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|FUN_801fe134|auto-c0001-004,auto-c0001-005": {
+      "symbol": "FUN_801fe134",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-004",
+        "auto-c0001-005"
+      ],
+      "variants": {
+        "auto-c0001-004": "int FUN_801fe134();",
+        "auto-c0001-005": "void FUN_801fe134(void);"
+      },
+      "detail": "2 divergent function_decl declarations of FUN_801fe134",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0045204_|auto-c0001-004,auto-c0001-005": {
+      "symbol": "zz_0045204_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-004",
+        "auto-c0001-005"
+      ],
+      "variants": {
+        "auto-c0001-004": "int zz_0045204_();",
+        "auto-c0001-005": "double zz_0045204_(short);"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0045204_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0045238_|auto-c0001-004,auto-c0001-005,auto-c0001-014": {
+      "symbol": "zz_0045238_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-004",
+        "auto-c0001-005",
+        "auto-c0001-014"
+      ],
+      "variants": {
+        "auto-c0001-004": "int zz_0045238_();",
+        "auto-c0001-005": "double zz_0045238_(short);",
+        "auto-c0001-014": "double zz_0045238_(short);"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0045238_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0007cac_|auto-c0001-011,auto-c0001-014": {
+      "symbol": "zz_0007cac_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-011",
+        "auto-c0001-014"
+      ],
+      "variants": {
+        "auto-c0001-011": "undefined8 zz_0007cac_(double,int);",
+        "auto-c0001-014": "double zz_0007cac_(double,int);"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0007cac_",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|FUN_8000f604|auto-c0001-004,auto-c0001-005": {
+      "symbol": "FUN_8000f604",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-004",
+        "auto-c0001-005"
+      ],
+      "variants": {
+        "auto-c0001-004": "header: int FUN_8000f604();",
+        "auto-c0001-005": "prelude: void FUN_8000f604(int,int);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for FUN_8000f604; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0006f98_|auto-c0000-006,auto-c0034-018": {
+      "symbol": "zz_0006f98_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0000-006",
+        "auto-c0034-018"
+      ],
+      "variants": {
+        "auto-c0034-018": "header: int zz_0006f98_();",
+        "auto-c0000-006": "prelude: int zz_0006f98_(int);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_0006f98_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0007ae4_|auto-c0000-008,auto-c0001-014": {
+      "symbol": "zz_0007ae4_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0000-008",
+        "auto-c0001-014"
+      ],
+      "variants": {
+        "auto-c0001-014": "header: undefined8 zz_0007ae4_(undefined8,double,double,double,double,double,double,double,int,void*,char*,short*,undefined4,undefined4,undefined4,undefined4);",
+        "auto-c0000-008": "prelude: void zz_0007ae4_(undefined8,double,double,double,double,double,double,double,int,undefined4*,char*,undefined4,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_0007ae4_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0007cf4_|auto-c0000-008,auto-c0001-010": {
+      "symbol": "zz_0007cf4_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0000-008",
+        "auto-c0001-010"
+      ],
+      "variants": {
+        "auto-c0001-010": "header: int zz_0007cf4_();",
+        "auto-c0000-008": "prelude: void zz_0007cf4_(int,undefined4,undefined4,undefined4);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_0007cf4_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0012638_|auto-c0001-010,auto-c0001-011": {
+      "symbol": "zz_0012638_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011"
+      ],
+      "variants": {
+        "auto-c0001-010": "header: int zz_0012638_();",
+        "auto-c0001-011": "prelude: void zz_0012638_(undefined8,undefined8,double,double,double,double,double,double,int);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_0012638_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0012984_|auto-c0001-010,auto-c0001-011": {
+      "symbol": "zz_0012984_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011"
+      ],
+      "variants": {
+        "auto-c0001-010": "header: int zz_0012984_();",
+        "auto-c0001-011": "prelude: void zz_0012984_(undefined8,undefined8,double,double,double,double,double,double,int,undefined4,float*,undefined*,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_0012984_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0012e4c_|auto-c0001-010,auto-c0001-011": {
+      "symbol": "zz_0012e4c_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011"
+      ],
+      "variants": {
+        "auto-c0001-010": "header: int zz_0012e4c_();",
+        "auto-c0001-011": "prelude: void zz_0012e4c_(int,undefined4,undefined4,undefined4,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_0012e4c_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_00131b8_|auto-c0001-010,auto-c0001-011": {
+      "symbol": "zz_00131b8_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011"
+      ],
+      "variants": {
+        "auto-c0001-010": "header: int zz_00131b8_();",
+        "auto-c0001-011": "prelude: void zz_00131b8_(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined*,undefined4,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_00131b8_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_00133f4_|auto-c0001-010,auto-c0001-011": {
+      "symbol": "zz_00133f4_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-011"
+      ],
+      "variants": {
+        "auto-c0001-010": "header: int zz_00133f4_();",
+        "auto-c0001-011": "prelude: void zz_00133f4_(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined*,undefined4,undefined4,undefined4,undefined4,undefined4);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_00133f4_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0013690_|auto-c0001-010,auto-c0001-012": {
+      "symbol": "zz_0013690_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-010": "header: int zz_0013690_();",
+        "auto-c0001-012": "prelude: void zz_0013690_(undefined8,undefined8,double,double,double,double,double,double,int);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_0013690_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0013a28_|auto-c0001-010,auto-c0001-012": {
+      "symbol": "zz_0013a28_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-010": "header: int zz_0013a28_();",
+        "auto-c0001-012": "prelude: void zz_0013a28_(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined4,undefined4,undefined4*,undefined4,undefined4,undefined4);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_0013a28_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "collision_stub|zz_0013d80_|auto-c0001-010,auto-c0001-012": {
+      "symbol": "zz_0013d80_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-010",
+        "auto-c0001-012"
+      ],
+      "variants": {
+        "auto-c0001-010": "header: int zz_0013d80_();",
+        "auto-c0001-012": "prelude: void zz_0013d80_(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined4,undefined4,undefined4*,undefined4,undefined4,undefined4);"
+      },
+      "detail": "header extern vs unit.c prelude prototype diverge for zz_0013d80_; under a merged header this is a conflicting-types compile error",
+      "first_seen": "2026-08-21T00:44:31.833113Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:31.833113Z"
+    },
+    "undefined8_fork|undefined8|auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002": {
+      "symbol": "undefined8",
+      "class": "undefined8_fork",
+      "units": [
+        "auto-c0001-014",
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0034-018",
+        "auto-c0035-002"
+      ],
+      "variants": {
+        "auto-c0001-014": "typedef unsigned long long undefined8;",
+        "auto-c0035-002": "typedef unsigned long long undefined8;",
+        "auto-c0034-018": "typedef unsigned long long undefined8;",
+        "auto-c0011-005": "typedef unsigned long long undefined8;",
+        "auto-c0002-001": "typedef double undefined8;"
+      },
+      "detail": "2 divergent typedef declarations of undefined8",
+      "first_seen": "2026-08-21T00:44:34.776159Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:34.776159Z"
+    },
+    "undefined8_fork|CONCAT44|auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002": {
+      "symbol": "CONCAT44",
+      "class": "undefined8_fork",
+      "units": [
+        "auto-c0001-014",
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0034-018",
+        "auto-c0035-002"
+      ],
+      "variants": {
+        "auto-c0001-014": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0035-002": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0034-018": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0011-005": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0002-001": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)"
+      },
+      "detail": "2 divergent macro declarations of CONCAT44",
+      "first_seen": "2026-08-21T00:44:34.776159Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:34.776159Z"
+    },
+    "collision_stub|zz_00086b8_|auto-c0001-014,auto-c0034-018": {
+      "symbol": "zz_00086b8_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-014",
+        "auto-c0034-018"
+      ],
+      "variants": {
+        "auto-c0001-014": "undefined8 zz_00086b8_(double,double,double,double,double,double,double,double,int,int,float*,short*,undefined4,undefined4,undefined4,undefined4);",
+        "auto-c0034-018": "int zz_00086b8_();"
+      },
+      "detail": "2 divergent function_decl declarations of zz_00086b8_",
+      "first_seen": "2026-08-21T00:44:34.776159Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:34.776159Z"
+    },
+    "collision_stub|zz_0007c30_|auto-c0001-014,auto-c0034-018": {
+      "symbol": "zz_0007c30_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0001-014",
+        "auto-c0034-018"
+      ],
+      "variants": {
+        "auto-c0001-014": "undefined8 zz_0007c30_(undefined8,double,double,double,double,double,double,double,int,undefined4,float*,short*,undefined4,undefined4,undefined4,undefined4);",
+        "auto-c0034-018": "int zz_0007c30_();"
+      },
+      "detail": "2 divergent function_decl declarations of zz_0007c30_",
+      "first_seen": "2026-08-21T00:44:34.776159Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T00:44:34.776159Z"
+    },
+    "undefined8_fork|undefined8|auto-c0002-001,auto-c0011-005,auto-c0029-013,auto-c0034-018,auto-c0035-002": {
+      "symbol": "undefined8",
+      "class": "undefined8_fork",
+      "units": [
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0029-013",
+        "auto-c0034-018",
+        "auto-c0035-002"
+      ],
+      "variants": {
+        "auto-c0002-001": "typedef double undefined8;",
+        "auto-c0035-002": "typedef unsigned long long undefined8;",
+        "auto-c0034-018": "typedef unsigned long long undefined8;",
+        "auto-c0011-005": "typedef unsigned long long undefined8;",
+        "auto-c0029-013": "typedef unsigned long long undefined8;"
+      },
+      "detail": "2 divergent typedef declarations of undefined8",
+      "first_seen": "2026-08-21T01:57:36.348690Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T01:57:36.348690Z"
+    },
+    "undefined8_fork|CONCAT44|auto-c0002-001,auto-c0011-005,auto-c0029-013,auto-c0034-018,auto-c0035-002": {
+      "symbol": "CONCAT44",
+      "class": "undefined8_fork",
+      "units": [
+        "auto-c0002-001",
+        "auto-c0011-005",
+        "auto-c0029-013",
+        "auto-c0034-018",
+        "auto-c0035-002"
+      ],
+      "variants": {
+        "auto-c0002-001": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+        "auto-c0035-002": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0034-018": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0011-005": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+        "auto-c0029-013": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))"
+      },
+      "detail": "2 divergent macro declarations of CONCAT44",
+      "first_seen": "2026-08-21T01:57:36.348690Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T01:57:36.348690Z"
+    }
+  },
+  "last_run": {
+    "checked_at": "2026-08-21T01:57:36.331842Z",
+    "n": 5,
+    "units": [
+      "auto-c0002-001",
+      "auto-c0035-002",
+      "auto-c0034-018",
+      "auto-c0011-005",
+      "auto-c0029-013"
+    ],
+    "passed": false,
+    "stage": "merge",
+    "conflict_count": 2,
+    "detail": "header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)"
+  },
+  "updated_at": "2026-08-21T01:57:36.348690Z"
+}
