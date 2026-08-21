@@ -1129,6 +1129,10 @@ class BattleImpl implements Battle {
       if (b.hp <= 0 || b.state === "death") {
         b.romDriver?.interrupt();
         if (b.state !== "death") enterDeath(b);
+        // Preserve the normal death-state physics path: horizontal control remains frozen by
+        // canMove(), while gravity, integration, collision, and ground clamp still run once.
+        stepMovement(b, prof, input, ctx);
+        clearJumpLatch(b, input.jump);
         b.stateTime += 1;
         const r = stepActionState(b);
         if (r.died) {
@@ -1295,6 +1299,10 @@ class BattleImpl implements Battle {
 
   private tickBattleTimer(): void {
     if (this.state.result !== "ongoing" || this.timeLimitFrames === null) return;
+    // A timeout cannot freeze Battle.step while an actor still owns pending death lifecycle.
+    // Once death/deployment completes, the normal judge runs first and the timer settles only
+    // if the battle remains ongoing (for example, when a replacement was deployed).
+    if (this.hasPendingDeathLifecycle()) return;
     // DERIVED — PTR_DAT_80433934[0x50] gate: with the freeze flag set, the original
     // countdown (zz_0029b58_, chunk_0003.c:4631-4638) never decrements +0x4c and the
     // judge's timeout branches (zz_00297c8_, chunk_0003.c:4519-4529/4547-4553) never
@@ -1411,7 +1419,7 @@ class BattleImpl implements Battle {
     // Force energy is removed at the kill event, but the battle cannot freeze while an
     // on-field actor is still advancing its death animation. Battle.step stops once a result
     // settles, so judging earlier would leave the final defeated actor alive forever.
-    if (this.state.borgs.some((b) => b.alive && (b.hp <= 0 || b.state === "death"))) return;
+    if (this.hasPendingDeathLifecycle()) return;
     // Winner-mask judge (behavior-notes (ae), zz_00297c8_ @0x800297c8). A side is "destroyed"
     // when its remaining force reaches 0 — the ROM tests count byte OR energy s32 (rule-flag
     // selectable, chunk_0003.c:4519-4529); here count and energy are coupled (recomputeEnergy
@@ -1437,6 +1445,10 @@ class BattleImpl implements Battle {
     // exits to the same failure screen as a loss, so it resolves to "lose" for the player.
     const playerBit = 1 << playerTeam;
     this.state.result = (mask & playerBit) !== 0 && mask <= 2 ? "win" : "lose";
+  }
+
+  private hasPendingDeathLifecycle(): boolean {
+    return this.state.borgs.some((b) => b.alive && (b.hp <= 0 || b.state === "death"));
   }
 }
 

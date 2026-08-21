@@ -1,26 +1,25 @@
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-
 import { battleStateForSelfcheck, createBattle } from "./battle.js";
 import { applyHit } from "./combat.js";
 import { STATE } from "./constants.js";
 import { buildProfile, type BorgStats } from "./stats.js";
 import { emptyInput, type Battle, type BorgRuntime, type PlayerInput } from "./types.js";
+import borgsData from "../../assets/data/borgs.json" with { type: "json" };
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(`[lifecycle.selftest] ${message}`);
 }
 
 function loadStats(): BorgStats[] {
-  const data = JSON.parse(
-    readFileSync(fileURLToPath(new URL("../../assets/data/borgs.json", import.meta.url)), "utf8"),
-  ) as { borgs: BorgStats[] };
-  return data.borgs;
+  return (borgsData as { borgs: BorgStats[] }).borgs;
 }
 
 const IDLE: PlayerInput = emptyInput();
 
-function setupBattle(stats: readonly BorgStats[], replacement: boolean): {
+function setupBattle(
+  stats: readonly BorgStats[],
+  replacement: boolean,
+  timeLimitFrames?: number,
+): {
   battle: Battle;
   victim: BorgRuntime;
   attacker: BorgRuntime;
@@ -38,6 +37,7 @@ function setupBattle(stats: readonly BorgStats[], replacement: boolean): {
         { team: 1, ownerPlayer: "p2", borgIds: ["pl0008"] },
       ],
       bounds: { x: 40, z: 40 },
+      ...(timeLimitFrames !== undefined ? { timeLimitFrames } : {}),
     },
     stats,
   );
@@ -142,10 +142,71 @@ function assertFinalDeathSettlesResult(stats: readonly BorgStats[]): void {
   assert(state.defeats?.filter((entry) => entry.victimTeam === 0).length === 1, "final defeat list duplicated victim");
 }
 
+function assertFinalKillNearTimeoutFinishesDeathFirst(stats: readonly BorgStats[]): void {
+  const timeoutFrame = STATE.SPAWN_DURATION + 2;
+  const { battle, victim, attacker, inputs } = setupBattle(stats, false, timeoutFrame);
+  killDuringRomSpecial(stats, victim, attacker);
+
+  for (let frame = 0; frame < STATE.DEATH_DURATION + 5 && victim.alive; frame += 1) {
+    const observation = battle.step(1 / 60, inputs);
+    if (victim.alive) {
+      assert(observation.result === "ongoing", `timeout preempted pending final death as ${observation.result}`);
+    }
+  }
+  const state = battleStateForSelfcheck(battle);
+  assert(!victim.alive, "final kill near timeout never completed death lifecycle");
+  assert(state.result === "lose", `final kill near timeout settled as ${state.result}`);
+  assert(state.winnerMask === 2, `final kill near timeout produced winner mask ${String(state.winnerMask)}`);
+  assert(state.defeated[0] === 1, "final kill near timeout was not counted exactly once");
+}
+
+function assertReplacementNearTimeoutDeploysBeforeDraw(stats: readonly BorgStats[]): void {
+  const timeoutFrame = STATE.SPAWN_DURATION + 2;
+  const { battle, victim, attacker, inputs } = setupBattle(stats, true, timeoutFrame);
+  killDuringRomSpecial(stats, victim, attacker);
+
+  for (let frame = 0; frame < STATE.DEATH_DURATION + 5 && victim.alive; frame += 1) {
+    const observation = battle.step(1 / 60, inputs);
+    if (victim.alive) {
+      assert(observation.result === "ongoing", `timeout preempted replacement death as ${observation.result}`);
+    }
+  }
+  const state = battleStateForSelfcheck(battle);
+  assert(!victim.alive, "replacement kill near timeout never completed death lifecycle");
+  const replacement = state.borgs.find((actor) => actor.team === 0 && actor.uid !== victim.uid);
+  const replacementCost = buildProfile(stats.find((entry) => entry.id === "pl000c")!).energy;
+  assert(replacement?.borgId === "pl000c", "timeout settled before replacement deployment");
+  assert(state.energy[0] === replacementCost, "replacement energy was not recomputed before timeout");
+  assert(state.result === "draw", `replacement near timeout did not settle draw: ${state.result}`);
+  assert(state.winnerMask === 4, `replacement timeout produced winner mask ${String(state.winnerMask)}`);
+  assert(state.defeated[0] === 1, "replacement timeout defeat was not counted exactly once");
+}
+
+function assertNonRomAirborneDeathKeepsGravity(stats: readonly BorgStats[]): void {
+  const { battle, victim, inputs } = setupBattle(stats, false);
+  victim.romDriver = null;
+  victim.hp = 0;
+  victim.state = "death";
+  victim.stateTime = 0;
+  victim.pos.y = 100;
+  victim.vel.y = -2;
+  victim.grounded = false;
+  const beforeY = victim.pos.y;
+  const beforeVelocityY = victim.vel.y;
+
+  battle.step(1 / 60, inputs);
+  assert(victim.stateTime === 1, "non-ROM death lifecycle did not advance exactly one frame");
+  assert(victim.vel.y < beforeVelocityY, "non-ROM airborne death did not apply gravity");
+  assert(victim.pos.y < beforeY, "non-ROM airborne death did not integrate vertical position");
+}
+
 export function runSelfTest(): void {
   const stats = loadStats();
   assertReplacementAndExactlyOnceAccounting(stats);
   assertFinalDeathSettlesResult(stats);
+  assertFinalKillNearTimeoutFinishesDeathFirst(stats);
+  assertReplacementNearTimeoutDeploysBeforeDraw(stats);
+  assertNonRomAirborneDeathKeepsGravity(stats);
   console.log("[lifecycle.selftest] PASS: lethal ROM ownership interruption, deployment, accounting, and result settlement");
 }
 
