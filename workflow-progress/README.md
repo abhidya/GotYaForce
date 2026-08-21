@@ -1,6 +1,6 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-21T13:28:42.824083Z - machine-written, do not edit.*
+*Generated 2026-08-21T13:28:53.986587Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,9 +10,9 @@
 | **Queue progress** | 16/1396 settled (3 green, 13 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1375 |
-| **Last transition** | 2026-08-21T13:28:42.824083Z |
-| **Last green** | 2026-08-21T13:28:42.824083Z (`auto-c0011-005`) |
-| **Last product commit** | `dfec894b44c0383098025a866601bbd1cc73aead` |
+| **Last transition** | 2026-08-21T13:28:53.986587Z |
+| **Last green** | 2026-08-21T13:28:53.986587Z (`auto-c0011-006`) |
+| **Last product commit** | `7ab0bc4f9f5889803d6c4ba830140943a1dc8f35` |
 | **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | stopped |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T13:28:53.986587Z | `auto-c0011-006` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:28:42.824083Z | `auto-c0011-005` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:28:31.613924Z | `auto-c0002-001` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:28:19.134620Z | `auto-c0001-005` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
@@ -70,4 +71,3 @@
 | 2026-08-21T06:02:29.449906Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T06:02:17.484599Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T06:01:37.664052Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-21T05:37:17.022664Z | `auto-c0035-006` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
