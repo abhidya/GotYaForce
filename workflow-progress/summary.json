@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-21T08:39:06.838362Z",
-  "run_id": "2026-08-21T08:39:06.722394Z",
+  "generated_at": "2026-08-21T08:43:31.454208Z",
+  "run_id": "2026-08-21T08:43:31.339185Z",
   "total_units": 1396,
   "green": 3,
   "staged": 24,
@@ -22,7 +22,7 @@
     "workflow_state": "manual_paused",
     "driver_status": "stopped",
     "manual_paused": true,
-    "block_reason": "serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1:8888/api/inference/load",
+    "block_reason": null,
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
