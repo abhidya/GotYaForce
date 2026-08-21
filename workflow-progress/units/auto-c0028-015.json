@@ -2,21 +2,29 @@
   "schema": 1,
   "unit": "auto-c0028-015",
   "unit_id": "auto-c0028-015",
-  "timestamp": "2026-08-21T05:06:31.944737Z",
-  "run_id": "2026-08-21T05:06:07.336769Z",
-  "result": "staged",
-  "stage": "commit",
+  "timestamp": "2026-08-21T13:26:45.200769Z",
+  "run_id": "2026-08-21T13:26:45.117850Z",
+  "result": "deferred",
+  "stage": "manual-revoke",
   "attempt": 1,
-  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
-  "product_commit": "04ee080cf55a322d436c465c1106b25810a233d3",
-  "product_pushed": true,
-  "product_effect": "durable product commit",
+  "detail": "verdict revoked and requeued: assembly eligibility audit: events.jsonl:1823-1824; timestamp=2026-08-21T05:06:34.653589Z; stage=merge; n=5; window=auto-c0019-001,auto-c0019-002,auto-c0028-013,auto-c0028-014,auto-c0028-015; conflicts=collision_stub:FUN_800bae68,collision_stub:FUN_80103428,collision_stub:zz_01033f8_",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
   "product_commit_failed": false,
-  "oracle_summary": "compile-only (UNVERIFIED)",
+  "oracle_summary": null,
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": "compile_only",
+  "tier": null,
+  "extra": {
+    "revoked_via": "revoke-unit",
+    "previous_status": "green",
+    "previous_tier": "compile_only",
+    "previous_commit": "04ee080cf55a322d436c465c1106b25810a233d3",
+    "previous_record_sha256": "7832a321b9a93ec040b9a843f410a76ccd12c52e6ad47e616ca6ec94171bf735",
+    "transition_id": "verdict-revoke-c20a48684bafd68af6ddb108112d3d14246e05ce27f2674e295d80a65faf6925"
+  },
   "driver_record": {
-    "status": "porting",
+    "status": "pending",
     "attempts": 1,
     "symbol_set": [
       "FUN_800452a0",
@@ -56,7 +64,20 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 19
+    "registry_version_used": 19,
+    "error": null,
+    "last_stage": "manual-revoke",
+    "revoked": {
+      "via": "revoke-unit",
+      "at": "2026-08-21T13:26:45.152671Z",
+      "reason": "assembly eligibility audit: events.jsonl:1823-1824; timestamp=2026-08-21T05:06:34.653589Z; stage=merge; n=5; window=auto-c0019-001,auto-c0019-002,auto-c0028-013,auto-c0028-014,auto-c0028-015; conflicts=collision_stub:FUN_800bae68,collision_stub:FUN_80103428,collision_stub:zz_01033f8_",
+      "previous_status": "green",
+      "previous_tier": "compile_only",
+      "previous_commit": "04ee080cf55a322d436c465c1106b25810a233d3",
+      "previous_oracle_summary": "compile-only (UNVERIFIED)",
+      "previous_record_sha256": "7832a321b9a93ec040b9a843f410a76ccd12c52e6ad47e616ca6ec94171bf735",
+      "transition_id": "verdict-revoke-c20a48684bafd68af6ddb108112d3d14246e05ce27f2674e295d80a65faf6925"
+    }
   },
   "history": [
     {
@@ -66,6 +87,14 @@
       "attempt": 1,
       "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
       "product_commit": "04ee080cf55a322d436c465c1106b25810a233d3"
+    },
+    {
+      "timestamp": "2026-08-21T13:26:45.200769Z",
+      "result": "deferred",
+      "stage": "manual-revoke",
+      "attempt": 1,
+      "detail": "verdict revoked and requeued: assembly eligibility audit: events.jsonl:1823-1824; timestamp=2026-08-21T05:06:34.653589Z; stage=merge; n=5; window=auto-c0019-001,auto-c0019-002,auto-c0028-013,auto-c0028-014,auto-c0028-015; conflicts=collision_stub:FUN_800bae68,collision_stub:FUN_80103428,collision_stub:zz_01033f8_",
+      "product_commit": null
     }
   ]
 }
