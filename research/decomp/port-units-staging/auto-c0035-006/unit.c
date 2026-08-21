@@ -20,7 +20,7 @@ void zz_01330b4_(int param_1)
   return;
 }
 
-/* ==== VERBATIM: research/decomp/ghidra-export/chunk_0035.c 1665-1738 ==== */
+/* ==== VERBATIM+D5: research/decomp/ghidra-export/chunk_0035.c 1665-1738 ==== */
 // ==== 801330cc  zz_01330cc_ ====
 
 /* WARNING: Removing unreachable block (ram,0x801332b8) */
@@ -56,7 +56,7 @@ void zz_01330cc_(int param_1,int param_2)
   uStack_3c = (int)*(short *)(param_1 + 0x1c) ^ 0x80000000;
   local_40 = 0x43300000;
   iVar1 = *(char *)(param_1 + 0x11) * 0x24;
-  dVar3 = (double)((float)((double)CONCAT44(0x43300000,uStack_3c) - DOUBLE_80439ee8) /
+  dVar3 = (double)((float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,uStack_3c)) - DOUBLE_80439ee8) /
                   FLOAT_80439ef8);
   pfVar2 = (float *)(*(int *)(param_1 + 0x90) + (char)(&DAT_80336561)[iVar1] * 0x30 + 0x8d4);
   gnt4_PSMTXMultVec_bl(pfVar2,(float *)(iVar1 + param_2 * 0xc + -0x7fcc9a9c),&local_ac);
@@ -64,19 +64,19 @@ void zz_01330cc_(int param_1,int param_2)
   local_38 = 0x43300000;
   uStack_34 = (int)*(short *)(&DAT_80336580 + iVar1) ^ 0x80000000;
   gnt4_PSMTXRotRad_bl((double)(FLOAT_80439ed8 *
-                              (float)((double)CONCAT44(0x43300000,uStack_34) - DOUBLE_80439ee8)),
+                              (float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,uStack_34)) - DOUBLE_80439ee8)),
                       afStack_a0,0x7a);
   gnt4_PSMTXConcat_bl(pfVar2,afStack_a0,afStack_70);
   local_30 = 0x43300000;
   uStack_2c = (int)*(short *)(&DAT_8033657e + iVar1) ^ 0x80000000;
   gnt4_PSMTXRotRad_bl((double)(FLOAT_80439ed8 *
-                              (float)((double)CONCAT44(0x43300000,uStack_2c) - DOUBLE_80439ee8)),
+                              (float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,uStack_2c)) - DOUBLE_80439ee8)),
                       afStack_a0,0x79);
   gnt4_PSMTXConcat_bl(afStack_70,afStack_a0,afStack_70);
   local_28 = 0x43300000;
   uStack_24 = (int)*(short *)(&DAT_8033657c + iVar1) ^ 0x80000000;
   gnt4_PSMTXRotRad_bl((double)(FLOAT_80439ed8 *
-                              (float)((double)CONCAT44(0x43300000,uStack_24) - DOUBLE_80439ee8)),
+                              (float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,uStack_24)) - DOUBLE_80439ee8)),
                       afStack_a0,0x78);
   gnt4_PSMTXConcat_bl(afStack_70,afStack_a0,afStack_70);
   local_ac = local_68;
@@ -119,7 +119,7 @@ void zz_01332dc_(int param_1)
   return;
 }
 
-/* ==== VERBATIM: research/decomp/ghidra-export/chunk_0035.c 1766-1825 ==== */
+/* ==== VERBATIM+D5: research/decomp/ghidra-export/chunk_0035.c 1766-1825 ==== */
 // ==== 80133358  FUN_80133358 ====
 
 /* WARNING: Removing unreachable block (ram,0x801334e8) */
@@ -175,7 +175,7 @@ void FUN_80133358(double param_1,int param_2)
   }
   local_38 = 0x43300000;
   uStack_34 = (int)*(short *)(param_2 + 0x1c) ^ 0x80000000;
-  zz_0046588_((double)((float)((double)CONCAT44(0x43300000,uStack_34) - DOUBLE_80439ee8) /
+  zz_0046588_((double)((float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,uStack_34)) - DOUBLE_80439ee8) /
                       FLOAT_80439ef8),(float *)(param_2 + 0x14c),(float *)(param_2 + 0x158),
               (float *)(param_2 + 0x20));
   return;
