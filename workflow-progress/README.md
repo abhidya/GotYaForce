@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T05:06:12.498587Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:06:21.902337Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 33/1396 settled (3 green, 30 staged) |
+| **Queue progress** | 34/1396 settled (3 green, 31 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1358 |
-| **Last transition** | 2026-08-21T05:06:12.498587Z |
-| **Last green** | 2026-08-21T05:06:12.498587Z (`auto-c0028-013`) |
-| **Last product commit** | `fe4bc7a4a6d6104dc316854d826a6f8d0310f09a` |
+| **Untouched** | 1357 |
+| **Last transition** | 2026-08-21T05:06:21.902337Z |
+| **Last green** | 2026-08-21T05:06:21.902337Z (`auto-c0028-014`) |
+| **Last product commit** | `9a1474a1f0d848b98eb1e7b94bf90c7836349d42` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:06:21.902337Z | `auto-c0028-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:12.498587Z | `auto-c0028-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:05:46.845122Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T05:05:44.024948Z | `auto-c0019-003` | gate_failed | wasm-link | 1 | not linked: unit.c:137:43: error: too many arguments to function call, expected 0, have 2   137 \|   (*(code * |
@@ -69,4 +70,3 @@
 | 2026-08-20T08:06:00.010464Z | `auto-c0001-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T06:15:12.193225Z | `auto-c0001-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T05:48:06.303774Z | `auto-c0001-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-20T05:47:59.551235Z | `auto-c0001-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
