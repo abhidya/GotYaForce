@@ -1,6 +1,6 @@
 # Port workflow: BLOCKED
 
-*Generated 2026-08-21T08:31:03.783917Z - machine-written, do not edit.*
+*Generated 2026-08-21T08:31:27.450905Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T08:31:03.783917Z |
+| **Last transition** | 2026-08-21T08:31:27.450905Z |
 | **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
 | **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
@@ -22,6 +22,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T08:31:27.450905Z | `-` | running | machine | 0 | Driver running. |
 | 2026-08-21T08:31:03.783917Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1: |
 | 2026-08-21T07:12:44.407214Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T07:12:26.010755Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1: |
@@ -71,4 +72,3 @@
 | 2026-08-21T05:06:21.902337Z | `auto-c0028-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:12.498587Z | `auto-c0028-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:05:46.845122Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-21T05:05:44.024948Z | `auto-c0019-003` | gate_failed | wasm-link | 1 | not linked: unit.c:137:43: error: too many arguments to function call, expected 0, have 2   137 \|   (*(code * |

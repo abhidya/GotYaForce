@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-21T08:31:04.061260Z",
-  "run_id": "2026-08-21T08:31:03.783917Z",
+  "generated_at": "2026-08-21T08:31:27.577254Z",
+  "run_id": "2026-08-21T08:31:27.450905Z",
   "total_units": 1396,
   "green": 3,
   "staged": 24,
@@ -19,13 +19,13 @@
   "repeated_failure_classes": [],
   "health": "blocked",
   "machine": {
-    "workflow_state": "blocked",
+    "workflow_state": "running",
     "driver_status": "stopped",
     "manual_paused": false,
     "block_reason": "serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1:8888/api/inference/load",
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Blocked: serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1:8888/api/inference/load"
+    "detail": "Driver running."
   }
 }
