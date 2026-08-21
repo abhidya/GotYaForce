@@ -1,0 +1,77 @@
+{
+  "unit": "auto-c0034-018",
+  "run_id": "2026-08-21T00:10:41.652527Z",
+  "generated_at": "2026-08-21T00:10:55.537923Z",
+  "extractions": [
+    {
+      "file": "research/decomp/ghidra-export/chunk_0034.c",
+      "start": 4781,
+      "end": 4811,
+      "sha256": "9e7f3338457c1fb67dfcfa2342390bed1c5545154c459cdafea417459e5ce355"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0034.c",
+      "start": 4815,
+      "end": 4869,
+      "sha256": "05946e24dcb99fd7a7975f0b47df0d3099190f948c74218bc160568bd5c0572c"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0034.c",
+      "start": 4873,
+      "end": 4950,
+      "sha256": "805d8b8cffacfe08313a2ed3eaa80cdd6a550472f739aba7e160fb70812194e6"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0034.c",
+      "start": 4954,
+      "end": 4961,
+      "sha256": "786a31b67a9a1716adfbdccbed7be13b15a74345784b22d6aa76ed726d2d5f08"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0034.c",
+      "start": 4965,
+      "end": 4977,
+      "sha256": "f001874fd3895b86877c762f72a66f49b23a358c32fa7dafb22fd573d1ac9f70"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0034.c",
+      "start": 4981,
+      "end": 4989,
+      "sha256": "2217cd5538b8c43b93d61b37e92bcda950c0c46c494af57261f004c64e29fe91"
+    }
+  ],
+  "extracted_sha256": "ea99a0f1de08b91f6501ad5008b8ddf575730a259ff3a2726f8c3472360df2be",
+  "exported_functions": [
+    "FUN_80130154",
+    "FUN_80130330",
+    "FUN_801304b8",
+    "FUN_80130788",
+    "FUN_801307c4",
+    "FUN_80130844"
+  ],
+  "compile_iterations": 1,
+  "model": null,
+  "model_requests": 0,
+  "verified": false,
+  "tier": "compile_only",
+  "allowed_extra_imports": [
+    "zz_0006f98_",
+    "zz_00076d0_",
+    "zz_0007c30_",
+    "zz_00086b8_",
+    "zz_00097b4_",
+    "zz_0011cc4_",
+    "zz_006dbe0_",
+    "zz_00e058c_",
+    "zz_00f0104_",
+    "zz_00f0214_",
+    "zz_00f036c_",
+    "zz_012fd9c_",
+    "zz_013b194_",
+    "zz_01c621c_"
+  ],
+  "oracle": {
+    "type": "compile_only",
+    "summary": "compile-only (UNVERIFIED)"
+  }
+}
