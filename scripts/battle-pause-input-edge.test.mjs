@@ -18,11 +18,17 @@ const output = ts.transpileModule(source, {
 });
 assert.deepEqual(output.diagnostics, [], "input-edge helper must transpile without diagnostics");
 
-const ownedDir = path.join(root, ".tmp", "battle-pause-input-edge-test");
-fs.mkdirSync(ownedDir, { recursive: true });
-const modulePath = path.join(ownedDir, "inputEdge.mjs");
-fs.writeFileSync(modulePath, output.outputText);
-const { createInputEdgeLatch } = await import(`${pathToFileURL(modulePath).href}?t=${Date.now()}`);
+const ownedRoot = path.join(root, ".tmp", "battle-pause-input-edge-test");
+fs.mkdirSync(ownedRoot, { recursive: true });
+const runDir = fs.mkdtempSync(path.join(ownedRoot, "run-"));
+let createInputEdgeLatch;
+try {
+  const modulePath = path.join(runDir, "inputEdge.mjs");
+  fs.writeFileSync(modulePath, output.outputText);
+  ({ createInputEdgeLatch } = await import(pathToFileURL(modulePath).href));
+} finally {
+  fs.rmSync(runDir, { recursive: true, force: true });
+}
 
 test("a press opens once and must be released before it can open again", () => {
   const edge = createInputEdgeLatch();
