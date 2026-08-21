@@ -1,16 +1,16 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-21T13:25:27.887467Z - machine-written, do not edit.*
+*Generated 2026-08-21T13:25:46.596394Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 26/1396 settled (3 green, 23 staged) |
+| **Queue progress** | 25/1396 settled (3 green, 22 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1365 |
-| **Last transition** | 2026-08-21T13:25:27.887467Z |
+| **Untouched** | 1366 |
+| **Last transition** | 2026-08-21T13:25:46.596394Z |
 | **Last green** | 2026-08-21T08:57:34.711639Z (`auto-c0029-014`) |
 | **Last product commit** | `b96586649c8ca84c2d7a220c2aecb0eca017ebcc` |
 | **Active model** | `-` @ - ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T13:25:46.596394Z | `auto-c0019-001` | deferred | manual-revoke | 1 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1770-1771; timestamp=2026-08-21T04:21:0 |
 | 2026-08-21T13:25:27.887467Z | `auto-c0018-018` | deferred | manual-revoke | 2 | verdict revoked and requeued: assembly eligibility audit: events.jsonl:1661-1662; timestamp=2026-08-21T04:18:0 |
 | 2026-08-21T12:09:44.045851Z | `auto-c0029-014` | deferred | manual-revoke | 1 | verdict revoked and requeued: Legacy pre-transaction promotion b96586649c8ca84c2d7a220c2aecb0eca017ebcc was pu |
 | 2026-08-21T11:42:19.166344Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -70,4 +71,3 @@
 | 2026-08-21T05:32:35.641606Z | `auto-c0011-012` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 3 |
 | 2026-08-21T05:32:32.957068Z | `auto-c0011-011` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:30.299436Z | `auto-c0011-004` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 4 |
-| 2026-08-21T05:32:27.546076Z | `auto-c0001-014` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
