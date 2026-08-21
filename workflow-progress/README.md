@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T16:19:48.574372Z - machine-written, do not edit.*
+*Generated 2026-08-21T16:20:02.384641Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 19/1396 settled (3 green, 16 staged) |
+| **Queue progress** | 20/1396 settled (3 green, 17 staged) |
 | **Retries outstanding** | 3 |
-| **Untouched** | 1371 |
-| **Last transition** | 2026-08-21T16:19:48.574372Z |
-| **Last green** | 2026-08-21T16:19:48.574372Z (`auto-c0033-006`) |
-| **Last product commit** | `1eefc7cf0870b3d99e6c8e1118bb100f3e7a138c` |
+| **Untouched** | 1370 |
+| **Last transition** | 2026-08-21T16:20:02.384641Z |
+| **Last green** | 2026-08-21T16:20:02.384641Z (`auto-c0033-007`) |
+| **Last product commit** | `64c71703d7c258e885f20879a1cff78ec302c05b` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T16:20:02.384641Z | `auto-c0033-007` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T16:19:48.574372Z | `auto-c0033-006` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T16:19:40.835252Z | `auto-c0035-006` | gate_failed | assembly | 4 | assembly gate link failed before promotion: m_asm --export-if-defined=__start_em_lib_deps --export-if-defined= |
 | 2026-08-21T16:19:12.855874Z | `auto-c0018-018` | gate_failed | assembly | 3 | assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner i |
@@ -70,4 +71,3 @@
 | 2026-08-21T11:25:19.650124Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T09:28:06.851661Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:57:34.711639Z | `auto-c0029-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T08:56:57.296370Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
