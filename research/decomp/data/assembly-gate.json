@@ -2,7 +2,7 @@
   "schema": 1,
   "created_at": "2026-08-21T00:44:31.833113Z",
   "largest_n_passed": 5,
-  "runs_total": 5,
+  "runs_total": 6,
   "conflicts": {
     "undefined8_fork|undefined8|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core": {
       "symbol": "undefined8",
@@ -1050,19 +1050,19 @@
     }
   },
   "last_run": {
-    "checked_at": "2026-08-21T01:58:21.421900Z",
+    "checked_at": "2026-08-21T03:01:47.413536Z",
     "n": 5,
     "units": [
-      "auto-c0034-018",
       "auto-c0011-005",
       "auto-c0029-013",
       "auto-c0029-015",
-      "auto-c0035-005"
+      "auto-c0035-005",
+      "auto-c0053-009"
     ],
     "passed": true,
     "stage": "pass",
     "conflict_count": 0,
     "detail": "5 unit(s) linked and instantiated together"
   },
-  "updated_at": "2026-08-21T01:58:23.367437Z"
+  "updated_at": "2026-08-21T03:01:49.373881Z"
 }
