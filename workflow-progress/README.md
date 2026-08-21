@@ -1,6 +1,6 @@
 # Port workflow: PAUSED
 
-*Generated 2026-08-21T15:26:25.074848Z - machine-written, do not edit.*
+*Generated 2026-08-21T15:41:00.425774Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 17/1396 settled (3 green, 14 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1374 |
-| **Last transition** | 2026-08-21T15:26:25.074848Z |
+| **Last transition** | 2026-08-21T15:41:00.425774Z |
 | **Last green** | 2026-08-21T15:16:34.667615Z (`auto-c0035-002`) |
 | **Last product commit** | `c494e58b797a4258693d994f320048b9c23ec4e4` |
 | **Active model** | `-` @ - ctx |
@@ -23,6 +23,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T15:41:00.425774Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T15:26:25.074848Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T15:16:34.667615Z | `auto-c0035-002` | staged | commit | 4 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T15:16:28.119037Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
@@ -72,4 +73,3 @@
 | 2026-08-21T08:43:31.339185Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:39:06.722394Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:31:27.450905Z | `-` | running | machine | 0 | Driver running. |
-| 2026-08-21T08:31:03.783917Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: 400 Client Error: Bad Request for url: http://127.0.0.1: |
