@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T08:56:57.111838Z - machine-written, do not edit.*
+*Generated 2026-08-21T08:57:34.711639Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T08:56:57.111838Z |
-| **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
-| **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
+| **Last transition** | 2026-08-21T08:57:34.711639Z |
+| **Last green** | 2026-08-21T08:57:34.711639Z (`auto-c0029-014`) |
+| **Last product commit** | `b96586649c8ca84c2d7a220c2aecb0eca017ebcc` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,8 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T08:57:34.711639Z | `auto-c0029-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
+| 2026-08-21T08:56:57.296370Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T08:56:57.111838Z | `auto-c0029-012` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-21T08:55:01.924134Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T08:45:45.758222Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -68,5 +70,3 @@
 | 2026-08-21T05:32:19.701274Z | `auto-c0001-010` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:18.421572Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T05:32:16.900246Z | `auto-c0001-007` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
-| 2026-08-21T05:32:14.024387Z | `auto-c0001-004` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
-| 2026-08-21T05:32:11.218690Z | `auto-c0001-003` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 6 |
