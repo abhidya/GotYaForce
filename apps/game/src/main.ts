@@ -95,6 +95,7 @@ import { createGameAssetCatalog } from "./assetCatalog.js";
 import { publicUrl } from "./publicUrl.js";
 import { BattleCamera, type CameraFollowTarget } from "./sim/camera.js";
 import { createBrowserGotchaBoxPersistence } from "./sim/getStorage.js";
+import { createInputEdgeLatch } from "./inputEdge.js";
 import {
   activeBorgForPlayer,
   battleEnergyMaxima,
@@ -853,6 +854,10 @@ async function enterBattle(): Promise<void> {
         pauseHandle: null,
         resolved: false,
       };
+      // The Intro confirm can still be physically held when the battle mounts.
+      // Adopt that state so it cannot become a fresh Pause edge on the first
+      // simulation tick; release + press is still detected normally.
+      pauseInputEdge.consume(pauseControlPressed());
       simAccumulator = 0;
       battleScene.clear();
       // Prime the scene + HUD on frame 0.
@@ -966,15 +971,17 @@ function projectedTeammateMarkers(
 // press to a "back"/"start" action and resumes via its own onResume callback below — so a
 // direct resumeBattle() call here as well would double-dispatch resume for one keypress (and,
 // now that onResume/onQuit play menu SFX, would have double-played the confirm/back cue too).
-let pausePressedLast = false;
+const pauseInputEdge = createInputEdgeLatch();
+function pauseControlPressed(): boolean {
+  const pad = activeGamepad();
+  return keys.has("Escape") || keys.has("Enter") || (pad?.buttons[9]?.pressed ?? false);
+}
+
 function pollPauseToggle(): void {
   if (!session || session.resolved) return;
-  const pad = activeGamepad();
-  const startPressed = keys.has("Escape") || keys.has("Enter") || (pad?.buttons[9]?.pressed ?? false);
-  if (startPressed && !pausePressedLast && !session.paused) {
+  if (pauseInputEdge.poll(pauseControlPressed()) && !session.paused) {
     pauseBattle();
   }
-  pausePressedLast = startPressed;
 }
 
 function pauseBattle(): void {
@@ -1010,7 +1017,7 @@ function resumeBattle(): void {
   // the player in the pause menu (Escape/Enter/gamepad-Start toggle the menu
   // off then right back on). Claiming the press was "previous-frame" makes the
   // next poll see no rising edge until the key is actually released.
-  pausePressedLast = true;
+  pauseInputEdge.consume(true);
 }
 
 function closePauseMenu(): void {
@@ -1275,12 +1282,15 @@ window.addEventListener("resize", () => {
 
 ensureStyles();
 showLoadingMessage("Loading extracted stage + model assets…");
+document.documentElement.dataset.gfRuntime = "booting";
 
 void loadInitialAssets()
   .then(() => {
     dispatchSession({ type: "boot-ready" });
+    document.documentElement.dataset.gfRuntime = "boot-ready";
   })
   .catch((error: unknown) => {
+    document.documentElement.dataset.gfRuntime = "boot-failed";
     showLoadingMessage(`Asset load failed: ${error instanceof Error ? error.message : String(error)}`);
   });
 
@@ -1365,6 +1375,3 @@ function showLoadingMessage(text: string): void {
   },
 };
 
-// Stable browser-smoke signal used by the autonomous port controller. It proves that the
-// production bundle executed far enough to install the live verification handle.
-document.documentElement.dataset.gfRuntime = "loaded";
