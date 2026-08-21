@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
-import http from "node:http";
 import path from "node:path";
 import process from "node:process";
-import { spawn, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -12,6 +11,7 @@ import {
   verifyGeneratedCandidate,
 } from "./lib/oghidra-port-auto-verify.mjs";
 import { extractEagleJetFacts, importArtifact } from "./lib/oghidra-port-import.mjs";
+import { runMaintainedProductionBrowserSmoke } from "./lib/production-browser-smoke.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const forceCheckpointResume = process.argv.slice(2).includes("--resume-qwen-checkpoint");
@@ -594,141 +594,8 @@ export const OGHIDRA_PROMOTED_PORTS = {
 `;
 }
 
-function contentType(file) {
-  const extension = path.extname(file).toLowerCase();
-  return {
-    ".css": "text/css; charset=utf-8",
-    ".html": "text/html; charset=utf-8",
-    ".js": "text/javascript; charset=utf-8",
-    ".json": "application/json; charset=utf-8",
-    ".png": "image/png",
-    ".svg": "image/svg+xml",
-    ".wasm": "application/wasm",
-  }[extension] ?? "application/octet-stream";
-}
-
-function startStaticServer(dist) {
-  const resolvedDist = path.resolve(dist);
-  const server = http.createServer((request, response) => {
-    const requestPath = decodeURIComponent(new URL(request.url ?? "/", "http://localhost").pathname);
-    const relative = requestPath === "/" ? "index.html" : requestPath.replace(/^\/+/, "");
-    let target = path.resolve(resolvedDist, relative);
-    if (target !== resolvedDist && !target.startsWith(`${resolvedDist}${path.sep}`)) {
-      response.writeHead(403).end("Forbidden");
-      return;
-    }
-    if (!fs.existsSync(target) || fs.statSync(target).isDirectory()) {
-      target = path.join(resolvedDist, "index.html");
-    }
-    response.writeHead(200, { "content-type": contentType(target) });
-    fs.createReadStream(target).pipe(response);
-  });
-  return new Promise((resolve, reject) => {
-    server.once("error", reject);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      if (!address || typeof address === "string") {
-        reject(new Error("could not allocate browser-smoke port"));
-        return;
-      }
-      resolve({ server, url: `http://127.0.0.1:${address.port}/` });
-    });
-  });
-}
-
-function findBrowser() {
-  const candidates = process.platform === "win32"
-    ? [
-      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-      "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
-    ]
-    : [
-      "/usr/bin/google-chrome",
-      "/usr/bin/chromium",
-      "/usr/bin/chromium-browser",
-    ];
-  return candidates.find((candidate) => fs.existsSync(candidate)) ?? null;
-}
-
-async function dumpBrowserDom(browser, url, profileDir) {
-  return await new Promise((resolve, reject) => {
-    const child = spawn(
-      browser,
-      [
-        "--headless=new",
-        "--disable-gpu",
-        "--disable-dev-shm-usage",
-        "--no-first-run",
-        "--no-default-browser-check",
-        `--user-data-dir=${profileDir}`,
-        "--virtual-time-budget=10000",
-        "--dump-dom",
-        url,
-      ],
-      { cwd: root, windowsHide: true },
-    );
-    let stdout = "";
-    let stderr = "";
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk.toString();
-    });
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk.toString();
-    });
-    const timer = setTimeout(() => {
-      child.kill();
-      reject(new Error(`headless browser timed out\n${tail(stderr)}`));
-    }, 45000);
-    child.once("error", (error) => {
-      clearTimeout(timer);
-      reject(error);
-    });
-    child.once("close", (code) => {
-      clearTimeout(timer);
-      if (code !== 0) {
-        reject(new Error(`headless browser exited ${code}\n${tail(stderr)}`));
-        return;
-      }
-      resolve({ stdout, stderr });
-    });
-  });
-}
-
-function removeOwnedBrowserTemp(target) {
-  const ownedRoot = path.resolve(root, ".tmp", "finish-game-port-browser");
-  const resolved = path.resolve(target);
-  if (resolved !== ownedRoot && !resolved.startsWith(`${ownedRoot}${path.sep}`)) {
-    throw new Error(`refusing to remove non-controller path: ${resolved}`);
-  }
-  fs.rmSync(resolved, { recursive: true, force: true });
-}
-
 async function browserSmoke() {
-  const browser = findBrowser();
-  if (!browser) throw new Error("Chrome/Edge not found for production browser smoke");
-  const dist = path.join(root, "apps", "game", "dist");
-  const { server, url } = await startStaticServer(dist);
-  const tempParent = path.join(root, ".tmp", "finish-game-port-browser");
-  fs.mkdirSync(tempParent, { recursive: true });
-  const profile = fs.mkdtempSync(path.join(tempParent, "profile-"));
-  try {
-    const result = await dumpBrowserDom(browser, url, profile);
-    if (!/data-gf-runtime="loaded"/.test(result.stdout)) {
-      throw new Error(
-        "browser bundle loaded without the data-gf-runtime readiness signal\n"
-        + tail(result.stdout),
-      );
-    }
-    return {
-      browser: path.basename(browser),
-      url,
-      readiness: "data-gf-runtime=loaded",
-    };
-  } finally {
-    await new Promise((resolve) => server.close(resolve));
-    removeOwnedBrowserTemp(profile);
-  }
+  return runMaintainedProductionBrowserSmoke(runPnpm);
 }
 
 const originalRegistry = fs.readFileSync(registryPath, "utf8");
