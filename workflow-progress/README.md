@@ -1,25 +1,26 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-21T01:40:39.058131Z - machine-written, do not edit.*
+*Generated 2026-08-21T01:57:33.430678Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 15/1396 settled (3 green, 12 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1377 |
-| **Last transition** | 2026-08-21T01:40:39.058131Z |
-| **Last green** | 2026-08-21T00:11:04.806655Z (`auto-c0011-005`) |
-| **Last product commit** | `dfec894b44c0383098025a866601bbd1cc73aead` |
+| **Untouched** | 1376 |
+| **Last transition** | 2026-08-21T01:57:33.430678Z |
+| **Last green** | 2026-08-21T01:57:33.430678Z (`auto-c0029-013`) |
+| **Last product commit** | `d2c1c11fcb4d64c4b3a9e770d14be57c7b3ba6cf` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T01:57:33.430678Z | `auto-c0029-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T01:40:39.058131Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T01:40:35.568087Z | `auto-c0018-018` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:127:9: error: expected ';' after top level declarato |
 | 2026-08-21T00:11:04.806655Z | `auto-c0011-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +70,3 @@
 | 2026-08-19T17:03:11.975572Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
 | 2026-08-19T17:00:38.029650Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-19T17:00:16.611438Z | `auto-c0000-010` | deferred | compile-fix | 0 | provider unavailable, unit not blamed: Custom API returned no assistant content or tool-call arguments (finish |
-| 2026-08-19T14:20:11.003240Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 32768 ctx. |
