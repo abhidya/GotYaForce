@@ -1,0 +1,53 @@
+{
+ "result_schema": 1,
+ "unit": "auto-c0034-018",
+ "generated_at": "2026-08-21T03:55:29.801Z",
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-unit.mjs",
+  "git_rev": "04b3a551d9c55591ec08d28d073b18c85c73d082"
+ },
+ "wasm": {
+  "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0034-018\\unit.wasm",
+  "sha256": "35349e6cd25a3a5e94928d907fa52ec29bd187596329cdaff28ec7fc30e68cab"
+ },
+ "corpus": {
+  "mode": "generate",
+  "seed": 3407896,
+  "n": 5
+ },
+ "spec_sha256": "cfb07134af5fd85a190213afb9d72f3bc38b9b8027c281143e25f815e13daca5",
+ "reference_kind": "ts_port",
+ "references": [
+  "packages/combat/src/families/wire-gunner.ts (createWireGunnerRootAction, via refs/wire-gunner-ref.mjs seam-spy bundle)"
+ ],
+ "functions": [
+  {
+   "name": "FUN_80130788",
+   "cases": 5,
+   "exact": 5,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "reference": "wire-gunner.ts:158-172 createWireGunnerRootAction — dispatch rule actionTable[actor.actionIndex]",
+   "verdict": "pass"
+  }
+ ],
+ "coverage": {
+  "offsets_read_unwritten": 0,
+  "sentinel_reads_detected": false,
+  "stray_writes": [],
+  "class_mismatches": []
+ },
+ "export_coverage": {
+  "covered": 1,
+  "exported": 6,
+  "uncovered": [
+   "FUN_80130154",
+   "FUN_80130330",
+   "FUN_801304b8",
+   "FUN_801307c4",
+   "FUN_80130844"
+  ]
+ },
+ "unexplained_cases": [],
+ "verdict": "partial"
+}

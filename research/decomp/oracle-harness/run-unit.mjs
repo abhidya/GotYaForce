@@ -1,9 +1,24 @@
 #!/usr/bin/env node
 // run-unit.mjs — generic differential-oracle harness entry point.
-// Oracle workstream Phase 1 (research/tools/OGhidra/docs/oracle-workstream-plan.md
-// §3.1/§3.2/§3.3): drives one wasm unit against its TS reference per its spec module,
-// replaying a pinned corpus fixture, and writes the machine-readable verdict to
+// Oracle workstream Phase 1+2 (research/tools/OGhidra/docs/oracle-workstream-plan.md
+// §3.1/§3.2/§3.3): drives one wasm unit against its TS reference per its spec module
+// and writes the machine-readable verdict to
 // research/decomp/data/oracle-results/<unit>.json.
+//
+// Corpus modes (§3.2 tagged union):
+//   replay   — Phase 1: pinned fixture file, integrity-bound to the committed
+//              oracle.log (damage-core). meta.fixture names the file.
+//   generate — Phase 2: deterministic seeded generation (I-2: randomness flows from
+//              the seeded mulberry32 lineage; the result artifact records
+//              {mode:"generate", seed, n}). meta.corpus = {mode:"generate", seed, n}
+//              and the spec exports generateCorpus({seed, n}) -> iterable of records.
+//
+// Export coverage (§3.4 per-function mandate): a spec that cannot cover every
+// exported function of the unit (functions without any in-repo TS reference) MUST
+// list the uncovered names in meta.uncovered_exports with the blocker documented
+// in-spec. Such a run can NEVER print the PASS total line or exit 0 — the verdict
+// is "partial" (or "fail" on any divergence), so a partially-covered unit can never
+// satisfy an I-5 success pattern nor be promoted.
 //
 // Usage:
 //   node run-unit.mjs --unit damage-core [--n 20000] [--replay <fixture>]
@@ -87,7 +102,7 @@ async function main() {
 
   const wasmPath = process.env.ORACLE_WASM ?? path.resolve(here, meta.wasmDefault);
   const arenaPath = path.resolve(here, meta.arena);
-  const fixturePath = argOf("--replay") ?? path.resolve(here, meta.fixture);
+  const fixturePath = argOf("--replay") ?? (meta.fixture ? path.resolve(here, meta.fixture) : null);
   const flipEnv = process.env.ORACLE_FLIP_ARENA_BYTE;
   const flipByte = flipEnv ? Number.parseInt(flipEnv, 16) : null;
   if (flipByte != null) console.log(`DELIBERATE-RED REHEARSAL: arena byte 0x${flipByte.toString(16)} flipped`);
@@ -109,22 +124,42 @@ async function main() {
     fail("actor-field-map.json is stale: source_sha256 does not match packages/combat/src/rom/actor.ts — regenerate with gen_actor_field_map.py");
   }
 
-  // ---- fixture load + integrity binding (§6 Phase 1 / [R2]) ----
-  const fixtureRaw = fs.readFileSync(fixturePath);
-  const lines = fixtureRaw.toString("utf8").split("\n").filter((l) => l.length > 0);
-  const header = JSON.parse(lines[0]);
-  if (header.kind !== "header" || header.fixture_schema !== 1) {
-    fail("fixture has no valid header record — an unbound corpus file proves nothing");
-  }
-  if (header.unit !== unitName) fail(`fixture is for unit ${header.unit}, not ${unitName}`);
-  const committedLogPath = path.join(root, "research", "decomp", "port-units", unitName, "oracle.log");
-  if (!fs.existsSync(committedLogPath) || sha256(fs.readFileSync(committedLogPath)) !== header.oracle_log_sha256) {
-    fail("fixture header's oracle_log_sha256 does not match the committed artifact — refusing replay");
-  }
-
+  const corpusMode = spec.meta.corpus?.mode ?? "replay";
   const nArg = argOf("--n");
-  if (nArg != null && Number(nArg) !== header.counts.case) {
-    fail(`--n ${nArg} != fixture main-corpus count ${header.counts.case} (replay is exact, not resizable)`);
+
+  // ---- corpus records ----
+  let records; // iterable of fixture/generated records
+  let header = null;
+  let fixtureRaw = null;
+  let genParams = null;
+  if (corpusMode === "replay") {
+    // ---- fixture load + integrity binding (§6 Phase 1 / [R2]) ----
+    fixtureRaw = fs.readFileSync(fixturePath);
+    const lines = fixtureRaw.toString("utf8").split("\n").filter((l) => l.length > 0);
+    header = JSON.parse(lines[0]);
+    if (header.kind !== "header" || header.fixture_schema !== 1) {
+      fail("fixture has no valid header record — an unbound corpus file proves nothing");
+    }
+    if (header.unit !== unitName) fail(`fixture is for unit ${header.unit}, not ${unitName}`);
+    const committedLogPath = path.join(root, "research", "decomp", "port-units", unitName, "oracle.log");
+    if (!fs.existsSync(committedLogPath) || sha256(fs.readFileSync(committedLogPath)) !== header.oracle_log_sha256) {
+      fail("fixture header's oracle_log_sha256 does not match the committed artifact — refusing replay");
+    }
+    if (nArg != null && Number(nArg) !== header.counts.case) {
+      fail(`--n ${nArg} != fixture main-corpus count ${header.counts.case} (replay is exact, not resizable)`);
+    }
+    records = lines.slice(1).map((l) => JSON.parse(l));
+  } else if (corpusMode === "generate") {
+    if (typeof spec.generateCorpus !== "function") {
+      fail("meta.corpus.mode is 'generate' but the spec exports no generateCorpus({seed, n})");
+    }
+    const seed = spec.meta.corpus.seed >>> 0;
+    const n = nArg != null ? Number(nArg) : spec.meta.corpus.n;
+    if (!Number.isInteger(n) || n <= 0) fail(`generate mode needs a positive case count (got ${n})`);
+    genParams = { seed, n };
+    records = spec.generateCorpus(genParams);
+  } else {
+    fail(`unknown corpus mode ${corpusMode}`);
   }
 
   const makeCodec = (sentinel) => new Codec({
@@ -146,8 +181,7 @@ async function main() {
   const probeRecords = []; // records re-run under a different sentinel (F-1 probe)
   const perKindCount = { case: 0, cat: 0, hp: 0, unitb: 0 };
 
-  for (let li = 1; li < lines.length; li++) {
-    const rec = JSON.parse(lines[li]);
+  for (const rec of records) {
     if (rec.kind === "class") {
       const got = classByN.get(rec.n);
       if (got !== rec.class) classMismatches.push({ n: rec.n, fixture: rec.class, replay: got ?? "(missing)" });
@@ -179,9 +213,11 @@ async function main() {
     }
   }
 
-  // fixture count integrity
-  for (const [kind, want] of Object.entries(header.counts)) {
-    if ((perKindCount[kind] ?? 0) !== want) fail(`fixture count mismatch for ${kind}: ${perKindCount[kind] ?? 0} != ${want}`);
+  // fixture count integrity (replay only; generated corpora are deterministic by I-2)
+  if (header != null) {
+    for (const [kind, want] of Object.entries(header.counts)) {
+      if ((perKindCount[kind] ?? 0) !== want) fail(`fixture count mismatch for ${kind}: ${perKindCount[kind] ?? 0} != ${want}`);
+    }
   }
   if (classMismatches.length > 0) {
     for (const m of classMismatches.slice(0, 8)) console.log(`  CLASS MISMATCH n=${m.n}: fixture=${m.fixture} replay=${m.replay}`);
@@ -211,9 +247,27 @@ async function main() {
   }
   const coverageClean = coverage.offsets_read_unwritten === 0
     && !coverage.sentinel_reads_detected && coverage.stray_writes.length === 0;
+
+  // ---- export coverage (§3.4 per-function mandate) ----
+  // The spec's covered ∪ uncovered function set must equal the wasm's actual
+  // function exports (minus the emscripten runtime trio) — self-auditing, so a
+  // spec cannot silently omit an exported function.
+  const runtimeExports = new Set(["_initialize", "_emscripten_stack_restore", "emscripten_stack_get_current"]);
+  const wasmFns = Object.entries(ex)
+    .filter(([k, v]) => typeof v === "function" && !runtimeExports.has(k))
+    .map(([k]) => k).sort();
+  const uncovered = [...(meta.uncovered_exports ?? [])].sort();
+  const declared = [...meta.functions.map((f) => f.name), ...uncovered].sort();
+  if (JSON.stringify(declared) !== JSON.stringify(wasmFns)) {
+    fail(`spec export coverage mismatch: spec declares [${declared}] but wasm exports [${wasmFns}]`);
+  }
+
   // F2: a rehearsal run can NEVER pass — even if the flipped byte was unread.
-  const allPass = fnResults.every((f) => f.verdict === "pass") && coverageClean
+  // A partially-covered spec (uncovered exports) can never pass either.
+  const fnsClean = fnResults.every((f) => f.verdict === "pass") && coverageClean
     && classMismatches.length === 0 && flipByte == null;
+  const allPass = fnsClean && uncovered.length === 0;
+  const partial = fnsClean && uncovered.length > 0;
 
   // ---- log (per-function lines + coverage + anchored total, I-5) ----
   for (const f of fnResults) {
@@ -223,6 +277,8 @@ async function main() {
   const k = fnResults.filter((f) => f.verdict === "pass").length;
   if (allPass) {
     console.log(`ORACLE TOTAL functions=${k}/${fnResults.length} cases=${totalCases} UNEXPLAINED: 0 VERDICT: PASS`);
+  } else if (partial) {
+    console.log(`ORACLE TOTAL functions=${k}/${fnResults.length} cases=${totalCases} UNEXPLAINED: 0 VERDICT: PARTIAL (spec covers ${fnResults.length} of ${wasmFns.length} exports)`);
   } else {
     console.log(`ORACLE TOTAL functions=${k}/${fnResults.length} cases=${totalCases} UNEXPLAINED: ${totalUnexplained} VERDICT: FAIL`);
   }
@@ -236,8 +292,10 @@ async function main() {
     generated_at: new Date().toISOString(),
     harness: { entry: "research/decomp/oracle-harness/run-unit.mjs", git_rev: gitRev },
     wasm: { path: wasmPath, sha256: sha256(wasmBytes) },
-    corpus: { mode: "replay", file: path.relative(root, fixturePath).replace(/\\/g, "/"),
-              sha256: sha256(fixtureRaw), n: totalCases },
+    corpus: corpusMode === "replay"
+      ? { mode: "replay", file: path.relative(root, fixturePath).replace(/\\/g, "/"),
+          sha256: sha256(fixtureRaw), n: totalCases }
+      : { mode: "generate", seed: genParams.seed, n: totalCases },
     spec_sha256: sha256(fs.readFileSync(specPath)),
     reference_kind: meta.reference_kind,
     references: meta.references,
@@ -250,8 +308,9 @@ async function main() {
       stray_writes: coverage.stray_writes,
       class_mismatches: classMismatches.slice(0, 8),
     },
+    export_coverage: { covered: fnResults.length, exported: wasmFns.length, uncovered },
     unexplained_cases: unexplainedDumps,
-    verdict: allPass ? "pass" : "fail",
+    verdict: allPass ? "pass" : partial ? "partial" : "fail",
   };
   // F2: a rehearsal artifact is stamped as such — never mistakable for a real verdict.
   if (flipByte != null) {

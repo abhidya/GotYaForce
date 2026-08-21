@@ -1,0 +1,603 @@
+{
+ "result_schema": 1,
+ "unit": "auto-c0035-002",
+ "generated_at": "2026-08-21T03:55:37.930Z",
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-unit.mjs",
+  "git_rev": "04b3a551d9c55591ec08d28d073b18c85c73d082"
+ },
+ "wasm": {
+  "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-002\\unit.wasm",
+  "sha256": "fa4d27f7d11314dd31f98c4009f6b1925c5866c6b517042a88b5d4c2dd95d1ee"
+ },
+ "corpus": {
+  "mode": "generate",
+  "seed": 3473410,
+  "n": 20000
+ },
+ "spec_sha256": "cb1a3d480b9af9f72a9a35c49eb58e99471aebac9754cf664d724bf52987ba75",
+ "reference_kind": "ts_port",
+ "references": [
+  "packages/combat/src/families/wire-gunner.ts (X-special phase machine via createWireGunnerRootAction, refs/wire-gunner-ref.mjs seam-spy bundle)"
+ ],
+ "functions": [
+  {
+   "name": "zz_01316e0_",
+   "cases": 10000,
+   "exact": 6250,
+   "rounding_explained": 0,
+   "unexplained": 3750,
+   "reference": "wire-gunner.ts:85-149 wireGunnerXPhase0/Phase1 (via wireGunnerXHandler; port-grade citations :64/:73)",
+   "verdict": "fail"
+  },
+  {
+   "name": "FUN_80131688",
+   "cases": 10000,
+   "exact": 0,
+   "rounding_explained": 0,
+   "unexplained": 10000,
+   "reference": "wire-gunner.ts:145-149 wireGunnerXHandler (wrapper; weak-grade citation :144 — the +0x1900 timer math is unmodeled by the port)",
+   "verdict": "fail"
+  }
+ ],
+ "coverage": {
+  "offsets_read_unwritten": 0,
+  "sentinel_reads_detected": false,
+  "stray_writes": [],
+  "class_mismatches": []
+ },
+ "export_coverage": {
+  "covered": 2,
+  "exported": 8,
+  "uncovered": [
+   "FUN_80131634",
+   "FUN_80131664",
+   "FUN_80131834",
+   "FUN_801318a8",
+   "FUN_801318f8",
+   "FUN_80131a00"
+  ]
+ },
+ "unexplained_cases": [
+  {
+   "fn": "FUN_80131688",
+   "n": 1,
+   "case": {
+    "kind": "wrap",
+    "n": 1,
+    "phase": 1,
+    "cw": 2489066696,
+    "ubState": 0,
+    "contactP0": 1,
+    "wallContact": 0,
+    "t1af8": 3339,
+    "f1ae0": 4.292211055755615,
+    "dt": 0.019351568073034286,
+    "timer694": 3.635307550430298,
+    "t1900": 25023
+   },
+   "trap": null,
+   "wasmSeams": [
+    [
+     "stream_tick",
+     1
+    ]
+   ],
+   "refSeams": [
+    [
+     "stream_tick",
+     1
+    ]
+   ],
+   "writeBackMismatches": [
+    {
+     "offset": "0x1900",
+     "got": 255,
+     "want": 191
+    },
+    {
+     "offset": "0x1901",
+     "got": 255,
+     "want": 97
+    }
+   ]
+  },
+  {
+   "fn": "FUN_80131688",
+   "n": 3,
+   "case": {
+    "kind": "wrap",
+    "n": 3,
+    "phase": 1,
+    "cw": 2343882540,
+    "ubState": 3,
+    "contactP0": 1,
+    "wallContact": 1,
+    "t1af8": 6875,
+    "f1ae0": 4.3133463859558105,
+    "dt": 0.013532593846321106,
+    "timer694": 3.2378976345062256,
+    "t1900": 30254
+   },
+   "trap": null,
+   "wasmSeams": [
+    [
+     "stream_tick",
+     1
+    ],
+    [
+     "projectile",
+     30
+    ]
+   ],
+   "refSeams": [
+    [
+     "stream_tick",
+     1
+    ],
+    [
+     "projectile",
+     30
+    ],
+    [
+     "ub_cue",
+     7
+    ],
+    [
+     "fb_cue",
+     0
+    ]
+   ],
+   "writeBackMismatches": [
+    {
+     "offset": "0x73f",
+     "got": 0,
+     "want": 165
+    },
+    {
+     "offset": "0x1900",
+     "got": 255,
+     "want": 46
+    },
+    {
+     "offset": "0x1901",
+     "got": 255,
+     "want": 118
+    }
+   ]
+  },
+  {
+   "fn": "FUN_80131688",
+   "n": 5,
+   "case": {
+    "kind": "wrap",
+    "n": 5,
+    "phase": 0,
+    "cw": 3923164708,
+    "ubState": 3,
+    "contactP0": 1,
+    "wallContact": 1,
+    "t1af8": 30063,
+    "f1ae0": 5.989487171173096,
+    "dt": 0.023112140595912933,
+    "timer694": 2.8941726684570312,
+    "t1900": 26262
+   },
+   "trap": null,
+   "wasmSeams": [
+    [
+     "projectile",
+     4
+    ]
+   ],
+   "refSeams": [
+    [
+     "projectile",
+     4
+    ],
+    [
+     "ub_cue",
+     7
+    ],
+    [
+     "fb_cue",
+     0
+    ]
+   ],
+   "writeBackMismatches": [
+    {
+     "offset": "0x540",
+     "got": 1,
+     "want": 0
+    },
+    {
+     "offset": "0x694",
+     "got": 0,
+     "want": 172
+    },
+    {
+     "offset": "0x695",
+     "got": 64,
+     "want": 85
+    },
+    {
+     "offset": "0x696",
+     "got": 134,
+     "want": 189
+    },
+    {
+     "offset": "0x697",
+     "got": 94,
+     "want": 60
+    },
+    {
+     "offset": "0x73f",
+     "got": 0,
+     "want": 165
+    },
+    {
+     "offset": "0x1900",
+     "got": 255,
+     "want": 150
+    },
+    {
+     "offset": "0x1901",
+     "got": 255,
+     "want": 102
+    }
+   ]
+  },
+  {
+   "fn": "FUN_80131688",
+   "n": 7,
+   "case": {
+    "kind": "wrap",
+    "n": 7,
+    "phase": 0,
+    "cw": 2495136992,
+    "ubState": 2,
+    "contactP0": 1,
+    "wallContact": 1,
+    "t1af8": 17262,
+    "f1ae0": 6.767897129058838,
+    "dt": 0.017150361090898514,
+    "timer694": 1.9195623397827148,
+    "t1900": 25895
+   },
+   "trap": null,
+   "wasmSeams": [
+    [
+     "projectile",
+     4
+    ]
+   ],
+   "refSeams": [
+    [
+     "projectile",
+     4
+    ],
+    [
+     "ub_cue",
+     7
+    ],
+    [
+     "fb_cue",
+     0
+    ]
+   ],
+   "writeBackMismatches": [
+    {
+     "offset": "0x540",
+     "got": 1,
+     "want": 0
+    },
+    {
+     "offset": "0x694",
+     "got": 0,
+     "want": 234
+    },
+    {
+     "offset": "0x695",
+     "got": 64,
+     "want": 126
+    },
+    {
+     "offset": "0x696",
+     "got": 134,
+     "want": 140
+    },
+    {
+     "offset": "0x697",
+     "got": 94,
+     "want": 60
+    },
+    {
+     "offset": "0x73f",
+     "got": 0,
+     "want": 165
+    },
+    {
+     "offset": "0x1900",
+     "got": 255,
+     "want": 39
+    },
+    {
+     "offset": "0x1901",
+     "got": 255,
+     "want": 101
+    }
+   ]
+  },
+  {
+   "fn": "zz_01316e0_",
+   "n": 8,
+   "case": {
+    "kind": "phase",
+    "n": 8,
+    "phase": 0,
+    "cw": 4212685870,
+    "ubState": 0,
+    "contactP0": 1,
+    "wallContact": 1,
+    "t1af8": -15629,
+    "f1ae0": 0.42792242765426636,
+    "dt": 0.017739959061145782,
+    "timer694": 2.6010823249816895
+   },
+   "trap": null,
+   "wasmSeams": [
+    [
+     "projectile",
+     4
+    ]
+   ],
+   "refSeams": [
+    [
+     "projectile",
+     4
+    ],
+    [
+     "ub_cue",
+     7
+    ],
+    [
+     "fb_cue",
+     0
+    ]
+   ],
+   "writeBackMismatches": [
+    {
+     "offset": "0x540",
+     "got": 1,
+     "want": 0
+    },
+    {
+     "offset": "0x694",
+     "got": 0,
+     "want": 100
+    },
+    {
+     "offset": "0x695",
+     "got": 64,
+     "want": 83
+    },
+    {
+     "offset": "0x696",
+     "got": 134,
+     "want": 145
+    },
+    {
+     "offset": "0x697",
+     "got": 94,
+     "want": 60
+    },
+    {
+     "offset": "0x73f",
+     "got": 0,
+     "want": 165
+    }
+   ]
+  },
+  {
+   "fn": "FUN_80131688",
+   "n": 9,
+   "case": {
+    "kind": "wrap",
+    "n": 9,
+    "phase": 0,
+    "cw": 1479370950,
+    "ubState": 2,
+    "contactP0": 1,
+    "wallContact": 0,
+    "t1af8": 5411,
+    "f1ae0": 7.612652778625488,
+    "dt": 0.008876100182533264,
+    "timer694": 2.2497265338897705,
+    "t1900": 13060
+   },
+   "trap": null,
+   "wasmSeams": [
+    [
+     "stream_arm",
+     1,
+     4,
+     3,
+     -1
+    ]
+   ],
+   "refSeams": [
+    [
+     "stream_arm",
+     1,
+     4,
+     3,
+     -1
+    ]
+   ],
+   "writeBackMismatches": [
+    {
+     "offset": "0x1900",
+     "got": 255,
+     "want": 4
+    },
+    {
+     "offset": "0x1901",
+     "got": 255,
+     "want": 51
+    }
+   ]
+  },
+  {
+   "fn": "zz_01316e0_",
+   "n": 10,
+   "case": {
+    "kind": "phase",
+    "n": 10,
+    "phase": 0,
+    "cw": 1807307191,
+    "ubState": 0,
+    "contactP0": 1,
+    "wallContact": 1,
+    "t1af8": -29237,
+    "f1ae0": 2.802467107772827,
+    "dt": 0.0249441247433424,
+    "timer694": 3.347698211669922
+   },
+   "trap": null,
+   "wasmSeams": [
+    [
+     "projectile",
+     4
+    ]
+   ],
+   "refSeams": [
+    [
+     "projectile",
+     4
+    ],
+    [
+     "ub_cue",
+     7
+    ],
+    [
+     "fb_cue",
+     0
+    ]
+   ],
+   "writeBackMismatches": [
+    {
+     "offset": "0x540",
+     "got": 1,
+     "want": 0
+    },
+    {
+     "offset": "0x694",
+     "got": 0,
+     "want": 159
+    },
+    {
+     "offset": "0x695",
+     "got": 64,
+     "want": 87
+    },
+    {
+     "offset": "0x696",
+     "got": 134,
+     "want": 204
+    },
+    {
+     "offset": "0x697",
+     "got": 94,
+     "want": 60
+    },
+    {
+     "offset": "0x73f",
+     "got": 0,
+     "want": 165
+    }
+   ]
+  },
+  {
+   "fn": "FUN_80131688",
+   "n": 11,
+   "case": {
+    "kind": "wrap",
+    "n": 11,
+    "phase": 0,
+    "cw": 3627509170,
+    "ubState": 2,
+    "contactP0": 1,
+    "wallContact": 0,
+    "t1af8": -12153,
+    "f1ae0": 7.233710765838623,
+    "dt": 0.019933568313717842,
+    "timer694": 2.9116642475128174,
+    "t1900": -11475
+   },
+   "trap": null,
+   "wasmSeams": [
+    [
+     "projectile",
+     4
+    ]
+   ],
+   "refSeams": [
+    [
+     "projectile",
+     4
+    ],
+    [
+     "ub_cue",
+     7
+    ],
+    [
+     "fb_cue",
+     0
+    ]
+   ],
+   "writeBackMismatches": [
+    {
+     "offset": "0x540",
+     "got": 1,
+     "want": 0
+    },
+    {
+     "offset": "0x694",
+     "got": 0,
+     "want": 185
+    },
+    {
+     "offset": "0x695",
+     "got": 64,
+     "want": 75
+    },
+    {
+     "offset": "0x696",
+     "got": 134,
+     "want": 163
+    },
+    {
+     "offset": "0x697",
+     "got": 94,
+     "want": 60
+    },
+    {
+     "offset": "0x73f",
+     "got": 0,
+     "want": 165
+    },
+    {
+     "offset": "0x1900",
+     "got": 255,
+     "want": 45
+    },
+    {
+     "offset": "0x1901",
+     "got": 255,
+     "want": 211
+    }
+   ]
+  }
+ ],
+ "verdict": "fail"
+}

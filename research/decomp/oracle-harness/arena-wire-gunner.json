@@ -1,0 +1,15 @@
+{
+ "generated_by": "gen_arena_wire_gunner.py (boot.dol)",
+ "segments": [
+  {
+   "addr": 2151915104,
+   "b64": "ZmbmPwAAAAAzM9M/MzMzMwAAAADNzMw9AAAAAAAAgECPwnU/AAAAAAAAAIAAADBDAACAvzMzcz8AAEBAAACAPw==",
+   "note": "sdata2 consts 80439e60 (f32 x10, f64 @e88, f32 x4)"
+  },
+  {
+   "addr": 2151892424,
+   "b64": "AAAAAAAAAAAEAv//BAL/AExFE4BQRROAGE8TgBxPE4A=",
+   "note": "DAT_804345c8 int table"
+  }
+ ]
+}
