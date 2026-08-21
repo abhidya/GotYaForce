@@ -2,34 +2,22 @@
   "schema": 1,
   "unit": "auto-c0035-006",
   "unit_id": "auto-c0035-006",
-  "timestamp": "2026-08-21T05:32:46.855768Z",
-  "run_id": "2026-08-21T05:26:39.191526Z",
-  "result": "deferred",
-  "stage": "d5-migrate",
-  "attempt": 2,
-  "detail": "verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 5 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "timestamp": "2026-08-21T05:37:17.022664Z",
+  "run_id": "2026-08-21T05:36:11.560992Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 3,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "5f124e6c2c27b51e33707835954aa1138a56197e",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": null,
-  "extra": {
-    "revoked_via": "d5-migrate",
-    "previous_status": "green",
-    "world_version": {
-      "config_hash": "f85869d4ffe85044cb01574074c195c6d30c3cdf5a79aa8bfc823e9e75d9455b",
-      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "5a5968441843fc9298569eb563da82cb33f80726",
-      "prompt_version": "3",
-      "registry_version": "26"
-    },
-    "transform_sites": 5
-  },
+  "tier": "compile_only",
   "driver_record": {
-    "status": "green",
-    "attempts": 2,
+    "status": "porting",
+    "attempts": 3,
     "symbol_set": [
       "CONCAT44",
       "DAT_80336561",
@@ -42,6 +30,7 @@
       "FUN_80133504",
       "FUN_80133510",
       "FUN_80133530",
+      "__gnt4_bitcast_f64",
       "byte",
       "code",
       "gnt4_PSMTXConcat_bl",
@@ -65,10 +54,10 @@
       "zz_01332dc_",
       "zz_013358c_"
     ],
-    "prompt_version": 2,
+    "prompt_version": 3,
     "registry_holdout": false,
-    "registry_version_used": 5,
-    "model_requests": 3,
+    "registry_version_used": 29,
+    "model_requests": 4,
     "rounds": [
       {
         "iteration": 1,
@@ -113,12 +102,19 @@
       "registry_version": "2"
     },
     "error": null,
-    "last_stage": "commit",
+    "last_stage": "d5-migrate",
     "registry_deviations": [],
     "oracle_summary": "compile-only (UNVERIFIED)",
     "commit": "a77a5e969e7d72b42a01225a89bd402937607ced",
     "pushed": true,
-    "tier": "compile_only"
+    "revoked": {
+      "via": "d5-migrate",
+      "at": "2026-08-21T05:32:49.792334Z",
+      "reason": "D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 5 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
+      "previous_status": "green",
+      "previous_tier": "compile_only",
+      "transform_sites": 5
+    }
   },
   "history": [
     {
@@ -144,6 +140,14 @@
       "attempt": 2,
       "detail": "verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 5 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-21T05:37:17.022664Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 3,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "5f124e6c2c27b51e33707835954aa1138a56197e"
     }
   ]
 }

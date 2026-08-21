@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T05:36:29.101246Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:37:17.022664Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 25/1396 settled (3 green, 22 staged) |
+| **Queue progress** | 26/1396 settled (3 green, 23 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1366 |
-| **Last transition** | 2026-08-21T05:36:29.101246Z |
-| **Last green** | 2026-08-21T05:36:29.101246Z (`auto-c0034-018`) |
-| **Last product commit** | `cb4f28fcf2fd834a4ff2ad19b1b75f7eff6df31d` |
+| **Untouched** | 1365 |
+| **Last transition** | 2026-08-21T05:37:17.022664Z |
+| **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
+| **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:37:17.022664Z | `auto-c0035-006` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:36:29.101246Z | `auto-c0034-018` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:36:19.438496Z | `auto-c0035-002` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:36:11.624972Z | `auto-c0028-018` | deferred | port | 0 | interrupted before a verdict; requeued |
@@ -69,4 +70,3 @@
 | 2026-08-21T01:58:25.770912Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T01:58:18.512173Z | `auto-c0035-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T01:58:06.366051Z | `auto-c0029-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T01:57:39.076057Z | `-` | stopped_at_boundary | machine | 0 |  |
