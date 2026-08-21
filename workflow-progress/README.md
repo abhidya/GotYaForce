@@ -1,25 +1,28 @@
-# Port workflow: RUNNING
+# Port workflow: PAUSED
 
-*Generated 2026-08-21T05:37:17.022664Z - machine-written, do not edit.*
+*Generated 2026-08-21T06:01:37.664052Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 26/1396 settled (3 green, 23 staged) |
+| **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1365 |
-| **Last transition** | 2026-08-21T05:37:17.022664Z |
+| **Untouched** | 1364 |
+| **Last transition** | 2026-08-21T06:01:37.664052Z |
 | **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
 | **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
-| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
-| **Driver** | running |
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
+| **Driver** | stopped |
+
+> **Manually paused by the owner** (rig gate). No heavy work runs.
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T06:01:37.664052Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T05:37:17.022664Z | `auto-c0035-006` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:36:29.101246Z | `auto-c0034-018` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:36:19.438496Z | `auto-c0035-002` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -69,4 +72,3 @@
 | 2026-08-21T02:40:29.857487Z | `auto-c0035-006` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
 | 2026-08-21T01:58:25.770912Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T01:58:18.512173Z | `auto-c0035-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T01:58:06.366051Z | `auto-c0029-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
