@@ -1,16 +1,16 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T05:32:41.518455Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:32:44.108102Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 27/1396 settled (3 green, 24 staged) |
+| **Queue progress** | 26/1396 settled (3 green, 23 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T05:32:41.518455Z |
+| **Untouched** | 1365 |
+| **Last transition** | 2026-08-21T05:32:44.108102Z |
 | **Last green** | 2026-08-21T05:06:54.849862Z (`auto-c0028-017`) |
 | **Last product commit** | `5c923c5d696385455c850141a744c57da68f5bb2` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:32:44.108102Z | `auto-c0035-002` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 3 |
 | 2026-08-21T05:32:41.518455Z | `auto-c0034-018` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:38.739592Z | `auto-c0019-000` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:35.641606Z | `auto-c0011-012` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 3 |
@@ -69,4 +70,3 @@
 | 2026-08-21T00:11:04.806655Z | `auto-c0011-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T00:10:58.153178Z | `auto-c0034-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T00:10:49.092310Z | `auto-c0035-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T00:10:41.677199Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
