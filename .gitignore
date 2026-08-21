@@ -61,6 +61,14 @@ hp_log.csv
 # The browser source changes are durable; these files are regenerated per run.
 logs/llm_interactions_*.json
 research/decomp/generated/finish-game-port/
+# T2c knowledge registry (design 2.11 [V4-8]): the ONE tracked file inside the
+# wholesale-ignored generated dir -- it is the cross-unit assembly ledger and
+# must be versioned by git. A gitignored parent dir would silently untrack it,
+# so the negation needs BOTH lines (git cannot re-include inside an excluded
+# directory unless the directory itself is re-included).
+!research/decomp/generated/finish-game-port/
+research/decomp/generated/finish-game-port/*
+!research/decomp/generated/finish-game-port/knowledge-registry.json
 
 # Dolphin savestates stay local: they embed the emulated RAM image (boot.dol code +
 # loaded disc assets), i.e. ROM-derived bytes — see the never-commit rule.
