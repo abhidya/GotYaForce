@@ -45,6 +45,16 @@ typedef long long          longlong;
 #define CONCAT44(hi, lo) \
   (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))
 
+/* PPC lfd-of-assembled-bits: reinterpret a u64 bit pattern as an IEEE754
+ * double. The extraction transform (D5) rewrites Ghidra's reinterpretation
+ * casts `(double)CONCAT44(...)` to this helper; a bare (double) cast on an
+ * integer in unit.c is then always a genuine value conversion. */
+static inline double __gnt4_bitcast_f64(unsigned long long __u) {
+  union { unsigned long long u; double d; } __b;
+  __b.u = __u;
+  return __b.d;
+}
+
 /* PPC cntlzw: defined for 0 (returns 32), unlike __builtin_clz. */
 static inline uint countLeadingZeros(int x) {
   return x == 0 ? 32u : (uint)__builtin_clz((unsigned int)x);
