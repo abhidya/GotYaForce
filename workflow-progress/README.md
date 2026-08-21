@@ -1,6 +1,6 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-21T13:30:55.951566Z - machine-written, do not edit.*
+*Generated 2026-08-21T13:33:37.947361Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 16/1396 settled (3 green, 13 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1375 |
-| **Last transition** | 2026-08-21T13:30:55.951566Z |
+| **Last transition** | 2026-08-21T13:33:37.947361Z |
 | **Last green** | 2026-08-21T13:30:55.951566Z (`collision-core`) |
 | **Last product commit** | `f6b8b65d202671ac397c104d3ed13f1bccbfbb52` |
 | **Active model** | `-` @ - ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T13:33:37.947361Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T13:30:55.951566Z | `collision-core` | green | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:30:39.420895Z | `auto-c0053-010` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:30:26.298668Z | `auto-c0053-009` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
@@ -70,4 +71,3 @@
 | 2026-08-21T06:32:16.292260Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T06:31:32.810041Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T06:31:14.210535Z | `-` | blocked | machine | 0 | Blocked: chat contract preflight failed: {"error":{"message":"Lost connection to the model server. It may have |
-| 2026-08-21T06:30:05.278129Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |

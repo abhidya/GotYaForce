@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-21T13:30:56.069323Z",
-  "run_id": "2026-08-21T13:30:54.896798Z",
+  "generated_at": "2026-08-21T13:33:38.067342Z",
+  "run_id": "2026-08-21T13:33:37.947361Z",
   "total_units": 1396,
   "green": 3,
   "staged": 13,
@@ -19,13 +19,13 @@
   "repeated_failure_classes": [],
   "health": "idle",
   "machine": {
-    "workflow_state": "maintenance",
+    "workflow_state": "starting",
     "driver_status": "stopped",
     "manual_paused": false,
     "block_reason": null,
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": ""
+    "detail": "Manual pause lifted; resuming heavy work."
   }
 }
