@@ -18,6 +18,7 @@ import { dirname, resolve } from "node:path";
 
 import { battleStateForSelfcheck, createBattle } from "./battle.js";
 import { applyHit } from "./combat.js";
+import { STATE } from "./constants.js";
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 import { emptyInput, type BorgRuntime, type PlayerInput, type Battle, type BattleConfig } from "./types.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex } from "./gauges.js";
@@ -102,6 +103,15 @@ function kill(borg: BorgRuntime, profile: BorgProfile): void {
 
 const idle: Record<string, PlayerInput> = { p1: emptyInput(), p2: emptyInput() };
 
+/** Advance host-owned death lifecycle before asserting the terminal judge result. */
+function settleDeathLifecycle(battle: Battle): ReturnType<Battle["observe"]> {
+  let observation = battle.observe();
+  for (let frame = 0; frame <= STATE.DEATH_DURATION && observation.result === "ongoing"; frame += 1) {
+    observation = battle.step(1 / 60, idle);
+  }
+  return observation;
+}
+
 // --- Cases -------------------------------------------------------------------------------
 
 function testEnemyWipeIsPlayerWin(): void {
@@ -131,7 +141,7 @@ function testEnemyWipeIsPlayerWin(): void {
   const enemy = battleStateForSelfcheck(battle).borgs.find((b) => b.team === 1);
   if (!enemy) throw new Error("no enemy borg");
   kill(enemy, profileFor(E1));
-  const after = battle.step(1 / 60, idle);
+  const after = settleDeathLifecycle(battle);
   assertEqual(after.energy[1] ?? -1, 0, "fixed-step result reports team 1 energy dropping to 0");
   assertEqual(after.winnerMask, 1, "enemy wipe -> winnerMask === 1 (side 0 won)");
   assertEqual(after.result, "win", "fixed-step result reports a player win");
@@ -222,7 +232,7 @@ function testPlayerWipeIsLose(): void {
   const me = battleStateForSelfcheck(battle).borgs.find((b) => b.team === 0);
   if (!me) throw new Error("no player borg");
   kill(me, profileFor(P1));
-  battle.step(1 / 60, idle);
+  settleDeathLifecycle(battle);
   assertEqual(battle.observe().energy[0] ?? -1, 0, "team 0 energy drops to 0 after its only borg dies");
   assertEqual(battle.observe().winnerMask, 2, "player wipe -> winnerMask === 2 (side 1 won)");
   assertEqual(battle.observe().result, "lose", "player wipe -> result 'lose' (equality test fails)");
@@ -238,7 +248,7 @@ function testMutualDestructionIsLose(): void {
   if (!me || !enemy) throw new Error("missing borg");
   kill(me, profileFor(P1));
   kill(enemy, profileFor(E1));
-  battle.step(1 / 60, idle);
+  settleDeathLifecycle(battle);
   assertEqual(battle.observe().energy[0] ?? -1, 0, "team 0 energy 0 (mutual)");
   assertEqual(battle.observe().energy[1] ?? -1, 0, "team 1 energy 0 (mutual)");
   assertEqual(battle.observe().winnerMask, 3, "mutual destruction -> winnerMask === 3");
@@ -269,7 +279,7 @@ function testAllCpuEnemyWipeIsWin(): void {
   const enemy = battleStateForSelfcheck(battle).borgs.find((b) => b.team === 1);
   if (!enemy) throw new Error("no enemy borg");
   kill(enemy, profileFor(E1));
-  battle.step(1 / 60, idle);
+  settleDeathLifecycle(battle);
   assertEqual(battle.observe().winnerMask, 1, "all-CPU enemy wipe -> winnerMask === 1");
   assertEqual(battle.observe().result, "win", "all-CPU: lone survivor -> 'win'");
 }

@@ -144,6 +144,8 @@ export interface RomFamilyDriver {
   tryStartXSpecial(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
   tryStartBAttack(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
   drainProjectiles(): Projectile[];
+  /** Relinquish action ownership without overwriting the host-owned lifecycle state. */
+  interrupt(): void;
 }
 
 export interface BorgRuntime {

@@ -2336,14 +2336,22 @@ export class RomDriverBridge implements RomFamilyDriver {
     }
   }
 
-  /** Force-clear (e.g. on hit-interrupt). The existing hit reaction will set state to
-   *  "hit"/"down" which overrides whatever the ROM driver was doing. */
+  /** Force-clear when host lifecycle (hit/down/death) outranks ROM action ownership.
+   *  Deliberately leaves runtime state/animation untouched for the host lifecycle to own. */
   interrupt(): void {
+    const wasActive = this.specialActive || this.romOwnedSpecial;
     this.specialActive = false;
     this.romOwnedSpecial = false;
     this.armedHits = [];
+    this.streamEvents = null;
     this.streamSchedules = [];
-    if (this.actor.fbState === 61) {
+    this.pendingProjectiles = [];
+    this.familyProjectiles = [];
+    this.actor.controlWord &= ~0x3;
+    if (this.runtime) {
+      this.runtime.cooldowns["romSpecialActive"] = 0;
+    }
+    if (wasActive && this.actor.fbState === 61) {
       dispatchFullBodyCue(this.actor, 0);
       dispatchUpperBodyCue(this.actor, 6);
     }
