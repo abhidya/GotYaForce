@@ -1,16 +1,16 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T05:32:44.108102Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:32:46.855768Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 26/1396 settled (3 green, 23 staged) |
+| **Queue progress** | 25/1396 settled (3 green, 22 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1365 |
-| **Last transition** | 2026-08-21T05:32:44.108102Z |
+| **Untouched** | 1366 |
+| **Last transition** | 2026-08-21T05:32:46.855768Z |
 | **Last green** | 2026-08-21T05:06:54.849862Z (`auto-c0028-017`) |
 | **Last product commit** | `5c923c5d696385455c850141a744c57da68f5bb2` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:32:46.855768Z | `auto-c0035-006` | deferred | d5-migrate | 2 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 5 |
 | 2026-08-21T05:32:44.108102Z | `auto-c0035-002` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 3 |
 | 2026-08-21T05:32:41.518455Z | `auto-c0034-018` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:38.739592Z | `auto-c0019-000` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
@@ -69,4 +70,3 @@
 | 2026-08-21T01:40:35.568087Z | `auto-c0018-018` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:127:9: error: expected ';' after top level declarato |
 | 2026-08-21T00:11:04.806655Z | `auto-c0011-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T00:10:58.153178Z | `auto-c0034-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T00:10:49.092310Z | `auto-c0035-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
