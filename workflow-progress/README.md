@@ -1,25 +1,28 @@
-# Port workflow: RUNNING
+# Port workflow: PAUSED
 
-*Generated 2026-08-21T08:57:34.711639Z - machine-written, do not edit.*
+*Generated 2026-08-21T09:28:06.851661Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 27/1396 settled (3 green, 24 staged) |
+| **Queue progress** | 28/1396 settled (3 green, 25 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T08:57:34.711639Z |
+| **Untouched** | 1363 |
+| **Last transition** | 2026-08-21T09:28:06.851661Z |
 | **Last green** | 2026-08-21T08:57:34.711639Z (`auto-c0029-014`) |
 | **Last product commit** | `b96586649c8ca84c2d7a220c2aecb0eca017ebcc` |
-| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
-| **Driver** | running |
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
+| **Driver** | stopped |
+
+> **Manually paused by the owner** (rig gate). No heavy work runs.
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T09:28:06.851661Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T08:57:34.711639Z | `auto-c0029-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T08:56:57.296370Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T08:56:57.111838Z | `auto-c0029-012` | deferred | port | 0 | interrupted before a verdict; requeued |
@@ -69,4 +72,3 @@
 | 2026-08-21T05:32:22.372064Z | `auto-c0001-011` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:19.701274Z | `auto-c0001-010` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:18.421572Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-21T05:32:16.900246Z | `auto-c0001-007` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
