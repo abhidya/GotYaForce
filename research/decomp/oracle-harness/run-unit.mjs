@@ -142,8 +142,12 @@ async function main() {
     }
     if (header.unit !== unitName) fail(`fixture is for unit ${header.unit}, not ${unitName}`);
     const committedLogPath = path.join(root, "research", "decomp", "port-units", unitName, "oracle.log");
-    if (!fs.existsSync(committedLogPath) || sha256(fs.readFileSync(committedLogPath)) !== header.oracle_log_sha256) {
-      fail("fixture header's oracle_log_sha256 does not match the committed artifact — refusing replay");
+    // oracle.log is Class-B evidence and globally ignored, so a clean engineering
+    // checkout legitimately lacks it. The tracked fixture header remains bound to
+    // its reviewed digest; if a local evidence log is present it must corroborate
+    // that digest, but absence cannot make the clean-checkout replay impossible.
+    if (fs.existsSync(committedLogPath) && sha256(fs.readFileSync(committedLogPath)) !== header.oracle_log_sha256) {
+      fail("fixture header's oracle_log_sha256 does not match the local artifact — refusing replay");
     }
     if (nArg != null && Number(nArg) !== header.counts.case) {
       fail(`--n ${nArg} != fixture main-corpus count ${header.counts.case} (replay is exact, not resizable)`);
@@ -293,17 +297,31 @@ async function main() {
   // ---- result artifact (§3.2) ----
   let gitRev = "unknown";
   try { gitRev = execSync("git rev-parse HEAD", { cwd: root }).toString().trim(); } catch { /* evidence field only */ }
+  const actorSha256 = sha256(Buffer.from(actorNormalized, "utf8"));
   const result = {
     result_schema: 1,
     unit: unitName,
     generated_at: new Date().toISOString(),
-    harness: { entry: "research/decomp/oracle-harness/run-unit.mjs", git_rev: gitRev },
+    harness: {
+      entry: "research/decomp/oracle-harness/run-unit.mjs",
+      git_rev: gitRev,
+      sha256: sha256(fs.readFileSync(path.join(here, "run-unit.mjs"))),
+    },
     wasm: { path: wasmPath, sha256: sha256(wasmBytes) },
+    arena: {
+      path: path.relative(root, arenaPath).replace(/\\/g, "/"),
+      sha256: sha256(fs.readFileSync(arenaPath)),
+    },
     corpus: corpusMode === "replay"
       ? { mode: "replay", file: path.relative(root, fixturePath).replace(/\\/g, "/"),
           sha256: sha256(fixtureRaw), n: totalCases }
       : { mode: "generate", seed: genParams.seed, n: totalCases },
     spec_sha256: sha256(fs.readFileSync(specPath)),
+    field_map: {
+      path: "research/decomp/oracle-harness/actor-field-map.json",
+      sha256: sha256(fs.readFileSync(fieldMapPath)),
+      source: { path: fieldMap.raw.source, sha256: actorSha256 },
+    },
     reference_kind: meta.reference_kind,
     references: meta.references,
     // F5: per-function reference annotation — fnResults carry each function's own

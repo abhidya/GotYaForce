@@ -31,6 +31,9 @@ jobs:
       - name: Verify game and importer
         run: pnpm verify:contributor
 
+      - name: Verify deterministic oracle evidence
+        run: pnpm test:oracle
+
       - name: Build atlas and check internal links
         env:
           GF_ATLAS_SKIP_MODELS: '1'
