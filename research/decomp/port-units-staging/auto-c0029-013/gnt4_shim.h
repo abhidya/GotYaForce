@@ -114,12 +114,16 @@ extern void   gnt4_PSQUATScale_bl(double s, float *v, float *out);
  * compile. Staging units are never executed; address->wasm-table
  * dispatch mapping is a later pipeline stage. */
 typedef void (code)();
+
 /* unit-referenced globals + external callees; widths are prefix-derived defaults
  * (the compile-fix loop may refine them). */
 #define PTR_FUN_803240f8 GC_PTR(0x803240f8)
 #define PTR_FUN_80324108 GC_PTR(0x80324108)
-/* label-table pointer (sec11 .data): (&PTR_LAB_804344d0)[i] is a function ptr */
+
+/* PTR_LAB_804344d0: label table (array of function pointers).
+ * Used as (&PTR_LAB_804344d0)[param_2] -> element type is code* (i.e. char** via GC_PTR). */
 #define PTR_LAB_804344d0 GC_PTR(0x804344d0)
+
 extern int zz_00f0104_();
 extern int zz_010a4ac_();
 extern int zz_010b2f4_();
