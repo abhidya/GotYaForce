@@ -1,25 +1,27 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-21T06:02:29.449906Z - machine-written, do not edit.*
+*Generated 2026-08-21T06:03:21.957050Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1364 |
-| **Last transition** | 2026-08-21T06:02:29.449906Z |
+| **Last transition** | 2026-08-21T06:03:21.957050Z |
 | **Last green** | 2026-08-21T05:37:17.022664Z (`auto-c0035-006`) |
 | **Last product commit** | `5f124e6c2c27b51e33707835954aa1138a56197e` |
-| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ ? ctx |
-| **Driver** | stopped |
+| **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T06:03:21.957050Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
+| 2026-08-21T06:03:22.023149Z | `auto-c0029-000` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-21T06:02:29.449906Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T06:02:17.484599Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T06:01:37.664052Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -68,5 +70,3 @@
 | 2026-08-21T03:02:18.947843Z | `auto-c0053-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T03:01:52.234508Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-21T03:01:44.434678Z | `auto-c0053-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-21T02:40:35.565882Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-21T02:40:29.857487Z | `auto-c0035-006` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
