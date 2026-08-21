@@ -110,8 +110,11 @@ these automatically on release; prefer letting it.
 
 ## Monitoring invariants (breach = RCA, not waiting)
 
-- `main` should receive a push whenever a unit goes green; >4 h with the
-  driver `running` and no green → investigate the current unit for a dead end.
+- origin `port-staging` should receive a push whenever a unit goes green
+  (owner-ordered interim, 2026-08-20: artifact pushes redirected off
+  origin/main pending docs/git-topology-design.md in the OGhidra repo;
+  local lineage and commits unchanged); >4 h with the driver `running`
+  and no green → investigate the current unit for a dead end.
 - `red_retryable` climbing across consecutive units → classify errors before
   assuming model quality; nearly all reds to date were infrastructure.
 - Greens tiered `compile-only (UNVERIFIED)` are **not** progress toward a
