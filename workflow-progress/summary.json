@@ -1,21 +1,21 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-21T15:44:29.308316Z",
-  "run_id": "2026-08-21T15:44:29.191111Z",
+  "generated_at": "2026-08-21T15:58:50.275413Z",
+  "run_id": "2026-08-21T15:44:29.141737Z",
   "total_units": 1396,
   "green": 3,
-  "staged": 14,
+  "staged": 15,
   "retryable": 1,
   "untouched": 1374,
   "deferred": 0,
   "structural_ineligible": 3,
-  "active": 1,
+  "active": 0,
   "total_attempts": 51,
-  "transitions_last_hour": 4,
-  "greens_last_hour": 1,
-  "last_green_at": "2026-08-21T15:16:34.667615Z",
-  "last_green_unit": "auto-c0035-002",
-  "last_product_commit": "c494e58b797a4258693d994f320048b9c23ec4e4",
+  "transitions_last_hour": 5,
+  "greens_last_hour": 2,
+  "last_green_at": "2026-08-21T15:58:44.998526Z",
+  "last_green_unit": "auto-c0029-013",
+  "last_product_commit": "90eaf9e2f3b4f94f7f9bfed0d58afba66a4c9c53",
   "repeated_failure_classes": [],
   "health": "healthy_progress",
   "machine": {
@@ -26,6 +26,6 @@
     "active_model": "unsloth/Qwen3.8-27B-GGUF",
     "context_length": 60000,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx."
+    "detail": ""
   }
 }

@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T15:44:29.191111Z - machine-written, do not edit.*
+*Generated 2026-08-21T15:58:44.998526Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 17/1396 settled (3 green, 14 staged) |
+| **Queue progress** | 18/1396 settled (3 green, 15 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1374 |
-| **Last transition** | 2026-08-21T15:44:29.191111Z |
-| **Last green** | 2026-08-21T15:16:34.667615Z (`auto-c0035-002`) |
-| **Last product commit** | `c494e58b797a4258693d994f320048b9c23ec4e4` |
+| **Last transition** | 2026-08-21T15:58:44.998526Z |
+| **Last green** | 2026-08-21T15:58:44.998526Z (`auto-c0029-013`) |
+| **Last product commit** | `90eaf9e2f3b4f94f7f9bfed0d58afba66a4c9c53` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T15:58:44.998526Z | `auto-c0029-013` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T15:44:29.191111Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T15:44:29.242091Z | `auto-c0018-018` | deferred | manual-revoke | 2 | interrupted before a verdict; requeued |
 | 2026-08-21T15:42:56.396349Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
@@ -70,4 +71,3 @@
 | 2026-08-21T08:56:57.111838Z | `auto-c0029-012` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-21T08:55:01.924134Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T08:45:45.758222Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-21T08:44:00.797387Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
