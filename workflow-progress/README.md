@@ -1,16 +1,16 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T05:32:30.299436Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:32:32.957068Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 31/1396 settled (3 green, 28 staged) |
+| **Queue progress** | 30/1396 settled (3 green, 27 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1360 |
-| **Last transition** | 2026-08-21T05:32:30.299436Z |
+| **Untouched** | 1361 |
+| **Last transition** | 2026-08-21T05:32:32.957068Z |
 | **Last green** | 2026-08-21T05:06:54.849862Z (`auto-c0028-017`) |
 | **Last product commit** | `5c923c5d696385455c850141a744c57da68f5bb2` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:32:32.957068Z | `auto-c0011-011` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:30.299436Z | `auto-c0011-004` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 4 |
 | 2026-08-21T05:32:27.546076Z | `auto-c0001-014` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 |
 | 2026-08-21T05:32:24.926916Z | `auto-c0001-012` | deferred | d5-migrate | 1 | verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 7 |
@@ -69,4 +70,3 @@
 | 2026-08-20T23:14:14.902202Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-20T22:41:00.850847Z | `auto-c0002-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T22:40:49.277067Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 262144 ctx. |
-| 2026-08-20T22:40:49.292661Z | `auto-c0002-000` | deferred | port | 0 | interrupted before a verdict; requeued |
