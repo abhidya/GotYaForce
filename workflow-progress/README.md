@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-21T05:06:21.902337Z - machine-written, do not edit.*
+*Generated 2026-08-21T05:06:31.944737Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 34/1396 settled (3 green, 31 staged) |
+| **Queue progress** | 35/1396 settled (3 green, 32 staged) |
 | **Retries outstanding** | 1 |
-| **Untouched** | 1357 |
-| **Last transition** | 2026-08-21T05:06:21.902337Z |
-| **Last green** | 2026-08-21T05:06:21.902337Z (`auto-c0028-014`) |
-| **Last product commit** | `9a1474a1f0d848b98eb1e7b94bf90c7836349d42` |
+| **Untouched** | 1356 |
+| **Last transition** | 2026-08-21T05:06:31.944737Z |
+| **Last green** | 2026-08-21T05:06:31.944737Z (`auto-c0028-015`) |
+| **Last product commit** | `04ee080cf55a322d436c465c1106b25810a233d3` |
 | **Current model** | `unsloth/Qwen3.8-27B-GGUF` @ 262144 ctx |
 | **Driver** | running |
 
@@ -20,6 +20,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-21T05:06:31.944737Z | `auto-c0028-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:21.902337Z | `auto-c0028-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:06:12.498587Z | `auto-c0028-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T05:05:46.845122Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -69,4 +70,3 @@
 | 2026-08-20T08:06:03.039975Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-20T08:06:00.010464Z | `auto-c0001-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-20T06:15:12.193225Z | `auto-c0001-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-20T05:48:06.303774Z | `auto-c0001-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
