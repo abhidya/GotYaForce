@@ -2,7 +2,7 @@
   "schema": 1,
   "created_at": "2026-08-21T00:44:31.833113Z",
   "largest_n_passed": 5,
-  "runs_total": 28,
+  "runs_total": 29,
   "conflicts": {
     "undefined8_fork|undefined8|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core": {
       "symbol": "undefined8",
@@ -1273,22 +1273,38 @@
       "first_seen": "2026-08-21T05:37:21.981044Z",
       "times_seen": 1,
       "last_seen": "2026-08-21T05:37:21.981044Z"
+    },
+    "collision_stub|zz_00076d0_|auto-c0028-017,auto-c0029-014,auto-c0034-018,auto-c0035-002,auto-c0035-006": {
+      "symbol": "zz_00076d0_",
+      "class": "collision_stub",
+      "units": [
+        "auto-c0028-017",
+        "auto-c0029-014",
+        "auto-c0034-018",
+        "auto-c0035-002",
+        "auto-c0035-006"
+      ],
+      "variants": {},
+      "detail": "wasm-ld: error: function signature mismatch: zz_00076d0_",
+      "first_seen": "2026-08-21T08:57:42.827930Z",
+      "times_seen": 1,
+      "last_seen": "2026-08-21T08:57:42.827930Z"
     }
   },
   "last_run": {
-    "checked_at": "2026-08-21T05:37:20.237094Z",
+    "checked_at": "2026-08-21T08:57:38.537198Z",
     "n": 5,
     "units": [
-      "auto-c0028-016",
       "auto-c0028-017",
       "auto-c0035-002",
       "auto-c0034-018",
-      "auto-c0035-006"
+      "auto-c0035-006",
+      "auto-c0029-014"
     ],
     "passed": false,
     "stage": "link",
     "conflict_count": 1,
-    "detail": "m_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_g1u_nolw\\auto-c0028-016.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_g1u_nolw\\auto-c0028-017.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_g1u_nolw\\auto-c0035-002.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_g1u_nolw"
+    "detail": "m_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_tqs4ogmv\\auto-c0028-017.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_tqs4ogmv\\auto-c0035-002.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_tqs4ogmv\\auto-c0034-018.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_tqs4ogmv"
   },
-  "updated_at": "2026-08-21T05:37:21.981044Z"
+  "updated_at": "2026-08-21T08:57:42.827930Z"
 }
