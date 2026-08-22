@@ -2,86 +2,42 @@
   "schema": 1,
   "unit": "auto-c0018-018",
   "unit_id": "auto-c0018-018",
-  "timestamp": "2026-08-21T16:19:12.855874Z",
-  "run_id": "2026-08-21T15:44:29.141737Z",
-  "result": "gate_failed",
-  "stage": "assembly",
-  "attempt": 3,
-  "detail": "assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "timestamp": "2026-08-22T23:06:09.168198Z",
+  "run_id": "2026-08-22T21:56:47.688409Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 4,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "a5e4bb748ed1a08d832832255f398c1b619e6841",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": null,
+  "tier": "compile_only",
   "extra": {
-    "rounds": [
-      {
-        "iteration": 1,
-        "stage": "compile",
-        "error_count": 2,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0018-018.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ba0g27fp\\unit.o'' failed (returned 1)",
-          "unit.c:164:15: error: use of undeclared identifier 'PTR_LAB_80300390'"
-        ],
-        "fingerprint": "41f217c990b8ee71af5acd385b2cbdbf1608a36d70889d75757427e9a8e25503"
-      }
-    ],
-    "assembly_gate": {
-      "passed": false,
-      "n": 5,
-      "units": [
-        "auto-c0011-010",
-        "auto-c0034-018",
-        "auto-c0035-002",
-        "auto-c0029-013",
-        "auto-c0018-018"
-      ],
-      "stage": "merge",
-      "conflicts": [
-        {
-          "symbol": "zz_00f0104_",
-          "class": "collision_stub",
-          "units": [
-            "auto-c0018-018",
-            "auto-c0029-013",
-            "auto-c0034-018"
-          ],
-          "variants": {
-            "auto-c0034-018": "int zz_00f0104_();",
-            "auto-c0029-013": "int zz_00f0104_();",
-            "auto-c0018-018": "void zz_00f0104_(int,int,int);"
-          },
-          "detail": "2 divergent function_decl declarations of zz_00f0104_"
-        }
-      ],
-      "detail": "header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
-      "candidate": {
-        "name": "auto-c0018-018",
-        "sha256": "e96ef43340ddd601613940fd3a7cd1aa2c778ffe1f5d43e64aeb41651ceaf4f4"
-      },
-      "expected_candidate": {
-        "name": "auto-c0018-018",
-        "sha256": "e96ef43340ddd601613940fd3a7cd1aa2c778ffe1f5d43e64aeb41651ceaf4f4"
-      },
-      "attempt_cleanup": "removed"
-    },
-    "world_version": {
-      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
-      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "150b140e135f7597d596ecd332b0801cd6ced529",
-      "prompt_version": "3",
-      "registry_version": "44"
-    },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false
+    "transition_id": "42184bc35f7e4290be64e6edacb76c3c",
+    "transition_timestamp": "2026-08-22T23:06:09.168198Z",
+    "transition_run_id": "2026-08-22T21:56:47.688409Z",
+    "promotion_transaction_id": "8cf63a8d0cab41c8a369da9801e7aa95",
+    "candidate_sha256": "a532e2fbd505c64dbd3333e7b67debe23427898ebdcf750d84fcbd4bdebf9b24",
+    "replacement_evidence": {
+      "schema": 1,
+      "transaction_id": "8cf63a8d0cab41c8a369da9801e7aa95",
+      "revocation_transition_id": "verdict-revoke-e6192a3026e506f3f8a7eb3677d7c32ab91625dabe3a5cef066c08abb00e4eab",
+      "previous_commit": "d833565b51d3c5af6c89b83003221642ad61c04d",
+      "preimage_sha256": "514cb681c77175da7e411717d97739da48cb135188952deefb5f715ea1d394ef",
+      "preimage_inventory_sha256": "ee5535bf1cc13321e6171937afcc80b4c8887fbf05b444b5e2242769cad6a4ee",
+      "preimage_inventory_entries": 5,
+      "proof_binding": "legacy-git-tree",
+      "proof_sha256": "71cc131e3749db46485d3f462add193e2aa051209be3b3fb6cabc9cd9c2dd88e",
+      "candidate_sha256": "a532e2fbd505c64dbd3333e7b67debe23427898ebdcf750d84fcbd4bdebf9b24"
+    }
   },
   "driver_record": {
-    "status": "red_retryable",
-    "attempts": 3,
-    "model_requests": 7,
+    "status": "green",
+    "attempts": 4,
+    "model_requests": 8,
     "rounds": [
       {
         "iteration": 1,
@@ -95,8 +51,8 @@
         "fingerprint": "41f217c990b8ee71af5acd385b2cbdbf1608a36d70889d75757427e9a8e25503"
       }
     ],
-    "error": "assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
-    "last_stage": "assembly",
+    "error": null,
+    "last_stage": "commit",
     "symbol_set": [
       "DAT_803002d8",
       "DAT_803002dc",
@@ -133,20 +89,9 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 44,
-    "revoked": {
-      "via": "revoke-unit",
-      "at": "2026-08-21T13:25:27.837436Z",
-      "reason": "assembly eligibility audit: events.jsonl:1661-1662; timestamp=2026-08-21T04:18:05.917038Z; stage=merge; n=5; window=auto-c0029-015,auto-c0035-005,auto-c0053-009,auto-c0053-010,auto-c0018-018; conflicts=collision_stub:zz_0099e70_,collision_stub:zz_0137540_",
-      "previous_status": "green",
-      "previous_tier": "compile_only",
-      "previous_commit": "d833565b51d3c5af6c89b83003221642ad61c04d",
-      "previous_oracle_summary": "compile-only (UNVERIFIED)",
-      "previous_record_sha256": "c71c6447e442c10817c02427222d1478badf6ab6fc6e45873bbe8cee0443d6ba",
-      "transition_id": "verdict-revoke-e6192a3026e506f3f8a7eb3677d7c32ab91625dabe3a5cef066c08abb00e4eab"
-    },
-    "interruptions": 1,
-    "interrupted_reconcile_transition_id": "interrupted-reconcile-b1c39686edec5b5e5ed89548efd714563e36caf94d4e75fb5b5bbbca402ed456",
+    "registry_version_used": 49,
+    "interruptions": 4,
+    "interrupted_reconcile_transition_id": "interrupted-reconcile-eb8d7f6dfdccd2acc05959e3d1ec0dfce729b2bdc189841c00c77b8c307d2171",
     "assembly_gate": {
       "passed": false,
       "n": 5,
@@ -193,8 +138,25 @@
       "prompt_version": "3",
       "registry_version": "44"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "a5e4bb748ed1a08d832832255f398c1b619e6841",
+    "pushed": true,
+    "tier": "compile_only",
+    "promotion_transaction_id": "8cf63a8d0cab41c8a369da9801e7aa95",
+    "promotion_transition_id": "42184bc35f7e4290be64e6edacb76c3c",
+    "candidate_sha256": "a532e2fbd505c64dbd3333e7b67debe23427898ebdcf750d84fcbd4bdebf9b24",
+    "replacement_evidence": {
+      "schema": 1,
+      "transaction_id": "8cf63a8d0cab41c8a369da9801e7aa95",
+      "revocation_transition_id": "verdict-revoke-e6192a3026e506f3f8a7eb3677d7c32ab91625dabe3a5cef066c08abb00e4eab",
+      "previous_commit": "d833565b51d3c5af6c89b83003221642ad61c04d",
+      "preimage_sha256": "514cb681c77175da7e411717d97739da48cb135188952deefb5f715ea1d394ef",
+      "preimage_inventory_sha256": "ee5535bf1cc13321e6171937afcc80b4c8887fbf05b444b5e2242769cad6a4ee",
+      "preimage_inventory_entries": 5,
+      "proof_binding": "legacy-git-tree",
+      "proof_sha256": "71cc131e3749db46485d3f462add193e2aa051209be3b3fb6cabc9cd9c2dd88e",
+      "candidate_sha256": "a532e2fbd505c64dbd3333e7b67debe23427898ebdcf750d84fcbd4bdebf9b24"
+    }
   },
   "history": [
     {
@@ -228,6 +190,14 @@
       "attempt": 3,
       "detail": "assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-22T23:06:09.168198Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 4,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "a5e4bb748ed1a08d832832255f398c1b619e6841"
     }
   ]
 }
