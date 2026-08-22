@@ -307,7 +307,7 @@ function seekAimPitch(a: GActor): void {
 function aimTrack(a: GActor): number {
   const helper = a as GActor & { aimRoll1dfc?: number };
   helper.aimRoll1dfc = a.aimYawTrack ?? 0;
-  const result = stepTargetRoll(helper, true);
+  const result = stepTargetRoll(helper, false);
   a.aimYawTrack = helper.aimRoll1dfc ?? 0;
   return result;
 }

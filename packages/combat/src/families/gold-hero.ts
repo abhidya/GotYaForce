@@ -491,7 +491,7 @@ function action0Variant1Phase0(a: GhActor): void {
 }
 
 function action0Variant1Phase1(a: GhActor, ctx: StreamContext): void {
-  const aim = stepTargetRoll(a, true); // zz_006dee8_(1)
+  const aim = stepTargetRoll(a, false); // zz_006dee8_(1)
   tickStream(a, 1, ctx); // zz_004cd24_(1)
   if (aim < 0) {
     // Target invalid → re-route (ground/air).

@@ -354,7 +354,7 @@ function alphaA0V1(a: UA, ctx: UnregFamilyCtx): void {
     return;
   }
   if (ph === 1) {
-    const aim = stepTargetRoll(a, true);
+    const aim = stepTargetRoll(a, false);
     tickStream(a, 1, ctx);
     a.unregTimer560 = (a.unregTimer560 ?? 0) - a.dt;
     if (aim < 0) { redispatchAction(a, 0, 2); return; }
