@@ -19,7 +19,7 @@ const compiled = ts.transpileModule(source, {
 });
 assert.deepEqual(compiled.diagnostics ?? [], []);
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled.outputText).toString("base64")}`;
-const { createBrowserGotchaBoxPersistence, GOTCHA_BOX_STORAGE_KEY } = await import(moduleUrl);
+const { createBrowserGotchaBoxPersistence, GOTCHA_BOX_STORAGE_KEY, GOTCHA_BOX_UNREADABLE_KEY } = await import(moduleUrl);
 
 assert.match(mainSource, /await initializeGotchaBoxBattle\(/, "enterBattle uses the guarded initialization helper");
 const initializationCompiled = ts.transpileModule(initializationSource, {
@@ -144,5 +144,43 @@ combined.collection.push({ borgId: "pl0003", colorVariant: 0, kind: "unit", part
 adapter.save(combined);
 assert.equal(atomic.writes.length, 1, "one commit performs one storage write");
 assert.deepEqual(JSON.parse(atomic.writes[0][1]), combined, "the write contains pool and collection together");
+
+// An unreadable payload must never be destroyed. parseState is all-or-nothing --
+// isPool/isCollection use .every and the version is compared exactly -- so one
+// malformed row, or any future version bump, used to discard the whole
+// collection and let the next save() write the empty state over it.
+for (const [label, payload] of [
+  ["one malformed collection row", JSON.stringify({
+    version: 1,
+    pool: { entries: [{ borgId: "pl0000", colorVariant: 0, points: 5 }] },
+    collection: [{ borgId: "pl0001", colorVariant: 0, kind: "unit", partIndex: 0, collectedAt: 3 }, { nope: true }],
+  })],
+  ["a future state version", JSON.stringify({ version: 99, pool: { entries: [] }, collection: [] })],
+  ["malformed json", "{not json"],
+]) {
+  const store = new FakeStorage();
+  store.values.set(GOTCHA_BOX_STORAGE_KEY, payload);
+  const state = createBrowserGotchaBoxPersistence(store).load();
+  assert.equal(state.collection.length, 0, `${label}: falls back to an empty state`);
+  assert.equal(
+    store.getItem(GOTCHA_BOX_UNREADABLE_KEY),
+    payload,
+    `${label}: the original bytes are preserved`,
+  );
+}
+
+// The FIRST unreadable payload wins: a later failure must not overwrite the copy
+// closest to the player's real collection.
+const twice = new FakeStorage();
+twice.values.set(GOTCHA_BOX_UNREADABLE_KEY, "first");
+twice.values.set(GOTCHA_BOX_STORAGE_KEY, "{also broken");
+createBrowserGotchaBoxPersistence(twice).load();
+assert.equal(twice.getItem(GOTCHA_BOX_UNREADABLE_KEY), "first", "an existing backup is never clobbered");
+
+// A readable payload must not leave a backup behind.
+const good = new FakeStorage();
+good.values.set(GOTCHA_BOX_STORAGE_KEY, JSON.stringify({ version: 1, pool: { entries: [] }, collection: [] }));
+createBrowserGotchaBoxPersistence(good).load();
+assert.equal(good.getItem(GOTCHA_BOX_UNREADABLE_KEY), null, "a valid load writes no backup");
 
 console.log("Gotcha-Box browser storage selfcheck PASS: initialization cleanup, strict validation, migration, fallback, atomic write");

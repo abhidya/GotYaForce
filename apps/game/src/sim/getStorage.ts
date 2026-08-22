@@ -9,6 +9,8 @@ import {
 } from "@gf/missions";
 
 export const GOTCHA_BOX_STORAGE_KEY = "gf-gotcha-box-v1";
+/** Where an unreadable payload is parked before the empty state replaces it. */
+export const GOTCHA_BOX_UNREADABLE_KEY = "gf-gotcha-box-v1.unreadable";
 const LEGACY_POOL_STORAGE_KEY = "gf-get-pool-v1";
 const LEGACY_COLLECTION_STORAGE_KEY = "gf-get-collection-v1";
 
@@ -36,7 +38,18 @@ export function createBrowserGotchaBoxPersistence(
       try {
         const current = storage.getItem(GOTCHA_BOX_STORAGE_KEY);
         if (current !== null) {
-          cached = parseState(current) ?? createGotchaBoxState();
+          const parsed = parseState(current);
+          if (parsed) {
+            cached = parsed;
+            return cloneState(cached);
+          }
+          // parseState is all-or-nothing: isPool and isCollection use .every,
+          // and the version is compared exactly. So one malformed row -- or any
+          // future GOTCHA_BOX_STATE_VERSION bump -- discarded the entire
+          // collection, and the next save() wrote that empty state straight over
+          // it. Park the original bytes first so the loss is recoverable.
+          preserveUnreadable(storage, current);
+          cached = createGotchaBoxState();
           return cloneState(cached);
         }
 
@@ -67,6 +80,17 @@ function defaultStorage(): StorageLike | null {
     return typeof window === "undefined" ? null : window.localStorage;
   } catch {
     return null;
+  }
+}
+
+/** Keep the FIRST unreadable payload. A later failure must not overwrite it --
+ *  the earliest copy is the one closest to the player's real collection. */
+function preserveUnreadable(storage: StorageLike, raw: string): void {
+  try {
+    if (storage.getItem(GOTCHA_BOX_UNREADABLE_KEY) !== null) return;
+    storage.setItem(GOTCHA_BOX_UNREADABLE_KEY, raw);
+  } catch {
+    // Storage refused the backup; the session still continues on the empty state.
   }
 }
 
