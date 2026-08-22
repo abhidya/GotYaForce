@@ -169,6 +169,22 @@ function testStepStatusOnClearedIsNoop(): void {
   assertEqual(b.statusTimer, 0, "stepStatus on cleared status -> timer stays 0");
 }
 
+/** Ids 32-63 are never immune: the ROM's shift is PowerPC `slw`, which yields
+ *  zero once bit 5 of the count is set. JS `<<` masks the count to five bits, so
+ *  `1 << 32` is 1 and these ids used to alias onto 0-31. */
+function testHighIdsAreNeverImmune(): void {
+  for (const [id, aliasBit] of [[32, 0], [33, 1], [37, 5], [63, 31]] as const) {
+    const b = makeBorg({ statusImmunityMask: 1 << aliasBit });
+    applyStatusFromRecord(b, id, 60);
+    assertEqual(b.statusId, id, `id ${id} is not gated by immunity bit ${aliasBit}`);
+    assertEqual(b.statusTimer, 60, `id ${id} keeps its duration`);
+  }
+  // A full immunity word still must not gate them.
+  const all = makeBorg({ statusImmunityMask: -1 });
+  applyStatusFromRecord(all, 40, 30);
+  assertEqual(all.statusId, 40, "id 40 applies even against an all-ones immunity word");
+}
+
 // --- Runner ---------------------------------------------------------------------------------
 
 export function runSelfTest(): number {
@@ -179,6 +195,7 @@ export function runSelfTest(): number {
   testMaxMergeNeverShortens();
   testImmunityRejectsApplicationAndZeroesDamage();
   testIdIsMaskedTo6Bits();
+  testHighIdsAreNeverImmune();
   testStatusZeroIsNoop();
   testStepStatusOnClearedIsNoop();
 

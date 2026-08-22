@@ -27,6 +27,14 @@ export const STATUS_ID_MASK = 0x3f;
 /** Bit test against the victim's per-status immunity word (+0x5a0). Bit N gates status id N. */
 function isImmune(victim: BorgRuntime, maskedId: number): boolean {
   if (maskedId === 0) return false;
+  // chunk_0003.c:7648 is `*(uint *)(+0x5a0) & 1 << id`, and the id is masked to
+  // 0x3f one line earlier, so it reaches 63. That shift compiles to PowerPC
+  // `slw`, which takes the low SIX bits of the count and yields zero whenever
+  // bit 5 is set -- ids 32-63 therefore produce an all-zero mask on hardware and
+  // are never immune. JavaScript masks the count to five bits instead, so
+  // `1 << 32` is 1 and ids 32-63 aliased onto 0-31, rejecting statuses the ROM
+  // applies.
+  if (maskedId >= 32) return false;
   return (victim.statusImmunityMask & (1 << maskedId)) !== 0;
 }
 
