@@ -1,7 +1,7 @@
 {
   "unit": "auto-c0018-018",
-  "run_id": "2026-08-21T03:02:14.269032Z",
-  "generated_at": "2026-08-21T04:17:59.556888Z",
+  "run_id": "2026-08-22T21:56:47.688409Z",
+  "generated_at": "2026-08-22T23:03:02.659409Z",
   "extractions": [
     {
       "file": "research/decomp/ghidra-export/chunk_0018.c",
@@ -41,6 +41,21 @@
     }
   ],
   "extracted_sha256": "ba5d9f829a8ab649b992aeebad9c26f7fc4ffa493e3b58b4e0c4500c4551327a",
+  "transform": {
+    "name": "d5-fp-reinterpret",
+    "version": 1,
+    "sites": 0,
+    "sites_per_block": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "transformed_sha256": "ba5d9f829a8ab649b992aeebad9c26f7fc4ffa493e3b58b4e0c4500c4551327a",
+    "d5_residual_risk": 0
+  },
   "exported_functions": [
     "zz_00b9e60_",
     "FUN_800ba240",
@@ -49,9 +64,9 @@
     "FUN_800ba364",
     "FUN_800ba390"
   ],
-  "compile_iterations": 4,
+  "compile_iterations": 2,
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "model_requests": 6,
+  "model_requests": 8,
   "verified": false,
   "tier": "compile_only",
   "allowed_extra_imports": [
@@ -62,7 +77,7 @@
     "zz_0137540_"
   ],
   "registry": {
-    "version_used": 4,
+    "version_used": 49,
     "holdout": false,
     "authoritative_injected": [],
     "advisory_injected": 0

@@ -110,63 +110,83 @@ extern void   gnt4_PSQUATScale_bl(double s, float *v, float *out);
 #endif /* GNT4_SHIM_H */
 
 /* ---- AUTO-GENERATED (port_unit_generator) ---- */
-/* Ghidra `code` for indirect dispatch: a FUNCTION POINTER type so that the
- * explicit (code *) cast at the call site recovers the callable. Staging units
- * are never executed; address->wasm-table dispatch mapping is a later stage. */
+/* Ghidra `code` for indirect dispatch: unprototyped so any-arg calls
+ * compile. Staging units are never executed; address->wasm-table
+ * dispatch mapping is a later pipeline stage. */
 typedef void (code)();
 
 /* unit-referenced globals + external callees; widths are prefix-derived defaults
  * (the compile-fix loop may refine them). */
 
-/* DAT_803002d8..ee: table of per-state short pairs, byte-addressed (&SYM + off).
- * The .c reads *(undefined4*)(&DAT+off) and *(short*)(&DAT+off), so an
- * unsigned-char lvalue base makes the pointer arithmetic come out right. */
+/* DAT_803002d8: used as (&DAT_803002d8 + iVar7) then dereferenced as undefined4.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_803002d8 GC_U8(0x803002d8)
+
+/* DAT_803002dc: used as (&DAT_803002dc + iVar7) then dereferenced as short.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_803002dc GC_U8(0x803002dc)
+
+/* DAT_803002de: used as (&DAT_803002de + iVar7) then dereferenced as undefined4.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_803002de GC_U8(0x803002de)
+
+/* DAT_803002e2: used as (&DAT_803002e2 + iVar7) then dereferenced as short.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_803002e2 GC_U8(0x803002e2)
+
+/* DAT_803002e4: used as (&DAT_803002e4 + iVar7) then dereferenced as undefined4.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_803002e4 GC_U8(0x803002e4)
+
+/* DAT_803002e8: used as (&DAT_803002e8 + iVar7) then dereferenced as short.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_803002e8 GC_U8(0x803002e8)
+
+/* DAT_803002ea: used as (&DAT_803002ea + iVar7) then dereferenced as undefined4.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_803002ea GC_U8(0x803002ea)
+
+/* DAT_803002ee: used as (&DAT_803002ee + iVar7) then dereferenced as short.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_803002ee GC_U8(0x803002ee)
 
-/* DAT_80300320..2c: per-state float clamp params, byte-addressed (&SYM + off).
- * The .c reads *(float*)(&DAT+off), so an unsigned-char lvalue base is correct. */
+/* DAT_80300320: used as (&DAT_80300320 + iVar7) then dereferenced as float.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_80300320 GC_U8(0x80300320)
+
+/* DAT_80300324: used as (&DAT_80300324 + iVar7) then dereferenced as float.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_80300324 GC_U8(0x80300324)
+
+/* DAT_80300328: used as (&DAT_80300328 + iVar7) then dereferenced as float.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_80300328 GC_U8(0x80300328)
+
+/* DAT_8030032c: used as (&DAT_8030032c + iVar7) then dereferenced as float.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_8030032c GC_U8(0x8030032c)
 
-/* PTR_LAB_80300390: function-pointer dispatch table. The .c does
- *   (*(code *)(&PTR_LAB_80300390)[param_2])(...)
- * i.e. it takes the symbol's ADDRESS and then indexes it, so PTR_LAB must be a
- * pointer to an array of `code` (a table base). Declaring it `code *` makes
- * &PTR_LAB a `code **`, which is subscriptable and yields a `code` element for
- * the explicit cast. (Declaring it as a bare `code` lvalue made &SYM a pointer
- * TO a function, which cannot be subscripted.) */
-#define PTR_LAB_80300390 (*(code **)(unsigned int)0x80300390)
+/* PTR_LAB_80300390: used as (&PTR_LAB_80300390)[param_2] then cast to (code*).
+ * This is a function pointer table. Each element is 4 bytes (pointer).
+ * The base must be an lvalue so that &PTR_LAB_80300390 gives the address of the first element.
+ * We type it as undefined4 (int) since it's a table of pointers/labels in wasm linear memory. */
+#define PTR_LAB_80300390 GC_IPTR(0x80300390)
 
-/* DAT_80433ad0: per-state short table, byte-addressed (&SYM + off). */
+/* DAT_80433ad0: used as (&DAT_80433ad0 + ...) then dereferenced as undefined2.
+ * The address arithmetic is byte-based, so the base must be an lvalue of unsigned char. */
 #define DAT_80433ad0 GC_U8(0x80433ad0)
 
-/* DAT_80433ad8: per-state int table. The .c does zz_0099e70_(p, (&DAT)[i]), so
- * the element type is `int` (matching the callee's second param). */
-#define DAT_80433ad8 (*(int *)(unsigned int)0x80433ad8)
+/* DAT_80433ad8: used as (&DAT_80433ad8)[param_2] then passed to zz_0099e70_.
+ * The indexing is element-based. Looking at the call: zz_0099e70_(param_1,(&DAT_80433ad8)[param_2]).
+ * If DAT_80433ad8 is an int (undefined4), then (&DAT_80433ad8)[i] accesses the i-th int.
+ * If it's a byte, it accesses the i-th byte. Given the name DAT and typical usage, let's assume int/undefined4. */
+#define DAT_80433ad8 GC_IPTR(0x80433ad8)
 
-/* FLOAT_804384e8: bss float clamp constant. */
+/* FLOAT_804384e8: used as a float comparison value. */
 #define FLOAT_804384e8 GC_F32(0x804384e8)
 
-/* external callees referenced by this unit */
-extern void zz_0099e70_(int param_1, int param_2);
-extern void zz_00b9e30_(int param_1, short *param_2);
-extern void zz_00cbe9c_(int param_1);
-extern void zz_00f0104_(int param_1, int param_2, int param_3);
-extern void zz_0137540_(int param_1, int param_2);
-
-/* auto-generated prototypes (from chunk markers) */
-void zz_00b9e60_(int param_1, short *param_2);
-void FUN_800ba240(int param_1);
-void FUN_800ba2c4(int param_1);
-void FUN_800ba324(undefined4 param_1, char param_2, char param_3);
-void FUN_800ba364(int param_1, int param_2);
-void FUN_800ba390(int param_1);
+extern int zz_0099e70_();
+extern int zz_00b9e30_();
+extern int zz_00cbe9c_();
+extern int zz_00f0104_();
+extern int zz_0137540_();
