@@ -438,6 +438,32 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
   let sceneDisposed = false;
   let sceneFrame = 0;
 
+  // The 3D desk scene is decoration; the VM is what advances the intro and sets
+  // endRequested, which enter() gates on. Every await in the loader below is
+  // unguarded, so a single 404 lands in its catch, the render loop never starts,
+  // the VM never ticks, and every keypress, click and gamepad button is swallowed
+  // for the rest of the session -- while data-gf-runtime already reads boot-ready.
+  // Tick the VM on its own in that case so the title is always dismissible.
+  let fallbackFrame = 0;
+  const startVmOnlyFallback = (): void => {
+    let last = performance.now();
+    let accumulator = 0;
+    const step = (now = performance.now()): void => {
+      if (destroyed) return;
+      accumulator += Math.min(0.1, Math.max(0, (now - last) / 1000));
+      last = now;
+      while (accumulator >= FIXED_FRAME_SECONDS) {
+        vm.tick();
+        accumulator -= FIXED_FRAME_SECONDS;
+      }
+      root.dataset["gfIntroEnd"] = String(vm.state.endRequested);
+      root.dataset["gfIntroDone"] = String(vm.state.endRequested === 1);
+      fallbackFrame = requestAnimationFrame(step);
+    };
+    fallbackFrame = requestAnimationFrame(step);
+    teardown.push(() => cancelAnimationFrame(fallbackFrame));
+  };
+
   void (async () => {
     try {
       const canvas = sceneHost.querySelector<HTMLCanvasElement>(".gf-ui-scene-canvas");
@@ -711,6 +737,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     } catch (err) {
       sceneHost.dataset["gfModelStatus"] = "failed";
       console.warn("[title] source tl00 3D desk scene unavailable:", err);
+      startVmOnlyFallback();
     }
   })();
 
