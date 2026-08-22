@@ -22,7 +22,7 @@ import {
   stepRomActor,
   type StateHandler,
 } from "./rom/state-tables.js";
-import { tickStream } from "./rom/stream-vm.js";
+import { resetStreamParts, tickStream } from "./rom/stream-vm.js";
 import {
   dispatchCommandRecord,
   dispatchUpperBodyCue,
@@ -2360,6 +2360,12 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.streamSchedules = [];
     this.pendingProjectiles = [];
     this.familyProjectiles = [];
+    // The host-scheduled path parks streamPtr at MAX_SAFE_INTEGER, and the
+    // `handled` predicate in tryStartXSpecial treats any streamPtr >= 0 as a
+    // live special. Clearing the schedules alone left that sentinel standing
+    // forever, so after one interrupt -- a death, say -- every later X press
+    // was claimed by the ROM path and the generic fallback never ran again.
+    resetStreamParts(this.actor);
     this.actor.controlWord &= ~0x3;
     if (this.runtime) {
       this.runtime.cooldowns["romSpecialActive"] = 0;

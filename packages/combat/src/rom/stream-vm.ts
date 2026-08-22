@@ -169,6 +169,18 @@ function resetPart(part: RomPartState): void {
   part.stateByte = 0;
 }
 
+/** Reset every part's stream state (the `zz_004c020_` shape, applied to all parts).
+ *
+ *  The host-scheduled path parks `streamPtr` at a non-negative sentinel, and the
+ *  bridge treats any non-negative `streamPtr` as "a special is still running".
+ *  A caller that tears a special down out of band must therefore clear the parts
+ *  too, or that sentinel outlives the special forever.
+ */
+export function resetStreamParts(actor: RomActor): void {
+  for (const part of actor.parts) resetPart(part);
+}
+
+
 /**
  * Port of `zz_004cd24_` @ chunk_0006.c:1996 — advance all parts selected by `mask` one
  *  tick. For each part: if its wait clock has expired, dispatch the next opcode via
