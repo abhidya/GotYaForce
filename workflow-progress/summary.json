@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-21T22:07:59.601468Z",
-  "run_id": "2026-08-21T22:07:59.479820Z",
+  "generated_at": "2026-08-22T21:38:32.670847Z",
+  "run_id": "2026-08-22T21:38:32.410178Z",
   "total_units": 1396,
   "green": 3,
   "staged": 20,
@@ -11,21 +11,21 @@
   "structural_ineligible": 3,
   "active": 1,
   "total_attempts": 59,
-  "transitions_last_hour": 1,
+  "transitions_last_hour": 0,
   "greens_last_hour": 0,
   "last_green_at": "2026-08-21T16:20:45.850788Z",
   "last_green_unit": "auto-c0033-010",
   "last_product_commit": "0901d3cd24820364d3e0649b848757eb3bccb5e0",
   "repeated_failure_classes": [],
-  "health": "manual_paused",
+  "health": "possibly_stuck",
   "machine": {
-    "workflow_state": "manual_paused",
-    "driver_status": "stopped",
-    "manual_paused": true,
+    "workflow_state": "running",
+    "driver_status": "running",
+    "manual_paused": false,
     "block_reason": null,
-    "active_model": null,
-    "context_length": null,
+    "active_model": "C:\\Users\\manny\\.cache\\huggingface\\hub\\models--unsloth--Qwen3.8-27B-GGUF\\snapshots\\4ca720788d1e01f1bff70c033e0d0028fd02e502",
+    "context_length": 71296,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Manually paused by owner (rig gate)."
+    "detail": "Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx."
   }
 }
