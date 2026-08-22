@@ -317,7 +317,7 @@ function alphaA0V0(a: UA, ctx: UnregFamilyCtx): void {
     a.fbPhaseSlots[0] = 1;
     startStream(a, 1, 2, a.unregSlot6ee ?? 0, DEATH_BORG_ALPHA.STREAM_RATE);
     startStream(a, 2, 2, 9, DEATH_BORG_ALPHA.STREAM_RATE);
-    a.controlWord = a.controlWord & ~0xffffff4f;
+    a.controlWord = a.controlWord & 0xffffff4f;
     alphaLoadTimers(a);
     a.hDecel = DEATH_BORG_ALPHA.ZERO; a.hSpeed = DEATH_BORG_ALPHA.ZERO;
     return;
@@ -423,7 +423,7 @@ function alphaA0V3(a: UA, ctx: UnregFamilyCtx): void {
   if (ph === 0) {
     a.fbPhaseSlots[0] = 1;
     stepTargetYaw(a, 0x81, 0, true);
-    a.controlWord = a.controlWord & ~0xffffff7f;
+    a.controlWord = a.controlWord & 0xffffff7f;
     integratePhysics(DEATH_BORG_ALPHA.PHYSICS_GRAVITY, a, a.lockYaw);
     groundStep(a);
     startStream(a, 1, 2, ((a.unregSlot6ee ?? 0) + 6) | 0, DEATH_BORG_ALPHA.STREAM_RATE);
@@ -1044,7 +1044,7 @@ function metalA2(a: UA, ctx: UnregFamilyCtx): void {
     }
     if (a.contactP1 < 0 && (a.unregFlag541 ?? 0) < 0) {
       a.fbPhaseSlots[0] = ph + 2; a.unregFlag6e9 = 0;
-      if (grounded) a.controlWord = a.controlWord & ~0xffffffbf;
+      if (grounded) a.controlWord = a.controlWord & 0xffffffbf;
       const slot = a.unregSlot6ea ?? 0; a.unregSlot6ea = slot + 1;
       startStream(a, 0xf, 4, slot, METAL_HERO.STREAM_RATE);
     } else if (a.contactP0 < 0) {
