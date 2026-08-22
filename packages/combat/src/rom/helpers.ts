@@ -213,14 +213,21 @@ export function stepDualTargetAim(actor: RomActor): number {
 
 /** Port of zz_006dee8_: clamp target-relative yaw to ±0x4000 and converge +0x1dfc
  * by exactly 0x800 BAM units per call. Returns -1 invalid, 0 moving, 1 ready. */
-export function stepTargetRoll(actor: RomActor, clearInvalidTarget = true): number {
+export function stepTargetRoll(actor: RomActor, clearInvalidTarget = false): number {
   const scratch = actor as RomActor & RomHelperScratch;
   const angles = targetAngles(actor);
   if (!angles) return -1;
   const raw = toS16(angles.yaw - actor.heading);
   if (raw <= -0x4801 || raw >= 0x4801) {
-    if (clearInvalidTarget) scratch.lockTarget = null;
-    scratch.aimRoll1dfc = toS16((scratch.aimRoll1dfc ?? 0) * 0.5);
+    // chunk_0009.c:3077-3084 gates BOTH the decay and the target clear on
+    // `param_2 == 0`. The decay was unconditional here. All 68 real ROM call
+    // sites pass 1, so this block never runs in the game -- hence the default
+    // is false, and a caller that forgets gets ROM behaviour rather than a
+    // target it never should have dropped.
+    if (clearInvalidTarget) {
+      scratch.lockTarget = null;
+      scratch.aimRoll1dfc = toS16((scratch.aimRoll1dfc ?? 0) * 0.5);
+    }
     return -1;
   }
   const desired = Math.max(-0x4000, Math.min(0x4000, raw));

@@ -142,14 +142,14 @@ function upperBodyBurst(ctx: StreamContext): (actor: RomActor) => void {
       case 0: // FUN_80129da8
         actor.fbPhaseSlots[0] = 1;
         actor.eagleAimTimer = EAGLE_ROBOT_ACTION0.UPPER_AIM_TIMER;
-        stepTargetRoll(actor, true);
+        stepTargetRoll(actor, false);
         startStream(actor, 1, EAGLE_ROBOT_ACTION0.STREAM_GROUP, directionalSlot(actor),
           EAGLE_ROBOT_ACTION0.STREAM_RATE);
         return;
       case 1: // FUN_80129e58
         if (actor.contactP0 === 0 || isStreamTickEnabled(actor)) tickStream(actor, 1, ctx);
         actor.eagleAimTimer = (actor.eagleAimTimer ?? 0) - actor.dt;
-        const aimResult = stepTargetRoll(actor, true);
+        const aimResult = stepTargetRoll(actor, false);
         if (actor.contactP0 !== 0 && (aimResult !== 0 || (actor.eagleAimTimer ?? 0) <= 0)) {
           actor.fbPhaseSlots[0] = 2;
           firePair(actor, ctx);

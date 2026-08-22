@@ -198,13 +198,13 @@ function dashV123Phase0(actor: RomActor): void {
   actor.fbPhaseSlots[0] = 1;
   s.dashLatch745 = false;
   s.dashAimTimer560 = GRED_DASH.AIM_TIMER;
-  stepTargetRoll(actor, true);
+  stepTargetRoll(actor, false);
   startStream(actor, 1, 2, variant123Slot(actor), GRED_DASH.STREAM_RATE);
 }
 
 function dashV123Phase1(actor: RomActor, ctx: StreamContext): void {
   const s = scratch(actor);
-  const aim = stepTargetRoll(actor, true);
+  const aim = stepTargetRoll(actor, false);
   if (actor.contactP0 === 0) tickStream(actor, 1, ctx);
   if (aim < 0) {
     restartVariant(actor, (actor.controlWord & 0x40) === 0 ? 0 : 4);
@@ -227,7 +227,7 @@ function dashSharedPhase2(actor: RomActor, ctx: StreamContext): void {
   tickStream(actor, 1, ctx);
   if (actor.handlerTimer > 0) {
     actor.handlerTimer -= actor.dt;
-    stepTargetRoll(actor, true);
+    stepTargetRoll(actor, false);
   } else if (s.dashLatch745 && allocateWeapon(actor, ctx, 0, 1, false)) {
     s.dashLatch745 = false;
     actor.fbPhaseSlots[0] = 1;
