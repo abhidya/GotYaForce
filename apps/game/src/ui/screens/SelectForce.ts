@@ -60,19 +60,45 @@ export interface ForceSlot {
 // ---------------------------------------------------------------------------
 
 const FORCE_SLOTS_STORAGE_KEY = "gf-force-slots-v1";
+/** Where an unreadable payload is parked before defaults overwrite it. */
+export const FORCE_SLOTS_UNREADABLE_KEY = "gf-force-slots-v1.unreadable";
 let restoredThisPageLoad = false;
 
-function loadStoredForceSlots(): ForceSlot[] | null {
+/** Keep the FIRST unreadable payload; a later failure must not clobber the copy
+ *  closest to the player's real forces. */
+function preserveUnreadableForceSlots(raw: string): void {
   try {
-    const raw = window.localStorage.getItem(FORCE_SLOTS_STORAGE_KEY);
+    if (window.localStorage.getItem(FORCE_SLOTS_UNREADABLE_KEY) !== null) return;
+    window.localStorage.setItem(FORCE_SLOTS_UNREADABLE_KEY, raw);
+  } catch {
+    // Storage refused the backup; the session still continues on the defaults.
+  }
+}
+
+function loadStoredForceSlots(): ForceSlot[] | null {
+  // Rejection is all-or-nothing: one bad entry discards every slot, and
+  // syncForceSlots then writes the defaults straight over all 30 saved forces.
+  // Park the original bytes first so that loss is recoverable.
+  let raw: string | null = null;
+  try {
+    raw = window.localStorage.getItem(FORCE_SLOTS_STORAGE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return null;
+    if (!Array.isArray(parsed)) {
+      preserveUnreadableForceSlots(raw);
+      return null;
+    }
     const slots: ForceSlot[] = [];
     for (const entry of parsed) {
-      if (typeof entry !== "object" || entry === null) return null;
+      if (typeof entry !== "object" || entry === null) {
+        preserveUnreadableForceSlots(raw);
+        return null;
+      }
       const slot = entry as Partial<ForceSlot>;
-      if (typeof slot.no !== "number" || typeof slot.name !== "string" || !Array.isArray(slot.borgIds)) return null;
+      if (typeof slot.no !== "number" || typeof slot.name !== "string" || !Array.isArray(slot.borgIds)) {
+        preserveUnreadableForceSlots(raw);
+        return null;
+      }
       slots.push({
         no: slot.no,
         name: slot.name,
@@ -81,6 +107,7 @@ function loadStoredForceSlots(): ForceSlot[] | null {
     }
     return slots;
   } catch {
+    if (raw) preserveUnreadableForceSlots(raw);
     return null;
   }
 }
