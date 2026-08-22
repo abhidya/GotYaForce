@@ -20,6 +20,7 @@
     "selfcheck:battle-pause-edge": "node --test scripts/battle-pause-input-edge.test.mjs",
     "selfcheck:browser-cdp": "node --test scripts/cdp-client.test.mjs scripts/network-gate.test.mjs",
     "selfcheck:browser-poc-gate": "node --test scripts/finish-game-port-browser-gate.test.mjs",
+    "test:render-loop": "node scripts/run-render-loop-tests.mjs",
     "smoke:browser": "node scripts/smoke-browser-game.mjs",
     "selfcheck:get-settlement": "pnpm --filter @gf/missions build && node packages/missions/dist/gotchaBoxSettlement.selfcheck.js && node scripts/selfcheck-get-storage.mjs",
     "selfcheck:hud": "node scripts/selfcheck-hud.mjs",
