@@ -82,6 +82,7 @@ import {
   isExportedStageId,
 } from "./sim/adapter.js";
 import { initializeGotchaBoxBattle } from "./sim/gotchaBoxBattleInitialization.js";
+import { initTouchControls, touchGamepad, watchViewport } from "./ui/touch/index.js";
 import {
   createGameSession,
   type DeepReadonly,
@@ -648,10 +649,14 @@ const NO_KEYS: ReadonlySet<string> = new Set();
 
 function activeGamepad(playerIndex = 0, allowFallback = playerIndex === 0): Gamepad | null {
   const pads = navigator.getGamepads?.();
-  if (!pads) return null;
-  const exact = pads[playerIndex];
+  const exact = pads?.[playerIndex];
   if (exact?.connected) return exact;
-  return allowFallback ? pads.find((g) => g?.connected) ?? null : null;
+  const anyPad = allowFallback ? pads?.find((g) => g?.connected) ?? null : null;
+  if (anyPad) return anyPad;
+  // The on-screen GameCube overlay reports itself as a standard-mapping pad (ui/touch),
+  // so it drops straight into the mapping below without a second input path. A real
+  // controller always wins: plugging one in on a tablet should take over immediately.
+  return playerIndex === 0 ? touchGamepad() : null;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1275,6 +1280,17 @@ startFixedStepLoop({
 window.addEventListener("resize", () => {
   viewport.resize();
 });
+
+// Rotation support. A bare "resize" listener is not enough on mobile: iOS fires it before
+// the rotation settles, so the renderer would keep the pre-rotation size until something
+// else resized it. watchViewport coalesces resize/orientationchange/visualViewport and
+// re-measures once more after the viewport settles (see ui/touch/orientation.ts).
+watchViewport(() => {
+  viewport.resize();
+});
+
+// On-screen GameCube controls; shows itself on touch devices, respects a stored override.
+initTouchControls();
 
 // ------------------------------------------------------------------------------------------
 // Boot
