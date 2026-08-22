@@ -1373,6 +1373,10 @@ export class RomDriverBridge implements RomFamilyDriver {
   /** Armed hitbox records for the current special. */
   private armedHits: ArmedHit[] = [];
   private streamFrame = 0;
+  /** Frames since the current armHit. Hit windows are authored relative to the
+   *  arm, not to the stream clock, and the two must not share a counter: the
+   *  stream clock also drives streamSchedules and the specialMaxFrames timeout. */
+  private armedHitFrame = 0;
   /** Pre-decoded stream events from meleeAnimKinds.json. Played back each tick to
    *  drive anim changes + hitbox arming at the decoded ROM frames. */
   private streamEvents: StreamEvent[] | null = null;
@@ -2216,7 +2220,10 @@ export class RomDriverBridge implements RomFamilyDriver {
         struck: new Set<string>(),
       } satisfies ArmedHit;
     }).filter((h): h is ArmedHit => h !== null);
-    this.streamFrame = 0;
+    // Reset the HIT clock only. Rewinding streamFrame here desynchronised every
+    // streamSchedule (whose startFrame was recorded on the old clock) and
+    // restarted the specialMaxFrames timeout, so the special outran its author.
+    this.armedHitFrame = 0;
   }
 
   /** Called by the stream VM when a fireChild op (0x09) fires. Spawns a ROM-data-driven
@@ -2311,9 +2318,15 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  resolve hits against nearby enemies via the host's applyHit callback. */
   private resolveHits(runtime: BorgRuntime, all: readonly BorgRuntime[]): void {
     if (this.armedHits.length === 0) return;
-    this.streamFrame += 1;
+    // Check this frame BEFORE advancing: windows are authored inclusive of frame
+    // 0, which is the most common activeStart in attackHitTables.json (1,947 of
+    // 4,258 records). Advancing first made frame 0 unreachable, and advancing a
+    // clock that tick() had already advanced left only even values reachable --
+    // 2,282 of 4,258 windows could never fire.
+    const frame = this.armedHitFrame;
+    this.armedHitFrame += 1;
     for (const hit of this.armedHits) {
-      if (this.streamFrame < hit.activeStart || this.streamFrame > hit.activeEnd) continue;
+      if (frame < hit.activeStart || frame > hit.activeEnd) continue;
       for (const target of all) {
         if (!target.alive || target.team === runtime.team) continue;
         if (hit.struck.has(target.uid)) continue;
