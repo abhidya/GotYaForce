@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-22T21:46:57.682224Z - machine-written, do not edit.*
+*Generated 2026-08-22T21:56:47.752408Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 23/1396 settled (3 green, 20 staged) |
 | **Retries outstanding** | 1 |
 | **Untouched** | 1368 |
-| **Last transition** | 2026-08-22T21:46:57.682224Z |
+| **Last transition** | 2026-08-22T21:56:47.752408Z |
 | **Last green** | 2026-08-21T16:20:45.850788Z (`auto-c0033-010`) |
 | **Last product commit** | `0901d3cd24820364d3e0649b848757eb3bccb5e0` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,8 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-22T21:56:47.752408Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
+| 2026-08-22T21:56:47.843302Z | `auto-c0018-018` | deferred | assembly | 3 | interrupted before a verdict; requeued |
 | 2026-08-22T21:46:57.682224Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-22T21:46:57.779786Z | `auto-c0035-006` | deferred | assembly | 4 | interrupted before a verdict; requeued |
 | 2026-08-22T21:38:32.735448Z | `auto-c0018-018` | deferred | assembly | 3 | interrupted before a verdict; requeued |
@@ -69,5 +71,3 @@
 | 2026-08-21T13:29:50.123303Z | `auto-c0029-015` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:29:37.507648Z | `auto-c0011-010` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:29:26.223078Z | `auto-c0011-009` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
-| 2026-08-21T13:29:15.938781Z | `auto-c0011-008` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
-| 2026-08-21T13:29:04.816702Z | `auto-c0011-007` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
