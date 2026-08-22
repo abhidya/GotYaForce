@@ -45,8 +45,11 @@ export const EAGLE_JET_ACTION0 = {
   CONE_HALF: 0x2001,
   /** turret-pivot clamp ±0x1000 (both channels). */
   PIVOT_CLAMP: 0x1000,
-  /** Exit kind passed to zz_006a53c_. */
+  /** Exit kind passed to zz_006a53c_; also the +0x694 cooldown it writes. */
   EXIT_KIND: 0x10,
+  /** zz_006a53c_ dispatches zz_006a6fc_(actor, 0x1b) -- a LITERAL. The +0x5e4
+   *  read belongs to a different helper (zz_006a668_, chunk_0009.c:830). */
+  EXIT_CUE: 0x1b,
   /** +0x5e0 action-mode bits stripped at exit. */
   ACTION_MODE_BITS: 0x3,
 } as const;
@@ -63,7 +66,10 @@ export const EAGLE_JET_ACTION1 = {
   SOUND_CUE: 0x20,        // zz_00f036c_(actor, 0x20)
   EXIT_COOLDOWN: 0x10,    // zz_006a53c_ parameter
   EXIT_CUE: 0x1b,         // zz_006a53c_ -> zz_006a6fc_(actor, 0x1b)
-  PREPARED_PARTS: [4, 5] as const, // zz_016c7ec_(actor, 4/5, 0) for borg 0x61b
+  /** zz_016c7ec_ slots by borg (chunk_0034.c:1837-1844). An unmatched borg gets
+   *  NO call, so its previous slots must be left alone rather than overwritten. */
+  PREPARED_PARTS_607: [1, 2] as const,
+  PREPARED_PARTS: [4, 5] as const, // borg 0x61b
 } as const;
 
 /** Port-side mirrors for ROM fields/helpers not yet first-class on RomActor. */
@@ -103,7 +109,11 @@ function eagleJetAction0(actor: RomActor, ctx: StreamContext): void {
   const targetYaw = pivotChannelTarget(actor);
   const cone =
     targetYaw === null ? 0 : toS16(toS16(targetYaw - actor.heading));
-  const inCone = targetYaw !== null && cone >= -EAGLE_JET_ACTION0.CONE_HALF && cone <= EAGLE_JET_ACTION0.CONE_HALF;
+  // chunk_0034.c:1746 is `(sVar2 < 0x2001) && (-0x2001 < sVar2)` -- strict on
+  // both sides, so the accepted range is [-0x2000, 0x2000]. Inclusive bounds
+  // kept aiming at exactly +/-0x2001, where the ROM drops out of the cone.
+  const inCone =
+    targetYaw !== null && cone > -EAGLE_JET_ACTION0.CONE_HALF && cone < EAGLE_JET_ACTION0.CONE_HALF;
 
   if (inCone) {
     // Seek the two turret-pivot channels toward the target bearing (zz_017a6e0_ on
@@ -130,9 +140,13 @@ function eagleJetAction0(actor: RomActor, ctx: StreamContext): void {
     ctx.onFamilyProjectile?.(actor, EAGLE_JET_SHOT_SPAWNER, types[0]);
     ctx.onFamilyProjectile?.(actor, EAGLE_JET_SHOT_SPAWNER, types[1]);
   }
+  // zz_006a53c_(actor, 0x10), chunk_0009.c:752-765. The parameter is positive,
+  // so +0x694 is written first, then the common cleanup, then the literal cue.
+  // Action 1 already does this; action 0 skipped the timer and passed ubCue.
+  actor.stateTimer = EAGLE_JET_ACTION0.EXIT_KIND + actor.dt;
   actor.housekeeping73f = 0;
   actor.controlWord &= ~EAGLE_JET_ACTION0.ACTION_MODE_BITS;
-  dispatchFullBodyCue(actor, actor.ubCue); // zz_006a53c_ → zz_006a6fc_(+0x5e4)
+  dispatchFullBodyCue(actor, EAGLE_JET_ACTION0.EXIT_CUE);
 }
 
 export function createEagleJetAction1Reference(ctx: StreamContext): (actor: RomActor) => void {
@@ -144,7 +158,11 @@ export function createEagleJetAction1Reference(ctx: StreamContext): (actor: RomA
       actor.fbPhaseSlots[0] = 1;
       actor.handlerTimer = EAGLE_JET_ACTION1.DURATION;
       a.retiredHitboxKind = EAGLE_JET_ACTION1.HITBOX_KIND;
-      a.preparedPartSlots = EAGLE_JET_ACTION1.PREPARED_PARTS;
+      if (actor.borgNumber === 0x607) {
+        a.preparedPartSlots = EAGLE_JET_ACTION1.PREPARED_PARTS_607;
+      } else if (actor.borgNumber === 0x61b) {
+        a.preparedPartSlots = EAGLE_JET_ACTION1.PREPARED_PARTS;
+      }
       ctx.onPlayCue?.(actor, EAGLE_JET_ACTION1.SOUND_CUE);
       return;
     }
