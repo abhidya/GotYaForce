@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-22T23:09:52.241913Z",
-  "run_id": "2026-08-22T21:56:47.688409Z",
+  "generated_at": "2026-08-22T23:35:30.034477Z",
+  "run_id": "2026-08-22T23:11:54.804049Z",
   "total_units": 1396,
   "green": 3,
   "staged": 22,
@@ -10,21 +10,26 @@
   "deferred": 0,
   "structural_ineligible": 3,
   "active": 0,
-  "total_attempts": 61,
-  "transitions_last_hour": 3,
+  "total_attempts": 62,
+  "transitions_last_hour": 4,
   "greens_last_hour": 2,
   "last_green_at": "2026-08-22T23:09:41.685168Z",
   "last_green_unit": "auto-c0035-000",
   "last_product_commit": "c3bf56403c2c52cd643a4a45ed7dadd88a21c8ef",
-  "repeated_failure_classes": [],
-  "health": "idle",
+  "repeated_failure_classes": [
+    [
+      "assembly:assembly gate canonicalize failed before promotion: owner_va",
+      2
+    ]
+  ],
+  "health": "healthy_progress",
   "machine": {
-    "workflow_state": "stopped_at_boundary",
-    "driver_status": "stopped",
+    "workflow_state": "running",
+    "driver_status": "running",
     "manual_paused": false,
     "block_reason": null,
-    "active_model": null,
-    "context_length": null,
+    "active_model": "unsloth/Qwen3.8-27B-GGUF",
+    "context_length": 60000,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
     "detail": ""
   }

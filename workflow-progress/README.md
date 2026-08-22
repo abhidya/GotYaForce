@@ -1,26 +1,31 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-22T23:09:52.118914Z - machine-written, do not edit.*
+*Generated 2026-08-22T23:35:29.882739Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 25/1396 settled (3 green, 22 staged) |
 | **Retries outstanding** | 2 |
 | **Untouched** | 1366 |
-| **Last transition** | 2026-08-22T23:09:52.118914Z |
+| **Last transition** | 2026-08-22T23:35:29.882739Z |
 | **Last green** | 2026-08-22T23:09:41.685168Z (`auto-c0035-000`) |
 | **Last product commit** | `c3bf56403c2c52cd643a4a45ed7dadd88a21c8ef` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
+
+**Repeated recent failure classes**
+
+- `assembly:assembly gate canonicalize failed before promotion: owner_va` x2
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-22T23:35:29.882739Z | `auto-c0035-006` | gate_failed | assembly | 6 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801336a |
 | 2026-08-22T23:09:52.118914Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-22T23:09:41.685168Z | `auto-c0035-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-22T23:06:09.168198Z | `auto-c0018-018` | staged | commit | 4 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +75,3 @@
 | 2026-08-21T13:30:55.951566Z | `collision-core` | green | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:30:39.420895Z | `auto-c0053-010` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
 | 2026-08-21T13:30:26.298668Z | `auto-c0053-009` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |
-| 2026-08-21T13:30:14.071673Z | `auto-c0035-005` | staged | artifact-digest-backfill | 1 | legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote pu |

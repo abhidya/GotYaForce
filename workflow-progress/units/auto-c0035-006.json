@@ -2,11 +2,11 @@
   "schema": 1,
   "unit": "auto-c0035-006",
   "unit_id": "auto-c0035-006",
-  "timestamp": "2026-08-22T22:37:33.018904Z",
-  "run_id": "2026-08-22T21:56:47.688409Z",
+  "timestamp": "2026-08-22T23:35:29.882739Z",
+  "run_id": "2026-08-22T23:11:54.804049Z",
   "result": "gate_failed",
   "stage": "assembly",
-  "attempt": 5,
+  "attempt": 6,
   "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
   "product_commit": null,
   "product_pushed": null,
@@ -19,21 +19,9 @@
     "rounds": [
       {
         "iteration": 1,
-        "stage": "compile",
-        "error_count": 3,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0035-006.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_hpd_n0rc\\unit.o'' failed (returned 1)",
-          "unit.c:243:32: error: use of undeclared identifier 'FUN_801336a4'; did you mean 'FUN_80133504'?",
-          "unit.c:244:34: error: use of undeclared identifier 'FUN_80133cbc'"
-        ],
-        "fingerprint": "24f565360694237bf82beab6604deb7aaf1f786c0384b426605510de67d65864"
-      },
-      {
-        "iteration": 2,
         "stage": "import-gate",
         "error_count": 0,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-006\\header-attempt5-iter1.h",
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-006\\header-attempt6-iter0.h",
         "diagnostics": [
           "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
           "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: FUN_801336a4, FUN_80133cbc"
@@ -45,22 +33,22 @@
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0033-007",
-        "auto-c0033-008",
         "auto-c0033-009",
         "auto-c0033-010",
+        "auto-c0018-018",
+        "auto-c0035-000",
         "auto-c0035-006"
       ],
       "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": null,
+          "symbol": "FUN_801336a4",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0033-007",
-            "auto-c0033-008",
+            "auto-c0018-018",
             "auto-c0033-009",
             "auto-c0033-010",
+            "auto-c0035-000",
             "auto-c0035-006"
           ],
           "variants": {},
@@ -70,18 +58,18 @@
       "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0035-006",
-        "sha256": "ab9dcba4b1009779bd0c1f38ddbb42122828a401fd9382e7d9254bf75f6bb723"
+        "sha256": "589d86a68edd4986408a34d3aa6e51ea109bd1ba51d8f04a616bc16f938f293d"
       },
       "expected_candidate": {
         "name": "auto-c0035-006",
-        "sha256": "ab9dcba4b1009779bd0c1f38ddbb42122828a401fd9382e7d9254bf75f6bb723"
+        "sha256": "589d86a68edd4986408a34d3aa6e51ea109bd1ba51d8f04a616bc16f938f293d"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "47f6047035d9555b9c1d55917d1885a90c90a69e",
+      "driver_rev": "94ceddce2121dccd50874d183d3bd800b0d00cbe",
       "prompt_version": "3",
       "registry_version": "49"
     },
@@ -90,7 +78,7 @@
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 5,
+    "attempts": 6,
     "symbol_set": [
       "CONCAT44",
       "DAT_80336561",
@@ -130,25 +118,13 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_version_used": 49,
-    "model_requests": 7,
+    "model_requests": 9,
     "rounds": [
       {
         "iteration": 1,
-        "stage": "compile",
-        "error_count": 3,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0035-006.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_hpd_n0rc\\unit.o'' failed (returned 1)",
-          "unit.c:243:32: error: use of undeclared identifier 'FUN_801336a4'; did you mean 'FUN_80133504'?",
-          "unit.c:244:34: error: use of undeclared identifier 'FUN_80133cbc'"
-        ],
-        "fingerprint": "24f565360694237bf82beab6604deb7aaf1f786c0384b426605510de67d65864"
-      },
-      {
-        "iteration": 2,
         "stage": "import-gate",
         "error_count": 0,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-006\\header-attempt5-iter1.h",
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-006\\header-attempt6-iter0.h",
         "diagnostics": [
           "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
           "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: FUN_801336a4, FUN_80133cbc"
@@ -174,22 +150,22 @@
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0033-007",
-        "auto-c0033-008",
         "auto-c0033-009",
         "auto-c0033-010",
+        "auto-c0018-018",
+        "auto-c0035-000",
         "auto-c0035-006"
       ],
       "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": null,
+          "symbol": "FUN_801336a4",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0033-007",
-            "auto-c0033-008",
+            "auto-c0018-018",
             "auto-c0033-009",
             "auto-c0033-010",
+            "auto-c0035-000",
             "auto-c0035-006"
           ],
           "variants": {},
@@ -199,18 +175,18 @@
       "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0035-006",
-        "sha256": "ab9dcba4b1009779bd0c1f38ddbb42122828a401fd9382e7d9254bf75f6bb723"
+        "sha256": "589d86a68edd4986408a34d3aa6e51ea109bd1ba51d8f04a616bc16f938f293d"
       },
       "expected_candidate": {
         "name": "auto-c0035-006",
-        "sha256": "ab9dcba4b1009779bd0c1f38ddbb42122828a401fd9382e7d9254bf75f6bb723"
+        "sha256": "589d86a68edd4986408a34d3aa6e51ea109bd1ba51d8f04a616bc16f938f293d"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "47f6047035d9555b9c1d55917d1885a90c90a69e",
+      "driver_rev": "94ceddce2121dccd50874d183d3bd800b0d00cbe",
       "prompt_version": "3",
       "registry_version": "49"
     },
@@ -273,6 +249,14 @@
       "result": "gate_failed",
       "stage": "assembly",
       "attempt": 5,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-22T23:35:29.882739Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 6,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
       "product_commit": null
     }
