@@ -23,6 +23,8 @@
  * tab visibility, matching the sim's own startFixedStepLoop rationale in main.ts.
  */
 
+import { touchGamepad } from "./touch/index.js";
+
 export type MenuAction =
   | "up"
   | "down"
@@ -74,7 +76,12 @@ interface PadEdgeState {
   stickY: 0 | -1 | 1;
   lastStickFireAt: number;
 }
-const padStates = new Map<number, PadEdgeState>();
+// Keyed by a STABLE identity, not by array position: the touch overlay is appended after
+// the physical pads, so its index shifts when a controller is plugged in. Reusing a
+// position-keyed entry across two different pads would carry stale button-edge state and
+// swallow the first press after the shift.
+type PadKey = number | "touch";
+const padStates = new Map<PadKey, PadEdgeState>();
 
 function isTextInputTarget(target: EventTarget | null): boolean {
   return (
@@ -132,27 +139,35 @@ function onWindowKeydown(ev: KeyboardEvent): void {
   ev.preventDefault();
 }
 
-function padEdgeStateFor(index: number): PadEdgeState {
-  let state = padStates.get(index);
+function padEdgeStateFor(key: PadKey): PadEdgeState {
+  let state = padStates.get(key);
   if (!state) {
     state = { buttonsPressed: [], stickX: 0, stickY: 0, lastStickFireAt: 0 };
-    padStates.set(index, state);
+    padStates.set(key, state);
   }
   return state;
 }
 
 function pollGamepads(): void {
   if (subscribers.length === 0) return; // no screen listening; skip the work
-  const pads = navigator.getGamepads?.();
-  if (!pads) return;
+  // The on-screen GameCube overlay (ui/touch) publishes a synthetic standard-mapping pad
+  // so menus work under touch with no second code path. It is appended rather than
+  // substituted, so a physical pad and the overlay can both be live on a tablet.
+  const physical = navigator.getGamepads?.() ?? [];
+  const touch = touchGamepad();
+  const pads: (Gamepad | null)[] = touch ? [...physical, touch] : [...physical];
+  if (!touch) padStates.delete("touch"); // overlay hidden: drop its edge state
+  if (pads.length === 0) return;
   const now = performance.now();
+  const touchIndex = touch ? pads.length - 1 : -1;
   for (let i = 0; i < pads.length; i += 1) {
     const pad = pads[i];
+    const key: PadKey = i === touchIndex ? "touch" : i;
     if (!pad?.connected) {
-      padStates.delete(i);
+      padStates.delete(key);
       continue;
     }
-    const state = padEdgeStateFor(i);
+    const state = padEdgeStateFor(key);
 
     // Face/shoulder buttons: fire once per press (rising edge).
     const wasPressed = (idx: number) => state.buttonsPressed[idx] ?? false;

@@ -24,6 +24,12 @@ import os
 import re
 import sys
 from collections import Counter, defaultdict
+from pathlib import Path
+
+from oracle_registry_schema import (
+    ORACLE_REGISTRY_SCHEMA,
+    validate_oracle_registry_v1,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
@@ -39,7 +45,7 @@ TS_EXTS = (".ts", ".tsx", ".mjs", ".js")
 TS_SKIP_DIRS = {"node_modules", ".git", "dist", "build", "coverage", "out", ".next", ".turbo"}
 
 MARKER_RX = re.compile(r"^// ==== ([0-9a-fA-F]{8})\s+(.+?) ====\s*$")
-ZZ_RX = re.compile(r"^zz_([0-9a-f]{7})_$")
+ZZ_RX = re.compile(r"^zz_([0-9a-fA-F]{7})_$")
 FUN_RX = re.compile(r"^FUN_([0-9a-fA-F]{8})$")
 GLOBAL_RX = re.compile(r"\b(PTR_FUN|PTR_DAT|PTR_PTR|FLOAT|DOUBLE|DAT|UNK)_([0-9a-fA-F]{6,8})\b")
 CALL_RX = re.compile(r"\b([A-Za-z_]\w*)\s*\(")
@@ -84,8 +90,6 @@ def split_params(paramtext):
     tail = "".join(cur).strip()
     if tail:
         parts.append(tail)
-    if parts == ["void"]:
-        return []
     return parts
 
 
@@ -378,6 +382,7 @@ def main():
             buckets["citations_no_family"].append(r["unit"])
         else:
             buckets["trace_only"].append(r["unit"])
+    buckets = {name: sorted(units) for name, units in buckets.items()}
 
     # --- summary -------------------------------------------------------------
     matrix = defaultdict(Counter)
@@ -431,8 +436,19 @@ def main():
         },
     }
 
+    registry = {
+        "oracle_registry_schema": ORACLE_REGISTRY_SCHEMA,
+        "meta": meta,
+        "summary": summary,
+        "ranked_units": ranked_units,
+        "functions": functions,
+        "excluded": excluded,
+    }
+    validate_oracle_registry_v1(registry, Path(ROOT))
+
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("{\n")
+        fh.write('"oracle_registry_schema": %d,\n' % ORACLE_REGISTRY_SCHEMA)
         fh.write('"meta": %s,\n' % json.dumps(meta, indent=1))
         fh.write('"summary": %s,\n' % json.dumps(summary, indent=1))
         fh.write('"ranked_units": %s,\n' % json.dumps(ranked_units, indent=1))

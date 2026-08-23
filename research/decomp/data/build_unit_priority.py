@@ -42,7 +42,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from oracle_registry_schema import load_oracle_registry_v1
+
 DATA_DIR = Path(__file__).resolve().parent
+PRODUCT_ROOT = DATA_DIR.parents[2]
 REGISTRY_PATH = DATA_DIR / "oracle-registry.json"
 OUTPUT_PATH = DATA_DIR / "unit-priority.json"
 
@@ -77,8 +80,14 @@ def build_priorities(registry: dict) -> dict[str, int]:
     }
 
 
+def load_registry_for_priority() -> dict:
+    """Load only a complete, source-corroborated schema-1 owner registry."""
+
+    return load_oracle_registry_v1(REGISTRY_PATH, PRODUCT_ROOT)
+
+
 def main() -> int:
-    registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8-sig"))
+    registry = load_registry_for_priority()
     priorities = build_priorities(registry)
     payload = {
         "generated_by": "research/decomp/data/build_unit_priority.py",

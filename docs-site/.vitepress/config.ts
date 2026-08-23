@@ -41,14 +41,14 @@ export default defineConfig({
       { text: 'Progress', link: '/progress' },
       { text: 'Functions', link: '/functions' },
       { text: 'Call Graph', link: '/call-graph' },
+      { text: 'Contribute', link: '/contributing/' },
       {
         text: 'Architecture',
         items: [
           { text: 'Execution Map', link: '/execution-map' },
           { text: 'Memory Map', link: '/memory-map' },
           { text: 'Source Map', link: '/source-map' },
-          { text: 'Ghidra Corpus', link: '/ghidra-corpus' },
-          { text: 'Call Graph', link: '/call-graph' }
+          { text: 'Ghidra Corpus', link: '/ghidra-corpus' }
         ]
       },
       { text: 'Systems', link: '/systems/' },
@@ -73,6 +73,19 @@ export default defineConfig({
       }
     ],
     sidebar: {
+      '/contributing/': [
+        {
+          text: 'Contributor guide',
+          items: [
+            { text: 'Overview', link: '/contributing/' },
+            { text: 'Clean setup', link: '/contributing/setup' },
+            { text: 'Verification', link: '/contributing/verification' },
+            { text: 'Verified ports', link: '/contributing/porting' },
+            { text: 'Asset workflows', link: '/contributing/assets' },
+            { text: 'Troubleshooting', link: '/contributing/troubleshooting' }
+          ]
+        }
+      ],
       '/systems/': [
         {
           text: 'Systems',

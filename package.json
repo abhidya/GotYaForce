@@ -19,6 +19,7 @@
     "selfcheck:game-session": "node scripts/selfcheck-game-session.mjs",
     "selfcheck:battle-pause-edge": "node --test scripts/battle-pause-input-edge.test.mjs",
     "selfcheck:browser-cdp": "node --test scripts/cdp-client.test.mjs scripts/network-gate.test.mjs",
+    "selfcheck:browser-poc-gate": "node --test scripts/finish-game-port-browser-gate.test.mjs",
     "smoke:browser": "node scripts/smoke-browser-game.mjs",
     "selfcheck:get-settlement": "pnpm --filter @gf/missions build && node packages/missions/dist/gotchaBoxSettlement.selfcheck.js && node scripts/selfcheck-get-storage.mjs",
     "selfcheck:hud": "node scripts/selfcheck-hud.mjs",
@@ -57,7 +58,11 @@
     "atlas:curate": "node docs-site/scripts/curate-data.mjs",
     "atlas:dev": "pnpm atlas:curate && pnpm --filter gotcha-force-atlas dev",
     "atlas:build": "pnpm atlas:curate && pnpm --filter gotcha-force-atlas build",
-    "atlas:preview": "pnpm --filter gotcha-force-atlas preview"
+    "atlas:preview": "pnpm --filter gotcha-force-atlas preview",
+    "test:repo-policy": "node --test scripts/repository-policy.test.mjs",
+    "test:oracle": "node research/decomp/oracle-harness/tests/run-oracle-tests.mjs",
+    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm selfcheck:browser-poc-gate && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
+    "verify:docs": "pnpm atlas:build"
   },
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.2",

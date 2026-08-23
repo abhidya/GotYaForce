@@ -128,8 +128,6 @@ importers:
 
   packages/test-fixtures: {}
 
-  packages/tools: {}
-
 packages:
 
   '@algolia/abtesting@1.21.1':
