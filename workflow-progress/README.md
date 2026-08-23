@@ -1,16 +1,16 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T00:41:33.731614Z - machine-written, do not edit.*
+*Generated 2026-08-23T02:04:52.133452Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 26/1396 settled (3 green, 23 staged) |
-| **Retries outstanding** | 3 |
-| **Untouched** | 1364 |
-| **Last transition** | 2026-08-23T00:41:33.731614Z |
+| **Retries outstanding** | 4 |
+| **Untouched** | 1363 |
+| **Last transition** | 2026-08-23T02:04:52.133452Z |
 | **Last green** | 2026-08-23T00:41:33.731614Z (`auto-c0035-006`) |
 | **Last product commit** | `ce9c6f4dbf750219fc438794a86c341d356908c9` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T02:04:52.133452Z | `auto-c0035-004` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
 | 2026-08-23T00:41:33.731614Z | `auto-c0035-006` | staged | commit | 7 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T00:33:15.961570Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T00:33:13.104625Z | `auto-c0035-003` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0035-003 declares FUN_80 |
@@ -70,4 +71,3 @@
 | 2026-08-21T13:36:57.057687Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T13:35:16.971877Z | `auto-c0035-002` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: artifact destination already exists with a different preimage: D |
 | 2026-08-21T13:35:10.394751Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
-| 2026-08-21T13:35:10.431247Z | `auto-c0033-005` | deferred | port | 0 | interrupted before a verdict; requeued |

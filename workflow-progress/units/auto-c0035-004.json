@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "unit": "auto-c0035-004",
+  "unit_id": "auto-c0035-004",
+  "timestamp": "2026-08-23T02:04:52.133452Z",
+  "run_id": "2026-08-23T00:37:40.445764Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "stuck: identical diagnostics after applied fix",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0035-004.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_cmebws5s\\unit.o'' failed (returned 1)",
+          "unit.c:120:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:77:33: error: use of undeclared identifier 'FUN_80047aa4'; did you mean 'FUN_800452a0'?"
+        ],
+        "fingerprint": "07ee7bfa1143f4f0969e78bbde5e52c64406d5e93df83caf48f9bd70033ce234"
+      },
+      {
+        "iteration": 2,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-004\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: FUN_80047aa4"
+        ],
+        "fingerprint": "e03ecebd500890c78b2f842391f3491ad3b0e4aa95724b4ef08050a599746c91"
+      },
+      {
+        "iteration": 4,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-004\\header-attempt1-iter3.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: FUN_80047aa4"
+        ],
+        "fingerprint": "e03ecebd500890c78b2f842391f3491ad3b0e4aa95724b4ef08050a599746c91"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "37e6ff384ab1039cb4c64ad054946ea393c3791f",
+      "prompt_version": "3",
+      "registry_version": "51"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_80336560",
+      "DAT_80336561",
+      "DAT_80336562",
+      "DAT_8033657c",
+      "DAT_8033657e",
+      "DAT_80336580",
+      "DAT_80336908",
+      "DAT_80336909",
+      "DAT_8033690a",
+      "DAT_8033690c",
+      "DAT_8033690e",
+      "DAT_80336914",
+      "DAT_80336918",
+      "DAT_8033691c",
+      "DAT_80336920",
+      "DAT_80336924",
+      "DAT_8033692a",
+      "DAT_8033692b",
+      "DAT_8033692c",
+      "FUN_800452a0",
+      "FUN_80083874",
+      "FUN_801322dc",
+      "FUN_8013237c",
+      "FUN_80132674",
+      "FUN_801326d8",
+      "FUN_801327ac",
+      "FUN_80132974",
+      "FUN_80132a00",
+      "FUN_80133358",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "code",
+      "gnt4_PSMTXConcat_bl",
+      "gnt4_PSMTXCopy_bl",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSMTXRotRad_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006f98_",
+      "zz_0006fb4_",
+      "zz_006d228_",
+      "zz_006dbe0_",
+      "zz_006ebb4_",
+      "zz_006ec1c_",
+      "zz_0083244_",
+      "zz_0089100_",
+      "zz_008ac80_",
+      "zz_008aff0_",
+      "zz_00c3be0_",
+      "zz_00c74ec_",
+      "zz_0132734_",
+      "zz_0132f30_",
+      "zz_0132f9c_",
+      "zz_01330b4_",
+      "zz_01330cc_",
+      "zz_01332dc_",
+      "zz_01deb68_",
+      "zz_01df908_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 51,
+    "model_requests": 3,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0035-004.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_cmebws5s\\unit.o'' failed (returned 1)",
+          "unit.c:120:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:77:33: error: use of undeclared identifier 'FUN_80047aa4'; did you mean 'FUN_800452a0'?"
+        ],
+        "fingerprint": "07ee7bfa1143f4f0969e78bbde5e52c64406d5e93df83caf48f9bd70033ce234"
+      },
+      {
+        "iteration": 2,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-004\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: FUN_80047aa4"
+        ],
+        "fingerprint": "e03ecebd500890c78b2f842391f3491ad3b0e4aa95724b4ef08050a599746c91"
+      },
+      {
+        "iteration": 4,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-004\\header-attempt1-iter3.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: FUN_80047aa4"
+        ],
+        "fingerprint": "e03ecebd500890c78b2f842391f3491ad3b0e4aa95724b4ef08050a599746c91"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "37e6ff384ab1039cb4c64ad054946ea393c3791f",
+      "prompt_version": "3",
+      "registry_version": "51"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "stuck: identical diagnostics after applied fix",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-d53e5890fd860b08c4002f1ab96a92faa848058c64a2d5ce1179946fab4ed142"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-23T02:04:52.133452Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "stuck: identical diagnostics after applied fix",
+      "product_commit": null
+    }
+  ]
+}
