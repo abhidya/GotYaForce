@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T13:31:39.182679Z - machine-written, do not edit.*
+*Generated 2026-08-23T13:35:20.434084Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 38/1396 settled (3 green, 35 staged) |
+| **Queue progress** | 39/1396 settled (3 green, 36 staged) |
 | **Retries outstanding** | 17 |
-| **Untouched** | 1338 |
-| **Last transition** | 2026-08-23T13:31:39.182679Z |
-| **Last green** | 2026-08-23T13:31:39.182679Z (`auto-c0028-013`) |
-| **Last product commit** | `85c583934e5749882fe0cca69faa14b4d5fcb839` |
+| **Untouched** | 1337 |
+| **Last transition** | 2026-08-23T13:35:20.434084Z |
+| **Last green** | 2026-08-23T13:35:20.434084Z (`auto-c0028-014`) |
+| **Last product commit** | `77695a9ca756e76f346a4da10f063fc8473e460e` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T13:35:20.434084Z | `auto-c0028-014` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T13:31:39.182679Z | `auto-c0028-013` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T13:27:48.153342Z | `auto-c0019-003` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T13:05:34.628508Z | `auto-c0019-002` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800bae6 |
@@ -74,4 +75,3 @@
 | 2026-08-22T21:38:32.410178Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T22:07:59.479820Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T22:00:29.212518Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
-| 2026-08-21T22:00:29.288948Z | `auto-c0035-006` | deferred | assembly | 4 | interrupted before a verdict; requeued |
