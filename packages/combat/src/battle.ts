@@ -1141,6 +1141,19 @@ class BattleImpl implements Battle {
         continue;
       }
 
+      // A hit or knockdown outranks ROM action ownership. bridge.ts's interrupt()
+      // documents itself as covering "hit/down/death", but only the death branch
+      // above ever called it. A borg struck mid-special therefore kept ownership,
+      // so the `continue` below skipped `b.stateTime += 1` and stepActionState --
+      // hitstun never expired, it went on attacking through the hit, and on
+      // completion tick() overwrote state/anim back to "idle", discarding the
+      // reaction entirely. interrupt() clears specialActive, and tick() opens with
+      // `if (!this.specialActive) return false`, so the generic path resumes this
+      // same frame.
+      if (b.romDriver && (b.state === "hit" || b.state === "down")) {
+        b.romDriver.interrupt();
+      }
+
       // ROM-family driver (1:1 ported state machine) — when active, owns the borg's
       // motion + attacks for this frame; skip the generic stepMovement/stepAttacks.
       // See packages/combat/src/bridge.ts. Borgs without a ported family are unaffected.
