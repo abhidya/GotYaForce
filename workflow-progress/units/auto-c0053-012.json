@@ -1,0 +1,242 @@
+{
+  "schema": 1,
+  "unit": "auto-c0053-012",
+  "unit_id": "auto-c0053-012",
+  "timestamp": "2026-08-23T11:19:23.779521Z",
+  "run_id": "2026-08-23T10:39:48.367114Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate link failed before promotion: link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-012.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_fy26x9mi\\unit.o'' failed (returned 1)",
+          "unit.c:202:33: error: use of undeclared identifier 'FUN_80047aa4'",
+          "unit.c:81:36: error: use of undeclared identifier 'FUN_801b9adc'; did you mean 'FUN_801b8a1c'?"
+        ],
+        "fingerprint": "f178b2648021f852c424492b0e800edc76098c2c72b0e3161b3738f1e6b0d06a"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0050-002",
+        "auto-c0050-003",
+        "auto-c0050-004",
+        "auto-c0053-011",
+        "auto-c0053-012"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "link_failure",
+          "units": [
+            "auto-c0050-002",
+            "auto-c0050-003",
+            "auto-c0050-004",
+            "auto-c0053-011",
+            "auto-c0053-012"
+          ],
+          "variants": {},
+          "detail": "link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc"
+        }
+      ],
+      "detail": "link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+      "candidate": {
+        "name": "auto-c0053-012",
+        "sha256": "70e14f2deb938bd848cacb4ba826ed4d042da7933fef2c44cf93d89dc78c485b"
+      },
+      "expected_candidate": {
+        "name": "auto-c0053-012",
+        "sha256": "70e14f2deb938bd848cacb4ba826ed4d042da7933fef2c44cf93d89dc78c485b"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "86c6142006b3472bcf38705816af4bccf0cf3711",
+      "prompt_version": "3",
+      "registry_version": "61"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "ABS",
+      "CONCAT44",
+      "DAT_80382440",
+      "DAT_80382444",
+      "DAT_80382446",
+      "DAT_80382448",
+      "DAT_8038244c",
+      "DAT_80382450",
+      "DAT_80382454",
+      "DAT_8038245c",
+      "DAT_8038245e",
+      "DAT_8038246c",
+      "DAT_80382470",
+      "DAT_80382474",
+      "DAT_80382478",
+      "DAT_803bb374",
+      "DAT_803c4e6c",
+      "DAT_8043625c",
+      "DAT_80436260",
+      "FUN_80067310",
+      "FUN_8006c498",
+      "FUN_80083874",
+      "FUN_801b8a1c",
+      "FUN_801b8b6c",
+      "FUN_801b8c90",
+      "FUN_801b8e2c",
+      "FUN_801b9028",
+      "PTR_DAT_80433934",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "code",
+      "gnt4_PSMTXConcat_bl",
+      "gnt4_PSMTXCopy_bl",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSMTXRotRad_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "longlong",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006fb4_",
+      "zz_004cd24_",
+      "zz_00679d0_",
+      "zz_006a474_",
+      "zz_006a5a4_",
+      "zz_006d144_",
+      "zz_006e1ac_",
+      "zz_006ebb4_",
+      "zz_0083244_",
+      "zz_00833a4_",
+      "zz_00833ec_",
+      "zz_0083610_",
+      "zz_0083714_",
+      "zz_0084170_",
+      "zz_008458c_",
+      "zz_0088aa0_",
+      "zz_0088f98_",
+      "zz_0089100_",
+      "zz_0089444_",
+      "zz_008ac80_",
+      "zz_008aff0_",
+      "zz_00b22f4_",
+      "zz_00f036c_",
+      "zz_01b90a4_",
+      "zz_01b94e8_",
+      "zz_01b961c_",
+      "zz_01b98ec_",
+      "zz_01b9b1c_",
+      "zz_01b9b68_",
+      "zz_01b9be0_",
+      "zz_01b9df0_",
+      "zz_01b9f0c_",
+      "zz_01b9f8c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 61,
+    "model_requests": 1,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-012.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_fy26x9mi\\unit.o'' failed (returned 1)",
+          "unit.c:202:33: error: use of undeclared identifier 'FUN_80047aa4'",
+          "unit.c:81:36: error: use of undeclared identifier 'FUN_801b9adc'; did you mean 'FUN_801b8a1c'?"
+        ],
+        "fingerprint": "f178b2648021f852c424492b0e800edc76098c2c72b0e3161b3738f1e6b0d06a"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0050-002",
+        "auto-c0050-003",
+        "auto-c0050-004",
+        "auto-c0053-011",
+        "auto-c0053-012"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "link_failure",
+          "units": [
+            "auto-c0050-002",
+            "auto-c0050-003",
+            "auto-c0050-004",
+            "auto-c0053-011",
+            "auto-c0053-012"
+          ],
+          "variants": {},
+          "detail": "link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc"
+        }
+      ],
+      "detail": "link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+      "candidate": {
+        "name": "auto-c0053-012",
+        "sha256": "70e14f2deb938bd848cacb4ba826ed4d042da7933fef2c44cf93d89dc78c485b"
+      },
+      "expected_candidate": {
+        "name": "auto-c0053-012",
+        "sha256": "70e14f2deb938bd848cacb4ba826ed4d042da7933fef2c44cf93d89dc78c485b"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "86c6142006b3472bcf38705816af4bccf0cf3711",
+      "prompt_version": "3",
+      "registry_version": "61"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate link failed before promotion: link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-23T11:19:23.779521Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate link failed before promotion: link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+      "product_commit": null
+    }
+  ]
+}
