@@ -1,8 +1,8 @@
 {
   "registry_schema": 1,
   "program": "gnt4",
-  "version": 49,
-  "updated_at": "2026-08-21T16:20:44.651855Z",
+  "version": 51,
+  "updated_at": "2026-08-23T00:41:32.764701Z",
   "entries": {
     "fn:FUN_8010858c": {
       "kind": "prototype",
@@ -602,7 +602,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T04:17:59.565908Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -616,7 +616,38 @@
       "declaration": "extern void zz_0099e70_(int param_1, int param_2);",
       "derivation": "call_site",
       "updated_version": 33,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:2dabb9507a370101e2d19735806eaf226a9e29f1b9f447c1136c61ed42a01aa2",
+          "material_sha256": "b0cf241a2eaf0678454c3513f32fff8a1b7a9b5bd42e39b49577e311944bd86c",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0099e70_|auto-c0018-018,auto-c0053-009",
+          "class": "collision_stub",
+          "symbol": "zz_0099e70_",
+          "units": [
+            "auto-c0018-018",
+            "auto-c0053-009"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0099e70_",
+          "variants": {
+            "auto-c0018-018": "void zz_0099e70_(int,int);",
+            "auto-c0053-009": "int zz_0099e70_();"
+          },
+          "first_seen": "2026-08-21T04:18:05.917038Z",
+          "last_seen": "2026-08-21T04:19:22.058611Z",
+          "times_seen": 3
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 33
     },
     "fn:zz_00b9e30_": {
       "kind": "prototype",
@@ -671,7 +702,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T04:17:59.565908Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -685,7 +716,40 @@
       "declaration": "extern void zz_00f0104_(int param_1, int param_2, int param_3);",
       "derivation": "call_site",
       "updated_version": 33,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:a4e6963f54547a62f64343cef26a39e6ffa72f6e3a248f8141e3552e733916ea",
+          "material_sha256": "54708fe5789be868e5a438ab1046fa6578e40347d3da902e8f6fefa3d69d113d",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_00f0104_|auto-c0018-018,auto-c0029-013,auto-c0034-018",
+          "class": "collision_stub",
+          "symbol": "zz_00f0104_",
+          "units": [
+            "auto-c0018-018",
+            "auto-c0029-013",
+            "auto-c0034-018"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_00f0104_",
+          "variants": {
+            "auto-c0018-018": "void zz_00f0104_(int,int,int);",
+            "auto-c0029-013": "int zz_00f0104_();",
+            "auto-c0034-018": "int zz_00f0104_();"
+          },
+          "first_seen": "2026-08-21T16:19:12.855522Z",
+          "last_seen": "2026-08-21T16:19:12.855522Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 33
     },
     "fn:zz_0137540_": {
       "kind": "prototype",
@@ -694,7 +758,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T04:17:59.565908Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -708,7 +772,38 @@
       "declaration": "extern void zz_0137540_(int param_1, int param_2);",
       "derivation": "call_site",
       "updated_version": 33,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:981318e753ad63add5769b0b2478ab3f289c067555513f1f6ccba937c3cc0e3d",
+          "material_sha256": "7fd07c23412c4bdcd98e228bec80cadf6592411ad5a0b5b2b7661b800d3a0967",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0137540_|auto-c0018-018,auto-c0053-009",
+          "class": "collision_stub",
+          "symbol": "zz_0137540_",
+          "units": [
+            "auto-c0018-018",
+            "auto-c0053-009"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0137540_",
+          "variants": {
+            "auto-c0018-018": "void zz_0137540_(int,int);",
+            "auto-c0053-009": "int zz_0137540_();"
+          },
+          "first_seen": "2026-08-21T04:18:05.917038Z",
+          "last_seen": "2026-08-21T04:19:22.058611Z",
+          "times_seen": 3
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 33
     },
     "fn:FUN_800ba240": {
       "kind": "prototype",
@@ -852,9 +947,13 @@
       "kind": "prototype",
       "symbol": "FUN_80133358",
       "tier": "compile_only",
-      "source_units": [],
-      "source_tiers": {},
-      "harvested_at": "2026-08-21T05:37:13.987274Z",
+      "source_units": [
+        "auto-c0035-006"
+      ],
+      "source_tiers": {
+        "auto-c0035-006": "compile_only"
+      },
+      "harvested_at": "2026-08-23T00:41:32.762703Z",
       "contested": false,
       "conflicts": [
         {
@@ -874,18 +973,22 @@
           "recorded_at": "2026-08-21T13:27:51.288653Z"
         }
       ],
-      "declaration": "void FUN_80133358(double,int);;",
+      "declaration": "void FUN_80133358(double,int);",
       "derivation": "definition",
-      "updated_version": 42,
-      "revoked": true
+      "updated_version": 51,
+      "source_updated_version": 51
     },
     "fn:FUN_80133504": {
       "kind": "prototype",
       "symbol": "FUN_80133504",
       "tier": "compile_only",
-      "source_units": [],
-      "source_tiers": {},
-      "harvested_at": "2026-08-21T05:37:13.987274Z",
+      "source_units": [
+        "auto-c0035-006"
+      ],
+      "source_tiers": {
+        "auto-c0035-006": "compile_only"
+      },
+      "harvested_at": "2026-08-23T00:41:32.762703Z",
       "contested": false,
       "conflicts": [
         {
@@ -905,18 +1008,22 @@
           "recorded_at": "2026-08-21T13:27:51.288653Z"
         }
       ],
-      "declaration": "void FUN_80133504(int);;",
+      "declaration": "void FUN_80133504(int);",
       "derivation": "definition",
-      "updated_version": 42,
-      "revoked": true
+      "updated_version": 51,
+      "source_updated_version": 51
     },
     "fn:FUN_80133510": {
       "kind": "prototype",
       "symbol": "FUN_80133510",
       "tier": "compile_only",
-      "source_units": [],
-      "source_tiers": {},
-      "harvested_at": "2026-08-21T05:37:13.987274Z",
+      "source_units": [
+        "auto-c0035-006"
+      ],
+      "source_tiers": {
+        "auto-c0035-006": "compile_only"
+      },
+      "harvested_at": "2026-08-23T00:41:32.762703Z",
       "contested": false,
       "conflicts": [
         {
@@ -936,18 +1043,22 @@
           "recorded_at": "2026-08-21T13:27:51.288653Z"
         }
       ],
-      "declaration": "void FUN_80133510(undefined8,double,double,double,double,double,double,double,undefined1*);;",
+      "declaration": "void FUN_80133510(undefined8,double,double,double,double,double,double,double,undefined1*);",
       "derivation": "definition",
-      "updated_version": 42,
-      "revoked": true
+      "updated_version": 51,
+      "source_updated_version": 51
     },
     "fn:FUN_80133530": {
       "kind": "prototype",
       "symbol": "FUN_80133530",
       "tier": "compile_only",
-      "source_units": [],
-      "source_tiers": {},
-      "harvested_at": "2026-08-21T05:37:13.987274Z",
+      "source_units": [
+        "auto-c0035-006"
+      ],
+      "source_tiers": {
+        "auto-c0035-006": "compile_only"
+      },
+      "harvested_at": "2026-08-23T00:41:32.762703Z",
       "contested": false,
       "conflicts": [
         {
@@ -967,19 +1078,23 @@
           "recorded_at": "2026-08-21T13:27:51.288653Z"
         }
       ],
-      "declaration": "void FUN_80133530(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined*,undefined4,undefined4,undefined4,undefined4,undefined4);;",
+      "declaration": "void FUN_80133530(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined*,undefined4,undefined4,undefined4,undefined4,undefined4);",
       "derivation": "definition",
-      "updated_version": 42,
-      "revoked": true
+      "updated_version": 51,
+      "source_updated_version": 51
     },
     "fn:zz_01330b4_": {
       "kind": "prototype",
       "symbol": "zz_01330b4_",
       "tier": "compile_only",
-      "source_units": [],
-      "source_tiers": {},
-      "harvested_at": "2026-08-21T05:37:13.987274Z",
-      "contested": false,
+      "source_units": [
+        "auto-c0035-006"
+      ],
+      "source_tiers": {
+        "auto-c0035-006": "compile_only"
+      },
+      "harvested_at": "2026-08-23T00:41:32.762703Z",
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -998,19 +1113,53 @@
           "recorded_at": "2026-08-21T13:27:51.288653Z"
         }
       ],
-      "declaration": "void zz_01330b4_(int);;",
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:aee045009145aefb278cd0297ec9e38f92898e3b9524acd942ee1e60b02a0ed0",
+          "material_sha256": "b4be09a08676c3fe25aea05c91fc08ca2abdd6aa9e9bcb00498b4b46f63e98ad",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_01330b4_|auto-c0035-005,auto-c0035-006",
+          "class": "collision_stub",
+          "symbol": "zz_01330b4_",
+          "units": [
+            "auto-c0035-005",
+            "auto-c0035-006"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_01330b4_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0035-005": "header: int zz_01330b4_();",
+            "auto-c0035-006": "prelude: void zz_01330b4_(int);"
+          },
+          "first_seen": "2026-08-21T04:19:12.575531Z",
+          "last_seen": "2026-08-21T04:19:12.575531Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "declaration": "void zz_01330b4_(int);",
       "derivation": "definition",
-      "updated_version": 42,
-      "revoked": true
+      "assembly_only": false,
+      "behavioral_authority": false,
+      "updated_version": 51,
+      "source_updated_version": 51
     },
     "fn:zz_01330cc_": {
       "kind": "prototype",
       "symbol": "zz_01330cc_",
       "tier": "compile_only",
-      "source_units": [],
-      "source_tiers": {},
-      "harvested_at": "2026-08-21T05:37:13.987274Z",
-      "contested": false,
+      "source_units": [
+        "auto-c0035-006"
+      ],
+      "source_tiers": {
+        "auto-c0035-006": "compile_only"
+      },
+      "harvested_at": "2026-08-23T00:41:32.762703Z",
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -1029,19 +1178,53 @@
           "recorded_at": "2026-08-21T13:27:51.288653Z"
         }
       ],
-      "declaration": "void zz_01330cc_(int,int);;",
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:a1439f552443313f2e3c8a2eb3b6d817aa423f0da303b8fe51778276d23b832a",
+          "material_sha256": "7a66d445a0d6f6eef77eec07a291d1a5cf8167da9c322ce86341b18a11bfb14e",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_01330cc_|auto-c0035-005,auto-c0035-006",
+          "class": "collision_stub",
+          "symbol": "zz_01330cc_",
+          "units": [
+            "auto-c0035-005",
+            "auto-c0035-006"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_01330cc_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0035-005": "header: int zz_01330cc_();",
+            "auto-c0035-006": "prelude: void zz_01330cc_(int,int);"
+          },
+          "first_seen": "2026-08-21T04:19:12.575531Z",
+          "last_seen": "2026-08-21T04:19:12.575531Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "declaration": "void zz_01330cc_(int,int);",
       "derivation": "definition",
-      "updated_version": 42,
-      "revoked": true
+      "assembly_only": false,
+      "behavioral_authority": false,
+      "updated_version": 51,
+      "source_updated_version": 51
     },
     "fn:zz_01332dc_": {
       "kind": "prototype",
       "symbol": "zz_01332dc_",
       "tier": "compile_only",
-      "source_units": [],
-      "source_tiers": {},
-      "harvested_at": "2026-08-21T05:37:13.987274Z",
-      "contested": false,
+      "source_units": [
+        "auto-c0035-006"
+      ],
+      "source_tiers": {
+        "auto-c0035-006": "compile_only"
+      },
+      "harvested_at": "2026-08-23T00:41:32.762703Z",
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -1060,18 +1243,52 @@
           "recorded_at": "2026-08-21T13:27:51.288653Z"
         }
       ],
-      "declaration": "void zz_01332dc_(int);;",
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:81f8067afc5cffe76882da2f22fdee7de8b8b1673fac2828a5b534c32f9d5a36",
+          "material_sha256": "e1ac9cce1334298b86178f1c83e8b3e4f7b6470be659d40e0fc62146ecdf1d58",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_01332dc_|auto-c0035-005,auto-c0035-006",
+          "class": "collision_stub",
+          "symbol": "zz_01332dc_",
+          "units": [
+            "auto-c0035-005",
+            "auto-c0035-006"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_01332dc_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0035-005": "header: int zz_01332dc_();",
+            "auto-c0035-006": "prelude: void zz_01332dc_(int);"
+          },
+          "first_seen": "2026-08-21T04:19:12.575531Z",
+          "last_seen": "2026-08-21T04:19:12.575531Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "declaration": "void zz_01332dc_(int);",
       "derivation": "definition",
-      "updated_version": 42,
-      "revoked": true
+      "assembly_only": false,
+      "behavioral_authority": false,
+      "updated_version": 51,
+      "source_updated_version": 51
     },
     "fn:zz_013358c_": {
       "kind": "prototype",
       "symbol": "zz_013358c_",
       "tier": "compile_only",
-      "source_units": [],
-      "source_tiers": {},
-      "harvested_at": "2026-08-21T05:37:13.987274Z",
+      "source_units": [
+        "auto-c0035-006"
+      ],
+      "source_tiers": {
+        "auto-c0035-006": "compile_only"
+      },
+      "harvested_at": "2026-08-23T00:41:32.762703Z",
       "contested": false,
       "conflicts": [
         {
@@ -1091,10 +1308,10 @@
           "recorded_at": "2026-08-21T13:27:51.288653Z"
         }
       ],
-      "declaration": "void zz_013358c_(int,undefined1);;",
+      "declaration": "void zz_013358c_(int,undefined1);",
       "derivation": "definition",
-      "updated_version": 42,
-      "revoked": true
+      "updated_version": 51,
+      "source_updated_version": 51
     },
     "fn:FUN_80078c68": {
       "kind": "prototype",
@@ -2266,7 +2483,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T04:20:35.444634Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -2280,7 +2497,38 @@
       "declaration": "void zz_007c800_(int,uint);;",
       "derivation": "definition",
       "updated_version": 25,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:30b84260eff987542e23ca2e25d61f4f9e9ec82d8f20682bf0aaafc9437aee4a",
+          "material_sha256": "250eb4432947ea33418841ac29c1962d7657beadd26537477a8b7482bcda6a90",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_007c800_|auto-c0011-011,auto-c0011-012",
+          "class": "collision_stub",
+          "symbol": "zz_007c800_",
+          "units": [
+            "auto-c0011-011",
+            "auto-c0011-012"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_007c800_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0011-011": "header: int zz_007c800_();",
+            "auto-c0011-012": "prelude: void zz_007c800_(int,uint);"
+          },
+          "first_seen": "2026-08-21T04:20:41.127350Z",
+          "last_seen": "2026-08-21T04:21:10.358070Z",
+          "times_seen": 4
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 25
     },
     "fn:zz_007c844_": {
       "kind": "prototype",
@@ -2289,7 +2537,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T04:20:35.444634Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -2303,7 +2551,38 @@
       "declaration": "void zz_007c844_(int);;",
       "derivation": "definition",
       "updated_version": 25,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:3b4f3ba7ded1d2d82143a17d67f8dfc038bb06279ffac880412bcf37b0e064a5",
+          "material_sha256": "0f66509c206f3bcaf3493486486b996762e7fcb0a8e4ef84fbe7a4f71dacec6b",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_007c844_|auto-c0011-011,auto-c0011-012",
+          "class": "collision_stub",
+          "symbol": "zz_007c844_",
+          "units": [
+            "auto-c0011-011",
+            "auto-c0011-012"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_007c844_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0011-011": "header: int zz_007c844_();",
+            "auto-c0011-012": "prelude: void zz_007c844_(int);"
+          },
+          "first_seen": "2026-08-21T04:20:41.127350Z",
+          "last_seen": "2026-08-21T04:21:10.358070Z",
+          "times_seen": 4
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 25
     },
     "fn:zz_007c9ac_": {
       "kind": "prototype",
@@ -2312,7 +2591,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T04:20:35.444634Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -2326,7 +2605,38 @@
       "declaration": "void zz_007c9ac_(int);;",
       "derivation": "definition",
       "updated_version": 25,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:bbbd3ae37c208d92909ab6fc86c227d107c7b3681d0beb2a104276a1dd1e8773",
+          "material_sha256": "a390fa6e6992333c699979f02c66773f47eb5a06b805f8c8c0a7904cdf533038",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_007c9ac_|auto-c0011-011,auto-c0011-012",
+          "class": "collision_stub",
+          "symbol": "zz_007c9ac_",
+          "units": [
+            "auto-c0011-011",
+            "auto-c0011-012"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_007c9ac_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0011-011": "header: int zz_007c9ac_();",
+            "auto-c0011-012": "prelude: void zz_007c9ac_(int);"
+          },
+          "first_seen": "2026-08-21T04:20:41.127350Z",
+          "last_seen": "2026-08-21T04:21:10.358070Z",
+          "times_seen": 4
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 25
     },
     "fn:FUN_800ba3b4": {
       "kind": "prototype",
@@ -2680,7 +2990,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T04:20:54.888554Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -2694,7 +3004,38 @@
       "declaration": "void FUN_800bae3c(int);;",
       "derivation": "definition",
       "updated_version": 34,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:f4b3975eecd99aaba59c50be6b8fac4cee3ca7b50bacdf8c77be1025c6bc70c7",
+          "material_sha256": "a86afa43a0cae55a1ef83859ec64da486642bcc61ec56efda2bc72840c857e5b",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|FUN_800bae3c|auto-c0019-000,auto-c0019-001",
+          "class": "collision_stub",
+          "symbol": "FUN_800bae3c",
+          "units": [
+            "auto-c0019-000",
+            "auto-c0019-001"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for FUN_800bae3c; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0019-000": "header: int FUN_800bae3c();",
+            "auto-c0019-001": "prelude: void FUN_800bae3c(int);"
+          },
+          "first_seen": "2026-08-21T04:21:00.611010Z",
+          "last_seen": "2026-08-21T05:06:25.109770Z",
+          "times_seen": 4
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 34
     },
     "fn:FUN_800bae68": {
       "kind": "prototype",
@@ -2703,7 +3044,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T04:21:04.704950Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -2717,7 +3058,65 @@
       "declaration": "void FUN_800bae68(int);;",
       "derivation": "definition",
       "updated_version": 35,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:4594863b6b28e7baf1d928a00485d7bbeb6c6b4a061e38e468f5eebbc98714f4",
+          "material_sha256": "6a120587a745fa8c147982afa940b06584a02a42303288ec9e4116be760d0d7e",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|FUN_800bae68|auto-c0019-001,auto-c0019-002",
+          "class": "collision_stub",
+          "symbol": "FUN_800bae68",
+          "units": [
+            "auto-c0019-001",
+            "auto-c0019-002"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for FUN_800bae68; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0019-001": "header: int FUN_800bae68();",
+            "auto-c0019-002": "prelude: void FUN_800bae68(int);"
+          },
+          "first_seen": "2026-08-21T05:06:34.637923Z",
+          "last_seen": "2026-08-21T05:06:34.637923Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:e495f279a0c218878c5a16c491b71471b6564922e5912ce999313038c9cb7635",
+          "material_sha256": "05eeb640c1e0ccc06ec3449d8fbddcd6e343a90885159e9c8f72167ee8f30573",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|FUN_800bae68|auto-c0019-000,auto-c0019-001,auto-c0019-002",
+          "class": "collision_stub",
+          "symbol": "FUN_800bae68",
+          "units": [
+            "auto-c0019-000",
+            "auto-c0019-001",
+            "auto-c0019-002"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for FUN_800bae68; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0019-000": "header: int FUN_800bae68();",
+            "auto-c0019-001": "header: int FUN_800bae68();",
+            "auto-c0019-002": "prelude: void FUN_800bae68(int);"
+          },
+          "first_seen": "2026-08-21T04:21:10.358070Z",
+          "last_seen": "2026-08-21T05:06:25.109770Z",
+          "times_seen": 3
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 35
     },
     "fn:FUN_800bb004": {
       "kind": "prototype",
@@ -3417,7 +3816,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T05:06:29.020170Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -3431,7 +3830,38 @@
       "declaration": "void FUN_80103428(int);;",
       "derivation": "definition",
       "updated_version": 38,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:e65c9407275c2af19c10716df601fcd1508315cd9bba16aefa31c3874ee73e91",
+          "material_sha256": "3dffdb742bb1df7f24bbb22eff9a85715ca274ca918e5beeaf5a76d5dd1c845f",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|FUN_80103428|auto-c0028-014,auto-c0028-015",
+          "class": "collision_stub",
+          "symbol": "FUN_80103428",
+          "units": [
+            "auto-c0028-014",
+            "auto-c0028-015"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for FUN_80103428; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0028-014": "header: int FUN_80103428();",
+            "auto-c0028-015": "prelude: void FUN_80103428(int);"
+          },
+          "first_seen": "2026-08-21T05:06:34.637923Z",
+          "last_seen": "2026-08-21T05:36:22.210489Z",
+          "times_seen": 4
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 38
     },
     "fn:zz_01033f8_": {
       "kind": "prototype",
@@ -3440,7 +3870,7 @@
       "source_units": [],
       "source_tiers": {},
       "harvested_at": "2026-08-21T05:06:29.020170Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [
         {
           "tombstone": true,
@@ -3454,7 +3884,38 @@
       "declaration": "void zz_01033f8_(int);;",
       "derivation": "definition",
       "updated_version": 38,
-      "revoked": true
+      "revoked": true,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:7124df51e228a4d7a5d90a873337962d80c3e956c95d092ad874d6ea2dd485a6",
+          "material_sha256": "20d3bdc032105904832a42f772eec3a2b35318e6443281fcf67c09942c7b39c0",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_01033f8_|auto-c0028-014,auto-c0028-015",
+          "class": "collision_stub",
+          "symbol": "zz_01033f8_",
+          "units": [
+            "auto-c0028-014",
+            "auto-c0028-015"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_01033f8_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0028-014": "header: int zz_01033f8_();",
+            "auto-c0028-015": "prelude: void zz_01033f8_(int);"
+          },
+          "first_seen": "2026-08-21T05:06:34.637923Z",
+          "last_seen": "2026-08-21T05:36:22.210489Z",
+          "times_seen": 4
+        }
+      ],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_updated_version": 50,
+      "source_updated_version": 38
     },
     "fn:FUN_801035ac": {
       "kind": "prototype",
@@ -5157,6 +5618,2343 @@
       "declaration": "undefined4 zz_01252c8_(int);;",
       "derivation": "definition",
       "updated_version": 49
+    },
+    "fn:FUN_801336a4": {
+      "kind": "prototype",
+      "symbol": "FUN_801336a4",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-22T23:35:29.870550Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:f1a0a6b7bb48d2387a9e4a1a4461735fa6a13f7e1c049f71114aafcbf668141c",
+          "material_sha256": "acb48b4203ce979adbf28d7d22291e6a1ffb720a4c9cc0b24c12f60a5f4ee732",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "canonicalization_refused|FUN_801336a4|auto-c0018-018,auto-c0033-009,auto-c0033-010,auto-c0035-000,auto-c0035-006",
+          "class": "canonicalization_refused",
+          "symbol": "FUN_801336a4",
+          "units": [
+            "auto-c0018-018",
+            "auto-c0033-009",
+            "auto-c0033-010",
+            "auto-c0035-000",
+            "auto-c0035-006"
+          ],
+          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
+          "variants": {},
+          "first_seen": "2026-08-22T23:35:29.870550Z",
+          "last_seen": "2026-08-22T23:35:29.870550Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_013138c_": {
+      "kind": "prototype",
+      "symbol": "zz_013138c_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-22T23:38:47.217845Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:124871872d051054d0a95c024695f9693a13616f40fa094a98dee8bf7db57cde",
+          "material_sha256": "e80b980dd9895e4d392bbe8ab9f87b20470a8ca28d1912b677571f8ad25c549b",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "canonicalization_refused|zz_013138c_|auto-c0018-018,auto-c0033-009,auto-c0033-010,auto-c0035-000,auto-c0035-001",
+          "class": "canonicalization_refused",
+          "symbol": "zz_013138c_",
+          "units": [
+            "auto-c0018-018",
+            "auto-c0033-009",
+            "auto-c0033-010",
+            "auto-c0035-000",
+            "auto-c0035-001"
+          ],
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_013138c_ owner/variant pair at auto-c0035-000/gnt4_shim.h",
+          "variants": {},
+          "first_seen": "2026-08-22T23:38:47.217845Z",
+          "last_seen": "2026-08-22T23:38:47.217845Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:FUN_8000f604": {
+      "kind": "prototype",
+      "symbol": "FUN_8000f604",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:bd662c9ff2ddda78574f9cf0c1146471ea5a9b292e63ae76b8ee9b57db4c025a",
+          "material_sha256": "a3730dbd92667b05c3b65547a1c7ecde0a16c6a297a87bb1a18c4c6032ef3795",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|FUN_8000f604|auto-c0001-004,auto-c0001-005",
+          "class": "collision_stub",
+          "symbol": "FUN_8000f604",
+          "units": [
+            "auto-c0001-004",
+            "auto-c0001-005"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for FUN_8000f604; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0001-004": "header: int FUN_8000f604();",
+            "auto-c0001-005": "prelude: void FUN_8000f604(int,int);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:FUN_80047aa4": {
+      "kind": "prototype",
+      "symbol": "FUN_80047aa4",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:9ba8e8d2c3e9004c0933a1425b85fc43fd8c66e823e8a52b2302e37727c7a139",
+          "material_sha256": "348700a01c16648435e65cf95ad0585009436daf0e34c4f3c0aea23f3a3fb9c4",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|FUN_80047aa4|auto-c0001-010,auto-c0001-011",
+          "class": "collision_stub",
+          "symbol": "FUN_80047aa4",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011"
+          ],
+          "detail": "2 divergent function_decl declarations of FUN_80047aa4",
+          "variants": {
+            "auto-c0001-010": "int FUN_80047aa4();",
+            "auto-c0001-011": "void FUN_80047aa4(int);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:FUN_801fe050": {
+      "kind": "prototype",
+      "symbol": "FUN_801fe050",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:d294e6c0ec037935bfce974cafe417fb315c1c25a275032d17227c51e3c89395",
+          "material_sha256": "982c78a801ec5666fb32b201f6bf2db396f3182863cd5af5fb5232022b26171b",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|FUN_801fe050|auto-c0001-004,auto-c0001-005",
+          "class": "collision_stub",
+          "symbol": "FUN_801fe050",
+          "units": [
+            "auto-c0001-004",
+            "auto-c0001-005"
+          ],
+          "detail": "2 divergent function_decl declarations of FUN_801fe050",
+          "variants": {
+            "auto-c0001-004": "int FUN_801fe050();",
+            "auto-c0001-005": "void FUN_801fe050(int);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:FUN_801fe134": {
+      "kind": "prototype",
+      "symbol": "FUN_801fe134",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:35da5b1bfd276346b081a233bff8e053e2a2a7bdaff613d70cb9b59615b2a95a",
+          "material_sha256": "56d0553f7768c9b1287c412a84c6651bf7b42fc9714380f1fbbd12d12d5e1a5a",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|FUN_801fe134|auto-c0001-004,auto-c0001-005",
+          "class": "collision_stub",
+          "symbol": "FUN_801fe134",
+          "units": [
+            "auto-c0001-004",
+            "auto-c0001-005"
+          ],
+          "detail": "2 divergent function_decl declarations of FUN_801fe134",
+          "variants": {
+            "auto-c0001-004": "int FUN_801fe134();",
+            "auto-c0001-005": "void FUN_801fe134(void);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:gnt4_PSMTXConcat_bl": {
+      "kind": "prototype",
+      "symbol": "gnt4_PSMTXConcat_bl",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:45c293cbb954412601dd232be77931295c3a42fa306cba96ca5d0627d9c3798e",
+          "material_sha256": "1f91c31fbdb3c297d6be2ba0677837d37156f32c76d7278991817e758b3e095e",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|gnt4_PSMTXConcat_bl|auto-c0001-011,auto-c0001-012",
+          "class": "collision_stub",
+          "symbol": "gnt4_PSMTXConcat_bl",
+          "units": [
+            "auto-c0001-011",
+            "auto-c0001-012"
+          ],
+          "detail": "2 divergent function_decl declarations of gnt4_PSMTXConcat_bl",
+          "variants": {
+            "auto-c0001-011": "undefined8 gnt4_PSMTXConcat_bl(float*,float*,float*);",
+            "auto-c0001-012": "double gnt4_PSMTXConcat_bl(float*,float*,float*);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:gnt4_PSMTXTrans_bl": {
+      "kind": "prototype",
+      "symbol": "gnt4_PSMTXTrans_bl",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:ba0385360580aebf8ba3ee1a82937be4b2d489925a6a7bbacd2b741ab56e2269",
+          "material_sha256": "4eaaa1352f915fcedbe7b037a75976dccdc87474fb5c79c344575f75b721c09f",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|gnt4_PSMTXTrans_bl|auto-c0001-011,auto-c0001-012",
+          "class": "collision_stub",
+          "symbol": "gnt4_PSMTXTrans_bl",
+          "units": [
+            "auto-c0001-011",
+            "auto-c0001-012"
+          ],
+          "detail": "2 divergent function_decl declarations of gnt4_PSMTXTrans_bl",
+          "variants": {
+            "auto-c0001-011": "undefined8 gnt4_PSMTXTrans_bl(double,double,double,float*);",
+            "auto-c0001-012": "void gnt4_PSMTXTrans_bl(double,double,double,float*);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:gnt4_PSVECAdd_bl": {
+      "kind": "prototype",
+      "symbol": "gnt4_PSVECAdd_bl",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:d55fcba2a3393328385817ea670be417e1850e24b08181961d41db25cb5288a5",
+          "material_sha256": "73cc57f93f4d723239c05a3c36958733a2249f65b4ab0daef1246b2b1a699727",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|gnt4_PSVECAdd_bl|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core",
+          "class": "collision_stub",
+          "symbol": "gnt4_PSVECAdd_bl",
+          "units": [
+            "auto-c0000-004",
+            "auto-c0000-006",
+            "auto-c0000-008",
+            "auto-c0000-018",
+            "auto-c0001-003",
+            "auto-c0001-004",
+            "auto-c0001-005",
+            "auto-c0001-007",
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014",
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "collision-core",
+            "damage-core",
+            "knockback-core"
+          ],
+          "detail": "2 divergent function_decl declarations of gnt4_PSVECAdd_bl",
+          "variants": {
+            "auto-c0000-004": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0000-006": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0000-008": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0000-018": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0001-003": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0001-004": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0001-005": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0001-007": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0001-010": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0001-011": "undefined8 gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0001-012": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0001-014": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0002-001": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0011-005": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0034-018": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0035-002": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "collision-core": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "damage-core": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "knockback-core": "void gnt4_PSVECAdd_bl(float*,float*,float*);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:gnt4_PSVECSubtract_bl": {
+      "kind": "prototype",
+      "symbol": "gnt4_PSVECSubtract_bl",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:17a883d4d938fa5f5d4814f15475eef2b43de86e4d86b928a0e69f4f6b3ad5f3",
+          "material_sha256": "58bd47b6f0fe667545a36dfd10b77fbad05ef2a0cff1d9d016f35007aadbdc7c",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|gnt4_PSVECSubtract_bl|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core",
+          "class": "collision_stub",
+          "symbol": "gnt4_PSVECSubtract_bl",
+          "units": [
+            "auto-c0000-004",
+            "auto-c0000-006",
+            "auto-c0000-008",
+            "auto-c0000-018",
+            "auto-c0001-003",
+            "auto-c0001-004",
+            "auto-c0001-005",
+            "auto-c0001-007",
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014",
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "collision-core",
+            "damage-core",
+            "knockback-core"
+          ],
+          "detail": "2 divergent function_decl declarations of gnt4_PSVECSubtract_bl",
+          "variants": {
+            "auto-c0000-004": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0000-006": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0000-008": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0000-018": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0001-003": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0001-004": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0001-005": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0001-007": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0001-010": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0001-011": "undefined8 gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0001-012": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0001-014": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0002-001": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0011-005": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0034-018": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "auto-c0035-002": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "collision-core": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "damage-core": "void gnt4_PSVECSubtract_bl(float*,float*,float*);",
+            "knockback-core": "void gnt4_PSVECSubtract_bl(float*,float*,float*);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0006f98_": {
+      "kind": "prototype",
+      "symbol": "zz_0006f98_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:c7a4880d03f2e6b7afb1955afee213638c6bd73bd9ab28f6aa7e1aef9f4def48",
+          "material_sha256": "221fcee55434ab24e4cdd0208c1ec6f6cc4e856993726d5f723a113bdd8e096a",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0006f98_|auto-c0000-006,auto-c0034-018",
+          "class": "collision_stub",
+          "symbol": "zz_0006f98_",
+          "units": [
+            "auto-c0000-006",
+            "auto-c0034-018"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_0006f98_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0000-006": "prelude: int zz_0006f98_(int);",
+            "auto-c0034-018": "header: int zz_0006f98_();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0006fb4_": {
+      "kind": "prototype",
+      "symbol": "zz_0006fb4_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:30c90522334d832d6507eb1d6bd21875190316f25929adf936f8ede3919745bc",
+          "material_sha256": "470c164f83d4a6cffcd9d48121374be0643ff0ec167f8c4e9f7484d757341876",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0006fb4_|auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014",
+          "class": "collision_stub",
+          "symbol": "zz_0006fb4_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014"
+          ],
+          "detail": "3 divergent function_decl declarations of zz_0006fb4_",
+          "variants": {
+            "auto-c0001-010": "int zz_0006fb4_();",
+            "auto-c0001-011": "undefined8 zz_0006fb4_(double,double,double,double,double,double,double,double,int,int,int,int,int,int,int,int);",
+            "auto-c0001-012": "int zz_0006fb4_();",
+            "auto-c0001-014": "undefined8 zz_0006fb4_(undefined8,double,double,double,double,double,double,double,int,int,int,short*,undefined4,undefined4,undefined4,undefined4);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_00076d0_": {
+      "kind": "prototype",
+      "symbol": "zz_00076d0_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:5155761ac3603b3ccb066b5e2164e510be398a2b9751f3ccefdf22c7373ebabf",
+          "material_sha256": "80bccfa791a3e1cb157271e79839ef7b726c785e81179cdf0c6f08084984ad4e",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_00076d0_|auto-c0028-017,auto-c0029-014,auto-c0034-018,auto-c0035-002,auto-c0035-006",
+          "class": "collision_stub",
+          "symbol": "zz_00076d0_",
+          "units": [
+            "auto-c0028-017",
+            "auto-c0029-014",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "auto-c0035-006"
+          ],
+          "detail": "wasm-ld: error: function signature mismatch: zz_00076d0_",
+          "variants": {},
+          "first_seen": "2026-08-21T08:57:42.827930Z",
+          "last_seen": "2026-08-21T08:57:42.827930Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:5712e7d3917d4b62cac28ff8d480dce6bf6d3af56adfe92708374cdc04eb618c",
+          "material_sha256": "83b6fa2abd5fe6d753d56e379d02b336e7e2fa43ce0f9c91a6c1a742abce27b7",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_00076d0_|auto-c0001-011,auto-c0001-012,auto-c0034-018",
+          "class": "collision_stub",
+          "symbol": "zz_00076d0_",
+          "units": [
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0034-018"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_00076d0_",
+          "variants": {
+            "auto-c0001-011": "undefined8 zz_00076d0_(undefined8,double,double,double,double,double,double,double,int,float*,undefined*,undefined4,undefined4,undefined4,undefined4,undefined4);",
+            "auto-c0001-012": "int zz_00076d0_();",
+            "auto-c0034-018": "int zz_00076d0_();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:b1c7a2218b226ffb80383273e3c80c14bc77b17d04a0d5a21f7d16912c1d1c84",
+          "material_sha256": "a1a44dbe9d4ce4efb11ad2b2e14ea719d067b5e0aaf6365f5ce4989705334f3a",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_00076d0_|auto-c0011-010,auto-c0029-013,auto-c0034-018,auto-c0035-002,auto-c0035-006",
+          "class": "collision_stub",
+          "symbol": "zz_00076d0_",
+          "units": [
+            "auto-c0011-010",
+            "auto-c0029-013",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "auto-c0035-006"
+          ],
+          "detail": "wasm-ld: error: function signature mismatch: zz_00076d0_",
+          "variants": {},
+          "first_seen": "2026-08-21T16:19:40.819618Z",
+          "last_seen": "2026-08-21T16:19:40.819618Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:d0320fa99a6332816cbb36bc6faf4efb35764d0cc861a931766932321506da4d",
+          "material_sha256": "fa706e873a076ce6d8014889a75242939df6b6eafc4fd68666c7a022420635d7",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_00076d0_|auto-c0028-016,auto-c0028-017,auto-c0034-018,auto-c0035-002,auto-c0035-006",
+          "class": "collision_stub",
+          "symbol": "zz_00076d0_",
+          "units": [
+            "auto-c0028-016",
+            "auto-c0028-017",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "auto-c0035-006"
+          ],
+          "detail": "wasm-ld: error: function signature mismatch: zz_00076d0_",
+          "variants": {},
+          "first_seen": "2026-08-21T05:37:21.981044Z",
+          "last_seen": "2026-08-21T05:37:21.981044Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0007834_": {
+      "kind": "prototype",
+      "symbol": "zz_0007834_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:d0f3a464204271f6013074e54c6fc29bc996f23d686dd055c896b1194a03cc5f",
+          "material_sha256": "4e16a257772fc5a088bad4a943805d38bf22c74b0c1bcd2b1abcd9e09ab3edb3",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0007834_|auto-c0001-011,auto-c0001-012,auto-c0001-014",
+          "class": "collision_stub",
+          "symbol": "zz_0007834_",
+          "units": [
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014"
+          ],
+          "detail": "3 divergent function_decl declarations of zz_0007834_",
+          "variants": {
+            "auto-c0001-011": "undefined8 zz_0007834_(undefined8,double,double,double,double,double,double,double,int,float*,char*,undefined*,undefined4,undefined4,undefined4,undefined4);",
+            "auto-c0001-012": "int zz_0007834_();",
+            "auto-c0001-014": "undefined8 zz_0007834_(undefined8,double,double,double,double,double,double,double,int,float*,char*,int,undefined4,undefined4,undefined4,undefined4);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0007ae4_": {
+      "kind": "prototype",
+      "symbol": "zz_0007ae4_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:8b7d601b807c336960c9ad674464bab044a1e49750da0b868ae733d521b2be53",
+          "material_sha256": "b285ed444037164ee46265eec93d48bf85afbb99df551512defbb22fc198d85d",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0007ae4_|auto-c0000-008,auto-c0001-014",
+          "class": "collision_stub",
+          "symbol": "zz_0007ae4_",
+          "units": [
+            "auto-c0000-008",
+            "auto-c0001-014"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_0007ae4_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0000-008": "prelude: void zz_0007ae4_(undefined8,double,double,double,double,double,double,double,int,undefined4*,char*,undefined4,undefined4,undefined4,undefined4,undefined4);",
+            "auto-c0001-014": "header: undefined8 zz_0007ae4_(undefined8,double,double,double,double,double,double,double,int,void*,char*,short*,undefined4,undefined4,undefined4,undefined4);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0007c30_": {
+      "kind": "prototype",
+      "symbol": "zz_0007c30_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:31872c734eb472cdbe750362242e5c75e451d9f1c72fe49dbd815ecbe6c6cd5f",
+          "material_sha256": "ec01f8741762ea01d0d6e0aed527015e734b1e44f2730760ec824afc441bd0e9",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0007c30_|auto-c0001-014,auto-c0034-018",
+          "class": "collision_stub",
+          "symbol": "zz_0007c30_",
+          "units": [
+            "auto-c0001-014",
+            "auto-c0034-018"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0007c30_",
+          "variants": {
+            "auto-c0001-014": "undefined8 zz_0007c30_(undefined8,double,double,double,double,double,double,double,int,undefined4,float*,short*,undefined4,undefined4,undefined4,undefined4);",
+            "auto-c0034-018": "int zz_0007c30_();"
+          },
+          "first_seen": "2026-08-21T00:44:34.776159Z",
+          "last_seen": "2026-08-21T00:44:34.776159Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:e6c53512bba20fb5793f627875a51571eacd3172d414f7e4ca6784181094b184",
+          "material_sha256": "3cb5926b45b35170a553330ac72e4d37ee459c57e1954a92e2efc4a27f9e3b64",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0007c30_|auto-c0000-006,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0034-018",
+          "class": "collision_stub",
+          "symbol": "zz_0007c30_",
+          "units": [
+            "auto-c0000-006",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014",
+            "auto-c0034-018"
+          ],
+          "detail": "3 divergent function_decl declarations of zz_0007c30_",
+          "variants": {
+            "auto-c0000-006": "int zz_0007c30_();",
+            "auto-c0001-011": "undefined8 zz_0007c30_(undefined8,double,double,double,double,double,double,double,int,undefined4,float*,uint,undefined4,undefined4,undefined4,undefined4);",
+            "auto-c0001-012": "int zz_0007c30_();",
+            "auto-c0001-014": "undefined8 zz_0007c30_(undefined8,double,double,double,double,double,double,double,int,undefined4,float*,short*,undefined4,undefined4,undefined4,undefined4);",
+            "auto-c0034-018": "int zz_0007c30_();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0007cac_": {
+      "kind": "prototype",
+      "symbol": "zz_0007cac_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:f17fa67b79f659c24d52afb318cc2a775668f942f028e4c309537ba0230f5888",
+          "material_sha256": "4714649955fb995a334c8a7bbb9b0d4b0907929a841af3ab4c4c70c8a70ca726",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0007cac_|auto-c0001-011,auto-c0001-014",
+          "class": "collision_stub",
+          "symbol": "zz_0007cac_",
+          "units": [
+            "auto-c0001-011",
+            "auto-c0001-014"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0007cac_",
+          "variants": {
+            "auto-c0001-011": "undefined8 zz_0007cac_(double,int);",
+            "auto-c0001-014": "double zz_0007cac_(double,int);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0007cd0_": {
+      "kind": "prototype",
+      "symbol": "zz_0007cd0_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:043bd3d5ce25f18ac37438f0393af6725776d76c2785cd652b9d1f0e943f0f45",
+          "material_sha256": "da1e188a14a65bc4888b8adf8b77e68d0ef666fa824801d6b76a95fee107e714",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0007cd0_|auto-c0001-010,auto-c0001-011,auto-c0001-014",
+          "class": "collision_stub",
+          "symbol": "zz_0007cd0_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-014"
+          ],
+          "detail": "3 divergent function_decl declarations of zz_0007cd0_",
+          "variants": {
+            "auto-c0001-010": "int zz_0007cd0_();",
+            "auto-c0001-011": "void zz_0007cd0_(int,int,int,int);",
+            "auto-c0001-014": "void zz_0007cd0_(int,int,char*,int);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0007cf4_": {
+      "kind": "prototype",
+      "symbol": "zz_0007cf4_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:a3b41d15a5fe53885df8354c86fd29086b6ba76017d6cd7ac05652e32e886952",
+          "material_sha256": "fff8e96da0afc286793856065a34560693ccc2894a83e9258ab9690b503cc785",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0007cf4_|auto-c0000-008,auto-c0001-010",
+          "class": "collision_stub",
+          "symbol": "zz_0007cf4_",
+          "units": [
+            "auto-c0000-008",
+            "auto-c0001-010"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_0007cf4_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0000-008": "prelude: void zz_0007cf4_(int,undefined4,undefined4,undefined4);",
+            "auto-c0001-010": "header: int zz_0007cf4_();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_00086b8_": {
+      "kind": "prototype",
+      "symbol": "zz_00086b8_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:012e13c1b52a5a46763c1fa6a1ca75910384704749fd02544a361edce52281f6",
+          "material_sha256": "d6c0c0444943074b6a6a3c820bc339b39dc79dc47ab5a62dae7fb8e1c145337f",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_00086b8_|auto-c0000-006,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0034-018",
+          "class": "collision_stub",
+          "symbol": "zz_00086b8_",
+          "units": [
+            "auto-c0000-006",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014",
+            "auto-c0034-018"
+          ],
+          "detail": "3 divergent function_decl declarations of zz_00086b8_",
+          "variants": {
+            "auto-c0000-006": "int zz_00086b8_();",
+            "auto-c0001-011": "undefined8 zz_00086b8_(double,double,double,double,double,double,double,double,int,int,float*,uint,undefined4,undefined4,undefined4,undefined4);",
+            "auto-c0001-012": "int zz_00086b8_();",
+            "auto-c0001-014": "undefined8 zz_00086b8_(double,double,double,double,double,double,double,double,int,int,float*,short*,undefined4,undefined4,undefined4,undefined4);",
+            "auto-c0034-018": "int zz_00086b8_();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:29069cd435c5212208fa87ff59e0a1c3c7c35177bfb86935f0e7cfc70a7e9f70",
+          "material_sha256": "002e5fac8927abadc8c7a1833774688c5fef42788d867287807ddd4991882759",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_00086b8_|auto-c0001-014,auto-c0034-018",
+          "class": "collision_stub",
+          "symbol": "zz_00086b8_",
+          "units": [
+            "auto-c0001-014",
+            "auto-c0034-018"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_00086b8_",
+          "variants": {
+            "auto-c0001-014": "undefined8 zz_00086b8_(double,double,double,double,double,double,double,double,int,int,float*,short*,undefined4,undefined4,undefined4,undefined4);",
+            "auto-c0034-018": "int zz_00086b8_();"
+          },
+          "first_seen": "2026-08-21T00:44:34.776159Z",
+          "last_seen": "2026-08-21T00:44:34.776159Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0009958_": {
+      "kind": "prototype",
+      "symbol": "zz_0009958_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:82116326a1bf468ba066083484bb530642f69f96b7001a44835581dacfc804e2",
+          "material_sha256": "c5afeb38829e8bb4a7ba79556696930a9331637542f497c1bdfab7852c7cdf39",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0009958_|auto-c0001-011,auto-c0001-012",
+          "class": "collision_stub",
+          "symbol": "zz_0009958_",
+          "units": [
+            "auto-c0001-011",
+            "auto-c0001-012"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0009958_",
+          "variants": {
+            "auto-c0001-011": "void zz_0009958_(int,int);",
+            "auto-c0001-012": "int zz_0009958_();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0010664_": {
+      "kind": "prototype",
+      "symbol": "zz_0010664_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:22d414d3b462ad80c3bf7dc31aab1ebdbdf9726503435c04952d4e4efec012e2",
+          "material_sha256": "b84781712e1399bb5e57226630f38139f402d5a86f99dbc002ba66ade9d19b20",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0010664_|auto-c0001-003,auto-c0001-004",
+          "class": "collision_stub",
+          "symbol": "zz_0010664_",
+          "units": [
+            "auto-c0001-003",
+            "auto-c0001-004"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0010664_",
+          "variants": {
+            "auto-c0001-003": "void zz_0010664_(int);",
+            "auto-c0001-004": "int zz_0010664_();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0011ce0_": {
+      "kind": "prototype",
+      "symbol": "zz_0011ce0_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:9a5e2e3d64757ae81047ff67fa8db8c8be2c6a10cce4ceaf5e136a9fcd2be610",
+          "material_sha256": "b9c1ef8be17b96b196721185a5076238027e66fa881e1232f5a8e84c5846a5b9",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0011ce0_|auto-c0001-011,auto-c0001-012",
+          "class": "collision_stub",
+          "symbol": "zz_0011ce0_",
+          "units": [
+            "auto-c0001-011",
+            "auto-c0001-012"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0011ce0_",
+          "variants": {
+            "auto-c0001-011": "int zz_0011ce0_(int);",
+            "auto-c0001-012": "int zz_0011ce0_();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0012638_": {
+      "kind": "prototype",
+      "symbol": "zz_0012638_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:2a0fabe00601a2d3e99d7001b0247258d4335b438f9ef73c0d0af3c5e39bf5e7",
+          "material_sha256": "176d3657f57357041fd7ae50c259c710e16dc191090619d96b68fe329882f26d",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0012638_|auto-c0001-010,auto-c0001-011",
+          "class": "collision_stub",
+          "symbol": "zz_0012638_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_0012638_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0001-010": "header: int zz_0012638_();",
+            "auto-c0001-011": "prelude: void zz_0012638_(undefined8,undefined8,double,double,double,double,double,double,int);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0012984_": {
+      "kind": "prototype",
+      "symbol": "zz_0012984_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:0a4112824184923ecad0c07213330a74eda21fcace897925453fd0fe9e5dc3f2",
+          "material_sha256": "99da36238e7392b1aca660ab3b0f72b255daf2312ad1dbcb038c549b096bb0f1",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0012984_|auto-c0001-010,auto-c0001-011",
+          "class": "collision_stub",
+          "symbol": "zz_0012984_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_0012984_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0001-010": "header: int zz_0012984_();",
+            "auto-c0001-011": "prelude: void zz_0012984_(undefined8,undefined8,double,double,double,double,double,double,int,undefined4,float*,undefined*,undefined4,undefined4,undefined4,undefined4);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0012e4c_": {
+      "kind": "prototype",
+      "symbol": "zz_0012e4c_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:a200a71775a7929bbf852b97e4ecf29f5193117ad9f44c221faa4fac43b0545e",
+          "material_sha256": "7c53dde1d1dc2d19289038afcb90b4cf01e55de2ba9d3fa4f7e29a0e8daae949",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0012e4c_|auto-c0001-010,auto-c0001-011",
+          "class": "collision_stub",
+          "symbol": "zz_0012e4c_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_0012e4c_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0001-010": "header: int zz_0012e4c_();",
+            "auto-c0001-011": "prelude: void zz_0012e4c_(int,undefined4,undefined4,undefined4,undefined4,undefined4,undefined4,undefined4);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_00131b8_": {
+      "kind": "prototype",
+      "symbol": "zz_00131b8_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:b82b4c6d21296119e06051dbc3b26d05fc761e5b565632a9801a86f57e6c7518",
+          "material_sha256": "d589a9d2d14905aba882c9af8957b5552a2122df17f6ca062e826f973bf4cc3a",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_00131b8_|auto-c0001-010,auto-c0001-011",
+          "class": "collision_stub",
+          "symbol": "zz_00131b8_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_00131b8_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0001-010": "header: int zz_00131b8_();",
+            "auto-c0001-011": "prelude: void zz_00131b8_(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined*,undefined4,undefined4,undefined4,undefined4,undefined4);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_00133f4_": {
+      "kind": "prototype",
+      "symbol": "zz_00133f4_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:46ac398ea9824d0b9f03829508a22588405cab2ded543a8f3a34c44894ebbffe",
+          "material_sha256": "6effc24dfe2462a3d48db2ff510b27cb69fc6f29b211f53ca2797ef02a566b7a",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_00133f4_|auto-c0001-010,auto-c0001-011",
+          "class": "collision_stub",
+          "symbol": "zz_00133f4_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_00133f4_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0001-010": "header: int zz_00133f4_();",
+            "auto-c0001-011": "prelude: void zz_00133f4_(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined*,undefined4,undefined4,undefined4,undefined4,undefined4);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0013690_": {
+      "kind": "prototype",
+      "symbol": "zz_0013690_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:c28f6236b93d66a2f63c63de1f511346be4796f47313e0bb193a0f941b17945b",
+          "material_sha256": "5259def252408cb2bccad6f0f5289e0c3da64143fa815f7b7f0b60aedb6bfe3f",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0013690_|auto-c0001-010,auto-c0001-012",
+          "class": "collision_stub",
+          "symbol": "zz_0013690_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-012"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_0013690_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0001-010": "header: int zz_0013690_();",
+            "auto-c0001-012": "prelude: void zz_0013690_(undefined8,undefined8,double,double,double,double,double,double,int);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0013a28_": {
+      "kind": "prototype",
+      "symbol": "zz_0013a28_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:5ba8c2b2bfd2f6acd202d0f919d6fecaad65b610439e30d111767f890551771e",
+          "material_sha256": "a4edbd98062214558be881da13de56f1e99ec283a98f41a6cbb80707b55fe3b9",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0013a28_|auto-c0001-010,auto-c0001-012",
+          "class": "collision_stub",
+          "symbol": "zz_0013a28_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-012"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_0013a28_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0001-010": "header: int zz_0013a28_();",
+            "auto-c0001-012": "prelude: void zz_0013a28_(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined4,undefined4,undefined4*,undefined4,undefined4,undefined4);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0013d80_": {
+      "kind": "prototype",
+      "symbol": "zz_0013d80_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:0476b742914914909aa1bf86a335f59ba0aa612b2ae944793bc0a86b8b05b24c",
+          "material_sha256": "b01beec052e8929c4ffc6dbd11238ca515e5b2be24f66e9f641c088a8491304d",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0013d80_|auto-c0001-010,auto-c0001-012",
+          "class": "collision_stub",
+          "symbol": "zz_0013d80_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-012"
+          ],
+          "detail": "header extern vs unit.c prelude prototype diverge for zz_0013d80_; under a merged header this is a conflicting-types compile error",
+          "variants": {
+            "auto-c0001-010": "header: int zz_0013d80_();",
+            "auto-c0001-012": "prelude: void zz_0013d80_(undefined8,double,double,double,double,double,double,double,int,undefined4,undefined4,undefined4,undefined4*,undefined4,undefined4,undefined4);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0045204_": {
+      "kind": "prototype",
+      "symbol": "zz_0045204_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:65887c82cb09a3a7bcd542ba39df93005e749f708a3fd2739fcf5b18b2902ece",
+          "material_sha256": "dc4618d6a8588c4ed0f710b17779c086ba0aaa621819055b9face08d9801503d",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0045204_|auto-c0001-004,auto-c0001-005",
+          "class": "collision_stub",
+          "symbol": "zz_0045204_",
+          "units": [
+            "auto-c0001-004",
+            "auto-c0001-005"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0045204_",
+          "variants": {
+            "auto-c0001-004": "int zz_0045204_();",
+            "auto-c0001-005": "double zz_0045204_(short);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0045238_": {
+      "kind": "prototype",
+      "symbol": "zz_0045238_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:fd72e31a4219c6098d864cc799f546a8bbc15c983e070e6bf66434d710b7828f",
+          "material_sha256": "ca87c0ab41e5f8817815590f6f99b19cf9115005bd11d8a48e9d4b24b91e3b86",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0045238_|auto-c0001-004,auto-c0001-005,auto-c0001-014",
+          "class": "collision_stub",
+          "symbol": "zz_0045238_",
+          "units": [
+            "auto-c0001-004",
+            "auto-c0001-005",
+            "auto-c0001-014"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0045238_",
+          "variants": {
+            "auto-c0001-004": "int zz_0045238_();",
+            "auto-c0001-005": "double zz_0045238_(short);",
+            "auto-c0001-014": "double zz_0045238_(short);"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "fn:zz_0089100_": {
+      "kind": "prototype",
+      "symbol": "zz_0089100_",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:5254fe12a71dbc09bc297788523e99cc4f626e4ab6b12444c4e44d380f436ac4",
+          "material_sha256": "be96355b6055a2cdaaaaaec9959506f01e95d21d94db9f9fdd7c9878c28163b0",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "collision_stub|zz_0089100_|auto-c0001-010,auto-c0001-011,auto-c0001-012",
+          "class": "collision_stub",
+          "symbol": "zz_0089100_",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012"
+          ],
+          "detail": "2 divergent function_decl declarations of zz_0089100_",
+          "variants": {
+            "auto-c0001-010": "int zz_0089100_();",
+            "auto-c0001-011": "void zz_0089100_(int,int,int);",
+            "auto-c0001-012": "int zz_0089100_();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "dat:0x803b0720": {
+      "kind": "dat_typing",
+      "symbol": "DAT_803b0720",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "address": "0x803b0720",
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:f130849fac9edb18d9e9f1eb0e7db58c86fdc83bc69ea1200badb334c4271b9b",
+          "material_sha256": "f3b57a8b8cb29387544af17bd2007e02350725a402ff86668c7c45079f9b290b",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "dat_width_divergence|DAT_803b0720|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core",
+          "class": "dat_width_divergence",
+          "symbol": "DAT_803b0720",
+          "units": [
+            "auto-c0000-004",
+            "auto-c0000-006",
+            "auto-c0000-008",
+            "auto-c0000-018",
+            "auto-c0001-003",
+            "auto-c0001-004",
+            "auto-c0001-005",
+            "auto-c0001-007",
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014",
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "collision-core",
+            "damage-core"
+          ],
+          "detail": "2 divergent macro declarations of DAT_803b0720",
+          "variants": {
+            "auto-c0000-004": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0000-006": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0000-008": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0000-018": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0001-003": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0001-004": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0001-005": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0001-007": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0001-010": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0001-011": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0001-012": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0001-014": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0002-001": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0011-005": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0034-018": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "auto-c0035-002": "#define DAT_803b0720 GC_F32(0x803b0720)",
+            "collision-core": "#define DAT_803b0720 GC_U32(0x803b0720)",
+            "damage-core": "#define DAT_803b0720 GC_F32(0x803b0720)"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "dat:0x803c4e84": {
+      "kind": "dat_typing",
+      "symbol": "DAT_803c4e84",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "address": "0x803c4e84",
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:da6821ecffbefd3efada2457036c80a33e0cd83c11cbae8eb692773cb927bdbc",
+          "material_sha256": "923ecd26fe7e6e5ef34a3682fdfed164e93bd6fad16e197c61cd59cf88f662a3",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "dat_width_divergence|DAT_803c4e84|auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012",
+          "class": "dat_width_divergence",
+          "symbol": "DAT_803c4e84",
+          "units": [
+            "auto-c0001-005",
+            "auto-c0001-007",
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012"
+          ],
+          "detail": "2 divergent macro declarations of DAT_803c4e84",
+          "variants": {
+            "auto-c0001-005": "#define DAT_803c4e84 GC_U8(0x803c4e84)",
+            "auto-c0001-007": "#define DAT_803c4e84 GC_U8(0x803c4e84)",
+            "auto-c0001-010": "#define DAT_803c4e84 GC_U8(0x803c4e84)",
+            "auto-c0001-011": "#define DAT_803c4e84 GC_U8(0x803c4e84)",
+            "auto-c0001-012": "#define DAT_803c4e84 GC_IPTR(0x803c4e84)"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "dat:0x803c7422": {
+      "kind": "dat_typing",
+      "symbol": "DAT_803c7422",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "address": "0x803c7422",
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:a2ccd6964c9d4687fa795db7e4258a439ff1c75d3f4c01e6c380c8c2535c0a09",
+          "material_sha256": "c1af29942f332bd138e820fe43a3dd6fa103b2ae3abe84c92aff7575a2ecd32f",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "dat_width_divergence|DAT_803c7422|auto-c0001-011,auto-c0001-012",
+          "class": "dat_width_divergence",
+          "symbol": "DAT_803c7422",
+          "units": [
+            "auto-c0001-011",
+            "auto-c0001-012"
+          ],
+          "detail": "2 divergent macro declarations of DAT_803c7422",
+          "variants": {
+            "auto-c0001-011": "#define DAT_803c7422 GC_U8(0x803c7422)",
+            "auto-c0001-012": "#define DAT_803c7422 GC_IPTR(0x803c7422)"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "dat:0x804361fc": {
+      "kind": "dat_typing",
+      "symbol": "DAT_804361fc",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "address": "0x804361fc",
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:348d62509c0d90c478d71a374380bd5cc8902adefd19d92d72306ac8001a9ef2",
+          "material_sha256": "dc2a02d7167c16ad96d474dfff4efc4a7598b2bc841533b255ee2f46ee9fdda4",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "dat_width_divergence|DAT_804361fc|auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014",
+          "class": "dat_width_divergence",
+          "symbol": "DAT_804361fc",
+          "units": [
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014"
+          ],
+          "detail": "2 divergent macro declarations of DAT_804361fc",
+          "variants": {
+            "auto-c0001-010": "#define DAT_804361fc GC_U8(0x804361fc)",
+            "auto-c0001-011": "#define DAT_804361fc GC_IPTR(0x804361fc)",
+            "auto-c0001-012": "#define DAT_804361fc GC_U8(0x804361fc)",
+            "auto-c0001-014": "#define DAT_804361fc GC_IPTR(0x804361fc)"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "macro:ABS": {
+      "kind": "pseudo_op",
+      "symbol": "ABS",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:e64a07d2b568434c14e93538998236974348ec00191484d738ba35f86684567b",
+          "material_sha256": "5c33f55a7ccd6de22338b020f8bad3b369637460167340da27461bcf49c354ad",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "declaration_divergence|ABS|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core",
+          "class": "declaration_divergence",
+          "symbol": "ABS",
+          "units": [
+            "auto-c0000-004",
+            "auto-c0000-006",
+            "auto-c0000-008",
+            "auto-c0000-018",
+            "auto-c0001-003",
+            "auto-c0001-004",
+            "auto-c0001-005",
+            "auto-c0001-007",
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014",
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "collision-core",
+            "damage-core",
+            "knockback-core"
+          ],
+          "detail": "2 divergent macro declarations of ABS",
+          "variants": {
+            "auto-c0000-004": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0000-006": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0000-008": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0000-018": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0001-003": "#define ABS(x) fabs((double)(x))",
+            "auto-c0001-004": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0001-005": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0001-007": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0001-010": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0001-011": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0001-012": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0001-014": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0002-001": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0011-005": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0034-018": "#define ABS(x) __builtin_fabs(x)",
+            "auto-c0035-002": "#define ABS(x) __builtin_fabs(x)",
+            "collision-core": "#define ABS(x) __builtin_fabs(x)",
+            "damage-core": "#define ABS(x) __builtin_fabs(x)",
+            "knockback-core": "#define ABS(x) __builtin_fabs(x)"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "macro:SQRT": {
+      "kind": "pseudo_op",
+      "symbol": "SQRT",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:f791a386a5d745e6926e3010f86e8bc77fdc63896ddd185ecd8c048274fb8346",
+          "material_sha256": "ca629f15b74e36c221869b5913d39c4656d78bd910f9259563d9ecf9fec03fa8",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "declaration_divergence|SQRT|auto-c0001-003,auto-c0001-005",
+          "class": "declaration_divergence",
+          "symbol": "SQRT",
+          "units": [
+            "auto-c0001-003",
+            "auto-c0001-005"
+          ],
+          "detail": "2 divergent macro declarations of SQRT",
+          "variants": {
+            "auto-c0001-003": "#define SQRT(x) (sqrt((double)(x)))",
+            "auto-c0001-005": "#define SQRT(x) sqrt(x)"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "typedef:code": {
+      "kind": "typedef",
+      "symbol": "code",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:2a8d6631859e16ea908fec95db5dcb2bc152c80e3e5d5c713d99c00068db1136",
+          "material_sha256": "454f698a4451cb6b4835db8a00ca4ec2a6961b7e359c71eebbf84ead4170a341",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "declaration_divergence|code|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core",
+          "class": "declaration_divergence",
+          "symbol": "code",
+          "units": [
+            "auto-c0000-004",
+            "auto-c0000-006",
+            "auto-c0000-008",
+            "auto-c0000-018",
+            "auto-c0001-003",
+            "auto-c0001-004",
+            "auto-c0001-005",
+            "auto-c0001-007",
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014",
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "collision-core"
+          ],
+          "detail": "2 divergent typedef declarations of code",
+          "variants": {
+            "auto-c0000-004": "typedef void (code)();",
+            "auto-c0000-006": "typedef void (code)();",
+            "auto-c0000-008": "typedef void (code)();",
+            "auto-c0000-018": "typedef void (code)();",
+            "auto-c0001-003": "typedef void (code)();",
+            "auto-c0001-004": "typedef void (code)();",
+            "auto-c0001-005": "typedef void (code)();",
+            "auto-c0001-007": "typedef void (code)();",
+            "auto-c0001-010": "typedef void (code)();",
+            "auto-c0001-011": "typedef void (code)();",
+            "auto-c0001-012": "typedef void (code)();",
+            "auto-c0001-014": "typedef void (code)();",
+            "auto-c0002-001": "typedef void (code)();",
+            "auto-c0011-005": "typedef void (code)();",
+            "auto-c0034-018": "typedef void (code)();",
+            "auto-c0035-002": "typedef void (code)();",
+            "collision-core": "typedef void code();"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "macro:CONCAT44": {
+      "kind": "pseudo_op",
+      "symbol": "CONCAT44",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:1284a3608dc561489e042470afdd44c905d08ef0342c9180440008a1a95c3171",
+          "material_sha256": "4ac1a546acdaca9d6a232efd7060444ed08b6a44989980a61ff84c2ac0315a68",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "undefined8_fork|CONCAT44|auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002",
+          "class": "undefined8_fork",
+          "symbol": "CONCAT44",
+          "units": [
+            "auto-c0001-014",
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0034-018",
+            "auto-c0035-002"
+          ],
+          "detail": "2 divergent macro declarations of CONCAT44",
+          "variants": {
+            "auto-c0001-014": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0002-001": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0011-005": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0034-018": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0035-002": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))"
+          },
+          "first_seen": "2026-08-21T00:44:34.776159Z",
+          "last_seen": "2026-08-21T00:44:34.776159Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:ac97bc5121f6022fb29f0df335ff38b2ca8645fc44812240bd6cd6a123183d68",
+          "material_sha256": "0098c148a9b3584446101677158a19a8878c59c9ebeff9b92619f7640926d294",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "undefined8_fork|CONCAT44|auto-c0002-001,auto-c0011-005,auto-c0029-013,auto-c0034-018,auto-c0035-002",
+          "class": "undefined8_fork",
+          "symbol": "CONCAT44",
+          "units": [
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0029-013",
+            "auto-c0034-018",
+            "auto-c0035-002"
+          ],
+          "detail": "2 divergent macro declarations of CONCAT44",
+          "variants": {
+            "auto-c0002-001": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0011-005": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0029-013": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0034-018": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0035-002": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))"
+          },
+          "first_seen": "2026-08-21T01:57:36.348690Z",
+          "last_seen": "2026-08-21T01:57:36.348690Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:c7cabc56a86d93991526486c7cd106b89ccd7d0052b74fe5854c2b785ad92610",
+          "material_sha256": "5c8b634a335fca4dfb5058367e6d7862a1724f4fb3e301ae99156038758f1c69",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "undefined8_fork|CONCAT44|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core",
+          "class": "undefined8_fork",
+          "symbol": "CONCAT44",
+          "units": [
+            "auto-c0000-004",
+            "auto-c0000-006",
+            "auto-c0000-008",
+            "auto-c0000-018",
+            "auto-c0001-003",
+            "auto-c0001-004",
+            "auto-c0001-005",
+            "auto-c0001-007",
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014",
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "collision-core",
+            "damage-core",
+            "knockback-core"
+          ],
+          "detail": "3 divergent macro declarations of CONCAT44",
+          "variants": {
+            "auto-c0000-004": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0000-006": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0000-008": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0000-018": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0001-003": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0001-004": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0001-005": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0001-007": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0001-010": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0001-011": "#define CONCAT44(hi, lo) ((unsigned long long)((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0001-012": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0001-014": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0002-001": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "auto-c0011-005": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0034-018": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "auto-c0035-002": "#define CONCAT44(hi, lo) (((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo))",
+            "collision-core": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "damage-core": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)",
+            "knockback-core": "#define CONCAT44(hi, lo) (((union { unsigned long long u; double d; }){ .u = ((unsigned long long)(unsigned int)(hi) << 32) | (unsigned int)(lo) }).d)"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
+    },
+    "typedef:undefined8": {
+      "kind": "typedef",
+      "symbol": "undefined8",
+      "tier": "compile_only",
+      "source_units": [],
+      "source_tiers": {},
+      "harvested_at": "2026-08-21T00:44:31.833113Z",
+      "contested": true,
+      "conflicts": [],
+      "assembly_only": true,
+      "behavioral_authority": false,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:2d6194019f12f5ab1aa3187c2faca5fadb3185f55a9be7a5d020164eca60051e",
+          "material_sha256": "b09493d26553d4c2cf925801ed82beffbe720894b9db857912819a4ed5f7d7a6",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "undefined8_fork|undefined8|auto-c0000-004,auto-c0000-006,auto-c0000-008,auto-c0000-018,auto-c0001-003,auto-c0001-004,auto-c0001-005,auto-c0001-007,auto-c0001-010,auto-c0001-011,auto-c0001-012,auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002,collision-core,damage-core,knockback-core",
+          "class": "undefined8_fork",
+          "symbol": "undefined8",
+          "units": [
+            "auto-c0000-004",
+            "auto-c0000-006",
+            "auto-c0000-008",
+            "auto-c0000-018",
+            "auto-c0001-003",
+            "auto-c0001-004",
+            "auto-c0001-005",
+            "auto-c0001-007",
+            "auto-c0001-010",
+            "auto-c0001-011",
+            "auto-c0001-012",
+            "auto-c0001-014",
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0034-018",
+            "auto-c0035-002",
+            "collision-core",
+            "damage-core",
+            "knockback-core"
+          ],
+          "detail": "2 divergent typedef declarations of undefined8",
+          "variants": {
+            "auto-c0000-004": "typedef double undefined8;",
+            "auto-c0000-006": "typedef double undefined8;",
+            "auto-c0000-008": "typedef double undefined8;",
+            "auto-c0000-018": "typedef unsigned long long undefined8;",
+            "auto-c0001-003": "typedef unsigned long long undefined8;",
+            "auto-c0001-004": "typedef double undefined8;",
+            "auto-c0001-005": "typedef unsigned long long undefined8;",
+            "auto-c0001-007": "typedef double undefined8;",
+            "auto-c0001-010": "typedef double undefined8;",
+            "auto-c0001-011": "typedef unsigned long long undefined8;",
+            "auto-c0001-012": "typedef double undefined8;",
+            "auto-c0001-014": "typedef unsigned long long undefined8;",
+            "auto-c0002-001": "typedef double undefined8;",
+            "auto-c0011-005": "typedef unsigned long long undefined8;",
+            "auto-c0034-018": "typedef unsigned long long undefined8;",
+            "auto-c0035-002": "typedef unsigned long long undefined8;",
+            "collision-core": "typedef double undefined8;",
+            "damage-core": "typedef double undefined8;",
+            "knockback-core": "typedef double undefined8;"
+          },
+          "first_seen": "2026-08-21T00:44:31.833113Z",
+          "last_seen": "2026-08-21T00:44:31.833113Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:56ead42a230823b9681da9a86ab96cc546ec5510814d5147a5ac2a8101be1037",
+          "material_sha256": "57a377ac8de91494d8543250483690eda3410ba6e045e189e0419c09c33ba1bd",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "undefined8_fork|undefined8|auto-c0002-001,auto-c0011-005,auto-c0029-013,auto-c0034-018,auto-c0035-002",
+          "class": "undefined8_fork",
+          "symbol": "undefined8",
+          "units": [
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0029-013",
+            "auto-c0034-018",
+            "auto-c0035-002"
+          ],
+          "detail": "2 divergent typedef declarations of undefined8",
+          "variants": {
+            "auto-c0002-001": "typedef double undefined8;",
+            "auto-c0011-005": "typedef unsigned long long undefined8;",
+            "auto-c0029-013": "typedef unsigned long long undefined8;",
+            "auto-c0034-018": "typedef unsigned long long undefined8;",
+            "auto-c0035-002": "typedef unsigned long long undefined8;"
+          },
+          "first_seen": "2026-08-21T01:57:36.348690Z",
+          "last_seen": "2026-08-21T01:57:36.348690Z",
+          "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:652033d6112defc76279f7047ccc197ff0abaa948edbe76a32de0d4b426ba67b",
+          "material_sha256": "ef7232456bc34dda9fcc4345b314cc81ecd586ece2b2755d49c229a41d9378f6",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+          "ledger_key": "undefined8_fork|undefined8|auto-c0001-014,auto-c0002-001,auto-c0011-005,auto-c0034-018,auto-c0035-002",
+          "class": "undefined8_fork",
+          "symbol": "undefined8",
+          "units": [
+            "auto-c0001-014",
+            "auto-c0002-001",
+            "auto-c0011-005",
+            "auto-c0034-018",
+            "auto-c0035-002"
+          ],
+          "detail": "2 divergent typedef declarations of undefined8",
+          "variants": {
+            "auto-c0001-014": "typedef unsigned long long undefined8;",
+            "auto-c0002-001": "typedef double undefined8;",
+            "auto-c0011-005": "typedef unsigned long long undefined8;",
+            "auto-c0034-018": "typedef unsigned long long undefined8;",
+            "auto-c0035-002": "typedef unsigned long long undefined8;"
+          },
+          "first_seen": "2026-08-21T00:44:34.776159Z",
+          "last_seen": "2026-08-21T00:44:34.776159Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_updated_version": 50,
+      "source_updated_version": 0
     }
-  }
+  },
+  "assembly_unattributed_conflicts": [
+    {
+      "conflict_id": "assembly:63df792172b31f2587b755afe8471b22b5d45fde06b8fd44b07863da814dcf16",
+      "material_sha256": "6f50e1ff014b94eea573f630cfc1d2aa1182d484a538af9a227df2830bc29f50",
+      "evidence_domain": "assembly",
+      "behavioral_authority": false,
+      "injectable": false,
+      "resolution": "unresolved",
+      "ledger_schema": 1,
+      "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+      "ledger_key": "canonicalization_refused|None|auto-c0033-007,auto-c0033-008,auto-c0033-009,auto-c0033-010,auto-c0035-006",
+      "class": "canonicalization_refused",
+      "symbol": null,
+      "units": [
+        "auto-c0033-007",
+        "auto-c0033-008",
+        "auto-c0033-009",
+        "auto-c0033-010",
+        "auto-c0035-006"
+      ],
+      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
+      "variants": {},
+      "first_seen": "2026-08-22T22:37:33.005917Z",
+      "last_seen": "2026-08-22T22:37:33.005917Z",
+      "times_seen": 1
+    },
+    {
+      "conflict_id": "assembly:e8feaa59b979e6067593468e7515c120edb739cde0346b650b7ad09db6ab8cc2",
+      "material_sha256": "9e72a6b5725e1361a56b8f0652bb5ca6bc991f4b51e5e940773369a9e0f8e47b",
+      "evidence_domain": "assembly",
+      "behavioral_authority": false,
+      "injectable": false,
+      "resolution": "unresolved",
+      "ledger_schema": 1,
+      "ledger_sha256": "a94e70629ef53efe4f40d412a03a79b7fd9f753717ca8336c84434fabee22501",
+      "ledger_key": "canonicalization_refused|None|auto-c0018-018,auto-c0033-009,auto-c0033-010,auto-c0035-000,auto-c0035-003",
+      "class": "canonicalization_refused",
+      "symbol": null,
+      "units": [
+        "auto-c0018-018",
+        "auto-c0033-009",
+        "auto-c0033-010",
+        "auto-c0035-000",
+        "auto-c0035-003"
+      ],
+      "detail": "canonical_header_ambiguous: auto-c0035-003 declares FUN_80047aa4, FUN_801322dc, FUN_80133530 more than once after canonicalization",
+      "variants": {},
+      "first_seen": "2026-08-23T00:33:13.090598Z",
+      "last_seen": "2026-08-23T00:33:13.090598Z",
+      "times_seen": 1
+    }
+  ],
+  "assembly_unattributed_updated_version": 50
 }
