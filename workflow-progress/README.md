@@ -1,30 +1,27 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T17:14:21.333532Z - machine-written, do not edit.*
+*Generated 2026-08-23T17:38:44.853905Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 43/1396 settled (3 green, 40 staged) |
+| **Queue progress** | 44/1396 settled (3 green, 41 staged) |
 | **Retries outstanding** | 23 |
-| **Untouched** | 1327 |
-| **Last transition** | 2026-08-23T17:14:21.333532Z |
-| **Last green** | 2026-08-23T17:14:21.333532Z (`auto-c0033-005`) |
-| **Last product commit** | `97d6f36f99008aa4e8b3e87d80bf7c39443afb59` |
+| **Untouched** | 1326 |
+| **Last transition** | 2026-08-23T17:38:44.853905Z |
+| **Last green** | 2026-08-23T17:38:44.853905Z (`auto-c0033-011`) |
+| **Last product commit** | `141d5f136904b8283b964c283ed72b1fd60fc962` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
-
-**Repeated recent failure classes**
-
-- `assembly:assembly gate canonicalize failed before promotion: owner_va` x2
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T17:38:44.853905Z | `auto-c0033-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T17:14:21.333532Z | `auto-c0033-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T16:51:32.849153Z | `auto-c0029-014` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T16:47:53.273547Z | `auto-c0029-012` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80047aa |
@@ -74,4 +71,3 @@
 | 2026-08-22T23:38:47.231847Z | `auto-c0035-001` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_013138c_ |
 | 2026-08-22T23:35:29.882739Z | `auto-c0035-006` | gate_failed | assembly | 6 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801336a |
 | 2026-08-22T23:09:52.118914Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-22T23:09:41.685168Z | `auto-c0035-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
