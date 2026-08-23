@@ -1,7 +1,7 @@
 {
   "unit": "auto-c0019-002",
-  "run_id": "2026-08-21T04:18:31.026140Z",
-  "generated_at": "2026-08-21T04:21:04.704950Z",
+  "run_id": "2026-08-23T22:32:58.325044Z",
+  "generated_at": "2026-08-23T22:47:25.276584Z",
   "extractions": [
     {
       "file": "research/decomp/ghidra-export/chunk_0019.c",
@@ -53,6 +53,23 @@
     }
   ],
   "extracted_sha256": "d70c35fe14a61ffe312ac14d263f96d9fe3da879271bf68264ca8695eb84bcad",
+  "transform": {
+    "name": "d5-fp-reinterpret",
+    "version": 1,
+    "sites": 0,
+    "sites_per_block": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "transformed_sha256": "d70c35fe14a61ffe312ac14d263f96d9fe3da879271bf68264ca8695eb84bcad",
+    "d5_residual_risk": 0
+  },
   "exported_functions": [
     "FUN_800bae68",
     "FUN_800bb004",
@@ -79,7 +96,7 @@
     "zz_0158a94_"
   ],
   "registry": {
-    "version_used": 16,
+    "version_used": 85,
     "holdout": false,
     "authoritative_injected": [],
     "advisory_injected": 0
