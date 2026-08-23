@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T07:19:26.896523Z - machine-written, do not edit.*
+*Generated 2026-08-23T08:44:24.506768Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 33/1396 settled (3 green, 30 staged) |
-| **Retries outstanding** | 8 |
-| **Untouched** | 1352 |
-| **Last transition** | 2026-08-23T07:19:26.896523Z |
+| **Retries outstanding** | 9 |
+| **Untouched** | 1351 |
+| **Last transition** | 2026-08-23T08:44:24.506768Z |
 | **Last green** | 2026-08-23T06:17:53.680719Z (`auto-c0050-004`) |
 | **Last product commit** | `ccded265bc56cc90a008ab7a47e017780bdb02e6` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T08:44:24.506768Z | `auto-c0050-006` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:177:1: error: unterminated /* comment   177 \| /* PT |
 | 2026-08-23T07:19:26.896523Z | `auto-c0050-005` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
 | 2026-08-23T06:17:53.680719Z | `auto-c0050-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T06:14:16.923342Z | `auto-c0050-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-21T16:19:12.855874Z | `auto-c0018-018` | gate_failed | assembly | 3 | assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner i |
 | 2026-08-21T15:58:44.998526Z | `auto-c0029-013` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T15:44:29.191111Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
-| 2026-08-21T15:44:29.242091Z | `auto-c0018-018` | deferred | manual-revoke | 2 | interrupted before a verdict; requeued |
