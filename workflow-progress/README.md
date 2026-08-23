@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T22:53:06.907723Z - machine-written, do not edit.*
+*Generated 2026-08-23T23:11:48.369042Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 51/1396 settled (3 green, 48 staged) |
-| **Retries outstanding** | 15 |
+| **Queue progress** | 52/1396 settled (3 green, 49 staged) |
+| **Retries outstanding** | 14 |
 | **Untouched** | 1327 |
-| **Last transition** | 2026-08-23T22:53:06.907723Z |
-| **Last green** | 2026-08-23T22:50:46.664154Z (`auto-c0019-002`) |
-| **Last product commit** | `98ab901f3b1794f07866031ac4cfde0e9f824b11` |
+| **Last transition** | 2026-08-23T23:11:48.369042Z |
+| **Last green** | 2026-08-23T23:11:48.369042Z (`auto-c0028-018`) |
+| **Last product commit** | `f2554addc211cdc440fd2a241b42742941467aad` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -20,12 +20,12 @@
 **Repeated recent failure classes**
 
 - `artifact-install:artifact install refused after assembly pass: legacy revoked` x4
-- `assembly:assembly gate canonicalize failed before promotion: owner_va` x2
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T23:11:48.369042Z | `auto-c0028-018` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T22:53:06.907723Z | `auto-c0028-015` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8010342 |
 | 2026-08-23T22:50:46.664154Z | `auto-c0019-002` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T22:47:20.972951Z | `auto-c0019-000` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
@@ -75,4 +75,3 @@
 | 2026-08-23T10:43:28.563373Z | `auto-c0053-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T10:38:44.366378Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T10:38:41.147863Z | `auto-c0050-008` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:200:18: error: expected ';' after top level declarat |
-| 2026-08-23T09:18:13.618410Z | `auto-c0050-007` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |

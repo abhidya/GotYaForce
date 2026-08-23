@@ -2,83 +2,29 @@
   "schema": 1,
   "unit": "auto-c0028-018",
   "unit_id": "auto-c0028-018",
-  "timestamp": "2026-08-23T14:06:46.079321Z",
-  "run_id": "2026-08-23T13:03:30.528559Z",
-  "result": "gate_failed",
-  "stage": "assembly",
-  "attempt": 1,
-  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0007030_ owner/variant pair at auto-c0028-018/gnt4_shim.h",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "timestamp": "2026-08-23T23:11:48.369042Z",
+  "run_id": "2026-08-23T22:32:58.325044Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 2,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "f2554addc211cdc440fd2a241b42742941467aad",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": null,
+  "tier": "compile_only",
   "extra": {
-    "rounds": [
-      {
-        "iteration": 1,
-        "stage": "compile",
-        "error_count": 2,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0028-018.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_bb32s469\\unit.o'' failed (returned 1)",
-          "unit.c:85:33: error: use of undeclared identifier 'FUN_80047dcc'"
-        ],
-        "fingerprint": "64758073930e226dc1898faa83ec55d3ac5aab47053a7a8d8c096a23c65583ab"
-      }
-    ],
-    "assembly_gate": {
-      "passed": false,
-      "n": 5,
-      "units": [
-        "auto-c0028-013",
-        "auto-c0028-014",
-        "auto-c0028-016",
-        "auto-c0028-017",
-        "auto-c0028-018"
-      ],
-      "stage": "canonicalize",
-      "conflicts": [
-        {
-          "symbol": "zz_0007030_",
-          "class": "canonicalization_refused",
-          "units": [
-            "auto-c0028-013",
-            "auto-c0028-014",
-            "auto-c0028-016",
-            "auto-c0028-017",
-            "auto-c0028-018"
-          ],
-          "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected zz_0007030_ owner/variant pair at auto-c0028-018/gnt4_shim.h"
-        }
-      ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected zz_0007030_ owner/variant pair at auto-c0028-018/gnt4_shim.h",
-      "candidate": {
-        "name": "auto-c0028-018",
-        "sha256": "f4b7dc340e0dba0bcfcc9df21037d6e3dcfac44ad3c9bc97b50394c92a6c18aa"
-      },
-      "expected_candidate": {
-        "name": "auto-c0028-018",
-        "sha256": "f4b7dc340e0dba0bcfcc9df21037d6e3dcfac44ad3c9bc97b50394c92a6c18aa"
-      },
-      "attempt_cleanup": "removed"
-    },
-    "world_version": {
-      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
-      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
-      "prompt_version": "3",
-      "registry_version": "72"
-    },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false
+    "transition_id": "1cf6811a4a084cd2877778af3be8c4c2",
+    "transition_timestamp": "2026-08-23T23:11:48.369042Z",
+    "transition_run_id": "2026-08-23T22:32:58.325044Z",
+    "promotion_transaction_id": "c980bd5bf02742d7b813797bf7c95c4f",
+    "candidate_sha256": "9bc87c1ceb20d0eb88860b15353bb33a662d21a64e87cacf043aa5ac639263ff"
   },
   "driver_record": {
-    "status": "red_retryable",
-    "attempts": 1,
+    "status": "green",
+    "attempts": 2,
     "symbol_set": [
       "FUN_801041b0",
       "FUN_80104204",
@@ -106,9 +52,9 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 72,
-    "model_requests": 2,
-    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0007030_ owner/variant pair at auto-c0028-018/gnt4_shim.h",
+    "registry_version_used": 87,
+    "model_requests": 3,
+    "error": null,
     "interruptions": 1,
     "rounds": [
       {
@@ -167,9 +113,14 @@
       "prompt_version": "3",
       "registry_version": "72"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false,
-    "last_stage": "assembly"
+    "last_stage": "commit",
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "f2554addc211cdc440fd2a241b42742941467aad",
+    "pushed": true,
+    "tier": "compile_only",
+    "promotion_transaction_id": "c980bd5bf02742d7b813797bf7c95c4f",
+    "promotion_transition_id": "1cf6811a4a084cd2877778af3be8c4c2",
+    "candidate_sha256": "9bc87c1ceb20d0eb88860b15353bb33a662d21a64e87cacf043aa5ac639263ff"
   },
   "history": [
     {
@@ -187,6 +138,14 @@
       "attempt": 1,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0007030_ owner/variant pair at auto-c0028-018/gnt4_shim.h",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-23T23:11:48.369042Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 2,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "f2554addc211cdc440fd2a241b42742941467aad"
     }
   ]
 }
