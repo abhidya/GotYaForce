@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0011-004",
   "unit_id": "auto-c0011-004",
-  "timestamp": "2026-08-21T05:32:30.299436Z",
-  "run_id": "2026-08-21T05:26:39.191526Z",
-  "result": "deferred",
-  "stage": "d5-migrate",
-  "attempt": 1,
-  "detail": "verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 4 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
+  "timestamp": "2026-08-23T12:46:32.213130Z",
+  "run_id": "2026-08-23T12:21:56.706758Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 2,
+  "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -16,20 +16,57 @@
   "model": "unsloth/Qwen3.8-27B-GGUF",
   "tier": null,
   "extra": {
-    "revoked_via": "d5-migrate",
-    "previous_status": "green",
-    "world_version": {
-      "config_hash": "f85869d4ffe85044cb01574074c195c6d30c3cdf5a79aa8bfc823e9e75d9455b",
-      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "5a5968441843fc9298569eb563da82cb33f80726",
-      "prompt_version": "3",
-      "registry_version": "22"
+    "rounds": [],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0050-003",
+        "auto-c0050-004",
+        "auto-c0053-011",
+        "auto-c0053-014",
+        "auto-c0011-004"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSVECMag_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0011-004",
+            "auto-c0050-003",
+            "auto-c0050-004",
+            "auto-c0053-011",
+            "auto-c0053-014"
+          ],
+          "variants": {},
+          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSVECMag_bl"
+        }
+      ],
+      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+      "candidate": {
+        "name": "auto-c0011-004",
+        "sha256": "97589551b398e06300fd7f12f14e0b41d842ca26cd9d83ad5af05583ff1ba0ce"
+      },
+      "expected_candidate": {
+        "name": "auto-c0011-004",
+        "sha256": "97589551b398e06300fd7f12f14e0b41d842ca26cd9d83ad5af05583ff1ba0ce"
+      },
+      "attempt_cleanup": "removed"
     },
-    "transform_sites": 4
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "35cd02261e615e0121b138168d7aca841d5bd368",
+      "prompt_version": "3",
+      "registry_version": "63"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
   },
   "driver_record": {
-    "status": "green",
-    "attempts": 1,
+    "status": "red_retryable",
+    "attempts": 2,
     "symbol_set": [
       "CONCAT44",
       "DAT_802d6370",
@@ -46,6 +83,7 @@
       "FUN_800e4294",
       "FUN_800e43e0",
       "FUN_800e4f9c",
+      "__gnt4_bitcast_f64",
       "gnt4_PSVECMag_bl",
       "gnt4_PSVECSubtract_bl",
       "uint",
@@ -73,16 +111,70 @@
       "zz_01005ec_",
       "zz_0197ad8_"
     ],
-    "prompt_version": 2,
+    "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 6,
-    "error": null,
+    "registry_version_used": 63,
+    "error": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
     "oracle_summary": "compile-only (UNVERIFIED)",
     "commit": "0d343c079fd33bfa015bd70b5698b31240c247f6",
     "pushed": true,
-    "tier": "compile_only",
-    "last_stage": "commit"
+    "last_stage": "assembly",
+    "revoked": {
+      "via": "d5-migrate",
+      "at": "2026-08-21T05:32:32.892079Z",
+      "reason": "D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 4 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
+      "previous_status": "green",
+      "previous_tier": "compile_only",
+      "transform_sites": 4
+    },
+    "rounds": [],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0050-003",
+        "auto-c0050-004",
+        "auto-c0053-011",
+        "auto-c0053-014",
+        "auto-c0011-004"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSVECMag_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0011-004",
+            "auto-c0050-003",
+            "auto-c0050-004",
+            "auto-c0053-011",
+            "auto-c0053-014"
+          ],
+          "variants": {},
+          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSVECMag_bl"
+        }
+      ],
+      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2a3hx5u_\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+      "candidate": {
+        "name": "auto-c0011-004",
+        "sha256": "97589551b398e06300fd7f12f14e0b41d842ca26cd9d83ad5af05583ff1ba0ce"
+      },
+      "expected_candidate": {
+        "name": "auto-c0011-004",
+        "sha256": "97589551b398e06300fd7f12f14e0b41d842ca26cd9d83ad5af05583ff1ba0ce"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "35cd02261e615e0121b138168d7aca841d5bd368",
+      "prompt_version": "3",
+      "registry_version": "63"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
   },
   "history": [
     {
@@ -99,6 +191,14 @@
       "stage": "d5-migrate",
       "attempt": 1,
       "detail": "verdict revoked: D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 4 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-23T12:46:32.213130Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 2,
+      "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Use",
       "product_commit": null
     }
   ]

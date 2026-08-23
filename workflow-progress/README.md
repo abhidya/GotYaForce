@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T12:42:25.910430Z - machine-written, do not edit.*
+*Generated 2026-08-23T12:46:32.213130Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 35/1396 settled (3 green, 32 staged) |
-| **Retries outstanding** | 13 |
-| **Untouched** | 1345 |
-| **Last transition** | 2026-08-23T12:42:25.910430Z |
+| **Retries outstanding** | 14 |
+| **Untouched** | 1344 |
+| **Last transition** | 2026-08-23T12:46:32.213130Z |
 | **Last green** | 2026-08-23T12:42:25.910430Z (`auto-c0053-014`) |
 | **Last product commit** | `6aefed93d147c1acdb9e51bc90693532425b264e` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T12:46:32.213130Z | `auto-c0011-004` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T12:42:25.910430Z | `auto-c0053-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T12:21:27.193973Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T12:21:24.196267Z | `auto-c0053-013` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_00097b4_ |
@@ -70,4 +71,3 @@
 | 2026-08-21T20:26:53.076657Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T20:26:18.786459Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T20:26:18.903814Z | `auto-c0033-011` | deferred | port | 0 | interrupted before a verdict; requeued |
-| 2026-08-21T16:21:20.036764Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
