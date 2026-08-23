@@ -297,13 +297,27 @@ async function main() {
     result_schema: 1,
     unit: unitName,
     generated_at: new Date().toISOString(),
-    harness: { entry: "research/decomp/oracle-harness/run-unit.mjs", git_rev: gitRev },
+    // git_rev is provenance evidence only (it moves with every unrelated commit);
+    // sha256 is the harness's real identity, and what result-integrity recomputes.
+    harness: {
+      entry: "research/decomp/oracle-harness/run-unit.mjs",
+      git_rev: gitRev,
+      sha256: sha256(fs.readFileSync(path.join(here, "run-unit.mjs"))),
+    },
     wasm: { path: wasmPath, sha256: sha256(wasmBytes) },
     corpus: corpusMode === "replay"
       ? { mode: "replay", file: path.relative(root, fixturePath).replace(/\\/g, "/"),
           sha256: sha256(fixtureRaw), n: totalCases }
       : { mode: "generate", seed: genParams.seed, n: totalCases },
     spec_sha256: sha256(fs.readFileSync(specPath)),
+    // The codec binding: both the extracted map and the actor.ts it was extracted
+    // from. Either drifting supersedes the result — the run's decode direction no
+    // longer describes the struct it claimed to decode.
+    field_map: {
+      path: "research/decomp/oracle-harness/actor-field-map.json",
+      sha256: sha256(fs.readFileSync(fieldMapPath)),
+      source_sha256: sha256(Buffer.from(actorNormalized, "utf8")),
+    },
     reference_kind: meta.reference_kind,
     references: meta.references,
     // F5: per-function reference annotation — fnResults carry each function's own
