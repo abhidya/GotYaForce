@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T03:06:12.002112Z - machine-written, do not edit.*
+*Generated 2026-08-23T03:09:45.237668Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 26/1396 settled (3 green, 23 staged) |
+| **Queue progress** | 27/1396 settled (3 green, 24 staged) |
 | **Retries outstanding** | 5 |
-| **Untouched** | 1362 |
-| **Last transition** | 2026-08-23T03:06:12.002112Z |
-| **Last green** | 2026-08-23T00:41:33.731614Z (`auto-c0035-006`) |
-| **Last product commit** | `ce9c6f4dbf750219fc438794a86c341d356908c9` |
+| **Untouched** | 1361 |
+| **Last transition** | 2026-08-23T03:09:45.237668Z |
+| **Last green** | 2026-08-23T03:09:45.237668Z (`auto-c0035-008`) |
+| **Last product commit** | `61e9a4a9c8d1d56a2879496a1dc92fbb8511bedd` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T03:09:45.237668Z | `auto-c0035-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T03:06:12.002112Z | `auto-c0035-007` | gate_failed | assembly | 1 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T02:04:52.133452Z | `auto-c0035-004` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
 | 2026-08-23T00:41:33.731614Z | `auto-c0035-006` | staged | commit | 7 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-21T15:15:38.205887Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T15:14:25.343118Z | `auto-c0035-002` | deferred | diagnosis-invalidate | 3 | diagnosis invalidated: control-plane misroute: attempt 3 passed build+assembly; terminal stage artifact-instal |
 | 2026-08-21T13:36:57.057687Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-21T13:35:16.971877Z | `auto-c0035-002` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: artifact destination already exists with a different preimage: D |
