@@ -2,83 +2,41 @@
   "schema": 1,
   "unit": "auto-c0035-006",
   "unit_id": "auto-c0035-006",
-  "timestamp": "2026-08-22T23:35:29.882739Z",
-  "run_id": "2026-08-22T23:11:54.804049Z",
-  "result": "gate_failed",
-  "stage": "assembly",
-  "attempt": 6,
-  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "timestamp": "2026-08-23T00:41:33.731614Z",
+  "run_id": "2026-08-23T00:37:40.445764Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 7,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "ce9c6f4dbf750219fc438794a86c341d356908c9",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": null,
+  "tier": "compile_only",
   "extra": {
-    "rounds": [
-      {
-        "iteration": 1,
-        "stage": "import-gate",
-        "error_count": 0,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-006\\header-attempt6-iter0.h",
-        "diagnostics": [
-          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
-          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: FUN_801336a4, FUN_80133cbc"
-        ],
-        "fingerprint": "b0fcbe4003a1cd5be7cd77b44930fd6639913f3493a4ff9cbb7f2d9e8fbd2583"
-      }
-    ],
-    "assembly_gate": {
-      "passed": false,
-      "n": 5,
-      "units": [
-        "auto-c0033-009",
-        "auto-c0033-010",
-        "auto-c0018-018",
-        "auto-c0035-000",
-        "auto-c0035-006"
-      ],
-      "stage": "canonicalize",
-      "conflicts": [
-        {
-          "symbol": "FUN_801336a4",
-          "class": "canonicalization_refused",
-          "units": [
-            "auto-c0018-018",
-            "auto-c0033-009",
-            "auto-c0033-010",
-            "auto-c0035-000",
-            "auto-c0035-006"
-          ],
-          "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h"
-        }
-      ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
-      "candidate": {
-        "name": "auto-c0035-006",
-        "sha256": "589d86a68edd4986408a34d3aa6e51ea109bd1ba51d8f04a616bc16f938f293d"
-      },
-      "expected_candidate": {
-        "name": "auto-c0035-006",
-        "sha256": "589d86a68edd4986408a34d3aa6e51ea109bd1ba51d8f04a616bc16f938f293d"
-      },
-      "attempt_cleanup": "removed"
-    },
-    "world_version": {
-      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
-      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "94ceddce2121dccd50874d183d3bd800b0d00cbe",
-      "prompt_version": "3",
-      "registry_version": "49"
-    },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false
+    "transition_id": "49ee09cfd1bc439c998c479d38824da9",
+    "transition_timestamp": "2026-08-23T00:41:33.731614Z",
+    "transition_run_id": "2026-08-23T00:37:40.445764Z",
+    "promotion_transaction_id": "407b57b7565b4ab09f1efd206c5ed506",
+    "candidate_sha256": "e92e51f742e5a1cda06fcea8d3d67c40855e5d55a3bbebc9da04c5f929457a72",
+    "replacement_evidence": {
+      "schema": 1,
+      "transaction_id": "407b57b7565b4ab09f1efd206c5ed506",
+      "revocation_transition_id": "verdict-revoke-eeec96d15e595b6df1b1b54b1601565dd602e108ffee2be6c9d2b8af25bf7354",
+      "previous_commit": "5f124e6c2c27b51e33707835954aa1138a56197e",
+      "preimage_sha256": "14d368fd4b036c41ebd1e187524b3eb25d0aaf6baea974aa136c6ae5f5caf4ca",
+      "preimage_inventory_sha256": "358d3078096b0f1ec408ec102ccda10d6f122fb5138b6cb35aadb88dbc64ea7d",
+      "preimage_inventory_entries": 5,
+      "proof_binding": "legacy-git-tree",
+      "proof_sha256": "ab1cf1e6e7e33ffff2a5180fcb9349e8b6d9d11b975c61d60dbe54898681ca42",
+      "candidate_sha256": "e92e51f742e5a1cda06fcea8d3d67c40855e5d55a3bbebc9da04c5f929457a72"
+    }
   },
   "driver_record": {
-    "status": "red_retryable",
-    "attempts": 6,
+    "status": "green",
+    "attempts": 7,
     "symbol_set": [
       "CONCAT44",
       "DAT_80336561",
@@ -118,7 +76,7 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_version_used": 49,
-    "model_requests": 9,
+    "model_requests": 10,
     "rounds": [
       {
         "iteration": 1,
@@ -132,20 +90,9 @@
         "fingerprint": "b0fcbe4003a1cd5be7cd77b44930fd6639913f3493a4ff9cbb7f2d9e8fbd2583"
       }
     ],
-    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
-    "last_stage": "assembly",
+    "error": null,
+    "last_stage": "commit",
     "registry_deviations": [],
-    "revoked": {
-      "via": "revoke-unit",
-      "at": "2026-08-21T13:27:48.584243Z",
-      "reason": "assembly eligibility audit: events.jsonl:1898-1899; timestamp=2026-08-21T05:37:21.981044Z; stage=link; n=5; window=auto-c0028-016,auto-c0028-017,auto-c0035-002,auto-c0034-018,auto-c0035-006; conflicts=collision_stub:zz_00076d0_",
-      "previous_status": "green",
-      "previous_tier": "compile_only",
-      "previous_commit": "5f124e6c2c27b51e33707835954aa1138a56197e",
-      "previous_oracle_summary": "compile-only (UNVERIFIED)",
-      "previous_record_sha256": "419a6ebe513f493b4f6148e7d7c9f1742ac61ab403cc1952e1e5579425846ebb",
-      "transition_id": "verdict-revoke-eeec96d15e595b6df1b1b54b1601565dd602e108ffee2be6c9d2b8af25bf7354"
-    },
     "assembly_gate": {
       "passed": false,
       "n": 5,
@@ -190,10 +137,27 @@
       "prompt_version": "3",
       "registry_version": "49"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false,
     "interruptions": 2,
-    "interrupted_reconcile_transition_id": "interrupted-reconcile-a7bec073379afeb694e889931d55f2efa976ccc829c50022ceaa5024d780439f"
+    "interrupted_reconcile_transition_id": "interrupted-reconcile-a7bec073379afeb694e889931d55f2efa976ccc829c50022ceaa5024d780439f",
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "ce9c6f4dbf750219fc438794a86c341d356908c9",
+    "pushed": true,
+    "tier": "compile_only",
+    "promotion_transaction_id": "407b57b7565b4ab09f1efd206c5ed506",
+    "promotion_transition_id": "49ee09cfd1bc439c998c479d38824da9",
+    "candidate_sha256": "e92e51f742e5a1cda06fcea8d3d67c40855e5d55a3bbebc9da04c5f929457a72",
+    "replacement_evidence": {
+      "schema": 1,
+      "transaction_id": "407b57b7565b4ab09f1efd206c5ed506",
+      "revocation_transition_id": "verdict-revoke-eeec96d15e595b6df1b1b54b1601565dd602e108ffee2be6c9d2b8af25bf7354",
+      "previous_commit": "5f124e6c2c27b51e33707835954aa1138a56197e",
+      "preimage_sha256": "14d368fd4b036c41ebd1e187524b3eb25d0aaf6baea974aa136c6ae5f5caf4ca",
+      "preimage_inventory_sha256": "358d3078096b0f1ec408ec102ccda10d6f122fb5138b6cb35aadb88dbc64ea7d",
+      "preimage_inventory_entries": 5,
+      "proof_binding": "legacy-git-tree",
+      "proof_sha256": "ab1cf1e6e7e33ffff2a5180fcb9349e8b6d9d11b975c61d60dbe54898681ca42",
+      "candidate_sha256": "e92e51f742e5a1cda06fcea8d3d67c40855e5d55a3bbebc9da04c5f929457a72"
+    }
   },
   "history": [
     {
@@ -259,6 +223,14 @@
       "attempt": 6,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801336a4 owner/variant pair at auto-c0035-006/gnt4_shim.h",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-23T00:41:33.731614Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 7,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "ce9c6f4dbf750219fc438794a86c341d356908c9"
     }
   ]
 }
