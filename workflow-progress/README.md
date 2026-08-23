@@ -1,26 +1,27 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-23T22:00:59.312938Z - machine-written, do not edit.*
+*Generated 2026-08-23T22:32:58.697290Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 50/1396 settled (3 green, 47 staged) |
-| **Retries outstanding** | 17 |
-| **Untouched** | 1326 |
-| **Last transition** | 2026-08-23T22:00:59.312938Z |
+| **Retries outstanding** | 16 |
+| **Untouched** | 1327 |
+| **Last transition** | 2026-08-23T22:32:58.697290Z |
 | **Last green** | 2026-08-23T20:14:46.912010Z (`auto-c0050-007`) |
 | **Last product commit** | `dadf854cd6bd3a5d6c07292eba0e3a8d50b1fb01` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T22:32:58.697290Z | `auto-c0053-013` | deferred | assembly | 1 | interrupted before a verdict; requeued |
 | 2026-08-23T22:00:59.312938Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T22:00:55.895283Z | `auto-c0053-012` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801b9ad |
 | 2026-08-23T21:26:21.692805Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -70,4 +71,3 @@
 | 2026-08-23T06:17:53.680719Z | `auto-c0050-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T06:14:16.923342Z | `auto-c0050-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T05:50:19.898878Z | `auto-c0050-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-23T05:26:24.982227Z | `auto-c0050-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
