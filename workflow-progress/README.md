@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T13:35:20.434084Z - machine-written, do not edit.*
+*Generated 2026-08-23T13:38:14.809236Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 39/1396 settled (3 green, 36 staged) |
-| **Retries outstanding** | 17 |
-| **Untouched** | 1337 |
-| **Last transition** | 2026-08-23T13:35:20.434084Z |
+| **Retries outstanding** | 18 |
+| **Untouched** | 1336 |
+| **Last transition** | 2026-08-23T13:38:14.809236Z |
 | **Last green** | 2026-08-23T13:35:20.434084Z (`auto-c0028-014`) |
 | **Last product commit** | `77695a9ca756e76f346a4da10f063fc8473e460e` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -20,11 +20,13 @@
 **Repeated recent failure classes**
 
 - `assembly:assembly gate link failed before promotion: _start_em_asm --` x3
+- `assembly:assembly gate canonicalize failed before promotion: owner_va` x2
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T13:38:14.809236Z | `auto-c0028-015` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8010342 |
 | 2026-08-23T13:35:20.434084Z | `auto-c0028-014` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T13:31:39.182679Z | `auto-c0028-013` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T13:27:48.153342Z | `auto-c0019-003` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -74,4 +76,3 @@
 | 2026-08-22T21:38:32.735448Z | `auto-c0018-018` | deferred | assembly | 3 | interrupted before a verdict; requeued |
 | 2026-08-22T21:38:32.410178Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T22:07:59.479820Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-21T22:00:29.212518Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |

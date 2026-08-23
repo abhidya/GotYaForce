@@ -1,17 +1,17 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-23T13:35:25.437758Z",
+  "generated_at": "2026-08-23T13:38:14.929663Z",
   "run_id": "2026-08-23T13:03:30.528559Z",
   "total_units": 1396,
   "green": 3,
   "staged": 36,
-  "retryable": 17,
-  "untouched": 1337,
+  "retryable": 18,
+  "untouched": 1336,
   "deferred": 0,
   "structural_ineligible": 3,
   "active": 0,
-  "total_attempts": 93,
-  "transitions_last_hour": 10,
+  "total_attempts": 94,
+  "transitions_last_hour": 11,
   "greens_last_hour": 5,
   "last_green_at": "2026-08-23T13:35:20.434084Z",
   "last_green_unit": "auto-c0028-014",
@@ -20,6 +20,10 @@
     [
       "assembly:assembly gate link failed before promotion: _start_em_asm --",
       3
+    ],
+    [
+      "assembly:assembly gate canonicalize failed before promotion: owner_va",
+      2
     ]
   ],
   "health": "healthy_progress",
