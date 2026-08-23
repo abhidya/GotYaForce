@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T03:39:03.431622Z - machine-written, do not edit.*
+*Generated 2026-08-23T03:56:58.871325Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 28/1396 settled (3 green, 25 staged) |
-| **Retries outstanding** | 5 |
-| **Untouched** | 1360 |
-| **Last transition** | 2026-08-23T03:39:03.431622Z |
+| **Retries outstanding** | 6 |
+| **Untouched** | 1359 |
+| **Last transition** | 2026-08-23T03:56:58.871325Z |
 | **Last green** | 2026-08-23T03:39:03.431622Z (`auto-c0049-016`) |
 | **Last product commit** | `66b6b6917ec1be87358d7beb22ad94d04d979fad` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T03:56:58.871325Z | `auto-c0049-017` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_001ab6c_ |
 | 2026-08-23T03:39:03.431622Z | `auto-c0049-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T03:09:45.237668Z | `auto-c0035-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T03:06:12.002112Z | `auto-c0035-007` | gate_failed | assembly | 1 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
@@ -70,4 +71,3 @@
 | 2026-08-21T15:16:28.119037Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T15:16:28.154914Z | `auto-c0029-013` | deferred | manual-revoke | 1 | interrupted before a verdict; requeued |
 | 2026-08-21T15:15:38.205887Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
-| 2026-08-21T15:14:25.343118Z | `auto-c0035-002` | deferred | diagnosis-invalidate | 3 | diagnosis invalidated: control-plane misroute: attempt 3 passed build+assembly; terminal stage artifact-instal |
