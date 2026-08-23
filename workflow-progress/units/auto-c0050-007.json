@@ -2,69 +2,29 @@
   "schema": 1,
   "unit": "auto-c0050-007",
   "unit_id": "auto-c0050-007",
-  "timestamp": "2026-08-23T09:18:13.618410Z",
-  "run_id": "2026-08-23T08:47:14.546586Z",
-  "result": "retryable",
-  "stage": "compile-fix",
-  "attempt": 1,
-  "detail": "stuck: identical diagnostics after applied fix",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "timestamp": "2026-08-23T20:14:46.912010Z",
+  "run_id": "2026-08-23T13:03:30.528559Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 2,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "dadf854cd6bd3a5d6c07292eba0e3a8d50b1fb01",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": null,
+  "tier": "compile_only",
   "extra": {
-    "rounds": [
-      {
-        "iteration": 1,
-        "stage": "compile",
-        "error_count": 3,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0050-007.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_9ax1ozur\\unit.o'' failed (returned 1)",
-          "unit.c:241:32: error: use of undeclared identifier 'zz_01a4e90_'",
-          "unit.c:242:34: error: use of undeclared identifier 'zz_01a50f8_'; did you mean 'zz_01a49f8_'?"
-        ],
-        "fingerprint": "4e778de59bc0e7dae5fc6ecc8cc5e7b0c22506adafd16bf9e18035a21efc0b42"
-      },
-      {
-        "iteration": 2,
-        "stage": "import-gate",
-        "error_count": 0,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-007\\header-attempt1-iter1.h",
-        "diagnostics": [
-          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
-          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: zz_01a4e90_, zz_01a50f8_"
-        ],
-        "fingerprint": "b6a621ac62e5fbd56e569601d3f2f6d0d87a9d5be3916ed8bf6e5b6f120bd7e6"
-      },
-      {
-        "iteration": 3,
-        "stage": "import-gate",
-        "error_count": 0,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-007\\header-attempt1-iter2.h",
-        "diagnostics": [
-          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
-          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: zz_01a4e90_, zz_01a50f8_"
-        ],
-        "fingerprint": "b6a621ac62e5fbd56e569601d3f2f6d0d87a9d5be3916ed8bf6e5b6f120bd7e6"
-      }
-    ],
-    "world_version": {
-      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
-      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "912528f5791fc69d501a7b0c79cedc7ddfe16459",
-      "prompt_version": "3",
-      "registry_version": "60"
-    },
-    "failure_domain": "source-compiler",
-    "diagnosis_eligible": true
+    "transition_id": "8bf9197a3a13439698477a701b9002d6",
+    "transition_timestamp": "2026-08-23T20:14:46.912010Z",
+    "transition_run_id": "2026-08-23T13:03:30.528559Z",
+    "promotion_transaction_id": "7c768fefbb0f4e6eb2b617367cbe7f59",
+    "candidate_sha256": "58233d1465597b5a4b368cac3da62e0db59720166104d7e58fda8448ce88d7a6"
   },
   "driver_record": {
-    "status": "red_retryable",
-    "attempts": 1,
+    "status": "green",
+    "attempts": 2,
     "symbol_set": [
       "DAT_80435760",
       "code",
@@ -101,8 +61,8 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 60,
-    "model_requests": 2,
+    "registry_version_used": 83,
+    "model_requests": 3,
     "rounds": [
       {
         "iteration": 1,
@@ -146,11 +106,15 @@
       "prompt_version": "3",
       "registry_version": "60"
     },
-    "failure_domain": "source-compiler",
-    "diagnosis_eligible": true,
-    "error": "stuck: identical diagnostics after applied fix",
-    "last_stage": "compile-fix",
-    "source_failure_id": "source-failure-c9b363f661d53c0e237e9428c1fa2e33bc5b743a27728a4479e79bf1ee3e09d6"
+    "error": null,
+    "last_stage": "commit",
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "dadf854cd6bd3a5d6c07292eba0e3a8d50b1fb01",
+    "pushed": true,
+    "tier": "compile_only",
+    "promotion_transaction_id": "7c768fefbb0f4e6eb2b617367cbe7f59",
+    "promotion_transition_id": "8bf9197a3a13439698477a701b9002d6",
+    "candidate_sha256": "58233d1465597b5a4b368cac3da62e0db59720166104d7e58fda8448ce88d7a6"
   },
   "history": [
     {
@@ -160,6 +124,14 @@
       "attempt": 1,
       "detail": "stuck: identical diagnostics after applied fix",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-23T20:14:46.912010Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 2,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "dadf854cd6bd3a5d6c07292eba0e3a8d50b1fb01"
     }
   ]
 }
