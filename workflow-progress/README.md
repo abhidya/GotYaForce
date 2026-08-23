@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T03:09:45.237668Z - machine-written, do not edit.*
+*Generated 2026-08-23T03:39:03.431622Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 27/1396 settled (3 green, 24 staged) |
+| **Queue progress** | 28/1396 settled (3 green, 25 staged) |
 | **Retries outstanding** | 5 |
-| **Untouched** | 1361 |
-| **Last transition** | 2026-08-23T03:09:45.237668Z |
-| **Last green** | 2026-08-23T03:09:45.237668Z (`auto-c0035-008`) |
-| **Last product commit** | `61e9a4a9c8d1d56a2879496a1dc92fbb8511bedd` |
+| **Untouched** | 1360 |
+| **Last transition** | 2026-08-23T03:39:03.431622Z |
+| **Last green** | 2026-08-23T03:39:03.431622Z (`auto-c0049-016`) |
+| **Last product commit** | `66b6b6917ec1be87358d7beb22ad94d04d979fad` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T03:39:03.431622Z | `auto-c0049-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T03:09:45.237668Z | `auto-c0035-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T03:06:12.002112Z | `auto-c0035-007` | gate_failed | assembly | 1 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T02:04:52.133452Z | `auto-c0035-004` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
@@ -70,4 +71,3 @@
 | 2026-08-21T15:16:28.154914Z | `auto-c0029-013` | deferred | manual-revoke | 1 | interrupted before a verdict; requeued |
 | 2026-08-21T15:15:38.205887Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T15:14:25.343118Z | `auto-c0035-002` | deferred | diagnosis-invalidate | 3 | diagnosis invalidated: control-plane misroute: attempt 3 passed build+assembly; terminal stage artifact-instal |
-| 2026-08-21T13:36:57.057687Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
