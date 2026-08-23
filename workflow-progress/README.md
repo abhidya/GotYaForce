@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T22:43:58.554806Z - machine-written, do not edit.*
+*Generated 2026-08-23T22:47:20.972951Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 50/1396 settled (3 green, 47 staged) |
 | **Retries outstanding** | 16 |
 | **Untouched** | 1327 |
-| **Last transition** | 2026-08-23T22:43:58.554806Z |
+| **Last transition** | 2026-08-23T22:47:20.972951Z |
 | **Last green** | 2026-08-23T20:14:46.912010Z (`auto-c0050-007`) |
 | **Last product commit** | `dadf854cd6bd3a5d6c07292eba0e3a8d50b1fb01` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -19,12 +19,13 @@
 
 **Repeated recent failure classes**
 
-- `artifact-install:artifact install refused after assembly pass: legacy revoked` x3
+- `artifact-install:artifact install refused after assembly pass: legacy revoked` x4
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T22:47:20.972951Z | `auto-c0019-000` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-23T22:43:58.554806Z | `auto-c0011-012` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-23T22:40:26.947973Z | `auto-c0011-011` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-23T22:36:47.690743Z | `auto-c0011-004` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
@@ -74,4 +75,3 @@
 | 2026-08-23T09:18:13.618410Z | `auto-c0050-007` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
 | 2026-08-23T08:44:28.165111Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T08:44:24.506768Z | `auto-c0050-006` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:177:1: error: unterminated /* comment   177 \| /* PT |
-| 2026-08-23T07:19:26.896523Z | `auto-c0050-005` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
