@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T23:11:48.369042Z - machine-written, do not edit.*
+*Generated 2026-08-23T23:35:23.317406Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 52/1396 settled (3 green, 49 staged) |
 | **Retries outstanding** | 14 |
 | **Untouched** | 1327 |
-| **Last transition** | 2026-08-23T23:11:48.369042Z |
+| **Last transition** | 2026-08-23T23:35:23.317406Z |
 | **Last green** | 2026-08-23T23:11:48.369042Z (`auto-c0028-018`) |
 | **Last product commit** | `f2554addc211cdc440fd2a241b42742941467aad` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T23:35:23.317406Z | `auto-c0029-000` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T23:11:48.369042Z | `auto-c0028-018` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T22:53:06.907723Z | `auto-c0028-015` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8010342 |
 | 2026-08-23T22:50:46.664154Z | `auto-c0019-002` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -74,4 +75,3 @@
 | 2026-08-23T11:19:23.779521Z | `auto-c0053-012` | gate_failed | assembly | 1 | assembly gate link failed before promotion: link gate: these symbols are UNDEFINED across the assembled units  |
 | 2026-08-23T10:43:28.563373Z | `auto-c0053-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T10:38:44.366378Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-23T10:38:41.147863Z | `auto-c0050-008` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:200:18: error: expected ';' after top level declarat |
