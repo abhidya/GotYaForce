@@ -146,5 +146,5 @@ static inline double __gnt4_bitcast_f64(unsigned long long __u) {
 }
 
 /* ==== TARGETED (design 2.12a): model-declared symbols: FUN_801336a4, FUN_80133cbc ==== */
-#define FUN_801336a4 ((code *)0x801336a4)
-#define FUN_80133cbc ((code *)0x80133cbc)
+#define FUN_801336a4 (code *)0x801336a4
+#define FUN_80133cbc (code *)0x80133cbc

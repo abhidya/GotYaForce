@@ -1,0 +1,201 @@
+{
+ "provenance_schema": 1,
+ "generated_by": "research/decomp/oracle-harness/gen_arena_rom_provenance.py",
+ "describes": {
+  "path": "research/decomp/poc/wasm-port-poc/arena.json",
+  "sha256": "66ce1b0e61d698ac71599612b7fbf62e55e479639783d214c1abcd1460ffdb24"
+ },
+ "rom_sources": [
+  {
+   "name": "mem1_t1.bin",
+   "sha256": "0f4a42359341a9e43e79a79c8f8ec7bc4ff9baed3900c265f0d932b86a24bef3",
+   "bytes": 25165824
+  },
+  {
+   "name": "mem1_t2.bin",
+   "sha256": "ad06f8ef6b8cdd69a6dea1e70caf17c4e04a149827c960d42472922694f06f78",
+   "bytes": 25165824
+  }
+ ],
+ "notes": [
+  "The arena stores each segment little-endian (the port runs on wasm);",
+  "real GameCube RAM is big-endian PowerPC. Each segment is therefore an",
+  "ELEMENT-WISE byte-swapped copy at its own elem_width -- comparing the",
+  "two without that width reports ~1% agreement and is meaningless.",
+  "rom_be_sha256 lets the binding be re-verified from the tracked arena",
+  "alone; the MEM1 captures under user-data/ are private and never needed",
+  "again except to re-establish the binding from scratch."
+ ],
+ "segments": [
+  {
+   "addr": 2151888352,
+   "addr_hex": "0x804335e0",
+   "size": 64,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "b65b4c3dab8342a8d513626b24177a56c2da8c8690f8d2ac37c60d1510e5322e",
+   "note": "table pointer slots 804335e0"
+  },
+  {
+   "addr": 2150386592,
+   "addr_hex": "0x802c4ba0",
+   "size": 12608,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "44d8aeb6a5d55f918a44772c12c70db301120440ebd86645bac05f37edb7698e",
+   "note": "damage tables+matrix region 0x802c4ba0..0x802c7ce0"
+  },
+  {
+   "addr": 2150575656,
+   "addr_hex": "0x802f2e28",
+   "size": 64,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "c2eba07973491cc78ee55c8faff9513d2cb448bfb35335402be67f8d122d1fae",
+   "note": "remap pointer array 802f2e28"
+  },
+  {
+   "addr": 2150575192,
+   "addr_hex": "0x802f2c58",
+   "size": 464,
+   "elem_width": 2,
+   "elem_width_candidates": [
+    2
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "576146353dc3aea34fc229c6936aa4e4c670ac3dea60d0b0ebdc745e5925760a",
+   "note": "remap s16 rows 0x802f2c58..802f2e28"
+  },
+  {
+   "addr": 2151889200,
+   "addr_hex": "0x80433930",
+   "size": 40,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "ceb554ea4faab2637735c6224109f1e5290c8da742e455f17777969e65e0e86e",
+   "note": "runtime struct ptrs 80433930-80433954"
+  },
+  {
+   "addr": 2151903080,
+   "addr_hex": "0x80436f68",
+   "size": 4,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4,
+    2,
+    1
+   ],
+   "width_ambiguous": true,
+   "rom_be_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+   "note": "const f@0x80436f68=0.0"
+  },
+  {
+   "addr": 2151903096,
+   "addr_hex": "0x80436f78",
+   "size": 4,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "de620abd6d3615746360c1d15ce3a56291236d37424124054a49d25e947ffc4d",
+   "note": "const f@0x80436f78=1.0"
+  },
+  {
+   "addr": 2151903100,
+   "addr_hex": "0x80436f7c",
+   "size": 4,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "1b9e0fe7b740b4e583727aa1c9d27ff8c01491f911d2de0747f8c997ef6b3498",
+   "note": "const f@0x80436f7c=0.5"
+  },
+  {
+   "addr": 2151903132,
+   "addr_hex": "0x80436f9c",
+   "size": 4,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "c31425b44a7ed682a3356bf6820141e1584a15c43b6d6793f552e5d4621586f7",
+   "note": "const f@0x80436f9c=2.0"
+  },
+  {
+   "addr": 2151903268,
+   "addr_hex": "0x80437024",
+   "size": 4,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "9fa19f3d2af14b74a561e94d6f080c015d9a963c89737bd362bec36dd44e344f",
+   "note": "const f@0x80437024=0.25"
+  },
+  {
+   "addr": 2151903272,
+   "addr_hex": "0x80437028",
+   "size": 4,
+   "elem_width": 4,
+   "elem_width_candidates": [
+    4
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "e8ed90c1eadc4cdc681ef61f06f767afc7043be08ecd94c5c2990ed7e560c8f8",
+   "note": "const f@0x80437028=40.0"
+  },
+  {
+   "addr": 2151903112,
+   "addr_hex": "0x80436f88",
+   "size": 8,
+   "elem_width": 8,
+   "elem_width_candidates": [
+    8
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "07af8387624cf8f36152797d2f561246f21237d1d22b5c13006eacfa6f475e43",
+   "note": "const d@0x80436f88=4503601774854144.0"
+  },
+  {
+   "addr": 2151903152,
+   "addr_hex": "0x80436fb0",
+   "size": 8,
+   "elem_width": 8,
+   "elem_width_candidates": [
+    8
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "2b2979f362d94c89fe17a6e01637f14332de063fe7a544bdc5facfc046f4169f",
+   "note": "const d@0x80436fb0=4503599627370496.0"
+  },
+  {
+   "addr": 2150432712,
+   "addr_hex": "0x802cffc8",
+   "size": 32,
+   "elem_width": 1,
+   "elem_width_candidates": [
+    1
+   ],
+   "width_ambiguous": false,
+   "rom_be_sha256": "25c0224023e10baee8f86e37122028f01394d17c071a289678037ff08520904a",
+   "note": "unit-b char table 802cffc8"
+  }
+ ]
+}

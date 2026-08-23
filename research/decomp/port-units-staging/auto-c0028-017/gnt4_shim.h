@@ -161,3 +161,9 @@ static inline double __gnt4_bitcast_f64(unsigned long long __u) {
   __b.u = __u;
   return __b.d;
 }
+
+/* ==== REGISTRY (advisory): previous units of this program compiled with
+   the typings below. Verify each against THIS unit's use sites before
+   adopting it; you are free to disagree -- a reasoned disagreement is
+   wanted data. ==== */
+/* extern void zz_00f036c_(); */

@@ -1,7 +1,7 @@
 {
   "unit": "auto-c0029-014",
-  "run_id": "2026-08-21T08:56:57.060876Z",
-  "generated_at": "2026-08-21T08:57:30.951980Z",
+  "run_id": "2026-08-23T13:03:30.528559Z",
+  "generated_at": "2026-08-23T16:47:57.530281Z",
   "extractions": [
     {
       "file": "research/decomp/ghidra-export/chunk_0029.c",
@@ -102,7 +102,7 @@
     "zz_016cc24_"
   ],
   "registry": {
-    "version_used": 30,
+    "version_used": 72,
     "holdout": true,
     "authoritative_injected": [],
     "advisory_injected": 0

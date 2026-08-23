@@ -42,6 +42,7 @@
     "index:decomp": "node scripts/build-decomp-evidence-index.mjs",
     "import:oghidra-port": "node scripts/import-oghidra-port-artifact.mjs",
     "test:oghidra-port": "node --test scripts/test-oghidra-port-import.mjs",
+    "test:oracle": "node --test research/decomp/oracle-harness/tests/codec.test.mjs research/decomp/oracle-harness/tests/zero-case-guard.test.mjs research/decomp/oracle-harness/tests/result-integrity.test.mjs research/decomp/oracle-harness/tests/arena-rom-binding.test.mjs research/decomp/oracle-harness/tests/replay-gate.test.mjs",
     "verify:oghidra-port": "node scripts/verify-oghidra-eagle-jet-live.mjs",
     "port:finish:poc": "node scripts/finish-game-port-poc.mjs",
     "port:finish:poc:fresh": "node scripts/finish-game-port-poc.mjs --refresh-artifact",
