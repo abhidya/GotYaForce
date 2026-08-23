@@ -1,7 +1,7 @@
 {
   "unit": "auto-c0028-017",
-  "run_id": "2026-08-21T05:06:07.336769Z",
-  "generated_at": "2026-08-21T05:06:52.073018Z",
+  "run_id": "2026-08-23T13:03:30.528559Z",
+  "generated_at": "2026-08-23T13:41:48.727835Z",
   "extractions": [
     {
       "file": "research/decomp/ghidra-export/chunk_0028.c",
@@ -110,10 +110,10 @@
     "zz_00f036c_"
   ],
   "registry": {
-    "version_used": 21,
+    "version_used": 71,
     "holdout": false,
     "authoritative_injected": [],
-    "advisory_injected": 0
+    "advisory_injected": 1
   },
   "oracle": {
     "type": "compile_only",
