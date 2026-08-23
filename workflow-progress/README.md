@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T13:05:34.628508Z - machine-written, do not edit.*
+*Generated 2026-08-23T13:27:48.153342Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 36/1396 settled (3 green, 33 staged) |
-| **Retries outstanding** | 18 |
+| **Queue progress** | 37/1396 settled (3 green, 34 staged) |
+| **Retries outstanding** | 17 |
 | **Untouched** | 1339 |
-| **Last transition** | 2026-08-23T13:05:34.628508Z |
-| **Last green** | 2026-08-23T13:02:56.503413Z (`auto-c0019-001`) |
-| **Last product commit** | `ab2c47b985000997bfb3fdb7536231b176214c42` |
+| **Last transition** | 2026-08-23T13:27:48.153342Z |
+| **Last green** | 2026-08-23T13:27:48.153342Z (`auto-c0019-003`) |
+| **Last product commit** | `353f9dcaca1a5364e124f6b7f913344066b87e6e` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -20,12 +20,12 @@
 **Repeated recent failure classes**
 
 - `assembly:assembly gate link failed before promotion: _start_em_asm --` x3
-- `assembly:assembly gate canonicalize failed before promotion: owner_va` x2
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T13:27:48.153342Z | `auto-c0019-003` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T13:05:34.628508Z | `auto-c0019-002` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800bae6 |
 | 2026-08-23T13:03:05.856427Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T13:02:56.503413Z | `auto-c0019-001` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -75,4 +75,3 @@
 | 2026-08-21T22:00:29.212518Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T22:00:29.288948Z | `auto-c0035-006` | deferred | assembly | 4 | interrupted before a verdict; requeued |
 | 2026-08-21T21:57:43.919978Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
-| 2026-08-21T20:50:34.558550Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
