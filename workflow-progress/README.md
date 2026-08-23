@@ -1,21 +1,21 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-23T12:50:15.976235Z - machine-written, do not edit.*
+*Generated 2026-08-23T12:55:32.774481Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 35/1396 settled (3 green, 32 staged) |
-| **Retries outstanding** | 15 |
-| **Untouched** | 1343 |
-| **Last transition** | 2026-08-23T12:50:15.976235Z |
+| **Retries outstanding** | 16 |
+| **Untouched** | 1342 |
+| **Last transition** | 2026-08-23T12:55:32.774481Z |
 | **Last green** | 2026-08-23T12:42:25.910430Z (`auto-c0053-014`) |
 | **Last product commit** | `6aefed93d147c1acdb9e51bc90693532425b264e` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
 
 **Repeated recent failure classes**
 
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T12:55:32.774481Z | `auto-c0011-012` | gate_failed | artifact-install | 2 | artifact install refused after assembly pass: artifact preimage has no eligible revoked lifecycle |
 | 2026-08-23T12:50:15.976235Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T12:50:13.219849Z | `auto-c0011-011` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T12:46:32.213130Z | `auto-c0011-004` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
@@ -74,4 +75,3 @@
 | 2026-08-21T20:45:52.522020Z | `auto-c0018-018` | deferred | assembly | 3 | interrupted before a verdict; requeued |
 | 2026-08-21T20:44:18.827648Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T20:28:45.140310Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-21T20:26:53.076657Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
