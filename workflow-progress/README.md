@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T19:48:57.311797Z - machine-written, do not edit.*
+*Generated 2026-08-23T20:10:48.090603Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 49/1396 settled (3 green, 46 staged) |
 | **Retries outstanding** | 18 |
 | **Untouched** | 1326 |
-| **Last transition** | 2026-08-23T19:48:57.311797Z |
+| **Last transition** | 2026-08-23T20:10:48.090603Z |
 | **Last green** | 2026-08-23T19:48:57.311797Z (`auto-c0050-005`) |
 | **Last product commit** | `788b184b95fa43e92e285bc62b2435fecb4374a0` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T20:10:48.090603Z | `auto-c0050-006` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_01a452c_ |
 | 2026-08-23T19:48:57.311797Z | `auto-c0050-005` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T19:24:47.313085Z | `auto-c0049-018` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T19:03:21.190722Z | `auto-c0049-017` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-23T03:56:58.871325Z | `auto-c0049-017` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_001ab6c_ |
 | 2026-08-23T03:39:03.431622Z | `auto-c0049-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T03:09:45.237668Z | `auto-c0035-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-23T03:06:12.002112Z | `auto-c0035-007` | gate_failed | assembly | 1 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
