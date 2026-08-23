@@ -1,30 +1,27 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T14:06:46.079321Z - machine-written, do not edit.*
+*Generated 2026-08-23T14:57:00.712595Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 41/1396 settled (3 green, 38 staged) |
-| **Retries outstanding** | 19 |
-| **Untouched** | 1333 |
-| **Last transition** | 2026-08-23T14:06:46.079321Z |
+| **Retries outstanding** | 20 |
+| **Untouched** | 1332 |
+| **Last transition** | 2026-08-23T14:57:00.712595Z |
 | **Last green** | 2026-08-23T13:45:22.582156Z (`auto-c0028-017`) |
 | **Last product commit** | `f3a57fc1b142e0b34d2db72bda653f462c6374a3` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
 
-**Repeated recent failure classes**
-
-- `assembly:assembly gate canonicalize failed before promotion: owner_va` x2
-
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T14:57:00.712595Z | `auto-c0029-000` | gate_failed | assembly | 1 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T14:06:46.079321Z | `auto-c0028-018` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0007030_ |
 | 2026-08-23T13:45:22.582156Z | `auto-c0028-017` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T13:41:38.443640Z | `auto-c0028-016` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -74,4 +71,3 @@
 | 2026-08-22T21:56:47.752408Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-22T21:56:47.843302Z | `auto-c0018-018` | deferred | assembly | 3 | interrupted before a verdict; requeued |
 | 2026-08-22T21:46:57.682224Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
-| 2026-08-22T21:46:57.779786Z | `auto-c0035-006` | deferred | assembly | 4 | interrupted before a verdict; requeued |

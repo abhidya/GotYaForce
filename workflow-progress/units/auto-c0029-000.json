@@ -1,0 +1,246 @@
+{
+  "schema": 1,
+  "unit": "auto-c0029-000",
+  "unit_id": "auto-c0029-000",
+  "timestamp": "2026-08-23T14:57:00.712595Z",
+  "run_id": "2026-08-23T13:03:30.528559Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0029-000.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_t4_wd58x\\unit.o'' failed (returned 1)",
+          "unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:63:15: error: use of undeclared identifier 'PTR_zz_010455c__8032170c'",
+          "unit.c:93:33: error: use of undeclared identifier 'zz_0048288_'"
+        ],
+        "fingerprint": "5553749ce99bd64c32451dff2805c040f4e4e7da8009f1d1329838d7d485e9fa"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 6,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0029-000\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mfyca9rr\\unit.o'' failed (returned 1)",
+          "unit.c:115:54: error: use of undeclared identifier 'DAT_803216f2'",
+          "unit.c:117:55: error: use of undeclared identifier 'DAT_803216f6'",
+          "unit.c:120:55: error: use of undeclared identifier 'DAT_80321704'",
+          "unit.c:126:57: error: use of undeclared identifier 'DAT_803216c0'",
+          "unit.c:85:13: error: use of undeclared identifier 'DAT_803216c0'"
+        ],
+        "fingerprint": "e6cc4bfe0ac583d207ddc544f7a8e6bbd7a92c2aec55e12be956233aafd66687"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0028-013",
+        "auto-c0028-014",
+        "auto-c0028-016",
+        "auto-c0028-017",
+        "auto-c0029-000"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0028-013",
+            "auto-c0028-014",
+            "auto-c0028-016",
+            "auto-c0028-017",
+            "auto-c0029-000"
+          ],
+          "variants": {},
+          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSQUATScale_bl"
+        }
+      ],
+      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+      "candidate": {
+        "name": "auto-c0029-000",
+        "sha256": "c5f7cb80d431c9f359ccc3187e196128f8c97021419d21c65d1d34c6cab9d259"
+      },
+      "expected_candidate": {
+        "name": "auto-c0029-000",
+        "sha256": "c5f7cb80d431c9f359ccc3187e196128f8c97021419d21c65d1d34c6cab9d259"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
+      "prompt_version": "3",
+      "registry_version": "72"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "DAT_803216c0",
+      "DAT_803216c2",
+      "DAT_803216f0",
+      "DAT_803216f2",
+      "DAT_803216f4",
+      "DAT_803216f6",
+      "DAT_803216f8",
+      "DAT_803216fc",
+      "DAT_80321700",
+      "DAT_80321704",
+      "DAT_80321708",
+      "FUN_8001bda8",
+      "FUN_80083874",
+      "FUN_80083ad4",
+      "byte",
+      "code",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECNormalize_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006f98_",
+      "zz_0006fb4_",
+      "zz_00076d0_",
+      "zz_00097b4_",
+      "zz_0083244_",
+      "zz_00833ec_",
+      "zz_0083610_",
+      "zz_0083714_",
+      "zz_0084170_",
+      "zz_0085e00_",
+      "zz_0088aa0_",
+      "zz_0088e50_",
+      "zz_0089100_",
+      "zz_008ac80_",
+      "zz_008aff0_",
+      "zz_00c74ec_",
+      "zz_00f036c_",
+      "zz_01043ac_",
+      "zz_01044c4_",
+      "zz_010455c_",
+      "zz_0104758_",
+      "zz_0104910_",
+      "zz_010494c_",
+      "zz_0104958_",
+      "zz_0104978_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 72,
+    "error": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+    "interruptions": 1,
+    "model_requests": 2,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0029-000.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_t4_wd58x\\unit.o'' failed (returned 1)",
+          "unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:63:15: error: use of undeclared identifier 'PTR_zz_010455c__8032170c'",
+          "unit.c:93:33: error: use of undeclared identifier 'zz_0048288_'"
+        ],
+        "fingerprint": "5553749ce99bd64c32451dff2805c040f4e4e7da8009f1d1329838d7d485e9fa"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 6,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0029-000\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mfyca9rr\\unit.o'' failed (returned 1)",
+          "unit.c:115:54: error: use of undeclared identifier 'DAT_803216f2'",
+          "unit.c:117:55: error: use of undeclared identifier 'DAT_803216f6'",
+          "unit.c:120:55: error: use of undeclared identifier 'DAT_80321704'",
+          "unit.c:126:57: error: use of undeclared identifier 'DAT_803216c0'",
+          "unit.c:85:13: error: use of undeclared identifier 'DAT_803216c0'"
+        ],
+        "fingerprint": "e6cc4bfe0ac583d207ddc544f7a8e6bbd7a92c2aec55e12be956233aafd66687"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0028-013",
+        "auto-c0028-014",
+        "auto-c0028-016",
+        "auto-c0028-017",
+        "auto-c0029-000"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0028-013",
+            "auto-c0028-014",
+            "auto-c0028-016",
+            "auto-c0028-017",
+            "auto-c0029-000"
+          ],
+          "variants": {},
+          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSQUATScale_bl"
+        }
+      ],
+      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_pdcb59c6\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+      "candidate": {
+        "name": "auto-c0029-000",
+        "sha256": "c5f7cb80d431c9f359ccc3187e196128f8c97021419d21c65d1d34c6cab9d259"
+      },
+      "expected_candidate": {
+        "name": "auto-c0029-000",
+        "sha256": "c5f7cb80d431c9f359ccc3187e196128f8c97021419d21c65d1d34c6cab9d259"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
+      "prompt_version": "3",
+      "registry_version": "72"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-23T14:57:00.712595Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Use",
+      "product_commit": null
+    }
+  ]
+}
