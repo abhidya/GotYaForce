@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T22:47:20.972951Z - machine-written, do not edit.*
+*Generated 2026-08-23T22:50:46.664154Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 50/1396 settled (3 green, 47 staged) |
-| **Retries outstanding** | 16 |
+| **Queue progress** | 51/1396 settled (3 green, 48 staged) |
+| **Retries outstanding** | 15 |
 | **Untouched** | 1327 |
-| **Last transition** | 2026-08-23T22:47:20.972951Z |
-| **Last green** | 2026-08-23T20:14:46.912010Z (`auto-c0050-007`) |
-| **Last product commit** | `dadf854cd6bd3a5d6c07292eba0e3a8d50b1fb01` |
+| **Last transition** | 2026-08-23T22:50:46.664154Z |
+| **Last green** | 2026-08-23T22:50:46.664154Z (`auto-c0019-002`) |
+| **Last product commit** | `98ab901f3b1794f07866031ac4cfde0e9f824b11` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T22:50:46.664154Z | `auto-c0019-002` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T22:47:20.972951Z | `auto-c0019-000` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-23T22:43:58.554806Z | `auto-c0011-012` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-23T22:40:26.947973Z | `auto-c0011-011` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
@@ -74,4 +75,3 @@
 | 2026-08-23T10:38:41.147863Z | `auto-c0050-008` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:200:18: error: expected ';' after top level declarat |
 | 2026-08-23T09:18:13.618410Z | `auto-c0050-007` | retryable | compile-fix | 1 | stuck: identical diagnostics after applied fix |
 | 2026-08-23T08:44:28.165111Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-23T08:44:24.506768Z | `auto-c0050-006` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:177:1: error: unterminated /* comment   177 \| /* PT |
