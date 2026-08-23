@@ -1,18 +1,18 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-22T23:38:47.348841Z",
+  "generated_at": "2026-08-23T00:33:13.223778Z",
   "run_id": "2026-08-22T23:11:54.804049Z",
   "total_units": 1396,
   "green": 3,
   "staged": 22,
-  "retryable": 3,
-  "untouched": 1365,
+  "retryable": 4,
+  "untouched": 1364,
   "deferred": 0,
   "structural_ineligible": 3,
   "active": 0,
-  "total_attempts": 63,
-  "transitions_last_hour": 4,
-  "greens_last_hour": 2,
+  "total_attempts": 64,
+  "transitions_last_hour": 3,
+  "greens_last_hour": 0,
   "last_green_at": "2026-08-22T23:09:41.685168Z",
   "last_green_unit": "auto-c0035-000",
   "last_product_commit": "c3bf56403c2c52cd643a4a45ed7dadd88a21c8ef",
@@ -22,7 +22,7 @@
       2
     ]
   ],
-  "health": "healthy_progress",
+  "health": "active_no_green",
   "machine": {
     "workflow_state": "running",
     "driver_status": "running",

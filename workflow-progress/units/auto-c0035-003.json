@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "unit": "auto-c0035-003",
+  "unit_id": "auto-c0035-003",
+  "timestamp": "2026-08-23T00:33:13.104625Z",
+  "run_id": "2026-08-22T23:11:54.804049Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0035-003 declares FUN_80047aa4, FUN_801322dc, FUN_80133530 more than once after canonicalization",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0035-003.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_j3929gcl\\unit.o'' failed (returned 1)",
+          "unit.c:119:33: error: use of undeclared identifier 'FUN_80047aa4'; did you mean 'FUN_80067310'?",
+          "unit.c:310:34: error: use of undeclared identifier 'FUN_801322dc'",
+          "unit.c:311:36: error: use of undeclared identifier 'FUN_80133530'"
+        ],
+        "fingerprint": "3c03eeba388c6eedf89c48caf87e4be742026abb8adf702f60777383c97965ba"
+      },
+      {
+        "iteration": 2,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-003\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: FUN_80047aa4, FUN_801322dc, FUN_80133530"
+        ],
+        "fingerprint": "a5e354399e51c084758f386908a8978ff2c2f51940eedac374eb3a383179d97f"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0033-009",
+        "auto-c0033-010",
+        "auto-c0018-018",
+        "auto-c0035-000",
+        "auto-c0035-003"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0018-018",
+            "auto-c0033-009",
+            "auto-c0033-010",
+            "auto-c0035-000",
+            "auto-c0035-003"
+          ],
+          "variants": {},
+          "detail": "canonical_header_ambiguous: auto-c0035-003 declares FUN_80047aa4, FUN_801322dc, FUN_80133530 more than once after canonicalization"
+        }
+      ],
+      "detail": "canonical_header_ambiguous: auto-c0035-003 declares FUN_80047aa4, FUN_801322dc, FUN_80133530 more than once after canonicalization",
+      "candidate": {
+        "name": "auto-c0035-003",
+        "sha256": "ca97e1cdcd854c325d95243a3f4bb9faea62781e830f983469fe409d183d4df7"
+      },
+      "expected_candidate": {
+        "name": "auto-c0035-003",
+        "sha256": "ca97e1cdcd854c325d95243a3f4bb9faea62781e830f983469fe409d183d4df7"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "94ceddce2121dccd50874d183d3bd800b0d00cbe",
+      "prompt_version": "3",
+      "registry_version": "49"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_80336460",
+      "DAT_80336461",
+      "DAT_80336462",
+      "DAT_80336464",
+      "DAT_80336468",
+      "DAT_8033646c",
+      "DAT_80336470",
+      "DAT_80336474",
+      "DAT_80336476",
+      "DAT_80336563",
+      "DAT_80336928",
+      "DAT_80336b20",
+      "DAT_80336b21",
+      "FUN_80067310",
+      "FUN_80131b0c",
+      "FUN_80131d24",
+      "FUN_80131d78",
+      "FUN_8013202c",
+      "FUN_8013204c",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "code",
+      "gnt4_PSMTXConcat_bl",
+      "gnt4_PSMTXScale_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006f98_",
+      "zz_0007030_",
+      "zz_00076d0_",
+      "zz_0007c54_",
+      "zz_0007cac_",
+      "zz_00097b4_",
+      "zz_004cd24_",
+      "zz_00660e8_",
+      "zz_00677b0_",
+      "zz_006a474_",
+      "zz_006a5a4_",
+      "zz_006a750_",
+      "zz_0088aa0_",
+      "zz_0088e50_",
+      "zz_0089100_",
+      "zz_00f036c_",
+      "zz_0131c14_",
+      "zz_0131ecc_",
+      "zz_013212c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 49,
+    "model_requests": 2,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0035-003.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_j3929gcl\\unit.o'' failed (returned 1)",
+          "unit.c:119:33: error: use of undeclared identifier 'FUN_80047aa4'; did you mean 'FUN_80067310'?",
+          "unit.c:310:34: error: use of undeclared identifier 'FUN_801322dc'",
+          "unit.c:311:36: error: use of undeclared identifier 'FUN_80133530'"
+        ],
+        "fingerprint": "3c03eeba388c6eedf89c48caf87e4be742026abb8adf702f60777383c97965ba"
+      },
+      {
+        "iteration": 2,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-003\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: FUN_80047aa4, FUN_801322dc, FUN_80133530"
+        ],
+        "fingerprint": "a5e354399e51c084758f386908a8978ff2c2f51940eedac374eb3a383179d97f"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0033-009",
+        "auto-c0033-010",
+        "auto-c0018-018",
+        "auto-c0035-000",
+        "auto-c0035-003"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0018-018",
+            "auto-c0033-009",
+            "auto-c0033-010",
+            "auto-c0035-000",
+            "auto-c0035-003"
+          ],
+          "variants": {},
+          "detail": "canonical_header_ambiguous: auto-c0035-003 declares FUN_80047aa4, FUN_801322dc, FUN_80133530 more than once after canonicalization"
+        }
+      ],
+      "detail": "canonical_header_ambiguous: auto-c0035-003 declares FUN_80047aa4, FUN_801322dc, FUN_80133530 more than once after canonicalization",
+      "candidate": {
+        "name": "auto-c0035-003",
+        "sha256": "ca97e1cdcd854c325d95243a3f4bb9faea62781e830f983469fe409d183d4df7"
+      },
+      "expected_candidate": {
+        "name": "auto-c0035-003",
+        "sha256": "ca97e1cdcd854c325d95243a3f4bb9faea62781e830f983469fe409d183d4df7"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "94ceddce2121dccd50874d183d3bd800b0d00cbe",
+      "prompt_version": "3",
+      "registry_version": "49"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0035-003 declares FUN_80047aa4, FUN_801322dc, FUN_80133530 more than once after canonicalization",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-23T00:33:13.104625Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0035-003 declares FUN_80047aa4, FUN_801322dc, FUN_80133530 more than once after canonicalization",
+      "product_commit": null
+    }
+  ]
+}
