@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0053-012",
   "unit_id": "auto-c0053-012",
-  "timestamp": "2026-08-23T11:19:23.779521Z",
-  "run_id": "2026-08-23T10:39:48.367114Z",
+  "timestamp": "2026-08-23T22:00:55.895283Z",
+  "run_id": "2026-08-23T21:29:22.800248Z",
   "result": "gate_failed",
   "stage": "assembly",
-  "attempt": 1,
-  "detail": "assembly gate link failed before promotion: link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+  "attempt": 2,
+  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801b9adc owner/variant pair at auto-c0053-012/gnt4_shim.h",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -23,63 +23,63 @@
         "error_count": 3,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-012.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_fy26x9mi\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_kwqbz87i\\unit.o'' failed (returned 1)",
           "unit.c:202:33: error: use of undeclared identifier 'FUN_80047aa4'",
           "unit.c:81:36: error: use of undeclared identifier 'FUN_801b9adc'; did you mean 'FUN_801b8a1c'?"
         ],
-        "fingerprint": "f178b2648021f852c424492b0e800edc76098c2c72b0e3161b3738f1e6b0d06a"
+        "fingerprint": "4a0ca730c19d24530b57ecef46d31eded20efbf2432789ee05aa880039b8577f"
       }
     ],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0050-002",
-        "auto-c0050-003",
-        "auto-c0050-004",
-        "auto-c0053-011",
+        "auto-c0033-007",
+        "auto-c0033-008",
+        "auto-c0033-009",
+        "auto-c0033-010",
         "auto-c0053-012"
       ],
-      "stage": "link",
+      "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": null,
-          "class": "link_failure",
+          "symbol": "FUN_801b9adc",
+          "class": "canonicalization_refused",
           "units": [
-            "auto-c0050-002",
-            "auto-c0050-003",
-            "auto-c0050-004",
-            "auto-c0053-011",
+            "auto-c0033-007",
+            "auto-c0033-008",
+            "auto-c0033-009",
+            "auto-c0033-010",
             "auto-c0053-012"
           ],
           "variants": {},
-          "detail": "link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc"
+          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801b9adc owner/variant pair at auto-c0053-012/gnt4_shim.h"
         }
       ],
-      "detail": "link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801b9adc owner/variant pair at auto-c0053-012/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0053-012",
-        "sha256": "70e14f2deb938bd848cacb4ba826ed4d042da7933fef2c44cf93d89dc78c485b"
+        "sha256": "1dff778e381833ee3d9a3670c29edd0b183f7434c641853dafedc44c4cf8c479"
       },
       "expected_candidate": {
         "name": "auto-c0053-012",
-        "sha256": "70e14f2deb938bd848cacb4ba826ed4d042da7933fef2c44cf93d89dc78c485b"
+        "sha256": "1dff778e381833ee3d9a3670c29edd0b183f7434c641853dafedc44c4cf8c479"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "86c6142006b3472bcf38705816af4bccf0cf3711",
+      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
       "prompt_version": "3",
-      "registry_version": "61"
+      "registry_version": "49"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 1,
+    "attempts": 2,
     "symbol_set": [
       "ABS",
       "CONCAT44",
@@ -164,8 +164,8 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 61,
-    "model_requests": 1,
+    "registry_version_used": 49,
+    "model_requests": 2,
     "rounds": [
       {
         "iteration": 1,
@@ -173,60 +173,60 @@
         "error_count": 3,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-012.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_fy26x9mi\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_kwqbz87i\\unit.o'' failed (returned 1)",
           "unit.c:202:33: error: use of undeclared identifier 'FUN_80047aa4'",
           "unit.c:81:36: error: use of undeclared identifier 'FUN_801b9adc'; did you mean 'FUN_801b8a1c'?"
         ],
-        "fingerprint": "f178b2648021f852c424492b0e800edc76098c2c72b0e3161b3738f1e6b0d06a"
+        "fingerprint": "4a0ca730c19d24530b57ecef46d31eded20efbf2432789ee05aa880039b8577f"
       }
     ],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0050-002",
-        "auto-c0050-003",
-        "auto-c0050-004",
-        "auto-c0053-011",
+        "auto-c0033-007",
+        "auto-c0033-008",
+        "auto-c0033-009",
+        "auto-c0033-010",
         "auto-c0053-012"
       ],
-      "stage": "link",
+      "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": null,
-          "class": "link_failure",
+          "symbol": "FUN_801b9adc",
+          "class": "canonicalization_refused",
           "units": [
-            "auto-c0050-002",
-            "auto-c0050-003",
-            "auto-c0050-004",
-            "auto-c0053-011",
+            "auto-c0033-007",
+            "auto-c0033-008",
+            "auto-c0033-009",
+            "auto-c0033-010",
             "auto-c0053-012"
           ],
           "variants": {},
-          "detail": "link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc"
+          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801b9adc owner/variant pair at auto-c0053-012/gnt4_shim.h"
         }
       ],
-      "detail": "link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_801b9adc owner/variant pair at auto-c0053-012/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0053-012",
-        "sha256": "70e14f2deb938bd848cacb4ba826ed4d042da7933fef2c44cf93d89dc78c485b"
+        "sha256": "1dff778e381833ee3d9a3670c29edd0b183f7434c641853dafedc44c4cf8c479"
       },
       "expected_candidate": {
         "name": "auto-c0053-012",
-        "sha256": "70e14f2deb938bd848cacb4ba826ed4d042da7933fef2c44cf93d89dc78c485b"
+        "sha256": "1dff778e381833ee3d9a3670c29edd0b183f7434c641853dafedc44c4cf8c479"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "86c6142006b3472bcf38705816af4bccf0cf3711",
+      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
       "prompt_version": "3",
-      "registry_version": "61"
+      "registry_version": "49"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false,
-    "error": "assembly gate link failed before promotion: link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801b9adc owner/variant pair at auto-c0053-012/gnt4_shim.h",
     "last_stage": "assembly"
   },
   "history": [
@@ -236,6 +236,14 @@
       "stage": "assembly",
       "attempt": 1,
       "detail": "assembly gate link failed before promotion: link gate: these symbols are UNDEFINED across the assembled units and became wasm imports, but they are neither gnt4_* SDK functions nor whitelisted external callees: FUN_80047aa4, FUN_801b9adc",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-23T22:00:55.895283Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 2,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801b9adc owner/variant pair at auto-c0053-012/gnt4_shim.h",
       "product_commit": null
     }
   ]
