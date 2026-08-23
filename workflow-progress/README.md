@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T06:14:16.923342Z - machine-written, do not edit.*
+*Generated 2026-08-23T06:17:53.680719Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 32/1396 settled (3 green, 29 staged) |
+| **Queue progress** | 33/1396 settled (3 green, 30 staged) |
 | **Retries outstanding** | 7 |
-| **Untouched** | 1354 |
-| **Last transition** | 2026-08-23T06:14:16.923342Z |
-| **Last green** | 2026-08-23T06:14:16.923342Z (`auto-c0050-003`) |
-| **Last product commit** | `b5270dfd742c0a9cf7244e9e46bfe71a33e7df39` |
+| **Untouched** | 1353 |
+| **Last transition** | 2026-08-23T06:17:53.680719Z |
+| **Last green** | 2026-08-23T06:17:53.680719Z (`auto-c0050-004`) |
+| **Last product commit** | `ccded265bc56cc90a008ab7a47e017780bdb02e6` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T06:17:53.680719Z | `auto-c0050-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T06:14:16.923342Z | `auto-c0050-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T05:50:19.898878Z | `auto-c0050-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T05:26:24.982227Z | `auto-c0050-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-21T15:44:29.191111Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T15:44:29.242091Z | `auto-c0018-018` | deferred | manual-revoke | 2 | interrupted before a verdict; requeued |
 | 2026-08-21T15:42:56.396349Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
-| 2026-08-21T15:41:00.425774Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
