@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T12:59:12.516168Z - machine-written, do not edit.*
+*Generated 2026-08-23T13:02:56.503413Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 35/1396 settled (3 green, 32 staged) |
+| **Queue progress** | 36/1396 settled (3 green, 33 staged) |
 | **Retries outstanding** | 17 |
-| **Untouched** | 1341 |
-| **Last transition** | 2026-08-23T12:59:12.516168Z |
-| **Last green** | 2026-08-23T12:42:25.910430Z (`auto-c0053-014`) |
-| **Last product commit** | `6aefed93d147c1acdb9e51bc90693532425b264e` |
+| **Untouched** | 1340 |
+| **Last transition** | 2026-08-23T13:02:56.503413Z |
+| **Last green** | 2026-08-23T13:02:56.503413Z (`auto-c0019-001`) |
+| **Last product commit** | `ab2c47b985000997bfb3fdb7536231b176214c42` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T13:02:56.503413Z | `auto-c0019-001` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T12:59:12.516168Z | `auto-c0019-000` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T12:55:32.774481Z | `auto-c0011-012` | gate_failed | artifact-install | 2 | artifact install refused after assembly pass: artifact preimage has no eligible revoked lifecycle |
 | 2026-08-23T12:50:15.976235Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -74,4 +75,3 @@
 | 2026-08-21T20:50:34.558550Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T20:45:52.410452Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-21T20:45:52.522020Z | `auto-c0018-018` | deferred | assembly | 3 | interrupted before a verdict; requeued |
-| 2026-08-21T20:44:18.827648Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
