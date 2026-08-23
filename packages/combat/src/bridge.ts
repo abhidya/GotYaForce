@@ -1412,12 +1412,21 @@ export class RomDriverBridge implements RomFamilyDriver {
   private pendingProjectiles: Projectile[] = [];
   /** Projectiles spawned by family hooks during the current special. */
   private familyProjectiles: Projectile[] = [];
+  /** Never reset: family projectile uids must stay unique across specials. */
+  private familyProjectileSeq = 0;
 
   /** Drain projectiles spawned by the ROM stream's fireChild op. Called by battle.ts
    *  after each romDriver.tick(). */
   drainProjectiles(): Projectile[] {
-    const drained = this.pendingProjectiles;
+    // Both queues, not just pendingProjectiles. familyProjectiles was pushed to
+    // and never read: on the plain attach() path -- any host that does not
+    // override onFamilyProjectile, which is every standalone and selftest
+    // harness -- every family-spawner shot was allocated, silently swallowed,
+    // and accumulated until interrupt(). attachToBattle happens to override the
+    // hook, which is the only reason production never saw it.
+    const drained = this.pendingProjectiles.concat(this.familyProjectiles);
     this.pendingProjectiles = [];
+    this.familyProjectiles = [];
     return drained;
   }
 
@@ -1428,7 +1437,10 @@ export class RomDriverBridge implements RomFamilyDriver {
     void actor;
     void spawnerAddr;
     const p: Projectile = {
-      uid: `family-${type}-${this.familyProjectiles.length}`,
+      // Monotonic, not a length: the array is cleared on every drain and on
+      // interrupt(), so a length-based id repeats across specials and two live
+      // projectiles can share a uid.
+      uid: `family-${type}-${(this.familyProjectileSeq += 1)}`,
       ownerUid: this.runtime?.uid ?? "",
       team: this.runtime?.team ?? 0,
       pos: { x: 0, y: 0, z: 0 },
