@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-23T10:38:41.271699Z",
+  "generated_at": "2026-08-23T10:38:44.483623Z",
   "run_id": "2026-08-23T08:47:14.546586Z",
   "total_units": 1396,
   "green": 3,
@@ -17,14 +17,14 @@
   "last_green_unit": "auto-c0050-004",
   "last_product_commit": "ccded265bc56cc90a008ab7a47e017780bdb02e6",
   "repeated_failure_classes": [],
-  "health": "active_no_green",
+  "health": "idle",
   "machine": {
-    "workflow_state": "running",
-    "driver_status": "running",
+    "workflow_state": "stopped_at_boundary",
+    "driver_status": "stopped",
     "manual_paused": false,
     "block_reason": null,
-    "active_model": "unsloth/Qwen3.8-27B-GGUF",
-    "context_length": 60000,
+    "active_model": null,
+    "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
     "detail": ""
   }
