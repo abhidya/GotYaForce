@@ -1,30 +1,27 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T04:37:14.222238Z - machine-written, do not edit.*
+*Generated 2026-08-23T05:02:44.142015Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 28/1396 settled (3 green, 25 staged) |
+| **Queue progress** | 29/1396 settled (3 green, 26 staged) |
 | **Retries outstanding** | 7 |
-| **Untouched** | 1358 |
-| **Last transition** | 2026-08-23T04:37:14.222238Z |
-| **Last green** | 2026-08-23T03:39:03.431622Z (`auto-c0049-016`) |
-| **Last product commit** | `66b6b6917ec1be87358d7beb22ad94d04d979fad` |
+| **Untouched** | 1357 |
+| **Last transition** | 2026-08-23T05:02:44.142015Z |
+| **Last green** | 2026-08-23T05:02:44.142015Z (`auto-c0050-000`) |
+| **Last product commit** | `d11faad3ff7847287e3b390b9f68ec989e1b2f09` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
-
-**Repeated recent failure classes**
-
-- `assembly:assembly gate canonicalize failed before promotion: owner_va` x2
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T05:02:44.142015Z | `auto-c0050-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T04:37:14.222238Z | `auto-c0049-018` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ |
 | 2026-08-23T03:56:58.871325Z | `auto-c0049-017` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_001ab6c_ |
 | 2026-08-23T03:39:03.431622Z | `auto-c0049-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -74,4 +71,3 @@
 | 2026-08-21T15:26:25.074848Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T15:16:34.667615Z | `auto-c0035-002` | staged | commit | 4 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-21T15:16:28.119037Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
-| 2026-08-21T15:16:28.154914Z | `auto-c0029-013` | deferred | manual-revoke | 1 | interrupted before a verdict; requeued |
