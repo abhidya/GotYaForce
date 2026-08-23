@@ -2,11 +2,11 @@
   "schema": 1,
   "unit": "auto-c0028-015",
   "unit_id": "auto-c0028-015",
-  "timestamp": "2026-08-23T13:38:14.809236Z",
-  "run_id": "2026-08-23T13:03:30.528559Z",
+  "timestamp": "2026-08-23T22:53:06.907723Z",
+  "run_id": "2026-08-23T22:32:58.325044Z",
   "result": "gate_failed",
   "stage": "assembly",
-  "attempt": 2,
+  "attempt": 3,
   "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80103428 owner/variant pair at auto-c0028-014/gnt4_shim.h",
   "product_commit": null,
   "product_pushed": null,
@@ -21,10 +21,10 @@
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0019-001",
-        "auto-c0019-003",
-        "auto-c0028-013",
         "auto-c0028-014",
+        "auto-c0028-016",
+        "auto-c0029-014",
+        "auto-c0019-002",
         "auto-c0028-015"
       ],
       "stage": "canonicalize",
@@ -33,11 +33,11 @@
           "symbol": "FUN_80103428",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0019-001",
-            "auto-c0019-003",
-            "auto-c0028-013",
+            "auto-c0019-002",
             "auto-c0028-014",
-            "auto-c0028-015"
+            "auto-c0028-015",
+            "auto-c0028-016",
+            "auto-c0029-014"
           ],
           "variants": {},
           "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80103428 owner/variant pair at auto-c0028-014/gnt4_shim.h"
@@ -46,27 +46,27 @@
       "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80103428 owner/variant pair at auto-c0028-014/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0028-015",
-        "sha256": "a26172cdb441cb36a7724859e2872d10f82daf5c0843d7fc2dcfe3e42d1f3982"
+        "sha256": "613efd597d79f59a87c0caee9132c15d83b8f528155fa474b99986c9841995dc"
       },
       "expected_candidate": {
         "name": "auto-c0028-015",
-        "sha256": "a26172cdb441cb36a7724859e2872d10f82daf5c0843d7fc2dcfe3e42d1f3982"
+        "sha256": "613efd597d79f59a87c0caee9132c15d83b8f528155fa474b99986c9841995dc"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
+      "driver_rev": "c53747bd698afb80f431280ac61ae4fe96d68c50",
       "prompt_version": "3",
-      "registry_version": "69"
+      "registry_version": "87"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 2,
+    "attempts": 3,
     "symbol_set": [
       "FUN_800452a0",
       "FUN_80067310",
@@ -105,7 +105,7 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 69,
+    "registry_version_used": 87,
     "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80103428 owner/variant pair at auto-c0028-014/gnt4_shim.h",
     "last_stage": "assembly",
     "revoked": {
@@ -124,10 +124,10 @@
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0019-001",
-        "auto-c0019-003",
-        "auto-c0028-013",
         "auto-c0028-014",
+        "auto-c0028-016",
+        "auto-c0029-014",
+        "auto-c0019-002",
         "auto-c0028-015"
       ],
       "stage": "canonicalize",
@@ -136,11 +136,11 @@
           "symbol": "FUN_80103428",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0019-001",
-            "auto-c0019-003",
-            "auto-c0028-013",
+            "auto-c0019-002",
             "auto-c0028-014",
-            "auto-c0028-015"
+            "auto-c0028-015",
+            "auto-c0028-016",
+            "auto-c0029-014"
           ],
           "variants": {},
           "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80103428 owner/variant pair at auto-c0028-014/gnt4_shim.h"
@@ -149,20 +149,20 @@
       "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80103428 owner/variant pair at auto-c0028-014/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0028-015",
-        "sha256": "a26172cdb441cb36a7724859e2872d10f82daf5c0843d7fc2dcfe3e42d1f3982"
+        "sha256": "613efd597d79f59a87c0caee9132c15d83b8f528155fa474b99986c9841995dc"
       },
       "expected_candidate": {
         "name": "auto-c0028-015",
-        "sha256": "a26172cdb441cb36a7724859e2872d10f82daf5c0843d7fc2dcfe3e42d1f3982"
+        "sha256": "613efd597d79f59a87c0caee9132c15d83b8f528155fa474b99986c9841995dc"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
+      "driver_rev": "c53747bd698afb80f431280ac61ae4fe96d68c50",
       "prompt_version": "3",
-      "registry_version": "69"
+      "registry_version": "87"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false
@@ -189,6 +189,14 @@
       "result": "gate_failed",
       "stage": "assembly",
       "attempt": 2,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80103428 owner/variant pair at auto-c0028-014/gnt4_shim.h",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-23T22:53:06.907723Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 3,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80103428 owner/variant pair at auto-c0028-014/gnt4_shim.h",
       "product_commit": null
     }
