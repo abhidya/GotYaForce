@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "unit": "auto-c0050-005",
+  "unit_id": "auto-c0050-005",
+  "timestamp": "2026-08-23T07:19:26.896523Z",
+  "run_id": "2026-08-23T00:37:40.445764Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "stuck: identical diagnostics after applied fix",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0050-005.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_vwqxs_dq\\unit.o'' failed (returned 1)",
+          "unit.c:126:34: error: use of undeclared identifier 'zz_01a44a8_'; did you mean 'zz_01a41b8_'?",
+          "unit.c:163:15: error: use of undeclared identifier 'PTR_zz_01a4244__80379318'",
+          "unit.c:205:35: error: use of undeclared identifier 'zz_01a43f8_'"
+        ],
+        "fingerprint": "e4c2421632ab33f91904128870dbe69402bdbeaf8ea9784a760ea94698cc6b34"
+      },
+      {
+        "iteration": 2,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-005\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: zz_01a43f8_, zz_01a44a8_"
+        ],
+        "fingerprint": "992d24aa9c10f09aa0ebeb2a23ee9d68e1e9ed34a76341bba2675235dbf2d13f"
+      },
+      {
+        "iteration": 4,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-005\\header-attempt1-iter3.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: zz_01a43f8_, zz_01a44a8_"
+        ],
+        "fingerprint": "992d24aa9c10f09aa0ebeb2a23ee9d68e1e9ed34a76341bba2675235dbf2d13f"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "37e6ff384ab1039cb4c64ad054946ea393c3791f",
+      "prompt_version": "3",
+      "registry_version": "60"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_803792b9",
+      "DAT_803792bc",
+      "DAT_803792c0",
+      "DAT_803792c4",
+      "FUN_800669d0",
+      "__gnt4_bitcast_f64",
+      "code",
+      "gnt4_PSQUATDotProduct_bl",
+      "gnt4_PSVECNormalize_bl",
+      "gnt4_acos_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006dc8_",
+      "zz_006660c_",
+      "zz_0088aa0_",
+      "zz_0089100_",
+      "zz_01a3e54_",
+      "zz_01a3e98_",
+      "zz_01a4000_",
+      "zz_01a40b0_",
+      "zz_01a41b8_",
+      "zz_01a4244_",
+      "zz_01a4344_",
+      "zz_01a439c_",
+      "zz_01a452c_",
+      "zz_01a4644_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 60,
+    "model_requests": 3,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0050-005.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_vwqxs_dq\\unit.o'' failed (returned 1)",
+          "unit.c:126:34: error: use of undeclared identifier 'zz_01a44a8_'; did you mean 'zz_01a41b8_'?",
+          "unit.c:163:15: error: use of undeclared identifier 'PTR_zz_01a4244__80379318'",
+          "unit.c:205:35: error: use of undeclared identifier 'zz_01a43f8_'"
+        ],
+        "fingerprint": "e4c2421632ab33f91904128870dbe69402bdbeaf8ea9784a760ea94698cc6b34"
+      },
+      {
+        "iteration": 2,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-005\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: zz_01a43f8_, zz_01a44a8_"
+        ],
+        "fingerprint": "992d24aa9c10f09aa0ebeb2a23ee9d68e1e9ed34a76341bba2675235dbf2d13f"
+      },
+      {
+        "iteration": 4,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-005\\header-attempt1-iter3.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: zz_01a43f8_, zz_01a44a8_"
+        ],
+        "fingerprint": "992d24aa9c10f09aa0ebeb2a23ee9d68e1e9ed34a76341bba2675235dbf2d13f"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "37e6ff384ab1039cb4c64ad054946ea393c3791f",
+      "prompt_version": "3",
+      "registry_version": "60"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "stuck: identical diagnostics after applied fix",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-93410a3ebd8580f6e3fa8379d73f994ab0bafaacd627e7b6c31b0fcb75f673a2"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-23T07:19:26.896523Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "stuck: identical diagnostics after applied fix",
+      "product_commit": null
+    }
+  ]
+}
