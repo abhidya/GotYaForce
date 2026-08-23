@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "unit": "auto-c0053-013",
+  "unit_id": "auto-c0053-013",
+  "timestamp": "2026-08-23T12:21:24.196267Z",
+  "run_id": "2026-08-23T10:39:48.367114Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_00097b4_ owner/variant pair at auto-c0053-013/gnt4_shim.h",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-013.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ycx6ekki\\unit.o'' failed (returned 1)",
+          "unit.c:39:35: error: use of undeclared identifier 'zz_0048288_'; did you mean 'zz_0046588_'?"
+        ],
+        "fingerprint": "6f554eb3cdfa18a3706886a294c4a8d810f57f3f91f500cfa345998dcd503d3c"
+      },
+      {
+        "iteration": 2,
+        "stage": "link-gate",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\wasm-ld.exe' -o unit.wasm 'C:\\Users\\manny\\AppData\\Local\\Temp\\tmp094jyyzllibemscripten_js_symbols.so' -Bstatic --import-undefined --strip-debug --export-if-defined=zz_01b98ec_ --export-if-defined=FUN_801b9ab0 --export-if-defined=FUN_801b9abc --export-if-defined=FUN_801b9adc --export-if-defined=zz_01b9b1c_ --export-if-defined=zz_01b9b68_ --export-if-defined=zz_01b9be0_ --export-if-defined=zz_01b9df0_ --export-if-defined=emscripten_stack_get_current --export-if-defined=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uiqlb1p9\\unit.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+          "wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uiqlb1p9\\unit.o: undefined symbol: zz_0048288_"
+        ],
+        "fingerprint": "09dee317c69eb68ec964df4caa141d4227850d4d95c684559d1651b3f5983068"
+      },
+      {
+        "iteration": 3,
+        "stage": "link-gate",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt1-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\wasm-ld.exe' -o unit.wasm 'C:\\Users\\manny\\AppData\\Local\\Temp\\tmpcw2eu5qmlibemscripten_js_symbols.so' -Bstatic --import-undefined --strip-debug --export-if-defined=zz_01b98ec_ --export-if-defined=FUN_801b9ab0 --export-if-defined=FUN_801b9abc --export-if-defined=FUN_801b9adc --export-if-defined=zz_01b9b1c_ --export-if-defined=zz_01b9b68_ --export-if-defined=zz_01b9be0_ --export-if-defined=zz_01b9df0_ --export-if-defined=emscripten_stack_get_current --export-if-defined=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2ar4rwpn\\unit.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+          "wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2ar4rwpn\\unit.o: undefined symbol: zz_0048288_"
+        ],
+        "fingerprint": "8d798192ebab13061f40ef45a91e9751417a9dbe8e5a2aaad461e729737d87f1"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0050-002",
+        "auto-c0050-003",
+        "auto-c0050-004",
+        "auto-c0053-011",
+        "auto-c0053-013"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": "zz_00097b4_",
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0050-002",
+            "auto-c0050-003",
+            "auto-c0050-004",
+            "auto-c0053-011",
+            "auto-c0053-013"
+          ],
+          "variants": {},
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_00097b4_ owner/variant pair at auto-c0053-013/gnt4_shim.h"
+        }
+      ],
+      "detail": "owner_variant_abi_incompatible: Clang rejected zz_00097b4_ owner/variant pair at auto-c0053-013/gnt4_shim.h",
+      "candidate": {
+        "name": "auto-c0053-013",
+        "sha256": "c48c5fd957f9c4d9a83bc8559b1b615b78d1e1490b4ea1d22d46acafae4fefd5"
+      },
+      "expected_candidate": {
+        "name": "auto-c0053-013",
+        "sha256": "c48c5fd957f9c4d9a83bc8559b1b615b78d1e1490b4ea1d22d46acafae4fefd5"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "86c6142006b3472bcf38705816af4bccf0cf3711",
+      "prompt_version": "3",
+      "registry_version": "61"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "DAT_80382450",
+      "DAT_8038245e",
+      "DAT_8038246c",
+      "FUN_801b9ab0",
+      "FUN_801b9abc",
+      "FUN_801b9adc",
+      "SQRT",
+      "byte",
+      "code",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "gnt4_atan",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_00076d0_",
+      "zz_00097b4_",
+      "zz_0046588_",
+      "zz_006de10_",
+      "zz_0085e00_",
+      "zz_0088e50_",
+      "zz_0089100_",
+      "zz_0089444_",
+      "zz_008aff0_",
+      "zz_00f036c_",
+      "zz_01b98ec_",
+      "zz_01b9b1c_",
+      "zz_01b9b68_",
+      "zz_01b9be0_",
+      "zz_01b9df0_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 61,
+    "model_requests": 3,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-013.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ycx6ekki\\unit.o'' failed (returned 1)",
+          "unit.c:39:35: error: use of undeclared identifier 'zz_0048288_'; did you mean 'zz_0046588_'?"
+        ],
+        "fingerprint": "6f554eb3cdfa18a3706886a294c4a8d810f57f3f91f500cfa345998dcd503d3c"
+      },
+      {
+        "iteration": 2,
+        "stage": "link-gate",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\wasm-ld.exe' -o unit.wasm 'C:\\Users\\manny\\AppData\\Local\\Temp\\tmp094jyyzllibemscripten_js_symbols.so' -Bstatic --import-undefined --strip-debug --export-if-defined=zz_01b98ec_ --export-if-defined=FUN_801b9ab0 --export-if-defined=FUN_801b9abc --export-if-defined=FUN_801b9adc --export-if-defined=zz_01b9b1c_ --export-if-defined=zz_01b9b68_ --export-if-defined=zz_01b9be0_ --export-if-defined=zz_01b9df0_ --export-if-defined=emscripten_stack_get_current --export-if-defined=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uiqlb1p9\\unit.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+          "wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uiqlb1p9\\unit.o: undefined symbol: zz_0048288_"
+        ],
+        "fingerprint": "09dee317c69eb68ec964df4caa141d4227850d4d95c684559d1651b3f5983068"
+      },
+      {
+        "iteration": 3,
+        "stage": "link-gate",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt1-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\wasm-ld.exe' -o unit.wasm 'C:\\Users\\manny\\AppData\\Local\\Temp\\tmpcw2eu5qmlibemscripten_js_symbols.so' -Bstatic --import-undefined --strip-debug --export-if-defined=zz_01b98ec_ --export-if-defined=FUN_801b9ab0 --export-if-defined=FUN_801b9abc --export-if-defined=FUN_801b9adc --export-if-defined=zz_01b9b1c_ --export-if-defined=zz_01b9b68_ --export-if-defined=zz_01b9be0_ --export-if-defined=zz_01b9df0_ --export-if-defined=emscripten_stack_get_current --export-if-defined=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2ar4rwpn\\unit.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+          "wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_2ar4rwpn\\unit.o: undefined symbol: zz_0048288_"
+        ],
+        "fingerprint": "8d798192ebab13061f40ef45a91e9751417a9dbe8e5a2aaad461e729737d87f1"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0050-002",
+        "auto-c0050-003",
+        "auto-c0050-004",
+        "auto-c0053-011",
+        "auto-c0053-013"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": "zz_00097b4_",
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0050-002",
+            "auto-c0050-003",
+            "auto-c0050-004",
+            "auto-c0053-011",
+            "auto-c0053-013"
+          ],
+          "variants": {},
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_00097b4_ owner/variant pair at auto-c0053-013/gnt4_shim.h"
+        }
+      ],
+      "detail": "owner_variant_abi_incompatible: Clang rejected zz_00097b4_ owner/variant pair at auto-c0053-013/gnt4_shim.h",
+      "candidate": {
+        "name": "auto-c0053-013",
+        "sha256": "c48c5fd957f9c4d9a83bc8559b1b615b78d1e1490b4ea1d22d46acafae4fefd5"
+      },
+      "expected_candidate": {
+        "name": "auto-c0053-013",
+        "sha256": "c48c5fd957f9c4d9a83bc8559b1b615b78d1e1490b4ea1d22d46acafae4fefd5"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "86c6142006b3472bcf38705816af4bccf0cf3711",
+      "prompt_version": "3",
+      "registry_version": "61"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_00097b4_ owner/variant pair at auto-c0053-013/gnt4_shim.h",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-23T12:21:24.196267Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_00097b4_ owner/variant pair at auto-c0053-013/gnt4_shim.h",
+      "product_commit": null
+    }
+  ]
+}
