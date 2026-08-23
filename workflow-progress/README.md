@@ -1,21 +1,21 @@
-# Port workflow: RUNNING
+# Port workflow: IDLE
 
-*Generated 2026-08-23T12:50:13.219849Z - machine-written, do not edit.*
+*Generated 2026-08-23T12:50:15.976235Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 35/1396 settled (3 green, 32 staged) |
 | **Retries outstanding** | 15 |
 | **Untouched** | 1343 |
-| **Last transition** | 2026-08-23T12:50:13.219849Z |
+| **Last transition** | 2026-08-23T12:50:15.976235Z |
 | **Last green** | 2026-08-23T12:42:25.910430Z (`auto-c0053-014`) |
 | **Last product commit** | `6aefed93d147c1acdb9e51bc90693532425b264e` |
-| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
+| **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | running |
+| **Driver** | stopped |
 
 **Repeated recent failure classes**
 
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T12:50:15.976235Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T12:50:13.219849Z | `auto-c0011-011` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T12:46:32.213130Z | `auto-c0011-004` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T12:42:25.910430Z | `auto-c0053-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -74,4 +75,3 @@
 | 2026-08-21T20:44:18.827648Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-21T20:28:45.140310Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-21T20:26:53.076657Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-21T20:26:18.786459Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
