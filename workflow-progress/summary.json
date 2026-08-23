@@ -1,22 +1,27 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-23T15:23:35.480542Z",
+  "generated_at": "2026-08-23T16:20:00.039453Z",
   "run_id": "2026-08-23T13:03:30.528559Z",
   "total_units": 1396,
   "green": 3,
   "staged": 38,
-  "retryable": 21,
-  "untouched": 1331,
+  "retryable": 22,
+  "untouched": 1330,
   "deferred": 0,
   "structural_ineligible": 3,
   "active": 0,
-  "total_attempts": 99,
+  "total_attempts": 100,
   "transitions_last_hour": 2,
   "greens_last_hour": 0,
   "last_green_at": "2026-08-23T13:45:22.582156Z",
   "last_green_unit": "auto-c0028-017",
   "last_product_commit": "f3a57fc1b142e0b34d2db72bda653f462c6374a3",
-  "repeated_failure_classes": [],
+  "repeated_failure_classes": [
+    [
+      "assembly:assembly gate canonicalize failed before promotion: owner_va",
+      2
+    ]
+  ],
   "health": "active_no_green",
   "machine": {
     "workflow_state": "running",
