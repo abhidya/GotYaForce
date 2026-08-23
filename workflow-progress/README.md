@@ -1,16 +1,16 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-23T20:14:46.912010Z - machine-written, do not edit.*
+*Generated 2026-08-23T21:25:09.016615Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 50/1396 settled (3 green, 47 staged) |
 | **Retries outstanding** | 17 |
 | **Untouched** | 1326 |
-| **Last transition** | 2026-08-23T20:14:46.912010Z |
+| **Last transition** | 2026-08-23T21:25:09.016615Z |
 | **Last green** | 2026-08-23T20:14:46.912010Z (`auto-c0050-007`) |
 | **Last product commit** | `dadf854cd6bd3a5d6c07292eba0e3a8d50b1fb01` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-23T21:25:09.016615Z | `auto-c0050-008` | gate_failed | wasm-link | 2 | not linked: unit.c:75:29: error: too many arguments to function call, expected 1, have 16 unit.c:78:21: error: |
 | 2026-08-23T20:14:46.912010Z | `auto-c0050-007` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T20:10:48.090603Z | `auto-c0050-006` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_01a452c_ |
 | 2026-08-23T19:48:57.311797Z | `auto-c0050-005` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-23T05:02:44.142015Z | `auto-c0050-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T04:37:14.222238Z | `auto-c0049-018` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ |
 | 2026-08-23T03:56:58.871325Z | `auto-c0049-017` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_001ab6c_ |
-| 2026-08-23T03:39:03.431622Z | `auto-c0049-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |

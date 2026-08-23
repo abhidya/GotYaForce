@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0050-008",
   "unit_id": "auto-c0050-008",
-  "timestamp": "2026-08-23T10:38:41.147863Z",
-  "run_id": "2026-08-23T08:47:14.546586Z",
+  "timestamp": "2026-08-23T21:25:09.016615Z",
+  "run_id": "2026-08-23T13:03:30.528559Z",
   "result": "gate_failed",
   "stage": "wasm-link",
-  "attempt": 1,
-  "detail": "not linked: In file included from unit.c:1:\n.\\gnt4_shim.h:200:18: error: expected ';' after top level declarator\n  200 | extern void zz_00\n      |                  ^\n      |                  ;\nunit.c:20:13: error: subscript of pointer to function type 'void (void)'\n   20 |   (*(code *)(&PTR_zz_01a4ee4__80379380)[*(char *)(param_1 + 0x18)])(param_1);\n      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~\n2 errors generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_sw5kc4zv\\unit.o'' failed (returned 1)",
+  "attempt": 2,
+  "detail": "not linked: unit.c:75:29: error: too many arguments to function call, expected 1, have 16\nunit.c:78:21: error: too many arguments to function call, expected 1, have 16\nunit.c:80:38: error: too many arguments to function call, expected 1, have 2\nunit.c:107:38: error: too many arguments to function call, expected 1, have 4\nunit.c:129:23: error: too many arguments to function call, expected 1, have 9\nunit.c:178:23: error: too many arguments to function call, expected 1, have 16\nunit.c:180:48: error: too many arguments to function call, expected 1, have 2\nunit.c:182:23: error: too many arguments to function call, expected 1, have 16\nunit.c:184:40: error: too many arguments to function call, expected 1, have 2\nunit.c:232:25: error: too many arguments to function call, expected 1, have 2",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -23,7 +23,7 @@
         "error_count": 12,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0050-008.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_jfolw11j\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_tke78pqi\\unit.o'' failed (returned 1)",
           "unit.c:195:38: error: use of undeclared identifier 'PTR_zz_01a5454__80379390'",
           "unit.c:196:38: error: use of undeclared identifier 'PTR_zz_01a52c8__80379394'",
           "unit.c:197:38: error: use of undeclared identifier 'PTR_zz_01a5330__80379398'",
@@ -36,59 +36,83 @@
           "unit.c:20:15: error: use of undeclared identifier 'PTR_zz_01a4ee4__80379380'",
           "unit.c:45:33: error: use of undeclared identifier 'FUN_80047aa4'"
         ],
-        "fingerprint": "14ef1d6d4875632b0296d29becf173aa011ef62ce82fc19fb38af9f6475af8eb"
+        "fingerprint": "c45dd104799d9105684459d9b470be437b7f4efbf04bd420db63d4315d04064a"
       },
       {
         "iteration": 2,
         "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt1-iter1.h",
+        "error_count": 10,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt2-iter1.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_7gz5zo4c\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:176:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
-          "unit.c:20:13: error: subscript of pointer to function type 'code' (aka 'void ()')"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_e8o784ea\\unit.o'' failed (returned 1)",
+          "unit.c:180:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:20:13: error: subscript of pointer to function type 'void (int)'",
+          "unit.c:46:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:58:9: error: assigning to 'int' from incompatible type 'void'",
+          "unit.c:59:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:64:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:69:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:70:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:75:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
         ],
-        "fingerprint": "4373c5380a042e042e555428bd5030aa659fbaaed999b4d6f8a8cd3142a7a668"
+        "fingerprint": "2ec42df2fdc7ad7746b3c9bc7a06c91ed57d78e156ff1c4883290ebaad5d5c33"
       },
       {
         "iteration": 3,
         "stage": "compile",
-        "error_count": 3,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt1-iter2.h",
+        "error_count": 13,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt2-iter2.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_8f6148uc\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:20:13: error: subscript of pointer to function type 'code' (aka 'void ()')"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_hoyubzvd\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: ISO C requires a named parameter before '...'",
+          "unit.c:195:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:196:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:197:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:198:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:199:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:200:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:201:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:202:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:204:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:20:13: error: subscript of pointer to function type 'void (...)'",
+          "unit.c:20:15: error: ISO C requires a named parameter before '...'"
         ],
-        "fingerprint": "0bf1aa3d80950003863e9569c732133110b2b08804aaf760ddcc85af03cc8b7d"
+        "fingerprint": "c1c52e2fa1e8f22f7e46abb4389ab340ee9de6320f7be99be6c209bf5d4a8de4"
       },
       {
         "iteration": 4,
         "stage": "compile",
-        "error_count": 3,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt1-iter3.h",
+        "error_count": 11,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt2-iter3.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_sw5kc4zv\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:20:13: error: subscript of pointer to function type 'void (void)'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_zoex7pgl\\unit.o'' failed (returned 1)",
+          "unit.c:107:38: error: too many arguments to function call, expected 1, have 4",
+          "unit.c:129:23: error: too many arguments to function call, expected 1, have 9",
+          "unit.c:178:23: error: too many arguments to function call, expected 1, have 16",
+          "unit.c:180:48: error: too many arguments to function call, expected 1, have 2",
+          "unit.c:182:23: error: too many arguments to function call, expected 1, have 16",
+          "unit.c:184:40: error: too many arguments to function call, expected 1, have 2",
+          "unit.c:232:25: error: too many arguments to function call, expected 1, have 2",
+          "unit.c:75:29: error: too many arguments to function call, expected 1, have 16",
+          "unit.c:78:21: error: too many arguments to function call, expected 1, have 16",
+          "unit.c:80:38: error: too many arguments to function call, expected 1, have 2"
         ],
-        "fingerprint": "e4c055bdc52790ad407b7d161b2a2fb44483fa2d8ae56f899b6b9906c0679d51"
+        "fingerprint": "1926e5be2bfdc181117257eb5282bebb67c9d8c57b480138630abd8c6fa0db74"
       }
     ],
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "912528f5791fc69d501a7b0c79cedc7ddfe16459",
+      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
       "prompt_version": "3",
-      "registry_version": "60"
+      "registry_version": "49"
     },
     "failure_domain": "source-compiler",
     "diagnosis_eligible": true
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 1,
+    "attempts": 2,
     "symbol_set": [
       "DAT_802bb714",
       "DAT_802bc080",
@@ -138,8 +162,8 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 60,
-    "model_requests": 3,
+    "registry_version_used": 85,
+    "model_requests": 6,
     "rounds": [
       {
         "iteration": 1,
@@ -147,7 +171,7 @@
         "error_count": 12,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0050-008.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_jfolw11j\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_tke78pqi\\unit.o'' failed (returned 1)",
           "unit.c:195:38: error: use of undeclared identifier 'PTR_zz_01a5454__80379390'",
           "unit.c:196:38: error: use of undeclared identifier 'PTR_zz_01a52c8__80379394'",
           "unit.c:197:38: error: use of undeclared identifier 'PTR_zz_01a5330__80379398'",
@@ -160,58 +184,82 @@
           "unit.c:20:15: error: use of undeclared identifier 'PTR_zz_01a4ee4__80379380'",
           "unit.c:45:33: error: use of undeclared identifier 'FUN_80047aa4'"
         ],
-        "fingerprint": "14ef1d6d4875632b0296d29becf173aa011ef62ce82fc19fb38af9f6475af8eb"
+        "fingerprint": "c45dd104799d9105684459d9b470be437b7f4efbf04bd420db63d4315d04064a"
       },
       {
         "iteration": 2,
         "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt1-iter1.h",
+        "error_count": 10,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt2-iter1.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_7gz5zo4c\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:176:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
-          "unit.c:20:13: error: subscript of pointer to function type 'code' (aka 'void ()')"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_e8o784ea\\unit.o'' failed (returned 1)",
+          "unit.c:180:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:20:13: error: subscript of pointer to function type 'void (int)'",
+          "unit.c:46:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:58:9: error: assigning to 'int' from incompatible type 'void'",
+          "unit.c:59:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:64:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:69:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:70:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:75:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
         ],
-        "fingerprint": "4373c5380a042e042e555428bd5030aa659fbaaed999b4d6f8a8cd3142a7a668"
+        "fingerprint": "2ec42df2fdc7ad7746b3c9bc7a06c91ed57d78e156ff1c4883290ebaad5d5c33"
       },
       {
         "iteration": 3,
         "stage": "compile",
-        "error_count": 3,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt1-iter2.h",
+        "error_count": 13,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt2-iter2.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_8f6148uc\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:20:13: error: subscript of pointer to function type 'code' (aka 'void ()')"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_hoyubzvd\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: ISO C requires a named parameter before '...'",
+          "unit.c:195:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:196:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:197:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:198:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:199:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:200:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:201:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:202:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:204:38: error: ISO C requires a named parameter before '...'",
+          "unit.c:20:13: error: subscript of pointer to function type 'void (...)'",
+          "unit.c:20:15: error: ISO C requires a named parameter before '...'"
         ],
-        "fingerprint": "0bf1aa3d80950003863e9569c732133110b2b08804aaf760ddcc85af03cc8b7d"
+        "fingerprint": "c1c52e2fa1e8f22f7e46abb4389ab340ee9de6320f7be99be6c209bf5d4a8de4"
       },
       {
         "iteration": 4,
         "stage": "compile",
-        "error_count": 3,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt1-iter3.h",
+        "error_count": 11,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0050-008\\header-attempt2-iter3.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_sw5kc4zv\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:20:13: error: subscript of pointer to function type 'void (void)'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_zoex7pgl\\unit.o'' failed (returned 1)",
+          "unit.c:107:38: error: too many arguments to function call, expected 1, have 4",
+          "unit.c:129:23: error: too many arguments to function call, expected 1, have 9",
+          "unit.c:178:23: error: too many arguments to function call, expected 1, have 16",
+          "unit.c:180:48: error: too many arguments to function call, expected 1, have 2",
+          "unit.c:182:23: error: too many arguments to function call, expected 1, have 16",
+          "unit.c:184:40: error: too many arguments to function call, expected 1, have 2",
+          "unit.c:232:25: error: too many arguments to function call, expected 1, have 2",
+          "unit.c:75:29: error: too many arguments to function call, expected 1, have 16",
+          "unit.c:78:21: error: too many arguments to function call, expected 1, have 16",
+          "unit.c:80:38: error: too many arguments to function call, expected 1, have 2"
         ],
-        "fingerprint": "e4c055bdc52790ad407b7d161b2a2fb44483fa2d8ae56f899b6b9906c0679d51"
+        "fingerprint": "1926e5be2bfdc181117257eb5282bebb67c9d8c57b480138630abd8c6fa0db74"
       }
     ],
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "912528f5791fc69d501a7b0c79cedc7ddfe16459",
+      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
       "prompt_version": "3",
-      "registry_version": "60"
+      "registry_version": "49"
     },
     "failure_domain": "source-compiler",
     "diagnosis_eligible": true,
-    "error": "not linked: In file included from unit.c:1:\n.\\gnt4_shim.h:200:18: error: expected ';' after top level declarator\n  200 | extern void zz_00\n      |                  ^\n      |                  ;\nunit.c:20:13: error: subscript of pointer to function type 'void (void)'\n   20 |   (*(code *)(&PTR_zz_01a4ee4__80379380)[*(char *)(param_1 + 0x18)])(param_1);\n      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~\n2 errors generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_sw5kc4zv\\unit.o'' failed (returned 1)",
+    "error": "not linked: unit.c:75:29: error: too many arguments to function call, expected 1, have 16\nunit.c:78:21: error: too many arguments to function call, expected 1, have 16\nunit.c:80:38: error: too many arguments to function call, expected 1, have 2\nunit.c:107:38: error: too many arguments to function call, expected 1, have 4\nunit.c:129:23: error: too many arguments to function call, expected 1, have 9\nunit.c:178:23: error: too many arguments to function call, expected 1, have 16\nunit.c:180:48: error: too many arguments to function call, expected 1, have 2\nunit.c:182:23: error: too many arguments to function call, expected 1, have 16\nunit.c:184:40: error: too many arguments to function call, expected 1, have 2\nunit.c:232:25: error: too many arguments to function call, expected 1, have 2",
     "last_stage": "wasm-link",
-    "source_failure_id": "source-failure-4e003226b7f0d5c2ca535c3ce40ea555bfc21e2731ebbf47d7ef108e479191f7"
+    "source_failure_id": "source-failure-cc8d3da89fdde8aa94d6cf2234c4c16a83f32b2a7973b31669087d2d44e96dfe"
   },
   "history": [
     {
@@ -220,6 +268,14 @@
       "stage": "wasm-link",
       "attempt": 1,
       "detail": "not linked: In file included from unit.c:1:\n.\\gnt4_shim.h:200:18: error: expected ';' after top level declarator\n  200 | extern void zz_00\n      |                  ^\n      |                  ;\nunit.c:20:13: error: subscript of pointer to function type 'void (void)'\n   20 |   (*(code *)(&PTR_zz_01a4ee4__80379380)[*(char *)(param_1 + 0x18)])(param_1);\n      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-23T21:25:09.016615Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 2,
+      "detail": "not linked: unit.c:75:29: error: too many arguments to function call, expected 1, have 16\nunit.c:78:21: error: too many arguments to function call, expected 1, have 16\nunit.c:80:38: error: too many arguments to function call, expected 1, have 2\nunit.c:107:38: error: too many arguments to function call, expected 1, have 4\nunit.c:129:23: error: too many arguments to function call, expected 1, have 9",
       "product_commit": null
     }
   ]
