@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-24T03:51:13.081522Z",
+  "generated_at": "2026-08-24T03:53:07.683055Z",
   "run_id": "2026-08-24T01:57:30.243221Z",
   "total_units": 1396,
   "green": 3,
@@ -10,7 +10,7 @@
   "deferred": 0,
   "structural_ineligible": 3,
   "active": 0,
-  "total_attempts": 134,
+  "total_attempts": 135,
   "transitions_last_hour": 5,
   "greens_last_hour": 0,
   "last_green_at": "2026-08-24T01:56:49.350787Z",
@@ -20,10 +20,6 @@
     [
       "artifact-install:artifact install refused after assembly pass: legacy revoked",
       3
-    ],
-    [
-      "assembly:assembly gate link failed before promotion: _start_em_asm --",
-      2
     ]
   ],
   "health": "active_no_green",
