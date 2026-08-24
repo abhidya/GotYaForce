@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T16:17:39.852480Z - machine-written, do not edit.*
+*Generated 2026-08-24T16:37:46.563449Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 75/1396 settled (3 green, 72 staged) |
-| **Retries outstanding** | 17 |
-| **Untouched** | 1300 |
-| **Last transition** | 2026-08-24T16:17:39.852480Z |
+| **Retries outstanding** | 18 |
+| **Untouched** | 1299 |
+| **Last transition** | 2026-08-24T16:37:46.563449Z |
 | **Last green** | 2026-08-24T16:17:39.852480Z (`auto-c0052-016`) |
 | **Last product commit** | `c6fda189db8a35b3f2acd45d45ddeb13a5ffcbba` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T16:37:46.563449Z | `auto-c0052-017` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ |
 | 2026-08-24T16:17:39.852480Z | `auto-c0052-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T16:14:46.969617Z | `auto-c0046-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T16:11:48.310710Z | `auto-c0043-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-23T23:11:48.369042Z | `auto-c0028-018` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T22:53:06.907723Z | `auto-c0028-015` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8010342 |
 | 2026-08-23T22:50:46.664154Z | `auto-c0019-002` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-23T22:47:20.972951Z | `auto-c0019-000` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
