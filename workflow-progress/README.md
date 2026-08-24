@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T17:14:47.639074Z - machine-written, do not edit.*
+*Generated 2026-08-24T17:37:10.252553Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 77/1396 settled (3 green, 74 staged) |
+| **Queue progress** | 78/1396 settled (3 green, 75 staged) |
 | **Retries outstanding** | 19 |
-| **Untouched** | 1296 |
-| **Last transition** | 2026-08-24T17:14:47.639074Z |
-| **Last green** | 2026-08-24T16:43:33.203204Z (`auto-c0057-008`) |
-| **Last product commit** | `dec8566157150d99906e3f73d09f9e604561d403` |
+| **Untouched** | 1295 |
+| **Last transition** | 2026-08-24T17:37:10.252553Z |
+| **Last green** | 2026-08-24T17:37:10.252553Z (`auto-c0010-001`) |
+| **Last product commit** | `b5529bd2a0d641665cdfd1bc83a0a71e1bcc097d` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T17:37:10.252553Z | `auto-c0010-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T17:14:47.639074Z | `auto-c0010-000` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0045ef4_ |
 | 2026-08-24T16:43:33.203204Z | `auto-c0057-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T16:40:39.211623Z | `auto-c0053-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -74,4 +75,3 @@
 | 2026-08-24T00:49:59.114356Z | `auto-c0029-012` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-24T00:26:17.588659Z | `auto-c0029-002` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-24T00:01:19.489860Z | `auto-c0029-001` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0197ad8_ |
-| 2026-08-23T23:35:23.317406Z | `auto-c0029-000` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
