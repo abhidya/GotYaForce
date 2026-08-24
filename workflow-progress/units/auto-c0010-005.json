@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "unit": "auto-c0010-005",
+  "unit_id": "auto-c0010-005",
+  "timestamp": "2026-08-24T19:27:40.251967Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "result": "gate_failed",
+  "stage": "wasm-link",
+  "attempt": 1,
+  "detail": "not linked: .\\gnt4_shim.h:170:15: error: conflicting types for 'gnt4_PSVECMag_bl'\nunit.c:129:13: error: assigning to 'double' from incompatible type 'void'\nunit.c:137:13: error: assigning to 'double' from incompatible type 'void'\nunit.c:153:9: error: assigning to 'double' from incompatible type 'void'",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0010-005.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_hhlyks9j\\unit.o'' failed (returned 1)",
+          "unit.c:255:15: error: use of undeclared identifier 'PTR_LAB_802d47f8'",
+          "unit.c:32:15: error: use of undeclared identifier 'PTR_zz_00736bc__802d4374'"
+        ],
+        "fingerprint": "99524e85d6d1abc47c8086b9168aec61a448e6e13293b4ebc6ee0b25d0356159"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0010-005\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_iozqsmxc\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: conflicting types for 'gnt4_PSVECMag_bl'",
+          "unit.c:129:13: error: assigning to 'double' from incompatible type 'void'",
+          "unit.c:137:13: error: assigning to 'double' from incompatible type 'void'",
+          "unit.c:153:9: error: assigning to 'double' from incompatible type 'void'"
+        ],
+        "fingerprint": "62c7cb9a2e8d433b879c9aa8e6f26efe0046d24ea27075c4f3dfeba7fd91ec8e"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "124"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "CONCAT44",
+      "FUN_800452a0",
+      "FUN_80067310",
+      "FUN_800737d8",
+      "FUN_80073a3c",
+      "FUN_80073c90",
+      "FUN_80073d0c",
+      "FUN_80073da4",
+      "__gnt4_bitcast_f64",
+      "code",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "zz_004beb8_",
+      "zz_004cd24_",
+      "zz_004e00c_",
+      "zz_00677b0_",
+      "zz_00679d0_",
+      "zz_006a474_",
+      "zz_006a5a4_",
+      "zz_006a750_",
+      "zz_006d0dc_",
+      "zz_006dbe0_",
+      "zz_006de10_",
+      "zz_006e1ac_",
+      "zz_006ed8c_",
+      "zz_0073648_",
+      "zz_0073668_",
+      "zz_00736bc_",
+      "zz_0084600_",
+      "zz_00853ec_",
+      "zz_00b22f4_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": true,
+    "registry_deviations": [],
+    "registry_version_used": 124,
+    "model_requests": 3,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0010-005.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_hhlyks9j\\unit.o'' failed (returned 1)",
+          "unit.c:255:15: error: use of undeclared identifier 'PTR_LAB_802d47f8'",
+          "unit.c:32:15: error: use of undeclared identifier 'PTR_zz_00736bc__802d4374'"
+        ],
+        "fingerprint": "99524e85d6d1abc47c8086b9168aec61a448e6e13293b4ebc6ee0b25d0356159"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0010-005\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_iozqsmxc\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: conflicting types for 'gnt4_PSVECMag_bl'",
+          "unit.c:129:13: error: assigning to 'double' from incompatible type 'void'",
+          "unit.c:137:13: error: assigning to 'double' from incompatible type 'void'",
+          "unit.c:153:9: error: assigning to 'double' from incompatible type 'void'"
+        ],
+        "fingerprint": "62c7cb9a2e8d433b879c9aa8e6f26efe0046d24ea27075c4f3dfeba7fd91ec8e"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "124"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "not linked: .\\gnt4_shim.h:170:15: error: conflicting types for 'gnt4_PSVECMag_bl'\nunit.c:129:13: error: assigning to 'double' from incompatible type 'void'\nunit.c:137:13: error: assigning to 'double' from incompatible type 'void'\nunit.c:153:9: error: assigning to 'double' from incompatible type 'void'",
+    "last_stage": "wasm-link",
+    "source_failure_id": "source-failure-3e068107ccea470d05ab449f1ddd47e15cd5f8de089debbc5a2ee796ccf44f9e"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-24T19:27:40.251967Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 1,
+      "detail": "not linked: .\\gnt4_shim.h:170:15: error: conflicting types for 'gnt4_PSVECMag_bl'\nunit.c:129:13: error: assigning to 'double' from incompatible type 'void'\nunit.c:137:13: error: assigning to 'double' from incompatible type 'void'\nunit.c:153:9: error: assigning to 'double' from incompatible type 'void'",
+      "product_commit": null
+    }
+  ]
+}
