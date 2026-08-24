@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T12:26:57.091581Z - machine-written, do not edit.*
+*Generated 2026-08-24T12:30:28.410265Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 63/1396 settled (3 green, 60 staged) |
+| **Queue progress** | 64/1396 settled (3 green, 61 staged) |
 | **Retries outstanding** | 16 |
-| **Untouched** | 1313 |
-| **Last transition** | 2026-08-24T12:26:57.091581Z |
-| **Last green** | 2026-08-24T12:26:57.091581Z (`auto-c0021-016`) |
-| **Last product commit** | `109927caae3d76bb3434c517bbef53dc457f158b` |
+| **Untouched** | 1312 |
+| **Last transition** | 2026-08-24T12:30:28.410265Z |
+| **Last green** | 2026-08-24T12:30:28.410265Z (`auto-c0024-013`) |
+| **Last product commit** | `ccbd9e8590c433d16cd9d891c8b009c8c8921db9` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T12:30:28.410265Z | `auto-c0024-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T12:26:57.091581Z | `auto-c0021-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T12:23:27.275122Z | `auto-c0020-012` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T12:19:58.070405Z | `auto-c0020-007` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800c5a6 |
@@ -70,4 +71,3 @@
 | 2026-08-23T20:10:48.090603Z | `auto-c0050-006` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_01a452c_ |
 | 2026-08-23T19:48:57.311797Z | `auto-c0050-005` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T19:24:47.313085Z | `auto-c0049-018` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
-| 2026-08-23T19:03:21.190722Z | `auto-c0049-017` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
