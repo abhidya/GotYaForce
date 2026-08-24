@@ -1,30 +1,27 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T03:56:26.710331Z - machine-written, do not edit.*
+*Generated 2026-08-24T05:12:56.455725Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 54/1396 settled (3 green, 51 staged) |
 | **Retries outstanding** | 13 |
 | **Untouched** | 1326 |
-| **Last transition** | 2026-08-24T03:56:26.710331Z |
+| **Last transition** | 2026-08-24T05:12:56.455725Z |
 | **Last green** | 2026-08-24T03:56:26.710331Z (`auto-c0028-015`) |
 | **Last product commit** | `d23350b7546f3785400195b277e91f0c2dafb15d` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
 
-**Repeated recent failure classes**
-
-- `artifact-install:artifact install refused after assembly pass: legacy revoked` x3
-
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T05:12:56.455725Z | `auto-c0029-000` | gate_failed | wasm-link | 3 | not linked: unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type ' |
 | 2026-08-24T03:56:26.710331Z | `auto-c0028-015` | staged | commit | 4 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T03:53:07.548145Z | `auto-c0019-000` | gate_failed | assembly | 4 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800bae6 |
 | 2026-08-24T03:51:12.947999Z | `auto-c0011-012` | gate_failed | artifact-install | 4 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
@@ -74,4 +71,3 @@
 | 2026-08-23T13:38:14.809236Z | `auto-c0028-015` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8010342 |
 | 2026-08-23T13:35:20.434084Z | `auto-c0028-014` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T13:31:39.182679Z | `auto-c0028-013` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-23T13:27:48.153342Z | `auto-c0019-003` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |

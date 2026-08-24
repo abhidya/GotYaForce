@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0029-000",
   "unit_id": "auto-c0029-000",
-  "timestamp": "2026-08-23T23:35:23.317406Z",
-  "run_id": "2026-08-23T22:32:58.325044Z",
+  "timestamp": "2026-08-24T05:12:56.455725Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
   "result": "gate_failed",
-  "stage": "assembly",
-  "attempt": 2,
-  "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+  "stage": "wasm-link",
+  "attempt": 3,
+  "detail": "not linked: unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'\n  112 |   uVar9 = gnt4_PSQUATScale_bl((double)*(float *)(&DAT_80321700 + iVar3),(float *)(param_9 + 0x38),\n      |         ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  113 |                               (float *)(param_9 + 0x38));\n      |                               ~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_up07kf8k\\unit.o'' failed (returned 1)",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -23,64 +23,38 @@
         "error_count": 4,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0029-000.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_dbxbaril\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_80u3b0og\\unit.o'' failed (returned 1)",
           "unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
           "unit.c:63:15: error: use of undeclared identifier 'PTR_zz_010455c__8032170c'",
           "unit.c:93:33: error: use of undeclared identifier 'zz_0048288_'"
         ],
-        "fingerprint": "5a27274ff5ffaaba270158602438b48ba187abd1ef957f182556d828d0bc23f3"
+        "fingerprint": "99335afe500f36a4e49d66e1c141de08c970e34938f063ec5e6631c26dacacb0"
+      },
+      {
+        "iteration": 4,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0029-000\\header-attempt3-iter3.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_up07kf8k\\unit.o'' failed (returned 1)",
+          "unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "d6f6d93a5d8c9a832aeacb8812a5129765d3c62ab3ec8d735e4c15ca987add56"
       }
     ],
-    "assembly_gate": {
-      "passed": false,
-      "n": 5,
-      "units": [
-        "auto-c0028-016",
-        "auto-c0029-014",
-        "auto-c0019-002",
-        "auto-c0028-018",
-        "auto-c0029-000"
-      ],
-      "stage": "link",
-      "conflicts": [
-        {
-          "symbol": "gnt4_PSQUATScale_bl",
-          "class": "collision_stub",
-          "units": [
-            "auto-c0019-002",
-            "auto-c0028-016",
-            "auto-c0028-018",
-            "auto-c0029-000",
-            "auto-c0029-014"
-          ],
-          "variants": {},
-          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSQUATScale_bl"
-        }
-      ],
-      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
-      "candidate": {
-        "name": "auto-c0029-000",
-        "sha256": "3164ac0c24b22614ec48ce845b5908c9b686e9b0050bf020acb71d415df4963a"
-      },
-      "expected_candidate": {
-        "name": "auto-c0029-000",
-        "sha256": "3164ac0c24b22614ec48ce845b5908c9b686e9b0050bf020acb71d415df4963a"
-      },
-      "attempt_cleanup": "removed"
-    },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "c53747bd698afb80f431280ac61ae4fe96d68c50",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
       "prompt_version": "3",
-      "registry_version": "89"
+      "registry_version": "93"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 2,
+    "attempts": 3,
     "symbol_set": [
       "DAT_803216c0",
       "DAT_803216c2",
@@ -136,10 +110,10 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 89,
-    "error": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1dys665m\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+    "registry_version_used": 93,
+    "error": "not linked: unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'\n  112 |   uVar9 = gnt4_PSQUATScale_bl((double)*(float *)(&DAT_80321700 + iVar3),(float *)(param_9 + 0x38),\n      |         ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  113 |                               (float *)(param_9 + 0x38));\n      |                               ~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_up07kf8k\\unit.o'' failed (returned 1)",
     "interruptions": 1,
-    "model_requests": 3,
+    "model_requests": 6,
     "rounds": [
       {
         "iteration": 1,
@@ -147,12 +121,23 @@
         "error_count": 4,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0029-000.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_dbxbaril\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_80u3b0og\\unit.o'' failed (returned 1)",
           "unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
           "unit.c:63:15: error: use of undeclared identifier 'PTR_zz_010455c__8032170c'",
           "unit.c:93:33: error: use of undeclared identifier 'zz_0048288_'"
         ],
-        "fingerprint": "5a27274ff5ffaaba270158602438b48ba187abd1ef957f182556d828d0bc23f3"
+        "fingerprint": "99335afe500f36a4e49d66e1c141de08c970e34938f063ec5e6631c26dacacb0"
+      },
+      {
+        "iteration": 4,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0029-000\\header-attempt3-iter3.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_up07kf8k\\unit.o'' failed (returned 1)",
+          "unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "d6f6d93a5d8c9a832aeacb8812a5129765d3c62ab3ec8d735e4c15ca987add56"
       }
     ],
     "assembly_gate": {
@@ -195,13 +180,14 @@
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "c53747bd698afb80f431280ac61ae4fe96d68c50",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
       "prompt_version": "3",
-      "registry_version": "89"
+      "registry_version": "93"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false,
-    "last_stage": "assembly"
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "last_stage": "wasm-link",
+    "source_failure_id": "source-failure-43ccb43b454ceb2308f2825def6b35272b82d8e08248546697d35ba97a5df7ee"
   },
   "history": [
     {
@@ -218,6 +204,14 @@
       "stage": "assembly",
       "attempt": 2,
       "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Use",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-24T05:12:56.455725Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 3,
+      "detail": "not linked: unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'\n  112 |   uVar9 = gnt4_PSQUATScale_bl((double)*(float *)(&DAT_80321700 + iVar3),(float *)(param_9 + 0x38),\n      |         ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  113 |                               (float *)(param_9 + 0x38));\n    ",
       "product_commit": null
     }
   ]
