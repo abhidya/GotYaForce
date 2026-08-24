@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T14:54:49.790014Z - machine-written, do not edit.*
+*Generated 2026-08-24T14:57:57.298914Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 68/1396 settled (3 green, 65 staged) |
+| **Queue progress** | 69/1396 settled (3 green, 66 staged) |
 | **Retries outstanding** | 17 |
-| **Untouched** | 1307 |
-| **Last transition** | 2026-08-24T14:54:49.790014Z |
-| **Last green** | 2026-08-24T14:54:49.790014Z (`auto-c0039-000`) |
-| **Last product commit** | `79357bfe2e57d5e88154af34ce8a58f6d158941a` |
+| **Untouched** | 1306 |
+| **Last transition** | 2026-08-24T14:57:57.298914Z |
+| **Last green** | 2026-08-24T14:57:57.298914Z (`auto-c0039-011`) |
+| **Last product commit** | `555b0574810ce2da5921d534efaadf7db6774461` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T14:57:57.298914Z | `auto-c0039-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T14:54:49.790014Z | `auto-c0039-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T14:51:41.980469Z | `auto-c0035-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T14:31:03.822380Z | `auto-c0031-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-23T22:32:58.697290Z | `auto-c0053-013` | deferred | assembly | 1 | interrupted before a verdict; requeued |
 | 2026-08-23T22:00:59.312938Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T22:00:55.895283Z | `auto-c0053-012` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801b9ad |
-| 2026-08-23T21:26:21.692805Z | `-` | stopped_at_boundary | machine | 0 |  |
