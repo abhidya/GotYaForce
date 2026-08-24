@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T19:27:40.251967Z - machine-written, do not edit.*
+*Generated 2026-08-24T19:49:55.554497Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 79/1396 settled (3 green, 76 staged) |
+| **Queue progress** | 80/1396 settled (3 green, 77 staged) |
 | **Retries outstanding** | 22 |
-| **Untouched** | 1291 |
-| **Last transition** | 2026-08-24T19:27:40.251967Z |
-| **Last green** | 2026-08-24T18:22:28.078952Z (`auto-c0010-004`) |
-| **Last product commit** | `61eefd618cac92c7409d6891ef951f52f8f933e5` |
+| **Untouched** | 1290 |
+| **Last transition** | 2026-08-24T19:49:55.554497Z |
+| **Last green** | 2026-08-24T19:49:55.554497Z (`auto-c0010-009`) |
+| **Last product commit** | `cea3257f9b20c9c568c3b16eb9c5eb31ac0d252f` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T19:49:55.554497Z | `auto-c0010-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T19:27:40.251967Z | `auto-c0010-005` | gate_failed | wasm-link | 1 | not linked: .\gnt4_shim.h:170:15: error: conflicting types for 'gnt4_PSVECMag_bl' unit.c:129:13: error: assign |
 | 2026-08-24T18:22:28.078952Z | `auto-c0010-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T18:01:25.183116Z | `auto-c0010-003` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0072438_ |
@@ -70,4 +71,3 @@
 | 2026-08-24T02:52:40.969627Z | `auto-c0053-012` | gate_failed | assembly | 3 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-24T02:19:14.462630Z | `auto-c0050-006` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_01a4a40_ |
 | 2026-08-24T01:57:00.051943Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-24T01:56:49.350787Z | `auto-c0049-018` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
