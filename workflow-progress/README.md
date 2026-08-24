@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T11:29:58.213695Z - machine-written, do not edit.*
+*Generated 2026-08-24T12:19:58.070405Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 61/1396 settled (3 green, 58 staged) |
-| **Retries outstanding** | 15 |
-| **Untouched** | 1316 |
-| **Last transition** | 2026-08-24T11:29:58.213695Z |
+| **Retries outstanding** | 16 |
+| **Untouched** | 1315 |
+| **Last transition** | 2026-08-24T12:19:58.070405Z |
 | **Last green** | 2026-08-24T11:29:58.213695Z (`auto-c0010-011`) |
 | **Last product commit** | `30624f1a31b2c0fdc1cc6f7cf02672aa43396f9c` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T12:19:58.070405Z | `auto-c0020-007` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800c5a6 |
 | 2026-08-24T11:29:58.213695Z | `auto-c0010-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T11:25:54.234067Z | `auto-c0031-002` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_011243c_ declared void but their results are assigned; no header edit ca |
 | 2026-08-24T11:25:50.934608Z | `auto-c0019-016` | gate_failed | wasm-link | 1 | not linked: link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functi |
@@ -70,4 +71,3 @@
 | 2026-08-23T19:03:21.190722Z | `auto-c0049-017` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T18:44:10.432066Z | `auto-c0035-007` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T18:18:06.278937Z | `auto-c0035-004` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8008387 |
-| 2026-08-23T17:46:56.798184Z | `auto-c0035-003` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
