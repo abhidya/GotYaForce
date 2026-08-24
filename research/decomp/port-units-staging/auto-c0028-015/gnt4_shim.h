@@ -138,3 +138,12 @@ extern int zz_006dbe0_();
 extern int zz_006dee8_();
 extern int zz_00b22f4_();
 extern int zz_00c3be0_();
+
+/* ==== REGISTRY (advisory): previous units of this program compiled with
+   the typings below. Verify each against THIS unit's use sites before
+   adopting it; you are free to disagree -- a reasoned disagreement is
+   wanted data. ==== */
+/* extern void zz_006a3d0_(); */
+/* extern void zz_006a668_(); */
+/* extern void zz_006bf80_(); */
+/* extern void zz_00b22f4_(); */
