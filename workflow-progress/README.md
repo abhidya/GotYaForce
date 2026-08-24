@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T00:49:59.114356Z - machine-written, do not edit.*
+*Generated 2026-08-24T01:19:29.218320Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 52/1396 settled (3 green, 49 staged) |
 | **Retries outstanding** | 14 |
 | **Untouched** | 1327 |
-| **Last transition** | 2026-08-24T00:49:59.114356Z |
+| **Last transition** | 2026-08-24T01:19:29.218320Z |
 | **Last green** | 2026-08-23T23:11:48.369042Z (`auto-c0028-018`) |
 | **Last product commit** | `f2554addc211cdc440fd2a241b42742941467aad` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T01:19:29.218320Z | `auto-c0035-004` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80047aa |
 | 2026-08-24T00:49:59.114356Z | `auto-c0029-012` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-24T00:26:17.588659Z | `auto-c0029-002` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-24T00:01:19.489860Z | `auto-c0029-001` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0197ad8_ |
@@ -74,4 +75,3 @@
 | 2026-08-23T12:46:32.213130Z | `auto-c0011-004` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T12:42:25.910430Z | `auto-c0053-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T12:21:27.193973Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-23T12:21:24.196267Z | `auto-c0053-013` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_00097b4_ |

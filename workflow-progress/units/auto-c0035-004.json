@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0035-004",
   "unit_id": "auto-c0035-004",
-  "timestamp": "2026-08-23T18:18:06.278937Z",
-  "run_id": "2026-08-23T13:03:30.528559Z",
+  "timestamp": "2026-08-24T01:19:29.218320Z",
+  "run_id": "2026-08-23T22:32:58.325044Z",
   "result": "gate_failed",
   "stage": "assembly",
-  "attempt": 2,
-  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80083874 owner/variant pair at auto-c0035-004/gnt4_shim.h",
+  "attempt": 3,
+  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80047aa4 owner/variant pair at auto-c0035-004/gnt4_shim.h",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -20,65 +20,66 @@
       {
         "iteration": 1,
         "stage": "compile",
-        "error_count": 2,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-004\\header-attempt2-iter0.h",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0035-004.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_qruf14ky\\unit.o'' failed (returned 1)",
-          "unit.c:120:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_a0qznyt1\\unit.o'' failed (returned 1)",
+          "unit.c:120:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:77:33: error: use of undeclared identifier 'FUN_80047aa4'; did you mean 'FUN_800452a0'?"
         ],
-        "fingerprint": "0a29f9c4aae795616ad6bb09712da2391ad943333fe8f258fad0d20de0ef7d96"
+        "fingerprint": "13371ca025cb9fd8d6efc7a45f839d035bc527ba9f5858462ee0faa237c20a1d"
       }
     ],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0033-005",
-        "auto-c0033-011",
-        "auto-c0035-001",
-        "auto-c0035-003",
+        "auto-c0028-016",
+        "auto-c0029-014",
+        "auto-c0019-002",
+        "auto-c0028-018",
         "auto-c0035-004"
       ],
       "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": "FUN_80083874",
+          "symbol": "FUN_80047aa4",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0033-005",
-            "auto-c0033-011",
-            "auto-c0035-001",
-            "auto-c0035-003",
+            "auto-c0019-002",
+            "auto-c0028-016",
+            "auto-c0028-018",
+            "auto-c0029-014",
             "auto-c0035-004"
           ],
           "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80083874 owner/variant pair at auto-c0035-004/gnt4_shim.h"
+          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80047aa4 owner/variant pair at auto-c0035-004/gnt4_shim.h"
         }
       ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80083874 owner/variant pair at auto-c0035-004/gnt4_shim.h",
+      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80047aa4 owner/variant pair at auto-c0035-004/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0035-004",
-        "sha256": "07ea62cd48ae535397a206ec4c51ba3e5a5c675681b3180fc1f6056d23a86b7c"
+        "sha256": "fce72e61b009d6d3a9cfd16f4f2923c9b06e07fd0fd0ba847f3447c8ca875f18"
       },
       "expected_candidate": {
         "name": "auto-c0035-004",
-        "sha256": "07ea62cd48ae535397a206ec4c51ba3e5a5c675681b3180fc1f6056d23a86b7c"
+        "sha256": "fce72e61b009d6d3a9cfd16f4f2923c9b06e07fd0fd0ba847f3447c8ca875f18"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
+      "driver_rev": "c53747bd698afb80f431280ac61ae4fe96d68c50",
       "prompt_version": "3",
-      "registry_version": "78"
+      "registry_version": "89"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 2,
+    "attempts": 3,
     "symbol_set": [
       "CONCAT44",
       "DAT_80336560",
@@ -151,66 +152,67 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 78,
-    "model_requests": 5,
+    "registry_version_used": 89,
+    "model_requests": 6,
     "rounds": [
       {
         "iteration": 1,
         "stage": "compile",
-        "error_count": 2,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0035-004\\header-attempt2-iter0.h",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0035-004.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_qruf14ky\\unit.o'' failed (returned 1)",
-          "unit.c:120:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_a0qznyt1\\unit.o'' failed (returned 1)",
+          "unit.c:120:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:77:33: error: use of undeclared identifier 'FUN_80047aa4'; did you mean 'FUN_800452a0'?"
         ],
-        "fingerprint": "0a29f9c4aae795616ad6bb09712da2391ad943333fe8f258fad0d20de0ef7d96"
+        "fingerprint": "13371ca025cb9fd8d6efc7a45f839d035bc527ba9f5858462ee0faa237c20a1d"
       }
     ],
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "513b7bcd7d65f31ebbd78009ba2a9fc2c8850793",
+      "driver_rev": "c53747bd698afb80f431280ac61ae4fe96d68c50",
       "prompt_version": "3",
-      "registry_version": "78"
+      "registry_version": "89"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false,
-    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80083874 owner/variant pair at auto-c0035-004/gnt4_shim.h",
+    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80047aa4 owner/variant pair at auto-c0035-004/gnt4_shim.h",
     "last_stage": "assembly",
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0033-005",
-        "auto-c0033-011",
-        "auto-c0035-001",
-        "auto-c0035-003",
+        "auto-c0028-016",
+        "auto-c0029-014",
+        "auto-c0019-002",
+        "auto-c0028-018",
         "auto-c0035-004"
       ],
       "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": "FUN_80083874",
+          "symbol": "FUN_80047aa4",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0033-005",
-            "auto-c0033-011",
-            "auto-c0035-001",
-            "auto-c0035-003",
+            "auto-c0019-002",
+            "auto-c0028-016",
+            "auto-c0028-018",
+            "auto-c0029-014",
             "auto-c0035-004"
           ],
           "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80083874 owner/variant pair at auto-c0035-004/gnt4_shim.h"
+          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80047aa4 owner/variant pair at auto-c0035-004/gnt4_shim.h"
         }
       ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80083874 owner/variant pair at auto-c0035-004/gnt4_shim.h",
+      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_80047aa4 owner/variant pair at auto-c0035-004/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0035-004",
-        "sha256": "07ea62cd48ae535397a206ec4c51ba3e5a5c675681b3180fc1f6056d23a86b7c"
+        "sha256": "fce72e61b009d6d3a9cfd16f4f2923c9b06e07fd0fd0ba847f3447c8ca875f18"
       },
       "expected_candidate": {
         "name": "auto-c0035-004",
-        "sha256": "07ea62cd48ae535397a206ec4c51ba3e5a5c675681b3180fc1f6056d23a86b7c"
+        "sha256": "fce72e61b009d6d3a9cfd16f4f2923c9b06e07fd0fd0ba847f3447c8ca875f18"
       },
       "attempt_cleanup": "removed"
     }
@@ -230,6 +232,14 @@
       "stage": "assembly",
       "attempt": 2,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80083874 owner/variant pair at auto-c0035-004/gnt4_shim.h",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-24T01:19:29.218320Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 3,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80047aa4 owner/variant pair at auto-c0035-004/gnt4_shim.h",
       "product_commit": null
     }
   ]
