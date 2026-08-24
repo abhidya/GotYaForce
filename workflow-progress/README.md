@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T14:31:03.822380Z - machine-written, do not edit.*
+*Generated 2026-08-24T14:51:41.980469Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 66/1396 settled (3 green, 63 staged) |
+| **Queue progress** | 67/1396 settled (3 green, 64 staged) |
 | **Retries outstanding** | 17 |
-| **Untouched** | 1309 |
-| **Last transition** | 2026-08-24T14:31:03.822380Z |
-| **Last green** | 2026-08-24T14:31:03.822380Z (`auto-c0031-015`) |
-| **Last product commit** | `a41d8ee78d7c744c762a252b2f6372330103150d` |
+| **Untouched** | 1308 |
+| **Last transition** | 2026-08-24T14:51:41.980469Z |
+| **Last green** | 2026-08-24T14:51:41.980469Z (`auto-c0035-009`) |
+| **Last product commit** | `69bd1a525e6d666cd41d45e1efb62ca72970d087` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T14:51:41.980469Z | `auto-c0035-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T14:31:03.822380Z | `auto-c0031-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T14:11:08.630942Z | `auto-c0029-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T13:51:39.341560Z | `auto-c0025-003` | gate_failed | wasm-link | 1 | not linked: ing: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parenthe |
@@ -70,4 +71,3 @@
 | 2026-08-23T22:00:55.895283Z | `auto-c0053-012` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801b9ad |
 | 2026-08-23T21:26:21.692805Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T21:25:09.016615Z | `auto-c0050-008` | gate_failed | wasm-link | 2 | not linked: unit.c:75:29: error: too many arguments to function call, expected 1, have 16 unit.c:78:21: error: |
-| 2026-08-23T20:14:46.912010Z | `auto-c0050-007` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |

@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "unit": "auto-c0035-009",
+  "unit_id": "auto-c0035-009",
+  "timestamp": "2026-08-24T14:51:41.980469Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 1,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "69bd1a525e6d666cd41d45e1efb62ca72970d087",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
+  "product_commit_failed": false,
+  "oracle_summary": "compile-only (UNVERIFIED)",
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": "compile_only",
+  "extra": {
+    "transition_id": "1e7f4f5b7b514f03865b42245332422e",
+    "transition_timestamp": "2026-08-24T14:51:41.980469Z",
+    "transition_run_id": "2026-08-24T01:57:30.243221Z",
+    "promotion_transaction_id": "cbb21b1d84474001b351157c53afd8a2",
+    "candidate_sha256": "65f2ee9f8f4df82c5d007e563ff02c465432b9f31aba3c6eca7b3a93a5ce1038"
+  },
+  "driver_record": {
+    "status": "green",
+    "attempts": 1,
+    "symbol_set": [
+      "FUN_80134514",
+      "FUN_80134580",
+      "FUN_801345bc",
+      "FUN_80134604",
+      "FUN_80134628",
+      "FUN_8013464c",
+      "FUN_80134670",
+      "FUN_80134694",
+      "code",
+      "undefined4",
+      "zz_010b2f4_",
+      "zz_010b7ac_",
+      "zz_010bd10_",
+      "zz_010c220_",
+      "zz_010c590_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 108,
+    "model_requests": 1,
+    "error": null,
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "69bd1a525e6d666cd41d45e1efb62ca72970d087",
+    "pushed": true,
+    "tier": "compile_only",
+    "last_stage": "commit",
+    "promotion_transaction_id": "cbb21b1d84474001b351157c53afd8a2",
+    "promotion_transition_id": "1e7f4f5b7b514f03865b42245332422e",
+    "candidate_sha256": "65f2ee9f8f4df82c5d007e563ff02c465432b9f31aba3c6eca7b3a93a5ce1038"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-24T14:51:41.980469Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 1,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "69bd1a525e6d666cd41d45e1efb62ca72970d087"
+    }
+  ]
+}
