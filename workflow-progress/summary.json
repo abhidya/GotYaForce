@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-24T03:47:52.751220Z",
+  "generated_at": "2026-08-24T03:51:13.081522Z",
   "run_id": "2026-08-24T01:57:30.243221Z",
   "total_units": 1396,
   "green": 3,
@@ -10,19 +10,19 @@
   "deferred": 0,
   "structural_ineligible": 3,
   "active": 0,
-  "total_attempts": 133,
-  "transitions_last_hour": 4,
+  "total_attempts": 134,
+  "transitions_last_hour": 5,
   "greens_last_hour": 0,
   "last_green_at": "2026-08-24T01:56:49.350787Z",
   "last_green_unit": "auto-c0049-018",
   "last_product_commit": "99e0e821b52a71bc515f7f28afdf99914b23b21f",
   "repeated_failure_classes": [
     [
-      "assembly:assembly gate link failed before promotion: _start_em_asm --",
-      2
+      "artifact-install:artifact install refused after assembly pass: legacy revoked",
+      3
     ],
     [
-      "artifact-install:artifact install refused after assembly pass: legacy revoked",
+      "assembly:assembly gate link failed before promotion: _start_em_asm --",
       2
     ]
   ],
