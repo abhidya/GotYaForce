@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T09:57:52.169712Z - machine-written, do not edit.*
+*Generated 2026-08-24T10:26:29.795376Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 59/1396 settled (3 green, 56 staged) |
+| **Queue progress** | 60/1396 settled (3 green, 57 staged) |
 | **Retries outstanding** | 14 |
-| **Untouched** | 1320 |
-| **Last transition** | 2026-08-24T09:57:52.169712Z |
-| **Last green** | 2026-08-24T09:57:52.169712Z (`auto-c0046-001`) |
-| **Last product commit** | `961b8311f322a4ae5c958e281d30c4c86f149091` |
+| **Untouched** | 1319 |
+| **Last transition** | 2026-08-24T10:26:29.795376Z |
+| **Last green** | 2026-08-24T10:26:29.795376Z (`auto-c0019-013`) |
+| **Last product commit** | `72bc62e52c4f809f88709a11cf7dd237f60faa5e` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T10:26:29.795376Z | `auto-c0019-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T09:57:52.169712Z | `auto-c0046-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T09:54:03.175978Z | `auto-c0010-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T09:49:53.239020Z | `auto-c0043-007` | gate_failed | wasm-link | 1 | not linked: .\gnt4_shim.h:209:20: error: expected ';' after top level declarator unit.c:102:34: error: use of  |
@@ -70,4 +71,3 @@
 | 2026-08-23T17:42:34.118364Z | `auto-c0035-001` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T17:38:44.853905Z | `auto-c0033-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T17:14:21.333532Z | `auto-c0033-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-23T16:51:32.849153Z | `auto-c0029-014` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
