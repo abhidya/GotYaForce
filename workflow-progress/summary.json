@@ -1,28 +1,28 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-24T03:53:07.683055Z",
+  "generated_at": "2026-08-24T03:56:32.353300Z",
   "run_id": "2026-08-24T01:57:30.243221Z",
   "total_units": 1396,
   "green": 3,
-  "staged": 50,
-  "retryable": 14,
+  "staged": 51,
+  "retryable": 13,
   "untouched": 1326,
   "deferred": 0,
   "structural_ineligible": 3,
   "active": 0,
-  "total_attempts": 135,
-  "transitions_last_hour": 5,
-  "greens_last_hour": 0,
-  "last_green_at": "2026-08-24T01:56:49.350787Z",
-  "last_green_unit": "auto-c0049-018",
-  "last_product_commit": "99e0e821b52a71bc515f7f28afdf99914b23b21f",
+  "total_attempts": 136,
+  "transitions_last_hour": 6,
+  "greens_last_hour": 1,
+  "last_green_at": "2026-08-24T03:56:26.710331Z",
+  "last_green_unit": "auto-c0028-015",
+  "last_product_commit": "d23350b7546f3785400195b277e91f0c2dafb15d",
   "repeated_failure_classes": [
     [
       "artifact-install:artifact install refused after assembly pass: legacy revoked",
       3
     ]
   ],
-  "health": "active_no_green",
+  "health": "healthy_progress",
   "machine": {
     "workflow_state": "running",
     "driver_status": "running",
