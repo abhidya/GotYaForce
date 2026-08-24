@@ -1,26 +1,31 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-24T01:57:00.051943Z - machine-written, do not edit.*
+*Generated 2026-08-24T02:19:14.462630Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 53/1396 settled (3 green, 50 staged) |
 | **Retries outstanding** | 13 |
 | **Untouched** | 1327 |
-| **Last transition** | 2026-08-24T01:57:00.051943Z |
+| **Last transition** | 2026-08-24T02:19:14.462630Z |
 | **Last green** | 2026-08-24T01:56:49.350787Z (`auto-c0049-018`) |
 | **Last product commit** | `99e0e821b52a71bc515f7f28afdf99914b23b21f` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
+
+**Repeated recent failure classes**
+
+- `assembly:assembly gate canonicalize failed before promotion: owner_va` x2
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T02:19:14.462630Z | `auto-c0050-006` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_01a4a40_ |
 | 2026-08-24T01:57:00.051943Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-24T01:56:49.350787Z | `auto-c0049-018` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T01:19:29.218320Z | `auto-c0035-004` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80047aa |
@@ -70,4 +75,3 @@
 | 2026-08-23T12:55:32.774481Z | `auto-c0011-012` | gate_failed | artifact-install | 2 | artifact install refused after assembly pass: artifact preimage has no eligible revoked lifecycle |
 | 2026-08-23T12:50:15.976235Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T12:50:13.219849Z | `auto-c0011-011` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
-| 2026-08-23T12:46:32.213130Z | `auto-c0011-004` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
