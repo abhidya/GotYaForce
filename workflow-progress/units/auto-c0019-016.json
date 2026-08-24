@@ -1,0 +1,211 @@
+{
+  "schema": 1,
+  "unit": "auto-c0019-016",
+  "unit_id": "auto-c0019-016",
+  "timestamp": "2026-08-24T11:25:50.934608Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "result": "gate_failed",
+  "stage": "wasm-link",
+  "attempt": 1,
+  "detail": "not linked: link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: cCameraManager__HasCamera_cBaseCamera\n(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0019-016.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_g5lb6hkz\\unit.o'' failed (returned 1)",
+          "unit.c:171:15: error: use of undeclared identifier 'FUN_80089eb4'; did you mean 'FUN_800c03b4'?",
+          "unit.c:172:15: error: use of undeclared identifier 'FUN_80089f28'",
+          "unit.c:173:15: error: use of undeclared identifier 'FUN_80089f9c'"
+        ],
+        "fingerprint": "0eadaf0eab215a7a2cd447b15d732c36cc993387787757789a6921125415d2c1"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 6,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0019-016\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp__zh_u0s3\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_0005984_'",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_00088a4_'",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_0008924_'",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_0008948_'",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_0008970_'"
+        ],
+        "fingerprint": "af92eb594fd54a6c75ec31d7f2130e8eee9dd2c85ffd0c59256c34764c760d5f"
+      },
+      {
+        "iteration": 3,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0019-016\\header-attempt1-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_n17eip__\\unit.o'' failed (returned 1)",
+          "unit.c:155:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "3b221b644603d4a90b78b8d584c8281fda1f479918e04b60303b8cb79466dafb"
+      },
+      {
+        "iteration": 4,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0019-016\\header-attempt1-iter3.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: cCameraManager__HasCamera_cBaseCamera"
+        ],
+        "fingerprint": "e6cae44a7d51ce0e113602323ce5bb768f4d791d612705191d44619d02ca405e"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "101"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "DAT_80301cf0",
+      "DAT_803bb470",
+      "DAT_803c7380",
+      "FUN_800c01c8",
+      "FUN_800c020c",
+      "FUN_800c028c",
+      "FUN_800c0358",
+      "FUN_800c0390",
+      "FUN_800c03b4",
+      "FUN_800c03fc",
+      "FUN_800c0454",
+      "PTR_DAT_80433930",
+      "PTR_DAT_80433940",
+      "byte",
+      "cCameraManager__HasCamera_cBaseCamera",
+      "uint",
+      "ulonglong",
+      "undefined",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0005984_",
+      "zz_00088a4_",
+      "zz_0008924_",
+      "zz_0008948_",
+      "zz_0008970_",
+      "zz_0008b58_",
+      "zz_0008cf4_",
+      "zz_0040910_",
+      "zz_0040b94_",
+      "zz_0087814_",
+      "zz_0087cf0_",
+      "zz_0089554_",
+      "zz_0089658_",
+      "zz_0089898_",
+      "zz_0089c00_",
+      "zz_008a16c_",
+      "zz_008c0dc_",
+      "zz_008c104_",
+      "zz_008c12c_",
+      "zz_00ff618_",
+      "zz_01978d0_",
+      "zz_01ae8a8_",
+      "zz_01b1f10_",
+      "zz_01b1fb8_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 101,
+    "model_requests": 3,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0019-016.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_g5lb6hkz\\unit.o'' failed (returned 1)",
+          "unit.c:171:15: error: use of undeclared identifier 'FUN_80089eb4'; did you mean 'FUN_800c03b4'?",
+          "unit.c:172:15: error: use of undeclared identifier 'FUN_80089f28'",
+          "unit.c:173:15: error: use of undeclared identifier 'FUN_80089f9c'"
+        ],
+        "fingerprint": "0eadaf0eab215a7a2cd447b15d732c36cc993387787757789a6921125415d2c1"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 6,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0019-016\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp__zh_u0s3\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_0005984_'",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_00088a4_'",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_0008924_'",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_0008948_'",
+          "gnt4_shim.h:*: error: conflicting types for 'zz_0008970_'"
+        ],
+        "fingerprint": "af92eb594fd54a6c75ec31d7f2130e8eee9dd2c85ffd0c59256c34764c760d5f"
+      },
+      {
+        "iteration": 3,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0019-016\\header-attempt1-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_n17eip__\\unit.o'' failed (returned 1)",
+          "unit.c:155:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "3b221b644603d4a90b78b8d584c8281fda1f479918e04b60303b8cb79466dafb"
+      },
+      {
+        "iteration": 4,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0019-016\\header-attempt1-iter3.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: cCameraManager__HasCamera_cBaseCamera"
+        ],
+        "fingerprint": "e6cae44a7d51ce0e113602323ce5bb768f4d791d612705191d44619d02ca405e"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "101"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "not linked: link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: cCameraManager__HasCamera_cBaseCamera\n(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+    "last_stage": "wasm-link",
+    "source_failure_id": "source-failure-c273c065d64e9e36eb3578ffcb32c8fb6c0382277db9cd7300e37e8d582b65c6"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-24T11:25:50.934608Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 1,
+      "detail": "not linked: link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: cCameraManager__HasCamera_cBaseCamera\n(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+      "product_commit": null
+    }
+  ]
+}
