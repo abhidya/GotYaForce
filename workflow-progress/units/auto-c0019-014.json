@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "unit": "auto-c0019-014",
+  "unit_id": "auto-c0019-014",
+  "timestamp": "2026-08-24T22:41:30.771202Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: Serving context 16384 < required 17388 and reload failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0019-014.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_b6_20j9i\\unit.o'' failed (returned 1)",
+          "unit.c:167:33: error: use of undeclared identifier 'FUN_80047aa4'"
+        ],
+        "fingerprint": "96cf15a57eba0dc9affd852149df08491a4eef1094d4495f25bcff76272ade0f"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "132"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "CONCAT44",
+      "FUN_800bf24c",
+      "FUN_800bf26c",
+      "FUN_800bf530",
+      "FUN_800bf584",
+      "FUN_800bf6bc",
+      "FUN_800bf824",
+      "FUN_800bf844",
+      "__gnt4_bitcast_f64",
+      "code",
+      "gnt4_PSMTXConcat_bl",
+      "gnt4_PSMTXRotRad_bl",
+      "gnt4_PSMTXScale_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006f98_",
+      "zz_0007030_",
+      "zz_00076d0_",
+      "zz_0007c54_",
+      "zz_0007cac_",
+      "zz_00097b4_",
+      "zz_00660e8_",
+      "zz_0088aa0_",
+      "zz_0088e50_",
+      "zz_0089100_",
+      "zz_00bf40c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 131,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0019-014.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_b6_20j9i\\unit.o'' failed (returned 1)",
+          "unit.c:167:33: error: use of undeclared identifier 'FUN_80047aa4'"
+        ],
+        "fingerprint": "96cf15a57eba0dc9affd852149df08491a4eef1094d4495f25bcff76272ade0f"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "132"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: Serving context 16384 < required 17388 and reload failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-7373d3687a6454b6d01b24e66c4a474676b26d390e998c80449477ad28d9548e"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-24T22:41:30.771202Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: Serving context 16384 < required 17388 and reload failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
+      "product_commit": null
+    }
+  ]
+}
