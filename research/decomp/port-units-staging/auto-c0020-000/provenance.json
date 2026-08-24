@@ -1,0 +1,119 @@
+{
+  "unit": "auto-c0020-000",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "generated_at": "2026-08-24T23:35:02.909478Z",
+  "extractions": [
+    {
+      "file": "research/decomp/ghidra-export/chunk_0020.c",
+      "start": 1,
+      "end": 58,
+      "sha256": "97a8c426442525598d0c2e759a644036f9ddfa375f24d0f005b3f9788c266853"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0020.c",
+      "start": 62,
+      "end": 100,
+      "sha256": "07fb97b2c0b0178181ad880d6e3801d7c44cda800010566f664b2b9abb65e032"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0020.c",
+      "start": 104,
+      "end": 110,
+      "sha256": "7e7ede0a93e2062f06718129691bc17f4523e00dcf682e45f7ad238bebfe1d36"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0020.c",
+      "start": 114,
+      "end": 122,
+      "sha256": "f2a7f81f9be5a3c022329daecd8b711d8c9ada745fac6d5cc3d6a36dbe882205"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0020.c",
+      "start": 126,
+      "end": 180,
+      "sha256": "55f4ad0304bfa47c2a24052d61426aef6d5dcc52cdf65616cfbc56675d0c898b"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0020.c",
+      "start": 184,
+      "end": 210,
+      "sha256": "fd9d257eea0c3e6b631fb92dcf1fa63b22f00c1103cb33a0b14032813a6a7b3f"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0020.c",
+      "start": 214,
+      "end": 222,
+      "sha256": "91d8b9dec92412cf94b3da82d22d154f9b57f68a739873f9cf71cb916f42638f"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0020.c",
+      "start": 226,
+      "end": 258,
+      "sha256": "2b97617cad575a310f6707fd6ed82341b79a473fcbbced1e55a4c4862f705136"
+    }
+  ],
+  "extracted_sha256": "855615d7fec32344f395ed222c6a7e8ac7a125c101c7a61c07938d3e70a84974",
+  "transform": {
+    "name": "d5-fp-reinterpret",
+    "version": 1,
+    "sites": 0,
+    "sites_per_block": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "transformed_sha256": "855615d7fec32344f395ed222c6a7e8ac7a125c101c7a61c07938d3e70a84974",
+    "d5_residual_risk": 0
+  },
+  "exported_functions": [
+    "FUN_800c0b44",
+    "zz_00c0d0c_",
+    "zz_00c0d3c_",
+    "FUN_800c0e2c",
+    "FUN_800c0e80",
+    "FUN_800c0fb4",
+    "FUN_800c1038",
+    "FUN_800c1058"
+  ],
+  "compile_iterations": 2,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "model_requests": 1,
+  "verified": false,
+  "tier": "compile_only",
+  "allowed_extra_imports": [
+    "zz_0006f98_",
+    "zz_0007030_",
+    "zz_00076d0_",
+    "zz_0007c54_",
+    "zz_0007cac_",
+    "zz_00097b4_",
+    "zz_004cd24_",
+    "zz_00660e8_",
+    "zz_00679d0_",
+    "zz_006a474_",
+    "zz_006a5a4_",
+    "zz_006a750_",
+    "zz_006d144_",
+    "zz_006dbe0_",
+    "zz_006e1ac_",
+    "zz_0088aa0_",
+    "zz_0088e50_",
+    "zz_0089100_",
+    "zz_00fe668_"
+  ],
+  "registry": {
+    "version_used": 135,
+    "holdout": false,
+    "authoritative_injected": [],
+    "advisory_injected": 2
+  },
+  "oracle": {
+    "type": "compile_only",
+    "summary": "compile-only (UNVERIFIED)"
+  }
+}
