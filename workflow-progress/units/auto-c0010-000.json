@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "unit": "auto-c0010-000",
+  "unit_id": "auto-c0010-000",
+  "timestamp": "2026-08-24T17:14:47.639074Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0045ef4_ owner/variant pair at auto-c0010-000/gnt4_shim.h",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 9,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0010-000.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ino6a2fp\\unit.o'' failed (returned 1)",
+          "unit.c:127:38: error: use of undeclared identifier 'PTR_zz_0072144__802d4284'",
+          "unit.c:128:38: error: use of undeclared identifier 'PTR_LAB_802d4288'",
+          "unit.c:129:38: error: use of undeclared identifier 'PTR_LAB_802d428c'",
+          "unit.c:130:38: error: use of undeclared identifier 'PTR_LAB_802d4290'",
+          "unit.c:131:38: error: use of undeclared identifier 'PTR_LAB_802d4294'",
+          "unit.c:132:38: error: use of undeclared identifier 'PTR_LAB_802d4298'",
+          "unit.c:133:38: error: use of undeclared identifier 'PTR_LAB_802d429c'",
+          "unit.c:173:15: error: use of undeclared identifier 'PTR_LAB_802d42c0'"
+        ],
+        "fingerprint": "8be936b8158cc0c232a79c9b38bef2f8f70a4ec734892da1cd08c07fcdae64b5"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0046-000",
+        "auto-c0052-016",
+        "auto-c0053-015",
+        "auto-c0057-008",
+        "auto-c0010-000"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": "zz_0045ef4_",
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0010-000",
+            "auto-c0046-000",
+            "auto-c0052-016",
+            "auto-c0053-015",
+            "auto-c0057-008"
+          ],
+          "variants": {},
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_0045ef4_ owner/variant pair at auto-c0010-000/gnt4_shim.h"
+        }
+      ],
+      "detail": "owner_variant_abi_incompatible: Clang rejected zz_0045ef4_ owner/variant pair at auto-c0010-000/gnt4_shim.h",
+      "candidate": {
+        "name": "auto-c0010-000",
+        "sha256": "07a1eccaf9319c31a060437fd35f6edf00a52ce97b20353e012eb41c17098227"
+      },
+      "expected_candidate": {
+        "name": "auto-c0010-000",
+        "sha256": "07a1eccaf9319c31a060437fd35f6edf00a52ce97b20353e012eb41c17098227"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "120"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "DAT_802bae60",
+      "DAT_802bc080",
+      "DAT_802be960",
+      "DAT_802bf040",
+      "DAT_802d42a0",
+      "DAT_802d42a8",
+      "DAT_802d42ac",
+      "DAT_802d42d0",
+      "DAT_802d4478",
+      "DAT_802d46e0",
+      "DAT_803c4d94",
+      "DAT_80433870",
+      "FUN_80066838",
+      "FUN_800721d8",
+      "FUN_80072218",
+      "PTR_DAT_802d42b4",
+      "PTR_DAT_802d42bc",
+      "code",
+      "gnt4_PSMTXIdentity_bl",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "zz_0045ef4_",
+      "zz_004beb8_",
+      "zz_004cd24_",
+      "zz_004dbd8_",
+      "zz_00670dc_",
+      "zz_0067458_",
+      "zz_00677b0_",
+      "zz_006a474_",
+      "zz_006a5a4_",
+      "zz_006a750_",
+      "zz_006d144_",
+      "zz_006ed8c_",
+      "zz_0071d78_",
+      "zz_0071e4c_",
+      "zz_0071e98_",
+      "zz_0071f6c_",
+      "zz_0072048_",
+      "zz_0072144_",
+      "zz_00aedc0_",
+      "zz_00b22f4_",
+      "zz_00f036c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 120,
+    "model_requests": 1,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 9,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0010-000.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ino6a2fp\\unit.o'' failed (returned 1)",
+          "unit.c:127:38: error: use of undeclared identifier 'PTR_zz_0072144__802d4284'",
+          "unit.c:128:38: error: use of undeclared identifier 'PTR_LAB_802d4288'",
+          "unit.c:129:38: error: use of undeclared identifier 'PTR_LAB_802d428c'",
+          "unit.c:130:38: error: use of undeclared identifier 'PTR_LAB_802d4290'",
+          "unit.c:131:38: error: use of undeclared identifier 'PTR_LAB_802d4294'",
+          "unit.c:132:38: error: use of undeclared identifier 'PTR_LAB_802d4298'",
+          "unit.c:133:38: error: use of undeclared identifier 'PTR_LAB_802d429c'",
+          "unit.c:173:15: error: use of undeclared identifier 'PTR_LAB_802d42c0'"
+        ],
+        "fingerprint": "8be936b8158cc0c232a79c9b38bef2f8f70a4ec734892da1cd08c07fcdae64b5"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0046-000",
+        "auto-c0052-016",
+        "auto-c0053-015",
+        "auto-c0057-008",
+        "auto-c0010-000"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": "zz_0045ef4_",
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0010-000",
+            "auto-c0046-000",
+            "auto-c0052-016",
+            "auto-c0053-015",
+            "auto-c0057-008"
+          ],
+          "variants": {},
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_0045ef4_ owner/variant pair at auto-c0010-000/gnt4_shim.h"
+        }
+      ],
+      "detail": "owner_variant_abi_incompatible: Clang rejected zz_0045ef4_ owner/variant pair at auto-c0010-000/gnt4_shim.h",
+      "candidate": {
+        "name": "auto-c0010-000",
+        "sha256": "07a1eccaf9319c31a060437fd35f6edf00a52ce97b20353e012eb41c17098227"
+      },
+      "expected_candidate": {
+        "name": "auto-c0010-000",
+        "sha256": "07a1eccaf9319c31a060437fd35f6edf00a52ce97b20353e012eb41c17098227"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "120"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0045ef4_ owner/variant pair at auto-c0010-000/gnt4_shim.h",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-24T17:14:47.639074Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0045ef4_ owner/variant pair at auto-c0010-000/gnt4_shim.h",
+      "product_commit": null
+    }
+  ]
+}
