@@ -115,10 +115,7 @@ static inline uint countLeadingZeros(int x) {
 extern void   gnt4_PSVECSubtract_bl(float *a, float *b, float *out);
 extern undefined8 gnt4_PSVECAdd_bl(float *a, float *b, float *out);
 extern double gnt4_PSQUATDotProduct_bl(float *a, float *b);
-extern void   gnt4_PSQUATScale_bl(double s, float *v, float *out);
-
-#endif /* GNT4_SHIM_H */
-
+extern undefined8 gnt4_PSQUATScale_bl(double s, float *v, float *out);
 /* ---- SDK shims recovered from the corpus (2026-08-23) --------------------
  * The seed declared 6 gnt4_* functions; units referenced 66. The 60 with no
  * canonical declaration were invented per unit, so units disagreed and the
@@ -210,3 +207,5 @@ extern undefined8 gnt4_PSMTXCopy_bl(float *src, float *dst);
 extern undefined8 gnt4_PSMTXMultVec_bl(float *mtx, float *vec, float *out);
 extern undefined8 gnt4_PSMTXTrans_bl(double x, double y, double z, float *out);
 extern undefined8 gnt4_HSD_JObjReqAnimAll(int *jobj, double frame);
+
+#endif /* GNT4_SHIM_H */
