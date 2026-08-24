@@ -1,0 +1,91 @@
+{
+  "unit": "auto-c0019-018",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "generated_at": "2026-08-24T23:05:08.513809Z",
+  "extractions": [
+    {
+      "file": "research/decomp/ghidra-export/chunk_0019.c",
+      "start": 4359,
+      "end": 4366,
+      "sha256": "90d1f689c0e112ba361017f7e16ae7f8bddf9230ffcc6c305e916599d3e0460e"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0019.c",
+      "start": 4370,
+      "end": 4377,
+      "sha256": "13f2761296a78b49eab87811a53f9b5e154462a588607b59f9b28500481f8094"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0019.c",
+      "start": 4381,
+      "end": 4388,
+      "sha256": "86a71011d13567f1f753a59d1c20f6ec11fe396527d1563040f1978c734cba2a"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0019.c",
+      "start": 4392,
+      "end": 4399,
+      "sha256": "94bab116e00482298df691a9a61207ec2e5f18327460763e075569b49e6ef875"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0019.c",
+      "start": 4403,
+      "end": 4413,
+      "sha256": "93c6c7a6b6756286e48b66119e00c96565f91974ccef5667cddb1d3a8c52d9e2"
+    },
+    {
+      "file": "research/decomp/ghidra-export/chunk_0019.c",
+      "start": 4417,
+      "end": 4451,
+      "sha256": "45b018b5580794fdfea1cd6f94ab772863786b513fb709ed4edf30cc105a52d5"
+    }
+  ],
+  "extracted_sha256": "d79b54505eb99e4237e0536083432a80101d6590d1de6049349e996107620e70",
+  "transform": {
+    "name": "d5-fp-reinterpret",
+    "version": 1,
+    "sites": 0,
+    "sites_per_block": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "transformed_sha256": "d79b54505eb99e4237e0536083432a80101d6590d1de6049349e996107620e70",
+    "d5_residual_risk": 0
+  },
+  "exported_functions": [
+    "FUN_800c0938",
+    "FUN_800c095c",
+    "FUN_800c0980",
+    "FUN_800c09a4",
+    "FUN_800c09e0",
+    "FUN_800c0a2c"
+  ],
+  "compile_iterations": 1,
+  "model": null,
+  "model_requests": 0,
+  "verified": false,
+  "tier": "compile_only",
+  "allowed_extra_imports": [
+    "zz_004beb8_",
+    "zz_00679d0_",
+    "zz_006d144_",
+    "zz_006e1ac_",
+    "zz_010bd10_",
+    "zz_010c220_",
+    "zz_010c590_"
+  ],
+  "registry": {
+    "version_used": 134,
+    "holdout": false,
+    "authoritative_injected": [],
+    "advisory_injected": 4
+  },
+  "oracle": {
+    "type": "compile_only",
+    "summary": "compile-only (UNVERIFIED)"
+  }
+}
