@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T11:25:50.934608Z - machine-written, do not edit.*
+*Generated 2026-08-24T11:25:54.234067Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -9,8 +9,8 @@
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 60/1396 settled (3 green, 57 staged) |
 | **Retries outstanding** | 15 |
-| **Untouched** | 1318 |
-| **Last transition** | 2026-08-24T11:25:50.934608Z |
+| **Untouched** | 1317 |
+| **Last transition** | 2026-08-24T11:25:54.234067Z |
 | **Last green** | 2026-08-24T10:26:29.795376Z (`auto-c0019-013`) |
 | **Last product commit** | `72bc62e52c4f809f88709a11cf7dd237f60faa5e` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T11:25:54.234067Z | `auto-c0031-002` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_011243c_ declared void but their results are assigned; no header edit ca |
 | 2026-08-24T11:25:50.934608Z | `auto-c0019-016` | gate_failed | wasm-link | 1 | not linked: link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functi |
 | 2026-08-24T10:26:29.795376Z | `auto-c0019-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T09:57:52.169712Z | `auto-c0046-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-23T18:18:06.278937Z | `auto-c0035-004` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8008387 |
 | 2026-08-23T17:46:56.798184Z | `auto-c0035-003` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T17:42:34.118364Z | `auto-c0035-001` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-23T17:38:44.853905Z | `auto-c0033-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
