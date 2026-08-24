@@ -1,8 +1,8 @@
 {
   "registry_schema": 1,
   "program": "gnt4",
-  "version": 117,
-  "updated_at": "2026-08-24T16:17:38.697435Z",
+  "version": 119,
+  "updated_at": "2026-08-24T16:40:38.370561Z",
   "entries": {
     "fn:FUN_8010858c": {
       "kind": "prototype",
@@ -8945,9 +8945,34 @@
           "first_seen": "2026-08-23T04:37:14.207238Z",
           "last_seen": "2026-08-23T04:37:14.207238Z",
           "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:be28589dbed920d190b7091abd54818ebdc4f9c31c5591f976c192bbc9464aad",
+          "material_sha256": "c09e9825032ec3f5d280b44a4acfe37d660a2bb0db8bfaaf71214319ea153f15",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "8271dd9142f680c792f0c80f6089c4c44e63fc7cfa7f7353da57532a3e3f3872",
+          "ledger_key": "canonicalization_refused|zz_004beb8_|auto-c0043-017,auto-c0043-018,auto-c0046-000,auto-c0052-016,auto-c0052-017",
+          "class": "canonicalization_refused",
+          "symbol": "zz_004beb8_",
+          "units": [
+            "auto-c0043-017",
+            "auto-c0043-018",
+            "auto-c0046-000",
+            "auto-c0052-016",
+            "auto-c0052-017"
+          ],
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0052-017/gnt4_shim.h",
+          "variants": {},
+          "first_seen": "2026-08-24T16:37:46.548905Z",
+          "last_seen": "2026-08-24T16:37:46.548905Z",
+          "times_seen": 1
         }
       ],
-      "assembly_updated_version": 97,
+      "assembly_updated_version": 118,
       "source_updated_version": 91,
       "updated_version": 91
     },
@@ -15766,6 +15791,150 @@
       "derivation": "definition",
       "updated_version": 117,
       "source_updated_version": 117
+    },
+    "fn:FUN_801ba3c0": {
+      "kind": "prototype",
+      "symbol": "FUN_801ba3c0",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0053-015"
+      ],
+      "source_tiers": {
+        "auto-c0053-015": "compile_only"
+      },
+      "harvested_at": "2026-08-24T16:40:38.369561Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801ba3c0(int);",
+      "derivation": "definition",
+      "updated_version": 119,
+      "source_updated_version": 119
+    },
+    "fn:FUN_801ba3e4": {
+      "kind": "prototype",
+      "symbol": "FUN_801ba3e4",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0053-015"
+      ],
+      "source_tiers": {
+        "auto-c0053-015": "compile_only"
+      },
+      "harvested_at": "2026-08-24T16:40:38.369561Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801ba3e4(int);",
+      "derivation": "definition",
+      "updated_version": 119,
+      "source_updated_version": 119
+    },
+    "fn:FUN_801ba408": {
+      "kind": "prototype",
+      "symbol": "FUN_801ba408",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0053-015"
+      ],
+      "source_tiers": {
+        "auto-c0053-015": "compile_only"
+      },
+      "harvested_at": "2026-08-24T16:40:38.369561Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801ba408(int);",
+      "derivation": "definition",
+      "updated_version": 119,
+      "source_updated_version": 119
+    },
+    "fn:FUN_801ba42c": {
+      "kind": "prototype",
+      "symbol": "FUN_801ba42c",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0053-015"
+      ],
+      "source_tiers": {
+        "auto-c0053-015": "compile_only"
+      },
+      "harvested_at": "2026-08-24T16:40:38.369561Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801ba42c(int);",
+      "derivation": "definition",
+      "updated_version": 119,
+      "source_updated_version": 119
+    },
+    "fn:FUN_801ba450": {
+      "kind": "prototype",
+      "symbol": "FUN_801ba450",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0053-015"
+      ],
+      "source_tiers": {
+        "auto-c0053-015": "compile_only"
+      },
+      "harvested_at": "2026-08-24T16:40:38.369561Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801ba450(int);",
+      "derivation": "definition",
+      "updated_version": 119,
+      "source_updated_version": 119
+    },
+    "fn:FUN_801ba474": {
+      "kind": "prototype",
+      "symbol": "FUN_801ba474",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0053-015"
+      ],
+      "source_tiers": {
+        "auto-c0053-015": "compile_only"
+      },
+      "harvested_at": "2026-08-24T16:40:38.369561Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801ba474(void);",
+      "derivation": "definition",
+      "updated_version": 119,
+      "source_updated_version": 119
+    },
+    "fn:FUN_801ba4f8": {
+      "kind": "prototype",
+      "symbol": "FUN_801ba4f8",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0053-015"
+      ],
+      "source_tiers": {
+        "auto-c0053-015": "compile_only"
+      },
+      "harvested_at": "2026-08-24T16:40:38.369561Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801ba4f8(void);",
+      "derivation": "definition",
+      "updated_version": 119,
+      "source_updated_version": 119
+    },
+    "fn:FUN_801ba5e4": {
+      "kind": "prototype",
+      "symbol": "FUN_801ba5e4",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0053-015"
+      ],
+      "source_tiers": {
+        "auto-c0053-015": "compile_only"
+      },
+      "harvested_at": "2026-08-24T16:40:38.369561Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801ba5e4(void);",
+      "derivation": "definition",
+      "updated_version": 119,
+      "source_updated_version": 119
     }
   },
   "assembly_unattributed_conflicts": [
