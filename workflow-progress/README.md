@@ -1,26 +1,31 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T02:52:40.969627Z - machine-written, do not edit.*
+*Generated 2026-08-24T03:40:51.386594Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 53/1396 settled (3 green, 50 staged) |
-| **Retries outstanding** | 13 |
-| **Untouched** | 1327 |
-| **Last transition** | 2026-08-24T02:52:40.969627Z |
+| **Retries outstanding** | 14 |
+| **Untouched** | 1326 |
+| **Last transition** | 2026-08-24T03:40:51.386594Z |
 | **Last green** | 2026-08-24T01:56:49.350787Z (`auto-c0049-018`) |
 | **Last product commit** | `99e0e821b52a71bc515f7f28afdf99914b23b21f` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
 
+**Repeated recent failure classes**
+
+- `assembly:assembly gate link failed before promotion: _start_em_asm --` x2
+
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T03:40:51.386594Z | `auto-c0053-013` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-24T02:52:40.969627Z | `auto-c0053-012` | gate_failed | assembly | 3 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-24T02:19:14.462630Z | `auto-c0050-006` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_01a4a40_ |
 | 2026-08-24T01:57:00.051943Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -70,4 +75,3 @@
 | 2026-08-23T13:02:56.503413Z | `auto-c0019-001` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T12:59:12.516168Z | `auto-c0019-000` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T12:55:32.774481Z | `auto-c0011-012` | gate_failed | artifact-install | 2 | artifact install refused after assembly pass: artifact preimage has no eligible revoked lifecycle |
-| 2026-08-23T12:50:15.976235Z | `-` | stopped_at_boundary | machine | 0 |  |
