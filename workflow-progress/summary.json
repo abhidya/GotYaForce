@@ -1,28 +1,28 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-24T07:48:06.684147Z",
+  "generated_at": "2026-08-24T07:51:45.266375Z",
   "run_id": "2026-08-24T01:57:30.243221Z",
   "total_units": 1396,
   "green": 3,
-  "staged": 52,
+  "staged": 53,
   "retryable": 12,
-  "untouched": 1326,
+  "untouched": 1325,
   "deferred": 0,
   "structural_ineligible": 3,
   "active": 0,
-  "total_attempts": 141,
-  "transitions_last_hour": 2,
-  "greens_last_hour": 0,
-  "last_green_at": "2026-08-24T05:35:58.193403Z",
-  "last_green_unit": "auto-c0029-001",
-  "last_product_commit": "1a9596b41d776dd12001785ccb79e73b1477c0b8",
+  "total_attempts": 142,
+  "transitions_last_hour": 3,
+  "greens_last_hour": 1,
+  "last_green_at": "2026-08-24T07:51:39.861359Z",
+  "last_green_unit": "auto-c0019-009",
+  "last_product_commit": "c88cb161b5d9bf5b6ff63b2fe9a962dc99ef560a",
   "repeated_failure_classes": [
     [
       "assembly:assembly gate link failed before promotion: _start_em_asm --",
       2
     ]
   ],
-  "health": "active_no_green",
+  "health": "healthy_progress",
   "machine": {
     "workflow_state": "running",
     "driver_status": "running",
