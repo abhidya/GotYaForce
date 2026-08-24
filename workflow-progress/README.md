@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T09:54:03.175978Z - machine-written, do not edit.*
+*Generated 2026-08-24T09:57:52.169712Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 58/1396 settled (3 green, 55 staged) |
+| **Queue progress** | 59/1396 settled (3 green, 56 staged) |
 | **Retries outstanding** | 14 |
-| **Untouched** | 1321 |
-| **Last transition** | 2026-08-24T09:54:03.175978Z |
-| **Last green** | 2026-08-24T09:54:03.175978Z (`auto-c0010-010`) |
-| **Last product commit** | `aa33bc2f5768c4392c3e2f7cca8c5f75f0cdc725` |
+| **Untouched** | 1320 |
+| **Last transition** | 2026-08-24T09:57:52.169712Z |
+| **Last green** | 2026-08-24T09:57:52.169712Z (`auto-c0046-001`) |
+| **Last product commit** | `961b8311f322a4ae5c958e281d30c4c86f149091` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T09:57:52.169712Z | `auto-c0046-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T09:54:03.175978Z | `auto-c0010-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T09:49:53.239020Z | `auto-c0043-007` | gate_failed | wasm-link | 1 | not linked: .\gnt4_shim.h:209:20: error: expected ';' after top level declarator unit.c:102:34: error: use of  |
 | 2026-08-24T08:19:26.053800Z | `auto-c0040-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-23T17:38:44.853905Z | `auto-c0033-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T17:14:21.333532Z | `auto-c0033-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T16:51:32.849153Z | `auto-c0029-014` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-23T16:47:53.273547Z | `auto-c0029-012` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80047aa |
