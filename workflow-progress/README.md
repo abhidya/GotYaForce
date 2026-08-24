@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T21:16:39.755443Z - machine-written, do not edit.*
+*Generated 2026-08-24T21:18:56.272065Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 81/1396 settled (3 green, 78 staged) |
-| **Retries outstanding** | 24 |
-| **Untouched** | 1287 |
-| **Last transition** | 2026-08-24T21:16:39.755443Z |
+| **Retries outstanding** | 25 |
+| **Untouched** | 1286 |
+| **Last transition** | 2026-08-24T21:18:56.272065Z |
 | **Last green** | 2026-08-24T21:16:39.755443Z (`auto-c0019-005`) |
 | **Last product commit** | `2445616397fb579cc47c093768d5819965c08253` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T21:18:56.272065Z | `auto-c0019-006` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800bc2d |
 | 2026-08-24T21:16:39.755443Z | `auto-c0019-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T21:13:32.062605Z | `auto-c0019-004` | gate_failed | wasm-link | 1 | not linked: unit.c:22:47: error: use of undeclared identifier 'FLOAT_80438528' unit.c:23:15: error: use of und |
 | 2026-08-24T19:50:10.132660Z | `auto-c0010-012` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 17173 and reload failed: 409 Client Error: Conflict for url: |
@@ -70,4 +71,3 @@
 | 2026-08-24T03:51:12.947999Z | `auto-c0011-012` | gate_failed | artifact-install | 4 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-24T03:47:52.618706Z | `auto-c0011-011` | gate_failed | artifact-install | 4 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-24T03:44:25.939236Z | `auto-c0011-004` | gate_failed | artifact-install | 4 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
-| 2026-08-24T03:40:51.386594Z | `auto-c0053-013` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
