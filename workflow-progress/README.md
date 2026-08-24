@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T14:57:57.298914Z - machine-written, do not edit.*
+*Generated 2026-08-24T15:01:00.654400Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 69/1396 settled (3 green, 66 staged) |
+| **Queue progress** | 70/1396 settled (3 green, 67 staged) |
 | **Retries outstanding** | 17 |
-| **Untouched** | 1306 |
-| **Last transition** | 2026-08-24T14:57:57.298914Z |
-| **Last green** | 2026-08-24T14:57:57.298914Z (`auto-c0039-011`) |
-| **Last product commit** | `555b0574810ce2da5921d534efaadf7db6774461` |
+| **Untouched** | 1305 |
+| **Last transition** | 2026-08-24T15:01:00.654400Z |
+| **Last green** | 2026-08-24T15:01:00.654400Z (`auto-c0041-005`) |
+| **Last product commit** | `e608a42d928c5a7b589cdaadcb471ced83282585` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T15:01:00.654400Z | `auto-c0041-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T14:57:57.298914Z | `auto-c0039-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T14:54:49.790014Z | `auto-c0039-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T14:51:41.980469Z | `auto-c0035-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-23T22:36:47.690743Z | `auto-c0011-004` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-23T22:32:58.697290Z | `auto-c0053-013` | deferred | assembly | 1 | interrupted before a verdict; requeued |
 | 2026-08-23T22:00:59.312938Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-23T22:00:55.895283Z | `auto-c0053-012` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_801b9ad |
