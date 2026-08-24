@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0029-002",
   "unit_id": "auto-c0029-002",
-  "timestamp": "2026-08-24T00:26:17.588659Z",
-  "run_id": "2026-08-23T22:32:58.325044Z",
+  "timestamp": "2026-08-24T06:04:33.041275Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
   "result": "gate_failed",
   "stage": "assembly",
-  "attempt": 2,
-  "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+  "attempt": 3,
+  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0104f20_ owner/variant pair at auto-c0029-001/gnt4_shim.h",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -23,7 +23,7 @@
         "error_count": 9,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0029-002.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_3m61a7su\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_f9fjbq49\\unit.o'' failed (returned 1)",
           "unit.c:75:38: error: use of undeclared identifier 'PTR_zz_01052c8__80321f38'",
           "unit.c:76:38: error: use of undeclared identifier 'PTR_zz_0105240__80321f3c'",
           "unit.c:77:38: error: use of undeclared identifier 'PTR_zz_010528c__80321f40'",
@@ -33,59 +33,59 @@
           "unit.c:81:38: error: use of undeclared identifier 'PTR_zz_01052c0__80321f50'",
           "unit.c:82:38: error: use of undeclared identifier 'PTR_zz_01052c4__80321f54'"
         ],
-        "fingerprint": "71c339f09376164ddacca8ea4b4905bfcb571ed1004d564cd1fafa26733e371e"
+        "fingerprint": "d9beddeb456d85ec74f3d64bd723d48b7310a9b5440fee2a2cf8fba3e709cc01"
       }
     ],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0028-016",
-        "auto-c0029-014",
-        "auto-c0019-002",
         "auto-c0028-018",
+        "auto-c0049-018",
+        "auto-c0028-015",
+        "auto-c0029-001",
         "auto-c0029-002"
       ],
-      "stage": "link",
+      "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": "gnt4_PSVECMag_bl",
-          "class": "collision_stub",
+          "symbol": "zz_0104f20_",
+          "class": "canonicalization_refused",
           "units": [
-            "auto-c0019-002",
-            "auto-c0028-016",
+            "auto-c0028-015",
             "auto-c0028-018",
+            "auto-c0029-001",
             "auto-c0029-002",
-            "auto-c0029-014"
+            "auto-c0049-018"
           ],
           "variants": {},
-          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSVECMag_bl"
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_0104f20_ owner/variant pair at auto-c0029-001/gnt4_shim.h"
         }
       ],
-      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+      "detail": "owner_variant_abi_incompatible: Clang rejected zz_0104f20_ owner/variant pair at auto-c0029-001/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0029-002",
-        "sha256": "79ba20ce1b56ca2418b46722601ed98ecf57d444aca9efe44a10b5506eef7f65"
+        "sha256": "fdb7d67142a79a0ef32af7e7a206b8d93fd465ad56d2fbebc90f50201dcd5cf2"
       },
       "expected_candidate": {
         "name": "auto-c0029-002",
-        "sha256": "79ba20ce1b56ca2418b46722601ed98ecf57d444aca9efe44a10b5506eef7f65"
+        "sha256": "fdb7d67142a79a0ef32af7e7a206b8d93fd465ad56d2fbebc90f50201dcd5cf2"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "c53747bd698afb80f431280ac61ae4fe96d68c50",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
       "prompt_version": "3",
-      "registry_version": "89"
+      "registry_version": "94"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 2,
+    "attempts": 3,
     "symbol_set": [
       "DAT_802bbd94",
       "DAT_802bcfa8",
@@ -128,10 +128,10 @@
     "prompt_version": 3,
     "registry_holdout": true,
     "registry_deviations": [],
-    "registry_version_used": 89,
-    "error": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+    "registry_version_used": 94,
+    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0104f20_ owner/variant pair at auto-c0029-001/gnt4_shim.h",
     "interruptions": 1,
-    "model_requests": 3,
+    "model_requests": 4,
     "rounds": [
       {
         "iteration": 1,
@@ -139,7 +139,7 @@
         "error_count": 9,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0029-002.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_3m61a7su\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_f9fjbq49\\unit.o'' failed (returned 1)",
           "unit.c:75:38: error: use of undeclared identifier 'PTR_zz_01052c8__80321f38'",
           "unit.c:76:38: error: use of undeclared identifier 'PTR_zz_0105240__80321f3c'",
           "unit.c:77:38: error: use of undeclared identifier 'PTR_zz_010528c__80321f40'",
@@ -149,52 +149,52 @@
           "unit.c:81:38: error: use of undeclared identifier 'PTR_zz_01052c0__80321f50'",
           "unit.c:82:38: error: use of undeclared identifier 'PTR_zz_01052c4__80321f54'"
         ],
-        "fingerprint": "71c339f09376164ddacca8ea4b4905bfcb571ed1004d564cd1fafa26733e371e"
+        "fingerprint": "d9beddeb456d85ec74f3d64bd723d48b7310a9b5440fee2a2cf8fba3e709cc01"
       }
     ],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0028-016",
-        "auto-c0029-014",
-        "auto-c0019-002",
         "auto-c0028-018",
+        "auto-c0049-018",
+        "auto-c0028-015",
+        "auto-c0029-001",
         "auto-c0029-002"
       ],
-      "stage": "link",
+      "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": "gnt4_PSVECMag_bl",
-          "class": "collision_stub",
+          "symbol": "zz_0104f20_",
+          "class": "canonicalization_refused",
           "units": [
-            "auto-c0019-002",
-            "auto-c0028-016",
+            "auto-c0028-015",
             "auto-c0028-018",
+            "auto-c0029-001",
             "auto-c0029-002",
-            "auto-c0029-014"
+            "auto-c0049-018"
           ],
           "variants": {},
-          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSVECMag_bl"
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_0104f20_ owner/variant pair at auto-c0029-001/gnt4_shim.h"
         }
       ],
-      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mw2g7u1u\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+      "detail": "owner_variant_abi_incompatible: Clang rejected zz_0104f20_ owner/variant pair at auto-c0029-001/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0029-002",
-        "sha256": "79ba20ce1b56ca2418b46722601ed98ecf57d444aca9efe44a10b5506eef7f65"
+        "sha256": "fdb7d67142a79a0ef32af7e7a206b8d93fd465ad56d2fbebc90f50201dcd5cf2"
       },
       "expected_candidate": {
         "name": "auto-c0029-002",
-        "sha256": "79ba20ce1b56ca2418b46722601ed98ecf57d444aca9efe44a10b5506eef7f65"
+        "sha256": "fdb7d67142a79a0ef32af7e7a206b8d93fd465ad56d2fbebc90f50201dcd5cf2"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "c53747bd698afb80f431280ac61ae4fe96d68c50",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
       "prompt_version": "3",
-      "registry_version": "89"
+      "registry_version": "94"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false,
@@ -215,6 +215,14 @@
       "stage": "assembly",
       "attempt": 2,
       "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Use",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-24T06:04:33.041275Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 3,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0104f20_ owner/variant pair at auto-c0029-001/gnt4_shim.h",
       "product_commit": null
     }
   ]
