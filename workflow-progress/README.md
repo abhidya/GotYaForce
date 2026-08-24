@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T13:51:39.341560Z - machine-written, do not edit.*
+*Generated 2026-08-24T14:11:08.630942Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 64/1396 settled (3 green, 61 staged) |
+| **Queue progress** | 65/1396 settled (3 green, 62 staged) |
 | **Retries outstanding** | 17 |
-| **Untouched** | 1311 |
-| **Last transition** | 2026-08-24T13:51:39.341560Z |
-| **Last green** | 2026-08-24T12:30:28.410265Z (`auto-c0024-013`) |
-| **Last product commit** | `ccbd9e8590c433d16cd9d891c8b009c8c8921db9` |
+| **Untouched** | 1310 |
+| **Last transition** | 2026-08-24T14:11:08.630942Z |
+| **Last green** | 2026-08-24T14:11:08.630942Z (`auto-c0029-011`) |
+| **Last product commit** | `0b07a6fd76e6f3f88377945ccedd96073ac9c825` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T14:11:08.630942Z | `auto-c0029-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T13:51:39.341560Z | `auto-c0025-003` | gate_failed | wasm-link | 1 | not linked: ing: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parenthe |
 | 2026-08-24T12:30:28.410265Z | `auto-c0024-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T12:26:57.091581Z | `auto-c0021-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-23T21:25:09.016615Z | `auto-c0050-008` | gate_failed | wasm-link | 2 | not linked: unit.c:75:29: error: too many arguments to function call, expected 1, have 16 unit.c:78:21: error: |
 | 2026-08-23T20:14:46.912010Z | `auto-c0050-007` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T20:10:48.090603Z | `auto-c0050-006` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_01a452c_ |
-| 2026-08-23T19:48:57.311797Z | `auto-c0050-005` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
