@@ -483,6 +483,45 @@ async function drivePlayableRoute(cdp, url) {
   if (errors.length > 0 || networkErrors.length > 0) {
     throw new Error(`browser emitted runtime errors:\n${[...errors, ...networkErrors.map((error) => `network: ${error}`)].join("\n")}`);
   }
+  // Optional deep proof (GF_SMOKE_ROM_HIT=1): land a real combat hit and watch
+  // the ROM call counters rise past the boot gate's 256 — the moment a landed
+  // hit's damage is computed by the ported GameCube code. Opt-in so the default
+  // smoke stays free of combat-outcome nondeterminism.
+  if (process.env.GF_SMOKE_ROM_HIT === "1") {
+    const before = await evaluate(cdp, `window.__romDamage?.callCounts?.computeBaseDamage ?? -1`);
+    if (before < 0) throw new Error("ROM-wasm not live before the hit phase");
+    // The route above ends PAUSED (second post-resume pause) — a frozen sim
+    // lands no hits. Resume via the pause menu before fighting.
+    await tapEnter(cdp);
+    await waitForBattle(
+      cdp,
+      `window.__gf?.session?.paused === false && !document.querySelector(".gf-pause-overlay")`,
+      "battle resumed for the ROM hit phase",
+    );
+    const key = (code, vk, type) => cdp.send("Input.dispatchKeyEvent", {
+      type, key: code.replace("Key", "").toLowerCase(), code,
+      windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk,
+    });
+    // The CPU side attacks on its own; the player also holds lock-on + attack.
+    // ANY landed hit (either direction) computes damage through the seam.
+    await key("KeyU", 85, "keyDown");
+    await key("KeyK", 75, "keyDown");
+    try {
+      await waitForBattle(
+        cdp,
+        `(window.__romDamage?.callCounts?.computeBaseDamage ?? 0) > ${before}`,
+        "a landed hit computed by the ROM wasm",
+        180_000,
+      );
+    } finally {
+      await key("KeyK", 75, "keyUp");
+      await key("KeyU", 85, "keyUp");
+    }
+    const after = await evaluate(cdp, `window.__romDamage.callCounts.computeBaseDamage`);
+    process.stdout.write(`ROM combat hit PROVEN: computeBaseDamage ${before} -> ${after} during live battle
+`);
+  }
+
   // ROM-wasm proof: the ported damage-core unit must be LIVE (installed after
   // its 256-case fidelity gate) for the battle this smoke just played. The call
   // counts show how much of the session the ROM code actually served.
