@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T22:15:06.292061Z - machine-written, do not edit.*
+*Generated 2026-08-24T22:41:24.565340Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 85/1396 settled (3 green, 82 staged) |
-| **Retries outstanding** | 25 |
-| **Untouched** | 1282 |
-| **Last transition** | 2026-08-24T22:15:06.292061Z |
+| **Retries outstanding** | 26 |
+| **Untouched** | 1281 |
+| **Last transition** | 2026-08-24T22:41:24.565340Z |
 | **Last green** | 2026-08-24T22:15:06.292061Z (`auto-c0019-011`) |
 | **Last product commit** | `e25f8a3e77c3f901e74072b6557cd05db1758f6b` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T22:41:24.565340Z | `auto-c0019-012` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800be8e |
 | 2026-08-24T22:15:06.292061Z | `auto-c0019-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T21:50:16.436449Z | `auto-c0019-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T21:25:45.730585Z | `auto-c0019-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-24T06:04:33.041275Z | `auto-c0029-002` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0104f20_ |
 | 2026-08-24T05:35:58.193403Z | `auto-c0029-001` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T05:12:56.455725Z | `auto-c0029-000` | gate_failed | wasm-link | 3 | not linked: unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type ' |
-| 2026-08-24T03:56:26.710331Z | `auto-c0028-015` | staged | commit | 4 | compile-only staging artifact (UNVERIFIED, not integrated) |
