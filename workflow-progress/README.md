@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T21:13:32.062605Z - machine-written, do not edit.*
+*Generated 2026-08-24T21:16:39.755443Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 80/1396 settled (3 green, 77 staged) |
+| **Queue progress** | 81/1396 settled (3 green, 78 staged) |
 | **Retries outstanding** | 24 |
-| **Untouched** | 1288 |
-| **Last transition** | 2026-08-24T21:13:32.062605Z |
-| **Last green** | 2026-08-24T19:49:55.554497Z (`auto-c0010-009`) |
-| **Last product commit** | `cea3257f9b20c9c568c3b16eb9c5eb31ac0d252f` |
+| **Untouched** | 1287 |
+| **Last transition** | 2026-08-24T21:16:39.755443Z |
+| **Last green** | 2026-08-24T21:16:39.755443Z (`auto-c0019-005`) |
+| **Last product commit** | `2445616397fb579cc47c093768d5819965c08253` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T21:16:39.755443Z | `auto-c0019-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T21:13:32.062605Z | `auto-c0019-004` | gate_failed | wasm-link | 1 | not linked: unit.c:22:47: error: use of undeclared identifier 'FLOAT_80438528' unit.c:23:15: error: use of und |
 | 2026-08-24T19:50:10.132660Z | `auto-c0010-012` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 17173 and reload failed: 409 Client Error: Conflict for url: |
 | 2026-08-24T19:49:55.554497Z | `auto-c0010-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-24T03:47:52.618706Z | `auto-c0011-011` | gate_failed | artifact-install | 4 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-24T03:44:25.939236Z | `auto-c0011-004` | gate_failed | artifact-install | 4 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-24T03:40:51.386594Z | `auto-c0053-013` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
-| 2026-08-24T02:52:40.969627Z | `auto-c0053-012` | gate_failed | assembly | 3 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
