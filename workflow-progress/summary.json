@@ -1,27 +1,22 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-24T08:15:33.901739Z",
+  "generated_at": "2026-08-24T08:19:32.140756Z",
   "run_id": "2026-08-24T01:57:30.243221Z",
   "total_units": 1396,
   "green": 3,
-  "staged": 53,
+  "staged": 54,
   "retryable": 13,
-  "untouched": 1324,
+  "untouched": 1323,
   "deferred": 0,
   "structural_ineligible": 3,
   "active": 0,
-  "total_attempts": 143,
+  "total_attempts": 144,
   "transitions_last_hour": 4,
-  "greens_last_hour": 1,
-  "last_green_at": "2026-08-24T07:51:39.861359Z",
-  "last_green_unit": "auto-c0019-009",
-  "last_product_commit": "c88cb161b5d9bf5b6ff63b2fe9a962dc99ef560a",
-  "repeated_failure_classes": [
-    [
-      "assembly:assembly gate link failed before promotion: _start_em_asm --",
-      2
-    ]
-  ],
+  "greens_last_hour": 2,
+  "last_green_at": "2026-08-24T08:19:26.053800Z",
+  "last_green_unit": "auto-c0040-016",
+  "last_product_commit": "0f1989a766a3a4b3a2b2ed006db619fa5b2e126f",
+  "repeated_failure_classes": [],
   "health": "healthy_progress",
   "machine": {
     "workflow_state": "running",
