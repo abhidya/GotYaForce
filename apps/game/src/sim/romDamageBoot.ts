@@ -98,7 +98,14 @@ function fidelityGate(core: RomDamageCore, n: number): { ok: boolean; detail: st
       ] as [number, number, number],
       cpuHalvingEnabled: rnd() < 0.5,
     };
-    const basePower = 1 + Math.floor(rnd() * 400);
+    // Cover FRACTIONAL basePower, not just integers: in real combat
+    // combat.ts forms basePower as record.hpDamage * damageScale, and
+    // damageScale is routinely fractional (combo steps 1.08/1.22, charge tiers,
+    // projectile scales). An integer-only gate would certify wasm==TS while they
+    // diverge on exactly the inputs that occur in play (the ROM record field is
+    // u16, so the fraction is truncated on hardware and in the wasm).
+    const scale = [1, 1, 1.08, 1.22, 0.5, 1.5][Math.floor(rnd() * 6)]!;
+    const basePower = (1 + Math.floor(rnd() * 400)) * scale;
     const w = core.computeBaseDamage(att, def, basePower, ctx);
     const t = tsComputeBaseDamage(att, def, basePower, ctx);
     if (w !== t) {

@@ -258,6 +258,16 @@ export function computeBaseDamage(
   basePower: number,
   ctx: SourceDamageContext,
 ): number {
+  // The ROM record field at +0x00 is a 16-bit integer (the verified spec writes
+  // it with wU16 and reads 2 bytes), so `(float)*param_1` sees a u16 on hardware.
+  // combat.ts forms basePower as a FLOAT (record.hpDamage * damageScale, with
+  // fractional combo/charge/projectile scales), so coerce to the u16 record width
+  // here: the TS port and the ROM wasm unit (which writes wU16) then compute on
+  // the identical value, and both match the console. No-op for every integer
+  // caller, including the verified damage-core oracle (basePower 1..1000).
+  // Realistic damage is < 32768; the >32767 wrap/sign edge is out of the
+  // reachable domain and not modeled here.
+  basePower = basePower & 0xffff;
   if (romDamageImpl) return romDamageImpl.computeBaseDamage(attacker, defender, basePower, ctx);
   // Step 0 (6693-6695): fVar1 = (float)*param_1 = record hpDamage; gate `> FLOAT_80436f68` (0.0).
   if (!(basePower > 0)) return 0;
