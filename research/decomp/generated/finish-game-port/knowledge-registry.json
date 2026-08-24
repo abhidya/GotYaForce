@@ -1,8 +1,8 @@
 {
   "registry_schema": 1,
   "program": "gnt4",
-  "version": 122,
-  "updated_at": "2026-08-24T17:37:09.335135Z",
+  "version": 124,
+  "updated_at": "2026-08-24T18:22:27.157863Z",
   "entries": {
     "fn:FUN_8010858c": {
       "kind": "prototype",
@@ -8970,9 +8970,34 @@
           "first_seen": "2026-08-24T16:37:46.548905Z",
           "last_seen": "2026-08-24T16:37:46.548905Z",
           "times_seen": 1
+        },
+        {
+          "conflict_id": "assembly:e005f7e56fca8c8d4a91bc9f8b9235781de207b58d61caefc48cde8b66903962",
+          "material_sha256": "6701677e2c61b09240e69d830a785318520f1a8e4fed9987628ba4792bbd5c12",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "62110c43eec47d593fcd5b2dc674bf2c3a5233814f8922babaa9fe7427d10eaf",
+          "ledger_key": "canonicalization_refused|zz_004beb8_|auto-c0010-001,auto-c0010-002,auto-c0052-016,auto-c0053-015,auto-c0057-008",
+          "class": "canonicalization_refused",
+          "symbol": "zz_004beb8_",
+          "units": [
+            "auto-c0010-001",
+            "auto-c0010-002",
+            "auto-c0052-016",
+            "auto-c0053-015",
+            "auto-c0057-008"
+          ],
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0010-002/gnt4_shim.h",
+          "variants": {},
+          "first_seen": "2026-08-24T17:59:03.535246Z",
+          "last_seen": "2026-08-24T17:59:03.535246Z",
+          "times_seen": 1
         }
       ],
-      "assembly_updated_version": 118,
+      "assembly_updated_version": 123,
       "source_updated_version": 91,
       "updated_version": 91
     },
@@ -16186,12 +16211,42 @@
         "auto-c0010-001": "compile_only"
       },
       "harvested_at": "2026-08-24T17:37:09.332130Z",
-      "contested": false,
+      "contested": true,
       "conflicts": [],
       "declaration": "void zz_0072438_(int);",
       "derivation": "definition",
       "updated_version": 122,
-      "source_updated_version": 122
+      "source_updated_version": 122,
+      "assembly_conflicts": [
+        {
+          "conflict_id": "assembly:dc96d20f49dcee4604046798d6fc0461aa5f674765c8a4cc5254830bc8bbfd35",
+          "material_sha256": "d4b281307bbba891fe38b4d6d52f9f2e43a4e4a36763dbbf74a2d4e73c4d8f8c",
+          "evidence_domain": "assembly",
+          "behavioral_authority": false,
+          "injectable": false,
+          "resolution": "unresolved",
+          "ledger_schema": 1,
+          "ledger_sha256": "62110c43eec47d593fcd5b2dc674bf2c3a5233814f8922babaa9fe7427d10eaf",
+          "ledger_key": "canonicalization_refused|zz_0072438_|auto-c0010-001,auto-c0010-003,auto-c0052-016,auto-c0053-015,auto-c0057-008",
+          "class": "canonicalization_refused",
+          "symbol": "zz_0072438_",
+          "units": [
+            "auto-c0010-001",
+            "auto-c0010-003",
+            "auto-c0052-016",
+            "auto-c0053-015",
+            "auto-c0057-008"
+          ],
+          "detail": "owner_variant_abi_incompatible: Clang rejected zz_0072438_ owner/variant pair at auto-c0010-003/gnt4_shim.h",
+          "variants": {},
+          "first_seen": "2026-08-24T18:01:25.168115Z",
+          "last_seen": "2026-08-24T18:01:25.168115Z",
+          "times_seen": 1
+        }
+      ],
+      "assembly_only": false,
+      "behavioral_authority": false,
+      "assembly_updated_version": 123
     },
     "fn:zz_00724c8_": {
       "kind": "prototype",
@@ -16264,6 +16319,150 @@
       "derivation": "definition",
       "updated_version": 122,
       "source_updated_version": 122
+    },
+    "fn:zz_007320c_": {
+      "kind": "prototype",
+      "symbol": "zz_007320c_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0010-004"
+      ],
+      "source_tiers": {
+        "auto-c0010-004": "compile_only"
+      },
+      "harvested_at": "2026-08-24T18:22:27.156352Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_007320c_(int);",
+      "derivation": "definition",
+      "updated_version": 124,
+      "source_updated_version": 124
+    },
+    "fn:zz_0073330_": {
+      "kind": "prototype",
+      "symbol": "zz_0073330_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0010-004"
+      ],
+      "source_tiers": {
+        "auto-c0010-004": "compile_only"
+      },
+      "harvested_at": "2026-08-24T18:22:27.156352Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_0073330_(int);",
+      "derivation": "definition",
+      "updated_version": 124,
+      "source_updated_version": 124
+    },
+    "fn:zz_00734d8_": {
+      "kind": "prototype",
+      "symbol": "zz_00734d8_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0010-004"
+      ],
+      "source_tiers": {
+        "auto-c0010-004": "compile_only"
+      },
+      "harvested_at": "2026-08-24T18:22:27.156352Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_00734d8_(int);",
+      "derivation": "definition",
+      "updated_version": 124,
+      "source_updated_version": 124
+    },
+    "fn:zz_0073558_": {
+      "kind": "prototype",
+      "symbol": "zz_0073558_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0010-004"
+      ],
+      "source_tiers": {
+        "auto-c0010-004": "compile_only"
+      },
+      "harvested_at": "2026-08-24T18:22:27.156352Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_0073558_(int);",
+      "derivation": "definition",
+      "updated_version": 124,
+      "source_updated_version": 124
+    },
+    "fn:zz_0073594_": {
+      "kind": "prototype",
+      "symbol": "zz_0073594_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0010-004"
+      ],
+      "source_tiers": {
+        "auto-c0010-004": "compile_only"
+      },
+      "harvested_at": "2026-08-24T18:22:27.156352Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_0073594_(int);",
+      "derivation": "definition",
+      "updated_version": 124,
+      "source_updated_version": 124
+    },
+    "fn:zz_00735c4_": {
+      "kind": "prototype",
+      "symbol": "zz_00735c4_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0010-004"
+      ],
+      "source_tiers": {
+        "auto-c0010-004": "compile_only"
+      },
+      "harvested_at": "2026-08-24T18:22:27.156352Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_00735c4_(int);",
+      "derivation": "definition",
+      "updated_version": 124,
+      "source_updated_version": 124
+    },
+    "fn:zz_00735f4_": {
+      "kind": "prototype",
+      "symbol": "zz_00735f4_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0010-004"
+      ],
+      "source_tiers": {
+        "auto-c0010-004": "compile_only"
+      },
+      "harvested_at": "2026-08-24T18:22:27.156352Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_00735f4_(int);",
+      "derivation": "definition",
+      "updated_version": 124,
+      "source_updated_version": 124
+    },
+    "fn:zz_0073624_": {
+      "kind": "prototype",
+      "symbol": "zz_0073624_",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0010-004"
+      ],
+      "source_tiers": {
+        "auto-c0010-004": "compile_only"
+      },
+      "harvested_at": "2026-08-24T18:22:27.156352Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void zz_0073624_(int);",
+      "derivation": "definition",
+      "updated_version": 124,
+      "source_updated_version": 124
     }
   },
   "assembly_unattributed_conflicts": [
