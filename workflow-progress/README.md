@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T16:11:48.310710Z - machine-written, do not edit.*
+*Generated 2026-08-24T16:14:46.969617Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 73/1396 settled (3 green, 70 staged) |
+| **Queue progress** | 74/1396 settled (3 green, 71 staged) |
 | **Retries outstanding** | 17 |
-| **Untouched** | 1302 |
-| **Last transition** | 2026-08-24T16:11:48.310710Z |
-| **Last green** | 2026-08-24T16:11:48.310710Z (`auto-c0043-018`) |
-| **Last product commit** | `1f0a8a779cee2eb489ea15d064dedc431cde9570` |
+| **Untouched** | 1301 |
+| **Last transition** | 2026-08-24T16:14:46.969617Z |
+| **Last green** | 2026-08-24T16:14:46.969617Z (`auto-c0046-000`) |
+| **Last product commit** | `0275d1922070042f7cbcdecf1150583eba92ee22` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T16:14:46.969617Z | `auto-c0046-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T16:11:48.310710Z | `auto-c0043-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T15:43:31.798277Z | `auto-c0043-017` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T15:22:30.219454Z | `auto-c0043-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-23T22:50:46.664154Z | `auto-c0019-002` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T22:47:20.972951Z | `auto-c0019-000` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-23T22:43:58.554806Z | `auto-c0011-012` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
-| 2026-08-23T22:40:26.947973Z | `auto-c0011-011` | gate_failed | artifact-install | 3 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
