@@ -1,16 +1,16 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-24T06:04:33.041275Z - machine-written, do not edit.*
+*Generated 2026-08-24T07:16:45.427273Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 55/1396 settled (3 green, 52 staged) |
 | **Retries outstanding** | 12 |
 | **Untouched** | 1326 |
-| **Last transition** | 2026-08-24T06:04:33.041275Z |
+| **Last transition** | 2026-08-24T07:16:45.427273Z |
 | **Last green** | 2026-08-24T05:35:58.193403Z (`auto-c0029-001`) |
 | **Last product commit** | `1a9596b41d776dd12001785ccb79e73b1477c0b8` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T07:16:45.427273Z | `auto-c0029-012` | gate_failed | assembly | 3 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-24T06:04:33.041275Z | `auto-c0029-002` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0104f20_ |
 | 2026-08-24T05:35:58.193403Z | `auto-c0029-001` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T05:12:56.455725Z | `auto-c0029-000` | gate_failed | wasm-link | 3 | not linked: unit.c:112:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type ' |
@@ -70,4 +71,3 @@
 | 2026-08-23T14:06:46.079321Z | `auto-c0028-018` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0007030_ |
 | 2026-08-23T13:45:22.582156Z | `auto-c0028-017` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-23T13:41:38.443640Z | `auto-c0028-016` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-23T13:38:14.809236Z | `auto-c0028-015` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8010342 |
