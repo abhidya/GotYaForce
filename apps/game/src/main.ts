@@ -17,6 +17,7 @@
 // preserved (defined but dormant) so multiplayer can be wired next.
 
 import * as THREE from "three";
+import { bootRomDamage } from "./sim/romDamageBoot";
 
 import { type StageAssets } from "@gf/assets";
 import { startFixedStepLoop, startRenderLoop } from "@gf/core";
@@ -396,6 +397,16 @@ const ENABLE_RENDER_DEBUG = urlParams.has("debugRender") || urlParams.has("captu
 // once at startup, hidden by default; toggled with the backtick key or ?debugOverlay=1. See
 // apps/game/src/ui/hud/DebugOverlay.ts and research/tasks/attack-port/ATK-015-debug-overlay-fields.md.
 const debugOverlay: DebugOverlayHandle = createDebugOverlay(ui);
+
+// ROM-wasm damage core (the 1:1 port, live in the game): fetch + fidelity-gate
+// against the TS reference + install into sourceDamage's override seam.
+// Default ON; `?romwasm=0` forces the TS implementation.
+if (urlParams.get("romwasm") !== "0") {
+  void bootRomDamage().then((r) => {
+    if (!r.active) console.warn(`[rom-wasm] TS port active (${r.detail})`);
+  });
+}
+
 if (urlParams.has("debugOverlay")) debugOverlay.setVisible(true);
 
 const viewport = createThreeViewport(canvas, {

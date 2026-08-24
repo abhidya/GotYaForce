@@ -59,6 +59,19 @@ type FormulaData = {
 };
 const DATA = damageFormulaData as unknown as FormulaData;
 
+
+/** Per-hero curve/table counts — the valid selector domain for each curve family.
+ *  Index 0 = player tables, 1 = CPU tables (heroFlag != 0). */
+export function sourceDamageCurveCounts() {
+  return {
+    attHp: [DATA.attackerHpCurves_804335e8[0]!.curves.length, DATA.attackerHpCurves_804335e8[1]!.curves.length],
+    attForce: [DATA.attackerForceCurves_804335f0[0]!.curves.length, DATA.attackerForceCurves_804335f0[1]!.curves.length],
+    defRank: [DATA.defenseRankCurves_80433600[0]!.curves.length, DATA.defenseRankCurves_80433600[1]!.curves.length],
+    defHp: [DATA.defenderHpCurves_80433608[0]!.curves.length, DATA.defenderHpCurves_80433608[1]!.curves.length],
+    defForce: [DATA.defenderForceCurves_80433610[0]!.curves.length, DATA.defenderForceCurves_80433610[1]!.curves.length],
+  } as const;
+}
+
 /** ROM neutral-handicap table index. The +0x43a byte is 3 for "no handicap" (table[3]==1.0). */
 const HANDICAP_NEUTRAL_BYTE = 3;
 
@@ -151,6 +164,36 @@ export interface SourceDamageTarget {
 // Returns the canonical category 0..19 used to index the type-multiplier matrix.
 // =============================================================================
 
+// =============================================================================
+// ROM-wasm override seam. When the app boots with the ported damage-core wasm
+// (packages/combat/src/rom/wasmDamageCore.ts — oracle-verified byte-exact over
+// 26,232 cases), it installs the implementation here and every call site below
+// runs the ROM's own compiled code instead of the TS port. Absent an override,
+// behaviour is bit-identical to before this seam existed.
+// =============================================================================
+export interface SourceDamageImplementation {
+  computeBaseDamage(
+    attacker: SourceDamageActor,
+    defender: SourceDamageActor,
+    basePower: number,
+    ctx: SourceDamageContext,
+  ): number;
+  lookupTypeCategory(borgNumber: number): number;
+  applyHpDamage(target: SourceDamageTarget, amount: number): void;
+}
+
+let romDamageImpl: SourceDamageImplementation | null = null;
+
+/** Install (or clear, with null) the ROM-wasm damage implementation. */
+export function setRomDamageImplementation(impl: SourceDamageImplementation | null): void {
+  romDamageImpl = impl;
+}
+
+/** Whether the ROM-wasm implementation is live. */
+export function romDamageActive(): boolean {
+  return romDamageImpl !== null;
+}
+
 /** Convert a borgNumber (0x3e8/+1000) to its "pl####" id (family/variant hex). 0x0615 -> "pl0615". */
 export function borgNumberToBorgId(borgNumber: number): string {
   const family = (borgNumber >>> 8) & 0xff;
@@ -164,6 +207,7 @@ export function borgNumberToBorgId(borgNumber: number): string {
  * family byte is 0..15) falls back to 0 (the all-1.0 neutral matrix row).
  */
 export function lookupTypeCategory(borgNumber: number): number {
+  if (romDamageImpl) return romDamageImpl.lookupTypeCategory(borgNumber);
   const family = (borgNumber >>> 8) & 0xff;
   const variant = borgNumber & 0xff;
   const row = TYPE_CATEGORY_REMAP[family];
@@ -214,6 +258,7 @@ export function computeBaseDamage(
   basePower: number,
   ctx: SourceDamageContext,
 ): number {
+  if (romDamageImpl) return romDamageImpl.computeBaseDamage(attacker, defender, basePower, ctx);
   // Step 0 (6693-6695): fVar1 = (float)*param_1 = record hpDamage; gate `> FLOAT_80436f68` (0.0).
   if (!(basePower > 0)) return 0;
 
@@ -387,6 +432,7 @@ function clampIndex(value: number, length: number): number {
  * is a no-op (source returns early). Negative `amount` heals, clamped at maxHp.
  */
 export function applyHpDamage(target: SourceDamageTarget, amount: number): void {
+  if (romDamageImpl) return romDamageImpl.applyHpDamage(target, amount);
   // Already-dead guard (6839-6841): HP == 0 -> no-op.
   if (target.hp === 0) return;
   // +0x1c8 = pre-subtract HP mirror (6847).

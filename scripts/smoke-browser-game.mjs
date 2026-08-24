@@ -483,11 +483,24 @@ async function drivePlayableRoute(cdp, url) {
   if (errors.length > 0 || networkErrors.length > 0) {
     throw new Error(`browser emitted runtime errors:\n${[...errors, ...networkErrors.map((error) => `network: ${error}`)].join("\n")}`);
   }
+  // ROM-wasm proof: the ported damage-core unit must be LIVE (installed after
+  // its 256-case fidelity gate) for the battle this smoke just played. The call
+  // counts show how much of the session the ROM code actually served.
+  const romDamage = await evaluate(cdp, `({
+    live: Boolean(window.__romDamage),
+    calls: window.__romDamage ? { ...window.__romDamage.callCounts } : null,
+    shims: window.__romDamage ? { ...window.__romDamage.shimCounts } : null
+  })`);
+  if (!romDamage.live) {
+    throw new Error("ROM-wasm damage core is not live — the game fell back to the TS port");
+  }
+
   return {
     battle: battleState,
     resumed: resumeState,
     repaused: pauseCycle,
     expectedMediaCancellations: expectedMediaCancellations.length,
+    romDamage,
   };
 }
 

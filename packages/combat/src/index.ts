@@ -222,3 +222,21 @@ export function createBattle(cfg: BattleConfig, borgStats?: readonly BorgStats[]
   }
   return createBattleWithStats(cfg, stats);
 }
+
+// ROM-wasm damage seam: the ported damage-core unit and the override hook it
+// installs into (see rom/wasmDamageCore.ts and damage/sourceDamage.ts).
+export {
+  computeBaseDamage,
+  lookupTypeCategory,
+  applyHpDamage,
+  defaultSourceDamageActor,
+  defaultSourceDamageContext,
+  setRomDamageImplementation,
+  sourceDamageCurveCounts,
+  romDamageActive,
+  type SourceDamageActor,
+  type SourceDamageContext,
+  type SourceDamageTarget,
+  type SourceDamageImplementation,
+} from "./damage/sourceDamage.js";
+export { createRomDamageCore, type RomDamageCore, type ArenaJson } from "./rom/wasmDamageCore.js";
