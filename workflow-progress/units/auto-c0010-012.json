@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "unit": "auto-c0010-012",
+  "unit_id": "auto-c0010-012",
+  "timestamp": "2026-08-24T19:50:10.132660Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: Serving context 16384 < required 17173 and reload failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0010-012.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_yugxp63c\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: unknown type name 'size_t'",
+          "unit.c:236:15: error: use of undeclared identifier 'PTR_LAB_80433898'"
+        ],
+        "fingerprint": "f24bb56fe4dc15fa57ca54638f840edea8a84592718d02db1cc5e6b86a47a370"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "125"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "CONCAT44",
+      "FUN_800452a0",
+      "FUN_8007578c",
+      "FUN_800757f4",
+      "FUN_80075840",
+      "FUN_800758b8",
+      "FUN_80075908",
+      "FUN_80075958",
+      "FUN_80075994",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "code",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "longlong",
+      "uint",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "zz_0046698_",
+      "zz_0066580_",
+      "zz_0074fc0_",
+      "zz_0075038_",
+      "zz_00750cc_",
+      "zz_0075104_",
+      "zz_00751a4_",
+      "zz_007521c_",
+      "zz_00752b0_",
+      "zz_00752e8_",
+      "zz_0075388_",
+      "zz_0183730_",
+      "zz_01ef2b4_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": true,
+    "registry_deviations": [],
+    "registry_version_used": 125,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0010-012.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_yugxp63c\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: unknown type name 'size_t'",
+          "unit.c:236:15: error: use of undeclared identifier 'PTR_LAB_80433898'"
+        ],
+        "fingerprint": "f24bb56fe4dc15fa57ca54638f840edea8a84592718d02db1cc5e6b86a47a370"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "125"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: Serving context 16384 < required 17173 and reload failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-99c0ca2d2356f714d1eea069e8b5080f4120938384ef06cae40c2257cf852783"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-24T19:50:10.132660Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: Serving context 16384 < required 17173 and reload failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
+      "product_commit": null
+    }
+  ]
+}
