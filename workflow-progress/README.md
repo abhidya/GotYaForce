@@ -1,26 +1,27 @@
-# Port workflow: RUNNING
+# Port workflow: IDLE
 
-*Generated 2026-08-24T01:56:49.350787Z - machine-written, do not edit.*
+*Generated 2026-08-24T01:57:00.051943Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `IDLE` (idle) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 53/1396 settled (3 green, 50 staged) |
 | **Retries outstanding** | 13 |
 | **Untouched** | 1327 |
-| **Last transition** | 2026-08-24T01:56:49.350787Z |
+| **Last transition** | 2026-08-24T01:57:00.051943Z |
 | **Last green** | 2026-08-24T01:56:49.350787Z (`auto-c0049-018`) |
 | **Last product commit** | `99e0e821b52a71bc515f7f28afdf99914b23b21f` |
-| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
+| **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | running |
+| **Driver** | stopped |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-24T01:57:00.051943Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-24T01:56:49.350787Z | `auto-c0049-018` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T01:19:29.218320Z | `auto-c0035-004` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_80047aa |
 | 2026-08-24T00:49:59.114356Z | `auto-c0029-012` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
@@ -70,4 +71,3 @@
 | 2026-08-23T12:50:15.976235Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-23T12:50:13.219849Z | `auto-c0011-011` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-23T12:46:32.213130Z | `auto-c0011-004` | gate_failed | assembly | 2 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
-| 2026-08-23T12:42:25.910430Z | `auto-c0053-014` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
