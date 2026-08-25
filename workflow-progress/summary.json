@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-25T16:27:43.382772Z",
+  "generated_at": "2026-08-25T17:52:31.660231Z",
   "run_id": "2026-08-25T15:28:22.545919Z",
   "total_units": 1396,
   "green": 3,
@@ -10,19 +10,14 @@
   "deferred": 0,
   "structural_ineligible": 4,
   "active": 0,
-  "total_attempts": 222,
-  "transitions_last_hour": 5,
-  "greens_last_hour": 1,
+  "total_attempts": 223,
+  "transitions_last_hour": 1,
+  "greens_last_hour": 0,
   "last_green_at": "2026-08-25T16:02:26.029432Z",
   "last_green_unit": "auto-c0029-012",
   "last_product_commit": "c2c47c9c07db4b3f23a42249a2eda3ffeddde351",
-  "repeated_failure_classes": [
-    [
-      "assembly:assembly gate canonicalize failed before promotion: owner_va",
-      2
-    ]
-  ],
-  "health": "healthy_progress",
+  "repeated_failure_classes": [],
+  "health": "active_no_green",
   "machine": {
     "workflow_state": "running",
     "driver_status": "running",

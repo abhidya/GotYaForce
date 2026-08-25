@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0043-007",
   "unit_id": "auto-c0043-007",
-  "timestamp": "2026-08-25T15:27:50.323590Z",
-  "run_id": "2026-08-25T12:04:28.934663Z",
+  "timestamp": "2026-08-25T17:52:31.513699Z",
+  "run_id": "2026-08-25T15:28:22.545919Z",
   "result": "gate_failed",
-  "stage": "assembly",
-  "attempt": 2,
-  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h",
+  "stage": "wasm-link",
+  "attempt": 3,
+  "detail": "not linked: unit.c:4:1: error: expected ')'\nunit.c:96:36: error: too many arguments to function call, expected 3, have 5\nunit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'\nunit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -20,66 +20,72 @@
       {
         "iteration": 1,
         "stage": "compile",
-        "error_count": 3,
+        "error_count": 4,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-007.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_asv_k_qs\\unit.o'' failed (returned 1)",
-          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
-          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_m465afqa\\unit.o'' failed (returned 1)",
+          "unit.c:216:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:290:25: error: operand of type 'void' where arithmetic or pointer type is required",
+          "unit.c:293:25: error: operand of type 'void' where arithmetic or pointer type is required"
         ],
-        "fingerprint": "ba65e764078f7de97f81228d0ccff4d332c7ddc376b2f5c5dc82c87968f1b2b5"
+        "fingerprint": "364431713ee672f260ae568c846c5b18ccba35cb0229d18cac30f6877af326cb"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt3-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_wp6f748k\\unit.o'' failed (returned 1)",
+          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
+          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
+          "unit.c:4:1: error: expected ')'",
+          "unit.c:84:55: error: too many arguments to function call, expected 5, have 9"
+        ],
+        "fingerprint": "4408cbd1676a64742e3611229221e5d1b7fae8f2357bae7a2eaf441d5e4ec2e3"
+      },
+      {
+        "iteration": 3,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt3-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_3wmygmbx\\unit.o'' failed (returned 1)",
+          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
+          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
+          "unit.c:4:1: error: expected ')'",
+          "unit.c:96:36: error: too many arguments to function call, expected 3, have 5"
+        ],
+        "fingerprint": "54d9520c0e195621c14b57734c1ea17924e018af393a9d15027e1f5c85be631e"
+      },
+      {
+        "iteration": 4,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt3-iter3.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_n1o1_tz3\\unit.o'' failed (returned 1)",
+          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
+          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
+          "unit.c:4:1: error: expected ')'",
+          "unit.c:96:36: error: too many arguments to function call, expected 3, have 5"
+        ],
+        "fingerprint": "e299e8b6e1d90db4361033ccdde4249ab1f5f5debee17fb2bae677f96cb3bb5d"
       }
     ],
-    "assembly_gate": {
-      "passed": false,
-      "n": 5,
-      "units": [
-        "auto-c0011-011",
-        "auto-c0019-000",
-        "auto-c0029-002",
-        "auto-c0035-004",
-        "auto-c0043-007"
-      ],
-      "stage": "canonicalize",
-      "conflicts": [
-        {
-          "symbol": "FUN_8016d398",
-          "class": "canonicalization_refused",
-          "units": [
-            "auto-c0011-011",
-            "auto-c0019-000",
-            "auto-c0029-002",
-            "auto-c0035-004",
-            "auto-c0043-007"
-          ],
-          "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h"
-        }
-      ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h",
-      "candidate": {
-        "name": "auto-c0043-007",
-        "sha256": "587bf8087c09ca8bc0def7ad850ec04498c63b66f9b1b0bf8255d1f004112b16"
-      },
-      "expected_candidate": {
-        "name": "auto-c0043-007",
-        "sha256": "587bf8087c09ca8bc0def7ad850ec04498c63b66f9b1b0bf8255d1f004112b16"
-      },
-      "attempt_cleanup": "removed"
-    },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
+      "driver_rev": "b57b2c410c9fc994f98f7228b4444564e9e1f4f9",
       "prompt_version": "3",
-      "registry_version": "145"
+      "registry_version": "147"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 2,
+    "attempts": 3,
     "symbol_set": [
       "DAT_803501e0",
       "DAT_803501f0",
@@ -138,40 +144,80 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 145,
-    "model_requests": 4,
+    "registry_version_used": 147,
+    "model_requests": 7,
     "rounds": [
       {
         "iteration": 1,
         "stage": "compile",
-        "error_count": 3,
+        "error_count": 4,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-007.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_asv_k_qs\\unit.o'' failed (returned 1)",
-          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
-          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_m465afqa\\unit.o'' failed (returned 1)",
+          "unit.c:216:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:290:25: error: operand of type 'void' where arithmetic or pointer type is required",
+          "unit.c:293:25: error: operand of type 'void' where arithmetic or pointer type is required"
         ],
-        "fingerprint": "ba65e764078f7de97f81228d0ccff4d332c7ddc376b2f5c5dc82c87968f1b2b5"
+        "fingerprint": "364431713ee672f260ae568c846c5b18ccba35cb0229d18cac30f6877af326cb"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt3-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_wp6f748k\\unit.o'' failed (returned 1)",
+          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
+          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
+          "unit.c:4:1: error: expected ')'",
+          "unit.c:84:55: error: too many arguments to function call, expected 5, have 9"
+        ],
+        "fingerprint": "4408cbd1676a64742e3611229221e5d1b7fae8f2357bae7a2eaf441d5e4ec2e3"
+      },
+      {
+        "iteration": 3,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt3-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_3wmygmbx\\unit.o'' failed (returned 1)",
+          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
+          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
+          "unit.c:4:1: error: expected ')'",
+          "unit.c:96:36: error: too many arguments to function call, expected 3, have 5"
+        ],
+        "fingerprint": "54d9520c0e195621c14b57734c1ea17924e018af393a9d15027e1f5c85be631e"
+      },
+      {
+        "iteration": 4,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt3-iter3.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_n1o1_tz3\\unit.o'' failed (returned 1)",
+          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
+          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
+          "unit.c:4:1: error: expected ')'",
+          "unit.c:96:36: error: too many arguments to function call, expected 3, have 5"
+        ],
+        "fingerprint": "e299e8b6e1d90db4361033ccdde4249ab1f5f5debee17fb2bae677f96cb3bb5d"
       }
     ],
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
+      "driver_rev": "b57b2c410c9fc994f98f7228b4444564e9e1f4f9",
       "prompt_version": "3",
-      "registry_version": "145"
+      "registry_version": "147"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false,
-    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h",
-    "last_stage": "assembly",
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "not linked: unit.c:4:1: error: expected ')'\nunit.c:96:36: error: too many arguments to function call, expected 3, have 5\nunit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'\nunit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
+    "last_stage": "wasm-link",
+    "source_failure_id": "source-failure-82736494c1570cc987bc453af8792f549f8510bef4a37ba822d4547c351db421",
     "sdk_decl_sync": {
-      "injected": [
-        "gnt4_PSMTXMultVec_bl"
-      ],
-      "superseded": [
-        "gnt4_PSQUATScale_bl"
-      ],
+      "injected": [],
+      "superseded": [],
       "unresolved": []
     },
     "assembly_gate": {
@@ -210,6 +256,28 @@
         "sha256": "587bf8087c09ca8bc0def7ad850ec04498c63b66f9b1b0bf8255d1f004112b16"
       },
       "attempt_cleanup": "removed"
+    },
+    "owner_decl_sync": {
+      "injected": [
+        "FUN_8016d398",
+        "FUN_8016d4ac"
+      ],
+      "superseded": [
+        "zz_0018fd8_",
+        "zz_0045ef4_",
+        "zz_006ec1c_",
+        "zz_0083244_",
+        "zz_0084170_",
+        "zz_0088aa0_",
+        "zz_0088e50_",
+        "zz_0089100_",
+        "zz_008ac80_",
+        "zz_008aff0_",
+        "zz_00f036c_",
+        "zz_00f061c_",
+        "zz_016d4d4_"
+      ],
+      "unresolved": []
     }
   },
   "history": [
@@ -227,6 +295,14 @@
       "stage": "assembly",
       "attempt": 2,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-25T17:52:31.513699Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 3,
+      "detail": "not linked: unit.c:4:1: error: expected ')'\nunit.c:96:36: error: too many arguments to function call, expected 3, have 5\nunit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'\nunit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
       "product_commit": null
     }
   ]
