@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-25T15:27:54.192271Z",
-  "run_id": "2026-08-25T12:04:28.934663Z",
+  "generated_at": "2026-08-25T15:54:12.946295Z",
+  "run_id": "2026-08-25T15:28:22.545919Z",
   "total_units": 1396,
   "green": 3,
   "staged": 90,
@@ -10,8 +10,8 @@
   "deferred": 0,
   "structural_ineligible": 4,
   "active": 0,
-  "total_attempts": 218,
-  "transitions_last_hour": 3,
+  "total_attempts": 219,
+  "transitions_last_hour": 4,
   "greens_last_hour": 1,
   "last_green_at": "2026-08-25T14:58:12.930676Z",
   "last_green_unit": "auto-c0035-004",
@@ -22,14 +22,14 @@
       2
     ]
   ],
-  "health": "idle",
+  "health": "healthy_progress",
   "machine": {
-    "workflow_state": "stopped_at_boundary",
-    "driver_status": "stopped",
+    "workflow_state": "running",
+    "driver_status": "running",
     "manual_paused": false,
     "block_reason": null,
-    "active_model": null,
-    "context_length": null,
+    "active_model": "unsloth/Qwen3.8-27B-GGUF",
+    "context_length": 60000,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
     "detail": ""
   }

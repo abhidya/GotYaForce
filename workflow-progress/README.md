@@ -1,21 +1,21 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-25T15:27:54.049222Z - machine-written, do not edit.*
+*Generated 2026-08-25T15:54:12.789899Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 93/1396 settled (3 green, 90 staged) |
 | **Retries outstanding** | 31 |
 | **Untouched** | 1268 |
-| **Last transition** | 2026-08-25T15:27:54.049222Z |
+| **Last transition** | 2026-08-25T15:54:12.789899Z |
 | **Last green** | 2026-08-25T14:58:12.930676Z (`auto-c0035-004`) |
 | **Last product commit** | `8dd1a752de29ab13db2a2da0c50f4ce177bf4d21` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
 
 **Repeated recent failure classes**
 
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T15:54:12.789899Z | `auto-c0053-013` | gate_failed | artifact-install | 4 | artifact install refused after assembly pass: artifact preimage has no eligible revoked lifecycle |
 | 2026-08-25T15:27:54.049222Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-25T15:27:50.323590Z | `auto-c0043-007` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8016d39 |
 | 2026-08-25T15:01:42.227993Z | `auto-c0030-014` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected apply_actor |
@@ -74,4 +75,3 @@
 | 2026-08-24T21:18:56.272065Z | `auto-c0019-006` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800bc2d |
 | 2026-08-24T21:16:39.755443Z | `auto-c0019-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T21:13:32.062605Z | `auto-c0019-004` | gate_failed | wasm-link | 1 | not linked: unit.c:22:47: error: use of undeclared identifier 'FLOAT_80438528' unit.c:23:15: error: use of und |
-| 2026-08-24T19:50:10.132660Z | `auto-c0010-012` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 17173 and reload failed: 409 Client Error: Conflict for url: |
