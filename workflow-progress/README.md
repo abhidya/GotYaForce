@@ -1,28 +1,28 @@
-# Port workflow: PAUSED
+# Port workflow: RUNNING
 
-*Generated 2026-08-25T04:32:10.554522Z - machine-written, do not edit.*
+*Generated 2026-08-25T06:06:53.512808Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `PAUSED` (manual_paused) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 88/1396 settled (3 green, 85 staged) |
 | **Retries outstanding** | 35 |
 | **Untouched** | 1268 |
-| **Last transition** | 2026-08-25T04:32:10.554522Z |
+| **Last transition** | 2026-08-25T06:06:53.512808Z |
 | **Last green** | 2026-08-24T23:38:51.149010Z (`auto-c0020-000`) |
 | **Last product commit** | `1923f3a6e9f877677045111f1893bdbf33dc636b` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
-
-> **Manually paused by the owner** (rig gate). No heavy work runs.
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T06:06:53.512808Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
+| 2026-08-25T06:06:53.623325Z | `auto-c0053-012` | deferred | assembly | 3 | interrupted before a verdict; requeued |
 | 2026-08-25T04:32:10.554522Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-25T04:17:03.809356Z | `auto-c0050-006` | gate_failed | wasm-link | 4 | not linked: wasm-ld: error: C:\Users\manny\AppData\Local\Temp\emscripten_temp_73qpxf7_\unit.o: undefined symbo |
 | 2026-08-25T03:10:45.932770Z | `-` | stopped_at_boundary | machine | 0 |  |
@@ -71,5 +71,3 @@
 | 2026-08-24T14:11:08.630942Z | `auto-c0029-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T13:51:39.341560Z | `auto-c0025-003` | gate_failed | wasm-link | 1 | not linked: ing: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parenthe |
 | 2026-08-24T12:30:28.410265Z | `auto-c0024-013` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-24T12:26:57.091581Z | `auto-c0021-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-24T12:23:27.275122Z | `auto-c0020-012` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
