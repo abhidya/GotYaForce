@@ -67,6 +67,24 @@ through pi 0.84.3; UNREVIEWED, not integrated.
 | gnt4_pow_bl | y | y | y | host libm; same caveat |
 | gnt4_sin_bl | y | y | y | host libm; same caveat |
 
+## gx_stubs.c (test_gx_stubs.c: GX_TESTS_PASS)
+
+| function | impl | comp | test | notes |
+|---|---|---|---|---|
+| gnt4_GXSetProjection_bl | y | y | y | records SDK 7-float projection vector (type + 6 coefficients) into static state |
+| gnt4_GXGetProjectionv_bl | y | y | y | reads recorded state |
+| gnt4_GXSetViewport_bl | y | y | y | records 6-float viewport |
+| gnt4_GXGetViewportv_bl | y | y | y | reads recorded state |
+| gnt4_GXSetScissor_bl | y | y | y | records only; no getter exists in the seam |
+| gnt4_GXProject_bl | y | y | y | real math per SDK GXProject: model transform + perspective/ortho projection vector + viewport mapping; args map to (model 3x4, pm[7], vp[6]) |
+| gnt4_GXInitLightColor_bl | y | y | y | TODO no-op: corpus prototype does not carry SDK (GXLightObj*, GXColor) shape; semantics deferred |
+| gnt4_GXInitLightDistAttn_bl | y | y | y | TODO no-op, same reason |
+| gnt4_GXInitLightSpot_bl | y | y | y | TODO no-op, same reason |
+
+GX caveat: Set*/Get* record into process-local static state, not real GX
+hardware registers; sufficient for callers that round-trip through the seam,
+not a rendering implementation.
+
 Family-wide uncertainty: every `undefined8`-returning shim returns the entry
 value of PPC r3 (first pointer arg) zero-extended to 64 bits. The corpus
 proves callers consume r3, but which value r3 holds at exit is an assumption
