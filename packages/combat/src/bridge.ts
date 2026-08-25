@@ -14,6 +14,7 @@
 // yVel model. The bridge decomposes/recomposes each sync.
 
 import type { BorgRuntime, PlayerInput, RomFamilyDriver } from "./types.js";
+import { OPEN_WINDOW_ACTIVE_FRAMES } from "./actionStreamData.js";
 import type { Vec3 } from "@gf/physics";
 import type { RomActor, RomPhysicsRuntime, RomVisibilityTarget } from "./rom/actor.js";
 import { createRomActor } from "./rom/actor.js";
@@ -2276,15 +2277,34 @@ export class RomDriverBridge implements RomFamilyDriver {
         activeStart: number; activeEnd: number; halfExtent: number[]; damageRecordIndex: number;
       } | undefined;
       if (!rec) return null;
+      // OPEN-WINDOW sentinel normalization: attackHitTables.json encodes "active from
+      // activeStart until the anim ends" as an activeEnd -1/-2 sentinel (2,190 of the
+      // 4,258 records — 1,800 x -1, 259 x -2, plus 131 with 0 <= activeEnd < activeStart).
+      // Copying the raw value made resolveHits' inclusive [activeStart, activeEnd] test
+      // an EMPTY window, so none of those hits could ever fire. Mirror the combo-ladder
+      // resolver (actionStreamData.ts stepFromKind): give them the labeled TUNED
+      // open-window active length instead.
+      const activeEnd =
+        rec.activeEnd < rec.activeStart
+          ? rec.activeStart + OPEN_WINDOW_ACTIVE_FRAMES - 1
+          : rec.activeEnd;
       return {
         activeStart: rec.activeStart,
-        activeEnd: rec.activeEnd,
+        activeEnd,
         reach: rec.halfExtent?.[0] ?? 50,
         damageRecordIndex: rec.damageRecordIndex,
         struck: new Set<string>(),
       } satisfies ArmedHit;
     }).filter((h): h is ArmedHit => h !== null);
-    if (this.armedHits.length > 0) this.specialHadEffect = true;
+    // Count as a real payload only when at least one armed window can actually fire
+    // (activeStart reachable and the inclusive window non-empty after the sentinel
+    // normalization above). Before the normalization, arming an open-window record
+    // latched specialHadEffect=true while resolveHits could never fire it — so the
+    // xImpotent fallback never engaged and borgs like pl0400/pl0800 kept a zero-damage
+    // X special forever.
+    if (this.armedHits.some((h) => h.activeStart >= 0 && h.activeEnd >= h.activeStart)) {
+      this.specialHadEffect = true;
+    }
     // Reset the HIT clock only. Rewinding streamFrame here desynchronised every
     // streamSchedule (whose startFrame was recorded on the old clock) and
     // restarted the specialMaxFrames timeout, so the special outran its author.
