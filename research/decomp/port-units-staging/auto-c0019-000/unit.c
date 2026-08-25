@@ -42,15 +42,15 @@ void FUN_800ba418(int param_1)
   return;
 }
 
-/* ==== VERBATIM: research/decomp/ghidra-export/chunk_0019.c 36-48 ==== */
+/* ==== VERBATIM+D5: research/decomp/ghidra-export/chunk_0019.c 36-48 ==== */
 // ==== 800ba454  FUN_800ba454 ====
 
 void FUN_800ba454(int param_1)
 
 {
   *(short *)(param_1 + 0x1918) =
-       (short)(int)((float)((double)CONCAT44(0x43300000,
-                                             (int)*(short *)(param_1 + 0x1918) ^ 0x80000000) -
+       (short)(int)((float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,
+                                             (int)*(short *)(param_1 + 0x1918) ^ 0x80000000)) -
                            DOUBLE_804384f0) * FLOAT_804384ec);
   *(short *)(param_1 + 0x18da) = *(short *)(param_1 + 0x18da) >> 1;
   (*(code *)(&PTR_FUN_803003b4)[*(char *)(param_1 + 0x581)])();
