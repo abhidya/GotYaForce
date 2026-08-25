@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-25T08:24:36.311558Z",
+  "generated_at": "2026-08-25T08:29:38.636179Z",
   "run_id": "2026-08-25T08:13:01.132808Z",
   "total_units": 1396,
   "green": 3,
@@ -10,8 +10,8 @@
   "deferred": 0,
   "structural_ineligible": 4,
   "active": 0,
-  "total_attempts": 202,
-  "transitions_last_hour": 3,
+  "total_attempts": 203,
+  "transitions_last_hour": 4,
   "greens_last_hour": 0,
   "last_green_at": "2026-08-24T23:38:51.149010Z",
   "last_green_unit": "auto-c0020-000",
@@ -19,7 +19,7 @@
   "repeated_failure_classes": [
     [
       "artifact-install:artifact install refused after assembly pass: legacy revoked",
-      2
+      3
     ]
   ],
   "health": "active_no_green",
