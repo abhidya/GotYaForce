@@ -62,12 +62,14 @@ export function proveAttackDamage(
   maxFrames = 900,
 ): AttackDamageProof[] {
   return borgIds.map((borgId) => {
-    // B attack: hold attack + lock until damage lands.
+    // B attack: hold-40 / release-20 cycles with lock — the hold covers plain melee/shot
+    // borgs and accumulates charge for chargeable-B borgs, and the RELEASE is what fires
+    // a charged shot (holding forever would legitimately never fire one).
     const atk = proofBattle(borgId, 150);
     const atkHp0 = foeHp(atk.battle);
     let attackDamage = 0;
     for (let f = 0; f < maxFrames; f += 1) {
-      atk.inputs.p1 = { ...emptyInput(), attack: true, lockOn: true };
+      atk.inputs.p1 = { ...emptyInput(), attack: f % 60 < 40, lockOn: true };
       atk.battle.step(DT, atk.inputs);
       if (f % 10 === 0 || f === maxFrames - 1) {
         attackDamage = atkHp0 - foeHp(atk.battle);
@@ -75,14 +77,15 @@ export function proveAttackDamage(
       }
     }
 
-    // X special: press edges (2 frames down / 18 up) until damage lands. Close-range
-    // fixture (60 units): the probed borgs' X moves are close-quarters strikes whose
-    // hit windows do not reach a 150-unit standoff.
+    // X special: the same hold-40 / release-20 cycle (fires tap specials on the press
+    // edge and X-charge moves on the release edge). Close-range fixture (60 units): the
+    // probed borgs' X moves are close-quarters strikes whose hit windows do not reach a
+    // 150-unit standoff.
     const sp = proofBattle(borgId, 60);
     const spHp0 = foeHp(sp.battle);
     let specialDamage = 0;
     for (let f = 0; f < maxFrames; f += 1) {
-      sp.inputs.p1 = { ...emptyInput(), special: f % 20 < 2, lockOn: true };
+      sp.inputs.p1 = { ...emptyInput(), special: f % 60 < 40, lockOn: true };
       sp.battle.step(DT, sp.inputs);
       if (f % 10 === 0 || f === maxFrames - 1) {
         specialDamage = spHp0 - foeHp(sp.battle);
