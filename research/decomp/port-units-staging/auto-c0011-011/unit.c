@@ -302,7 +302,7 @@ void FUN_8007c19c(int param_1)
   return;
 }
 
-/* ==== VERBATIM: research/decomp/ghidra-export/chunk_0011.c 3225-3248 ==== */
+/* ==== VERBATIM+D5: research/decomp/ghidra-export/chunk_0011.c 3225-3248 ==== */
 // ==== 8007c350  FUN_8007c350 ====
 
 void FUN_8007c350(int param_1)
@@ -321,8 +321,8 @@ void FUN_8007c350(int param_1)
     *(float *)(param_1 + 0x40) = *(float *)(param_1 + 0x40) + *(float *)(param_1 + 0x150);
   }
   *(short *)(param_1 + 0x18da) =
-       (short)(int)((float)((double)CONCAT44(0x43300000,
-                                             (int)*(short *)(param_1 + 0x18da) ^ 0x80000000) -
+       (short)(int)((float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,
+                                             (int)*(short *)(param_1 + 0x18da) ^ 0x80000000)) -
                            DOUBLE_80437968) * FLOAT_80437960);
   *(undefined1 *)(param_1 + 0x547) = 1;
   return;
