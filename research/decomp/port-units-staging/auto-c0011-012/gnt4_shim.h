@@ -107,6 +107,10 @@ extern void   gnt4_PSVECAdd_bl(float *a, float *b, float *out);
 extern double gnt4_PSQUATDotProduct_bl(float *a, float *b);
 extern void   gnt4_PSQUATScale_bl(double s, float *v, float *out);
 
+/* corpus-canonical SDK declarations for symbols this unit calls */
+extern void gnt4_PSVECNormalize_bl(float *in, float *out);
+extern double gnt4_acos_bl(double x);
+
 #endif /* GNT4_SHIM_H */
 
 /* ---- AUTO-GENERATED (port_unit_generator) ---- */
@@ -126,16 +130,35 @@ typedef void (code)();
 #define FLOAT_80437978 GC_F32(0x80437978)
 #define FLOAT_8043797c GC_F32(0x8043797c)
 #define FLOAT_80437980 GC_F32(0x80437980)
-extern int FUN_800452a0();
-extern int FUN_800669d0();
-extern int FUN_80067310();
-extern int FUN_80067610();
-extern int zz_004beb8_();
-extern int zz_004cd24_();
-extern int zz_004f1c4_();
-extern int zz_006660c_();
-extern int zz_00677b0_();
-extern int zz_006a474_();
-extern int zz_006a5a4_();
-extern int zz_006d520_();
-extern int zz_00c74ec_();
+extern int FUN_800452a0(double param_1,double param_2);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern void FUN_800669d0(int param_1,uint param_2);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern void FUN_80067310(double param_1,int param_2,short param_3);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern void FUN_80067610(int param_1);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern void zz_004beb8_(undefined8 param_1,int param_2,uint param_3,uint param_4,int param_5,undefined4 param_6,undefined4 param_7);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern undefined4 zz_004cd24_(int param_1,uint param_2);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern void zz_004f1c4_(int param_1);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern void zz_006660c_(int param_1);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern undefined4 zz_00677b0_(int param_1);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern void zz_006a474_(int param_1);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern void zz_006a5a4_(int param_1);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern void zz_006d520_(int param_1,float *param_2);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+extern undefined1 * zz_00c74ec_(int param_1,int param_2);  /* OWNER PROTOTYPE (oracle-registry.json): do not alter */
+
+/* PPC lfd-of-assembled-bits: reinterpret a u64 bit pattern as an IEEE754
+ * double. The extraction transform (D5) rewrites Ghidra's reinterpretation
+ * casts `(double)CONCAT44(...)` to this helper; a bare (double) cast on an
+ * integer in unit.c is then always a genuine value conversion. */
+static inline double __gnt4_bitcast_f64(unsigned long long __u) {
+  union { unsigned long long u; double d; } __b;
+  __b.u = __u;
+  return __b.d;
+}
+
+/* ==== REGISTRY (advisory): previous units of this program compiled with
+   the typings below. Verify each against THIS unit's use sites before
+   adopting it; you are free to disagree -- a reasoned disagreement is
+   wanted data. ==== */
+/* extern void   gnt4_PSVECNormalize_bl(float *v, float *out); */
+/* extern double gnt4_acos_bl(double x); */
+/* extern void zz_004cd24_(int param_1, int param_2); */
+/* extern void zz_006a5a4_(int param_1); */

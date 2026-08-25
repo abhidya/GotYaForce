@@ -80,7 +80,7 @@ void FUN_8007c4b8(int param_1)
   return;
 }
 
-/* ==== VERBATIM: research/decomp/ghidra-export/chunk_0011.c 3347-3382 ==== */
+/* ==== VERBATIM+D5: research/decomp/ghidra-export/chunk_0011.c 3347-3382 ==== */
 // ==== 8007c6b0  FUN_8007c6b0 ====
 
 /* WARNING: Removing unreachable block (ram,0x8007c788) */
@@ -104,7 +104,7 @@ void FUN_8007c6b0(int param_1)
     dVar3 = DOUBLE_80437968;
     *(undefined4 *)(param_1 + 0x50) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x6c);
     *(undefined1 *)(param_1 + 0x73f) = 0;
-    dVar3 = (double)(float)((double)CONCAT44(0x43300000,(int)(short)iVar1 ^ 0x80000000) - dVar3);
+    dVar3 = (double)(float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,(int)(short)iVar1 ^ 0x80000000)) - dVar3);
     *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;
     zz_006a5a4_(param_1);
     *(short *)(param_1 + 0x5ae) = (short)(int)dVar3;
@@ -149,7 +149,7 @@ void zz_007c800_(int param_1,uint param_2)
   return;
 }
 
-/* ==== VERBATIM: research/decomp/ghidra-export/chunk_0011.c 3419-3469 ==== */
+/* ==== VERBATIM+D5: research/decomp/ghidra-export/chunk_0011.c 3419-3469 ==== */
 // ==== 8007c844  zz_007c844_ ====
 
 void zz_007c844_(int param_1)
@@ -179,7 +179,7 @@ void zz_007c844_(int param_1)
   if (*(float *)(param_1 + 0x3c) <= FLOAT_804378e8) {
     fVar1 = FLOAT_80437974 * (float)dVar3;
     *(short *)(param_1 + 0x18da) = *(short *)(param_1 + 0x18da) + 0x222;
-    local_10 = (double)(CONCAT44(0x43300000,(int)*(short *)(param_1 + 0x18da)) ^ 0x80000000);
+    local_10 = __gnt4_bitcast_f64(CONCAT44(0x43300000,(int)*(short *)(param_1 + 0x18da)) ^ 0x80000000);
     if (fVar1 < (float)(local_10 - dVar2)) {
       *(short *)(param_1 + 0x18da) = (short)(int)fVar1;
     }
@@ -191,7 +191,7 @@ void zz_007c844_(int param_1)
     fVar1 = FLOAT_80437974 * (float)dVar3;
     *(short *)(param_1 + 0x18da) = *(short *)(param_1 + 0x18da) + -0x222;
     fVar1 = -fVar1;
-    local_10 = (double)(CONCAT44(0x43300000,(int)*(short *)(param_1 + 0x18da)) ^ 0x80000000);
+    local_10 = __gnt4_bitcast_f64(CONCAT44(0x43300000,(int)*(short *)(param_1 + 0x18da)) ^ 0x80000000);
     if ((float)(local_10 - dVar2) < fVar1) {
       *(short *)(param_1 + 0x18da) = (short)(int)fVar1;
     }
