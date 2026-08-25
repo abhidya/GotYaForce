@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0030-014",
   "unit_id": "auto-c0030-014",
-  "timestamp": "2026-08-24T08:15:33.673039Z",
-  "run_id": "2026-08-24T01:57:30.243221Z",
+  "timestamp": "2026-08-25T15:01:42.227993Z",
+  "run_id": "2026-08-25T12:04:28.934663Z",
   "result": "gate_failed",
   "stage": "assembly",
-  "attempt": 1,
-  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0030-014/gnt4_shim.h",
+  "attempt": 2,
+  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected apply_actor_param_tier_delta_127 owner/variant pair at auto-c0030-014/gnt4_shim.h",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -16,69 +16,57 @@
   "model": "unsloth/Qwen3.8-27B-GGUF",
   "tier": null,
   "extra": {
-    "rounds": [
-      {
-        "iteration": 1,
-        "stage": "import-gate",
-        "error_count": 0,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0030-014.h",
-        "diagnostics": [
-          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
-          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: apply_actor_param_tier_delta_127"
-        ],
-        "fingerprint": "860d5f086924609b29eefa72c5231f9be6721883ff0101861fb3661ca688fc5d"
-      }
-    ],
+    "rounds": [],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0049-018",
-        "auto-c0028-015",
-        "auto-c0029-001",
-        "auto-c0019-009",
+        "auto-c0011-011",
+        "auto-c0019-000",
+        "auto-c0029-002",
+        "auto-c0035-004",
         "auto-c0030-014"
       ],
       "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": "zz_004beb8_",
+          "symbol": "apply_actor_param_tier_delta_127",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0019-009",
-            "auto-c0028-015",
-            "auto-c0029-001",
+            "auto-c0011-011",
+            "auto-c0019-000",
+            "auto-c0029-002",
             "auto-c0030-014",
-            "auto-c0049-018"
+            "auto-c0035-004"
           ],
           "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0030-014/gnt4_shim.h"
+          "detail": "owner_variant_abi_incompatible: Clang rejected apply_actor_param_tier_delta_127 owner/variant pair at auto-c0030-014/gnt4_shim.h"
         }
       ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0030-014/gnt4_shim.h",
+      "detail": "owner_variant_abi_incompatible: Clang rejected apply_actor_param_tier_delta_127 owner/variant pair at auto-c0030-014/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0030-014",
-        "sha256": "068a2b301ca901a91c0c4837c35dab98ffd679acfc47fdf9f43a35c833bb080a"
+        "sha256": "5b9fde8e8cb4c082d26f09ece887e2dc6b0375fd6544eceb6c31c2a86e19ee1d"
       },
       "expected_candidate": {
         "name": "auto-c0030-014",
-        "sha256": "068a2b301ca901a91c0c4837c35dab98ffd679acfc47fdf9f43a35c833bb080a"
+        "sha256": "5b9fde8e8cb4c082d26f09ece887e2dc6b0375fd6544eceb6c31c2a86e19ee1d"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
       "prompt_version": "3",
-      "registry_version": "96"
+      "registry_version": "145"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 1,
+    "attempts": 2,
     "symbol_set": [
       "DAT_803c74c4",
       "FUN_8010f420",
@@ -117,69 +105,68 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 96,
-    "model_requests": 1,
-    "rounds": [
-      {
-        "iteration": 1,
-        "stage": "import-gate",
-        "error_count": 0,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0030-014.h",
-        "diagnostics": [
-          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
-          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: apply_actor_param_tier_delta_127"
-        ],
-        "fingerprint": "860d5f086924609b29eefa72c5231f9be6721883ff0101861fb3661ca688fc5d"
-      }
-    ],
+    "registry_version_used": 145,
+    "model_requests": 2,
+    "rounds": [],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0049-018",
-        "auto-c0028-015",
-        "auto-c0029-001",
-        "auto-c0019-009",
+        "auto-c0011-011",
+        "auto-c0019-000",
+        "auto-c0029-002",
+        "auto-c0035-004",
         "auto-c0030-014"
       ],
       "stage": "canonicalize",
       "conflicts": [
         {
-          "symbol": "zz_004beb8_",
+          "symbol": "apply_actor_param_tier_delta_127",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0019-009",
-            "auto-c0028-015",
-            "auto-c0029-001",
+            "auto-c0011-011",
+            "auto-c0019-000",
+            "auto-c0029-002",
             "auto-c0030-014",
-            "auto-c0049-018"
+            "auto-c0035-004"
           ],
           "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0030-014/gnt4_shim.h"
+          "detail": "owner_variant_abi_incompatible: Clang rejected apply_actor_param_tier_delta_127 owner/variant pair at auto-c0030-014/gnt4_shim.h"
         }
       ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0030-014/gnt4_shim.h",
+      "detail": "owner_variant_abi_incompatible: Clang rejected apply_actor_param_tier_delta_127 owner/variant pair at auto-c0030-014/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0030-014",
-        "sha256": "068a2b301ca901a91c0c4837c35dab98ffd679acfc47fdf9f43a35c833bb080a"
+        "sha256": "5b9fde8e8cb4c082d26f09ece887e2dc6b0375fd6544eceb6c31c2a86e19ee1d"
       },
       "expected_candidate": {
         "name": "auto-c0030-014",
-        "sha256": "068a2b301ca901a91c0c4837c35dab98ffd679acfc47fdf9f43a35c833bb080a"
+        "sha256": "5b9fde8e8cb4c082d26f09ece887e2dc6b0375fd6544eceb6c31c2a86e19ee1d"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
       "prompt_version": "3",
-      "registry_version": "96"
+      "registry_version": "145"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false,
-    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0030-014/gnt4_shim.h",
-    "last_stage": "assembly"
+    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected apply_actor_param_tier_delta_127 owner/variant pair at auto-c0030-014/gnt4_shim.h",
+    "last_stage": "assembly",
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSMTXConcat_bl",
+        "gnt4_PSMTXTrans_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl",
+        "gnt4_PSVECAdd_bl"
+      ],
+      "unresolved": []
+    }
   },
   "history": [
     {
@@ -188,6 +175,14 @@
       "stage": "assembly",
       "attempt": 1,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0030-014/gnt4_shim.h",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-25T15:01:42.227993Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 2,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected apply_actor_param_tier_delta_127 owner/variant pair at auto-c0030-014/gnt4_shim.h",
       "product_commit": null
     }
   ]
