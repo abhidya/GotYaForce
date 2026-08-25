@@ -2158,6 +2158,11 @@ export class RomDriverBridge implements RomFamilyDriver {
         this.streamEvents = null;
         this.streamSchedules = [];
         runtime.cooldowns["romSpecialActive"] = 0;
+        // Re-arm the B cooldown so a mash cannot chain ROM machines back-to-back —
+        // the X path does the same with cooldowns["special"] below. PLACEHOLDER (not
+        // ROM-derived): the ROM's post-charge recovery frame count is untraced; reuse
+        // the generic shot cooldown slot at the melee-cooldown magnitude.
+        runtime.cooldowns["shot"] = Math.max(runtime.cooldowns["shot"] ?? 0, 20);
         // Return to idle so the renderer stops selecting the attack slot now
         // that the ROM no longer owns the borg (stepMovement will take over and
         // re-derive state from velocity next frame).

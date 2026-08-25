@@ -1307,11 +1307,22 @@ function runSourceCollisionPasses(
     return fresh;
   };
 
+  // Narrow-phase contact stand-in for the unported hitbox-shape queries. The ROM's
+  // +0x54 shape/transform records are undumped, so each active object carries the SAME
+  // reach the legacy hit tests use (melee reach for a swinging borg, hitRadius for a
+  // projectile). PLACEHOLDER (not ROM-derived): a proximity capsule, not the real
+  // per-move hitbox shape — but the RANGES themselves reuse the existing per-borg /
+  // per-projectile reach data, so contact only forms where the legacy paths would also
+  // register a hit. Replaces the old forcing stub, whose `overlap: true` admitted every
+  // attacker x victim pair ARENA-WIDE and melted whole battles in seconds.
+  const contactShape = new WeakMap<SourceCollisionObject, { radius: number; yBand: number }>();
+
   // Active list (DAT_803c477c): borgs mid-attack + in-flight projectiles.
   const activeList: SourceCollisionObject[] = [];
   for (const b of all) {
     if (b.state !== "attack" && b.state !== "special") continue;
-    if (!profiles.has(b.uid)) continue;
+    const prof = profiles.get(b.uid);
+    if (!prof) continue;
     const owner = ownerActorFor(b);
     // Borg's current attack record: the archetype fallback (melee → record 1, special →
     // record 2). TODO: read the borg's currently-armed exact kind → family record, mirroring
@@ -1319,14 +1330,27 @@ function runSourceCollisionPasses(
     const record = damageRecordByIndex(
       b.state === "special" ? DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL : DAMAGE_RECORD_INDEX.MELEE,
     );
-    activeList.push(borgToCollisionObject(b, owner, record, b.state === "special" ? 2 : 0));
+    const obj = borgToCollisionObject(b, owner, record, b.state === "special" ? 2 : 0);
+    const meleeDef = actionProfileForProfile(prof).melee;
+    contactShape.set(obj, {
+      // PLACEHOLDER (not ROM-derived): melee reach from the borg's own action profile
+      // (same value the legacy swing-resolve loop uses); specials get the same reach —
+      // ROM special hitboxes are resolved by the bridge's own resolveHits, not here.
+      radius: meleeDef?.range ?? MELEE.RANGE,
+      yBand: meleeDef?.yTolerance ?? MELEE.Y_TOLERANCE,
+    });
+    activeList.push(obj);
   }
   for (const pr of projectiles) {
     const shooter = all.find((b) => b.uid === pr.ownerUid);
     if (!shooter) continue;
     const owner = ownerActorFor(shooter);
     const record = pr.damageRecord ?? damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT);
-    activeList.push(projectileToCollisionObject(pr, owner, record));
+    const obj = projectileToCollisionObject(pr, owner, record);
+    // Mirror the legacy projectile hit test: hitRadius + the victim-body stand-in
+    // (SHOT.TARGET_BODY_RADIUS � see stepProjectiles' swept test) + the |dy| <= 60 band.
+    contactShape.set(obj, { radius: pr.hitRadius + SHOT.TARGET_BODY_RADIUS, yBand: 60 });
+    activeList.push(obj);
   }
 
   // Borg list (DAT_803c2f7c): every targetable borg. Attackers appear here too; the
@@ -1338,18 +1362,32 @@ function runSourceCollisionPasses(
     borgList.push(borgToCollisionObject(b, owner, damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE), 0));
   }
 
-  // Default forcing hooks + the adapter-level self-pair exclusion. The ROM relies on the
+  // Proximity hooks + the adapter-level self-pair exclusion. The ROM relies on the
   // hitbox-shape overlap test (zz_0030490_) to keep a borg's own attack off its body; the
-  // forcing stub admits every pair, so the exclusion is ported here via owner identity.
+  // exclusion is ported here via owner identity. transformAndOverlap is the proximity
+  // stand-in described at contactShape above — an active object only overlaps a target
+  // inside its own reach capsule. (The previous forcing stub returned `overlap: true`
+  // unconditionally, which made every attack anywhere hit every borg in the arena.)
   const ctx: SourceCollisionContext = {
     hooks: {
       broadPhase: (active, target) => active.owner !== target.actor,
       shapeCompat: () => true,
-      transformAndOverlap: (active) => ({
-        overlap: true,
-        contactPoint: { x: active.owner.pos.x, y: active.owner.pos.y, z: active.owner.pos.z },
-        squareDistance: 0,
-      }),
+      transformAndOverlap: (active, target) => {
+        const shape = contactShape.get(active);
+        const tp = target.actor.pos;
+        const dx = active.pos98.x - tp.x;
+        const dz = active.pos98.z - tp.z;
+        const squareDistance = dx * dx + dz * dz;
+        const overlap =
+          shape !== undefined &&
+          squareDistance <= shape.radius * shape.radius &&
+          Math.abs(active.pos98.y - tp.y) <= shape.yBand;
+        return {
+          overlap,
+          contactPoint: { x: tp.x, y: tp.y, z: tp.z },
+          squareDistance,
+        };
+      },
     },
   };
 
@@ -1367,15 +1405,20 @@ function runSourceCollisionPasses(
   // pair is NOT added to the defer set, so the per-projectile applyHit loop still runs for
   // these victims if a separate projectile hit is pending (applyHit is the fallback for
   // pairs source-collision did not authoritatively settle).
-  for (const pair of pairs) {
-    const targetBorg = backRef.get(pair.target.actor);
-    if (!targetBorg) continue;
-    if (__applyHitAlreadyDamaged.has(targetBorg.uid)) continue;
-    if (targetBorg.hp !== pair.target.actor.hp) {
-      targetBorg.hp = pair.target.actor.hp;
-    }
-    __sourceCollisionDeferHandled.add(targetBorg.uid);
-  }
+  // NO HP SYNC-BACK — the resolved pairs are returned for audit only, and the resolver's
+  // HP mutations stay on the throwaway adapter actors. The live damage authority is the
+  // existing applyHit chain (melee swing resolve in stepAttacks, the swept projectile
+  // test in stepProjectiles, the bridge's ROM-special resolveHits), whose damage math IS
+  // the source-owned computeBaseDamage/applyHpDamage seam (ROM wasm when live). This
+  // resolver remains an honest PARTIAL port: it has no active-window model (a borg in
+  // "attack" STATE overlapped a victim on EVERY frame of the ~18-frame state, not only
+  // the swing's active frames), no per-swing already-hit dedup (its reaction1da gate only
+  // arms when the victim actually enters hit/down — which requires the reaction wiring it
+  // does not port), and no knockback/reaction/telemetry application. Syncing its HP back
+  // therefore multi-applied damage frame-after-frame with no attribution and no hit
+  // reaction — a stationary victim silently lost its whole bar in ~30 frames. Until the
+  // window/dedup/reaction layers are ported, the pass must not write gameplay state, so
+  // __sourceCollisionDeferHandled stays empty and applyHit never defers to it.
   return pairs;
 }
 
@@ -2479,10 +2522,14 @@ export function stepAttacks(
     // ROM-family B-charge driver (zz_0179814_): if the borg's ported family wires a
     // B-charge handler (RomActor.hasBCharge), delegate the B press to its 4-phase
     // stream-event-driven machine instead of the generic chargeFrames/melee/shot path.
-    // Fires on the press edge (attackHeld && cooldown clear) so phase 0 (windup) starts
-    // immediately; subsequent ticks advance via romDriver.tick (romOwnedSpecial=true).
+    // Fires on the PRESS EDGE only (pressedAttackEdge + cooldown clear) so phase 0
+    // (windup) starts immediately; subsequent ticks advance via romDriver.tick
+    // (romOwnedSpecial=true). Edge-gated, NOT held-gated: the old `attackHeld` test
+    // re-armed a fresh ROM machine on the very frame the previous one completed, so a
+    // held B chained the choreography forever (its launch arc compounding each cycle
+    // carried the borg thousands of units into the sky, and no shot ever came out).
     if (
-      attackHeld &&
+      pressedAttackEdge &&
       (b.cooldowns["shot"] ?? 0) <= 0 &&
       b.romDriver?.tryStartBAttack(b, all)
     ) {
@@ -3390,6 +3437,30 @@ function spawnSwordBeam(
 // ---------------------------------------------------------------------------------------
 // Projectiles — advance, home toward target, resolve hits. Returns survivors.
 // ---------------------------------------------------------------------------------------
+/**
+ * Swept projectile-vs-borg contact test for one fixed step. Finds the closest approach
+ * of the XZ segment [prev -> cur] to the target's XZ position; contact when that
+ * distance is within `radius` AND the projectile's interpolated height at the closest
+ * approach is within the flat 60-unit vertical band (same band the old point test used).
+ */
+function projectileSweepHit(prev: Vec3, cur: Vec3, targetPos: Vec3, radius: number): boolean {
+  const sx = cur.x - prev.x;
+  const sz = cur.z - prev.z;
+  const lenSq = sx * sx + sz * sz;
+  let t = 0;
+  if (lenSq > 0) {
+    t = ((targetPos.x - prev.x) * sx + (targetPos.z - prev.z) * sz) / lenSq;
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+  }
+  const cx = prev.x + sx * t;
+  const cz = prev.z + sz * t;
+  const dx = targetPos.x - cx;
+  const dz = targetPos.z - cz;
+  if (dx * dx + dz * dz > radius * radius) return false;
+  const cy = prev.y + (cur.y - prev.y) * t;
+  return Math.abs(cy - targetPos.y) <= 60;
+}
+
 export function stepProjectiles(
   projectiles: Projectile[],
   all: BorgRuntime[],
@@ -3484,10 +3555,17 @@ export function stepProjectiles(
       for (const o of all) {
         if (!isTargetable(o) || o.uid === pr.ownerUid) continue;
         if (isInvincible(o)) continue;
-        // Vertical hit band |dy| <= 60: TUNED — the ROM's projectile-vs-borg overlap is a real
-        // 3D hitbox record test (chunk_0013.c hit pipeline), not a cylinder; this flat band is
-        // the port's stand-in until per-move hitbox records are dumped.
-        if (distXZ(pr.pos, o.pos) <= pr.hitRadius && Math.abs(pr.pos.y - o.pos.y) <= 60) {
+        // SWEPT hit test over this frame's [prevPos -> pos] segment, radius =
+        // projectile hitRadius + SHOT.TARGET_BODY_RADIUS (the victim's body volume
+        // stand-in — see the constant's doc). Vertical band |dy| <= 60 at the closest
+        // approach: TUNED — the ROM's projectile-vs-borg overlap is a real 3D hitbox
+        // record test (chunk_0013.c hit pipeline), not a cylinder; this flat band is
+        // the port's stand-in until per-move hitbox records are dumped. The old
+        // point-sample distXZ(pr.pos, o.pos) test tunneled: a bolt moving faster than
+        // its own hit diameter per frame (e.g. authored radius 5, speed 22/frame)
+        // stepped clean over its target and NO ranged attack could ever connect.
+        const sweep = projectileSweepHit(prevPos, pr.pos, o.pos, pr.hitRadius + SHOT.TARGET_BODY_RADIUS);
+        if (sweep) {
           const op = profiles.get(o.uid);
           // A projectile carrying an exact per-borg FAMILY record (familyDamageData.ts, bound
           // at spawn from the borg's kind-0 hitbox record) uses it; others keep the archetype.

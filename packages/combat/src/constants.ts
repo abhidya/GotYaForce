@@ -325,6 +325,17 @@ export const SHOT = {
   AIM_TARGET_Y: 20,
   /** Hit radius (XZ units) for projectile-vs-borg. */
   HIT_RADIUS: 35,
+  /**
+   * Target BODY radius added to every projectile's own hitRadius by the swept
+   * projectile-vs-borg test. PLACEHOLDER (not ROM-derived): the ROM overlaps the
+   * projectile's hitbox SHAPE against the victim's body shape (chunk_0013.c hit
+   * pipeline), so the authored per-projectile extents (shotHitRadiusForBorgId — some
+   * as small as 5 units) assume the victim contributes its own body volume. Until
+   * per-borg body shapes are dumped, this stand-in restores that contribution at the
+   * scale of the port's melee reach/y-band tuning; without it a 5-unit bolt stepping
+   * 22 units/frame tunnels straight through every borg it should hit.
+   */
+  TARGET_BODY_RADIUS: 25,
   /** Frames between shots while firing. */
   FIRE_COOLDOWN: 12,
   /** Magazine size before a reload. */
