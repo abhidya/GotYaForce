@@ -2,11 +2,11 @@
   "schema": 1,
   "unit": "auto-c0029-012",
   "unit_id": "auto-c0029-012",
-  "timestamp": "2026-08-25T09:45:44.359960Z",
-  "run_id": "2026-08-25T09:11:03.196343Z",
+  "timestamp": "2026-08-25T14:27:15.499561Z",
+  "run_id": "2026-08-25T12:04:28.934663Z",
   "result": "gate_failed",
   "stage": "assembly",
-  "attempt": 4,
+  "attempt": 5,
   "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ owner/variant pair at auto-c0029-012/gnt4_shim.h",
   "product_commit": null,
   "product_pushed": null,
@@ -21,22 +21,33 @@
         "iteration": 1,
         "stage": "compile",
         "error_count": 2,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0029-012\\header-attempt4-iter0.h",
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0029-012.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_7b_ip33y\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_tasnfkv7\\unit.o'' failed (returned 1)",
           "unit.c:61:33: error: use of undeclared identifier 'FUN_80047aa4'"
         ],
-        "fingerprint": "2c4c346444d38d9c272459af37f88f01151f59d2fb610f3bd26fc5048793bc94"
+        "fingerprint": "5a6756679480784cf5ae3cba1a8e44679bde51e0454f366f111426c62fbe8d02"
+      },
+      {
+        "iteration": 2,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0029-012\\header-attempt5-iter1.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: SQRT"
+        ],
+        "fingerprint": "af8afde6b78a084c66e5a785b6d8ba3a6a205d8b51782d1c5b117ef7308b1f07"
       }
     ],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0019-011",
-        "auto-c0019-017",
-        "auto-c0019-018",
-        "auto-c0020-000",
+        "auto-c0011-004",
+        "auto-c0011-011",
+        "auto-c0019-000",
+        "auto-c0029-002",
         "auto-c0029-012"
       ],
       "stage": "canonicalize",
@@ -45,10 +56,10 @@
           "symbol": "zz_0006fb4_",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0019-011",
-            "auto-c0019-017",
-            "auto-c0019-018",
-            "auto-c0020-000",
+            "auto-c0011-004",
+            "auto-c0011-011",
+            "auto-c0019-000",
+            "auto-c0029-002",
             "auto-c0029-012"
           ],
           "variants": {},
@@ -58,27 +69,27 @@
       "detail": "owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ owner/variant pair at auto-c0029-012/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0029-012",
-        "sha256": "d5fd5e7fa5e0698af6b77753342c911f3afcd6a74a00d4a515fe5c30f06e5d97"
+        "sha256": "dda78a844a95e13b283c9cbb1ee8cd5c8fb0350d851cb52953142c881bbfbb6c"
       },
       "expected_candidate": {
         "name": "auto-c0029-012",
-        "sha256": "d5fd5e7fa5e0698af6b77753342c911f3afcd6a74a00d4a515fe5c30f06e5d97"
+        "sha256": "dda78a844a95e13b283c9cbb1ee8cd5c8fb0350d851cb52953142c881bbfbb6c"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "cb8fb6e342dc94d4214fce9ff10aea31c4a83892",
+      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
       "prompt_version": "3",
-      "registry_version": "137"
+      "registry_version": "143"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 4,
+    "attempts": 5,
     "symbol_set": [
       "DAT_803232f8",
       "DAT_803232fa",
@@ -126,8 +137,8 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 136,
-    "model_requests": 8,
+    "registry_version_used": 143,
+    "model_requests": 10,
     "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ owner/variant pair at auto-c0029-012/gnt4_shim.h",
     "interruptions": 1,
     "rounds": [
@@ -135,22 +146,33 @@
         "iteration": 1,
         "stage": "compile",
         "error_count": 2,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0029-012\\header-attempt4-iter0.h",
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0029-012.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_7b_ip33y\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_tasnfkv7\\unit.o'' failed (returned 1)",
           "unit.c:61:33: error: use of undeclared identifier 'FUN_80047aa4'"
         ],
-        "fingerprint": "2c4c346444d38d9c272459af37f88f01151f59d2fb610f3bd26fc5048793bc94"
+        "fingerprint": "5a6756679480784cf5ae3cba1a8e44679bde51e0454f366f111426c62fbe8d02"
+      },
+      {
+        "iteration": 2,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0029-012\\header-attempt5-iter1.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: SQRT"
+        ],
+        "fingerprint": "af8afde6b78a084c66e5a785b6d8ba3a6a205d8b51782d1c5b117ef7308b1f07"
       }
     ],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0019-011",
-        "auto-c0019-017",
-        "auto-c0019-018",
-        "auto-c0020-000",
+        "auto-c0011-004",
+        "auto-c0011-011",
+        "auto-c0019-000",
+        "auto-c0029-002",
         "auto-c0029-012"
       ],
       "stage": "canonicalize",
@@ -159,10 +181,10 @@
           "symbol": "zz_0006fb4_",
           "class": "canonicalization_refused",
           "units": [
-            "auto-c0019-011",
-            "auto-c0019-017",
-            "auto-c0019-018",
-            "auto-c0020-000",
+            "auto-c0011-004",
+            "auto-c0011-011",
+            "auto-c0019-000",
+            "auto-c0029-002",
             "auto-c0029-012"
           ],
           "variants": {},
@@ -172,20 +194,20 @@
       "detail": "owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ owner/variant pair at auto-c0029-012/gnt4_shim.h",
       "candidate": {
         "name": "auto-c0029-012",
-        "sha256": "d5fd5e7fa5e0698af6b77753342c911f3afcd6a74a00d4a515fe5c30f06e5d97"
+        "sha256": "dda78a844a95e13b283c9cbb1ee8cd5c8fb0350d851cb52953142c881bbfbb6c"
       },
       "expected_candidate": {
         "name": "auto-c0029-012",
-        "sha256": "d5fd5e7fa5e0698af6b77753342c911f3afcd6a74a00d4a515fe5c30f06e5d97"
+        "sha256": "dda78a844a95e13b283c9cbb1ee8cd5c8fb0350d851cb52953142c881bbfbb6c"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "cb8fb6e342dc94d4214fce9ff10aea31c4a83892",
+      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
       "prompt_version": "3",
-      "registry_version": "137"
+      "registry_version": "143"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false,
@@ -234,6 +256,14 @@
       "result": "gate_failed",
       "stage": "assembly",
       "attempt": 4,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ owner/variant pair at auto-c0029-012/gnt4_shim.h",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-25T14:27:15.499561Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 5,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ owner/variant pair at auto-c0029-012/gnt4_shim.h",
       "product_commit": null
     }
