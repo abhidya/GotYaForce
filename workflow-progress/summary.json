@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-25T09:07:27.841499Z",
-  "run_id": "2026-08-25T08:13:01.132808Z",
+  "generated_at": "2026-08-25T09:45:44.712915Z",
+  "run_id": "2026-08-25T09:11:03.196343Z",
   "total_units": 1396,
   "green": 3,
   "staged": 85,
@@ -10,30 +10,21 @@
   "deferred": 0,
   "structural_ineligible": 4,
   "active": 0,
-  "total_attempts": 205,
-  "transitions_last_hour": 6,
+  "total_attempts": 206,
+  "transitions_last_hour": 2,
   "greens_last_hour": 0,
   "last_green_at": "2026-08-24T23:38:51.149010Z",
   "last_green_unit": "auto-c0020-000",
   "last_product_commit": "1923f3a6e9f877677045111f1893bdbf33dc636b",
-  "repeated_failure_classes": [
-    [
-      "artifact-install:artifact install refused after assembly pass: legacy revoked",
-      3
-    ],
-    [
-      "assembly:assembly gate link failed before promotion: _start_em_asm --",
-      2
-    ]
-  ],
-  "health": "idle",
+  "repeated_failure_classes": [],
+  "health": "active_no_green",
   "machine": {
-    "workflow_state": "stopped_at_boundary",
-    "driver_status": "stopped",
+    "workflow_state": "running",
+    "driver_status": "running",
     "manual_paused": false,
     "block_reason": null,
-    "active_model": null,
-    "context_length": null,
+    "active_model": "unsloth/Qwen3.8-27B-GGUF",
+    "context_length": 60000,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
     "detail": ""
   }

@@ -1,31 +1,27 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-25T09:07:27.626328Z - machine-written, do not edit.*
+*Generated 2026-08-25T09:45:44.359960Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 88/1396 settled (3 green, 85 staged) |
 | **Retries outstanding** | 34 |
 | **Untouched** | 1270 |
-| **Last transition** | 2026-08-25T09:07:27.626328Z |
+| **Last transition** | 2026-08-25T09:45:44.359960Z |
 | **Last green** | 2026-08-24T23:38:51.149010Z (`auto-c0020-000`) |
 | **Last product commit** | `1923f3a6e9f877677045111f1893bdbf33dc636b` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
-
-**Repeated recent failure classes**
-
-- `artifact-install:artifact install refused after assembly pass: legacy revoked` x3
-- `assembly:assembly gate link failed before promotion: _start_em_asm --` x2
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T09:45:44.359960Z | `auto-c0029-012` | gate_failed | assembly | 4 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ |
 | 2026-08-25T09:07:27.626328Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-25T09:07:23.417032Z | `auto-c0029-002` | gate_failed | assembly | 4 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-25T08:34:44.889846Z | `auto-c0019-000` | gate_failed | assembly | 5 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
@@ -75,4 +71,3 @@
 | 2026-08-24T16:14:46.969617Z | `auto-c0046-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T16:11:48.310710Z | `auto-c0043-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T15:43:31.798277Z | `auto-c0043-017` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-24T15:22:30.219454Z | `auto-c0043-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
