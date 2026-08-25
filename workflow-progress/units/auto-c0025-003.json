@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0025-003",
   "unit_id": "auto-c0025-003",
-  "timestamp": "2026-08-24T13:51:39.341560Z",
-  "run_id": "2026-08-24T01:57:30.243221Z",
+  "timestamp": "2026-08-25T20:05:55.656045Z",
+  "run_id": "2026-08-25T15:28:22.545919Z",
   "result": "gate_failed",
   "stage": "wasm-link",
-  "attempt": 1,
-  "detail": "not linked: ing: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:272:24: warning: operator '>>' has lower precedence than '-'; '-' will be evaluated first [-Wshift-op-parentheses]\nunit.c:281:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:285:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:290:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:291:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:300:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:305:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:306:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:342:28: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]",
+  "attempt": 2,
+  "detail": "not linked: s]\nunit.c:272:24: warning: operator '>>' has lower precedence than '-'; '-' will be evaluated first [-Wshift-op-parentheses]\nunit.c:281:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:285:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:290:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:291:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:300:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:305:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:306:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:340:16: error: use of undeclared identifier 'code'\nunit.c:340:22: error: expected expression\nunit.c:342:28: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -23,73 +23,90 @@
         "error_count": 4,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0025-003.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ufufr1hy\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ae0xjfen\\unit.o'' failed (returned 1)",
           "unit.c:135:1: error: conflicting types for 'FUN_800e9138'",
           "unit.c:205:17: error: use of undeclared identifier 'stack0x00000008'",
           "unit.c:340:11: error: assigning to 'int' from incompatible type 'void'"
         ],
-        "fingerprint": "47d07832dce39232b265effbfcd0aef27ebdf9b5ba1bd62d26ffcf1ce8aae865"
+        "fingerprint": "bc1918fc7a803a39ee5d07df98a8b60aada1ec4623c9e18c1389f7f08d300097"
       },
       {
         "iteration": 2,
         "stage": "compile",
-        "error_count": 12,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt1-iter1.h",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt2-iter1.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_qcq3oga4\\unit.o'' failed (returned 1)",
-          "unit.c:265:23: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:265:7: error: use of undeclared identifier 'DAT_80436338'",
-          "unit.c:267:38: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:271:17: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:279:29: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:325:15: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:340:25: error: use of undeclared identifier 'PTR_FUN_8031a0f4'",
-          "unit.c:342:15: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:343:46: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:343:7: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:361:7: error: use of undeclared identifier 'DAT_804361c4'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_o8l1ll5b\\unit.o'' failed (returned 1)",
+          "unit.c:135:1: error: conflicting types for 'FUN_800e9138'",
+          "unit.c:340:11: error: assigning to 'int' from incompatible type 'void'"
         ],
-        "fingerprint": "81db5e53b961d1b5c363e8d14c70504a36ff19ae1e97718bd4d3f9bd99e5011a"
+        "fingerprint": "7c6cc224c9c57a5680a7168e4d7cb873d54b6a9dd49ffe5bef3dd440a760a4f7"
       },
       {
         "iteration": 3,
         "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt1-iter2.h",
+        "error_count": 27,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt2-iter2.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_xenvzf2r\\unit.o'' failed (returned 1)",
-          "unit.c:135:1: error: conflicting types for 'FUN_800e9138'",
-          "unit.c:90:18: error: assigning to 'u64_fields' from incompatible type 'int'",
-          "unit.c:99:1: error: conflicting types for 'FUN_800e90ac'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp__ojhjrg6\\unit.o'' failed (returned 1)",
+          "unit.c:343:46: error: use of undeclared identifier 'DAT_8043633c'",
+          "unit.c:353:33: error: unknown type name 'undefined8'",
+          "unit.c:353:52: error: unknown type name 'undefined8'",
+          "unit.c:353:71: error: unknown type name 'undefined8'",
+          "unit.c:354:17: error: unknown type name 'undefined8'",
+          "unit.c:354:36: error: unknown type name 'undefined8'",
+          "unit.c:354:55: error: unknown type name 'undefined8'",
+          "unit.c:354:74: error: unknown type name 'undefined8'",
+          "unit.c:355:29: error: unknown type name 'undefined4'",
+          "unit.c:355:49: error: unknown type name 'undefined4'",
+          "unit.c:355:69: error: unknown type name 'undefined4'",
+          "unit.c:356:17: error: unknown type name 'undefined4'",
+          "unit.c:356:37: error: unknown type name 'undefined4'",
+          "unit.c:356:57: error: unknown type name 'undefined4'",
+          "unit.c:356:77: error: unknown type name 'undefined4'",
+          "unit.c:361:7: error: use of undeclared identifier 'DAT_804361c4'",
+          "unit.c:362:26: error: use of undeclared identifier 'DAT_803cd228'",
+          "unit.c:363:34: error: use of undeclared identifier 'DAT_803cd228'",
+          "unit.c:365:36: error: use of undeclared identifier 'DAT_803cd22c'",
+          "unit.c:366:34: error: use of undeclared identifier 'DAT_803cd22c'",
+          "unit.c:368:7: error: use of undeclared identifier 'DAT_803cd224'",
+          "unit.c:369:11: error: use of undeclared identifier 'DAT_803b2980'",
+          "unit.c:370:25: error: use of undeclared identifier 'DAT_80319dfc'",
+          "unit.c:371:26: error: use of undeclared identifier 'DAT_80319dfc'",
+          "unit.c:373:21: error: use of undeclared identifier 'DAT_803b2980'",
+          "unit.c:373:69: error: use of undeclared identifier 'DAT_80319dfc'"
         ],
-        "fingerprint": "47e9ac4b590db414112f7a0a1af50b17f78f4bead8a924b859995d6a828b735d"
+        "fingerprint": "ea3d3ee23b73bf6500bd61d36de95fea865c49d82da2a13e79cfd2f78a949597"
       },
       {
         "iteration": 4,
         "stage": "compile",
-        "error_count": 3,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt1-iter3.h",
+        "error_count": 6,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt2-iter3.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_8hkyhov8\\unit.o'' failed (returned 1)",
-          "unit.c:135:1: error: conflicting types for 'FUN_800e9138'",
-          "unit.c:99:1: error: conflicting types for 'FUN_800e90ac'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_9aw7yidu\\unit.o'' failed (returned 1)",
+          "unit.c:113:41: error: use of undeclared identifier 'DAT_803d0000'",
+          "unit.c:194:8: error: use of undeclared identifier 'bool'",
+          "unit.c:340:16: error: use of undeclared identifier 'code'",
+          "unit.c:340:22: error: expected expression",
+          "unit.c:87:60: error: member reference base type 'int' is not a structure or union"
         ],
-        "fingerprint": "0c233f176c3beaa633ab8c774f49ab737487b54d970df8284be035f79d5f6d99"
+        "fingerprint": "228b3a0d4761e7faf520296ca3b0e96b35c899c4062ef4235fd44065f98399b4"
       }
     ],
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "b57b2c410c9fc994f98f7228b4444564e9e1f4f9",
       "prompt_version": "3",
-      "registry_version": "106"
+      "registry_version": "149"
     },
     "failure_domain": "source-compiler",
     "diagnosis_eligible": true
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 1,
+    "attempts": 2,
     "symbol_set": [
       "DAT_80319dec",
       "DAT_80319dfc",
@@ -144,8 +161,8 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 106,
-    "model_requests": 3,
+    "registry_version_used": 149,
+    "model_requests": 6,
     "rounds": [
       {
         "iteration": 1,
@@ -153,72 +170,106 @@
         "error_count": 4,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0025-003.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ufufr1hy\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ae0xjfen\\unit.o'' failed (returned 1)",
           "unit.c:135:1: error: conflicting types for 'FUN_800e9138'",
           "unit.c:205:17: error: use of undeclared identifier 'stack0x00000008'",
           "unit.c:340:11: error: assigning to 'int' from incompatible type 'void'"
         ],
-        "fingerprint": "47d07832dce39232b265effbfcd0aef27ebdf9b5ba1bd62d26ffcf1ce8aae865"
+        "fingerprint": "bc1918fc7a803a39ee5d07df98a8b60aada1ec4623c9e18c1389f7f08d300097"
       },
       {
         "iteration": 2,
         "stage": "compile",
-        "error_count": 12,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt1-iter1.h",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt2-iter1.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_qcq3oga4\\unit.o'' failed (returned 1)",
-          "unit.c:265:23: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:265:7: error: use of undeclared identifier 'DAT_80436338'",
-          "unit.c:267:38: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:271:17: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:279:29: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:325:15: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:340:25: error: use of undeclared identifier 'PTR_FUN_8031a0f4'",
-          "unit.c:342:15: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:343:46: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:343:7: error: use of undeclared identifier 'DAT_8043633c'",
-          "unit.c:361:7: error: use of undeclared identifier 'DAT_804361c4'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_o8l1ll5b\\unit.o'' failed (returned 1)",
+          "unit.c:135:1: error: conflicting types for 'FUN_800e9138'",
+          "unit.c:340:11: error: assigning to 'int' from incompatible type 'void'"
         ],
-        "fingerprint": "81db5e53b961d1b5c363e8d14c70504a36ff19ae1e97718bd4d3f9bd99e5011a"
+        "fingerprint": "7c6cc224c9c57a5680a7168e4d7cb873d54b6a9dd49ffe5bef3dd440a760a4f7"
       },
       {
         "iteration": 3,
         "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt1-iter2.h",
+        "error_count": 27,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt2-iter2.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_xenvzf2r\\unit.o'' failed (returned 1)",
-          "unit.c:135:1: error: conflicting types for 'FUN_800e9138'",
-          "unit.c:90:18: error: assigning to 'u64_fields' from incompatible type 'int'",
-          "unit.c:99:1: error: conflicting types for 'FUN_800e90ac'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp__ojhjrg6\\unit.o'' failed (returned 1)",
+          "unit.c:343:46: error: use of undeclared identifier 'DAT_8043633c'",
+          "unit.c:353:33: error: unknown type name 'undefined8'",
+          "unit.c:353:52: error: unknown type name 'undefined8'",
+          "unit.c:353:71: error: unknown type name 'undefined8'",
+          "unit.c:354:17: error: unknown type name 'undefined8'",
+          "unit.c:354:36: error: unknown type name 'undefined8'",
+          "unit.c:354:55: error: unknown type name 'undefined8'",
+          "unit.c:354:74: error: unknown type name 'undefined8'",
+          "unit.c:355:29: error: unknown type name 'undefined4'",
+          "unit.c:355:49: error: unknown type name 'undefined4'",
+          "unit.c:355:69: error: unknown type name 'undefined4'",
+          "unit.c:356:17: error: unknown type name 'undefined4'",
+          "unit.c:356:37: error: unknown type name 'undefined4'",
+          "unit.c:356:57: error: unknown type name 'undefined4'",
+          "unit.c:356:77: error: unknown type name 'undefined4'",
+          "unit.c:361:7: error: use of undeclared identifier 'DAT_804361c4'",
+          "unit.c:362:26: error: use of undeclared identifier 'DAT_803cd228'",
+          "unit.c:363:34: error: use of undeclared identifier 'DAT_803cd228'",
+          "unit.c:365:36: error: use of undeclared identifier 'DAT_803cd22c'",
+          "unit.c:366:34: error: use of undeclared identifier 'DAT_803cd22c'",
+          "unit.c:368:7: error: use of undeclared identifier 'DAT_803cd224'",
+          "unit.c:369:11: error: use of undeclared identifier 'DAT_803b2980'",
+          "unit.c:370:25: error: use of undeclared identifier 'DAT_80319dfc'",
+          "unit.c:371:26: error: use of undeclared identifier 'DAT_80319dfc'",
+          "unit.c:373:21: error: use of undeclared identifier 'DAT_803b2980'",
+          "unit.c:373:69: error: use of undeclared identifier 'DAT_80319dfc'"
         ],
-        "fingerprint": "47e9ac4b590db414112f7a0a1af50b17f78f4bead8a924b859995d6a828b735d"
+        "fingerprint": "ea3d3ee23b73bf6500bd61d36de95fea865c49d82da2a13e79cfd2f78a949597"
       },
       {
         "iteration": 4,
         "stage": "compile",
-        "error_count": 3,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt1-iter3.h",
+        "error_count": 6,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0025-003\\header-attempt2-iter3.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_8hkyhov8\\unit.o'' failed (returned 1)",
-          "unit.c:135:1: error: conflicting types for 'FUN_800e9138'",
-          "unit.c:99:1: error: conflicting types for 'FUN_800e90ac'"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_9aw7yidu\\unit.o'' failed (returned 1)",
+          "unit.c:113:41: error: use of undeclared identifier 'DAT_803d0000'",
+          "unit.c:194:8: error: use of undeclared identifier 'bool'",
+          "unit.c:340:16: error: use of undeclared identifier 'code'",
+          "unit.c:340:22: error: expected expression",
+          "unit.c:87:60: error: member reference base type 'int' is not a structure or union"
         ],
-        "fingerprint": "0c233f176c3beaa633ab8c774f49ab737487b54d970df8284be035f79d5f6d99"
+        "fingerprint": "228b3a0d4761e7faf520296ca3b0e96b35c899c4062ef4235fd44065f98399b4"
       }
     ],
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "b57b2c410c9fc994f98f7228b4444564e9e1f4f9",
       "prompt_version": "3",
-      "registry_version": "106"
+      "registry_version": "149"
     },
     "failure_domain": "source-compiler",
     "diagnosis_eligible": true,
-    "error": "not linked: ing: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:272:24: warning: operator '>>' has lower precedence than '-'; '-' will be evaluated first [-Wshift-op-parentheses]\nunit.c:281:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:285:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:290:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:291:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:300:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:305:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:306:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:342:28: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]",
+    "error": "not linked: s]\nunit.c:272:24: warning: operator '>>' has lower precedence than '-'; '-' will be evaluated first [-Wshift-op-parentheses]\nunit.c:281:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:285:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:290:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:291:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:300:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:305:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:306:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:340:16: error: use of undeclared identifier 'code'\nunit.c:340:22: error: expected expression\nunit.c:342:28: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]",
     "last_stage": "wasm-link",
-    "source_failure_id": "source-failure-4aa7160becea75fb63d3d0a2f262d5cb8ad7446324f1f23082fae066a2f1d1f3"
+    "source_failure_id": "source-failure-515c5d61a8f52e051cbe1e9d072fa2ad828a39ff3cca059851e2d74ef96503d2",
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "zz_00076d0_",
+        "zz_00097b4_",
+        "zz_026e4b8_",
+        "zz_026e77c_",
+        "zz_026eea4_",
+        "zz_026f9b8_"
+      ],
+      "unresolved": []
+    }
   },
   "history": [
     {
@@ -227,6 +278,14 @@
       "stage": "wasm-link",
       "attempt": 1,
       "detail": "not linked: ing: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:272:24: warning: operator '>>' has lower precedence than '-'; '-' will be evaluated first [-Wshift-op-parentheses]\nunit.c:281:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:285:27: warning: operator '>>' has",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-25T20:05:55.656045Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 2,
+      "detail": "not linked: s]\nunit.c:272:24: warning: operator '>>' has lower precedence than '-'; '-' will be evaluated first [-Wshift-op-parentheses]\nunit.c:281:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:285:27: warning: operator '>>' has lower precedence than '+'; '+' will be evaluated first [-Wshift-op-parentheses]\nunit.c:290:27: warn",
       "product_commit": null
     }
   ]
