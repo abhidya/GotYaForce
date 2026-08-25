@@ -85,6 +85,33 @@ GX caveat: Set*/Get* record into process-local static state, not real GX
 hardware registers; sufficient for callers that round-trip through the seam,
 not a rendering implementation.
 
+## hsd_stubs.c (test_hsd_stubs.c: HSD_TESTS_PASS)
+
+All 27 declared HSD_* seam functions are documented TODO no-op stubs (empty
+body, or 0/NULL matching the declared return type). Real semantics operate on
+sysdolphin scene-graph objects that do not exist in the portable harness;
+implementing them is out of scope for this lane and marked deferred. All 27:
+impl=y(stub) comp=y test=y(smoke: callable, returns 0/NULL, no crash).
+
+Per the seed header, two symbols are additionally present with deliberately
+EMPTY-PAREN signatures and no semantics, because their parameter types are
+still contested between corpus units and must not be guessed:
+
+| function | status |
+|---|---|
+| gnt4_HSD_JObjSetMtxDirtySub_bl | stub-with-TODO, signature unsettled (void* vs int*), not declared in header |
+| gnt4___assert_bl | stub-with-TODO, signature unsettled (char* vs float*), not declared in header |
+
+Stub caveats: gnt4_HSD_JObjLoadJoint returns NULL — callers that dereference
+the joint will fault; that is intentional surfacing, not correctness.
+gnt4_HSD_JObjClearFlags/SetFlags return 0 rather than an entry-register
+value because their first GPR pair is packed into an undefined8 and the
+r3-at-exit assumption is not meaningful there.
+
+Harness note: one mechanical fix was applied by the harness (not the model):
+test_hsd_stubs.c printed its pass marker without a trailing newline, which
+emscripten's line-buffered stdout drops; a `\n` was added. No logic changed.
+
 Family-wide uncertainty: every `undefined8`-returning shim returns the entry
 value of PPC r3 (first pointer arg) zero-extended to 64 bits. The corpus
 proves callers consume r3, but which value r3 holds at exit is an assumption
