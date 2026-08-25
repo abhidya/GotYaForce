@@ -1,0 +1,8 @@
+{"kind":"header","spine_schema":1,"unit":"spine-synth","spine":{"export":"spine_main","gc_addr":"0x0","args":[]},"wasm":"spine_synth.wasm","arena":"spine-synth.arena.json","iterations":2,"terminator":{"mode":"call_cap"},"owned_regions":[{"addr":"0x104000","size":4}],"counts":{"call":6}}
+{"kind":"call","i":0,"iter":0,"callee":"stub_alpha","callee_addr":"0x1001","args":[7,3],"ret":10,"deltas":[],"owned":[{"addr":"0x104000","b64":"AAAAAA=="}]}
+{"kind":"call","i":1,"iter":0,"callee":"stub_beta","callee_addr":"0x1002","args":[10],"ret":null,"deltas":[{"addr":"0x104004","b64":"BQAAAA=="}]}
+{"kind":"call","i":2,"iter":0,"callee":"stub_gamma","callee_addr":"0x1003","args":[15],"ret":2.5,"deltas":[]}
+{"kind":"call","i":3,"iter":1,"callee":"stub_alpha","callee_addr":"0x1001","args":[2,3],"ret":8,"deltas":[],"owned":[{"addr":"0x104000","b64":"AQAAAA=="}]}
+{"kind":"call","i":4,"iter":1,"callee":"stub_beta","callee_addr":"0x1002","args":[8],"ret":null,"deltas":[{"addr":"0x104004","b64":"AQAAAA=="}]}
+{"kind":"call","i":5,"iter":1,"callee":"stub_gamma","callee_addr":"0x1003","args":[9],"ret":4,"deltas":[]}
+{"kind":"end","owned":[{"addr":"0x104000","b64":"AgAAAA=="}]}

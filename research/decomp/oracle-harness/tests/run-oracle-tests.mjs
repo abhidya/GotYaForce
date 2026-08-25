@@ -19,6 +19,7 @@ try {
     path.join(here, "result-integrity.test.mjs"),
     path.join(here, "arena-rom-binding.test.mjs"),
     path.join(here, "replay-gate.test.mjs"),
+    path.join(here, "spine-harness.test.mjs"),
   ], {
     cwd: root,
     env: {
