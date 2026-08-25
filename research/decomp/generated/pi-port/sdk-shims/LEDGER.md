@@ -55,6 +55,18 @@ through pi 0.84.3; UNREVIEWED, not integrated.
 | gnt4___init_user_bl | y | y | y | no-op, returns 0; real MSL __init_user return value unverified |
 | gnt4___cvt_fp2unsigned_bl | y | y | y | PPC saturating double->u32: NaN/<=0 -> 0, >=2^32-1 -> 0xFFFFFFFF, else truncate |
 
+## libc_math.c (test_libc_math.c: LIBC_MATH_TESTS_PASS)
+
+| function | impl | comp | test | notes |
+|---|---|---|---|---|
+| gnt4_memcpy | y | y | y | delegates to host memcpy |
+| gnt4_memset | y | y | y | delegates to host memset |
+| gnt4_acos_bl | y | y | y | host libm; MSL bit-exactness not verified (last-ulp differences possible vs GC libm) |
+| gnt4_atan | y | y | y | host libm; same caveat |
+| gnt4_atan2_bl | y | y | y | host libm; same caveat |
+| gnt4_pow_bl | y | y | y | host libm; same caveat |
+| gnt4_sin_bl | y | y | y | host libm; same caveat |
+
 Family-wide uncertainty: every `undefined8`-returning shim returns the entry
 value of PPC r3 (first pointer arg) zero-extended to 64 bits. The corpus
 proves callers consume r3, but which value r3 holds at exit is an assumption
