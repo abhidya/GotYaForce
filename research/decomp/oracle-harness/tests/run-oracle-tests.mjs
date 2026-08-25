@@ -17,6 +17,7 @@ try {
     path.join(here, "codec.test.mjs"),
     path.join(here, "zero-case-guard.test.mjs"),
     path.join(here, "result-integrity.test.mjs"),
+    path.join(here, "spine-harness.test.mjs"),
   ], {
     cwd: root,
     env: {

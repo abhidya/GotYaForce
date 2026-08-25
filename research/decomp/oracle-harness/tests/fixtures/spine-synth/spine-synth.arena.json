@@ -1,0 +1,6 @@
+{
+  "note": "synthetic arena for the boundary_green self-test: zeroes SPINE_TICK (0x104000) and BETA_CELL (0x104004) — see spine_synth.c",
+  "segments": [
+    { "addr": 1064960, "b64": "AAAAAAAAAAA=" }
+  ]
+}
