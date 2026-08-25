@@ -239,7 +239,7 @@ function resolveStreamArm(
  *  combo-reconcile root-cause pass (2026-07-06) proved rejecting these records deleted
  *  REAL armed combo rungs on pl0501/pl0a00/pl0a02 (ladder fell below both the asset
  *  count and the ROM's armed-rung count). */
-const OPEN_WINDOW_ACTIVE_FRAMES = 8;
+export const OPEN_WINDOW_ACTIVE_FRAMES = 8;
 
 function stepFromKind(
   borgId: string,
