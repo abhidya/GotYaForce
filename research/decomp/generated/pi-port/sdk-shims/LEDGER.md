@@ -17,6 +17,13 @@ through pi 0.84.3; UNREVIEWED, not integrated.
 | gnt4_PSVECSquareDistance_bl | y | y | y | |
 | gnt4_PSVECSquareMag_bl | y | y | y | |
 
+## psquat.c (test_psquat.c: PSQUAT_TESTS_PASS)
+
+| function | impl | comp | test | notes |
+|---|---|---|---|---|
+| gnt4_PSQUATDotProduct_bl | y | y | y | float accumulator, widened at return |
+| gnt4_PSQUATScale_bl | y | y | y | arg map: s=scale (f1), v=src quat (r3), out=dst (r4); returns entry r3 (= `v`) |
+
 Family-wide uncertainty: every `undefined8`-returning shim returns the entry
 value of PPC r3 (first pointer arg) zero-extended to 64 bits. The corpus
 proves callers consume r3, but which value r3 holds at exit is an assumption
