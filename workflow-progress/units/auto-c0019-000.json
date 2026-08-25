@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0019-000",
   "unit_id": "auto-c0019-000",
-  "timestamp": "2026-08-24T03:53:07.548145Z",
-  "run_id": "2026-08-24T01:57:30.243221Z",
+  "timestamp": "2026-08-25T08:34:44.889846Z",
+  "run_id": "2026-08-25T08:13:01.132808Z",
   "result": "gate_failed",
   "stage": "assembly",
-  "attempt": 4,
-  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800bae68 owner/variant pair at auto-c0019-000/gnt4_shim.h",
+  "attempt": 5,
+  "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -21,52 +21,52 @@
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0029-014",
-        "auto-c0019-002",
-        "auto-c0028-018",
-        "auto-c0049-018",
+        "auto-c0019-011",
+        "auto-c0019-017",
+        "auto-c0019-018",
+        "auto-c0020-000",
         "auto-c0019-000"
       ],
-      "stage": "canonicalize",
+      "stage": "link",
       "conflicts": [
         {
-          "symbol": "FUN_800bae68",
-          "class": "canonicalization_refused",
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
           "units": [
             "auto-c0019-000",
-            "auto-c0019-002",
-            "auto-c0028-018",
-            "auto-c0029-014",
-            "auto-c0049-018"
+            "auto-c0019-011",
+            "auto-c0019-017",
+            "auto-c0019-018",
+            "auto-c0020-000"
           ],
           "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_800bae68 owner/variant pair at auto-c0019-000/gnt4_shim.h"
+          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSQUATScale_bl"
         }
       ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_800bae68 owner/variant pair at auto-c0019-000/gnt4_shim.h",
+      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
       "candidate": {
         "name": "auto-c0019-000",
-        "sha256": "7c65db96191255953509c45ef2fcc3bdfdb943d8ebb8105c4e3b327c335421dc"
+        "sha256": "268b2e00cc74e221d80e96146ad964fb171d83610067607e36e58e0dad4243a7"
       },
       "expected_candidate": {
         "name": "auto-c0019-000",
-        "sha256": "7c65db96191255953509c45ef2fcc3bdfdb943d8ebb8105c4e3b327c335421dc"
+        "sha256": "268b2e00cc74e221d80e96146ad964fb171d83610067607e36e58e0dad4243a7"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "cde96261dbaca38b922171bf03908f66149fab30",
       "prompt_version": "3",
-      "registry_version": "91"
+      "registry_version": "136"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 4,
+    "attempts": 5,
     "symbol_set": [
       "CONCAT44",
       "FUN_800ba3b4",
@@ -103,8 +103,8 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 91,
-    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800bae68 owner/variant pair at auto-c0019-000/gnt4_shim.h",
+    "registry_version_used": 136,
+    "error": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
     "oracle_summary": "compile-only (UNVERIFIED)",
     "commit": "8b9f6982677707504dee8d90ea41c2a932f1f680",
     "pushed": true,
@@ -122,49 +122,54 @@
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0029-014",
-        "auto-c0019-002",
-        "auto-c0028-018",
-        "auto-c0049-018",
+        "auto-c0019-011",
+        "auto-c0019-017",
+        "auto-c0019-018",
+        "auto-c0020-000",
         "auto-c0019-000"
       ],
-      "stage": "canonicalize",
+      "stage": "link",
       "conflicts": [
         {
-          "symbol": "FUN_800bae68",
-          "class": "canonicalization_refused",
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
           "units": [
             "auto-c0019-000",
-            "auto-c0019-002",
-            "auto-c0028-018",
-            "auto-c0029-014",
-            "auto-c0049-018"
+            "auto-c0019-011",
+            "auto-c0019-017",
+            "auto-c0019-018",
+            "auto-c0020-000"
           ],
           "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_800bae68 owner/variant pair at auto-c0019-000/gnt4_shim.h"
+          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSQUATScale_bl"
         }
       ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_800bae68 owner/variant pair at auto-c0019-000/gnt4_shim.h",
+      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
       "candidate": {
         "name": "auto-c0019-000",
-        "sha256": "7c65db96191255953509c45ef2fcc3bdfdb943d8ebb8105c4e3b327c335421dc"
+        "sha256": "268b2e00cc74e221d80e96146ad964fb171d83610067607e36e58e0dad4243a7"
       },
       "expected_candidate": {
         "name": "auto-c0019-000",
-        "sha256": "7c65db96191255953509c45ef2fcc3bdfdb943d8ebb8105c4e3b327c335421dc"
+        "sha256": "268b2e00cc74e221d80e96146ad964fb171d83610067607e36e58e0dad4243a7"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "cde96261dbaca38b922171bf03908f66149fab30",
       "prompt_version": "3",
-      "registry_version": "91"
+      "registry_version": "136"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false,
-    "candidate_sha256": "caa4a9832653f841851ff6b3a3d72173dd62530e24edf652102ae5101683c630"
+    "candidate_sha256": "caa4a9832653f841851ff6b3a3d72173dd62530e24edf652102ae5101683c630",
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    }
   },
   "history": [
     {
@@ -205,6 +210,14 @@
       "stage": "assembly",
       "attempt": 4,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800bae68 owner/variant pair at auto-c0019-000/gnt4_shim.h",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-25T08:34:44.889846Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 5,
+      "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Use",
       "product_commit": null
     }
   ]
