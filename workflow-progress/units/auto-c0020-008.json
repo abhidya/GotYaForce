@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "unit": "auto-c0020-008",
+  "unit_id": "auto-c0020-008",
+  "timestamp": "2026-08-25T02:46:49.712626Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "result": "gate_failed",
+  "stage": "wasm-link",
+  "attempt": 1,
+  "detail": "not linked: unit.c:56:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'\n   56 |   uVar10 = gnt4_PSQUATScale_bl((double)*(float *)(&DAT_80305210 + iVar5),(float *)(param_9 + 0x38),\n      |          ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n   57 |                                (float *)(param_9 + 0x38));\n      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_22wkyuby\\unit.o'' failed (returned 1)",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0020-008.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_scsgtcx0\\unit.o'' failed (returned 1)",
+          "unit.c:39:33: error: use of undeclared identifier 'zz_0048288_'",
+          "unit.c:56:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "c602f7008b14e949ffe20aefd6aa5a88a9958ce8e54e7b905c4221a92b862b72"
+      },
+      {
+        "iteration": 3,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0020-008\\header-attempt1-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_22wkyuby\\unit.o'' failed (returned 1)",
+          "unit.c:56:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "1804740aafea0ed122dd9fc30fdc2e31fcfb97c328c001236bb1d488d1d75901"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "136"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "DAT_802b0ca8",
+      "DAT_802b0cac",
+      "DAT_802b0cb0",
+      "DAT_802b0cb4",
+      "DAT_802b0cb8",
+      "DAT_802b0cbc",
+      "DAT_80305200",
+      "DAT_80305201",
+      "DAT_80305202",
+      "DAT_80305204",
+      "DAT_80305208",
+      "DAT_8030520c",
+      "DAT_80305210",
+      "DAT_80305214",
+      "DAT_80305218",
+      "DAT_8030521c",
+      "DAT_8030521d",
+      "DAT_8030521e",
+      "DAT_8030521f",
+      "FUN_80083874",
+      "FUN_80083ad4",
+      "FUN_800c48d0",
+      "FUN_800c4b48",
+      "FUN_800c5010",
+      "FUN_800c5a34",
+      "FUN_800c5a40",
+      "PTR_DAT_80433934",
+      "SQRT",
+      "byte",
+      "code",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSQUATDotProduct_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECNormalize_bl",
+      "gnt4_PSVECSquareDistance_bl",
+      "gnt4_PSVECSquareMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006f98_",
+      "zz_0006fb4_",
+      "zz_0066408_",
+      "zz_006c440_",
+      "zz_006de10_",
+      "zz_0083244_",
+      "zz_00833ec_",
+      "zz_0083610_",
+      "zz_0083714_",
+      "zz_0083d60_",
+      "zz_0084170_",
+      "zz_0084434_",
+      "zz_0084498_",
+      "zz_0088e50_",
+      "zz_0089100_",
+      "zz_008ac80_",
+      "zz_008aff0_",
+      "zz_00a2bf8_",
+      "zz_00c4ba4_",
+      "zz_00c5730_",
+      "zz_00c590c_",
+      "zz_00f0104_",
+      "zz_00f036c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 136,
+    "model_requests": 3,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0020-008.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_scsgtcx0\\unit.o'' failed (returned 1)",
+          "unit.c:39:33: error: use of undeclared identifier 'zz_0048288_'",
+          "unit.c:56:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "c602f7008b14e949ffe20aefd6aa5a88a9958ce8e54e7b905c4221a92b862b72"
+      },
+      {
+        "iteration": 3,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0020-008\\header-attempt1-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_22wkyuby\\unit.o'' failed (returned 1)",
+          "unit.c:56:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "1804740aafea0ed122dd9fc30fdc2e31fcfb97c328c001236bb1d488d1d75901"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "136"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "not linked: unit.c:56:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'\n   56 |   uVar10 = gnt4_PSQUATScale_bl((double)*(float *)(&DAT_80305210 + iVar5),(float *)(param_9 + 0x38),\n      |          ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n   57 |                                (float *)(param_9 + 0x38));\n      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_22wkyuby\\unit.o'' failed (returned 1)",
+    "last_stage": "wasm-link",
+    "source_failure_id": "source-failure-440e174829042b3fc098bc3daf322a7f2cc175add5d92642865336423b4c4aba"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-25T02:46:49.712626Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 1,
+      "detail": "not linked: unit.c:56:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'\n   56 |   uVar10 = gnt4_PSQUATScale_bl((double)*(float *)(&DAT_80305210 + iVar5),(float *)(param_9 + 0x38),\n      |          ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n   57 |                                (float *)(param_9 + 0x38));\n ",
+      "product_commit": null
+    }
+  ]
+}
