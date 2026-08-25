@@ -670,3 +670,230 @@ production shim and re-verification after the threads relink, host-bridge
 out-of-window boundary with ledger-defined passivity, uniform dispatch ABI with
 defined table misses, formulaic ladder budget, dual-canvas hybrid rendering) and
 the 13-step order above.**
+
+
+---
+
+# V5 AMENDMENTS (2026-08-25) — bridged-callee contract, reentrant bridge, spine verification
+
+A fourth adversarial review of v4 returned FAIL: three fatal gaps and three
+non-fatal notes. All three fatals sit inside the mechanisms v4 itself introduced —
+the host bridge (H2) and its prerequisite chain — where v4 named the RPC transport
+but left the callee's semantic contract, the bridge's reentrancy behavior, and the
+verification standard for nonterminating functions unstated. Each is given below as
+gap, mechanism, and gate. The three notes are folded in as NORMATIVE one-liners.
+Where a citation reads `file:line`, the line was read and verified for this
+amendment.
+
+## I1 — Bridged-callee contract: routing a call is not servicing it
+
+**The gap.** H2's bridge assumed the TS scaffold can service a bridged call "as if
+the callee had been linked." That is false twice over:
+
+- (a) **No per-symbol callees exist.** The scaffold is a HOLISTIC recreation, not a
+  function-for-function one: `apps/game/src/sim/battleScene.ts` is a scene-driven
+  monolith (one `BattleScene` class, apps/game/src/sim/battleScene.ts:607, ~98KB of
+  scene logic). There is no TS function corresponding to an arbitrary GC symbol,
+  and nothing in the scaffold takes GC-pointer arguments read out of the shared
+  arena.
+- (b) **"As if linked" is a MEMORY claim, not a return-value claim.** A linked
+  callee performs byte-level writes into the shared GC RAM image — struct fields,
+  pools, globals at original addresses — that downstream LINKED code then reads.
+  TS object-state cannot emit those writes: a bridged call serviced by scaffold
+  logic would return a plausible value while leaving the arena stale, and every
+  linked function reading that state afterward would consume garbage. The
+  routing-only gate (H2 gate (b), "every out-of-window call routed through the
+  declared bridge") would PASS while the game state silently diverged.
+
+**The mechanism: a BRIDGED-CALLEE CLASS.** Out-of-window symbols are serviced by
+**per-symbol host adapters**, each owning the full memory contract:
+
+- An adapter **reads its arguments from GC memory** (dereferencing GC-pointer args
+  in the shared arena) and **writes its results AND side-effects back to GC memory
+  at the original addresses** — the same observable behavior a linked callee would
+  have.
+- Adapters are written **ONLY for symbols the bridged-call ledger proves are
+  actually hit** — demand-driven from measured frames, never thousands up-front.
+  The ledger (H2) is the adapter work-queue.
+- Each adapter is **derived from the same Dolphin trace evidence as ports**: the
+  callee's per-call memory-write set is captured at its Stage-B breakpoints, and
+  the adapter must REPRODUCE that write set. An adapter without trace evidence for
+  its symbol is not a valid adapter.
+- The TS scaffold MAY back an adapter's logic (compute with scaffold code where it
+  matches), but **the adapter owns marshalling** — state moves into and out of GC
+  memory at the adapter boundary, never implicitly through TS object state.
+
+**The gate.** The control-inversion gate (H2 gate (b)) gains **STATE EVIDENCE**:
+at each frame boundary, the shared arena is compared against a Dolphin trace of
+the SAME DTM replay at the same frame boundary. A frame passes only if the arena
+matches the trace **modulo a declared exclusion list** (e.g. uninitialized
+scratch regions), with every exclusion justified in the ledger. Routing counts
+alone no longer pass a frame; a frame whose arena diverges outside the exclusion
+list fails, regardless of how faithfully calls were routed.
+
+## I2 — Bridge reentrancy: a bridged callee that calls back into the module deadlocks it
+
+**The gap.** A bridged TS/host callee whose implementation reaches a ported
+function's seam (the Stage-C pattern — scaffold code calling into verified wasm)
+targets the worker's instance — but the worker's thread is PARKED in
+`Atomics.wait` inside that very call chain (H2 step 1). The main thread would be
+waiting on the worker's export while the worker waits on the main thread's
+result: deadlock, by construction, the first time a bridged callee touches a
+ported seam. Separately, scaffold paths are ASYNC (loaders, promise chains) while
+the H2 RPC contract is synchronous — an async servicing path would leave the
+worker parked forever with no error.
+
+**The mechanism: worker-side REENTRANT DISPATCH LOOP (normative).** The bridge
+adopts the Emscripten-proxying-style discipline:
+
+- The parked worker-side bridge stub distinguishes two wake kinds in the ring
+  buffer: **"result"** (the bridged call completed) and **"invoke linked
+  export"** (the main-thread servicer needs a linked function run).
+- On an invoke-request wake, the worker **calls the requested export on its own
+  stack**, writes the result back into the ring buffer, notifies, and
+  **re-waits** for its original result. The main-thread servicer never calls
+  worker exports directly; it enqueues invoke requests to the parked worker.
+- Nesting (a re-entered export that itself bridges out) is allowed to a **stated
+  maximum depth**; exceeding it is a **declared servicing error** recorded in the
+  ledger, never a silent hang.
+- **Bridged callees MUST be synchronous.** Any async path reached during
+  servicing (an await, a pending promise, a lazy load) is a declared servicing
+  error surfaced in the ledger — the frame fails loudly. Adapters requiring async
+  resources must acquire them ahead of servicing (preload), never during it.
+
+**The gate.** The bridge pilot (order-of-work step 7) includes at least **one
+reentrant case** — a bridged call whose adapter invokes a linked export via the
+dispatch loop — passing with correct results and correct ledger entries. A
+bridge pilot of leaf-only adapters has not exercised the deadlock it exists to
+prevent.
+
+## I3 — Spine verification: `oracle_green` is unreachable for nonterminating functions
+
+**The gap.** H2 gate (a) requires `run_main_game_loop` to reach `oracle_green`
+before the control-inversion step. But `run_main_game_loop` (`0x800527d8`,
+named at research/decomp/index/start-code-flow.md:33; decompiled body at
+research/decomp/ghidra-export/chunk_0006.c:5790-5833) is `do { ... } while( true )`
+(chunk_0006.c:5808 and :5832) — it NEVER RETURNS, and its loop body is almost
+entirely out-of-unit calls. Stage B's per-call replay standard — capture
+(args, referenced memory, return, memory writes), replay, byte-compare — cannot
+even terminate on it: there is no return to compare and the harness would spin.
+The v4 step-7 prerequisite permanently blocks its own step. The same applies to
+any spine/dispatcher function whose body is a nonterminating loop over callees.
+
+**The mechanism: a distinct verification standard, `boundary_green`.**
+
+- **Capture:** from Dolphin, record K loop iterations' **callee-boundary
+  sequence** — for each call the spine makes: callee GC address, arguments, and
+  memory deltas attributable to the interval.
+- **Replay:** the harness stubs every callee with its captured boundary behavior
+  (returning the recorded results, applying the recorded memory deltas),
+  **terminates after K iterations** via an iteration-counting stub, and asserts
+  the wasm emits the **identical call sequence and writes** — same callees, same
+  order, same arguments, same spine-owned memory writes.
+- `boundary_green` — NOT `oracle_green` — is the verification prerequisite for
+  nonterminating/spine functions. The two standards are recorded distinctly in
+  the ledger; a `boundary_green` unit never silently upgrades to an
+  `oracle_green` claim.
+
+**The ordering defect, fixed.** v4 placed the first owner-supplied DTM at step 10
+while steps 2, 7, and 9 all consume trace captures — every trace-dependent step
+sat upstream of its own input. Corrected: **at least one owner-supplied DTM is a
+prerequisite of the FIRST trace-dependent step (step 2, the trace pilot)**, and
+the full capture library remains the step-10 deliverable.
+
+**The gate.** `run_main_game_loop` reaches `boundary_green` over K owner-approved
+iterations before the control-inversion step runs; the K, the callee-boundary
+corpus, and the stub exclusions are recorded in its result artifact.
+
+## Non-fatal review notes (normative)
+
+1. **H3's uniform ABI trades traps for potential silent mis-marshalling.** With
+   every table entry sharing one canonical signature, a wrong "true signature"
+   (81 contested symbols in the registry) no longer traps at `call_indirect` —
+   it mis-marshals silently; the design states this trade explicitly and relies
+   on the trace/oracle discipline (Stage B replay + I1 state evidence) to catch
+   the divergence. PPC **register-residue reads** — a callee consuming argument
+   registers the call site never set — are a known unreproducible class, flagged
+   to the ledger when detected, never silently papered over.
+2. **The smoke harness must tolerate the coi-serviceworker first-load reload**
+   (install, then one reload into the isolated context — H1's production
+   mechanism), or the production `crossOriginIsolated` assertion will flake on
+   every first visit.
+3. **Step-8 re-verification requires harness work that does not exist yet:** the
+   Node harness instantiates units with only an `env` shim import and reads the
+   module's own EXPORTED memory (research/decomp/oracle-harness/lib/wasm.mjs:27-33,
+   used by research/decomp/oracle-harness/run-unit.mjs); threads-target wasm
+   instead IMPORTS a shared `WebAssembly.Memory`, which Node supports but the
+   harness does not implement. Extending the harness to instantiate
+   threads-target wasm with imported shared memory is an explicit step-8 subtask.
+
+## Revised order of work (supersedes v4's 13-step list)
+
+1. Stage-A amendment (generator-side SDK declarations) — unchanged from v1-v4.
+2. Trace pilot — unchanged gate (one staged unit to `oracle_green` end-to-end via
+   Dolphin-GDB capture and the existing promotion path), amended prerequisite
+   (I3): **at least one owner-supplied DTM exists before this step runs** — the
+   first trace-dependent step carries the DTM dependency, not step 10.
+3. Assembly-gate dispatch lowering (G2 as amended by H3): uniform-ABI adapter
+   thunks, canonical-signature call-site lowering, miss-handler import routing to
+   the host bridge. Lands before the composed-module pilot.
+4. Composed-module pilot (v2 F3 + G2 + H3 gates): one assembled N-unit module
+   (shared memory, original addresses) wired behind seams; two units sharing
+   state stay coherent in play; window exercises a real ROM dispatch table, one
+   cross-class dispatch, and one table-miss case — correct results and ledger
+   entries for all three.
+5. OSThread and blocking-call inventory (G1 prerequisite) — unchanged: per-thread
+   ledger and HLE strategy; owner reviews any thread that defeats cooperative
+   scheduling.
+6. Cross-origin isolation serving plan (H1, amended by note 2): Vite
+   `server.headers` for dev; coi-serviceworker shim for GitHub Pages with the
+   smoke harness tolerating the first-load reload; host-change fallback
+   documented. Gate: `window.crossOriginIsolated === true` asserted in both dev
+   and production. Precondition for steps 7-9.
+7. Host bridge (H2 as amended by I1 + I2 + I3): generate the out-of-window
+   import set, the Atomics RPC transport, the per-frame bridged-call ledger, and
+   the **bridged-callee adapter class** (per-symbol, demand-driven from the
+   ledger, trace-derived write sets, adapter-owned marshalling into/out of GC
+   memory); the worker-side **reentrant dispatch loop** is normative (stated
+   nesting depth, synchronous-only servicing, declared servicing errors).
+   Prerequisite: `run_main_game_loop` reaches **`boundary_green`** (I3) and is
+   linked into the composed window. Gate additionally includes I2's reentrant
+   pilot case.
+8. Stage-B re-verification pass (H1, amended by note 3): after the
+   threads-enabled relink, replay every verified unit's corpus against the
+   relinked artifact; all `oracle_green`/`boundary_green` statuses suspended
+   until re-green. **Explicit subtask: extend run-unit.mjs (via lib/wasm.mjs) to
+   instantiate threads-target wasm with an imported shared memory.**
+9. Control-inversion pilot (G1 as amended by H2 + E2 + I1): composed module in a
+   dedicated Web Worker — shared `WebAssembly.Memory`, SharedArrayBuffer +
+   Atomics.wait blocking shims, dual-canvas compositor; Asyncify excluded, JSPI
+   future-noted. Gate: the composed module drives N frames with every
+   out-of-window call routed through the declared bridge AND **frame-boundary
+   state evidence** — the shared arena matches a Dolphin trace of the same DTM
+   at each frame boundary, modulo the declared, ledger-justified exclusion list.
+   Bridged-call count reported per frame and monotonically shrinking as the
+   ladder grows.
+10. Coverage ledger + full DTM capture library (v2 F4, amended by G4 and I3):
+    captures are owner-supplied; the ledger tracks capture coverage as an
+    explicit external dependency; the FIRST DTM moved to step 2, the library
+    grows here.
+11. SDK shim ledger + verification harness for math/OS shims (v2 F2) —
+    GX/audio/DVD held to framebuffer/audio/file-read equivalence, stated as
+    such.
+12. Composition ladder (G3 as amended by E1): N-doubling 5 → 10 → 20 → 40 → …,
+    rung passes only if its window links AND its new-contested/new-linked ratio
+    is ≤ the previous rung's ratio (recorded per rung); hard stop and
+    ABI-unification redesign if the rate rises.
+13. Continuous loop at scale. Convergence metric:
+    `compiled / exercised / verified / playing-composed of 1,396`
+    (+ shim ledger, + capture-coverage dependency, + current ladder rung,
+    + per-frame bridged-call count, + adapter ledger with per-symbol trace
+    evidence, + frame-boundary state-evidence status, + isolation status in the
+    smoke report).
+
+The review question for the owner, updated in content:
+**approve the v5 boundary semantics (bridged-callee adapters with trace-derived
+memory contracts and frame-boundary state evidence, worker-side reentrant
+dispatch loop with synchronous-only servicing, `boundary_green` as the
+verification standard for nonterminating spine functions, DTM dependency moved
+to the first trace-dependent step) and the 13-step order above.**
