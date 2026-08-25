@@ -1,0 +1,40 @@
+{
+  "unit": "auto-c0001-005",
+  "fn": "FUN_8000fc2c",
+  "addr": "0x8000fc2c",
+  "prototype": "void FUN_8000fc2c(int cam, int view)  /* chunk_0001.c 2768-2840 */",
+  "note": "camera-distance solver: accumulates a shake/zoom term (cam+0x350), copies the view target vec3 (view+0x20 -> cam+0x300 with a computed y at cam+0x304), then clamps the camera distance cam+0x348 between per-mode min/max rows (view+0x894.. selected by [view+0x582]) with a frsqrte+2xNewton sqrt of PSVECSquareMag(cam+0x318 - view+0x20); hysteresis byte cam+0x35e. Calls the ROM's PSVECSubtract/PSVECSquareMag (env shims in replay).",
+  "args": [
+    { "reg": "r3", "name": "cam" },
+    { "reg": "r4", "name": "view" }
+  ],
+  "reads": [
+    { "id": "c350",     "addr": "r3+0x350",  "width": 4 },
+    { "id": "c354",     "addr": "r3+0x354",  "width": 4 },
+    { "id": "c310",     "addr": "r3+0x310",  "width": 4 },
+    { "id": "c318",     "addr": "r3+0x318",  "width": 12 },
+    { "id": "c348_pre", "addr": "r3+0x348",  "width": 4 },
+    { "id": "c35e_pre", "addr": "r3+0x35e",  "width": 1 },
+    { "id": "v582",     "addr": "r4+0x582",  "width": 1 },
+    { "id": "vtab",     "addr": "r4+0x88c",  "width": 24 },
+    { "id": "vpos",     "addr": "r4+0x20",   "width": 12 },
+    { "id": "v6d0",     "addr": "r4+0x6d0",  "width": 4 },
+    { "id": "v7c9",     "addr": "r4+0x7c9",  "width": 1 },
+    { "id": "g930",     "addr": "0x80433930", "width": 4, "capture_only": true },
+    { "id": "g930_29",  "addr": "[0x80433930]+0x29", "width": 1 },
+    { "id": "g930_3d",  "addr": "[0x80433930]+0x3d", "width": 1 },
+    { "id": "f_ac4",    "addr": "0x80436ac4", "width": 4 },
+    { "id": "f_aa8",    "addr": "0x80436aa8", "width": 4 },
+    { "id": "f_ad0",    "addr": "0x80436ad0", "width": 4 },
+    { "id": "d_ab0",    "addr": "0x80436ab0", "width": 8 },
+    { "id": "d_ab8",    "addr": "0x80436ab8", "width": 8 },
+    { "id": "f_b38",    "addr": "0x80436b38", "width": 4 }
+  ],
+  "ret": null,
+  "writes": [
+    { "id": "w350", "addr": "r3+0x350", "width": 4 },
+    { "id": "w300", "addr": "r3+0x300", "width": 12 },
+    { "id": "w348", "addr": "r3+0x348", "width": 4 },
+    { "id": "w35e", "addr": "r3+0x35e", "width": 1 }
+  ]
+}

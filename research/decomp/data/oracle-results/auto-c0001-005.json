@@ -1,0 +1,192 @@
+{
+ "result_schema": 1,
+ "unit": "auto-c0001-005",
+ "generated_at": "2026-08-25T21:37:00.309Z",
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-unit.mjs",
+  "git_rev": "c2c47c9c07db4b3f23a42249a2eda3ffeddde351",
+  "sha256": "3b4d57a595f84d5debb340cb2669fe5f74895abbe5856fbe05b2f22d762be766"
+ },
+ "wasm": {
+  "path": "D:\\GotYaForce\\.claude\\worktrees\\agent-a14ab7d53e02b46e7\\research\\decomp\\port-units-staging\\auto-c0001-005\\unit.wasm",
+  "sha256": "60b8349b2539bfbc39fac69ef4993ec6a1ad5eda1c4d95183c034ed41e94e226"
+ },
+ "arena": {
+  "path": "research/decomp/oracle-harness/arena-trace-empty.json",
+  "sha256": "5a1f6379fdf866eb1b3535188b78e9fb3660644440b09f36d205db0775811ae2"
+ },
+ "corpus": {
+  "mode": "replay",
+  "file": "research/decomp/oracle-harness/corpora/auto-c0001-005.dolphin-trace.jsonl",
+  "sha256": "f3afbc3a1fab30e554044666902c70e8fd39e559587b8785d74f4259058d425f",
+  "n": 200
+ },
+ "spec_sha256": "24bcc0adee91f24273657bf9acf9d10c395f10cb69bf269d4c148b54d1d3138d",
+ "field_map": {
+  "path": "research/decomp/oracle-harness/actor-field-map.json",
+  "sha256": "14c102284ea0a2188d6a137525df04777055de3725f5b7afb60ca0ed6280862c",
+  "source": {
+   "path": "packages/combat/src/rom/actor.ts",
+   "sha256": "ee17e82015d7aaba3b0f949fa35305d3b94c7bd53414a7183b5f3b07a660c2dd"
+  }
+ },
+ "reference_kind": "dolphin_trace",
+ "references": [
+  "real GG4E in bundled Dolphin 2606-97 (GDB-stub per-call capture; tool: research/tools/dolphin-trace/capture_oracle.py; plan: research/tools/dolphin-trace/plans/auto-c0001-005.FUN_8000fc2c.json)",
+  "env shims: ROM PSVECSubtract/PSVECSquareMag per their decompiled bodies (chunk_0064.c:1283-1292 / 1361-1366)"
+ ],
+ "functions": [
+  {
+   "name": "FUN_8000fc2c",
+   "cases": 200,
+   "exact": 0,
+   "rounding_explained": 0,
+   "unexplained": 200,
+   "reference": "dolphin_trace 0x8000fc2c (entry+LR breakpoint capture, per-call args/reads/writes)",
+   "note": "camera-distance solver; float-channel divergences reported as rounding (bound 1.0 = report, don't hide); see spec header",
+   "verdict": "fail"
+  }
+ ],
+ "coverage": {
+  "offsets_read_unwritten": 0,
+  "sentinel_reads_detected": false,
+  "stray_writes": [],
+  "class_mismatches": []
+ },
+ "export_coverage": {
+  "covered": 1,
+  "exported": 8,
+  "uncovered": [
+   "FUN_8000f604",
+   "FUN_8000f72c",
+   "FUN_8000f764",
+   "FUN_8000f7fc",
+   "FUN_8000f9e0",
+   "FUN_8000fe60",
+   "FUN_8000fffc"
+  ]
+ },
+ "unexplained_cases": [
+  {
+   "fn": "FUN_8000fc2c",
+   "n": 0,
+   "trap": null,
+   "worstUlp": 883281,
+   "fields": [
+    {
+     "f": "w348",
+     "gotBits": "442ffa51",
+     "wantBits": "44228000",
+     "ulp": 883281
+    }
+   ],
+   "stray": []
+  },
+  {
+   "fn": "FUN_8000fc2c",
+   "n": 1,
+   "trap": null,
+   "worstUlp": 881899,
+   "fields": [
+    {
+     "f": "w348",
+     "gotBits": "442ff4eb",
+     "wantBits": "44228000",
+     "ulp": 881899
+    }
+   ],
+   "stray": []
+  },
+  {
+   "fn": "FUN_8000fc2c",
+   "n": 2,
+   "trap": null,
+   "worstUlp": 884319,
+   "fields": [
+    {
+     "f": "w348",
+     "gotBits": "442ffe5f",
+     "wantBits": "44228000",
+     "ulp": 884319
+    }
+   ],
+   "stray": []
+  },
+  {
+   "fn": "FUN_8000fc2c",
+   "n": 3,
+   "trap": null,
+   "worstUlp": 884321,
+   "fields": [
+    {
+     "f": "w348",
+     "gotBits": "442ffe61",
+     "wantBits": "44228000",
+     "ulp": 884321
+    }
+   ],
+   "stray": []
+  },
+  {
+   "fn": "FUN_8000fc2c",
+   "n": 4,
+   "trap": null,
+   "worstUlp": 883282,
+   "fields": [
+    {
+     "f": "w348",
+     "gotBits": "442ffa52",
+     "wantBits": "44228000",
+     "ulp": 883282
+    }
+   ],
+   "stray": []
+  },
+  {
+   "fn": "FUN_8000fc2c",
+   "n": 5,
+   "trap": null,
+   "worstUlp": 881899,
+   "fields": [
+    {
+     "f": "w348",
+     "gotBits": "442ff4eb",
+     "wantBits": "44228000",
+     "ulp": 881899
+    }
+   ],
+   "stray": []
+  },
+  {
+   "fn": "FUN_8000fc2c",
+   "n": 6,
+   "trap": null,
+   "worstUlp": 884319,
+   "fields": [
+    {
+     "f": "w348",
+     "gotBits": "442ffe5f",
+     "wantBits": "44228000",
+     "ulp": 884319
+    }
+   ],
+   "stray": []
+  },
+  {
+   "fn": "FUN_8000fc2c",
+   "n": 7,
+   "trap": null,
+   "worstUlp": 884321,
+   "fields": [
+    {
+     "f": "w348",
+     "gotBits": "442ffe61",
+     "wantBits": "44228000",
+     "ulp": 884321
+    }
+   ],
+   "stray": []
+  }
+ ],
+ "verdict": "fail"
+}

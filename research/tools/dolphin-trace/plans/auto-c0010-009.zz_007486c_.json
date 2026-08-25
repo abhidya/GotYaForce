@@ -1,0 +1,26 @@
+{
+  "unit": "auto-c0010-009",
+  "fn": "zz_007486c_",
+  "addr": "0x8007486c",
+  "prototype": "undefined4 zz_007486c_(int actor, uint cmd)  /* chunk_0010.c 1781-1824 */",
+  "note": "turn-toward-target helper: clamps a signed 16-bit heading delta (actor+0x5aa) by a per-frame turn amount derived from a table s16 ([actor+0x4ac]+0xac+2*(cmd&0xf)) scaled by f32 actor+0x1dc8 via the PPC int->double magic constant at 0x804377e0; conditionally writes actor+0x5ae (cmd&0x40) and actor+0x72 (cmd&0x80); returns 1 when the delta was fully consumed, else 0.",
+  "args": [
+    { "reg": "r3", "name": "actor" },
+    { "reg": "r4", "name": "cmd" }
+  ],
+  "reads": [
+    { "id": "act_heading",  "addr": "r3+0x72",   "width": 2 },
+    { "id": "act_delta",    "addr": "r3+0x5aa",  "width": 2 },
+    { "id": "act_5ae",      "addr": "r3+0x5ae",  "width": 2 },
+    { "id": "act_turnrate", "addr": "r3+0x1dc8", "width": 4 },
+    { "id": "sub_ptr",      "addr": "r3+0x4ac",  "width": 4, "capture_only": true },
+    { "id": "sub_entry",    "addr": "[r3+0x4ac]+0xac+((r4&0xf)*2)", "width": 2 },
+    { "id": "dconst_804377e0", "addr": "0x804377e0", "width": 8 }
+  ],
+  "ret": { "reg": "r3" },
+  "writes": [
+    { "id": "act_heading", "addr": "r3+0x72",  "width": 2 },
+    { "id": "act_delta",   "addr": "r3+0x5aa", "width": 2 },
+    { "id": "act_5ae",     "addr": "r3+0x5ae", "width": 2 }
+  ]
+}
