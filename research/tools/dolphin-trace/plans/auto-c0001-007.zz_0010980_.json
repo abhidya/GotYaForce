@@ -1,0 +1,22 @@
+{
+  "unit": "auto-c0001-007",
+  "fn": "zz_0010980_",
+  "addr": "0x80010980",
+  "prototype": "void zz_0010980_(int ui)  /* chunk_0001.c, staged unit.c: player marker RGBA selector */",
+  "note": "if [ui+0x1da]==0: fades [ui+0x35b] alpha byte via the PPC CONCAT44 int->double idiom (DOUBLE_80436b88) scaled by FLOAT_80436ae4; else selects RGBA at ui+0x358..0x35b from state bytes [[ui+0x290]+0x10] and [[ui+0x290]+0x11]. Writes only ui+0x358..0x35b.",
+  "args": [
+    { "reg": "r3", "name": "ui" }
+  ],
+  "reads": [
+    { "id": "flag_1da",   "addr": "r3+0x1da",  "width": 1 },
+    { "id": "rgba_pre",   "addr": "r3+0x358",  "width": 4 },
+    { "id": "state_ptr",  "addr": "r3+0x290",  "width": 4, "capture_only": true },
+    { "id": "state_1011", "addr": "[r3+0x290]+0x10", "width": 2, "optional": true },
+    { "id": "dconst_80436b88", "addr": "0x80436b88", "width": 8 },
+    { "id": "fconst_80436ae4", "addr": "0x80436ae4", "width": 4 }
+  ],
+  "ret": null,
+  "writes": [
+    { "id": "rgba_post", "addr": "r3+0x358", "width": 4 }
+  ]
+}
