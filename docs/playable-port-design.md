@@ -142,3 +142,97 @@ today.
   `large-unit-context-vram-ceiling`, `sdk-shim-seed-gap`,
   `phase-a-dolphin-feasibility`, `canonical-header-ambiguous-append`
 - Port stopped + GPU ceded: `D:/rig/state/manual-gate.json` (by: oghidra-port)
+
+
+---
+
+# ADVERSARIAL REVIEW (2026-08-25) — v1 FAILS the requirement; v2 corrections below
+
+Reviewed against the actual requirement: **a fully 1:1 port of the game, playable.**
+Four material failures found in v1. Each is stated with evidence, then the correction.
+
+## F1 — v1's terminal state is not the ported game; it is the TS game with grafts
+
+The seam-registry (v1 Stage C) substitutes individual ROM functions behind seams in the
+EXISTING TypeScript engine. Its asymptote is "a TS recreation whose leaf computations are
+ROM-computed" — the frame loop, scheduling, call graph, and composition remain the
+recreation, forever. That is not a 1:1 port of the game; it is a TS game with an
+increasing number of verified islands.
+
+**Correction (v2 terminal architecture):** the destination is the ASSEMBLED module — the
+N-unit composed wasm the assembly gate already builds and links (shared linear memory,
+original GameCube addresses) — grown until it contains the ROM's call graph including its
+own main loop, with the browser app reduced to a HOST: rendering, audio, input, and DVD
+backends behind the SDK seam. The end-state is boot.dol's code executing in one wasm
+module with a high-level host — and the TS engine is SCAFFOLDING that shrinks as the
+composed module grows. The seam-registry survives only as the transitional mechanism that
+lets verified pieces play (and be regression-tested in play) before the composed module
+can stand alone.
+
+## F2 — v1 ignores the SDK layer entirely: 996 functions with 6 verified shims
+
+Measured: **996 functions are excluded as `sdk_prefix`** ("never ported by design"), the
+corpus references at least 68 distinct `gnt4_*` entry points, and exactly **~6 shims
+exist and are oracle-validated** (damage/knockback/collision specs). A "fully 1:1 playable"
+game calls the SDK constantly — matrix/quaternion math, GX graphics, OS, DVD, audio. v1
+contains no plan for the other ~62 referenced shims, no verification story for any shim,
+and no accounting for the long tail of the 996.
+
+**Correction (v2 Stage D — SDK seam):** every SDK function the composed module imports
+gets a host implementation with the SAME verification bar as ported units: trace-captured
+input/output pairs from the real game, replayed against the shim. Math/OS shims are small
+and verifiable this way; GX/audio/DVD are the HLE host boundary (F1) and are verified at
+the observable-behavior level (framebuffer/audio-buffer/file-read equivalence), stated
+honestly as such. The shim ledger (implemented/verified per symbol) joins the convergence
+metric.
+
+## F3 — per-unit wasm instances cannot compose a game: shared state diverges
+
+The proven integration pattern instantiates EACH unit with a PRIVATE memory and arena
+copy (wasmDamageCore.ts). Two units sharing mutable ROM state (HP mirrors, bss arrays,
+struct pools) in separate instances read/write DIFFERENT copies — state diverges the
+moment two wired units touch the same address. v1 Stage C scales this pattern; it cannot
+produce a coherent game beyond a few disjoint islands.
+
+**Correction:** all wired units share **one** WebAssembly.Memory (the composed module's),
+one arena, original addresses — which is exactly what the assembly gate already produces
+per window. Stage C v2 wires the COMPOSED module once and routes seams into its exports;
+individual-instance wiring is only permissible for provably-disjoint state (damage-core
+qualifies; it was checked — most units will not).
+
+## F4 — trace verification is bounded by play coverage, and v1 has no coverage plan
+
+Trace oracles prove equivalence ON OBSERVED CASES. "Record a battle" exercises a sliver
+of 10,954 functions: menus, 200+ borgs, every stage, every mode, attract, shop, save —
+most code runs only under inputs no single battle produces. v1 has no plan for reaching
+the code, so "verified" would silently mean "verified on whatever we happened to play."
+
+**Correction:** a coverage LEDGER drives capture: per function, hit-count from traces
+(the GDB stub counts breakpoint hits cheaply). Capture sessions are authored per
+subsystem as DTM replays (deterministic, re-runnable), and the convergence metric gains a
+fourth column: functions EXERCISED. Uncalled code is reported as unverified-unreachable,
+never bundled into a byte-exact claim. The claim discipline: "byte-exact on N recorded
+cases across M call sites", per unit, in the result artifact — the damage-core standard
+applied honestly at scale.
+
+## Residual risks v2 states plainly (no design can remove them)
+
+- ~9+ units exceed the serving-context/VRAM ceiling on current hardware; they queue
+  behind a model/hardware change, tracked, not hidden.
+- 2 SDK signatures remain unsettled pending a real reference.
+- Anti-piracy/timing-sensitive code may resist HLE hosting; discovered empirically.
+
+## Revised order of work (supersedes v1 §5)
+
+1. Stage-A amendment (generator-side SDK declarations) — unchanged.
+2. **Trace pilot** — unchanged gate: one staged unit to `oracle_green` end-to-end.
+3. **Composed-module pilot (new, from F3):** wire one ASSEMBLED N-unit module (shared
+   memory) into the app behind seams; prove two units sharing state stay coherent in play.
+4. Coverage ledger + first authored DTM capture set (from F4).
+5. SDK shim ledger + verification harness for math/OS shims (from F2).
+6. Only then scale the loop; convergence metric becomes:
+   `compiled / exercised / verified / playing-composed of 1,396 (+ shim ledger)`.
+
+v1's checklist is withdrawn. The review question for the owner is single:
+**approve the v2 terminal architecture (composed module + HLE host, TS as shrinking
+scaffold) and the 6-step order above.**
