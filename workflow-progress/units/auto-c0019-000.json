@@ -2,71 +2,41 @@
   "schema": 1,
   "unit": "auto-c0019-000",
   "unit_id": "auto-c0019-000",
-  "timestamp": "2026-08-25T08:34:44.889846Z",
-  "run_id": "2026-08-25T08:13:01.132808Z",
-  "result": "gate_failed",
-  "stage": "assembly",
-  "attempt": 5,
-  "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "timestamp": "2026-08-25T13:05:29.790679Z",
+  "run_id": "2026-08-25T12:04:28.934663Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 6,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "38cdc8f7359c37281e3729962b611017108cdce3",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": null,
+  "tier": "compile_only",
   "extra": {
-    "rounds": [],
-    "assembly_gate": {
-      "passed": false,
-      "n": 5,
-      "units": [
-        "auto-c0019-011",
-        "auto-c0019-017",
-        "auto-c0019-018",
-        "auto-c0020-000",
-        "auto-c0019-000"
-      ],
-      "stage": "link",
-      "conflicts": [
-        {
-          "symbol": "gnt4_PSQUATScale_bl",
-          "class": "collision_stub",
-          "units": [
-            "auto-c0019-000",
-            "auto-c0019-011",
-            "auto-c0019-017",
-            "auto-c0019-018",
-            "auto-c0020-000"
-          ],
-          "variants": {},
-          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSQUATScale_bl"
-        }
-      ],
-      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
-      "candidate": {
-        "name": "auto-c0019-000",
-        "sha256": "268b2e00cc74e221d80e96146ad964fb171d83610067607e36e58e0dad4243a7"
-      },
-      "expected_candidate": {
-        "name": "auto-c0019-000",
-        "sha256": "268b2e00cc74e221d80e96146ad964fb171d83610067607e36e58e0dad4243a7"
-      },
-      "attempt_cleanup": "removed"
-    },
-    "world_version": {
-      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
-      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "cde96261dbaca38b922171bf03908f66149fab30",
-      "prompt_version": "3",
-      "registry_version": "136"
-    },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false
+    "transition_id": "8ad2420f5eaf4300a55192dffbb24b3c",
+    "transition_timestamp": "2026-08-25T13:05:29.790679Z",
+    "transition_run_id": "2026-08-25T12:04:28.934663Z",
+    "promotion_transaction_id": "5feaf06addb34b8b86f137ecb724a931",
+    "candidate_sha256": "9eaea92b93d598cc88ed96a05b71a6c263aaf768bd0a64389cd829d6e3eb084b",
+    "replacement_evidence": {
+      "schema": 1,
+      "transaction_id": "5feaf06addb34b8b86f137ecb724a931",
+      "revocation_transition_id": null,
+      "previous_commit": null,
+      "preimage_sha256": "32094cc4b73173742f66c88c9a1c1299c25627be34a64ef47b879b0e125bcfa1",
+      "preimage_inventory_sha256": "fe42f9353cee7e910100d99ad87fcb4d797c3935f35c155933b2cd432414ad99",
+      "preimage_inventory_entries": 5,
+      "proof_binding": "legacy-git-tree",
+      "proof_sha256": "b0c32465ba6bf10930ec118419fa560806aa2b0732273414f3f01c654197bc45",
+      "candidate_sha256": "9eaea92b93d598cc88ed96a05b71a6c263aaf768bd0a64389cd829d6e3eb084b"
+    }
   },
   "driver_record": {
-    "status": "red_retryable",
-    "attempts": 5,
+    "status": "green",
+    "attempts": 6,
     "symbol_set": [
       "CONCAT44",
       "FUN_800ba3b4",
@@ -103,20 +73,12 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 136,
-    "error": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_v9__dnww\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+    "registry_version_used": 140,
+    "error": null,
     "oracle_summary": "compile-only (UNVERIFIED)",
-    "commit": "8b9f6982677707504dee8d90ea41c2a932f1f680",
+    "commit": "38cdc8f7359c37281e3729962b611017108cdce3",
     "pushed": true,
-    "last_stage": "assembly",
-    "revoked": {
-      "via": "d5-migrate",
-      "at": "2026-08-21T05:32:41.420269Z",
-      "reason": "D5-6 migration: artifact predates the d5-fp-reinterpret transform and its extractions carry 1 rewritable idiom site(s); verdict revoked and unit requeued for rebuild under the transform",
-      "previous_status": "green",
-      "previous_tier": "compile_only",
-      "transform_sites": 1
-    },
+    "last_stage": "commit",
     "rounds": [],
     "assembly_gate": {
       "passed": false,
@@ -162,13 +124,26 @@
       "prompt_version": "3",
       "registry_version": "136"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false,
-    "candidate_sha256": "caa4a9832653f841851ff6b3a3d72173dd62530e24edf652102ae5101683c630",
+    "candidate_sha256": "9eaea92b93d598cc88ed96a05b71a6c263aaf768bd0a64389cd829d6e3eb084b",
     "sdk_decl_sync": {
       "injected": [],
       "superseded": [],
       "unresolved": []
+    },
+    "tier": "compile_only",
+    "promotion_transaction_id": "5feaf06addb34b8b86f137ecb724a931",
+    "promotion_transition_id": "8ad2420f5eaf4300a55192dffbb24b3c",
+    "replacement_evidence": {
+      "schema": 1,
+      "transaction_id": "5feaf06addb34b8b86f137ecb724a931",
+      "revocation_transition_id": null,
+      "previous_commit": null,
+      "preimage_sha256": "32094cc4b73173742f66c88c9a1c1299c25627be34a64ef47b879b0e125bcfa1",
+      "preimage_inventory_sha256": "fe42f9353cee7e910100d99ad87fcb4d797c3935f35c155933b2cd432414ad99",
+      "preimage_inventory_entries": 5,
+      "proof_binding": "legacy-git-tree",
+      "proof_sha256": "b0c32465ba6bf10930ec118419fa560806aa2b0732273414f3f01c654197bc45",
+      "candidate_sha256": "9eaea92b93d598cc88ed96a05b71a6c263aaf768bd0a64389cd829d6e3eb084b"
     }
   },
   "history": [
@@ -219,6 +194,14 @@
       "attempt": 5,
       "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Use",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-25T13:05:29.790679Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 6,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "38cdc8f7359c37281e3729962b611017108cdce3"
     }
   ]
 }
