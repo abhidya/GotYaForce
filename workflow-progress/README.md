@@ -1,26 +1,27 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-25T03:10:45.932770Z - machine-written, do not edit.*
+*Generated 2026-08-25T04:17:03.809356Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 88/1396 settled (3 green, 85 staged) |
 | **Retries outstanding** | 36 |
 | **Untouched** | 1268 |
-| **Last transition** | 2026-08-25T03:10:45.932770Z |
+| **Last transition** | 2026-08-25T04:17:03.809356Z |
 | **Last green** | 2026-08-24T23:38:51.149010Z (`auto-c0020-000`) |
 | **Last product commit** | `1923f3a6e9f877677045111f1893bdbf33dc636b` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T04:17:03.809356Z | `auto-c0050-006` | gate_failed | wasm-link | 4 | not linked: wasm-ld: error: C:\Users\manny\AppData\Local\Temp\emscripten_temp_73qpxf7_\unit.o: undefined symbo |
 | 2026-08-25T03:10:45.932770Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-25T03:10:42.432975Z | `auto-c0020-009` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800c617 |
 | 2026-08-25T02:46:49.712626Z | `auto-c0020-008` | gate_failed | wasm-link | 1 | not linked: unit.c:56:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type ' |
@@ -70,4 +71,3 @@
 | 2026-08-24T12:26:57.091581Z | `auto-c0021-016` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T12:23:27.275122Z | `auto-c0020-012` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T12:19:58.070405Z | `auto-c0020-007` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800c5a6 |
-| 2026-08-24T11:29:58.213695Z | `auto-c0010-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
