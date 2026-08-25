@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-25T16:02:26.029432Z - machine-written, do not edit.*
+*Generated 2026-08-25T16:27:43.235751Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 94/1396 settled (3 green, 91 staged) |
 | **Retries outstanding** | 30 |
 | **Untouched** | 1268 |
-| **Last transition** | 2026-08-25T16:02:26.029432Z |
+| **Last transition** | 2026-08-25T16:27:43.235751Z |
 | **Last green** | 2026-08-25T16:02:26.029432Z (`auto-c0029-012`) |
 | **Last product commit** | `c2c47c9c07db4b3f23a42249a2eda3ffeddde351` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T16:27:43.235751Z | `auto-c0030-014` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0030-014 declares apply_ |
 | 2026-08-25T16:02:26.029432Z | `auto-c0029-012` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T15:57:33.884878Z | `auto-c0011-012` | gate_failed | assembly | 7 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_007c800_ |
 | 2026-08-25T15:54:12.789899Z | `auto-c0053-013` | gate_failed | artifact-install | 4 | artifact install refused after assembly pass: artifact preimage has no eligible revoked lifecycle |
@@ -74,4 +75,3 @@
 | 2026-08-24T21:50:16.436449Z | `auto-c0019-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T21:25:45.730585Z | `auto-c0019-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T21:22:11.220108Z | `auto-c0019-007` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-24T21:18:56.272065Z | `auto-c0019-006` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800bc2d |
