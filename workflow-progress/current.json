@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "timestamp": "2026-08-25T10:21:07.897675Z",
+  "timestamp": "2026-08-25T12:01:17.981024Z",
   "run_id": "2026-08-25T09:11:03.196343Z",
   "port_mode": "wasm_units",
   "workflow_state": "running",
   "current_unit": null,
-  "previous_unit": "auto-c0029-012",
+  "previous_unit": "auto-c0035-004",
   "previous_result": "gate_failed",
   "current_stage": null,
   "current_attempt": 0,
@@ -14,7 +14,7 @@
   "context_length": 60000,
   "driver_status": "running",
   "driver_running": true,
-  "last_transition": "2026-08-25T10:21:07.897675Z",
+  "last_transition": "2026-08-25T12:01:17.981024Z",
   "last_green": "2026-08-24T23:38:51.149010Z",
   "last_product_commit": "1923f3a6e9f877677045111f1893bdbf33dc636b",
   "block_reason": null,
@@ -23,8 +23,8 @@
     "total": 1396,
     "green": 3,
     "staged": 85,
-    "retryable": 34,
-    "untouched": 1270,
+    "retryable": 35,
+    "untouched": 1269,
     "active": 0
   }
 }
