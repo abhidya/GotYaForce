@@ -92,6 +92,7 @@ import {
 } from "./gameSession.js";
 import { BattleScene } from "./sim/battleScene.js";
 import { BORG_CATALOG, DEFAULT_LEAD } from "./sim/borgCatalog.js";
+import { proveAttackDamage, proveBoundsClamp, proveJumpArc } from "./sim/gameplayProof.js";
 import { createBorgPresentationAssets } from "./sim/borgPresentationAssets.js";
 import { createGameAssetCatalog } from "./assetCatalog.js";
 import { publicUrl } from "./publicUrl.js";
@@ -1343,6 +1344,13 @@ function showLoadingMessage(text: string): void {
   },
   get session() {
     return session;
+  },
+  // Deterministic gameplay proofs for the browser smoke — throwaway sim battles from
+  // the shipped bundle (see sim/gameplayProof.ts). Never touches the live session.
+  selfcheck: {
+    attackDamage: proveAttackDamage,
+    boundsClamp: proveBoundsClamp,
+    jumpArc: proveJumpArc,
   },
   stages: EXPORTED_STAGE_CATALOG,
   loadStage: async (stageId: string) => {

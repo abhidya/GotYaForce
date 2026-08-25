@@ -1372,6 +1372,22 @@ export class RomDriverBridge implements RomFamilyDriver {
   private readonly tables: { fullBody: StateHandler[]; upperBody: StateHandler[] };
   /** Armed hitbox records for the current special. */
   private armedHits: ArmedHit[] = [];
+  /** Which button started the active ROM machine ("x" | "b"), for the impotence latch. */
+  private specialKind: "x" | "b" | null = null;
+  /** True once the active ROM special armed a resolvable hit or fired a child projectile. */
+  private specialHadEffect = false;
+  /** Accumulated |Δpos| the ROM machine drove this special (movement X moves count as effect). */
+  private specialMotionAccum = 0;
+  /** Position at special start, for the NET displacement test in the impotence latch. */
+  private specialStartPos = { x: 0, y: 0, z: 0 };
+  /** Latched when this borg's ROM X special completed with NO payload at all (no armed
+   *  hits, no child projectiles, no meaningful motion). Many families have decoded
+   *  choreography but no resolvable hit kinds yet — their X was a pure pantomime that
+   *  consumed the press and dealt nothing. Once latched, tryStartXSpecial refuses
+   *  ownership and the caller's generic startSpecialAttack (the pre-ROM behavior)
+   *  handles the X press instead. PLACEHOLDER policy until every family's hit kinds
+   *  are decoded. */
+  private xImpotent = false;
   private streamFrame = 0;
   /** Frames since the current armHit. Hit windows are authored relative to the
    *  arm, not to the stream clock, and the two must not share a counter: the
@@ -1961,10 +1977,17 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  machine; subsequent `tick` calls advance it. */
   tryStartXSpecial(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean {
     if (this.specialActive) return false;
+    // Impotence latch (see the field's doc): this borg's ROM X already proved to be a
+    // no-payload pantomime — hand the press to the generic startSpecialAttack path.
+    if (this.xImpotent) return false;
     const actionIndex = runtime.command?.actionIndex ?? 2;
     const variantIndex = runtime.command?.variantIndex ?? 0;
     this.runtime = runtime;
     this.armedHits = [];
+    this.specialKind = "x";
+    this.specialHadEffect = false;
+    this.specialMotionAccum = 0;
+    this.specialStartPos = { x: runtime.pos.x, y: runtime.pos.y, z: runtime.pos.z };
     this.streamFrame = 0;
     // Load pre-decoded stream events for the choreography (anim + hitbox arming).
     this.streamEvents = null;
@@ -2045,6 +2068,9 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.runtime = runtime;
     this.romOwnedSpecial = true;
     this.armedHits = [];
+    this.specialKind = "b";
+    this.specialHadEffect = false;
+    this.specialMotionAccum = 0;
     this.streamFrame = 0;
     // Load pre-decoded stream events for the group-4 charge choreography (anim + fireChild).
     this.streamEvents = null;
@@ -2121,6 +2147,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     //     battle.ts skips stepMovement/stepAttacks (the ROM owns motion + facing). ---
     if (this.romOwnedSpecial) {
       const preX = runtime.pos.x;
+      const preY = runtime.pos.y;
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
       this.syncActionInput(input, true);
@@ -2148,6 +2175,10 @@ export class RomDriverBridge implements RomFamilyDriver {
       this.dispatchEvent(this.streamFrame);
       this.streamFrame++;
       this.resolveHits(runtime, all);
+      // Payload tracking for the X impotence latch: ROM-driven motion counts as a real
+      // effect (movement/reposition X moves like Fly or a launch arc have no hitboxes).
+      this.specialMotionAccum +=
+        Math.abs(runtime.pos.x - preX) + Math.abs(runtime.pos.y - preY) + Math.abs(runtime.pos.z - preZ);
       // Completion: the phase machine's phase-3 exit clears +0x5e0's action bits
       // (controlWord &= ~0x3). Detect that OR the max-frame safety timeout.
       const phaseDone = (this.actor.controlWord & 0x3) === 0 && this.streamFrame > 2;
@@ -2158,6 +2189,27 @@ export class RomDriverBridge implements RomFamilyDriver {
         this.streamEvents = null;
         this.streamSchedules = [];
         runtime.cooldowns["romSpecialActive"] = 0;
+        // Re-arm the B cooldown so a mash cannot chain ROM machines back-to-back —
+        // the X path does the same with cooldowns["special"] below. PLACEHOLDER (not
+        // ROM-derived): the ROM's post-charge recovery frame count is untraced; reuse
+        // the generic shot cooldown slot at the melee-cooldown magnitude.
+        runtime.cooldowns["shot"] = Math.max(runtime.cooldowns["shot"] ?? 0, 20);
+        // X impotence latch: this ROM X ran to completion with no armed hit and no
+        // child projectile, and either barely moved OR moved-and-returned (a spin/dash
+        // that ends where it began, e.g. Iron Spin/Senpuken with undecoded hit kinds)
+        // — a pure pantomime. A genuine movement X (Fly, a launch arc) ENDS somewhere
+        // else, so the net-displacement test keeps it ROM-owned. Latch so every FUTURE
+        // X press on this borg goes to the generic startSpecialAttack fallback instead
+        // of silently doing nothing again. PLACEHOLDER policy until every family's hit
+        // kinds are decoded.
+        if (this.specialKind === "x" && !this.specialHadEffect) {
+          const net =
+            Math.abs(runtime.pos.x - this.specialStartPos.x) +
+            Math.abs(runtime.pos.y - this.specialStartPos.y) +
+            Math.abs(runtime.pos.z - this.specialStartPos.z);
+          if (this.specialMotionAccum < 20 || net < 40) this.xImpotent = true;
+        }
+        this.specialKind = null;
         // Return to idle so the renderer stops selecting the attack slot now
         // that the ROM no longer owns the borg (stepMovement will take over and
         // re-derive state from velocity next frame).
@@ -2232,6 +2284,7 @@ export class RomDriverBridge implements RomFamilyDriver {
         struck: new Set<string>(),
       } satisfies ArmedHit;
     }).filter((h): h is ArmedHit => h !== null);
+    if (this.armedHits.length > 0) this.specialHadEffect = true;
     // Reset the HIT clock only. Rewinding streamFrame here desynchronised every
     // streamSchedule (whose startFrame was recorded on the old clock) and
     // restarted the specialMaxFrames timeout, so the special outran its author.
@@ -2246,7 +2299,10 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (!this.runtime) return;
     const yawRad = (this.actor.activeYaw / 0x10000) * Math.PI * 2;
     const proj = spawnRomProjectile(this.runtime, variant, yawRad);
-    if (proj) this.pendingProjectiles.push(proj);
+    if (proj) {
+      this.pendingProjectiles.push(proj);
+      this.specialHadEffect = true;
+    }
   }
 
   /** Called by family handlers (STAR HERO / PLANET HERO X-special) when they apply a
