@@ -534,12 +534,40 @@ async function drivePlayableRoute(cdp, url) {
     throw new Error("ROM-wasm damage core is not live — the game fell back to the TS port");
   }
 
+  // Gameplay proofs — deterministic sim battles built INSIDE the production bundle
+  // (apps/game/src/sim/gameplayProof.ts, exposed as window.__gf.selfcheck). They run the
+  // exact shipped combat code, ROM-wasm damage seam included, without touching the live
+  // battle. Proves the owner-reported core loop: attack input → damage applied for three
+  // different borgs (B attack AND X special each connect), a unit driven at the arena
+  // edge is clamped inside stage bounds without falling out of the world, and a jump
+  // arc rises then lands back on its takeoff surface.
+  const gameplay = {
+    attacks: await evaluate(cdp, `window.__gf.selfcheck.attackDamage(["pl0615", "pl0102", "pl0008"])`),
+    bounds: await evaluate(cdp, `window.__gf.selfcheck.boundsClamp()`),
+    jump: await evaluate(cdp, `window.__gf.selfcheck.jumpArc()`),
+  };
+  for (const proof of gameplay.attacks) {
+    if (!(proof.attackDamage > 0)) {
+      throw new Error(`B attack dealt no damage for ${proof.borgId}: ${JSON.stringify(gameplay.attacks)}`);
+    }
+    if (!(proof.specialDamage > 0)) {
+      throw new Error(`X special dealt no damage for ${proof.borgId}: ${JSON.stringify(gameplay.attacks)}`);
+    }
+  }
+  if (!gameplay.bounds.clamped) {
+    throw new Error(`arena bounds clamp failed: ${JSON.stringify(gameplay.bounds)}`);
+  }
+  if (!gameplay.jump.rose || !gameplay.jump.landed) {
+    throw new Error(`jump arc did not rise+land: ${JSON.stringify(gameplay.jump)}`);
+  }
+
   return {
     battle: battleState,
     resumed: resumeState,
     repaused: pauseCycle,
     expectedMediaCancellations: expectedMediaCancellations.length,
     romDamage,
+    gameplay,
   };
 }
 
