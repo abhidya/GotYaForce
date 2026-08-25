@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0053-013",
   "unit_id": "auto-c0053-013",
-  "timestamp": "2026-08-24T03:40:51.386594Z",
-  "run_id": "2026-08-24T01:57:30.243221Z",
+  "timestamp": "2026-08-25T12:47:58.440284Z",
+  "run_id": "2026-08-25T12:04:28.934663Z",
   "result": "gate_failed",
-  "stage": "assembly",
-  "attempt": 2,
-  "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+  "stage": "wasm-link",
+  "attempt": 3,
+  "detail": "not linked: wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_0eul7rvn\\unit.o: undefined symbol: zz_0048288_",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -21,75 +21,49 @@
         "iteration": 1,
         "stage": "compile",
         "error_count": 2,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-013.h",
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt3-iter0.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_fvdnmgh4\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_45kmitb6\\unit.o'' failed (returned 1)",
           "unit.c:39:35: error: use of undeclared identifier 'zz_0048288_'; did you mean 'zz_0046588_'?"
         ],
-        "fingerprint": "d6a1865a374b46e1e94624271c8774549a65a5ac78b4f459496dffce3e981908"
+        "fingerprint": "a3d4d9b5c6790e760f964379035a7d3218f141d448f40180d246aed6edebaff8"
       },
       {
         "iteration": 2,
-        "stage": "import-gate",
-        "error_count": 0,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt2-iter1.h",
+        "stage": "link-gate",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt3-iter1.h",
         "diagnostics": [
-          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
-          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: SQRT"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\wasm-ld.exe' -o unit.wasm 'C:\\Users\\manny\\AppData\\Local\\Temp\\tmptera0ucglibemscripten_js_symbols.so' -Bstatic --import-undefined --strip-debug --export-if-defined=zz_01b98ec_ --export-if-defined=FUN_801b9ab0 --export-if-defined=FUN_801b9abc --export-if-defined=FUN_801b9adc --export-if-defined=zz_01b9b1c_ --export-if-defined=zz_01b9b68_ --export-if-defined=zz_01b9be0_ --export-if-defined=zz_01b9df0_ --export-if-defined=emscripten_stack_get_current --export-if-defined=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_281q6lp6\\unit.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+          "wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_281q6lp6\\unit.o: undefined symbol: zz_0048288_"
         ],
-        "fingerprint": "af8afde6b78a084c66e5a785b6d8ba3a6a205d8b51782d1c5b117ef7308b1f07"
+        "fingerprint": "9826ed0bd789fe9982b9738ac070a750250aae61520ba8e3495e892a6e28a190"
+      },
+      {
+        "iteration": 3,
+        "stage": "link-gate",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt3-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\wasm-ld.exe' -o unit.wasm 'C:\\Users\\manny\\AppData\\Local\\Temp\\tmpy4a31b2blibemscripten_js_symbols.so' -Bstatic --import-undefined --strip-debug --export-if-defined=zz_01b98ec_ --export-if-defined=FUN_801b9ab0 --export-if-defined=FUN_801b9abc --export-if-defined=FUN_801b9adc --export-if-defined=zz_01b9b1c_ --export-if-defined=zz_01b9b68_ --export-if-defined=zz_01b9be0_ --export-if-defined=zz_01b9df0_ --export-if-defined=emscripten_stack_get_current --export-if-defined=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_0eul7rvn\\unit.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+          "wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_0eul7rvn\\unit.o: undefined symbol: zz_0048288_"
+        ],
+        "fingerprint": "25b79c08a36a9fd057e143816c9b915fb3dd6926ac40441f6d55766f01f632d8"
       }
     ],
-    "assembly_gate": {
-      "passed": false,
-      "n": 5,
-      "units": [
-        "auto-c0029-014",
-        "auto-c0019-002",
-        "auto-c0028-018",
-        "auto-c0049-018",
-        "auto-c0053-013"
-      ],
-      "stage": "link",
-      "conflicts": [
-        {
-          "symbol": "gnt4_PSVECMag_bl",
-          "class": "collision_stub",
-          "units": [
-            "auto-c0019-002",
-            "auto-c0028-018",
-            "auto-c0029-014",
-            "auto-c0049-018",
-            "auto-c0053-013"
-          ],
-          "variants": {},
-          "detail": "wasm-ld: error: function signature mismatch: gnt4_PSVECMag_bl"
-        }
-      ],
-      "detail": "_start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
-      "candidate": {
-        "name": "auto-c0053-013",
-        "sha256": "1acb53bce4e4e84b2346477a619a00cb8fb714139cd165929654ea664a3cb9f7"
-      },
-      "expected_candidate": {
-        "name": "auto-c0053-013",
-        "sha256": "1acb53bce4e4e84b2346477a619a00cb8fb714139cd165929654ea664a3cb9f7"
-      },
-      "attempt_cleanup": "removed"
-    },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
       "prompt_version": "3",
-      "registry_version": "91"
+      "registry_version": "137"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 2,
+    "attempts": 3,
     "symbol_set": [
       "DAT_80382450",
       "DAT_8038245e",
@@ -130,30 +104,41 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 91,
-    "model_requests": 6,
+    "registry_version_used": 137,
+    "model_requests": 10,
     "rounds": [
       {
         "iteration": 1,
         "stage": "compile",
         "error_count": 2,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-013.h",
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt3-iter0.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_fvdnmgh4\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_45kmitb6\\unit.o'' failed (returned 1)",
           "unit.c:39:35: error: use of undeclared identifier 'zz_0048288_'; did you mean 'zz_0046588_'?"
         ],
-        "fingerprint": "d6a1865a374b46e1e94624271c8774549a65a5ac78b4f459496dffce3e981908"
+        "fingerprint": "a3d4d9b5c6790e760f964379035a7d3218f141d448f40180d246aed6edebaff8"
       },
       {
         "iteration": 2,
-        "stage": "import-gate",
-        "error_count": 0,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt2-iter1.h",
+        "stage": "link-gate",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt3-iter1.h",
         "diagnostics": [
-          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
-          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: SQRT"
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\wasm-ld.exe' -o unit.wasm 'C:\\Users\\manny\\AppData\\Local\\Temp\\tmptera0ucglibemscripten_js_symbols.so' -Bstatic --import-undefined --strip-debug --export-if-defined=zz_01b98ec_ --export-if-defined=FUN_801b9ab0 --export-if-defined=FUN_801b9abc --export-if-defined=FUN_801b9adc --export-if-defined=zz_01b9b1c_ --export-if-defined=zz_01b9b68_ --export-if-defined=zz_01b9be0_ --export-if-defined=zz_01b9df0_ --export-if-defined=emscripten_stack_get_current --export-if-defined=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_281q6lp6\\unit.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+          "wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_281q6lp6\\unit.o: undefined symbol: zz_0048288_"
         ],
-        "fingerprint": "af8afde6b78a084c66e5a785b6d8ba3a6a205d8b51782d1c5b117ef7308b1f07"
+        "fingerprint": "9826ed0bd789fe9982b9738ac070a750250aae61520ba8e3495e892a6e28a190"
+      },
+      {
+        "iteration": 3,
+        "stage": "link-gate",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-013\\header-attempt3-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\wasm-ld.exe' -o unit.wasm 'C:\\Users\\manny\\AppData\\Local\\Temp\\tmpy4a31b2blibemscripten_js_symbols.so' -Bstatic --import-undefined --strip-debug --export-if-defined=zz_01b98ec_ --export-if-defined=FUN_801b9ab0 --export-if-defined=FUN_801b9abc --export-if-defined=FUN_801b9adc --export-if-defined=zz_01b9b1c_ --export-if-defined=zz_01b9b68_ --export-if-defined=zz_01b9be0_ --export-if-defined=zz_01b9df0_ --export-if-defined=emscripten_stack_get_current --export-if-defined=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_0eul7rvn\\unit.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
+          "wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_0eul7rvn\\unit.o: undefined symbol: zz_0048288_"
+        ],
+        "fingerprint": "25b79c08a36a9fd057e143816c9b915fb3dd6926ac40441f6d55766f01f632d8"
       }
     ],
     "assembly_gate": {
@@ -196,16 +181,22 @@
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
       "prompt_version": "3",
-      "registry_version": "91"
+      "registry_version": "137"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false,
-    "error": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_1.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_2.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_3.o' 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_rwzvsuq_\\unit_4.o' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten' '-LD:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\src\\lib' 'D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot\\lib\\wasm32-emscripten\\crt1_reactor.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lnoexit -lc -ldlmalloc -lclang_rt.builtins -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)",
-    "last_stage": "assembly",
-    "interruptions": 1,
-    "interrupted_reconcile_transition_id": "interrupted-reconcile-169030b2afdc491fa4ad0fd5d9b61c53702eb77cfb1fd70935e5baf649897c60"
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "not linked: wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_0eul7rvn\\unit.o: undefined symbol: zz_0048288_",
+    "last_stage": "wasm-link",
+    "source_failure_id": "source-failure-64267d95a8c2298346ed1f1a4781af361c6d427efe88a2e2329226bdba7e0d09",
+    "interruptions": 2,
+    "interrupted_reconcile_transition_id": "interrupted-reconcile-863cf98e5e23a164987c33e8559dbb5eb462dec1cedde76dece985fce644154a",
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    }
   },
   "history": [
     {
@@ -230,6 +221,14 @@
       "stage": "assembly",
       "attempt": 2,
       "detail": "assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-memory=2155479040 --entry=_initialize --no-stack-first --table-base=1 --global-base=1024 'C:\\Use",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-25T12:47:58.440284Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 3,
+      "detail": "not linked: wasm-ld: error: C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_0eul7rvn\\unit.o: undefined symbol: zz_0048288_",
       "product_commit": null
     }
   ]
