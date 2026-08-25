@@ -1,0 +1,70 @@
+{
+ "result_schema": 1,
+ "unit": "auto-c0001-007",
+ "generated_at": "2026-08-25T21:37:00.026Z",
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-unit.mjs",
+  "git_rev": "c2c47c9c07db4b3f23a42249a2eda3ffeddde351",
+  "sha256": "3b4d57a595f84d5debb340cb2669fe5f74895abbe5856fbe05b2f22d762be766"
+ },
+ "wasm": {
+  "path": "D:\\GotYaForce\\.claude\\worktrees\\agent-a14ab7d53e02b46e7\\research\\decomp\\port-units-staging\\auto-c0001-007\\unit.wasm",
+  "sha256": "104e1678763c7a91f5682602b2f80cb42ec722f00b56d1e7e42d8bde3396c844"
+ },
+ "arena": {
+  "path": "research/decomp/oracle-harness/arena-trace-empty.json",
+  "sha256": "5a1f6379fdf866eb1b3535188b78e9fb3660644440b09f36d205db0775811ae2"
+ },
+ "corpus": {
+  "mode": "replay",
+  "file": "research/decomp/oracle-harness/corpora/auto-c0001-007.dolphin-trace.jsonl",
+  "sha256": "8565cd87b9ba6f7ecf14d2fbfde31147a71be385bd7b1eb27d10a7a055b0ecc2",
+  "n": 120
+ },
+ "spec_sha256": "044f56a85a27937554788bc587127198332245243a20c445c3feb2f1ec4fcb19",
+ "field_map": {
+  "path": "research/decomp/oracle-harness/actor-field-map.json",
+  "sha256": "14c102284ea0a2188d6a137525df04777055de3725f5b7afb60ca0ed6280862c",
+  "source": {
+   "path": "packages/combat/src/rom/actor.ts",
+   "sha256": "ee17e82015d7aaba3b0f949fa35305d3b94c7bd53414a7183b5f3b07a660c2dd"
+  }
+ },
+ "reference_kind": "dolphin_trace",
+ "references": [
+  "real GG4E in bundled Dolphin 2606-97 (GDB-stub per-call capture; tool: research/tools/dolphin-trace/capture_oracle.py; plan: research/tools/dolphin-trace/plans/auto-c0001-007.zz_0010980_.json)"
+ ],
+ "functions": [
+  {
+   "name": "zz_0010980_",
+   "cases": 120,
+   "exact": 120,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "reference": "dolphin_trace 0x80010980 (entry+LR breakpoint capture, per-call args/reads/writes)",
+   "note": "marker RGBA selector; corpus currently exercises the flag==0 fade path only (see CORPUS HONESTY NOTE)",
+   "verdict": "pass"
+  }
+ ],
+ "coverage": {
+  "offsets_read_unwritten": 0,
+  "sentinel_reads_detected": false,
+  "stray_writes": [],
+  "class_mismatches": []
+ },
+ "export_coverage": {
+  "covered": 1,
+  "exported": 8,
+  "uncovered": [
+   "FUN_800108c8",
+   "FUN_80010924",
+   "zz_00107a0_",
+   "zz_001080c_",
+   "zz_0010b50_",
+   "zz_0010b64_",
+   "zz_0010c7c_"
+  ]
+ },
+ "unexplained_cases": [],
+ "verdict": "partial"
+}
