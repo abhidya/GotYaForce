@@ -10,7 +10,7 @@ void zz_0079754_(int param_1);
 void zz_007978c_(int param_1);
 void FUN_800798d4(int param_1);
 
-/* ==== VERBATIM: research/decomp/ghidra-export/chunk_0011.c 1140-1261 ==== */
+/* ==== VERBATIM+D5: research/decomp/ghidra-export/chunk_0011.c 1140-1261 ==== */
 // ==== 80078c68  FUN_80078c68 ====
 
 void FUN_80078c68(int param_1)
@@ -110,12 +110,12 @@ LAB_80078e40:
     *(undefined1 *)(param_1 + 0x542) = 0;
     *(float *)(param_1 + 0x4c) = fVar3;
     *(undefined4 *)(param_1 + 0x50) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x6c);
-    fVar3 = fVar2 * (float)((double)CONCAT44(0x43300000,(int)*(short *)(param_1 + 0x72) ^ 0x80000000
-                                            ) - dVar5);
+    fVar3 = fVar2 * (float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,(int)*(short *)(param_1 + 0x72) ^ 0x80000000
+                                            )) - dVar5);
     dVar7 = (double)fVar3;
     *(float *)(param_1 + 0x170) = fVar3;
-    dVar5 = (double)(fVar2 * (float)((double)CONCAT44(0x43300000,
-                                                      (int)*(short *)(param_1 + 0x5ae) ^ 0x80000000)
+    dVar5 = (double)(fVar2 * (float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,
+                                                      (int)*(short *)(param_1 + 0x5ae) ^ 0x80000000))
                                     - dVar5));
     if (dVar7 < dVar6) {
       dVar7 = (double)(float)(DOUBLE_804378a8 + dVar7);
@@ -134,7 +134,7 @@ LAB_80078e40:
   return;
 }
 
-/* ==== VERBATIM: research/decomp/ghidra-export/chunk_0011.c 1265-1388 ==== */
+/* ==== VERBATIM+D5: research/decomp/ghidra-export/chunk_0011.c 1265-1388 ==== */
 // ==== 80078fc8  FUN_80078fc8 ====
 
 void FUN_80078fc8(int param_1)
@@ -184,7 +184,7 @@ void FUN_80078fc8(int param_1)
       *(float *)(param_1 + 0x150) = fVar2;
       *(float *)(param_1 + 0x158) = fVar9;
       *(float *)(param_1 + 0x164) = fVar2;
-      local_18 = (double)(CONCAT44(0x43300000,(int)*(short *)(param_1 + 0x72)) ^ 0x80000000);
+      local_18 = __gnt4_bitcast_f64(CONCAT44(0x43300000,(int)*(short *)(param_1 + 0x72)) ^ 0x80000000);
       fVar4 = fVar4 * (float)(local_18 - dVar13);
       *(float *)(param_1 + 0x170) = fVar4;
       *(float *)(param_1 + 0x168) = fVar4;
@@ -260,7 +260,7 @@ LAB_800792c4:
   return;
 }
 
-/* ==== VERBATIM: research/decomp/ghidra-export/chunk_0011.c 1392-1435 ==== */
+/* ==== VERBATIM+D5: research/decomp/ghidra-export/chunk_0011.c 1392-1435 ==== */
 // ==== 8007933c  zz_007933c_ ====
 
 undefined4 zz_007933c_(int param_1,uint param_2)
@@ -276,10 +276,10 @@ undefined4 zz_007933c_(int param_1,uint param_2)
   if (sVar1 < 0) {
     iVar4 = -iVar4;
   }
-  sVar3 = (short)(int)((float)((double)CONCAT44(0x43300000,
+  sVar3 = (short)(int)((float)(__gnt4_bitcast_f64(CONCAT44(0x43300000,
                                                 (int)*(short *)(*(int *)(param_1 + 0x4ac) +
                                                                 (param_2 & 0xf) * 2 + 0xac) ^
-                                                0x80000000) - DOUBLE_80437840) *
+                                                0x80000000)) - DOUBLE_80437840) *
                       *(float *)(param_1 + 0x1dc8));
   if (sVar3 < iVar4) {
     sVar1 = *(short *)(param_1 + 0x72) - sVar3;

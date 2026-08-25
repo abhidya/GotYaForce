@@ -107,6 +107,9 @@ extern void   gnt4_PSVECAdd_bl(float *a, float *b, float *out);
 extern double gnt4_PSQUATDotProduct_bl(float *a, float *b);
 extern void   gnt4_PSQUATScale_bl(double s, float *v, float *out);
 
+/* corpus-canonical SDK declarations for symbols this unit calls */
+extern double gnt4_PSVECMag_bl(float *v);
+
 #endif /* GNT4_SHIM_H */
 
 /* ---- AUTO-GENERATED (port_unit_generator) ---- */
@@ -167,3 +170,21 @@ extern int zz_00e4ec4_();
 extern int zz_00e5184_();
 extern int zz_01005ec_();
 extern int zz_0197ad8_();
+
+/* PPC lfd-of-assembled-bits: reinterpret a u64 bit pattern as an IEEE754
+ * double. The extraction transform (D5) rewrites Ghidra's reinterpretation
+ * casts `(double)CONCAT44(...)` to this helper; a bare (double) cast on an
+ * integer in unit.c is then always a genuine value conversion. */
+static inline double __gnt4_bitcast_f64(unsigned long long __u) {
+  union { unsigned long long u; double d; } __b;
+  __b.u = __u;
+  return __b.d;
+}
+
+/* ==== REGISTRY (advisory): previous units of this program compiled with
+   the typings below. Verify each against THIS unit's use sites before
+   adopting it; you are free to disagree -- a reasoned disagreement is
+   wanted data. ==== */
+/* extern void zz_004cd24_(int param_1, int param_2); */
+/* extern void zz_006a5a4_(int param_1); */
+/* extern void zz_00b22f4_(); */
