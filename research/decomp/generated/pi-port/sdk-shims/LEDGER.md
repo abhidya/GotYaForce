@@ -44,6 +44,17 @@ through pi 0.84.3; UNREVIEWED, not integrated.
 | gnt4_C_MTXOrtho_bl | y | y | y | arg order t,b,l,r,n,f (SDK order); GC z-range [-1,0] convention: m[2][2]=-1/(f-n), m[2][3]=-f/(f-n) |
 | gnt4_C_MTXPerspective_bl | y | y | y | fovY in DEGREES; GC z-range [-1,0]: m[2][2]=-n/(f-n), m[2][3]=-fn/(f-n), m[3][2]=-1, m[3][3]=0; outputs Mtx44 (4x4), not 3x4 |
 
+## os_stubs.c (test_os_stubs.c: OS_STUBS_TESTS_PASS)
+
+| function | impl | comp | test | notes |
+|---|---|---|---|---|
+| gnt4___OSCacheInit_bl | y | y | y | documented no-op (no cache in portable target) |
+| gnt4___OSFPRInit_bl | y | y | y | documented no-op |
+| gnt4___OSPSInit_bl | y | y | y | documented no-op (no paired-single mode) |
+| gnt4___init_hardware_bl | y | y | y | documented no-op |
+| gnt4___init_user_bl | y | y | y | no-op, returns 0; real MSL __init_user return value unverified |
+| gnt4___cvt_fp2unsigned_bl | y | y | y | PPC saturating double->u32: NaN/<=0 -> 0, >=2^32-1 -> 0xFFFFFFFF, else truncate |
+
 Family-wide uncertainty: every `undefined8`-returning shim returns the entry
 value of PPC r3 (first pointer arg) zero-extended to 64 bits. The corpus
 proves callers consume r3, but which value r3 holds at exit is an assumption
