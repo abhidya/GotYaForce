@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-25T18:45:09.116891Z - machine-written, do not edit.*
+*Generated 2026-08-25T18:49:57.556833Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 94/1396 settled (3 green, 91 staged) |
-| **Retries outstanding** | 30 |
+| **Queue progress** | 95/1396 settled (3 green, 92 staged) |
+| **Retries outstanding** | 29 |
 | **Untouched** | 1268 |
-| **Last transition** | 2026-08-25T18:45:09.116891Z |
-| **Last green** | 2026-08-25T16:02:26.029432Z (`auto-c0029-012`) |
-| **Last product commit** | `c2c47c9c07db4b3f23a42249a2eda3ffeddde351` |
+| **Last transition** | 2026-08-25T18:49:57.556833Z |
+| **Last green** | 2026-08-25T18:49:57.556833Z (`auto-c0020-007`) |
+| **Last product commit** | `02be050b5a4bceea6c76ab4acf4d211bbc543c0b` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T18:49:57.556833Z | `auto-c0020-007` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T18:45:09.116891Z | `auto-c0019-016` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_00088a4_ |
 | 2026-08-25T17:52:31.513699Z | `auto-c0043-007` | gate_failed | wasm-link | 3 | not linked: unit.c:4:1: error: expected ')' unit.c:96:36: error: too many arguments to function call, expected |
 | 2026-08-25T16:27:43.235751Z | `auto-c0030-014` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0030-014 declares apply_ |
@@ -70,4 +71,3 @@
 | 2026-08-24T22:41:30.771202Z | `auto-c0019-014` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 17388 and reload failed: 409 Client Error: Conflict for url: |
 | 2026-08-24T22:41:24.565340Z | `auto-c0019-012` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800be8e |
 | 2026-08-24T22:15:06.292061Z | `auto-c0019-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-24T21:50:16.436449Z | `auto-c0019-010` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
