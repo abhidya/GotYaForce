@@ -189,8 +189,8 @@ extern undefined8 gnt4___init_user_bl(void);
 extern double     gnt4_acos_bl(double x);
 extern double     gnt4_atan(double x);
 extern double     gnt4_atan2_bl(double y, double x);
-extern void       gnt4_memcpy(void *dest, const void *src, size_t n);
-extern void       gnt4_memset(void *dest, int c, size_t n);
+extern void       gnt4_memcpy(void *dest, const void *src, unsigned long n);
+extern void       gnt4_memset(void *dest, int c, unsigned long n);
 extern double     gnt4_pow_bl(double base, double exp);
 extern double     gnt4_sin_bl(double x);
 
