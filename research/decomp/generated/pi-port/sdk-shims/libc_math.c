@@ -2,12 +2,12 @@
 #include <math.h>
 #include <string.h>
 
-void gnt4_memcpy(void *dest, const void *src, size_t n)
+void gnt4_memcpy(void *dest, const void *src, unsigned long n)
 {
     memcpy(dest, src, n);
 }
 
-void gnt4_memset(void *dest, int c, size_t n)
+void gnt4_memset(void *dest, int c, unsigned long n)
 {
     memset(dest, c, n);
 }
