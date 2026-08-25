@@ -897,3 +897,42 @@ memory contracts and frame-boundary state evidence, worker-side reentrant
 dispatch loop with synchronous-only servicing, `boundary_green` as the
 verification standard for nonterminating spine functions, DTM dependency moved
 to the first trace-dependent step) and the 13-step order above.**
+
+# V5 REVIEW VERDICT (2026-08-25): PASS — design accepted for implementation
+
+The adversarial review of v5 against the requirement — fully 1:1 playable,
+byte-exact-as-provable, autonomous local-LLM pipeline with owner-supplied DTM
+captures — returned **PASS**. Five citations were re-verified exact. The three
+prior FAIL rounds (v2: 4 gaps; v3: 3; v4: 3) are all closed by mechanisms now
+normative in this document. Decisive findings: the adapter set stays tractable
+because the state-evidence gate admits **trace-delta adapters** — adapters that
+mechanically apply recorded per-call memory deltas under DTM lockstep, which are
+auto-generatable and retire symbol-by-symbol as the ladder links; the reentrant
+loop's edge paths cannot originate a deadlock, because only a servicing main
+thread issues invokes, which implies a parked worker, and late invokes queue to
+the next park; and `boundary_green` is non-vacuous for the spine, because the
+loop body is 17 calls plus exactly one spine-owned write
+(research/decomp/ghidra-export/chunk_0006.c:5808-5832), and whole-arena
+frame-boundary state evidence independently checks composition.
+
+## Residual risks — recorded as NORMATIVE requirements
+
+- **R1 — Address-deterministic allocator shims are a HARD requirement.**
+  OSAlloc-family HLE shims must return the exact trace-captured addresses (the
+  returned address IS the traced I/O); otherwise heap pointers stored in
+  game-owned structs leak divergence through compared regions and the step-9
+  gate fails undiagnosably.
+- **R2 — Adapter-serviced frames are REPLAY frames.** The hybrid-period gates
+  pin bridged/adapter frames to a recorded DTM; interactive play during the
+  hybrid period comes only from fully-linked seam subtrees (the damage-core
+  pattern) until the composed module with real SDK shims takes over. Gate (b)'s
+  "N frames of play" must never be read as interactive hybrid play.
+- **R3 — Two reentrant-loop corners are part of the normative mechanism.** The
+  main thread cannot `Atomics.wait`, so nested servicing uses the
+  busy-wait/`Atomics.waitAsync` discipline (as in Emscripten proxying); GC
+  interrupt callbacks (VI retrace, AI/DSP DMA) are delivered as invoke-requests
+  at worker park points.
+
+Implementation proceeds per the 13-step revised order of work in V5 AMENDMENTS;
+further design changes require a new adversarial review round recorded in this
+document.
