@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-25T12:57:30.811238Z",
+  "generated_at": "2026-08-25T13:01:09.829136Z",
   "run_id": "2026-08-25T12:04:28.934663Z",
   "total_units": 1396,
   "green": 3,
@@ -10,8 +10,8 @@
   "deferred": 0,
   "structural_ineligible": 4,
   "active": 0,
-  "total_attempts": 211,
-  "transitions_last_hour": 4,
+  "total_attempts": 212,
+  "transitions_last_hour": 5,
   "greens_last_hour": 2,
   "last_green_at": "2026-08-25T12:57:25.355978Z",
   "last_green_unit": "auto-c0011-011",
