@@ -809,6 +809,46 @@ export class BattleScene {
     return this.actors.get(uid)?.group.position ?? null;
   }
 
+  /**
+   * Read-only per-actor animation state for debugging/smoke assertions
+   * (window.__gf.animationDebug in main.ts): which slot each actor is on and how many
+   * mixer actions are actually RUNNING with weight. An actor whose model is ready but
+   * whose runningClips is 0 is rendering its bind pose (T-pose) — the exact regression
+   * class the browser smoke's state-only checks could not see.
+   */
+  animationDebug(): Array<{
+    uid: string;
+    borgId: string;
+    ready: boolean;
+    placeholder: boolean;
+    slot: string | null;
+    runningClips: number;
+    clipNames: string[];
+  }> {
+    const out = [];
+    for (const [uid, actor] of this.actors) {
+      const running: THREE.AnimationAction[] = [];
+      const collect = (a: THREE.AnimationAction | undefined) => {
+        if (a && a.getEffectiveWeight() > 0 && (a.isRunning() || a.paused)) running.push(a);
+      };
+      for (const a of Object.values(actor.actions)) collect(a);
+      for (const a of Object.values(actor.streamActions)) collect(a);
+      out.push({
+        uid,
+        borgId: actor.borgId,
+        ready: actor.ready,
+        placeholder: actor.isPlaceholder,
+        slot: actor.current,
+        runningClips: running.length,
+        clipNames: running.map(
+          (a) =>
+            `${a.getClip().name}:w${a.getEffectiveWeight().toFixed(2)}${a.paused ? ":paused" : ""}${a.isRunning() ? "" : ":stopped"}`,
+        ),
+      });
+    }
+    return out;
+  }
+
   private spawn(b: BattleActorView): Actor {
     const presentationId = b.combatFormId ?? b.borgId;
     const group = new THREE.Group();
@@ -1062,13 +1102,27 @@ export class BattleScene {
       .setLoop(looping ? THREE.LoopRepeat : THREE.LoopOnce, looping ? Infinity : 1)
       .play();
     action.clampWhenFinished = !looping;
-    // Fade out any other playing action (both the plain slot cache and the per-combo-step
-    // stream-ref cache, since a melee chain may cross between the two).
-    for (const [s, a] of Object.entries(actor.actions)) {
-      if (s !== slot && a !== action && a.isRunning()) a.crossFadeTo(action, 0.18, false);
+    // Fade out any other action still contributing weight (both the plain slot cache and
+    // the per-combo-step stream-ref cache, since a melee chain may cross between the two).
+    //
+    // CRITICAL: a LoopOnce action that already FINISHED (clampWhenFinished) is paused, so
+    // isRunning() is FALSE — but it still holds its clamped end pose at full effective
+    // weight. The old `a.isRunning()` guard skipped exactly those actions, so every
+    // finished one-shot (spawn pose, hit react, ROM-special stream clips…) stayed in the
+    // blend at weight 1.0 FOREVER. They accumulated over a battle until the live clip's
+    // share of the weighted average was negligible — characters visibly froze into a
+    // static bind/end-pose blend ("T-posing"). fadeOut works on paused actions (the weight
+    // interpolant advances on mixer time), and three.js disables the action once the fade
+    // reaches 0.
+    const fadeOther = (a: THREE.AnimationAction): void => {
+      if (a.isRunning()) a.crossFadeTo(action, 0.18, false);
+      else if (a.getEffectiveWeight() > 0) a.fadeOut(0.18);
+    };
+    for (const a of Object.values(actor.actions)) {
+      if (a && a !== action) fadeOther(a);
     }
     for (const a of Object.values(actor.streamActions)) {
-      if (a && a !== action && a.isRunning()) a.crossFadeTo(action, 0.18, false);
+      if (a && a !== action) fadeOther(a);
     }
   }
 

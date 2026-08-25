@@ -1361,6 +1361,9 @@ function showLoadingMessage(text: string): void {
     return normalized;
   },
   renderDiagnostics: () => viewport.diagnostics(),
+  // Per-actor mixer state (battleScene.animationDebug): lets the browser smoke assert
+  // visible borgs are actually PLAYING a clip (runningClips > 0), not stuck in bind pose.
+  animationDebug: () => battleScene.animationDebug(),
   // Read-only scene readout for preview debugging: current stage, lights, and a per-material
   // summary (color/map/side/transparent) of everything under the stage and battle roots.
   sceneInfo: () => {
