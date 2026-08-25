@@ -24,6 +24,18 @@ through pi 0.84.3; UNREVIEWED, not integrated.
 | gnt4_PSQUATDotProduct_bl | y | y | y | float accumulator, widened at return |
 | gnt4_PSQUATScale_bl | y | y | y | arg map: s=scale (f1), v=src quat (r3), out=dst (r4); returns entry r3 (= `v`) |
 
+## psmtx.c (test_psmtx.c: PSMTX_TESTS_PASS)
+
+| function | impl | comp | test | notes |
+|---|---|---|---|---|
+| gnt4_PSMTXIdentity_bl | y | y | y | row-major 3x4 |
+| gnt4_PSMTXCopy_bl | y | y | y | returns entry r3 (= `src`) |
+| gnt4_PSMTXConcat_bl | y | y | y | ab = a*b with implicit {0,0,0,1} row; alias-safe via temp; returns entry r3 (= `a`) |
+| gnt4_PSMTXMultVec_bl | y | y | y | w=1 point transform; alias-safe (loads vec first); returns entry r3 (= `mtx`) |
+| gnt4_PSMTXTrans_bl | y | y | y | arg map: x,y,z in f1-f3, matrix in r3; returns entry r3 (= `out`) |
+| gnt4_PSMTXScale_bl | y | y | y | arg map: sx,sy,sz in f1-f3, matrix in r3 |
+| gnt4_PSMTXRotRad_bl | y | y | y | arg map: angle=f1 rad, `quat_out` is the 3x4 MATRIX (corpus name misleading), axis is char 'x'/'y'/'z' (case-insensitive); unknown axis leaves matrix untouched |
+
 Family-wide uncertainty: every `undefined8`-returning shim returns the entry
 value of PPC r3 (first pointer arg) zero-extended to 64 bits. The corpus
 proves callers consume r3, but which value r3 holds at exit is an assumption
