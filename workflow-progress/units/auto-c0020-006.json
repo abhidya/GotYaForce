@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "unit": "auto-c0020-006",
+  "unit_id": "auto-c0020-006",
+  "timestamp": "2026-08-25T01:08:18.916123Z",
+  "run_id": "2026-08-24T01:57:30.243221Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: Serving context 16384 < required 17596 and reload failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0020-006.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_bug4qttj\\unit.o'' failed (returned 1)",
+          "unit.c:307:15: error: use of undeclared identifier 'PTR_zz_00c42a8__803051f4'",
+          "unit.c:69:34: error: use of undeclared identifier 'FUN_800c4468'"
+        ],
+        "fingerprint": "dca193e9a9b9eb1a231b2173e90f902e0167adf21a057041a92df590bdf72378"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "136"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "symbol_set": [
+      "DAT_80303138",
+      "DAT_80303139",
+      "DAT_8030313a",
+      "DAT_8030313b",
+      "DAT_80303154",
+      "DAT_80303155",
+      "DAT_80303156",
+      "DAT_80303164",
+      "DAT_80303168",
+      "DAT_8030316c",
+      "DAT_80303170",
+      "DAT_80303174",
+      "DAT_80303178",
+      "DAT_8030317a",
+      "DAT_803bb374",
+      "FUN_80083874",
+      "FUN_800c3b40",
+      "FUN_800c3b60",
+      "FUN_800c3cdc",
+      "FUN_800c3d2c",
+      "FUN_800c4088",
+      "FUN_800c426c",
+      "SQRT",
+      "byte",
+      "code",
+      "gnt4_PSMTXCopy_bl",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECNormalize_bl",
+      "gnt4_PSVECSquareDistance_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006f78_",
+      "zz_000726c_",
+      "zz_00076d0_",
+      "zz_00097b4_",
+      "zz_006ec84_",
+      "zz_0083244_",
+      "zz_00834b0_",
+      "zz_0083524_",
+      "zz_0083714_",
+      "zz_0083e64_",
+      "zz_0084000_",
+      "zz_0084170_",
+      "zz_0088aa0_",
+      "zz_0088e50_",
+      "zz_0089100_",
+      "zz_008ac80_",
+      "zz_008aff0_",
+      "zz_00aedc0_",
+      "zz_00c3be0_",
+      "zz_00c42a8_",
+      "zz_00c44a8_",
+      "zz_00c4540_",
+      "zz_00f036c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 136,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0020-006.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_bug4qttj\\unit.o'' failed (returned 1)",
+          "unit.c:307:15: error: use of undeclared identifier 'PTR_zz_00c42a8__803051f4'",
+          "unit.c:69:34: error: use of undeclared identifier 'FUN_800c4468'"
+        ],
+        "fingerprint": "dca193e9a9b9eb1a231b2173e90f902e0167adf21a057041a92df590bdf72378"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "prompt_version": "3",
+      "registry_version": "136"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: Serving context 16384 < required 17596 and reload failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-07f3564a6872cebbd9e9feba60a3e024d999777dcc20d20bf63a89de5d80758c"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-25T01:08:18.916123Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: Serving context 16384 < required 17596 and reload failed: 409 Client Error: Conflict for url: http://127.0.0.1:8888/api/inference/load",
+      "product_commit": null
+    }
+  ]
+}
