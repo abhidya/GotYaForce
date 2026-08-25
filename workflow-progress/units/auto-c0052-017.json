@@ -2,85 +2,29 @@
   "schema": 1,
   "unit": "auto-c0052-017",
   "unit_id": "auto-c0052-017",
-  "timestamp": "2026-08-24T16:37:46.563449Z",
-  "run_id": "2026-08-24T01:57:30.243221Z",
-  "result": "gate_failed",
-  "stage": "assembly",
-  "attempt": 1,
-  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0052-017/gnt4_shim.h",
-  "product_commit": null,
-  "product_pushed": null,
-  "product_effect": "no product-tree change by design",
+  "timestamp": "2026-08-25T20:40:04.641119Z",
+  "run_id": "2026-08-25T15:28:22.545919Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 2,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "89e089c880294b2a8a1e1968174b7365bd772422",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
   "product_commit_failed": false,
-  "oracle_summary": null,
+  "oracle_summary": "compile-only (UNVERIFIED)",
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": null,
+  "tier": "compile_only",
   "extra": {
-    "rounds": [
-      {
-        "iteration": 1,
-        "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0052-017.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_5go53g5o\\unit.o'' failed (returned 1)",
-          "unit.c:48:15: error: use of undeclared identifier 'PTR_zz_01b4244__803816b0'",
-          "unit.c:58:15: error: use of undeclared identifier 'PTR_zz_01b4280__803816bc'",
-          "unit.c:71:15: error: use of undeclared identifier 'PTR_zz_01b42f4__803816d0'"
-        ],
-        "fingerprint": "f89afe4a6b70b461235e28566d1e905c42610dcae086ac9b5a9be2b9af170db8"
-      }
-    ],
-    "assembly_gate": {
-      "passed": false,
-      "n": 5,
-      "units": [
-        "auto-c0043-017",
-        "auto-c0043-018",
-        "auto-c0046-000",
-        "auto-c0052-016",
-        "auto-c0052-017"
-      ],
-      "stage": "canonicalize",
-      "conflicts": [
-        {
-          "symbol": "zz_004beb8_",
-          "class": "canonicalization_refused",
-          "units": [
-            "auto-c0043-017",
-            "auto-c0043-018",
-            "auto-c0046-000",
-            "auto-c0052-016",
-            "auto-c0052-017"
-          ],
-          "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0052-017/gnt4_shim.h"
-        }
-      ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0052-017/gnt4_shim.h",
-      "candidate": {
-        "name": "auto-c0052-017",
-        "sha256": "f5514e74d9a700102a88bb15a4bd7dc04b930884003974fd845085d0ed1ea711"
-      },
-      "expected_candidate": {
-        "name": "auto-c0052-017",
-        "sha256": "f5514e74d9a700102a88bb15a4bd7dc04b930884003974fd845085d0ed1ea711"
-      },
-      "attempt_cleanup": "removed"
-    },
-    "world_version": {
-      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
-      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
-      "prompt_version": "3",
-      "registry_version": "117"
-    },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false
+    "transition_id": "69271abd0196429496f8975763350297",
+    "transition_timestamp": "2026-08-25T20:40:04.641119Z",
+    "transition_run_id": "2026-08-25T15:28:22.545919Z",
+    "promotion_transaction_id": "9ec6ac3a33bf4d9e9c1e93d7b28993e9",
+    "candidate_sha256": "c10e0ee340a7698bff46e84cfbd143fd43f6701de5bed63662f9c1d80a34f797"
   },
   "driver_record": {
-    "status": "red_retryable",
-    "attempts": 1,
+    "status": "green",
+    "attempts": 2,
     "symbol_set": [
       "CONCAT44",
       "__gnt4_bitcast_f64",
@@ -101,8 +45,8 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 117,
-    "model_requests": 1,
+    "registry_version_used": 149,
+    "model_requests": 2,
     "rounds": [
       {
         "iteration": 1,
@@ -162,10 +106,30 @@
       "prompt_version": "3",
       "registry_version": "117"
     },
-    "failure_domain": "pipeline-control",
-    "diagnosis_eligible": false,
-    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0052-017/gnt4_shim.h",
-    "last_stage": "assembly"
+    "error": null,
+    "last_stage": "commit",
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "zz_004beb8_",
+        "zz_006d0dc_",
+        "zz_01b3f94_",
+        "zz_01b3fcc_"
+      ],
+      "unresolved": []
+    },
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "89e089c880294b2a8a1e1968174b7365bd772422",
+    "pushed": true,
+    "tier": "compile_only",
+    "promotion_transaction_id": "9ec6ac3a33bf4d9e9c1e93d7b28993e9",
+    "promotion_transition_id": "69271abd0196429496f8975763350297",
+    "candidate_sha256": "c10e0ee340a7698bff46e84cfbd143fd43f6701de5bed63662f9c1d80a34f797"
   },
   "history": [
     {
@@ -175,6 +139,14 @@
       "attempt": 1,
       "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ owner/variant pair at auto-c0052-017/gnt4_shim.h",
       "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-25T20:40:04.641119Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 2,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "89e089c880294b2a8a1e1968174b7365bd772422"
     }
   ]
 }
