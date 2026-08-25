@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-25T14:27:15.499561Z - machine-written, do not edit.*
+*Generated 2026-08-25T14:58:12.930676Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 92/1396 settled (3 green, 89 staged) |
-| **Retries outstanding** | 32 |
+| **Queue progress** | 93/1396 settled (3 green, 90 staged) |
+| **Retries outstanding** | 31 |
 | **Untouched** | 1268 |
-| **Last transition** | 2026-08-25T14:27:15.499561Z |
-| **Last green** | 2026-08-25T13:31:47.616846Z (`auto-c0029-002`) |
-| **Last product commit** | `327ebcca9d231af6790fe1665ce751bc27eda710` |
+| **Last transition** | 2026-08-25T14:58:12.930676Z |
+| **Last green** | 2026-08-25T14:58:12.930676Z (`auto-c0035-004`) |
+| **Last product commit** | `8dd1a752de29ab13db2a2da0c50f4ce177bf4d21` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T14:58:12.930676Z | `auto-c0035-004` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T14:27:15.499561Z | `auto-c0029-012` | gate_failed | assembly | 5 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ |
 | 2026-08-25T13:31:47.616846Z | `auto-c0029-002` | staged | commit | 5 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T13:05:29.790679Z | `auto-c0019-000` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-24T19:49:55.554497Z | `auto-c0010-009` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T19:27:40.251967Z | `auto-c0010-005` | gate_failed | wasm-link | 1 | not linked: .\gnt4_shim.h:170:15: error: conflicting types for 'gnt4_PSVECMag_bl' unit.c:129:13: error: assign |
 | 2026-08-24T18:22:28.078952Z | `auto-c0010-004` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-24T18:01:25.183116Z | `auto-c0010-003` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0072438_ |
