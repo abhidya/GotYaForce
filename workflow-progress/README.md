@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-25T02:46:49.712626Z - machine-written, do not edit.*
+*Generated 2026-08-25T03:10:42.432975Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 88/1396 settled (3 green, 85 staged) |
-| **Retries outstanding** | 35 |
-| **Untouched** | 1269 |
-| **Last transition** | 2026-08-25T02:46:49.712626Z |
+| **Retries outstanding** | 36 |
+| **Untouched** | 1268 |
+| **Last transition** | 2026-08-25T03:10:42.432975Z |
 | **Last green** | 2026-08-24T23:38:51.149010Z (`auto-c0020-000`) |
 | **Last product commit** | `1923f3a6e9f877677045111f1893bdbf33dc636b` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T03:10:42.432975Z | `auto-c0020-009` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800c617 |
 | 2026-08-25T02:46:49.712626Z | `auto-c0020-008` | gate_failed | wasm-link | 1 | not linked: unit.c:56:10: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type ' |
 | 2026-08-25T01:08:18.916123Z | `auto-c0020-006` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 17596 and reload failed: 409 Client Error: Conflict for url: |
 | 2026-08-25T01:08:13.852401Z | `auto-c0020-005` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 18333 and reload failed: 409 Client Error: Conflict for url: |
@@ -70,4 +71,3 @@
 | 2026-08-24T12:19:58.070405Z | `auto-c0020-007` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800c5a6 |
 | 2026-08-24T11:29:58.213695Z | `auto-c0010-011` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T11:25:54.234067Z | `auto-c0031-002` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_011243c_ declared void but their results are assigned; no header edit ca |
-| 2026-08-24T11:25:50.934608Z | `auto-c0019-016` | gate_failed | wasm-link | 1 | not linked: link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functi |
