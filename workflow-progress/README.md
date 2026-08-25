@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-25T12:47:58.440284Z - machine-written, do not edit.*
+*Generated 2026-08-25T12:52:59.319115Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 88/1396 settled (3 green, 85 staged) |
-| **Retries outstanding** | 36 |
+| **Queue progress** | 89/1396 settled (3 green, 86 staged) |
+| **Retries outstanding** | 35 |
 | **Untouched** | 1268 |
-| **Last transition** | 2026-08-25T12:47:58.440284Z |
-| **Last green** | 2026-08-24T23:38:51.149010Z (`auto-c0020-000`) |
-| **Last product commit** | `1923f3a6e9f877677045111f1893bdbf33dc636b` |
+| **Last transition** | 2026-08-25T12:52:59.319115Z |
+| **Last green** | 2026-08-25T12:52:59.319115Z (`auto-c0011-004`) |
+| **Last product commit** | `7ef81043df54538ac2c739e07493f0567004ad9c` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T12:52:59.319115Z | `auto-c0011-004` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T12:47:58.440284Z | `auto-c0053-013` | gate_failed | wasm-link | 3 | not linked: wasm-ld: error: C:\Users\manny\AppData\Local\Temp\emscripten_temp_0eul7rvn\unit.o: undefined symbo |
 | 2026-08-25T12:02:52.923154Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-25T12:01:17.981024Z | `auto-c0053-012` | gate_failed | wasm-link | 4 | not linked: unit.c:81:36: error: use of undeclared identifier 'FUN_801b9adc'; did you mean 'FUN_801b8a1c'? uni |
@@ -70,4 +71,3 @@
 | 2026-08-24T17:14:47.639074Z | `auto-c0010-000` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0045ef4_ |
 | 2026-08-24T16:43:33.203204Z | `auto-c0057-008` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T16:40:39.211623Z | `auto-c0053-015` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-24T16:37:46.563449Z | `auto-c0052-017` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_004beb8_ |
