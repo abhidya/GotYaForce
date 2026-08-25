@@ -18,6 +18,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="icon" href="data:," />
     <title>Gotcha Force (web)</title>
+    <!--
+      H1 cross-origin isolation (docs/playable-port-design.md): must be registered
+      FIRST, before the app module loads. On header-less static hosts (GitHub
+      Pages) the vendored coi-serviceworker re-serves every response with
+      COOP/COEP and reloads once on first visit; where the isolation headers are
+      already present (Vite dev/preview send them from vite.config.ts) the script
+      sees crossOriginIsolated === true and is a no-op, and it also no-ops where
+      serviceWorker is unsupported. Vite rewrites the root-absolute public URL
+      with the production base (/GotYaForce/game/) at build time.
+    -->
+    <script src="/coi-serviceworker.js"></script>
     <style>
       html, body {
         margin: 0;

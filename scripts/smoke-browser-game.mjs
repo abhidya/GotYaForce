@@ -88,7 +88,17 @@ function startStaticServer(dist) {
       response.writeHead(404).end("Not found");
       return;
     }
-    response.writeHead(200, { "content-type": contentType(target) });
+    response.writeHead(200, {
+      "content-type": contentType(target),
+      // H1 cross-origin isolation: serve the gameplay route the way an
+      // isolated production host behaves (GitHub Pages reaches the same state
+      // via public/coi-serviceworker.js). With the headers present the
+      // vendored SW deliberately no-ops, so the route runs without its
+      // first-visit reload; the header-LESS SW path is proven separately by
+      // the COI isolation phase at the end of this file.
+      "cross-origin-opener-policy": "same-origin",
+      "cross-origin-embedder-policy": "require-corp",
+    });
     const stream = fs.createReadStream(target);
     stream.once("error", () => response.destroy());
     stream.pipe(response);
@@ -630,3 +640,16 @@ try {
     }
   }
 }
+
+// ============================================================================
+// >>> H1 COI ISOLATION PHASE (separate, self-contained — keep at end of file).
+// Asserts window.crossOriginIsolated === true in dev-header mode (Vite
+// server.headers) AND in production coi-serviceworker mode, tolerating the
+// SW's first-load reload. Owns its own build/servers/browser; see
+// scripts/smoke-coi-phase.mjs. Do not fold into the gameplay route above.
+// ============================================================================
+{
+  const { runCoiPhase } = await import("./smoke-coi-phase.mjs");
+  await runCoiPhase();
+}
+// >>> END H1 COI ISOLATION PHASE =============================================
