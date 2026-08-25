@@ -438,3 +438,235 @@ The review question for the owner is unchanged in kind, updated in content:
 **approve the v3 execution model (Worker + Atomics control inversion, address-keyed
 indirect dispatch, gated composition ladder, owner-supplied capture dependency) and
 the 10-step order above.**
+
+
+---
+
+# V4 AMENDMENTS (2026-08-25) — deployment isolation, out-of-window boundary, dispatch ABI
+
+A third adversarial review of v3 returned FAIL: three fatal gaps and two
+enforceability notes. All three fatals sit in the space v3 opened — the Worker +
+Atomics execution model and the address-keyed dispatch table — where v3 named the
+mechanism but left a load-bearing precondition, boundary, or failure mode unstated.
+Each is given below as gap, mechanism, and gate. The two enforceability notes are
+folded in as NORMATIVE rules, not commentary. Where a citation reads `file:line`,
+the line was read and verified for this amendment.
+
+## H1 — Cross-origin isolation is an unstated precondition of the entire execution model
+
+**The gap.** Everything in G1 rests on shared `WebAssembly.Memory`,
+`SharedArrayBuffer`, and `Atomics.wait` — and browsers gate all three behind
+`crossOriginIsolated === true`, which requires the server to send COOP/COEP response
+headers (`Cross-Origin-Opener-Policy: same-origin`,
+`Cross-Origin-Embedder-Policy: require-corp`). Production is GitHub Pages
+(apps/game/vite.config.ts:5-7 — production base is the Pages subpath
+`/GotYaForce/game/`), and GitHub Pages cannot set response headers. Nothing in
+`apps/game` sets or references them: a search for
+COOP/COEP/`crossOriginIsolated`/`SharedArrayBuffer` across `apps/game` matches no
+source file (verified this session; the only hits are byte coincidences inside two
+texture PNGs). As written, v3's control-inversion pilot would pass on a
+suitably-configured dev machine and the shipped game would throw on
+`new SharedArrayBuffer` — the execution model silently did not apply to production.
+
+**The mechanism.** Cross-origin isolation becomes an explicit PRECONDITION of the
+control-inversion step, with a serving plan for both environments:
+- **Dev:** the Vite dev server sends COOP/COEP via `server.headers` in
+  apps/game/vite.config.ts.
+- **Production (GitHub Pages):** a coi-serviceworker-style shim — a service worker
+  that intercepts and re-serves every response with the isolation headers added —
+  installed at first load, after which the page reloads once into an isolated
+  context. This is a known, widely-used pattern for header-less static hosts.
+- **Fallback:** if the service-worker shim proves unreliable (first-load reload
+  loops, SW update races), the fallback is a host change to any static host that
+  can set response headers. The subpath base is already config-driven
+  (vite.config.ts:7), so a host change is a config change, not a code change.
+
+**Threads relink invalidates Stage-B verification — a required re-verification
+pass, not a footnote.** Building the composed module against a shared, imported
+memory (the threads/atomics target) changes the emitted module bytes relative to
+what Stage B verified. The same "the verified bytes are the shipped bytes"
+principle that excluded Asyncify (G1) applies with full force here: after the
+threads-enabled relink, EVERY previously-verified unit's `oracle_green` status is
+SUSPENDED until its corpus is replayed against the relinked artifact and comes back
+byte-equal. This re-verification pass is a scheduled step in the order of work
+(step 8 below), and no composed-module claim may cite pre-relink verification.
+
+**The gate.** The smoke script asserts `window.crossOriginIsolated === true` in
+BOTH dev and production before any shared-memory work counts as done. A
+control-inversion pilot that passed only where headers happen to be set has not
+passed.
+
+## H2 — The out-of-window call boundary is undefined, making the control-inversion gate unpassable or vacuous
+
+**The gap.** The G1 gate reads "the composed module DRIVES N frames of play with
+the TS engine fully passive." The largest window ever linked is N=5 of 1,396
+(research/decomp/data/assembly-gate.json:4, `largest_n_passed: 5`), and
+`run_main_game_loop` (`0x800527d8`, research/decomp/index/start-code-flow.md:87)
+fans out into essentially the entire per-frame call graph — the flow table routes
+every per-frame entry through it. v3 never says what a linked function's call to an
+UNLINKED callee binds to. With no answer, the gate is unpassable (the module traps
+at the first out-of-window call) or vacuous (out-of-window calls silently no-op and
+"drives N frames" means nothing). Either way, "TS engine fully passive" is
+undefined while the TS scaffold still implements most of the game.
+
+**The mechanism: a generated HOST BRIDGE.** Every out-of-window callee becomes a
+declared wasm import, bound to a bridge that performs a synchronous Atomics-based
+RPC from the worker to the main-thread TS scaffold:
+1. The worker-side bridge stub writes the callee's GC address and marshalled
+   arguments into a fixed ring buffer in shared memory, then `Atomics.wait`s.
+2. The main thread services the call — dispatching into the TS scaffold's
+   implementation of that function — writes the result into the ring buffer, and
+   `Atomics.notify`s.
+3. The worker resumes with the result, exactly as if the callee had been linked.
+
+A **per-frame bridged-call ledger** records every symbol that crosses the boundary
+(symbol, GC address, call count). This redefines the terms of G1 precisely:
+- The TS scaffold remains the implementation of not-yet-ported functions WITHOUT
+  being in control.
+- **Passivity is redefined as: "TS executes only when called through the bridge."**
+  Control inversion is real — the composed module owns the loop; TS is a set of
+  callees.
+- The ledger is the shrink metric F1 promised: as the composition ladder grows,
+  symbols move from bridged to linked and the per-frame bridged-call count falls.
+
+**The gates.**
+- (a) **Prerequisite:** `run_main_game_loop` itself reaches `oracle_green` and is
+  linked INTO the composed window before the control-inversion step runs. A
+  composed module driven by anything other than the ROM's own loop has not
+  inverted control.
+- (b) The control-inversion gate is restated: **the composed module drives N frames
+  with every out-of-window call routed through the declared bridge, with the
+  bridged-call count reported per frame and monotonically shrinking as the ladder
+  grows.** Frames driven with any undeclared or unrouted out-of-window call do not
+  count.
+
+## H3 — Dispatch ABI: signature mismatch must be RESOLVED, not merely checked
+
+**The gap.** G2's signature classes make `call_indirect` signature-CHECKED — and
+wasm's answer to a failed check is a TRAP. PPC indirect calls are
+signature-agnostic: the caller jumps through `ctr` with whatever is in the argument
+registers, and the ROM exploits that freely. The menu table dispatches with zero
+arguments (`(*(code *)(&PTR_FUN_802da780)[menu_mode])();`,
+research/decomp/ghidra-export/chunk_0013.c:2625) while the actor table passes the
+actor pointer (research/decomp/behavior-notes.md:2633) — and callee-signature
+divergence is endemic in the gate's own data: 81 contested symbols, `undefined8`
+forks, `collision_stub` prototype conflicts (G3's evidence). Under G2 as written,
+the first dispatch whose caller-side class disagrees with the callee's true
+signature traps the module. Signature classes turn UB into a crash; they do not
+make dispatch work.
+
+**The mechanism: a UNIFORM DISPATCH ABI.** The assembly gate emits, for every
+address-keyed table:
+- **Adapter thunks as table entries.** Every entry in the `WebAssembly.Table` is a
+  generated thunk with ONE canonical signature — e.g. `(i32 argptr) -> i32`, with
+  arguments marshalled through a fixed frame in shared memory. Each thunk is
+  generated AT LINK TIME from the callee's true signature: it unmarshals the frame
+  into the callee's real parameters, calls the callee directly, and marshals the
+  return back.
+- **Caller-site lowering to the uniform signature.** Indirect call sites lower to:
+  write arguments into the fixed frame, `call_indirect` with the canonical
+  signature. Cross-class calls (zero-arg menu dispatch, one-arg actor dispatch,
+  anything the ROM does) CANNOT trap on signature — every table entry has the same
+  wasm type; fidelity to the callee lives in the thunk.
+- **Table misses are defined behavior.** A stored function pointer whose target is
+  not yet linked hits a **miss-handler import**: it logs the GC address to the
+  bridged-call ledger and routes the call to the host bridge (H2's mechanism) —
+  the TS scaffold services it like any out-of-window call. A miss is a bridge
+  call, never a trap and never undefined behavior. This also closes the loop with
+  H2: the dispatch table and the bridge share one ledger and one boundary
+  semantics.
+
+**The gate.** The dispatch pilot (order-of-work step 3/4) must include, in
+addition to G2's real-ROM-table requirement:
+- one **deliberately cross-class dispatch** (e.g. a zero-arg-style call into a
+  callee with parameters), passing with correct results, and
+- one **table-miss case** (a stored pointer to a not-yet-linked function),
+  serviced through the miss handler with a correct result and a ledger entry.
+Both must pass with correct results AND correct ledger entries. A pilot of
+same-class, all-linked dispatches proves nothing about the two failure modes the
+ROM will actually produce.
+
+## Enforceability amendments (normative)
+
+**E1 — The composition ladder's conflict budget gets a formula (amends G3).** "A
+per-rung conflict budget" is unenforceable without a number. The budget is:
+
+    a rung passes if  (new contested symbols introduced at that rung)
+                    / (new symbols linked at that rung)
+                    ≤ the same ratio at the previous rung.
+
+That is, the contested-symbol RATE must be non-increasing rung-over-rung — the
+quantitative form of G3's stop rule. The ratio is recorded per rung in the ledger.
+The formula is PROVISIONAL and revisable with evidence, but any revision must be
+written into this document with the measurements that justified it; the ladder
+never runs against an unstated budget.
+
+**E2 — Canvas ownership during the hybrid period (amends G1's OffscreenCanvas
+plan).** `transferControlToOffscreen()` permanently detaches a canvas from
+main-thread rendering — so the existing three.js renderer (scaffold) and the
+worker-side GX shim CANNOT share one canvas, and no hand-off scheme can un-transfer
+it. The stated mechanism for the hybrid period is a **dual-canvas compositor**: the
+scaffold's three.js canvas below, the worker's OffscreenCanvas layered above,
+opacity-switched per scene ownership (whichever side owns the current scene's
+rendering is visible; the other is transparent and idle). The dual-canvas period
+ends when the GX path owns rendering outright, on the same retirement schedule as
+the TS scaffold itself.
+
+## Revised order of work (supersedes v3's 10-step list)
+
+1. Stage-A amendment (generator-side SDK declarations) — unchanged from v1/v2/v3.
+2. Trace pilot — unchanged gate: one staged unit to `oracle_green` end-to-end via
+   Dolphin-GDB capture and the existing promotion path.
+3. Assembly-gate dispatch lowering (G2 as amended by H3): emit the address-keyed
+   table as UNIFORM-ABI adapter thunks (one canonical signature, link-time
+   generation from true callee signatures), lower indirect call sites to the
+   canonical signature, and emit the miss-handler import routing to the host
+   bridge. Lands before the composed-module pilot so the pilot can gate on it.
+4. Composed-module pilot (v2 F3 + G2 + H3 gates): wire one assembled N-unit module
+   (shared memory, original addresses) into the app behind seams; prove two units
+   sharing state stay coherent in play. The window MUST exercise: at least one
+   real ROM dispatch table, one deliberately cross-class dispatch, and one
+   table-miss case — all with correct results and ledger entries.
+5. OSThread and blocking-call inventory (G1 prerequisite) — unchanged: per-thread
+   ledger and HLE strategy; owner reviews any thread that defeats cooperative
+   scheduling.
+6. Cross-origin isolation serving plan (H1): Vite `server.headers` for dev; the
+   coi-serviceworker shim for GitHub Pages; host-change fallback documented. Gate:
+   the smoke script asserts `window.crossOriginIsolated === true` in both dev and
+   production. PRECONDITION for steps 7-9; no shared-memory work counts as done
+   without it.
+7. Host bridge (H2): generate the out-of-window import set and the Atomics RPC
+   bridge with its per-frame bridged-call ledger. Prerequisite folded in:
+   `run_main_game_loop` reaches `oracle_green` and is linked into the composed
+   window.
+8. Stage-B re-verification pass (H1): after the threads-enabled relink (shared
+   imported memory), replay every verified unit's corpus against the relinked
+   artifact; all `oracle_green` statuses are suspended until re-green. No
+   composed-module claim may cite pre-relink verification.
+9. Control-inversion pilot (G1 as amended by H2 + E2): composed module in a
+   dedicated Web Worker — shared `WebAssembly.Memory`, SharedArrayBuffer +
+   Atomics.wait blocking shims, dual-canvas compositor for the hybrid rendering
+   period; Asyncify excluded, JSPI future-noted. Gate: the composed module drives
+   N frames with every out-of-window call routed through the declared bridge,
+   bridged-call count reported per frame and monotonically shrinking as the
+   ladder grows.
+10. Coverage ledger + first DTM capture set (v2 F4, amended by G4): captures are
+    owner-supplied; the ledger tracks capture coverage as an explicit external
+    dependency.
+11. SDK shim ledger + verification harness for math/OS shims (v2 F2) —
+    GX/audio/DVD held to framebuffer/audio/file-read equivalence, stated as such.
+12. Composition ladder (G3 as amended by E1): N-doubling 5 → 10 → 20 → 40 → …,
+    rung passes only if its window links AND its new-contested/new-linked ratio is
+    ≤ the previous rung's ratio (recorded per rung); hard stop and
+    ABI-unification redesign if the rate rises.
+13. Continuous loop at scale. Convergence metric:
+    `compiled / exercised / verified / playing-composed of 1,396`
+    (+ shim ledger, + capture-coverage dependency, + current ladder rung,
+    + per-frame bridged-call count, + isolation status in the smoke report).
+
+The review question for the owner, updated in content:
+**approve the v4 deployment and boundary model (COOP/COEP isolation plan with
+production shim and re-verification after the threads relink, host-bridge
+out-of-window boundary with ledger-defined passivity, uniform dispatch ABI with
+defined table misses, formulaic ladder budget, dual-canvas hybrid rendering) and
+the 13-step order above.**
