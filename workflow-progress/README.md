@@ -1,16 +1,16 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-25T20:40:04.641119Z - machine-written, do not edit.*
+*Generated 2026-08-25T22:08:12.947308Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (healthy_progress) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 96/1396 settled (3 green, 93 staged) |
-| **Retries outstanding** | 28 |
-| **Untouched** | 1268 |
-| **Last transition** | 2026-08-25T20:40:04.641119Z |
+| **Retries outstanding** | 29 |
+| **Untouched** | 1267 |
+| **Last transition** | 2026-08-25T22:08:12.947308Z |
 | **Last green** | 2026-08-25T20:40:04.641119Z (`auto-c0052-017`) |
 | **Last product commit** | `89e089c880294b2a8a1e1968174b7365bd772422` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T22:08:12.947308Z | `auto-c0020-010` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:191:1: error: unterminated /* comment   191 \| /* ex |
 | 2026-08-25T20:40:04.641119Z | `auto-c0052-017` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T20:05:55.656045Z | `auto-c0025-003` | gate_failed | wasm-link | 2 | not linked: s] unit.c:272:24: warning: operator '>>' has lower precedence than '-'; '-' will be evaluated firs |
 | 2026-08-25T18:49:57.556833Z | `auto-c0020-007` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-24T23:08:48.006233Z | `auto-c0019-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T23:04:54.542163Z | `auto-c0019-017` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T22:41:37.647680Z | `auto-c0019-015` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 20481 and reload failed: 409 Client Error: Conflict for url: |
-| 2026-08-24T22:41:30.771202Z | `auto-c0019-014` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 17388 and reload failed: 409 Client Error: Conflict for url: |
