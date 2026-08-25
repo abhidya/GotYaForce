@@ -22,9 +22,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { REPO_ROOT } from "../lib/result-integrity.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+// result-integrity.mjs no longer exports REPO_ROOT; derive the checkout root the
+// same way run-oracle-tests.mjs does (tests -> oracle-harness -> decomp -> research -> root).
+const REPO_ROOT = path.resolve(here, "..", "..", "..", "..");
 const provenancePath = path.join(here, "..", "arena-rom-provenance.json");
 const arenaPath = path.join(REPO_ROOT, "research", "decomp", "poc", "wasm-port-poc", "arena.json");
 const MEM1_BASE = 0x80000000;

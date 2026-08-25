@@ -1175,20 +1175,34 @@ function assertUnresolvedLadderBorgStillCombosViaTunedPath(borgs: BorgStats[]): 
 
 /**
  * G RED (pl0615) B-charge release: action index 3, baseline variant 0 seeds group-4 slot 2
- * (config byte @0x80365854, per actionStreamTables.json) — but that stream is NOT captured in
- * meleeAnimKinds.json's bank 0x80366220 g4 table at all (only s0/s1/s4 were captured for that
- * bank), so chargeMoveForBorgId("pl0615") resolves to null and the runtime must keep today's
- * behavior (no exact anim stream ref, generic CHARGE_OR_SPECIAL record) rather than fabricate
- * one. This is the HONEST outcome cue-script-stream-decode-2026-07-04.md's G RED table
- * documents (the charge stream fires a projectile CHILD, not a captured melee-style stream) —
- * asserting it locks the null-safe fallback path in instead of silently regressing to a wrong
- * "found a stream" reading if the source data ever shifts.
+ * (config byte @0x80365854, per actionStreamTables.json). Earlier data captures were missing
+ * that stream entirely (only s0/s1/s4 of bank 0x80366220's g4 table were captured), so this
+ * assertion used to pin an UNRESOLVED leaf. The extraction has since caught up: the leaf now
+ * resolves — kind 0, NO exact active window (activeStart/activeEnd null), NO damage record,
+ * animStreamRef g4 s1 — which matches cue-script-stream-decode-2026-07-04.md's corrected G RED
+ * reading: the charge stream is windup-only (its real hit is a spawned projectile CHILD, not a
+ * melee-shaped hit on this stream). What the runtime must therefore do on a charged release:
+ * take the exact anim stream ref (the charge-fire anim is real), but KEEP the generic
+ * CHARGE_OR_SPECIAL damage record — chargeDamageRecordSpread's `!chargeLeaf.damageRecord` gate
+ * (combat.ts) returns the empty spread, so the archetype fallback stands. Pinning both halves
+ * locks the resolved-but-record-less path in against silently fabricating a damage record (or
+ * silently losing the anim ref) if the source data shifts again.
  */
 function assertGRedChargeStreamUnresolvedKeepsFallback(borgs: BorgStats[]): void {
   const leaf = chargeMoveForBorgId("pl0615");
-  if (leaf !== null) {
+  if (!leaf) {
     throw new Error(
-      `[selfcheck] expected G RED's B-charge leaf to be unresolved (its g4 s2 stream isn't in meleeAnimKinds.json): got ${JSON.stringify(leaf)}`,
+      "[selfcheck] G RED's B-charge leaf should resolve now (bank 0x80366220 g4 is captured): got null",
+    );
+  }
+  if (leaf.kind !== 0 || leaf.activeEnd !== null || leaf.damageRecord !== null) {
+    throw new Error(
+      `[selfcheck] G RED's B-charge leaf should be windup-only (kind 0, null window, null damageRecord): got ${JSON.stringify(leaf)}`,
+    );
+  }
+  if (leaf.animStreamRef?.group !== 4 || leaf.animStreamRef?.slot !== 1) {
+    throw new Error(
+      `[selfcheck] G RED's B-charge leaf should carry the g4 s1 anim stream ref: got ${JSON.stringify(leaf.animStreamRef)}`,
     );
   }
 
@@ -1207,18 +1221,23 @@ function assertGRedChargeStreamUnresolvedKeepsFallback(borgs: BorgStats[]): void
   const released = pumpAttackFrame(b, gRed, false, [b, enemy], profiles);
   const proj = released[0];
   if (!proj) throw new Error("[selfcheck] G RED charge release spawned nothing");
-  if (b.meleeAnimStream) {
+  if (b.meleeAnimStream?.group !== 4 || b.meleeAnimStream?.slot !== 1) {
     throw new Error(
-      `[selfcheck] G RED's unresolved charge leaf should leave meleeAnimStream null: got ${JSON.stringify(b.meleeAnimStream)}`,
+      `[selfcheck] G RED's resolved charge leaf should set meleeAnimStream to g4 s1: got ${JSON.stringify(b.meleeAnimStream)}`,
     );
   }
   if (proj.damageRecordIndex !== DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL) {
     throw new Error(
-      `[selfcheck] G RED's charged release should keep the generic CHARGE_OR_SPECIAL record: got ${proj.damageRecordIndex}`,
+      `[selfcheck] G RED's charged release should keep the generic CHARGE_OR_SPECIAL record (leaf has no damageRecord): got ${proj.damageRecordIndex}`,
+    );
+  }
+  if (proj.damageRecord) {
+    throw new Error(
+      `[selfcheck] G RED's charged release should NOT carry an exact damage record (chargeDamageRecordSpread gate): got ${JSON.stringify(proj.damageRecord)}`,
     );
   }
   console.log(
-    "[selfcheck] G RED B-charge leaf unresolved (g4 s2 not captured) -> runtime kept the fallback anim/record exactly",
+    "[selfcheck] G RED B-charge leaf resolved windup-only (g4 s1 anim, no record) -> runtime took the anim ref and kept the CHARGE_OR_SPECIAL fallback record",
   );
 }
 
@@ -1549,13 +1568,28 @@ function assertArmedAirBLeafUsesExactWindow(borgs: BorgStats[]): void {
 /**
  * A borg with no resolved air-B or charge leaf at all must keep today's behavior exactly: no
  * meleeAnimStream set from either path (airBMoveForBorgId/chargeMoveForBorgId both null), so
- * neither addition regresses the unresolved majority of the roster. Also logs fleet-wide
- * coverage counts (airBChargeCoverage) per the ticket's reporting requirement.
+ * neither addition regresses the unresolved minority of the roster. The probe borg is SCANNED
+ * (first melee-capable borg with both leaves unresolved) rather than hardcoded — the original
+ * pl0100 pick went stale when the extraction caught up and pl0100 gained a resolved air-B
+ * leaf. Also logs fleet-wide coverage counts (airBChargeCoverage) per the ticket's reporting
+ * requirement.
  */
 function assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs: BorgStats[]): void {
-  const id = "pl0100";
-  if (airBMoveForBorgId(id) !== null || chargeMoveForBorgId(id) !== null) {
-    throw new Error(`[selfcheck] expected pl0100 to have no resolved air-B/charge leaf for this test to be meaningful`);
+  let id: string | null = null;
+  for (const stats of borgs) {
+    if (airBMoveForBorgId(stats.id) !== null || chargeMoveForBorgId(stats.id) !== null) continue;
+    // The ground-melee ladder (exactMeleeForBorgId) sets meleeAnimStream on its own — a
+    // separate, older exact path. Exclude ladder borgs so a null meleeAnimStream below
+    // isolates the air-B/charge additions specifically.
+    if (exactMeleeForBorgId(stats.id) !== null) continue;
+    if (!actionProfileForProfile(buildProfile(stats)).melee) continue;
+    id = stats.id;
+    break;
+  }
+  if (!id) {
+    throw new Error(
+      "[selfcheck] expected at least one melee-capable borg with no resolved air-B/charge leaf for this test to be meaningful",
+    );
   }
   const profile = buildProfile(borgById(borgs, id));
   const b = fakeRuntime("unresolved_air_charge", 0, 0);
@@ -1573,7 +1607,7 @@ function assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs: BorgStats[]): vo
   }
   if (b.meleeAnimStream) {
     throw new Error(
-      `[selfcheck] pl0100 with no resolved air-B leaf should not set meleeAnimStream: got ${JSON.stringify(b.meleeAnimStream)}`,
+      `[selfcheck] ${id} with no resolved air-B leaf should not set meleeAnimStream: got ${JSON.stringify(b.meleeAnimStream)}`,
     );
   }
 
@@ -1582,7 +1616,7 @@ function assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs: BorgStats[]): vo
     throw new Error(`[selfcheck] expected nonzero fleet coverage for both air-B and charge: ${JSON.stringify(coverage)}`);
   }
   console.log(
-    `[selfcheck] air-B/charge coverage: ${coverage.airBResolved}/${coverage.rosterSize} borgs resolve an exact air-B leaf, ${coverage.chargeResolved}/${coverage.rosterSize} resolve an exact charge leaf; unresolved borgs (e.g. pl0100) keep today's behavior exactly`,
+    `[selfcheck] air-B/charge coverage: ${coverage.airBResolved}/${coverage.rosterSize} borgs resolve an exact air-B leaf, ${coverage.chargeResolved}/${coverage.rosterSize} resolve an exact charge leaf; unresolved borgs (e.g. ${id}) keep today's behavior exactly`,
   );
 }
 
@@ -1667,22 +1701,30 @@ function assertArmedXLeafUsesExactDamageRecord(borgs: BorgStats[]): void {
   b.lockTarget = enemy.uid;
 
   const specialDef = actionProfileForProfile(profile).special;
-  const expectedExactDamage = computeSourceDamage({
-    attacker: b,
-    attackerProfile: profile,
-    victim: enemy,
-    victimProfile: profiles.get(enemy.uid)!,
-    record: exactRecord,
-    damageScale: specialDef.damageMultiplier,
-  });
-  const expectedGenericDamage = computeSourceDamage({
-    attacker: b,
-    attackerProfile: profile,
-    victim: enemy,
-    victimProfile: profiles.get(enemy.uid)!,
-    record: damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL),
-    damageScale: specialDef.damageMultiplier,
-  });
+  // Predict via applyHit itself on clone victims (identical position/hp), so the prediction
+  // rides the SAME primary damage path the real hit takes (sourceDamage.ts computeBaseDamage).
+  // The old computeSourceDamage-based prediction went stale when applyHit's primary path moved
+  // to the source-owned formula (computeSourceDamage is now the documented fallback only) —
+  // it predicted 59 where the live path deals 54 for pl0202.
+  let predictCounter = 0;
+  const predictDealt = (record: DamageRecord): number => {
+    const ctrl = fakeRuntime(`armed_x_ctrl_${predictCounter++}`, 1, 20);
+    ctrl.hp = ctrl.maxHp = enemy.maxHp;
+    return applyHit(
+      ctrl,
+      profiles.get(enemy.uid)!,
+      0,
+      specialDef.knockbackMultiplier,
+      { x: 0, y: 0, z: 0 },
+      b.pos,
+      true,
+      record,
+      { attacker: b, attackerProfile: profile, damageScale: specialDef.damageMultiplier },
+      {},
+    );
+  };
+  const expectedExactDamage = predictDealt(exactRecord);
+  const expectedGenericDamage = predictDealt(damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL));
   if (expectedExactDamage === expectedGenericDamage) {
     throw new Error(`[selfcheck] ${armedId}'s exact X-leaf record should predict damage distinct from the generic archetype for this test to be meaningful`);
   }
@@ -1713,15 +1755,25 @@ function assertArmedXLeafUsesExactDamageRecord(borgs: BorgStats[]): void {
  * fleet-wide X coverage (xMoveCoverage) per the ticket's reporting requirement.
  */
 function assertUnresolvedXKeepsTodaysBehavior(borgs: BorgStats[]): void {
-  const id = "pl0100";
-  if (xMoveForBorgId(id) !== null) {
-    throw new Error(`[selfcheck] expected pl0100 to have no resolved X leaf for this test to be meaningful`);
+  // SCANNED probe borg (the original hardcoded pl0100 went stale when the extraction caught
+  // up and pl0100 gained a resolved X leaf): first borg with NO resolved X leaf and an
+  // AoE-archetype special (the path this test drives).
+  let id: string | null = null;
+  for (const stats of borgs) {
+    if (xMoveForBorgId(stats.id) !== null) continue;
+    // X-charge borgs fire on RELEASE, not on the press edge this test drives.
+    if (xChargeMoveForBorgId(stats.id) !== null) continue;
+    if (actionProfileForProfile(buildProfile(stats)).special.archetype === "projectile") continue;
+    id = stats.id;
+    break;
+  }
+  if (!id) {
+    throw new Error(
+      "[selfcheck] expected at least one AoE-special borg with no resolved X leaf for this test to be meaningful",
+    );
   }
   const profile = buildProfile(borgById(borgs, id));
   const specialDef = actionProfileForProfile(profile).special;
-  if (specialDef.archetype === "projectile") {
-    throw new Error("[selfcheck] pl0100 fixture assumption stale: expected an AoE-archetype special for this test");
-  }
   const b = fakeRuntime("unresolved_x", 0, 0);
   b.borgId = profile.id;
   const enemy = fakeRuntime("unresolved_x_enemy", 1, 20); // inside the special's AoE radius
@@ -1732,14 +1784,23 @@ function assertUnresolvedXKeepsTodaysBehavior(borgs: BorgStats[]): void {
   ]);
   b.lockTarget = enemy.uid;
 
-  const expectedGenericDamage = computeSourceDamage({
-    attacker: b,
-    attackerProfile: profile,
-    victim: enemy,
-    victimProfile: profiles.get(enemy.uid)!,
-    record: damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL),
-    damageScale: specialDef.damageMultiplier,
-  });
+  // Predict via applyHit itself on a clone victim so the prediction rides the SAME primary
+  // damage path the real hit takes (sourceDamage.ts computeBaseDamage — the old
+  // computeSourceDamage prediction is the fallback formula and no longer matches).
+  const ctrl = fakeRuntime("unresolved_x_ctrl", 1, 20);
+  ctrl.hp = ctrl.maxHp = enemy.maxHp;
+  const expectedGenericDamage = applyHit(
+    ctrl,
+    profiles.get(enemy.uid)!,
+    0,
+    specialDef.knockbackMultiplier,
+    { x: 0, y: 0, z: 0 },
+    b.pos,
+    true,
+    damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL),
+    { attacker: b, attackerProfile: profile, damageScale: specialDef.damageMultiplier },
+    {},
+  );
 
   stepCooldowns(b);
   stepAttacks(b, profile, false, true, [b, enemy], profiles); // X press edge
@@ -1747,12 +1808,12 @@ function assertUnresolvedXKeepsTodaysBehavior(borgs: BorgStats[]): void {
 
   if (b.meleeAnimStream) {
     throw new Error(
-      `[selfcheck] pl0100 with no resolved X leaf should not set meleeAnimStream: got ${JSON.stringify(b.meleeAnimStream)}`,
+      `[selfcheck] ${id} with no resolved X leaf should not set meleeAnimStream: got ${JSON.stringify(b.meleeAnimStream)}`,
     );
   }
   if (dealt !== expectedGenericDamage) {
     throw new Error(
-      `[selfcheck] pl0100's unresolved X special should keep the generic CHARGE_OR_SPECIAL record: dealt ${dealt}, expected ${expectedGenericDamage}`,
+      `[selfcheck] ${id}'s unresolved X special should keep the generic CHARGE_OR_SPECIAL record: dealt ${dealt}, expected ${expectedGenericDamage}`,
     );
   }
 
@@ -1761,7 +1822,7 @@ function assertUnresolvedXKeepsTodaysBehavior(borgs: BorgStats[]): void {
     throw new Error(`[selfcheck] expected nonzero fleet coverage for X specials: ${JSON.stringify(coverage)}`);
   }
   console.log(
-    `[selfcheck] X-special coverage: ${coverage.xResolved}/${coverage.rosterSize} borgs resolve an exact X leaf; unresolved borgs (e.g. pl0100) keep today's TUNED behavior exactly`,
+    `[selfcheck] X-special coverage: ${coverage.xResolved}/${coverage.rosterSize} borgs resolve an exact X leaf; unresolved borgs (e.g. ${id}) keep today's TUNED behavior exactly`,
   );
 }
 

@@ -13,14 +13,18 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { validateResult, countsAsPassCoverage, REPO_ROOT } from "../lib/result-integrity.mjs";
+import { validateOracleResult } from "../lib/result-integrity.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const harnessDir = path.join(here, "..");
 const runUnit = path.join(harnessDir, "run-unit.mjs");
+// result-integrity.mjs no longer exports REPO_ROOT; derive the checkout root the
+// same way run-oracle-tests.mjs does (tests -> oracle-harness -> decomp -> research -> root).
+const REPO_ROOT = path.resolve(here, "..", "..", "..", "..");
 const trackedResults = path.join(REPO_ROOT, "research", "decomp", "data", "oracle-results");
-// Scratch lives inside the repo, which is on D: — no %TEMP% on C:.
-const scratchRoot = path.join(REPO_ROOT, ".tmp", "oracle-test");
+// Scratch placement is explicit: run-oracle-tests.mjs pins it to the checkout drive.
+// Fall back to the repo-local .tmp for direct `node --test` runs.
+const scratchRoot = process.env.ORACLE_TEST_TMP_ROOT ?? path.join(REPO_ROOT, ".tmp", "oracle-test");
 
 const PASS_LINE = "ORACLE TOTAL functions=4/4 cases=26232 UNEXPLAINED: 0 VERDICT: PASS";
 const REPLAY_TIMEOUT_MS = 600_000;
@@ -53,7 +57,7 @@ function determinismKey(result) {
   return JSON.stringify(rest);
 }
 
-test("clean damage-core replay reproduces the pinned gate exactly", { timeout: REPLAY_TIMEOUT_MS }, () => {
+test("clean damage-core replay reproduces the pinned gate exactly", { timeout: REPLAY_TIMEOUT_MS }, async () => {
   const run = runReplay({ dir: "clean-1" });
   assert.equal(run.status, 0, `replay must exit 0\n${run.stdout}\n${run.stderr}`);
   assert.ok(run.stdout.includes(PASS_LINE), `missing anchored total line\n${run.stdout}`);
@@ -89,13 +93,12 @@ test("clean damage-core replay reproduces the pinned gate exactly", { timeout: R
   assert.deepEqual(r.unexplained_cases, []);
   assert.equal(r.export_coverage.uncovered.length, 0, "damage-core must have full export coverage");
 
-  // A fresh run must bind every identity the validator knows how to recompute.
-  const v = validateResult(r);
-  assert.equal(v.status, "current", v.reasons.join(" | "));
-  for (const id of ["wasm", "spec", "corpus", "field_map", "field_map_source", "harness"]) {
-    assert.ok(v.checked.includes(id), `fresh result must bind '${id}', got [${v.checked}]`);
-  }
-  assert.equal(countsAsPassCoverage(r).ok, true);
+  // A fresh run must validate as current pass coverage against the live checkout.
+  // (validateOracleResult recomputes every file-backed identity itself; the per-identity
+  // mutation sweep lives in result-integrity.test.mjs.)
+  const v = await validateOracleResult(r, { root: REPO_ROOT });
+  assert.equal(v.status, "current", JSON.stringify(v.issues));
+  assert.equal(v.valid, true);
 });
 
 test("two clean replays are byte-identical modulo generated_at", { timeout: REPLAY_TIMEOUT_MS }, () => {
@@ -111,7 +114,7 @@ test("two clean replays are byte-identical modulo generated_at", { timeout: REPL
   assert.notEqual(a.result.generated_at, undefined);
 });
 
-test("the deliberate-red rehearsal fails loudly and cannot masquerade as a pass", { timeout: REPLAY_TIMEOUT_MS }, () => {
+test("the deliberate-red rehearsal fails loudly and cannot masquerade as a pass", { timeout: REPLAY_TIMEOUT_MS }, async () => {
   // Snapshot the tracked evidence: a rehearsal must not be able to touch it.
   const trackedBefore = fs.readdirSync(trackedResults).sort().map((f) => [
     f,
@@ -155,8 +158,9 @@ test("the deliberate-red rehearsal fails loudly and cannot masquerade as a pass"
   assert.equal(byName.FUN_80031634.unexplained, 0);
 
   // The stamp alone disqualifies it, even though its identities are current.
-  const c = countsAsPassCoverage(r);
-  assert.equal(c.ok, false, "a rehearsal artifact must never count as pass coverage");
+  const c = await validateOracleResult(r, { root: REPO_ROOT });
+  assert.equal(c.valid, false, "a rehearsal artifact must never count as pass coverage");
+  assert.equal(c.status, "rejected", JSON.stringify(c.issues));
 
   const trackedAfter = fs.readdirSync(trackedResults).sort().map((f) => [
     f,
