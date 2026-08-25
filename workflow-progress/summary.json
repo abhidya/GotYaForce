@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-25T15:54:12.946295Z",
+  "generated_at": "2026-08-25T15:57:34.028909Z",
   "run_id": "2026-08-25T15:28:22.545919Z",
   "total_units": 1396,
   "green": 3,
@@ -10,8 +10,8 @@
   "deferred": 0,
   "structural_ineligible": 4,
   "active": 0,
-  "total_attempts": 219,
-  "transitions_last_hour": 4,
+  "total_attempts": 220,
+  "transitions_last_hour": 5,
   "greens_last_hour": 1,
   "last_green_at": "2026-08-25T14:58:12.930676Z",
   "last_green_unit": "auto-c0035-004",
@@ -19,7 +19,7 @@
   "repeated_failure_classes": [
     [
       "assembly:assembly gate canonicalize failed before promotion: owner_va",
-      2
+      3
     ]
   ],
   "health": "healthy_progress",
