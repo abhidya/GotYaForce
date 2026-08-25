@@ -1,26 +1,27 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-08-25T22:08:18.184368Z - machine-written, do not edit.*
+*Generated 2026-08-25T22:13:43.451290Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 96/1396 settled (3 green, 93 staged) |
 | **Retries outstanding** | 29 |
 | **Untouched** | 1267 |
-| **Last transition** | 2026-08-25T22:08:18.184368Z |
+| **Last transition** | 2026-08-25T22:13:43.451290Z |
 | **Last green** | 2026-08-25T20:40:04.641119Z (`auto-c0052-017`) |
 | **Last product commit** | `89e089c880294b2a8a1e1968174b7365bd772422` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-25T22:13:43.451290Z | `auto-c0053-013` | gate_failed | artifact-install | 5 | artifact install refused after assembly pass: artifact preimage has no eligible revoked lifecycle |
 | 2026-08-25T22:08:18.184368Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-25T22:08:12.947308Z | `auto-c0020-010` | gate_failed | wasm-link | 1 | not linked: In file included from unit.c:1: .\gnt4_shim.h:191:1: error: unterminated /* comment   191 \| /* ex |
 | 2026-08-25T20:40:04.641119Z | `auto-c0052-017` | staged | commit | 2 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-25T00:38:56.825983Z | `auto-c0020-001` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0020-000 declares zz_000 |
 | 2026-08-24T23:38:51.149010Z | `auto-c0020-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-24T23:08:48.006233Z | `auto-c0019-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-24T23:04:54.542163Z | `auto-c0019-017` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
