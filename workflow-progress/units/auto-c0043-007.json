@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0043-007",
   "unit_id": "auto-c0043-007",
-  "timestamp": "2026-08-24T09:49:53.239020Z",
-  "run_id": "2026-08-24T01:57:30.243221Z",
+  "timestamp": "2026-08-25T15:27:50.323590Z",
+  "run_id": "2026-08-25T12:04:28.934663Z",
   "result": "gate_failed",
-  "stage": "wasm-link",
-  "attempt": 1,
-  "detail": "not linked: .\\gnt4_shim.h:209:20: error: expected ';' after top level declarator\nunit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'\nunit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
+  "stage": "assembly",
+  "attempt": 2,
+  "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -23,65 +23,63 @@
         "error_count": 3,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-007.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_z9snp6w4\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_asv_k_qs\\unit.o'' failed (returned 1)",
           "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
           "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
         ],
-        "fingerprint": "a77a4c03b557110f047debbf4201f5dc5602c0e0c4a43d7e35233c62e71d9dd5"
-      },
-      {
-        "iteration": 2,
-        "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt1-iter1.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_e7bx8q4q\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
-          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
-        ],
-        "fingerprint": "8cbfcb11123d059237753f93d520696c52fcf21a5ce739dd8634061ef8859515"
-      },
-      {
-        "iteration": 3,
-        "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt1-iter2.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_6nd0b3sj\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
-          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
-        ],
-        "fingerprint": "e49e91e624a380d11f5f223b03823dd079c1ab96f37ed1ec8dc2471c471c80b9"
-      },
-      {
-        "iteration": 4,
-        "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt1-iter3.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_z0chddbj\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
-          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
-        ],
-        "fingerprint": "fa51ee0827141a1c7acc2a14374f7bd214ae95de32ab37f489f4866321a21eb0"
+        "fingerprint": "ba65e764078f7de97f81228d0ccff4d332c7ddc376b2f5c5dc82c87968f1b2b5"
       }
     ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0011-011",
+        "auto-c0019-000",
+        "auto-c0029-002",
+        "auto-c0035-004",
+        "auto-c0043-007"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": "FUN_8016d398",
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0011-011",
+            "auto-c0019-000",
+            "auto-c0029-002",
+            "auto-c0035-004",
+            "auto-c0043-007"
+          ],
+          "variants": {},
+          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h"
+        }
+      ],
+      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h",
+      "candidate": {
+        "name": "auto-c0043-007",
+        "sha256": "587bf8087c09ca8bc0def7ad850ec04498c63b66f9b1b0bf8255d1f004112b16"
+      },
+      "expected_candidate": {
+        "name": "auto-c0043-007",
+        "sha256": "587bf8087c09ca8bc0def7ad850ec04498c63b66f9b1b0bf8255d1f004112b16"
+      },
+      "attempt_cleanup": "removed"
+    },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
       "prompt_version": "3",
-      "registry_version": "98"
+      "registry_version": "145"
     },
-    "failure_domain": "source-compiler",
-    "diagnosis_eligible": true
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
   },
   "driver_record": {
     "status": "red_retryable",
-    "attempts": 1,
+    "attempts": 2,
     "symbol_set": [
       "DAT_803501e0",
       "DAT_803501f0",
@@ -140,8 +138,8 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 98,
-    "model_requests": 3,
+    "registry_version_used": 145,
+    "model_requests": 4,
     "rounds": [
       {
         "iteration": 1,
@@ -149,64 +147,70 @@
         "error_count": 3,
         "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-007.h",
         "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_z9snp6w4\\unit.o'' failed (returned 1)",
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_asv_k_qs\\unit.o'' failed (returned 1)",
           "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
           "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
         ],
-        "fingerprint": "a77a4c03b557110f047debbf4201f5dc5602c0e0c4a43d7e35233c62e71d9dd5"
-      },
-      {
-        "iteration": 2,
-        "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt1-iter1.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_e7bx8q4q\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
-          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
-        ],
-        "fingerprint": "8cbfcb11123d059237753f93d520696c52fcf21a5ce739dd8634061ef8859515"
-      },
-      {
-        "iteration": 3,
-        "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt1-iter2.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_6nd0b3sj\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
-          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
-        ],
-        "fingerprint": "e49e91e624a380d11f5f223b03823dd079c1ab96f37ed1ec8dc2471c471c80b9"
-      },
-      {
-        "iteration": 4,
-        "stage": "compile",
-        "error_count": 4,
-        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0043-007\\header-attempt1-iter3.h",
-        "diagnostics": [
-          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_z0chddbj\\unit.o'' failed (returned 1)",
-          "gnt4_shim.h:*: error: expected ';' after top level declarator",
-          "unit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'",
-          "unit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'"
-        ],
-        "fingerprint": "fa51ee0827141a1c7acc2a14374f7bd214ae95de32ab37f489f4866321a21eb0"
+        "fingerprint": "ba65e764078f7de97f81228d0ccff4d332c7ddc376b2f5c5dc82c87968f1b2b5"
       }
     ],
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "a9d84cee904f7d11bd99b654fade8f2ce7ff41bb",
+      "driver_rev": "ef458f55f48b97d48f5eded521b9a47c1786de02",
       "prompt_version": "3",
-      "registry_version": "98"
+      "registry_version": "145"
     },
-    "failure_domain": "source-compiler",
-    "diagnosis_eligible": true,
-    "error": "not linked: .\\gnt4_shim.h:209:20: error: expected ';' after top level declarator\nunit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'\nunit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
-    "last_stage": "wasm-link",
-    "source_failure_id": "source-failure-4174b289e5e91e43380484b3c907a681d4d28bc30ef13315ececf6bf65d0354d"
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h",
+    "last_stage": "assembly",
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSMTXMultVec_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl"
+      ],
+      "unresolved": []
+    },
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0011-011",
+        "auto-c0019-000",
+        "auto-c0029-002",
+        "auto-c0035-004",
+        "auto-c0043-007"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": "FUN_8016d398",
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0011-011",
+            "auto-c0019-000",
+            "auto-c0029-002",
+            "auto-c0035-004",
+            "auto-c0043-007"
+          ],
+          "variants": {},
+          "detail": "owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h"
+        }
+      ],
+      "detail": "owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h",
+      "candidate": {
+        "name": "auto-c0043-007",
+        "sha256": "587bf8087c09ca8bc0def7ad850ec04498c63b66f9b1b0bf8255d1f004112b16"
+      },
+      "expected_candidate": {
+        "name": "auto-c0043-007",
+        "sha256": "587bf8087c09ca8bc0def7ad850ec04498c63b66f9b1b0bf8255d1f004112b16"
+      },
+      "attempt_cleanup": "removed"
+    }
   },
   "history": [
     {
@@ -215,6 +219,14 @@
       "stage": "wasm-link",
       "attempt": 1,
       "detail": "not linked: .\\gnt4_shim.h:209:20: error: expected ';' after top level declarator\nunit.c:102:34: error: use of undeclared identifier 'FUN_8016d4ac'\nunit.c:215:35: error: use of undeclared identifier 'FUN_8016d398'",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-08-25T15:27:50.323590Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 2,
+      "detail": "assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8016d398 owner/variant pair at auto-c0043-007/gnt4_shim.h",
       "product_commit": null
     }
   ]
