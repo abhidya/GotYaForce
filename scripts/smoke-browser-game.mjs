@@ -191,8 +191,8 @@ async function waitForDevtools(profile, browserProcess, timeoutMs = 20_000) {
   throw new Error("timed out waiting for Chrome DevTools endpoint");
 }
 
-async function evaluate(cdp, expression) {
-  const result = await cdp.send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true });
+async function evaluate(cdp, expression, timeoutMs) {
+  const result = await cdp.send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true }, timeoutMs);
   if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description ?? result.exceptionDetails.text);
   return result.result?.value;
 }
@@ -541,10 +541,12 @@ async function drivePlayableRoute(cdp, url) {
   // different borgs (B attack AND X special each connect), a unit driven at the arena
   // edge is clamped inside stage bounds without falling out of the world, and a jump
   // arc rises then lands back on its takeoff surface.
+  // These proofs step thousands of synchronous sim frames inside the page; on a loaded
+  // machine they can exceed the default 15s CDP call timeout, so give them their own.
   const gameplay = {
-    attacks: await evaluate(cdp, `window.__gf.selfcheck.attackDamage(["pl0615", "pl0102", "pl0008"])`),
-    bounds: await evaluate(cdp, `window.__gf.selfcheck.boundsClamp()`),
-    jump: await evaluate(cdp, `window.__gf.selfcheck.jumpArc()`),
+    attacks: await evaluate(cdp, `window.__gf.selfcheck.attackDamage(["pl0615", "pl0102", "pl0008"])`, 180_000),
+    bounds: await evaluate(cdp, `window.__gf.selfcheck.boundsClamp()`, 60_000),
+    jump: await evaluate(cdp, `window.__gf.selfcheck.jumpArc()`, 60_000),
   };
   for (const proof of gameplay.attacks) {
     if (!(proof.attackDamage > 0)) {
@@ -561,8 +563,34 @@ async function drivePlayableRoute(cdp, url) {
     throw new Error(`jump arc did not rise+land: ${JSON.stringify(gameplay.jump)}`);
   }
 
+  // Animation liveness — the visual gap the state-only checks missed (T-pose regression,
+  // 2026-08-25): every model-ready battle actor must be PLAYING at least one mixer clip
+  // with effective weight. An actor with runningClips 0 renders its bind pose (T-pose)
+  // no matter what the sim state says. battleScene.animationDebug() counts actions that
+  // are running OR paused-with-weight (a clamped one-shot holding its end pose counts as
+  // posed, not T-posed; permanently accumulating ones are the bug the crossfade fix
+  // removed).
+  // Clip loads are async right after an actor's model attaches, so allow a short grace
+  // period before declaring an actor clipless.
+  let readyActors = [];
+  let tposed = [];
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const animation = await evaluate(cdp, `window.__gf.animationDebug()`);
+    readyActors = animation.filter((a) => a.ready && !a.placeholder);
+    tposed = readyActors.filter((a) => a.runningClips === 0);
+    if (readyActors.length > 0 && tposed.length === 0) break;
+    await delay(500);
+  }
+  if (readyActors.length === 0) {
+    throw new Error("no model-ready battle actors to verify animation on");
+  }
+  if (tposed.length > 0) {
+    throw new Error(`T-pose regression: battle actors with no active animation clip: ${JSON.stringify(tposed)}`);
+  }
+
   return {
     battle: battleState,
+    animation: { actors: readyActors.length },
     resumed: resumeState,
     repaused: pauseCycle,
     expectedMediaCancellations: expectedMediaCancellations.length,
