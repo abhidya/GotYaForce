@@ -816,10 +816,15 @@ class BattleImpl implements Battle {
     }
 
     // 6) Fire-time aim: fly straight along facing, UNLESS the shooter's locked target sits in
-    //    the muzzle aim cone — then aim the full 3D muzzle->target direction (mirrors
+    //    the aim cone — then aim the full 3D muzzle->target direction (mirrors
     //    spawnProjectile's aimUid/yawOffset===0 branch + homingTargetForSpawn cone gate).
+    //    The cone is measured from the SHOOTER'S position, not the muzzle: several decoded
+    //    spawner rows carry large LATERAL muzzle offsets (e.g. pl0000's [55, 0, 0]), and a
+    //    muzzle-origin cone rejected the lock the moment the target was closer than a few
+    //    muzzle-widths away — the shot then flew a parallel line past a locked point-blank
+    //    target and that borg's attack could never connect.
     const all = this.state.borgs;
-    const aimUid = romAimConeTarget(b, all, muzzlePos, fwd);
+    const aimUid = romAimConeTarget(b, all, b.pos, fwd);
     let flightDir = fwd;
     if (aimUid) {
       const tgt = all.find((o) => o.uid === aimUid);
