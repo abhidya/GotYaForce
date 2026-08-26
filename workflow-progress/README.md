@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T02:03:39.900465Z - machine-written, do not edit.*
+*Generated 2026-08-26T02:03:53.046170Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 99/1396 settled (3 green, 96 staged) |
-| **Retries outstanding** | 61 |
-| **Untouched** | 1231 |
-| **Last transition** | 2026-08-26T02:03:39.900465Z |
+| **Retries outstanding** | 62 |
+| **Untouched** | 1230 |
+| **Last transition** | 2026-08-26T02:03:53.046170Z |
 | **Last green** | 2026-08-26T01:15:01.475553Z (`auto-c0025-002`) |
 | **Last product commit** | `514c85759591ae3def65a08e204128438e43e7d6` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -19,12 +19,13 @@
 
 **Repeated recent failure classes**
 
-- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x9
+- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x10
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T02:03:53.046170Z | `auto-c0031-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:03:39.900465Z | `auto-c0030-018` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:03:26.914759Z | `auto-c0030-017` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T01:40:48.314055Z | `auto-c0030-016` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-25T17:52:31.513699Z | `auto-c0043-007` | gate_failed | wasm-link | 3 | not linked: unit.c:4:1: error: expected ')' unit.c:96:36: error: too many arguments to function call, expected |
 | 2026-08-25T16:27:43.235751Z | `auto-c0030-014` | gate_failed | assembly | 3 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0030-014 declares apply_ |
 | 2026-08-25T16:02:26.029432Z | `auto-c0029-012` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-25T15:57:33.884878Z | `auto-c0011-012` | gate_failed | assembly | 7 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_007c800_ |
