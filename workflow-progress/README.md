@@ -1,26 +1,29 @@
-# Port workflow: IDLE
+# Port workflow: PAUSED
 
-*Generated 2026-08-26T07:34:39.759624Z - machine-written, do not edit.*
+*Generated 2026-08-26T07:54:21.791283Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 107/1396 settled (3 green, 104 staged) |
-| **Retries outstanding** | 148 |
+| **Retries outstanding** | 147 |
 | **Untouched** | 1131 |
-| **Last transition** | 2026-08-26T07:34:39.759624Z |
+| **Last transition** | 2026-08-26T07:54:21.791283Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | stopped |
 
+> **Manually paused by the owner** (rig gate). No heavy work runs.
+
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T07:54:21.791283Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-26T07:34:39.759624Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-26T07:34:28.953704Z | `auto-c0053-013` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T07:03:31.057949Z | `auto-c0054-005` | deferred | port | 0 | interrupted before a verdict; requeued |
@@ -70,4 +73,3 @@
 | 2026-08-26T02:38:41.301267Z | `auto-c0043-001` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:38:28.379468Z | `auto-c0043-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:38:15.321953Z | `auto-c0042-018` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:38:02.282385Z | `auto-c0042-017` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0167334_ declared void but their results are assigned; no header edit ca |
