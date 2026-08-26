@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "unit": "auto-c0043-006",
+  "unit_id": "auto-c0043-006",
+  "timestamp": "2026-08-26T02:39:49.479997Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 14,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-006.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_sq_3po7o\\unit.o'' failed (returned 1)",
+          "unit.c:103:10: error: use of undeclared identifier 'sVar4'",
+          "unit.c:103:3: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:165:3: error: use of undeclared identifier 'sVar4'",
+          "unit.c:166:39: error: use of undeclared identifier 'sVar4'",
+          "unit.c:184:14: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:228:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:254:10: error: use of undeclared identifier 'sVar3'",
+          "unit.c:254:3: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:301:3: error: use of undeclared identifier 'sVar3'",
+          "unit.c:302:33: error: use of undeclared identifier 'sVar3'",
+          "unit.c:75:22: error: operand of type 'void' where arithmetic or pointer type is required",
+          "unit.c:79:14: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:83:24: error: operand of type 'void' where arithmetic or pointer type is required"
+        ],
+        "fingerprint": "f78e0c68b643bbe76eb98692ad0481a202c649f6725e5a00152fc68565f4b7ab"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSMTXMultVec_bl",
+        "gnt4_PSMTXTrans_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl",
+        "gnt4_PSVECAdd_bl"
+      ],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [
+        "FUN_80047f60"
+      ],
+      "superseded": [
+        "FUN_80051ef4",
+        "FUN_8016ca94",
+        "zz_0006fb4_",
+        "zz_00076d0_",
+        "zz_0007c30_",
+        "zz_00086b8_",
+        "zz_00097b4_",
+        "zz_00455fc_",
+        "zz_0084000_",
+        "zz_0088aa0_",
+        "zz_0089100_",
+        "zz_008ac80_",
+        "zz_0097fbc_",
+        "zz_0098214_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_803501ac",
+      "DAT_803501ae",
+      "DAT_803501b0",
+      "DAT_803501b4",
+      "DAT_803501b8",
+      "DAT_803501e0",
+      "DAT_803501e1",
+      "DAT_803501e2",
+      "DAT_803501e3",
+      "DAT_803501f2",
+      "DAT_803bb384",
+      "DAT_803c1140",
+      "DAT_803c1144",
+      "DAT_803c1150",
+      "DAT_803c115c",
+      "DAT_803c1160",
+      "DAT_803c1164",
+      "DAT_803c1168",
+      "DAT_803c1170",
+      "DAT_803c1173",
+      "DAT_8043aab0",
+      "DAT_8043ab38",
+      "FUN_80051ef4",
+      "FUN_8016c1a0",
+      "FUN_8016c544",
+      "FUN_8016c5f4",
+      "FUN_8016c810",
+      "FUN_8016c92c",
+      "FUN_8016c97c",
+      "FUN_8016ca94",
+      "PTR_DAT_80433930",
+      "PTR_DAT_80433934",
+      "PTR_DAT_80433944",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "code",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSMTXTrans_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECSubtract_bl",
+      "longlong",
+      "sprintf",
+      "strlen",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006fb4_",
+      "zz_00076d0_",
+      "zz_0007c30_",
+      "zz_00086b8_",
+      "zz_00097b4_",
+      "zz_00455fc_",
+      "zz_0084000_",
+      "zz_0088aa0_",
+      "zz_0089100_",
+      "zz_008ac80_",
+      "zz_0097fbc_",
+      "zz_0098214_",
+      "zz_016c34c_",
+      "zz_016c7ec_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 14,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-006.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_sq_3po7o\\unit.o'' failed (returned 1)",
+          "unit.c:103:10: error: use of undeclared identifier 'sVar4'",
+          "unit.c:103:3: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:165:3: error: use of undeclared identifier 'sVar4'",
+          "unit.c:166:39: error: use of undeclared identifier 'sVar4'",
+          "unit.c:184:14: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:228:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:254:10: error: use of undeclared identifier 'sVar3'",
+          "unit.c:254:3: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:301:3: error: use of undeclared identifier 'sVar3'",
+          "unit.c:302:33: error: use of undeclared identifier 'sVar3'",
+          "unit.c:75:22: error: operand of type 'void' where arithmetic or pointer type is required",
+          "unit.c:79:14: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:83:24: error: operand of type 'void' where arithmetic or pointer type is required"
+        ],
+        "fingerprint": "f78e0c68b643bbe76eb98692ad0481a202c649f6725e5a00152fc68565f4b7ab"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-f7086c05a05dcb5cd90b0fe28b7dd9330932ce7388a786c7d024c030ff7509ee"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:39:49.479997Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+      "product_commit": null
+    }
+  ]
+}
