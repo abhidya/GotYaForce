@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T00:46:07.214268Z - machine-written, do not edit.*
+*Generated 2026-08-26T00:46:20.174016Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 98/1396 settled (3 green, 95 staged) |
-| **Retries outstanding** | 48 |
-| **Untouched** | 1245 |
-| **Last transition** | 2026-08-26T00:46:07.214268Z |
+| **Retries outstanding** | 49 |
+| **Untouched** | 1244 |
+| **Last transition** | 2026-08-26T00:46:20.174016Z |
 | **Last green** | 2026-08-25T23:39:56.962508Z (`auto-c0019-016`) |
 | **Last product commit** | `2ca0bb90ac96cd9958494ef0d96a8b318e7426e2` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -19,12 +19,13 @@
 
 **Repeated recent failure classes**
 
-- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x20
+- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x21
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T00:46:20.174016Z | `auto-c0024-017` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:46:07.214268Z | `auto-c0024-016` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:45:54.315665Z | `auto-c0024-015` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:45:41.471107Z | `auto-c0024-014` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-25T12:52:59.319115Z | `auto-c0011-004` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T12:47:58.440284Z | `auto-c0053-013` | gate_failed | wasm-link | 3 | not linked: wasm-ld: error: C:\Users\manny\AppData\Local\Temp\emscripten_temp_0eul7rvn\unit.o: undefined symbo |
 | 2026-08-25T12:02:52.923154Z | `-` | stopped_at_boundary | machine | 0 |  |
-| 2026-08-25T12:01:17.981024Z | `auto-c0053-012` | gate_failed | wasm-link | 4 | not linked: unit.c:81:36: error: use of undeclared identifier 'FUN_801b9adc'; did you mean 'FUN_801b8a1c'? uni |
