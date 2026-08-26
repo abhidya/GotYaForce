@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "unit": "auto-c0054-003",
+  "unit_id": "auto-c0054-003",
+  "timestamp": "2026-08-26T06:26:05.318522Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 1,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "0516a3307e195881d82f5fb10ce236905204d59f",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
+  "product_commit_failed": false,
+  "oracle_summary": "compile-only (UNVERIFIED)",
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": "compile_only",
+  "extra": {
+    "transition_id": "9ae682ad4e404f169fc46e7e5c448d35",
+    "transition_timestamp": "2026-08-26T06:26:05.318522Z",
+    "transition_run_id": "2026-08-25T22:08:48.995173Z",
+    "promotion_transaction_id": "1460a49aa51743d89f814d5b76cb9cbf",
+    "candidate_sha256": "6714027acadcc608f488eb214e240f9188adce18d270f630fd1e7f313df4c321"
+  },
+  "driver_record": {
+    "status": "green",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "zz_00f0468_",
+        "zz_01bfbe4_",
+        "zz_01cbe14_",
+        "zz_01cd060_",
+        "zz_01cd1b4_",
+        "zz_01e488c_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "DAT_803d4b60",
+      "DAT_80435a44",
+      "FUN_801bdca0",
+      "FUN_801bdcdc",
+      "FUN_801bdd90",
+      "FUN_801bdfe0",
+      "FUN_801be26c",
+      "FUN_801be2a8",
+      "FUN_801be35c",
+      "FUN_801be4f0",
+      "PTR_DAT_80435a30",
+      "code",
+      "uint",
+      "undefined2",
+      "undefined4",
+      "ushort",
+      "zz_00f0468_",
+      "zz_01bfbe4_",
+      "zz_01cbe14_",
+      "zz_01cd060_",
+      "zz_01cd1b4_",
+      "zz_01e488c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 164,
+    "error": null,
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "0516a3307e195881d82f5fb10ce236905204d59f",
+    "pushed": true,
+    "tier": "compile_only",
+    "last_stage": "commit",
+    "promotion_transaction_id": "1460a49aa51743d89f814d5b76cb9cbf",
+    "promotion_transition_id": "9ae682ad4e404f169fc46e7e5c448d35",
+    "candidate_sha256": "6714027acadcc608f488eb214e240f9188adce18d270f630fd1e7f313df4c321"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T06:26:05.318522Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 1,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "0516a3307e195881d82f5fb10ce236905204d59f"
+    }
+  ]
+}
