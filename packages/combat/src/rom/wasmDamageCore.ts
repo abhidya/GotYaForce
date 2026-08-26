@@ -46,11 +46,20 @@ export interface ArenaJson {
 }
 
 interface DamageCoreExports {
-  memory: WebAssembly.Memory;
+  /** Exported by the classic build; the threads relink IMPORTS env.memory instead. */
+  memory?: WebAssembly.Memory;
   zz_003cd5c_(rec: number, att: number, def: number): number;
   zz_0066298_(borgNumberPtr: number): number;
   zz_003d344_(target: number, amount: number): number;
   _initialize?(): void;
+}
+
+/** How the instantiated unit's linear memory is provided — proof surface for
+ * the step-8 threads relink (design v5 note 3): a threads-target module imports
+ * a shared WebAssembly.Memory instead of exporting its own. */
+export interface RomDamageMemoryInfo {
+  imported: boolean;
+  shared: boolean;
 }
 
 export interface RomDamageCore {
@@ -66,6 +75,8 @@ export interface RomDamageCore {
   readonly shimCounts: Record<string, number>;
   /** Total wasm calls served, for proving the ROM path is actually live. */
   readonly callCounts: Record<string, number>;
+  /** Whether the module imported (shared) memory — the threads-relink proof. */
+  readonly memoryInfo: RomDamageMemoryInfo;
 }
 
 function base64ToBytes(b64: string): Uint8Array {
@@ -73,6 +84,75 @@ function base64ToBytes(b64: string): Uint8Array {
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
+}
+
+/**
+ * Read the env.memory import limits straight out of the binary import section
+ * (wasm core spec §5.5.5/§5.5.7: section id 2; limits flags bit 0x1 = has-max,
+ * bit 0x2 = shared). Browser-safe TS port of the oracle harness's
+ * importedMemoryLimits (research/decomp/oracle-harness/lib/wasm.mjs) — the JS
+ * API does not reflect memory limits, and instantiation must construct the
+ * shared memory with EXACTLY the limits the relink declared so the link-check
+ * proves the module got what it asked for. Returns null when the module
+ * imports no env.memory (the exported-memory status quo).
+ */
+function importedMemoryLimits(u8: Uint8Array): { initial: number; maximum?: number; shared: boolean } | null {
+  let p = 8; // magic + version
+  const leb = (): number => {
+    let r = 0;
+    let s = 0;
+    let b: number;
+    do {
+      b = u8[p++]!;
+      r |= (b & 0x7f) << s;
+      s += 7;
+    } while (b & 0x80);
+    return r >>> 0;
+  };
+  const utf8 = new TextDecoder();
+  const name = (): string => {
+    const n = leb();
+    const v = utf8.decode(u8.subarray(p, p + n));
+    p += n;
+    return v;
+  };
+  const limits = (): { initial: number; maximum?: number; shared: boolean } => {
+    const flags = leb();
+    const initial = leb();
+    const out: { initial: number; maximum?: number; shared: boolean } = {
+      initial,
+      shared: (flags & 0x2) !== 0,
+    };
+    if (flags & 0x1) out.maximum = leb();
+    return out;
+  };
+  while (p < u8.length) {
+    const id = u8[p]!;
+    p += 1;
+    const size = leb();
+    const end = p + size;
+    if (id !== 2) {
+      p = end;
+      continue;
+    }
+    const count = leb();
+    for (let i = 0; i < count; i++) {
+      const mod = name();
+      const field = name();
+      const kind = u8[p++]!;
+      if (kind === 0x00) leb(); // func: typeidx
+      else if (kind === 0x01) {
+        p++; // table: reftype
+        limits();
+      } else if (kind === 0x02) {
+        const lim = limits(); // memory
+        if (mod === "env" && field === "memory") return lim;
+      } else if (kind === 0x03) p += 2; // global: valtype + mut
+      else throw new Error(`unknown import kind 0x${kind.toString(16)} in wasm import section`);
+    }
+    return null; // a module has at most one import section
+  }
+  return null;
 }
 
 /** The three SDK imports the unit needs, fround-exact like the oracle's shims. */
@@ -118,23 +198,55 @@ export async function createRomDamageCore(
 ): Promise<RomDamageCore> {
   const memCtx: { dv: DataView | null; counts: Record<string, number> } = { dv: null, counts: {} };
   const shims = makeShims(memCtx);
-  const module = await WebAssembly.compile(
+  const bytesU8 =
     wasmBytes instanceof Uint8Array
-      ? (wasmBytes.buffer.slice(wasmBytes.byteOffset, wasmBytes.byteOffset + wasmBytes.byteLength) as ArrayBuffer)
-      : wasmBytes,
+      ? wasmBytes
+      : new Uint8Array(wasmBytes);
+  const module = await WebAssembly.compile(
+    bytesU8.buffer.slice(bytesU8.byteOffset, bytesU8.byteOffset + bytesU8.byteLength) as ArrayBuffer,
   );
+  // Threads-target path (step 8, design v5 note 3): the relinked module IMPORTS
+  // env.memory as a shared WebAssembly.Memory — construct it host-side with the
+  // module's own declared limits, mirroring the oracle harness's loadUnit
+  // exactly. The exported-memory path (classic damage-core.wasm) is untouched
+  // and remains the fallback for ?romwasm=1/default.
+  let importedMemory: WebAssembly.Memory | null = null;
+  const importsMemory = WebAssembly.Module.imports(module).some(
+    (i) => i.module === "env" && i.name === "memory" && i.kind === "memory",
+  );
+  if (importsMemory) {
+    const lim = importedMemoryLimits(bytesU8);
+    if (!lim) throw new Error("module imports env.memory but the binary import section has no env.memory entry");
+    importedMemory = new WebAssembly.Memory({
+      initial: lim.initial,
+      // shared memories require a maximum; a fixed-size arena declares max=min.
+      maximum: lim.maximum ?? lim.initial,
+      shared: lim.shared,
+    });
+  }
   const instance = await WebAssembly.instantiate(module, {
     env: new Proxy(shims as Record<string, unknown>, {
       get: (t, k) =>
-        t[k as string] ??
-        (() => {
-          throw new Error(`unshimmed import ${String(k)}`);
-        }),
+        k === "memory" && importedMemory != null
+          ? importedMemory
+          : (t[k as string] ??
+            (() => {
+              throw new Error(`unshimmed import ${String(k)}`);
+            })),
     }) as WebAssembly.ModuleImports,
   });
   const ex = instance.exports as unknown as DamageCoreExports;
-  const u8 = new Uint8Array(ex.memory.buffer);
-  const dv = new DataView(ex.memory.buffer);
+  const mem = ex.memory ?? importedMemory;
+  if (!mem) throw new Error("module neither exports nor imports a linear memory");
+  const memoryInfo: RomDamageMemoryInfo = {
+    imported: importedMemory != null,
+    shared:
+      importedMemory != null &&
+      typeof SharedArrayBuffer !== "undefined" &&
+      mem.buffer instanceof SharedArrayBuffer,
+  };
+  const u8 = new Uint8Array(mem.buffer);
+  const dv = new DataView(mem.buffer);
   memCtx.dv = dv;
 
   // Arena at original GameCube addresses — the DOL-initialized tables the
@@ -252,5 +364,6 @@ export async function createRomDamageCore(
     applyHpDamage,
     shimCounts: memCtx.counts,
     callCounts,
+    memoryInfo,
   };
 }

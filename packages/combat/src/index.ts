@@ -239,4 +239,9 @@ export {
   type SourceDamageTarget,
   type SourceDamageImplementation,
 } from "./damage/sourceDamage.js";
-export { createRomDamageCore, type RomDamageCore, type ArenaJson } from "./rom/wasmDamageCore.js";
+export {
+  createRomDamageCore,
+  type RomDamageCore,
+  type RomDamageMemoryInfo,
+  type ArenaJson,
+} from "./rom/wasmDamageCore.js";
