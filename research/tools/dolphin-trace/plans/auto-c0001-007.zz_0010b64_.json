@@ -1,0 +1,17 @@
+{
+  "unit": "auto-c0001-007",
+  "fn": "zz_0010b64_",
+  "addr": "0x80010b64",
+  "prototype": "void zz_0010b64_(void)",
+  "generated_by": "port_trace_verify plan generator v1",
+  "note": "SKELETON generated from oracle-registry.json prototypes: args/ret only. reads/writes need hand-authoring from the unit's verbatim C (research/tools/dolphin-trace/README.md) before a capture proves memory behaviour; editing them removes none of this plan's fields.",
+  "args": [
+    {
+      "reg": "r3",
+      "name": "param_1"
+    }
+  ],
+  "reads": [],
+  "ret": null,
+  "writes": []
+}

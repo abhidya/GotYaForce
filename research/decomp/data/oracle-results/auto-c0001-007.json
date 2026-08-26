@@ -1,27 +1,27 @@
 {
  "result_schema": 1,
  "unit": "auto-c0001-007",
- "generated_at": "2026-08-25T21:37:00.026Z",
+ "generated_at": "2026-08-26T07:25:06.267Z",
  "harness": {
   "entry": "research/decomp/oracle-harness/run-unit.mjs",
-  "git_rev": "c2c47c9c07db4b3f23a42249a2eda3ffeddde351",
+  "git_rev": "1ed92fcfcd074c877d72f64842d92829f4c89bbe",
   "sha256": "3b4d57a595f84d5debb340cb2669fe5f74895abbe5856fbe05b2f22d762be766"
  },
  "wasm": {
-  "path": "D:\\GotYaForce\\.claude\\worktrees\\agent-a14ab7d53e02b46e7\\research\\decomp\\port-units-staging\\auto-c0001-007\\unit.wasm",
+  "path": "D:\\GotYaForce\\.claude\\worktrees\\trace-verification-outer\\research\\decomp\\port-units-staging\\auto-c0001-007\\unit.wasm",
   "sha256": "104e1678763c7a91f5682602b2f80cb42ec722f00b56d1e7e42d8bde3396c844"
  },
  "arena": {
   "path": "research/decomp/oracle-harness/arena-trace-empty.json",
-  "sha256": "5a1f6379fdf866eb1b3535188b78e9fb3660644440b09f36d205db0775811ae2"
+  "sha256": "a382e7401f2192cc3ce7990e05ca1947ad744f07a23b3f9bfe5452ca3fd19632"
  },
  "corpus": {
   "mode": "replay",
   "file": "research/decomp/oracle-harness/corpora/auto-c0001-007.dolphin-trace.jsonl",
-  "sha256": "8565cd87b9ba6f7ecf14d2fbfde31147a71be385bd7b1eb27d10a7a055b0ecc2",
+  "sha256": "f20d11ec5ee83457c39be09f2c2412a29d26574eef0ebe77c9a2fdae4d977ffd",
   "n": 120
  },
- "spec_sha256": "044f56a85a27937554788bc587127198332245243a20c445c3feb2f1ec4fcb19",
+ "spec_sha256": "ff9e77f60cf819fe20b1dc4161041f267087b9ad3ad44d659fbf4980799c6cc3",
  "field_map": {
   "path": "research/decomp/oracle-harness/actor-field-map.json",
   "sha256": "14c102284ea0a2188d6a137525df04777055de3725f5b7afb60ca0ed6280862c",
