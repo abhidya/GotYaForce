@@ -1,0 +1,111 @@
+{
+  "schema": "composition-ladder-1",
+  "design": "docs/playable-port-design.md G3 + E1 (V5 verdict)",
+  "budget_rule": "a rung passes iff its window links AND new_contested_symbols/new_symbols_linked <= previous rung ratio",
+  "dispatch_companion": true,
+  "rungs": [
+    {
+      "rung": 0,
+      "n": 5,
+      "units": [
+        "auto-c0054-000",
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013"
+      ],
+      "substitution": null,
+      "passed": true,
+      "link_passed": true,
+      "stage": "pass",
+      "checked_at": "2026-08-26T08:04:43.452993Z",
+      "conflicts": [],
+      "new_contested_symbols": 0,
+      "new_symbols_linked": 40,
+      "ratio": 0.0,
+      "budget_ok": true,
+      "attempt_tags": [
+        "rung0"
+      ],
+      "companion": {
+        "functions": 40,
+        "table_size": 40,
+        "companion_sha256": "5f07b283ec20c5be3f74eceb96188f7c7f47b92c954108aebda3eae77d96ef7a",
+        "dispatch_export": "__gf_dispatch",
+        "miss_import": "__gf_dispatch_miss",
+        "arity_export": "__gf_dispatch_arity_mismatches",
+        "frame_abi_version": 1,
+        "dispatch_export_present": true,
+        "arity_mismatch_export_present": true,
+        "miss_import_present": true
+      }
+    },
+    {
+      "rung": 1,
+      "n": 10,
+      "units": [
+        "auto-c0019-016",
+        "auto-c0053-003",
+        "auto-c0053-005",
+        "auto-c0053-017",
+        "auto-c0053-018",
+        "auto-c0054-000",
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013"
+      ],
+      "substitution": {
+        "dropped": [
+          "auto-c0025-002"
+        ],
+        "substituted": [
+          "auto-c0019-016"
+        ]
+      },
+      "passed": false,
+      "link_passed": true,
+      "stage": "pass",
+      "checked_at": "2026-08-26T08:19:41.730334Z",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0025-002",
+            "auto-c0053-003",
+            "auto-c0053-005",
+            "auto-c0053-013",
+            "auto-c0053-017",
+            "auto-c0053-018",
+            "auto-c0054-000",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003"
+          ],
+          "detail": "canonical_header_ambiguous: auto-c0053-013 declares zz_0089100_ more than once after canonicalization"
+        }
+      ],
+      "new_contested_symbols": 1,
+      "new_symbols_linked": 38,
+      "ratio": 0.02631578947368421,
+      "budget_ok": false,
+      "attempt_tags": [
+        "rung1",
+        "rung1b"
+      ],
+      "companion": {
+        "functions": 78,
+        "table_size": 78,
+        "companion_sha256": "03b6107f4bcda6145a9920aebaa7ed235b4bf94ff9ad6cb795b734b926d26b72",
+        "dispatch_export": "__gf_dispatch",
+        "miss_import": "__gf_dispatch_miss",
+        "arity_export": "__gf_dispatch_arity_mismatches",
+        "frame_abi_version": 1,
+        "dispatch_export_present": true,
+        "arity_mismatch_export_present": true,
+        "miss_import_present": true
+      }
+    }
+  ]
+}
