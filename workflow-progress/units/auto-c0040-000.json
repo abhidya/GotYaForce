@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "unit": "auto-c0040-000",
+  "unit_id": "auto-c0040-000",
+  "timestamp": "2026-08-26T02:12:23.244109Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0040-000.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_5bn95a3g\\unit.o'' failed (returned 1)",
+          "error: unable to open output file 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_5bn95a3g\\unit.o': 'no space on device'"
+        ],
+        "fingerprint": "11cf438796148f198a65b32914ee97f74a46057ff305391ddba0798497ddbe33"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSVECNormalize_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl",
+        "gnt4_PSVECAdd_bl"
+      ],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "FUN_80083874",
+        "FUN_80083ad4",
+        "zz_00076d0_",
+        "zz_00097b4_",
+        "zz_00456a0_",
+        "zz_00457d4_",
+        "zz_0045ef4_",
+        "zz_0083244_",
+        "zz_00833ec_",
+        "zz_0083524_",
+        "zz_0083714_",
+        "zz_0084170_",
+        "zz_0088e50_",
+        "zz_008aff0_",
+        "zz_00b19b4_",
+        "zz_00db250_",
+        "zz_00f036c_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "DAT_802b0ca8",
+      "DAT_802b0cb4",
+      "DAT_80341f52",
+      "DAT_80341f54",
+      "DAT_80341f60",
+      "FUN_80083874",
+      "FUN_80083ad4",
+      "FUN_80154510",
+      "FUN_80154d18",
+      "FUN_80154d38",
+      "FUN_80154de8",
+      "PTR_DAT_80433934",
+      "byte",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECNormalize_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "ushort",
+      "zz_00076d0_",
+      "zz_00097b4_",
+      "zz_00456a0_",
+      "zz_00457d4_",
+      "zz_0045ef4_",
+      "zz_0083244_",
+      "zz_00833ec_",
+      "zz_0083524_",
+      "zz_0083714_",
+      "zz_0084170_",
+      "zz_0088e50_",
+      "zz_008aff0_",
+      "zz_00b19b4_",
+      "zz_00db250_",
+      "zz_00f036c_",
+      "zz_01545f0_",
+      "zz_0154754_",
+      "zz_015498c_",
+      "zz_0154be8_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0040-000.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_5bn95a3g\\unit.o'' failed (returned 1)",
+          "error: unable to open output file 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_5bn95a3g\\unit.o': 'no space on device'"
+        ],
+        "fingerprint": "11cf438796148f198a65b32914ee97f74a46057ff305391ddba0798497ddbe33"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-73b5b6eb98f0610ae1b86d7ae32332282bd03f1301723335c57dce1ef7d82cd3"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:12:23.244109Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+      "product_commit": null
+    }
+  ]
+}
