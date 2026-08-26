@@ -1,8 +1,8 @@
 {
   "registry_schema": 1,
   "program": "gnt4",
-  "version": 161,
-  "updated_at": "2026-08-26T06:09:40.179102Z",
+  "version": 162,
+  "updated_at": "2026-08-26T06:14:02.284501Z",
   "entries": {
     "fn:FUN_8010858c": {
       "kind": "prototype",
@@ -20510,6 +20510,150 @@
       ],
       "updated_version": 161,
       "source_updated_version": 161
+    },
+    "fn:FUN_801bbac0": {
+      "kind": "prototype",
+      "symbol": "FUN_801bbac0",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0054-000"
+      ],
+      "source_tiers": {
+        "auto-c0054-000": "compile_only"
+      },
+      "harvested_at": "2026-08-26T06:14:02.281499Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801bbac0(void);",
+      "derivation": "definition",
+      "updated_version": 162,
+      "source_updated_version": 162
+    },
+    "fn:FUN_801bbaf8": {
+      "kind": "prototype",
+      "symbol": "FUN_801bbaf8",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0054-000"
+      ],
+      "source_tiers": {
+        "auto-c0054-000": "compile_only"
+      },
+      "harvested_at": "2026-08-26T06:14:02.281499Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801bbaf8(void);",
+      "derivation": "definition",
+      "updated_version": 162,
+      "source_updated_version": 162
+    },
+    "fn:FUN_801bbfdc": {
+      "kind": "prototype",
+      "symbol": "FUN_801bbfdc",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0054-000"
+      ],
+      "source_tiers": {
+        "auto-c0054-000": "compile_only"
+      },
+      "harvested_at": "2026-08-26T06:14:02.281499Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801bbfdc(void);",
+      "derivation": "definition",
+      "updated_version": 162,
+      "source_updated_version": 162
+    },
+    "fn:FUN_801bc018": {
+      "kind": "prototype",
+      "symbol": "FUN_801bc018",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0054-000"
+      ],
+      "source_tiers": {
+        "auto-c0054-000": "compile_only"
+      },
+      "harvested_at": "2026-08-26T06:14:02.281499Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801bc018(void);",
+      "derivation": "definition",
+      "updated_version": 162,
+      "source_updated_version": 162
+    },
+    "fn:FUN_801bc0d0": {
+      "kind": "prototype",
+      "symbol": "FUN_801bc0d0",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0054-000"
+      ],
+      "source_tiers": {
+        "auto-c0054-000": "compile_only"
+      },
+      "harvested_at": "2026-08-26T06:14:02.281499Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801bc0d0(void);",
+      "derivation": "definition",
+      "updated_version": 162,
+      "source_updated_version": 162
+    },
+    "fn:FUN_801bc324": {
+      "kind": "prototype",
+      "symbol": "FUN_801bc324",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0054-000"
+      ],
+      "source_tiers": {
+        "auto-c0054-000": "compile_only"
+      },
+      "harvested_at": "2026-08-26T06:14:02.281499Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801bc324(void);",
+      "derivation": "definition",
+      "updated_version": 162,
+      "source_updated_version": 162
+    },
+    "fn:FUN_801bc5b4": {
+      "kind": "prototype",
+      "symbol": "FUN_801bc5b4",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0054-000"
+      ],
+      "source_tiers": {
+        "auto-c0054-000": "compile_only"
+      },
+      "harvested_at": "2026-08-26T06:14:02.281499Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801bc5b4(void);",
+      "derivation": "definition",
+      "updated_version": 162,
+      "source_updated_version": 162
+    },
+    "fn:FUN_801bc608": {
+      "kind": "prototype",
+      "symbol": "FUN_801bc608",
+      "tier": "compile_only",
+      "source_units": [
+        "auto-c0054-000"
+      ],
+      "source_tiers": {
+        "auto-c0054-000": "compile_only"
+      },
+      "harvested_at": "2026-08-26T06:14:02.281499Z",
+      "contested": false,
+      "conflicts": [],
+      "declaration": "void FUN_801bc608(void);",
+      "derivation": "definition",
+      "updated_version": 162,
+      "source_updated_version": 162
     }
   },
   "assembly_unattributed_conflicts": [
