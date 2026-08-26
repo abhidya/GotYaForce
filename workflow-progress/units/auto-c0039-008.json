@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "unit": "auto-c0039-008",
+  "unit_id": "auto-c0039-008",
+  "timestamp": "2026-08-26T02:10:23.243868Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 6,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0039-008.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_qcpuzefa\\unit.o'' failed (returned 1)",
+          "unit.c:130:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:136:13: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:243:12: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:246:13: error: assigning to 'longlong' (aka 'long long') from incompatible type 'void'",
+          "unit.c:82:13: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "d03763b46b11c0af18243f58789957e1a606e78ae2cc5965aef3763d4cfbf9e9"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSVECNormalize_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl"
+      ],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [
+        "FUN_80150a18",
+        "FUN_80150bc8"
+      ],
+      "superseded": [
+        "FUN_80083874",
+        "FUN_80083ad4",
+        "zz_00055fc_",
+        "zz_0006f78_",
+        "zz_0006fb4_",
+        "zz_00076d0_",
+        "zz_0007c30_",
+        "zz_00086b8_",
+        "zz_00097b4_",
+        "zz_00456a0_",
+        "zz_00457d4_",
+        "zz_0045ef4_",
+        "zz_0083244_",
+        "zz_00833ec_",
+        "zz_0083610_",
+        "zz_0083714_",
+        "zz_0084170_",
+        "zz_0088aa0_",
+        "zz_0088e50_",
+        "zz_008aff0_",
+        "zz_0197ad8_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_802b0ca8",
+      "DAT_802b0cb4",
+      "DAT_80340f16",
+      "DAT_80340f18",
+      "DAT_80340f1c",
+      "DAT_80340f28",
+      "DAT_804346c8",
+      "FUN_80083874",
+      "FUN_80083ad4",
+      "FUN_8015039c",
+      "FUN_801504e4",
+      "FUN_80150520",
+      "FUN_80150568",
+      "FUN_8015068c",
+      "FUN_801506f4",
+      "FUN_801508cc",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "code",
+      "countLeadingZeros",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECNormalize_bl",
+      "longlong",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "ushort",
+      "zz_00055fc_",
+      "zz_0006f78_",
+      "zz_0006fb4_",
+      "zz_00076d0_",
+      "zz_0007c30_",
+      "zz_00086b8_",
+      "zz_00097b4_",
+      "zz_00456a0_",
+      "zz_00457d4_",
+      "zz_0045ef4_",
+      "zz_0083244_",
+      "zz_00833ec_",
+      "zz_0083610_",
+      "zz_0083714_",
+      "zz_0084170_",
+      "zz_0088aa0_",
+      "zz_0088e50_",
+      "zz_008aff0_",
+      "zz_015091c_",
+      "zz_0197ad8_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": true,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 6,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0039-008.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_qcpuzefa\\unit.o'' failed (returned 1)",
+          "unit.c:130:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:136:13: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:243:12: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:246:13: error: assigning to 'longlong' (aka 'long long') from incompatible type 'void'",
+          "unit.c:82:13: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "d03763b46b11c0af18243f58789957e1a606e78ae2cc5965aef3763d4cfbf9e9"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-7b003cdadf1c728c818c33b65ad31a079f3a46c1078fd3aa117dfb0b6c75b14a"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:10:23.243868Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+      "product_commit": null
+    }
+  ]
+}
