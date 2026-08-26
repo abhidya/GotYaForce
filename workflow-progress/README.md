@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T06:00:09.601311Z - machine-written, do not edit.*
+*Generated 2026-08-26T06:05:10.220254Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 101/1396 settled (3 green, 98 staged) |
+| **Queue progress** | 102/1396 settled (3 green, 99 staged) |
 | **Retries outstanding** | 148 |
-| **Untouched** | 1137 |
-| **Last transition** | 2026-08-26T06:00:09.601311Z |
-| **Last green** | 2026-08-26T04:01:34.891104Z (`auto-c0053-005`) |
-| **Last product commit** | `8fca023d8152041a25ebe1cf630a13e41b7b0c42` |
+| **Untouched** | 1136 |
+| **Last transition** | 2026-08-26T06:05:10.220254Z |
+| **Last green** | 2026-08-26T06:05:10.220254Z (`auto-c0053-017`) |
+| **Last product commit** | `d2b07823de0b38468ccaf0acb0535ca653fe8fc2` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T06:05:10.220254Z | `auto-c0053-017` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T06:00:09.601311Z | `auto-c0053-016` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_01ba750_ declared void but their results are assigned; no header edit ca |
 | 2026-08-26T06:00:06.178042Z | `auto-c0053-008` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_01b7894_ declared void but their results are assigned; no header edit ca |
 | 2026-08-26T06:00:02.714102Z | `auto-c0053-007` | gate_failed | wasm-link | 1 | not linked: .\gnt4_shim.h:188:80: error: unterminated /* comment unit.c:156:86: error: subscripted value is no |
@@ -70,4 +71,3 @@
 | 2026-08-26T02:35:49.074022Z | `auto-c0041-007` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:35:36.146600Z | `auto-c0041-006` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:35:23.202735Z | `auto-c0040-015` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:35:10.231960Z | `auto-c0040-014` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
