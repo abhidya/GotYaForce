@@ -1,0 +1,294 @@
+{
+  "schema": 1,
+  "unit": "auto-c0053-007",
+  "unit_id": "auto-c0053-007",
+  "timestamp": "2026-08-26T06:00:02.714102Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "gate_failed",
+  "stage": "wasm-link",
+  "attempt": 1,
+  "detail": "not linked: .\\gnt4_shim.h:188:80: error: unterminated /* comment\nunit.c:156:86: error: subscripted value is not an array, pointer, or vector",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 11,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-007.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_p5di5np2\\unit.o'' failed (returned 1)",
+          "unit.c:183:12: error: assigning to 'undefined4' (aka 'unsigned int') from incompatible type 'void'",
+          "unit.c:262:57: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:262:65: error: expected expression",
+          "unit.c:263:60: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:263:68: error: expected expression",
+          "unit.c:280:13: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:284:17: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:292:32: error: use of undeclared identifier 'PTR_s_sfd_op_sfd_8038212c'",
+          "unit.c:297:15: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:304:38: error: use of undeclared identifier 'PTR_s_sfd_op_sfd_8038212c'"
+        ],
+        "fingerprint": "4800a0f007e6dc691fd3ceb8e28bf17028157bcd2f499c402ff44fbc124233be"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-007\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ul_kg45q\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: unterminated /* comment",
+          "unit.c:183:12: error: assigning to 'undefined4' (aka 'unsigned int') from incompatible type 'void'",
+          "unit.c:290:17: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "c34ca3d407545badb0cf4d3d98167805fce01c59727d03f6a2a3b9c0788b82da"
+      },
+      {
+        "iteration": 3,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-007\\header-attempt1-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_m7xadecx\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: unterminated /* comment"
+        ],
+        "fingerprint": "48c7559c1626092b74d5d1e67ecdd42f3eff2ae100e7dd2b066347bfd23f1f8d"
+      },
+      {
+        "iteration": 4,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-007\\header-attempt1-iter3.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mvgfycw2\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: unterminated /* comment",
+          "unit.c:156:86: error: subscripted value is not an array, pointer, or vector"
+        ],
+        "fingerprint": "a8bc6a96056cd0f3f1b624530649d5635c15d68006943baf98f2112db1847288"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "158"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_memset"
+      ],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "FUN_80051998",
+        "zz_00076d0_",
+        "zz_00097b4_",
+        "zz_002b27c_",
+        "zz_0088e50_",
+        "zz_008b480_",
+        "zz_01b7894_",
+        "zz_02aa17c_",
+        "zz_02aa338_",
+        "zz_02ab8ec_",
+        "zz_02ada60_",
+        "zz_02ade34_",
+        "zz_02ae1e0_",
+        "zz_02af560_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "DAT_802b3650",
+      "DAT_802b3654",
+      "DAT_802b3658",
+      "DAT_8031a024",
+      "DAT_80382120",
+      "DAT_80382124",
+      "DAT_80382128",
+      "DAT_80382130",
+      "DAT_80382132",
+      "DAT_80382134",
+      "DAT_80382136",
+      "DAT_80382138",
+      "DAT_80382139",
+      "DAT_803c1140",
+      "DAT_803c1144",
+      "DAT_803c1150",
+      "DAT_803c1154",
+      "DAT_803c1164",
+      "DAT_803c1168",
+      "DAT_803c1170",
+      "DAT_803d4a50",
+      "DAT_803d4a51",
+      "DAT_803d4a52",
+      "DAT_803d4a53",
+      "DAT_803d4a54",
+      "DAT_803d4a58",
+      "DAT_803d4a5c",
+      "DAT_803d4a60",
+      "DAT_803d4a64",
+      "DAT_803d4a68",
+      "DAT_803d4a6c",
+      "DAT_803d4a70",
+      "DAT_803d4a74",
+      "DAT_803d4a78",
+      "DAT_803d4a7c",
+      "DAT_803d4a80",
+      "DAT_803d4a84",
+      "DAT_803d4a88",
+      "DAT_803d4a8c",
+      "DAT_803d4a90",
+      "DAT_803d4a94",
+      "DAT_803d4a98",
+      "DAT_803d4a9c",
+      "DAT_803d4aa0",
+      "DAT_803d4aa4",
+      "DAT_803d4ab4",
+      "DAT_803d4ab8",
+      "DAT_803d4afc",
+      "DAT_803d4b14",
+      "DAT_803d4b2c",
+      "DAT_803d4b30",
+      "DAT_803d4b34",
+      "DAT_803d4b38",
+      "DAT_80435a24",
+      "DAT_80435a28",
+      "DAT_8043ba0c",
+      "FUN_80051998",
+      "PTR_DAT_8043394c",
+      "byte",
+      "code",
+      "gnt4_GXGetTexBufferSize_bl",
+      "gnt4_memset",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined4",
+      "undefined8",
+      "ushort",
+      "zz_00076d0_",
+      "zz_00097b4_",
+      "zz_002b27c_",
+      "zz_0088e50_",
+      "zz_008b480_",
+      "zz_01b7150_",
+      "zz_01b7160_",
+      "zz_01b7180_",
+      "zz_01b729c_",
+      "zz_01b7304_",
+      "zz_01b74a8_",
+      "zz_01b7528_",
+      "zz_01b757c_",
+      "zz_01b7894_",
+      "zz_02aa17c_",
+      "zz_02aa338_",
+      "zz_02ab8ec_",
+      "zz_02ada60_",
+      "zz_02ade34_",
+      "zz_02ae1e0_",
+      "zz_02af560_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 158,
+    "model_requests": 3,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 11,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-007.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_p5di5np2\\unit.o'' failed (returned 1)",
+          "unit.c:183:12: error: assigning to 'undefined4' (aka 'unsigned int') from incompatible type 'void'",
+          "unit.c:262:57: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:262:65: error: expected expression",
+          "unit.c:263:60: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:263:68: error: expected expression",
+          "unit.c:280:13: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:284:17: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:292:32: error: use of undeclared identifier 'PTR_s_sfd_op_sfd_8038212c'",
+          "unit.c:297:15: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:304:38: error: use of undeclared identifier 'PTR_s_sfd_op_sfd_8038212c'"
+        ],
+        "fingerprint": "4800a0f007e6dc691fd3ceb8e28bf17028157bcd2f499c402ff44fbc124233be"
+      },
+      {
+        "iteration": 2,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-007\\header-attempt1-iter1.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_ul_kg45q\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: unterminated /* comment",
+          "unit.c:183:12: error: assigning to 'undefined4' (aka 'unsigned int') from incompatible type 'void'",
+          "unit.c:290:17: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "c34ca3d407545badb0cf4d3d98167805fce01c59727d03f6a2a3b9c0788b82da"
+      },
+      {
+        "iteration": 3,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-007\\header-attempt1-iter2.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_m7xadecx\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: unterminated /* comment"
+        ],
+        "fingerprint": "48c7559c1626092b74d5d1e67ecdd42f3eff2ae100e7dd2b066347bfd23f1f8d"
+      },
+      {
+        "iteration": 4,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\wasm-units\\auto-c0053-007\\header-attempt1-iter3.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mvgfycw2\\unit.o'' failed (returned 1)",
+          "gnt4_shim.h:*: error: unterminated /* comment",
+          "unit.c:156:86: error: subscripted value is not an array, pointer, or vector"
+        ],
+        "fingerprint": "a8bc6a96056cd0f3f1b624530649d5635c15d68006943baf98f2112db1847288"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "158"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "not linked: .\\gnt4_shim.h:188:80: error: unterminated /* comment\nunit.c:156:86: error: subscripted value is not an array, pointer, or vector",
+    "last_stage": "wasm-link",
+    "source_failure_id": "source-failure-b3669c4d7a83aedc1af4c3403a320e263d32a405be7d762a317191ec5931041b"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T06:00:02.714102Z",
+      "result": "gate_failed",
+      "stage": "wasm-link",
+      "attempt": 1,
+      "detail": "not linked: .\\gnt4_shim.h:188:80: error: unterminated /* comment\nunit.c:156:86: error: subscripted value is not an array, pointer, or vector",
+      "product_commit": null
+    }
+  ]
+}

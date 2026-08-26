@@ -1,28 +1,23 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-26T04:33:53.558638Z",
+  "generated_at": "2026-08-26T06:00:02.872742Z",
   "run_id": "2026-08-25T22:08:48.995173Z",
   "total_units": 1396,
   "green": 3,
   "staged": 98,
-  "retryable": 147,
-  "untouched": 1140,
+  "retryable": 148,
+  "untouched": 1139,
   "deferred": 0,
   "structural_ineligible": 8,
   "active": 0,
-  "total_attempts": 359,
-  "transitions_last_hour": 3,
-  "greens_last_hour": 1,
+  "total_attempts": 360,
+  "transitions_last_hour": 1,
+  "greens_last_hour": 0,
   "last_green_at": "2026-08-26T04:01:34.891104Z",
   "last_green_unit": "auto-c0053-005",
   "last_product_commit": "8fca023d8152041a25ebe1cf630a13e41b7b0c42",
-  "repeated_failure_classes": [
-    [
-      "assembly:assembly gate canonicalize failed before promotion: canonica",
-      2
-    ]
-  ],
-  "health": "healthy_progress",
+  "repeated_failure_classes": [],
+  "health": "active_no_green",
   "machine": {
     "workflow_state": "running",
     "driver_status": "running",
