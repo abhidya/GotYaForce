@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T01:39:56.325918Z - machine-written, do not edit.*
+*Generated 2026-08-26T01:40:09.355601Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 99/1396 settled (3 green, 96 staged) |
-| **Retries outstanding** | 55 |
-| **Untouched** | 1237 |
-| **Last transition** | 2026-08-26T01:39:56.325918Z |
+| **Retries outstanding** | 56 |
+| **Untouched** | 1236 |
+| **Last transition** | 2026-08-26T01:40:09.355601Z |
 | **Last green** | 2026-08-26T01:15:01.475553Z (`auto-c0025-002`) |
 | **Last product commit** | `514c85759591ae3def65a08e204128438e43e7d6` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -19,12 +19,13 @@
 
 **Repeated recent failure classes**
 
-- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x27
+- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x28
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T01:40:09.355601Z | `auto-c0029-009` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T01:39:56.325918Z | `auto-c0025-006` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T01:39:43.357807Z | `auto-c0025-005` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T01:39:30.361560Z | `auto-c0025-004` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-25T15:27:50.323590Z | `auto-c0043-007` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_8016d39 |
 | 2026-08-25T15:01:42.227993Z | `auto-c0030-014` | gate_failed | assembly | 2 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected apply_actor |
 | 2026-08-25T14:58:12.930676Z | `auto-c0035-004` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-25T14:27:15.499561Z | `auto-c0029-012` | gate_failed | assembly | 5 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ |
