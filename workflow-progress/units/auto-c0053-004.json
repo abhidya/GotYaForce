@@ -1,0 +1,210 @@
+{
+  "schema": 1,
+  "unit": "auto-c0053-004",
+  "unit_id": "auto-c0053-004",
+  "timestamp": "2026-08-26T03:37:17.602528Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0011-012 declares FUN_800669d0 more than once after canonicalization",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-004.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_u0yd2lya\\unit.o'' failed (returned 1)",
+          "unit.c:186:15: error: use of undeclared identifier 'PTR_zz_01b61a4__8038176c'",
+          "unit.c:230:11: error: assigning to 'int' from incompatible type 'void'",
+          "unit.c:51:11: error: assigning to 'int' from incompatible type 'void'"
+        ],
+        "fingerprint": "b55a0d1783ccce8976149e4698c67be14561a337708b504b32e195981fd992dd"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0011-012",
+        "auto-c0019-016",
+        "auto-c0025-002",
+        "auto-c0053-003",
+        "auto-c0053-004"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0011-012",
+            "auto-c0019-016",
+            "auto-c0025-002",
+            "auto-c0053-003",
+            "auto-c0053-004"
+          ],
+          "variants": {},
+          "detail": "canonical_header_ambiguous: auto-c0011-012 declares FUN_800669d0 more than once after canonicalization"
+        }
+      ],
+      "detail": "canonical_header_ambiguous: auto-c0011-012 declares FUN_800669d0 more than once after canonicalization",
+      "candidate": {
+        "name": "auto-c0053-004",
+        "sha256": "d13f86936a9dfd0388cd49c9e0fd26ffbca005259c1a99049fad8cbeadbc3db5"
+      },
+      "expected_candidate": {
+        "name": "auto-c0053-004",
+        "sha256": "d13f86936a9dfd0388cd49c9e0fd26ffbca005259c1a99049fad8cbeadbc3db5"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "156"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSVECMag_bl"
+      ],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "FUN_80066838",
+        "FUN_800669d0",
+        "FUN_80067310",
+        "zz_004beb8_",
+        "zz_004cd24_",
+        "zz_006660c_",
+        "zz_00677b0_",
+        "zz_006a5a4_",
+        "zz_0092dcc_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "FUN_80066838",
+      "FUN_800669d0",
+      "FUN_80067310",
+      "code",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined1",
+      "undefined4",
+      "zz_004beb8_",
+      "zz_004cd24_",
+      "zz_006660c_",
+      "zz_00677b0_",
+      "zz_006a5a4_",
+      "zz_0092dcc_",
+      "zz_01b5ce8_",
+      "zz_01b5da4_",
+      "zz_01b5e64_",
+      "zz_01b60b0_",
+      "zz_01b6154_",
+      "zz_01b61a4_",
+      "zz_01b6260_",
+      "zz_01b631c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 156,
+    "model_requests": 1,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 4,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0053-004.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_u0yd2lya\\unit.o'' failed (returned 1)",
+          "unit.c:186:15: error: use of undeclared identifier 'PTR_zz_01b61a4__8038176c'",
+          "unit.c:230:11: error: assigning to 'int' from incompatible type 'void'",
+          "unit.c:51:11: error: assigning to 'int' from incompatible type 'void'"
+        ],
+        "fingerprint": "b55a0d1783ccce8976149e4698c67be14561a337708b504b32e195981fd992dd"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0011-012",
+        "auto-c0019-016",
+        "auto-c0025-002",
+        "auto-c0053-003",
+        "auto-c0053-004"
+      ],
+      "stage": "canonicalize",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "canonicalization_refused",
+          "units": [
+            "auto-c0011-012",
+            "auto-c0019-016",
+            "auto-c0025-002",
+            "auto-c0053-003",
+            "auto-c0053-004"
+          ],
+          "variants": {},
+          "detail": "canonical_header_ambiguous: auto-c0011-012 declares FUN_800669d0 more than once after canonicalization"
+        }
+      ],
+      "detail": "canonical_header_ambiguous: auto-c0011-012 declares FUN_800669d0 more than once after canonicalization",
+      "candidate": {
+        "name": "auto-c0053-004",
+        "sha256": "d13f86936a9dfd0388cd49c9e0fd26ffbca005259c1a99049fad8cbeadbc3db5"
+      },
+      "expected_candidate": {
+        "name": "auto-c0053-004",
+        "sha256": "d13f86936a9dfd0388cd49c9e0fd26ffbca005259c1a99049fad8cbeadbc3db5"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "156"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0011-012 declares FUN_800669d0 more than once after canonicalization",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T03:37:17.602528Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0011-012 declares FUN_800669d0 more than once after canonicalization",
+      "product_commit": null
+    }
+  ]
+}
