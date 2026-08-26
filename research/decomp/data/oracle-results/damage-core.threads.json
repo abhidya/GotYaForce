@@ -1,0 +1,115 @@
+{
+ "result_schema": 1,
+ "unit": "damage-core",
+ "variant": "threads",
+ "generated_at": "2026-08-26T06:49:39.856Z",
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-unit.mjs",
+  "git_rev": "cdfac084a763134382cbe921dbc1849d2503b25b",
+  "sha256": "3b4d57a595f84d5debb340cb2669fe5f74895abbe5856fbe05b2f22d762be766"
+ },
+ "wasm": {
+  "path": "research/decomp/poc/wasm-port-poc/damage-core.threads.wasm",
+  "sha256": "9ba2c4c082d8729c87c432b6d1c1a123b9509c5b334272c994f4aba594b31044"
+ },
+ "relink": {
+  "design": "docs/playable-port-design.md v5 step 8 — Stage-B re-verification after the threads-target relink (H1 verified-bytes principle: the relink changes module bytes vs what Stage B verified, so every oracle_green is suspended until its corpus replays byte-equal against the relinked artifact)",
+  "base_module": {
+   "path": "research/decomp/port-units/damage-core/unit.wasm",
+   "sha256": "3de9a52a61ecfcd416fd89dae049e9e42f214100bca51b31ef0cafdbcb1e25f5",
+   "recipe": "research/decomp/poc/wasm-port-poc/build.sh (emcc unit_poc.c -O1 -fno-strict-aliasing --no-entry -Wno-implicit-function-declaration -Wno-int-conversion -sERROR_ON_UNDEFINED_SYMBOLS=0 -sINITIAL_MEMORY=2155479040 -sALLOW_MEMORY_GROWTH=0 -sEXPORTED_FUNCTIONS=_zz_003cd5c_,_zz_003d344_,_zz_0066298_,_FUN_80031634)",
+   "recipe_reproduced": true,
+   "reproduced_sha256": "3de9a52a61ecfcd416fd89dae049e9e42f214100bca51b31ef0cafdbcb1e25f5",
+   "reproduced_note": "byte-identical rebuild from the committed unit_poc.c on 2026-08-26 with the pinned toolchain BEFORE any relink flag was added — the relink proceeds from a proven recipe, not a divergent base"
+  },
+  "flags_added": ["-sSHARED_MEMORY=1", "-sIMPORTED_MEMORY=1"],
+  "toolchain": "emcc 6.0.6 (ce75e06884093bcefb86a6b8fd56a5d62a4cc245), pinned research/tools/emsdk",
+  "imported_memory": { "initial": 32890, "maximum": 32890, "shared": true },
+  "verdict_delta": "none — the threads run's result artifact is byte-identical to a same-checkout baseline rerun of the exported-memory module except generated_at, wasm.path, and wasm.sha256: same per-function exact/rounding_explained/unexplained counts (19998+2/20000, 232/232, 4000/4000, 2000/2000), same coverage block, same corpus identity",
+  "baseline_rerun_generated_at": "2026-08-26T06:49:26.969Z",
+  "corpus_note": "corpus.sha256 below is this checkout's working-copy bytes (CRLF checkout); the committed LF blob of corpora/damage-core-poc.jsonl hashes 5ac6664ef51adde118488a53d8d3be2470cef13b83e891808ab4df7a36c87417 as recorded in oracle-results/damage-core.json — same content, line-ending normalization only",
+  "browser_copy": {
+   "path": "apps/game/public/rom/damage-core.threads.wasm",
+   "sha256": "9ba2c4c082d8729c87c432b6d1c1a123b9509c5b334272c994f4aba594b31044",
+   "selected_by": "?romwasm=threads (default stays the exported-memory module; switching the default is a separate reviewed decision)"
+  }
+ },
+ "arena": {
+  "path": "research/decomp/poc/wasm-port-poc/arena.json",
+  "sha256": "66ce1b0e61d698ac71599612b7fbf62e55e479639783d214c1abcd1460ffdb24"
+ },
+ "corpus": {
+  "mode": "replay",
+  "file": "research/decomp/oracle-harness/corpora/damage-core-poc.jsonl",
+  "sha256": "eabc1f3e04a1d92093156f567f754d6c272508c31a4faef16c103ee93b8bd499",
+  "n": 26232
+ },
+ "spec_sha256": "65adec46c15b8c74580052ad7e2ac186a87a3ef230bd11b63650e5c67c7ff9cb",
+ "field_map": {
+  "path": "research/decomp/oracle-harness/actor-field-map.json",
+  "sha256": "14c102284ea0a2188d6a137525df04777055de3725f5b7afb60ca0ed6280862c",
+  "source": {
+   "path": "packages/combat/src/rom/actor.ts",
+   "sha256": "ee17e82015d7aaba3b0f949fa35305d3b94c7bd53414a7183b5f3b07a660c2dd"
+  }
+ },
+ "reference_kind": "ts_port",
+ "references": [
+  "packages/combat/src/damage/sourceDamage.ts (via research/decomp/poc/wasm-port-poc/oracle.mjs esbuild bundle)"
+ ],
+ "functions": [
+  {
+   "name": "zz_003cd5c_",
+   "cases": 20000,
+   "exact": 19998,
+   "rounding_explained": 2,
+   "unexplained": 0,
+   "reference": "sourceDamage.ts computeBaseDamage (oracle.mjs bundle)",
+   "note": "integer damage formula; PoC baseline 2/20000 f32-rounding-explained",
+   "verdict": "pass"
+  },
+  {
+   "name": "zz_0066298_",
+   "cases": 232,
+   "exact": 232,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "reference": "sourceDamage.ts lookupTypeCategory (oracle.mjs bundle)",
+   "note": null,
+   "verdict": "pass"
+  },
+  {
+   "name": "zz_003d344_",
+   "cases": 4000,
+   "exact": 4000,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "reference": "sourceDamage.ts applyHpDamage (oracle.mjs bundle)",
+   "note": null,
+   "verdict": "pass"
+  },
+  {
+   "name": "FUN_80031634",
+   "cases": 2000,
+   "exact": 2000,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "reference": "spec-embedded jsRef (JS mirror of the verbatim C; shares arena/input reads with the wasm — see caveat above)",
+   "note": null,
+   "verdict": "pass"
+  }
+ ],
+ "coverage": {
+  "offsets_read_unwritten": 0,
+  "sentinel_reads_detected": false,
+  "stray_writes": [],
+  "class_mismatches": []
+ },
+ "export_coverage": {
+  "covered": 4,
+  "exported": 4,
+  "uncovered": []
+ },
+ "unexplained_cases": [],
+ "verdict": "pass"
+}

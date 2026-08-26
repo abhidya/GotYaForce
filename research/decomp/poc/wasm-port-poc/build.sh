@@ -29,10 +29,19 @@ source ../../../tools/emsdk/emsdk_env.sh >/dev/null 2>&1
 # INITIAL_MEMORY = 0x80710000 (32881 wasm pages): covers all GC data/bss addresses
 # plus the harness scratch objects at 0x8060xxxx. Arena addresses ARE the original
 # GameCube addresses ("one memory arena at original addresses").
-emcc unit_poc.c -O1 -fno-strict-aliasing --no-entry \
+FLAGS="-O1 -fno-strict-aliasing --no-entry \
   -Wno-implicit-function-declaration -Wno-int-conversion \
   -sERROR_ON_UNDEFINED_SYMBOLS=0 \
   -sINITIAL_MEMORY=2155479040 -sALLOW_MEMORY_GROWTH=0 \
-  -sEXPORTED_FUNCTIONS=_zz_003cd5c_,_zz_003d344_,_zz_0066298_,_FUN_80031634 \
-  -o unit_poc.wasm
-ls -la unit_poc.wasm
+  -sEXPORTED_FUNCTIONS=_zz_003cd5c_,_zz_003d344_,_zz_0066298_,_FUN_80031634"
+emcc unit_poc.c $FLAGS -o unit_poc.wasm
+
+# Threads-target relink (design v5 step 8, docs/threads-relink-reverify.md):
+# IDENTICAL source and flags plus -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1, so the
+# module imports env.memory as a shared WebAssembly.Memory (threads-target
+# codegen without the pthread JS runtime). Committed under a distinct name;
+# every rebuild REQUIRES the Stage-B re-verification replay before any verified
+# status applies to it (verified-bytes principle, playable-port-design.md H1).
+emcc unit_poc.c $FLAGS -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1 -o damage-core.threads.wasm
+
+ls -la unit_poc.wasm damage-core.threads.wasm
