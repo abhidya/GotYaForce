@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "unit": "auto-c0034-002",
+  "unit_id": "auto-c0034-002",
+  "timestamp": "2026-08-26T02:07:07.581173Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0034-002.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_m47x_pl8\\unit.o'' failed (returned 1)",
+          "unit.c:153:9: error: assigning to 'int' from incompatible type 'void'",
+          "unit.c:37:15: error: use of undeclared identifier 'PTR_LAB_80331928'"
+        ],
+        "fingerprint": "c34e3eded761dc25fad2ccb74b0249feb2e59752215f34b843a82b77c539d71e"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSVECMag_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl",
+        "gnt4_PSVECAdd_bl"
+      ],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "FUN_8012a308",
+        "zz_001ab6c_",
+        "zz_0046698_",
+        "zz_004beb8_",
+        "zz_004cd24_",
+        "zz_00679d0_",
+        "zz_006d0dc_",
+        "zz_00b22f4_",
+        "zz_00c74ec_",
+        "zz_012aa24_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "FUN_80129728",
+      "FUN_8012980c",
+      "FUN_80129854",
+      "FUN_8012990c",
+      "FUN_80129948",
+      "FUN_8012999c",
+      "FUN_801299e4",
+      "FUN_80129ac4",
+      "FUN_8012a308",
+      "code",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "zz_001ab6c_",
+      "zz_0046698_",
+      "zz_004beb8_",
+      "zz_004cd24_",
+      "zz_00679d0_",
+      "zz_006d0dc_",
+      "zz_00b22f4_",
+      "zz_00c74ec_",
+      "zz_012aa24_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0034-002.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_m47x_pl8\\unit.o'' failed (returned 1)",
+          "unit.c:153:9: error: assigning to 'int' from incompatible type 'void'",
+          "unit.c:37:15: error: use of undeclared identifier 'PTR_LAB_80331928'"
+        ],
+        "fingerprint": "c34e3eded761dc25fad2ccb74b0249feb2e59752215f34b843a82b77c539d71e"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-2cab2da8f1019d64a5ce0429b463e052db1501b6e5f41c944bbf7f1ed7025faf"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:07:07.581173Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+      "product_commit": null
+    }
+  ]
+}
