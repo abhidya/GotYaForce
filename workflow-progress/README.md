@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T00:46:58.609972Z - machine-written, do not edit.*
+*Generated 2026-08-26T01:15:01.475553Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 98/1396 settled (3 green, 95 staged) |
+| **Queue progress** | 99/1396 settled (3 green, 96 staged) |
 | **Retries outstanding** | 52 |
-| **Untouched** | 1241 |
-| **Last transition** | 2026-08-26T00:46:58.609972Z |
-| **Last green** | 2026-08-25T23:39:56.962508Z (`auto-c0019-016`) |
-| **Last product commit** | `2ca0bb90ac96cd9958494ef0d96a8b318e7426e2` |
+| **Untouched** | 1240 |
+| **Last transition** | 2026-08-26T01:15:01.475553Z |
+| **Last green** | 2026-08-26T01:15:01.475553Z (`auto-c0025-002`) |
+| **Last product commit** | `514c85759591ae3def65a08e204128438e43e7d6` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T01:15:01.475553Z | `auto-c0025-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T00:46:58.609972Z | `auto-c0025-001` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:46:45.841181Z | `auto-c0025-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:46:32.967251Z | `auto-c0024-018` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-25T13:31:47.616846Z | `auto-c0029-002` | staged | commit | 5 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T13:05:29.790679Z | `auto-c0019-000` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T13:01:09.678544Z | `auto-c0011-012` | gate_failed | assembly | 6 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_007c800_ |
-| 2026-08-25T12:57:25.355978Z | `auto-c0011-011` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
