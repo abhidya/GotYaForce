@@ -1,17 +1,17 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-26T02:04:58.971483Z",
+  "generated_at": "2026-08-26T02:05:11.881355Z",
   "run_id": "2026-08-25T22:08:48.995173Z",
   "total_units": 1396,
   "green": 3,
   "staged": 96,
-  "retryable": 67,
-  "untouched": 1225,
+  "retryable": 68,
+  "untouched": 1224,
   "deferred": 0,
   "structural_ineligible": 5,
   "active": 0,
-  "total_attempts": 274,
-  "transitions_last_hour": 16,
+  "total_attempts": 275,
+  "transitions_last_hour": 17,
   "greens_last_hour": 1,
   "last_green_at": "2026-08-26T01:15:01.475553Z",
   "last_green_unit": "auto-c0025-002",
@@ -19,7 +19,7 @@
   "repeated_failure_classes": [
     [
       "compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for",
-      15
+      16
     ]
   ],
   "health": "healthy_progress",
