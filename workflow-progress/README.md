@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-25T23:39:56.962508Z - machine-written, do not edit.*
+*Generated 2026-08-26T00:15:35.115812Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 98/1396 settled (3 green, 95 staged) |
-| **Retries outstanding** | 27 |
-| **Untouched** | 1267 |
-| **Last transition** | 2026-08-25T23:39:56.962508Z |
+| **Retries outstanding** | 28 |
+| **Untouched** | 1266 |
+| **Last transition** | 2026-08-26T00:15:35.115812Z |
 | **Last green** | 2026-08-25T23:39:56.962508Z (`auto-c0019-016`) |
 | **Last product commit** | `2ca0bb90ac96cd9958494ef0d96a8b318e7426e2` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T00:15:35.115812Z | `auto-c0020-011` | gate_failed | assembly | 1 | assembly gate link failed before promotion:       ~~ ~~~~~^~~~~~~~~~~~~~~~ auto-c0020-007/unit.c:170:51: note: |
 | 2026-08-25T23:39:56.962508Z | `auto-c0019-016` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T22:21:48.246460Z | `auto-c0030-014` | gate_failed | assembly | 4 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected apply_actor |
 | 2026-08-25T22:18:31.246813Z | `auto-c0011-012` | staged | commit | 8 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-25T01:08:13.852401Z | `auto-c0020-005` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 18333 and reload failed: 409 Client Error: Conflict for url: |
 | 2026-08-25T01:08:08.643463Z | `auto-c0020-004` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 22940 and reload failed: 409 Client Error: Conflict for url: |
 | 2026-08-25T01:08:03.275133Z | `auto-c0020-003` | retryable | compile-fix | 1 | compile-fix LLM: Serving context 16384 < required 16548 and reload failed: 409 Client Error: Conflict for url: |
-| 2026-08-25T01:07:57.506101Z | `auto-c0020-002` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected FUN_800c1ed |

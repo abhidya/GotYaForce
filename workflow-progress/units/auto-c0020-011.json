@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "unit": "auto-c0020-011",
+  "unit_id": "auto-c0020-011",
+  "timestamp": "2026-08-26T00:15:35.115812Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate link failed before promotion:       ~~ ~~~~~^~~~~~~~~~~~~~~~\nauto-c0020-007/unit.c:170:51: note: place parentheses around the '-' expression to silence this warning\n  170 |         uVar1 = (1 << (uVar1 & 0x1f) | 1U >> 0x20 - (uVar1 & 0x1f)) & 1;\n      |                                                   ^               \n      |                                              (                    )\nerror: unable to open output file 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o': 'no space on device'\n1 warning and 1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0020-007/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o'' failed (returned 1)",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0020-011.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_fv69cokx\\unit.o'' failed (returned 1)",
+          "unit.c:309:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "dec27f1a1f5f7fd014e0903d7ea01a924be45aff692d3b8f3fbffec463815fea"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0020-007",
+        "auto-c0052-017",
+        "auto-c0011-012",
+        "auto-c0019-016",
+        "auto-c0020-011"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "link_failure",
+          "units": [
+            "auto-c0011-012",
+            "auto-c0019-016",
+            "auto-c0020-007",
+            "auto-c0020-011",
+            "auto-c0052-017"
+          ],
+          "variants": {},
+          "detail": "arget wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0020-007/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o'' failed (returned 1)"
+        }
+      ],
+      "detail": "      ~~ ~~~~~^~~~~~~~~~~~~~~~\nauto-c0020-007/unit.c:170:51: note: place parentheses around the '-' expression to silence this warning\n  170 |         uVar1 = (1 << (uVar1 & 0x1f) | 1U >> 0x20 - (uVar1 & 0x1f)) & 1;\n      |                                                   ^               \n      |                                              (                    )\nerror: unable to open output file 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o': 'no space on device'\n1 warning and 1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0020-007/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o'' failed (returned 1)",
+      "candidate": {
+        "name": "auto-c0020-011",
+        "sha256": "d93d688e0f4c2b67a0f23267202347e901db2379c9165b73e7fc1913079e04e6"
+      },
+      "expected_candidate": {
+        "name": "auto-c0020-011",
+        "sha256": "d93d688e0f4c2b67a0f23267202347e901db2379c9165b73e7fc1913079e04e6"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "153"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSMTXMultVec_bl",
+        "gnt4_PSVECNormalize_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl",
+        "gnt4_PSVECAdd_bl"
+      ],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [
+        "FUN_80047aa4",
+        "FUN_800c715c"
+      ],
+      "superseded": [
+        "FUN_80083874",
+        "FUN_80083ad4",
+        "zz_00055fc_",
+        "zz_0006f78_",
+        "zz_0006fb4_",
+        "zz_00076d0_",
+        "zz_00097b4_",
+        "zz_003e978_",
+        "zz_0045204_",
+        "zz_0046470_",
+        "zz_0046588_",
+        "zz_0083244_",
+        "zz_00833ec_",
+        "zz_0083524_",
+        "zz_0083714_",
+        "zz_0088aa0_",
+        "zz_0088e50_",
+        "zz_0089100_",
+        "zz_008ac80_",
+        "zz_008aff0_",
+        "zz_00c3be0_",
+        "zz_00c7034_",
+        "zz_00f036c_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "DAT_80305292",
+      "DAT_80305294",
+      "DAT_803052a0",
+      "DAT_803052a2",
+      "DAT_803052a4",
+      "DAT_803052a8",
+      "DAT_803052ac",
+      "DAT_803052b0",
+      "DAT_803052b2",
+      "DAT_80305e58",
+      "DAT_80305e59",
+      "DAT_80305e5a",
+      "DAT_80305e5b",
+      "DAT_80305e68",
+      "DAT_80305e6c",
+      "DAT_80305e70",
+      "DAT_80305e74",
+      "DAT_80305e84",
+      "DAT_80305e85",
+      "DAT_80305e86",
+      "DAT_80305e88",
+      "FUN_80083874",
+      "FUN_80083ad4",
+      "FUN_800c6704",
+      "FUN_800c6724",
+      "FUN_800c6a94",
+      "FUN_800c6c84",
+      "FUN_800c6d1c",
+      "byte",
+      "code",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECNormalize_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_00055fc_",
+      "zz_0006f78_",
+      "zz_0006fb4_",
+      "zz_00076d0_",
+      "zz_00097b4_",
+      "zz_003e978_",
+      "zz_0045204_",
+      "zz_0046470_",
+      "zz_0046588_",
+      "zz_0083244_",
+      "zz_00833ec_",
+      "zz_0083524_",
+      "zz_0083714_",
+      "zz_0088aa0_",
+      "zz_0088e50_",
+      "zz_0089100_",
+      "zz_008ac80_",
+      "zz_008aff0_",
+      "zz_00c3be0_",
+      "zz_00c6544_",
+      "zz_00c67bc_",
+      "zz_00c6e8c_",
+      "zz_00c7034_",
+      "zz_00f036c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": true,
+    "registry_deviations": [],
+    "registry_version_used": 153,
+    "model_requests": 1,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0020-011.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_fv69cokx\\unit.o'' failed (returned 1)",
+          "unit.c:309:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "dec27f1a1f5f7fd014e0903d7ea01a924be45aff692d3b8f3fbffec463815fea"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0020-007",
+        "auto-c0052-017",
+        "auto-c0011-012",
+        "auto-c0019-016",
+        "auto-c0020-011"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "link_failure",
+          "units": [
+            "auto-c0011-012",
+            "auto-c0019-016",
+            "auto-c0020-007",
+            "auto-c0020-011",
+            "auto-c0052-017"
+          ],
+          "variants": {},
+          "detail": "arget wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0020-007/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o'' failed (returned 1)"
+        }
+      ],
+      "detail": "      ~~ ~~~~~^~~~~~~~~~~~~~~~\nauto-c0020-007/unit.c:170:51: note: place parentheses around the '-' expression to silence this warning\n  170 |         uVar1 = (1 << (uVar1 & 0x1f) | 1U >> 0x20 - (uVar1 & 0x1f)) & 1;\n      |                                                   ^               \n      |                                              (                    )\nerror: unable to open output file 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o': 'no space on device'\n1 warning and 1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0020-007/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o'' failed (returned 1)",
+      "candidate": {
+        "name": "auto-c0020-011",
+        "sha256": "d93d688e0f4c2b67a0f23267202347e901db2379c9165b73e7fc1913079e04e6"
+      },
+      "expected_candidate": {
+        "name": "auto-c0020-011",
+        "sha256": "d93d688e0f4c2b67a0f23267202347e901db2379c9165b73e7fc1913079e04e6"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "153"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate link failed before promotion:       ~~ ~~~~~^~~~~~~~~~~~~~~~\nauto-c0020-007/unit.c:170:51: note: place parentheses around the '-' expression to silence this warning\n  170 |         uVar1 = (1 << (uVar1 & 0x1f) | 1U >> 0x20 - (uVar1 & 0x1f)) & 1;\n      |                                                   ^               \n      |                                              (                    )\nerror: unable to open output file 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o': 'no space on device'\n1 warning and 1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0020-007/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_uyauq2nf\\unit.o'' failed (returned 1)",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T00:15:35.115812Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate link failed before promotion:       ~~ ~~~~~^~~~~~~~~~~~~~~~\nauto-c0020-007/unit.c:170:51: note: place parentheses around the '-' expression to silence this warning\n  170 |         uVar1 = (1 << (uVar1 & 0x1f) | 1U >> 0x20 - (uVar1 & 0x1f)) & 1;\n      |                                                   ^               \n      |                                              (           ",
+      "product_commit": null
+    }
+  ]
+}
