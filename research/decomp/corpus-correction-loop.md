@@ -65,10 +65,18 @@ cd research/tools/OGhidra
 
 Operational discipline (same as the orphan repair):
 
+- **order matters:** the corpus fix must be landed on the checkout the driver reads BEFORE
+  the revocation takes effect. A revoked compile-only unit that rebuilds from the uncorrected
+  chunk goes green again with the same wrong behavior — silently, because its tier runs no
+  oracle — and needs a second revocation.
 - run it **only between driver units** — after a terminal unit event in
   `research/decomp/generated/finish-game-port/events.jsonl` and before the next
-  `wasm_unit_started`. The command takes the driver lock and refuses while a driver is alive;
-  do not fight it — wait for the boundary (or pause the manual gate per AGENTS.md).
+  `wasm_unit_started`. The command takes the driver lock and refuses while a driver is alive.
+  Measured 2026-08-26: the driver holds `wasm-units.lock` for its ENTIRE multi-unit run
+  (`run()` acquires once, releases at exit; one run had held it 8+ hours), so in practice the
+  boundary is created with the AGENTS.md manual-gate pause — pause, wait for
+  `supervisor-state.json` `driver_pid: null`, land the fix + revoke, unpause. Do not fight
+  the lock and do not add `--wait` loops around it.
 - it computes every required binding itself (deterministic `transition_id`,
   `previous_record_sha256`, `previous_commit`), backs up the state file, emits the journal
   checkpoint + `verdict_revoked` event, pushes only the `port-progress` journal, and requeues
@@ -85,6 +93,14 @@ Make sure the corrected chunk is present in the checkout the driver reads
 boundary. The requeued `pending` unit is picked up by the driver's normal rotation;
 its build re-extracts the corrected chunk text, and the new `provenance.json` records the
 corrected block sha — the export chain stays honest without any manual artifact writes.
+
+**Expect latency, not hours.** Selection order is `(structural, -product_priority, cost,
+queue index)` and a revoked unit keeps its attempt count, so a low-priority unit re-queues
+behind every higher-priority pending unit (case study: `auto-c0001-005` has priority 2,
+rank ~586 of 1396 — its natural rebuild is days out, not the next cycle). That is by design:
+the correction is durable in the corpus and the journal; the rebuild rides the normal queue.
+If the owner wants the corrected artifact sooner, that is a product-priority decision
+(`research/decomp/data/unit-priority.json` generator), not a reason to hand-build.
 
 ### 5. Re-verify
 
