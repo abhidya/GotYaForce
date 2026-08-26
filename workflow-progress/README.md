@@ -1,6 +1,6 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-26T06:59:59.333006Z - machine-written, do not edit.*
+*Generated 2026-08-26T07:00:24.960699Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 106/1396 settled (3 green, 103 staged) |
 | **Retries outstanding** | 149 |
 | **Untouched** | 1130 |
-| **Last transition** | 2026-08-26T06:59:59.333006Z |
+| **Last transition** | 2026-08-26T07:00:24.960699Z |
 | **Last green** | 2026-08-26T06:26:05.318522Z (`auto-c0054-003`) |
 | **Last product commit** | `0516a3307e195881d82f5fb10ce236905204d59f` |
 | **Active model** | `-` @ - ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T07:00:24.960699Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-26T06:59:22.634473Z | `auto-c0001-005` | deferred | manual-revoke | 1 | verdict revoked and requeued: behaviorally wrong vs console: 200/200 dolphin-trace captures diverge on w348 (r |
 | 2026-08-26T06:59:02.341374Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-26T06:47:47.000880Z | `auto-c0054-004` | gate_failed | assembly | 1 | assembly gate link failed before promotion: -1;       \|                                                  ~~ ~ |
@@ -70,4 +71,3 @@
 | 2026-08-26T02:37:45.900787Z | `auto-c0042-015` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:37:32.971585Z | `auto-c0042-014` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:37:19.863922Z | `auto-c0042-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:37:06.975514Z | `auto-c0041-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |

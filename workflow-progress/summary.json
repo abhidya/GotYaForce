@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-26T06:59:59.475337Z",
-  "run_id": "2026-08-26T06:59:59.210404Z",
+  "generated_at": "2026-08-26T07:00:25.140559Z",
+  "run_id": "2026-08-26T07:00:24.959698Z",
   "total_units": 1396,
   "green": 3,
   "staged": 103,
@@ -11,7 +11,7 @@
   "structural_ineligible": 10,
   "active": 1,
   "total_attempts": 370,
-  "transitions_last_hour": 11,
+  "transitions_last_hour": 8,
   "greens_last_hour": 6,
   "last_green_at": "2026-08-26T06:26:05.318522Z",
   "last_green_unit": "auto-c0054-003",
@@ -19,13 +19,13 @@
   "repeated_failure_classes": [],
   "health": "idle",
   "machine": {
-    "workflow_state": "maintenance",
+    "workflow_state": "starting",
     "driver_status": "stopped",
     "manual_paused": false,
     "block_reason": null,
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": ""
+    "detail": "Manual pause lifted; resuming heavy work."
   }
 }
