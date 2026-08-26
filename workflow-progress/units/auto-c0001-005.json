@@ -2,90 +2,34 @@
   "schema": 1,
   "unit": "auto-c0001-005",
   "unit_id": "auto-c0001-005",
-  "timestamp": "2026-08-21T13:28:19.134620Z",
-  "run_id": "2026-08-21T13:28:18.163733Z",
-  "result": "staged",
-  "stage": "artifact-digest-backfill",
+  "timestamp": "2026-08-26T06:59:59.333006Z",
+  "run_id": "2026-08-26T06:59:59.210404Z",
+  "result": "deferred",
+  "stage": "manual-revoke",
   "attempt": 1,
-  "detail": "legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote publication and full artifact inventory reviewed",
-  "product_commit": "9b453c674421043bcbe24909933e5c79d6f179ac",
-  "product_pushed": true,
-  "product_effect": "durable product commit",
+  "detail": "verdict revoked and requeued: behaviorally wrong vs console: 200/200 dolphin-trace captures diverge on w348 (research/decomp/data/oracle-results/auto-c0001-005.json); root cause: Ghidra mis-lift of the ROM Y-zeroing store (stack aliasing, chunk_0001.c:2790); corpus corrected in commit 871ec98; preflight rebuild replays the corpus exact=196 rounding_explained=4 unexplained=0",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
   "product_commit_failed": false,
-  "oracle_summary": "compile-only (UNVERIFIED)",
+  "oracle_summary": null,
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": "compile_only",
+  "tier": null,
   "extra": {
-    "binding": "legacy-git-tree",
-    "artifact_sha256": "34c12837b67c3d8a2bda5ad36132b9c72dd469506ac3f76f828ab3d409d94d8c",
-    "commit": "9b453c674421043bcbe24909933e5c79d6f179ac",
-    "publication_ref": "refs/heads/port-staging",
-    "publication_sha": "b96586649c8ca84c2d7a220c2aecb0eca017ebcc",
-    "path": "research/decomp/port-units-staging/auto-c0001-005",
-    "tree_entry_count": 4,
-    "tree_sha256": "08ce99d73188dc455fd74d7b8ec5b0e9552dc617e128014bd7f7bc0331ac4265",
-    "file_inventory": [
-      {
-        "path": "gnt4_shim.h",
-        "size": 7929,
-        "sha256": "f58c72b7573c58ae9cd16bb08fb40a0046c86e9306efc8eb6505b18b9afe59aa"
-      },
-      {
-        "path": "oracle.log",
-        "size": 110,
-        "sha256": "878390b55bbc62d3c90e8af34eeb887fb3cff20f72ea43169079ed4612b5c97f"
-      },
-      {
-        "path": "provenance.json",
-        "size": 2474,
-        "sha256": "692bb80a074f678729c9890fd97544fe8829763796ad6fa3062746bdb6f01fa7"
-      },
-      {
-        "path": "unit.c",
-        "size": 17227,
-        "sha256": "f48d10f40bfb671b00f11d5dfe8286fabbf6f47a7444345e3d76865814396749"
-      },
-      {
-        "path": "unit.wasm",
-        "size": 4236,
-        "sha256": "60b8349b2539bfbc39fac69ef4993ec6a1ad5eda1c4d95183c034ed41e94e226"
-      }
-    ],
-    "uncommitted_files": [
-      "oracle.log"
-    ],
-    "uncommitted_directories": [],
-    "ignored_extra_evidence": [
-      {
-        "path": "oracle.log",
-        "repo_path": "research/decomp/port-units-staging/auto-c0001-005/oracle.log",
-        "classification": "allowed-ignored-evidence",
-        "allowlist_entry": "oracle.log",
-        "git_check_ignore": ".gitignore:8:*.log\tresearch/decomp/port-units-staging/auto-c0001-005/oracle.log"
-      }
-    ],
-    "required_committed_files": [
-      "gnt4_shim.h",
-      "provenance.json",
-      "unit.c",
-      "unit.wasm"
-    ],
-    "via": "backfill-artifact-digest",
-    "reason": "one-time canonical digest binding for surviving pre-digest green; remote publication and full artifact inventory reviewed",
-    "canonical_state_sha256": "ffb7e3adae1857bfe4154605ce2519c9ff1ed50da5e4ce68e40e16ef5ee75956",
-    "transition_id": "artifact-digest-backfill-1ee4d34c3ac96eb6d50add24c1471cbbcfd7aae9347390afe5c6c7278c75894f"
+    "revoked_via": "revoke-unit",
+    "previous_status": "green",
+    "previous_tier": "compile_only",
+    "previous_commit": "9b453c674421043bcbe24909933e5c79d6f179ac",
+    "previous_candidate_sha256": "34c12837b67c3d8a2bda5ad36132b9c72dd469506ac3f76f828ab3d409d94d8c",
+    "previous_record_sha256": "74d3552949e2fd9f02e34b202b0d67bb421e6bf676ecc79c092a82447f0fe3ce",
+    "transition_id": "verdict-revoke-640f5024b5f30eb9fad4da5454b57980c544e78206d1122640e3bcadbb5484dd"
   },
   "driver_record": {
-    "status": "green",
+    "status": "pending",
     "attempts": 1,
     "model_requests": 8,
     "error": null,
-    "last_stage": "commit",
-    "oracle_summary": "compile-only (UNVERIFIED)",
-    "commit": "9b453c674421043bcbe24909933e5c79d6f179ac",
-    "pushed": true,
-    "tier": "compile_only",
-    "candidate_sha256": "34c12837b67c3d8a2bda5ad36132b9c72dd469506ac3f76f828ab3d409d94d8c",
+    "last_stage": "manual-revoke",
     "artifact_digest_backfill": {
       "binding": "legacy-git-tree",
       "artifact_sha256": "34c12837b67c3d8a2bda5ad36132b9c72dd469506ac3f76f828ab3d409d94d8c",
@@ -145,6 +89,18 @@
       "reason": "one-time canonical digest binding for surviving pre-digest green; remote publication and full artifact inventory reviewed",
       "canonical_state_sha256": "ffb7e3adae1857bfe4154605ce2519c9ff1ed50da5e4ce68e40e16ef5ee75956",
       "transition_id": "artifact-digest-backfill-1ee4d34c3ac96eb6d50add24c1471cbbcfd7aae9347390afe5c6c7278c75894f"
+    },
+    "revoked": {
+      "via": "revoke-unit",
+      "at": "2026-08-26T06:59:59.241498Z",
+      "reason": "behaviorally wrong vs console: 200/200 dolphin-trace captures diverge on w348 (research/decomp/data/oracle-results/auto-c0001-005.json); root cause: Ghidra mis-lift of the ROM Y-zeroing store (stack aliasing, chunk_0001.c:2790); corpus corrected in commit 871ec98; preflight rebuild replays the corpus exact=196 rounding_explained=4 unexplained=0",
+      "previous_status": "green",
+      "previous_tier": "compile_only",
+      "previous_commit": "9b453c674421043bcbe24909933e5c79d6f179ac",
+      "previous_candidate_sha256": "34c12837b67c3d8a2bda5ad36132b9c72dd469506ac3f76f828ab3d409d94d8c",
+      "previous_oracle_summary": "compile-only (UNVERIFIED)",
+      "previous_record_sha256": "74d3552949e2fd9f02e34b202b0d67bb421e6bf676ecc79c092a82447f0fe3ce",
+      "transition_id": "verdict-revoke-640f5024b5f30eb9fad4da5454b57980c544e78206d1122640e3bcadbb5484dd"
     }
   },
   "history": [
@@ -171,6 +127,14 @@
       "attempt": 1,
       "detail": "legacy artifact digest sanctioned: one-time canonical digest binding for surviving pre-digest green; remote publication and full artifact inventory reviewed",
       "product_commit": "9b453c674421043bcbe24909933e5c79d6f179ac"
+    },
+    {
+      "timestamp": "2026-08-26T06:59:59.333006Z",
+      "result": "deferred",
+      "stage": "manual-revoke",
+      "attempt": 1,
+      "detail": "verdict revoked and requeued: behaviorally wrong vs console: 200/200 dolphin-trace captures diverge on w348 (research/decomp/data/oracle-results/auto-c0001-005.json); root cause: Ghidra mis-lift of the ROM Y-zeroing store (stack aliasing, chunk_0001.c:2790); corpus corrected in commit 871ec98; preflight rebuild replays the corpus exact=196 rounding_explained=4 unexplained=0",
+      "product_commit": null
     }
   ]
 }
