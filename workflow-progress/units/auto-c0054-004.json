@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "unit": "auto-c0054-004",
+  "unit_id": "auto-c0054-004",
+  "timestamp": "2026-08-26T06:47:47.000880Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate link failed before promotion: -1;\n      |                                                  ~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~\nauto-c0054-000/unit.c:371:83: note: place parentheses around the '+' expression to silence this warning\n  371 |           *(int *)(PTR_DAT_80435a30 + 0x164) = 1 << (char)PTR_DAT_80435a30[0x15b] + -1;\n      |                                                                                   ^   \n      |                                                     (                                 )\n2 warnings and 1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0054-000/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_nuabq6y9\\unit.o'' failed (returned 1)",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0054-004.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_82u69v5n\\unit.o'' failed (returned 1)",
+          "unit.c:133:10: error: use of undeclared identifier 'sVar3'",
+          "unit.c:133:3: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:149:9: error: use of undeclared identifier 'sVar3'",
+          "unit.c:150:13: error: use of undeclared identifier 'sVar3'"
+        ],
+        "fingerprint": "9b6e6b69676b4e22b6ecd86a9a330e164e224bbe6afbf5ab70f1dcc9392bf181"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0054-000",
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0054-004"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "link_failure",
+          "units": [
+            "auto-c0054-000",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003",
+            "auto-c0054-004"
+          ],
+          "variants": {},
+          "detail": "arget wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0054-000/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_nuabq6y9\\unit.o'' failed (returned 1)"
+        }
+      ],
+      "detail": "-1;\n      |                                                  ~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~\nauto-c0054-000/unit.c:371:83: note: place parentheses around the '+' expression to silence this warning\n  371 |           *(int *)(PTR_DAT_80435a30 + 0x164) = 1 << (char)PTR_DAT_80435a30[0x15b] + -1;\n      |                                                                                   ^   \n      |                                                     (                                 )\n2 warnings and 1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0054-000/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_nuabq6y9\\unit.o'' failed (returned 1)",
+      "candidate": {
+        "name": "auto-c0054-004",
+        "sha256": "3900334f516c0402c4bea73b235ea9394c83dd0f1f8f9f3c6ee99b0fbe918ad8"
+      },
+      "expected_candidate": {
+        "name": "auto-c0054-004",
+        "sha256": "3900334f516c0402c4bea73b235ea9394c83dd0f1f8f9f3c6ee99b0fbe918ad8"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "165"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "zz_0027aac_",
+        "zz_0027adc_",
+        "zz_00e9b60_",
+        "zz_01bfbf4_",
+        "zz_01c66a0_",
+        "zz_01c677c_",
+        "zz_01cc768_",
+        "zz_01ccac8_",
+        "zz_01ccccc_",
+        "zz_01ccd2c_",
+        "zz_01ccd94_",
+        "zz_01e488c_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "DAT_802b3678",
+      "FUN_801be708",
+      "FUN_801be7a8",
+      "FUN_801be7e4",
+      "FUN_801be838",
+      "FUN_801be88c",
+      "FUN_801be8c8",
+      "FUN_801be99c",
+      "FUN_801be9ec",
+      "PTR_DAT_80435a30",
+      "code",
+      "sprintf",
+      "strlen",
+      "uint",
+      "undefined1",
+      "undefined2",
+      "zz_0027aac_",
+      "zz_0027adc_",
+      "zz_00e9b60_",
+      "zz_01bfbf4_",
+      "zz_01c66a0_",
+      "zz_01c677c_",
+      "zz_01cc768_",
+      "zz_01ccac8_",
+      "zz_01ccccc_",
+      "zz_01ccd2c_",
+      "zz_01ccd94_",
+      "zz_01e488c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 165,
+    "model_requests": 1,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0054-004.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_82u69v5n\\unit.o'' failed (returned 1)",
+          "unit.c:133:10: error: use of undeclared identifier 'sVar3'",
+          "unit.c:133:3: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?",
+          "unit.c:149:9: error: use of undeclared identifier 'sVar3'",
+          "unit.c:150:13: error: use of undeclared identifier 'sVar3'"
+        ],
+        "fingerprint": "9b6e6b69676b4e22b6ecd86a9a330e164e224bbe6afbf5ab70f1dcc9392bf181"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0054-000",
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0054-004"
+      ],
+      "stage": "link",
+      "conflicts": [
+        {
+          "symbol": null,
+          "class": "link_failure",
+          "units": [
+            "auto-c0054-000",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003",
+            "auto-c0054-004"
+          ],
+          "variants": {},
+          "detail": "arget wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0054-000/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_nuabq6y9\\unit.o'' failed (returned 1)"
+        }
+      ],
+      "detail": "-1;\n      |                                                  ~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~\nauto-c0054-000/unit.c:371:83: note: place parentheses around the '+' expression to silence this warning\n  371 |           *(int *)(PTR_DAT_80435a30 + 0x164) = 1 << (char)PTR_DAT_80435a30[0x15b] + -1;\n      |                                                                                   ^   \n      |                                                     (                                 )\n2 warnings and 1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0054-000/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_nuabq6y9\\unit.o'' failed (returned 1)",
+      "candidate": {
+        "name": "auto-c0054-004",
+        "sha256": "3900334f516c0402c4bea73b235ea9394c83dd0f1f8f9f3c6ee99b0fbe918ad8"
+      },
+      "expected_candidate": {
+        "name": "auto-c0054-004",
+        "sha256": "3900334f516c0402c4bea73b235ea9394c83dd0f1f8f9f3c6ee99b0fbe918ad8"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "165"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate link failed before promotion: -1;\n      |                                                  ~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~\nauto-c0054-000/unit.c:371:83: note: place parentheses around the '+' expression to silence this warning\n  371 |           *(int *)(PTR_DAT_80435a30 + 0x164) = 1 << (char)PTR_DAT_80435a30[0x15b] + -1;\n      |                                                                                   ^   \n      |                                                     (                                 )\n2 warnings and 1 error generated.\nemcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c auto-c0054-000/unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_nuabq6y9\\unit.o'' failed (returned 1)",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T06:47:47.000880Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate link failed before promotion: -1;\n      |                                                  ~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~\nauto-c0054-000/unit.c:371:83: note: place parentheses around the '+' expression to silence this warning\n  371 |           *(int *)(PTR_DAT_80435a30 + 0x164) = 1 << (char)PTR_DAT_80435a30[0x15b] + -1;\n      |                                                  ",
+      "product_commit": null
+    }
+  ]
+}
