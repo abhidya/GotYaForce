@@ -1,6 +1,6 @@
 # Port workflow: PAUSED
 
-*Generated 2026-08-26T07:54:21.791283Z - machine-written, do not edit.*
+*Generated 2026-08-26T16:45:59.680375Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 107/1396 settled (3 green, 104 staged) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1131 |
-| **Last transition** | 2026-08-26T07:54:21.791283Z |
+| **Last transition** | 2026-08-26T16:45:59.680375Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `-` @ - ctx |
@@ -23,6 +23,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T16:45:59.680375Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-26T07:54:21.791283Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-26T07:34:39.759624Z | `-` | stopped_at_boundary | machine | 0 |  |
 | 2026-08-26T07:34:28.953704Z | `auto-c0053-013` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -72,4 +73,3 @@
 | 2026-08-26T02:38:54.550432Z | `auto-c0043-002` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:38:41.301267Z | `auto-c0043-001` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:38:28.379468Z | `auto-c0043-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:38:15.321953Z | `auto-c0042-018` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
