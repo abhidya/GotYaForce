@@ -1,30 +1,31 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T02:44:01.567665Z - machine-written, do not edit.*
+*Generated 2026-08-26T03:12:01.813822Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 99/1396 settled (3 green, 96 staged) |
+| **Queue progress** | 100/1396 settled (3 green, 97 staged) |
 | **Retries outstanding** | 145 |
-| **Untouched** | 1144 |
-| **Last transition** | 2026-08-26T02:44:01.567665Z |
-| **Last green** | 2026-08-26T01:15:01.475553Z (`auto-c0025-002`) |
-| **Last product commit** | `514c85759591ae3def65a08e204128438e43e7d6` |
+| **Untouched** | 1143 |
+| **Last transition** | 2026-08-26T03:12:01.813822Z |
+| **Last green** | 2026-08-26T03:12:01.813822Z (`auto-c0053-003`) |
+| **Last product commit** | `3d30c89efcba9001ac67c7f9747396bdf7cdc9de` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
 
 **Repeated recent failure classes**
 
-- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x86
+- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x46
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T03:12:01.813822Z | `auto-c0053-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T02:44:01.567665Z | `auto-c0053-002` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:43:48.704874Z | `auto-c0053-001` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:43:35.615442Z | `auto-c0053-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-26T02:12:23.244109Z | `auto-c0040-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:12:10.335389Z | `auto-c0039-018` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:11:57.392618Z | `auto-c0039-017` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:11:44.475965Z | `auto-c0039-016` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |

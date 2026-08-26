@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "unit": "auto-c0053-003",
+  "unit_id": "auto-c0053-003",
+  "timestamp": "2026-08-26T03:12:01.813822Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "staged",
+  "stage": "commit",
+  "attempt": 1,
+  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+  "product_commit": "3d30c89efcba9001ac67c7f9747396bdf7cdc9de",
+  "product_pushed": true,
+  "product_effect": "durable product commit",
+  "product_commit_failed": false,
+  "oracle_summary": "compile-only (UNVERIFIED)",
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": "compile_only",
+  "extra": {
+    "transition_id": "a42f9976e0a7489ebfcecdc13443ea5b",
+    "transition_timestamp": "2026-08-26T03:12:01.813822Z",
+    "transition_run_id": "2026-08-25T22:08:48.995173Z",
+    "promotion_transaction_id": "bcf03d2a1ab94991ae3219793c63b483",
+    "candidate_sha256": "a8112b39e65a5f60df2e85849c0c14d0001acd22677f12dc5d84c53c3912252e"
+  },
+  "driver_record": {
+    "status": "green",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSVECMag_bl"
+      ],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "FUN_80066838",
+        "FUN_800669d0",
+        "zz_004beb8_",
+        "zz_004cd24_",
+        "zz_006660c_",
+        "zz_0066ed8_",
+        "zz_0066ff0_",
+        "zz_00670dc_",
+        "zz_0067754_",
+        "zz_00677b0_",
+        "zz_006a474_",
+        "zz_006d144_",
+        "zz_00b2190_",
+        "zz_00b22f4_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "FUN_80066838",
+      "FUN_800669d0",
+      "code",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "ushort",
+      "zz_004beb8_",
+      "zz_004cd24_",
+      "zz_006660c_",
+      "zz_0066ed8_",
+      "zz_0066ff0_",
+      "zz_00670dc_",
+      "zz_0067754_",
+      "zz_00677b0_",
+      "zz_006a474_",
+      "zz_006d144_",
+      "zz_00b2190_",
+      "zz_00b22f4_",
+      "zz_01b570c_",
+      "zz_01b575c_",
+      "zz_01b5840_",
+      "zz_01b5980_",
+      "zz_01b5a60_",
+      "zz_01b5c60_",
+      "zz_01b5c94_",
+      "zz_01b5c98_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "model_requests": 1,
+    "error": null,
+    "oracle_summary": "compile-only (UNVERIFIED)",
+    "commit": "3d30c89efcba9001ac67c7f9747396bdf7cdc9de",
+    "pushed": true,
+    "tier": "compile_only",
+    "last_stage": "commit",
+    "promotion_transaction_id": "bcf03d2a1ab94991ae3219793c63b483",
+    "promotion_transition_id": "a42f9976e0a7489ebfcecdc13443ea5b",
+    "candidate_sha256": "a8112b39e65a5f60df2e85849c0c14d0001acd22677f12dc5d84c53c3912252e"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T03:12:01.813822Z",
+      "result": "staged",
+      "stage": "commit",
+      "attempt": 1,
+      "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
+      "product_commit": "3d30c89efcba9001ac67c7f9747396bdf7cdc9de"
+    }
+  ]
+}
