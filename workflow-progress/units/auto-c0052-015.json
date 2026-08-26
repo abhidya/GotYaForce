@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "unit": "auto-c0052-015",
+  "unit_id": "auto-c0052-015",
+  "timestamp": "2026-08-26T02:43:09.685481Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 15,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0052-015.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_94zzm4ji\\unit.o'' failed (returned 1)",
+          "unit.c:131:38: error: use of undeclared identifier 'PTR_zz_01b4208__803814f0'",
+          "unit.c:132:38: error: use of undeclared identifier 'PTR_zz_01b4114__803814f4'",
+          "unit.c:133:38: error: use of undeclared identifier 'PTR_LAB_803814f8'",
+          "unit.c:134:38: error: use of undeclared identifier 'PTR_zz_01b4190__803814fc'",
+          "unit.c:135:38: error: use of undeclared identifier 'PTR_zz_01b41bc__80381500'",
+          "unit.c:136:38: error: use of undeclared identifier 'PTR_zz_01b41c0__80381504'",
+          "unit.c:137:38: error: use of undeclared identifier 'PTR_zz_01b41c4__80381508'",
+          "unit.c:138:38: error: use of undeclared identifier 'PTR_zz_01b41c8__8038150c'",
+          "unit.c:139:38: error: use of undeclared identifier 'PTR_zz_01b41e8__80381510'",
+          "unit.c:142:38: error: use of undeclared identifier 'PTR_zz_01b419c__8038151c'",
+          "unit.c:19:15: error: use of undeclared identifier 'PTR_zz_01b3ae0__80381168'",
+          "unit.c:41:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:49:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:79:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "5efa457ad330ea465d3ce500909145ab0e169951dd05badc197b6d0936ed6f5d"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [
+        "FUN_80047aa4"
+      ],
+      "superseded": [
+        "FUN_800e4294",
+        "zz_0006dc8_",
+        "zz_0007c30_",
+        "zz_00086b8_",
+        "zz_0045204_",
+        "zz_0045238_",
+        "zz_0088e50_",
+        "zz_0089100_",
+        "zz_01a7668_",
+        "zz_01a7688_",
+        "zz_01a77e8_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_802bae60",
+      "DAT_802bc080",
+      "DAT_803811e0",
+      "DAT_80381448",
+      "DAT_80381514",
+      "DAT_80381518",
+      "DAT_803817c0",
+      "DAT_80381b40",
+      "DAT_803c4d94",
+      "FUN_800e4294",
+      "PTR_DAT_80381524",
+      "PTR_DAT_8038152c",
+      "__gnt4_bitcast_f64",
+      "code",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "zz_0006dc8_",
+      "zz_0007c30_",
+      "zz_00086b8_",
+      "zz_0045204_",
+      "zz_0045238_",
+      "zz_0088e50_",
+      "zz_0089100_",
+      "zz_01a7668_",
+      "zz_01a7688_",
+      "zz_01a77e8_",
+      "zz_01b3aa4_",
+      "zz_01b3ae0_",
+      "zz_01b3b6c_",
+      "zz_01b3c18_",
+      "zz_01b3c2c_",
+      "zz_01b3c4c_",
+      "zz_01b3c6c_",
+      "zz_01b3d68_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 15,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0052-015.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_94zzm4ji\\unit.o'' failed (returned 1)",
+          "unit.c:131:38: error: use of undeclared identifier 'PTR_zz_01b4208__803814f0'",
+          "unit.c:132:38: error: use of undeclared identifier 'PTR_zz_01b4114__803814f4'",
+          "unit.c:133:38: error: use of undeclared identifier 'PTR_LAB_803814f8'",
+          "unit.c:134:38: error: use of undeclared identifier 'PTR_zz_01b4190__803814fc'",
+          "unit.c:135:38: error: use of undeclared identifier 'PTR_zz_01b41bc__80381500'",
+          "unit.c:136:38: error: use of undeclared identifier 'PTR_zz_01b41c0__80381504'",
+          "unit.c:137:38: error: use of undeclared identifier 'PTR_zz_01b41c4__80381508'",
+          "unit.c:138:38: error: use of undeclared identifier 'PTR_zz_01b41c8__8038150c'",
+          "unit.c:139:38: error: use of undeclared identifier 'PTR_zz_01b41e8__80381510'",
+          "unit.c:142:38: error: use of undeclared identifier 'PTR_zz_01b419c__8038151c'",
+          "unit.c:19:15: error: use of undeclared identifier 'PTR_zz_01b3ae0__80381168'",
+          "unit.c:41:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:49:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:79:9: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "5efa457ad330ea465d3ce500909145ab0e169951dd05badc197b6d0936ed6f5d"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-39afc243518c8d6a586805af6f624edf76f1fd119676bdf54dc8ca11c378f3dd"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:43:09.685481Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+      "product_commit": null
+    }
+  ]
+}
