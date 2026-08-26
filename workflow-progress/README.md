@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T00:45:28.748581Z - machine-written, do not edit.*
+*Generated 2026-08-26T00:45:41.471107Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 98/1396 settled (3 green, 95 staged) |
-| **Retries outstanding** | 45 |
-| **Untouched** | 1248 |
-| **Last transition** | 2026-08-26T00:45:28.748581Z |
+| **Retries outstanding** | 46 |
+| **Untouched** | 1247 |
+| **Last transition** | 2026-08-26T00:45:41.471107Z |
 | **Last green** | 2026-08-25T23:39:56.962508Z (`auto-c0019-016`) |
 | **Last product commit** | `2ca0bb90ac96cd9958494ef0d96a8b318e7426e2` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -19,12 +19,13 @@
 
 **Repeated recent failure classes**
 
-- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x17
+- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x18
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T00:45:41.471107Z | `auto-c0024-014` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:45:28.748581Z | `auto-c0024-012` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:45:16.015656Z | `auto-c0024-011` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:45:02.648221Z | `auto-c0021-017` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-25T12:01:17.981024Z | `auto-c0053-012` | gate_failed | wasm-link | 4 | not linked: unit.c:81:36: error: use of undeclared identifier 'FUN_801b9adc'; did you mean 'FUN_801b8a1c'? uni |
 | 2026-08-25T10:21:07.897675Z | `auto-c0035-004` | gate_failed | assembly | 5 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-25T09:45:44.359960Z | `auto-c0029-012` | gate_failed | assembly | 4 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected zz_0006fb4_ |
-| 2026-08-25T09:07:27.626328Z | `-` | stopped_at_boundary | machine | 0 |  |
