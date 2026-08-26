@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "unit": "auto-c0039-010",
+  "unit_id": "auto-c0039-010",
+  "timestamp": "2026-08-26T02:10:39.551290Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "structural_ineligible",
+  "stage": "extract",
+  "attempt": 1,
+  "detail": "verbatim .c is self-contradictory: zz_01515b8_ declared void but their results are assigned; no header edit can reconcile this",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "structural_ineligible",
+    "attempts": 1,
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "verbatim .c is self-contradictory: zz_01515b8_ declared void but their results are assigned; no header edit can reconcile this",
+    "last_stage": "extract"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:10:39.551290Z",
+      "result": "structural_ineligible",
+      "stage": "extract",
+      "attempt": 1,
+      "detail": "verbatim .c is self-contradictory: zz_01515b8_ declared void but their results are assigned; no header edit can reconcile this",
+      "product_commit": null
+    }
+  ]
+}
