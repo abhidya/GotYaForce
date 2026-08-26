@@ -2787,7 +2787,7 @@ void FUN_8000fc2c(int param_1,int param_2)
        fVar1;
   *(undefined4 *)(param_1 + 0x308) = *(undefined4 *)(param_2 + 0x28);
   gnt4_PSVECSubtract_bl((float *)(param_1 + 0x318),(float *)(param_2 + 0x20),&fStack_20);
-  local_1c = FLOAT_80436aa8;
+  *((float *)&fStack_20 + 1) = FLOAT_80436aa8; /* CORPUS CORRECTION 2026-08-26: Ghidra mis-lifted the ROM's Y-zeroing store as a dead local (stack aliasing: local_1c IS fStack_20.y). ROM zeroes diff.y before PSVECSquareMag - horizontal distance. Live-verified: at the 0x8000fd2c fcmpo the stack vector reads (x,0,z) while the true y-delta is nonzero; f1 = x*x+z*z exactly. Evidence: research/decomp/data/oracle-results/auto-c0001-005.json + research/decomp/oracle-harness/specs/auto-c0001-005.spec.mjs header. */
   dVar3 = gnt4_PSVECSquareMag_bl(&fStack_20);
   if (*(char *)(param_2 + 0x582) == '\0') {
     fVar1 = *(float *)(param_2 + 0x898);

@@ -56,6 +56,34 @@ with the reasoning; this is just the quick index:
 | `0x80066298` | `zz_0066298_` | `return table[param_1[0]][param_1[1]]` — a real 2D short lookup table (category row, index column), the actual subtle type/category mechanic keyed through `object+1000`; **not** the same field as the `+0x88` slot/team byte | Ported for all `borgs.json` ids in `packages/combat/src/typeDamage.ts` |
 | `0x800300bc` | `zz_00300bc_` | Computes a launch/knockback *direction* (yaw/pitch as BAM16 shorts) from one of 5 vector-source modes selected by `puVar17[7]` (a per-move signed-byte mode field on the same hit-record `zz_003cd5c_` reads), plus a per-move angular trim from `record[0x14]/[0x15]` (the "angle-offset table" is 2 bytes on that same per-move record, not a separate fixed ROM table). Sole call site: `resolve_hitbox_target_effects_and_damage` (`0x8002e2a8`). Full mode table + raw constants in `research/decomp/behavior-notes.md` §p and `research/decomp/data/knockback-direction-800300bc.json` | Ported — `packages/physics/src/knockback.ts`; direction modes 0/1/3 DERIVED, modes 2/4 and the angle-trim table DERIVED-mechanism/TUNED-fallback (see file header); magnitude still TUNED (this function never computes speed, only angle) |
 
+## Manual corpus corrections
+
+The chunks are decompiler OUTPUT, and Ghidra occasionally mis-lifts (stack aliasing, dead-store
+folding). When a staged unit is proven behaviorally wrong against the console (a dolphin-trace
+oracle divergence with a root-caused mis-lift), the fix lands HERE — in the chunk — never in a
+staged `unit.c` (unit.c is sha-pinned regenerated output; editing it is forbidden and would be
+overwritten by the next rebuild anyway).
+
+Convention (first applied 2026-08-26, `chunk_0001.c:2790`, FUN_8000fc2c):
+
+- **Same-line replacement only.** The wasm-unit queue (`wasm-units.json`) and every recorded
+  `provenance.json` pin extractions by **1-based line ranges** into these files. A correction
+  must replace its line(s) 1:1 — never insert or delete lines — or every other unit's pinned
+  ranges in the same chunk silently shift.
+- **Inline provenance comment on the corrected line itself:**
+  `/* CORPUS CORRECTION YYYY-MM-DD: <what Ghidra got wrong, live evidence, pointer to the
+  oracle-results file that proved it> */`
+- **Evidence required.** A correction must cite a divergence artifact
+  (`research/decomp/data/oracle-results/<unit>.json`) and/or a live-capture proof
+  (`research/tools/dolphin-trace/`). No speculative "cleanups" — the corpus stays as close to
+  verbatim decompiler output as the proven ROM behavior allows.
+- **Semantics, not style.** Keep the original identifiers/constants (e.g. keep
+  `FLOAT_80436aa8` rather than a literal `0.0f`) so the correction is the minimal semantic
+  delta against the mis-lift.
+
+Full loop (divergence -> correction -> revoke -> rebuild -> re-verify):
+`research/decomp/corpus-correction-loop.md`.
+
 ## Honest scope note
 
 This corpus covers the whole binary (SDK/OS/math library internals included), so most of its
