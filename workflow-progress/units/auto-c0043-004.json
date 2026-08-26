@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "unit": "auto-c0043-004",
+  "unit_id": "auto-c0043-004",
+  "timestamp": "2026-08-26T02:39:22.268232Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 9,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-004.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_lrm4ek67\\unit.o'' failed (returned 1)",
+          "unit.c:394:15: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:475:23: error: operand of type 'void' where arithmetic or pointer type is required",
+          "unit.c:596:16: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:599:16: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:612:16: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:616:16: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:674:12: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:784:22: error: operand of type 'void' where arithmetic or pointer type is required"
+        ],
+        "fingerprint": "9407e7818dd632c9019eae82494691bd7fd9324c52ff680c2993eda93657d8f1"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSMTXCopy_bl",
+        "gnt4_PSMTXTrans_bl",
+        "gnt4_PSVECMag_bl",
+        "gnt4_PSVECNormalize_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl",
+        "gnt4_PSVECAdd_bl"
+      ],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "FUN_801c53dc",
+        "zz_0006fb4_",
+        "zz_00075cc_",
+        "zz_00076d0_",
+        "zz_0007c30_",
+        "zz_0007d40_",
+        "zz_00086b8_",
+        "zz_0008744_",
+        "zz_00097b4_",
+        "zz_00455fc_",
+        "zz_00456a0_",
+        "zz_00457d4_",
+        "zz_016b860_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_80350058",
+      "DAT_803500f8",
+      "DAT_80350158",
+      "DAT_8035017c",
+      "DAT_8035017e",
+      "DAT_80350180",
+      "DAT_80350184",
+      "DAT_80350188",
+      "DAT_8035162c",
+      "DAT_8035162d",
+      "DAT_803bb384",
+      "DAT_803bfe00",
+      "DAT_8043abbc",
+      "DAT_8043abc0",
+      "DAT_8043abc4",
+      "DAT_8043abc8",
+      "FUN_8016a8b8",
+      "FUN_8016a97c",
+      "FUN_8016af70",
+      "FUN_8016b138",
+      "FUN_8016b5ac",
+      "FUN_8016b720",
+      "FUN_801c53dc",
+      "PTR_DAT_80433944",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "gnt4_HSD_JObjSetMtxDirtySub_bl",
+      "gnt4_PSMTXCopy_bl",
+      "gnt4_PSMTXTrans_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECNormalize_bl",
+      "gnt4_PSVECSubtract_bl",
+      "longlong",
+      "sprintf",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "ushort",
+      "zz_0006fb4_",
+      "zz_00075cc_",
+      "zz_00076d0_",
+      "zz_0007c30_",
+      "zz_0007d40_",
+      "zz_00086b8_",
+      "zz_0008744_",
+      "zz_00097b4_",
+      "zz_00455fc_",
+      "zz_00456a0_",
+      "zz_00457d4_",
+      "zz_016ab40_",
+      "zz_016b260_",
+      "zz_016b860_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 9,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-004.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_lrm4ek67\\unit.o'' failed (returned 1)",
+          "unit.c:394:15: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:475:23: error: operand of type 'void' where arithmetic or pointer type is required",
+          "unit.c:596:16: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:599:16: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:612:16: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:616:16: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:674:12: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:784:22: error: operand of type 'void' where arithmetic or pointer type is required"
+        ],
+        "fingerprint": "9407e7818dd632c9019eae82494691bd7fd9324c52ff680c2993eda93657d8f1"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-97eeef0968c2b8a9355e94985a4522900f6e731c6f1933fda8640e214d663587"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:39:22.268232Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+      "product_commit": null
+    }
+  ]
+}
