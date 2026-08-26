@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T04:01:34.891104Z - machine-written, do not edit.*
+*Generated 2026-08-26T04:33:53.400740Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,19 +8,24 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 101/1396 settled (3 green, 98 staged) |
-| **Retries outstanding** | 146 |
-| **Untouched** | 1141 |
-| **Last transition** | 2026-08-26T04:01:34.891104Z |
+| **Retries outstanding** | 147 |
+| **Untouched** | 1140 |
+| **Last transition** | 2026-08-26T04:33:53.400740Z |
 | **Last green** | 2026-08-26T04:01:34.891104Z (`auto-c0053-005`) |
 | **Last product commit** | `8fca023d8152041a25ebe1cf630a13e41b7b0c42` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
 
+**Repeated recent failure classes**
+
+- `assembly:assembly gate canonicalize failed before promotion: canonica` x2
+
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T04:33:53.400740Z | `auto-c0053-006` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0053-006 declares zz_008 |
 | 2026-08-26T04:01:34.891104Z | `auto-c0053-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T03:37:17.602528Z | `auto-c0053-004` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0011-012 declares FUN_80 |
 | 2026-08-26T03:12:01.813822Z | `auto-c0053-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +75,3 @@
 | 2026-08-26T02:34:57.427750Z | `auto-c0040-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:34:44.476681Z | `auto-c0040-002` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:12:36.196789Z | `auto-c0040-001` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:12:23.244109Z | `auto-c0040-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
