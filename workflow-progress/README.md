@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T02:40:29.088233Z - machine-written, do not edit.*
+*Generated 2026-08-26T02:40:32.732700Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -9,8 +9,8 @@
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 99/1396 settled (3 green, 96 staged) |
 | **Retries outstanding** | 129 |
-| **Untouched** | 1161 |
-| **Last transition** | 2026-08-26T02:40:29.088233Z |
+| **Untouched** | 1160 |
+| **Last transition** | 2026-08-26T02:40:32.732700Z |
 | **Last green** | 2026-08-26T01:15:01.475553Z (`auto-c0025-002`) |
 | **Last product commit** | `514c85759591ae3def65a08e204128438e43e7d6` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -25,6 +25,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T02:40:32.732700Z | `auto-c0043-011` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_016e7fc_ declared void but their results are assigned; no header edit ca |
 | 2026-08-26T02:40:29.088233Z | `auto-c0043-010` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:40:15.722441Z | `auto-c0043-009` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:40:02.687870Z | `auto-c0043-008` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-26T02:08:51.461824Z | `auto-c0039-001` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:08:38.273378Z | `auto-c0038-018` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:08:25.445156Z | `auto-c0035-011` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:08:12.337306Z | `auto-c0035-010` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
