@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T00:44:11.179172Z - machine-written, do not edit.*
+*Generated 2026-08-26T00:44:24.278185Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 98/1396 settled (3 green, 95 staged) |
-| **Retries outstanding** | 39 |
-| **Untouched** | 1254 |
-| **Last transition** | 2026-08-26T00:44:11.179172Z |
+| **Retries outstanding** | 40 |
+| **Untouched** | 1253 |
+| **Last transition** | 2026-08-26T00:44:24.278185Z |
 | **Last green** | 2026-08-25T23:39:56.962508Z (`auto-c0019-016`) |
 | **Last product commit** | `2ca0bb90ac96cd9958494ef0d96a8b318e7426e2` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -19,12 +19,13 @@
 
 **Repeated recent failure classes**
 
-- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x11
+- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x12
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T00:44:24.278185Z | `auto-c0021-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:44:11.179172Z | `auto-c0021-007` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: FUN_800cc270 declared void but their results are assigned; no header edit c |
 | 2026-08-26T00:44:07.765163Z | `auto-c0021-006` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:43:54.850706Z | `auto-c0021-005` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-25T08:29:38.440541Z | `auto-c0011-012` | gate_failed | artifact-install | 5 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-25T08:24:36.165008Z | `auto-c0011-011` | gate_failed | artifact-install | 5 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
 | 2026-08-25T08:19:04.268884Z | `auto-c0011-004` | gate_failed | artifact-install | 5 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
-| 2026-08-25T08:13:01.298723Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
