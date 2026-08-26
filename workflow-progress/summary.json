@@ -1,28 +1,28 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-26T02:12:36.353395Z",
+  "generated_at": "2026-08-26T02:34:44.636491Z",
   "run_id": "2026-08-25T22:08:48.995173Z",
   "total_units": 1396,
   "green": 3,
   "staged": 96,
-  "retryable": 102,
-  "untouched": 1189,
+  "retryable": 103,
+  "untouched": 1188,
   "deferred": 0,
   "structural_ineligible": 6,
   "active": 0,
-  "total_attempts": 310,
+  "total_attempts": 311,
   "transitions_last_hour": 52,
-  "greens_last_hour": 1,
+  "greens_last_hour": 0,
   "last_green_at": "2026-08-26T01:15:01.475553Z",
   "last_green_unit": "auto-c0025-002",
   "last_product_commit": "514c85759591ae3def65a08e204128438e43e7d6",
   "repeated_failure_classes": [
     [
       "compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for",
-      50
+      51
     ]
   ],
-  "health": "healthy_progress",
+  "health": "active_no_green",
   "machine": {
     "workflow_state": "running",
     "driver_status": "running",
