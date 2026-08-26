@@ -1,0 +1,36 @@
+{
+  "unit": "auto-c0001-007",
+  "fn": "zz_001080c_",
+  "addr": "0x8001080c",
+  "prototype": "void zz_001080c_(double param_1, int param_2, undefined4 param_3, undefined1 param_4, undefined2 param_5, undefined1 param_6)",
+  "generated_by": "port_trace_verify plan generator v1",
+  "note": "SKELETON generated from oracle-registry.json prototypes: args/ret only. reads/writes need hand-authoring from the unit's verbatim C (research/tools/dolphin-trace/README.md) before a capture proves memory behaviour; editing them removes none of this plan's fields.",
+  "args": [
+    {
+      "reg": "r3",
+      "name": "param_2"
+    },
+    {
+      "reg": "r4",
+      "name": "param_3"
+    },
+    {
+      "reg": "r5",
+      "name": "param_4"
+    },
+    {
+      "reg": "r6",
+      "name": "param_5"
+    },
+    {
+      "reg": "r7",
+      "name": "param_6"
+    }
+  ],
+  "reads": [],
+  "ret": null,
+  "writes": [],
+  "unsampled_args": [
+    "param_1: double arg is FPR-passed (not sampled by capture tool)"
+  ]
+}

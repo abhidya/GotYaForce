@@ -1,0 +1,9 @@
+{
+  "scenario_schema": 1,
+  "name": "title-attract",
+  "description": "Cold boot to the title screen and attract loop (no savestate; the attract demo cycles on its own after the title timeout). For title/menu-family units (chunk 0013, research/decomp/index/title-main-menu-flow.md). Cold boot needs minutes before gameplay-relevant code fires (README fact 6) -- use generous --max-seconds and expect menu/attract code only.",
+  "save_state": null,
+  "inject": null,
+  "game_state": "cold boot title/attract",
+  "dtm": null
+}

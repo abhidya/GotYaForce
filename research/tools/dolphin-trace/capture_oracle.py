@@ -88,6 +88,42 @@ ASSET_ROOT = _main_checkout_root()
 DEFAULT_PORT = 55555
 MEM1_LO, MEM1_HI = 0x80000000, 0x81800000
 
+SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
+
+
+def load_scenario(name_or_path: str) -> dict:
+    """A scripted game state (scenarios/<name>.json — see scenarios/README.md):
+    savestate for `launch`, default --inject / --game-state for
+    `scout`/`capture`. Explicit CLI flags always override scenario defaults.
+    """
+    path = Path(name_or_path)
+    if path.suffix != ".json":
+        path = SCENARIO_DIR / f"{name_or_path}.json"
+    if not path.is_file():
+        known = sorted(p.stem for p in SCENARIO_DIR.glob("*.json"))
+        sys.exit(f"no scenario at {path} (known: {known})")
+    data = json.loads(path.read_text(encoding="utf-8-sig"))
+    if data.get("scenario_schema") != 1:
+        sys.exit(f"{path}: scenario_schema != 1")
+    if data.get("dtm"):
+        # Owner-recorded DTMs are the design's deterministic capture input
+        # (playable-port-design.md G4/I3). The field is reserved so a DTM
+        # slots straight into this schema; playback wiring into `launch` is
+        # refused (not silently skipped) until verified on the bundled build.
+        sys.exit(f"{path}: names a DTM, but DTM playback is not wired into "
+                 "launch yet — see scenarios/README.md")
+    return data
+
+
+def scenario_save_state(scenario: dict) -> str | None:
+    save = scenario.get("save_state")
+    if not save:
+        return None
+    path = Path(save)
+    if not path.is_absolute():
+        path = ASSET_ROOT / save
+    return str(path)
+
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -258,6 +294,10 @@ def _port_listening(port: int) -> bool:
 
 
 def cmd_launch(a: argparse.Namespace) -> int:
+    if a.scenario:
+        scenario = load_scenario(a.scenario)
+        if not a.save_state:
+            a.save_state = scenario_save_state(scenario)
     dolphin = Path(a.dolphin)
     iso = Path(a.iso)
     user_dir = Path(a.user_dir)
@@ -380,6 +420,10 @@ def unit_functions(unit: str) -> list[tuple[int, str]]:
 
 
 def cmd_scout(a: argparse.Namespace) -> int:
+    if a.scenario:
+        scenario = load_scenario(a.scenario)
+        if not a.inject:
+            a.inject = scenario.get("inject")
     if a.unit:
         fns = unit_functions(a.unit)
     elif a.addrs_file:
@@ -540,6 +584,12 @@ def capture_one_hit(d: StubDriver, plan: dict, entry: int, hit_timeout: float,
 
 
 def cmd_capture(a: argparse.Namespace) -> int:
+    if a.scenario:
+        scenario = load_scenario(a.scenario)
+        if not a.inject:
+            a.inject = scenario.get("inject")
+        if a.game_state == "unspecified":
+            a.game_state = scenario.get("game_state") or "unspecified"
     plan = load_plan(Path(a.plan))
     entry = int(plan["addr"], 16)
     n_target = a.n
@@ -592,6 +642,7 @@ def cmd_capture(a: argparse.Namespace) -> int:
             "plan": str(Path(a.plan).as_posix()),
             "pad_injection": a.inject or None,
             "injected_frames": injector.frame if injector else 0,
+            "scenario": a.scenario or None,
         },
     }
     out = Path(a.out)
@@ -625,6 +676,9 @@ def main() -> int:
                     help="video backend; Null keeps the GPU free for the LLM")
     lp.add_argument("--wait", type=float, default=90.0,
                     help="seconds to wait for the stub socket (0 = don't)")
+    lp.add_argument("--scenario", default=None,
+                    help="scenario name/path (scenarios/README.md); supplies "
+                         "the savestate when --save-state is not given")
     lp.set_defaults(func=cmd_launch)
 
     sp = sub.add_parser("stop", help="stop the instance `launch` started")
@@ -645,6 +699,8 @@ def main() -> int:
     sc.add_argument("--inject", default=None,
                     help='synthesize P1 input each frame: "circle", "hold:sx,sy", '
                          'optionally +buttons e.g. "circle+b" (dolphin-gdb-trace.mjs pattern)')
+    sc.add_argument("--scenario", default=None,
+                    help="scenario name/path; default for --inject")
     sc.add_argument("--port", type=int, default=DEFAULT_PORT)
     sc.set_defaults(func=cmd_scout)
 
@@ -657,6 +713,9 @@ def main() -> int:
                     help="human note: savestate/attract used during capture")
     cp.add_argument("--inject", default=None,
                     help='synthesize P1 input each frame (see scout --inject)')
+    cp.add_argument("--scenario", default=None,
+                    help="scenario name/path; defaults for --inject and "
+                         "--game-state")
     cp.add_argument("--hit-timeout", type=float, default=10.0)
     cp.add_argument("--ret-timeout", type=float, default=8.0)
     cp.add_argument("--max-seconds", type=float, default=1800.0)

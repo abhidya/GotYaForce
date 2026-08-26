@@ -112,3 +112,38 @@ write set byte-for-byte.
 
 Verdicts and evidence artifacts: `research/decomp/data/oracle-results/
 auto-c0001-007.json`, `auto-c0001-005.json`.
+
+## Scenarios (coverage authoring)
+
+`scenarios/<name>.json` scripts a capture game state: the savestate `launch`
+loads and the default `--inject`/`--game-state` for `scout`/`capture`
+(`--scenario <name>` on any of those verbs; explicit flags override). The
+library, the unit-family selection heuristic, and the schema live in
+`scenarios/README.md`. **Owner-recorded DTMs slot in as scenarios when
+provided** (reserved `dtm` field — the design's deterministic capture input,
+playable-port-design.md G4/I3); until one exists, captures ride savestate +
+synthesized input and are fresh samples, not replayable traces.
+
+## Driver integration (verification at scale)
+
+The port driver's maintenance verbs wrap this tool end-to-end — plan
+refresh (typing from `research/decomp/data/oracle-registry.json`) -> capture
+(one Dolphin boot per export; Null backend, GPU-free) -> harness replay ->
+verdict recorded in the unit's canonical state (`oracle` block; FAIL flags
+`oracle_divergent`, never auto-revokes). A FULL-coverage PASS publishes the
+unit's `oracle-commands.json` entry and promotes through the existing
+reverify path; anything less changes no tier. Operator-run (the rig
+supervisor's seam has no stage rotation); both verbs take the driver lock
+and refuse to fight a running driver or another Dolphin:
+
+```sh
+cd research/tools/OGhidra
+.venv/Scripts/python.exe -m src.port_wasm_units verify-unit \
+  --unit auto-c0001-007 --repo-root D:/GotYaForce     # one unit end-to-end
+.venv/Scripts/python.exe -m src.port_wasm_units verify-sweep \
+  --max-units 3 --max-seconds 3600 --repo-root D:/GotYaForce
+```
+
+`verify-unit --no-capture` replays the committed corpora only;
+`--no-promote` records + publishes the sidecar and leaves promotion to the
+driver's own verification lane.
