@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T00:44:37.163395Z - machine-written, do not edit.*
+*Generated 2026-08-26T00:44:49.908068Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 98/1396 settled (3 green, 95 staged) |
-| **Retries outstanding** | 41 |
-| **Untouched** | 1252 |
-| **Last transition** | 2026-08-26T00:44:37.163395Z |
+| **Retries outstanding** | 42 |
+| **Untouched** | 1251 |
+| **Last transition** | 2026-08-26T00:44:49.908068Z |
 | **Last green** | 2026-08-25T23:39:56.962508Z (`auto-c0019-016`) |
 | **Last product commit** | `2ca0bb90ac96cd9958494ef0d96a8b318e7426e2` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -19,12 +19,13 @@
 
 **Repeated recent failure classes**
 
-- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x13
+- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x14
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T00:44:49.908068Z | `auto-c0021-015` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:44:37.163395Z | `auto-c0021-014` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:44:24.278185Z | `auto-c0021-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:44:11.179172Z | `auto-c0021-007` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: FUN_800cc270 declared void but their results are assigned; no header edit c |
@@ -74,4 +75,3 @@
 | 2026-08-25T09:07:23.417032Z | `auto-c0029-002` | gate_failed | assembly | 4 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-25T08:34:44.889846Z | `auto-c0019-000` | gate_failed | assembly | 5 | assembly gate link failed before promotion: _start_em_asm --export-if-defined=__stop_em_asm --export-if-define |
 | 2026-08-25T08:29:38.440541Z | `auto-c0011-012` | gate_failed | artifact-install | 5 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
-| 2026-08-25T08:24:36.165008Z | `auto-c0011-011` | gate_failed | artifact-install | 5 | artifact install refused after assembly pass: legacy revoked artifact proof failed: legacy-commit-invalid |
