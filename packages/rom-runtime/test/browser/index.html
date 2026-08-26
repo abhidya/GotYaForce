@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- Browser self-test page for the composed-module execution runtime
+     (packages/rom-runtime). Served by scripts/smoke-rom-runtime-phase.mjs
+     with COOP/COEP headers (SharedArrayBuffer + shared wasm memory require
+     crossOriginIsolated); app.js / rom-runtime-worker.js are esbuild bundles
+     of src/selftest/selftestMain.ts and src/worker-entry.ts. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>rom-runtime bridge self-test</title>
+    <style>
+      body { font-family: ui-monospace, Consolas, monospace; background: #101418; color: #d8dee6; margin: 1.5rem; }
+      h1[data-status="pass"] { color: #4caf50; }
+      h1[data-status="fail"] { color: #ef5350; }
+      h1[data-status="running"] { color: #ffb300; }
+      table { border-collapse: collapse; margin-top: 1rem; }
+      td, th { border: 1px solid #2c3540; padding: 0.3rem 0.6rem; text-align: left; }
+      tr.pass td:last-child { color: #4caf50; }
+      tr.fail td:last-child { color: #ef5350; font-weight: bold; }
+      .error { color: #ef5350; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div id="results"><h1 data-status="running">rom-runtime bridge self-test: loading…</h1></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

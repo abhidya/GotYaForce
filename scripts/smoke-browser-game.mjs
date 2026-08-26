@@ -681,3 +681,15 @@ try {
   await runCoiPhase();
 }
 // >>> END H1 COI ISOLATION PHASE =============================================
+
+// ============================================================================
+// >>> H2/I2 ROM-RUNTIME BRIDGE PHASE (opt-in; separate, self-contained —
+// keep at end of file). Proves the Atomics RPC bridge, the reentrant
+// dispatch loop, the bridged-call ledger and the declared servicing errors
+// in a real isolated browser; see scripts/smoke-rom-runtime-phase.mjs.
+// Opt in with GF_SMOKE_ROM_RUNTIME=1 (or run its script standalone).
+// ============================================================================
+if (process.env.GF_SMOKE_ROM_RUNTIME === "1") {
+  await (await import("./smoke-rom-runtime-phase.mjs")).runRomRuntimePhase();
+}
+// >>> END ROM-RUNTIME BRIDGE PHASE ===========================================
