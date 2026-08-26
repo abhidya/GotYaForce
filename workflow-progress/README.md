@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T06:18:06.449254Z - machine-written, do not edit.*
+*Generated 2026-08-26T06:22:13.443847Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 105/1396 settled (3 green, 102 staged) |
+| **Queue progress** | 106/1396 settled (3 green, 103 staged) |
 | **Retries outstanding** | 148 |
-| **Untouched** | 1133 |
-| **Last transition** | 2026-08-26T06:18:06.449254Z |
-| **Last green** | 2026-08-26T06:18:06.449254Z (`auto-c0054-001`) |
-| **Last product commit** | `23830d26cb6d9879652945fc7574f9efbb775370` |
+| **Untouched** | 1132 |
+| **Last transition** | 2026-08-26T06:22:13.443847Z |
+| **Last green** | 2026-08-26T06:22:13.443847Z (`auto-c0054-002`) |
+| **Last product commit** | `1be6700fbdecaa54b9ca094211630301c836d7dd` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T06:22:13.443847Z | `auto-c0054-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T06:18:06.449254Z | `auto-c0054-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T06:14:03.174828Z | `auto-c0054-000` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T06:09:41.009476Z | `auto-c0053-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
@@ -70,4 +71,3 @@
 | 2026-08-26T02:36:40.846477Z | `auto-c0041-011` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:36:27.975584Z | `auto-c0041-010` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:36:15.020041Z | `auto-c0041-009` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:36:01.916799Z | `auto-c0041-008` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
