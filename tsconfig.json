@@ -12,6 +12,7 @@
     { "path": "packages/combat" },
     { "path": "packages/missions" },
     { "path": "packages/render" },
+    { "path": "packages/rom-runtime" },
     { "path": "packages/save" },
     { "path": "packages/test-fixtures" }
   ]

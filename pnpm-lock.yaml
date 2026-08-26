@@ -124,6 +124,16 @@ importers:
         specifier: ^0.169.0
         version: 0.169.0
 
+  packages/rom-runtime:
+    dependencies:
+      '@gf/combat':
+        specifier: workspace:*
+        version: link:../combat
+    devDependencies:
+      esbuild:
+        specifier: ^0.21.5
+        version: 0.21.5
+
   packages/save: {}
 
   packages/test-fixtures: {}
