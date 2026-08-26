@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T02:05:50.266872Z - machine-written, do not edit.*
+*Generated 2026-08-26T02:06:03.228157Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 99/1396 settled (3 green, 96 staged) |
-| **Retries outstanding** | 71 |
-| **Untouched** | 1221 |
-| **Last transition** | 2026-08-26T02:05:50.266872Z |
+| **Retries outstanding** | 72 |
+| **Untouched** | 1220 |
+| **Last transition** | 2026-08-26T02:06:03.228157Z |
 | **Last green** | 2026-08-26T01:15:01.475553Z (`auto-c0025-002`) |
 | **Last product commit** | `514c85759591ae3def65a08e204128438e43e7d6` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -19,12 +19,13 @@
 
 **Repeated recent failure classes**
 
-- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x19
+- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x20
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T02:06:03.228157Z | `auto-c0031-017` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:05:50.266872Z | `auto-c0031-016` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:05:37.457871Z | `auto-c0031-014` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:05:24.583385Z | `auto-c0031-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-25T23:39:56.962508Z | `auto-c0019-016` | staged | commit | 3 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-25T22:21:48.246460Z | `auto-c0030-014` | gate_failed | assembly | 4 | assembly gate canonicalize failed before promotion: owner_variant_abi_incompatible: Clang rejected apply_actor |
 | 2026-08-25T22:18:31.246813Z | `auto-c0011-012` | staged | commit | 8 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-25T22:13:43.451290Z | `auto-c0053-013` | gate_failed | artifact-install | 5 | artifact install refused after assembly pass: artifact preimage has no eligible revoked lifecycle |

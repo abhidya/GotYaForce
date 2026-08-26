@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "unit": "auto-c0031-017",
+  "unit_id": "auto-c0031-017",
+  "timestamp": "2026-08-26T02:06:03.228157Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0031-017.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mjl0oecg\\unit.o'' failed (returned 1)",
+          "unit.c:117:9: error: assigning to 'int' from incompatible type 'void'",
+          "unit.c:147:9: error: assigning to 'int' from incompatible type 'void'"
+        ],
+        "fingerprint": "0557eac4c4bc51ac5bdae4a5c347db9d6bca39a122d8c3d3dd77bdeb4d1db161"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSMTXMultVec_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl",
+        "gnt4_PSVECAdd_bl"
+      ],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [
+        "FUN_80117eac"
+      ],
+      "superseded": [
+        "FUN_80067310",
+        "zz_0006dc8_",
+        "zz_004beb8_",
+        "zz_004cd24_",
+        "zz_00679d0_",
+        "zz_006a474_",
+        "zz_006a5a4_",
+        "zz_006a750_",
+        "zz_006d144_",
+        "zz_006ed8c_",
+        "zz_0083d60_",
+        "zz_0088aa0_",
+        "zz_008aff0_",
+        "zz_0182680_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "DAT_8032a672",
+      "FUN_80067310",
+      "FUN_801173e0",
+      "FUN_8011746c",
+      "FUN_801174a8",
+      "FUN_801174f8",
+      "FUN_801175c4",
+      "FUN_801176e8",
+      "FUN_801177d0",
+      "FUN_80117938",
+      "byte",
+      "code",
+      "gnt4_PSMTXMultVec_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "zz_0006dc8_",
+      "zz_004beb8_",
+      "zz_004cd24_",
+      "zz_00679d0_",
+      "zz_006a474_",
+      "zz_006a5a4_",
+      "zz_006a750_",
+      "zz_006d144_",
+      "zz_006ed8c_",
+      "zz_0083d60_",
+      "zz_0088aa0_",
+      "zz_008aff0_",
+      "zz_0182680_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": true,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0031-017.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_mjl0oecg\\unit.o'' failed (returned 1)",
+          "unit.c:117:9: error: assigning to 'int' from incompatible type 'void'",
+          "unit.c:147:9: error: assigning to 'int' from incompatible type 'void'"
+        ],
+        "fingerprint": "0557eac4c4bc51ac5bdae4a5c347db9d6bca39a122d8c3d3dd77bdeb4d1db161"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-740226fe463192acfb42d75e0252356b17e71964173bcbf3f815c20c93900d9f"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:06:03.228157Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+      "product_commit": null
+    }
+  ]
+}
