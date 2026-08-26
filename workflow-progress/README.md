@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T00:43:16.289132Z - machine-written, do not edit.*
+*Generated 2026-08-26T00:43:29.168657Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,9 +8,9 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 98/1396 settled (3 green, 95 staged) |
-| **Retries outstanding** | 35 |
-| **Untouched** | 1259 |
-| **Last transition** | 2026-08-26T00:43:16.289132Z |
+| **Retries outstanding** | 36 |
+| **Untouched** | 1258 |
+| **Last transition** | 2026-08-26T00:43:29.168657Z |
 | **Last green** | 2026-08-25T23:39:56.962508Z (`auto-c0019-016`) |
 | **Last product commit** | `2ca0bb90ac96cd9958494ef0d96a8b318e7426e2` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
@@ -19,12 +19,13 @@
 
 **Repeated recent failure classes**
 
-- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x7
+- `compile-fix:compile-fix LLM: 500 Server Error: Internal Server Error for` x8
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T00:43:29.168657Z | `auto-c0021-003` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:43:16.289132Z | `auto-c0021-002` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:43:03.499204Z | `auto-c0021-001` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T00:42:50.346711Z | `auto-c0021-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
@@ -74,4 +75,3 @@
 | 2026-08-25T06:06:53.512808Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-25T06:06:53.623325Z | `auto-c0053-012` | deferred | assembly | 3 | interrupted before a verdict; requeued |
 | 2026-08-25T04:32:10.554522Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
-| 2026-08-25T04:17:03.809356Z | `auto-c0050-006` | gate_failed | wasm-link | 4 | not linked: wasm-ld: error: C:\Users\manny\AppData\Local\Temp\emscripten_temp_73qpxf7_\unit.o: undefined symbo |
