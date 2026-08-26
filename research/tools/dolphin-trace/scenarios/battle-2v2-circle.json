@@ -1,0 +1,9 @@
+{
+  "scenario_schema": 1,
+  "name": "battle-2v2-circle",
+  "description": "Owner's live 2v2 battle savestate (borg array at 0x803c4e84 populated); P1 stick circles continuously while holding B. The ONLY game state measured to fire per-frame camera/UI/actor helpers on this rig (README empirics 2026-08-25: zz_0010980_ and FUN_8000fc2c at 4/frame). Default scenario for battle/actor/camera/UI unit families.",
+  "save_state": "2v2 gred cotrolled players no cpu.sav",
+  "inject": "circle+b",
+  "game_state": "2v2 sav + circle+b injection",
+  "dtm": null
+}
