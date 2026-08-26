@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "unit": "auto-c0040-013",
+  "unit_id": "auto-c0040-013",
+  "timestamp": "2026-08-26T02:34:57.427750Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0040-013.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1z24itd_\\unit.o'' failed (returned 1)",
+          "unit.c:223:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:273:15: error: use of undeclared identifier 'PTR_LAB_803447d8'"
+        ],
+        "fingerprint": "961a541c569727af5bfe41821f0f983eef92992262549b198f906748a1788032"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSMTXCopy_bl",
+        "gnt4_PSVECMag_bl",
+        "gnt4_PSVECNormalize_bl"
+      ],
+      "superseded": [
+        "gnt4_PSQUATScale_bl",
+        "gnt4_PSVECAdd_bl"
+      ],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "FUN_800452a0",
+        "FUN_80083874",
+        "FUN_80083ad4",
+        "zz_00076d0_",
+        "zz_00097b4_",
+        "zz_00457d4_",
+        "zz_0046588_",
+        "zz_004f1c4_",
+        "zz_0083244_",
+        "zz_00833ec_",
+        "zz_0083610_",
+        "zz_0083714_",
+        "zz_0084170_",
+        "zz_0088e50_",
+        "zz_008aff0_",
+        "zz_00c74ec_",
+        "zz_0137540_",
+        "zz_0185850_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "CONCAT44",
+      "FUN_800452a0",
+      "FUN_80083874",
+      "FUN_80083ad4",
+      "FUN_8015a3d0",
+      "FUN_8015a3f0",
+      "FUN_8015a410",
+      "FUN_8015a5b4",
+      "FUN_8015a718",
+      "FUN_8015a760",
+      "__gnt4_bitcast_f64",
+      "code",
+      "gnt4_PSMTXCopy_bl",
+      "gnt4_PSQUATScale_bl",
+      "gnt4_PSVECAdd_bl",
+      "gnt4_PSVECMag_bl",
+      "gnt4_PSVECNormalize_bl",
+      "gnt4_PSVECSubtract_bl",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "ushort",
+      "zz_00076d0_",
+      "zz_00097b4_",
+      "zz_00457d4_",
+      "zz_0046588_",
+      "zz_004f1c4_",
+      "zz_0083244_",
+      "zz_00833ec_",
+      "zz_0083610_",
+      "zz_0083714_",
+      "zz_0084170_",
+      "zz_0088e50_",
+      "zz_008aff0_",
+      "zz_00c74ec_",
+      "zz_0137540_",
+      "zz_0159f1c_",
+      "zz_015a16c_",
+      "zz_0185850_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 3,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0040-013.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_1z24itd_\\unit.o'' failed (returned 1)",
+          "unit.c:223:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:273:15: error: use of undeclared identifier 'PTR_LAB_803447d8'"
+        ],
+        "fingerprint": "961a541c569727af5bfe41821f0f983eef92992262549b198f906748a1788032"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-25fda61a954ac8021b94a754eb2d5691b7f858c38b0f331fc2a683c1b33a6c00"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:34:57.427750Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+      "product_commit": null
+    }
+  ]
+}
