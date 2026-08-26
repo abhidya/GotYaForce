@@ -30,6 +30,22 @@ export interface RomDamageBootResult {
   core?: RomDamageCore;
 }
 
+/**
+ * Which build of the verified unit to fetch (step 8, playable-port-design v5):
+ *  - "default": damage-core.wasm — the classic exported-memory build.
+ *  - "threads": damage-core.threads.wasm — the threads-target relink
+ *    (-sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1), which imports a shared
+ *    WebAssembly.Memory and therefore needs cross-origin isolation.
+ * Selected by ?romwasm=threads; the default stays the exported-memory module
+ * until switching it is a separately reviewed decision.
+ */
+export type RomWasmVariant = "default" | "threads";
+
+const ROM_WASM_PATH: Record<RomWasmVariant, string> = {
+  default: "/rom/damage-core.wasm",
+  threads: "/rom/damage-core.threads.wasm",
+};
+
 /** Deterministic PRNG so the fidelity gate checks the same cases every boot. */
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -134,10 +150,13 @@ function fidelityGate(core: RomDamageCore, n: number): { ok: boolean; detail: st
  * Fetch, instantiate, fidelity-check, and install the ROM damage core.
  * Never throws: a failure leaves the TS implementation active.
  */
-export async function bootRomDamage(fidelityCases = 256): Promise<RomDamageBootResult> {
+export async function bootRomDamage(
+  fidelityCases = 256,
+  variant: RomWasmVariant = "default",
+): Promise<RomDamageBootResult> {
   try {
     const [wasmRes, arenaRes] = await Promise.all([
-      fetch(publicUrl("/rom/damage-core.wasm")),
+      fetch(publicUrl(ROM_WASM_PATH[variant])),
       fetch(publicUrl("/rom/arena.json")),
     ]);
     if (!wasmRes.ok || !arenaRes.ok) {
@@ -151,10 +170,14 @@ export async function bootRomDamage(fidelityCases = 256): Promise<RomDamageBootR
     }
     setRomDamageImplementation(core);
     // Expose for proof/diagnostics: window.__romDamage.callCounts shows the ROM
-    // path serving real gameplay (smoke scripts and humans both read this).
+    // path serving real gameplay (smoke scripts and humans both read this);
+    // __romDamage.memoryInfo proves which memory model the module linked with.
     (globalThis as Record<string, unknown>).__romDamage = core;
-    console.info(`[rom-wasm] damage-core LIVE — ${gate.detail}`);
-    return { active: true, detail: gate.detail, core };
+    const mem = core.memoryInfo;
+    console.info(
+      `[rom-wasm] damage-core LIVE (${variant}: memory ${mem.imported ? "imported" : "exported"}${mem.shared ? " shared" : ""}) — ${gate.detail}`,
+    );
+    return { active: true, detail: `${variant}: ${gate.detail}`, core };
   } catch (error) {
     console.error("[rom-wasm] boot failed — staying on TS port:", error);
     return { active: false, detail: String(error) };

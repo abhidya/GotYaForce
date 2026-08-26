@@ -21,6 +21,11 @@ try {
   throw new Error("browser smoke requires installed apps/game dependencies; run pnpm install", { cause: error });
 }
 const publicBase = "/GotYaForce/game/";
+// GF_SMOKE_ROMWASM=threads drives the whole playable route on the
+// threads-target relink (?romwasm=threads -> damage-core.threads.wasm with
+// imported shared memory) and asserts the served module's memory model.
+// Unset/default keeps the classic exported-memory build.
+const romWasmVariant = process.env.GF_SMOKE_ROMWASM === "threads" ? "threads" : "default";
 const ownedRoot = path.resolve(root, ".tmp", "game-browser-smoke");
 // Use the real BOX DATA persistence seam, but give the edge regression enough
 // deterministic reserves that combat cannot resolve during its first input polls.
@@ -302,7 +307,10 @@ async function waitForNetworkIdle(pendingRequests, lastActivity, idleMs = 750, t
   throw new Error(`network did not become idle; pending requests: ${JSON.stringify(pending)}`);
 }
 
-async function drivePlayableRoute(cdp, url) {
+// `url` is what the browser navigates to (may carry ?romwasm=threads);
+// `assetBase` is the query-less serving base the media-cancellation gate
+// matches asset URLs against.
+async function drivePlayableRoute(cdp, url, assetBase = url) {
   const errors = [];
   const networkErrors = [];
   const expectedMediaCancellations = [];
@@ -338,7 +346,7 @@ async function drivePlayableRoute(cdp, url) {
     // HTMLAudioElement intentionally aborts its current fetch when screen/BGM
     // routing replaces a sound. Permit only that explicit cancellation shape;
     // resets, timeouts, blocked requests, and every non-media failure stay fatal.
-    if (isExpectedMediaCancellation(event, request, url)) {
+    if (isExpectedMediaCancellation(event, request, assetBase)) {
       expectedMediaCancellations.push(request);
       return;
     }
@@ -538,10 +546,21 @@ async function drivePlayableRoute(cdp, url) {
   const romDamage = await evaluate(cdp, `({
     live: Boolean(window.__romDamage),
     calls: window.__romDamage ? { ...window.__romDamage.callCounts } : null,
-    shims: window.__romDamage ? { ...window.__romDamage.shimCounts } : null
+    shims: window.__romDamage ? { ...window.__romDamage.shimCounts } : null,
+    memory: window.__romDamage?.memoryInfo ?? null
   })`);
   if (!romDamage.live) {
     throw new Error("ROM-wasm damage core is not live — the game fell back to the TS port");
+  }
+  // Step-8 threads proof (GF_SMOKE_ROMWASM=threads): the battle above must have
+  // been served by the threads-target relink — imported SHARED memory, which
+  // only instantiates under the COI headers this server sends.
+  if (romWasmVariant === "threads") {
+    if (!romDamage.memory?.imported || !romDamage.memory?.shared) {
+      throw new Error(
+        `threads smoke did not run on imported shared memory: ${JSON.stringify(romDamage.memory)}`,
+      );
+    }
   }
 
   // Gameplay proofs — deterministic sim battles built INSIDE the production bundle
@@ -639,9 +658,10 @@ try {
   ], { cwd: root, windowsHide: true, stdio: "ignore" });
   const debuggerUrl = await waitForDevtools(profile, browserProcess);
   cdp = await CdpClient.connect(debuggerUrl, WebSocket);
-  const state = await drivePlayableRoute(cdp, started.url);
+  const routeUrl = romWasmVariant === "threads" ? `${started.url}?romwasm=threads` : started.url;
+  const state = await drivePlayableRoute(cdp, routeUrl, started.url);
   process.stdout.write(
-    `Browser smoke PASS: ${path.basename(browser)} production title -> Challenge -> Normal -> 1P -> box -> force -> briefing -> unpaused battle HUD ${JSON.stringify(state)}\n`,
+    `Browser smoke PASS (romwasm=${romWasmVariant}): ${path.basename(browser)} production title -> Challenge -> Normal -> 1P -> box -> force -> briefing -> unpaused battle HUD ${JSON.stringify(state)}\n`,
   );
 } finally {
   if (cdp) {

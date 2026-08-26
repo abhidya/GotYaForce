@@ -401,9 +401,13 @@ const debugOverlay: DebugOverlayHandle = createDebugOverlay(ui);
 
 // ROM-wasm damage core (the 1:1 port, live in the game): fetch + fidelity-gate
 // against the TS reference + install into sourceDamage's override seam.
-// Default ON; `?romwasm=0` forces the TS implementation.
-if (urlParams.get("romwasm") !== "0") {
-  void bootRomDamage().then((r) => {
+// Default ON; `?romwasm=0` forces the TS implementation; `?romwasm=threads`
+// loads the threads-target relink (imported shared memory, step 8) — the
+// exported-memory build stays the default until switching is separately
+// reviewed.
+const romWasmFlag = urlParams.get("romwasm");
+if (romWasmFlag !== "0") {
+  void bootRomDamage(256, romWasmFlag === "threads" ? "threads" : "default").then((r) => {
     if (!r.active) console.warn(`[rom-wasm] TS port active (${r.detail})`);
   });
 }
