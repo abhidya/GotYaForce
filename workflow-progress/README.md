@@ -1,18 +1,18 @@
 # Port workflow: RUNNING
 
-*Generated 2026-08-26T07:03:29.192023Z - machine-written, do not edit.*
+*Generated 2026-08-26T07:34:28.953704Z - machine-written, do not edit.*
 
 | | |
 |---|---|
 | **State** | `RUNNING` (healthy_progress) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 106/1396 settled (3 green, 103 staged) |
-| **Retries outstanding** | 149 |
-| **Untouched** | 1130 |
-| **Last transition** | 2026-08-26T07:03:29.192023Z |
-| **Last green** | 2026-08-26T06:26:05.318522Z (`auto-c0054-003`) |
-| **Last product commit** | `0516a3307e195881d82f5fb10ce236905204d59f` |
+| **Queue progress** | 107/1396 settled (3 green, 104 staged) |
+| **Retries outstanding** | 148 |
+| **Untouched** | 1131 |
+| **Last transition** | 2026-08-26T07:34:28.953704Z |
+| **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
+| **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
@@ -21,6 +21,8 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-26T07:34:28.953704Z | `auto-c0053-013` | staged | commit | 6 | compile-only staging artifact (UNVERIFIED, not integrated) |
+| 2026-08-26T07:03:31.057949Z | `auto-c0054-005` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-08-26T07:03:29.192023Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-26T07:00:24.960699Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-26T06:59:22.634473Z | `auto-c0001-005` | deferred | manual-revoke | 1 | verdict revoked and requeued: behaviorally wrong vs console: 200/200 dolphin-trace captures diverge on w348 (r |
@@ -69,5 +71,3 @@
 | 2026-08-26T02:38:15.321953Z | `auto-c0042-018` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:38:02.282385Z | `auto-c0042-017` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_0167334_ declared void but their results are assigned; no header edit ca |
 | 2026-08-26T02:37:59.061851Z | `auto-c0042-016` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:37:45.900787Z | `auto-c0042-015` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:37:32.971585Z | `auto-c0042-014` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
