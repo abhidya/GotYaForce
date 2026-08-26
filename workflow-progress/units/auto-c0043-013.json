@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "unit": "auto-c0043-013",
+  "unit_id": "auto-c0043-013",
+  "timestamp": "2026-08-26T02:40:59.232878Z",
+  "run_id": "2026-08-25T22:08:48.995173Z",
+  "result": "retryable",
+  "stage": "compile-fix",
+  "attempt": 1,
+  "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-013.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_8cuw5yoc\\unit.o'' failed (returned 1)",
+          "error: unable to open output file 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_8cuw5yoc\\unit.o': 'no space on device'"
+        ],
+        "fingerprint": "903e4923376e34fe66f0a1c32ced23a3ffe8681dfc15370dba1167b4d63dbb07"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "zz_0066168_",
+        "zz_00f0468_",
+        "zz_011c648_",
+        "zz_0174464_",
+        "zz_01748dc_",
+        "zz_01af660_",
+        "zz_01af738_",
+        "zz_01cada4_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_8035162c",
+      "DAT_803516f0",
+      "DAT_803bfde0",
+      "DAT_803bfe00",
+      "DAT_803c73b0",
+      "FUN_8016f084",
+      "FUN_8016f0f8",
+      "FUN_8016f2b8",
+      "FUN_8016f2f8",
+      "FUN_8016f80c",
+      "FUN_8016fc5c",
+      "PTR_DAT_80433930",
+      "PTR_DAT_80433934",
+      "PTR_DAT_80433944",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "code",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "undefined8",
+      "ushort",
+      "zz_0066168_",
+      "zz_00f0468_",
+      "zz_011c648_",
+      "zz_016f73c_",
+      "zz_016fae8_",
+      "zz_0174464_",
+      "zz_01748dc_",
+      "zz_01af660_",
+      "zz_01af738_",
+      "zz_01cada4_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": true,
+    "registry_deviations": [],
+    "registry_version_used": 155,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 2,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0043-013.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_8cuw5yoc\\unit.o'' failed (returned 1)",
+          "error: unable to open output file 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_8cuw5yoc\\unit.o': 'no space on device'"
+        ],
+        "fingerprint": "903e4923376e34fe66f0a1c32ced23a3ffe8681dfc15370dba1167b4d63dbb07"
+      }
+    ],
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "prompt_version": "3",
+      "registry_version": "155"
+    },
+    "failure_domain": "source-compiler",
+    "diagnosis_eligible": true,
+    "error": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+    "last_stage": "compile-fix",
+    "source_failure_id": "source-failure-51b960528c0629d47d778b456951596ad7627c302aadf767db6e1b8cfa9d578c"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-26T02:40:59.232878Z",
+      "result": "retryable",
+      "stage": "compile-fix",
+      "attempt": 1,
+      "detail": "compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions | body: Internal Server Error",
+      "product_commit": null
+    }
+  ]
+}
