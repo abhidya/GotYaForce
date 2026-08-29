@@ -21,7 +21,8 @@ const m = metricsData
         named functions, and repro steps.
       </p>
       <div class="gf-hero-cta">
-        <a class="gf-btn gf-btn-primary" href="/GotYaForce/progress/">View progress dashboard</a>
+        <a class="gf-btn gf-btn-primary" href="/GotYaForce/game/">Play the browser port</a>
+        <a class="gf-btn" href="/GotYaForce/progress/">View progress dashboard</a>
         <a class="gf-btn" href="/GotYaForce/borgs/">Browse Borg Atlas</a>
         <a class="gf-btn" href="/GotYaForce/evidence/">See evidence ledger</a>
       </div>

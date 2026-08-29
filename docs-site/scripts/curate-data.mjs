@@ -84,7 +84,13 @@ for (const line of mapTsv.slice(1)) {
 const unsortedFunctions = bucketFnCounts['game-unsorted'] ?? 0
 const totalFunctions = mapTsv.length - 1
 
-// real .c file counts under organized/ (dir walk, no venv/cache)
+// real .c file counts under organized/ (dir walk, no venv/cache).
+// NOTE: only `organized/_map.tsv` is tracked by git — the per-function .c files
+// are gitignored and regenerated with `node scripts/reorg-decomp.mjs`. So this
+// walk returns 0 on CI and on any clean clone. The FUNCTION-level counts below
+// come from the tracked map and are therefore the metric the dashboard shows;
+// the file counts stay as an extra, present only in a checkout that has run the
+// reorg script.
 function countFilesRecursive(dir, ext) {
   if (!existsSync(dir)) return 0
   let n = 0
@@ -97,6 +103,10 @@ function countFilesRecursive(dir, ext) {
 const organizedRoot = join(RESEARCH, 'decomp', 'organized')
 const totalOrganizedFiles = countFilesRecursive(organizedRoot, '.c')
 const unsortedFiles = countFilesRecursive(join(organizedRoot, 'game', 'unsorted'), '.c')
+const bucketedFunctions = Math.max(0, totalFunctions - unsortedFunctions)
+const organizedPct = totalFunctions
+  ? Math.round((bucketedFunctions / totalFunctions) * 100)
+  : 0
 
 // git short sha (best-effort, falls back if no git or shallow clone)
 let gitSha = 'unknown'
@@ -118,7 +128,8 @@ writeJson('metrics.json', {
   totalFunctions,
   unsortedFiles,
   totalOrganizedFiles,
-  organizedPct: totalOrganizedFiles ? Math.round(((totalOrganizedFiles - unsortedFiles) / totalOrganizedFiles) * 100) : 0,
+  bucketedFunctions,
+  organizedPct,
   lastVerified: new Date().toISOString().slice(0, 10),
   gitSha,
   generatedAt: new Date().toISOString()

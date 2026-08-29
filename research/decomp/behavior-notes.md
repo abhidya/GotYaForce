@@ -1,5 +1,13 @@
 # Gotcha Force (GG4E / NTSC-U) — Behavior Decompilation Notes
 
+> [!NOTE]
+> **This is a lab notebook, not a status document.** Entries are dated and are kept as
+> written, including the ones that were later superseded. In particular, passages below
+> that call the 3D model/animation format "unsolved" predate 2026-06-30: `_mdl.arc` is
+> HSD DAT, the HSD lead recorded in section (a) proved correct, and the export pipeline
+> works. See `research/format-specs/arc-hsd-format.md` for the settled format spec and
+> the root `README.md` for current project status.
+
 Source: `user-data/GG4E/disc/sys/boot.dol` (3,888,928 bytes, GC DOL, big-endian PPC Gekko).
 Symbol map: `research/symbols/GG4E-CSM-20220412.map` (5,897 symbols).
 Tooling used: **Capstone 5.0.1** (`CS_ARCH_PPC`, `CS_MODE_32 | CS_MODE_BIG_ENDIAN`) for the bulk

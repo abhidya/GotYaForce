@@ -48,6 +48,13 @@ command you ran, its result, and the product behavior it proves.
 - **Playable:** the browser acceptance route reaches and operates the intended
   game state; compilation alone never establishes this.
 
+For wasm port units the recorded tiers are `compile_only`, `oracle_green`, and
+`boundary_green`. **`compile_only` means the unit compiled and linked and nothing
+else** — it is inventory, not progress, and at least one `compile_only` unit is
+proven behaviorally wrong. Never describe a `compile_only` unit as ported, done,
+or working. The tier vocabulary is defined in the root `README.md` and in the
+[atlas porting guide](docs-site/contributing/porting.md).
+
 Unknown behavior stays `PARTIAL`, `TUNED`, or `BLOCKED`. Do not replace missing
 evidence with plausible constants and label it exact.
 

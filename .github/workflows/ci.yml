@@ -38,3 +38,11 @@ jobs:
         env:
           GF_ATLAS_SKIP_MODELS: '1'
         run: pnpm verify:docs
+
+      # `curate-data.mjs` copies research/decomp/ghidra-export/chunk_*.c into the
+      # committed docs-site/public/chunks/. Nothing enforced that copy, so a corpus
+      # correction could (and on 2026-08-26 did) land in research/ while the published
+      # atlas kept serving the pre-correction text. The build above regenerates the
+      # copy; this fails the run if it differs from what is committed.
+      - name: Published decomp chunks must match research/
+        run: git diff --exit-code -- docs-site/public/chunks

@@ -9,11 +9,13 @@
   </p>
 
   <p>
+    <a href="https://abhidya.github.io/GotYaForce/game/">Play in browser</a>
+    ·
     <a href="https://abhidya.github.io/GotYaForce/">Research Atlas</a>
     ·
-    <a href="research/decomp/PORT-1TO1-STATUS.md">Port Status</a>
+    <a href="docs/playable-port-design.md">Port design contract</a>
     ·
-    <a href="research/PHASE0_RESEARCH.md">Technical Research</a>
+    <a href="research/decomp/PORT-1TO1-STATUS.md">Subsystem tracker</a>
   </p>
 
   <p>
@@ -26,33 +28,244 @@
 
 > [!IMPORTANT]
 > GotYaForce is a playable research port, not a finished replacement for the original game.
-> Challenge mode runs from menus through results, but many Borg-specific actions still use
-> partial or generic behavior while their ROM state machines are being transcribed.
+> Challenge mode runs from menus through results. Some Borg actions still use partial
+> behavior while their ROM state machines are transcribed, and the automated
+> recompile-the-ROM pipeline described below is **research-stage**: almost everything it has
+> produced is unverified.
 
-## What is working
+---
 
-- Start-to-finish 1-player Challenge flow with force building, battles, results, and Gotcha Box drops
-- Real models for all 208 Borgs; 185 currently have animated bakes
-- Visual geometry and collision for all 40 exported stage variants
+## Two tracks, and why the distinction matters
+
+The repository runs two efforts at once. Conflating them is the single easiest way to
+misread this project's status.
+
+| | **Track 1 — TypeScript recreation** | **Track 2 — wasm-unit port pipeline** |
+| --- | --- | --- |
+| What it is | Hand-written TS/three.js game, each system transcribed from ROM evidence | Decompiled C recompiled to WebAssembly units, verified against the real console |
+| Status | **Playable.** This is what ships to GitHub Pages | **Research-stage.** 1,396 units queued, 112 staged, 3 verified |
+| Governing doc | [`research/decomp/PORT-1TO1-STATUS.md`](research/decomp/PORT-1TO1-STATUS.md) | [`docs/playable-port-design.md`](docs/playable-port-design.md) |
+| In production today | The whole game | One unit: the ROM damage core |
+
+Track 2's long-term goal is to replace Track 1 subsystem by subsystem with byte-exact
+recompiled ROM code. It has done that exactly once so far.
+
+---
+
+## Track 1 — what is working
+
+- Start-to-finish 1-player Challenge flow: force building, battles, results, Gotcha Box drops
+- Browser model exports for **209 of the 219 Borg IDs on disc**; **185** have animation
+  mappings; 208 have full metadata records
+- Visual geometry and collision for **all 40 exported stage variants**
 - ROM-derived damage, ammo, knockback, targeting, scoring, drop, and action-stream systems
 - Real UI, music, voice, combat-audio, lighting, and effect assets where attribution is verified
-- A searchable research atlas covering functions, data tables, Borgs, stages, mechanics, and evidence
+- The **ROM wasm damage core is live in production** — the game's damage numbers come from
+  recompiled ROM code, not from the TS reimplementation (see Track 2 below)
+- Cross-origin isolation in dev and production, so shared-memory wasm builds can run
+- A searchable research atlas over functions, data tables, Borgs, stages, mechanics, evidence
 
-### Port snapshot
+### Coverage snapshot
 
-| Area | Current state |
+Regenerate every number here with the command in its row — none of them are hand-maintained.
+
+| Area | Current state | Regenerate with |
+| --- | --- | --- |
+| Family action state machines | 232 ported, 93 partial, 0 missing across 325 slots | `pnpm audit:family-state-machines` |
+| Family coverage audit | 119 constructor families, 208 roster entries, 0 structural errors | `pnpm audit:family-state-machines` |
+| TUNED constant debt | 257 awaiting evidence, 238 DERIVED, across 38 files | `node scripts/report-tuned-constants.mjs` |
+| Borg model/animation coverage | 209 static exports, 185 animated, of 219 disc IDs | `node scripts/inventory-borg-assets.mjs` † |
+| Stages | 40 / 40 visual and collision exports | `pnpm manifest:stages` † |
+| Challenge mode | Playable end to end | `pnpm selfcheck:1p`, `pnpm smoke:browser` |
+
+† These read a user-supplied disc dump under `user-data/`, which is gitignored and absent
+from a clean clone. Their committed outputs cannot be refreshed without one.
+
+These describe evidence coverage, not one overall completion percentage. A `TUNED` marker is
+a value still waiting on ROM or trace evidence; `DERIVED` means the evidence is cited.
+
+### Recently fixed (2026-08)
+
+- **Animation freeze** — finished one-shot clips accumulated in the mixer blend and stalled
+  actors mid-battle. The smoke run now asserts battle actors are actually playing clips.
+- **Open-window hit sentinel** — a sentinel comparison discarded live hit windows;
+  **2,190 hit records restored**.
+- **Cross-origin isolation** — COOP/COEP in dev and preview via Vite headers, in production
+  via the vendored `coi-serviceworker.js`, with a smoke phase asserting
+  `crossOriginIsolated === true` in both serving modes.
+
+---
+
+## Track 2 — the wasm-unit port pipeline
+
+The pipeline takes decompiled PowerPC-derived C out of the Ghidra corpus, slices it into
+compilable units, drives a local LLM to make each unit compile against a shim seed, links it
+to WebAssembly with emscripten, and then tries to prove the result behaves like the real
+console. The design contract — reviewed adversarially through four FAIL rounds to a **v5
+PASS verdict** — is [`docs/playable-port-design.md`](docs/playable-port-design.md).
+
+### Verification tiers — read these literally
+
+| Tier | What was proven | What was **not** proven |
+| --- | --- | --- |
+| `compile_only` | The unit compiles and links to wasm | **Nothing about behavior.** This is inventory, not progress |
+| `oracle_green` | Its full corpus replays byte-exact against an independent oracle, per call | Coverage beyond the replayed corpus |
+| `boundary_green` | For a nonterminating spine function, every captured callee boundary and spine-owned write is byte-exact up to the cut | The same as `oracle_green` — it never upgrades into one. **Not yet reached by any real unit** |
+
+`boundary_green` currently exists as design, a harness (`run-spine.mjs`), and synthetic test
+fixtures only. No real spine capture exists, no `*.boundary.json` artifact has been written,
+and the driver has no code path to record the tier in unit state.
+
+### Current state (2026-08-29)
+
+Repository-verifiable, from committed artifacts:
+
+| | Count | Where |
+| --- | --- | --- |
+| Staged unit artifacts, **all tier `compile_only` (UNVERIFIED)** | **112** | `research/decomp/port-units-staging/*/provenance.json` |
+| Promoted units | **3** — `damage-core`, `collision-core`, `knockback-core` | `research/decomp/port-units/` |
+| Units in production | **1** — `damage-core` (+ its threads relink) | `apps/game/public/rom/` |
+| Oracle verdicts on record | 1 `pass`, 2 `partial`, 2 `fail` | `research/decomp/data/oracle-results/` |
+| Real Dolphin-trace corpora | **3** | `research/decomp/oracle-harness/corpora/` |
+
+Queue-level, from the driver's own state file — **machine-local and untracked**, so these
+numbers are not reproducible from a clone (`research/decomp/generated/finish-game-port/`
+is gitignored except for the knowledge registry):
+
+| | Count |
 | --- | --- |
-| Challenge mode | Playable end to end; approximately 85% ROM-derived |
-| Borg models | 208 / 208 static, 185 / 208 animated |
-| Stages | 40 / 40 visual and collision exports |
-| HUD | Approximately 90%; Power Burst meter remains trace-blocked |
-| Family action state machines | 20 ported, 234 partial, 71 missing across 325 action slots |
-| Family coverage audit | 119 constructor families, 208 roster entries, 0 structural errors |
+| Units in the queue | **1,396** |
+| `pending` | 1,131 |
+| `red_retryable` | 147 |
+| `green` | 107 — of which 104 `compile_only`, 1 `oracle_green`, 2 untiered legacy |
+| `structural_ineligible` (settled, permanent) | 10 |
+| Driver's own **verified fraction** | **0.93 %** |
 
-These numbers describe evidence coverage, not a single overall completion percentage. The
-canonical tracker is [`research/decomp/PORT-1TO1-STATUS.md`](research/decomp/PORT-1TO1-STATUS.md);
-the generated family audit lives in
-[`research/decomp/family-state-machine-coverage.md`](research/decomp/family-state-machine-coverage.md).
+Two units replayed **behaviorally divergent** against a reference:
+
+- **`auto-c0035-002`** — `FAIL`, **6,250 / 20,000 cases byte-exact**, 2 of 8 exports covered.
+  It compiles, it links, and it passed an N=5 assembly gate. Its behavior is wrong. By
+  design a FAIL flags `oracle_divergent` and changes no tier, so it is *still recorded as a
+  green `compile_only` unit* — which is precisely why `compile_only` must never be read as
+  progress.
+- **`auto-c0001-005`** — `FAIL`, 0 / 200. The more useful one: root-causing it proved
+  *Ghidra* was wrong, not the port. See the correction loop below.
+
+And one that passed everything it was asked and still is not verified:
+
+- **`auto-c0001-007`** — 120 / 120 captured cases byte-exact, verdict **`partial`**, because
+  the spec covers 1 of its 8 exports. Full-coverage or it does not count.
+
+`damage-core` is the one end-to-end success: 4 functions, **26,232 / 26,232 replayed cases
+byte-exact**, relinked for shared memory and re-verified with a byte-identical verdict, and
+serving the live game.
+
+### The workflow, with real commands
+
+The driver lives in **OGhidra**, an external tool checkout at `research/tools/OGhidra` that
+is **not vendored into this repository** (`tools/` and friends are gitignored; you clone it
+separately). All driver verbs run from inside that checkout:
+
+```powershell
+cd research/tools/OGhidra
+
+# The port run itself. Requires OGHIDRA_PORT_MODE=wasm_units in the env or .env;
+# this is the argv the rig supervisor launches.
+.venv\Scripts\python.exe main.py finish-port --drive --until-blocked
+
+# Trace-verify one staged compile-only unit against the real game:
+# refresh capture plans, capture per-export cases in a headless Null-backend
+# Dolphin, replay through run-unit.mjs, record the verdict in canonical state.
+.venv\Scripts\python.exe -m src.port_wasm_units verify-unit --unit <name> --cases 120
+
+# Budgeted batch of the same, product-priority first. Operator-run, not
+# supervisor-rotated. Refuses to start while a driver is alive.
+.venv\Scripts\python.exe -m src.port_wasm_units verify-sweep --max-units 3 --max-seconds 3600
+
+# Promote a staged green by re-running its recorded oracle sidecar.
+.venv\Scripts\python.exe -m src.port_wasm_units reverify-unit --unit <name>
+
+# Composability check over the last N green/staged units (--all sweeps everything).
+.venv\Scripts\python.exe -m src.port_wasm_units assembly-gate --n 5
+
+# Settle a provable contradiction PERMANENTLY, through the journal.
+# --status takes only `green` or `structural_ineligible`.
+# Hand-editing wasm-units-state.json is forbidden — see AGENTS.md.
+.venv\Scripts\python.exe -m src.port_wasm_units settle-unit --unit <name> \
+    --status structural_ineligible --reason "<file:line of the contradiction>"
+```
+
+Other verbs: `revoke-unit`, `invalidate-diagnosis`, `backfill-artifact-digest`,
+`d5-migrate`, `f4-recheck`. Every one of them takes the driver lock and emits a journal
+event; none of them edit artifacts by hand.
+
+Repository-side tooling. `research/tools/dolphin-trace/` **is** tracked here (the rest of
+`research/tools/` is gitignored); none of these have npm wrappers:
+
+```bash
+# Capture per-call oracle fixtures from the real game in Dolphin (GDB-RSP stub).
+python research/tools/dolphin-trace/capture_oracle.py --help   # launch|stop|probe|scout|capture
+
+# Replay a unit's corpus (oracle_green standard).
+node research/decomp/oracle-harness/run-unit.mjs --unit <name>
+
+# Replay a nonterminating spine at its callee boundary (boundary_green standard).
+node research/decomp/oracle-harness/run-spine.mjs --capture <capture.jsonl> [--wasm <path>]
+
+# Composition ladder rungs (scratch lane; never the live pipeline).
+python scripts/composition_ladder.py init   --scratch <dir>
+python scripts/composition_ladder.py select --scratch <dir>
+python scripts/composition_ladder.py rung   --scratch <dir> --tag rung0 --units <csv>
+python scripts/composition_ladder.py ledger --scratch <dir> --rungs "rung0;rung1" \
+    --out research/decomp/data/composition-ladder.json
+```
+
+### Where the pipeline is blocked
+
+- **The composition ladder is stopped at rung 1.**
+  ([`docs/composition-ladder.md`](docs/composition-ladder.md),
+  [`research/decomp/data/composition-ladder.json`](research/decomp/data/composition-ladder.json))
+  Rung 0 (N=5) linked clean — 40-thunk dispatch table, zero contested symbols. Rung 1 (N=10)
+  links only after substituting one unit, and that substitution costs a contested symbol:
+  ratio 1/38 against rung 0's 0/40. The E1 budget rule says a rising contested-symbol rate is
+  a hard stop, so the ladder halts pending ABI unification. It is stopped **by design**, not
+  by accident — but rung 1 of a 5 → 10 → 20 → 40 → … → 1,396 sequence is very early, and the
+  whole run happened in a scratch lane, never the live pipeline.
+- **Verification does not scale yet.** 1,396 units queued, 3 verified. Trace capture needs
+  the real game running in Dolphin with a user-supplied disc, which is the throughput
+  ceiling. A 90-second scout across 201 callee-free staged functions in a live 2v2 fight
+  found exactly **two** that fire at all.
+- **No DTM movie exists.** The design's coverage prerequisite (G4/I3) is **unmet**: every
+  capture so far rides a savestate plus synthesized input, so they are fresh samples, not
+  replayable traces.
+- **`@gf/rom-runtime` is a scaffold.** The composed-module execution runtime — worker,
+  Atomics bridge, reentrant dispatch, adapters, ledger — exists and self-tests, but
+  **nothing in `apps/game` imports it yet**. It is not on the production path.
+- **The G2/H3 dispatch companion is opt-in**, behind
+  `OGHIDRA_PORT_DISPATCH_COMPANION=1` (OGhidra `src/port_dispatch_companion.py`).
+
+### The corpus-correction loop
+
+When a unit is proven divergent, the fault may be in the *decompilation*, not the port.
+[`research/decomp/corpus-correction-loop.md`](research/decomp/corpus-correction-loop.md)
+is the sanctioned path, first executed 2026-08-26 on `auto-c0001-005` / `FUN_8000fc2c`:
+Ghidra had mis-lifted the ROM's Y-zeroing store as a dead local (stack aliasing), so the
+camera-distance solver used a 3D distance where the ROM uses a horizontal one.
+
+It works because **`unit.c` is regenerated output and the chunk is the source of truth** —
+fix `research/decomp/ghidra-export/chunk_NNNN.c`, revoke the verdict, and the driver's normal
+loop rebuilds the unit from corrected source. No driver changes, no hand-edited artifacts,
+no hand-edited state.
+
+### Threads relink
+
+A verified unit relinked for shared memory has **different bytes than what was verified**, so
+[`docs/threads-relink-reverify.md`](docs/threads-relink-reverify.md) suspends its
+`oracle_green` / `boundary_green` status until the full corpus replays byte-equal against the
+relinked module. `damage-core` passed this on 2026-08-26 (26,232/26,232, verdict-delta none).
+A compile-only threads build is inventory, not progress.
+
+---
 
 ## Quick start
 
@@ -70,7 +283,8 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open the local URL printed by Vite, normally `http://localhost:5173`.
+Open the local URL printed by Vite, normally `http://localhost:5173`. No disc image is
+needed for the normal development loop.
 
 ### Controls
 
@@ -85,6 +299,14 @@ Open the local URL printed by Vite, normally `http://localhost:5173`.
 | Next / previous target | `R` or `Tab` / `Q` | Right / left trigger |
 | Ally lock | `Z` | Left shoulder |
 
+### Useful query parameters
+
+| Parameter | Effect |
+| --- | --- |
+| `?romwasm=threads` | Load the shared-memory relink of the ROM damage core instead of the default exported-memory build |
+
+---
+
 ## How the port is built
 
 GotYaForce is not a clean-room reinterpretation of a wiki description. Mechanics are promoted
@@ -92,168 +314,149 @@ to ROM-derived only when they can be tied back to decompiled PowerPC code, DOL b
 tables, extracted assets, or controlled Dolphin traces.
 
 ```text
-boot.dol + disc assets + traces
+boot.dol + disc assets + Dolphin traces
               │
-              ▼
-   decompilation and evidence maps
-              │
-              ▼
-  deterministic extract/convert scripts
-              │
-              ▼
- TypeScript runtime + focused self-checks
+              ├──────────────────────────────┐
+              ▼                              ▼
+   decompilation and evidence maps    wasm-unit pipeline (Track 2)
+              │                              │
+              ▼                              ▼
+  deterministic extract/convert       compile → link → trace-verify
+              │                              │
+              ▼                              ▼
+ TypeScript runtime + self-checks  ←── oracle_green units replace TS seams
               │
               ▼
         browser recreation
 ```
 
-The actor runtime mirrors the original cue dispatch, action tables, phase handlers, stream VM,
-and physics integration. Families can land independently; Borgs without a completed family port
-continue through the generic combat path instead of being falsely labeled exact. See the
+The actor runtime mirrors the original cue dispatch, action tables, phase handlers, stream
+VM, and physics integration. Families land independently; Borgs without a completed family
+port continue through the generic combat path instead of being falsely labeled exact. See the
 [`ROM porting guide`](packages/combat/src/rom/PORTING.md) for the implementation model.
 
-### Local-LLM port artifacts
-
-The research checkout includes an evidence-first OGhidra exporter and a deterministic
-GotYaForce importer. OGhidra collects the selected function, disassembly, direct callees,
-cross-references, and raw constants; Pydantic validates the model output before it can reach
-TypeScript.
-
-```powershell
-# Full production vertical slice using the retained local-Qwen artifact
-pnpm port:finish:poc
-
-# Same flow with fresh live-Ghidra collection and local-Qwen inference
-pnpm port:finish:poc:fresh
-
-# Explicitly rescore and resume retained Qwen responses
-pnpm port:finish:poc:resume
-```
-
-The same controller is available inside OGhidra:
-
-```powershell
-cd research/tools/OGhidra
-.\.venv\Scripts\python.exe main.py --ui
-```
-
-Choose **Analysis → Finish Game Port**. The menu action starts or attaches to a durable run and
-opens its pipeline, port queue, and live log. The dashboard provides safe-boundary pause/resume,
-stop-with-rollback, and production browser-preview controls. Closing the dashboard or OGhidra
-does not terminate the detached port process.
-
-The dashboard also reports elapsed time, a stage-aware ETA learned from completed runs of the
-same mode, stages/minute, local-model API and structured-output calls, exact Ghidra collection
-calls, and Qwen tokens/second. When an OpenAI-compatible endpoint omits token usage, OGhidra
-calculates a deterministic token estimate and labels it **estimated**. Until a comparable run
-exists, ETA is shown as **Calibrating** instead of extrapolating across unlike stages.
-
-If a saved analysis session is active in the current OGhidra window, the controller passes its
-`session.json` to the exporter as advisory context. No vector load is required. Fresh
-decompilation, disassembly, references, and bytes remain authoritative; session summaries and
-vectors can help discovery but cannot establish a 1:1 claim.
-
-An unverified artifact, missing fact, or unresolved dependency generates an isolated function
-that returns `false`; the existing generic combat path remains authoritative. Raw model responses,
-evidence, prompts, and validation reports are retained beside each artifact. The importer exits
-with code `2` when it deliberately emits this fallback, making the blocked result visible to CI.
-
-For a trusted importer profile, the import command also compiles the generated TypeScript,
-derives boundary scenarios from the artifact, compares the candidate with an independent
-GotYaForce oracle, and writes `*-auto-verification.json`. The verifier contains no handwritten
-scenario list or copied expected outputs. The autonomous POC then promotes a green candidate,
-builds combat, runs the ROM replay suite, builds the production game, and executes it in Chrome.
-Any downstream failure rolls the promotion back.
-
-Schema-valid but importer-incomplete Qwen responses are retained and automatically repaired with
-deterministic missing-fact feedback. Candidate TypeScript is generated in the run directory;
-production source and its registry change together only after compile and differential gates pass.
-Rollback restores both files.
-
-The current Eagle Jet proof of concept runs Qwen 3.6 35B-A3B against live Ghidra evidence for
-`0x8012b458`. In the latest fresh run, three retained Qwen responses scored 9/12, 12/12, and 12/12
-required port facts. The controller selected attempt 3, passed 64 deterministic evidence/schema
-checks, compiled, matched the existing implementation across 12 automatically derived boundary
-scenarios, passed the full ROM replay suite, built the production browser game, and executed it in
-Chrome.
-
-Qwen output is mandatory: removing the validated Qwen mechanics while leaving all Ghidra evidence
-intact produces 0/12 importer facts and blocks generation. Ghidra corroborates the model's
-mechanics; it does not silently replace them. If Qwen's optional port IR is malformed, the
-controller may discard that IR only when its validated claims still cover every required fact.
-See the
-[`artifact`](research/decomp/generated/8012b458.port.json),
-[`validation report`](research/decomp/generated/8012b458.port.validation.json),
-[`automatic verification`](research/decomp/generated/8012b458-auto-verification.json),
-[`import report`](research/decomp/generated/8012b458-import-report.md), and
-[`generated candidate`](packages/combat/src/generated/oghidra/fn_8012b458.generated.ts). The
-[fresh-run artifact](research/decomp/generated/finish-game-port-poc/8012b458.port.json) and
-[persistent run state](research/decomp/generated/finish-game-port-poc/run-state.json) retain the
-76-check live run. The
-[full autonomous design](research/tools/OGhidra/docs/scalable-verified-port-design.md) explains
-how this proven single-function transaction scales to a one-button whole-game run.
+---
 
 ## Repository map
 
 | Path | Purpose |
 | --- | --- |
-| [`apps/game`](apps/game) | Vite, TypeScript, and three.js browser game |
-| [`packages/combat`](packages/combat) | Battle simulation and ROM-faithful actor runtime |
-| [`packages/missions`](packages/missions) | Challenge flow, scoring, stages, and Gotcha Box logic |
-| [`packages/assets`](packages/assets) | Borg catalogs and generated asset metadata |
+| [`apps/game`](apps/game) | Vite + TypeScript + three.js browser game (the deployed app) |
+| [`packages/combat`](packages/combat) | Battle simulation, ROM-faithful actor runtime, wasm damage-core loader |
+| [`packages/missions`](packages/missions) | Challenge flow, scoring, stages, Gotcha Box logic |
+| [`packages/assets`](packages/assets) | Borg and stage catalogs, generated asset metadata |
 | [`packages/render`](packages/render) | three.js loading and rendering helpers |
-| [`scripts`](scripts) | Extraction, conversion, generation, audit, and self-check tools |
-| [`research`](research) | Decompilation evidence, format specs, traces, and port trackers |
-| [`docs-site`](docs-site) | VitePress research atlas |
+| [`packages/physics`](packages/physics) | ROM-derived movement integration and collision |
+| [`packages/formats`](packages/formats) | Disc/archive format parsers (AFS, PZZ, TPL, HSD anim, hit bins) |
+| [`packages/rom-runtime`](packages/rom-runtime) | Composed-module execution runtime — **scaffold, not yet wired to the app** |
+| [`packages/audio`](packages/audio) · [`packages/ai`](packages/ai) · [`packages/save`](packages/save) · [`packages/core`](packages/core) | Supporting runtime libraries |
+| [`packages/test-fixtures`](packages/test-fixtures) | Shared synthetic fixtures for tests |
+| [`docs`](docs) | Port design contract, composition ladder, threads relink runbook |
+| [`docs-site`](docs-site) | VitePress research atlas (deployed to Pages root) |
+| [`scripts`](scripts) | Extraction, conversion, generation, audit, self-check, and smoke tools |
+| [`research/decomp`](research/decomp) | Ghidra corpus, evidence indexes, oracle harness, port units |
+| [`research/tools/dolphin-trace`](research/tools/dolphin-trace) | Per-call oracle capture from the real game |
+| [`research/format-specs`](research/format-specs) | File-format specifications and provenance |
+| `research/tools/OGhidra` | **External checkout, not vendored** — the port driver lives here |
+
+---
 
 ## Useful commands
 
 ```bash
 # Game
-pnpm dev
-pnpm build
+pnpm dev                     # dev server (COOP/COEP headers included)
+pnpm build                   # build all workspace packages
+pnpm --filter game build     # production build with the /GotYaForce/game/ base
 pnpm typecheck
 
-# High-value regression checks
+# Shared gate (what CI runs)
+pnpm verify:contributor      # repo policy + typecheck + browser gate + combat lifecycle
+                             # + importer test + production game build
+pnpm test:oracle             # deterministic oracle-harness evidence
+pnpm verify:docs             # atlas build; VitePress fails on broken internal links
+
+# Regression self-checks
 pnpm selfcheck:game-session
 pnpm selfcheck:1p
 pnpm selfcheck:challenge-stages
 pnpm selfcheck:rom
+pnpm selfcheck:hud
 pnpm audit:family-state-machines
+
+# Headless browser smoke gates
+pnpm smoke:browser                                              # playable route, animation liveness, COI
+GF_SMOKE_ROM_HIT=1 pnpm smoke:browser                           # + assert the ROM wasm damage core is live
+GF_SMOKE_ROMWASM=threads GF_SMOKE_ROM_HIT=1 pnpm smoke:browser  # + the shared-memory relink under COI
+pnpm smoke:rom-runtime                                          # @gf/rom-runtime self-test phase
 
 # Research atlas
 pnpm atlas:dev
 pnpm atlas:build
+GF_ATLAS_SKIP_MODELS=1 pnpm atlas:build   # text/data only, skips the heavy model copy
 
-# OGhidra artifact importer
-pnpm test:oghidra-port
-pnpm import:oghidra-port --artifact <artifact.json>
-pnpm verify:oghidra-port
-pnpm port:finish:poc
-pnpm port:finish:poc:fresh
-pnpm port:finish:poc:resume
+# Regenerate derived reports
+node scripts/report-tuned-constants.mjs   # research/tuned-burndown.md
+node scripts/reorg-decomp.mjs             # research/decomp/organized/ (gitignored)
+node scripts/build-decomp-evidence-index.mjs
 ```
 
-The family audit defaults to structural validation. It is expected to report partial and missing
-slots until the port is complete; strict completeness is a finish-line gate.
+The family audit defaults to structural validation. It is expected to report partial slots
+until the port is complete; strict completeness is a finish-line gate.
+
+---
 
 ## Disc data and generated assets
 
-The repository targets the US release (`GG4E`, NTSC-U). A disc image is never required for the
-normal browser-development loop and must not be committed. Extraction and regeneration workflows
-expect a legally obtained, user-supplied dump under `user-data/`, which is gitignored.
+The repository targets the US release (`GG4E`, NTSC-U). A disc image is never required for
+the normal browser-development loop and **must not be committed**. Extraction and
+regeneration workflows expect a legally obtained, user-supplied dump under `user-data/`,
+which is gitignored — as are `research/decomp/organized/`, all `dist/` output, savestates,
+and local model transcripts.
 
 The HSD asset pipeline runs offline:
 
 ```text
-GameCube archives → HSDRaw / project scripts → Collada or GLB + textures → browser assets
+GameCube archives → HSDRaw / HSDRawViewer → Collada or GLB + PNG textures → browser assets
 ```
 
-There is intentionally no runtime TypeScript parser for wrapped Borg `.arc` model archives.
-Format notes and provenance are documented in
-[`research/format-specs/arc-hsd-format.md`](research/format-specs/arc-hsd-format.md).
+The `_mdl.arc` model container is **HSD DAT** (HAL Sysdolphin) — solved 2026-06-30, spec and
+validation evidence in
+[`research/format-specs/arc-hsd-format.md`](research/format-specs/arc-hsd-format.md). There is
+intentionally **no runtime TypeScript parser** for it: conversion happens at build time, and
+[`packages/formats/src/mdl-arc.ts`](packages/formats/src/mdl-arc.ts) is a documented stub
+explaining why. (Older research notes, including
+[`research/PHASE0_RESEARCH.md`](research/PHASE0_RESEARCH.md), still describe the model format
+as the project's unsolved blocker; that snapshot predates the solution and carries a
+correction banner.)
+
+---
+
+## Deployment
+
+One GitHub Pages site, built by
+[`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) on every push to
+`main`:
+
+- `https://abhidya.github.io/GotYaForce/` — the research atlas
+- `https://abhidya.github.io/GotYaForce/game/` — the playable game
+
+`apps/game/vite.config.ts` sets the `/GotYaForce/game/` base for production builds, so
+runtime URLs must go through the app's `publicUrl` helper rather than absolute `/…` paths.
+Cross-origin isolation comes from Vite response headers in dev/preview and from the vendored
+`coi-serviceworker.js` in production. Full detail in [`DEPLOY-PLAN.md`](DEPLOY-PLAN.md).
+
+`apps/game/server.mjs` is a standalone WebSocket room-server prototype. Nothing in the client
+connects to it; treat online multiplayer as unimplemented.
+
+---
 
 ## Contributing
+
+Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) and the
+[atlas contributor guide](docs-site/contributing/). Agents operating the unattended port rig
+must read [`AGENTS.md`](AGENTS.md) first — it documents the one correct way to stop the
+pipeline and the failure modes of every shortcut.
 
 The highest-value contributions are small and evidence-backed:
 
@@ -264,12 +467,15 @@ The highest-value contributions are small and evidence-backed:
 4. Add boundary assertions for every transition.
 5. Run the ROM self-check and family audit before opening a pull request.
 
-Please do not replace unknown behavior with plausible constants and call it 1:1. In this project,
-an honest `TUNED`, `PARTIAL`, or `BLOCKED` label is better than an unsupported exactness claim.
+Please do not replace unknown behavior with plausible constants and call it 1:1. In this
+project, an honest `TUNED`, `PARTIAL`, `BLOCKED`, or `compile_only` label is better than an
+unsupported exactness claim.
+
+---
 
 ## Legal
 
 Gotcha Force, its characters, names, and original assets are property of their respective
 rightsholders. This is an unofficial preservation and reverse-engineering project and is not
-affiliated with or endorsed by Capcom or Nintendo. No disc image, encryption keys, or proprietary
-SDK is distributed by this project.
+affiliated with or endorsed by Capcom or Nintendo. No disc image, encryption keys, or
+proprietary SDK is distributed by this project.

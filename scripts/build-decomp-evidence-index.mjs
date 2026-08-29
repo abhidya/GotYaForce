@@ -392,15 +392,27 @@ function collectGlobalAccesses(body) {
   return unique(accesses).slice(0, 120);
 }
 
+// Blank out C comments, preserving length and newlines so nothing else shifts.
+// The corpus-correction loop (research/decomp/corpus-correction-loop.md) writes
+// provenance comments straight into the chunks — dates, unit ids, addresses. Those
+// are annotations about the code, not constants or strings IN the code, and
+// indexing them poisons the evidence index with values the ROM never contained.
+function stripComments(body) {
+  return body
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\r\n]/g, " "))
+    .replace(/\/\/[^\r\n]*/g, (m) => " ".repeat(m.length));
+}
+
 function collectConstants(body) {
-  const all = body.match(/\b(?:0x[0-9a-fA-F]+|\d+\.\d+|\d+)\b/g) ?? [];
+  const all = stripComments(body).match(/\b(?:0x[0-9a-fA-F]+|\d+\.\d+|\d+)\b/g) ?? [];
   return unique(all).slice(0, 80);
 }
 
 function collectStrings(body) {
+  const source = stripComments(body);
   const strings = [];
-  for (const match of body.matchAll(/"([^"\r\n]{2,160})"/g)) strings.push(match[1]);
-  for (const match of body.matchAll(/\bs_[A-Za-z0-9_.$-]+_[0-9a-fA-F]{8}\b/g)) strings.push(match[0]);
+  for (const match of source.matchAll(/"([^"\r\n]{2,160})"/g)) strings.push(match[1]);
+  for (const match of source.matchAll(/\bs_[A-Za-z0-9_.$-]+_[0-9a-fA-F]{8}\b/g)) strings.push(match[0]);
   return unique(strings).slice(0, 80);
 }
 

@@ -158,6 +158,30 @@ family has been ported. The bridge adapter (TODO file `bridge.ts`) copies fields
 Borgs without a ported family keep the existing generic-archetype behavior unchanged
 (the `SpecialActionDef` path); the registry returns null for them.
 
+## The wasm seam (added 2026-08)
+
+Hand transcription is no longer the only way a ROM function reaches this runtime. Some code
+is now **recompiled** rather than rewritten: decompiled C is sliced into a unit, linked to
+WebAssembly, verified byte-exact against the real console, and installed behind a seam in
+this package.
+
+- `wasmDamageCore.ts` loads `research/decomp/port-units/damage-core/unit.wasm` (4 functions,
+  26,232 / 26,232 replayed cases byte-exact) and also handles the imported-shared-memory
+  variant used by the threads build.
+- `../damage/sourceDamage.ts` carries the override hook. When the app boots with the wasm
+  core, damage numbers come from recompiled ROM code, not from the TypeScript port.
+- `../index.ts` exposes the seam.
+
+This does **not** change the recipe below — families still get transcribed by hand, and a
+family port is still the unit of work here. What it changes is the ceiling: where a function
+can be sliced cleanly and verified against a trace, the recompiled unit is stronger evidence
+than any transcription. The pipeline that produces those units, and the tier vocabulary that
+governs when one may be trusted, are documented in `docs/playable-port-design.md` and the
+root `README.md`.
+
+Only three units have earned that trust so far, and exactly one is wired into the game. A
+staged unit at tier `compile_only` is not a port; it is a build artifact.
+
 ## Honest scope to completion
 
 - VM + state tables: ~1 session each
