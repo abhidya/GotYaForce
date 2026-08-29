@@ -1,0 +1,37 @@
+{
+  "unit": "auto-c0020-007",
+  "fn": "FUN_800c4308",
+  "addr": "0x800c4308",
+  "prototype": "void FUN_800c4308(int actor)  /* chunk_0020.c 2453-2496, staged unit.c */",
+  "note": "HAND-AUTHORED read/write sets, line-by-line from the verbatim C. Per-frame integrator for the same tracker object FUN_800c42bc decrements: advances the position a+0x20 by the velocity a+0x38 (PSVECAdd), recomputes the sqrt of PSVECSquareDistance(a+0x20, a+0x174) with the frsqrte+2xNewton idiom (DOUBLE_80438748=0.5, DOUBLE_80438750=3.0) into a+0x180, ramps the speed a+0x44 by a+0x4c and clamps it to the per-type row field at 0x8030316c+idx, decays the scale a+0xb4 by FLOAT_80438760 (expiring via zz_00c42a8_ when it drops to FLOAT_80438764), mirrors it into a+0x58/a+0x5c, and re-seeds a+0x184 / a+0x60 from min(row 0x80303170+idx, a+0x180). idx = [a+0x11] * 0x44 selects a 0x44-stride row of the per-type table based at 0x80303148 (derived from the `iVar3 + -0x7fcfceb8` address expression). CALLEE-TAINT: the zz_00c42a8_ expiry branch is a ROM callee the replay cannot model.",
+  "args": [
+    { "reg": "r3", "name": "actor" }
+  ],
+  "reads": [
+    { "id": "a11_type", "addr": "r3+0x11", "width": 1 },
+    { "id": "a20_pos", "addr": "r3+0x20", "width": 12 },
+    { "id": "a38_vel", "addr": "r3+0x38", "width": 12 },
+    { "id": "a174_target", "addr": "r3+0x174", "width": 12 },
+    { "id": "a44_pre", "addr": "r3+0x44", "width": 4 },
+    { "id": "a4c", "addr": "r3+0x4c", "width": 4 },
+    { "id": "ab4_pre", "addr": "r3+0xb4", "width": 4 },
+    { "id": "row_16c", "addr": "0x8030316c + ((([r3+0x11]) >> 24) * 0x44)", "width": 4 },
+    { "id": "row_170", "addr": "0x80303170 + ((([r3+0x11]) >> 24) * 0x44)", "width": 4 },
+    { "id": "f_8744", "addr": "0x80438744", "width": 4 },
+    { "id": "d_8748", "addr": "0x80438748", "width": 8 },
+    { "id": "d_8750", "addr": "0x80438750", "width": 8 },
+    { "id": "f_875c", "addr": "0x8043875c", "width": 4 },
+    { "id": "f_8760", "addr": "0x80438760", "width": 4 },
+    { "id": "f_8764", "addr": "0x80438764", "width": 4 }
+  ],
+  "ret": null,
+  "writes": [
+    { "id": "w20", "addr": "r3+0x20", "width": 12 },
+    { "id": "w44", "addr": "r3+0x44", "width": 4 },
+    { "id": "w58", "addr": "r3+0x58", "width": 8 },
+    { "id": "w60", "addr": "r3+0x60", "width": 4 },
+    { "id": "wb4", "addr": "r3+0xb4", "width": 4 },
+    { "id": "w180", "addr": "r3+0x180", "width": 4 },
+    { "id": "w184", "addr": "r3+0x184", "width": 4 }
+  ]
+}

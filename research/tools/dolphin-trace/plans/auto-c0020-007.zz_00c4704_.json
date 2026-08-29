@@ -1,0 +1,30 @@
+{
+  "unit": "auto-c0020-007",
+  "fn": "zz_00c4704_",
+  "addr": "0x800c4704",
+  "prototype": "bool zz_00c4704_(int owner, undefined1 param_2, undefined1 *out_flag)  /* chunk_0020.c 2618-2656, staged unit.c */",
+  "note": "HAND-AUTHORED. Spawner/constructor for the tracker object: allocates through the external zz_0088aa0_(owner,3,8,0,2), and on success writes 22 fields of the NEW object (its type/state bytes, the two callback slots FUN_800c4838 / FUN_800c5a60, the owner back-pointer, and copies of owner +0x88/+0x90/+0x94/+0x96/+0x97/+0xb4/+0xb8/+0xc0/+0xc4/+0xc8/+0xcc/+0xd0), finishing with out_flag stored at newobj+0x184; on failure it stores 0 through out_flag and calls zz_006de10_(owner,2). The read set below is complete and typed. THE WRITE SET IS NOT CAPTURABLE by this tool: every store but one targets the allocator's return pointer, which does not exist at entry, and capture_oracle.py evaluates write addresses over ENTRY registers only. Only the failure path's *out_flag (r5) is expressible. Recorded here so the derivation is on file; the capture is honest about what it cannot observe.",
+  "args": [
+    { "reg": "r3", "name": "owner" },
+    { "reg": "r4", "name": "param_2" },
+    { "reg": "r5", "name": "out_flag" }
+  ],
+  "reads": [
+    { "id": "o88", "addr": "r3+0x88", "width": 1 },
+    { "id": "o90", "addr": "r3+0x90", "width": 4 },
+    { "id": "o94", "addr": "r3+0x94", "width": 2 },
+    { "id": "o96", "addr": "r3+0x96", "width": 2 },
+    { "id": "ob4", "addr": "r3+0xb4", "width": 4 },
+    { "id": "ob8", "addr": "r3+0xb8", "width": 4 },
+    { "id": "oc0", "addr": "r3+0xc0", "width": 8 },
+    { "id": "oc8", "addr": "r3+0xc8", "width": 8 },
+    { "id": "od0", "addr": "r3+0xd0", "width": 1 }
+  ],
+  "ret": { "reg": "r3" },
+  "writes": [
+    { "id": "w_out_flag", "addr": "r5", "width": 1 }
+  ],
+  "uncapturable_writes": [
+    "newobj+0x00, +0x0c, +0x10, +0x11, +0x13, +0x58, +0x5c, +0x60, +0x88, +0x8c, +0x90, +0x94, +0x96, +0x97, +0xb4, +0xb8, +0xc0, +0xc4, +0xc8, +0xcc, +0xd0, +0x10c, +0x184: all relative to the zz_0088aa0_ allocator's return value, which is not an entry register"
+  ]
+}

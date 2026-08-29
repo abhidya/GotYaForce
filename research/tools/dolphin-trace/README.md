@@ -16,6 +16,12 @@ rule); pure stdlib.
   `capture`.
 - `plans/<unit>.<fn>.json` — per-function capture plans, authored line-by-line
   from the unit's verbatim C (typed read/write sets with address expressions).
+- `merge_fixtures.py` — combine the per-export fixtures of one unit into the
+  single corpus `run-unit.mjs` loads (`spec.meta.fixture`). Needed by any spec
+  covering MORE THAN ONE export, because capture emits one fixture per export
+  (one emulator boot each) while the harness loads one file per unit. It
+  renumbers `n` across the whole file (the harness keys per-case results by `n`)
+  and keeps the original per-export index as `fn_n`.
 - Harness side (not here): `oracle-harness/specs/<unit>.spec.mjs` replays the
   fixture (`reference_kind: "dolphin_trace"`), rebasing captured pointers into
   scratch regions and byte-swapping scalars element-wise (BE console RAM ->
@@ -110,8 +116,56 @@ write set byte-for-byte.
   capture. Fix path: repair the aliasing in the unit's C (through the
   driver's sanctioned path), recompile, re-run the same corpus.
 
+- **auto-c0020-007 (2026-08-29)** — the first MULTI-EXPORT trace spec, and the
+  first unit taken from a bare skeleton to a real typed capture end to end.
+  All 8 exports got hand-authored plans (typed read/write sets derived
+  line-by-line from the verbatim C); 5 of them fire in `battle-2v2-combat` and
+  captured **815 cases** (200 / 200 / 200 / 200 / 15). Replay:
+  `ORACLE TOTAL functions=5/5 cases=815 UNEXPLAINED: 0 VERDICT: PARTIAL`,
+  789/815 byte-exact, 26 within <= 3 ulp on the PSVECNormalize channel, zero
+  stray writes, zero sentinel reads. **No divergence: this unit is behaviourally
+  consistent with the console over everything the capture can observe.**
+  PARTIAL is structural, not a defect — the other 3 exports fire 0 times in the
+  repo's one savestate, and two of them are unreplayable anyway
+  (`zz_00c4704_`'s stores all target an allocator return value, which capture
+  cannot address off entry registers; `FUN_800c4838` ends in a dispatch through
+  the ROM function table at `0x80305240`, which staged wasm has no mapping for).
+  Live-capture side-findings that the hand derivation predicted and the console
+  confirmed: the per-type parameter table is a 0x44-stride array based at
+  `0x80303148` (from the `iVar3 + -0x7fcfceb8` expression), and
+  `FLOAT_8043ca90/94` — PSVECNormalize's Newton constants — really are 0.5 / 3.0.
+  Honesty note recorded in the spec header: on the 141 re-aim cases the ROM's
+  `zz_006c440_` (chunk_0009.c:2031) *itself* renormalizes and advances the
+  actor, so `a+0x38 / a+0x20 / a+0x180` are the callee's on that path and the
+  spec compares only the subset the unit owns; the full write set (float channel
+  included) is compared on the 59 non-re-aim cases.
+
 Verdicts and evidence artifacts: `research/decomp/data/oracle-results/
-auto-c0001-007.json`, `auto-c0001-005.json`.
+auto-c0001-007.json`, `auto-c0001-005.json`, `auto-c0020-007.json`.
+
+### Multi-export specs (2026-08-29)
+
+`run-unit.mjs` loads ONE fixture per unit and dispatches by each case's `fn`, so
+a spec covering several exports needs `merge_fixtures.py` run after the capture
+sweep. Two consequences worth knowing:
+
+- the merged header deliberately carries no top-level `fn`, so the driver's
+  in-place spec-corpus refresh (`port_wasm_units._trace_capture`, which only
+  overwrites a corpus whose header `fn` matches the export it just captured)
+  cannot silently replace a merged corpus with one export's fixture. It also
+  records each source fixture's sha256, so `merge_fixtures.py --unit <u> --check`
+  detects the remaining footgun: a `verify-unit` WITH capture rewrites the
+  per-export fixtures without re-merging, and the spec would otherwise replay a
+  stale corpus while the fresh capture sat unread. Run `--check` after any
+  capture sweep for a unit whose spec covers more than one export. Teaching the
+  driver to re-merge (or to run `--check`) is the obvious next tooling step and
+  is NOT done yet;
+- a spec that stands in for ROM callees must say which post-state bytes those
+  callees own. `zz_00c4540_` is the worked example: it derives the ROM's branch
+  from console evidence, requires the wasm to take the same branch and to call
+  the callee with the derived arguments, and only then narrows the byte
+  comparison. That keeps a callee-owned byte from being reported as a unit
+  defect without quietly dropping the case.
 
 ## Scenarios (coverage authoring)
 

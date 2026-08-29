@@ -1,0 +1,40 @@
+{
+  "unit": "auto-c0020-007",
+  "fn": "zz_00c4540_",
+  "addr": "0x800c4540",
+  "prototype": "void zz_00c4540_(int actor)  /* chunk_0020.c 2551-2614, staged unit.c */",
+  "note": "HAND-AUTHORED read/write sets, line-by-line from the verbatim C. The homing/impact step. (1) Always: normalize the velocity a+0x38 in place and rescale it by the speed a+0x44 (PSVECNormalize + PSQUATScale, both writing a+0x38..a+0x43). (2) If the tracked-object pointer a+0xc8 is non-zero (the `(-u|u) < 0` idiom), copy that object's world position words +0x64/+0x68/+0x6c into the translation column a+0x150 / a+0x160 / a+0x170 of the matrix at a+0x144, transform the per-type hit offset row (0x80303148 + idx) by that matrix, and compare the offset-to-position delta against the per-type radius at 0x80303160+idx: too close, or heading dot delta < FLOAT_80438744, clears a+0xc8 to 0; otherwise the hit counter a+0x1cb is decremented, and on the counter's low-bit condition it is reloaded from 0x80303157+idx and the impact callees zz_006c440_ / zz_00833a4_ fire. (3) Unless that impact fired, the position a+0x20 is advanced by the velocity (PSVECAdd). (4) Always: a+0x180 <- sqrt(PSVECSquareDistance(a+0x20, a+0x174)) via the frsqrte+2xNewton idiom (DOUBLE_80438748=0.5, DOUBLE_80438750=3.0). idx = [a+0x11] * 0x44 indexes the 0x44-stride per-type table based at 0x80303148 (from the `iVar3 + -0x7fcfceb8` address expression). CALLEE-TAINT: the impact branch calls zz_006c440_/zz_00833a4_, ROM callees the replay cannot model; the spec reports cases that reach it separately. sdk_ca90 captures the two SDK float constants FLOAT_8043ca90 / FLOAT_8043ca94 that gnt4_PSVECNormalize_bl's Newton step uses (chunk_0064.c:1322-1340) -- the spec's SDK shim reads them from the console rather than assuming 0.5 / 3.0.",
+  "args": [
+    { "reg": "r3", "name": "actor" }
+  ],
+  "reads": [
+    { "id": "a11_type", "addr": "r3+0x11", "width": 1 },
+    { "id": "a20_pos", "addr": "r3+0x20", "width": 12 },
+    { "id": "a38_vel", "addr": "r3+0x38", "width": 12 },
+    { "id": "a44_speed", "addr": "r3+0x44", "width": 4 },
+    { "id": "ac8_track", "addr": "r3+0xc8", "width": 4 },
+    { "id": "a144_mtx", "addr": "r3+0x144", "width": 48 },
+    { "id": "a174_target", "addr": "r3+0x174", "width": 12 },
+    { "id": "a1cb_pre", "addr": "r3+0x1cb", "width": 1 },
+    { "id": "track_64", "addr": "[r3+0xc8]+0x64", "width": 12, "optional": true },
+    { "id": "row_vec", "addr": "0x80303148 + ((([r3+0x11]) >> 24) * 0x44)", "width": 12 },
+    { "id": "row_157", "addr": "0x80303157 + ((([r3+0x11]) >> 24) * 0x44)", "width": 1 },
+    { "id": "row_158", "addr": "0x80303158 + ((([r3+0x11]) >> 24) * 0x44)", "width": 4 },
+    { "id": "row_160", "addr": "0x80303160 + ((([r3+0x11]) >> 24) * 0x44)", "width": 4 },
+    { "id": "f_8744", "addr": "0x80438744", "width": 4 },
+    { "id": "d_8748", "addr": "0x80438748", "width": 8 },
+    { "id": "d_8750", "addr": "0x80438750", "width": 8 },
+    { "id": "sdk_ca90", "addr": "0x8043ca90", "width": 8 }
+  ],
+  "ret": null,
+  "writes": [
+    { "id": "w20", "addr": "r3+0x20", "width": 12 },
+    { "id": "w38", "addr": "r3+0x38", "width": 12 },
+    { "id": "wc8", "addr": "r3+0xc8", "width": 4 },
+    { "id": "w150", "addr": "r3+0x150", "width": 4 },
+    { "id": "w160", "addr": "r3+0x160", "width": 4 },
+    { "id": "w170", "addr": "r3+0x170", "width": 4 },
+    { "id": "w180", "addr": "r3+0x180", "width": 4 },
+    { "id": "w1cb", "addr": "r3+0x1cb", "width": 1 }
+  ]
+}

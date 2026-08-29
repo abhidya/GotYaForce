@@ -1,0 +1,20 @@
+{
+  "unit": "auto-c0020-007",
+  "fn": "zz_00c44a8_",
+  "addr": "0x800c44a8",
+  "prototype": "void zz_00c44a8_(int actor)  /* chunk_0020.c 2529-2547, staged unit.c */",
+  "note": "HAND-AUTHORED read/write sets, line-by-line from the verbatim C. Orientation update for the tracker: PSVECSubtract(a+0x20 pos, a+0x174 target) into a stack vec3, feeds that heading through the ROM helpers zz_0045ef4_ (twice, axes 5 then 4, gated on the first call's bool) and zz_00456a0_ -- all three operate on the 3x4 matrix at a+0x114 and the rate a+0x58, which are ROM-CALLEE-OWNED memory this replay deliberately does NOT declare as writes. The function's OWN stores are the last three lines: the matrix translation column a+0x120 / a+0x130 / a+0x140 <- the position words a+0x20 / a+0x24 / a+0x28 (raw 32-bit copies). Those three stores happen AFTER every callee returns, so the console's post-state at them is exactly this unit's behaviour and is byte-comparable.",
+  "args": [
+    { "reg": "r3", "name": "actor" }
+  ],
+  "reads": [
+    { "id": "a20_pos", "addr": "r3+0x20", "width": 12 },
+    { "id": "a174_target", "addr": "r3+0x174", "width": 12 }
+  ],
+  "ret": null,
+  "writes": [
+    { "id": "w120", "addr": "r3+0x120", "width": 4 },
+    { "id": "w130", "addr": "r3+0x130", "width": 4 },
+    { "id": "w140", "addr": "r3+0x140", "width": 4 }
+  ]
+}

@@ -1,0 +1,16 @@
+{"kind": "header", "fixture_schema": 1, "trace_schema": 1, "unit": "auto-c0020-007", "fn": "FUN_800c4448", "addr": "0x800c4448", "reference_kind": "dolphin_trace", "dumped_at": "2026-08-29T17:45:17.607310Z", "counts": {"case": 15}, "source": {"emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe)", "stub": "gdb-rsp 127.0.0.1:55555, Z0 entry+LR breakpoints", "game_state": "2v2 sav + circling stick with B/X/A press-release edges", "capture_tool": "research/tools/dolphin-trace/capture_oracle.py", "plan": "D:/GotYaForce/research/tools/dolphin-trace/plans/auto-c0020-007.FUN_800c4448.json", "pad_injection": "combat:b,x,a", "injected_frames": 1123, "scenario": "battle-2v2-combat"}}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8065c600", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 0}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x80669be8", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 1}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x80669ecc", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 2}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8063f49c", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 3}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8065d190", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 4}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8066b308", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 5}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8066b5ec", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 6}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8066bbb4", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 7}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x80679a48", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 8}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x80679d2c", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 9}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8062a268", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 10}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x80640ea0", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 11}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8065e8b0", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 12}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8067ae84", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 13}
+{"kind": "case", "fn": "FUN_800c4448", "args": ["0x8066d2d4", "0x803051e4", "0x805dbdc0"], "lr": "0x800c3d18", "reads": [], "writes": [], "n": 14}

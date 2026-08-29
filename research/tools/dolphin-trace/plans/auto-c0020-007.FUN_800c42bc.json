@@ -1,0 +1,21 @@
+{
+  "unit": "auto-c0020-007",
+  "fn": "FUN_800c42bc",
+  "addr": "0x800c42bc",
+  "prototype": "void FUN_800c42bc(int actor)  /* chunk_0020.c 2431-2449, staged unit.c */",
+  "note": "HAND-AUTHORED read/write sets, line-by-line from the verbatim C. Per-frame decrement of the projectile/tracker 'remaining distance' field: fVar2 = [a+0x184] - [a+0x44] (distance minus this frame's speed); stores it back to a+0x184 and stores fVar2/FLOAT_8043875c into a+0x60 (frames-to-arrival estimate). When that quotient falls to <= FLOAT_80438744 it tail-calls the external zz_00c42a8_(a) (expiry handler) -- a ROM callee the replay cannot model, so any case that takes it is CALLEE-TAINTED: the console's post-state at a+0x184 / a+0x60 may then include the callee's own stores. The spec detects the branch from the captured reads and reports those cases separately instead of pretending they are unit behaviour.",
+  "args": [
+    { "reg": "r3", "name": "actor" }
+  ],
+  "reads": [
+    { "id": "a184_pre", "addr": "r3+0x184", "width": 4 },
+    { "id": "a44", "addr": "r3+0x44", "width": 4 },
+    { "id": "f_8744", "addr": "0x80438744", "width": 4 },
+    { "id": "f_875c", "addr": "0x8043875c", "width": 4 }
+  ],
+  "ret": null,
+  "writes": [
+    { "id": "w184", "addr": "r3+0x184", "width": 4 },
+    { "id": "w60", "addr": "r3+0x60", "width": 4 }
+  ]
+}

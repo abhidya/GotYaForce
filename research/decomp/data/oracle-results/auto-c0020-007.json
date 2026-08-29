@@ -1,0 +1,108 @@
+{
+ "result_schema": 1,
+ "unit": "auto-c0020-007",
+ "generated_at": "2026-08-29T17:51:57.526Z",
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-unit.mjs",
+  "git_rev": "8185e28fa496e644eda4ace5e936d1ed2409121f",
+  "sha256": "3b4d57a595f84d5debb340cb2669fe5f74895abbe5856fbe05b2f22d762be766"
+ },
+ "wasm": {
+  "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0020-007\\unit.wasm",
+  "sha256": "016bbe4393aa4aa794d3a6b56ea67d93d09d300ed7d69c978f37f5d91e4a1317"
+ },
+ "arena": {
+  "path": "research/decomp/oracle-harness/arena-trace-empty.json",
+  "sha256": "a382e7401f2192cc3ce7990e05ca1947ad744f07a23b3f9bfe5452ca3fd19632"
+ },
+ "corpus": {
+  "mode": "replay",
+  "file": "research/decomp/oracle-harness/corpora/auto-c0020-007.dolphin-trace.jsonl",
+  "sha256": "6df2d80281e333840099a175b2f5661bce27cb375d38eabd3bacb40830325155",
+  "n": 815
+ },
+ "spec_sha256": "7bdbce216793726c6c583de431a7a2640aa99725631402133e2972b5fb21797e",
+ "field_map": {
+  "path": "research/decomp/oracle-harness/actor-field-map.json",
+  "sha256": "9da8ef1fdedae2eb9ec566c78dc705dfbd60ecd3df19a5c9195b64ee6b282da0",
+  "source": {
+   "path": "packages/combat/src/rom/actor.ts",
+   "sha256": "ee17e82015d7aaba3b0f949fa35305d3b94c7bd53414a7183b5f3b07a660c2dd"
+  }
+ },
+ "reference_kind": "dolphin_trace",
+ "references": [
+  "real GG4E in bundled Dolphin 2606-97 (GDB-stub per-call capture; tool: research/tools/dolphin-trace/capture_oracle.py; plans: research/tools/dolphin-trace/plans/auto-c0020-007.*.json)",
+  "corpus merge: research/tools/dolphin-trace/merge_fixtures.py",
+  "env shims: the ROM's own SDK bodies per research/decomp/ghidra-export/chunk_0064.c (PSMTXMultVec 1039, PSVECAdd 1249, PSVECSubtract 1274, PSQUATScale 1299, PSVECNormalize 1322, PSVECSquareMag 1352, PSQUATDotProduct 1390, PSVECSquareDistance 1467)"
+ ],
+ "functions": [
+  {
+   "name": "FUN_800c4468",
+   "cases": 200,
+   "exact": 200,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "reference": "dolphin_trace 0x800c4468 (entry+LR capture; plan auto-c0020-007.FUN_800c4468.json)",
+   "note": "forwarding thunk: verified through recording env shims — the [param_9+0xe0] load, the param_9+0x114 interior pointer, argument positions, and the zz_00076d0_ -> zz_00097b4_ call order. Stores nothing, so it has no write set to compare.",
+   "verdict": "pass"
+  },
+  {
+   "name": "zz_00c44a8_",
+   "cases": 200,
+   "exact": 200,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "reference": "dolphin_trace 0x800c44a8 (entry+LR capture; plan auto-c0020-007.zz_00c44a8_.json)",
+   "note": "orientation update; only its own three stores (matrix translation column a+0x120/0x130/0x140 <- position words) are declared — the a+0x114 matrix is ROM-callee-owned and deliberately not compared.",
+   "verdict": "pass"
+  },
+  {
+   "name": "zz_00c4540_",
+   "cases": 200,
+   "exact": 174,
+   "rounding_explained": 26,
+   "unexplained": 0,
+   "reference": "dolphin_trace 0x800c4540 (entry+LR capture; plan auto-c0020-007.zz_00c4540_.json)",
+   "note": "homing/impact step; the float-heavy one. normalize-derived f32 write-backs may sit a few ulps off the console's frsqrte path — reported as rounding, bound 1.0 = report, do not hide.",
+   "verdict": "pass"
+  },
+  {
+   "name": "FUN_800c42bc",
+   "cases": 200,
+   "exact": 200,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "reference": "dolphin_trace 0x800c42bc (entry+LR capture; plan auto-c0020-007.FUN_800c42bc.json)",
+   "note": "range/ETA decrement; cases that reach the zz_00c42a8_ expiry callee are marked callee_tainted.",
+   "verdict": "pass"
+  },
+  {
+   "name": "FUN_800c4448",
+   "cases": 15,
+   "exact": 15,
+   "rounding_explained": 0,
+   "unexplained": 0,
+   "reference": "dolphin_trace 0x800c4448 (entry+LR capture; plan auto-c0020-007.FUN_800c4448.json)",
+   "note": "pure forwarding thunk with no memory effect; the only replayable property is argument forwarding, checked through a recording shim. The seven double args are FPR-passed and unsampled by the capture tool, so they are supplied as distinct sentinels and only their SLOTS are proven.",
+   "verdict": "pass"
+  }
+ ],
+ "coverage": {
+  "offsets_read_unwritten": 0,
+  "sentinel_reads_detected": false,
+  "stray_writes": [],
+  "class_mismatches": []
+ },
+ "export_coverage": {
+  "covered": 5,
+  "exported": 8,
+  "uncovered": [
+   "FUN_800c4308",
+   "FUN_800c4838",
+   "zz_00c4704_"
+  ]
+ },
+ "unexplained_cases": [],
+ "verdict": "partial"
+}

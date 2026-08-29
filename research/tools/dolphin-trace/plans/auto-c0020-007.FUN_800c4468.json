@@ -1,0 +1,26 @@
+{
+  "unit": "auto-c0020-007",
+  "fn": "FUN_800c4468",
+  "addr": "0x800c4468",
+  "prototype": "void FUN_800c4468(undefined8 param_1, double param_2..param_8, int param_9, undefined4 param_10, undefined *param_11, undefined4 param_12..param_16)  /* chunk_0020.c 2512-2525, staged unit.c */",
+  "note": "HAND-AUTHORED. Two forwarding calls with DERIVED arguments -- the only thing this function computes. It loads the 32-bit word at param_9+0xe0 (a child/handle id) and forwards it, plus the interior pointer param_9+0x114, to zz_00076d0_; then passes the SAME loaded word and the literal 0x44 to zz_00097b4_. Typed read set is therefore exactly [param_9+0xe0] (4 bytes, big-endian on console); the function stores nothing, so the write set is EMPTY by derivation. The replayable properties are: the load offset, the interior-pointer arithmetic, the argument positions, and the two-call order -- all observed through recording env shims in the spec.",
+  "args": [
+    { "reg": "r3", "name": "param_1_hi" },
+    { "reg": "r4", "name": "param_1_lo" },
+    { "reg": "r5", "name": "param_9" },
+    { "reg": "r6", "name": "param_10" },
+    { "reg": "r7", "name": "param_11" },
+    { "reg": "r8", "name": "param_12" },
+    { "reg": "r9", "name": "param_13" },
+    { "reg": "r10", "name": "param_14" }
+  ],
+  "reads": [
+    { "id": "p9_e0", "addr": "r5+0xe0", "width": 4 }
+  ],
+  "ret": null,
+  "writes": [],
+  "unsampled_args": [
+    "param_2..param_8: double args are FPR-passed (not sampled by capture_oracle.py)",
+    "param_15, param_16: beyond r10 (stack-passed; not sampled)"
+  ]
+}

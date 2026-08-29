@@ -1,0 +1,23 @@
+{
+  "unit": "auto-c0020-007",
+  "fn": "FUN_800c4838",
+  "addr": "0x800c4838",
+  "prototype": "void FUN_800c4838(int self)  /* chunk_0020.c 2660-2674, staged unit.c */",
+  "note": "HAND-AUTHORED. The tracker's per-frame state-machine trampoline (the callback zz_00c4704_ installs at newobj+0x0c). If the state byte self+0x18 is below 2 AND the owner (self+0x90) has either advanced past state 1 or changed its id word at owner+0x3e8 relative to self+0x94, it forces state 2, calls the external teardown zz_008aff0_(self), and clears self+0x82. It then dispatches unconditionally through the ROM function table at 0x80305240 indexed by the (possibly just-updated) state byte. NOT REPLAYABLE by the harness: that trailing dispatch is a call through a raw ROM code address, and staged wasm units carry no address->function-table mapping (gnt4_shim.h: `Staging units are never executed; address->wasm-table dispatch mapping is a later pipeline stage`), so the wasm traps on the indirect call in every case. The read/write sets are recorded for when that pipeline stage lands.",
+  "args": [
+    { "reg": "r3", "name": "self" }
+  ],
+  "reads": [
+    { "id": "s18_pre", "addr": "r3+0x18", "width": 1 },
+    { "id": "s90_owner", "addr": "r3+0x90", "width": 4 },
+    { "id": "s94", "addr": "r3+0x94", "width": 2 },
+    { "id": "owner_18", "addr": "[r3+0x90]+0x18", "width": 1, "optional": true },
+    { "id": "owner_3e8", "addr": "[r3+0x90]+0x3e8", "width": 2, "optional": true },
+    { "id": "dispatch_slot", "addr": "0x80305240", "width": 16 }
+  ],
+  "ret": null,
+  "writes": [
+    { "id": "w18", "addr": "r3+0x18", "width": 1 },
+    { "id": "w82", "addr": "r3+0x82", "width": 1 }
+  ]
+}

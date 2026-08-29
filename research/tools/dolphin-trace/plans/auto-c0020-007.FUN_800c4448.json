@@ -1,0 +1,18 @@
+{
+  "unit": "auto-c0020-007",
+  "fn": "FUN_800c4448",
+  "addr": "0x800c4448",
+  "prototype": "void FUN_800c4448(undefined8 param_1, double param_2..param_8, undefined1 *param_9)  /* chunk_0020.c 2500-2508, staged unit.c */",
+  "note": "HAND-AUTHORED. The body is a single unconditional forward of all nine arguments to the external zz_0088e50_ -- it touches NO memory of its own, so the typed read set and write set are EMPTY by derivation, not by omission. The only replayable property is argument forwarding (positions and values). param_2..param_8 are FPR-passed and the capture tool samples GPRs only, so the replay supplies known sentinel doubles and asserts the shim observed them in the right slots; param_1 (r3:r4 as one undefined8/i64) and param_9 (r5) are asserted against the captured registers.",
+  "args": [
+    { "reg": "r3", "name": "param_1_hi" },
+    { "reg": "r4", "name": "param_1_lo" },
+    { "reg": "r5", "name": "param_9" }
+  ],
+  "reads": [],
+  "ret": null,
+  "writes": [],
+  "unsampled_args": [
+    "param_2..param_8: double args are FPR-passed (not sampled by capture_oracle.py)"
+  ]
+}
