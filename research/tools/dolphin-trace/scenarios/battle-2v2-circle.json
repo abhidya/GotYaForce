@@ -5,5 +5,9 @@
   "save_state": "2v2 gred cotrolled players no cpu.sav",
   "inject": "circle+b",
   "game_state": "2v2 sav + circle+b injection",
-  "dtm": null
+  "dtm": null,
+  "live_families": [
+    "0x800c04c0"
+  ],
+  "live_families_basis": "MEASURED 2026-08-29 on the owner's live 2v2 savestate: of the 818 exports across the 104 staged compile-only greens, only the 38 belonging to family 0x800c04c0 (pl0300/pl030b) ever fire here; the other 39 families' actors are not loaded in this state. Held-mask vs press-edge A/B the same day changed hit DENSITY only, never which family was live."
 }

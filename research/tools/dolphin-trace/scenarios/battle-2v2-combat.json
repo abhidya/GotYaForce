@@ -5,5 +5,9 @@
   "save_state": "2v2 gred cotrolled players no cpu.sav",
   "inject": "combat:b,x,a",
   "game_state": "2v2 sav + circling stick with B/X/A press-release edges",
-  "dtm": null
+  "dtm": null,
+  "live_families": [
+    "0x800c04c0"
+  ],
+  "live_families_basis": "Same savestate as battle-2v2-circle, so the same roster is loaded; the scenario differs only in injected pad edges. MEASURED 2026-08-29: combat:b,x,a roughly tripled the per-frame hit rate on family 0x800c04c0's hot exports and unlocked NO export circle+b could not already reach, i.e. it changed nothing about which families are live."
 }

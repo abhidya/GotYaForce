@@ -5,5 +5,7 @@
   "save_state": null,
   "inject": null,
   "game_state": "cold boot title/attract",
-  "dtm": null
+  "dtm": null,
+  "live_families": null,
+  "live_families_basis": "UNKNOWN, deliberately. Cold boot reaches the title screen and then an attract/demo loop; nobody has measured which borg families the attract demo constructs, and it plainly does show battle footage. Declaring [] here would claim a measurement that does not exist and would skip every family-gated unit routed to this scenario. null keeps the family gate OFF for title-attract (pre-gate behaviour) until someone measures the attract roster."
 }
