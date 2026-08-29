@@ -709,12 +709,12 @@ void FUN_800e8dac(undefined8 param_1,double param_2,double param_3,double param_
   undefined4 in_r9;
   undefined4 in_r10;
   int iVar5;
-  undefined8 uVar6;
+  undefined8 uVar6 = 0;  /* CORPUS CORRECTION 2026-08-29: r3 residue, not a return value (see line 717). It flows only into the dead first-parameter slots of zz_0007030_/zz_0007c54_, which never read param_1, so a deterministic 0 replaces undefined register content. */
   
   *(char *)(param_9 + 0x18) = *(char *)(param_9 + 0x18) + '\x01';
   iVar5 = *(int *)(param_9 + 0x90);
   *(code **)(param_9 + 0x100) = FUN_80047aa4;
-  uVar6 = zz_0089100_(param_9,(int)*(char *)(iVar5 + 0x3e4) + 0x10,1);
+  zz_0089100_(param_9,(int)*(char *)(iVar5 + 0x3e4) + 0x10,1);  /* CORPUS CORRECTION 2026-08-29: 0x80089100 returns NO value -- its own decompiled body (chunk_0013.c:65) is void and every exit is a bare "return;" with no result computed; this same chunk calls it bare at line 467; corpus-wide it is called 197x with an assignment and 172x bare, and the identical assign-a-void-function pattern occurs on other functions Ghidra itself declares void (zz_0007030_, chunk_0000.c:1548). The "uVar6 =" was Ghidra r3-residue threading, which made the ported unit declare a non-void zz_0089100_ and contest the oracle-registry owner at the assembly gate. Evidence: docs/composition-ladder.md, "zz_0089100_ resolution". */
   fVar1 = FLOAT_80438f40;
   *(undefined1 *)(param_9 + 0x84) = 0x41;
   *(float *)(param_9 + 0x60) = fVar1;
@@ -731,13 +731,13 @@ void FUN_800e8dac(undefined8 param_1,double param_2,double param_3,double param_
   *(undefined4 *)(param_9 + 0x70) = *(undefined4 *)(&DAT_80318b20 + iVar3);
   *(undefined2 *)(param_9 + 0x74) = *(undefined2 *)(&DAT_80318b24 + iVar3);
   iVar5 = zz_0006f98_(iVar5);
-  uVar6 = zz_0007030_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
+  zz_0007030_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,  /* CORPUS CORRECTION 2026-08-29: 0x80007030 returns NO value either -- its own decompiled body (chunk_0000.c:1548) is void with a bare "return;", and the oracle registry owner prototype is void. Same Ghidra r3-residue threading as line 717; uVar6 stays the modelled residue (0) and is still passed on, because the callee never reads param_1. */
                       *(int *)(iVar5 + 0x600),*(int *)(param_9 + 0xe0),
                       (int)*(short *)(&DAT_80318b10 + iVar3),iVar5 + 0xc28,in_r7,in_r8,in_r9,in_r10)
   ;
   iVar4 = iVar5 + 0xc28;
   iVar3 = (int)*(short *)(&DAT_80318b10 + iVar3);
-  uVar6 = zz_0007030_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
+  zz_0007030_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,  /* CORPUS CORRECTION 2026-08-29: r3-residue assignment removed, see line 734. */
                       *(int *)(iVar5 + 0x600),*(int *)(param_9 + 0xe4),iVar3,iVar4,in_r7,in_r8,in_r9
                       ,in_r10);
   zz_0007c54_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,*(int *)(param_9 + 0xe4)
