@@ -795,3 +795,19 @@ if (process.env.GF_SMOKE_COMPOSED_PILOT === "1") {
   await (await import("./smoke-composed-pilot-phase.mjs")).runComposedPilotPhase();
 }
 // >>> END COMPOSED-MODULE DISPATCH PILOT PHASE ===============================
+
+// ============================================================================
+// >>> GX HLE-HOST PHASE (opt-in; separate, self-contained — keep at end of
+// file). Drives a ROM-side wasm draw module through the GX adapter set: its GX
+// calls cross the Atomics bridge, the write-gather-pipe decoder assembles the
+// ROM's own vertex layouts (S16 XY direct, F32 XYZ direct, INDEX8 through
+// GXSetArray), and a real WebGL2 framebuffer is read back and screenshotted.
+// Also proves an unimplemented GX entry point fails LOUDLY rather than
+// no-opping. SEAM PROOF ONLY — no behavioural claim about the game's frames;
+// see docs/gx-hle-host.md. Opt in with GF_SMOKE_GX_HOST=1 (or run
+// scripts/smoke-gx-host-phase.mjs standalone).
+// ============================================================================
+if (process.env.GF_SMOKE_GX_HOST === "1") {
+  await (await import("./smoke-gx-host-phase.mjs")).runGxHostPhase();
+}
+// >>> END GX HLE-HOST PHASE ==================================================
