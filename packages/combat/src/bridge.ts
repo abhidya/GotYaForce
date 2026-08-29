@@ -1277,12 +1277,6 @@ function makeWireGunnerFamilyRegistration(): FamilyRegistration {
   };
 }
 
-/** Returns true if a ROM family driver is registered for this borg-id. With the
- *  shared-engine fallback, borgs with decoded action-stream data also get a driver. */
-export function hasRomFamilyDriver(borgId: string): boolean {
-  return borgId in familyRegistry() || borgId in ACTION_STREAM_BANKS;
-}
-
 function makeDefaultCueTable(): Int8Array {
   const t = new Int8Array(96).fill(-1);
   t[44 * 2] = 61;

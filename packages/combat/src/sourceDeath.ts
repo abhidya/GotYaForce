@@ -649,56 +649,26 @@ export function runSourceDeathSelfTests(assert: SourceDeathAssert): void {
 }
 
 /* =============================================================================
- * INTEGRATION SPEC — how combat.ts / battle.ts should delegate the death transition
- * and kill-event accounting to sourceDeath.ts instead of the current enterDeath path.
+ * WIRED AT: combat.ts runSourceDeathPath, called from applyHit's lethal branch.
+ * deathActorFromRuntime adapts BorgRuntime (which now carries the real +0x6fe/+0x272/
+ * +0x4aa/+0x434/+0x435/+0x420 fields, populated by battle.ts deployNext); borgDeathEntry's
+ * state writes and killEventEnergyAndScoreAccounting's per-actor counters are mirrored
+ * back. combat.ts's enterDeath still runs unconditionally afterwards for the port-mapped
+ * runtime writes (state/anim/vel) this module does not own.
  *
- * STATUS: sourceDeath.ts is a clean-room 1:1 port of zz_005bbc0_ (death state writes) +
- * zz_002f8dc_ (energy/score accounting). combat.ts and battle.ts are NOT edited per the
- * task. The current enterDeath(victim) in combat.ts does a DERIVED state flip ("death" +
- * alive=false); sourceDeath.ts ports the ROM's actual writes (+0x18=2, +0x5e0|=0x80000000,
- * +0x272|=0x443, death-type, state-timer, visibility clear, cue 0x2f) which the DERIVED
- * path collapses. The kill-event accounting (energy depletion + team score + roster
- * notification) is currently NOT in combat.ts at all — battle.ts's win/loss check would
- * delegate here.
+ * ENERGY IS NOT MIRRORED. kill_event computes the faithful side-pool subtract on a shadow
+ * pool, but battle.ts recomputeEnergy() is the live-pool authority and already drops the
+ * dead borg's cost; mirroring would double-subtract. See runSourceDeathPath's header.
  *
- * WIRING (drop-in for combat.ts enterDeath + the battle.ts win/loss accounting):
- *
- *   import {
- *     borgDeathEntry, killEventEnergyAndScoreAccounting,
- *     defaultDeathActor, defaultSourceBattleWork, type SourceDeathActor,
- *   } from "./sourceDeath.js";
- *
- *   // DEATH TRANSITION (replaces enterDeath):
- *   const target: SourceDeathActor = actorFromRuntime(victim);   // map BorgRuntime → offsets
- *   borgDeathEntry(target, battleWork, {
- *     onCueDispatch: (a, cue) => cueTableDispatch(a, cue),       // zz_006a750_/zz_006a6fc_
- *     onSlotSwap: () => swapToNextSlot(victim.slot),             // zz_008b640_ (Challenge)
- *     onDeathSubEntry: (a) => deathStateSubEntry(a),             // zz_005bccc_
- *   });
- *   // Then mirror target.state18/deathType6fe/... back onto BorgRuntime.
- *
- *   // KILL-EVENT ACCOUNTING (on the frame the victim's HP hits 0):
- *   const result = killEventEnergyAndScoreAccounting(
- *     actorFromRuntime(killer), actorFromRuntime(victim),
- *     battleWork, teamScores, challengeModeByte,
- *     rosterSlots, victim.uid,
- *   );
- *   if (result.sideDepleted) triggerWinLoss(victim.team);  // the victory/defeat branch
- *
- * REMAINING (honest TODOs, cited):
- *   - actorFromRuntime: BorgRuntime does not yet carry +0x6fe (deathType), +0x272
- *     (statusWord), +0x4aa (cost), +0x434/+0x435 (kills/deaths), +0x420/+0x424
- *     (costWon/lost). These ROM offsets need BorgRuntime fields (or a parallel results
- *     struct) before the port can run on live actors. Default neutral values are used in
- *     the self-tests.
- *   - SourceBattleWork.sides[].flagF6/flag108/flag109/killsRemaining10a: the per-side
- *     battle-work flags are not yet on BattleState. challengeMode comes from
- *     combat-config; the rest default to 0 (no energy subtract, no kill-counting) until
- *     the battle-work struct is ported.
- *   - The roster notification ring-buffer advance (chunk_0003.c:8305-8310) is a compiler
+ * REMAINING ROM GAPS (cited):
+ *   - SourceBattleWork.sides[].flagF6/flag108/flag109/killsRemaining10a are not on
+ *     BattleState; they default to 0 (no energy subtract, no kill-counting) until the
+ *     battle-work struct is ported. challengeMode likewise defaults to versus (0) because
+ *     it lives on BattleConfig and is not threaded into applyHit's DamageRuntimeContext.
+ *   - The roster-notification ring-buffer advance (chunk_0003.c:8305-8310) is a compiler
  *     artifact for (queueHead + 1) % 8; this port returns the events and lets the caller
  *     own the ring buffer rather than modeling the byte wrap inline.
  *   - zz_005f00c_ / zz_005efc4_ (pre-death cleanup) and zz_005bccc_ internals are cited
- *     deps, invoked via callbacks. The death STATE WRITES (+0x18/+0x5e0/+0x272/+0x6fe/
+ *     deps invoked via callbacks. The death STATE WRITES (+0x18/+0x5e0/+0x272/+0x6fe/
  *     +0x558) are the faithful core ported here.
  * ========================================================================== */

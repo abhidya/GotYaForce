@@ -67,7 +67,7 @@ import {
 } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
 import { runtimeShotPenetrationForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
-import { projectileVariant } from "./projectiles.js";
+import { projectileVariant, PROJECTILE_VARIANT_COUNT } from "./projectiles.js";
 import { AttackCommandType } from "./command.js";
 import {
   contextualBGatesForBorgId,
@@ -150,6 +150,20 @@ export interface ProjectileContext {
   bounds: RectStageBounds;
   collision: StageCollision | null;
 }
+
+/** Length below which a vector has no usable direction, so the caller must take its
+ *  degenerate branch instead of normalizing. Pure numerical guard on the port's own vector
+ *  math — no ROM analogue. */
+export const DIRECTION_EPSILON = 1e-6;
+/** Segment/triangle tolerances for the projectile-vs-terrain test — the same guards
+ *  movement.ts uses for its wall and ceiling tests. */
+const PLANE_EPSILON = 1e-5;
+const SEGMENT_T_EPSILON = 1e-4;
+const BARYCENTRIC_EPSILON = 1e-4;
+const DEGENERATE_TRIANGLE_EPSILON = 1e-8;
+/** XZ distance below which a lunge target is treated as coincident with the attacker, so the
+ *  swing keeps its current facing instead of snapping to a meaningless yaw. */
+const LUNGE_FACING_SNAP_EPSILON = 1e-3;
 
 // ---------------------------------------------------------------------------------------
 // Invincibility timer — DIRECT PORT of the decompiled countdown (behavior-notes.md s4a).
@@ -790,6 +804,9 @@ const FLAGS_B_NON_NORMAL_REACTION_MASK = 0xfc0;
 const FLAGS_A_GROW = 0x0004;
 /** flagsA bit — shrink, only when the grow bit is clear (chunk_0003.c:7758-7770). */
 const FLAGS_A_SHRINK = 0x0008;
+/** flagsA bit — "blast" (GUARD/40 DATA RULE T1): hits teammates at full damage and awards
+ *  no combo score (chunk_0003.c:7934). */
+const FLAGS_A_BLAST = 0x1000;
 
 /**
  * Sanity filter (report's honest caveat): many high-index familyDamageRecords rows are
@@ -913,16 +930,22 @@ export function knockbackPitchTrimRadians(record: DamageRecord): number {
  * Coverage: 111/208 ground, 175/208 launch — the honest count of borgs with a real exported
  * reaction clip (the rest substitute/idle per PORT-1TO1-STATUS.md:859).
  */
+/** Shortest exported reaction clip that counts as real data. The 23 render-frozen borgs bake
+ *  1-frame placeholder clips; those fall back to the labeled TUNED constants instead. */
+const MIN_REAL_REACTION_CLIP_FRAMES = 2;
+
 export function reactionAnimLengthFrames(
   borgId: string,
   kind: "ground" | "launch",
 ): number {
   const row = REACTION_ANIM_LENGTHS[borgId.toLowerCase()];
-  if (row) {
-    const v = kind === "launch" ? row.launch : row.ground;
-    if (typeof v === "number" && v >= 2) return v;
-  }
-  return kind === "launch" ? REACTION.LAUNCH_FALLBACK_FRAMES : REACTION.GROUND_STAGGER_FALLBACK_FRAMES;
+  const exported = kind === "launch" ? row?.launch : row?.ground;
+  const fallback =
+    kind === "launch" ? REACTION.LAUNCH_FALLBACK_FRAMES : REACTION.GROUND_STAGGER_FALLBACK_FRAMES;
+  // A 1-frame clip is a placeholder bake, not a real reaction — treat it as missing.
+  return typeof exported === "number" && exported >= MIN_REAL_REACTION_CLIP_FRAMES
+    ? exported
+    : fallback;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -1348,8 +1371,8 @@ function runSourceCollisionPasses(
     const record = pr.damageRecord ?? damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT);
     const obj = projectileToCollisionObject(pr, owner, record);
     // Mirror the legacy projectile hit test: hitRadius + the victim-body stand-in
-    // (SHOT.TARGET_BODY_RADIUS � see stepProjectiles' swept test) + the |dy| <= 60 band.
-    contactShape.set(obj, { radius: pr.hitRadius + SHOT.TARGET_BODY_RADIUS, yBand: 60 });
+    // (SHOT.TARGET_BODY_RADIUS, see stepProjectiles' swept test) + the same vertical band.
+    contactShape.set(obj, { radius: pr.hitRadius + SHOT.TARGET_BODY_RADIUS, yBand: SHOT.HIT_Y_BAND });
     activeList.push(obj);
   }
 
@@ -1846,11 +1869,11 @@ export function applyHit(
   // GUARD/40 DATA RULE (T1) exemption: a blast-flagged record (flagsA & 0x1000) skips combo
   // score entirely (chunk_0003.c:7934) — "blast hits teammates at full damage and awards
   // nothing", per the doc.
-  if ((record.flagsA & 0x1000) === 0) {
+  if ((record.flagsA & FLAGS_A_BLAST) === 0) {
     victim.comboAccum += record.comboScoreValue;
-    if (victim.comboAccum > 99) {
+    if (victim.comboAccum > STAGGER.COMBO_ACCUM_WRAP) {
       victim.comboAccum = 0;
-      victim.comboRank = Math.min(0x3f, victim.comboRank + 1);
+      victim.comboRank = Math.min(STAGGER.COMBO_RANK_MAX, victim.comboRank + 1);
     }
   }
 
@@ -2074,15 +2097,12 @@ export function enterDeath(b: BorgRuntime): void {
  * death state has fully elapsed (caller removes the borg + triggers next-deploy).
  */
 export function stepActionState(b: BorgRuntime): { died: boolean } {
+  let died = false;
   switch (b.state) {
     case "hit": {
       const stun = b.cooldowns["hitstun"] ?? 0;
-      if (stun <= 0) {
-        b.state = "idle";
-        b.stateTime = 0;
-        b.anim = "idle";
-      }
-      return { died: false };
+      if (stun <= 0) enterIdle(b, "idle");
+      break;
     }
     case "down": {
       // T6: release gated on the reaction anim completing (per-borg length where exported,
@@ -2092,42 +2112,46 @@ export function stepActionState(b: BorgRuntime): { died: boolean } {
       if (b.stateTime >= downAnimFrames && b.grounded) {
         // Wake up with the ported 60-frame invincibility.
         b.invincTimer = WAKE_UP_INVINCIBILITY_FRAMES;
-        b.state = "idle";
-        b.stateTime = 0;
-        b.anim = "wake";
+        enterIdle(b, "wake");
       }
-      return { died: false };
+      break;
     }
     case "death": {
       if (b.stateTime >= STATE.DEATH_DURATION) {
         b.alive = false;
-        return { died: true };
+        died = true;
       }
-      return { died: false };
+      break;
     }
     case "spawn": {
-      // 3-phase deploy (DEPLOY, behavior-notes.md (af), state-table slots 0-2 on actor +0x558):
-      // phase 0 descent (20f) -> phase 1 setup (1f, fires ALLY reaction cue id 8 via
-      // FUN_8005bec8) -> phase 2 pose (15f). stateTime is 1-based here (caller increments
-      // before calling), so phase 0 = stateTime 1..20, phase 1 = stateTime 21, phase 2 = 22..36.
-      // deployPhase is renderer-readable; the 0 -> 1 transition is the ally-cue-8 frame.
-      if (b.stateTime <= DEPLOY.PHASE0_DESCENT_FRAMES) {
-        b.deployPhase = 0;
-      } else if (b.stateTime <= DEPLOY.PHASE0_DESCENT_FRAMES + DEPLOY.PHASE1_SETUP_FRAMES) {
-        b.deployPhase = 1;
-      } else {
-        b.deployPhase = 2;
-      }
-      if (b.stateTime >= STATE.SPAWN_DURATION) {
-        b.state = "idle";
-        b.stateTime = 0;
-        b.anim = "idle";
-      }
-      return { died: false };
+      b.deployPhase = deployPhaseAt(b.stateTime);
+      if (b.stateTime >= STATE.SPAWN_DURATION) enterIdle(b, "idle");
+      break;
     }
     default:
-      return { died: false };
+      break;
   }
+  return { died };
+}
+
+/** Return to the idle STATE, choosing the anim the transition should play ("wake" after a
+ *  knockdown, "idle" otherwise). The state/anim/stateTime triple always moves together. */
+function enterIdle(b: BorgRuntime, anim: "idle" | "wake"): void {
+  b.state = "idle";
+  b.stateTime = 0;
+  b.anim = anim;
+}
+
+/**
+ * 3-phase deploy (DEPLOY, behavior-notes.md (af), state-table slots 0-2 on actor +0x558):
+ * phase 0 descent (20f) -> phase 1 setup (1f, fires ALLY reaction cue id 8 via FUN_8005bec8)
+ * -> phase 2 pose (15f). `stateTime` is 1-based here (stepActionState's caller increments
+ * before calling), so phase 0 = 1..20, phase 1 = 21, phase 2 = 22..36. deployPhase is
+ * renderer-readable; the 0 -> 1 transition is the ally-cue-8 frame.
+ */
+function deployPhaseAt(stateTime: number): 0 | 1 | 2 {
+  const setupEndFrame = DEPLOY.PHASE0_DESCENT_FRAMES + DEPLOY.PHASE1_SETUP_FRAMES;
+  return stateTime <= DEPLOY.PHASE0_DESCENT_FRAMES ? 0 : stateTime <= setupEndFrame ? 1 : 2;
 }
 
 /** True while the borg is locked out of acting (hit/down/death/spawn). */
@@ -2202,6 +2226,15 @@ export function resetProjectileCounter(): void {
 const VISUAL_FAMILY_BY_BORG_ID: Readonly<Record<string, ProjectileVisualKind>> =
   projectileVisualFamilies.kinds as Record<string, ProjectileVisualKind>;
 
+/** Name-string heuristic backing projectileVisualKindForProfile's fallback, in match order.
+ *  TUNED, and strictly worse evidence than the asset-family table above — it exists only for
+ *  the ids that table has no confident signal for. */
+const VISUAL_FAMILY_NAME_PATTERNS: ReadonlyArray<{ pattern: RegExp; kind: ProjectileVisualKind }> = [
+  { pattern: /(flame|fire|phoenix|dragon)/, kind: "flame" },
+  { pattern: /(beam|laser|plasma|satellite|bit)/, kind: "energy" },
+  { pattern: /(gun|gatling|revolver|rifle|cannon|tank|machine|bullet|missile|launcher)/, kind: "muzzle" },
+];
+
 /**
  * Resolve a projectile's visual kind for a borg. Prefers the asset-family table above (real,
  * per-borg asset-inventory evidence); falls back to the original name-string heuristic only for
@@ -2211,13 +2244,10 @@ const VISUAL_FAMILY_BY_BORG_ID: Readonly<Record<string, ProjectileVisualKind>> =
  */
 export function projectileVisualKindForProfile(p: BorgProfile): ProjectileVisualKind {
   const fromAssets = VISUAL_FAMILY_BY_BORG_ID[p.id];
-  if (fromAssets) return fromAssets;
   // LAST-RESORT fallback: no real per-borg asset-family signal found for this id.
   const text = `${p.id} ${p.name}`.toLowerCase();
-  if (/(flame|fire|phoenix|dragon)/.test(text)) return "flame";
-  if (/(beam|laser|plasma|satellite|bit)/.test(text)) return "energy";
-  if (/(gun|gatling|revolver|rifle|cannon|tank|machine|bullet|missile|launcher)/.test(text)) return "muzzle";
-  return "energy";
+  const fromName = VISUAL_FAMILY_NAME_PATTERNS.find(({ pattern }) => pattern.test(text));
+  return fromAssets ?? fromName?.kind ?? "energy";
 }
 
 /**
@@ -2246,35 +2276,52 @@ export const X_CHARGE = {
   TIER2_DAMAGE_MULT: 2.4,
 } as const;
 
-/** Per-tier X-charge scaling — the X-side mirror of chargeScaling below: damage from the
- *  TUNED X_CHARGE mults, speed/radius/hitstun/knockback from the shared CHARGE.* tier
- *  constants (tier 0 = all 1x, identical to an uncharged X press). */
-function xChargeScaling(tier: number): {
+interface TierScaling {
   damage: number;
   speed: number;
   radius: number;
   hitstun: number;
   knockback: number;
-} {
-  if (tier >= 2) {
-    return {
-      damage: X_CHARGE.TIER2_DAMAGE_MULT,
-      speed: CHARGE.TIER2_SPEED_MULT,
-      radius: CHARGE.TIER2_RADIUS_MULT,
-      hitstun: CHARGE.TIER2_HITSTUN_MULT,
-      knockback: CHARGE.TIER2_KNOCKBACK_MULT,
-    };
-  }
-  if (tier === 1) {
-    return {
-      damage: X_CHARGE.TIER1_DAMAGE_MULT,
-      speed: CHARGE.TIER1_SPEED_MULT,
-      radius: CHARGE.TIER1_RADIUS_MULT,
-      hitstun: CHARGE.TIER1_HITSTUN_MULT,
-      knockback: CHARGE.TIER1_KNOCKBACK_MULT,
-    };
-  }
-  return { damage: 1, speed: 1, radius: 1, hitstun: 1, knockback: 1 };
+}
+
+/** The speed/radius/hitstun/knockback half of a charge tier, indexed by tier. Identical for
+ *  B-charge and X-charge (both read the shared TUNED CHARGE.* constants); only `damage`
+ *  differs between them, so each caller supplies that itself. Tier 0 = all 1x, i.e. an
+ *  unmodified press. */
+const CHARGE_TIER_SCALING: readonly Omit<TierScaling, "damage">[] = [
+  { speed: 1, radius: 1, hitstun: 1, knockback: 1 },
+  {
+    speed: CHARGE.TIER1_SPEED_MULT,
+    radius: CHARGE.TIER1_RADIUS_MULT,
+    hitstun: CHARGE.TIER1_HITSTUN_MULT,
+    knockback: CHARGE.TIER1_KNOCKBACK_MULT,
+  },
+  {
+    speed: CHARGE.TIER2_SPEED_MULT,
+    radius: CHARGE.TIER2_RADIUS_MULT,
+    hitstun: CHARGE.TIER2_HITSTUN_MULT,
+    knockback: CHARGE.TIER2_KNOCKBACK_MULT,
+  },
+];
+
+/** Clamp an arbitrary caller-supplied tier onto 0/1/2 — tiers above 2 read as tier 2, and
+ *  anything below 1 (including negatives) as tier 0, matching the old `>= 2 / === 1 / else`
+ *  chains this replaced. */
+function chargeTierIndex(tier: number): number {
+  return tier >= 2 ? 2 : tier === 1 ? 1 : 0;
+}
+
+function sharedChargeTierScaling(tier: number): Omit<TierScaling, "damage"> {
+  return CHARGE_TIER_SCALING[chargeTierIndex(tier)]!;
+}
+
+/** Per-tier X-charge scaling — the X-side mirror of chargeScaling below: damage from the
+ *  TUNED X_CHARGE mults, speed/radius/hitstun/knockback from the shared CHARGE.* tier
+ *  constants (tier 0 = all 1x, identical to an uncharged X press). */
+function xChargeScaling(tier: number): TierScaling {
+  const damage =
+    tier >= 2 ? X_CHARGE.TIER2_DAMAGE_MULT : tier === 1 ? X_CHARGE.TIER1_DAMAGE_MULT : 1;
+  return { damage, ...sharedChargeTierScaling(tier) };
 }
 
 type BActionKind = "melee" | "shot";
@@ -2338,22 +2385,31 @@ function resolveBActionOrder(
   romGates: ContextualBGates | null,
 ): readonly BActionKind[] {
   const fallback = primaryBActionOrder(actionProfile);
-  if (!meleeDef || !shotDef) return fallback;
-  // ROM +0x4ec record gating (decoded exact tables only, commandDispatch.ts): a table whose
-  // B-close (type 1) row has no active records means the ROM's own per-borg command data says
-  // there is NO battle attack — B selects the shot even inside the engage window. Conversely
-  // a table with no active B-far (type 0) records has no far command — B out of the window
-  // selects melee only (the whiff gate downstream keeps hybrids from air-swinging at range,
-  // which for a shot-primary borg makes far-B a ROM-shaped no-op). Borgs without a decoded
-  // table (romGates null) and single-action borgs keep the profile-driven behavior above.
-  if (romGates) {
-    if (meleeEngaged && !romGates.melee) return ["shot"] as const;
-    if (!meleeEngaged && !romGates.shot) return ["melee"] as const;
-  }
   // A held charge keeps the shot path first (stable release semantics) ONLY while no
   // melee-context target is in the engage window.
-  if ((b.cooldowns["chargeFrames"] ?? 0) > 0 && !meleeEngaged) return fallback;
-  return meleeEngaged ? (["melee", "shot"] as const) : (["shot", "melee"] as const);
+  const chargeBanked = (b.cooldowns["chargeFrames"] ?? 0) > 0;
+
+  let order: readonly BActionKind[];
+  if (!meleeDef || !shotDef) {
+    // Single-action borgs have nothing to choose between.
+    order = fallback;
+  } else if (romGates && meleeEngaged && !romGates.melee) {
+    // ROM +0x4ec record gating (decoded exact tables only, commandDispatch.ts): a table whose
+    // B-close (type 1) row has no active records means the ROM's own per-borg command data
+    // says there is NO battle attack — B selects the shot even inside the engage window.
+    order = ["shot"];
+  } else if (romGates && !meleeEngaged && !romGates.shot) {
+    // Mirror case: no active B-far (type 0) records means no far command, so B out of the
+    // window selects melee only. The whiff gate downstream keeps hybrids from air-swinging at
+    // range, which for a shot-primary borg makes far-B a ROM-shaped no-op. Borgs without a
+    // decoded table (romGates null) keep the profile-driven behaviour.
+    order = ["melee"];
+  } else if (chargeBanked && !meleeEngaged) {
+    order = fallback;
+  } else {
+    order = meleeEngaged ? ["melee", "shot"] : ["shot", "melee"];
+  }
+  return order;
 }
 
 /**
@@ -2824,7 +2880,7 @@ function startMeleeAttack(
   // the MELEE.LUNGE_* citations in constants.ts — all TUNED, root-motion-anchored). The full
   // facing snap is a TUNED stand-in for the ROM's lock-tracked attack facing; stepMovement's
   // lock-facing keeps tracking the target on subsequent frames either way.
-  if (lungeTarget && distXZ(b.pos, lungeTarget.pos) > 1e-3) {
+  if (lungeTarget && distXZ(b.pos, lungeTarget.pos) > LUNGE_FACING_SNAP_EPSILON) {
     b.rotY = yawFromXZ(lungeTarget.pos.x - b.pos.x, lungeTarget.pos.z - b.pos.z);
     b.cooldowns["meleeLunge"] = Math.min(
       startup + meleeDef.active,
@@ -3028,11 +3084,12 @@ function spawnSpecialProjectiles(
       y: b.pos.y + MUZZLE_OFFSET.up,
       z: b.pos.z + fwd.z * MUZZLE_OFFSET.forward,
     };
-    // TUNED floor (2026-07-04 playtest): several generated profiles carry projectileSpeed
-    // below the borg's own bullet speed (G RED's G Crash was 24 vs his 28 u/f shots), which
-    // read as broken. A special is never slower than 1.4x the generic shot speed until the
-    // per-move speed params (shot variant table row bytes, undecoded) replace this.
-    const specialSpeed = Math.max(specialDef.projectileSpeed ?? SHOT.SPEED, SHOT.SPEED * 1.4);
+    // A special is never slower than SPECIAL.MIN_PROJECTILE_SPEED_MULT x the generic shot
+    // speed — see that constant for why the profile value alone is not trusted.
+    const specialSpeed = Math.max(
+      specialDef.projectileSpeed ?? SHOT.SPEED,
+      SHOT.SPEED * SPECIAL.MIN_PROJECTILE_SPEED_MULT,
+    );
     projectiles.push({
       uid: `proj_${projCounter++}`,
       ownerUid: b.uid,
@@ -3124,32 +3181,14 @@ function startShotAttack(
 
 /** Per-tier charge scaling (tier 0 = all 1x). Damage mults come from the profile; the rest
  *  from the TUNED CHARGE constants. */
-function chargeScaling(shotDef: ShotActionDef, tier: number): {
-  damage: number;
-  speed: number;
-  radius: number;
-  hitstun: number;
-  knockback: number;
-} {
-  if (tier >= 2) {
-    return {
-      damage: shotDef.chargeTier2DamageMult,
-      speed: CHARGE.TIER2_SPEED_MULT,
-      radius: CHARGE.TIER2_RADIUS_MULT,
-      hitstun: CHARGE.TIER2_HITSTUN_MULT,
-      knockback: CHARGE.TIER2_KNOCKBACK_MULT,
-    };
-  }
-  if (tier === 1) {
-    return {
-      damage: shotDef.chargeTier1DamageMult,
-      speed: CHARGE.TIER1_SPEED_MULT,
-      radius: CHARGE.TIER1_RADIUS_MULT,
-      hitstun: CHARGE.TIER1_HITSTUN_MULT,
-      knockback: CHARGE.TIER1_KNOCKBACK_MULT,
-    };
-  }
-  return { damage: 1, speed: 1, radius: 1, hitstun: 1, knockback: 1 };
+function chargeScaling(shotDef: ShotActionDef, tier: number): TierScaling {
+  const damage =
+    tier >= 2
+      ? shotDef.chargeTier2DamageMult
+      : tier === 1
+        ? shotDef.chargeTier1DamageMult
+        : 1;
+  return { damage, ...sharedChargeTierScaling(tier) };
 }
 
 // Multi-muzzle note (ROM, fx-cluster-2026-07-03): the fire handler zz_0070558_
@@ -3186,7 +3225,7 @@ function spawnProjectiles(
  *  (DAT_802f3dda). Returns null when no variant matches — callers keep TUNED values.
  *  Exported for selfcheck.ts's charge-tier drop expectation. */
 export function findVariantByKind(kind: number): { hSpeed: number; drop: number; lifetimeFrames: number; scale: [number, number, number] } | null {
-  for (let i = 0; i < 64; i++) {
+  for (let i = 0; i < PROJECTILE_VARIANT_COUNT; i++) {
     const variant = projectileVariant(i);
     if (variant && variant.kind === kind) {
       return { hSpeed: variant.hSpeed, drop: variant.drop, lifetimeFrames: variant.lifetimeFrames, scale: variant.scale };
@@ -3201,21 +3240,34 @@ export function findVariantByKind(kind: number): { hSpeed: number; drop: number;
  *  otherwise it flies straight (homingTarget = null). Previously the port granted
  *  homingTarget = b.lockTarget unconditionally. The cone half-angle is TUNED
  *  (HOMING.AIM_CONE_HALF_ANGLE_RAD) — the ROM compares against FLOAT_8043768c, identified but
- *  UNDUMPED. `dir` must be a unit vector. */
-function homingTargetForSpawn(
+ *  UNDUMPED. `dir` must be a unit vector.
+ *
+ *  Exported because battle.ts's ROM-family spawner needs the identical gate and used to
+ *  carry a hand-copied duplicate of this function. Note the two call sites deliberately
+ *  pass DIFFERENT origins: the generic spawner measures from the muzzle, battle.ts measures
+ *  from the shooter (several decoded spawner rows carry large lateral muzzle offsets, and a
+ *  muzzle-origin cone rejected the lock as soon as the target came inside a few muzzle-widths
+ *  — the shot then flew a parallel line past a locked point-blank target). */
+export function homingTargetForSpawn(
   b: BorgRuntime,
   all: BorgRuntime[],
   muzzlePos: Vec3,
   dir: Vec3,
 ): string | null {
-  if (!b.lockTarget) return null;
-  const tgt = all.find((o) => o.uid === b.lockTarget);
-  if (!tgt || !isTargetable(tgt)) return null;
-  const to = sub(tgt.pos, muzzlePos);
+  const tgt = b.lockTarget ? all.find((o) => o.uid === b.lockTarget) : undefined;
+  return tgt && isTargetable(tgt) && withinAimCone(muzzlePos, dir, tgt.pos)
+    ? b.lockTarget
+    : null;
+}
+
+/** True when `targetPos` lies inside the spawn-time aim cone around `dir` (a unit vector)
+ *  measured from `origin`. A target sitting on the origin is trivially in-cone. */
+function withinAimCone(origin: Vec3, dir: Vec3, targetPos: Vec3): boolean {
+  const to = sub(targetPos, origin);
   const dist = len(to);
-  if (dist <= 1e-6) return b.lockTarget; // muzzle on top of the target: trivially in-cone
+  if (dist <= DIRECTION_EPSILON) return true;
   const cos = (to.x * dir.x + to.y * dir.y + to.z * dir.z) / dist;
-  return cos >= Math.cos(HOMING.AIM_CONE_HALF_ANGLE_RAD) ? b.lockTarget : null;
+  return cos >= Math.cos(HOMING.AIM_CONE_HALF_ANGLE_RAD);
 }
 
 function spawnProjectile(
@@ -3255,7 +3307,7 @@ function spawnProjectile(
     if (tgt) {
       const to = sub(add(tgt.pos, { x: 0, y: SHOT.AIM_TARGET_Y, z: 0 }), muzzlePos);
       const d = len(to);
-      if (d > 1e-6) flightDir = scale(to, 1 / d);
+      if (d > DIRECTION_EPSILON) flightDir = scale(to, 1 / d);
     }
   }
   // ROM projectile data override: look up the borg's shot kind in the decoded variant
@@ -3402,12 +3454,10 @@ function spawnSwordBeam(
   all: BorgRuntime[],
 ): Projectile {
   const fwd = forwardFromYaw(b.rotY);
-  // TUNED spawn offsets (forward 40 / up 20): a port-side design value for the beam's launch
-  // point — no ROM anchor (the sword-beam emitter is not one of the dumped muzzle params).
   const spawnPos = {
-    x: b.pos.x + fwd.x * 40,
-    y: b.pos.y + 20,
-    z: b.pos.z + fwd.z * 40,
+    x: b.pos.x + fwd.x * MELEE.SWORD_BEAM_MUZZLE.forward,
+    y: b.pos.y + MELEE.SWORD_BEAM_MUZZLE.up,
+    z: b.pos.z + fwd.z * MELEE.SWORD_BEAM_MUZZLE.forward,
   };
   return {
     uid: `proj_${projCounter++}`,
@@ -3441,7 +3491,7 @@ function spawnSwordBeam(
  * Swept projectile-vs-borg contact test for one fixed step. Finds the closest approach
  * of the XZ segment [prev -> cur] to the target's XZ position; contact when that
  * distance is within `radius` AND the projectile's interpolated height at the closest
- * approach is within the flat 60-unit vertical band (same band the old point test used).
+ * approach is within SHOT.HIT_Y_BAND (same band the old point test used).
  */
 function projectileSweepHit(prev: Vec3, cur: Vec3, targetPos: Vec3, radius: number): boolean {
   const sx = cur.x - prev.x;
@@ -3458,7 +3508,7 @@ function projectileSweepHit(prev: Vec3, cur: Vec3, targetPos: Vec3, radius: numb
   const dz = targetPos.z - cz;
   if (dx * dx + dz * dz > radius * radius) return false;
   const cy = prev.y + (cur.y - prev.y) * t;
-  return Math.abs(cy - targetPos.y) <= 60;
+  return Math.abs(cy - targetPos.y) <= SHOT.HIT_Y_BAND;
 }
 
 export function stepProjectiles(
@@ -3655,22 +3705,22 @@ function steerProjectile3d(pr: Projectile, targetPos: Vec3): void {
   const cur = scale(pr.vel as Vec3, 1 / speed);
   const toTarget = sub(targetPos, pr.pos);
   const dist = len(toTarget);
-  if (dist <= 1e-6) return; // on top of the target: no defined steer direction
+  if (dist <= DIRECTION_EPSILON) return; // on top of the target: no defined steer direction
   const desired = scale(toTarget, 1 / dist);
   const dot = clamp(cur.x * desired.x + cur.y * desired.y + cur.z * desired.z, -1, 1);
   const angle = Math.acos(dot);
-  if (angle <= 1e-6) return; // already aligned
+  if (angle <= DIRECTION_EPSILON) return; // already aligned
   if (angle <= pr.homingTurn) {
     pr.vel = scale(desired, speed); // clamp not binding: snap onto the target direction
     return;
   }
   const sinAngle = Math.sin(angle);
-  if (sinAngle <= 1e-6) {
+  if (sinAngle <= DIRECTION_EPSILON) {
     // Anti-parallel: the rotation axis (cur x desired) degenerates to zero — the ROM builds
     // its axis from the same cross product and its tie-break is unread, so TUNED: turn the
     // horizontal component by the clamp in the +yaw direction this frame (deterministic).
     const horiz = Math.hypot(cur.x, cur.z);
-    if (horiz <= 1e-6) return; // straight up/down reversal: leave it for the hit/impact tests
+    if (horiz <= DIRECTION_EPSILON) return; // straight up/down reversal: leave it for the hit/impact tests
     const newYaw = yawFromXZ(cur.x, cur.z) + pr.homingTurn;
     pr.vel = {
       x: Math.sin(newYaw) * horiz * speed,
@@ -3708,24 +3758,32 @@ function projectileImpactReason(
   ctx: ProjectileContext,
 ): "hit-terrain" | "out-of-bounds" | null {
   const { pos } = projectile;
-  if (pos.x < ctx.bounds.minX || pos.x > ctx.bounds.maxX || pos.z < ctx.bounds.minZ || pos.z > ctx.bounds.maxZ) {
-    return "out-of-bounds";
+  const outsideBounds =
+    pos.x < ctx.bounds.minX || pos.x > ctx.bounds.maxX ||
+    pos.z < ctx.bounds.minZ || pos.z > ctx.bounds.maxZ;
+
+  let reason: "hit-terrain" | "out-of-bounds" | null;
+  if (outsideBounds) {
+    reason = "out-of-bounds";
+  } else if (!ctx.collision || ctx.collision.triangles.length === 0) {
+    reason = null;
+  } else {
+    // Terrain/wall impact: earliest crossing along prev->new (zz_0083244_/zz_0083714_ shape).
+    let best: { point: Vec3; t: number } | null = null;
+    for (const tri of candidateTrianglesForSegment(ctx.collision, prevPos, pos)) {
+      const hit = segmentTriangleImpact(tri, prevPos, pos);
+      if (hit && (!best || hit.t < best.t)) best = hit;
+    }
+    if (best) {
+      projectile.pos = best.point;
+      reason = "hit-terrain";
+    } else {
+      // Pre-existing floor-presence cull: flying over space with no floor at all counts as
+      // leaving the play area (port-side; the original relies on geometry + the 600f lifetime).
+      reason = floorSurfaceYAt(ctx.collision, pos.x, pos.z, pos.y) == null ? "out-of-bounds" : null;
+    }
   }
-  if (!ctx.collision || ctx.collision.triangles.length === 0) return null;
-  // Terrain/wall impact: earliest crossing along prev->new (zz_0083244_/zz_0083714_ shape).
-  let best: { point: Vec3; t: number } | null = null;
-  for (const tri of candidateTrianglesForSegment(ctx.collision, prevPos, pos)) {
-    const hit = segmentTriangleImpact(tri, prevPos, pos);
-    if (hit && (!best || hit.t < best.t)) best = hit;
-  }
-  if (best) {
-    projectile.pos = best.point;
-    return "hit-terrain";
-  }
-  // Pre-existing floor-presence cull: flying over space with no floor at all counts as
-  // leaving the play area (port-side; the original relies on geometry + the 600f lifetime).
-  if (floorSurfaceYAt(ctx.collision, pos.x, pos.z, pos.y) == null) return "out-of-bounds";
-  return null;
+  return reason;
 }
 
 /** Segment-vs-triangle crossing for projectile impact. Same solid-geometry filters as the
@@ -3745,10 +3803,10 @@ function segmentTriangleImpact(
   const d0 = (p0.x - a.x) * n.x + (p0.y - a.y) * n.y + (p0.z - a.z) * n.z;
   const d1 = (p1.x - a.x) * n.x + (p1.y - a.y) * n.y + (p1.z - a.z) * n.z;
   if (!Number.isFinite(d0) || !Number.isFinite(d1)) return null;
-  if (Math.abs(d0 - d1) < 1e-5) return null; // parallel to the plane
+  if (Math.abs(d0 - d1) < PLANE_EPSILON) return null; // parallel to the plane
   if (d0 === 0 || d0 * d1 > 0) return null; // no crossing (start-on-plane skipped, as movement.ts)
   const t = d0 / (d0 - d1);
-  if (t < -1e-4 || t > 1 + 1e-4) return null;
+  if (t < -SEGMENT_T_EPSILON || t > 1 + SEGMENT_T_EPSILON) return null;
   const point = {
     x: p0.x + (p1.x - p0.x) * t,
     y: p0.y + (p1.y - p0.y) * t,
@@ -3774,10 +3832,10 @@ function pointInTriangleByDominantAxis(p: Vec3, tri: StageCollisionTriangle): bo
     pu = p.x; pv = p.y; u0 = a.x; v0 = a.y; u1 = b.x; v1 = b.y; u2 = c.x; v2 = c.y;
   }
   const denom = (v1 - v2) * (u0 - u2) + (u2 - u1) * (v0 - v2);
-  if (Math.abs(denom) < 1e-8) return false; // degenerate projection
+  if (Math.abs(denom) < DEGENERATE_TRIANGLE_EPSILON) return false; // degenerate projection
   const wa = ((v1 - v2) * (pu - u2) + (u2 - u1) * (pv - v2)) / denom;
   const wb = ((v2 - v0) * (pu - u2) + (u0 - u2) * (pv - v2)) / denom;
   const wc = 1 - wa - wb;
-  return wa >= -1e-4 && wb >= -1e-4 && wc >= -1e-4;
+  return wa >= -BARYCENTRIC_EPSILON && wb >= -BARYCENTRIC_EPSILON && wc >= -BARYCENTRIC_EPSILON;
 }
 

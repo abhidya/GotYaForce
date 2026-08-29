@@ -124,10 +124,9 @@ export function startStream(
     onStartStream?: (group: number, slot: number, mask: number) => boolean;
   }).onStartStream?.(group, slot, mask) === true;
   const effective = mask & actor.weaponPartMask;
-  if ((effective & 2) !== 0) {
-    // Clear +0x709 (chunk_0006.c:1442-1444) — the contact-slow flag. Bridge clears it
-    // on the BorgRuntime status word.
-  }
+  // NOT PORTED: for an effective mask with bit 1 set the ROM clears +0x709, the contact-slow
+  // flag (chunk_0006.c:1442-1444). That field lives on BorgRuntime's status word, not
+  // RomActor, so the bridge owns the clear.
   const streamStart = resolveStreamOffset(actor, group, slot);
   if (streamStart < 0) {
     for (let i = 0; i < actor.parts.length; i++) {

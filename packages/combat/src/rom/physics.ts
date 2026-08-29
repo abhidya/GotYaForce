@@ -198,7 +198,12 @@ export function projectXzMagnitude(magnitude: number, actor: RomActor, yaw: numb
  * Port of `FUN_80067610` @ chunk_0008.c:3915 — the "drift" integrator that only applies
  *  when the motion vector `(motion.x, motion.y, motion.z)` exceeds DRIFT_EPSILON_SQ.
  *  Normalizes motion, scales by `hSpeed × timescale × tierScale`, adds to position; then
- *  decays hSpeed by `hDecel × timescale`. Used by knockback reactions.
+ *  decays hSpeed by `hDecel × timescale`.
+ *
+ *  NOT WIRED. The ROM uses this for knockback reactions, but this port drives knockback
+ *  through combat.ts applyHit + movement.ts's REACTION integration instead, so nothing
+ *  calls it today. Kept as the verified 1:1 port for when the reaction path moves onto
+ *  the RomActor model.
  */
 export function integrateDrift(actor: RomActor): void {
   const m = actor.motion;

@@ -8,14 +8,6 @@
 
 import type { RomActor } from "./actor.js";
 
-/** Cue id 44 (0x2c) — the attack cue. Fleet-uniform: maps to state [61, 0] in every
- *  decoded cue table (cue-script-stream-decode §1). State 61 calls the family virtual. */
-export const CUE_ATTACK = 44;
-/** Cue id 36 (0x24) — deploy. G RED maps to [47, 0]. */
-export const CUE_DEPLOY = 36;
-/** Cue id 5 — G RED maps to [22, 22]. */
-export const CUE_5 = 5;
-
 /**
  * Port of `zz_006a6fc_` @ chunk_0009.c:835 — full-body cue→state transition.
  *
@@ -102,10 +94,8 @@ export function dispatchCommandRecord(actor: RomActor, rec: CommandRecord): bool
   actor.actionIndex = rec.actionIndex;
   actor.variantIndex = rec.variantIndex;
   actor.stateTimer = 0; // FLOAT_8043762c == 0.0
-  if (rec.stateMode === 3) {
-    // op 0x0b's +0x709 flag byte is cleared on stateMode 3 entry.
-    // The full field lives on the existing BorgRuntime status word; the bridge clears it.
-  }
+  // NOT PORTED: on stateMode 3 the ROM also clears op 0x0b's +0x709 flag byte. That field
+  // lives on BorgRuntime's status word, not RomActor, so the bridge owns the clear.
   dispatchFullBodyCue(actor, rec.cueId);
   if (rec.stateMode === 3) {
     dispatchUpperBodyCue(actor, rec.cueId);

@@ -600,74 +600,19 @@ export function runSourceDamageSelfTests(assert: SourceDamageAssert): void {
 }
 
 /* =============================================================================
- * INTEGRATION SPEC — how combat.ts applyHit should delegate to sourceDamage
- * instead of the TUNED mitigate() / current damageFormula.ts path.
+ * WIRED AT: combat.ts applyHit. sourceDamageActorFromRuntime adapts BorgRuntime to
+ * SourceDamageActor, computeBaseDamage is the primary damage path, and applyHpDamage
+ * replaces the bare `victim.hp -= dmg`. damageFormula.computeSourceDamage / mitigate are
+ * the throw-on-error fallbacks under the GF_SOURCE_STRICT contract. The exported
+ * functions above are ALSO the ROM-wasm interception points — see
+ * setRomDamageImplementation; anything that bypasses them silently leaves the wasm path.
  *
- * STATUS: sourceDamage.ts is a clean-room 1:1 port of zz_003cd5c_ + zz_003d344_ +
- * zz_0066298_, driven by the DOL type-multiplier matrix. It is functionally equivalent
- * to damageFormula.ts (the current production port) — both consume the same DOL tables
- * and implement the same formula — but sourceDamage.ts is self-contained (no BorgRuntime
- * / BorgProfile coupling) and uses the task's requested (attacker, defender, basePower,
- * ctx) signature. combat.ts and constants.ts are NOT edited per the task.
- *
- * WIRING (drop-in replacement for the `dmg = source ? computeSourceDamage({...}) :
- * mitigate(...)` block at combat.ts:923-956):
- *
- *   import {
- *     computeBaseDamage, applyHpDamage, defaultSourceDamageActor,
- *     defaultSourceDamageContext, forceGaugeRatioIndex, type SourceDamageActor,
- *   } from "./damage/sourceDamage.js";
- *
- *   function actorFromRuntime(b: BorgRuntime, profile: BorgProfile): SourceDamageActor {
- *     return {
- *       borgNumber: borgNumberFromBorgId(b.borgId),   // parse "pl####" -> 0xNNNN
- *       team: b.team,                                  // +0x88
- *       heroFlag: b.ownerPlayer === null ? 1 : 0,      // +0x3e6 (CPU flag, T2 decode)
- *       pairAttack: b.burstPaired ? 1 : 0,             // +0x6fc (side-wide burst, T3)
- *       power: 1,                                      // +0xc4 INIT UNCONFIRMED (TODO)
- *       hp: b.hp,                                      // +0x1c6 mirror
- *       maxHp: b.maxHp,                                // +0x1c4
- *       handicap: 3,                                   // +0x43a neutral (init site TODO)
- *       comboRank: b.comboRank,                        // +0x6ca
- *       forceRatioIndex: forceGaugeRatioIndex(
- *         energyByTeam?.[b.team] ?? 0, energyMaxByTeam?.[b.team]),
- *       sideRank: sideRankForTeam(b.team),            // PTR_DAT_80433950[team] (challenge mode)
- *       isBorg: true,
- *       isActive: true,                                // +0x18 == 1 in normal combat
- *     };
- *   }
- *
- *   const dmg = source
- *     ? computeBaseDamage(
- *         actorFromRuntime(source.attacker, source.attackerProfile),
- *         actorFromRuntime(victim, victimProfile),
- *         record.hpDamage * (source.damageScale ?? 1),   // basePower = *param_1 (record +0x00)
- *         {
- *           flagsA: record.flagsA,                       // +0x10
- *           flagsB: record.flagsB,                       // +0x12
- *           attackerHpCurveIndex: record.attackerHpCurveIndex,       // +0x06
- *           attackerForceCurveIndex: record.forceGaugeCurveIndex,    // +0x07
- *           victimStatusImmune: <status immunity gate>,
- *           victimResistanceMask: statusImmunityMasksForBorgId(victim.borgId).immunityA,
- *           victimSpawnProtection: false,                // +0x5e0 writer untraced
- *           cpuHalvingEnabled: damageContext?.cpuHalvingEnabled,
- *         },
- *       )
- *     : mitigate(rawDamage, victimProfile.defense);
- *   applyHpDamage(victim, dmg);   // replaces `victim.hp -= dmg` with the clamped zz_003d344_ port
- *
- * REMAINING (honest TODOs, cited):
- *   - actor.power (+0xc4/+0xb4): init site STILL NOT FOUND (behavior-notes.md ak). Defaults to
- *     1.0 (identity). damageFormula.ts has the same open gap — no regression vs current behavior.
- *   - actor.handicap (+0x43a): neutral byte 3 assumed; per-borg handicap init site untraced.
- *   - victimSpawnProtection (+0x5e0 bit 0x4000000): writer untraced; stays false (no-op).
- *   - The defender descriptor +0x9c/+0x9d/+0x9e curve selectors are resolved here by borgId via
- *     defenseCurveSelectors_pldata_9c9d9e (the port's available mapping). damageFormula.ts uses
- *     the identical lookup; passing ctx.defenderDefenseCurveSelectors overrides if a descriptor
- *     read is ever wired.
- *
- * Because sourceDamage.ts and damageFormula.ts implement the same ROM formula from the same DOL
- * tables, switching applyHit to sourceDamage.ts is behavior-preserving relative to today's
- * damageFormula.ts output (verified structurally: same step order, same tables, same floor/trunc).
- * The win is decoupling (no BorgRuntime/BorgProfile dep) and the standalone self-test surface.
+ * OPEN ROM GAPS (the reason the adapter passes neutral identities, not tuned values):
+ *   - actor.power (+0xc4/+0xb4): init site STILL NOT FOUND (behavior-notes.md ak);
+ *     defaults to 1.0. damageFormula.ts has the same gap, so this is not a regression.
+ *   - actor.handicap (+0x43a): neutral byte 3 assumed; per-borg init site untraced.
+ *   - victimSpawnProtection (+0x5e0 bit 0x4000000): writer untraced; stays false.
+ *   - The defender descriptor +0x9c/+0x9d/+0x9e curve selectors resolve by borgId via
+ *     defenseCurveSelectors_pldata_9c9d9e; pass ctx.defenderDefenseCurveSelectors to
+ *     override once a real descriptor read is wired.
  * ========================================================================== */

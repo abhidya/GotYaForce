@@ -381,38 +381,12 @@ export function groundSnapRevert79d0(actor: RomActor): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// INTEGRATION SPEC — what physics.ts should delegate to (no edits made here).
+// WIRED AT: physics.ts. ROM_FLOAT is sourced from ROM_FLOAT_EX below, and
+// integratePhysics delegates its body to integratePosition / groundClamp (which
+// prefers floorSnap8030 when the extras floor contract is present) / decayHSpeed /
+// accumulateGravity, so the FUN_80067310 core is defined once and the
+// integratePhysicsNoClamp + integratePhysicsFullClamp variants stay identical to it.
 // ---------------------------------------------------------------------------
-//
-// physics.ts is currently ~90% faithful. To close the remaining gaps without
-// duplicating logic, re-point these four sites at this module:
-//
-//  1. ROM_FLOAT (physics.ts:13-20) — replace the 0.0 stubs with the DOL-decoded
-//     ROM_FLOAT_EX. Specifically:
-//       ROM_FLOAT.FLY_FALL        0.0  → ROM_FLOAT_EX.FLY_FALL      (-35.0)
-//       ROM_FLOAT.DRIFT_EPSILON_SQ 0.0 → ROM_FLOAT_EX.DRIFT_EPSILON_SQ (~1e-8)
-//     (H_SPEED_FLOOR is already correct at 0.0.) clampVertical/groundClamp then
-//     read the real flyer floor and the drift gate matches FUN_80067610:3921.
-//
-//  2. clampVertical (physics.ts:78-89) — keep as-is (it is the exact lower-only
-//     FUN_80067310 tail) OR delegate to applyVerticalClampLower. Family handlers
-//     that need the speed cap should call integratePhysicsFullClamp (zz_0067458_)
-//     instead of integratePhysics; that path layers clampHSpeedBand +
-//     applyVerticalClampBand on top.
-//
-//  3. groundClamp (physics.ts:93-100) — the host abstraction is fine for battles
-//     that supply clampToGround. For unit tests / faithful reproduction, call
-//     floorSnap8030 (zz_0068030_) which implements the exact skip conditions +
-//     pos.y = max(savedGroundPos.y, floorY - hoverOffset) formula.
-//
-//  4. integrator body (physics.ts:60-72) — optional refactor: the three lines
-//     pos.x/pos.y/pos.z are exactly integratePosition(); the hSpeed tail is
-//     decayHSpeed(); the gravity line is accumulateGravity(). Delegating removes
-//     the hand-maintained copy and guarantees FUN_80067524 (integratePhysicsNoClamp)
-//     and zz_0067458_ (integratePhysicsFullClamp) stay byte-identical to the core.
-//
-// No edit to physics.ts is required for THIS module to build or for the new
-// integrators to be correct; the above is the recommended migration path.
 
 // ===========================================================================
 // Self-tests.

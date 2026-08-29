@@ -167,6 +167,13 @@ export const MOVE = {
   DECEL: 3.5,
   /** Yaw turn rate toward facing target (radians/frame). */
   TURN_RATE: 0.35,
+  /**
+   * Horizontal speed (units/frame) below which a grounded borg reads as "idle" rather than
+   * "move" for the locomotion state/anim pick. TUNED — a port-side presentation threshold,
+   * not a ROM value; sized well under a single frame of MOVE.DECEL so a borg that has fully
+   * stopped never flickers between the two anims.
+   */
+  IDLE_SPEED_EPSILON: 0.05,
 } as const;
 
 export const JUMP = {
@@ -193,6 +200,15 @@ export const JUMP = {
   BOOST_FUEL_FRAMES: 90,
   /** Ground Y level (RAM trace: ~10 when grounded). DERIVED. */
   GROUND_Y: 10,
+  /**
+   * How far ABOVE the borg's feet a floor triangle may sit and still be accepted as the
+   * surface it stands on (world units), i.e. the step-up ceiling for floorSurfaceYAt
+   * queries. TUNED — the ROM's exact step-up limit needs a DOL mechanics trace; this is
+   * sized so a borg walks up shallow stage geometry without teleporting onto distant
+   * platforms or ceilings. Shared by movement.ts groundYAt/keepOnStageFloor and battle.ts's
+   * ROM-driver ground clamp, which previously carried its own private copy of the number.
+   */
+  GROUND_SNAP_UP: 35,
 } as const;
 
 export const DASH = {
@@ -295,6 +311,13 @@ export const MELEE = {
    * the attacker closes into reach without overrunning through the target. TUNED.
    */
   LUNGE_STOP_FRACTION: 0.75,
+  /**
+   * Launch point of the combo-finisher sword beam, relative to the borg origin along its
+   * facing (world units). TUNED — the sword-beam emitter is NOT one of the dumped muzzle
+   * params (DAT_802d39dc), so this is a port-side design value and deliberately separate
+   * from the shared MUZZLE_OFFSET used by gun projectiles.
+   */
+  SWORD_BEAM_MUZZLE: { forward: 40, up: 20 },
 } as const;
 
 export const SHOT = {
@@ -325,6 +348,15 @@ export const SHOT = {
   AIM_TARGET_Y: 20,
   /** Hit radius (XZ units) for projectile-vs-borg. */
   HIT_RADIUS: 35,
+  /**
+   * Vertical half-band (world units) a projectile-vs-borg contact must fall inside, tested
+   * at the swept segment's closest approach. PLACEHOLDER (not ROM-derived): the ROM overlaps
+   * real 3D hitbox records (chunk_0013.c hit pipeline), not a cylinder — this flat band is
+   * the port's stand-in until per-move hitbox shapes are dumped. Used by BOTH the swept hit
+   * test in stepProjectiles and the proximity capsule the source-collision pass builds for
+   * projectiles, which must agree or the two paths disagree about what counts as a hit.
+   */
+  HIT_Y_BAND: 60,
   /**
    * Target BODY radius added to every projectile's own hitRadius by the swept
    * projectile-vs-borg test. PLACEHOLDER (not ROM-derived): the ROM overlaps the
@@ -565,6 +597,14 @@ export const SPECIAL = {
    *  gated in ROM — see MELEE.HITSTUN note); the stagger TRIGGER is now DERIVED via the gauge
    *  model (specials map to damage record 2, reactionFlags 1 — no forced stagger). */
   HITSTUN: 18,
+  /**
+   * Floor on a projectile-archetype special's muzzle speed, as a multiple of SHOT.SPEED.
+   * TUNED (2026-07-04 playtest): several generated profiles carry a projectileSpeed BELOW
+   * the borg's own bullet speed (G RED's G Crash was 24 vs his 28 u/f shots), which read as
+   * broken. Retire once the per-move speed params (shot-variant table row bytes, undecoded)
+   * replace the profile values.
+   */
+  MIN_PROJECTILE_SPEED_MULT: 1.4,
 } as const;
 
 export const STAGGER = {
@@ -589,6 +629,13 @@ export const STAGGER = {
    * the three windows above for the reaction's duration.
    */
   STAGGER_IFRAMES: 60,
+  /**
+   * DERIVED — combo accumulator (+0x6c8) wrap point and rank byte (+0x6ca) cap
+   * (chunk_0003.c:8021-8029). Each hit adds the record's combo score; once the accumulator
+   * passes COMBO_ACCUM_WRAP it resets to 0 and the rank increments, capped at COMBO_RANK_MAX.
+   */
+  COMBO_ACCUM_WRAP: 99,
+  COMBO_RANK_MAX: 0x3f,
 } as const;
 
 export const DAMAGE = {
