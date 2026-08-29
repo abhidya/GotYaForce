@@ -23,6 +23,10 @@ rule); pure stdlib.
   `scenarios/README.md` ("Roster-reload scenarios").
 - `plans/<unit>.<fn>.json` — per-function capture plans, authored line-by-line
   from the unit's verbatim C (typed read/write sets with address expressions).
+- `capture_spine.py` — CLI: `sites` / `capture`. The **boundary_green**
+  capture side for NONTERMINATING spine functions (design I3), which
+  `capture_oracle.py`'s run-to-LR strategy structurally cannot handle. See
+  "Spine capture" below.
 - `merge_fixtures.py` — combine the per-export fixtures of one unit into the
   single corpus `run-unit.mjs` loads (`spec.meta.fixture`). Needed by any spec
   covering MORE THAN ONE export, because capture emits one fixture per export
@@ -273,3 +277,162 @@ cd research/tools/OGhidra
 `verify-unit --no-capture` replays the committed corpora only;
 `--no-promote` records + publishes the sidecar and leaves promotion to the
 driver's own verification lane.
+
+## Spine capture — `boundary_green` for nonterminating functions (2026-08-29)
+
+`capture_oracle.py` implements **`oracle_green`**: break on a function's entry,
+snapshot args, *run to the caller's LR*, snapshot the return and the write set.
+That control strategy cannot exist for a spine. `run_main_game_loop`
+(`0x800527d8`, export `zz_00527d8_`, `research/decomp/ghidra-export/chunk_0006.c`
+lines 5790-5833) is `do { ... } while( true )` — it never returns, so the LR
+breakpoint never fires and every attempt scores a miss forever. Design amendment
+I3 (`docs/playable-port-design.md`) answers this with a distinct standard,
+**`boundary_green`**, and `capture_spine.py` is its capture side
+(`research/decomp/oracle-harness/run-spine.mjs` is its replay side).
+
+### The control strategy: breakpoint every instruction of the spine body
+
+A spine's body is, by the definition that makes it a spine, a straight run of
+out-of-unit calls. So every instruction in it is a call, a spine-owned store, or
+the loop's back edge — a handful of addresses. `capture_spine.py` breakpoints
+**all of them** and walks the loop. For `run_main_game_loop` that is 21
+addresses; the callees still run at native JIT speed between stops.
+
+Because the instructions are contiguous, each stop closes the previous one and
+opens the current one:
+
+| stop at | means |
+|---|---|
+| call site `S_i` | callee `i-1` has returned (read its return regs) **and** callee `i` is about to be called (read its arg regs and the owned-region bytes — the harness's `owned` check fires on call arrival, before deltas apply) |
+| the spine's store | read the value the spine is about to write |
+| the back edge | one iteration retired |
+
+Termination is by iteration count, which is exactly `run-spine.mjs`'s `call_cap`
+terminator: the harness services the captured calls and cuts on the next
+incoming call, so the wasm spine *looping onward* is asserted rather than
+hanging.
+
+`sites` decodes the spine straight out of the retail ISO (the GCM header's BE
+u32 at `0x420` locates `boot.dol`; no extracted copy is needed) and **refuses**
+a function that has no backward branch — that function terminates and belongs to
+`capture_oracle.py`. It also reports any conditional branch or indirect call in
+the body, because those would break the walk's straight-line assumption.
+
+### Where the argument register map comes from
+
+The harness compares the wasm's actual call arguments against the capture, so
+the capture must bind to the same ABI the module declares. That is not
+hand-authored: `sites` reads the built module's **import section**, takes each
+callee's wasm signature (which emcc induced from the verbatim Ghidra call site),
+and runs the PowerPC EABI allocator over it — `f32`/`f64` to `f1..f8` in
+declaration order, `i32` to `r3..r10` in declaration order, `i64` to an
+(odd,even) GPR pair, overflow to the caller's outgoing parameter area at `r1+8`.
+Both sides therefore derive from one C declaration, and the mapping is written
+into the plan so it is auditable.
+
+Non-finite floats are carried **boxed and bit-exact** (`{"t":"f64","bits":"..."}`)
+because JSON cannot spell NaN/Infinity and a residue-carrying FPR routinely is
+one. `run-spine.mjs` unboxes them. (JS canonicalises NaN, so a boxed NaN can
+only be compared as "both are NaN".)
+
+### Recipe
+
+```sh
+# 1. decode the spine and bind it to the module ABI (offline; no emulator)
+python research/tools/dolphin-trace/capture_spine.py sites \
+  --spine 0x800527d8 --export zz_00527d8_ \
+  --wasm research/decomp/spine-boundary/unit.wasm \
+  --out research/tools/dolphin-trace/plans/spine.0x800527d8.json
+
+# 2. COLD boot — see "--from-entry" below
+python research/tools/dolphin-trace/capture_oracle.py launch --wait 120
+
+# 3. walk K iterations (~21 s for K=16)
+python research/tools/dolphin-trace/capture_spine.py capture \
+  --plan research/tools/dolphin-trace/plans/spine.0x800527d8.json \
+  --iterations 16 --from-entry \
+  --wasm-rel ../../spine-boundary/unit.wasm \
+  --arena-rel ../arena-trace-empty.json \
+  --out research/decomp/oracle-harness/corpora/spine-run-main-game-loop.boundary.jsonl
+
+python research/tools/dolphin-trace/capture_oracle.py stop
+node research/decomp/oracle-harness/run-spine.mjs --capture <that file>
+```
+
+**`--from-entry` needs a COLD boot, and that is the whole reason spine capture
+does not use a savestate or a `force_navigator` scenario.** A spine's entry
+arguments are observable at exactly one moment — the one time it is entered, at
+boot. Every savestate in this repo was taken *inside* the loop, so attaching to
+one lands mid-loop with the entry params unbound and the two pre-loop calls
+(`zz_002a3e4_`, `zz_002a638_`) unobservable. Measured: from a cold boot the spine
+entry breakpoint fires **~2 s after attach**, so this is indeed the cheapest
+capture in the fleet — no roster reload, no pad injection, no family gating,
+because the spine's body has no conditional branches and runs identically in
+every game state. What game state changes is what happens *inside* the callees,
+which boundary_green stubs out by construction.
+
+### Declared exclusions (recorded in every capture header)
+
+* **Memory deltas are watch-set-scoped.** A full MEM1 diff is 24 MB per boundary
+  over a GDB-RSP socket; nothing like that runs at frame rate. Only regions the
+  plan declares are diffed. For `run_main_game_loop` this costs nothing
+  measurable: its loop body contains **zero loads**, so no callee write can
+  change what the spine itself does.
+* **Console stack addresses are excluded** — the wasm module has its own linear
+  stack.
+* **K is not owner-approved.** I3's gate says "K owner-approved iterations"; a
+  capture taken without an owner in the loop records `k_owner_approved: false`.
+
+### First real run (2026-08-29): `run_main_game_loop` is NOT `boundary_green`
+
+Shape, decoded from the ROM and confirmed against the decompile: 2 pre-loop
+calls, then a 17-call straight-line body with **zero** conditional branches,
+**zero** indirect calls, **zero** loads, and exactly one spine-owned store —
+`stw r3, -0x5410(r13)` at `0x80052804`, i.e. `DAT_80436190 = zz_008dbe0_()`.
+
+K=16 from a cold boot gives 274 calls. Verdict artifact:
+`research/decomp/data/oracle-results/spine-run-main-game-loop.boundary.json`
+(`standard: "boundary_green"`, `verdict: "fail"`).
+
+* **Call sequence: 274/274 exact.** Every callee, in order, across all 16
+  iterations and both pre-loop calls.
+* **Spine-owned write: 0 divergent bytes**, at all 274 boundaries and at the cut.
+* **Arguments: 783 of 920 compared slots diverge.** The first — the one
+  `run-spine.mjs` names — is call `i=0`, `zz_002a3e4_` arg 14 (`stack+8`).
+
+Root cause, and it is a **corpus** finding, not a port bug: on PPC EABI `r3-r12`
+and `f1-f13` are **volatile (caller-saved)**, and this spine emits no
+instructions between its calls — it saves nothing, reloads nothing, and never
+writes its outgoing parameter area. Ghidra nevertheless gave
+`run_main_game_loop` a 16-parameter signature and models `param_2..param_16` as
+flowing unchanged into `zz_002a3e4_`, `zz_00e9994_`, `zz_0018b10_`,
+`zz_00efda8_` and `zz_002a4d4_`. On the console those callees are reading
+whatever the *previous* callee left in the volatile registers and in the stack
+slots at `r1+8`/`r1+12`. A compiled port faithfully forwards the parameters it
+was handed, so it cannot reproduce that residue — this is exactly the
+"**PPC register-residue reads**" class the design doc declares unreproducible
+and requires be "flagged to the ledger when detected, never silently papered
+over" (`docs/playable-port-design.md`, non-fatal review note 1).
+
+The real ROM function is almost certainly `void run_main_game_loop(void)`. Its
+16 parameters are a decompiler artifact synthesised from its callees' register
+reads, and **no capture can make the verbatim C pass boundary_green while that
+signature stands**. Correcting it is a signature change across the spine and
+five callee call sites, not the same-line edit
+`research/decomp/corpus-correction-loop.md` describes — an owner decision, not
+an agent one.
+
+### Where the spine wasm comes from
+
+`0x800527d8` is **not staged**. The queue's unit for it is `auto-c0006-013`
+(`research/decomp/generated/finish-game-port/wasm-units.json`, index 129, tier
+`compile_only`); no `c0006` unit is staged at all. Even once it lands it cannot
+serve as the boundary_green target, because it bundles `zz_0052838_` — one of
+the spine's own 17 loop callees — so that call would be internal and invisible
+to the harness.
+
+The boundary_green target is instead a **single-function preflight build**,
+`research/decomp/spine-boundary/` (`build.sh`, driver-identical emcc flags,
+verbatim extraction, export `_zz_00527d8_` only). It is evidence, never a
+promoted unit: no driver lock, no driver state, nothing written under
+`port-units/` or `port-units-staging/`.

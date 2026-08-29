@@ -30,7 +30,10 @@
 //   {"kind":"call","i":<0-based>,"iter":<0-based iteration>,
 //    "callee":<env import name>,"callee_addr":"0x..",   // GC address of the callee
 //    "args":[..],              // captured arg values; i32 compared mod 2^32 (>>>0),
-//                              // i64 captured as decimal string, floats via Object.is
+//                              // i64 captured as decimal string, floats via Object.is;
+//                              // a NON-FINITE float is BOXED bit-exact as
+//                              // {"t":"f64"|"f32","bits":"<hex>"} (JSON has no
+//                              // NaN/Infinity) and is unboxed before comparison
 //    "ret":<value|null>,       // null/absent = void; {"t":"i64","v":"<dec>"} for i64
 //    "deltas":[{"addr":"0x..","b64":..},..],  // memory writes attributed to this callee,
 //                                             // applied by the stub before returning
@@ -97,8 +100,26 @@ const parseAddr = (s) => {
   return v >>> 0;
 };
 
+/**
+ * spine_schema 1 BOXED float: {"t":"f64"|"f32","bits":"<hex>"}. JSON cannot
+ * spell NaN or Infinity, and a PowerPC argument register carrying residue is
+ * routinely one of them (`run_main_game_loop` sets NO register between its
+ * calls, so every arg it passes is residue) — so a non-finite captured float
+ * travels bit-exact in this box and is unboxed here. NOTE: JS canonicalises
+ * NaN, so a boxed NaN can only ever be compared as "both are NaN"; the payload
+ * bits are not observable across the wasm/JS import boundary.
+ */
+const boxView = new DataView(new ArrayBuffer(8));
+const unbox = (v) => {
+  if (v === null || typeof v !== "object" || typeof v.bits !== "string") return v;
+  if (v.t === "f64") { boxView.setBigUint64(0, BigInt("0x" + v.bits)); return boxView.getFloat64(0); }
+  if (v.t === "f32") { boxView.setUint32(0, Number.parseInt(v.bits, 16)); return boxView.getFloat32(0); }
+  return v;
+};
+
 /** Captured-vs-actual value equality: i32 mod 2^32, i64 via BigInt, floats via Object.is. */
-const valueEq = (expected, actual) => {
+const valueEq = (boxed, actual) => {
+  const expected = unbox(boxed);
   if (typeof actual === "bigint") {
     return BigInt.asUintN(64, BigInt(expected)) === BigInt.asUintN(64, actual);
   }
@@ -108,7 +129,10 @@ const valueEq = (expected, actual) => {
   return Object.is(expected, actual);
 };
 
-const fmtArgs = (a) => `(${a.map((v) => typeof v === "bigint" ? `${v}n` : String(v)).join(", ")})`;
+const fmtArgs = (a) => `(${a.map((v) => {
+  const u = unbox(v);
+  return typeof u === "bigint" ? `${u}n` : (v !== u ? `${u}[0x${v.bits}]` : String(u));
+}).join(", ")})`;
 
 try {
   await main();
@@ -237,7 +261,7 @@ async function main() {
   let divergence = null;
   let cut = false;
   try {
-    spineFn(...(header.spine.args ?? []));
+    spineFn(...(header.spine.args ?? []).map(unbox));
     // a spine that returns is not the captured nonterminating spine
     divergence = { i: state.i, kind: "returned",
       report: `spine returned after ${state.i} calls — captured spine never returns` };
