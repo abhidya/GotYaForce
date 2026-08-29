@@ -2,28 +2,30 @@
   "schema": 1,
   "unit": "auto-c0025-002",
   "unit_id": "auto-c0025-002",
-  "timestamp": "2026-08-26T01:15:01.475553Z",
-  "run_id": "2026-08-25T22:08:48.995173Z",
-  "result": "staged",
-  "stage": "commit",
+  "timestamp": "2026-08-29T22:33:09.531529Z",
+  "run_id": "2026-08-29T22:33:09.078624Z",
+  "result": "deferred",
+  "stage": "manual-revoke",
   "attempt": 1,
-  "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
-  "product_commit": "514c85759591ae3def65a08e204128438e43e7d6",
-  "product_pushed": true,
-  "product_effect": "durable product commit",
+  "detail": "verdict revoked and requeued: corpus correction landed on main as 747bc061 (chunk_0025.c:712/717/734/740): 0x80089100 and 0x80007030 are void ROM procedures and this unit's verbatim .c assigned their r3/r4 residue, forcing the compile-fix model to redeclare them undefined8. That redeclaration is what rung 1 of the composition ladder refuses on (owner_variant_abi_incompatible: zz_0089100_ void in auto-c0053-013 vs int here). Preflight against the corrected chunk with the unmodified owner prototypes compiles first try, no model call, no header edit. Evidence: docs/composition-ladder.md 'zz_0089100_ resolution', research/decomp/corpus-correction-loop.md step 3.",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
   "product_commit_failed": false,
-  "oracle_summary": "compile-only (UNVERIFIED)",
+  "oracle_summary": null,
   "model": "unsloth/Qwen3.8-27B-GGUF",
-  "tier": "compile_only",
+  "tier": null,
   "extra": {
-    "transition_id": "d061f3c4269f40f39e17dec6da0b23af",
-    "transition_timestamp": "2026-08-26T01:15:01.475553Z",
-    "transition_run_id": "2026-08-25T22:08:48.995173Z",
-    "promotion_transaction_id": "b0b2c8fdc5dc43a2819f5ef3de4cf545",
-    "candidate_sha256": "b48e3a520428f6ff10c15c9632ffcd569570d79e8a0e47fb406aaee6db7cf2d9"
+    "revoked_via": "revoke-unit",
+    "previous_status": "green",
+    "previous_tier": "compile_only",
+    "previous_commit": "514c85759591ae3def65a08e204128438e43e7d6",
+    "previous_candidate_sha256": "b48e3a520428f6ff10c15c9632ffcd569570d79e8a0e47fb406aaee6db7cf2d9",
+    "previous_record_sha256": "f550ac277be24abfe77cbdbe9e953326dfed215d43493d736d67bf1b3c9e1001",
+    "transition_id": "verdict-revoke-bb414324c7e6a3a9a0d0e04c969672f1bedda6ce326ed8e302a36b632e7fc179"
   },
   "driver_record": {
-    "status": "green",
+    "status": "pending",
     "attempts": 1,
     "sdk_decl_sync": {
       "injected": [],
@@ -89,14 +91,19 @@
     "registry_version_used": 153,
     "model_requests": 1,
     "error": null,
-    "oracle_summary": "compile-only (UNVERIFIED)",
-    "commit": "514c85759591ae3def65a08e204128438e43e7d6",
-    "pushed": true,
-    "tier": "compile_only",
-    "last_stage": "commit",
-    "promotion_transaction_id": "b0b2c8fdc5dc43a2819f5ef3de4cf545",
-    "promotion_transition_id": "d061f3c4269f40f39e17dec6da0b23af",
-    "candidate_sha256": "b48e3a520428f6ff10c15c9632ffcd569570d79e8a0e47fb406aaee6db7cf2d9"
+    "last_stage": "manual-revoke",
+    "revoked": {
+      "via": "revoke-unit",
+      "at": "2026-08-29T22:33:09.128625Z",
+      "reason": "corpus correction landed on main as 747bc061 (chunk_0025.c:712/717/734/740): 0x80089100 and 0x80007030 are void ROM procedures and this unit's verbatim .c assigned their r3/r4 residue, forcing the compile-fix model to redeclare them undefined8. That redeclaration is what rung 1 of the composition ladder refuses on (owner_variant_abi_incompatible: zz_0089100_ void in auto-c0053-013 vs int here). Preflight against the corrected chunk with the unmodified owner prototypes compiles first try, no model call, no header edit. Evidence: docs/composition-ladder.md 'zz_0089100_ resolution', research/decomp/corpus-correction-loop.md step 3.",
+      "previous_status": "green",
+      "previous_tier": "compile_only",
+      "previous_commit": "514c85759591ae3def65a08e204128438e43e7d6",
+      "previous_candidate_sha256": "b48e3a520428f6ff10c15c9632ffcd569570d79e8a0e47fb406aaee6db7cf2d9",
+      "previous_oracle_summary": "compile-only (UNVERIFIED)",
+      "previous_record_sha256": "f550ac277be24abfe77cbdbe9e953326dfed215d43493d736d67bf1b3c9e1001",
+      "transition_id": "verdict-revoke-bb414324c7e6a3a9a0d0e04c969672f1bedda6ce326ed8e302a36b632e7fc179"
+    }
   },
   "history": [
     {
@@ -106,6 +113,14 @@
       "attempt": 1,
       "detail": "compile-only staging artifact (UNVERIFIED, not integrated)",
       "product_commit": "514c85759591ae3def65a08e204128438e43e7d6"
+    },
+    {
+      "timestamp": "2026-08-29T22:33:09.531529Z",
+      "result": "deferred",
+      "stage": "manual-revoke",
+      "attempt": 1,
+      "detail": "verdict revoked and requeued: corpus correction landed on main as 747bc061 (chunk_0025.c:712/717/734/740): 0x80089100 and 0x80007030 are void ROM procedures and this unit's verbatim .c assigned their r3/r4 residue, forcing the compile-fix model to redeclare them undefined8. That redeclaration is what rung 1 of the composition ladder refuses on (owner_variant_abi_incompatible: zz_0089100_ void in a",
+      "product_commit": null
     }
   ]
 }

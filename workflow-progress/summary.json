@@ -1,17 +1,17 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-29T21:29:51.395697Z",
-  "run_id": "2026-08-29T21:29:50.608532Z",
+  "generated_at": "2026-08-29T22:33:09.795122Z",
+  "run_id": "2026-08-29T22:33:09.078624Z",
   "total_units": 1396,
   "green": 3,
-  "staged": 104,
+  "staged": 103,
   "retryable": 147,
-  "untouched": 1132,
+  "untouched": 1133,
   "deferred": 0,
   "structural_ineligible": 10,
   "active": 0,
   "total_attempts": 370,
-  "transitions_last_hour": 2,
+  "transitions_last_hour": 1,
   "greens_last_hour": 0,
   "last_green_at": "2026-08-26T07:34:28.953704Z",
   "last_green_unit": "auto-c0053-013",
@@ -19,13 +19,13 @@
   "repeated_failure_classes": [],
   "health": "idle",
   "machine": {
-    "workflow_state": "leased-out",
+    "workflow_state": "maintenance",
     "driver_status": "stopped",
     "manual_paused": false,
     "block_reason": null,
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Rehydrated an active GPU lease to omr-sweep across a restart; the slot is the lessee's, not the port's to reap."
+    "detail": ""
   }
 }
