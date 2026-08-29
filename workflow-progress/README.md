@@ -1,26 +1,29 @@
-# Port workflow: IDLE
+# Port workflow: PAUSED
 
-*Generated 2026-08-29T22:33:09.531529Z - machine-written, do not edit.*
+*Generated 2026-08-29T22:33:30.104744Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 106/1396 settled (3 green, 103 staged) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1133 |
-| **Last transition** | 2026-08-29T22:33:09.531529Z |
+| **Last transition** | 2026-08-29T22:33:30.104744Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | stopped |
 
+> **Manually paused by the owner** (rig gate). No heavy work runs.
+
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-29T22:33:30.104744Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-29T22:33:09.531529Z | `auto-c0025-002` | deferred | manual-revoke | 1 | verdict revoked and requeued: corpus correction landed on main as 747bc061 (chunk_0025.c:712/717/734/740): 0x8 |
 | 2026-08-29T21:29:50.608532Z | `-` | leased-out | machine | 0 | Rehydrated an active GPU lease to omr-sweep across a restart; the slot is the lessee's, not the port's to reap |
 | 2026-08-29T21:24:22.038146Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
@@ -70,4 +73,3 @@
 | 2026-08-26T02:43:09.685481Z | `auto-c0052-015` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:42:56.644387Z | `auto-c0046-005` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:42:43.837447Z | `auto-c0046-004` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:42:30.877631Z | `auto-c0046-003` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
