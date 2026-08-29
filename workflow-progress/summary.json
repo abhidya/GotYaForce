@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-29T18:50:54.312032Z",
-  "run_id": "2026-08-29T18:50:54.129904Z",
+  "generated_at": "2026-08-29T18:51:22.788201Z",
+  "run_id": "2026-08-29T18:51:22.615936Z",
   "total_units": 1396,
   "green": 3,
   "staged": 104,
@@ -17,15 +17,15 @@
   "last_green_unit": "auto-c0053-013",
   "last_product_commit": "218911ab5e2455c447e5beec8efe9e95e7c8f2ec",
   "repeated_failure_classes": [],
-  "health": "manual_paused",
+  "health": "blocked",
   "machine": {
-    "workflow_state": "manual_paused",
+    "workflow_state": "starting",
     "driver_status": "stopped",
-    "manual_paused": true,
+    "manual_paused": false,
     "block_reason": "chat contract preflight failed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (read timeout=120)",
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Manually paused by owner (rig gate)."
+    "detail": "Manual pause lifted; resuming heavy work."
   }
 }
