@@ -100,6 +100,10 @@ import {
 } from "./battle/spawnFromSlotTables.js";
 import type { RomActor } from "./rom/actor.js";
 
+/** DERIVED — the T4 force-gauge MAX snapshot rounds the side's start energy DOWN to a
+ *  multiple of 10 (chunk_0000.c:1076-1079), matching side[+0x114]'s init-once semantics. */
+const FORCE_GAUGE_MAX_ROUNDING = 10;
+
 const SPAWN_RADIUS_FRACTION = 0.35;
 const SPAWN_RADIUS_MAX = 3200;
 const SPAWN_FLOOR_NORMAL_MIN_Y = 0.5;
@@ -402,7 +406,8 @@ class BattleImpl implements Battle {
     // recomputed — matching the ROM's side[+0x114] init-once-per-battle semantics.
     const energyMax: Record<number, number> = {};
     for (const [team, total] of Object.entries(this.state.energy)) {
-      energyMax[Number(team)] = Math.floor(total / 10) * 10;
+      energyMax[Number(team)] =
+        Math.floor(total / FORCE_GAUGE_MAX_ROUNDING) * FORCE_GAUGE_MAX_ROUNDING;
     }
     this.state.energyMax = energyMax;
   }
@@ -898,13 +903,12 @@ class BattleImpl implements Battle {
     this.state.projectiles.push(p);
   }
 
-  /** Ground-Y query for the ROM driver's ground clamp — mirrors movement.ts's
-   *  groundYAt (floorSurfaceYAt + GROUND_SNAP_UP fallback to JUMP.GROUND_Y). */
+  /** Ground-Y query for the ROM driver's ground clamp — mirrors movement.ts's groundYAt.
+   *  Both read the same JUMP.GROUND_Y / JUMP.GROUND_SNAP_UP pair; this file used to carry a
+   *  private copy of the snap distance and two bare `10`s for the ground plane. */
   private groundYFor(x: number, z: number, currentY: number): number {
-    const GROUND_SNAP_UP = 35;
-    const surfaceY = floorSurfaceYAt(this.collision, x, z, currentY - 10 + GROUND_SNAP_UP);
-    if (surfaceY != null) return surfaceY;
-    return 10; // JUMP.GROUND_Y
+    const maxSurfaceY = currentY - JUMP.GROUND_Y + JUMP.GROUND_SNAP_UP;
+    return floorSurfaceYAt(this.collision, x, z, maxSurfaceY) ?? JUMP.GROUND_Y;
   }
 
   /** energy[team] = sum of not-yet-defeated on-field borgs + queued borgs. */

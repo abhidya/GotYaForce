@@ -31,7 +31,6 @@ import { actorVelocityScale } from "./timescale.js";
 import type { BorgProfile } from "./stats.js";
 import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
 
-const GROUND_SNAP_UP = 35;
 const WALL_NORMAL_MAX_Y = 0.5;
 const WALL_CLEARANCE = 0.25;
 const CEILING_NORMAL_MAX_Y = -0.5;
@@ -307,7 +306,8 @@ export function stepMovement(
     if (!b.grounded) {
       if (b.state !== "fly") setState(b, "jump");
     } else {
-      const moving = Math.abs(b.vel.x) > 0.05 || Math.abs(b.vel.z) > 0.05;
+      const moving =
+        Math.abs(b.vel.x) > MOVE.IDLE_SPEED_EPSILON || Math.abs(b.vel.z) > MOVE.IDLE_SPEED_EPSILON;
       setState(b, moving ? "move" : "idle");
     }
   }
@@ -399,7 +399,7 @@ function approachScalar(current: number, target: number, maxDelta: number): numb
 function groundYAt(collision: StageCollision | null, x: number, z: number, currentY: number): number {
   // Use STIH triangles as floor candidates, but do not teleport up to distant
   // platforms/ceilings; exact step-up limits still need a DOL mechanics trace.
-  const surfaceY = floorSurfaceYAt(collision, x, z, currentY - JUMP.GROUND_Y + GROUND_SNAP_UP);
+  const surfaceY = floorSurfaceYAt(collision, x, z, currentY - JUMP.GROUND_Y + JUMP.GROUND_SNAP_UP);
   return surfaceY == null ? JUMP.GROUND_Y : surfaceY + JUMP.GROUND_Y;
 }
 
@@ -410,7 +410,7 @@ function keepOnStageFloor(
   velocity: Vec3,
 ): void {
   if (!collision || collision.triangles.length === 0) return;
-  const maxSurfaceY = current.y - JUMP.GROUND_Y + GROUND_SNAP_UP;
+  const maxSurfaceY = current.y - JUMP.GROUND_Y + JUMP.GROUND_SNAP_UP;
   if (floorSurfaceYAt(collision, current.x, current.z, maxSurfaceY) != null) return;
   if (floorSurfaceYAt(collision, previous.x, previous.z, maxSurfaceY) == null) return;
 

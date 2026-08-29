@@ -67,7 +67,7 @@ import {
 } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
 import { runtimeShotPenetrationForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
-import { projectileVariant } from "./projectiles.js";
+import { projectileVariant, PROJECTILE_VARIANT_COUNT } from "./projectiles.js";
 import { AttackCommandType } from "./command.js";
 import {
   contextualBGatesForBorgId,
@@ -790,6 +790,9 @@ const FLAGS_B_NON_NORMAL_REACTION_MASK = 0xfc0;
 const FLAGS_A_GROW = 0x0004;
 /** flagsA bit — shrink, only when the grow bit is clear (chunk_0003.c:7758-7770). */
 const FLAGS_A_SHRINK = 0x0008;
+/** flagsA bit — "blast" (GUARD/40 DATA RULE T1): hits teammates at full damage and awards
+ *  no combo score (chunk_0003.c:7934). */
+const FLAGS_A_BLAST = 0x1000;
 
 /**
  * Sanity filter (report's honest caveat): many high-index familyDamageRecords rows are
@@ -1348,8 +1351,8 @@ function runSourceCollisionPasses(
     const record = pr.damageRecord ?? damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT);
     const obj = projectileToCollisionObject(pr, owner, record);
     // Mirror the legacy projectile hit test: hitRadius + the victim-body stand-in
-    // (SHOT.TARGET_BODY_RADIUS � see stepProjectiles' swept test) + the |dy| <= 60 band.
-    contactShape.set(obj, { radius: pr.hitRadius + SHOT.TARGET_BODY_RADIUS, yBand: 60 });
+    // (SHOT.TARGET_BODY_RADIUS, see stepProjectiles' swept test) + the same vertical band.
+    contactShape.set(obj, { radius: pr.hitRadius + SHOT.TARGET_BODY_RADIUS, yBand: SHOT.HIT_Y_BAND });
     activeList.push(obj);
   }
 
@@ -1846,11 +1849,11 @@ export function applyHit(
   // GUARD/40 DATA RULE (T1) exemption: a blast-flagged record (flagsA & 0x1000) skips combo
   // score entirely (chunk_0003.c:7934) — "blast hits teammates at full damage and awards
   // nothing", per the doc.
-  if ((record.flagsA & 0x1000) === 0) {
+  if ((record.flagsA & FLAGS_A_BLAST) === 0) {
     victim.comboAccum += record.comboScoreValue;
-    if (victim.comboAccum > 99) {
+    if (victim.comboAccum > STAGGER.COMBO_ACCUM_WRAP) {
       victim.comboAccum = 0;
-      victim.comboRank = Math.min(0x3f, victim.comboRank + 1);
+      victim.comboRank = Math.min(STAGGER.COMBO_RANK_MAX, victim.comboRank + 1);
     }
   }
 
@@ -3028,11 +3031,12 @@ function spawnSpecialProjectiles(
       y: b.pos.y + MUZZLE_OFFSET.up,
       z: b.pos.z + fwd.z * MUZZLE_OFFSET.forward,
     };
-    // TUNED floor (2026-07-04 playtest): several generated profiles carry projectileSpeed
-    // below the borg's own bullet speed (G RED's G Crash was 24 vs his 28 u/f shots), which
-    // read as broken. A special is never slower than 1.4x the generic shot speed until the
-    // per-move speed params (shot variant table row bytes, undecoded) replace this.
-    const specialSpeed = Math.max(specialDef.projectileSpeed ?? SHOT.SPEED, SHOT.SPEED * 1.4);
+    // A special is never slower than SPECIAL.MIN_PROJECTILE_SPEED_MULT x the generic shot
+    // speed — see that constant for why the profile value alone is not trusted.
+    const specialSpeed = Math.max(
+      specialDef.projectileSpeed ?? SHOT.SPEED,
+      SHOT.SPEED * SPECIAL.MIN_PROJECTILE_SPEED_MULT,
+    );
     projectiles.push({
       uid: `proj_${projCounter++}`,
       ownerUid: b.uid,
@@ -3186,7 +3190,7 @@ function spawnProjectiles(
  *  (DAT_802f3dda). Returns null when no variant matches — callers keep TUNED values.
  *  Exported for selfcheck.ts's charge-tier drop expectation. */
 export function findVariantByKind(kind: number): { hSpeed: number; drop: number; lifetimeFrames: number; scale: [number, number, number] } | null {
-  for (let i = 0; i < 64; i++) {
+  for (let i = 0; i < PROJECTILE_VARIANT_COUNT; i++) {
     const variant = projectileVariant(i);
     if (variant && variant.kind === kind) {
       return { hSpeed: variant.hSpeed, drop: variant.drop, lifetimeFrames: variant.lifetimeFrames, scale: variant.scale };
@@ -3402,12 +3406,10 @@ function spawnSwordBeam(
   all: BorgRuntime[],
 ): Projectile {
   const fwd = forwardFromYaw(b.rotY);
-  // TUNED spawn offsets (forward 40 / up 20): a port-side design value for the beam's launch
-  // point — no ROM anchor (the sword-beam emitter is not one of the dumped muzzle params).
   const spawnPos = {
-    x: b.pos.x + fwd.x * 40,
-    y: b.pos.y + 20,
-    z: b.pos.z + fwd.z * 40,
+    x: b.pos.x + fwd.x * MELEE.SWORD_BEAM_MUZZLE.forward,
+    y: b.pos.y + MELEE.SWORD_BEAM_MUZZLE.up,
+    z: b.pos.z + fwd.z * MELEE.SWORD_BEAM_MUZZLE.forward,
   };
   return {
     uid: `proj_${projCounter++}`,
@@ -3441,7 +3443,7 @@ function spawnSwordBeam(
  * Swept projectile-vs-borg contact test for one fixed step. Finds the closest approach
  * of the XZ segment [prev -> cur] to the target's XZ position; contact when that
  * distance is within `radius` AND the projectile's interpolated height at the closest
- * approach is within the flat 60-unit vertical band (same band the old point test used).
+ * approach is within SHOT.HIT_Y_BAND (same band the old point test used).
  */
 function projectileSweepHit(prev: Vec3, cur: Vec3, targetPos: Vec3, radius: number): boolean {
   const sx = cur.x - prev.x;
@@ -3458,7 +3460,7 @@ function projectileSweepHit(prev: Vec3, cur: Vec3, targetPos: Vec3, radius: numb
   const dz = targetPos.z - cz;
   if (dx * dx + dz * dz > radius * radius) return false;
   const cy = prev.y + (cur.y - prev.y) * t;
-  return Math.abs(cy - targetPos.y) <= 60;
+  return Math.abs(cy - targetPos.y) <= SHOT.HIT_Y_BAND;
 }
 
 export function stepProjectiles(

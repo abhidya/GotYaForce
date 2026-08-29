@@ -4,6 +4,16 @@
 import type { RomActor, Vec3 } from "./actor.js";
 import type { StreamContext } from "./stream-vm.js";
 
+/**
+ * DERIVED — DOL 0x804375d4, the exact f32 0.9. The ROM decays a target-relative aim
+ * accumulator by this factor on the frame it loses its target. Declared locally (rather
+ * than imported from physicsExtras.ROM_FLOAT_EX.WALL_DAMP, which is the SAME DOL float)
+ * to keep this module free of the physics/physicsExtras import cycle. Do NOT round it to
+ * 0.9: the value is consumed inside Math.trunc, so the f32 representation is observable at
+ * integer boundaries.
+ */
+const TARGET_LOSS_DECAY = 0.8999999761581421;
+
 export interface RomHelperScratch {
   lockTarget?: Vec3 | null;
   /** +0x18e0/+0x18e2: dual-axis aim accumulators used by zz_006ea9c_. */
@@ -94,7 +104,7 @@ export function stepTargetPitch(actor: RomActor, aimType: number, current: numbe
 } {
   const angles = targetAngles(actor);
   if (!angles) {
-    return { value: toS16(Math.trunc(toS16(current) * 0.8999999761581421)), result: -1 };
+    return { value: toS16(Math.trunc(toS16(current) * TARGET_LOSS_DECAY)), result: -1 };
   }
   const desired = Math.max(-0x4000, Math.min(0x4000,
     toS16(-toS16(actor.bodyPitch) - angles.pitch)));
@@ -115,7 +125,7 @@ export function stepPartTargetPitch(actor: RomActor, aimType: number): -1 | 0 | 
   const current = toS16(actor.steerYaw);
   const target = (actor as RomActor & RomHelperScratch).lockTarget;
   if (!target) {
-    actor.steerYaw = toS16(Math.trunc(current * 0.8999999761581421));
+    actor.steerYaw = toS16(Math.trunc(current * TARGET_LOSS_DECAY));
     return -1;
   }
   // The renderer/world-cache owns +0x8e0/+0x8f0/+0x900. Until it supplies row 1,
