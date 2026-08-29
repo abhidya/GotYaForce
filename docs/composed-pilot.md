@@ -124,9 +124,20 @@ With `?composed=1` (or `?composed=<n>` for n frames) on the game page:
 
 Headless proof: `node scripts/smoke-composed-pilot-phase.mjs` (or
 `GF_SMOKE_COMPOSED_PILOT=1 node scripts/smoke-browser-game.mjs`). It builds the
-real production bundle, serves it COOP/COEP-isolated, drives 8 frames, and
-asserts all four proofs plus exact per-frame crossing counts. Screenshot,
-console log and ledger/pilot JSON land in `.tmp/composed-pilot-smoke/evidence/`.
+real production bundle, serves it COOP/COEP-isolated, and drives **16 frames in
+two batches**: 8 while the game is still loading assets, then — after the game
+reports `boot-ready` and the smoke confirms `window.__gf.navigation.screen ===
+"title"` — 8 more requested through `composedRun()`. The second batch is what
+makes "driven from the game's frame loop in a real game context" an assertion
+rather than a claim: those frames provably ran off the same render loop that was
+drawing the live title screen. The phase then asserts all four proofs plus exact
+per-frame *and* per-symbol crossing counts. Screenshot, console log and
+ledger/pilot JSON land in `.tmp/composed-pilot-smoke/evidence/`.
+
+Recorded run: 16/16 frames pass, 80 crossings (5/frame exactly), 0 servicing
+errors, 31 declared bridged imports, 3 adapters — the ledger's per-symbol totals
+(`8006de10`: 8, `80085e00`: 16, `8008aff0`: 16) isolate the conditional edge, the
+miss-plus-direct edge, and the direct-only edge from each other.
 
 ## The 2GB shared-memory finding
 

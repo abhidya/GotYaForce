@@ -53,8 +53,15 @@ const gameRequire = createRequire(pathToFileURL(path.join(gameRoot, "package.jso
 const ownedRoot = path.resolve(root, ".tmp", "composed-pilot-smoke");
 const publicBase = "/GotYaForce/game/";
 
-/** Frames the pilot drives in this phase. */
-const PILOT_FRAMES = 8;
+// The pilot is driven in two batches on purpose. The first runs while the game
+// is still loading its assets — the render loop is already ticking, so the
+// pilot starts immediately. The second is requested AFTER the game reports
+// boot-ready and the title screen is up, which is what makes "driven from the
+// game's frame loop in a real game context" an assertion rather than a claim:
+// those frames provably ran with the game live.
+const PILOT_FRAMES_INITIAL = 8;
+const PILOT_FRAMES_AFTER_BOOT = 8;
+const PILOT_FRAMES = PILOT_FRAMES_INITIAL + PILOT_FRAMES_AFTER_BOOT;
 /** Bridged crossings the driven window makes per frame:
  *    zz_01b9b1c_  -> zz_0085e00_ + zz_008aff0_        (2, DIRECT import edge)
  *    zz_01b9b68_  -> zz_006de10_ + zz_008aff0_        (2, DIRECT import edge)
@@ -291,7 +298,7 @@ export async function runComposedPilotPhase() {
       consoleLines.push(`[exception] ${params.exceptionDetails?.exception?.description ?? params.exceptionDetails?.text ?? ""}`);
     });
 
-    await cdp.send("Page.navigate", { url: `${started.url}?composed=${PILOT_FRAMES}` });
+    await cdp.send("Page.navigate", { url: `${started.url}?composed=${PILOT_FRAMES_INITIAL}` });
     await waitFor(cdp, "window.crossOriginIsolated === true", "cross-origin isolation", 60_000);
     // The pilot handle appears only after the module instantiated, the arena
     // landed and the adapters registered — its presence IS the instantiation
@@ -299,7 +306,24 @@ export async function runComposedPilotPhase() {
     // loop. Boot failures are surfaced by the console warning, so a timeout
     // here always comes with the reason in the captured console log.
     await waitFor(cdp, "window.__gf?.composedPilot?.() != null", "composed module boot", 120_000);
-    await waitFor(cdp, "window.__gf.composedPilot().finished === true", "pilot frame budget", 120_000);
+    await waitFor(cdp, "window.__gf.composedPilot().finished === true", "first pilot batch", 120_000);
+
+    // Now let the game finish booting, and drive the second batch with the
+    // title screen actually up: same render loop, live game.
+    await waitFor(
+      cdp,
+      "document.documentElement.dataset.gfRuntime === 'boot-ready'",
+      "game boot-ready (real game context for the second batch)",
+      180_000,
+    );
+    const bootedScreen = await evaluate(cdp, "window.__gf.navigation?.screen ?? null");
+    await evaluate(cdp, `window.__gf.composedRun(${PILOT_FRAMES_AFTER_BOOT})`);
+    await waitFor(
+      cdp,
+      `window.__gf.composedPilot().framesDriven === ${PILOT_FRAMES} && window.__gf.composedPilot().finished === true`,
+      "second pilot batch (game live)",
+      120_000,
+    );
 
     const pilot = await evaluate(cdp, "window.__gf.composedPilot()");
     const ledger = await evaluate(cdp, "window.__gf.bridgeLedger()");
@@ -312,8 +336,16 @@ export async function runComposedPilotPhase() {
     fs.writeFileSync(path.join(evidenceDir, "console.log"), consoleLines.join("\n") + "\n");
     fs.writeFileSync(
       path.join(evidenceDir, "composed-pilot-results.json"),
-      JSON.stringify({ crossOriginIsolated: isolated, pilot, ledger, adapters, imports }, null, 2),
+      JSON.stringify({ crossOriginIsolated: isolated, bootedScreen, pilot, ledger, adapters, imports }, null, 2),
     );
+
+    // ---- Proof 0: the second batch really did run in a live game. The game
+    //      reported boot-ready and was sitting on its title screen before
+    //      composedRun() was called, and the frames after that came from the
+    //      same render loop that was drawing it.
+    if (bootedScreen !== "title") {
+      throw new Error(`game was not on the title screen when the second pilot batch was requested: ${bootedScreen}`);
+    }
 
     // ---- Proof 1: the REAL composed module instantiated, in-browser, with
     //      its declared 2GB imported SHARED memory, under COI.
@@ -400,6 +432,8 @@ export async function runComposedPilotPhase() {
       declaredBridgedImports: imports.length,
       adapters: adapters.length,
       framesDriven: pilot.framesDriven,
+      framesAfterGameBoot: PILOT_FRAMES_AFTER_BOOT,
+      gameScreenAtSecondBatch: bootedScreen,
       crossings: ledger.totals.bridgedCalls,
       servicingErrors: ledger.totals.servicingErrors,
       evidence: path.relative(root, evidenceDir),
