@@ -13,8 +13,7 @@
 //   PauseMenu overlays the battle on Start/Esc.
 //
 // The existing three.js scene, stage rendering, lighting, camera, the centralized
-// render asset loader, and the baked-clip builder are REUSED. The netcode `ws` hooks are
-// preserved (defined but dormant) so multiplayer can be wired next.
+// render asset loader, and the baked-clip builder are REUSED.
 
 import * as THREE from "three";
 import { bootRomDamage } from "./sim/romDamageBoot";
@@ -107,7 +106,6 @@ import {
   battleSceneState,
   battleAudioEvents,
   battleVoiceCues,
-  liveActorPositions as battleLiveActorPositions,
   snapshotBattleAudio,
   type BattleEventCue,
 } from "./sim/presentation.js";
@@ -541,17 +539,6 @@ async function loadInitialAssets(): Promise<void> {
   borgPresentationAssets.setModelManifest(manifest);
   await loadStage(DEFAULT_ARENA_STAGE);
 }
-
-// ------------------------------------------------------------------------------------------
-// Netcode hooks (preserved, dormant). Multiplayer is wired next; do not delete.
-// ------------------------------------------------------------------------------------------
-
-let ws: WebSocket | null = null;
-function closeSocket(): void {
-  ws?.close();
-  ws = null;
-}
-void closeSocket; // referenced so the dormant hook isn't tree-shaken/flagged.
 
 // ------------------------------------------------------------------------------------------
 // Audio
@@ -1144,8 +1131,7 @@ function followCamera(): void {
           lockCameraState: focus.targetLockState?.cameraState ?? 2,
         })
       : null;
-  const positions = battleLiveActorPositions(session.battle, (uid) => battleScene.positionOf(uid));
-  battleCamera.update(primary, positions, session.stageBounds);
+  battleCamera.update(primary);
   // zz_000584c_ @0x8000584c: copy light source position (DAT_802c3470/74/78) into
   // light destination (DAT_803c10f4/8/10fc) each frame. The source is the first
   // directional light's position from the stage render state.

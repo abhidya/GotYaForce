@@ -4,12 +4,8 @@
 // documented no-three runtime contract. Three-aware hosts — TitleIntro.ts,
 // bootGlobals.ts once it owns a renderer — import from here; combat does not.
 //
-// Two surfaces are exposed, both equivalent:
-//   - Standalone helpers mtx34ToThreeMatrix4 / applySourceCameraToThree, which
-//     any caller can use with a bare Mtx34 or a SourceCamera.
-//   - A SourceCameraThree wrapper interface (toThreeMatrix4 / applyToCamera
-//     methods) + wrapSourceCameraWithThree(), for hosts that prefer the method
-//     form the way the host already calls camera.lookAt today.
+// Two standalone helpers are exposed — mtx34ToThreeMatrix4 (bare Mtx34 -> view
+// matrix) and applySourceCameraToThree (SourceCamera -> PerspectiveCamera).
 
 import * as THREE from "three";
 import { mtx34ToColumnMajor4x4 } from "./sourceCamera.js";
@@ -63,40 +59,4 @@ export function applySourceCameraToThree(source: SourceCamera, camera: THREE.Per
     camera.far = far;
     camera.updateProjectionMatrix();
   }
-}
-
-/**
- * A SourceCamera augmented with the THREE-aware method form. Methods delegate
- * to the standalone helpers so there's one implementation. Hosts that prefer
- * `cam.applyToCamera(camera)` over `applySourceCameraToThree(cam, camera)` get
- * it via wrapSourceCameraWithThree.
- */
-export interface SourceCameraThree extends SourceCamera {
-  /**
-   * Convert this camera's current view (`setupView()` Mtx34) into a THREE.Matrix4
-   * view matrix. See mtx34ToThreeMatrix4. Roll is NOT folded in.
-   */
-  toThreeMatrix4(): THREE.Matrix4;
-  /**
-   * Push the source-owned view + projection into a THREE.PerspectiveCamera.
-   * Replaces `camera.lookAt(target)`. See applySourceCameraToThree.
-   */
-  applyToCamera(camera: THREE.PerspectiveCamera): void;
-}
-
-/**
- * Wrap any SourceCamera with the THREE-aware method form (toThreeMatrix4 /
- * applyToCamera). The wrapper delegates every core method to the source camera
- * and adds the two THREE helpers on top. Use this in three-aware hosts that
- * want the method-call ergonomics:
- *
- *   const cam = wrapSourceCameraWithThree(createSourceCamera());
- *   cam.applyToCamera(threeCamera);   // replaces threeCamera.lookAt(target)
- */
-export function wrapSourceCameraWithThree(source: SourceCamera): SourceCameraThree {
-  return {
-    ...source,
-    toThreeMatrix4: () => mtx34ToThreeMatrix4(source.setupView()),
-    applyToCamera: (camera) => applySourceCameraToThree(source, camera),
-  };
 }

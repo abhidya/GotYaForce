@@ -49,8 +49,6 @@ function sourceMissing(reason: string, detail?: unknown): void {
   console.error(`[title][source-missing] ${reason}`, detail ?? "");
   if (SOURCE_STRICT) throw new Error(`[title][source-missing] ${reason}`);
 }
-export function __titleSourceStrictForTest(): boolean { return SOURCE_STRICT; }
-
 export interface TitleIntroOptions {
   /** Called on confirm (click or Enter/Space/any key = "press start"). */
   onEnter: () => void;

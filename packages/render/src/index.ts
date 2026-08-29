@@ -18,8 +18,6 @@ export interface ThreeViewportOptions {
    * it costs memory/bandwidth on several WebGL drivers.
    */
   debugCapture?: boolean;
-  /** @deprecated Use debugCapture. */
-  preserveDrawingBuffer?: boolean;
   pixelRatioLimit?: number;
   camera?: {
     fov: number;
@@ -59,25 +57,12 @@ export interface ThreeViewport {
   render(): void;
   diagnostics(): RenderDiagnostics;
   captureFrame(type?: string, quality?: number): string;
-  /**
-   * Set viewport and optional scissor rectangle.
-   *
-   * Maps to the GameCube GXSetViewport / GXSetScissor pipeline (zz_00058d0_).
-   * `scissor` is optional — when omitted the scissor is left unchanged (matching
-   * the ROM's param_2 == 0 path which skips GXSetScissor entirely).
-   */
-  setViewport(x: number, y: number, width: number, height: number, scissor?: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }): void;
 }
 
 export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeViewportOptions = {}): ThreeViewport {
   const backend = options.backend ?? "webgl";
   if (backend !== "webgl") throw new Error(`Unsupported render backend: ${backend}`);
-  const debugCapture = options.debugCapture ?? options.preserveDrawingBuffer ?? false;
+  const debugCapture = options.debugCapture ?? false;
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: options.antialias ?? true,
@@ -133,13 +118,6 @@ export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeVie
     captureFrame(type = "image/png", quality) {
       renderer.render(scene, camera);
       return renderer.domElement.toDataURL(type, quality);
-    },
-    setViewport(x, y, width, height, scissor) {
-      renderer.setViewport(x, y, width, height);
-      if (scissor) {
-        renderer.setScissor(scissor.x, scissor.y, scissor.width, scissor.height);
-        renderer.setScissorTest(true);
-      }
     },
   };
 }

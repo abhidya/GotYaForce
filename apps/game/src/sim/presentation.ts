@@ -287,13 +287,6 @@ export function battleSceneState(battle: Battle, focus: BattleActorObservation |
   };
 }
 
-export function liveActorPositions<T>(battle: Battle, positionOf: (uid: string) => T | null): T[] {
-  return battle.observe().actors
-    .filter((b) => b.alive)
-    .map((b) => positionOf(b.uid))
-    .filter((p): p is T => p !== null);
-}
-
 /**
  * Build the results-screen outcome for one player. DERIVED
  * (research/decomp/results-scoring-decode-2026-07-04.md): every field maps 1:1 to the
