@@ -127,14 +127,19 @@ export {
 export {
   DAMAGE_RECORDS,
   DAMAGE_RECORD_INDEX,
-  KNOCKBACK_STRENGTH_TABLE,
   REACTION_FORCE_STAGGER_MASK,
   damageRecordByIndex,
-  knockbackStrengthClamp,
   gaugeInitForBorgId,
   type BorgGaugeInit,
   type DamageRecord,
 } from "./gauges.js";
+// Knockback strength tables + clamp: the ROM's own (abs-then-clamp) pair, re-exported under
+// their previous public names so consumers keep one import site. gauges.ts's duplicates were
+// deleted — see the "KNOCKBACK MAGNITUDE — NOT HERE" note there for the chunk_0007.c citation.
+export {
+  KNOCKBACK_STRENGTH_TABLES as KNOCKBACK_STRENGTH_TABLE,
+  knockbackStrengthClamp,
+} from "./damage/sourceKnockback.js";
 export {
   actorDataCombatStatsForBorgId,
   actorDataCombatStatsSummary,

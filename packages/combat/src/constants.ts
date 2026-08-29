@@ -20,35 +20,42 @@
 //     addresses (0x803b069c, 0x805dbf86, 0x805f3850/58/5c) tracks the on-screen HP gauge;
 //     found independently by a 6-save-state MEM1 diff AND by Dolphin's live Cheat Search,
 //     converging on the same address set (behavior-notes.md s4f).
-//   - Damage application mechanism: DERIVED (2026-07-01). Live disassembly at the HP write site
-//     (object+0x1C6) showed a plain `HP -= raw_damage`, clamped at 0, with a secondary bound
-//     check against a neighboring field at +0x1C4 (behavior-notes.md s4h). applyHit()/mitigate()
-//     in combat.ts already implement subtract-then-clamp-at-zero, matching this shape exactly.
-//   - object+0x88 same-team divisor (DAMAGE.SAME_TEAM_HIT_DIVISOR): DERIVED mechanism (a 0.25x
-//     friendly-fire reducer, not a "type mismatch" — see s4o, which corrected the s4m-era name).
-//     Ghidra export re-read (behavior-notes.md s4m) shows +0x88 is copied from match slot/team
-//     state (`PTR_DAT_80433934[slot+0xcb]`) in the active spawn paths. Wired in combat.ts for
-//     melee, special, and projectile hits.
-//   - Runtime HP damage formula: DERIVED (2026-07-03, behavior-notes.md ag/ah). combat.ts
-//     now calls damageFormula.ts for real attacker-context hits: record.hpDamage, type matrix,
-//     same-team 0.25x, Challenge side ranks, HP-ratio curves, defense curve selectors, handicap
-//     defaults, and combo falloff are table-backed from the decomp. Remaining formula context
-//     not yet modeled: hero flag (+0x3e6), pair-attack flag (+0x6fc), force-gauge ratio, guard/
-//     reflect state, and actor level/handicap init sites. MELEE/SHOT DMG_BASE/DMG_PER_STAT below
-//     are retained for legacy direct applyHit callers and should not be treated as runtime truth.
+//   - Damage application mechanism: PORTED 1:1. `zz_003d344_` @0x8003d344 (chunk_0004.c:6832-6860)
+//     is damage/sourceDamage.ts's applyHpDamage — subtract at object+0x1C6, mirror the pre-hit
+//     value to +0x1C8, clamp to [0, +0x1C4]. applyHit calls it directly; there is no second
+//     HP-write path.
+//   - object+0x88 same-team divisor: DERIVED (a 0.25x friendly-fire reducer, not a "type
+//     mismatch" — see s4o, which corrected the s4m-era name). Ghidra export re-read
+//     (behavior-notes.md s4m) shows +0x88 is copied from match slot/team state
+//     (`PTR_DAT_80433934[slot+0xcb]`) in the active spawn paths. The 0.25 itself is
+//     FLOAT_80437024, read from the formula's own DOL table (scalars.sameTeam_80437024) — this
+//     file no longer keeps a copy of it.
+//   - Runtime HP damage formula: PORTED 1:1 and SINGLE-PATH. `zz_003cd5c_` @0x8003cd5c
+//     (chunk_0004.c:6667-6828) is damage/sourceDamage.ts computeBaseDamage, which applyHit calls
+//     with no fallback and which the oracle-verified ROM-wasm unit can replace wholesale
+//     (setRomDamageImplementation). Record hpDamage, the type matrix, same-team 0.25x, Challenge
+//     side ranks, both HP-ratio curves and their >= 201 skip gates, force-gauge curves, defence
+//     curve selectors, handicap bytes, the CPU/side-0 halvings, the GUARD/40 rule and combo
+//     falloff are all table-backed from the decomp. Still unmodelled, and honestly defaulted to
+//     their neutral identity rather than invented: the power floats (+0xc4/+0xb4 init site
+//     untraced), the per-borg handicap byte (+0x43a init site untraced), and the +0x5e0
+//     0x4000000 spawn-protection bit (writer untraced).
 //   - Knockback DIRECTION: DERIVED (2026-07-01, behavior-notes.md s4p). `zz_00300bc_` (0x800300bc)
 //     computes launch direction (yaw/pitch as BAM16 shorts) from one of 5 vector-source modes
 //     selected by a per-move byte, plus a per-move angular trim. Mode 1 (attacker->target
 //     relative-position vector, the only mode this port has data to compute) is now ported byte-
 //     for-byte (atan2 -> BAM16 via the confirmed 65536/(2*pi) constant) in
-//     packages/physics/src/knockback.ts and wired into combat.ts's applyHit(). Modes 0/2/4 need
+//     packages/combat/src/damage/sourceKnockback.ts (computeKnockbackLaunchDirection) and called
+//     directly by combat.ts's applyHit(), with no fallback direction path. Modes 0/2/4 need
 //     sub-object fields (muzzle points, camera-aim vectors) this port doesn't model and remain
 //     unported; mode 3 ("linked object") is exposed but not wired (no linked-object concept on
 //     BorgRuntime yet). The per-move angle-trim VALUES are still-undecoded hit.bin data, so trim
 //     is always 0 for now (mechanism DERIVED, values TUNED-absent).
 //     Knockback MAGNITUDE was later resolved separately (2026-07-04, behavior-notes.md (bc)):
-//     the damage record's +0x0d strength byte indexes DAT_802d3664[s]=(s+1)*8; applyHit now
-//     uses gauges.ts knockbackVelocityForRecord(record) × KNOCKBACK.PORT_SCALE × the per-move
+//     the damage record's +0x0d strength byte is |abs|-clamped to 0..15 and indexes
+//     DAT_802dd8a0[s]=s*7 (ground, zz_005ec20_) or DAT_802d3664[s]=(s+1)*8 (launch,
+//     FUN_8005ed38). applyHit reads both through damage/sourceKnockback.ts
+//     (groundHorizontalSpeed / launchVelocityMagnitude) × KNOCKBACK.PORT_SCALE × the per-move
 //     multiplier. Hit-reaction LENGTHS below remain TUNED because the original is animation-
 //     gated, not a flat hitstun constant.
 //   - Lock-on target state is source-shaped in combat.ts/types.ts. The old manual
@@ -244,9 +251,6 @@ export const MELEE = {
    *  0x8005cc00/0x8005d494 state dispatch's per-case semantics (which +0x544 number is "melee
    *  attack") remain unmapped, so no attack-specific cooldown constant is isolable yet. */
   COOLDOWN: 10,
-  /** Legacy direct-helper fallback only. Runtime hits use damageFormula.ts record.hpDamage. */
-  DMG_BASE: 6,
-  DMG_PER_STAT: 4,
   /**
    * Reaction LENGTH after a confirmed melee stagger (frames). Still TUNED — the original's
    * stagger reaction duration is animation-gated (per-borg anim completion flags), not a ROM
@@ -260,10 +264,10 @@ export const MELEE = {
    * 60-frame trio is the balance-refill / down-reset / combo-window timers (see STAGGER).
    */
   HITSTUN: 14,
-  /** RETIRED as the applied magnitude (2026-07-04): applyHit now derives knockback from the
-   *  hit record's DERIVED strength byte via gauges.ts knockbackVelocityForRecord × the
-   *  KNOCKBACK.PORT_SCALE anchor below. Kept only as the historical tuned melee base that
-   *  PORT_SCALE is anchored to (5 u/f at melee strength 6). */
+  /** RETIRED as an applied magnitude (2026-07-04): applyHit derives knockback from the hit
+   *  record's strength byte via damage/sourceKnockback.ts × the KNOCKBACK.PORT_SCALE anchor
+   *  below. NOT read by any code path — kept only because PORT_SCALE's own derivation is
+   *  anchored to it (5 u/f at melee strength 6) and deleting it would orphan that citation. */
   KNOCKBACK: 5,
   /**
    * Contextual-B melee ENGAGE window (XZ units): the SELECTION distance within which a B
@@ -374,18 +378,15 @@ export const SHOT = {
   AMMO_MAX: 6,
   /** Reload time (frames) when ammo hits 0. */
   RELOAD_FRAMES: 60,
-  /** Legacy direct-helper fallback only. Runtime shots use damageFormula.ts record.hpDamage. */
-  DMG_BASE: 4,
-  DMG_PER_STAT: 3,
   /** Reaction LENGTH after a confirmed shot stagger (frames). Still TUNED (animation-gated in
    *  ROM — see MELEE.HITSTUN note); the stagger TRIGGER is now DERIVED via the gauge model
    *  (combat.ts applyHit + gauges.ts). Normal shots map to damage record 0 (reactionFlags 1,
    *  no forced stagger), so a shot only interrupts once it depletes a gauge — a lone shot no
    *  longer flinches the victim at all. */
   HITSTUN: 10,
-  /** RETIRED as the applied magnitude (2026-07-04) — see MELEE.KNOCKBACK note; applyHit now
-   *  derives shot knockback from record 0's strength byte (4 -> 40 ROM u/f) × PORT_SCALE
-   *  ≈ 3.6 u/f, close to this old tuned 3. Kept for historical reference only. */
+  /** RETIRED as an applied magnitude (2026-07-04) — see MELEE.KNOCKBACK. Not read by any code
+   *  path; kept as the calibration datum for PORT_SCALE (record 0's strength byte 4 -> 40 ROM
+   *  u/f × PORT_SCALE ≈ 3.6 u/f, against this old tuned 3). */
   KNOCKBACK: 3,
 } as const;
 
@@ -393,8 +394,9 @@ export const SHOT = {
  * Knockback magnitude model (behavior-notes (bc), T9 resolved statically): the ROM's knockback
  * speed is STRENGTH-INDEXED, not flat — the hit record's +0x0d severity byte is copied to the
  * victim's actor+0x702 and indexes DAT_802d3664[s]=(s+1)*8 (velocity, FUN_8005ed38; see
- * gauges.ts KNOCKBACK_STRENGTH_TABLE / knockbackVelocityForRecord). applyHit applies
- *   magnitude = knockbackVelocityForRecord(record) × PORT_SCALE × perMoveMultiplier.
+ * damage/sourceKnockback.ts KNOCKBACK_STRENGTH_TABLES / launchVelocityMagnitude). applyHit
+ * applies magnitude = launchVelocityMagnitude(strength) × PORT_SCALE × perMoveMultiplier for a
+ * launch reaction, groundHorizontalSpeed(strength, sizeRatio) × the same for a ground one.
  */
 export const KNOCKBACK = {
   /**
@@ -638,35 +640,24 @@ export const STAGGER = {
   COMBO_RANK_MAX: 0x3f,
 } as const;
 
+// REMOVED (2026-08-29) from DAMAGE, with no replacement needed — every one of these had zero
+// consumers left once applyHit became single-path, and each was either an invented model or a
+// second copy of a value the ported formula already reads from its own DOL table:
+//   DEF_PER_STAT / MIN_MULT      the flat defence percentage mitigate() used. behavior-notes.md
+//                                (k): "the real 'defense' effect is spread across multiple
+//                                rank/category table lookups rather than a single stat-driven
+//                                percentage ... the real mechanism doesn't have a percentage to
+//                                extract at all." Those tables are ported in sourceDamage.ts.
+//   SAME_TEAM_HIT_DIVISOR (4)    the reciprocal of FLOAT_80437024 = 0.25, which the formula
+//                                reads as scalars.sameTeam_80437024 (chunk_0004.c:6811-6813).
+//   BLOCK_OR_REFLECT_DIVISOR(40) FLOAT_80437028, read as scalars.blockDiv_80437028
+//                                (chunk_0004.c:6814-6817).
+//   MELEE/SHOT DMG_BASE +        the invented `base + attack * per-stat` damage model. Runtime
+//   DMG_PER_STAT                 damage is the hit record's +0x00 hpDamage; the last reader was
+//                                a selfcheck ceiling, now derived from that record instead.
 export const DAMAGE = {
-  /**
-   * Legacy direct-helper fallback only. Runtime attacker-context hits use the decoded formula in
-   * damageFormula.ts; this percentage model remains for tests/tools that call applyHit without a
-   * source attacker context.
-   */
-  DEF_PER_STAT: 0.06,
-  MIN_MULT: 0.25,
   /** A hit that brings HP to <= KNOCKDOWN_FRACTION of a big blow forces knockdown. */
   KNOCKDOWN_DMG: 40,
-  /**
-   * DERIVED and RENAMED (2026-07-01, behavior-notes.md s4o): this is a SAME-TEAM (friendly-fire)
-   * damage divisor, not a "type mismatch" — direct read of `zz_003cd5c_` (0x8003cd5c) shows
-   * `if (attacker+0x88 == defender+0x88) damage *= 0.25` (exact ROM constant, confirmed 0.25 via
-   * raw float read), and +0x88 is the match slot/team byte (s4m), not a type category. Formerly
-   * named TYPE_MISMATCH_DIVISOR — that name was wrong on both counts (it's a match, not a
-   * mismatch; and it's team, not type). Kept as a divisor (4 = 1/0.25) for call-site continuity.
-   * Runtime formula applies the original 0.25x multiplier directly in damageFormula.ts.
-   * Kept as a divisor for legacy direct-helper fallback continuity.
-   */
-  SAME_TEAM_HIT_DIVISOR: 4,
-  /**
-   * DERIVED (2026-07-01, behavior-notes.md s4o): a second, harsher block/reflect divisor found in
-   * the same formula — `damage /= 40.0` when a defender state bit (+0x59c & 0x1000) matches a
-   * move-flag bit, gated on the defender not being a sub-object. Likely a guard/shield/reflect
-   * mechanic. Not named, not wired — the move-flag and target-state bit meanings aren't traced
-   * yet, so there's no source of truth in the port to gate this on.
-   */
-  BLOCK_OR_REFLECT_DIVISOR: 40,
 } as const;
 
 export const STATE = {

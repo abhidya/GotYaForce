@@ -59,6 +59,7 @@ import {
   attackHitRecordsForKind,
 } from "./attackHitData.js";
 import { challengeSideRanksForMode } from "./damageFormula.js";
+import { nextRomProjectileUid, resetRomProjectileCounter } from "./projectiles.js";
 import { setBootConfigByte } from "./bootGlobals.js";
 import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
@@ -148,10 +149,11 @@ function borgNumberToId(borgNumber: number): string {
   return "pl" + (borgNumber & 0xffff).toString(16).padStart(4, "0");
 }
 
-// Deterministic uid counter for ROM-family projectiles (combat.ts's projCounter is
-// module-private; a ROM-side counter keeps uids unique + deterministic — Date.now() in the old
-// stub broke determinism). Reset in createBattle alongside resetProjectileCounter.
-let romProjCounter = 0;
+// ROM-family projectile uids come from projectiles.ts's nextRomProjectileUid() — the SAME counter
+// the stream fireChild spawner mints from. This file used to keep a private `romProjCounter`
+// while projectiles.ts minted `proj_rom_${Date.now()}_${Math.random()...}`; making the second one
+// deterministic with its own counter would have produced colliding "proj_rom_<n>" ids, so both
+// spawners share one. Reset in createBattle alongside resetProjectileCounter.
 
 /** Per-record projectile muzzle offset (f32[3]@+0x04) + spawn speed (f32@+0x10) decoded
  *  straight from the boot.dol spawner-table rows (scripts/gen-shot-muzzle-speed.mjs), keyed by
@@ -304,7 +306,7 @@ class BattleImpl implements Battle {
     this.useRomAi = cfg.useRomAi !== false;
     setBootConfigByte(cfg.bootConfigByte ?? 0);
     resetProjectileCounter();
-    romProjCounter = 0;
+    resetRomProjectileCounter();
 
     let cpuIdx = 0;
     cfg.forces.forEach((f, fi) => {
@@ -829,7 +831,7 @@ class BattleImpl implements Battle {
     const damageRecord = familyRecord ?? damageRecordByIndex(DAMAGE_RECORD_INDEX.SHOT);
 
     const p: Projectile = {
-      uid: `proj_rom_${romProjCounter++}`,
+      uid: nextRomProjectileUid(),
       ownerUid: b.uid,
       team: b.team,
       pos: muzzlePos,
@@ -867,7 +869,8 @@ class BattleImpl implements Battle {
    *  production path (addRomProjectile above) no longer routes here. */
   private addRomProjectileStub(b: BorgRuntime, kind: number): void {
     const p: Projectile = {
-      uid: `rom-family-${kind}-${romProjCounter++}`,
+      // Same shared counter as the real spawner (uids must not collide across the two).
+      uid: `rom-family-${kind}-${nextRomProjectileUid()}`,
       ownerUid: b.uid,
       team: b.team,
       pos: { x: b.pos.x, y: b.pos.y, z: b.pos.z },

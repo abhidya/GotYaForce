@@ -68,9 +68,10 @@ export interface DamageRecord {
    * u8 +0x0d — hit-severity byte (behavior-notes (bc)/(bd)). Dual role: it selects the reaction-
    * anim variant AND is the KNOCKBACK-MAGNITUDE index — chunk_0003.c:8047 copies it to the victim's
    * actor+0x702, which then indexes DAT_802dd8a0[s]=s*7 (horizontal launch, zz_005ec20_) and
-   * DAT_802d3664[s]=(s+1)*8 (velocity, FUN_8005ed38). See KNOCKBACK_STRENGTH_TABLE below. The
-   * port's knockback APPLICATION stays anchored-TUNED (flat per-attack magnitude in applyHit)
-   * pending a model restructure to single-base × strength — PORT-1TO1-STATUS §1 knockback row.
+   * DAT_802d3664[s]=(s+1)*8 (velocity, FUN_8005ed38). It is a SIGNED char in the ROM and both
+   * readers take |s| before clamping to 0..15. The tables and that clamp live in exactly one
+   * place — damage/sourceKnockback.ts (KNOCKBACK_STRENGTH_TABLES / knockbackStrengthClamp /
+   * launchVelocityMagnitude / groundHorizontalSpeed), which applyHit calls directly.
    */
   reactionAnimVariant: number;
   /** u16 +0x10 — formula/guard flags. */
@@ -107,61 +108,24 @@ const DAMAGE_RECORDS_FILE = damageRecordsData as unknown as DamageRecordsFile;
 /** The 9 borg-family damage records (DAT_802d46e0), VERIFIED extraction. */
 export const DAMAGE_RECORDS: readonly DamageRecord[] = DAMAGE_RECORDS_FILE.records;
 
-/**
- * DERIVED_ROM knockback-magnitude tables (behavior-notes (bc), verified chunk_0007.c:5568/5630).
- * Indexed by a hit's strength byte (the damage record's `reactionAnimVariant` = record+0xd, copied
- * to actor+0x702 and clamped 0..15):
- *   - HORIZONTAL[s] = DAT_802dd8a0[s] = s*7   (launch h-speed factor, zz_005ec20_)
- *   - VELOCITY[s]   = DAT_802d3664[s] = (s+1)*8 (velocity magnitude, FUN_8005ed38)
- * These are the real ROM values (T9 resolved statically). WIRED (2026-07-04): applyHit now derives
- * its magnitude as single-base × strength — knockbackVelocityForRecord(record) × KNOCKBACK.PORT_SCALE
- * × the caller's per-move multiplier — replacing the old flat MELEE/SHOT/SPECIAL.KNOCKBACK scalars.
- * Only PORT_SCALE (one anchor preserving the old melee base) remains TUNED; see constants.ts.
- */
-export const KNOCKBACK_STRENGTH_TABLE = {
-  /** DAT_802dd8a0[s] = s*7, s∈0..15 — horizontal launch factor. */
-  HORIZONTAL: Object.freeze(Array.from({ length: 16 }, (_, s) => s * 7)) as readonly number[],
-  /** DAT_802d3664[s] = (s+1)*8, s∈0..15 — velocity magnitude. */
-  VELOCITY: Object.freeze(Array.from({ length: 16 }, (_, s) => (s + 1) * 8)) as readonly number[],
-} as const;
-
-/** Clamp a strength byte to 0..15 (the ROM clamps actor+0x702 to the 16-entry tables). */
-export function knockbackStrengthClamp(strength: number): number {
-  const s = Math.trunc(strength);
-  return s < 0 ? 0 : s > 15 ? 15 : s;
-}
-
-/**
- * DERIVED knockback velocity magnitude for a hit record (ROM u/f): the record's +0x0d severity
- * byte (`reactionAnimVariant`) is copied to the victim's actor+0x702 (chunk_0003.c:8047) and
- * FUN_8005ed38 reads the velocity from DAT_802d3664[s]=(s+1)*8. Yields melee(rec 1, s=6)=56 >
- * shot(rec 0, s=4)=40 > charge/special(rec 2, s=2)=24. Consumed by combat.ts applyHit as the
- * single base, scaled by KNOCKBACK.PORT_SCALE (constants.ts) × the caller's per-move multiplier.
- */
-export function knockbackVelocityForRecord(record: DamageRecord): number {
-  return KNOCKBACK_STRENGTH_TABLE.VELOCITY[knockbackStrengthClamp(record.reactionAnimVariant)] ?? 8;
-}
-
-/**
- * DERIVED (T6 combat-feel-gaps-decode-2026-07-05.md §"Knockback magnitude — zz_005ec20_"):
- * the GROUND-reaction knockback horizontal speed, distinct from the LAUNCH-reaction velocity
- * above. `zz_005ec20_` @0x8005ec20 (chunk_0007.c:5546-5573):
- *   idx = clamp(|victim.reactionAnimVariant|, 0..15)
- *   ratio = attackerScale / victimScale        (T5 — see below; now WIRED end-to-end)
- *   h-speed = ratio * DAT_802dd8a0[idx]         (= idx * 7.0, KNOCKBACK_STRENGTH_TABLE.HORIZONTAL)
- *   h-accel = -speed / 20.0                     (stops in 20 frames — see reactionGroundDecel)
- * This is the table the STAGGER-family reaction handlers (FUN_8005db44/FUN_8005dc24/FUN_8005df2c,
- * anim slots 0xd/0xe) use; the LAUNCH handler (FUN_8005ed38, knockdown/get-up family, anim
- * 0x13+dir/0x17+dir) uses the VELOCITY table with a pitch split instead (see
- * combat.ts's launch-vs-ground selection and knockbackPitchTrimRadians for the pitch half).
- */
-export function knockbackGroundSpeedForRecord(
-  record: DamageRecord,
-  scaleRatio = 1,
-): number {
-  const idx = knockbackStrengthClamp(Math.abs(record.reactionAnimVariant));
-  return scaleRatio * (KNOCKBACK_STRENGTH_TABLE.HORIZONTAL[idx] ?? 0);
-}
+// KNOCKBACK MAGNITUDE — NOT HERE. The DOL strength tables (DAT_802dd8a0[s]=s*7,
+// DAT_802d3664[s]=(s+1)*8) and their index clamp live in damage/sourceKnockback.ts
+// (KNOCKBACK_STRENGTH_TABLES, knockbackStrengthClamp, launchVelocityMagnitude,
+// groundHorizontalSpeed), which is the 1:1 port of the two reaction handlers that read them.
+//
+// REMOVED (2026-08-29): this module's own KNOCKBACK_STRENGTH_TABLE / knockbackStrengthClamp /
+// knockbackVelocityForRecord / knockbackGroundSpeedForRecord duplicates. The clamps disagreed:
+// this one mapped a negative severity byte to index 0 (`s < 0 ? 0 : ...`), the ROM takes the
+// absolute value first —
+//   zz_005ec20_  @0x8005ec20, chunk_0007.c:5556-5561:
+//     cVar5 = *(char *)(param_1 + 0x702);   // signed char
+//     if (cVar5 < 0)    { cVar5 = -cVar5; } // ABS FIRST
+//     if (cVar5 > 0x0f) { cVar5 = 0x0f; }   // then clamp
+//   FUN_8005ed38 @0x8005ed38, chunk_0007.c:5617-5626: the same abs, then the +0x6fd&0x80
+//     airborne +2 boost, then the same 0x0f clamp.
+// So a severity byte of -7 is index 7 (h-speed 49), not index 0 (h-speed 0) — a 7x gap on the
+// one input where the two implementations could differ. sourceKnockback.ts's abs-then-clamp is
+// the ROM's, and is now the only one.
 
 /**
  * DERIVED (T5 combat-feel-gaps-decode-2026-07-05.md): the knockback scale-ratio multiplier —

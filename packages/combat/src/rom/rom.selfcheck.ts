@@ -143,6 +143,18 @@ import { runSharedGunXSelfTests } from "../families/shared-gun-x.js";
 import { runCyberDragonAction4SelfTests } from "../families/cyber-dragon.js";
 import { runEagleJetAction0SelfTests } from "../families/eagle-jet.js";
 import { runDeathBombSelfTests } from "../families/wave-b-catch-all.js";
+// Source-owned module self-tests. These assert the ROM invariants of the modules that own
+// damage, knockback, death, collision, the physics extras and the battle spawn/force setup —
+// i.e. every path applyHit now runs unconditionally. They shipped with the ports but had no
+// caller, so nothing ever executed them; wired here so `pnpm selfcheck:rom` covers them.
+import { runSourceDamageSelfTests } from "../damage/sourceDamage.js";
+import { runSourceKnockbackSelfTests } from "../damage/sourceKnockback.js";
+import { runSourceCollisionSelfTests } from "../damage/sourceCollision.js";
+import { runSourceDeathSelfTests } from "../sourceDeath.js";
+import { runPhysicsExtrasSelfTests } from "./physicsExtras.js";
+import { runForceSetupSelfTests } from "../battle/forceSetup.js";
+import { runSpawnFromSlotTablesSelfTests } from "../battle/spawnFromSlotTables.js";
+import { assertRomStateTableCoverage } from "./state-tables.js";
 import { runDeathBorgChiSelfTests } from "../families/death-borg-chi.js";
 import type { BorgRuntime } from "../types.js";
 import {
@@ -3444,6 +3456,7 @@ export function runSelfTest(): number {
   runDeathBorgNuClusterTests();
   runFighterCraftTests();
   runSubagentPortTests();
+  runSourceOwnedModuleTests();
 
   if (failures > 0) {
     console.error(`\n[rom.selfcheck] ${failures} FAILURES`);
@@ -3857,6 +3870,27 @@ function runFighterCraftTests(): void {
     assert(shots.length === 0 && a.fbPhaseSlots[0] === 3,
       "ammo gate (zz_006dbe0_ → false) suppresses action-0 spawn but phase still advances");
   }
+}
+
+/**
+ * Source-owned module self-tests — damage/sourceDamage, damage/sourceKnockback,
+ * damage/sourceCollision, sourceDeath, rom/physicsExtras, battle/forceSetup and
+ * battle/spawnFromSlotTables. Every one of these shipped a `runXxxSelfTests(assert)` that no
+ * runner ever called; they are the only executable checks on the modules applyHit now depends
+ * on with no fallback, so they belong in the gate rather than in the tree as dead scaffolding.
+ */
+function runSourceOwnedModuleTests(): void {
+  console.log("\n[rom.selfcheck] Source-owned modules — damage / knockback / collision / death / spawn:");
+  // The state-table port gap, asserted rather than commented: every noop slot must be one the
+  // module declares unported, and every declared-unported slot must still be a noop.
+  assertRomStateTableCoverage(assert);
+  runSourceDamageSelfTests(assert);
+  runSourceKnockbackSelfTests(assert);
+  runSourceCollisionSelfTests(assert);
+  runSourceDeathSelfTests(assert);
+  runPhysicsExtrasSelfTests(assert);
+  runForceSetupSelfTests(assert);
+  runSpawnFromSlotTablesSelfTests(assert);
 }
 
 /** Aggregator for the subagent-ported family self-tests (phoenix-dragon, sirius,

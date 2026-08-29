@@ -527,7 +527,17 @@ export function runSourceDamageSelfTests(assert: SourceDamageAssert): void {
   const a0 = defaultSourceDamageActor(0x0000);
   const d0 = defaultSourceDamageActor(0x0000, 200);
   assert(computeBaseDamage(a0, d0, 0, neutralCtx) === 0, "basePower 0 -> 0 damage");
-  assert(computeBaseDamage(a0, d0, -5, neutralCtx) === 0, "basePower negative -> 0 damage");
+  // A NEGATIVE basePower is not a ROM state and must not read as one. `param_1` is a `ushort *`
+  // (chunk_0004.c:6673) and the formula seeds from `(uint)*param_1` (:6692) — a zero-extended
+  // u16 — so the record word 0xfffb is 65531, not -5. The port's `basePower & 0xffff` coercion
+  // at the top of computeBaseDamage reproduces that, and the ROM-wasm unit (which writes the
+  // record with wU16) sees the identical value. This assertion previously expected -5 -> 0,
+  // which is the pre-coercion behaviour and contradicts the record's declared width; it was
+  // never executed, so nothing caught the drift.
+  assert(
+    computeBaseDamage(a0, d0, -5, neutralCtx) === computeBaseDamage(a0, d0, 0xfffb, neutralCtx),
+    "negative basePower reads as its u16 record word (-5 == 0xfffb), not as <= 0",
+  );
 
   // victimStatusImmune -> 0 (ATK-010, chunk_0004.c:6696-6699).
   assert(

@@ -49,7 +49,8 @@ import {
   PANTHER_MORPH_CONFIG,
   VICTORY_MACHINE_MORPH_CONFIG,
 } from "./families/shared-morph-x.js";
-import { configureSatelliteFamily } from "./families/satellite.js";
+import { configureSatelliteFamily, satelliteFamilyUpdate } from "./families/satellite.js";
+import { stepRng8 } from "./prng.js";
 import { configureStarHeroFamily } from "./families/star-hero.js";
 import { configureCyberMachineFamily } from "./families/cyber-machine.js";
 import {
@@ -321,6 +322,16 @@ export interface FamilyRegistration {
   /** The cue→state table for this family (48 entries × 2 bytes). Extracted from
    *  boot.dol; hardcoded for G RED until the extractor script lands. */
   cueTable: Int8Array;
+  /**
+   * The family's `+0x4bc` PER-FRAME virtual — the ROM invokes it every frame regardless of
+   * what action (if any) the actor is running, so `tick()` calls it BEFORE its
+   * `specialActive` early-return. That is the whole point of the offset: these handlers do
+   * the between-actions housekeeping (ammo-regen latch clears, cooldown bookkeeping) that
+   * an action-gated hook can never reach.
+   *
+   * Optional: only families with a ported +0x4bc set it.
+   */
+  frameUpdate?: (actor: RomActor, runtime: BorgRuntime) => void;
 }
 
 // Lazily built so the cue-table data consts below are initialized first (the
@@ -416,8 +427,8 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // FUN_8012b458. Other action rows retain the generic host fallback.
       pl061b: makeSimpleRegistration("pl061b", (a, ctx) => configureEagleJetFamily(a, ctx)),
       // Satellite family (engine 0x80188da4, x-action 1 + B actions):
-      pl0d01: makeSimpleRegistration("pl0d01", (a, ctx) => configureSatelliteFamily(a, "pl0d01", ctx)),
-      pl0d05: makeSimpleRegistration("pl0d05", (a, ctx) => configureSatelliteFamily(a, "pl0d05", ctx)),
+      pl0d01: makeSatelliteRegistration("pl0d01"),
+      pl0d05: makeSatelliteRegistration("pl0d05"),
       // STAR HERO family (ctor 0x8010f5ac) — cue table @0x80326cf0. PLANET HERO (pl080c)
       // shares the entire family module (status-effects-decode §A verified chain).
       pl0804: makeStarHeroFamilyRegistration(),
@@ -869,6 +880,46 @@ function makeGRedFamilyRegistration(): FamilyRegistration {
     },
     cueTable: cueTableForBorg("pl0615")!,
   };
+}
+
+/**
+ * SATELLITE family (pl0d01 / pl0d05) — the only registration that carries a `frameUpdate`,
+ * because it is the only family whose `+0x4bc` per-frame virtual (FUN_80188a64) is ported.
+ *
+ * WHY THIS EXISTS: satelliteFamilyUpdate was a complete port with no caller, so the deploy
+ * latches the X and pod machines SET (+0x145 in satXPhase1, +0x146/+0x147/+0x148 in podPhase1)
+ * were never cleared — the ROM clears them from this virtual when the matching ammo slot
+ * regenerates, and there was nothing in the port running per-frame to do it. Re-deploy gating
+ * in this family is ammo-regen-driven, not timer-driven, so the clear has no other home.
+ *
+ * AMMO PREDICATES: the ROM reads the cells at actor+0x774+slot*8 (cur) / +0x78e+slot*8 (max);
+ * BorgRuntime.weaponCells is the port's mirror of exactly those. "Refilled" is `cur >= max`,
+ * with the ROM's own infinite-cell convention on top — `max <= 0` means infinite
+ * (chunk_0002.c:7158-7165, types.ts WeaponCell.max), and an infinite cell is never waiting on
+ * a refill. That is what slot 2 is in the port today: the recovered per-borg stat rows carry
+ * only two weapon segments (types.ts weaponCells doc), so cell 2 is inert/infinite and the X
+ * latch clears every frame. Consistent with satXPhase1, which already models the slot-2 ammo
+ * gate as always granted for the same reason — NOT a new assumption, and the honest reading of
+ * an infinite cell. It becomes a real gate the moment a third weapon segment is extracted.
+ */
+function makeSatelliteRegistration(borgId: "pl0d01" | "pl0d05"): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => configureSatelliteFamily(actor, borgId, ctx),
+    cueTable: cueTableForBorg(borgId)!,
+    frameUpdate: (actor, runtime) => {
+      satelliteFamilyUpdate(actor, weaponCellRefilled(runtime, 0), weaponCellRefilled(runtime, 2));
+    },
+  };
+}
+
+/** ROM weapon-cell "refilled" predicate: cur >= max, with `max <= 0` (infinite, never waiting
+ *  on a refill) reading as refilled. Absent cells (a fake/constructor that never ran through
+ *  combat.ts's lazy ensureWeaponCells) read as infinite too — the same self-heal default the
+ *  rest of the port uses. */
+function weaponCellRefilled(runtime: BorgRuntime, slot: number): boolean {
+  const cell = runtime.weaponCells?.[slot];
+  if (!cell || cell.max <= 0) return true;
+  return cell.cur >= cell.max;
 }
 
 /** Small helper: registration from a configure closure + the borg's data-driven cue table. */
@@ -1365,6 +1416,10 @@ export interface RomHostContext {
 export class RomDriverBridge implements RomFamilyDriver {
   readonly actor: RomActor;
   private readonly tables: { fullBody: StateHandler[]; upperBody: StateHandler[] };
+  /** The family's ported `+0x4bc` per-frame virtual, when it has one (see
+   *  FamilyRegistration.frameUpdate). Runs every frame from tick(), before the
+   *  action-ownership gate — the ROM's own cadence for that offset. */
+  familyFrameUpdate: ((actor: RomActor, runtime: BorgRuntime) => void) | null = null;
   /** Armed hitbox records for the current special. */
   private armedHits: ArmedHit[] = [];
   /** Which button started the active ROM machine ("x" | "b"), for the impotence latch. */
@@ -1710,6 +1765,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     // the hand-rolled default remains only as a last-resort fallback.
     actor.cueTable = reg?.cueTable ?? cueTableForBorg(runtime.borgId) ?? makeDefaultCueTable();
     const bridge = new RomDriverBridge(actor, battleRuntime);
+    if (reg?.frameUpdate) bridge.familyFrameUpdate = reg.frameUpdate;
     actor.borgNumber = borgIdToNumber(runtime.borgId);
     actor.team = runtime.team;
     // Merge host-provided hooks into bridge ctx (overrides defaults).
@@ -1953,8 +2009,11 @@ export class RomDriverBridge implements RomFamilyDriver {
         y: a.afterimageSamplePos.y,
         z: a.afterimageSamplePos.z - Math.cos(ownerYaw) * 50 * baseScale,
       };
-      // zz_00055fc_ << 8: a uniformly selected byte becomes the effect's BAM16 yaw.
-      const effectYaw = (Math.floor(Math.random() * 256) & 0xff) * (TAU / 256);
+      // zz_00055fc_ << 8: the ROM 8-bit RNG's byte becomes the effect's BAM16 yaw. prng.ts's
+      // stepRng8() IS the 1:1 port of zz_00055fc_ @0x800055fc (chunk_0000.c:373-386), so it is
+      // the value the ROM actually produces here — Math.random() was a stand-in for a function
+      // the port already had, and it made the afterimage effect replay-nondeterministic.
+      const effectYaw = (stepRng8() & 0xff) * (TAU / 256);
       runtime.romAfterimage = {
         serial: a.afterimageSerial,
         pos,
@@ -2133,6 +2192,9 @@ export class RomDriverBridge implements RomFamilyDriver {
     all: readonly BorgRuntime[],
     input: PlayerInput | null = null,
   ): boolean {
+    // The family's +0x4bc per-frame virtual runs EVERY frame in the ROM — before, during and
+    // after any action — so it must run above the action-ownership early-return below.
+    this.familyFrameUpdate?.(this.actor, runtime);
     if (!this.specialActive) return false;
     this.runtime = runtime;
 

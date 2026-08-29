@@ -613,7 +613,11 @@ function inspectCommonBattleDataEvidence() {
 function inspectTypeDamageEvidence() {
   const generated = readText("packages/combat/src/typeDamage.generated.ts");
   const typeDamage = readText("packages/combat/src/typeDamage.ts");
-  const damageFormula = readText("packages/combat/src/damageFormula.ts");
+  // The runtime damage pipeline is damage/sourceDamage.ts (the 1:1 zz_003cd5c_ port and the
+  // ROM-wasm interception point). damageFormula.ts is now only a BorgRuntime->actor adapter over
+  // it, and typeDamage.ts delegates its matrix read there too, so this is where the type
+  // multiplier is actually applied.
+  const sourceDamage = readText("packages/combat/src/damage/sourceDamage.ts");
   const selfcheck = readText("packages/combat/src/selfcheck.ts");
   const numberField = (field) => Number.parseInt(new RegExp(`${field}:\\s*(\\d+)`).exec(generated)?.[1] ?? "0", 10);
   return {
@@ -625,7 +629,8 @@ function inspectTypeDamageEvidence() {
       generated.includes('matrixAddress: "0x802c5d60"'),
     runtimeImportsGeneratedTables: typeDamage.includes("typeDamage.generated.js"),
     runtimeDamagePipelineUsesTypeMultiplier:
-      damageFormula.includes("typeDamageMultiplier(") && damageFormula.includes("ctx.attackerProfile.id"),
+      sourceDamage.includes("typeMultiplier(attacker.borgNumber, defender.borgNumber)") &&
+      sourceDamage.includes("TYPE_MULTIPLIER_MATRIX[defenderCategory]"),
     selfcheckCoversMatrixSample: selfcheck.includes('typeDamageMultiplier("pl0b00", "pl0701")'),
     remapRows: numberField("remapRows"),
     matrixRows: numberField("matrixRows"),
@@ -633,7 +638,7 @@ function inspectTypeDamageEvidence() {
     mappedBorgIds: numberField("mappedBorgIds"),
     sourceRef: `packages/combat/src/typeDamage.generated.ts:${lineOf(generated, "remapSourcePath")}`,
     runtimeRef: `packages/combat/src/typeDamage.ts:${lineOf(typeDamage, "typeDamage.generated.js")}`,
-    pipelineRef: `packages/combat/src/damageFormula.ts:${lineOf(damageFormula, "typeDamageMultiplier(")}`,
+    pipelineRef: `packages/combat/src/damage/sourceDamage.ts:${lineOf(sourceDamage, "typeMultiplier(attacker.borgNumber, defender.borgNumber)")}`,
   };
 }
 
@@ -649,15 +654,17 @@ function inspectKnockbackEvidence() {
       generated.includes("research/decomp/data/knockback-direction-800300bc.json") &&
       generated.includes('address: "0x800300bc"'),
     runtimeImportsGeneratedConstants: knockback.includes("knockback.generated.js"),
+    // applyHit's direction now comes from damage/sourceKnockback.ts's 1:1 zz_00300bc_ port; the
+    // physics-package helper is no longer a second path inside combat.ts.
     runtimeCombatUsesKnockbackDirection:
-      combat.includes("knockbackDirectionFromPositions") &&
+      combat.includes("computeKnockbackLaunchDirection(") &&
       combat.includes("applyHit("),
     modeCount: numberField("modeCount"),
     bam16PerRadian: floatConst("BAM16_PER_RADIAN"),
     degenerateThreshold: floatConst("DEGENERATE_MAG_SQ_THRESHOLD"),
     sourceRef: `packages/physics/src/knockback.generated.ts:${lineOf(generated, "sourcePath")}`,
     runtimeRef: `packages/physics/src/knockback.ts:${lineOf(knockback, "knockback.generated.js")}`,
-    pipelineRef: `packages/combat/src/combat.ts:${lineOf(combat, "knockbackDirectionFromPositions")}`,
+    pipelineRef: `packages/combat/src/combat.ts:${lineOf(combat, "computeKnockbackLaunchDirection(")}`,
   };
 }
 
