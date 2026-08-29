@@ -309,6 +309,15 @@ needed for the normal development loop.
 | Parameter | Effect |
 | --- | --- |
 | `?romwasm=threads` | Load the shared-memory relink of the ROM damage core instead of the default exported-memory build |
+| `?romwasm=0` | Force the TypeScript damage port and skip the ROM core entirely (debugging) |
+| `?composed=<n>` | Boot the composed-module **dispatch pilot** for n frames. Synthetic adapters, unverified units, no behavioural claim — the page says so on screen while it runs |
+| `?debugOverlay=1` | Show the sim-state overlay (also toggled with `` ` ``). Its first line names which damage core is producing the numbers |
+
+Which damage core is live is always observable, never silent: `<html data-gf-rom-damage>` is
+`rom-live`, `ts-port-forced` or `ts-port-degraded`, `window.__romDamageStatus` carries the
+reason, `window.__romDamage` exists only while the ROM core is installed, and anything other
+than `rom-live` raises an on-screen banner (a genuine failure also logs `console.error`,
+which fails the production smoke).
 
 ---
 
@@ -353,8 +362,9 @@ port continue through the generic combat path instead of being falsely labeled e
 | [`packages/render`](packages/render) | three.js loading and rendering helpers |
 | [`packages/physics`](packages/physics) | ROM-derived movement integration and collision |
 | [`packages/formats`](packages/formats) | Disc/archive format parsers (AFS, PZZ, TPL, HSD anim, hit bins) |
-| [`packages/rom-runtime`](packages/rom-runtime) | Composed-module execution runtime — **scaffold, not yet wired to the app** |
-| [`packages/audio`](packages/audio) · [`packages/ai`](packages/ai) · [`packages/save`](packages/save) · [`packages/core`](packages/core) | Supporting runtime libraries |
+| [`packages/rom-runtime`](packages/rom-runtime) | Composed-module execution runtime. Wired into the app behind `?composed=` only, as a **dispatch pilot with synthetic adapters and no behavioural claim** (`docs/composed-pilot.md`); it does not serve gameplay |
+| [`packages/audio`](packages/audio) · [`packages/ai`](packages/ai) · [`packages/core`](packages/core) | Supporting runtime libraries |
+| [`packages/save`](packages/save) | **Empty on purpose** — no save layer exists here. Persistence lives in `apps/game/src/sim/getStorage.ts` and `SelectForce.ts`; see the package's own header and `docs/audits/game-app-defect-ledger.md` §3.6 |
 | [`packages/test-fixtures`](packages/test-fixtures) | Shared synthetic fixtures for tests |
 | [`docs`](docs) | Port design contract, composition ladder, threads relink runbook |
 | [`docs-site`](docs-site) | VitePress research atlas (deployed to Pages root) |

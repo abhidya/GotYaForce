@@ -4,32 +4,42 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
+import { emitInlineModuleGraph } from "./lib/ts-inline-module.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const corePath = path.join(repoRoot, "packages/core/src/index.ts");
 const hostPath = path.join(repoRoot, "apps/game/src/ui/menuScreenHost.ts");
 const screensDir = path.join(repoRoot, "apps/game/src/ui/screens");
 const mainPath = path.join(repoRoot, "apps/game/src/main.ts");
 
-// Execute the real TypeScript implementations without relying on a previous build.
-// The host's two imports are replaced only to join the core implementation in the same
-// in-memory module and inject a browser-free default input placeholder. Tests pass their
-// own input source, which is the intended seam exposed by createMenuScreenHost.
-const coreSource = readFileSync(corePath, "utf8");
-const hostSource = readFileSync(hostPath, "utf8")
-  .replace(/^import \{ createScreenHost \} from "@gf\/core";\s*$/m, "")
-  .replace(
-    /^import \{ subscribeMenuInput, type MenuInputHandler, type MenuInputTarget \} from "\.\/menuInput\.js";\s*$/m,
-    "const subscribeMenuInput = () => { throw new Error('browser input was not injected'); };",
-  );
-const compiled = ts.transpileModule(`${coreSource}\n${hostSource}`, {
-  compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
-  reportDiagnostics: true,
+// Execute the real TypeScript implementations without relying on a previous build: the host
+// is emitted as a module graph with the REAL @gf/core linked in, so it exercises the actual
+// createScreenHost rather than a stand-in.
+//
+// This is what used to break the script. It transpiled core+host into ONE data: module and
+// deleted their imports with hand-written regexes; when `packages/core/src/index.ts` gained
+// `export * from "./gcRuntime.js"` the regexes knew nothing about it, the specifier survived
+// into a data: URL that cannot resolve relative paths, and the run died on "Invalid relative
+// URL" — a selfcheck that could not execute while still looking like coverage.
+// emitInlineModuleGraph follows the real graph (gcRuntime included) and hard-errors by name
+// on any dependency that is neither mapped nor stubbed.
+const graph = emitInlineModuleGraph({
+  label: "selfcheck-menu-flow",
+  entry: hostPath,
+  outDir: path.join(repoRoot, ".tmp", "selfcheck-menu-flow"),
+  packages: {
+    // The real implementation, not a fake: linking it is the point of this check.
+    "@gf/core": path.join(repoRoot, "packages/core/src/index.ts"),
+  },
+  stubs: {
+    // menuInput is the browser DOM seam. Tests pass their own input source, which is the
+    // injection point createMenuScreenHost exposes; this placeholder only has to exist so
+    // the default parameter can be evaluated, and throws if it is ever actually reached.
+    "./menuInput.js":
+      "export const subscribeMenuInput = () => { throw new Error('browser input was not injected'); };",
+  },
 });
-assert.deepEqual(compiled.diagnostics ?? [], [], "host sources must transpile without diagnostics");
-const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled.outputText).toString("base64")}`;
-const { createMenuScreenHost } = await import(moduleUrl);
+const { createMenuScreenHost } = await import(graph.url);
+assert.equal(typeof createMenuScreenHost, "function", "createMenuScreenHost must be the real implementation");
 
 let subscribed = 0;
 let unsubscribed = 0;
@@ -143,10 +153,28 @@ assert.match(mainSource, /createMenuScreenHost\(ui\)/);
 assert.match(mainSource, /screenHost\.mountOverlay/);
 assert.doesNotMatch(mainSource, /createScreenHost\(ui\)/);
 assert.doesNotMatch(mainSource, /pauseHandle\?\.destroy/);
-const resultsWiring = mainSource.slice(mainSource.indexOf('case "results"'), mainSource.indexOf('case "gets"'));
-const getsWiring = mainSource.slice(mainSource.indexOf('case "gets"'), mainSource.indexOf('case "battle"'));
-assert.match(resultsWiring, /screenHost\.set\(handle\)/, "Results handle must be adopted by the host");
-assert.match(getsWiring, /screenHost\.set\(handle\)/, "Gets handle must be adopted by the host");
+// Results and Gets build their handle first (they need `.render(...)` before display) and
+// therefore ADOPT it with screenHost.set() rather than mounting a builder. Assert that
+// against the mount functions themselves. The previous version sliced main.ts between
+// `case "results"` and `case "gets"`, which only worked while the wiring was inline in the
+// switch; once each arm became a one-line call to a mountX() helper the slice contained no
+// screenHost call at all and the guard could not pass.
+function mountFunctionBody(source, name) {
+  const start = source.indexOf(`function ${name}(`);
+  assert.notEqual(start, -1, `main.ts must define ${name}()`);
+  const end = source.indexOf("\nfunction ", start + 1);
+  return source.slice(start, end === -1 ? undefined : end);
+}
+assert.match(
+  mountFunctionBody(mainSource, "mountResults"),
+  /screenHost\.set\(handle\)/,
+  "Results handle must be adopted by the host",
+);
+assert.match(
+  mountFunctionBody(mainSource, "mountGets"),
+  /screenHost\.set\(handle\)/,
+  "Gets handle must be adopted by the host",
+);
 
 console.log(
   `selfcheck-menu-flow PASS: ${screenFiles.length} targets; delivery/current/top routing, replacement, clear, overlay fall-through, exact-once teardown`,

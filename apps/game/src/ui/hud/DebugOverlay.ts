@@ -21,6 +21,13 @@ export interface DebugOverlayHandle {
   update: (borg: BattleActorObservation | null) => void;
   /** Show/hide without tearing down the DOM node. */
   setVisible: (visible: boolean) => void;
+  /**
+   * Provenance banner pinned above the sim readout: WHICH code is producing the
+   * numbers below. Without it a trace session can compare the overlay against
+   * Dolphin while the ROM damage core silently is not the thing computing the
+   * damage — see apps/game/src/sim/romDamageBoot.ts.
+   */
+  setProvenance: (lines: readonly string[]) => void;
   visible: boolean;
   destroy: () => void;
 }
@@ -64,9 +71,12 @@ export function createDebugOverlay(container: HTMLElement): DebugOverlayHandle {
   pre.style.display = "none";
   container.appendChild(pre);
 
+  let provenance: readonly string[] = [];
+
   const handle: DebugOverlayHandle = {
     update,
     setVisible,
+    setProvenance,
     visible: false,
     destroy: () => {
       pre.remove();
@@ -78,14 +88,23 @@ export function createDebugOverlay(container: HTMLElement): DebugOverlayHandle {
     pre.style.display = v ? "block" : "none";
   }
 
+  function setProvenance(lines: readonly string[]): void {
+    provenance = [...lines];
+  }
+
+  /** Provenance banner + separator, or nothing when no provenance was set. */
+  function header(): string[] {
+    return provenance.length > 0 ? [...provenance, "-".repeat(28)] : [];
+  }
+
   function update(borg: BattleActorObservation | null): void {
     if (!handle.visible) return;
     if (!borg) {
-      pre.textContent = "[debug] no focused borg";
+      pre.textContent = [...header(), "[debug] no focused borg"].join("\n");
       return;
     }
     const b = borg as BattleActorObservation & FutureBorgFields;
-    const lines: string[] = [];
+    const lines: string[] = header();
 
     lines.push(`${b.borgId}  uid=${b.uid}  team=${b.team}`);
     lines.push(`state       ${b.state}  (t=${b.stateTime})`);

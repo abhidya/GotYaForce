@@ -265,7 +265,10 @@ export async function runRomRuntimePhase() {
 
     const state = await evaluate(cdp, "window.__gfRomRuntimeSelfTest");
     const ledger = await evaluate(cdp, "window.__gf.bridgeLedger()");
-    const adapters = await evaluate(cdp, "window.__gf.bridgeAdapters()");
+    // { behaviouralClaim, adapters }: the roster now states its own evidence class up front,
+    // because this harness registers mostly synthetic stand-ins against a synthetic fixture.
+    const adapterRoster = await evaluate(cdp, "window.__gf.bridgeAdapters()");
+    const adapters = adapterRoster.adapters;
 
     // Evidence capture: screenshot, console log, ledger + results JSON.
     const screenshot = await cdp.send("Page.captureScreenshot", { format: "png" });
@@ -273,7 +276,7 @@ export async function runRomRuntimePhase() {
     fs.writeFileSync(path.join(evidenceDir, "console.log"), consoleLines.join("\n") + "\n");
     fs.writeFileSync(
       path.join(evidenceDir, "selftest-results.json"),
-      JSON.stringify({ state, ledger, adapters }, null, 2),
+      JSON.stringify({ state, ledger, adapters: adapterRoster }, null, 2),
     );
 
     // The four required proofs, asserted here as well as in-page.
@@ -297,12 +300,21 @@ export async function runRomRuntimePhase() {
       throw new Error(`rom-runtime ledger implausibly small: ${JSON.stringify(ledger?.totals)}`);
     }
 
+    // The two damage adapters are the only evidence-backed ones in this harness; everything
+    // else is a declared stand-in. Assert that split so a stub cannot quietly relabel itself
+    // as verified and inherit the damage seam's credibility.
+    const verified = adapters.filter((a) => a.evidenceClass === "verified").map((a) => a.name).sort();
+    if (JSON.stringify(verified) !== JSON.stringify(["zz_003d344_", "zz_0066298_"])) {
+      throw new Error(`unexpected verified-adapter set in the self-test: ${JSON.stringify(verified)}`);
+    }
+
     const summary = {
       checks: state.results.length,
       bridgedCalls: ledger.totals.bridgedCalls,
       servicingErrors: ledger.totals.servicingErrors,
       frames: ledger.frames.length,
       adapters: adapters.length,
+      verifiedAdapters: verified,
       evidence: path.relative(root, evidenceDir),
     };
     process.stdout.write(`ROM-runtime bridge phase PASS: ${JSON.stringify(summary)}\n`);

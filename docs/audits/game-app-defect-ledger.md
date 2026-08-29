@@ -83,6 +83,18 @@ This has materially improved since the audit — CI now runs `pnpm verify:contri
 **This is the finding that lets the others survive.** Finding #4 below shipped precisely
 because its test was orphaned.
 
+*2026-08-29:* the same disease was found in the APP selfchecks, one step worse — four of them
+were wired into `package.json` and **could not execute at all**, so they read as coverage while
+covering nothing. `selfcheck:hud` died on CRLF-anchored regexes and on `publicUrl()` wrapping
+it did not know about; `selfcheck:menu-flow`, `selfcheck:game-session` and
+`selfcheck:title-frontend` each rewrote imports with a hand-written regex per import statement
+and died on module resolution the moment the file they targeted gained an import. All four now
+run, via `scripts/lib/ts-inline-module.mjs` (emits the real module graph; hard-errors on any
+dependency that is neither mapped nor stubbed, so the next added import fails loudly instead of
+silently disabling the check), and all four are in `verify:contributor`. Several assertions had
+gone stale while the scripts were dark — the Challenge VM's win routing, the physical-menu
+constant move, the `screenHost.set` call sites — and are updated with a note saying so.
+
 Two runners were reported failing in the committed tree, independently of the P0 fixes
 (both reproduced with the changes stashed):
 
@@ -145,7 +157,7 @@ and still points `main`/`module`/`types` at `src/index.ts`.
 This is **not** an unused-dependency cleanup. Fixing it means relocating the pure camera
 math to a lower, Three-free package — an architectural change.
 
-### 3.6 `@gf/save` is a facade — OPEN
+### 3.6 `@gf/save` is a facade — OPEN (now stated in the package itself)
 
 `apps/game/src/main.ts:746-750`: "Load Box Data" `onConfirm` and `onSkip` both call the
 same `box-continue`; no load occurs. `packages/save/src/index.ts` is confirmed still a
@@ -153,6 +165,13 @@ comment block plus `export {}`. The app instead stores a custom Gotcha Box JSON 
 `localStorage`. There is no GameCube save import/export, IndexedDB schema, migration, or
 byte-exact round trip. Either implement the `@gf/save` contract behind the screen or
 rename it Skip-only.
+
+*2026-08-29:* the decision is still the owner's, but the package no longer reads like a
+module. `packages/save/src/index.ts` now says it is deliberately empty, names the two places
+persistence actually lives (`apps/game/src/sim/getStorage.ts`, `SelectForce.ts`), and points
+back at this row; the README package table says the same instead of listing it as a
+"supporting runtime library". Deleting it was considered and rejected: that would quietly
+close a decision nobody made.
 
 ### 3.7 Remaining P1/P2 findings — UNVERIFIED
 
@@ -200,6 +219,25 @@ Related: Challenge stage/roster selection uses `Math.random`
 (`gameSession.ts:267,278`) and drop RNG is seeded from `Date.now`
 (`main.ts:667-678`), so two runs cannot serve as a stable differential corpus without an
 injected seed and clock.
+
+*2026-08-29, partially closed.* Two of the listed fallbacks were the load-bearing ones and are
+now loud rather than silent; the rest of the row stands.
+
+- **ROM damage core.** `sim/romDamageBoot.ts` fell back to the TS port on any failure behind a
+  single `console.warn`, so a player build with a 404'd `damage-core.wasm` ran the wrong core
+  forever and looked identical to a correct one. The fallback itself is KEPT — it is what
+  `docs/playable-port-design.md` §"Stage C — Play" specifies, and the TS port is the reference
+  the wasm is gated against — but the state is now published on four surfaces
+  (`window.__romDamageStatus`, `<html data-gf-rom-damage>`, an on-screen banner, and
+  `console.error`, which the production smoke treats as fatal). `scripts/smoke-browser-game.mjs`
+  asserts all of them on the happy path AND drives `?romwasm=0` to prove the degraded surfaces
+  actually appear. `?romwasm` also rejects an unrecognised value instead of silently defaulting.
+- **Audio init.** `.catch(() => null)` swallowed a missing `/audio/manifest.json` whole, and the
+  combat-SE manifest was treated as optional though it ships. Both are required assets; a
+  failure now logs `console.error` (fatal to the smoke) while the game continues muted.
+
+Still open here: `GF_SOURCE_STRICT`-gated Challenge VM fallbacks, UI scene-model failure,
+storage fallbacks, and the `Math.random`/`Date.now` seeding.
 
 ### 3.10 2P is exposed but not independently playable — UNVERIFIED
 

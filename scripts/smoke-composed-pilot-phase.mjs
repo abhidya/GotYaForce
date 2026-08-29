@@ -327,7 +327,8 @@ export async function runComposedPilotPhase() {
 
     const pilot = await evaluate(cdp, "window.__gf.composedPilot()");
     const ledger = await evaluate(cdp, "window.__gf.bridgeLedger()");
-    const adapters = await evaluate(cdp, "window.__gf.bridgeAdapters()");
+    const adapterRoster = await evaluate(cdp, "window.__gf.bridgeAdapters()");
+    const adapters = adapterRoster.adapters;
     const imports = await evaluate(cdp, "window.__gf.bridgeImports()");
     const isolated = await evaluate(cdp, "window.crossOriginIsolated");
 
@@ -336,7 +337,11 @@ export async function runComposedPilotPhase() {
     fs.writeFileSync(path.join(evidenceDir, "console.log"), consoleLines.join("\n") + "\n");
     fs.writeFileSync(
       path.join(evidenceDir, "composed-pilot-results.json"),
-      JSON.stringify({ crossOriginIsolated: isolated, bootedScreen, pilot, ledger, adapters, imports }, null, 2),
+      JSON.stringify(
+        { crossOriginIsolated: isolated, bootedScreen, pilot, ledger, adapters: adapterRoster, imports },
+        null,
+        2,
+      ),
     );
 
     // ---- Proof 0: the second batch really did run in a live game. The game
@@ -367,9 +372,37 @@ export async function runComposedPilotPhase() {
     if (pilot.framesDriven !== PILOT_FRAMES) {
       throw new Error(`pilot drove ${pilot.framesDriven} frames, expected ${PILOT_FRAMES}`);
     }
-    const failedFrames = pilot.frames.filter((f) => !f.pass);
-    if (!pilot.pass || failedFrames.length > 0) {
+    const failedFrames = pilot.frames.filter((f) => !f.declaredChecksPass);
+    if (!pilot.declaredChecksPass || failedFrames.length > 0) {
       throw new Error(`composed dispatch pilot FAILED: ${JSON.stringify({ errors: pilot.errors, failedFrames }, null, 2)}`);
+    }
+    // ---- Proof 2b: the pilot must keep declaring what it is. A run that
+    //      stopped saying "synthetic adapters, no behavioural claim" would be
+    //      a pilot quietly promoting itself to evidence.
+    if (pilot.verified !== false || !/^NONE\b/.test(String(pilot.behaviouralClaim))) {
+      throw new Error(
+        `composed pilot no longer disclaims its behavioural claim: ${JSON.stringify({
+          verified: pilot.verified,
+          behaviouralClaim: pilot.behaviouralClaim,
+        })}`,
+      );
+    }
+    if (!/^NONE\b/.test(String(adapterRoster.behaviouralClaim))) {
+      throw new Error(
+        `bridgeAdapters() did not report the synthetic roster: ${adapterRoster.behaviouralClaim}`,
+      );
+    }
+    const nonSynthetic = adapters.filter((a) => a.evidenceClass !== "synthetic");
+    if (nonSynthetic.length > 0) {
+      throw new Error(
+        `pilot registered a non-synthetic adapter — the pilot host must only carry stand-ins: ${JSON.stringify(nonSynthetic)}`,
+      );
+    }
+    if (
+      (await evaluate(cdp, "document.documentElement.dataset.gfComposedPilot")) !==
+      "synthetic-no-behavioural-claim"
+    ) {
+      throw new Error("the composed pilot did not publish its provenance on <html data-gf-composed-pilot>");
     }
     for (const frame of pilot.frames) {
       if (frame.reentrantResult !== EXPECTED_REENTRANT) {
@@ -431,6 +464,7 @@ export async function runComposedPilotPhase() {
       tableSize: pilot.module.tableSize,
       declaredBridgedImports: imports.length,
       adapters: adapters.length,
+      behaviouralClaim: pilot.behaviouralClaim,
       framesDriven: pilot.framesDriven,
       framesAfterGameBoot: PILOT_FRAMES_AFTER_BOOT,
       gameScreenAtSecondBatch: bootedScreen,

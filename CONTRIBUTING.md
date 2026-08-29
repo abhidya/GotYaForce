@@ -21,7 +21,8 @@ pnpm install --frozen-lockfile
 pnpm verify:contributor
 ```
 
-The final command must exit zero. It type-checks the workspace, runs combat
+The final command must exit zero. It type-checks the workspace, runs the four app
+selfchecks (`hud`, `menu-flow`, `game-session`, `title-frontend`) plus combat
 lifecycle and OGhidra-import regression tests, and builds the production game.
 Run `pnpm dev` for the game or `pnpm atlas:dev` for the research atlas.
 
