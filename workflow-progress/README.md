@@ -1,6 +1,6 @@
 # Port workflow: BLOCKED
 
-*Generated 2026-08-29T18:57:10.990585Z - machine-written, do not edit.*
+*Generated 2026-08-29T19:12:21.844950Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 107/1396 settled (3 green, 104 staged) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1131 |
-| **Last transition** | 2026-08-29T18:57:10.990585Z |
+| **Last transition** | 2026-08-29T19:12:21.844950Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `-` @ - ctx |
@@ -23,6 +23,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-29T19:12:21.844950Z | `-` | blocked | machine | 0 | Blocked: chat contract preflight failed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (rea |
 | 2026-08-29T18:57:10.990585Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 2); slot drained and free. |
 | 2026-08-29T18:51:22.616907Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-29T18:50:54.130452Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -72,4 +73,3 @@
 | 2026-08-26T02:40:45.745771Z | `auto-c0043-012` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:40:32.732700Z | `auto-c0043-011` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_016e7fc_ declared void but their results are assigned; no header edit ca |
 | 2026-08-26T02:40:29.088233Z | `auto-c0043-010` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:40:15.722441Z | `auto-c0043-009` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
