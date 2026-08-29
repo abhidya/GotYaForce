@@ -223,6 +223,48 @@ owner decision, not a unilateral one -- correcting all 197 `zz_0089100_`
 assignment sites alone would invalidate pinned blocks across dozens of
 chunks and require a revocation per affected green unit.
 
+### What it actually costs to climb (measured 2026-08-29)
+
+Not every disagreement needs a corpus correction. Split each window's
+disagreeing symbols by whether the owner-decl seed sync could simply
+supersede the divergent declaration on the unit's next build:
+
+- **rebuild-only** -- the unit's staged header predates the owner-decl
+  injection pass (typically an unprototyped `int zz_004beb8_();` against a
+  real owner prototype), and nothing in that unit consumes a result the
+  owner declares void. A plain rebuild repairs it; no corpus change.
+- **corpus fix** -- the owner is a `void` ROM procedure AND the unit's
+  verbatim `.c` assigns its result. No header can reconcile that (the driver
+  says so itself in `void_result_contradictions`), so the residue assignment
+  has to come out of the chunk.
+
+| N | disagreements | rebuild-only | corpus fix | corpus-fix symbols |
+|---:|---:|---:|---:|---|
+| 5 | 0 | 0 | 0 | -- |
+| 10 | 1 | 0 | 1 | `zz_0089100_` (corrected on this branch) |
+| 20 | 23 | 21 | 2 | + `zz_006d0dc_` |
+| 40 | 44 | 38 | 6 | + `zz_0007030_` `zz_00456a0_` `zz_00679d0_` `zz_006d144_` |
+| 80 | 59 | 47 | 12 | + `FUN_800669d0` `zz_0006fb4_` `zz_0007cac_` `zz_0048288_` `zz_0085e00_` `zz_008aff0_` |
+| 83 | 63 | 51 | 12 | (same 12) |
+
+All twelve are confirmed void in their own decompiled bodies (zero
+return-with-value statements): `0x800669d0`, `0x80006fb4`, `0x80007030`,
+`0x80007cac`, `0x800456a0`, `0x80048288`, `0x800679d0`, `0x8006d0dc`,
+`0x8006d144`, `0x80085e00`, `0x80089100`, `0x8008aff0`.
+
+So the whole 83-unit composed module is reachable from **12 corpus
+corrections plus a rebuild sweep** -- two of the twelve (`zz_0089100_`,
+`zz_0007030_`) are already corrected on this branch for `auto-c0025-002`.
+Note that a symbol is only *cleared* once every unit that consumes it in the
+window has been corrected and rebuilt, so the corrections are per call site,
+not per symbol.
+
+Symbols that look contested but are NOT residue defects (their ROM bodies do
+return values, so the consuming units are right and only the declaration
+spelling diverges): `zz_0006f98_` `zz_004cd24_` `zz_0066ff0_` `zz_00677b0_`
+`zz_006dbe0_` `zz_0088aa0_` (`void *`) `zz_01cce38_` `zz_0027adc_`
+`FUN_800452a0` `FUN_80066838`. These belong to the rebuild-only bucket.
+
 ### Cost note
 
 Canonicalization cost scales steeply with the number of distinct owner
