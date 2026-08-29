@@ -1,26 +1,29 @@
-# Port workflow: IDLE
+# Port workflow: BLOCKED
 
-*Generated 2026-08-29T18:44:53.323412Z - machine-written, do not edit.*
+*Generated 2026-08-29T18:50:28.717996Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `BLOCKED` (blocked) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 107/1396 settled (3 green, 104 staged) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1131 |
-| **Last transition** | 2026-08-29T18:44:53.323412Z |
+| **Last transition** | 2026-08-29T18:50:28.717996Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | stopped |
 
+> **Blocked:** chat contract preflight failed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (read timeout=120)
+
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-29T18:50:28.717996Z | `-` | blocked | machine | 0 | Blocked: chat contract preflight failed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (rea |
 | 2026-08-29T18:44:53.323412Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-29T15:19:19.952253Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-26T17:00:28.169537Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
@@ -70,4 +73,3 @@
 | 2026-08-26T02:40:02.687870Z | `auto-c0043-008` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:39:49.479997Z | `auto-c0043-006` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:39:36.562833Z | `auto-c0043-005` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:39:22.268232Z | `auto-c0043-004` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
