@@ -20,7 +20,16 @@ defaults.
   "dtm": null,
 
   "live_families": ["0x800c04c0"],
-  "live_families_basis": "how that set was measured, or why it is null"
+  "live_families_basis": "how that set was measured, or why it is null",
+
+  "setup": {
+    "kind": "battle_roster_reload",
+    "borgs": ["pl0906"],
+    "slots": [0, 1, 2, 3],
+    "roster_depth": 6,
+    "expect_families": ["0x801a10e8"],
+    "timeout_s": 300
+  }
 }
 ```
 
@@ -30,6 +39,11 @@ hard-refuses any scenario whose `scenario_schema` is not exactly `1`, and it
 ignores keys it does not know, so schema-1 files carry these fields safely.
 Only the OGhidra driver's family gate reads them
 (`src/port_family_gate.py::scenario_live_families`).
+
+`setup` is OPTIONAL and ADDITIVE for the same reason. It names a scripted
+change `capture_oracle.py` applies ONCE on the freshly attached stub, before
+any capture breakpoint is installed — see **Roster-reload scenarios** below.
+A scenario with no `setup` behaves exactly as before.
 
 `live_families` lists the borg families whose actors are LOADED AND ACTING in
 this game state, named by their constructor address (the
@@ -54,6 +68,7 @@ plays a demo battle and nobody has measured which families it constructs.
 | `battle-2v2-circle` | owner's live 2v2 savestate + circling/shooting P1 | per-frame camera/UI/actor helpers (pilot: 120/120 byte-exact on `zz_0010980_`; the `FUN_8000fc2c` mis-lift catch) |
 | `title-attract` | cold boot, title/attract loop | title/menu/attract families (untested breadth; menus need input scripting to leave the title) |
 | `battle-2v2-combat` | same 2v2 savestate, circling stick + B/X/A press/release edges | MEASURED 2026-08-29: ~2.7-2.9x the per-frame hit rate of `circle+b` on the live family's hot exports; unlocked NO export `circle+b` could not already reach. Density/branch-coverage aid, not a coverage unlock. |
+| `battle-roster-0x…` (generated) | same 2v2 savestate, but the ROM re-loads the battle around a chosen borg family's roster | one file per covered family, each with a MEASURED `live_families`. Written by `force_navigator.py cover`; inventory + per-family evidence in `coverage-manifest.json`. |
 
 ## Held masks vs press edges (2026-08-29)
 
@@ -72,13 +87,88 @@ in this savestate: `combat` roughly tripled the per-frame hit rate
 So the held-mask defect is real, and fixing it makes captures denser and more
 branch-varied — but it is NOT the reason family exports score zero. **The
 binding constraint is which borg family is loaded.** In this savestate only
-family `0x800c04c0` (pl0300/pl030b) is live, which is why exactly 5 of 104
-staged units (38 of 818 exports) are capturable here and the other 99 are not.
-Growing coverage means new savestates/DTMs for the other 39 families, exactly
-as the design doc's G4 says — not more capture time or cleverer input in this
-state.
+family `0x800c04c0` is live (see the caveat under "Roster-reload scenarios":
+its roster is actually pl0615, and `0x800c04c0` is the block whose code that
+borg runs), which is why exactly 5 of 104 staged units (38 of 818 exports) are
+capturable here and the other 99 are not.
+Growing coverage means reaching the other 39 families — not more capture time
+or cleverer input in this state. That is what roster-reload scenarios do.
 
-## Unit-family -> scenario heuristic (v1)
+## Roster-reload scenarios: one savestate, any family (2026-08-29)
+
+**The whole coverage problem was that a savestate fixes the roster, and the
+checkout has exactly one savestate that loads into a live battle** (all twelve
+`.sav` files in the tree were booted and their slot tables read: four are the
+same 2v2 session with `pl0615` in every slot, the other eight land somewhere
+with no battle table at all). One roster, one family, 5 of 104 units capturable.
+
+`research/tools/dolphin-trace/force_navigator.py` removes that by making the
+roster an INPUT instead of a constant. A scenario `setup` block of kind
+`battle_roster_reload` says which borg to put in which slots, and
+`capture_oracle.py` applies it on the attached stub before capturing:
+
+1. write the borg id into the game's own slot table — `T[0x10+slot*2]` (the id
+   `FUN_800541ac` copies into `actor+1000` at spawn) plus `roster_depth`
+   identical entries in the per-slot roster at `T[slot*0x348+0x1e8]`, where
+   `T = *(u32*)0x80433934`;
+2. set the battle phase machine back to its load step (`T[0]=0`, `T[1]=0`).
+   `PTR_FUN_802cfde0[T[0]]` is dispatched every frame by `zz_0028264_`
+   (chunk_0003.c:3533); index 0 is `FUN_8002844c`, which tears the battle down
+   and calls `zz_0041288_` → `zz_00410bc_(slot)` to stream each slot's borg
+   archive off the DVD from that very id;
+3. wait for a Z0 on the family's own `constructorAddress` to FIRE, then for the
+   ROM to report live gameplay again (`T[0x45]==4` with an alive actor).
+
+Everything after the two writes is the ROM's: its archive load, its actor
+construction, its state machine. `live_families` for a generated scenario is
+therefore measured, not asserted — the constructor breakpoint fired.
+
+**A generated `live_families` is deliberately CONSERVATIVE, and here is the
+subtlety behind that.** `battle-2v2-circle` declares `0x800c04c0`
+(pl0300/pl030b) live — but its roster, read straight out of the slot table, is
+`pl0615` in all four slots, and pl0615 belongs to family `0x8018ccfc`. Both
+statements are true: the family gate partitions the DOL's borg text into
+constructor-to-constructor address blocks, and block `0x800c04c0` also holds
+shared actor code that pl0615 executes. So "family F is live" really means
+"code in F's address block runs", which one borg can satisfy for several
+blocks at once.
+
+A generated scenario claims only the ONE family whose constructor it watched
+fire. That under-claims — some units gated on other blocks would very likely
+fire there too — but the error is in the safe direction: an unlisted family
+keeps its units skipped as `family_not_live` (visible, costs capture time
+later) instead of routing them into a state nobody measured. Widening a
+scenario's `live_families` is a measurement job: scout the candidate units in
+it and add what actually fires, with the count as the basis.
+
+**Choosing the borg.** A family's members come from
+`family-state-machine-coverage.json`; `pl####` IS the spawn id in hex
+(spawn-pools-80380804.json), and the member is checked against the ROM's own
+existence bitmask at `0x802f29c8` (`zz_0068570_`, chunk_0008.c:4658) before it
+is staged.
+
+**Two traps this cost us, both worth keeping written down:**
+
+- *Colour is not the id's low byte.* `T[slot+0xa0]` / roster `+0x1ea` is the
+  0..5 costume colour; the id's low byte is the member index and is consumed
+  separately. Writing the low byte as the colour made the load callback
+  `zz_00412c4_` publish an archive pointer read from past the end of the slot's
+  six-entry colour block, and the game hung the instant the actor was built.
+- *Roster depth 1 ends the battle at the first death.* A slot is declared wiped
+  once `actor[0x491]` reaches `T[slot+0x5a]` (chunk_0006.c:7658), which closes
+  the capture window; the first depth-1 run stopped feeding cases at 42. Depth
+  6 (all entries the same borg) keeps redeploying the same family. The hard
+  ceiling is 30 — the per-slot block is `0x348` bytes.
+
+**Generating them.** `force_navigator.py cover` walks the blocked-family
+inventory biggest-first, does the above once per family in its own Dolphin
+boot, and writes `battle-roster-<family>.json` plus `coverage-manifest.json`
+(what was attempted, which member was used, the constructor evidence, and every
+failure with its reason). `force_navigator.py inventory` prints the blocked
+inventory alone; `force_navigator.py stage --borgs pl0906 --expect-family 0x…`
+does a single family interactively.
+
+## Unit-family -> scenario heuristic (v1, plus family routing)
 
 Selection is implemented in `src/port_trace_verify.py::select_scenario`
 (OGhidra repo) and used by the driver's `verify-unit`/`verify-sweep` verbs
@@ -90,11 +180,18 @@ when `--scenario` is not given:
   per-frame helpers; design doc G4: growing coverage beyond it is a
   game-state authoring problem, not a tooling problem)
 
-The heuristic is deliberately coarse: family-specific actor helpers need
-their borg family present and acting, which no current scenario guarantees.
-When a capture scouts 0 hits, the fix is a NEW scenario (a savestate or DTM
-that reaches the code), then extending this table — not more capture time in
-the wrong state.
+That heuristic is now only the FALLBACK. Ahead of it, `select_scenario` takes
+the unit's gating families (from the same `port_family_gate.FamilyIndex` the
+gate uses) and routes to whichever scenario has MEASURED one of them live —
+i.e. straight to that family's generated `battle-roster-0x…`. The routing
+index is built by reading the scenario files' own `live_families`, so routing
+and gating can never disagree about what a scenario provides.
+
+It fails open at every step: no family index, no gating family, or no scenario
+covering the family all fall back to the v1 heuristic, exactly as before. A
+family with no scenario yet is still skipped as `family_not_live` — visibly,
+in the sweep's blocked inventory — which is the signal to run
+`force_navigator.py cover` for it.
 
 ## Family-liveness gate on `verify-sweep` (2026-08-29)
 

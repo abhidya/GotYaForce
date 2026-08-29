@@ -14,6 +14,13 @@ rule); pure stdlib.
   stub quirk this rig taught us encoded (see its docstring).
 - `capture_oracle.py` — CLI: `launch` / `stop` / `probe` / `scout` /
   `capture`.
+- `force_navigator.py` — CLI: `inspect` / `survey` / `inventory` / `stage` /
+  `cover` / `families`. Makes an ARBITRARY borg family live in the running
+  game by rewriting the ROM's own battle roster and re-running its own battle
+  load, which is what lifts capture past the one family the single savestate
+  provides. `cover` generates a measured scenario per blocked family; the
+  mechanism, its evidence, and its two traps are documented in
+  `scenarios/README.md` ("Roster-reload scenarios").
 - `plans/<unit>.<fn>.json` — per-function capture plans, authored line-by-line
   from the unit's verbatim C (typed read/write sets with address expressions).
 - `merge_fixtures.py` — combine the per-export fixtures of one unit into the
@@ -57,6 +64,19 @@ rule); pure stdlib.
    non-deterministic across runs (each capture is a fresh sample, not a
    replayable trace). When the owner records a DTM, launch Dolphin with the
    movie and the same capture path applies unchanged.
+6b. **Dolphin on this rig cannot WRITE a savestate** (measured 2026-08-29, and
+   the reason coverage ships as scenarios rather than `.sav` files). Dolphin
+   exposes state SAVING only through its hotkey/menu UI — `--save_state` is
+   load-only — and the hotkey path needs synthetic keyboard input to reach the
+   emulator. It does not: `keybd_event`/`SendInput` produce no key state at all
+   from this session (`GetAsyncKeyState` reads 0 during an injected key-down,
+   `GetForegroundWindow()` returns 0), i.e. there is no interactive input
+   desktop to inject into. `Hotkeys.ini` + `Dolphin.Core.HotkeysRequireFocus`
+   were both configured and neither produced a `StateSaves/` file, with or
+   without `--batch`. So a derived game state cannot be frozen into a new
+   savestate here; it is instead re-derived from the base savestate by a
+   scenario `setup` block on every boot (a few seconds), which is also
+   versionable text rather than a 20 MB blob.
 7. `scout` empirics (90 s, 201 callee-free staged functions, live 2v2 +
    injection): only `FUN_8000fc2c` and `zz_0010980_` fire (4/frame each —
    per-player camera/UI updates). Family-specific actor helpers need their
@@ -87,6 +107,32 @@ node research/decomp/oracle-harness/run-unit.mjs --unit <unit>
 # 4. stop the instance
 python .../capture_oracle.py stop
 ```
+
+### Capturing a unit whose borg family the savestate does not load
+
+Most staged units are family-gated and the one battle savestate loads one
+family, so the recipe above scouts 0 hits for them. Use that family's
+roster-reload scenario instead — the `setup` block runs on attach and the rest
+is identical:
+
+```sh
+# which families block how many staged units, biggest first
+python .../force_navigator.py inventory
+
+# generate one measured scenario per blocked family (own Dolphin boot each)
+python .../force_navigator.py cover \
+  --manifest research/tools/dolphin-trace/scenarios/coverage-manifest.json
+
+# then scout/capture through the generated scenario
+python .../capture_oracle.py launch --scenario battle-roster-0x801a10e8 --wait 120
+python .../capture_oracle.py scout --unit auto-c0050-000 \
+  --scenario battle-roster-0x801a10e8 --seconds 60
+```
+
+`--scenario` supplies the savestate, the pad injection, the recorded
+`game_state`, AND the roster setup; the setup report is written into the
+fixture header (`source.scenario_setup`) so a fixture says which borg family
+was live when it was captured.
 
 Authoring a new plan: read the function's verbatim C in
 `research/decomp/port-units-staging/<unit>/unit.c`, list every load (typed,
@@ -139,6 +185,32 @@ write set byte-for-byte.
   actor, so `a+0x38 / a+0x20 / a+0x180` are the callee's on that path and the
   spec compares only the subset the unit owns; the full write set (float channel
   included) is compared on the 59 non-re-aim cases.
+
+- **Coverage unblock (2026-08-29)** — the first captures from borg families the
+  repo's one savestate never loads, via roster-reload scenarios
+  (`force_navigator.py`, scenarios/README.md). `force_navigator.py cover`
+  attempted all 40 families the 104 staged greens are gated on and brought up
+  **39**; each is asserted only on its own constructor breakpoint firing plus
+  the ROM reporting live gameplay afterwards. Through the family gate that
+  moves selection from **6 of 104 units (46 of 818 exports) to 104 of 104
+  (818 of 818)**. Two units carried it end to end:
+
+  | unit | family (was `family_not_live`) | export | cases |
+  |---|---|---|---|
+  | `auto-c0035-000` | `0x801301f8` / pl0103 | `FUN_80130c5c` | **200 / 200** |
+  | `auto-c0050-000` | `0x801a10e8` / pl0906 | `zz_01a1bbc_` | **42** |
+
+  Both had scouted 0 hits in every prior scenario. `auto-c0035-000` also scouts
+  7 of its 8 exports firing (186 hits in 60 s) where it previously scored zero.
+  `zz_01a1bbc_`'s 42 is a real ceiling, not a stopped battle: it stops firing
+  while the battle is still live and raising the roster depth did not change
+  the number, so it is called a fixed number of times per deployment rather
+  than per frame. Both fixtures are plan SKELETONS (args/ret only — the
+  generator's, not hand-authored read/write sets), so they prove reachability
+  and per-call sampling, not yet memory behaviour.
+  Fixtures: `research/decomp/oracle-harness/corpora/auto-c0035-000.FUN_80130c5c.dolphin-trace.jsonl`,
+  `…/auto-c0050-000.zz_01a1bbc_.dolphin-trace.jsonl`; each header's
+  `source.scenario_setup` records which borg family was live for it.
 
 Verdicts and evidence artifacts: `research/decomp/data/oracle-results/
 auto-c0001-007.json`, `auto-c0001-005.json`, `auto-c0020-007.json`.

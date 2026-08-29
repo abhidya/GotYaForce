@@ -1,0 +1,2873 @@
+{
+  "generated_at": "2026-08-29T20:14:36.687068Z",
+  "generated_by": "research/tools/dolphin-trace/force_navigator.py cover",
+  "base_save_state": "2v2 gred cotrolled players no cpu.sav",
+  "slots": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "roster_depth": 6,
+  "note": "Dolphin on this rig cannot WRITE a savestate (see the dolphin-trace README), so each covered family is delivered as a scenario whose `setup` block re-derives its state from the one base savestate, not as a .sav file.",
+  "results": [
+    {
+      "family": "0x801301f8",
+      "members": [
+        "pl0103",
+        "pl0106",
+        "pl0107"
+      ],
+      "blocked_units": 10,
+      "blocked_exports": 78,
+      "attempted_at": "2026-08-29T19:40:09.558245Z",
+      "member_used": "pl0103",
+      "report": {
+        "assignment": {
+          "0": "pl0103",
+          "1": "pl0103",
+          "2": "pl0103",
+          "3": "pl0103"
+        },
+        "expect_families": [
+          "0x801301f8"
+        ],
+        "constructors_hit": {
+          "0x801301f8": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0103"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0103",
+          "pl0103",
+          "pl0103",
+          "pl0103",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0103",
+          "0x0103",
+          "0x0103",
+          "0x0103",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x801301f8",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x801301f8.json"
+    },
+    {
+      "family": "0x801a10e8",
+      "members": [
+        "pl0906",
+        "pl090b"
+      ],
+      "blocked_units": 10,
+      "blocked_exports": 78,
+      "attempted_at": "2026-08-29T19:40:58.745217Z",
+      "member_used": "pl0906",
+      "report": {
+        "assignment": {
+          "0": "pl0906",
+          "1": "pl0906",
+          "2": "pl0906",
+          "3": "pl0906"
+        },
+        "expect_families": [
+          "0x801a10e8"
+        ],
+        "constructors_hit": {
+          "0x801a10e8": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0906"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0906",
+          "pl0906",
+          "pl0906",
+          "pl0906",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0906",
+          "0x0906",
+          "0x0906",
+          "0x0906",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x801a10e8",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x801a10e8.json"
+    },
+    {
+      "family": "0x80079410",
+      "members": [
+        "pl0900",
+        "pl0908",
+        "pl090d"
+      ],
+      "blocked_units": 9,
+      "blocked_exports": 72,
+      "attempted_at": "2026-08-29T19:42:01.569897Z",
+      "member_used": "pl0900",
+      "report": {
+        "assignment": {
+          "0": "pl0900",
+          "1": "pl0900",
+          "2": "pl0900",
+          "3": "pl0900"
+        },
+        "expect_families": [
+          "0x80079410"
+        ],
+        "constructors_hit": {
+          "0x80079410": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0900"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0900",
+          "pl0900",
+          "pl0900",
+          "pl0900",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0900",
+          "0x0900",
+          "0x0900",
+          "0x0900",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80079410",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80079410.json"
+    },
+    {
+      "family": "0x800bb390",
+      "members": [
+        "pl0208",
+        "pl020e"
+      ],
+      "blocked_units": 9,
+      "blocked_exports": 72,
+      "attempted_at": "2026-08-29T19:42:46.855122Z",
+      "member_used": "pl0208",
+      "report": {
+        "assignment": {
+          "0": "pl0208",
+          "1": "pl0208",
+          "2": "pl0208",
+          "3": "pl0208"
+        },
+        "expect_families": [
+          "0x800bb390"
+        ],
+        "constructors_hit": {
+          "0x800bb390": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0208"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0208",
+          "pl0208",
+          "pl0208",
+          "pl0208",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0208",
+          "0x0208",
+          "0x0208",
+          "0x0208",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x800bb390",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x800bb390.json"
+    },
+    {
+      "family": "0x80102824",
+      "members": [
+        "pl0104"
+      ],
+      "blocked_units": 8,
+      "blocked_exports": 62,
+      "attempted_at": "2026-08-29T19:43:32.555050Z",
+      "member_used": "pl0104",
+      "report": {
+        "assignment": {
+          "0": "pl0104",
+          "1": "pl0104",
+          "2": "pl0104",
+          "3": "pl0104"
+        },
+        "expect_families": [
+          "0x80102824"
+        ],
+        "constructors_hit": {
+          "0x80102824": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0104"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0104",
+          "pl0104",
+          "pl0104",
+          "pl0104",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0104",
+          "0x0104",
+          "0x0104",
+          "0x0104",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80102824",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80102824.json"
+    },
+    {
+      "family": "0x801ba020",
+      "members": [
+        "pl0307",
+        "pl030d"
+      ],
+      "blocked_units": 8,
+      "blocked_exports": 62,
+      "attempted_at": "2026-08-29T19:44:16.146714Z",
+      "member_used": "pl0307",
+      "report": {
+        "assignment": {
+          "0": "pl0307",
+          "1": "pl0307",
+          "2": "pl0307",
+          "3": "pl0307"
+        },
+        "expect_families": [
+          "0x801ba020"
+        ],
+        "constructors_hit": {
+          "0x801ba020": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0307"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0307",
+          "pl0307",
+          "pl0307",
+          "pl0307",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0307",
+          "0x0307",
+          "0x0307",
+          "0x0307",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x801ba020",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x801ba020.json"
+    },
+    {
+      "family": "0x80123438",
+      "members": [
+        "pl0202",
+        "pl020b"
+      ],
+      "blocked_units": 7,
+      "blocked_exports": 56,
+      "attempted_at": "2026-08-29T19:45:11.968508Z",
+      "member_used": "pl0202",
+      "report": {
+        "assignment": {
+          "0": "pl0202",
+          "1": "pl0202",
+          "2": "pl0202",
+          "3": "pl0202"
+        },
+        "expect_families": [
+          "0x80123438"
+        ],
+        "constructors_hit": {
+          "0x80123438": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0202"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0202",
+          "pl0202",
+          "pl0202",
+          "pl0202",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0202",
+          "0x0202",
+          "0x0202",
+          "0x0202",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80123438",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80123438.json"
+    },
+    {
+      "family": "0x800ba144",
+      "members": [
+        "pl0207"
+      ],
+      "blocked_units": 5,
+      "blocked_exports": 38,
+      "attempted_at": "2026-08-29T19:46:08.259679Z",
+      "member_used": "pl0207",
+      "report": {
+        "assignment": {
+          "0": "pl0207",
+          "1": "pl0207",
+          "2": "pl0207",
+          "3": "pl0207"
+        },
+        "expect_families": [
+          "0x800ba144"
+        ],
+        "constructors_hit": {
+          "0x800ba144": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0207"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0207",
+          "pl0207",
+          "pl0207",
+          "pl0207",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0207",
+          "0x0207",
+          "0x0207",
+          "0x0207",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x800ba144",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x800ba144.json"
+    },
+    {
+      "family": "0x800c04c0",
+      "members": [
+        "pl0300",
+        "pl030b"
+      ],
+      "blocked_units": 5,
+      "blocked_exports": 38,
+      "attempted_at": "2026-08-29T19:46:54.079429Z",
+      "member_used": "pl0300",
+      "report": {
+        "assignment": {
+          "0": "pl0300",
+          "1": "pl0300",
+          "2": "pl0300",
+          "3": "pl0300"
+        },
+        "expect_families": [
+          "0x800c04c0"
+        ],
+        "constructors_hit": {
+          "0x800c04c0": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0300"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0300",
+          "pl0300",
+          "pl0300",
+          "pl0300",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0300",
+          "0x0300",
+          "0x0300",
+          "0x0300",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x800c04c0",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x800c04c0.json"
+    },
+    {
+      "family": "0x801b3c6c",
+      "members": [
+        "pl0907",
+        "pl090c"
+      ],
+      "blocked_units": 5,
+      "blocked_exports": 40,
+      "attempted_at": "2026-08-29T19:47:37.588665Z",
+      "member_used": "pl0907",
+      "report": {
+        "assignment": {
+          "0": "pl0907",
+          "1": "pl0907",
+          "2": "pl0907",
+          "3": "pl0907"
+        },
+        "expect_families": [
+          "0x801b3c6c"
+        ],
+        "constructors_hit": {
+          "0x801b3c6c": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0907"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0907",
+          "pl0907",
+          "pl0907",
+          "pl0907",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0907",
+          "0x0907",
+          "0x0907",
+          "0x0907",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x801b3c6c",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x801b3c6c.json"
+    },
+    {
+      "family": "0x801b7c74",
+      "members": [
+        "pl0209"
+      ],
+      "blocked_units": 5,
+      "blocked_exports": 40,
+      "attempted_at": "2026-08-29T19:48:22.245332Z",
+      "member_used": "pl0209",
+      "report": {
+        "assignment": {
+          "0": "pl0209",
+          "1": "pl0209",
+          "2": "pl0209",
+          "3": "pl0209"
+        },
+        "expect_families": [
+          "0x801b7c74"
+        ],
+        "constructors_hit": {
+          "0x801b7c74": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0209"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0209",
+          "pl0209",
+          "pl0209",
+          "pl0209",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0209",
+          "0x0209",
+          "0x0209",
+          "0x0209",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x801b7c74",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x801b7c74.json"
+    },
+    {
+      "family": "0x80107e7c",
+      "members": [
+        "pl0302",
+        "pl0306"
+      ],
+      "blocked_units": 4,
+      "blocked_exports": 32,
+      "attempted_at": "2026-08-29T19:49:07.273566Z",
+      "member_used": "pl0302",
+      "report": {
+        "assignment": {
+          "0": "pl0302",
+          "1": "pl0302",
+          "2": "pl0302",
+          "3": "pl0302"
+        },
+        "expect_families": [
+          "0x80107e7c"
+        ],
+        "constructors_hit": {
+          "0x80107e7c": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0302"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0302",
+          "pl0302",
+          "pl0302",
+          "pl0302",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0302",
+          "0x0302",
+          "0x0302",
+          "0x0302",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80107e7c",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80107e7c.json"
+    },
+    {
+      "family": "0x80074940",
+      "members": [
+        "pl0400",
+        "pl040a"
+      ],
+      "blocked_units": 3,
+      "blocked_exports": 24,
+      "attempted_at": "2026-08-29T19:49:52.100927Z",
+      "member_used": "pl0400",
+      "report": {
+        "assignment": {
+          "0": "pl0400",
+          "1": "pl0400",
+          "2": "pl0400",
+          "3": "pl0400"
+        },
+        "expect_families": [
+          "0x80074940"
+        ],
+        "constructors_hit": {
+          "0x80074940": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0400"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0400",
+          "pl0400",
+          "pl0400",
+          "pl0400",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0400",
+          "0x0400",
+          "0x0400",
+          "0x0400",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80074940",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80074940.json"
+    },
+    {
+      "family": "0x80165f64",
+      "members": [
+        "pl0101"
+      ],
+      "blocked_units": 3,
+      "blocked_exports": 22,
+      "attempted_at": "2026-08-29T19:51:11.198690Z",
+      "member_used": "pl0101",
+      "report": {
+        "assignment": {
+          "0": "pl0101",
+          "1": "pl0101",
+          "2": "pl0101",
+          "3": "pl0101"
+        },
+        "expect_families": [
+          "0x80165f64"
+        ],
+        "constructors_hit": {
+          "0x80165f64": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0101"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0101",
+          "pl0101",
+          "pl0101",
+          "pl0101",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0101",
+          "0x0101",
+          "0x0101",
+          "0x0101",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80165f64",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80165f64.json"
+    },
+    {
+      "family": "0x80072048",
+      "members": [
+        "pl0100",
+        "pl0108"
+      ],
+      "blocked_units": 2,
+      "blocked_exports": 16,
+      "attempted_at": "2026-08-29T19:51:57.251746Z",
+      "member_used": "pl0100",
+      "report": {
+        "assignment": {
+          "0": "pl0100",
+          "1": "pl0100",
+          "2": "pl0100",
+          "3": "pl0100"
+        },
+        "expect_families": [
+          "0x80072048"
+        ],
+        "constructors_hit": {
+          "0x80072048": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0100"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0100",
+          "pl0100",
+          "pl0100",
+          "pl0100",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0100",
+          "0x0100",
+          "0x0100",
+          "0x0100",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80072048",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80072048.json"
+    },
+    {
+      "family": "0x800e5288",
+      "members": [
+        "pl0203",
+        "pl020c"
+      ],
+      "blocked_units": 2,
+      "blocked_exports": 16,
+      "attempted_at": "2026-08-29T19:52:41.364076Z",
+      "member_used": "pl0203",
+      "report": {
+        "assignment": {
+          "0": "pl0203",
+          "1": "pl0203",
+          "2": "pl0203",
+          "3": "pl0203"
+        },
+        "expect_families": [
+          "0x800e5288"
+        ],
+        "constructors_hit": {
+          "0x800e5288": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0203"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0203",
+          "pl0203",
+          "pl0203",
+          "pl0203",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0203",
+          "0x0203",
+          "0x0203",
+          "0x0203",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x800e5288",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x800e5288.json"
+    },
+    {
+      "family": "0x80106e3c",
+      "members": [
+        "pl0301"
+      ],
+      "blocked_units": 2,
+      "blocked_exports": 16,
+      "attempted_at": "2026-08-29T19:53:24.925926Z",
+      "member_used": "pl0301",
+      "report": {
+        "assignment": {
+          "0": "pl0301",
+          "1": "pl0301",
+          "2": "pl0301",
+          "3": "pl0301"
+        },
+        "expect_families": [
+          "0x80106e3c"
+        ],
+        "constructors_hit": {
+          "0x80106e3c": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0301"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0301",
+          "pl0301",
+          "pl0301",
+          "pl0301",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0301",
+          "0x0301",
+          "0x0301",
+          "0x0301",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80106e3c",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80106e3c.json"
+    },
+    {
+      "family": "0x80134078",
+      "members": [
+        "pl0304",
+        "pl0308"
+      ],
+      "blocked_units": 2,
+      "blocked_exports": 16,
+      "attempted_at": "2026-08-29T19:54:08.910093Z",
+      "member_used": "pl0304",
+      "report": {
+        "assignment": {
+          "0": "pl0304",
+          "1": "pl0304",
+          "2": "pl0304",
+          "3": "pl0304"
+        },
+        "expect_families": [
+          "0x80134078"
+        ],
+        "constructors_hit": {
+          "0x80134078": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0304"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0304",
+          "pl0304",
+          "pl0304",
+          "pl0304",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0304",
+          "0x0304",
+          "0x0304",
+          "0x0304",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80134078",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80134078.json"
+    },
+    {
+      "family": "0x8014d200",
+      "members": [
+        "pl0901"
+      ],
+      "blocked_units": 2,
+      "blocked_exports": 16,
+      "attempted_at": "2026-08-29T19:54:53.605943Z",
+      "member_used": "pl0901",
+      "report": {
+        "assignment": {
+          "0": "pl0901",
+          "1": "pl0901",
+          "2": "pl0901",
+          "3": "pl0901"
+        },
+        "expect_families": [
+          "0x8014d200"
+        ],
+        "constructors_hit": {
+          "0x8014d200": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0901"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0901",
+          "pl0901",
+          "pl0901",
+          "pl0901",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0901",
+          "0x0901",
+          "0x0901",
+          "0x0901",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x8014d200",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x8014d200.json"
+    },
+    {
+      "family": "0x801854f8",
+      "members": [
+        "pl0406"
+      ],
+      "blocked_units": 2,
+      "blocked_exports": 16,
+      "attempted_at": "2026-08-29T19:55:57.577971Z",
+      "member_used": "pl0406",
+      "report": {
+        "assignment": {
+          "0": "pl0406",
+          "1": "pl0406",
+          "2": "pl0406",
+          "3": "pl0406"
+        },
+        "expect_families": [
+          "0x801854f8"
+        ],
+        "constructors_hit": {
+          "0x801854f8": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0406"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0406",
+          "pl0406",
+          "pl0406",
+          "pl0406",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0406",
+          "0x0406",
+          "0x0406",
+          "0x0406",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x801854f8",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x801854f8.json"
+    },
+    {
+      "family": "0x80073b70",
+      "members": [
+        "pl0200",
+        "pl020a",
+        "pl020f"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T19:56:55.674027Z",
+      "member_used": "pl0200",
+      "report": {
+        "assignment": {
+          "0": "pl0200",
+          "1": "pl0200",
+          "2": "pl0200",
+          "3": "pl0200"
+        },
+        "expect_families": [
+          "0x80073b70"
+        ],
+        "constructors_hit": {
+          "0x80073b70": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0200"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0200",
+          "pl0200",
+          "pl0200",
+          "pl0200",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0200",
+          "0x0200",
+          "0x0200",
+          "0x0200",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80073b70",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80073b70.json"
+    },
+    {
+      "family": "0x80076784",
+      "members": [
+        "pl0800"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T19:57:42.710600Z",
+      "member_used": "pl0800",
+      "report": {
+        "assignment": {
+          "0": "pl0800",
+          "1": "pl0800",
+          "2": "pl0800",
+          "3": "pl0800"
+        },
+        "expect_families": [
+          "0x80076784"
+        ],
+        "constructors_hit": {
+          "0x80076784": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0800"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0800",
+          "pl0800",
+          "pl0800",
+          "pl0800",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0800",
+          "0x0800",
+          "0x0800",
+          "0x0800",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80076784",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80076784.json"
+    },
+    {
+      "family": "0x8007ca5c",
+      "members": [
+        "pl0c00",
+        "pl0c06"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T19:58:25.351859Z",
+      "member_used": "pl0c00",
+      "report": {
+        "assignment": {
+          "0": "pl0c00",
+          "1": "pl0c00",
+          "2": "pl0c00",
+          "3": "pl0c00"
+        },
+        "expect_families": [
+          "0x8007ca5c"
+        ],
+        "constructors_hit": {
+          "0x8007ca5c": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0c00"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0c00",
+          "pl0c00",
+          "pl0c00",
+          "pl0c00",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0c00",
+          "0x0c00",
+          "0x0c00",
+          "0x0c00",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x8007ca5c",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x8007ca5c.json"
+    },
+    {
+      "family": "0x800b8188",
+      "members": [
+        "pl0503",
+        "pl0506",
+        "pl0507",
+        "pl050f",
+        "pl0512",
+        "pl0513"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 6,
+      "attempted_at": "2026-08-29T19:59:07.967751Z",
+      "member_used": "pl0506",
+      "report": {
+        "assignment": {
+          "0": "pl0506",
+          "1": "pl0506",
+          "2": "pl0506",
+          "3": "pl0506"
+        },
+        "expect_families": [
+          "0x800b8188"
+        ],
+        "constructors_hit": {
+          "0x800b8188": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0506"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0506",
+          "pl0506",
+          "pl0506",
+          "pl0506",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0506",
+          "0x0506",
+          "0x0506",
+          "0x0506",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x800b8188",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x800b8188.json"
+    },
+    {
+      "family": "0x800ce730",
+      "members": [
+        "pl0601",
+        "pl0609",
+        "pl0617",
+        "pl061d"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:00:09.758093Z",
+      "member_used": "pl0601",
+      "report": {
+        "assignment": {
+          "0": "pl0601",
+          "1": "pl0601",
+          "2": "pl0601",
+          "3": "pl0601"
+        },
+        "expect_families": [
+          "0x800ce730"
+        ],
+        "constructors_hit": {
+          "0x800ce730": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0601"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0601",
+          "pl0601",
+          "pl0601",
+          "pl0601",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0601",
+          "0x0601",
+          "0x0601",
+          "0x0601",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x800ce730",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x800ce730.json"
+    },
+    {
+      "family": "0x80100ef4",
+      "members": [
+        "pl0a01"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:01:22.703075Z",
+      "member_used": "pl0a01",
+      "report": {
+        "assignment": {
+          "0": "pl0a01",
+          "1": "pl0a01",
+          "2": "pl0a01",
+          "3": "pl0a01"
+        },
+        "expect_families": [
+          "0x80100ef4"
+        ],
+        "constructors_hit": {
+          "0x80100ef4": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0a01"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0a01",
+          "pl0a01",
+          "pl0a01",
+          "pl0a01",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0a01",
+          "0x0a01",
+          "0x0a01",
+          "0x0a01",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80100ef4",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80100ef4.json"
+    },
+    {
+      "family": "0x80105144",
+      "members": [
+        "pl0c02"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:02:07.196980Z",
+      "member_used": "pl0c02",
+      "report": {
+        "assignment": {
+          "0": "pl0c02",
+          "1": "pl0c02",
+          "2": "pl0c02",
+          "3": "pl0c02"
+        },
+        "expect_families": [
+          "0x80105144"
+        ],
+        "constructors_hit": {
+          "0x80105144": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0c02"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0c02",
+          "pl0c02",
+          "pl0c02",
+          "pl0c02",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0c02",
+          "0x0c02",
+          "0x0c02",
+          "0x0c02",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80105144",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80105144.json"
+    },
+    {
+      "family": "0x80116acc",
+      "members": [
+        "pl0706"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:04:02.933804Z",
+      "member_used": "pl0706",
+      "report": {
+        "assignment": {
+          "0": "pl0706",
+          "1": "pl0706",
+          "2": "pl0706",
+          "3": "pl0706"
+        },
+        "expect_families": [
+          "0x80116acc"
+        ],
+        "constructors_hit": {
+          "0x80116acc": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0706"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0706",
+          "pl0706",
+          "pl0706",
+          "pl0706",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0706",
+          "0x0706",
+          "0x0706",
+          "0x0706",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80116acc",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80116acc.json"
+    },
+    {
+      "family": "0x801223c0",
+      "members": [
+        "pl0701",
+        "pl0708",
+        "pl070c",
+        "pl070d"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:05:23.050238Z",
+      "member_used": "pl0701",
+      "report": {
+        "assignment": {
+          "0": "pl0701",
+          "1": "pl0701",
+          "2": "pl0701",
+          "3": "pl0701"
+        },
+        "expect_families": [
+          "0x801223c0"
+        ],
+        "constructors_hit": {
+          "0x801223c0": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0701"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0701",
+          "pl0701",
+          "pl0701",
+          "pl0701",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0701",
+          "0x0701",
+          "0x0701",
+          "0x0701",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x801223c0",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x801223c0.json"
+    },
+    {
+      "family": "0x80125a28",
+      "members": [
+        "pl0604",
+        "pl0618"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:06:07.087185Z",
+      "member_used": "pl0604",
+      "report": {
+        "assignment": {
+          "0": "pl0604",
+          "1": "pl0604",
+          "2": "pl0604",
+          "3": "pl0604"
+        },
+        "expect_families": [
+          "0x80125a28"
+        ],
+        "constructors_hit": {
+          "0x80125a28": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0604"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0604",
+          "pl0604",
+          "pl0604",
+          "pl0604",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0604",
+          "0x0604",
+          "0x0604",
+          "0x0604",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80125a28",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80125a28.json"
+    },
+    {
+      "family": "0x8012f204",
+      "members": [
+        "pl0305",
+        "pl0309",
+        "pl030a"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 6,
+      "attempted_at": "2026-08-29T20:06:52.366394Z",
+      "member_used": "pl0305",
+      "report": {
+        "assignment": {
+          "0": "pl0305",
+          "1": "pl0305",
+          "2": "pl0305",
+          "3": "pl0305"
+        },
+        "expect_families": [
+          "0x8012f204"
+        ],
+        "constructors_hit": {
+          "0x8012f204": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0305"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0305",
+          "pl0305",
+          "pl0305",
+          "pl0305",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0305",
+          "0x0305",
+          "0x0305",
+          "0x0305",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x8012f204",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x8012f204.json"
+    },
+    {
+      "family": "0x80151790",
+      "members": [
+        "pl0903",
+        "pl090a"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:07:42.875082Z",
+      "member_used": "pl0903",
+      "report": {
+        "assignment": {
+          "0": "pl0903",
+          "1": "pl0903",
+          "2": "pl0903",
+          "3": "pl0903"
+        },
+        "expect_families": [
+          "0x80151790"
+        ],
+        "constructors_hit": {
+          "0x80151790": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0903"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0903",
+          "pl0903",
+          "pl0903",
+          "pl0903",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0903",
+          "0x0903",
+          "0x0903",
+          "0x0903",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80151790",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80151790.json"
+    },
+    {
+      "family": "0x8015a494",
+      "members": [
+        "pl0610",
+        "pl061e",
+        "pl0621",
+        "pl0623"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:08:58.306815Z",
+      "member_used": "pl0610",
+      "report": {
+        "assignment": {
+          "0": "pl0610",
+          "1": "pl0610",
+          "2": "pl0610",
+          "3": "pl0610"
+        },
+        "expect_families": [
+          "0x8015a494"
+        ],
+        "constructors_hit": {
+          "0x8015a494": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0610"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0610",
+          "pl0610",
+          "pl0610",
+          "pl0610",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0610",
+          "0x0610",
+          "0x0610",
+          "0x0610",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x8015a494",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x8015a494.json"
+    },
+    {
+      "family": "0x8015b420",
+      "members": [
+        "pl061f",
+        "pl0625"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:09:44.187822Z",
+      "member_used": "pl061f",
+      "report": {
+        "assignment": {
+          "0": "pl061f",
+          "1": "pl061f",
+          "2": "pl061f",
+          "3": "pl061f"
+        },
+        "expect_families": [
+          "0x8015b420"
+        ],
+        "constructors_hit": {
+          "0x8015b420": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x061f"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl061f",
+          "pl061f",
+          "pl061f",
+          "pl061f",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x061f",
+          "0x061f",
+          "0x061f",
+          "0x061f",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x8015b420",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x8015b420.json"
+    },
+    {
+      "family": "0x8015d288",
+      "members": [
+        "pl0b01"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:10:28.157452Z",
+      "member_used": "pl0b01",
+      "report": {
+        "assignment": {
+          "0": "pl0b01",
+          "1": "pl0b01",
+          "2": "pl0b01",
+          "3": "pl0b01"
+        },
+        "expect_families": [
+          "0x8015d288"
+        ],
+        "constructors_hit": {
+          "0x8015d288": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0b01"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0b01",
+          "pl0b01",
+          "pl0b01",
+          "pl0b01",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0b01",
+          "0x0b01",
+          "0x0b01",
+          "0x0b01",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x8015d288",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x8015d288.json"
+    },
+    {
+      "family": "0x8015d674",
+      "members": [
+        "pl0902",
+        "pl0909"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:11:17.245144Z",
+      "member_used": "pl0902",
+      "report": {
+        "assignment": {
+          "0": "pl0902",
+          "1": "pl0902",
+          "2": "pl0902",
+          "3": "pl0902"
+        },
+        "expect_families": [
+          "0x8015d674"
+        ],
+        "constructors_hit": {
+          "0x8015d674": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0902"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0902",
+          "pl0902",
+          "pl0902",
+          "pl0902",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0902",
+          "0x0902",
+          "0x0902",
+          "0x0902",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x8015d674",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x8015d674.json"
+    },
+    {
+      "family": "0x80174d88",
+      "members": [
+        "pl0704",
+        "pl0707"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:12:04.710218Z",
+      "member_used": "pl0704",
+      "report": {
+        "assignment": {
+          "0": "pl0704",
+          "1": "pl0704",
+          "2": "pl0704",
+          "3": "pl0704"
+        },
+        "expect_families": [
+          "0x80174d88"
+        ],
+        "constructors_hit": {
+          "0x80174d88": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0704"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0704",
+          "pl0704",
+          "pl0704",
+          "pl0704",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0704",
+          "0x0704",
+          "0x0704",
+          "0x0704",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x80174d88",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x80174d88.json"
+    },
+    {
+      "family": "0x801a04f0",
+      "members": [
+        "pl0807"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:12:51.042348Z",
+      "member_used": "pl0807",
+      "report": {
+        "assignment": {
+          "0": "pl0807",
+          "1": "pl0807",
+          "2": "pl0807",
+          "3": "pl0807"
+        },
+        "expect_families": [
+          "0x801a04f0"
+        ],
+        "constructors_hit": {
+          "0x801a04f0": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0807"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0807",
+          "pl0807",
+          "pl0807",
+          "pl0807",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0807",
+          "0x0807",
+          "0x0807",
+          "0x0807",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x801a04f0",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x801a04f0.json"
+    },
+    {
+      "family": "0x801d626c",
+      "members": [
+        "pl0e04"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:13:35.195623Z",
+      "outcome": "no_valid_member",
+      "detail": "no member of this family is flagged present in the ROM's own id table at 0x802f29c8"
+    },
+    {
+      "family": "0x801d73c8",
+      "members": [
+        "pl0e02"
+      ],
+      "blocked_units": 1,
+      "blocked_exports": 8,
+      "attempted_at": "2026-08-29T20:13:40.770686Z",
+      "member_used": "pl0e02",
+      "report": {
+        "assignment": {
+          "0": "pl0e02",
+          "1": "pl0e02",
+          "2": "pl0e02",
+          "3": "pl0e02"
+        },
+        "expect_families": [
+          "0x801d73c8"
+        ],
+        "constructors_hit": {
+          "0x801d73c8": 1
+        },
+        "constructors_fired": true,
+        "battle_live": true,
+        "settled": true,
+        "status": {
+          "battle_phase_T0": 2,
+          "battle_state_T0x45": 4,
+          "win_mask_T0x1f": 0,
+          "actor0": "0x805dbdc0",
+          "actor0_alive": 1,
+          "actor0_borg_id": "0x0e02"
+        },
+        "frames_run": 180,
+        "slot_ids_before": [
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "pl0615",
+          "plffff",
+          "plffff"
+        ],
+        "slot_ids_after": [
+          "pl0e02",
+          "pl0e02",
+          "pl0e02",
+          "pl0e02",
+          "plffff",
+          "plffff"
+        ],
+        "actor_borg_ids": [
+          "0x0e02",
+          "0x0e02",
+          "0x0e02",
+          "0x0e02",
+          "0x0000",
+          "0x0000"
+        ],
+        "actors_on_target": 4,
+        "archive_slot_records": [
+          "0x806cbe60",
+          "0x806cbe80",
+          "0x806cbea0",
+          "0x806cbec0",
+          "0x00000000",
+          "0x00000000"
+        ]
+      },
+      "outcome": "covered",
+      "scenario_name": "battle-roster-0x801d73c8",
+      "scenario_path": "C:\\Users\\manny\\AppData\\Local\\Temp\\claude\\wt-force-nav\\research\\tools\\dolphin-trace\\scenarios\\battle-roster-0x801d73c8.json"
+    }
+  ]
+}
