@@ -1638,13 +1638,9 @@ export function configureFlyingSaucerFamily(actor: RomActor, ctx: StreamContext)
   actor.streamSlot = 0;
 }
 
-/** Generic configure (tableless fallback). Stamps borg number; generic layer owns logic. */
-export function configureUnregisteredFamily(actor: RomActor, borgId: UnregBorgId, _ctx: StreamContext): void {
-  actor.borgNumber = UNREG_BORG_NUMBERS[borgId] ?? 0;
-  actor.rootAction = null;
-  actor.defaultGroup = 0;
-  actor.streamSlot = 0;
-}
+// The tableless "stamp the borg number, rootAction = null" fallback that used to live
+// here is gone: every id in UNREG_BORG_NUMBERS now has a bespoke configure registered in
+// bridge.ts, so nothing was left to fall back to.
 
 // ============================================================================
 // Self-tests — mirror rom.selfcheck.ts / vehicle-borg.ts style. Covers phase

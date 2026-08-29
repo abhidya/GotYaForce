@@ -883,63 +883,15 @@ export function createTitanPantherAction1(family: "titan" | "panther", ctx: Stre
 // the bridge resolves from its extracted JSON, keyed by borg id).
 // ============================================================================
 
-/** Root dispatcher FUN_80125dac → PTR_FUN_8032f41c[+0x580]. Table (DOL dump):
- *  [0]=0x80125de8 [1]=0x80125fdc [2]=0x801260a8(morph — other module) [3]=0x801260f0
- *  (X, ported here) [4]=[5]=0x80126018. Null slots fall through to the generic layer
- *  (or compose with the morph module's handler at the bridge). */
-export function createTitanRobotRootAction(ctx: StreamContext): (actor: RomActor) => void {
-  const xSpecial = createSharedAimedShotX(TITAN_ROBOT_X_CONFIG, ctx);
-  const actionTable: Array<((actor: RomActor) => void) | null> = [
-    null,     // 0: 0x80125de8 — TODO port
-    null,     // 1: 0x80125fdc — TODO port
-    null,     // 2: 0x801260a8 — MORPH engine (another module; compose at the bridge)
-    xSpecial, // 3: 0x801260f0 — aimed-shot X (this module)
-    null,     // 4: 0x80126018 (dup at [5]) — TODO port
-  ];
-  return (actor: RomActor) => {
-    const fn = actionTable[actor.actionIndex];
-    if (fn) fn(actor);
-  };
-}
+// ROOT-DISPATCHER PROVENANCE (no code here — the live wiring is bridge.ts's
+// makeMorphAimedComposite, which composes createSharedAimedShotX with the morph
+// engine because these families need BOTH slots; the single-module root-action
+// wrappers that used to live here were superseded by it):
+//   TITAN ROBOT   FUN_80125dac → PTR_FUN_8032f41c[+0x580]. Table (DOL dump):
+//     [0]=0x80125de8 [1]=0x80125fdc [2]=0x801260a8 (morph) [3]=0x801260f0
+//     (aimed-shot X, TITAN_ROBOT_X_CONFIG below) [4]=[5]=0x80126018.
+//   PANTHER ROBOT FUN_8018c79c → PTR_FUN_8036546c[+0x580]. Table (DOL dump):
+//     [0]=0x8018c7d8 [1]=0x8018c9cc [2]=0x8018cb00 (morph) [3]=0x8018cb48
+//     (aimed-shot X, PANTHER_ROBOT_X_CONFIG below) [4]=0x8018ca08.
+// Slots marked TODO above are still unported and fall through to the generic layer.
 
-/** Root dispatcher FUN_8018c79c → PTR_FUN_8036546c[+0x580]. Table (DOL dump):
- *  [0]=0x8018c7d8 [1]=0x8018c9cc [2]=0x8018cb00(morph — other module) [3]=0x8018cb48
- *  (X, ported here) [4]=0x8018ca08. */
-export function createPantherRobotRootAction(ctx: StreamContext): (actor: RomActor) => void {
-  const xSpecial = createSharedAimedShotX(PANTHER_ROBOT_X_CONFIG, ctx);
-  const actionTable: Array<((actor: RomActor) => void) | null> = [
-    null,     // 0: 0x8018c7d8 — TODO port
-    null,     // 1: 0x8018c9cc — TODO port
-    null,     // 2: 0x8018cb00 — MORPH engine (another module; compose at the bridge)
-    xSpecial, // 3: 0x8018cb48 — aimed-shot X (this module)
-    null,     // 4: 0x8018ca08 — TODO port
-  ];
-  return (actor: RomActor) => {
-    const fn = actionTable[actor.actionIndex];
-    if (fn) fn(actor);
-  };
-}
-
-/** Configure a TITAN ROBOT-family actor (pl0604 / pl0618). */
-export function configureTitanRobotFamily(
-  actor: RomActor,
-  borgId: "pl0604" | "pl0618",
-  ctx: StreamContext,
-): void {
-  actor.borgNumber = borgId === "pl0604" ? 0x604 : 0x618;
-  actor.rootAction = createTitanRobotRootAction(ctx);
-  actor.defaultGroup = 0;
-  actor.streamSlot = 0;
-}
-
-/** Configure a PANTHER ROBOT-family actor (pl0613 / pl0627). */
-export function configurePantherRobotFamily(
-  actor: RomActor,
-  borgId: "pl0613" | "pl0627",
-  ctx: StreamContext,
-): void {
-  actor.borgNumber = borgId === "pl0613" ? 0x613 : 0x627;
-  actor.rootAction = createPantherRobotRootAction(ctx);
-  actor.defaultGroup = 0;
-  actor.streamSlot = 0;
-}

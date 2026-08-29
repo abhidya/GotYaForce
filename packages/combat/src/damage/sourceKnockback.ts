@@ -448,54 +448,17 @@ export function runSourceKnockbackSelfTests(assert: SourceKnockbackAssert): void
 }
 
 /* =============================================================================
- * INTEGRATION SPEC — how combat.ts applyHit should delegate to sourceKnockback
- * instead of the TUNED KNOCKBACK scalars + the physics mode-1-only port.
+ * WIRED AT: combat.ts applyHit's knockback block. computeKnockbackLaunchDirection
+ * supplies the direction and launchVelocityMagnitude / groundHorizontalSpeed the
+ * magnitude; physics.knockbackDirectionFromPositions + gauges.knockback*ForRecord are
+ * the throw-on-error fallbacks under the same GF_SOURCE_STRICT contract.
  *
- * STATUS: sourceKnockback.ts is a clean-room 1:1 port of zz_00300bc_ (all 5 modes,
- * though only mode 1 is fully wired — modes 0/2/3/4 are honest partial ports cited to
- * their untraced sub-object fields) PLUS the strength-indexed magnitude select consumed
- * by zz_005ec20_ / FUN_8005ed38. combat.ts and gauges.ts are NOT edited per the task.
- *
- * WIRING (drop-in for the knockback DIRECTION + MAGNITUDE block at combat.ts:1039-1104):
- *
- *   import {
- *     computeKnockbackLaunchDirection, launchVelocityMagnitude,
- *     groundHorizontalSpeed, knockbackStrengthClamp, defaultSourceKnockbackActor,
- *   } from "./damage/sourceKnockback.js";
- *
- *   // DIRECTION (replaces the knockbackDirectionFromPositions + knockDir branch):
- *   const angle = computeKnockbackLaunchDirection(
- *     defaultSourceKnockbackActor(source.attacker.pos),
- *     defaultSourceKnockbackActor(victim.pos),
- *     { mode: record.knockbackMode ?? 1,          // record +0x0e (untraced → default 1)
- *       trimYaw: record.knockbackYawTrim ?? 0,    // record +0x14
- *       trimPitch: record.knockbackPitchTrim ?? 0 }, // record +0x15
- *   );
- *   // angle.yaw / angle.pitch are BAM16; convert to a velocity direction via the same
- *   // sin/cos combat.ts already uses, OR keep bam16YawToXZ for the horizontal-only path.
- *
- *   // MAGNITUDE (replaces knockbackVelocityForRecord / knockbackGroundSpeedForRecord):
- *   const strength = record.reactionAnimVariant;   // record +0x0d → actor+0x702
- *   const airborne = (victim.airborneFlag & 0x80) !== 0; // actor+0x6fd bit 0x80 (TODO)
- *   const baseSpeed = useLaunchTable
- *     ? launchVelocityMagnitude(strength, airborne)
- *     : groundHorizontalSpeed(strength, scaleRatio);
- *   const knockback = baseSpeed * KNOCKBACK.PORT_SCALE * knockbackMult;
- *
- * REMAINING (honest TODOs, cited):
- *   - record +0x0e (knockback mode selector): not exposed on DamageRecord yet. The
- *     confirmed caller (chunk_0003.c:7945) reads it as `(int)*(char*)(record+0x0e)`.
- *     Default mode 1 matches today's behavior (the physics port is mode-1-only).
- *   - modes 0/2/3/4 input vectors: sub-object fields +0x20/+0x2c, +0x30/+0x3c, +0x64
- *     (linked), +0x8dc/+0x8ec/+0x8fc, +0x11c/+0x12c/+0x13c are untraced in BorgRuntime.
- *     Pass them via SourceKnockbackActor's optional fields when traced.
- *   - airborne boost (actor+0x6fd & 0x80): the FUN_8005ed38 +2 strength boost. The port
- *     has no airborne flag on BorgRuntime yet; default false = no boost (ground launch).
- *
- * BEHAVIOR vs TODAY: sourceKnockback.ts and the physics/gauges ports compute the SAME
- * ROM direction (mode 1) and the SAME strength-indexed magnitude from the SAME DOL
- * tables. The win is the complete 5-mode direction port (modes 0/2/3/4 now have an
- * auditable home) + the squared-horiz pitch quirk reproduced in one place + the airborne
- * +2 launch boost (absent from gauges.ts). Switching applyHit to sourceKnockback.ts is
- * behavior-preserving for mode-1 ground hits and adds the faithful launch-magnitude path.
+ * OPEN ROM GAPS (the reason the call site passes literals rather than record fields):
+ *   - record +0x0e knockback-mode selector is not on DamageRecord; the caller passes
+ *     mode 1, which is the only mode this port has input vectors for.
+ *   - modes 0/2/3/4 need sub-object fields +0x20/+0x2c, +0x30/+0x3c, +0x64 (linked),
+ *     +0x8dc/+0x8ec/+0x8fc, +0x11c/+0x12c/+0x13c, none of which exist on BorgRuntime.
+ *     Supply them through SourceKnockbackActor's optional fields once traced.
+ *   - the FUN_8005ed38 airborne +2 strength boost needs actor+0x6fd bit 0x80; there is
+ *     no airborne flag on BorgRuntime, so the caller passes false (ground launch).
  * ========================================================================== */

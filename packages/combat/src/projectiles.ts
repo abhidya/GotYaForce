@@ -94,13 +94,3 @@ export function spawnRomProjectile(
     romScale: variant.scale,
   };
 }
-
-/** The per-frame projectile drop (gravity). Read from the variant table's +0x16 field.
- *  Callers (stepProjectiles) apply this to projectile.vel.y each frame. Returns 0
- *  for energy beams (flags & 0x8). */
-export function projectileDropFor(variantByte: number): number {
-  const v = projectileVariant(variantByte);
-  if (!v) return -3.0; // default: bullet drop
-  if (v.flags & 0x8) return 0; // energy beam: no drop
-  return v.drop;
-}

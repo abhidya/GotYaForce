@@ -422,15 +422,6 @@ export function createSeries3XSpecial(
 export type Series3BorgId =
   | "pl0301" | "pl0302" | "pl0303" | "pl0306" | "pl0307" | "pl030d";
 
-const SERIES3_BORG_NUMBERS: Record<Series3BorgId, number> = {
-  pl0301: 0x301,
-  pl0302: 0x302,
-  pl0303: 0x303,
-  pl0306: 0x306,
-  pl0307: 0x307,
-  pl030d: 0x30d,
-};
-
 /** Which action-table slots route to 0x8010cdec per family (P1 REFUTED correction +
  *  P2 wrapper proof, both verifiers):
  *   pl0303 (famA @0x80372108):          act[2] @0x80372110 AND act[3] @0x80372114
@@ -466,24 +457,14 @@ export function createSeries3RootAction(
   };
 }
 
-/** Configure a freshly-spawned series-3 (pl03xx) actor: stamps the borg number the
- *  inline switches read and wires the root action with the per-family slot layout.
- *
- *  Residuals NOT wired here (documented, out of the phase machine's scope):
- *   - famB's ammo-gated companion launch aux[1] @0x801ba27c → zz_01d2ffc_ @0x801d2ffc
- *     (kind-0x28 drone, variant 0 = pl0307 / 1 = pl030d; the variant param IS stored
- *     at child+0x11 — F4 REFUTED correction applied to this doc). Its trigger (famB
- *     vtable vt[9] invoker @0x801ba23c, index 1) is untraced (U1) — do not wire it
- *     into the X phases (dig portImplications item 7).
- *   - ctor-time FX child pre-attach zz_013358c_ / zz_00c74ec_ (presentation-side). */
-export function configureSeries3Family(
-  actor: RomActor,
-  borgId: Series3BorgId,
-  ctx: Series3FamilyCtx,
-  opts: Series3XOptions = {},
-): void {
-  actor.borgNumber = SERIES3_BORG_NUMBERS[borgId];
-  actor.rootAction = createSeries3RootAction(actor.borgNumber, ctx, opts);
-  actor.defaultGroup = 0;
-  actor.streamSlot = 0;
-}
+// The series-3 borgs (pl0301/0302/0303/0306/0307/030d) are wired by girl-cluster.ts's
+// configureGirlClusterFamily, which calls createSeries3XSpecial + series3XActionSlots
+// directly so it can compose them with the cluster's shared volley/melee tables.
+//
+// Residuals NOT wired anywhere (documented, out of the phase machine's scope):
+//  - famB's ammo-gated companion launch aux[1] @0x801ba27c → zz_01d2ffc_ @0x801d2ffc
+//    (kind-0x28 drone, variant 0 = pl0307 / 1 = pl030d; the variant param IS stored at
+//    child+0x11 — F4 REFUTED correction applied to this doc). Its trigger (famB vtable
+//    vt[9] invoker @0x801ba23c, index 1) is untraced (U1) — do not wire it into the X
+//    phases (dig portImplications item 7).
+//  - ctor-time FX child pre-attach zz_013358c_ / zz_00c74ec_ (presentation-side).

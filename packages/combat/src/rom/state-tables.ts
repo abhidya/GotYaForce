@@ -219,10 +219,12 @@ function buildUpperBodyTable(): StateHandler[] {
   for (let s = 23; s <= 31; s++) {
     t[s] = tickStreamWithPhysicsHandler(0x2, 0, ROM_STATE_FLOAT.AIM_GRAVITY, "lockYaw", { phaseSlotIndex: 1 });
   }
-  // [32, 48, 57, 58, 59] partner/phase machines — TODO(port)
-  for (let s = 32; s <= 60; s++) {
-    if (!t[s]) t[s] = tickStreamWithPhysicsHandler(0x2, 0, ROM_STATE_FLOAT.AIM_GRAVITY, "lockYaw", { phaseSlotIndex: 1 });
-  }
+  // [32, 48, 57, 58, 59] partner/phase machines — TODO(port). Slots 32-43 and 45-59 are
+  // still the noopHandler this table was filled with: a `for (s = 32..60) if (!t[s]) …`
+  // stub-fill used to sit here, but `.fill(noopHandler)` above makes every slot truthy,
+  // so the guard never fired and the stub never applied. Removed rather than "fixed" —
+  // enabling it now would give 27 unported states a stream+physics body they have never
+  // had. The gap is real and unchanged; it just no longer hides behind dead code.
   t[44] = transitionHandler(0xd);
   t[60] = tickStreamHandler(0xf, 0, 0, 1);
   t[62] = (a, _c) => {

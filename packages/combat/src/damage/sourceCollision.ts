@@ -875,62 +875,30 @@ export function runSourceCollisionSelfTests(assert: SourceCollisionAssert): void
 }
 
 /* =============================================================================
- * INTEGRATION SPEC — how combat.ts should call the collision passes each frame.
+ * WIRED AT: combat.ts stepSourceCollision -> runSourceCollisionPasses, called once per
+ * frame from stepProjectiles. It builds the adapters, supplies proximity-capsule hooks in
+ * place of the unported shape queries, and runs the three passes in the ROM's dispatch
+ * order (chunk_0003.c:6213-6215).
  *
- * STATUS: sourceCollision.ts is a clean-room structural port of the three hit-pair passes +
- * the delegation tail of the per-pair resolver. It feeds INTO sourceDamage.computeBaseDamage +
- * sourceKnockback.computeKnockbackLaunchDirection + sourceDamage.applyHpDamage (already ported).
- * combat.ts and the BorgRuntime are NOT edited per the task.
+ * AUDIT-ONLY TODAY. combat.ts deliberately discards the HP this resolver computes — see
+ * its "NO HP SYNC-BACK" note. Three layers are missing before it could own damage:
+ *   - no active-WINDOW model: a borg in the "attack" state overlaps on every frame of the
+ *     state, not only the swing's active frames;
+ *   - no per-swing already-hit dedup: the reaction1da bit-2 gate only arms once the victim
+ *     actually enters hit/down, which needs the unported effect layer;
+ *   - no knockback/reaction/telemetry application.
+ * Syncing HP back without them drained a victim's whole bar in ~30 frames.
  *
- * The dispatcher battle_frame_target_action_dispatch @0x8002bb14 calls the three passes IN
- * ORDER once per frame (chunk_0003.c:6213-6215), after the per-slot state reset
- * (chunk_0003.c:5900-5967) and the physics/position update (chunk_0003.c:5996-6211). combat.ts's
- * per-frame step should do the same:
- *
- *   import {
- *     collisionHitPairPassActiveVsBorgs, collisionHitPairPassObjectLists,
- *     collisionHitPairPassActiveVsSecondary, type SourceCollisionObject,
- *     type SourceCollisionContext, type SourceCollisionHooks,
- *   } from "./damage/sourceCollision.js";
- *
- *   // 1. Build the five object lists from the BorgRuntime roster (each borg/projectile/prop ->
- *   //    a SourceCollisionObject wrapping its actor + owner + active hit record). The active list
- *   //    (DAT_803c477c) is shared by passes 1 + 3.
- *   //    TODO(surfacing): the +0x20 actor / +0x24 owner / +0x28 descriptor / +0x2c record-table
- *   //    / +0x54 transform / +0x58 shape / +0x98 pos fields are NOT yet on BorgRuntime. Build
- *   //    adapters as those offsets are traced (cited per field on SourceCollisionObject).
- *   const activeList: SourceCollisionObject[] = ...;   // DAT_803c477c
- *   const borgList:   SourceCollisionObject[] = ...;   // DAT_803c2f7c
- *   const objListA:   SourceCollisionObject[] = ...;   // DAT_803c177c
- *   const objListB:   SourceCollisionObject[] = ...;   // DAT_803c117c
- *   const secondary:  SourceCollisionObject[] = ...;   // DAT_803c417c
- *
- *   // 2. Provide real hitbox-shape hooks (the four unsurfaced geometry functions). Until they
- *   //    are ported, defaultSourceCollisionHooks() forces all pairs — structural only.
- *   const hooks: SourceCollisionHooks = {
- *     broadPhase: (a, b, cat) => physicsBroadPhase(a, b, cat),       // zz_002fd7c_
- *     shapeCompat: (as, ts) => shapeTypeCompat(as, ts),              // zz_0039f6c_
- *     transformAndOverlap: (a, b) => transformAndOverlap(a, b),      // zz_0030348_ + zz_0030490_
- *   };
- *   const ctx: SourceCollisionContext = { hooks, forceGaugeBySlot: teamGauges };
- *
- *   // 3. Run the three passes in the ROM's order. Each mutates the actors (HP, meters, knockback)
- *   //    and returns the resolved pairs for audit / edge-emission.
- *   collisionHitPairPassActiveVsBorgs(activeList, borgList, ctx);
- *   collisionHitPairPassObjectLists(objListA, objListB, ctx);
- *   collisionHitPairPassActiveVsSecondary(activeList, secondary, ctx);
- *
- * REMAINING (honest TODOs, cited):
- *   - Hitbox-shape queries zz_002fd7c_ / zz_0039f6c_ / zz_0030348_ / zz_0030490_: UNSURFACED.
- *     Inject via SourceCollisionHooks. The default stub forces all pairs (structural exercise
- *     only — do NOT ship with it; pairs would resolve every frame against every target).
- *   - resolve_hitbox effect-bookkeeping body (chunk_0003.c:7519-7944): status flags, lock-on
- *     markers, combo counters, gauge deltas, reaction-anim selection. NOT ported — it is the
- *     per-pair EFFECT layer, separate from the pair-FORMATION pipeline that is this task's scope.
- *     It sets target.reaction1da bit 2 (the damage gate) upstream of the delegation; until it is
- *     ported, that bit must be set by the existing effect path or left 0 (damage always fires).
- *   - The deferred-nudge +0x100 callback (chunk_0003.c:7154-7156): unsurfaced; cited.
- *   - Adapter TODOs on toSourceDamageActor (heroFlag +0x3e6, handicap +0x43a, comboRank +0x6ca,
- *     forceRatioIndex, sideRank) and toSourceDamageContext (record +0x06/+0x07 curve selectors):
- *     same open gaps as sourceDamage.ts/damageFormula.ts — no regression vs current behavior.
+ * REMAINING ROM GAPS (cited):
+ *   - Hitbox-shape queries zz_002fd7c_ / zz_0039f6c_ / zz_0030348_ / zz_0030490_ are
+ *     UNSURFACED; inject via SourceCollisionHooks. defaultSourceCollisionHooks forces
+ *     every pair and must never ship as the live hook set.
+ *   - resolve_hitbox's effect-bookkeeping body (chunk_0003.c:7519-7944) — status flags,
+ *     lock-on markers, combo counters, gauge deltas, reaction-anim selection — is the
+ *     per-pair EFFECT layer and is NOT ported. It is what sets target.reaction1da bit 2.
+ *   - The deferred-nudge +0x100 callback (chunk_0003.c:7154-7156): unsurfaced.
+ *   - toSourceDamageActor's heroFlag/handicap/comboRank/forceRatioIndex/sideRank and
+ *     toSourceDamageContext's record +0x06/+0x07 curve selectors are hardcoded neutral —
+ *     note these DIVERGE from combat.ts's own richer sourceDamageActorFromRuntime, so the
+ *     two adapters would not agree if this pass ever became authoritative.
  * ========================================================================== */

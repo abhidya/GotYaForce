@@ -560,6 +560,3 @@ function horizontalNormal(normal: Vec3): { x: number; z: number } | null {
 function dot(a: Vec3, b: Vec3): number {
   return a.x * b.x + a.y * b.y + a.z * b.z;
 }
-
-// re-export for combat.ts convenience
-export { setState as _setState };

@@ -265,7 +265,3 @@ export function isStreamTickEnabled(actor: RomActor): boolean {
 export function partState(actor: RomActor, part: number): number {
   return actor.parts[part]?.stateByte ?? 0;
 }
-
-export function partStreamEnded(actor: RomActor, part = 0): boolean {
-  return (actor.parts[part]?.streamPtr ?? -1) < 0;
-}

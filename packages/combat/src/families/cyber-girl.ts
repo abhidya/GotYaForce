@@ -300,23 +300,8 @@ export function createCyberGirlRootAction(
   };
 }
 
-/** Configure a freshly-spawned CYBER GIRL-family actor (pl0305/pl0309/pl030a).
- *  Stamps the borg-number switch the X-special leaf reads and wires the root action
- *  dispatcher. */
-export function configureCyberGirlFamily(
-  actor: RomActor,
-  borgId: "pl0305" | "pl0309" | "pl030a",
-  ctx: CyberGirlFamilyCtx,
-): void {
-  const numMap: Record<typeof borgId, number> = {
-    pl0305: 0x305,
-    pl0309: 0x309,
-    pl030a: 0x30a,
-  };
-  actor.borgNumber = numMap[borgId];
-  actor.rootAction = createCyberGirlRootAction(ctx);
-  // cueTable + familyStreamBank are set by the spawn layer (familyCueTablesFull.json
-  // entry "0x8012f204"). Defaults matching power-on state:
-  actor.defaultGroup = 0;
-  actor.streamSlot = 0;
-}
+// pl0305/pl0309/pl030a are wired by girl-cluster.ts's configureGirlClusterFamily, which
+// calls createCyberGirlRootAction above directly (it also needs the cluster's shared
+// action-0 volley and melee tables, which a cyber-girl-only configure cannot supply).
+// cueTable + familyStreamBank come from the spawn layer (familyCueTablesFull.json entry
+// "0x8012f204").

@@ -266,38 +266,6 @@ export function getBootConfigByte(): number {
   return _bootConfigByte;
 }
 
-/**
- * Check whether MetroTRK debugger initialization should be triggered.
- * Mirrors the caller's gate: `if (zz_000314c_() == 1) InitMetroTRK_BBA();`
- */
-/**
- * Get the current audio cue value (DAT_804360c0).
- * Used by the title VM's setAudioCue opcode (0x0c) to read back the cue.
- */
-export function getAudioCue(): number {
-  return _audioCue;
-}
-
-/**
- * Get the pointer-table slot 0 (PTR_DAT_804335a0[0]).
- * Used by callers that need direct access to the explodable-count float buffer.
- */
-export function getPtrTableSlot0(): Float32Array {
-  return _ptrTableSlot0;
-}
-
-export function isMetroTRKEnabled(): boolean {
-  return getBootConfigByte() === 1;
-}
-
-/**
- * Reset the PTR_DAT_804335a0[0] slot to 0.
- * Called by callers before writing the explodable count.
- */
-export function resetPtrTableSlot0(): void {
-  _ptrTableSlot0[0] = 0;
-}
-
 // ---------------------------------------------------------------------------------------
 // zz_0003340_ @0x80003340 — Boot-time memory patching and BSS clearing.
 // ---------------------------------------------------------------------------------------

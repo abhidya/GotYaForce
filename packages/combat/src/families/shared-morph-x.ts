@@ -483,20 +483,6 @@ function makeMorphRootAction(
   };
 }
 
-/** Configure a TITAN-family actor (ctor 0x80125a28: pl0604 TITAN ROBOT / pl0618
- *  PROTO TITAN). X = shared morph engine with config @0x8032f48c. */
-export function configureTitanFamily(
-  actor: RomActor,
-  borgId: "pl0604" | "pl0618",
-  ctx: StreamContext,
-  hooks: SharedMorphXHooks = {},
-): void {
-  actor.borgNumber = borgId === "pl0604" ? 0x604 : 0x618;
-  actor.rootAction = makeMorphRootAction(TITAN_MORPH_CONFIG, ctx, hooks);
-  actor.defaultGroup = 0;
-  actor.streamSlot = 0;
-}
-
 /** Configure an EAGLE ROBOT actor (ctor 0x80129608, pl0606 ONLY — pl061a PROTO
  *  EAGLE's != 0x606 branch is a bespoke 4-phase gun machine, NOT this module). */
 export function configureEagleFamily(
@@ -507,36 +493,6 @@ export function configureEagleFamily(
 ): void {
   actor.borgNumber = 0x606;
   actor.rootAction = makeMorphRootAction(EAGLE_MORPH_CONFIG, ctx, hooks);
-  actor.defaultGroup = 0;
-  actor.streamSlot = 0;
-  void borgId;
-}
-
-/** Configure a PANTHER-family actor (ctor 0x8018c2b0: pl0613 PANTHER ROBOT /
- *  pl0627 PROTO PANTHER). X = shared morph engine with config @0x80365510. */
-export function configurePantherFamily(
-  actor: RomActor,
-  borgId: "pl0613" | "pl0627",
-  ctx: StreamContext,
-  hooks: SharedMorphXHooks = {},
-): void {
-  actor.borgNumber = borgId === "pl0613" ? 0x613 : 0x627;
-  actor.rootAction = makeMorphRootAction(PANTHER_MORPH_CONFIG, ctx, hooks);
-  actor.defaultGroup = 0;
-  actor.streamSlot = 0;
-}
-
-/** Configure a VICTORY MACHINE actor (ctor 0x8015b420, pl0625 only). pl061f
- *  VICTORY TANK has NO branch in the family X handler FUN_8015bb44 (X dead at
- *  this layer — DEAD-BORG-BRANCHES) and is intentionally not registered. */
-export function configureVictoryMachineFamily(
-  actor: RomActor,
-  borgId: "pl0625",
-  ctx: StreamContext,
-  hooks: SharedMorphXHooks = {},
-): void {
-  actor.borgNumber = 0x625;
-  actor.rootAction = makeMorphRootAction(VICTORY_MACHINE_MORPH_CONFIG, ctx, hooks);
   actor.defaultGroup = 0;
   actor.streamSlot = 0;
   void borgId;
