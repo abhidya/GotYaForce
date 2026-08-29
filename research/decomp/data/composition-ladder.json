@@ -18,7 +18,7 @@
       "passed": true,
       "link_passed": true,
       "stage": "pass",
-      "checked_at": "2026-08-29T21:27:51.055649Z",
+      "checked_at": "2026-08-29T22:35:18.778304Z",
       "conflicts": [],
       "new_contested_symbols": 0,
       "new_symbols_linked": 40,
@@ -55,44 +55,18 @@
         "auto-c0054-003",
         "auto-c0053-013"
       ],
-      "substitution": {
-        "dropped": [
-          "auto-c0025-002"
-        ],
-        "substituted": [
-          "auto-c0019-016"
-        ]
-      },
-      "passed": false,
+      "substitution": null,
+      "passed": true,
       "link_passed": true,
       "stage": "pass",
-      "checked_at": "2026-08-29T21:58:13.606694Z",
-      "conflicts": [
-        {
-          "symbol": "zz_0089100_",
-          "class": "canonicalization_refused",
-          "units": [
-            "auto-c0025-002",
-            "auto-c0053-003",
-            "auto-c0053-005",
-            "auto-c0053-013",
-            "auto-c0053-017",
-            "auto-c0053-018",
-            "auto-c0054-000",
-            "auto-c0054-001",
-            "auto-c0054-002",
-            "auto-c0054-003"
-          ],
-          "detail": "owner_variant_abi_incompatible: zz_0089100_ is declared void zz_0089100_(int, uint, int); in auto-c0053-013 but int zz_0089100_(int, uint, int); in auto-c0025-002; the two declarations cannot be unified"
-        }
-      ],
-      "new_contested_symbols": 1,
+      "checked_at": "2026-08-29T22:42:17.149176Z",
+      "conflicts": [],
+      "new_contested_symbols": 0,
       "new_symbols_linked": 38,
-      "ratio": 0.02631578947368421,
-      "budget_ok": false,
+      "ratio": 0.0,
+      "budget_ok": true,
       "attempt_tags": [
-        "rung1",
-        "rung1b"
+        "rung1"
       ],
       "companion": {
         "functions": 78,

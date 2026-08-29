@@ -392,3 +392,34 @@ rung 1 needs the oracle registry to record the tail-call return types for the
 ten value-carrier symbols (an owner decision: it changes the canonical ABI for
 symbols the whole fleet declares), after which those 28 units are
 rebuild-only. No amount of corpus correction substitutes for it.
+
+### Rung state after the `auto-c0025-002` revocation (2026-08-29)
+
+`auto-c0025-002`'s corpus fix landed on `main` as `747bc061`, so the ordering
+rule in `research/decomp/corpus-correction-loop.md` step 3 was satisfied and its
+compile-only verdict was revoked inside a manual-gate pause window
+(`verdict-revoke-bb414324c7e6…`, registry 167 -> 168, gate restored). The unit
+is `pending` and rebuilds from the corrected chunk on the driver's normal
+rotation.
+
+The eligible pool is therefore 82, and the rung-1 window is the old rung-1b set
+(`auto-c0019-016` in place of `auto-c0025-002`). Both rungs were re-run in
+scratch against that pool, with owner-derived canonicalization and the dispatch
+companion enabled:
+
+| rung | N | result | conflicts | companion | new_contested/new_linked |
+|---:|---:|---|---:|---:|---|
+| 0 | 5 | PASS | 0 | 40 thunks | 0/40 = 0.0 |
+| 1 | 10 | **PASS** | 0 | 78 thunks | 0/38 = 0.0 |
+
+Rung 1 links with no substitution and no contested symbol, so the E1 budget is
+met (0.0 <= rung 0's 0.0) and **the ladder ceiling moves from rung 0 to rung
+1**. The static declaration-disagreement measurement over this pool reproduces
+the gate exactly: 0 at N=5, 0 at N=10, then 27 at N=20, 42 at N=40, 57 at N=80,
+61 at N=82.
+
+Rung 2 (N=20) was NOT re-run: its refusal is already characterised
+(`owner_variant_abi_incompatible` on `zz_007c800_`, owner unit `auto-c0011-012`
+in the window), `zz_007c800_` is a value carrier per the section above, and the
+run costs hours. Projected ceiling stands at rung 1 until the owner-prototype
+decision lands.
