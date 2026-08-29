@@ -228,27 +228,47 @@ class PadInjector:
       circle  — stick rotates continuously (constant movement + turning; makes
                 heading/turn/velocity actor helpers fire without a human).
       hold    — fixed stick vector.
+      combat  — circling stick PLUS a round-robin of button
+                PRESS/RELEASE edges.
+
+    Why `combat` exists (measured 2026-08-29): `circle` and `hold` write the
+    same button mask every single frame, so the game only ever sees a button
+    already-held, never a fresh press. Action-table slots that transition on
+    a rising edge (attacks, specials, supers) therefore cannot be reached,
+    which is why `circle+b` only ever produced per-frame camera/UI hits while
+    every family-gated export scouted 0 across six verified units.
     """
 
     def __init__(self, port_idx: int, pattern: str, buttons: int,
-                 stick: tuple[int, int] = (0, 96), step_deg: float = 4.0):
+                 stick: tuple[int, int] = (0, 96), step_deg: float = 4.0,
+                 cycle: list[int] | None = None,
+                 hold_frames: int = 6, gap_frames: int = 10):
         self.port_idx = port_idx
         self.pattern = pattern
         self.buttons = buttons
         self.stick = stick
         self.step = step_deg
+        self.cycle = cycle or []
+        self.hold_frames = hold_frames
+        self.gap_frames = gap_frames
         self.frame = 0
 
     def on_hit(self, rsp) -> None:
         import math
-        if self.pattern == "circle":
+        if self.pattern in ("circle", "combat"):
             ang = math.radians(self.frame * self.step)
             sx = int(96 * math.cos(ang))
             sy = int(96 * math.sin(ang))
         else:
             sx, sy = self.stick
+        buttons = self.buttons
+        if self.pattern == "combat" and self.cycle:
+            period = self.hold_frames + self.gap_frames
+            slot = (self.frame // period) % len(self.cycle)
+            if (self.frame % period) < self.hold_frames:
+                buttons |= self.cycle[slot]
         buf = bytes([
-            (self.buttons >> 8) & 0xFF, self.buttons & 0xFF,
+            (buttons >> 8) & 0xFF, buttons & 0xFF,
             sx & 0xFF, sy & 0xFF,   # main stick
             0, 0,                   # substick
             0, 0,                   # triggers
@@ -273,6 +293,18 @@ def parse_inject_arg(spec: str | None) -> PadInjector | None:
     if head.startswith("hold:"):
         sx, sy = (int(v) for v in head[5:].split(","))
         return PadInjector(0, "hold", buttons, stick=(sx, sy))
+    if head.startswith("combat:"):
+        cycle = []
+        for n in head[len("combat:"):].split(","):
+            if not n:
+                continue
+            if n.lower() not in PAD_BUTTONS:
+                sys.exit(f"unknown button {n!r} in --inject combat cycle "
+                         f"(known: {sorted(PAD_BUTTONS)})")
+            cycle.append(PAD_BUTTONS[n.lower()])
+        if not cycle:
+            sys.exit("--inject combat: needs at least one button")
+        return PadInjector(0, "combat", buttons, cycle=cycle)
     if head in ("circle", ""):
         return PadInjector(0, "circle", buttons)
     sys.exit(f"unknown --inject pattern {head!r}")
@@ -284,6 +316,85 @@ def parse_inject_arg(spec: str | None) -> PadInjector | None:
 
 def default_pid_file(user_dir: Path) -> Path:
     return user_dir / "capture-dolphin.pid"
+
+
+def pid_ledger_file(user_dir: Path) -> Path:
+    """Append-only ledger of every instance this tool launched for user_dir.
+
+    The single-slot pid file is not enough: a second `launch` overwrites it and
+    the previous instance becomes permanently untracked. The ledger is the
+    tool's own marker and is the ONLY orphan signal this module uses.
+    """
+    return user_dir / "capture-dolphin.pids"
+
+
+def _pid_alive(pid: int) -> bool:
+    out = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH", "/FO", "CSV"],
+                         capture_output=True, text=True).stdout
+    return f'"{pid}"' in out
+
+
+def _tracked_pids(user_dir: Path) -> list[int]:
+    pids: set[int] = set()
+    for f in (default_pid_file(user_dir), pid_ledger_file(user_dir)):
+        try:
+            text = f.read_text()
+        except OSError:
+            continue
+        for tok in text.split():
+            try:
+                pids.add(int(tok))
+            except ValueError:
+                pass
+    return sorted(pids)
+
+
+def reap_tracked(user_dir: Path) -> list[int]:
+    """Kill every tracked instance and CONFIRM death before forgetting it.
+
+    Two defects this closes (measured 2026-08-29, verify-sweep run):
+      * the old cmd_stop unlinked the pid file whether or not taskkill worked,
+        so a Dolphin that refused to die became untracked forever and then
+        tripped verify-sweep's own `dolphin_contended` guard, aborting the
+        remaining unit budget;
+      * a second `launch` overwrote the single-slot pid file, orphaning the
+        instance it replaced.
+
+    Orphan detection is by this ledger + the user_dir marker ONLY. It must
+    never be "the process has no parent": `launch` DETACHES Dolphin on purpose,
+    so every healthy capture instance is parentless, and reaping on that signal
+    kills live captures (observed: 8 instances killed mid-capture, turning a
+    real run into a bogus `stub session died` result).
+    """
+    killed: list[int] = []
+    survivors: list[int] = []
+    for pid in _tracked_pids(user_dir):
+        if not _pid_alive(pid):
+            continue
+        subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"],
+                       capture_output=True, text=True)
+        for _ in range(40):
+            if not _pid_alive(pid):
+                break
+            time.sleep(0.25)
+        (killed if not _pid_alive(pid) else survivors).append(pid)
+    if survivors:
+        # keep the ledger so the next launch/stop tries again; never silently
+        # forget a live instance.
+        pid_ledger_file(user_dir).write_text(
+            "".join(str(p) + chr(10) for p in survivors))
+        try:
+            default_pid_file(user_dir).unlink()
+        except FileNotFoundError:
+            pass
+        raise RuntimeError(
+            f"Dolphin pid(s) {survivors} survived taskkill; still tracked")
+    for f in (default_pid_file(user_dir), pid_ledger_file(user_dir)):
+        try:
+            f.unlink()
+        except FileNotFoundError:
+            pass
+    return killed
 
 
 def _port_listening(port: int) -> bool:
@@ -341,6 +452,8 @@ def cmd_launch(a: argparse.Namespace) -> int:
     for c in configs:
         args += ["--config", c]
 
+    # never leave the instance we are about to replace untracked
+    reap_tracked(user_dir)
     proc = subprocess.Popen(
         args, cwd=str(dolphin.parent),
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -349,6 +462,8 @@ def cmd_launch(a: argparse.Namespace) -> int:
     )
     pid_file = default_pid_file(user_dir)
     pid_file.write_text(str(proc.pid))
+    with pid_ledger_file(user_dir).open("a", encoding="utf-8") as fh:
+        fh.write(str(proc.pid) + chr(10))
     print(json.dumps({"pid": proc.pid, "args": args,
                       "pid_file": str(pid_file)}, indent=2))
     if a.wait:
@@ -367,17 +482,17 @@ def cmd_launch(a: argparse.Namespace) -> int:
 
 
 def cmd_stop(a: argparse.Namespace) -> int:
-    pid_file = default_pid_file(Path(a.user_dir))
-    if not pid_file.exists():
-        sys.exit(f"no pid file at {pid_file} — nothing this tool launched is tracked")
-    pid = int(pid_file.read_text().strip())
-    subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"],
-                   capture_output=True, text=True)
-    try:
-        pid_file.unlink()
-    except FileNotFoundError:
-        pass
-    print(f"stopped pid {pid} (the instance this tool launched)")
+    """Stop every instance this tool launched for --user-dir.
+
+    Called from the driver's per-export `finally`, so "nothing to stop" is a
+    normal outcome and exits 0; only a survivor is an error.
+    """
+    user_dir = Path(a.user_dir)
+    killed = reap_tracked(user_dir)
+    if killed:
+        print(f"stopped {len(killed)} tracked instance(s): {killed}")
+    else:
+        print("nothing tracked to stop")
     return 0
 
 
@@ -698,6 +813,7 @@ def main() -> int:
     sc.add_argument("--seconds", type=float, default=60.0)
     sc.add_argument("--inject", default=None,
                     help='synthesize P1 input each frame: "circle", "hold:sx,sy", '
+         '"combat:b,x,a" (circling stick + button press/release edges), '
                          'optionally +buttons e.g. "circle+b" (dolphin-gdb-trace.mjs pattern)')
     sc.add_argument("--scenario", default=None,
                     help="scenario name/path; default for --inject")

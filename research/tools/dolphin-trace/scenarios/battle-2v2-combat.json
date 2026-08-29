@@ -1,0 +1,9 @@
+{
+  "scenario_schema": 1,
+  "name": "battle-2v2-combat",
+  "description": "Owner 2v2 savestate driven with button PRESS/RELEASE edges (B/X/A round-robin) instead of a permanently-held mask. circle+b holds one mask every frame, so the game never sees a fresh press and rising-edge action-table slots (attacks, specials, supers) cannot be entered; this scenario exists to reach them.",
+  "save_state": "2v2 gred cotrolled players no cpu.sav",
+  "inject": "combat:b,x,a",
+  "game_state": "2v2 sav + circling stick with B/X/A press-release edges",
+  "dtm": null
+}
