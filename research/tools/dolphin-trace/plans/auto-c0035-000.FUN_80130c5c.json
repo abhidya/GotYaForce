@@ -1,0 +1,17 @@
+{
+  "unit": "auto-c0035-000",
+  "fn": "FUN_80130c5c",
+  "addr": "0x80130c5c",
+  "prototype": "void FUN_80130c5c(int param_1)",
+  "generated_by": "port_trace_verify plan generator v1",
+  "note": "SKELETON generated from oracle-registry.json prototypes: args/ret only. reads/writes need hand-authoring from the unit's verbatim C (research/tools/dolphin-trace/README.md) before a capture proves memory behaviour; editing them removes none of this plan's fields.",
+  "args": [
+    {
+      "reg": "r3",
+      "name": "param_1"
+    }
+  ],
+  "reads": [],
+  "ret": null,
+  "writes": []
+}

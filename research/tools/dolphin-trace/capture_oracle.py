@@ -115,6 +115,45 @@ def load_scenario(name_or_path: str) -> dict:
     return data
 
 
+def apply_scenario_setup(scenario: dict | None, d) -> dict | None:
+    """Run a scenario's `setup` block on the freshly attached stub.
+
+    A scenario used to be nothing but "which savestate to load" — and since the
+    checkout has exactly ONE savestate that loads into a live battle, that made
+    the live borg family a constant and left 99 of 104 staged units permanently
+    uncapturable (scenarios/README.md). `setup` lifts that: it re-runs the
+    game's OWN battle load around a chosen roster, so the one savestate can
+    present any family. See force_navigator.py for the mechanism + evidence.
+
+    Applied AFTER attaching and BEFORE any capture breakpoint is installed, on
+    the same single stub connection the boot allows. Returns the setup report
+    (recorded into fixture headers) or None when the scenario has no setup.
+    """
+    setup = (scenario or {}).get("setup")
+    if not setup:
+        return None
+    kind = setup.get("kind")
+    if kind != "battle_roster_reload":
+        sys.exit(f"scenario setup kind {kind!r} is not supported by this build")
+    import force_navigator as fn  # local: force_navigator imports this module
+
+    borgs = [fn.borg_id(b) for b in setup["borgs"]]
+    slots = setup.get("slots") or [0, 1, 2, 3]
+    assignment = {s: borgs[i % len(borgs)] for i, s in enumerate(slots)}
+    rep = fn.stage_borgs(
+        d, assignment,
+        expect_families=setup.get("expect_families") or [],
+        timeout_s=float(setup.get("timeout_s", 240.0)),
+        color=int(setup.get("color", 0)),
+        depth=int(setup.get("roster_depth", 6)),
+        progress=lambda m: print(f"[setup] {m}", flush=True))
+    if setup.get("expect_families") and not rep["settled"]:
+        raise RspError(
+            "scenario setup did not bring up "
+            f"{setup['expect_families']}: {rep['constructors_hit']}")
+    return rep
+
+
 def scenario_save_state(scenario: dict) -> str | None:
     save = scenario.get("save_state")
     if not save:
@@ -535,6 +574,7 @@ def unit_functions(unit: str) -> list[tuple[int, str]]:
 
 
 def cmd_scout(a: argparse.Namespace) -> int:
+    scenario = None
     if a.scenario:
         scenario = load_scenario(a.scenario)
         if not a.inject:
@@ -553,8 +593,10 @@ def cmd_scout(a: argparse.Namespace) -> int:
     stray = 0
     injector = parse_inject_arg(a.inject)
     d = StubDriver(a.port)
+    setup_report = None
     try:
         d.halt()
+        setup_report = apply_scenario_setup(scenario, d)
         for addr in by_addr:
             d.set_bp(addr)
         if injector is not None:
@@ -579,6 +621,7 @@ def cmd_scout(a: argparse.Namespace) -> int:
         d.cleanup()
     print(json.dumps({"scouted_s": a.seconds, "hits": counts,
                       "stray_stops": stray,
+                      "scenario_setup": setup_report,
                       "injected_frames": injector.frame if injector else 0}, indent=2))
     return 0
 
@@ -699,6 +742,7 @@ def capture_one_hit(d: StubDriver, plan: dict, entry: int, hit_timeout: float,
 
 
 def cmd_capture(a: argparse.Namespace) -> int:
+    scenario = None
     if a.scenario:
         scenario = load_scenario(a.scenario)
         if not a.inject:
@@ -715,8 +759,10 @@ def cmd_capture(a: argparse.Namespace) -> int:
 
     injector = parse_inject_arg(a.inject)
     d = StubDriver(a.port)
+    setup_report = None
     try:
         d.halt()
+        setup_report = apply_scenario_setup(scenario, d)
         d.set_bp(entry)
         if injector is not None:
             d.set_bp(PAD_INJECT_BP)
@@ -758,6 +804,9 @@ def cmd_capture(a: argparse.Namespace) -> int:
             "pad_injection": a.inject or None,
             "injected_frames": injector.frame if injector else 0,
             "scenario": a.scenario or None,
+            # what the scenario's setup block actually brought up, so a fixture
+            # is self-describing about WHICH borg family was live for it
+            "scenario_setup": setup_report,
         },
     }
     out = Path(a.out)
