@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "timestamp": "2026-08-29T19:38:40.784679Z",
-  "run_id": "2026-08-29T19:38:40.784679Z",
+  "timestamp": "2026-08-29T20:05:02.520921Z",
+  "run_id": "2026-08-29T20:05:02.520921Z",
   "port_mode": "wasm_units",
   "workflow_state": "blocked",
   "current_unit": null,
@@ -14,10 +14,10 @@
   "context_length": null,
   "driver_status": "stopped",
   "driver_running": false,
-  "last_transition": "2026-08-29T19:38:40.784679Z",
+  "last_transition": "2026-08-29T20:05:02.520921Z",
   "last_green": "2026-08-26T07:34:28.953704Z",
   "last_product_commit": "218911ab5e2455c447e5beec8efe9e95e7c8f2ec",
-  "block_reason": "serving slot not ready: unsloth/Qwen3.8-27B-GGUF not ready at context>=60000 within 900s (resident=D:\\c_cache_moved\\huggingface\\hub\\models--unsloth--Qwen3.8-27B-GGUF\\snapshots\\f1bfb127c64f7072bdd2cad55f258b9c8b2910fe, context=71296)",
+  "block_reason": "serving slot not ready: load request failed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out.",
   "manual_paused": false,
   "queue": {
     "total": 1396,

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-29T19:38:45.237679Z",
-  "run_id": "2026-08-29T19:38:40.784679Z",
+  "generated_at": "2026-08-29T20:05:02.724308Z",
+  "run_id": "2026-08-29T20:05:02.520921Z",
   "total_units": 1396,
   "green": 3,
   "staged": 104,
@@ -22,10 +22,10 @@
     "workflow_state": "blocked",
     "driver_status": "stopped",
     "manual_paused": false,
-    "block_reason": "serving slot not ready: unsloth/Qwen3.8-27B-GGUF not ready at context>=60000 within 900s (resident=D:\\c_cache_moved\\huggingface\\hub\\models--unsloth--Qwen3.8-27B-GGUF\\snapshots\\f1bfb127c64f7072bdd2cad55f258b9c8b2910fe, context=71296)",
+    "block_reason": "serving slot not ready: load request failed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out.",
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Blocked: serving slot not ready: unsloth/Qwen3.8-27B-GGUF not ready at context>=60000 within 900s (resident=D:\\c_cache_moved\\huggingface\\hub\\models--unsloth--Qwen3.8-27B-GGUF\\snapshots\\f1bfb127c64f7072bdd2cad55f258b9c8b2910fe, context=71296)"
+    "detail": "Blocked: serving slot not ready: load request failed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out."
   }
 }
