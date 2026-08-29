@@ -10,8 +10,10 @@
 
 import { createBattle, emptyInput, type Battle, type PlayerInput } from "@gf/combat";
 import { BORG_CATALOG } from "./borgCatalog.js";
+import { SOURCE_FRAME_SECONDS } from "../constants.js";
 
-const DT = 1 / 60;
+/** The proofs step the sim at its real fixed rate, exactly like the live battle loop. */
+const DT = SOURCE_FRAME_SECONDS;
 const SPAWN_SETTLE_FRAMES = 130; // both sides fully deployed + idle (spawn state ends ~35f)
 
 interface ProofActors {

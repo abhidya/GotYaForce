@@ -1,7 +1,13 @@
 /**
  * Tiny framework-free DOM helpers shared by the Gotcha Force UI components.
- * No dependencies; keeps each screen/HUD component self-contained.
+ * No dependencies beyond the app's shared numeric helpers; keeps each
+ * screen/HUD component self-contained.
  */
+
+import { clamp01 } from "../constants.js";
+
+/** Re-exported so UI modules keep a single import for DOM + progress helpers. */
+export { clamp01 };
 
 /** Attribute / property bag accepted by {@link el}. */
 export interface ElOpts {
@@ -60,11 +66,6 @@ export function svg(markup: string): SVGElement {
   const node = wrap.firstElementChild;
   if (!(node instanceof SVGElement)) throw new Error("svg() expected an <svg> root");
   return node;
-}
-
-/** Clamp a 0..1 progress value. */
-export function clamp01(v: number): number {
-  return v < 0 ? 0 : v > 1 ? 1 : v;
 }
 
 /** Remove all children from a node. */

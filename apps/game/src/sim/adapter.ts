@@ -2,6 +2,7 @@
 
 import type { CombatStageCatalog } from "@gf/missions";
 import type { PlayerInput } from "@gf/combat";
+import { clamp } from "../constants.js";
 import {
   DEFAULT_ARENA_STAGE,
   EXPORTED_STAGE_CATALOG,
@@ -19,6 +20,26 @@ export const EXPORTED_STAGE_CATALOG_ADAPTER: CombatStageCatalog = {
     return !!entry && entry.collisionCount > 0;
   },
 };
+
+/**
+ * Standard-mapping gamepad button indices this adapter reads. Kept as names so the battle
+ * mapping and the on-screen overlay's published indices (ui/touch/gcOverlayLayout.ts
+ * PAD_BUTTON, which is the authority both consumers are matched against) stay comparable.
+ */
+const PAD = {
+  A: 0,
+  B: 1,
+  X: 2,
+  Y: 3,
+  LEFT_SHOULDER: 4,
+  RIGHT_SHOULDER: 5,
+  LEFT_TRIGGER: 6,
+  RIGHT_TRIGGER: 7,
+} as const;
+
+/** Analog-stick magnitude below which the pad is treated as centred, so a resting stick
+ *  never overrides the keyboard axes. TUNED (no ROM deadzone value is decoded). */
+const STICK_DEADZONE = 0.2;
 
 /** Local input snapshot accumulated from the keyboard/gamepad each frame. */
 export interface LocalControls {
@@ -83,22 +104,22 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
   if (pad) {
     const ax = pad.axes[0] ?? 0;
     const ay = pad.axes[1] ?? 0;
-    if (Math.abs(ax) > 0.2) moveX = -ax; // see HORIZONTAL AXIS SIGN note above
-    if (Math.abs(ay) > 0.2) moveZ = -ay; // stick up = forward
+    if (Math.abs(ax) > STICK_DEADZONE) moveX = -ax; // see HORIZONTAL AXIS SIGN note above
+    if (Math.abs(ay) > STICK_DEADZONE) moveZ = -ay; // stick up = forward
     const b = (i: number) => pad.buttons[i]?.pressed ?? false;
-    jump = jump || b(0); // A
-    attack = attack || b(1); // B
-    special = special || b(2); // X
+    jump = jump || b(PAD.A);
+    attack = attack || b(PAD.B);
+    special = special || b(PAD.X);
     // Explicit lock is mostly diagnostic because player borgs auto-lock by default.
     // No exact browser mapping for the GameCube shoulder cluster; use right shoulder/trigger
     // for source request 2 and left trigger for request 3. LB remains the Z stand-in below.
-    switchLock = switchLock || b(5) || b(7);
-    switchLockPrev = switchLockPrev || b(6);
+    switchLock = switchLock || b(PAD.RIGHT_SHOULDER) || b(PAD.RIGHT_TRIGGER);
+    switchLockPrev = switchLockPrev || b(PAD.LEFT_TRIGGER);
     // XInput has no exact GC Z; use the left shoulder as the least-conflicting ally-lock stand-in.
-    allyLock = allyLock || b(4);
+    allyLock = allyLock || b(PAD.LEFT_SHOULDER);
     // XInput button 3 (Y on the standard mapping) is otherwise unused here — natural stand-in
     // for GC Y (shell input only, ATK-011; no gameplay effect).
-    hyper = hyper || b(3);
+    hyper = hyper || b(PAD.Y);
   }
 
   return {
@@ -115,9 +136,5 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
     dash,
     hyper,
   };
-}
-
-function clamp(v: number, lo: number, hi: number): number {
-  return v < lo ? lo : v > hi ? hi : v;
 }
 

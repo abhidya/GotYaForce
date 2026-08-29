@@ -5,6 +5,7 @@ import { prepareImportedModel, type ThreeAssetLoader } from "@gf/render";
 
 import type { AnimSlot, BorgAssets } from "./battleScene.js";
 import { publicUrl } from "../publicUrl.js";
+import { SOURCE_FRAME_RATE_HZ } from "../constants.js";
 
 export interface BorgPresentationAssets extends BorgAssets {
   setModelManifest(manifest: readonly ModelManifestEntry[]): void;
@@ -77,7 +78,7 @@ const INTERNAL_MORPH_PRESENTATION: Readonly<Record<string, { animationId: string
 };
 
 function buildClip(json: BakedClip): THREE.AnimationClip {
-  const fps = json.fps ?? 60;
+  const fps = json.fps ?? SOURCE_FRAME_RATE_HZ;
   const times = Float32Array.from({ length: json.frameCount }, (_, frame) => frame / fps);
   const tracks: THREE.KeyframeTrack[] = [];
   for (const bone of json.bones) {

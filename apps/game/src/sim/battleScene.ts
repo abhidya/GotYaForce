@@ -26,6 +26,12 @@ import {
 import efctBankJson from "./data/efctBankMeshes.json" with { type: "json" };
 import type { BattleActorView } from "./battleView.js";
 import { publicUrl } from "../publicUrl.js";
+import {
+  BAM16_TO_RADIANS,
+  BAM16_UNITS_PER_TURN,
+  SOURCE_FRAME_RATE_HZ,
+  framesToSeconds,
+} from "../constants.js";
 
 /** Asset hooks supplied by main.ts so we reuse its loaders/caches. */
 export interface BorgAssets {
@@ -178,7 +184,13 @@ const STATUS_FX_TEXIDS: ReadonlyArray<{ texId: number; slot: 0 | 1 | 2 }> = [
 ];
 const STATUS_FX_PULSE_STEP = { slow: 0x222, haste: 0x444 } as const;
 const STATUS_FX_HAND_SPIN = { 1: -2184, 2: -182 } as const; // s16 units/frame (0xf778/0xff4a)
-const S16_TO_RAD = (Math.PI * 2) / 0x10000;
+/** DERIVED: FUN_8013f84c seeds slot-0 star-ring spin at +/-1024 s16 units/frame, split
+ *  across the x/z axes by t = (rand & 0x3f) / 63. */
+const STATUS_FX_STAR_SPIN = 1024;
+/** DERIVED: SLOW halves every spin speed (FUN_8013f84c +0x34/+0x36 / 2). */
+const STATUS_FX_SLOW_SPIN_DIVISOR = 2;
+/** DERIVED: slow adds 2 to the matAnim pulse frame (frames 0..1 haste, 2..3 slow). */
+const STATUS_FX_SLOW_ANIM_FRAME_OFFSET = 2;
 
 interface ProjectileActor {
   /** Scene node: a camera-facing Sprite for billboard kinds, the crossed-plane beam rig
@@ -604,6 +616,49 @@ const MUZZLE_FLASH_ALPHA_KEYS: ReadonlyArray<readonly number[]> = [
 /** texId 35 lifetime, frames (layer-def row 0 @0x802faef8). */
 const MUZZLE_FLASH_LIFE_FRAMES = 4;
 
+// ---------------------------------------------------------------------------
+// Presentation anchors and tweens shared by the battle FX/marker code below.
+// All TUNED: the ROM anchors its effects to per-borg joint matrices (gun joint
+// +0xa24, actor matrix translation) which the port does not carry at FX level,
+// so every offset here is a fixed stand-in matched by eye against the captures.
+// ---------------------------------------------------------------------------
+
+/** Torso height above the actor root — where a contact spark, charge aura or X-special
+ *  burst reads as coming from the body rather than the feet. */
+const ACTOR_TORSO_Y = 82;
+/** Slightly lower chest anchor used by the whole-body bursts (death, X-special). */
+const ACTOR_CHEST_Y = 70;
+/** Waist/thruster height for the dash burst. */
+const ACTOR_DASH_Y = 55;
+/** Head height: where the enemy lock reticle centres. */
+const ACTOR_RETICLE_Y = 80;
+/** Above the head: the ally marker floats clear of the reticle. */
+const ACTOR_ALLY_MARKER_Y = 145;
+/** Extra lift for the death explosion's trailing smoke ball. */
+const DEATH_SMOKE_RISE_Y = 24;
+
+/** Crossfade between animation slots, seconds. Long enough to hide a pose pop, short
+ *  enough that a 17-frame swing is not half-faded when it ends. */
+const SLOT_CROSSFADE_SECONDS = 0.18;
+
+/** Vertical speed (units/frame) below which a "jump" state is read as falling rather than
+ *  rising. ~1.5 frames past apex under JUMP.GRAVITY, so apex jitter and boost-thrust
+ *  oscillation cannot flip-flop the slot. */
+const FALL_VELOCITY_Y = -0.6;
+/** Squared XZ speed below which a dashing borg has no usable direction, so the dash slot
+ *  falls back to "forward". */
+const DASH_DIRECTION_MIN_SPEED_SQ = 0.0001;
+
+/** Floor applied to every FX scale axis: three.js drops a zero-scaled node's matrix into a
+ *  non-invertible state, so a ROM key of exactly 0 becomes this instead. */
+const FX_MIN_SCALE = 1e-4;
+
+/** id-1 hit burst (DERIVED (8..11)+(8..11) particles): the port draws a count in
+ *  [MIN, MIN+SPREAD) and scatters each particle inside a cube of JITTER world units. */
+const HIT_BURST_MIN_PARTICLES = 16;
+const HIT_BURST_PARTICLE_SPREAD = 7;
+const HIT_BURST_JITTER = 52;
+
 export class BattleScene {
   private actors = new Map<string, Actor>();
   private projectileActors = new Map<string, ProjectileActor>();
@@ -689,7 +744,7 @@ export class BattleScene {
       // (~1.5 frames past apex) keeps apex jitter and boost-thrust oscillation from
       // flip-flopping the slot. "fall" maps to the exported jump_land bank and falls
       // back to jump/fly for borgs without one.
-      return b.vel.y < -0.6 ? "fall" : "jump";
+      return b.vel.y < FALL_VELOCITY_Y ? "fall" : "jump";
     }
     if (b.state === "move") return "move";
     return "idle";
@@ -730,7 +785,7 @@ export class BattleScene {
         // yaw = the victim's facing (locked victims usually face their attacker) — TUNED
         // stand-in for the ROM's attacker->contact orientation basis (zz_0045ef4_).
         this.spawnHitFx(
-          new THREE.Vector3(b.pos.x, b.pos.y + 82, b.pos.z),
+          new THREE.Vector3(b.pos.x, b.pos.y + ACTOR_TORSO_Y, b.pos.z),
           b.lastHitImpactEffectId,
           b.lastHitAttackerTeam,
           b.rotY,
@@ -896,7 +951,7 @@ export class BattleScene {
   ): void {
     const s = event.baseScale;
     this.spawnBankFx(event.effectId, new THREE.Vector3(event.pos.x, event.pos.y, event.pos.z), {
-      ttl: event.lifetimeFrames / 60,
+      ttl: framesToSeconds(event.lifetimeFrames),
       startScale: { x: s, y: s, z: s },
       endScale: { x: 1.25 * s, y: 2.5 * s, z: 1.25 * s },
       opacity: 1,
@@ -940,7 +995,7 @@ export class BattleScene {
     this.enemyReticle.visible = showEnemy;
     if (showEnemy && enemy) {
       // Centered on the target's torso like the original ring, not floating above the head.
-      this.enemyReticle.position.set(enemy.pos.x, enemy.pos.y + 80, enemy.pos.z);
+      this.enemyReticle.position.set(enemy.pos.x, enemy.pos.y + ACTOR_RETICLE_Y, enemy.pos.z);
       // Reticle color = "battle mode" cue (behavior-notes (ao), NA manual): the cursor is yellow
       // at ranged distance and flips RED when the locked enemy is within melee reach. The exported
       // arrow mesh is tinted at runtime until the original GX material block is traced.
@@ -951,7 +1006,7 @@ export class BattleScene {
     const showAlly = !!(self && ally && ally.alive && ally.uid !== self.uid && ally.team === self.team);
     this.allyMarker.visible = showAlly;
     if (showAlly && ally) {
-      this.allyMarker.position.set(ally.pos.x, ally.pos.y + 145, ally.pos.z);
+      this.allyMarker.position.set(ally.pos.x, ally.pos.y + ACTOR_ALLY_MARKER_Y, ally.pos.z);
     }
   }
 
@@ -1115,8 +1170,8 @@ export class BattleScene {
     // interpolant advances on mixer time), and three.js disables the action once the fade
     // reaches 0.
     const fadeOther = (a: THREE.AnimationAction): void => {
-      if (a.isRunning()) a.crossFadeTo(action, 0.18, false);
-      else if (a.getEffectiveWeight() > 0) a.fadeOut(0.18);
+      if (a.isRunning()) a.crossFadeTo(action, SLOT_CROSSFADE_SECONDS, false);
+      else if (a.getEffectiveWeight() > 0) a.fadeOut(SLOT_CROSSFADE_SECONDS);
     };
     for (const a of Object.values(actor.actions)) {
       if (a && a !== action) fadeOther(a);
@@ -1437,7 +1492,7 @@ export class BattleScene {
     const flags = opts.romTransformFlags;
     if (opts.yaw !== undefined && (flags === undefined || (flags & 0x04) !== 0)) node.rotation.y = opts.yaw;
     if (flags === undefined || (flags & 0x10) !== 0) {
-      node.scale.set(Math.max(start.x, 1e-4), Math.max(start.y, 1e-4), Math.max(start.z, 1e-4));
+      node.scale.set(Math.max(start.x, FX_MIN_SCALE), Math.max(start.y, FX_MIN_SCALE), Math.max(start.z, FX_MIN_SCALE));
     }
     if ((opts.delay ?? 0) > 0) node.visible = false;
     this.root.add(node);
@@ -1530,14 +1585,14 @@ export class BattleScene {
       // keys 1 -> 2@f4 -> 3@f20 approximated linearly 1 -> 3 (same policy as before).
       if (
         !this.spawnBankFx(21, at, {
-          ttl: 20 / 60,
+          ttl: framesToSeconds(20),
           startScale: 1,
           endScale: 3,
           opacity: 1,
         })
       ) {
         this.spawnBurstSprite(this.hitSparkTexture, at, {
-          ttl: 20 / 60,
+          ttl: framesToSeconds(20),
           startScale: 36,
           endScale: 108,
           opacity: 1,
@@ -1550,19 +1605,19 @@ export class BattleScene {
       // Variant 2 — three-layer directional impact: texIds 144 (flash shell) / 145 (core
       // shell) / 146 (delayed flat ring). The ROM orients the layer basis by the
       // attacker->contact direction; `yaw` is the port's TUNED stand-in for that basis.
-      const okFlash = this.spawnBankFx(144, at, { ttl: 7 / 60, startScale: 1, endScale: 0, opacity: 1, ...(yaw !== undefined ? { yaw } : {}) });
-      const okCore = this.spawnBankFx(145, at, { ttl: 10 / 60, startScale: 1, endScale: 0, opacity: 1, ...(yaw !== undefined ? { yaw } : {}) });
+      const okFlash = this.spawnBankFx(144, at, { ttl: framesToSeconds(7), startScale: 1, endScale: 0, opacity: 1, ...(yaw !== undefined ? { yaw } : {}) });
+      const okCore = this.spawnBankFx(145, at, { ttl: framesToSeconds(10), startScale: 1, endScale: 0, opacity: 1, ...(yaw !== undefined ? { yaw } : {}) });
       const okRing = this.spawnBankFx(146, at, {
-        ttl: 10 / 60,
+        ttl: framesToSeconds(10),
         startScale: 1,
         endScale: 1.5,
         opacity: 1,
-        delay: 3 / 60,
+        delay: framesToSeconds(3),
         ...(yaw !== undefined ? { yaw } : {}),
       });
       if (!okFlash) {
         this.spawnBurstSprite(this.hitSparkTexture, at, {
-          ttl: 7 / 60,
+          ttl: framesToSeconds(7),
           startScale: 52,
           endScale: 0,
           opacity: 1,
@@ -1571,7 +1626,7 @@ export class BattleScene {
       }
       if (!okCore) {
         this.spawnBurstSprite(this.hitSparkTexture, at, {
-          ttl: 10 / 60,
+          ttl: framesToSeconds(10),
           startScale: 40,
           endScale: 0,
           opacity: 0.9,
@@ -1580,11 +1635,11 @@ export class BattleScene {
       }
       if (!okRing) {
         this.spawnBurstSprite(this.ringTexture, at, {
-          ttl: 10 / 60,
+          ttl: framesToSeconds(10),
           startScale: 0,
           endScale: 66,
           opacity: 0.9,
-          delay: 3 / 60,
+          delay: framesToSeconds(3),
         });
       }
       return;
@@ -1593,9 +1648,9 @@ export class BattleScene {
       // Variant 3 — two-layer slash flash: texId 53 (spike-star core, scale 0.5 -> 1@f2 ->
       // 0@f10 approximated 1 -> 0) + texId 54 (the cross mesh) with the ROM's ANISOTROPIC
       // keys (x,y,z) (0,1.5,1.5) -> (1,1,1)@f2 -> (1.5,0,0)@f6 approximated linearly.
-      const okCore = this.spawnBankFx(53, at, { ttl: 10 / 60, startScale: 1, endScale: 0, opacity: 1, ...(yaw !== undefined ? { yaw } : {}) });
+      const okCore = this.spawnBankFx(53, at, { ttl: framesToSeconds(10), startScale: 1, endScale: 0, opacity: 1, ...(yaw !== undefined ? { yaw } : {}) });
       const okCross = this.spawnBankFx(54, at, {
-        ttl: 6 / 60,
+        ttl: framesToSeconds(6),
         startScale: { x: 0, y: 1.5, z: 1.5 },
         endScale: { x: 1.5, y: 0, z: 0 },
         opacity: 1,
@@ -1603,7 +1658,7 @@ export class BattleScene {
       });
       if (!okCore) {
         this.spawnBurstSprite(this.dashStarTexture, at, {
-          ttl: 10 / 60,
+          ttl: framesToSeconds(10),
           startScale: 44,
           endScale: 0,
           opacity: 1,
@@ -1612,7 +1667,7 @@ export class BattleScene {
       }
       if (!okCross) {
         this.spawnBurstSprite(this.hitSparkTexture, at, {
-          ttl: 6 / 60,
+          ttl: framesToSeconds(6),
           startScale: { x: 0, y: 66 },
           endScale: { x: 66, y: 0 },
           opacity: 1,
@@ -1627,17 +1682,17 @@ export class BattleScene {
     // the ROM keys the row by the attacker's player index (+0x88); the port maps team 0/1
     // onto rows 0/1 (closest available fact). The rim colors now come from the REAL bank
     // vertex colors, replacing the old TUNED tint constants.
-    const count = 16 + Math.floor(Math.random() * 7);
+    const count = HIT_BURST_MIN_PARTICLES + Math.floor(Math.random() * HIT_BURST_PARTICLE_SPREAD);
     const burstTexId = attackerTeam === 1 ? 3 : 2;
     for (let i = 0; i < count; i++) {
       const jitter = new THREE.Vector3(
-        at.x + (Math.random() - 0.5) * 52,
-        at.y + (Math.random() - 0.5) * 52,
-        at.z + (Math.random() - 0.5) * 52,
+        at.x + (Math.random() - 0.5) * HIT_BURST_JITTER,
+        at.y + (Math.random() - 0.5) * HIT_BURST_JITTER,
+        at.z + (Math.random() - 0.5) * HIT_BURST_JITTER,
       );
       if (
         !this.spawnBankFx(burstTexId, jitter, {
-          ttl: 10 / 60,
+          ttl: framesToSeconds(10),
           startScale: 0.7 + Math.random() * 0.7,
           endScale: 1.8,
           opacity: 1,
@@ -1645,7 +1700,7 @@ export class BattleScene {
       ) {
         const tint = attackerTeam === undefined ? 0xffffff : attackerTeam === 0 ? 0xbfe4ff : 0xffc9a1;
         this.spawnBurstSprite(this.hitSparkTexture, jitter, {
-          ttl: 10 / 60,
+          ttl: framesToSeconds(10),
           startScale: 10 + Math.random() * 10,
           endScale: 26,
           opacity: 1,
@@ -1662,7 +1717,7 @@ export class BattleScene {
    * the textures are the real extracted sheets.
    */
   private spawnDeathExplosion(position: THREE.Vector3): void {
-    const at = new THREE.Vector3(position.x, position.y + 70, position.z);
+    const at = new THREE.Vector3(position.x, position.y + ACTOR_CHEST_Y, position.z);
     this.spawnBurstSprite(this.projectileTextures.get("flame") ?? null, at, {
       ttl: 0.5,
       startScale: 80,
@@ -1676,7 +1731,7 @@ export class BattleScene {
       endScale: 270,
       opacity: 0.85,
     });
-    this.spawnBurstSprite(this.smokeTexture, new THREE.Vector3(at.x, at.y + 24, at.z), {
+    this.spawnBurstSprite(this.smokeTexture, new THREE.Vector3(at.x, at.y + DEATH_SMOKE_RISE_Y, at.z), {
       ttl: 0.7,
       startScale: 90,
       endScale: 170,
@@ -1686,7 +1741,7 @@ export class BattleScene {
 
   /** Dash/boost burst: ptcl00.txg#0 wispy white star, edge-triggered on dash entry. */
   private spawnDashBurst(position: THREE.Vector3): void {
-    this.spawnBurstSprite(this.dashStarTexture, new THREE.Vector3(position.x, position.y + 55, position.z), {
+    this.spawnBurstSprite(this.dashStarTexture, new THREE.Vector3(position.x, position.y + ACTOR_DASH_Y, position.z), {
       ttl: 0.26,
       startScale: 62,
       endScale: 132,
@@ -1707,7 +1762,7 @@ export class BattleScene {
    * usage table is decoded — ptcl00.ptl/.ref are unparsed), the pixels are real assets.
    */
   private spawnSpecialBurst(position: THREE.Vector3): void {
-    const at = new THREE.Vector3(position.x, position.y + 70, position.z); // torso height, TUNED
+    const at = new THREE.Vector3(position.x, position.y + ACTOR_CHEST_Y, position.z);
     this.spawnBurstSprite(this.projectileTextures.get("flame") ?? null, at, {
       ttl: 0.3, // TUNED-visual: quicker than the 0.5s death fireball so it reads as a pulse
       startScale: 50, // TUNED-visual
@@ -1754,7 +1809,7 @@ export class BattleScene {
     );
     if (
       this.spawnBankFx(35, at, {
-        ttl: MUZZLE_FLASH_LIFE_FRAMES / 60,
+        ttl: framesToSeconds(MUZZLE_FLASH_LIFE_FRAMES),
         startScale: 1,
         endScale: 0,
         opacity: 1,
@@ -1799,7 +1854,7 @@ export class BattleScene {
         depthWrite: false,
       });
       const sprite = new THREE.Sprite(material);
-      sprite.position.set(0, 82, 0); // torso height, rides the actor group
+      sprite.position.set(0, ACTOR_TORSO_Y, 0); // rides the actor group
       sprite.renderOrder = 20;
       actor.group.add(sprite);
       actor.chargeGlow = { sprite, material };
@@ -1872,7 +1927,7 @@ export class BattleScene {
       // FUN_8013f84c seeding: slot 0 gets random phases + random +/- speeds split by
       // t = (rand&0x3f)/63 across x/z; slots 1/2 (the clock hands) start at phase 0 with
       // the fixed hand speeds. SLOW halves every speed.
-      const slowDiv = kind === "slow" ? 2 : 1;
+      const slowDiv = kind === "slow" ? STATUS_FX_SLOW_SPIN_DIVISOR : 1;
       let part: StatusAuraPart;
       if (def.slot === 0) {
         const t = Math.random();
@@ -1881,10 +1936,10 @@ export class BattleScene {
           materials,
           layers,
           billboard: false,
-          phaseX: Math.random() * 0x10000,
-          phaseZ: Math.random() * 0x10000,
-          spinX: ((Math.random() < 0.5 ? -1 : 1) * 1024 * t) / slowDiv,
-          spinZ: ((Math.random() < 0.5 ? -1 : 1) * 1024 * (1 - t)) / slowDiv,
+          phaseX: Math.random() * BAM16_UNITS_PER_TURN,
+          phaseZ: Math.random() * BAM16_UNITS_PER_TURN,
+          spinX: ((Math.random() < 0.5 ? -1 : 1) * STATUS_FX_STAR_SPIN * t) / slowDiv,
+          spinZ: ((Math.random() < 0.5 ? -1 : 1) * STATUS_FX_STAR_SPIN * (1 - t)) / slowDiv,
         };
       } else {
         part = {
@@ -1924,15 +1979,15 @@ export class BattleScene {
   /** Per-render advance of the status auras: spins, pulse phase and the pulse-driven
    *  matAnim color sample (frame = pulse, +2 when slow — zz_013fa70_/zz_00086b8_). */
   private updateStatusAuras(dt: number): void {
-    const frames = dt * 60; // ROM ticks these per 60fps frame
+    const frames = dt * SOURCE_FRAME_RATE_HZ; // ROM ticks these per source frame
     const camQ = this.camera?.quaternion ?? null;
     for (const actor of this.actors.values()) {
       for (const kind of ["slow", "haste"] as const) {
         const aura = actor.statusFx[kind];
         if (!aura) continue;
-        aura.pulsePhase = (aura.pulsePhase + STATUS_FX_PULSE_STEP[kind] * frames) % 0x10000;
-        const pulse = Math.min(1, Math.max(0, Math.sin(aura.pulsePhase * S16_TO_RAD) * 0.5 + 0.5));
-        const animFrame = pulse + (kind === "slow" ? 2 : 0);
+        aura.pulsePhase = (aura.pulsePhase + STATUS_FX_PULSE_STEP[kind] * frames) % BAM16_UNITS_PER_TURN;
+        const pulse = Math.min(1, Math.max(0, Math.sin(aura.pulsePhase * BAM16_TO_RADIANS) * 0.5 + 0.5));
+        const animFrame = pulse + (kind === "slow" ? STATUS_FX_SLOW_ANIM_FRAME_OFFSET : 0);
         for (const part of aura.parts) {
           part.phaseX += part.spinX * frames;
           part.phaseZ += part.spinZ * frames;
@@ -1940,11 +1995,11 @@ export class BattleScene {
             // Clock hands: camera-facing basis (FUN_8013f790), spun in the view plane.
             if (camQ) part.node.quaternion.copy(camQ);
             else part.node.quaternion.identity();
-            part.node.rotateZ(part.phaseZ * S16_TO_RAD);
+            part.node.rotateZ(part.phaseZ * BAM16_TO_RADIANS);
           } else {
             // Star ring: world rot z first then x (FUN_8013f698 zz_00457d4_ order) —
             // three.js Euler "XYZ" composes Rx*Ry*Rz, i.e. z applied first in world space.
-            part.node.rotation.set(part.phaseX * S16_TO_RAD, 0, part.phaseZ * S16_TO_RAD, "XYZ");
+            part.node.rotation.set(part.phaseX * BAM16_TO_RADIANS, 0, part.phaseZ * BAM16_TO_RADIANS, "XYZ");
           }
           for (let m = 0; m < part.materials.length; m++) {
             const material = part.materials[m];
@@ -2004,7 +2059,7 @@ export class BattleScene {
       const t = Math.min(1, (actor.age - delay) / actor.ttl);
       // ROM keyframe tracks (60fps frames) take precedence over the legacy linear lerp/fade
       // when the spawner provided them (currently the muzzle-flash family — DERIVED curves).
-      const frame = (actor.age - delay) * 60;
+      const frame = (actor.age - delay) * SOURCE_FRAME_RATE_HZ;
       let fade = actor.startOpacity * (1 - t);
       if (actor.alphaKeys) {
         evalRomKeys(actor.alphaKeys, frame, BANK_KEY_SCRATCH);
@@ -2017,15 +2072,15 @@ export class BattleScene {
       if (actor.scaleKeys && (actor.romTransformFlags === undefined || (actor.romTransformFlags & 0x10) !== 0)) {
         evalRomKeys(actor.scaleKeys, frame, BANK_KEY_SCRATCH);
         actor.node.scale.set(
-          Math.max(BANK_KEY_SCRATCH[0] ?? 0, 1e-4),
-          Math.max(BANK_KEY_SCRATCH[1] ?? 0, 1e-4),
-          Math.max(BANK_KEY_SCRATCH[2] ?? 0, 1e-4),
+          Math.max(BANK_KEY_SCRATCH[0] ?? 0, FX_MIN_SCALE),
+          Math.max(BANK_KEY_SCRATCH[1] ?? 0, FX_MIN_SCALE),
+          Math.max(BANK_KEY_SCRATCH[2] ?? 0, FX_MIN_SCALE),
         );
       } else {
         actor.node.scale.set(
-          Math.max(THREE.MathUtils.lerp(actor.startScale.x, actor.endScale.x, t), 1e-4),
-          Math.max(THREE.MathUtils.lerp(actor.startScale.y, actor.endScale.y, t), 1e-4),
-          Math.max(THREE.MathUtils.lerp(actor.startScale.z, actor.endScale.z, t), 1e-4),
+          Math.max(THREE.MathUtils.lerp(actor.startScale.x, actor.endScale.x, t), FX_MIN_SCALE),
+          Math.max(THREE.MathUtils.lerp(actor.startScale.y, actor.endScale.y, t), FX_MIN_SCALE),
+          Math.max(THREE.MathUtils.lerp(actor.startScale.z, actor.endScale.z, t), FX_MIN_SCALE),
         );
       }
       if (t >= 1) {
@@ -2063,7 +2118,7 @@ function dashSlotForBorg(b: BattleActorView): AnimSlot {
   const vx = b.vel.x;
   const vz = b.vel.z;
   const speedSq = vx * vx + vz * vz;
-  if (speedSq < 0.0001) return "dash_fwd";
+  if (speedSq < DASH_DIRECTION_MIN_SPEED_SQ) return "dash_fwd";
 
   const sin = Math.sin(b.rotY);
   const cos = Math.cos(b.rotY);

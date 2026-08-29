@@ -29,6 +29,7 @@ import { el, legendItem } from "../dom.js";
 import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
+import { TINT_MENU_WHITE, TINT_MENU_YELLOW } from "../tints.js";
 
 type DeepReadonly<T> =
   T extends readonly (infer Item)[] ? readonly DeepReadonly<Item>[]
@@ -68,20 +69,20 @@ export function createBattleIntro(
   root.appendChild(briefingScene);
 
   const title = bitmapText("gf-brief-title-text");
-  setBitmapText(title, opts.config.label ?? "BATTLE VS", { bold: true, scale: 2, tint: "#ffd21e" });
+  setBitmapText(title, opts.config.label ?? "BATTLE VS", { bold: true, scale: 2, tint: TINT_MENU_YELLOW });
   root.appendChild(el("h1", { class: "gf-brief-title", attrs: { "aria-label": opts.config.label ?? "BATTLE VS" } }, [title]));
 
   root.appendChild(sidePlate("player", playerLead, `${playerEnergy} ALLY`, byId.get(playerLead)?.name ?? "PLAYER"));
   root.appendChild(sidePlate("enemy", enemyLead, `ENEMY ${enemyEnergy}`, byId.get(enemyLead)?.name ?? "ENEMY"));
 
   const vsText = bitmapText("gf-brief-vs-text");
-  setBitmapText(vsText, "VS.", { bold: true, scale: 3, tint: "#ffffff" });
+  setBitmapText(vsText, "VS.", { bold: true, scale: 3, tint: TINT_MENU_WHITE });
   root.appendChild(el("div", { class: "gf-brief-vs" }, [vsText]));
 
   const objectiveText = bitmapText("gf-brief-objective-text");
-  setBitmapText(objectiveText, "DEFEAT ENEMY GOTCHA BORGS!", { bold: true, scale: 1, tint: "#ffffff" });
+  setBitmapText(objectiveText, "DEFEAT ENEMY GOTCHA BORGS!", { bold: true, scale: 1, tint: TINT_MENU_WHITE });
   const arenaNameText = bitmapText("gf-brief-arena-name-text");
-  if (arenaName) setBitmapText(arenaNameText, arenaName, { bold: true, scale: 1, tint: "#ffffff" });
+  if (arenaName) setBitmapText(arenaNameText, arenaName, { bold: true, scale: 1, tint: TINT_MENU_WHITE });
   root.appendChild(
     el("div", { class: "gf-brief-preview" }, [
       ...(arenaName ? [el("div", { class: "gf-brief-arena-name" }, [arenaNameText])] : []),
@@ -150,9 +151,9 @@ function sidePlate(kind: "player" | "enemy", lead: string, energyLabel: string, 
       ? el("span", { class: "gf-brief-emblem" })
       : el("img", { class: "gf-brief-icon", attrs: { src: borgMiniPath(lead), alt: name } });
   const energyText = bitmapText("gf-brief-energy-text");
-  setBitmapText(energyText, energyLabel, { bold: true, scale: 1, tint: "#ffffff" });
+  setBitmapText(energyText, energyLabel, { bold: true, scale: 1, tint: TINT_MENU_WHITE });
   const nameText = bitmapText("gf-brief-name-text");
-  setBitmapText(nameText, name, { bold: true, scale: 1, tint: "#ffffff" });
+  setBitmapText(nameText, name, { bold: true, scale: 1, tint: TINT_MENU_WHITE });
   return el("div", { class: `gf-brief-side gf-brief-${kind}` }, [
     icon,
     el("div", { class: `gf-brief-energy gf-brief-energy-${kind}` }, [energyText]),

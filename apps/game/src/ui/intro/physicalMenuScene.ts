@@ -8,9 +8,13 @@ import {
 import { createMenuWidgetSystem, type MenuWidgetEffectSink } from "./menuWidgetSystem.js";
 import { BAM16_TO_RADIANS } from "./titlePropController.js";
 import { publicUrl } from "../../publicUrl.js";
+import { MAX_DEVICE_PIXEL_RATIO, SOURCE_FRAME_SECONDS } from "../../constants.js";
 
-const SOURCE_FPS = 60;
-const FIXED_FRAME_SECONDS = 1 / SOURCE_FPS;
+const FIXED_FRAME_SECONDS = SOURCE_FRAME_SECONDS;
+/** Cap on the catch-up a single rendered frame may swallow (see main.ts stepBattle). */
+const MAX_CATCHUP_SECONDS = 0.25;
+/** stff stage archive model count (stage id 0x11 scene, created by zz_01c84a8_). */
+const STFF_ENVIRONMENT_MODEL_COUNT = 35;
 // The stff GLBs retain the HSD world space. Keeping the ROM camera unchanged makes
 // positive-X OPTION/Edit Force project right and views the authored text fronts.
 const CAMERA_EYE = new THREE.Vector3(83.785248, 940.888428, 2788.060059);
@@ -226,7 +230,7 @@ export function mountPhysicalMenuScene(
     const rect = host.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DEVICE_PIXEL_RATIO));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -239,7 +243,7 @@ export function mountPhysicalMenuScene(
   void (async () => {
     try {
       const stffEnvironment = await Promise.all(
-        Array.from({ length: 35 }, (_, modelId) =>
+        Array.from({ length: STFF_ENVIRONMENT_MODEL_COUNT }, (_, modelId) =>
           loader.loadGlbScene(modelPath(modelId)),
         ),
       );
@@ -296,7 +300,7 @@ export function mountPhysicalMenuScene(
 
   const render = (time: number): void => {
     if (disposed) return;
-    accumulatedSeconds += Math.min((time - previousTime) / 1000, 0.25);
+    accumulatedSeconds += Math.min((time - previousTime) / 1000, MAX_CATCHUP_SECONDS);
     previousTime = time;
     while (accumulatedSeconds >= FIXED_FRAME_SECONDS) {
       tickSourceFrame();

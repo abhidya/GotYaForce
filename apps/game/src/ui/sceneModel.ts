@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { createThreeAssetLoader, prepareImportedModel } from "@gf/render";
 
 import { createGameAssetCatalog } from "../assetCatalog.js";
+import { MAX_DEVICE_PIXEL_RATIO } from "../constants.js";
 
 const assetCatalog = createGameAssetCatalog();
 const sceneAssets = createThreeAssetLoader({ enableFileCache: true });
@@ -58,7 +59,7 @@ export function mountUiSceneModels(host: HTMLElement, opts: UiSceneModelOptions)
     const rect = host.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DEVICE_PIXEL_RATIO));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();

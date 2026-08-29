@@ -47,6 +47,7 @@
 
 import * as THREE from "three";
 import type { BorgCameraParams } from "@gf/combat";
+import { BAM16_TO_RADIANS } from "../constants.js";
 import {
   CAMERA_MODE1_DISTANCE_DECAY,
   CAMERA_MODE1_EYE_BLEND_DENOMINATOR,
@@ -85,7 +86,6 @@ const NO_TARGET_INTEREST_POINT = { x: 0, y: 80, z: 0 } as const;
 
 /** DERIVED: mode init/follow writes camera+0x70 = 0x600 (FUN_8000c660, FUN_8000cdc0). */
 export const CAMERA_MODE_INIT_PITCH_BAM_DERIVED = 0x600;
-const BAM16_TO_RADIANS = (Math.PI * 2) / 0x10000;
 const CAMERA_PITCH_RADIANS_DERIVED = CAMERA_MODE_INIT_PITCH_BAM_DERIVED * BAM16_TO_RADIANS;
 /** DERIVED: FUN_8000cdc0 sets the desired eye height via distance * tan(pitch)
  * (zz_004526c_ @ 0x8004526c is tan over BAM16). */

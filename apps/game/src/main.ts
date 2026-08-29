@@ -98,6 +98,7 @@ import { publicUrl } from "./publicUrl.js";
 import { BattleCamera, type CameraFollowTarget } from "./sim/camera.js";
 import { createBrowserGotchaBoxPersistence } from "./sim/getStorage.js";
 import { createInputEdgeLatch } from "./inputEdge.js";
+import { SOURCE_FRAME_SECONDS, framesToMilliseconds } from "./constants.js";
 import {
   activeBorgForPlayer,
   battleEnergyMaxima,
@@ -238,6 +239,8 @@ const COMBAT_SFX_MIN_GAP_MS: Partial<Record<CombatSfxCue, number>> = {
   lockon: 150,
   alert: 1500,
 };
+/** Rate limit for a cue with no COMBAT_SFX_MIN_GAP_MS entry of its own. TUNED. */
+const DEFAULT_COMBAT_SFX_MIN_GAP_MS = 250;
 const lastCombatSfxAt = new Map<string, number>();
 
 function playCombatSfx(cue: CombatSfxCue): void {
@@ -245,7 +248,7 @@ function playCombatSfx(cue: CombatSfxCue): void {
   const key = COMBAT_SFX[cue];
   if (!key) return;
   const now = performance.now();
-  const minGap = COMBAT_SFX_MIN_GAP_MS[cue] ?? 250;
+  const minGap = COMBAT_SFX_MIN_GAP_MS[cue] ?? DEFAULT_COMBAT_SFX_MIN_GAP_MS;
   const last = lastCombatSfxAt.get(cue) ?? -Infinity;
   if (now - last < minGap) return;
   lastCombatSfxAt.set(cue, now);
@@ -304,7 +307,7 @@ function seKeyForSoundId(id: number): string {
 function playAuthoredSwingSounds(sounds: readonly { frame: number; id: number }[]): void {
   if (DISABLE_COMBAT_SFX) return;
   for (const sound of sounds) {
-    const delayMs = Math.min((sound.frame * 1000) / 60, AUTHORED_MAX_DELAY_MS);
+    const delayMs = Math.min(framesToMilliseconds(sound.frame), AUTHORED_MAX_DELAY_MS);
     window.setTimeout(() => {
       const key = seKeyForSoundId(sound.id);
       const now = performance.now();
@@ -403,14 +406,20 @@ const debugOverlay: DebugOverlayHandle = createDebugOverlay(ui);
 // loads the threads-target relink (imported shared memory, step 8) — the
 // exported-memory build stays the default until switching is separately
 // reviewed.
+const ROM_WASM_FIDELITY_CASES = 256;
 const romWasmFlag = urlParams.get("romwasm");
 if (romWasmFlag !== "0") {
-  void bootRomDamage(256, romWasmFlag === "threads" ? "threads" : "default").then((r) => {
+  void bootRomDamage(ROM_WASM_FIDELITY_CASES, romWasmFlag === "threads" ? "threads" : "default").then((r) => {
     if (!r.active) console.warn(`[rom-wasm] TS port active (${r.detail})`);
   });
 }
 
 if (urlParams.has("debugOverlay")) debugOverlay.setVisible(true);
+
+/** Where the camera sits before the first battle seeds the follow rig — an over-the-shoulder
+ *  three-quarter view of the default arena, so the boot/menu frames are not staring at the
+ *  origin. TUNED (framing only; the follow camera overwrites it on battle entry). */
+const BOOT_CAMERA_POSITION: [number, number, number] = [950, 520, 1320];
 
 const viewport = createThreeViewport(canvas, {
   debugCapture: ENABLE_RENDER_DEBUG,
@@ -419,7 +428,7 @@ const viewport = createThreeViewport(canvas, {
     fov: DEFAULT_RENDER_STATE.fov,
     near: DEFAULT_RENDER_STATE.near,
     far: DEFAULT_RENDER_STATE.far,
-    position: [950, 520, 1320],
+    position: BOOT_CAMERA_POSITION,
   },
 });
 const { scene, camera, controls } = viewport;
@@ -503,6 +512,9 @@ function applyStageRenderState(stageId: string, rs: StageRenderState): void {
   camera.updateProjectionMatrix();
 }
 
+/** TUNED threshold (HSD PEDesc alpha-compare state is undecoded) — see loadStage below. */
+const STAGE_TRANSPARENT_ALPHA_TEST = 0.1;
+
 let loadedStageId: string | null = null;
 let loadedStageAssets: StageAssets<StageRenderState> | null = null;
 
@@ -525,7 +537,7 @@ async function loadStage(stageId: string): Promise<StageAssets<StageRenderState>
       // TUNED threshold (HSD PEDesc alpha-compare state is undecoded): discard near-invisible
       // texels of BLEND-mode stage props so their invisible quad corners stop writing depth
       // and punching holes into geometry behind them.
-      transparentAlphaTest: 0.1,
+      transparentAlphaTest: STAGE_TRANSPARENT_ALPHA_TEST,
     });
     stageRoot.add(model);
   }
@@ -673,13 +685,20 @@ function activeGamepad(playerIndex = 0, allowFallback = playerIndex === 0): Game
 //
 // The settlement module brackets every Challenge battle and owns win/lose/abandon ordering.
 // Its injected RNG stream outlives individual battles (the missions seeded-RNG convention).
-let getRngState = (Date.now() ^ 0x47474554) >>> 0; // "GGET" xor time — session-seeded, not a save value.
+/** "GGET" in ASCII, xored into the wall clock so each session draws a different GET stream
+ *  (this is a session seed, never a save value). */
+const GET_RNG_SEED_TAG = 0x47474554;
+/** mulberry32 constants (the same PRNG sim/romDamageBoot.ts uses for its fidelity gate). */
+const MULBERRY32_INCREMENT = 0x6d2b79f5;
+const UINT32_SPAN = 4294967296;
+
+let getRngState = (Date.now() ^ GET_RNG_SEED_TAG) >>> 0;
 function getRng(): number {
-  getRngState = (getRngState + 0x6d2b79f5) >>> 0;
+  getRngState = (getRngState + MULBERRY32_INCREMENT) >>> 0;
   let t = getRngState;
   t = Math.imul(t ^ (t >>> 15), t | 1);
   t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  return ((t ^ (t >>> 14)) >>> 0) / UINT32_SPAN;
 }
 const gotchaBox = createGotchaBoxSettlement({
   persistence: createBrowserGotchaBoxPersistence(),
@@ -823,7 +842,16 @@ interface BattleSession {
 
 let session: BattleSession | null = null;
 let simAccumulator = 0;
-const SIM_DT = 1 / 60;
+/** The sim runs at the source's fixed 60 Hz step. */
+const SIM_DT = SOURCE_FRAME_SECONDS;
+/** Longest wall-clock gap a single stepBattle call absorbs. A tab that was hidden for a
+ *  minute fast-forwards this much, not the whole minute. */
+const SIM_MAX_CATCHUP_SECONDS = 0.25;
+/** Hard cap on sub-steps per stepBattle call, so a slow frame cannot spiral into an
+ *  ever-growing catch-up loop. */
+const SIM_MAX_SUBSTEPS = 15;
+/** Longest render delta fed to the animation mixers, matching the sim's catch-up policy. */
+const RENDER_MAX_DELTA_SECONDS = 0.05;
 
 async function enterBattle(): Promise<void> {
   await initializeGotchaBoxBattle(
@@ -980,9 +1008,11 @@ function projectedTeammateMarkers(
 // direct resumeBattle() call here as well would double-dispatch resume for one keypress (and,
 // now that onResume/onQuit play menu SFX, would have double-played the confirm/back cue too).
 const pauseInputEdge = createInputEdgeLatch();
+/** Standard-mapping Start (the GameCube Start/Pause button; ui/touch publishes it here too). */
+const PAD_START_BUTTON = 9;
 function pauseControlPressed(): boolean {
   const pad = activeGamepad();
-  return keys.has("Escape") || keys.has("Enter") || (pad?.buttons[9]?.pressed ?? false);
+  return keys.has("Escape") || keys.has("Enter") || (pad?.buttons[PAD_START_BUTTON]?.pressed ?? false);
 }
 
 function pollPauseToggle(): void {
@@ -1057,7 +1087,7 @@ function stepBattle(dt: number): void {
   if (!session || session.paused || session.resolved) return;
   const { battle } = session;
 
-  simAccumulator += Math.min(dt, 0.25);
+  simAccumulator += Math.min(dt, SIM_MAX_CATCHUP_SECONDS);
   // Fixed 60 Hz; collect local input once and apply for each sub-step.
   const inputs: Record<string, PlayerInput> = {};
   for (let playerIndex = 0; playerIndex < session.localPlayerIds.length; playerIndex += 1) {
@@ -1069,7 +1099,7 @@ function stepBattle(dt: number): void {
   }
 
   let steps = 0;
-  while (simAccumulator >= SIM_DT && steps < 15) {
+  while (simAccumulator >= SIM_DT && steps < SIM_MAX_SUBSTEPS) {
     // The profile accessor lets the snapshot capture the local borg's charge tier thresholds
     // (chargeTier1Frames/chargeTier2Frames) for the charge_start/tier-up cues — read from the
     // combat package's action profiles, never hardcoded app-side.
@@ -1160,6 +1190,10 @@ function cameraFollowTargetForBorg(
   };
 }
 
+/** One decimal place: enough to diff positions between runs without churning the dataset
+ *  attribute (and the JSON blob it produces) on sub-unit float noise. */
+const DEBUG_DATASET_DECIMALS = 10;
+
 function updateBattleDebugDataset(): void {
   if (!ENABLE_BATTLE_DEBUG_DATASET) return;
   if (!session || challengeSession.snapshot().screen !== "battle") {
@@ -1168,7 +1202,8 @@ function updateBattleDebugDataset(): void {
   }
   const activeUid = localActiveUid();
   const focusUid = localFocusBorg()?.uid ?? null;
-  const rounded = (v: number): number => Math.round(v * 10) / 10;
+  const rounded = (v: number): number =>
+    Math.round(v * DEBUG_DATASET_DECIMALS) / DEBUG_DATASET_DECIMALS;
   ui.dataset["gfBattleDebug"] = JSON.stringify({
     activeUid,
     focusUid,
@@ -1199,6 +1234,9 @@ function updateBattleDebugDataset(): void {
   });
 }
 
+/** computeResults reports ratios as 0..1; the Results screen renders percentages. */
+const PERCENT_SCALE = 100;
+
 function resolveBattle(): void {
   if (!session || session.resolved) return;
   session.resolved = true;
@@ -1225,8 +1263,8 @@ function resolveBattle(): void {
     drops,
     stats: {
       attack: results.attack,
-      hitRatio: results.hitRatio * 100,
-      dodgeRatio: results.dodgeRatio * 100,
+      hitRatio: results.hitRatio * PERCENT_SCALE,
+      dodgeRatio: results.dodgeRatio * PERCENT_SCALE,
       enemyBorgsDefeated: results.enemyBorgsDefeated,
       enemyTotalCost: results.costWon,
       playerBorgsDefeated: results.playerBorgsDefeated,
@@ -1254,7 +1292,7 @@ function getsRowsForDrops(drops: readonly GetDrop[]): GetsRow[] {
 // camera, and the WebGL render. Sim stepping is handled by the interval below.
 const renderClock = new THREE.Clock();
 function tick(): void {
-  const dt = Math.min(renderClock.getDelta(), 0.05);
+  const dt = Math.min(renderClock.getDelta(), RENDER_MAX_DELTA_SECONDS);
   const screen = challengeSession.snapshot().screen;
   if (screen === "battle" || screen === "results") {
     battleScene.update(dt);
@@ -1314,11 +1352,17 @@ void loadInitialAssets()
 
 startRenderLoop({ frame: tick });
 
+/** Centered boot/asset-failure notice. Inline (not in styles.generated.css) because it has
+ *  to render before ensureStyles' sheet can be guaranteed applied. */
+const LOADING_MESSAGE_CSS =
+  "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);" +
+  "color:#bfeeff;font:600 16px 'Trebuchet MS',system-ui,sans-serif;" +
+  "text-align:center;text-shadow:0 1px 3px #000;";
+
 function showLoadingMessage(text: string): void {
   screenHost.clear();
   const box = document.createElement("div");
-  box.style.cssText =
-    "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#bfeeff;font:600 16px 'Trebuchet MS',system-ui,sans-serif;text-align:center;text-shadow:0 1px 3px #000;";
+  box.style.cssText = LOADING_MESSAGE_CSS;
   box.textContent = text;
   ui.appendChild(box);
 }

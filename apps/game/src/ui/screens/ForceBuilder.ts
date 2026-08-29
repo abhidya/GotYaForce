@@ -44,6 +44,7 @@ import { borgMiniPath } from "../assets.js";
 import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
+import { TINT_MENU_ALERT, TINT_MENU_YELLOW } from "../tints.js";
 
 const CAPTURE = new URL("../../../reference/captures/challenge-6-edit-force.png", import.meta.url).href;
 /** Native capture is 2560x1966; crop boxes below are in that pixel space. */
@@ -251,7 +252,7 @@ export function createForceBuilder(
       });
       cell.appendChild(img);
       const costTag = bitmapText("gf-cost-tag");
-      setBitmapText(costTag, String(borg.energy), { bold: true, scale: 1, tint: "#ffd21e" });
+      setBitmapText(costTag, String(borg.energy), { bold: true, scale: 1, tint: TINT_MENU_YELLOW });
       cell.appendChild(costTag);
       grid.appendChild(cell);
     });
@@ -329,7 +330,7 @@ export function createForceBuilder(
     const rem = remain();
     setBitmapText(totalVal, String(total), { bold: true, scale: 2 });
     setBitmapText(limitVal, String(opts.limit), { bold: true, scale: 2 });
-    if (rem < 0) setBitmapText(remainVal, String(rem), { bold: true, scale: 2, tint: "#ff5a4f" });
+    if (rem < 0) setBitmapText(remainVal, String(rem), { bold: true, scale: 2, tint: TINT_MENU_ALERT });
     else setBitmapText(remainVal, String(rem), { bold: true, scale: 2 });
     panel.classList.toggle("gf-over", rem < 0);
   }

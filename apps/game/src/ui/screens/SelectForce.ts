@@ -30,6 +30,7 @@ import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import { createGameAssetCatalog } from "../../assetCatalog.js";
 import { publicUrl } from "../../publicUrl.js";
 import type { ForceBorg } from "./ForceBuilder.js";
+import { TINT_MENU_COOL, TINT_MENU_WHITE, TINT_MENU_YELLOW } from "../tints.js";
 
 const SELECT_FORCE_LAYOUT = UI_SCENE_LAYOUTS.entry00.semantics.selectForce;
 const assetCatalog = createGameAssetCatalog();
@@ -187,7 +188,7 @@ export function createSelectForce(
   const entryScene = createUiSceneHost("gf-ui-scene gf-select-entry-scene");
   root.appendChild(entryScene);
   const title = bitmapText("gf-select-title-text");
-  setBitmapText(title, "SELECT A FORCE", { bold: true, scale: 3, tint: "#ffd21e" });
+  setBitmapText(title, "SELECT A FORCE", { bold: true, scale: 3, tint: TINT_MENU_YELLOW });
   root.appendChild(el("h1", { class: "gf-title gf-select-title", attrs: { "aria-label": "SELECT A FORCE" } }, [title]));
 
   const platformCrop = el(
@@ -286,7 +287,7 @@ export function createSelectForce(
         attrs: { src: borgMiniPath(leadId), alt: fallbackText },
       }) as HTMLImageElement;
       const fallback = bitmapText("gf-select-mini gf-select-mini-fallback");
-      setBitmapText(fallback, fallbackText, { bold: true, scale: 2, tint: "#ffd21e" });
+      setBitmapText(fallback, fallbackText, { bold: true, scale: 2, tint: TINT_MENU_YELLOW });
       fallback.style.display = "none";
       mini.addEventListener("error", () => {
         mini.style.display = "none";
@@ -297,18 +298,18 @@ export function createSelectForce(
 
     clear(costRoot);
     const costLabel = bitmapText("gf-select-cost-label");
-    setBitmapText(costLabel, "COST", { bold: true, scale: 2, tint: "#ffd21e" });
+    setBitmapText(costLabel, "COST", { bold: true, scale: 2, tint: TINT_MENU_YELLOW });
     const costValue = bitmapText("gf-select-cost-value");
-    setBitmapText(costValue, String(cost), { bold: true, scale: 4, tint: "#ffffff" });
+    setBitmapText(costValue, String(cost), { bold: true, scale: 4, tint: TINT_MENU_WHITE });
     costRoot.append(costLabel, costValue);
 
     clear(nameRoot);
     const noText = bitmapText("gf-select-no");
-    setBitmapText(noText, `NO. ${slot.no}`, { bold: true, scale: 2, tint: "#ffffff" });
+    setBitmapText(noText, `NO. ${slot.no}`, { bold: true, scale: 2, tint: TINT_MENU_WHITE });
     const forceNameText = bitmapText("gf-select-force-name");
-    setBitmapText(forceNameText, slot.name, { bold: true, scale: 3, tint: "#ffd21e" });
+    setBitmapText(forceNameText, slot.name, { bold: true, scale: 3, tint: TINT_MENU_YELLOW });
     const limitText = bitmapText("gf-select-limit");
-    setBitmapText(limitText, `${Math.max(0, opts.limit - cost)} REMAIN`, { bold: true, scale: 2, tint: "#dff6ff" });
+    setBitmapText(limitText, `${Math.max(0, opts.limit - cost)} REMAIN`, { bold: true, scale: 2, tint: TINT_MENU_COOL });
     nameRoot.append(noText, forceBanner(lead, leadBorg?.name ?? slot.name), forceNameText, limitText);
   }
 
@@ -353,7 +354,7 @@ function forceBanner(borgId: string, fallbackText: string): HTMLElement {
   const image = el("img", { class: "gf-select-banner", attrs: { src: borgBannerPath(borgId), alt: "" } }) as HTMLImageElement;
   image.addEventListener("error", () => {
     const fallback = bitmapText("gf-select-banner gf-select-banner-fallback");
-    setBitmapText(fallback, fallbackText, { bold: true, scale: 2, tint: "#ffd21e" });
+    setBitmapText(fallback, fallbackText, { bold: true, scale: 2, tint: TINT_MENU_YELLOW });
     image.replaceWith(fallback);
   });
   return image;

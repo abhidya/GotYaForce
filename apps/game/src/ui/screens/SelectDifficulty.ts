@@ -30,6 +30,7 @@ import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../cha
 import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
+import { TINT_MENU_YELLOW } from "../tints.js";
 
 const DIFFICULTY_LAYOUT = UI_SCENE_LAYOUTS.vsel00.semantics.difficulty;
 
@@ -86,7 +87,7 @@ export function createSelectDifficulty(
   const selectScene = createUiSceneHost("gf-ui-scene gf-vsel-real-scene gf-vsel-difficulty-scene");
   frame.appendChild(selectScene);
   const title = bitmapText("gf-vsel-title-text");
-  setBitmapText(title, "SELECT DIFFICULTY", { bold: true, scale: 3, tint: "#ffd21e" });
+  setBitmapText(title, "SELECT DIFFICULTY", { bold: true, scale: 3, tint: TINT_MENU_YELLOW });
   frame.appendChild(el("h1", { class: "gf-title gf-vsel-title", attrs: { "aria-label": "SELECT DIFFICULTY" } }, [title]));
 
   const row = el("div", { class: "gf-row gf-vsel-options" });
