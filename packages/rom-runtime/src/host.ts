@@ -37,6 +37,7 @@ import {
   INVOKE_MAX_ARGS,
   type WorkerInitMessage,
   type WorkerMessage,
+  type WorkerReadyMessage,
 } from "./protocol.js";
 
 export interface RomRuntimeHostOptions {
@@ -48,6 +49,14 @@ export interface RomRuntimeHostOptions {
   arena?: Array<{ addr: number; bytes: Uint8Array }>;
   /** GcMemory options (seam accessor bases; test affordance). */
   memory?: GcMemoryOptions;
+  /** Bind every non-miss imported function to the bridge through a
+   *  signature-accurate trampoline (composed.ts; H2's direct-call edge).
+   *  Requires the two trampoline frame-region fields below. */
+  bridgeAllImports?: boolean;
+  /** Base address of the trampolines' dispatch-frame region in shared memory. */
+  trampolineFrameBase?: number;
+  /** Nested trampoline frames the region holds. */
+  trampolineFrameSlots?: number;
 }
 
 interface InvokeJob {
@@ -74,17 +83,23 @@ export class RomRuntimeHost {
   #queueSignal: (() => void) | null = null;
   #closed = false;
   #pumpDone: Promise<void>;
+  #bridgedImports: WorkerReadyMessage["bridgedImports"];
+  #bootTimings: WorkerReadyMessage["timings"];
 
   private constructor(
     worker: Worker,
     ctrl: SharedArrayBuffer,
     wasmMemory: WebAssembly.Memory,
     exportNames: string[],
+    bridgedImports: WorkerReadyMessage["bridgedImports"],
+    bootTimings: WorkerReadyMessage["timings"],
     options: RomRuntimeHostOptions,
   ) {
+    this.#bootTimings = bootTimings ?? { memoryMs: 0, compileMs: 0, instantiateMs: 0, arenaMs: 0 };
     this.#worker = worker;
     this.#i32 = new Int32Array(ctrl);
     this.#exportNames = exportNames;
+    this.#bridgedImports = bridgedImports ?? [];
     this.#exportIndex = new Map(exportNames.map((name, index) => [name, index]));
     this.#nestingCap = options.nestingCap ?? DEFAULT_NESTING_CAP;
     this.#busyWaitTimeoutMs = options.busyWaitTimeoutMs ?? DEFAULT_BUSY_WAIT_TIMEOUT_MS;
@@ -105,7 +120,17 @@ export class RomRuntimeHost {
         const message = event.data;
         if (message.type === "ready") {
           worker.removeEventListener("message", onMessage);
-          resolve(new RomRuntimeHost(worker, ctrl, message.memory, message.exports, options));
+          resolve(
+            new RomRuntimeHost(
+              worker,
+              ctrl,
+              message.memory,
+              message.exports,
+              message.bridgedImports,
+              message.timings,
+              options,
+            ),
+          );
         } else if (message.type === "fatal") {
           worker.removeEventListener("message", onMessage);
           reject(new Error(`rom-runtime worker failed to start: ${message.error}`));
@@ -120,6 +145,9 @@ export class RomRuntimeHost {
         wasmBytes,
         ctrl,
         arena: options.arena ?? [],
+        bridgeAllImports: options.bridgeAllImports ?? false,
+        trampolineFrameBase: options.trampolineFrameBase,
+        trampolineFrameSlots: options.trampolineFrameSlots,
       };
       worker.postMessage(init, [wasmBytes]);
     });
@@ -128,6 +156,18 @@ export class RomRuntimeHost {
   /** Function export names the worker's module offers (invoke targets). */
   get exportNames(): readonly string[] {
     return this.#exportNames;
+  }
+
+  /** The out-of-window symbols bound to the bridge (the DECLARED boundary).
+   *  Empty unless the host was started with `bridgeAllImports`. */
+  get bridgedImports(): readonly WorkerReadyMessage["bridgedImports"][number][] {
+    return this.#bridgedImports;
+  }
+
+  /** Worker-side boot costs in ms — `memoryMs` is the composed module's ~2GB
+   *  shared-memory allocation, which dominates the boot. */
+  get bootTimings(): WorkerReadyMessage["timings"] {
+    return this.#bootTimings;
   }
 
   registerAdapter(adapter: BridgedCalleeAdapter): void {
@@ -436,6 +476,15 @@ export function exposeBridgeLedger(host: RomRuntimeHost): void {
   w.__gf = w.__gf ?? {};
   w.__gf["bridgeLedger"] = () => host.ledger.snapshot();
   w.__gf["bridgeAdapters"] = () => host.adapters.list();
+  // The DECLARED out-of-window boundary: every symbol that CAN cross. The
+  // adapter roster above is the subset the ledger has proved is HIT (I1).
+  w.__gf["bridgeImports"] = () =>
+    host.bridgedImports.map((b) => ({
+      symbol: b.symbol,
+      gcAddr: (b.gcAddr >>> 0).toString(16).padStart(8, "0"),
+      source: b.source,
+      signature: b.signature,
+    }));
 }
 
 export { FrameValueClass };

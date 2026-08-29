@@ -1,0 +1,649 @@
+{
+  "schema": "pilot-trace-delta-fixture-1",
+  "symbol": "zz_006de10_",
+  "gcAddr": 2147933712,
+  "evidence": "SYNTHETIC PILOT FIXTURE - NOT a Dolphin DTM capture. The write set below is DECLARED by the composed-module dispatch pilot (apps/game/src/rom/composedPilot.ts), not recorded from hardware, and carries no behavioural claim about zz_006de10_. It exists to exercise the TraceDeltaAdapter class end to end: recorded per-call write sets applied in call order, with exhaustion past the last record raising a declared servicing error. Design authority: docs/playable-port-design.md V5 I1; scope and gap statement: docs/composed-pilot.md.",
+  "note": "One record per driven pilot frame. Each record writes a DIFFERENT byte at 0x80501160 so the adapter's lockstep cursor is observable: driven frame k must find record k's byte, and a cursor slip shows up as a frame-boundary state mismatch instead of a silent pass. Driving more than 64 frames exhausts the record and is a declared servicing error by design.",
+  "calls": [
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            109
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            110
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            111
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            112
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            113
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            114
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            115
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            116
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            117
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            118
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            119
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            120
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            121
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            122
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            123
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            124
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            125
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            126
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            128
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            129
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            130
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            131
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            132
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            133
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            134
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            135
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            136
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            137
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            138
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            139
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            140
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            141
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            142
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            143
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            144
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            145
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            146
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            147
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            148
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            149
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            150
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            151
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            152
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            153
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            154
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            155
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            156
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            157
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            158
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            159
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            160
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            161
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            162
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            163
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            164
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            165
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            166
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            167
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            168
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            169
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            170
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            171
+          ]
+        }
+      ]
+    },
+    {
+      "writes": [
+        {
+          "addr": 2152730976,
+          "bytes": [
+            172
+          ]
+        }
+      ]
+    }
+  ]
+}

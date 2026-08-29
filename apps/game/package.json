@@ -21,7 +21,8 @@
     "@gf/core": "workspace:*",
     "@gf/formats": "workspace:*",
     "@gf/missions": "workspace:*",
-    "@gf/render": "workspace:*"
+    "@gf/render": "workspace:*",
+    "@gf/rom-runtime": "workspace:*"
   },
   "devDependencies": {
     "@types/three": "^0.169.0",
