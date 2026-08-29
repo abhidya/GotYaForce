@@ -50,6 +50,11 @@ misread this project's status.
 Track 2's long-term goal is to replace Track 1 subsystem by subsystem with byte-exact
 recompiled ROM code. It has done that exactly once so far.
 
+Known defects and open findings for both tracks live in
+[`docs/audits/`](docs/audits/README.md) — a defect ledger for the game app, the port
+pipeline's integrity findings, data-provenance gaps, and what still blocks a public
+release. Machine-side operational knowledge is in [`docs/ops/`](docs/ops/).
+
 ---
 
 ## Track 1 — what is working

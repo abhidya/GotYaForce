@@ -45,13 +45,47 @@ test("missing identity fails closed", async () => {
   assert.ok(verdict.issues.some((issue) => issue.code === "missing_identity"));
 });
 
-test("tracked pilot results are superseded against rebuilt Wasm", async () => {
+const ISSUE_CODES = new Set([
+  "missing_identity",
+  "identity_unavailable",
+  "identity_mismatch",
+  "invalid_evidence",
+  "nonpass_evidence",
+]);
+
+// The two tracked pilot results are provenance, not coverage. This asserts the
+// invariant -- a committed result file never counts on the strength of what it
+// records -- and deliberately does NOT pin *which* identity is stale.
+//
+// The previous version asserted `identity_mismatch` on identity `wasm`
+// specifically. That is a supersession *reason*, not the invariant: the port
+// driver legitimately rebuilds one of these units and refreshes its result, at
+// which point `wasm` agrees again and the drift moves to `spec`, `corpus` or
+// `harness_revision` -- or the refusal moves to `nonpass_evidence` outright.
+// CI then went red on a routine driver commit rather than on a defect.
+//
+// Non-vacuity: this cannot pass by the validator simply refusing everything --
+// "clean damage-core replay is current" below asserts the same validator
+// returns {valid:true,status:"current"} for freshly generated evidence.
+test("tracked pilot results never count as current coverage", async () => {
   for (const unit of ["auto-c0034-018", "auto-c0035-002"]) {
     const resultPath = path.join(root, "research", "decomp", "data", "oracle-results", `${unit}.json`);
-    const verdict = await validateOracleResult(readJson(resultPath), { root });
+    const result = readJson(resultPath);
+
+    // Guard the premise rather than the reason. These are pilot units whose
+    // recorded evidence is non-passing, so no amount of identity freshness may
+    // promote them. If the driver ever lands a genuine `pass` here, this fires
+    // first and says so, instead of failing on an opaque reason mismatch.
+    assert.notEqual(result.verdict, "pass", `${unit}: tracked pilot result now records a pass; revisit this test`);
+
+    const verdict = await validateOracleResult(result, { root });
     assert.equal(verdict.valid, false, unit);
-    assert.equal(verdict.status, "superseded", unit);
-    assert.ok(verdict.issues.some((issue) => issue.code === "identity_mismatch" && issue.identity === "wasm"), unit);
+    assert.notEqual(verdict.status, "current", unit);
+    assert.ok(verdict.issues.length > 0, `${unit}: a refusal must name at least one reason`);
+    for (const issue of verdict.issues) {
+      assert.ok(ISSUE_CODES.has(issue.code), `${unit}: unknown issue code ${issue.code}`);
+      assert.equal(typeof issue.identity, "string", `${unit}: issue ${issue.code} must name an identity`);
+    }
   }
 });
 
