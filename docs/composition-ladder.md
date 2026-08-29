@@ -77,3 +77,157 @@ the rung its one contested symbol: ratio 1/38 against rung 0's 0/40. The
 rate rose, so per the E1 budget the ladder is STOPPED at rung 1 pending
 ABI unification (the known assembly-ABI seam work). See the ledger for
 the full record.
+
+## Re-execution (2026-08-29) and the `zz_0089100_` resolution
+
+The eligible pool is unchanged since 2026-08-26 (83 units; newest
+`generated_at` still `2026-08-26T07:30`), so the rung windows are the same.
+Rung 0 reproduced exactly (pass, 40 thunks, 0 conflicts). Rung 1 now refuses
+DECIDABLY -- the canonicalizer amendment landed as OGhidra `d0a0142` turns
+the old undecidable `canonical_header_ambiguous` into:
+
+    owner_variant_abi_incompatible: zz_0089100_ is declared
+    void zz_0089100_(int, uint, int); in auto-c0053-013 but
+    int zz_0089100_(int, uint, int); in auto-c0025-002;
+    the two declarations cannot be unified
+
+### Which side is wrong: the ROM says the registry is right
+
+PPC has no `void`, so Ghidra's `void` is an inference and a caller-side
+`uVarN = f(...)` is an inference about r3 liveness. Both are decidable from
+the corpus, and every line of evidence points the same way:
+
+1. **The owner's own body.** `0x80089100` (`chunk_0013.c:65`) decompiles as
+   `void zz_0089100_(int, uint, int)` and every one of its exits is a bare
+   `return;`. It computes no result: it is an intrusive doubly-linked-list
+   bucket insert into the `DAT_80436268/70/78/80/88/90` and
+   `DAT_803c6f3c/54` head/tail arrays, selected by the `0x40`/`0x20`/`0x10`
+   bits of `param_2` and the head-vs-tail flag `param_3`.
+2. **The corpus calls it both ways.** 197 call sites assign a "result", 172
+   call it bare -- `chunk_0025.c` itself does both (`:467` bare, `:717`
+   assigned). A genuine value-returning API is not used both ways.
+3. **The artifact is systematic, not specific to this symbol.** The identical
+   `uVarN = <void function>(...)` shape occurs on functions Ghidra itself
+   declares `void` at their definition site, e.g. `zz_0007030_`
+   (`chunk_0000.c:1548`). It is Ghidra threading the r3/r4 register pair
+   across a call inside the `undefined8 param_1 + double param_2..param_8`
+   HSD register model, not a return value.
+4. **The value goes nowhere.** In `FUN_800e8dac` the "result" flows only into
+   the first-parameter slots of `zz_0007030_` / `zz_0007c54_`, which never
+   read `param_1`.
+
+Verdict: the oracle registry is RIGHT, `auto-c0025-002` was consuming
+register residue, and the fix belongs in the corpus.
+
+### The fix, and why the fork existed at all
+
+`auto-c0025-002`'s per-unit header seed already carried the correct
+`extern void zz_0089100_(...)` owner prototype. The verbatim `.c` could
+therefore not compile (`void value not ignored`), so the compile-fix model
+was forced to redeclare the symbol as `undefined8` to make its own unit
+build. The gate then correctly contested that redeclaration. **The corpus
+defect is the root cause and the ABI fork is its symptom** -- which is why
+re-syncing the seed alone could never have fixed it.
+
+Corrected in `chunk_0025.c` per the manual-corpus-correction convention
+(same-line replacement, inline provenance comment, line count unchanged;
+of the 150 queue-pinned extraction blocks in that chunk only
+`auto-c0025-002`'s 696-749 block changes sha). Two symbols, same class:
+`zz_0089100_` at `:717` and `zz_0007030_` at `:734` / `:740`, with `uVar6`
+initialised to a deterministic `0` at `:712` in place of undefined register
+content.
+
+**Preflight (corpus-correction-loop step 2):** with only the corrected chunk
+and the UNMODIFIED owner prototypes, `auto-c0025-002` rebuilds through the
+production `emcc_build_unit` invocation and compiles first try -- no model
+call, no header edit. Projected onto the rung-1 window its declaration goes
+`undefined8 zz_0089100_(int,uint,int);` -> `void zz_0089100_(int,uint,int);`
+and the window drops from 1 declaration disagreement to **0**.
+
+The correction is committed on branch `corpus/zz-0089100-residue` (not
+pushed, not merged). It is inert until it is on the checkout the driver
+reads AND `auto-c0025-002`'s compile-only verdict is revoked so the unit
+rebuilds -- the ordering rule in `research/decomp/corpus-correction-loop.md`
+step 3. Until then the staged artifact still carries the fork, so the rung
+ledger below records the un-corrected reality.
+
+## Ceiling and the ranked blockers (measured 2026-08-29)
+
+A window refuses when two units in it declare the same `zz_*`/`FUN_*` symbol
+incompatibly. That is measurable statically from the staged `gnt4_shim.h`
+files, and the measurement reproduces the gate exactly at N=5 (0
+disagreements, rung 0 passes) and N=10 (exactly 1 -- `zz_0089100_`, which is
+exactly what rung 1 refuses on):
+
+| N | declaration disagreements | void/value forks |
+|---:|---:|---:|
+| 5 | 0 | 0 |
+| 10 | 1 | 1 |
+| 20 | 23 | 1 |
+| 40 | 44 | 4 |
+| 80 | 59 | 11 |
+| 83 (all eligible) | 63 | 11 |
+
+Ceiling today, on live state: **rung 0, N=5.** With the correction merged and
+`auto-c0025-002` rebuilt: **rung 1, N=10** (0 disagreements -> 0 contested ->
+ratio 0.0, which meets rung 0's 0.0 budget). Rung 2 (N=20) is blocked by 23
+disagreeing symbols and is the next real wall.
+
+Across the whole eligible pool the dominant class is one defect repeated:
+the corpus assigns the r3 residue of a void ROM procedure, so every
+consuming unit is forced to redeclare that procedure as value-returning.
+Every void/value fork symbol in the pool is a genuine void ROM procedure
+with zero return-with-value statements in its own decompiled body:
+
+| symbol | address | enters window at N | units carrying the value fork |
+|---|---|---:|---:|
+| `zz_006d144_` | `0x8006d144` | 8 | 11 |
+| `zz_0089100_` | `0x80089100` | 10 | 4 |
+| `zz_0007030_` | `0x80007030` | 10 | 5 |
+| `zz_006d0dc_` | `0x8006d0dc` | 13 | 9 |
+| `zz_00679d0_` | `0x800679d0` | 21 | 3 |
+| `zz_0088aa0_` | `0x80088aa0` | 21 | 7 |
+| `zz_00456a0_` | `0x800456a0` | 24 | 1 |
+| `zz_0006fb4_` | `0x80006fb4` | 49 | 1 |
+| `zz_0048288_` | `0x80048288` | 49 | 1 |
+| `zz_0085e00_` | `0x80085e00` | 49 | 1 |
+| `zz_008aff0_` | `0x8008aff0` | 49 | 1 |
+| `zz_0007cac_` | `0x80007cac` | 54 | 1 |
+| `FUN_800669d0` | `0x800669d0` | 72 | 1 |
+
+(`zz_004beb8_` at `0x8004beb8` is the same void-procedure class and the
+largest by unit count -- 30 of the 83 eligible units carry a declaration
+that diverges from its `void` owner prototype -- but the divergences in the
+N<=83 windows are arity/unprototyped rather than void-vs-value, so it is
+listed here as a sweep target rather than a window fork.)
+
+`auto-c0053-003`'s own header records the mechanism in the model's words:
+
+    /* Disagreement with the advisory registry: zz_006d144_ is assigned to an
+     * int in this unit's call site (`iVar4 = zz_006d144_(param_1,0xc0)`), so
+     * it MUST return ... */
+    extern undefined4 zz_006d144_(int param_1,uint param_2);
+    /* extern void zz_006d144_(int param_1, int param_2);  -- rejected: this
+     * unit assigns its result; must return undefined4. */
+
+A second, larger class shows up from N=20 on: unprototyped declarations
+(`int zz_004beb8_();`) against a real owner prototype. `_parameters_are_abi_
+equivalent` refuses unknown spellings, so those are contests too, and they
+account for most of the 23 disagreements at N=20.
+
+Scaling the ladder is therefore not a canonicalizer problem: it is a corpus
+sweep. Each fork symbol needs the same treatment `zz_0089100_` just received
+(prove the ROM body computes no result, drop the residue assignment at every
+pinned call site, revoke and rebuild the affected units). That sweep is an
+owner decision, not a unilateral one -- correcting all 197 `zz_0089100_`
+assignment sites alone would invalidate pinned blocks across dozens of
+chunks and require a revocation per affected green unit.
+
+### Cost note
+
+Canonicalization cost scales steeply with the number of distinct owner
+symbols in the bundle: rung 0 (N=5) completes in ~3 minutes, rung 2 (N=20)
+was still inside the owner corpus walk after 3 hours. Rungs 3-4 (N=40/80)
+are not runnable in a single session as the runner stands; the static
+disagreement measurement above is the practical instrument for planning
+them.
