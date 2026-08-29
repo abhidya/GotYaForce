@@ -713,3 +713,17 @@ if (process.env.GF_SMOKE_ROM_RUNTIME === "1") {
   await (await import("./smoke-rom-runtime-phase.mjs")).runRomRuntimePhase();
 }
 // >>> END ROM-RUNTIME BRIDGE PHASE ===========================================
+
+// ============================================================================
+// >>> COMPOSED-MODULE DISPATCH PILOT PHASE (opt-in; separate, self-contained —
+// keep at end of file). Drives the REAL assembly-gate rung-0 module inside the
+// real game page: 2GB imported shared memory under COI, the live 40-thunk
+// dispatch table, the table-miss and direct-import bridge edges, the I2
+// reentrant case, and the per-frame ledger. NOT control inversion — see
+// docs/composed-pilot.md. Opt in with GF_SMOKE_COMPOSED_PILOT=1 (or run
+// scripts/smoke-composed-pilot-phase.mjs standalone).
+// ============================================================================
+if (process.env.GF_SMOKE_COMPOSED_PILOT === "1") {
+  await (await import("./smoke-composed-pilot-phase.mjs")).runComposedPilotPhase();
+}
+// >>> END COMPOSED-MODULE DISPATCH PILOT PHASE ===============================

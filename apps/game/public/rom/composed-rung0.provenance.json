@@ -1,0 +1,416 @@
+{
+  "schema": "composed-module-provenance-1",
+  "artifact": "composed-rung0.threads.wasm",
+  "design": "docs/playable-port-design.md V4 H2/H3 + V5 I1/I2; docs/composition-ladder.md rung 0",
+  "pilot": "docs/composed-pilot.md",
+  "ladder": {
+    "rung": 0,
+    "n": 5,
+    "units": [
+      "auto-c0054-000",
+      "auto-c0054-001",
+      "auto-c0054-002",
+      "auto-c0054-003",
+      "auto-c0053-013"
+    ],
+    "stage": "pass",
+    "passed": true,
+    "detail": "5 unit(s) linked and instantiated together",
+    "checked_at": "2026-08-29T15:19:11.716162Z",
+    "conflicts": [],
+    "ledger": "research/decomp/data/composition-ladder.json (rung 0)",
+    "regenerated_by": "scripts/composition_ladder.py init --scratch <dir> && scripts/composition_ladder.py rung --scratch <dir> --tag rung0 --units auto-c0054-000,auto-c0054-001,auto-c0054-002,auto-c0054-003,auto-c0053-013"
+  },
+  "companion": {
+    "frame_abi_version": 1,
+    "companion_sha256": "5f07b283ec20c5be3f74eceb96188f7c7f47b92c954108aebda3eae77d96ef7a",
+    "dispatch_export": "__gf_dispatch",
+    "miss_import": "__gf_dispatch_miss",
+    "arity_export": "__gf_dispatch_arity_mismatches",
+    "table_size": 40
+  },
+  "link": {
+    "gate_flags": "-O1 -fno-strict-aliasing --no-entry -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sINITIAL_MEMORY=2155479040 -sALLOW_MEMORY_GROWTH=0",
+    "threads_flags_added": "-sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1",
+    "toolchain": "research/tools/emsdk (pinned emcc, ce75e06884093bcefb86a6b8fd56a5d62a4cc245)",
+    "base_proof": {
+      "procedure": "docs/threads-relink-reverify.md step 1",
+      "gate_assembly_sha256": "3d80e6da10cb0b3ad95ac77f1cddd8bd87e937cfd2613eb090da66866a26e6cd",
+      "reproduction_sha256": "3d80e6da10cb0b3ad95ac77f1cddd8bd87e937cfd2613eb090da66866a26e6cd",
+      "byte_identical": true
+    },
+    "threads_sha256": "269ae98b0f4bc170294f4b59f20dc97dd8f4a3beb6dbd57b232a1351c1f3b5e1",
+    "verification_status": "COMPILE/LINK ONLY. docs/threads-relink-reverify.md suspends every unit's oracle_green/boundary_green status across a threads relink until its full corpus replays byte-equal against the relinked artifact. None of the five rung-0 units has had that pass, and the composed module has no corpus of its own. This artifact carries NO behavioural claim."
+  },
+  "memory": {
+    "imported": true,
+    "shared": true,
+    "initial_pages": 32890,
+    "maximum_pages": 32890,
+    "bytes": 2155479040,
+    "note": "The gate links a fixed 0x807A0000-byte flat memory so the GC arena sits at ORIGINAL addresses (0x80000000+) as linear-memory offsets. The size is not a tuning knob: anything below 0x80000000 breaks the flat-arena address model."
+  },
+  "dispatch_table": [
+    {
+      "symbol": "zz_01b98ec_",
+      "unit": "auto-c0053-013",
+      "gc_address": "801b98ec",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": [
+        "i32"
+      ]
+    },
+    {
+      "symbol": "FUN_801b9ab0",
+      "unit": "auto-c0053-013",
+      "gc_address": "801b9ab0",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": [
+        "i32"
+      ]
+    },
+    {
+      "symbol": "FUN_801b9abc",
+      "unit": "auto-c0053-013",
+      "gc_address": "801b9abc",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": [
+        "i64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "i32"
+      ]
+    },
+    {
+      "symbol": "FUN_801b9adc",
+      "unit": "auto-c0053-013",
+      "gc_address": "801b9adc",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": [
+        "i64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ]
+    },
+    {
+      "symbol": "zz_01b9b1c_",
+      "unit": "auto-c0053-013",
+      "gc_address": "801b9b1c",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": [
+        "i32"
+      ]
+    },
+    {
+      "symbol": "zz_01b9b68_",
+      "unit": "auto-c0053-013",
+      "gc_address": "801b9b68",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": [
+        "i32"
+      ]
+    },
+    {
+      "symbol": "zz_01b9be0_",
+      "unit": "auto-c0053-013",
+      "gc_address": "801b9be0",
+      "address_source": "marker",
+      "return_class": "i32",
+      "param_classes": [
+        "i32",
+        "i32"
+      ]
+    },
+    {
+      "symbol": "zz_01b9df0_",
+      "unit": "auto-c0053-013",
+      "gc_address": "801b9df0",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": [
+        "i32",
+        "i32"
+      ]
+    },
+    {
+      "symbol": "FUN_801bbac0",
+      "unit": "auto-c0054-000",
+      "gc_address": "801bbac0",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bbaf8",
+      "unit": "auto-c0054-000",
+      "gc_address": "801bbaf8",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bbfdc",
+      "unit": "auto-c0054-000",
+      "gc_address": "801bbfdc",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bc018",
+      "unit": "auto-c0054-000",
+      "gc_address": "801bc018",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bc0d0",
+      "unit": "auto-c0054-000",
+      "gc_address": "801bc0d0",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bc324",
+      "unit": "auto-c0054-000",
+      "gc_address": "801bc324",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bc5b4",
+      "unit": "auto-c0054-000",
+      "gc_address": "801bc5b4",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bc608",
+      "unit": "auto-c0054-000",
+      "gc_address": "801bc608",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bc644",
+      "unit": "auto-c0054-001",
+      "gc_address": "801bc644",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bc738",
+      "unit": "auto-c0054-001",
+      "gc_address": "801bc738",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bc770",
+      "unit": "auto-c0054-001",
+      "gc_address": "801bc770",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bcb80",
+      "unit": "auto-c0054-001",
+      "gc_address": "801bcb80",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bcbbc",
+      "unit": "auto-c0054-001",
+      "gc_address": "801bcbbc",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bcc74",
+      "unit": "auto-c0054-001",
+      "gc_address": "801bcc74",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bcec8",
+      "unit": "auto-c0054-001",
+      "gc_address": "801bcec8",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bd158",
+      "unit": "auto-c0054-001",
+      "gc_address": "801bd158",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bd194",
+      "unit": "auto-c0054-002",
+      "gc_address": "801bd194",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bd248",
+      "unit": "auto-c0054-002",
+      "gc_address": "801bd248",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bd468",
+      "unit": "auto-c0054-002",
+      "gc_address": "801bd468",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bd684",
+      "unit": "auto-c0054-002",
+      "gc_address": "801bd684",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bd724",
+      "unit": "auto-c0054-002",
+      "gc_address": "801bd724",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bd760",
+      "unit": "auto-c0054-002",
+      "gc_address": "801bd760",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bd854",
+      "unit": "auto-c0054-002",
+      "gc_address": "801bd854",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bd88c",
+      "unit": "auto-c0054-002",
+      "gc_address": "801bd88c",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bdca0",
+      "unit": "auto-c0054-003",
+      "gc_address": "801bdca0",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bdcdc",
+      "unit": "auto-c0054-003",
+      "gc_address": "801bdcdc",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bdd90",
+      "unit": "auto-c0054-003",
+      "gc_address": "801bdd90",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801bdfe0",
+      "unit": "auto-c0054-003",
+      "gc_address": "801bdfe0",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801be26c",
+      "unit": "auto-c0054-003",
+      "gc_address": "801be26c",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801be2a8",
+      "unit": "auto-c0054-003",
+      "gc_address": "801be2a8",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801be35c",
+      "unit": "auto-c0054-003",
+      "gc_address": "801be35c",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    },
+    {
+      "symbol": "FUN_801be4f0",
+      "unit": "auto-c0054-003",
+      "gc_address": "801be4f0",
+      "address_source": "marker",
+      "return_class": "void",
+      "param_classes": []
+    }
+  ]
+}

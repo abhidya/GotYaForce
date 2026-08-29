@@ -24,6 +24,22 @@
 // =============================================================================
 
 import {
+  type BridgedImportBinding,
+  type MemoryLimits,
+  WasmType,
+  planBridgedImports,
+  readModuleShape,
+  wasmTypeName,
+} from "./composed.js";
+import {
+  FRAME_ARGS_OFFSET,
+  FRAME_ARG_COUNT_OFFSET,
+  FRAME_RET_CLASS_OFFSET,
+  FRAME_RET_OFFSET,
+  FRAME_SIZE,
+  FRAME_SLOT_SIZE,
+} from "./frame.js";
+import {
   BridgeCallError,
   BridgeState,
   BridgeStatus,
@@ -33,12 +49,6 @@ import {
   type WorkerReadyMessage,
 } from "./protocol.js";
 
-interface MemoryLimits {
-  initial: number;
-  maximum: number | undefined;
-  shared: boolean;
-}
-
 /**
  * Read the module's imported env.memory limits from the binary import
  * section (wasm core spec §5.5.5/§5.5.7: section id 2; limits flags bit 0x1 =
@@ -47,60 +57,99 @@ interface MemoryLimits {
  * worker bundle stays self-contained.
  */
 export function importedMemoryLimits(wasmBytes: ArrayBuffer): MemoryLimits | null {
-  const u8 = new Uint8Array(wasmBytes);
-  let p = 8; // magic + version
-  const leb = (): number => {
-    let r = 0;
-    let s = 0;
-    let b: number;
-    do {
-      b = u8[p++] ?? 0;
-      r |= (b & 0x7f) << s;
-      s += 7;
-    } while (b & 0x80);
-    return r >>> 0;
-  };
-  const name = (): string => {
-    const n = leb();
-    const v = new TextDecoder().decode(u8.subarray(p, p + n));
-    p += n;
-    return v;
-  };
-  const limits = (): MemoryLimits => {
-    const flags = leb();
-    const initial = leb();
-    const maximum = flags & 0x1 ? leb() : undefined;
-    return { initial, maximum, shared: (flags & 0x2) !== 0 };
-  };
-  while (p < u8.length) {
-    const id = u8[p++] ?? 0;
-    const size = leb();
-    const end = p + size;
-    if (id !== 2) {
-      p = end;
-      continue;
-    }
-    const count = leb();
-    for (let i = 0; i < count; i++) {
-      const mod = name();
-      const field = name();
-      const kind = u8[p++] ?? 0;
-      if (kind === 0x00) leb();
-      else if (kind === 0x01) {
-        p++;
-        limits();
-      } else if (kind === 0x02) {
-        const lim = limits();
-        if (mod === "env" && field === "memory") return lim;
-      } else if (kind === 0x03) p += 2;
-      else throw new Error(`unknown import kind 0x${kind.toString(16)} in wasm import section`);
-    }
-    return null; // a module has at most one import section
-  }
-  return null;
+  return readModuleShape(wasmBytes).memory;
 }
 
 type WasmFunction = (...args: number[]) => number | void;
+
+/**
+ * Per-import bridge trampolines (composed.ts, H2 direct-call edge).
+ *
+ * Each trampoline has the import's TRUE wasm signature. It claims a dispatch
+ * frame from a small depth-indexed region of the shared linear memory, writes
+ * the caller's arguments into the frame's 8-byte slots in parameter order,
+ * calls the SAME bridge stub the miss import uses, then reads the return out
+ * of the frame's authoritative ret slot at its declared wasm type and hands
+ * it back to wasm.
+ *
+ * NOTE the deliberate difference from the bridge's i32 wire result: here the
+ * wasm result type is KNOWN, so an i64 return is read as a full i64 from the
+ * ret slot rather than through frame.retPpcR3View()'s r3 word. The r3 view
+ * exists for the uniform-ABI thunk path, where the true width is not known
+ * at the call site; it must not be applied to a typed direct call.
+ *
+ * Frames nest: while a bridged call is parked, the worker may run an INVOKE
+ * that calls another out-of-window symbol. `depth` gives each nesting level
+ * its own frame; exhausting the region is a loud error, never reuse.
+ */
+function makeBridgeTrampolines(
+  bindings: BridgedImportBinding[],
+  memory: WebAssembly.Memory,
+  bridgeCall: (gcAddr: number, argptr: number) => number,
+  frameBase: number,
+  frameSlots: number,
+): Record<string, (...args: unknown[]) => unknown> {
+  const dv = new DataView(memory.buffer as ArrayBuffer);
+  let depth = 0;
+  const shims: Record<string, (...args: unknown[]) => unknown> = {};
+  for (const binding of bindings) {
+    const { gcAddr, symbol, params, results } = binding;
+    const resultType = results[0];
+    shims[symbol] = (...args: unknown[]): unknown => {
+      if (depth >= frameSlots) {
+        throw new BridgeCallError(
+          BridgeStatus.NESTING_OVERFLOW,
+          `bridged import ${symbol}: trampoline frame region exhausted at depth ${depth} (${frameSlots} slots)`,
+        );
+      }
+      const fp = frameBase + depth * FRAME_SIZE;
+      depth += 1;
+      try {
+        dv.setUint32(fp + FRAME_ARG_COUNT_OFFSET, params.length, true);
+        dv.setUint32(fp + FRAME_RET_CLASS_OFFSET, 0, true);
+        dv.setBigUint64(fp + FRAME_RET_OFFSET, 0n, true);
+        for (let i = 0; i < params.length; i++) {
+          const at = fp + FRAME_ARGS_OFFSET + i * FRAME_SLOT_SIZE;
+          dv.setBigUint64(at, 0n, true);
+          switch (params[i]) {
+            case WasmType.I32:
+              dv.setInt32(at, (args[i] as number) | 0, true);
+              break;
+            case WasmType.I64:
+              dv.setBigInt64(at, (args[i] as bigint) ?? 0n, true);
+              break;
+            case WasmType.F32:
+              dv.setFloat32(at, (args[i] as number) ?? 0, true);
+              break;
+            case WasmType.F64:
+              dv.setFloat64(at, (args[i] as number) ?? 0, true);
+              break;
+            default:
+              throw new Error(`bridged import ${symbol}: unsupported param type ${wasmTypeName(params[i] ?? -1)}`);
+          }
+        }
+        bridgeCall(gcAddr, fp);
+        switch (resultType) {
+          case undefined:
+            return undefined;
+          case WasmType.I32:
+            return dv.getInt32(fp + FRAME_RET_OFFSET, true);
+          case WasmType.I64:
+            return dv.getBigInt64(fp + FRAME_RET_OFFSET, true);
+          case WasmType.F32:
+            return dv.getFloat32(fp + FRAME_RET_OFFSET, true);
+          case WasmType.F64:
+            return dv.getFloat64(fp + FRAME_RET_OFFSET, true);
+          default:
+            throw new Error(`bridged import ${symbol}: unsupported result type ${wasmTypeName(resultType)}`);
+        }
+      } finally {
+        depth -= 1;
+      }
+    };
+  }
+  return shims;
+}
 
 class WorkerRuntime {
   #i32: Int32Array;
@@ -238,27 +287,61 @@ async function bootWorker(scope: DedicatedWorkerGlobalScope, init: WorkerInitMes
   try {
     const runtime = new WorkerRuntime(init.ctrl);
 
-    const limits = importedMemoryLimits(init.wasmBytes);
+    const shape = readModuleShape(init.wasmBytes);
+    const limits = shape.memory;
     if (!limits) {
       throw new Error("module does not import env.memory — the composed runtime requires a threads-target (shared imported memory) build");
     }
     if (!limits.shared) {
       throw new Error("module's env.memory import is not shared — rebuild with -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1");
     }
+    // The composed module's memory is the gate's fixed ~2GB flat arena. Time
+    // it separately: it dominates boot, and a host that cannot afford it must
+    // fail here with a clear cost attached, not somewhere downstream.
+    const tMemory = performance.now();
     const memory = new WebAssembly.Memory({
       initial: limits.initial,
       // Shared memories require a maximum; the composed arena is fixed-size.
       maximum: limits.maximum ?? limits.initial,
       shared: true,
     });
+    const tCompile = performance.now();
 
     const module = await WebAssembly.compile(init.wasmBytes);
+    const tInstantiate = performance.now();
     const shims: Record<string, unknown> = {
       memory,
       // H3: a table miss is a bridge call, never a trap — bound straight to
       // the Atomics RPC bridge.
       __gf_dispatch_miss: runtime.bridgeCall,
     };
+
+    // H2 direct-call edge (opt-in): bind every OTHER imported function to the
+    // same bridge through a signature-accurate trampoline, so a linked
+    // function calling an unlinked callee by name crosses the declared bridge
+    // instead of hitting the unshimmed-import error below.
+    let bridgedImports: WorkerReadyMessage["bridgedImports"] = [];
+    if (init.bridgeAllImports) {
+      const frameBase = init.trampolineFrameBase;
+      const frameSlots = init.trampolineFrameSlots ?? 0;
+      if (frameBase === undefined || frameSlots <= 0) {
+        throw new Error("bridgeAllImports requires trampolineFrameBase and a positive trampolineFrameSlots");
+      }
+      const memoryBytes = limits.initial * 65536;
+      if (frameBase < 0 || frameBase + frameSlots * FRAME_SIZE > memoryBytes) {
+        throw new Error(
+          `trampoline frame region 0x${frameBase.toString(16)}+${frameSlots * FRAME_SIZE} lies outside the module's ${memoryBytes}-byte memory`,
+        );
+      }
+      const bindings = planBridgedImports(shape);
+      Object.assign(shims, makeBridgeTrampolines(bindings, memory, runtime.bridgeCall, frameBase, frameSlots));
+      bridgedImports = bindings.map((b) => ({
+        symbol: b.symbol,
+        gcAddr: b.gcAddr,
+        source: b.source,
+        signature: `(${b.params.map(wasmTypeName).join(",")}) -> ${b.results.map(wasmTypeName).join(",") || "void"}`,
+      }));
+    }
     const instance = await WebAssembly.instantiate(module, {
       env: new Proxy(shims, {
         get: (t, k) =>
@@ -271,6 +354,8 @@ async function bootWorker(scope: DedicatedWorkerGlobalScope, init: WorkerInitMes
       }) as WebAssembly.ModuleImports,
     });
 
+    const tArena = performance.now();
+
     // Reactor-model ctors (emscripten --no-entry exports _initialize): run
     // once, before the arena lands and before any invoke.
     const initialize = instance.exports["_initialize"];
@@ -281,6 +366,7 @@ async function bootWorker(scope: DedicatedWorkerGlobalScope, init: WorkerInitMes
     for (const segment of init.arena) {
       u8.set(segment.bytes, segment.addr >>> 0);
     }
+    const tDone = performance.now();
 
     const names: string[] = [];
     const fns: WasmFunction[] = [];
@@ -292,7 +378,18 @@ async function bootWorker(scope: DedicatedWorkerGlobalScope, init: WorkerInitMes
     }
     runtime.setExports(names, fns);
 
-    const ready: WorkerReadyMessage = { type: "ready", exports: names, memory };
+    const ready: WorkerReadyMessage = {
+      type: "ready",
+      exports: names,
+      memory,
+      bridgedImports,
+      timings: {
+        memoryMs: Math.round(tCompile - tMemory),
+        compileMs: Math.round(tInstantiate - tCompile),
+        instantiateMs: Math.round(tArena - tInstantiate),
+        arenaMs: Math.round(tDone - tArena),
+      },
+    };
     scope.postMessage(ready);
 
     // From here the event loop is gone: the park loop owns the thread.

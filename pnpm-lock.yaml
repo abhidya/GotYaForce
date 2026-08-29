@@ -47,6 +47,9 @@ importers:
       '@gf/render':
         specifier: workspace:*
         version: link:../../packages/render
+      '@gf/rom-runtime':
+        specifier: workspace:*
+        version: link:../../packages/rom-runtime
       three:
         specifier: ^0.169.0
         version: 0.169.0

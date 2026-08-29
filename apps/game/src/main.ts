@@ -18,6 +18,7 @@
 
 import * as THREE from "three";
 import { bootRomDamage } from "./sim/romDamageBoot";
+import { DEFAULT_PILOT_FRAMES, bootComposedModule, onGameFrame as onComposedGameFrame } from "./rom/composedBoot";
 
 import { type StageAssets } from "@gf/assets";
 import { startFixedStepLoop, startRenderLoop } from "@gf/core";
@@ -409,6 +410,19 @@ const romWasmFlag = urlParams.get("romwasm");
 if (romWasmFlag !== "0") {
   void bootRomDamage(256, romWasmFlag === "threads" ? "threads" : "default").then((r) => {
     if (!r.active) console.warn(`[rom-wasm] TS port active (${r.detail})`);
+  });
+}
+
+// Composed-module dispatch pilot (docs/composed-pilot.md): boots the real
+// assembly-gate rung-0 module in a rom-runtime worker and drives it from the
+// render loop below, with every out-of-window call crossing the H2 bridge.
+// OFF by default — it reserves 2GB of shared memory and parks a worker thread.
+// `?composed=1` uses the default frame budget; `?composed=<n>` drives n frames.
+const composedFlag = urlParams.get("composed");
+if (composedFlag !== null && composedFlag !== "0") {
+  const requested = Number.parseInt(composedFlag, 10);
+  void bootComposedModule(Number.isFinite(requested) && requested > 1 ? requested : DEFAULT_PILOT_FRAMES).then((r) => {
+    if (!r.active) console.warn(`[composed-rom] pilot not active (${r.detail})`);
   });
 }
 
@@ -1280,6 +1294,9 @@ function tick(): void {
   }
   controls.update();
   viewport.render();
+  // One composed-module pilot frame per rendered game frame (no-op unless the
+  // pilot booted). Non-blocking: it starts at most one frame and returns.
+  onComposedGameFrame();
 }
 
 // Sim loop (setInterval): fixed-cadence wall-clock stepping, runs even when the

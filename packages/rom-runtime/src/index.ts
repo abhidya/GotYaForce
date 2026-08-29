@@ -61,5 +61,27 @@ export {
   GC_LOOKUP_TYPE_CATEGORY_ADDR,
 } from "./adapters/damage.js";
 
+export {
+  SCRATCH_BASE,
+  HOST_FRAME_SLOTS,
+  TRAMPOLINE_FRAME_SLOTS,
+  SYNTHETIC_ADDR_BASE,
+  SYNTHETIC_ADDR_MASK,
+  WasmType,
+  gcAddressForSymbol,
+  hostFrameAddr,
+  planBridgedImports,
+  readModuleShape,
+  scratchByteLength,
+  trampolineFrameBase,
+  wasmTypeName,
+  type AddressSource,
+  type BridgedImportBinding,
+  type ImportedFunctionSignature,
+  type MemoryLimits,
+  type ModuleShape,
+  type SymbolAddress,
+} from "./composed.js";
+
 export { RomRuntimeHost, exposeBridgeLedger, type RomRuntimeHostOptions } from "./host.js";
 export { installRomRuntimeWorker, importedMemoryLimits } from "./worker.js";

@@ -199,6 +199,24 @@ export interface WorkerInitMessage {
   /** Arena segments installed at GC addresses AFTER instantiation, BEFORE
    *  ready — the DOL-sourced image (or a synthetic test arena). */
   arena: Array<{ addr: number; bytes: Uint8Array }>;
+  /**
+   * Bind every imported function EXCEPT the companion's miss hook to the
+   * bridge, via per-import trampolines that marshal the call's real signature
+   * into a dispatch frame (composed.ts). This is H2's "every out-of-window
+   * callee becomes a declared wasm import bound to the bridge" for the DIRECT
+   * call edge; the miss hook already covers the indirect edge.
+   *
+   * OPT-IN. Omitted/false keeps the original contract exactly: only
+   * `env.memory` and `__gf_dispatch_miss` are provided and any other import
+   * is a loud composition error.
+   */
+  bridgeAllImports?: boolean;
+  /** Base address of the trampolines' dispatch-frame region in the shared
+   *  linear memory (composed.ts trampolineFrameBase). Required when
+   *  `bridgeAllImports` is set. */
+  trampolineFrameBase?: number | undefined;
+  /** How many nested trampoline frames the region holds. */
+  trampolineFrameSlots?: number | undefined;
 }
 
 /** ready message: worker -> main after instantiate + arena install. The
@@ -210,6 +228,23 @@ export interface WorkerReadyMessage {
   exports: string[];
   /** The shared WebAssembly.Memory the worker created for the module. */
   memory: WebAssembly.Memory;
+  /**
+   * The out-of-window symbols actually bound to the bridge, with the ledger
+   * key each one crosses on. Empty unless `bridgeAllImports` was requested.
+   * This is the DECLARED boundary: the host publishes it so a reader can see
+   * every edge that can cross, and the ledger's adapter work-queue (I1) is a
+   * subset of it.
+   */
+  bridgedImports: Array<{ symbol: string; gcAddr: number; source: string; signature: string }>;
+  /**
+   * Worker-side boot costs, in ms. `memoryMs` is the one that matters for a
+   * composed module: the gate links a fixed ~2GB flat arena, and a SHARED
+   * WebAssembly.Memory of that size is the single most expensive step of the
+   * boot in every engine measured. Reported rather than assumed so a
+   * regression (or a host that cannot afford it) is visible, not folded into
+   * one opaque number.
+   */
+  timings: { memoryMs: number; compileMs: number; instantiateMs: number; arenaMs: number };
 }
 
 export interface WorkerFatalMessage {
