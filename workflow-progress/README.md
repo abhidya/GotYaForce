@@ -1,28 +1,27 @@
-# Port workflow: BLOCKED
+# Port workflow: RUNNING
 
-*Generated 2026-08-29T20:50:47.435309Z - machine-written, do not edit.*
+*Generated 2026-08-29T21:02:11.857941Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `BLOCKED` (blocked) |
+| **State** | `RUNNING` (possibly_stuck) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 107/1396 settled (3 green, 104 staged) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1131 |
-| **Last transition** | 2026-08-29T20:50:47.435309Z |
+| **Last transition** | 2026-08-29T21:02:11.857941Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
-
-> **Blocked:** serving slot not ready: unsloth/Qwen3.8-27B-GGUF not ready at context>=60000 within 900s (resident=D:\c_cache_moved\huggingface\hub\models--unsloth--Qwen3.8-27B-GGUF\snapshots\f1bfb127c64f7072bdd2cad55f258b9c8b2910fe, context=71296)
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-29T21:02:11.857941Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-29T20:50:47.435309Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: unsloth/Qwen3.8-27B-GGUF not ready at context>=60000 within 900s (resident=D: |
 | 2026-08-29T20:05:02.520921Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: load request failed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read ti |
 | 2026-08-29T19:38:40.784679Z | `-` | blocked | machine | 0 | Blocked: serving slot not ready: unsloth/Qwen3.8-27B-GGUF not ready at context>=60000 within 900s (resident=D: |
@@ -72,4 +71,3 @@
 | 2026-08-26T02:41:38.712947Z | `auto-c0044-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:41:25.588093Z | `auto-c0043-015` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:41:12.664331Z | `auto-c0043-014` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:40:59.232878Z | `auto-c0043-013` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |

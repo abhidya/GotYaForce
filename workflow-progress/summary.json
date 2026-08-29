@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-29T20:50:48.167915Z",
-  "run_id": "2026-08-29T20:50:47.435309Z",
+  "generated_at": "2026-08-29T21:02:12.438556Z",
+  "run_id": "2026-08-29T21:02:11.857941Z",
   "total_units": 1396,
   "green": 3,
   "staged": 104,
@@ -17,15 +17,15 @@
   "last_green_unit": "auto-c0053-013",
   "last_product_commit": "218911ab5e2455c447e5beec8efe9e95e7c8f2ec",
   "repeated_failure_classes": [],
-  "health": "blocked",
+  "health": "possibly_stuck",
   "machine": {
-    "workflow_state": "blocked",
-    "driver_status": "stopped",
+    "workflow_state": "running",
+    "driver_status": "running",
     "manual_paused": false,
-    "block_reason": "serving slot not ready: unsloth/Qwen3.8-27B-GGUF not ready at context>=60000 within 900s (resident=D:\\c_cache_moved\\huggingface\\hub\\models--unsloth--Qwen3.8-27B-GGUF\\snapshots\\f1bfb127c64f7072bdd2cad55f258b9c8b2910fe, context=71296)",
-    "active_model": null,
-    "context_length": null,
+    "block_reason": null,
+    "active_model": "unsloth/Qwen3.8-27B-GGUF",
+    "context_length": 60000,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Blocked: serving slot not ready: unsloth/Qwen3.8-27B-GGUF not ready at context>=60000 within 900s (resident=D:\\c_cache_moved\\huggingface\\hub\\models--unsloth--Qwen3.8-27B-GGUF\\snapshots\\f1bfb127c64f7072bdd2cad55f258b9c8b2910fe, context=71296)"
+    "detail": "Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx."
   }
 }
