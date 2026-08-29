@@ -86,3 +86,12 @@ export {
 
 export { RomRuntimeHost, exposeBridgeLedger, type RomRuntimeHostOptions } from "./host.js";
 export { installRomRuntimeWorker, importedMemoryLimits } from "./worker.js";
+
+// The GX half of the HLE host — the browser standing in for the GameCube's
+// graphics hardware — lives at ./gx/index.js and is DELIBERATELY NOT re-exported
+// here. `export *` from this barrel made the measured GX call inventory reachable
+// from the game's entry graph, so rollup kept the table in apps/game's production
+// bundle even though nothing in the game references it. Import the GX host
+// directly (`@gf/rom-runtime/src/gx/index.js`, or a relative path inside this
+// package) so it stays out of any bundle that does not ask for it.
+// SCAFFOLDING: read docs/gx-hle-host.md before using it.

@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- Browser self-test page for the GX half of the HLE host
+     (packages/rom-runtime/src/gx). Served by scripts/smoke-gx-host-phase.mjs
+     with COOP/COEP headers (SharedArrayBuffer + shared wasm memory require
+     crossOriginIsolated); app.js / rom-runtime-worker.js are esbuild bundles
+     of src/gx/selftest/gxSelftestMain.ts and src/worker-entry.ts.
+
+     The canvas below is the actual GX framebuffer: the purpose-built ROM-side
+     draw module's GX calls cross the Atomics bridge into the GX adapters,
+     decode through the write-gather-pipe decoder, and rasterize here. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>GX HLE host self-test</title>
+    <style>
+      body { font-family: ui-monospace, Consolas, monospace; background: #101418; color: #d8dee6; margin: 1.5rem; }
+      h1[data-status="pass"] { color: #4caf50; }
+      h1[data-status="fail"] { color: #ef5350; }
+      h1[data-status="running"] { color: #ffb300; }
+      table { border-collapse: collapse; margin-top: 1rem; }
+      td, th { border: 1px solid #2c3540; padding: 0.3rem 0.6rem; text-align: left; }
+      tr.pass td:last-child { color: #4caf50; }
+      tr.fail td:last-child { color: #ef5350; font-weight: bold; }
+      .error { color: #ef5350; white-space: pre-wrap; }
+      .claim { color: #ffb300; max-width: 70ch; line-height: 1.4; border-left: 3px solid #ffb300; padding-left: 0.8rem; }
+      canvas { border: 1px solid #2c3540; image-rendering: pixelated; display: block; margin-bottom: 1rem; width: 640px; height: 448px; }
+      figcaption { color: #8b96a3; margin-bottom: 1.5rem; }
+    </style>
+  </head>
+  <body>
+    <figure style="margin: 0">
+      <canvas id="gx-canvas" width="640" height="448"></canvas>
+      <figcaption>
+        GX framebuffer &mdash; drawn by a ROM-side wasm module's GX calls through the HLE host.
+        Blue: an orthographic GX_QUADS screen quad (S16 XY + RGBA8 direct).
+        Green: a GX_TRIANGLESTRIP (F32 XYZ + RGBA8 direct).
+        Amber outline: a 0xb0 line primitive with INDEX8 attributes fetched through GXSetArray.
+      </figcaption>
+    </figure>
+    <div id="results"><h1 data-status="running">GX HLE host self-test: loading&hellip;</h1></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

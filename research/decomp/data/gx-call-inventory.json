@@ -1,0 +1,1049 @@
+{
+  "generatedBy": "scripts/gx-call-inventory.mjs",
+  "corpus": "research/decomp/ghidra-export",
+  "method": "static call-site counts attributed to the enclosing function; 'game' = caller is ROM game code, 'sdk-internal' = caller is itself a gnt4_* SDK/HSD function. NOT a runtime frequency measurement.",
+  "totals": {
+    "gxSymbolsInDol": 157,
+    "gxSymbolsCalledAnywhere": 146,
+    "gxSymbolsCalledByGameCode": 76,
+    "gameCallSites": 502,
+    "sdkInternalCallSites": 322
+  },
+  "entries": [
+    {
+      "symbol": "gnt4_GXSetVtxDesc_bl",
+      "romAddr": "80225894",
+      "gameCalls": 45,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 18
+    },
+    {
+      "symbol": "gnt4_GXSetVtxAttrFmt_bl",
+      "romAddr": "802261e4",
+      "gameCalls": 45,
+      "sdkInternalCalls": 3,
+      "distinctGameCallers": 18
+    },
+    {
+      "symbol": "gnt4_GXBegin_bl",
+      "romAddr": "8022760c",
+      "gameCalls": 19,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 17
+    },
+    {
+      "symbol": "gnt4_GXSetTevOrder_bl",
+      "romAddr": "8022a14c",
+      "gameCalls": 18,
+      "sdkInternalCalls": 16,
+      "distinctGameCallers": 15
+    },
+    {
+      "symbol": "gnt4_GXClearVtxDesc_bl",
+      "romAddr": "802261ac",
+      "gameCalls": 18,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 18
+    },
+    {
+      "symbol": "gnt4_GXSetProjection_bl",
+      "romAddr": "8022bce8",
+      "gameCalls": 18,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 16
+    },
+    {
+      "symbol": "gnt4_GXSetZMode_bl",
+      "romAddr": "8022a8b4",
+      "gameCalls": 18,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 15
+    },
+    {
+      "symbol": "gnt4_GXEnableTexOffsets_bl",
+      "romAddr": "802277e4",
+      "gameCalls": 16,
+      "sdkInternalCalls": 8,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXLoadPosMtxImm_bl",
+      "romAddr": "8022be60",
+      "gameCalls": 16,
+      "sdkInternalCalls": 6,
+      "distinctGameCallers": 15
+    },
+    {
+      "symbol": "gnt4_GXSetChanCtrl_bl",
+      "romAddr": "80228898",
+      "gameCalls": 16,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 14
+    },
+    {
+      "symbol": "gnt4_GXSetCurrentMtx_bl",
+      "romAddr": "8022bf00",
+      "gameCalls": 15,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 15
+    },
+    {
+      "symbol": "gnt4_GXSetNumChans_bl",
+      "romAddr": "8022885c",
+      "gameCalls": 15,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 15
+    },
+    {
+      "symbol": "gnt4_GXSetNumTevStages_bl",
+      "romAddr": "8022a2e8",
+      "gameCalls": 15,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 15
+    },
+    {
+      "symbol": "gnt4_GXSetNumTexGens_bl",
+      "romAddr": "80226d6c",
+      "gameCalls": 15,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 15
+    },
+    {
+      "symbol": "gnt4_GXSetCullMode_bl",
+      "romAddr": "8022782c",
+      "gameCalls": 14,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 14
+    },
+    {
+      "symbol": "gnt4_GXSetTevOp_bl",
+      "romAddr": "80229bac",
+      "gameCalls": 13,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 13
+    },
+    {
+      "symbol": "gnt4_GXSetTexCoordGen2_bl",
+      "romAddr": "80226aec",
+      "gameCalls": 9,
+      "sdkInternalCalls": 14,
+      "distinctGameCallers": 8
+    },
+    {
+      "symbol": "gnt4_GXLoadTexObj_bl",
+      "romAddr": "80229108",
+      "gameCalls": 9,
+      "sdkInternalCalls": 9,
+      "distinctGameCallers": 8
+    },
+    {
+      "symbol": "gnt4_GXSetTevKColor_bl",
+      "romAddr": "80229e88",
+      "gameCalls": 9,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 4
+    },
+    {
+      "symbol": "gnt4_GXLoadTexMtxImm_bl",
+      "romAddr": "8022bf34",
+      "gameCalls": 8,
+      "sdkInternalCalls": 13,
+      "distinctGameCallers": 8
+    },
+    {
+      "symbol": "gnt4_GXSetBlendMode_bl",
+      "romAddr": "8022a808",
+      "gameCalls": 8,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 8
+    },
+    {
+      "symbol": "gnt4_GXInitTexObjLOD_bl",
+      "romAddr": "80228e08",
+      "gameCalls": 8,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 6
+    },
+    {
+      "symbol": "gnt4_GXSetTevKColorSel_bl",
+      "romAddr": "80229efc",
+      "gameCalls": 7,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 4
+    },
+    {
+      "symbol": "gnt4_GXSetTevAlphaOp_bl",
+      "romAddr": "80229d28",
+      "gameCalls": 7,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 4
+    },
+    {
+      "symbol": "gnt4_GXSetTevColorIn_bl",
+      "romAddr": "80229c38",
+      "gameCalls": 7,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 4
+    },
+    {
+      "symbol": "gnt4_GXSetTevColorOp_bl",
+      "romAddr": "80229cc0",
+      "gameCalls": 7,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 4
+    },
+    {
+      "symbol": "gnt4_GXInvalidateTexAll_bl",
+      "romAddr": "80229358",
+      "gameCalls": 6,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 6
+    },
+    {
+      "symbol": "gnt4_GXSetTevSwapMode_bl",
+      "romAddr": "80229fb4",
+      "gameCalls": 5,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetTevColor_bl",
+      "romAddr": "80229d90",
+      "gameCalls": 5,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "gnt4_GXSetTevAlphaIn_bl",
+      "romAddr": "80229c7c",
+      "gameCalls": 5,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetArray",
+      "romAddr": "80226a50",
+      "gameCalls": 4,
+      "sdkInternalCalls": 3,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetAlphaUpdate_bl",
+      "romAddr": "8022a888",
+      "gameCalls": 4,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "gnt4_GXSetColorUpdate_bl",
+      "romAddr": "8022a85c",
+      "gameCalls": 4,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "gnt4_GXSetTevSwapModeTable_bl",
+      "romAddr": "80229ffc",
+      "gameCalls": 3,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXInitTexObj_bl",
+      "romAddr": "80228b74",
+      "gameCalls": 3,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetTevKAlphaSel_bl",
+      "romAddr": "80229f58",
+      "gameCalls": 3,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXLoadTlut_bl",
+      "romAddr": "80229194",
+      "gameCalls": 3,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "gnt4_GXSetVtxAttrFmtv_bl",
+      "romAddr": "80226440",
+      "gameCalls": 3,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "gnt4_GXProject_bl",
+      "romAddr": "8022bb74",
+      "gameCalls": 3,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "gnt4_GXSetCPUFifo_bl",
+      "romAddr": "80225378",
+      "gameCalls": 3,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetGPFifo_bl",
+      "romAddr": "802254a0",
+      "gameCalls": 3,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4___GXFlushTextureState_bl",
+      "romAddr": "80229b88",
+      "gameCalls": 2,
+      "sdkInternalCalls": 6,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXPixModeSync_bl",
+      "romAddr": "80227240",
+      "gameCalls": 2,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetChanMatColor_bl",
+      "romAddr": "8022876c",
+      "gameCalls": 2,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXSetFog_bl",
+      "romAddr": "8022a310",
+      "gameCalls": 2,
+      "sdkInternalCalls": 3,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetFogRangeAdj_bl",
+      "romAddr": "8022a6e4",
+      "gameCalls": 2,
+      "sdkInternalCalls": 3,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXInvalidateVtxCache_bl",
+      "romAddr": "80226adc",
+      "gameCalls": 2,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetAlphaCompare_bl",
+      "romAddr": "8022a07c",
+      "gameCalls": 2,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXGetGPFifo_bl",
+      "romAddr": "8022588c",
+      "gameCalls": 2,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXGetProjectionv_bl",
+      "romAddr": "8022be18",
+      "gameCalls": 2,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXSetLineWidth_bl",
+      "romAddr": "80227764",
+      "gameCalls": 2,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetPointSize_bl",
+      "romAddr": "802277a4",
+      "gameCalls": 2,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXCopyTex_bl",
+      "romAddr": "80228188",
+      "gameCalls": 2,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXInitTlutRegion_bl",
+      "romAddr": "80229320",
+      "gameCalls": 2,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXSetTexCopyDst_bl",
+      "romAddr": "80227b14",
+      "gameCalls": 2,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_GXSetTexCopySrc_bl",
+      "romAddr": "80227a64",
+      "gameCalls": 2,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXInitLightColor_bl",
+      "romAddr": "802285f4",
+      "gameCalls": 1,
+      "sdkInternalCalls": 7,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXInitLightPos_bl",
+      "romAddr": "802285c8",
+      "gameCalls": 1,
+      "sdkInternalCalls": 6,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXLoadNrmMtxImm_bl",
+      "romAddr": "8022beb0",
+      "gameCalls": 1,
+      "sdkInternalCalls": 6,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXLoadLightObjImm_bl",
+      "romAddr": "80228600",
+      "gameCalls": 1,
+      "sdkInternalCalls": 5,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXInitLightDistAttn_bl",
+      "romAddr": "802284f8",
+      "gameCalls": 1,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXSetChanAmbColor_bl",
+      "romAddr": "8022867c",
+      "gameCalls": 1,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXSetScissor_bl",
+      "romAddr": "8022c13c",
+      "gameCalls": 1,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXGetViewportv_bl",
+      "romAddr": "8022c118",
+      "gameCalls": 1,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXInitLightSpot_bl",
+      "romAddr": "80228368",
+      "gameCalls": 1,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXInitTlutObj_bl",
+      "romAddr": "8022915c",
+      "gameCalls": 1,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXSetCopyFilter_bl",
+      "romAddr": "80227e04",
+      "gameCalls": 1,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXSetNumIndStages_bl",
+      "romAddr": "80229ae8",
+      "gameCalls": 1,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXSetTevColorS10_bl",
+      "romAddr": "80229e0c",
+      "gameCalls": 1,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4___GXFifoInit_bl",
+      "romAddr": "8022565c",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4___GXInitGX_bl",
+      "romAddr": "80224824",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4___GXPEInit_bl",
+      "romAddr": "80227518",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4___GXSetIndirectMask_bl",
+      "romAddr": "80229b58",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4___GXSetTmemConfig_bl",
+      "romAddr": "802295e4",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXInitFifoBase_bl",
+      "romAddr": "80225290",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_GXSetMisc_bl",
+      "romAddr": "80226da8",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4___GXWriteFifoIntEnable_bl",
+      "romAddr": "80225724",
+      "gameCalls": 0,
+      "sdkInternalCalls": 7,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetCopyClamp_bl",
+      "romAddr": "80227c68",
+      "gameCalls": 0,
+      "sdkInternalCalls": 5,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXFifoLink_bl",
+      "romAddr": "802256f0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXWriteFifoIntReset_bl",
+      "romAddr": "80225754",
+      "gameCalls": 0,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXCopyDisp_bl",
+      "romAddr": "80228020",
+      "gameCalls": 0,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetDispCopyDst_bl",
+      "romAddr": "80227ae0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetDispCopySrc_bl",
+      "romAddr": "802279e8",
+      "gameCalls": 0,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetIndTexCoordScale_bl",
+      "romAddr": "802299a4",
+      "gameCalls": 0,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSetChanAmbColor_bl",
+      "romAddr": "80228738",
+      "gameCalls": 0,
+      "sdkInternalCalls": 3,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSetChanMatColor_bl",
+      "romAddr": "80228828",
+      "gameCalls": 0,
+      "sdkInternalCalls": 3,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetPixelFmt_bl",
+      "romAddr": "8022a91c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 3,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXCalculateVLim_bl",
+      "romAddr": "80225e44",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSendFlushPrim_bl",
+      "romAddr": "802276dc",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSetDirtyState_bl",
+      "romAddr": "8022758c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSetGenMode_bl",
+      "romAddr": "802278a4",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSetMatrixIndex_bl",
+      "romAddr": "8022c21c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSetSUTexRegs_bl",
+      "romAddr": "80229468",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSetVAT",
+      "romAddr": "802266c0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSetVCD_bl",
+      "romAddr": "80225d88",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXSetViewport_bl",
+      "romAddr": "8022bfe8",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXUpdateBPMask_bl",
+      "romAddr": "80229b54",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXInitLightDir_bl",
+      "romAddr": "802285d8",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetCopyClear_bl",
+      "romAddr": "80227d8c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetDispCopyGamma_bl",
+      "romAddr": "8022800c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetDispCopyYScale_bl",
+      "romAddr": "80227cc0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetDither_bl",
+      "romAddr": "8022a9f0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetDrawDoneCallback_bl",
+      "romAddr": "80227454",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetDstAlpha_bl",
+      "romAddr": "8022aa1c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetViewport_bl",
+      "romAddr": "8022c0d0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetZCompLoc_bl",
+      "romAddr": "8022a8e8",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXAbort_bl",
+      "romAddr": "80226e98",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXFifoReadDisable_bl",
+      "romAddr": "802256cc",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___GXFifoReadEnable_bl",
+      "romAddr": "802256a8",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXCallDisplayList_bl",
+      "romAddr": "8022bb04",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXClearBoundingBox_bl",
+      "romAddr": "80228314",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXClearGPMetric_bl",
+      "romAddr": "8022cae8",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXDrawDone_bl",
+      "romAddr": "802271c0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXFlush",
+      "romAddr": "80226e3c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXGetTexObjFmt_bl",
+      "romAddr": "80228f6c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXGetTexObjMipMap_bl",
+      "romAddr": "80228f74",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXInitFifoLimits_bl",
+      "romAddr": "8022536c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXInitFifoPtrs_bl",
+      "romAddr": "802252fc",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXInitFogAdjTable_bl",
+      "romAddr": "8022a534",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXInitLightAttn_bl",
+      "romAddr": "8022834c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXLoadTexObjPreLoaded_bl",
+      "romAddr": "80228f8c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXPokeAlphaMode_bl",
+      "romAddr": "80227264",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXPokeAlphaRead_bl",
+      "romAddr": "80227278",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXPokeAlphaUpdate_bl",
+      "romAddr": "80227298",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXPokeBlendMode_bl",
+      "romAddr": "802272b0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXPokeColorUpdate_bl",
+      "romAddr": "80227314",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXPokeDither_bl",
+      "romAddr": "80227350",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXPokeDstAlpha_bl",
+      "romAddr": "8022732c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXPokeZMode_bl",
+      "romAddr": "80227368",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetBreakPtCallback_bl",
+      "romAddr": "80225618",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetClipMode_bl",
+      "romAddr": "8022c1f4",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetCoPlanar_bl",
+      "romAddr": "80227870",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetDispCopyFrame2Field_bl",
+      "romAddr": "80227c44",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetDrawSyncCallback_bl",
+      "romAddr": "80227388",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetFieldMask_bl",
+      "romAddr": "8022aa58",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetFieldMode_bl",
+      "romAddr": "8022aa90",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetGPMetric_bl",
+      "romAddr": "8022c2a0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetProjectionv_bl",
+      "romAddr": "8022bd8c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetScissorBoxOffset_bl",
+      "romAddr": "8022c1b4",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetTevDirect_bl",
+      "romAddr": "80229b0c",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetTevIndirect_bl",
+      "romAddr": "80229938",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetTexRegionCallback_bl",
+      "romAddr": "802293a0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetTlutRegionCallback_bl",
+      "romAddr": "802293b4",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetViewportJitter_bl",
+      "romAddr": "8022c078",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXSetZTexture_bl",
+      "romAddr": "8022a0c0",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_GXWaitDrawDone_bl",
+      "romAddr": "80227174",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    }
+  ],
+  "neverCalled": [
+    "gnt4_GXCPInterruptHandler_bl",
+    "gnt4_GXFinishInterruptHandler_bl",
+    "gnt4_GXGetTexBufferSize_bl",
+    "gnt4_GXInitTexCacheRegion_bl",
+    "gnt4_GXInitTexObjCI_bl",
+    "gnt4_GXTokenInterruptHandler_bl",
+    "gnt4_HSD_GXInit_bl",
+    "gnt4_HSD_VIGXDrawDoneCB_bl",
+    "gnt4___GXDefaultTexRegionCallback_bl",
+    "gnt4___GXDefaultTlutRegionCallback_bl",
+    "gnt4___GXShutdown_bl"
+  ]
+}
