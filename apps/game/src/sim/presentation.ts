@@ -11,8 +11,26 @@ import type { BattleOutcome } from "@gf/missions";
 import type { AnimSlot } from "./battleScene.js";
 import { battleActorView, type BattleActorView } from "./battleView.js";
 import type { HudState } from "../ui/index.js";
+import { clamp01 } from "../constants.js";
 
 const BOOST_FUEL_FRAMES = JUMP.BOOST_FUEL_FRAMES;
+
+/**
+ * Fraction of a side's starting GF energy at or below which its bar is "in danger" — the
+ * yellow "!" roundel on the HUD and the one-shot `alert` cue. Single-sourced here because
+ * the snapshot (battleAudioEvents' edge) and the HUD state must agree on the threshold, or
+ * the cue fires on a frame the roundel is not lit. TUNED (no ROM threshold is decoded).
+ */
+const LOW_ENERGY_ALERT_FRACTION = 0.25;
+
+/**
+ * Fallbacks used only when the focus borg's action profile could not be resolved (unknown
+ * borg id). Real borgs always read their own profile values — these exist so the gauges
+ * degrade to a sane full/empty reading instead of dividing by zero. TUNED; they mirror the
+ * packages/combat actionProfiles defaults.
+ */
+const FALLBACK_SPECIAL_COOLDOWN_FRAMES = 90;
+const FALLBACK_CHARGE_CAP_FRAMES = 90;
 
 export type BattleEventCue =
   | AnimSlot
@@ -79,7 +97,7 @@ export function snapshotBattleAudio(
   return {
     borgs,
     localActiveUid,
-    allyAlert: allyEnergy > 0 && allyEnergy <= allyMax * 0.25,
+    allyAlert: allyEnergy > 0 && allyEnergy <= allyMax * LOW_ENERGY_ALERT_FRACTION,
     localChargeTier1: localChargeable ? localShot.chargeTier1Frames : 0,
     localChargeTier2: localChargeable ? localShot.chargeTier2Frames : 0,
   };
@@ -171,6 +189,9 @@ export function battleAudioEvents(before: BattleAudioSnapshot, after: BattleAudi
   return events;
 }
 
+/** Roster ids are `pl` plus a four-hex-digit family/variant pair (e.g. pl0615 = G RED). */
+const BORG_ID_PATTERN = /^pl[0-9a-fA-F]{4}$/;
+
 /**
  * Map a borg id to one of its two per-family voice-cue manifest keys.
  *
@@ -183,9 +204,8 @@ export function battleAudioEvents(before: BattleAudioSnapshot, after: BattleAudi
  * pending an SE/voice-dispatch trace. Returns null for a non-`pl####` id.
  */
 export function voiceKeyForBorgId(borgId: string, variant: 0 | 1): string | null {
-  if (!/^pl[0-9a-fA-F]{4}$/.test(borgId)) return null;
-  const family = borgId.slice(2, 4).toLowerCase();
-  return `pl${family}_00_0${variant}`;
+  const family = BORG_ID_PATTERN.test(borgId) ? borgId.slice(2, 4).toLowerCase() : null;
+  return family === null ? null : `pl${family}_00_0${variant}`;
 }
 
 /**
@@ -287,13 +307,6 @@ export function battleSceneState(battle: Battle, focus: BattleActorObservation |
   };
 }
 
-export function liveActorPositions<T>(battle: Battle, positionOf: (uid: string) => T | null): T[] {
-  return battle.observe().actors
-    .filter((b) => b.alive)
-    .map((b) => positionOf(b.uid))
-    .filter((p): p is T => p !== null);
-}
-
 /**
  * Build the results-screen outcome for one player. DERIVED
  * (research/decomp/results-scoring-decode-2026-07-04.md): every field maps 1:1 to the
@@ -304,6 +317,10 @@ export function liveActorPositions<T>(battle: Battle, positionOf: (uid: string) 
  *
  * `localPlayerId` selects the slot; when the battle predates slot telemetry the
  * team-aggregate fallbacks keep the screen non-degenerate (documented approximation).
+ *
+ * Two exits by design: the DERIVED slot path and the pre-slot fallback build the same
+ * 12-field outcome from different sources, so a single exit would mean assembling one of
+ * them into a temporary just to return it from the bottom.
  */
 export function battleOutcomeFromState(battle: Battle, localPlayerId?: string): BattleOutcome {
   const st = battle.observe();
@@ -374,19 +391,23 @@ export function battlePresentationState(input: BattlePresentationInput): BattleP
   };
 }
 
+/**
+ * The borg the HUD and camera frame: the player's own active borg while it lives, otherwise
+ * a live ally. FIGHT ALONE can leave the player slot empty while a CPU ally is still up, so
+ * the fallback prefers the player's own team before settling for anyone still standing.
+ */
 function focusBorg(
   battle: Battle,
   active: BattleActorObservation | null,
 ): BattleActorObservation | null {
-  if (active?.alive) return active;
-
-  // FIGHT ALONE can leave the player slot empty while a CPU ally is still alive.
-  const fallbackTeam = active?.team ?? 0;
-  return (
-    battle.observe().actors.find((b) => b.alive && b.team === fallbackTeam) ??
-    battle.observe().actors.find((b) => b.alive) ??
-    null
-  );
+  let focus = active?.alive ? active : null;
+  if (!focus) {
+    const actors = battle.observe().actors;
+    const fallbackTeam = active?.team ?? 0;
+    focus =
+      actors.find((b) => b.alive && b.team === fallbackTeam) ?? actors.find((b) => b.alive) ?? null;
+  }
+  return focus;
 }
 
 export function battleHudState(input: BattleHudPresentationInput): HudState {
@@ -416,12 +437,12 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
   const defeated =
     st.result === "lose" || (st.result === "ongoing" && (localActive === null || !localActive.alive));
   const ammoMax = actionProfile?.shot?.ammoMax ?? 0;
-  const specialCooldownMax = actionProfile?.special.cooldown ?? 90;
+  const specialCooldownMax = actionProfile?.special.cooldown ?? FALLBACK_SPECIAL_COOLDOWN_FRAMES;
 
   // Hold-B charge gauge (TUNED-faithful-to-sim): chargeFrames is a TUNED accumulator (combat.ts
   // stepAttacks) capped at shot.chargeTier2Frames. Read the cap from the profile; guard absent
   // key / zero cap -> 0 so the meter stays hidden for non-charge borgs.
-  const chargeCap = actionProfile?.shot?.chargeTier2Frames ?? 90;
+  const chargeCap = actionProfile?.shot?.chargeTier2Frames ?? FALLBACK_CHARGE_CAP_FRAMES;
   const chargeFrames = focus?.cooldowns?.["chargeFrames"] ?? 0;
   const charge01 = chargeCap > 0 ? clamp01(chargeFrames / chargeCap) : 0;
 
@@ -485,7 +506,7 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
     ...(jumpsMax !== undefined ? { jumpsMax } : {}),
     ...(jumpsRemaining !== undefined ? { jumpsRemaining } : {}),
     timeRemainingFrames: st.timeRemainingFrames,
-    alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= allyMax * 0.25,
+    alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= allyMax * LOW_ENERGY_ALERT_FRACTION,
   };
 }
 
@@ -525,14 +546,13 @@ function focusHasMeleeRangeTarget(
   focus: BattleActorObservation | null,
   actionProfile: BorgActionProfile | null,
 ): boolean {
-  if (!focus?.lockTarget) return false;
-  const target = battle.observe().actors.find((b) => b.uid === focus.lockTarget && b.alive);
-  if (!target) return false;
-  if (actionProfile && !actionProfile.melee) return false; // sim cannot select melee for this borg
+  // A RESOLVED profile without a melee def can never be selected into melee by the sim, so
+  // it never flips the reticle; an unresolved profile falls back to the shared window.
+  const canMelee = !actionProfile || Boolean(actionProfile.melee);
+  const target =
+    canMelee && focus?.lockTarget
+      ? battle.observe().actors.find((b) => b.uid === focus.lockTarget && b.alive) ?? null
+      : null;
   const meleeDef = actionProfile?.melee ?? MELEE_DEF_HUD_FALLBACK;
-  return targetWithinMeleeEngage(focus.pos, target.pos, meleeDef);
-}
-
-function clamp01(v: number): number {
-  return v < 0 ? 0 : v > 1 ? 1 : v;
+  return focus !== null && target !== null && targetWithinMeleeEngage(focus.pos, target.pos, meleeDef);
 }

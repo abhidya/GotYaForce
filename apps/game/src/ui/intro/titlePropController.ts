@@ -1,3 +1,4 @@
+import { BAM16_TO_RADIANS } from "../../constants.js";
 import {
   TITLE_INTRO_PROP_MOTION_ROWS,
   TITLE_INTRO_PROP_SCALAR_CONSTANTS,
@@ -5,8 +6,9 @@ import {
   TITLE_INTRO_WIDGET_DESCRIPTORS,
 } from "../titleIntroScript.generated.js";
 
-/** One GameCube BAM16 turn is 65536 units. */
-export const BAM16_TO_RADIANS = (Math.PI * 2) / 0x10000;
+/** Re-exported so the intro renderers keep importing their angle unit from the controller
+ *  that owns the BAM accumulators. */
+export { BAM16_TO_RADIANS };
 
 export interface TitlePropFrame {
   readonly index: number;

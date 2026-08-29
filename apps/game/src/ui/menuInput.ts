@@ -237,21 +237,3 @@ export function subscribeMenuInput(handler: MenuInputHandler): () => void {
     if (idx >= 0) subscribers.splice(idx, 1);
   };
 }
-
-/**
- * Debug/selfcheck hook: read-only view of the bus's live state. Not used by gameplay
- * code; exists so a browser-console/selfcheck harness can assert the stack behaves
- * (e.g. "exactly one subscriber while a screen is mounted").
- */
-export const menuInputDebug = {
-  subscriberCount(): number {
-    return subscribers.length;
-  },
-  /** Synchronously simulate an action as if it came from the given source (test hook). */
-  simulate(action: MenuAction, dir?: -1 | 1): void {
-    dispatch(action, "keyboard", dir);
-  },
-  isPolling(): boolean {
-    return gamepadPollHandle !== null;
-  },
-};

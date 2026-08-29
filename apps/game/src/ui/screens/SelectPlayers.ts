@@ -25,6 +25,7 @@ import { el, legendItem } from "../dom.js";
 import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
 import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
+import { TINT_MENU_YELLOW } from "../tints.js";
 
 const CAPTURE = new URL(
   "../../../reference/captures/challenge-3-select-players.png",
@@ -70,7 +71,7 @@ export function createSelectPlayers(
   // Shorter scale than SelectDifficulty's title: at scale 3 this 24-char string
   // (vs. "SELECT DIFFICULTY"'s 17) overflows a 4:3 frame at common viewport sizes.
   const title = bitmapText("gf-vsel-title-text");
-  setBitmapText(title, "SELECT NUMBER OF PLAYERS", { bold: true, scale: 2, tint: "#ffd21e" });
+  setBitmapText(title, "SELECT NUMBER OF PLAYERS", { bold: true, scale: 2, tint: TINT_MENU_YELLOW });
   frame.appendChild(
     el("h1", { class: "gf-title gf-vsel-title", attrs: { "aria-label": "SELECT NUMBER OF PLAYERS" } }, [title]),
   );

@@ -8,9 +8,9 @@
  */
 
 import { createGcTouchOverlay, type GcTouchOverlay } from "./gcTouchOverlay.js";
-import { isTouchDevice, lockLandscape, watchViewport } from "./orientation.js";
+import { isTouchDevice, watchViewport } from "./orientation.js";
 
-export { isTouchDevice, lockLandscape, unlockOrientation, watchViewport, readViewport } from "./orientation.js";
+export { watchViewport } from "./orientation.js";
 export type { GcTouchOverlay } from "./gcTouchOverlay.js";
 
 /** Persisted user override of the auto-detected default. */
@@ -87,17 +87,4 @@ export function initTouchControls(): TouchControlsHandle {
  */
 export function touchGamepad(): Gamepad | null {
   return overlay?.getGamepad() ?? null;
-}
-
-/** True when the overlay is mounted and visible. */
-export function touchControlsActive(): boolean {
-  return overlay?.visible === true;
-}
-
-/**
- * Attempt a landscape lock, for callers that want it on a user gesture (the only context
- * where browsers permit it). Never required — the overlay has a real portrait layout.
- */
-export async function requestLandscape(): Promise<boolean> {
-  return lockLandscape();
 }

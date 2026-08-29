@@ -29,6 +29,9 @@ export const ASCII_COLS = 16;
 export const ASCII_ATLAS_SIZE = 128;
 /** First atlas row of the thin ASCII block (rows 0..1 are blank + hex header). */
 export const ASCII_THIN_ROW_OFFSET = 2;
+/** The atlas covers printable ASCII only: space (0x20) through tilde (0x7e). */
+const ASCII_FIRST_PRINTABLE = 0x20;
+const ASCII_LAST_PRINTABLE = 0x7e;
 /** First atlas row of the bold ASCII block (row 8 blank, row 9 hex header). */
 export const ASCII_BOLD_ROW_OFFSET = 10;
 
@@ -40,12 +43,14 @@ export interface AtlasCell {
 /** Map a printable ASCII char to its atlas cell, or null when unprintable. */
 export function asciiAtlasCell(char: string, bold = false): AtlasCell | null {
   const code = char.charCodeAt(0);
-  if (Number.isNaN(code) || code < 0x20 || code > 0x7e) return null;
-  const idx = code - 0x20;
-  return {
-    col: idx % ASCII_COLS,
-    row: Math.floor(idx / ASCII_COLS) + (bold ? ASCII_BOLD_ROW_OFFSET : ASCII_THIN_ROW_OFFSET),
-  };
+  const printable = !Number.isNaN(code) && code >= ASCII_FIRST_PRINTABLE && code <= ASCII_LAST_PRINTABLE;
+  const idx = code - ASCII_FIRST_PRINTABLE;
+  return printable
+    ? {
+        col: idx % ASCII_COLS,
+        row: Math.floor(idx / ASCII_COLS) + (bold ? ASCII_BOLD_ROW_OFFSET : ASCII_THIN_ROW_OFFSET),
+      }
+    : null;
 }
 
 export interface BitmapTextOptions {
@@ -104,6 +109,8 @@ function loadAtlasImage(): Promise<HTMLImageElement> {
   return atlasImagePromise;
 }
 
+/** #rrggbb (with or without the hash) to 0..255 channels; anything else reads as white,
+ *  i.e. an untinted glyph. */
 function parseHexColor(hex: string): [number, number, number] {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
   const v = m?.[1] !== undefined ? parseInt(m[1], 16) : 0xffffff;
@@ -119,6 +126,7 @@ function tintedAtlasUrl(color: string): Promise<string> {
     canvas.width = img.naturalWidth;
     canvas.height = img.naturalHeight;
     const ctx = canvas.getContext("2d");
+    // Guard clause: no 2D context means no re-tint; the untinted sheet still renders.
     if (!ctx) return ASSETS.fontAscii;
     ctx.drawImage(img, 0, 0);
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height);

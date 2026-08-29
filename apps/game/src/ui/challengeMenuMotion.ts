@@ -1,4 +1,7 @@
-const FRAME_MS = 1000 / 60;
+import { clamp01, framesToMilliseconds } from "../constants.js";
+
+/** Menu motion is authored in source (60 Hz) frames, like every other timed value. */
+const FRAME_MS = framesToMilliseconds(1);
 const BANNER_ENTER_FRAMES = 10;
 const OPTION_ENTER_FRAMES = 15;
 const SELECT_PULSE_FRAMES = 10;
@@ -211,12 +214,6 @@ function setItemProgress(item: ChallengeMenuMotionItem, easedT: number): void {
   item.element.style.setProperty("--gf-enter-offset-x", `${x.toFixed(3)}%`);
   item.element.style.setProperty("--gf-enter-offset-y", `${y.toFixed(3)}%`);
   item.element.style.setProperty("--gf-enter-opacity", easedT.toFixed(4));
-}
-
-function clamp01(value: number): number {
-  if (value <= 0) return 0;
-  if (value >= 1) return 1;
-  return value;
 }
 
 function easeOutCubic(t: number): number {

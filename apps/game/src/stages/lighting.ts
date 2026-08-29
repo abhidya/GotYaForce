@@ -203,13 +203,6 @@ export function resolveStageLighting(rs: StageRenderState): ResolvedStageLightin
   };
 }
 
-/** Fetch a stage's exported render state. */
-export async function fetchStageRenderState(stageId: string): Promise<StageRenderState> {
-  const response = await fetch(`/stages/${stageId}/render-state.json`);
-  if (!response.ok) throw new Error(`Failed to load stage render-state ${stageId}: ${response.status}`);
-  return (await response.json()) as StageRenderState;
-}
-
 // ------------------------------------------------------------------------------------------
 // Scene rig: owns the three.js light objects and applies resolved state at stage mount.
 // ------------------------------------------------------------------------------------------
@@ -283,15 +276,4 @@ export function updateLightPosition(rig: StageLightingRig, source: THREE.Vector3
   if (dir) {
     dir.position.set(source.x, source.y, source.z);
   }
-}
-
-/** Convenience wrapper: resolve exported JSON and apply it in one call at stage mount. */
-export function applyStageRenderStateLighting(
-  scene: THREE.Scene,
-  rig: StageLightingRig,
-  rs: StageRenderState,
-): ResolvedStageLighting {
-  const resolved = resolveStageLighting(rs);
-  applyResolvedStageLighting(scene, rig, resolved);
-  return resolved;
 }

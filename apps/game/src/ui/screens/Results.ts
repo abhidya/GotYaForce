@@ -26,6 +26,7 @@ import { el } from "../dom.js";
 import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
+import { TINT_MENU_ALERT } from "../tints.js";
 
 const CAPTURE = new URL("../../../reference/captures/challenge-11-WIN-results.png", import.meta.url).href;
 /** Native capture is 2560x1966; crop box below is in that pixel space. */
@@ -138,7 +139,7 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
     rows.replaceChildren(
       ...defs.map((d) => {
         const valText = bitmapText("gf-result-val-text");
-        if (d.neg) setBitmapText(valText, d.value, { bold: true, scale: d.grand ? 4 : 3, tint: "#ff5a4f" });
+        if (d.neg) setBitmapText(valText, d.value, { bold: true, scale: d.grand ? 4 : 3, tint: TINT_MENU_ALERT });
         else setBitmapText(valText, d.value, { bold: true, scale: d.grand ? 4 : 3 });
         return el("div", { class: `gf-result-row${d.grand ? " gf-result-grand" : ""}` }, [
           el("div", { class: "gf-result-label-spacer" }),

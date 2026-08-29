@@ -13,8 +13,7 @@
 //   PauseMenu overlays the battle on Start/Esc.
 //
 // The existing three.js scene, stage rendering, lighting, camera, the centralized
-// render asset loader, and the baked-clip builder are REUSED. The netcode `ws` hooks are
-// preserved (defined but dormant) so multiplayer can be wired next.
+// render asset loader, and the baked-clip builder are REUSED.
 
 import * as THREE from "three";
 import { bootRomDamage } from "./sim/romDamageBoot";
@@ -72,7 +71,6 @@ import {
   type DebugOverlayHandle,
   type TeammateMarker,
   type GetsRow,
-  type MenuScreenHandle,
   type PauseMenuHandle,
 } from "./ui/index.js";
 
@@ -100,6 +98,7 @@ import { publicUrl } from "./publicUrl.js";
 import { BattleCamera, type CameraFollowTarget } from "./sim/camera.js";
 import { createBrowserGotchaBoxPersistence } from "./sim/getStorage.js";
 import { createInputEdgeLatch } from "./inputEdge.js";
+import { SOURCE_FRAME_SECONDS, clamp01, framesToMilliseconds } from "./constants.js";
 import {
   activeBorgForPlayer,
   battleEnergyMaxima,
@@ -108,7 +107,6 @@ import {
   battleSceneState,
   battleAudioEvents,
   battleVoiceCues,
-  liveActorPositions as battleLiveActorPositions,
   snapshotBattleAudio,
   type BattleEventCue,
 } from "./sim/presentation.js";
@@ -241,18 +239,34 @@ const COMBAT_SFX_MIN_GAP_MS: Partial<Record<CombatSfxCue, number>> = {
   lockon: 150,
   alert: 1500,
 };
+/** Rate limit for a cue with no COMBAT_SFX_MIN_GAP_MS entry of its own. TUNED. */
+const DEFAULT_COMBAT_SFX_MIN_GAP_MS = 250;
 const lastCombatSfxAt = new Map<string, number>();
 
-function playCombatSfx(cue: CombatSfxCue): void {
-  if (DISABLE_COMBAT_SFX) return;
-  const key = COMBAT_SFX[cue];
-  if (!key) return;
+/**
+ * Play `assetKey` unless `rateKey` fired less than `minGapMs` ago, recording the play.
+ * Shared by every combat/voice cue path so they cannot drift on how "too soon" is decided;
+ * each caller owns which keyspace it rate-limits on (per-EVENT cue vs per-SAMPLE se_* key).
+ */
+function playRateLimited(
+  lastPlayedAt: Map<string, number>,
+  rateKey: string,
+  minGapMs: number,
+  assetKey: string,
+): void {
   const now = performance.now();
-  const minGap = COMBAT_SFX_MIN_GAP_MS[cue] ?? 250;
-  const last = lastCombatSfxAt.get(cue) ?? -Infinity;
-  if (now - last < minGap) return;
-  lastCombatSfxAt.set(cue, now);
-  playSfx(key);
+  const elapsed = now - (lastPlayedAt.get(rateKey) ?? -Infinity);
+  if (elapsed >= minGapMs) {
+    lastPlayedAt.set(rateKey, now);
+    playSfx(assetKey);
+  }
+}
+
+function playCombatSfx(cue: CombatSfxCue): void {
+  const key = COMBAT_SFX[cue];
+  if (!DISABLE_COMBAT_SFX && key) {
+    playRateLimited(lastCombatSfxAt, cue, COMBAT_SFX_MIN_GAP_MS[cue] ?? DEFAULT_COMBAT_SFX_MIN_GAP_MS, key);
+  }
 }
 
 function playBattleEventSfx(cue: BattleEventCue): void {
@@ -270,13 +284,12 @@ function playBattleEventSfx(cue: BattleEventCue): void {
   // AUTHORED_SWING_SLOTS the moment "special" (X-special) was added to that set — exactly the
   // gap selfcheck-audio-wiring.mjs's parity check exists to catch. Sharing one Set makes the two
   // call sites impossible to drift apart again.
-  if (AUTHORED_SWING_SLOTS.has(cue) && localActiveBorgHasAuthoredSwingAudio()) return;
-  playCombatSfx(cue);
+  const suppressed = AUTHORED_SWING_SLOTS.has(cue) && localActiveBorgHasAuthoredSwingAudio();
+  if (!suppressed) playCombatSfx(cue);
 }
 
 function localActiveBorgHasAuthoredSwingAudio(): boolean {
-  if (!session) return false;
-  const active = activeBorgForPlayer(session.battle, session.localPlayerId);
+  const active = session ? activeBorgForPlayer(session.battle, session.localPlayerId) : null;
   return (active?.meleeSounds?.length ?? 0) > 0;
 }
 
@@ -305,16 +318,11 @@ function seKeyForSoundId(id: number): string {
 }
 
 function playAuthoredSwingSounds(sounds: readonly { frame: number; id: number }[]): void {
-  if (DISABLE_COMBAT_SFX) return;
+  if (DISABLE_COMBAT_SFX) return; // guard clause: nothing below applies with SFX off
   for (const sound of sounds) {
-    const delayMs = Math.min((sound.frame * 1000) / 60, AUTHORED_MAX_DELAY_MS);
-    window.setTimeout(() => {
-      const key = seKeyForSoundId(sound.id);
-      const now = performance.now();
-      if (now - (lastCombatSfxAt.get(key) ?? -Infinity) < AUTHORED_SE_MIN_GAP_MS) return;
-      lastCombatSfxAt.set(key, now);
-      playSfx(key);
-    }, delayMs);
+    const delayMs = Math.min(framesToMilliseconds(sound.frame), AUTHORED_MAX_DELAY_MS);
+    const key = seKeyForSoundId(sound.id);
+    window.setTimeout(() => playRateLimited(lastCombatSfxAt, key, AUTHORED_SE_MIN_GAP_MS, key), delayMs);
   }
 }
 
@@ -334,11 +342,7 @@ const VOICE_MIN_GAP_MS = 500;
 const lastVoiceAt = new Map<string, number>();
 
 function playBorgVoice(key: string): void {
-  if (DISABLE_COMBAT_SFX) return;
-  const now = performance.now();
-  if (now - (lastVoiceAt.get(key) ?? -Infinity) < VOICE_MIN_GAP_MS) return;
-  lastVoiceAt.set(key, now);
-  playSfx(key);
+  if (!DISABLE_COMBAT_SFX) playRateLimited(lastVoiceAt, key, VOICE_MIN_GAP_MS, key);
 }
 
 function forceFromSlot(slot: DeepReadonly<ForceSlot>): string[] {
@@ -395,6 +399,13 @@ const urlParams = new URLSearchParams(window.location.search);
 const ENABLE_BATTLE_DEBUG_DATASET = urlParams.has("debugBattle");
 const ENABLE_RENDER_DEBUG = urlParams.has("debugRender") || urlParams.has("capture");
 
+/** Centered boot/asset-failure notice. Inline (not in styles.generated.css) because it has
+ *  to render before ensureStyles' sheet can be guaranteed applied. */
+const LOADING_MESSAGE_CSS =
+  "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);" +
+  "color:#bfeeff;font:600 16px 'Trebuchet MS',system-ui,sans-serif;" +
+  "text-align:center;text-shadow:0 1px 3px #000;";
+
 // ATK-015: minimal read-only debug overlay (sim state readout for the focused borg). Mounted
 // once at startup, hidden by default; toggled with the backtick key or ?debugOverlay=1. See
 // apps/game/src/ui/hud/DebugOverlay.ts and research/tasks/attack-port/ATK-015-debug-overlay-fields.md.
@@ -406,9 +417,10 @@ const debugOverlay: DebugOverlayHandle = createDebugOverlay(ui);
 // loads the threads-target relink (imported shared memory, step 8) — the
 // exported-memory build stays the default until switching is separately
 // reviewed.
+const ROM_WASM_FIDELITY_CASES = 256;
 const romWasmFlag = urlParams.get("romwasm");
 if (romWasmFlag !== "0") {
-  void bootRomDamage(256, romWasmFlag === "threads" ? "threads" : "default").then((r) => {
+  void bootRomDamage(ROM_WASM_FIDELITY_CASES, romWasmFlag === "threads" ? "threads" : "default").then((r) => {
     if (!r.active) console.warn(`[rom-wasm] TS port active (${r.detail})`);
   });
 }
@@ -428,6 +440,11 @@ if (composedFlag !== null && composedFlag !== "0") {
 
 if (urlParams.has("debugOverlay")) debugOverlay.setVisible(true);
 
+/** Where the camera sits before the first battle seeds the follow rig — an over-the-shoulder
+ *  three-quarter view of the default arena, so the boot/menu frames are not staring at the
+ *  origin. TUNED (framing only; the follow camera overwrites it on battle entry). */
+const BOOT_CAMERA_POSITION: [number, number, number] = [950, 520, 1320];
+
 const viewport = createThreeViewport(canvas, {
   debugCapture: ENABLE_RENDER_DEBUG,
   clearColor: DEFAULT_RENDER_STATE.fogColor,
@@ -435,7 +452,7 @@ const viewport = createThreeViewport(canvas, {
     fov: DEFAULT_RENDER_STATE.fov,
     near: DEFAULT_RENDER_STATE.near,
     far: DEFAULT_RENDER_STATE.far,
-    position: [950, 520, 1320],
+    position: BOOT_CAMERA_POSITION,
   },
 });
 const { scene, camera, controls } = viewport;
@@ -519,6 +536,9 @@ function applyStageRenderState(stageId: string, rs: StageRenderState): void {
   camera.updateProjectionMatrix();
 }
 
+/** TUNED threshold (HSD PEDesc alpha-compare state is undecoded) — see loadStage below. */
+const STAGE_TRANSPARENT_ALPHA_TEST = 0.1;
+
 let loadedStageId: string | null = null;
 let loadedStageAssets: StageAssets<StageRenderState> | null = null;
 
@@ -541,7 +561,7 @@ async function loadStage(stageId: string): Promise<StageAssets<StageRenderState>
       // TUNED threshold (HSD PEDesc alpha-compare state is undecoded): discard near-invisible
       // texels of BLEND-mode stage props so their invisible quad corners stop writing depth
       // and punching holes into geometry behind them.
-      transparentAlphaTest: 0.1,
+      transparentAlphaTest: STAGE_TRANSPARENT_ALPHA_TEST,
     });
     stageRoot.add(model);
   }
@@ -555,17 +575,6 @@ async function loadInitialAssets(): Promise<void> {
   borgPresentationAssets.setModelManifest(manifest);
   await loadStage(DEFAULT_ARENA_STAGE);
 }
-
-// ------------------------------------------------------------------------------------------
-// Netcode hooks (preserved, dormant). Multiplayer is wired next; do not delete.
-// ------------------------------------------------------------------------------------------
-
-let ws: WebSocket | null = null;
-function closeSocket(): void {
-  ws?.close();
-  ws = null;
-}
-void closeSocket; // referenced so the dormant hook isn't tree-shaken/flagged.
 
 // ------------------------------------------------------------------------------------------
 // Audio
@@ -611,29 +620,28 @@ function queueBgm(key: string): void {
 
 async function playPendingBgm(): Promise<void> {
   const key = pendingBgmKey;
-  if (!key) return;
   if (key === activeBgmKey) {
-    pendingBgmKey = null;
-    return;
-  }
-  const audio = await initAudio();
-  if (!audio) return;
-  try {
-    await audio.playBgm(key);
-    activeBgmKey = key;
-    if (pendingBgmKey === key) pendingBgmKey = null;
-  } catch {
-    // Browsers reject autoplay before the first user gesture. Keep pending and
-    // retry from the next key/click/touch event.
+    // Already playing (or nothing pending); clear the request either way.
+    if (key) pendingBgmKey = null;
+  } else if (key) {
+    const audio = await initAudio();
+    try {
+      await audio?.playBgm(key);
+      if (audio) {
+        activeBgmKey = key;
+        if (pendingBgmKey === key) pendingBgmKey = null;
+      }
+    } catch {
+      // Browsers reject autoplay before the first user gesture. Keep pending and
+      // retry from the next key/click/touch event.
+    }
   }
 }
 
 function playSfx(key: string | null): void {
-  if (!key) return;
-  void initAudio().then((audio) => {
-    if (!audio) return;
-    void audio.playSfx(key).catch(() => undefined);
-  });
+  if (key) {
+    void initAudio().then((audio) => void audio?.playSfx(key).catch(() => undefined));
+  }
 }
 
 function playConfirmSfx(): void {
@@ -677,16 +685,23 @@ function isTextInputTarget(target: EventTarget | null): boolean {
 
 const NO_KEYS: ReadonlySet<string> = new Set();
 
+/**
+ * Resolve the pad driving `playerIndex`, preferring a real controller.
+ *
+ * The on-screen GameCube overlay reports itself as a standard-mapping pad (ui/touch), so
+ * it drops straight into the same mapping without a second input path — but it is the LAST
+ * resort, so plugging a controller into a tablet takes over immediately.
+ */
 function activeGamepad(playerIndex = 0, allowFallback = playerIndex === 0): Gamepad | null {
   const pads = navigator.getGamepads?.();
   const exact = pads?.[playerIndex];
-  if (exact?.connected) return exact;
-  const anyPad = allowFallback ? pads?.find((g) => g?.connected) ?? null : null;
-  if (anyPad) return anyPad;
-  // The on-screen GameCube overlay reports itself as a standard-mapping pad (ui/touch),
-  // so it drops straight into the mapping below without a second input path. A real
-  // controller always wins: plugging one in on a tablet should take over immediately.
-  return playerIndex === 0 ? touchGamepad() : null;
+  // Resolved lazily, in preference order: this player's own slot, then (for player 0) any
+  // connected pad, then the overlay. touchGamepad() builds a snapshot object per call, so
+  // it is only reached when no real controller answered.
+  let pad = exact?.connected ? exact : null;
+  if (!pad && allowFallback) pad = pads?.find((g) => g?.connected) ?? null;
+  if (!pad && playerIndex === 0) pad = touchGamepad();
+  return pad;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -700,19 +715,29 @@ function activeGamepad(playerIndex = 0, allowFallback = playerIndex === 0): Game
 //
 // The settlement module brackets every Challenge battle and owns win/lose/abandon ordering.
 // Its injected RNG stream outlives individual battles (the missions seeded-RNG convention).
-let getRngState = (Date.now() ^ 0x47474554) >>> 0; // "GGET" xor time — session-seeded, not a save value.
+/** "GGET" in ASCII, xored into the wall clock so each session draws a different GET stream
+ *  (this is a session seed, never a save value). */
+const GET_RNG_SEED_TAG = 0x47474554;
+/** mulberry32 constants (the same PRNG sim/romDamageBoot.ts uses for its fidelity gate). */
+const MULBERRY32_INCREMENT = 0x6d2b79f5;
+const UINT32_SPAN = 4294967296;
+
+let getRngState = (Date.now() ^ GET_RNG_SEED_TAG) >>> 0;
 function getRng(): number {
-  getRngState = (getRngState + 0x6d2b79f5) >>> 0;
+  getRngState = (getRngState + MULBERRY32_INCREMENT) >>> 0;
   let t = getRngState;
   t = Math.imul(t ^ (t >>> 15), t | 1);
   t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  return ((t ^ (t >>> 14)) >>> 0) / UINT32_SPAN;
 }
 const gotchaBox = createGotchaBoxSettlement({
   persistence: createBrowserGotchaBoxPersistence(),
   rng: getRng,
   clock: Date.now,
 });
+
+/** Challenge only ever offers FIGHT ALONE / TEAM UP; the session clamps to the same bound. */
+const MAX_LOCAL_PLAYERS = 2;
 
 const challengeSession = createGameSession({
   initialForceSlots: BORG_CATALOG.defaultForceSlots,
@@ -725,10 +750,6 @@ const challengeSession = createGameSession({
   loadStageAssets: loadStage,
 });
 
-function mountScreen(build: (root: HTMLElement) => MenuScreenHandle): void {
-  screenHost.mount(build);
-}
-
 function dispatchSession(event: GameSessionEvent): void {
   interpretSessionEffects(challengeSession.dispatch(event));
 }
@@ -737,96 +758,176 @@ function interpretSessionEffects(effects: readonly GameSessionEffect[]): void {
   for (const effect of effects) {
     if (effect.type === "render") renderSessionScreen();
     else if (effect.type === "teardown-battle") teardownBattle();
-    else {
-      void enterBattle().catch((error: unknown) => {
-        console.error("[battle] failed to enter battle, returning to Select Force", error);
-        teardownBattle();
-        dispatchSession({ type: "battle-preparation-failed" });
-      });
-    }
+    else enterBattleOrRecover();
   }
 }
 
+/** Battle entry is the one async effect; a failure tears the half-built battle back down
+ *  and routes the session back to Select Force rather than stranding the loading screen. */
+function enterBattleOrRecover(): void {
+  void enterBattle().catch((error: unknown) => {
+    console.error("[battle] failed to enter battle, returning to Select Force", error);
+    teardownBattle();
+    dispatchSession({ type: "battle-preparation-failed" });
+  });
+}
+
+// Screen callbacks. Every menu action is "play its cue, then dispatch the event"; naming
+// the three shapes keeps the screen builders below to the arguments that actually differ.
+function confirmWith(event: GameSessionEvent): () => void {
+  return () => {
+    playConfirmSfx();
+    dispatchSession(event);
+  };
+}
+
+function editWith(event: GameSessionEvent): () => void {
+  return () => {
+    playEditSfx();
+    dispatchSession(event);
+  };
+}
+
+function goBack(): void {
+  playBackSfx();
+  dispatchSession({ type: "back" });
+}
+
+type SessionState = ReturnType<typeof challengeSession.snapshot>;
+
+function mountTitle(): void {
+  queueBgm(AUDIO_CUES.menuBgm);
+  screenHost.mount((root) =>
+    createTitleIntro(root, {
+      onSound: (soundId) => playSfx(resolveCueToAsset(soundId, sfxKeys) ?? TITLE_SOUND_IDS[soundId] ?? null),
+      onEnter: confirmWith({ type: "title-enter" }),
+    }),
+  );
+}
+
+function mountMainMenu(state: SessionState): void {
+  queueBgm(AUDIO_CUES.menuBgm);
+  screenHost.mount((root) =>
+    createMainMenu(root, {
+      initial: state.menuMode,
+      onSelect: (mode) => {
+        if (mode === "challenge") confirmWith({ type: "menu-select", mode })();
+        else if (mode === "edit-force") editWith({ type: "menu-select", mode })();
+      },
+    }),
+  );
+}
+
+function mountDifficulty(): void {
+  screenHost.mount((root) =>
+    createSelectDifficulty(root, {
+      onSelect: (budget) => confirmWith({ type: "difficulty-select", budget })(),
+      onBack: goBack,
+    }),
+  );
+}
+
+function mountPlayerCount(): void {
+  screenHost.mount((root) =>
+    createSelectPlayers(root, {
+      maxPlayers: MAX_LOCAL_PLAYERS,
+      onSelect: (playerCount) => confirmWith({ type: "players-select", playerCount })(),
+      onBack: goBack,
+    }),
+  );
+}
+
+function mountLoadBoxData(): void {
+  // The port has its roster loaded already, so SKIP and CONFIRM advance identically.
+  const proceed = confirmWith({ type: "box-continue" });
+  screenHost.mount((root) => createLoadBoxData(root, { onConfirm: proceed, onSkip: proceed, onBack: goBack }));
+}
+
+function mountSelectForce(state: SessionState): void {
+  const slots = state.forceSlots.map((slot) => ({ ...slot, borgIds: [...slot.borgIds] }));
+  screenHost.mount((root) =>
+    createSelectForce(root, {
+      catalog: FORCE_CATALOG,
+      slots,
+      selectedSlot: state.selectedForceSlot,
+      limit: state.budget,
+      onSlotsSynced: (synced) => dispatchSession({ type: "force-slots-synced", slots: synced }),
+      onSelectSlot: (slotIndex) => confirmWith({ type: "force-slot-selected", slotIndex })(),
+      onConfirm: (slot) => confirmWith({ type: "force-slot-confirm", slot })(),
+      onEdit: (slot) => editWith({ type: "force-slot-edit", slot })(),
+      onBack: goBack,
+    }),
+  );
+}
+
+function mountForceBuilder(state: SessionState): void {
+  const slot = state.forceSlots[state.selectedForceSlot] ?? state.forceSlots[0];
+  screenHost.mount((root) =>
+    createForceBuilder(root, {
+      catalog: FORCE_CATALOG,
+      limit: state.budget,
+      initialForce: slot ? forceFromSlot(slot) : [],
+      onConfirm: (borgIds) => confirmWith({ type: "force-editor-confirm", borgIds })(),
+      onQuit: () => {
+        playBackSfx();
+        dispatchSession({ type: "force-editor-quit" });
+      },
+    }),
+  );
+}
+
+function mountBriefing(state: SessionState): void {
+  const config = state.pendingBattleConfig;
+  if (!config) throw new Error("Briefing requires a pending battle");
+  queueBgm(AUDIO_CUES.menuBgm);
+  screenHost.mount((root) =>
+    createBattleIntro(root, {
+      config,
+      catalog: FORCE_CATALOG,
+      onConfirm: confirmWith({ type: "briefing-confirm" }),
+      onBack: goBack,
+    }),
+  );
+}
+
+function mountResults(state: SessionState): void {
+  const postBattle = state.postBattle;
+  if (!postBattle) throw new Error("Results screen requires a settled battle");
+  // The battle is over but its 3D scene stays on screen behind the panel; only the HUD and
+  // any open pause overlay come down.
+  session?.hud.destroy();
+  closePauseMenu();
+  const handle = createResults(ui, { onAdvance: () => dispatchSession({ type: "advance" }) });
+  handle.render(postBattle.result, postBattle.stats);
+  screenHost.set(handle);
+}
+
+function mountGets(state: SessionState): void {
+  const handle = createGets(ui, { onAdvance: () => dispatchSession({ type: "advance" }) });
+  handle.render(getsRowsForDrops(state.postBattle?.drops ?? []));
+  screenHost.set(handle);
+}
+
+/** Mount the DOM for the session's current screen. "battle" mounts nothing: the battle IS
+ *  the 3D scene plus the HUD that enterBattle already put up. */
 function renderSessionScreen(): void {
   const state = challengeSession.snapshot();
   switch (state.screen) {
-    case "loading": queueBgm(AUDIO_CUES.battleBgm); screenHost.clear(); return;
-    case "title":
-      queueBgm(AUDIO_CUES.menuBgm);
-      mountScreen((root) => createTitleIntro(root, {
-        onSound: (soundId) => playSfx(resolveCueToAsset(soundId, sfxKeys) ?? TITLE_SOUND_IDS[soundId] ?? null),
-        onEnter: () => {
-          playConfirmSfx(); dispatchSession({ type: "title-enter" });
-        },
-      }));
-      return;
-    case "menu":
-      queueBgm(AUDIO_CUES.menuBgm);
-      mountScreen((root) => createMainMenu(root, { initial: state.menuMode, onSelect: (mode) => {
-        if (mode === "challenge") { playConfirmSfx(); dispatchSession({ type: "menu-select", mode }); }
-        else if (mode === "edit-force") { playEditSfx(); dispatchSession({ type: "menu-select", mode }); }
-      } }));
-      return;
-    case "difficulty":
-      mountScreen((root) => createSelectDifficulty(root, {
-        onSelect: (budget) => { playConfirmSfx(); dispatchSession({ type: "difficulty-select", budget }); },
-        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
-      }));
-      return;
-    case "players":
-      mountScreen((root) => createSelectPlayers(root, { maxPlayers: 2,
-        onSelect: (playerCount) => { playConfirmSfx(); dispatchSession({ type: "players-select", playerCount }); },
-        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
-      }));
-      return;
-    case "load-box": {
-      const proceed = () => { playConfirmSfx(); dispatchSession({ type: "box-continue" }); };
-      mountScreen((root) => createLoadBoxData(root, { onConfirm: proceed, onSkip: proceed,
-        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
-      }));
-      return;
-    }
-    case "select-force": {
-      const slots = state.forceSlots.map((slot) => ({ ...slot, borgIds: [...slot.borgIds] }));
-      mountScreen((root) => createSelectForce(root, { catalog: FORCE_CATALOG, slots,
-        selectedSlot: state.selectedForceSlot, limit: state.budget,
-        onSlotsSynced: (slots) => dispatchSession({ type: "force-slots-synced", slots }),
-        onSelectSlot: (slotIndex) => { playSfx(AUDIO_CUES.confirm); dispatchSession({ type: "force-slot-selected", slotIndex }); },
-        onConfirm: (slot) => { playConfirmSfx(); dispatchSession({ type: "force-slot-confirm", slot }); },
-        onEdit: (slot) => { playEditSfx(); dispatchSession({ type: "force-slot-edit", slot }); },
-        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
-      }));
-      return;
-    }
-    case "force": {
-      const slot = state.forceSlots[state.selectedForceSlot] ?? state.forceSlots[0];
-      mountScreen((root) => createForceBuilder(root, { catalog: FORCE_CATALOG, limit: state.budget,
-        initialForce: slot ? forceFromSlot(slot) : [],
-        onConfirm: (borgIds) => { playConfirmSfx(); dispatchSession({ type: "force-editor-confirm", borgIds }); },
-        onQuit: () => { playBackSfx(); dispatchSession({ type: "force-editor-quit" }); },
-      }));
-      return;
-    }
-    case "briefing":
-      if (!state.pendingBattleConfig) throw new Error("Briefing requires a pending battle");
-      queueBgm(AUDIO_CUES.menuBgm);
-      mountScreen((root) => createBattleIntro(root, { config: state.pendingBattleConfig!, catalog: FORCE_CATALOG,
-        onConfirm: () => { playConfirmSfx(); dispatchSession({ type: "briefing-confirm" }); },
-        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
-      }));
-      return;
-    case "results": {
-      const postBattle = state.postBattle;
-      if (!postBattle) throw new Error("Results screen requires a settled battle");
-      session?.hud.destroy(); closePauseMenu();
-      const handle = createResults(ui, { onAdvance: () => dispatchSession({ type: "advance" }) });
-      handle.render(postBattle.result, postBattle.stats); screenHost.set(handle); return;
-    }
-    case "gets": {
-      const handle = createGets(ui, { onAdvance: () => dispatchSession({ type: "advance" }) });
-      handle.render(getsRowsForDrops(state.postBattle?.drops ?? [])); screenHost.set(handle); return;
-    }
-    case "battle": return;
+    case "loading":
+      queueBgm(AUDIO_CUES.battleBgm);
+      screenHost.clear();
+      break;
+    case "title": mountTitle(); break;
+    case "menu": mountMainMenu(state); break;
+    case "difficulty": mountDifficulty(); break;
+    case "players": mountPlayerCount(); break;
+    case "load-box": mountLoadBoxData(); break;
+    case "select-force": mountSelectForce(state); break;
+    case "force": mountForceBuilder(state); break;
+    case "briefing": mountBriefing(state); break;
+    case "results": mountResults(state); break;
+    case "gets": mountGets(state); break;
+    case "battle": break;
   }
 }
 
@@ -850,7 +951,16 @@ interface BattleSession {
 
 let session: BattleSession | null = null;
 let simAccumulator = 0;
-const SIM_DT = 1 / 60;
+/** The sim runs at the source's fixed 60 Hz step. */
+const SIM_DT = SOURCE_FRAME_SECONDS;
+/** Longest wall-clock gap a single stepBattle call absorbs. A tab that was hidden for a
+ *  minute fast-forwards this much, not the whole minute. */
+const SIM_MAX_CATCHUP_SECONDS = 0.25;
+/** Hard cap on sub-steps per stepBattle call, so a slow frame cannot spiral into an
+ *  ever-growing catch-up loop. */
+const SIM_MAX_SUBSTEPS = 15;
+/** Longest render delta fed to the animation mixers, matching the sim's catch-up policy. */
+const RENDER_MAX_DELTA_SECONDS = 0.05;
 
 async function enterBattle(): Promise<void> {
   await initializeGotchaBoxBattle(
@@ -922,79 +1032,97 @@ function localFocusBorg(): BattleActorObservation | null {
 }
 
 function currentBattlePresentation(): ReturnType<typeof battlePresentationState> | null {
-  if (!session) return null;
-  return battlePresentationState({
-    battle: session.battle,
-    localPlayerId: session.localPlayerId,
-    allyMax: session.allyMax,
-    enemyMax: session.enemyMax,
-    defaultBorgId: DEFAULT_LEAD,
-    actionProfileFor: (borgId) => BORG_CATALOG.actionProfileFor(borgId),
-  });
+  return session
+    ? battlePresentationState({
+        battle: session.battle,
+        localPlayerId: session.localPlayerId,
+        allyMax: session.allyMax,
+        enemyMax: session.enemyMax,
+        defaultBorgId: DEFAULT_LEAD,
+        actionProfileFor: (borgId) => BORG_CATALOG.actionProfileFor(borgId),
+      })
+    : null;
+}
+
+/**
+ * Player tag ("1P"/"2P") for the HUD, or undefined in a single-local session.
+ *
+ * Only surfaced when more than one local player shares the session (future multi-viewport
+ * work); the single-player HUD stays capture-faithful with no tag.
+ */
+function localPlayerLabel(live: BattleSession): string | undefined {
+  const playerIndex = live.localPlayerIds.indexOf(live.localPlayerId);
+  const multiLocal = live.localPlayerIds.length > 1 && playerIndex >= 0;
+  return multiLocal ? `${playerIndex + 1}P` : undefined;
 }
 
 function updateHud(): void {
-  if (!session) return;
+  const live = session;
   const presentation = currentBattlePresentation();
-  if (presentation) {
-    const teammates = projectedTeammateMarkers(session.battle, presentation.focus);
-    // Player tag ("1P"/"2P") from the local player's index in localPlayerIds — only surfaced
-    // in multi-local sessions (future multi-viewport work); single-player HUD stays
-    // capture-faithful with no tag. Conditional-spread keeps the keys absent (not undefined)
-    // under exactOptionalPropertyTypes, matching battleHudState's optional-field style.
-    const playerIndex = session.localPlayerIds.indexOf(session.localPlayerId);
-    const playerLabel =
-      session.localPlayerIds.length > 1 && playerIndex >= 0 ? `${playerIndex + 1}P` : undefined;
-    const extras = {
+  if (live && presentation) {
+    // Conditional spread keeps absent extras absent (not `undefined`) under
+    // exactOptionalPropertyTypes, matching battleHudState's own optional-field style.
+    const teammates = projectedTeammateMarkers(live.battle, presentation.focus);
+    const playerLabel = localPlayerLabel(live);
+    live.hud.update({
+      ...presentation.hud,
       ...(teammates.length > 0 ? { teammates } : {}),
       ...(playerLabel !== undefined ? { playerLabel } : {}),
-    };
-    session.hud.update(
-      teammates.length > 0 || playerLabel !== undefined ? { ...presentation.hud, ...extras } : presentation.hud,
-    );
+    });
   }
 }
 
+/** Most floating ally plates drawn at once, so a big CPU-ally squad cannot paper over the
+ *  battle. TUNED (no ROM plate budget is decoded). */
 const TEAMMATE_MARKER_LIMIT = 3;
+/** Plate anchor above the ally's root — head height. TUNED, matching the captures. */
 const TEAMMATE_MARKER_Y_OFFSET = 125;
+/** Slack outside the viewport (fraction of the frame) before a plate is culled, so one
+ *  half-off-screen ally does not pop its plate in and out along the edge. TUNED. */
 const TEAMMATE_MARKER_SCREEN_MARGIN = 0.04;
 const _hudProject = new THREE.Vector3();
+
+/** Normalized screen position of an ally's plate anchor, or null when it projects behind
+ *  the camera or too far outside the frame to be worth drawing. */
+function projectTeammateAnchor(actor: BattleActorObservation): { x01: number; y01: number } | null {
+  const scenePos = battleScene.positionOf(actor.uid);
+  _hudProject
+    .set(
+      scenePos?.x ?? actor.pos.x,
+      (scenePos?.y ?? actor.pos.y) + TEAMMATE_MARKER_Y_OFFSET,
+      scenePos?.z ?? actor.pos.z,
+    )
+    .project(camera);
+  const x01 = (_hudProject.x + 1) * 0.5;
+  const y01 = (1 - _hudProject.y) * 0.5;
+  const behindCamera = _hudProject.z < -1 || _hudProject.z > 1;
+  const offFrame =
+    x01 < -TEAMMATE_MARKER_SCREEN_MARGIN ||
+    x01 > 1 + TEAMMATE_MARKER_SCREEN_MARGIN ||
+    y01 < -TEAMMATE_MARKER_SCREEN_MARGIN ||
+    y01 > 1 + TEAMMATE_MARKER_SCREEN_MARGIN;
+  return behindCamera || offFrame ? null : { x01, y01 };
+}
 
 function projectedTeammateMarkers(
   battle: Battle,
   focus: BattleActorObservation | null,
 ): TeammateMarker[] {
-  if (!focus) return [];
   const markers: TeammateMarker[] = [];
-  for (const b of battle.observe().actors) {
-    if (!b.alive || b.uid === focus.uid || b.team !== focus.team) continue;
-    const scenePos = battleScene.positionOf(b.uid);
-    _hudProject
-      .set(
-        scenePos?.x ?? b.pos.x,
-        (scenePos?.y ?? b.pos.y) + TEAMMATE_MARKER_Y_OFFSET,
-        scenePos?.z ?? b.pos.z,
-      )
-      .project(camera);
-    const x01 = (_hudProject.x + 1) * 0.5;
-    const y01 = (1 - _hudProject.y) * 0.5;
-    if (
-      _hudProject.z < -1 ||
-      _hudProject.z > 1 ||
-      x01 < -TEAMMATE_MARKER_SCREEN_MARGIN ||
-      x01 > 1 + TEAMMATE_MARKER_SCREEN_MARGIN ||
-      y01 < -TEAMMATE_MARKER_SCREEN_MARGIN ||
-      y01 > 1 + TEAMMATE_MARKER_SCREEN_MARGIN
-    ) {
-      continue;
+  if (focus) {
+    for (const actor of battle.observe().actors) {
+      if (markers.length >= TEAMMATE_MARKER_LIMIT) break;
+      const isTeammate = actor.alive && actor.uid !== focus.uid && actor.team === focus.team;
+      const anchor = isTeammate ? projectTeammateAnchor(actor) : null;
+      if (anchor) {
+        markers.push({
+          label: actor.ownerPlayer === null ? "CPU" : "ALLY",
+          hp01: clamp01(actor.hp / Math.max(1, actor.maxHp)),
+          x01: clamp01(anchor.x01),
+          y01: clamp01(anchor.y01),
+        });
+      }
     }
-    markers.push({
-      label: b.ownerPlayer === null ? "CPU" : "ALLY",
-      hp01: Math.max(0, Math.min(1, b.hp / Math.max(1, b.maxHp))),
-      x01: Math.max(0, Math.min(1, x01)),
-      y01: Math.max(0, Math.min(1, y01)),
-    });
-    if (markers.length >= TEAMMATE_MARKER_LIMIT) break;
   }
   return markers;
 }
@@ -1007,22 +1135,26 @@ function projectedTeammateMarkers(
 // direct resumeBattle() call here as well would double-dispatch resume for one keypress (and,
 // now that onResume/onQuit play menu SFX, would have double-played the confirm/back cue too).
 const pauseInputEdge = createInputEdgeLatch();
+/** Standard-mapping Start (the GameCube Start/Pause button; ui/touch publishes it here too). */
+const PAD_START_BUTTON = 9;
 function pauseControlPressed(): boolean {
   const pad = activeGamepad();
-  return keys.has("Escape") || keys.has("Enter") || (pad?.buttons[9]?.pressed ?? false);
+  return keys.has("Escape") || keys.has("Enter") || (pad?.buttons[PAD_START_BUTTON]?.pressed ?? false);
 }
 
 function pollPauseToggle(): void {
-  if (!session || session.resolved) return;
-  if (pauseInputEdge.poll(pauseControlPressed()) && !session.paused) {
-    pauseBattle();
-  }
+  const live = session;
+  // Guard clause: with no battle (or one already resolved) the latch is deliberately NOT
+  // polled, so a control held across the battle boundary cannot bank a rising edge.
+  if (!live || live.resolved) return;
+  if (pauseInputEdge.poll(pauseControlPressed()) && !live.paused) pauseBattle();
 }
 
 function pauseBattle(): void {
-  if (!session || session.paused) return;
-  session.paused = true;
-  session.pauseHandle = screenHost.mountOverlay((root) => createPauseMenu(root, {
+  const live = session;
+  if (!live || live.paused) return; // guard clause: no battle to pause
+  live.paused = true;
+  live.pauseHandle = screenHost.mountOverlay((root) => createPauseMenu(root, {
     // PauseMenu treats "back"/"start" (Escape/Enter/gamepad-Start, routed through the bus) the
     // same as an explicit RESUME confirm — see PauseMenu.ts onMenuAction — so this one callback
     // covers every resume input path; playConfirmSfx here cannot double-fire against
@@ -1041,7 +1173,7 @@ function pauseBattle(): void {
 }
 
 function resumeBattle(): void {
-  if (!session) return;
+  if (!session) return; // guard clause: nothing to resume
   closePauseMenu();
   session.paused = false;
   // Swallow the in-flight pause key edge: the menuInput bus resumed the game
@@ -1057,9 +1189,10 @@ function resumeBattle(): void {
 
 function closePauseMenu(): void {
   const handle = session?.pauseHandle;
-  if (!handle) return;
-  screenHost.closeOverlay(handle);
-  if (session?.pauseHandle === handle) session.pauseHandle = null;
+  if (handle) {
+    screenHost.closeOverlay(handle);
+    if (session?.pauseHandle === handle) session.pauseHandle = null;
+  }
 }
 
 function endBattleToMenu(): void {
@@ -1080,49 +1213,54 @@ function teardownBattle(): void {
 // battle keeps progressing even when the tab is backgrounded (rAF is throttled
 // to ~0 Hz while hidden). dt is clamped so returning from a long background gap
 // fast-forwards a bounded number of frames instead of one giant spike.
-function stepBattle(dt: number): void {
-  if (!session || session.paused || session.resolved) return;
-  const { battle } = session;
-
-  simAccumulator += Math.min(dt, 0.25);
-  // Fixed 60 Hz; collect local input once and apply for each sub-step.
+/**
+ * One PlayerInput per local player for this tick. Only player 0 reads the keyboard; every
+ * local player gets their own pad slot, and a player with no deployed borg is fed empty
+ * input so a dead slot cannot drive the sim.
+ */
+function collectLocalInputs(live: BattleSession): Record<string, PlayerInput> {
   const inputs: Record<string, PlayerInput> = {};
-  for (let playerIndex = 0; playerIndex < session.localPlayerIds.length; playerIndex += 1) {
-    const playerId = session.localPlayerIds[playerIndex] ?? playerIdFor(playerIndex);
-    const active = activeBorgForPlayer(battle, playerId);
+  const soloSession = live.localPlayerIds.length === 1;
+  for (let playerIndex = 0; playerIndex < live.localPlayerIds.length; playerIndex += 1) {
+    const playerId = live.localPlayerIds[playerIndex] ?? playerIdFor(playerIndex);
+    const active = activeBorgForPlayer(live.battle, playerId);
     const keySource = playerIndex === 0 ? keys : NO_KEYS;
-    const pad = activeGamepad(playerIndex, session.localPlayerIds.length === 1 && playerIndex === 0);
+    const pad = activeGamepad(playerIndex, soloSession && playerIndex === 0);
     inputs[playerId] = active ? inputFromKeys(keySource, pad) : emptyInput();
   }
+  return inputs;
+}
 
-  let steps = 0;
-  while (simAccumulator >= SIM_DT && steps < 15) {
-    // The profile accessor lets the snapshot capture the local borg's charge tier thresholds
-    // (chargeTier1Frames/chargeTier2Frames) for the charge_start/tier-up cues — read from the
-    // combat package's action profiles, never hardcoded app-side.
-    const audioBefore = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax, (id) =>
+/**
+ * Advance the sim one fixed step and emit the audio edges it crossed.
+ *
+ * The profile accessor lets the snapshot capture the local borg's charge tier thresholds
+ * (chargeTier1Frames/chargeTier2Frames) for the charge_start/tier-up cues — read from the
+ * combat package's action profiles, never hardcoded app-side.
+ */
+function stepSimOnce(live: BattleSession, inputs: Record<string, PlayerInput>): void {
+  const snapshot = (): ReturnType<typeof snapshotBattleAudio> =>
+    snapshotBattleAudio(live.battle, live.localPlayerId, live.allyMax, (id) =>
       BORG_CATALOG.actionProfileFor(id),
     );
-    battle.step(SIM_DT, inputs);
-    const audioAfter = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax, (id) =>
-      BORG_CATALOG.actionProfileFor(id),
-    );
-    for (const cue of battleAudioEvents(audioBefore, audioAfter)) {
-      playBattleEventSfx(cue);
-    }
-    // Per-borg voice cues (deploy shout / death cry), (az) — TUNED role binding.
-    for (const voiceKey of battleVoiceCues(audioBefore, audioAfter)) {
-      playBorgVoice(voiceKey);
-    }
-    simAccumulator -= SIM_DT;
-    steps += 1;
-    if (battle.observe().result !== "ongoing") break;
+  const audioBefore = snapshot();
+  live.battle.step(SIM_DT, inputs);
+  const audioAfter = snapshot();
+  for (const cue of battleAudioEvents(audioBefore, audioAfter)) {
+    playBattleEventSfx(cue);
   }
+  // Per-borg voice cues (deploy shout / death cry), (az) — TUNED role binding.
+  for (const voiceKey of battleVoiceCues(audioBefore, audioAfter)) {
+    playBorgVoice(voiceKey);
+  }
+}
 
-  // Compute the presentation once: it drives both the world scene (reticle color = melee mode)
-  // and the HUD, keeping the "battle mode" signal single-sourced from battleHudState.
+/** Push this tick's sim state into the scene and HUD. The presentation is computed ONCE:
+ *  it drives both the world scene (reticle color = melee mode) and the HUD, keeping the
+ *  "battle mode" signal single-sourced from battleHudState. */
+function syncBattlePresentation(live: BattleSession): void {
   const presentation = currentBattlePresentation();
-  const sceneState = battleSceneState(battle, presentation?.focus ?? localFocusBorg());
+  const sceneState = battleSceneState(live.battle, presentation?.focus ?? localFocusBorg());
   battleScene.sync(
     sceneState.actors,
     sceneState.projectiles,
@@ -1131,42 +1269,75 @@ function stepBattle(dt: number): void {
     sceneState.projectileDespawns,
   );
   updateHud();
+}
 
-  if (battle.observe().result !== "ongoing") resolveBattle();
+function stepBattle(dt: number): void {
+  const live = session;
+  if (!live || live.paused || live.resolved) return; // guard clause: sim is not running
+
+  simAccumulator += Math.min(dt, SIM_MAX_CATCHUP_SECONDS);
+  // Input is sampled once per tick and replayed for every sub-step, so a catch-up burst
+  // cannot read a different controller state mid-burst.
+  const inputs = collectLocalInputs(live);
+
+  let steps = 0;
+  while (simAccumulator >= SIM_DT && steps < SIM_MAX_SUBSTEPS) {
+    stepSimOnce(live, inputs);
+    simAccumulator -= SIM_DT;
+    steps += 1;
+    if (live.battle.observe().result !== "ongoing") break;
+  }
+
+  syncBattlePresentation(live);
+  if (live.battle.observe().result !== "ongoing") resolveBattle();
+}
+
+/** camera+0x2e6 default: state 2 = no-lock follow (sim/camera.ts header). */
+const DEFAULT_LOCK_CAMERA_STATE = 2;
+
+/**
+ * World position of the focus borg's lock target for the camera's lock-follow states.
+ *
+ * Prefers the RENDER position (the scene node the player actually sees, already smoothed by
+ * the actor sync) and falls back to the raw sim position for a target the scene has not
+ * spawned a node for yet. Null when nothing is locked.
+ */
+function lockTargetWorldPos(live: BattleSession, targetUid: string | null): THREE.Vector3 | null {
+  const scenePos = targetUid ? battleScene.positionOf(targetUid) : null;
+  const simActor =
+    !scenePos && targetUid
+      ? live.battle.observe().actors.find((b) => b.uid === targetUid) ?? null
+      : null;
+  const simPos = simActor
+    ? new THREE.Vector3(simActor.pos.x, simActor.pos.y, simActor.pos.z)
+    : null;
+  return scenePos ?? simPos;
 }
 
 // Battle-camera framing: see apps/game/src/sim/camera.ts header for the full DERIVED-vs-TUNED
-// breakdown (ram-trace-analysis.md §3.1 height-offset/distance/smoothing evidence, plus a TUNED
-// multi-actor widen-to-fit heuristic since no ROM multi-actor framing algorithm was found).
+// breakdown (ram-trace-analysis.md §3.1 height-offset/distance/smoothing evidence).
 function followCamera(): void {
-  if (!session) return;
+  const live = session;
+  if (!live) return; // guard clause: no battle to frame
+
   const focus = localFocusBorg();
-  const target = focus ? battleScene.positionOf(focus.uid) : null;
-  const activeTargetUid = focus?.targetLockState?.activeTargetUid ?? focus?.lockTarget ?? null;
-  const activeTargetScenePos = activeTargetUid ? battleScene.positionOf(activeTargetUid) : null;
-  const activeTargetSim = activeTargetUid
-    ? session.battle.observe().actors.find((b) => b.uid === activeTargetUid) ?? null
-    : null;
-  const lockTargetPos =
-    activeTargetScenePos ??
-    (activeTargetSim ? new THREE.Vector3(activeTargetSim.pos.x, activeTargetSim.pos.y, activeTargetSim.pos.z) : null);
+  const focusPos = focus ? battleScene.positionOf(focus.uid) : null;
+  const targetUid = focus?.targetLockState?.activeTargetUid ?? focus?.lockTarget ?? null;
   const primary =
-    focus && target
-      ? cameraFollowTargetForBorg(focus, target, {
-          lockTargetPos,
-          lockTargetKey: activeTargetUid,
-          lockCameraState: focus.targetLockState?.cameraState ?? 2,
+    focus && focusPos
+      ? cameraFollowTargetForBorg(focus, focusPos, {
+          lockTargetPos: lockTargetWorldPos(live, targetUid),
+          lockTargetKey: targetUid,
+          lockCameraState: focus.targetLockState?.cameraState ?? DEFAULT_LOCK_CAMERA_STATE,
         })
       : null;
-  const positions = battleLiveActorPositions(session.battle, (uid) => battleScene.positionOf(uid));
-  battleCamera.update(primary, positions, session.stageBounds);
+  battleCamera.update(primary);
+
   // zz_000584c_ @0x8000584c: copy light source position (DAT_802c3470/74/78) into
   // light destination (DAT_803c10f4/8/10fc) each frame. The source is the first
   // directional light's position from the stage render state.
-  if (session && !session.paused) {
-    const srcPos = stageLighting.directionals[0]?.position ?? null;
-    if (srcPos) updateLightPosition(stageLighting, srcPos);
-  }
+  const lightSource = live.paused ? null : stageLighting.directionals[0]?.position ?? null;
+  if (lightSource) updateLightPosition(stageLighting, lightSource);
 }
 
 function cameraFollowTargetForBorg(
@@ -1184,48 +1355,70 @@ function cameraFollowTargetForBorg(
     rotY: borg.rotY,
     lockTargetPos: lock?.lockTargetPos ?? null,
     lockTargetKey: lock?.lockTargetKey ?? null,
-    lockCameraState: lock?.lockCameraState ?? 2,
+    lockCameraState: lock?.lockCameraState ?? DEFAULT_LOCK_CAMERA_STATE,
   };
 }
 
-function updateBattleDebugDataset(): void {
-  if (!ENABLE_BATTLE_DEBUG_DATASET) return;
-  if (!session || challengeSession.snapshot().screen !== "battle") {
-    delete ui.dataset["gfBattleDebug"];
-    return;
-  }
-  const activeUid = localActiveUid();
-  const focusUid = localFocusBorg()?.uid ?? null;
-  const rounded = (v: number): number => Math.round(v * 10) / 10;
-  ui.dataset["gfBattleDebug"] = JSON.stringify({
-    activeUid,
-    focusUid,
-    camera: [rounded(camera.position.x), rounded(camera.position.y), rounded(camera.position.z)],
-    target: [rounded(controls.target.x), rounded(controls.target.y), rounded(controls.target.z)],
-    bounds: session.stageBounds,
-    borgs: session.battle.observe().actors.map((b) => ({
-      uid: b.uid,
-      team: b.team,
-      borgId: b.borgId,
-      alive: b.alive,
-      hp: b.hp,
-      state: b.state,
-      pos: [rounded(b.pos.x), rounded(b.pos.y), rounded(b.pos.z)],
-      vel: [rounded(b.vel.x), rounded(b.vel.y), rounded(b.vel.z)],
-      lockTarget: b.lockTarget,
-      allyLockTarget: b.allyLockTarget,
-      targetPointerUid: b.targetLockState?.activeTargetUid ?? null,
-      targetListIndex:
-        b.targetLockState?.mode === "ally" ? b.targetLockState.allyIndex : b.targetLockState?.enemyIndex ?? -1,
-      lockMode: b.targetLockState?.mode ?? "enemy",
-      sourceTargetState: b.targetLockState?.sourceState ?? 0,
-      lockCameraState: b.targetLockState?.cameraState ?? 2,
-      movementFrame: b.targetLockState?.activeTargetUid
-        ? `${b.targetLockState.mode}:${b.targetLockState.activeTargetUid}`
-        : "no-lock",
-    })),
-  });
+/** One decimal place: enough to diff positions between runs without churning the dataset
+ *  attribute (and the JSON blob it produces) on sub-unit float noise. */
+const DEBUG_DATASET_DECIMALS = 10;
+
+function roundedForDebug(value: number): number {
+  return Math.round(value * DEBUG_DATASET_DECIMALS) / DEBUG_DATASET_DECIMALS;
 }
+
+function debugActorRow(b: BattleActorObservation): Record<string, unknown> {
+  const lock = b.targetLockState;
+  return {
+    uid: b.uid,
+    team: b.team,
+    borgId: b.borgId,
+    alive: b.alive,
+    hp: b.hp,
+    state: b.state,
+    pos: [roundedForDebug(b.pos.x), roundedForDebug(b.pos.y), roundedForDebug(b.pos.z)],
+    vel: [roundedForDebug(b.vel.x), roundedForDebug(b.vel.y), roundedForDebug(b.vel.z)],
+    lockTarget: b.lockTarget,
+    allyLockTarget: b.allyLockTarget,
+    targetPointerUid: lock?.activeTargetUid ?? null,
+    targetListIndex: lock?.mode === "ally" ? lock.allyIndex : lock?.enemyIndex ?? -1,
+    lockMode: lock?.mode ?? "enemy",
+    sourceTargetState: lock?.sourceState ?? 0,
+    lockCameraState: lock?.cameraState ?? DEFAULT_LOCK_CAMERA_STATE,
+    movementFrame: lock?.activeTargetUid ? `${lock.mode}:${lock.activeTargetUid}` : "no-lock",
+  };
+}
+
+/** ?debugBattle: mirror the live sim/camera state onto #ui[data-gf-battle-debug] for the
+ *  browser harness. Read-only over the battle. */
+function updateBattleDebugDataset(): void {
+  if (!ENABLE_BATTLE_DEBUG_DATASET) return; // guard clause: the dataset is opt-in
+
+  const live = challengeSession.snapshot().screen === "battle" ? session : null;
+  if (!live) {
+    delete ui.dataset["gfBattleDebug"];
+  } else {
+    ui.dataset["gfBattleDebug"] = JSON.stringify({
+      activeUid: localActiveUid(),
+      focusUid: localFocusBorg()?.uid ?? null,
+      camera: [
+        roundedForDebug(camera.position.x),
+        roundedForDebug(camera.position.y),
+        roundedForDebug(camera.position.z),
+      ],
+      target: [
+        roundedForDebug(controls.target.x),
+        roundedForDebug(controls.target.y),
+        roundedForDebug(controls.target.z),
+      ],
+      bounds: live.stageBounds,
+      borgs: live.battle.observe().actors.map(debugActorRow),
+    });
+  }
+}
+
+/** computeResults reports ratios as 0..1; the Results screen renders percentages. */
+const PERCENT_SCALE = 100;
 
 function resolveBattle(): void {
   if (!session || session.resolved) return;
@@ -1240,11 +1433,12 @@ function resolveBattle(): void {
   // Challenge battle — toCombatBattleConfig's team mapping) and rolls drops; a LOSE reverts
   // the pool to its pre-battle snapshot exactly like an abandon (§2c — the ROM makes no
   // distinction between a lose and an abandon for the revert).
-  let drops: GetDrop[] = [];
+  let drops: readonly GetDrop[];
   if (outcome.win) {
     drops = gotchaBox.win(session.battle.observe().defeats);
   } else {
     gotchaBox.revert();
+    drops = [];
   }
 
   dispatchSession({
@@ -1253,8 +1447,8 @@ function resolveBattle(): void {
     drops,
     stats: {
       attack: results.attack,
-      hitRatio: results.hitRatio * 100,
-      dodgeRatio: results.dodgeRatio * 100,
+      hitRatio: results.hitRatio * PERCENT_SCALE,
+      dodgeRatio: results.dodgeRatio * PERCENT_SCALE,
       enemyBorgsDefeated: results.enemyBorgsDefeated,
       enemyTotalCost: results.costWon,
       playerBorgsDefeated: results.playerBorgsDefeated,
@@ -1282,7 +1476,7 @@ function getsRowsForDrops(drops: readonly GetDrop[]): GetsRow[] {
 // camera, and the WebGL render. Sim stepping is handled by the interval below.
 const renderClock = new THREE.Clock();
 function tick(): void {
-  const dt = Math.min(renderClock.getDelta(), 0.05);
+  const dt = Math.min(renderClock.getDelta(), RENDER_MAX_DELTA_SECONDS);
   const screen = challengeSession.snapshot().screen;
   if (screen === "battle" || screen === "results") {
     battleScene.update(dt);
@@ -1348,8 +1542,7 @@ startRenderLoop({ frame: tick });
 function showLoadingMessage(text: string): void {
   screenHost.clear();
   const box = document.createElement("div");
-  box.style.cssText =
-    "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#bfeeff;font:600 16px 'Trebuchet MS',system-ui,sans-serif;text-align:center;text-shadow:0 1px 3px #000;";
+  box.style.cssText = LOADING_MESSAGE_CSS;
   box.textContent = text;
   ui.appendChild(box);
 }

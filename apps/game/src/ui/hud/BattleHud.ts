@@ -47,10 +47,19 @@
 import { ASSETS, borgBannerPath } from "../assets.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { el, clamp01 } from "../dom.js";
+import { SOURCE_FRAME_RATE_HZ } from "../../constants.js";
 
 /** Native GameCube frame the HUD is authored against. */
 const FRAME_W = 640;
 const FRAME_H = 480;
+
+/** HP at or below this fraction of max swaps the glossy ring for the red critical capsule
+ *  (challenge-9 capture). TUNED: the capture shows the swapped state, not its threshold. */
+const DEFAULT_CRITICAL_HP_FRACTION = 0.25;
+
+/** Burst-charged flash: frames bright, then the same count dim, advanced once per HUD
+ *  update (one sim frame). TUNED — no capture of the charged state exists yet. */
+const BURST_FLASH_HALF_PERIOD_FRAMES = 8;
 
 export interface TeammateMarker {
   /** Short plate label, e.g. "CPU" or "ALLY". */
@@ -211,7 +220,7 @@ function hudText(className: string, left: number, top: number): HTMLSpanElement 
 }
 
 export function createBattleHud(container: HTMLElement, opts: BattleHudOptions = {}): BattleHudHandle {
-  const critFrac = opts.criticalFraction ?? 0.25;
+  const critFrac = opts.criticalFraction ?? DEFAULT_CRITICAL_HP_FRACTION;
   const root = el("div", { class: "gf-hud" });
 
   // One full-frame vector layer for all game-drawn geometry.
@@ -644,7 +653,9 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
     burstArc.setAttribute("stroke-dashoffset", String(BURST_C * (1 - burst)));
     if (s.burstCharged) {
       burstFlashFrame += 1;
-      burstArc.setAttribute("stroke", burstFlashFrame % 16 < 8 ? "#eafff8" : "#3fe8c4");
+      const bright =
+        burstFlashFrame % (BURST_FLASH_HALF_PERIOD_FRAMES * 2) < BURST_FLASH_HALF_PERIOD_FRAMES;
+      burstArc.setAttribute("stroke", bright ? "#eafff8" : "#3fe8c4");
     } else {
       burstFlashFrame = 0;
       burstArc.setAttribute("stroke", "#3fe8c4");
@@ -769,7 +780,7 @@ function syncTeammates(layer: HTMLElement, mates: readonly TeammateMarker[]): vo
 }
 
 function formatFramesAsClock(frames: number): string {
-  const seconds = Math.max(0, Math.ceil(frames / 60));
+  const seconds = Math.max(0, Math.ceil(frames / SOURCE_FRAME_RATE_HZ));
   const minutes = Math.floor(seconds / 60);
   const rest = seconds % 60;
   return `${minutes}:${String(rest).padStart(2, "0")}`;

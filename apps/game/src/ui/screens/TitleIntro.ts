@@ -35,6 +35,7 @@ import { el } from "../dom.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import type { MenuInputTarget } from "../menuInput.js";
 import { publicUrl } from "../../publicUrl.js";
+import { SOURCE_FRAME_RATE_HZ, SOURCE_FRAME_SECONDS } from "../../constants.js";
 
 /**
  * Source-strict mode: when a VM command cannot be satisfied from source data
@@ -49,8 +50,6 @@ function sourceMissing(reason: string, detail?: unknown): void {
   console.error(`[title][source-missing] ${reason}`, detail ?? "");
   if (SOURCE_STRICT) throw new Error(`[title][source-missing] ${reason}`);
 }
-export function __titleSourceStrictForTest(): boolean { return SOURCE_STRICT; }
-
 export interface TitleIntroOptions {
   /** Called on confirm (click or Enter/Space/any key = "press start"). */
   onEnter: () => void;
@@ -117,8 +116,10 @@ const INTRO_ACTOR_ANCHORS = [
   [1800, -1450, 2000],
 ] as const;
 
-const SOURCE_FPS = 60;
-const FIXED_FRAME_SECONDS = 1 / SOURCE_FPS;
+const FIXED_FRAME_SECONDS = SOURCE_FRAME_SECONDS;
+/** Cap on the catch-up a single fallback tick may swallow, so returning from a long
+ *  background gap fast-forwards a bounded number of VM frames instead of one spike. */
+const FALLBACK_MAX_CATCHUP_SECONDS = 0.1;
 
 // ROM script animId -> baked g0-file clip — DERIVED 2026-07-06 (family-ctor-anim-bank
 // decode): the VM fires actorPlayAnim(slot, groupSel=5, animId); groupSel 5 indexes the
@@ -153,7 +154,7 @@ type BakedClip = {
 /** Same bake->AnimationClip conversion as sim/borgPresentationAssets.ts. Root translation
  * is intentionally retained: the recovered g0 animation is the choreography source. */
 function buildClip(json: BakedClip): THREE.AnimationClip {
-  const fps = json.fps ?? 60;
+  const fps = json.fps ?? SOURCE_FRAME_RATE_HZ;
   const times = Float32Array.from({ length: json.frameCount }, (_, frame) => frame / fps);
   const tracks: THREE.KeyframeTrack[] = [];
   for (const bone of json.bones) {
@@ -450,7 +451,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     let accumulator = 0;
     const step = (now = performance.now()): void => {
       if (destroyed) return;
-      accumulator += Math.min(0.1, Math.max(0, (now - last) / 1000));
+      accumulator += Math.min(FALLBACK_MAX_CATCHUP_SECONDS, Math.max(0, (now - last) / 1000));
       last = now;
       while (accumulator >= FIXED_FRAME_SECONDS) {
         vm.tick();

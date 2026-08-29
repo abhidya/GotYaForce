@@ -9,6 +9,9 @@
  */
 export const BASE_URL = import.meta.env.BASE_URL;
 
+/** URL schemes that already address a complete resource and must pass through untouched. */
+const ABSOLUTE_PREFIXES = ["data:", "http", "blob:"] as const;
+
 /**
  * Prefix an absolute path with the Vite base URL.
  *
@@ -17,6 +20,7 @@ export const BASE_URL = import.meta.env.BASE_URL;
  * relative paths (e.g. `audio/bgm/bgm00.ogg`) get the BASE_URL prefix.
  */
 export function publicUrl(path: string): string {
-  if (path.startsWith("data:") || path.startsWith("http") || path.startsWith("blob:")) return path;
-  return path.startsWith("/") ? `${BASE_URL}${path.slice(1)}` : `${BASE_URL}${path}`;
+  const alreadyAbsolute = ABSOLUTE_PREFIXES.some((prefix) => path.startsWith(prefix));
+  const relative = path.startsWith("/") ? path.slice(1) : path;
+  return alreadyAbsolute ? path : `${BASE_URL}${relative}`;
 }

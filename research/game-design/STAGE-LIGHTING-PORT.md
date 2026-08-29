@@ -16,7 +16,7 @@ DATA COMPLETE 40/40, RUNTIME WIRED 40/40 (single-light path), MODULE READY.
   fov/near/far, falling back to the st00-derived `DEFAULT_RENDER_STATE`.
 - New canonical module: `apps/game/src/stages/lighting.ts`. It owns the exported-JSON ->
   three.js translation (typed shapes, `resolveStageLighting`, `createStageLightingRig`,
-  `applyResolvedStageLighting`, `fetchStageRenderState`) and fixes the one gap in the
+  `applyResolvedStageLighting`) and fixes the one gap in the
   inline main.ts resolver: stages with more than one positioned LObj (`stff` has two)
   keep only the first directional in main.ts, while the module drives all of them.
 - Resolver validated at runtime against all 40 on-disk `render-state.json` files plus the
@@ -32,23 +32,25 @@ readable image across all 40 stages (this matches the already-shipping main.ts b
 of `intensity = 1`). Any future global brightness correction goes through this single
 constant — never per-stage fudging.
 
-## Integration still needed (main.ts is owned elsewhere)
+## Integration (done — main.ts consumes the module)
 
-The stage-lighting mount point is main.ts-only, so main.ts was not edited. To move it
-onto the module, replace the inline helpers (`parseHexColor`, `stageVector`,
-`extractedLights`, `legacyLights`, `resolveAmbientLight`, `resolveDirectionalLight`,
-`applyStageRenderState`) and the `stageAmbient`/`stageLight` globals with:
+`apps/game/src/main.ts` builds the rig once at boot and drives it per stage. The three
+steps are kept separate (rather than behind a one-call wrapper) so the audit-flagged
+readability overrides land between resolve and apply:
 
 ```ts
-import { createStageLightingRig, applyStageRenderStateLighting } from "./stages/lighting";
+import { createStageLightingRig, resolveStageLighting, applyResolvedStageLighting } from "./stages/lighting";
+import { applyStageReadabilityOverrides } from "./stages/readabilityOverrides";
 
-const stageLighting = createStageLightingRig(scene); // replaces stageAmbient/stageLight setup
+const stageLighting = createStageLightingRig(scene);
 
-// in loadStage(), replacing applyStageRenderState(renderState):
-const resolved = applyStageRenderStateLighting(scene, stageLighting, renderState);
-camera.fov = resolved.camera.fovDegrees;
-camera.near = resolved.camera.near;
-camera.far = resolved.camera.far;
+// in applyStageRenderState(stageId, renderState):
+const resolved = resolveStageLighting(renderState);
+const withOverrides = applyStageReadabilityOverrides(stageId, resolved);
+applyResolvedStageLighting(scene, stageLighting, withOverrides);
+camera.fov = withOverrides.camera.fovDegrees;
+camera.near = withOverrides.camera.near;
+camera.far = withOverrides.camera.far;
 camera.updateProjectionMatrix();
 ```
 

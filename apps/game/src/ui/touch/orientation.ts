@@ -1,7 +1,7 @@
 /**
  * orientation — screen-rotation support for the browser app.
  *
- * Three separate problems, none of which the app handled before:
+ * Two separate problems, neither of which the app handled before:
  *
  * 1. WHEN DOES THE VIEWPORT ACTUALLY CHANGE. A single "resize" listener is not enough on
  *    mobile. iOS Safari fires resize BEFORE the rotation animation settles, so measuring
@@ -15,12 +15,10 @@
  *    the visual viewport without a layout resize, which is the classic "100vh is taller
  *    than the screen" bug. visualViewport events are included so the overlay tracks the
  *    space the player can actually touch.
- *
- * 3. LOCKING. screen.orientation.lock() is only permitted from fullscreen on the browsers
- *    that implement it at all (it is absent on iOS Safari entirely). It is therefore
- *    offered as a best-effort call that resolves to whether it worked — never awaited as
- *    though it were guaranteed, and never required for the app to function, because the
- *    overlay already carries Dolphin's portrait coordinate set as a real fallback.
+ * *
+ * Orientation LOCKING is deliberately not offered: screen.orientation.lock() requires
+ * fullscreen on every engine that implements it and is absent on iOS Safari entirely, and
+ * the overlay already carries Dolphin's portrait coordinate set as a real layout.
  */
 
 /** A viewport measurement plus the orientation bucket it implies. */
@@ -119,36 +117,3 @@ export function isTouchDevice(): boolean {
   );
 }
 
-/**
- * Best-effort landscape lock. Resolves true only if the lock was actually applied.
- *
- * Locking requires fullscreen on every engine that supports it, and iOS Safari does not
- * implement screen.orientation.lock at all — so a false result is an expected outcome,
- * not an error. Callers must stay functional in portrait regardless.
- */
-export async function lockLandscape(element: Element = document.documentElement): Promise<boolean> {
-  const orientation = screen.orientation as (ScreenOrientation & {
-    lock?: (o: string) => Promise<void>;
-  }) | undefined;
-  if (!orientation?.lock) return false;
-
-  try {
-    if (!document.fullscreenElement && element.requestFullscreen) {
-      await element.requestFullscreen({ navigationUI: "hide" });
-    }
-    await orientation.lock("landscape");
-    return true;
-  } catch {
-    // Rejected locks are routine: no fullscreen, no user gesture, or unsupported.
-    return false;
-  }
-}
-
-/** Release a landscape lock taken by lockLandscape. Safe to call unconditionally. */
-export function unlockOrientation(): void {
-  try {
-    screen.orientation?.unlock?.();
-  } catch {
-    // Unsupported; nothing to release.
-  }
-}
