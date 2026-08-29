@@ -2479,22 +2479,22 @@ undefined4 FUN_8006cc90(double param_1,int param_2,int param_3,int param_4,short
 
 // ==== 8006d0dc  zz_006d0dc_ ====
 
-void zz_006d0dc_(int param_1,uint param_2,short param_3)
+undefined4 zz_006d0dc_(int param_1,uint param_2,short param_3)  /* CORPUS CORRECTION 2026-08-29: 0x8006d0dc DELIVERS a value -- PPC has no void. Its last action is 'bl 0x800669d0' at 0x8006d124, which tail-calls FUN_80066a30 (0x80066a30, 'undefined4', li r3,0 / li r3,1). The ROM epilogue never writes r3, so the callee's r3 flows out through this function's blr; the true return type is undefined4. Ghidra printed 'void' because the decompiled body has no explicit 'return <expr>;', which is necessary but NOT sufficient for a no-result procedure. Evidence: disassembly of the DOL text section (boot.dol, symbol map GG4E-CSM-20220412) + the terminal function's own decompiled signature; corpus consumers assign and branch on the result. */
 
 {
   zz_006660c_(param_1);
   if (*(int *)(param_1 + 0xcc) != 0) {
     *(short *)(param_1 + 0x5aa) = *(short *)(param_1 + 0x5aa) - param_3;
   }
-  FUN_800669d0(param_1,param_2);
-  return;
+  return FUN_800669d0(param_1,param_2);
+  /* CORPUS CORRECTION 2026-08-29: the bare 'return;' is subsumed by the tail-call return above. */
 }
 
 
 
 // ==== 8006d144  zz_006d144_ ====
 
-void zz_006d144_(int param_1,uint param_2)
+undefined4 zz_006d144_(int param_1,uint param_2)  /* CORPUS CORRECTION 2026-08-29: 0x8006d144 DELIVERS a value -- PPC has no void. Its last action is 'bl 0x800669d0' at 0x8006d18c, which tail-calls FUN_80066a30 (0x80066a30, 'undefined4', li r3,0 / li r3,1). The ROM epilogue never writes r3, so the callee's r3 flows out through this function's blr; the true return type is undefined4. Ghidra printed 'void' because the decompiled body has no explicit 'return <expr>;', which is necessary but NOT sufficient for a no-result procedure. Evidence: disassembly of the DOL text section (boot.dol, symbol map GG4E-CSM-20220412) + the terminal function's own decompiled signature; corpus consumers assign and branch on the result. */
 
 {
   if (*(int *)(param_1 + 0xcc) == 0) {
@@ -2503,8 +2503,8 @@ void zz_006d144_(int param_1,uint param_2)
   else {
     zz_006660c_(param_1);
   }
-  FUN_800669d0(param_1,param_2);
-  return;
+  return FUN_800669d0(param_1,param_2);
+  /* CORPUS CORRECTION 2026-08-29: the bare 'return;' is subsumed by the tail-call return above. */
 }
 
 

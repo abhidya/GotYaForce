@@ -3222,11 +3222,11 @@ void zz_01b1f10_(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefi
 
 // ==== 801b1fb8  zz_01b1fb8_ ====
 
-void zz_01b1fb8_(void)
+int zz_01b1fb8_(void)  /* CORPUS CORRECTION 2026-08-29: 0x801b1fb8 DELIVERS a value -- PPC has no void. Its last action is 'bl 0x801b1014' at 0x801b1fc4; zz_01b1014_ is 'int' and ends 'mr r3,r31; blr' (chunk_0052.c:2453). The ROM epilogue never writes r3, so the callee's r3 flows out through this function's blr; the true return type is int. Ghidra printed 'void' because the decompiled body has no explicit 'return <expr>;', which is necessary but NOT sufficient for a no-result procedure. Evidence: disassembly of the DOL text section (boot.dol, symbol map GG4E-CSM-20220412) + the terminal function's own decompiled signature; corpus consumers assign and branch on the result. */
 
 {
-  zz_01b1014_();
-  return;
+  return zz_01b1014_();
+  /* CORPUS CORRECTION 2026-08-29: the bare 'return;' is subsumed by the tail-call return above. */
 }
 
 
