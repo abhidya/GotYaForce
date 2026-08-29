@@ -17,7 +17,7 @@ regenerated {{ metricsData.generatedAt?.slice(0, 10) }} (commit `{{ metricsData.
   <MetricCard label="Borgs catalogued" :value="metricsData.borgsIndexed" accent="pink" hint="of {{ metricsData.borgsOnDisc }} on disc" />
   <MetricCard label="Stages mapped" :value="metricsData.stagesMapped" accent="green" hint="18 named arenas" />
   <MetricCard label="TUNED remaining" :value="metricsData.tunedRemaining" unit="/ {{ metricsData.tunedTotal }}" accent="amber" hint="{{ metricsData.tunedDerived }} derived · {{ metricsData.tunedFilesWithDebt }} files" />
-  <MetricCard label="Decomp organized" :value="metricsData.organizedPct" unit="%" accent="green" hint="{{ (metricsData.totalOrganizedFiles - metricsData.unsortedFiles).toLocaleString() }} / {{ metricsData.totalOrganizedFiles.toLocaleString() }} files bucketed" />
+  <MetricCard label="Decomp organized" :value="metricsData.organizedPct" unit="%" accent="green" hint="{{ metricsData.bucketedFunctions.toLocaleString() }} / {{ metricsData.totalFunctions.toLocaleString() }} functions bucketed" />
   <MetricCard label="Unsorted functions" :value="metricsData.unsortedFunctions.toLocaleString()" accent="amber" hint="functions not yet bucketed" />
   <MetricCard label="Decoded data tables" :value="progressData.buckets?.length ?? 0" accent="blue" hint="research/decomp/data/" />
   <MetricCard label="Color variants" :value="6" accent="pink" hint="normal / alt / gold / silver / crystal / black" />

@@ -1,5 +1,30 @@
 # Gotcha Force (GG4E) — 1:1 Port Status & Source Map
 
+> [!NOTE]
+> **Scope, as of 2026-08-29.** This file tracks the **hand-written TypeScript port** —
+> subsystem by subsystem, DONE / PARTIAL / MISSING / STUB against ROM evidence. Its last
+> synthesis wave is **2026-08-03**; entries below that date are historical.
+>
+> It is no longer the whole story. Since then the project's active frontier is the
+> **automated wasm-unit port pipeline** — recompiling decompiled C into WebAssembly units
+> and verifying them against the ROM — which this file does not cover at all. For that,
+> read, in order:
+>
+> - [`docs/playable-port-design.md`](../../docs/playable-port-design.md) — the design
+>   contract (v1→v5, PASS verdict). The normative document.
+> - [`research/decomp/corpus-correction-loop.md`](corpus-correction-loop.md) — how a
+>   mis-lifted decompilation gets found and corrected.
+> - [`docs/threads-relink-reverify.md`](../../docs/threads-relink-reverify.md) — the
+>   re-verification a verified unit must pass to enter the shared-memory composed module.
+> - [`docs/composition-ladder.md`](../../docs/composition-ladder.md) — how the composed
+>   link scales past the N=5 gate window (currently **stopped at rung 1**).
+>
+> **Do not read a staged wasm unit as a ported subsystem.** 112 units are staged at tier
+> `compile_only` — they compile and link, and nothing more is claimed. Three units
+> (`damage-core`, `collision-core`, `knockback-core`) are `oracle_green`. One
+> (`auto-c0035-002`) replayed **behaviorally divergent** against its reference. See the
+> root [`README.md`](../../README.md) "Verification tiers" section for the vocabulary.
+
 Authoritative per-subsystem tracker: current port state, ROM/decomp source mapping, and the
 ranked next action to reach 1:1. Maintained alongside `behavior-notes.md` (the lab notebook,
 sections (a)–(ax)) and `attack-mechanics-findings.md`. Last synthesized 2026-08-03 from the

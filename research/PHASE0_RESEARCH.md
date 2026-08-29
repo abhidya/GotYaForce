@@ -5,6 +5,25 @@
 > **Confidence labels:** Confirmed (directly verified, 3-0 adversarial vote) / Likely (multiple clues) / Speculative / Unknown.
 > **Region discipline:** NTSC-J = **GG4J**, NTSC-U = **GG4E**, PAL = **GG4P**. Addresses/hashes/layouts are kept per-region and never merged.
 
+> [!WARNING]
+> **Superseded on its headline finding.** This document is a dated Phase-0 snapshot, kept
+> for its source survey and provenance work. Its central claim — that the 3D
+> model/skeleton/animation format is "the one unsolved blocker" — was **solved on
+> 2026-06-30**, shortly after this was written. `_mdl.arc` is **HSD DAT** (HAL Sysdolphin);
+> the HSD lead in section 1 was the correct one. Conversion runs offline through
+> HSDRaw / HSDRawViewer to Collada/GLB + PNG, and the browser app loads the converted
+> output. All 208 Borgs have static models exported and most have animated bakes.
+>
+> Current, authoritative sources for that area:
+> [`research/format-specs/arc-hsd-format.md`](format-specs/arc-hsd-format.md) (full format
+> spec and validation evidence) and
+> [`packages/formats/src/mdl-arc.ts`](../packages/formats/src/mdl-arc.ts) (why there is
+> deliberately no runtime TypeScript parser).
+>
+> The separate, stronger claim that HSD is *statically linked into `boot.dol`* stays
+> **refuted** — it was always a different claim from "the `.arc` FILES are HSD DAT".
+> Read every "UNSOLVED / critical path" marking below with this correction applied.
+
 Provenance note: every "Confirmed" item below was extracted from a primary source and survived a 3-vote adversarial verification pass. Engineering-design sections (architecture, roadmap, repo layout, recreation choices — outputs 9–16) are **design recommendations / inference**, not research findings, and are labeled as such.
 
 ---

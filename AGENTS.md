@@ -104,6 +104,16 @@ these automatically on release; prefer letting it.
   `fork/main`, so bare `git push` is safe, `git push origin` is not.
 - GotYaForce repo: product commits on `main`, machine journal on
   `port-progress` (worktree under `.tmp/port-progress-worktree`).
+- **The driver publishes the sha it just committed on the CURRENT branch, with an
+  explicit refspec `<sha>:refs/heads/port-staging` — fast-forward only.** It does
+  not consult upstream config (a bare `git push` caused the gate-ledger bug, which
+  is why the refspec is explicit). Two consequences, both proven by the 2026-08-23
+  outage: moving `HEAD` off the lineage that `origin/port-staging` already points
+  into makes every subsequent push non-fast-forward and **stops the port**; and a
+  repair commit made on top of the wrong lineage can invalidate a promotion that
+  was already pending. Before touching branches while the driver is alive, pause
+  the gate — then check `git ls-remote origin refs/heads/port-staging` against your
+  local lineage.
 - No vendor branding / Co-Authored-By in commit messages. A guard test in
   OGhidra (`tests/test_port_wasm_units.py`) fails if it reappears.
 - Verify pushes with `git ls-remote origin <branch>` — local tracking refs lie.
