@@ -37,6 +37,15 @@ const CEILING_NORMAL_MAX_Y = -0.5;
 const CEILING_BODY_CLEARANCE = JUMP.GROUND_Y;
 const CEILING_CLEARANCE = 0.25;
 const STICK_EPS = 0.001;
+/** Segment-vs-plane tolerances for the wall/ceiling tests below. Pure numerical guards on
+ *  the port's own geometry math — no ROM analogue. PLANE_EPSILON rejects a segment lying in
+ *  the plane (and a normal with no horizontal component); SEGMENT_T_EPSILON admits a
+ *  crossing parameter a hair outside [0,1]; BARYCENTRIC_EPSILON admits a point a hair
+ *  outside the triangle. */
+const PLANE_EPSILON = 1e-5;
+const SEGMENT_T_EPSILON = 1e-4;
+const BARYCENTRIC_EPSILON = 1e-4;
+const DEGENERATE_TRIANGLE_EPSILON = 1e-8;
 
 export interface MoveContext {
   /** Resolved lock-on target position, if locked (face toward it). */
@@ -79,12 +88,19 @@ export function movementContextOf(b: BorgRuntime): MovementContext {
   const dashing = (b.cooldowns["dashActive"] ?? 0) > 0;
   const landing = (b.cooldowns["landedFrames"] ?? 0) > 0;
 
-  if (landing) return "landing";
-  if (!b.grounded && dashing) return "air_dash";
-  if (b.grounded && dashing) return "ground_dash";
-  if (b.state === "fly") return "flying";
-  if (!b.grounded) return b.vel.y > 0 ? "jump_rise" : "neutral_air";
-  return "standing";
+  let context: MovementContext;
+  if (landing) {
+    context = "landing";
+  } else if (dashing) {
+    context = b.grounded ? "ground_dash" : "air_dash";
+  } else if (b.state === "fly") {
+    context = "flying";
+  } else if (!b.grounded) {
+    context = b.vel.y > 0 ? "jump_rise" : "neutral_air";
+  } else {
+    context = "standing";
+  }
+  return context;
 }
 
 /** True if the borg's current state allows free movement input. */
@@ -390,10 +406,14 @@ function resolveHorizontalIntent(b: BorgRuntime, input: PlayerInput, lockTargetP
   };
 }
 
+// The equal case falls into the `>=` arm and yields max(current - maxDelta, target) ===
+// target. Deliberately kept as the same Math.min/Math.max expressions rather than
+// current + clamp(delta): `current + (target - current)` is not exactly `target` in
+// floating point, and this feeds position integration every frame.
 function approachScalar(current: number, target: number, maxDelta: number): number {
-  if (current < target) return Math.min(current + maxDelta, target);
-  if (current > target) return Math.max(current - maxDelta, target);
-  return target;
+  return current < target
+    ? Math.min(current + maxDelta, target)
+    : Math.max(current - maxDelta, target);
 }
 
 function groundYAt(collision: StageCollision | null, x: number, z: number, currentY: number): number {
@@ -485,11 +505,11 @@ function segmentTriangleWallHit(
   const d0 = signedDistanceToPlane(previous, a, tri.normal);
   const d1 = signedDistanceToPlane(current, a, tri.normal);
   if (!Number.isFinite(d0) || !Number.isFinite(d1)) return null;
-  if (Math.abs(d0 - d1) < 1e-5) return null;
+  if (Math.abs(d0 - d1) < PLANE_EPSILON) return null;
   if (d0 === 0 || d0 * d1 > 0) return null;
 
   const t = d0 / (d0 - d1);
-  if (t < -1e-4 || t > 1 + 1e-4) return null;
+  if (t < -SEGMENT_T_EPSILON || t > 1 + SEGMENT_T_EPSILON) return null;
   const point = {
     x: previous.x + (current.x - previous.x) * t,
     y: previous.y + (current.y - previous.y) * t,
@@ -512,11 +532,11 @@ function segmentTriangleCeilingHit(
   const d0 = signedDistanceToPlane(previousTop, a, tri.normal);
   const d1 = signedDistanceToPlane(currentTop, a, tri.normal);
   if (!Number.isFinite(d0) || !Number.isFinite(d1)) return null;
-  if (Math.abs(d0 - d1) < 1e-5) return null;
+  if (Math.abs(d0 - d1) < PLANE_EPSILON) return null;
   if (d0 <= 0 || d1 > 0) return null;
 
   const t = d0 / (d0 - d1);
-  if (t < -1e-4 || t > 1 + 1e-4) return null;
+  if (t < -SEGMENT_T_EPSILON || t > 1 + SEGMENT_T_EPSILON) return null;
   const point = {
     x: previousTop.x + (currentTop.x - previousTop.x) * t,
     y: previousTop.y + (currentTop.y - previousTop.y) * t,
@@ -544,17 +564,16 @@ function pointInTriangle3d(point: Vec3, [a, b, c]: [Vec3, Vec3, Vec3]): boolean 
   const dot11 = dot(v1, v1);
   const dot12 = dot(v1, v2);
   const denom = dot00 * dot11 - dot01 * dot01;
-  if (Math.abs(denom) < 1e-8) return false;
+  if (Math.abs(denom) < DEGENERATE_TRIANGLE_EPSILON) return false;
   const inv = 1 / denom;
   const u = (dot11 * dot02 - dot01 * dot12) * inv;
   const v = (dot00 * dot12 - dot01 * dot02) * inv;
-  return u >= -1e-4 && v >= -1e-4 && u + v <= 1.0001;
+  return u >= -BARYCENTRIC_EPSILON && v >= -BARYCENTRIC_EPSILON && u + v <= 1 + BARYCENTRIC_EPSILON;
 }
 
 function horizontalNormal(normal: Vec3): { x: number; z: number } | null {
   const length = Math.hypot(normal.x, normal.z);
-  if (length < 1e-5) return null;
-  return { x: normal.x / length, z: normal.z / length };
+  return length < PLANE_EPSILON ? null : { x: normal.x / length, z: normal.z / length };
 }
 
 function dot(a: Vec3, b: Vec3): number {

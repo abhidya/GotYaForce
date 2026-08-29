@@ -27,7 +27,9 @@ import {
 } from "./burst.js";
 import {
   activeSourceTargetUid,
+  DIRECTION_EPSILON,
   enterDeath,
+  homingTargetForSpawn,
   findVariantByKind,
   isBusy,
   projectileVisualKindForProfile,
@@ -61,7 +63,7 @@ import { setBootConfigByte } from "./bootGlobals.js";
 import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
 import { stepStatus } from "./status.js";
-import { DEFAULT_BOUNDS, HOMING, JUMP, MUZZLE_OFFSET, SHOT, SIM } from "./constants.js";
+import { DEFAULT_BOUNDS, JUMP, MUZZLE_OFFSET, SHOT, SIM } from "./constants.js";
 import shotMuzzleSpeedData from "./data/shotMuzzleSpeed.generated.json" with { type: "json" };
 import { floorSurfaceYAt } from "@gf/physics";
 import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
@@ -174,28 +176,6 @@ function romMuzzleSpeedForBorgId(id: string): RomMuzzleSpeed | null {
   }
   const [rx, uy, fz] = mo as [number, number, number];
   return { muzzleOffset: [rx, uy, fz], speed: rec.speed };
-}
-
-/** Spawn-time aim-cone gate for ROM-family projectiles — a 1:1 port of combat.ts's private
- *  homingTargetForSpawn (FUN_8006c334, chunk_0009.c:1995): a shot only aims/homes at the
- *  shooter's locked target when that target lies inside the muzzle aim cone around the
- *  projectile's INITIAL facing direction; otherwise it flies straight. Replicated here because
- *  the original is module-private to combat.ts; the cone half-angle is the same TUNED
- *  HOMING.AIM_CONE_HALF_ANGLE_RAD (FLOAT_8043768c identified but UNDUMPED). */
-function romAimConeTarget(
-  b: BorgRuntime,
-  all: readonly BorgRuntime[],
-  muzzlePos: Vec3,
-  dir: Vec3,
-): string | null {
-  if (!b.lockTarget) return null;
-  const tgt = all.find((o) => o.uid === b.lockTarget);
-  if (!tgt || !tgt.alive || tgt.hp <= 0 || tgt.state === "death") return null;
-  const to = sub(tgt.pos, muzzlePos);
-  const dist = len(to);
-  if (dist <= 1e-6) return b.lockTarget; // muzzle on top of the target: trivially in-cone
-  const cos = (to.x * dir.x + to.y * dir.y + to.z * dir.z) / dist;
-  return cos >= Math.cos(HOMING.AIM_CONE_HALF_ANGLE_RAD) ? b.lockTarget : null;
 }
 
 // W17 (wiki-mechanics-queue.md): a player whose force is exhausted while a same-team ally
@@ -445,13 +425,14 @@ class BattleImpl implements Battle {
    * gone the team's energy is 0 and the battle is decided, so no further husk spawns.
    */
   private allyForceStillFighting(force: ForceRuntime): boolean {
-    return this.forces.some((f) => {
-      if (f === force || f.team !== force.team) return false;
-      if (f.queue.length > 0) return true;
-      if (f.activeUid === null) return false;
-      const active = this.byUid.get(f.activeUid);
-      return !!active && active.alive && active.hp > 0 && active.borgId !== HUSK_BORG_ID;
-    });
+    const isSameTeamAlly = (f: ForceRuntime): boolean => f !== force && f.team === force.team;
+    const hasRealFightLeft = (f: ForceRuntime): boolean => {
+      const active = f.activeUid === null ? undefined : this.byUid.get(f.activeUid);
+      const activeIsRealBorg =
+        active !== undefined && active.alive && active.hp > 0 && active.borgId !== HUSK_BORG_ID;
+      return f.queue.length > 0 || activeIsRealBorg;
+    };
+    return this.forces.some((f) => isSameTeamAlly(f) && hasRealFightLeft(f));
   }
 
   private deployNext(force: ForceRuntime, spawn: { pos: Vec3; rotY: number }, rom?: RomActor): void {
@@ -700,8 +681,8 @@ class BattleImpl implements Battle {
 
   private clampRomToGround(pos: Vec3, velY: number): { y: number; velY: number; grounded: boolean } {
     const groundY = this.groundYFor(pos.x, pos.z, pos.y);
-    if (pos.y <= groundY) return { y: groundY, velY: 0, grounded: true };
-    return { y: pos.y, velY, grounded: false };
+    const grounded = pos.y <= groundY;
+    return grounded ? { y: groundY, velY: 0, grounded } : { y: pos.y, velY, grounded };
   }
 
   private resolveRomHit(
@@ -829,14 +810,14 @@ class BattleImpl implements Battle {
     //    muzzle-widths away — the shot then flew a parallel line past a locked point-blank
     //    target and that borg's attack could never connect.
     const all = this.state.borgs;
-    const aimUid = romAimConeTarget(b, all, b.pos, fwd);
+    const aimUid = homingTargetForSpawn(b, all, b.pos, fwd);
     let flightDir = fwd;
     if (aimUid) {
       const tgt = all.find((o) => o.uid === aimUid);
       if (tgt) {
         const to = sub({ x: tgt.pos.x, y: tgt.pos.y + SHOT.AIM_TARGET_Y, z: tgt.pos.z }, muzzlePos);
         const d = len(to);
-        if (d > 1e-6) flightDir = scale(to, 1 / d);
+        if (d > DIRECTION_EPSILON) flightDir = scale(to, 1 / d);
       }
     }
 
