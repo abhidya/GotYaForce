@@ -223,6 +223,44 @@ owner decision, not a unilateral one -- correcting all 197 `zz_0089100_`
 assignment sites alone would invalidate pinned blocks across dozens of
 chunks and require a revocation per affected green unit.
 
+### Rung 2 probe (N=20) and what actually makes a window refuse
+
+The ladder is stopped at rung 1 by the E1 budget, so rung 2 was run only as a
+diagnostic probe -- it is deliberately NOT in the ledger. It refuses at
+canonicalization, on a different symbol and through a different path:
+
+    owner_variant_abi_incompatible: Clang rejected zz_007c800_
+    owner/variant pair at auto-c0011-011/gnt4_shim.h
+
+`0x8007c800` is another void ROM procedure (`chunk_0011.c:3407-3415`, registry
+`return_type: void`, `returns_value: false`); `auto-c0011-011` consumes its
+result.
+
+Comparing the three runs pins down when a window refuses. There are two
+independent paths, and a window has to clear both:
+
+1. **Header vs header** -- two units in the window declare the same symbol
+   incompatibly (rung 1: `auto-c0053-013` void vs `auto-c0025-002`
+   `undefined8` on `zz_0089100_`). This is what the disagreement table above
+   measures.
+2. **Owner registry vs variant** -- a unit's declaration is incompatible with
+   the registry owner AND that symbol's owner unit is itself in the window,
+   so the owner loop canonicalizes it (rung 2: `zz_007c800_`, owner unit
+   `auto-c0011-012`, which is in the last-20 window; the owner of
+   `zz_0089100_`, `auto-c0013-000`, is not in any window here, which is why
+   that symbol only ever surfaced through path 1).
+
+That is why rung 1b links: dropping `auto-c0025-002` removes the window's
+only header/header disagreement, and no owner unit for a divergent symbol is
+present. `auto-c0053-003`/`-005` still carry a divergent `zz_006d144_`
+declaration in that window and it costs nothing, because `zz_006d144_`'s
+owner (`auto-c0009-007`) is absent.
+
+Practical consequence: neither table alone predicts the gate. The
+header-disagreement count is the lower bound and the owner-fork count (24
+symbols across the full pool) is the upper bound. Both refusals observed so
+far are in the owner-fork set, and both are the same residue defect.
+
 ### What it actually costs to climb (measured 2026-08-29)
 
 Not every disagreement needs a corpus correction. Split each window's

@@ -18,7 +18,7 @@
       "passed": true,
       "link_passed": true,
       "stage": "pass",
-      "checked_at": "2026-08-26T08:04:43.452993Z",
+      "checked_at": "2026-08-29T21:27:51.055649Z",
       "conflicts": [],
       "new_contested_symbols": 0,
       "new_symbols_linked": 40,
@@ -66,10 +66,10 @@
       "passed": false,
       "link_passed": true,
       "stage": "pass",
-      "checked_at": "2026-08-26T08:19:41.730334Z",
+      "checked_at": "2026-08-29T21:58:13.606694Z",
       "conflicts": [
         {
-          "symbol": null,
+          "symbol": "zz_0089100_",
           "class": "canonicalization_refused",
           "units": [
             "auto-c0025-002",
@@ -83,7 +83,7 @@
             "auto-c0054-002",
             "auto-c0054-003"
           ],
-          "detail": "canonical_header_ambiguous: auto-c0053-013 declares zz_0089100_ more than once after canonicalization"
+          "detail": "owner_variant_abi_incompatible: zz_0089100_ is declared void zz_0089100_(int, uint, int); in auto-c0053-013 but int zz_0089100_(int, uint, int); in auto-c0025-002; the two declarations cannot be unified"
         }
       ],
       "new_contested_symbols": 1,
