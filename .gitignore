@@ -76,13 +76,35 @@ research/decomp/generated/finish-game-port/*
 # Memory-card saves (.gci) are pure progress data (no game code) and ARE tracked —
 # they're the standard starting saves for research/decomp/attack-mechanics-trace-plan.md.
 
-# Local extraction/build scratch.
+# Local extraction/build scratch. .tmp/ is also a build OUTPUT dir -- the
+# battle-scene-morph selfcheck bundles into .tmp/, and agent/pytest scratch
+# trees are created here. Nothing in it is durable.
 .tmp/
 .pnpm-store/
+.pytest_cache/
+/scratchpad/
+/.agents/
+# Local run logs. `*.log` already covers the vite/dev transcripts; this covers the
+# whole directory so JSON model transcripts dropped here cannot be committed either.
+/logs/
+
+# Agent worktrees. Claude Code checks agent worktrees out under .claude/worktrees/
+# (covered by the .claude/ rule above) and older tooling used .tmp/*-worktree.
+# These are ~1.2 GB apiece once node_modules is installed and are never durable:
+# a finished agent's work reaches main through its branch, not its worktree.
+/.tmp/*-worktree/
+/.claude/worktrees/
 
 # Private review/audit drafts. Durable conclusions belong in contributor or
-# design documentation, not in machine-generated review transcripts.
-/.superpowers/*.md
+# design documentation, not in machine-generated review transcripts. The whole
+# directory is ignored so ad-hoc session notes cannot silently accumulate;
+# files already tracked under .superpowers/sdd/ stay tracked regardless.
+/.superpowers/**
+
+# Oracle harness scratch: dolphin traces are regenerated per port run and land
+# here by the hundreds. The few that are real, curated evidence were added
+# deliberately and stay tracked; promote a new one with `git add -f`.
+research/decomp/oracle-harness/corpora/*.dolphin-trace.jsonl
 
 # Installers are fetched from their publisher, never vendored at repo root.
 /python-manager-*.msix
