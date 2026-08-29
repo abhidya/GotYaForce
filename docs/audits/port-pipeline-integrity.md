@@ -440,6 +440,13 @@ Mechanics that matter:
 - A standalone replay is topology proof only. **Its result must not be reused later as the
   migration receipt** — the migration runs a fresh replay inside the locked transaction.
 
+**Feature branches must be based on product `main`, not on the artifact lineage.** Basing a
+branch on `port-staging` has already been done once by mistake and is invisible in a diff.
+Verify before review with `git merge-base --is-ancestor <port-staging-sha> <tip>` — it must
+exit **1**. (See also the `AGENTS.md` git traps: the driver publishes `HEAD` to
+`refs/heads/port-staging` with an explicit refspec, so moving `HEAD` off that lineage stops
+the port outright.)
+
 ---
 
 ## 7. Standing defect classes in the driver
