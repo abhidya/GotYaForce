@@ -311,3 +311,115 @@ was still inside the owner corpus walk after 3 hours. Rungs 3-4 (N=40/80)
 are not runnable in a single session as the runner stands; the static
 disagreement measurement above is the practical instrument for planning
 them.
+
+## Correction to the "12 corpus fixes" estimate (measured 2026-08-29, second pass)
+
+The estimate above counted a symbol as a residue defect on one test: its own
+decompiled body is `void` with zero `return <expr>;` statements. That test is
+necessary but NOT sufficient, and re-deriving it independently changed the
+answer for **five of the twelve**.
+
+### Why a `void` body can still deliver a value
+
+PowerPC has no `void`. A function whose last action is a call leaves the
+callee's `r3` untouched through its own epilogue, so it delivers that value to
+its caller whether or not Ghidra prints a `return` for it. Ghidra's `void` at
+the definition site is an inference about `r3` liveness at `blr`, and for a
+tail-call wrapper that inference is simply wrong. The corpus shows the wrong
+side directly: the ROM contains a real `cmpwi r3,0` after those calls, which is
+why the decompiler emits `(iVarN = f(...), iVarN != 0)` -- a comparison Ghidra
+never invents.
+
+    void zz_006d144_(int param_1,uint param_2)      /* chunk_0009.c:2497 */
+    { ... FUN_800669d0(param_1,param_2); return; }  /* -> FUN_80066a30    */
+
+    undefined4 FUN_80066a30(int,uint,short)         /* chunk_0008.c:3390 */
+    { ... return 0; ... return 1; }                 /* angle-clamp flag  */
+
+`zz_006d144_` therefore returns `FUN_80066a30`'s 0/1 flag, and 156 of its 161
+assigning call sites branch on it. The consuming units' `extern int` are RIGHT
+and the registry owner prototype is wrong.
+
+### The decisive test: what the corpus does with the result
+
+Classifying every assignment site of every void-owner fork symbol inside the
+83-unit pool's pinned blocks by how the assigned variable is consumed
+(BRANCH / RETURN / STORE vs only reaching a dead first-parameter slot, or dead)
+separates the two classes cleanly, with no symbol landing in both:
+
+| class | symbols | pool units |
+|---|---:|---:|
+| residue -- result never branched on, stored or returned | 14 | 4 exclusively |
+| value carrier -- result drives control flow or is returned | 10 | 28 |
+
+Value carriers (registry `void` is wrong; the fix is an owner-prototype
+correction, NOT a corpus edit): `zz_006d144_` `zz_006d0dc_` `zz_007c800_`
+`FUN_800669d0` `zz_00679d0_` `zz_008ae10_` `zz_01b1fb8_` `zz_01f1280_`
+`zz_0085e00_` `zz_008aff0_`. Every one is either a terminal tail call into a
+value-returning callee (`FUN_80066a30`, `zz_008ae60_`, `zz_01b1014_`, an
+indirect `PTR_FUN_803a17..` dispatch) or leaves a live computed register at
+`blr` (`zz_00679d0_` carries `zz_00677b0_`'s `undefined4`). `zz_0085e00_` and
+`zz_008aff0_` are genuine no-result procedures, but the only pool call sites
+are `uVar6 = f(...); return uVar6;` inside `uint FUN_800bee1c`
+(`chunk_0019.c:3068`), which returns the residue -- correcting those two sites
+means deciding what `FUN_800bee1c` returns, which the corpus cannot settle.
+
+Residue symbols (safe, same class as the merged `chunk_0025.c` correction):
+`zz_0089100_` `zz_0007030_` `zz_0007cac_` `zz_0006fb4_` `zz_00456a0_`
+`zz_0048288_` `zz_0018270_` `zz_00086b8_` `zz_0005984_` `zz_00088a4_`
+`zz_0008970_` `zz_0040b94_` `zz_0040d64_` `zz_0197ad8_`.
+
+### What a corpus sweep can actually reach
+
+A unit only stops forking once EVERY void-owner assignment in its pinned blocks
+is gone. Of the 32 pool units carrying such assignments, only 4 have no value
+carrier among them and are therefore corpus-correctable end to end:
+`auto-c0002-001` `auto-c0028-018` `auto-c0029-001` `auto-c0034-018` (12 sites,
+corrected in the commit that carries this section). The other 28 are blocked on
+a value carrier and cannot be unforked by any corpus edit --
+`zz_006d144_` alone blocks 11 of them and `zz_006d0dc_` another 9.
+
+So the honest ceiling is NOT "12 corpus corrections plus a rebuild sweep":
+
+| step | reachable |
+|---|---|
+| corrections merged + `auto-c0025-002` revoked and rebuilt | rung 1, N=10 |
+| + the 4 units above revoked and rebuilt | still rung 1 |
+| rung 2 (N=20) and beyond | blocked on the owner-prototype decision |
+
+Rung 2's observed refusal is `zz_007c800_` -- a value carrier. Climbing past
+rung 1 needs the oracle registry to record the tail-call return types for the
+ten value-carrier symbols (an owner decision: it changes the canonical ABI for
+symbols the whole fleet declares), after which those 28 units are
+rebuild-only. No amount of corpus correction substitutes for it.
+
+### Rung state after the `auto-c0025-002` revocation (2026-08-29)
+
+`auto-c0025-002`'s corpus fix landed on `main` as `747bc061`, so the ordering
+rule in `research/decomp/corpus-correction-loop.md` step 3 was satisfied and its
+compile-only verdict was revoked inside a manual-gate pause window
+(`verdict-revoke-bb414324c7e6…`, registry 167 -> 168, gate restored). The unit
+is `pending` and rebuilds from the corrected chunk on the driver's normal
+rotation.
+
+The eligible pool is therefore 82, and the rung-1 window is the old rung-1b set
+(`auto-c0019-016` in place of `auto-c0025-002`). Both rungs were re-run in
+scratch against that pool, with owner-derived canonicalization and the dispatch
+companion enabled:
+
+| rung | N | result | conflicts | companion | new_contested/new_linked |
+|---:|---:|---|---:|---:|---|
+| 0 | 5 | PASS | 0 | 40 thunks | 0/40 = 0.0 |
+| 1 | 10 | **PASS** | 0 | 78 thunks | 0/38 = 0.0 |
+
+Rung 1 links with no substitution and no contested symbol, so the E1 budget is
+met (0.0 <= rung 0's 0.0) and **the ladder ceiling moves from rung 0 to rung
+1**. The static declaration-disagreement measurement over this pool reproduces
+the gate exactly: 0 at N=5, 0 at N=10, then 27 at N=20, 42 at N=40, 57 at N=80,
+61 at N=82.
+
+Rung 2 (N=20) was NOT re-run: its refusal is already characterised
+(`owner_variant_abi_incompatible` on `zz_007c800_`, owner unit `auto-c0011-012`
+in the window), `zz_007c800_` is a value carrier per the section above, and the
+run costs hours. Projected ceiling stands at rung 1 until the owner-prototype
+decision lands.

@@ -313,13 +313,13 @@ void FUN_80017c2c(undefined8 param_1,undefined8 param_2,undefined8 param_3,undef
   char cVar1;
   undefined *puVar2;
   int iVar3;
-  undefined8 uVar4;
+  undefined8 uVar4 = 0;  /* CORPUS CORRECTION 2026-08-29: r3/r4 residue, not a return value (see line 322). It flows only into zz_00282c0_'s dead first-parameter slot, so a deterministic 0 replaces undefined register content. */
   
   cVar1 = PTR_DAT_8043393c[3];
   if (cVar1 == '\x01') {
     iVar3 = zz_000a3c4_();
     if (iVar3 == 0) {
-      uVar4 = zz_0018270_();
+      zz_0018270_();  /* CORPUS CORRECTION 2026-08-29: 0x80018270 returns NO value -- its own decompiled body (chunk_0002.c:619) is "void zz_0018270_(void)", two stores then a bare "return;", and the oracle-registry owner prototype is void. The "uVar4 =" was Ghidra r3/r4-residue threading, the same defect corrected at chunk_0025.c:717. Evidence: docs/composition-ladder.md, "zz_0089100_ resolution" + this sweep's consumption audit (the result is never branched on, stored or returned anywhere in the corpus -- it only reaches dead first-parameter slots). */
       PTR_DAT_8043393c[1] = 3;
       PTR_DAT_8043393c[2] = 0;
       puVar2 = PTR_DAT_8043393c;

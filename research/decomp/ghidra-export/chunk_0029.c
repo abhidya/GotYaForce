@@ -328,7 +328,7 @@ void zz_0104b38_(undefined8 param_1,double param_2,double param_3,double param_4
   undefined4 in_r10;
   int iVar5;
   double dVar6;
-  undefined8 uVar7;
+  undefined8 uVar7 = 0;  /* CORPUS CORRECTION 2026-08-29: r3/r4 residue, not a return value (see line 352). It flows only into the dead first-parameter slots of zz_0007030_/zz_0007c54_/zz_0009b38_, which never read param_1, so a deterministic 0 replaces undefined register content. */
   int local_18 [4];
   
   iVar5 = *(int *)(param_9 + 0x90);
@@ -349,17 +349,17 @@ void zz_0104b38_(undefined8 param_1,double param_2,double param_3,double param_4
   *(float *)(param_9 + 0x68) = fVar2;
   *(float *)(param_9 + 0x6c) = fVar2;
   iVar5 = zz_0006f98_(iVar5);
-  uVar7 = zz_0007030_(dVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
+  zz_0007030_(dVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,  /* CORPUS CORRECTION 2026-08-29: 0x80007030 returns NO value -- its own decompiled body (chunk_0000.c:1548) is void and ends in stores plus a bare "return;", and the oracle-registry owner prototype is void. Same Ghidra r3/r4-residue threading as the merged chunk_0025.c:734 correction; note line 337 of this same chunk already calls the sibling zz_0089100_ bare. Evidence: docs/composition-ladder.md, "zz_0089100_ resolution" + this sweep's consumption audit (the result is never branched on, stored or returned anywhere in the corpus -- it only reaches dead first-parameter slots). */
                       *(int *)(iVar5 + 0x600),*(int *)(param_9 + 0xe0),9,iVar5 + 0xc28,in_r7,in_r8,
                       in_r9,in_r10);
   iVar4 = iVar5 + 0xc28;
   uVar3 = 9;
-  uVar7 = zz_0007030_(uVar7,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
+  zz_0007030_(uVar7,param_2,param_3,param_4,param_5,param_6,param_7,param_8,  /* CORPUS CORRECTION 2026-08-29: r3/r4-residue assignment removed, see line 352. */
                       *(int *)(iVar5 + 0x600),*(int *)(param_9 + 0xe4),9,iVar4,in_r7,in_r8,in_r9,
                       in_r10);
   zz_0007c54_(uVar7,param_2,param_3,param_4,param_5,param_6,param_7,param_8,*(int *)(param_9 + 0xe4)
               ,extraout_r4,uVar3,iVar4,in_r7,in_r8,in_r9,in_r10);
-  uVar7 = zz_0007cac_((double)FLOAT_804393f8,*(int *)(param_9 + 0xe4));
+  zz_0007cac_((double)FLOAT_804393f8,*(int *)(param_9 + 0xe4));  /* CORPUS CORRECTION 2026-08-29: 0x80007cac returns NO value -- its own decompiled body (chunk_0000.c:2365) is void, a single tail call to the void zz_00091e4_ (chunk_0000.c:3726) then a bare "return;", and the oracle-registry owner prototype is void. Same r3/r4-residue threading; uVar7 only reaches zz_0009b38_'s dead param_1. Evidence: docs/composition-ladder.md, "zz_0089100_ resolution" + this sweep's consumption audit (the result is never branched on, stored or returned anywhere in the corpus -- it only reaches dead first-parameter slots). */
   local_18[0] = 0;
   zz_0009b38_(uVar7,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
               *(int *)(*(int *)(param_9 + 0xe0) + 0xc),*(int *)(*(int *)(param_9 + 0xdc) + 0xc),

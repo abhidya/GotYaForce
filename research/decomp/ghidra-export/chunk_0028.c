@@ -4952,7 +4952,7 @@ void FUN_80104204(int param_1)
   undefined4 in_r10;
   int iVar7;
   double dVar8;
-  undefined8 uVar9;
+  undefined8 uVar9 = 0;  /* CORPUS CORRECTION 2026-08-29: r3/r4 residue, not a return value (see line 4988). It flows only into the dead first-parameter slots of zz_0007030_/zz_0007c54_, which never read param_1, so a deterministic 0 replaces undefined register content. */
   double dVar10;
   double dVar11;
   double in_f4;
@@ -4985,11 +4985,11 @@ void FUN_80104204(int param_1)
   *(undefined2 *)(param_1 + 0x70) = 0xee39;
   *(undefined2 *)(param_1 + 0x72) = 0;
   iVar7 = zz_0006f98_(iVar7);
-  uVar9 = zz_0007030_(dVar8,dVar10,dVar11,in_f4,in_f5,in_f6,in_f7,in_f8,*(int *)(iVar7 + 0x600),
+  zz_0007030_(dVar8,dVar10,dVar11,in_f4,in_f5,in_f6,in_f7,in_f8,*(int *)(iVar7 + 0x600),  /* CORPUS CORRECTION 2026-08-29: 0x80007030 returns NO value -- its own decompiled body (chunk_0000.c:1548) is void and ends in stores plus a bare "return;", and the oracle-registry owner prototype is void. Same Ghidra r3/r4-residue threading as the merged chunk_0025.c:734 correction; the residue is still passed on as uVar9, because the callee never reads param_1. Evidence: docs/composition-ladder.md, "zz_0089100_ resolution" + this sweep's consumption audit (the result is never branched on, stored or returned anywhere in the corpus -- it only reaches dead first-parameter slots). */
                       *(int *)(param_1 + 0xe0),10,iVar7 + 0xc28,in_r7,in_r8,in_r9,in_r10);
   iVar6 = iVar7 + 0xc28;
   uVar5 = 10;
-  uVar9 = zz_0007030_(uVar9,dVar10,dVar11,in_f4,in_f5,in_f6,in_f7,in_f8,*(int *)(iVar7 + 0x600),
+  zz_0007030_(uVar9,dVar10,dVar11,in_f4,in_f5,in_f6,in_f7,in_f8,*(int *)(iVar7 + 0x600),  /* CORPUS CORRECTION 2026-08-29: r3/r4-residue assignment removed, see line 4988. */
                       *(int *)(param_1 + 0xe4),10,iVar6,in_r7,in_r8,in_r9,in_r10);
   zz_0007c54_(uVar9,dVar10,dVar11,in_f4,in_f5,in_f6,in_f7,in_f8,*(int *)(param_1 + 0xe4),extraout_r4
               ,uVar5,iVar6,in_r7,in_r8,in_r9,in_r10);
