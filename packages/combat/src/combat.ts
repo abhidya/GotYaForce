@@ -7,7 +7,6 @@
 
 import {
   add,
-  angleTrimByteToBam16,
   bam16YawToXZ,
   candidateTrianglesForSegment,
   clamp,
@@ -15,7 +14,6 @@ import {
   floorSurfaceYAt,
   forwardFromYaw,
   isFiniteVec,
-  knockbackDirectionFromPositions,
   len,
   normalize,
   scale,
@@ -51,9 +49,7 @@ import {
   DAMAGE_RECORD_INDEX,
   REACTION_FORCE_STAGGER_MASK,
   damageRecordByIndex,
-  knockbackGroundSpeedForRecord,
   knockbackScaleRatio,
-  knockbackVelocityForRecord,
   type DamageRecord,
 } from "./gauges.js";
 import {
@@ -93,9 +89,9 @@ import {
   type ComboStep,
   type ExactMoveLeaf,
 } from "./actionStreamData.js";
-import { computeSourceDamage, forceGaugeRatioIndex } from "./damageFormula.js";
 import {
   computeBaseDamage,
+  forceGaugeRatioIndex,
   applyHpDamage,
   type SourceDamageActor,
   type SourceDamageContext,
@@ -687,16 +683,20 @@ function applySourceTarget(
 
 
 // ---------------------------------------------------------------------------------------
-// Damage application.
-// Runtime combat callers use the decoded zz_003cd5c_ formula in damageFormula.ts. The legacy
-// mitigate() path stays only for direct helper/test callers that do not provide an attacker
-// context. The subtract-then-clamp-at-0 shape below remains DERIVED from the live HP write trace
-// at object+0x1c6 (behavior-notes.md s4h).
+// Damage application. ONE implementation: damage/sourceDamage.ts computeBaseDamage (the 1:1
+// zz_003cd5c_ port and the ROM-wasm interception point) + applyHpDamage (zz_003d344_).
+//
+// REMOVED (2026-08-29): the `mitigate(raw, defenderDef)` flat percentage model
+// (DAMAGE.MIN_MULT / DAMAGE.DEF_PER_STAT) that used to serve attacker-less callers. It was a
+// stand-in for a mechanism the ROM does not have — behavior-notes.md (k): "the real 'defense'
+// effect is spread across multiple rank/category table lookups rather than a single
+// stat-driven percentage, which is why DAMAGE.DEF_PER_STAT/MIN_MULT (a flat percentage model)
+// stay explicitly TUNED ... the real mechanism doesn't have a percentage to extract at all."
+// Those table lookups (defenseRankCurves_80433600 / defenderHpCurves_80433608 /
+// defenderForceCurves_80433610 / defenseHandicap_80433618, chunk_0004.c:6764-6803) are now
+// ported inside computeBaseDamage, so the approximation is superseded, not merely duplicated.
+// See sourceDamageOrphanAttacker() below for how an attacker-less hit reaches the real formula.
 // ---------------------------------------------------------------------------------------
-function mitigate(raw: number, defenderDef: number): number {
-  const mult = Math.max(DAMAGE.MIN_MULT, 1 - defenderDef * DAMAGE.DEF_PER_STAT);
-  return Math.max(1, Math.round(raw * mult));
-}
 
 export interface HitSourceContext {
   attacker: BorgRuntime;
@@ -949,14 +949,17 @@ export function reactionAnimLengthFrames(
 }
 
 // ---------------------------------------------------------------------------------------
-// Source-owned module wiring — sourceDamage.ts / sourceKnockback.ts / sourceDeath.ts are the
-// PRIMARY damage / knockback-direction / death paths inside applyHit. Each delegates to the
-// clean-room 1:1 ROM port; the pre-existing derived path (damageFormula.computeSourceDamage,
-// gauges.knockback*ForRecord, physics.knockbackDirectionFromPositions, enterDeath) is the
-// documented FALLBACK so a source function that throws on unconfirmed input (or returns a
-// sentinel) never regresses the slice. Strict mode mirrors TitleIntro.ts:34-44: when
-// GF_SOURCE_STRICT is set (env or <html data-gf-source-strict>), a source-missing condition
-// FAILS VISIBLY (re-throws) instead of silently degrading to the fallback.
+// Source-owned module wiring — sourceDamage.ts / sourceKnockback.ts / sourceDeath.ts /
+// sourceCollision.ts own damage, knockback direction+magnitude, death and hit-pair resolution
+// inside applyHit. Each delegates to the clean-room 1:1 ROM port, and for damage and knockback
+// there is no longer any second path to degrade to: the derived damageFormula body, the flat
+// mitigate() percentage and the gauges.knockback*ForRecord clamp are deleted (see the
+// "Damage application" and "KNOCKBACK DIRECTION + MAGNITUDE" headers for the chunk_0004.c /
+// chunk_0007.c citations that settled each one).
+//
+// GF_SOURCE_STRICT still gates the remaining recoverable seams (the death-accounting mirror and
+// the collision pass): when set (env or <html data-gf-source-strict>, mirroring
+// TitleIntro.ts:34-44) a failure there re-throws instead of console.warn-ing.
 // ---------------------------------------------------------------------------------------
 const SOURCE_STRICT = readSourceStrictFlag();
 
@@ -1008,6 +1011,40 @@ function sourceDamageActorFromRuntime(b: BorgRuntime): SourceDamageActor {
     sideRank: 0, // overridden by applyHit
     isBorg: true,
     isActive: true, // +0x18 == 1 in normal combat
+  };
+}
+
+/**
+ * Attacker actor for an applyHit call with NO HitSourceContext (a direct helper/test call, or a
+ * projectile whose owner borg or profile is already gone). This is the ROM's own
+ * "attacking sub-object is not an active borg" arm, not an invented alternative formula:
+ * zz_003cd5c_ gates the entire attacker block on
+ * `pcVar13[0x83]=='\0' && *pcVar13!='\0' && pcVar13[0x18]=='\x01'` (chunk_0004.c:6704), so an
+ * attacker that fails it contributes nothing and the hit resolves through the defender tables,
+ * the friendly-fire compare, the GUARD/40 rule and the floor-at-1 exactly as usual.
+ *
+ * TEAM (+0x88): the ROM still reads the attacker's team byte at chunk_0004.c:6811 for the
+ * friendly-fire compare. An owner-less hit has no team relationship to compare, so this picks a
+ * value that provably differs from the victim's — i.e. the hit is NOT treated as friendly fire
+ * rather than silently taking the x0.25 cut. Everything else is the ROM's neutral identity
+ * (power 1.0, handicap byte 3, full force gauge), the same defaults sourceDamageActorFromRuntime
+ * documents.
+ */
+function sourceDamageOrphanAttacker(victim: BorgRuntime): SourceDamageActor {
+  return {
+    borgNumber: 0, // no owner object -> no +0x3e8; row 0 is the all-1.0 neutral matrix row
+    team: victim.team - 1, // provably != victim.team: no friendly-fire relationship
+    heroFlag: 0,
+    pairAttack: 0,
+    power: 1,
+    hp: 0,
+    maxHp: 0,
+    handicap: 3,
+    comboRank: 0,
+    forceRatioIndex: 0,
+    sideRank: 0,
+    isBorg: false, // +0x83 != 0 -> attacker block skipped (chunk_0004.c:6704)
+    isActive: false, // +0x18 != 1 -> same gate
   };
 }
 
@@ -1493,7 +1530,13 @@ export function stepSourceCollision(
  */
 export function applyHit(
   victim: BorgRuntime,
-  victimProfile: BorgProfile,
+  // UNUSED since the flat mitigate() defence model was removed: it was the only reader
+  // (victimProfile.defense). zz_003cd5c_ reads the victim's identity off the ACTOR — +0x3e8 for
+  // the type matrix (chunk_0004.c:6746), +0x1c4/+0x1c6 for the HP curve, +0x6ca for the combo
+  // falloff, +0x43a for handicap — all of which BorgRuntime already carries, so the profile has
+  // nothing left to contribute. Kept as a positional parameter so the ~30 existing call sites
+  // (and every downstream package) keep compiling; drop it in a dedicated signature change.
+  _victimProfile: BorgProfile,
   rawDamage: number,
   // Per-move knockback MULTIPLIER (1 = the record's derived magnitude; 0 = no knockback).
   // The BASE magnitude is derived from the hit record's strength byte — see the knockback
@@ -1530,10 +1573,12 @@ export function applyHit(
   victim.lastHitAttackerTeam = source?.attacker.team;
   victim.lastHitAttackerOwner = source ? source.attacker.ownerPlayer : victim.lastHitAttackerOwner;
 
-  // --- DAMAGE — source-owned sourceDamage.ts (computeBaseDamage + applyHpDamage) is the
-  //     PRIMARY path; damageFormula.computeSourceDamage / mitigate is the documented FALLBACK
-  //     (integration spec sourceDamage.ts:546-617). Shared inputs are hoisted so both paths
-  //     see identical force-ratio / GUARD-40 / CPU-halving values.
+  // --- DAMAGE — source-owned sourceDamage.ts (computeBaseDamage + applyHpDamage) is the ONLY
+  //     path (integration spec sourceDamage.ts). There is no second formula to fall back to:
+  //     the derived damageFormula body and the flat-percentage mitigate() are both gone (see
+  //     the header above "Damage application" and damageFormula.ts's own header for the four
+  //     places the removed body disagreed with chunk_0004.c). Calling computeBaseDamage /
+  //     applyHpDamage directly is also what keeps this on the ROM-wasm seam.
   const victimImmunityA = statusImmunityMasksForBorgId(victim.borgId).immunityA;
   const attackerForceRatioIndex = source
     ? forceGaugeRatioIndex(
@@ -1548,75 +1593,37 @@ export function applyHit(
       )
     : 0;
 
-  let dmg: number;
-  let hpAppliedViaSource = false;
-  if (source) {
-    try {
-      const attackerActor: SourceDamageActor = {
+  const attackerActor: SourceDamageActor = source
+    ? {
         ...sourceDamageActorFromRuntime(source.attacker),
         forceRatioIndex: attackerForceRatioIndex,
         sideRank: source.attackerSideRank ?? 0,
-      };
-      const defenderActor: SourceDamageActor = {
-        ...sourceDamageActorFromRuntime(victim),
-        forceRatioIndex: defenderForceRatioIndex,
-        sideRank: source.defenderSideRank ?? 0,
-      };
-      // basePower = *param_1 (record +0x00 hpDamage) × the unmapped-hitbox damageScale.
-      const basePower = record.hpDamage * (source.damageScale ?? 1);
-      const sourceCtx: SourceDamageContext = {
-        flagsA: record.flagsA, // +0x10 (incl. blast 0x1000 -> GUARD/40 + same-team bypass)
-        flagsB: record.flagsB, // +0x12 (incl. 0x4000 combo-falloff skip)
-        attackerHpCurveIndex: record.attackerHpCurveIndex, // +0x06
-        attackerForceCurveIndex: record.forceGaugeCurveIndex, // +0x07
-        // GUARD/40 DATA RULE (T1): victim static per-borg resistance mask (pldata+0xa8).
-        victimResistanceMask: victimImmunityA,
-        victimSpawnProtection: false, // +0x5e0 bit 0x4000000 writer untraced (spec TODO)
-        cpuHalvingEnabled: damageContext?.cpuHalvingEnabled === true, // T4 item 3 / T2 gate
-      };
-      const sourceDmg = computeBaseDamage(attackerActor, defenderActor, basePower, sourceCtx);
-      if (!Number.isFinite(sourceDmg) || sourceDmg < 0) {
-        throw new Error(`source computeBaseDamage returned invalid value ${sourceDmg}`);
       }
-      dmg = sourceDmg;
-      // zz_003d344_ port: subtract+clamp+prevHp-mirror replaces the bare `victim.hp -= dmg`.
-      const hpTarget: SourceDamageTarget = { hp: victim.hp, maxHp: victim.maxHp };
-      applyHpDamage(hpTarget, dmg);
-      victim.hp = hpTarget.hp;
-      hpAppliedViaSource = true;
-    } catch (err) {
-      if (SOURCE_STRICT) throw err;
-      console.warn("[combat] source damage path failed; falling back to computeSourceDamage:", err);
-      dmg = computeSourceDamage({
-        attacker: source.attacker,
-        attackerProfile: source.attackerProfile,
-        victim,
-        victimProfile,
-        record,
-        damageScale: source.damageScale ?? 1,
-        attackerSideRank: source.attackerSideRank,
-        defenderSideRank: source.defenderSideRank,
-        // GUARD/40 DATA RULE (T1): the victim's static per-borg resistance mask (pldata+0xa8),
-        // the SAME statusImmunityMasksForBorgId() the status-effect gate above already reads —
-        // see damageFormula.ts's victimStatusImmunityA doc for the full citation.
-        victimStatusImmunityA: victimImmunityA,
-        attackerForceRatioIndex,
-        defenderForceRatioIndex,
-        // T4 item 3 / T2: CPU-controlled x0.5 halvings, Challenge modes 0/1, side 0 only.
-        attackerIsCpuSide0:
-          damageContext?.cpuHalvingEnabled === true &&
-          source.attacker.team === 0 &&
-          source.attacker.ownerPlayer === null,
-        defenderIsCpuSide0:
-          damageContext?.cpuHalvingEnabled === true && victim.team === 0 && victim.ownerPlayer === null,
-      });
-    }
-  } else {
-    dmg = mitigate(rawDamage, victimProfile.defense);
-  }
-  if (!hpAppliedViaSource) {
-    victim.hp -= dmg;
-  }
+    : sourceDamageOrphanAttacker(victim);
+  const defenderActor: SourceDamageActor = {
+    ...sourceDamageActorFromRuntime(victim),
+    forceRatioIndex: defenderForceRatioIndex,
+    sideRank: source?.defenderSideRank ?? 0,
+  };
+  // basePower = *param_1 (record +0x00 hpDamage) × the unmapped-hitbox damageScale. With no
+  // attacker context there is no record binding either, so the caller's own rawDamage is the
+  // record word (that is what the attacker-less helper callers have always been passing).
+  const basePower = source ? record.hpDamage * (source.damageScale ?? 1) : rawDamage;
+  const sourceCtx: SourceDamageContext = {
+    flagsA: record.flagsA, // +0x10 (incl. blast 0x1000 -> GUARD/40 + same-team bypass)
+    flagsB: record.flagsB, // +0x12 (incl. 0x4000 combo-falloff skip)
+    attackerHpCurveIndex: record.attackerHpCurveIndex, // +0x06
+    attackerForceCurveIndex: record.forceGaugeCurveIndex, // +0x07
+    // GUARD/40 DATA RULE (T1): victim static per-borg resistance mask (pldata+0xa8).
+    victimResistanceMask: victimImmunityA,
+    victimSpawnProtection: false, // +0x5e0 bit 0x4000000 writer untraced (spec TODO)
+    cpuHalvingEnabled: damageContext?.cpuHalvingEnabled === true, // T4 item 3 / T2 gate
+  };
+  const dmg = computeBaseDamage(attackerActor, defenderActor, basePower, sourceCtx);
+  // zz_003d344_ port: subtract+clamp+prevHp-mirror replaces the bare `victim.hp -= dmg`.
+  const hpTarget: SourceDamageTarget = { hp: victim.hp, maxHp: victim.maxHp };
+  applyHpDamage(hpTarget, dmg);
+  victim.hp = hpTarget.hp;
   // Track that applyHit damaged this victim THIS frame so stepSourceCollision (which runs
   // in stepProjectiles, AFTER stepAttacks) SKIPS HP sync for this victim — its adapter
   // would otherwise build from the already-reduced HP and sync back a doubly-reduced
@@ -1722,14 +1729,16 @@ export function applyHit(
   const attackerScale = source?.attacker ? tierSizeScale(source.attacker) : 1;
   const victimScale = tierSizeScale(victim);
   const scaleRatio = knockbackScaleRatio(attackerScale, victimScale);
-  // T8 yaw trim (record byte +0x14), pre-converted for the FALLBACK mode-1 direction path.
-  const yawTrimBam16 = angleTrimByteToBam16(record.knockbackYawTrim ?? 0);
-
   // --- KNOCKBACK DIRECTION + MAGNITUDE — source-owned sourceKnockback.ts
   //     (computeKnockbackLaunchDirection + launchVelocityMagnitude/groundHorizontalSpeed) is the
-  //     PRIMARY path; physics.knockbackDirectionFromPositions + gauges.knockback*ForRecord is the
-  //     documented FALLBACK (integration spec sourceKnockback.ts:451-501). A caller-supplied
-  //     knockDir override (nonzero XZ) bypasses the ROM mode-1 calc in BOTH paths — unchanged.
+  //     ONLY path. The former fallback (physics.knockbackDirectionFromPositions +
+  //     gauges.knockback*ForRecord) is deleted: its strength clamp mapped a NEGATIVE +0x702
+  //     severity byte to index 0, while the ROM takes its ABSOLUTE VALUE first —
+  //     `cVar5 = *(char*)(param_1+0x702); if (cVar5 < '\0') cVar5 = -cVar5;` (zz_005ec20_,
+  //     chunk_0007.c:5556-5558) and `cVar5 = -cVar1; if (-1 < cVar1) cVar5 = cVar1;`
+  //     (FUN_8005ed38, chunk_0007.c:5617-5620). sourceKnockback.knockbackStrengthClamp is the
+  //     abs-then-clamp form and wins. A caller-supplied knockDir override (nonzero XZ) still
+  //     bypasses the ROM mode-1 direction calc — unchanged.
   //
   // MAGNITUDE MODEL (T6, shared by both paths): two ROM reaction families, selected by
   // useLaunchTable above:
@@ -1743,45 +1752,26 @@ export function applyHit(
   // paths are numerically identical for ground hits; the source path adds the airborne +2 boost
   // hook (launchVelocityMagnitude arg 2, currently false — +0x6fd bit 0x80 untraced).
   let dir: Vec3;
-  let baseSpeed: number;
-  try {
-    if (knockDir.x !== 0 || knockDir.z !== 0) {
-      dir = normalize(knockDir);
-    } else {
-      const angle = computeKnockbackLaunchDirection(
-        defaultSourceKnockbackActor(fromPos),
-        defaultSourceKnockbackActor(victim.pos),
-        {
-          mode: 1, // record +0x0e selector untraced (spec TODO) — mode 1 == today's behavior
-          trimYaw: record.knockbackYawTrim ?? 0, // record +0x14 (source applies byte * -0x100)
-          trimPitch: record.knockbackPitchTrim ?? 0, // record +0x15
-        },
-      );
-      if (!Number.isFinite(angle.yaw)) {
-        throw new Error(`source knockback yaw sentinel ${angle.yaw}`);
-      }
-      // BAM16 yaw -> XZ unit direction (same conversion physics.knockbackDirectionFromPositions
-      // uses internally via bam16YawToXZ; the pitch lands separately via the trim block below).
-      dir = bam16YawToXZ(angle.yaw);
-    }
-    const strength = record.reactionAnimVariant; // record +0x0d -> actor+0x702
-    baseSpeed = useLaunchTable
-      ? launchVelocityMagnitude(strength, false) // +0x6fd airborne boost bit untraced (spec TODO)
-      : groundHorizontalSpeed(strength, scaleRatio);
-    if (!Number.isFinite(baseSpeed)) {
-      throw new Error(`source knockback magnitude sentinel ${baseSpeed}`);
-    }
-  } catch (err) {
-    if (SOURCE_STRICT) throw err;
-    console.warn("[combat] source knockback path failed; falling back to TUNED path:", err);
-    dir =
-      knockDir.x === 0 && knockDir.z === 0
-        ? knockbackDirectionFromPositions(fromPos, victim.pos, yawTrimBam16)
-        : normalize(knockDir);
-    baseSpeed = useLaunchTable
-      ? knockbackVelocityForRecord(record)
-      : knockbackGroundSpeedForRecord(record, scaleRatio);
+  if (knockDir.x !== 0 || knockDir.z !== 0) {
+    dir = normalize(knockDir);
+  } else {
+    const angle = computeKnockbackLaunchDirection(
+      defaultSourceKnockbackActor(fromPos),
+      defaultSourceKnockbackActor(victim.pos),
+      {
+        mode: 1, // record +0x0e selector untraced (spec TODO) — mode 1 == today's behavior
+        trimYaw: record.knockbackYawTrim ?? 0, // record +0x14 (source applies byte * -0x100)
+        trimPitch: record.knockbackPitchTrim ?? 0, // record +0x15
+      },
+    );
+    // BAM16 yaw -> XZ unit direction (the same bam16YawToXZ conversion the physics package's
+    // knockbackDirectionFromPositions uses internally; the pitch lands separately below).
+    dir = bam16YawToXZ(angle.yaw);
   }
+  const strength = record.reactionAnimVariant; // record +0x0d -> actor+0x702
+  const baseSpeed = useLaunchTable
+    ? launchVelocityMagnitude(strength, false) // +0x6fd airborne boost bit untraced (spec TODO)
+    : groundHorizontalSpeed(strength, scaleRatio);
   const knockback = baseSpeed * KNOCKBACK.PORT_SCALE * knockbackMult;
 
   if (useLaunchTable) {
@@ -3096,7 +3086,7 @@ function spawnSpecialProjectiles(
       team: b.team,
       pos: muzzlePos,
       vel: scale(fwd, specialSpeed * tier.speed),
-      // `damage` is the damageScale fed to computeSourceDamage by stepProjectiles (same
+      // `damage` is the damageScale fed to computeBaseDamage by stepProjectiles (same
       // convention as gun projectiles); the AoE path passes the same multiplier as its
       // damageScale, so both special archetypes hit with identical record-2 strength.
       damage: specialDef.damageMultiplier * tier.damage,
