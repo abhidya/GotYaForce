@@ -401,22 +401,29 @@ export class BattleCamera {
     }
   }
 
+  /**
+   * Advance camera+0x2e6 for this frame: 2 = no lock, 3 = turning onto the lock, 4 = settled
+   * on it. Combat seeds a requested state; the camera owns the actual transitions.
+   */
   private resolveSourceCameraState(
     primary: CameraFollowTarget,
     eye: THREE.Vector3,
     interest: THREE.Vector3,
   ): 2 | 3 | 4 {
-    const rawSeed = primary.lockCameraState ?? (primary.lockTargetPos ? 3 : 2);
-    const seededState = primary.lockTargetPos && rawSeed === 2 ? 3 : rawSeed;
-    const lockKey = primary.lockTargetPos ? primary.lockTargetKey ?? "__lock_target__" : null;
-
-    if (!primary.lockTargetPos) {
+    const lockTargetPos = primary.lockTargetPos;
+    if (!lockTargetPos) {
+      // Guard clause: with nothing locked the state machine collapses to plain follow.
       this.sourceCameraState = 2;
       this.lastLockTargetKey = null;
       return this.sourceCameraState;
     }
 
+    const rawSeed = primary.lockCameraState ?? 3;
+    const seededState = rawSeed === 2 ? 3 : rawSeed;
+    const lockKey = primary.lockTargetKey ?? "__lock_target__";
+
     if (lockKey !== this.lastLockTargetKey) {
+      // A new target restarts the turn (unless combat explicitly seeded the settled state).
       this.sourceCameraState = seededState === 4 ? 4 : 3;
       this.lastLockTargetKey = lockKey;
     } else if (seededState === 4) {
@@ -427,12 +434,9 @@ export class BattleCamera {
 
     // FUN_8000cb8c can re-enter state 3 from state 4 when the lock target crosses in front of
     // the interest point in camera-local forward depth.
-    if (
-      this.sourceCameraState === 4 &&
-      shouldState4ReenterLockFollow(eye, interest, primary.lockTargetPos)
-    ) {
-      this.sourceCameraState = 3;
-    }
+    const settledButOvershot =
+      this.sourceCameraState === 4 && shouldState4ReenterLockFollow(eye, interest, lockTargetPos);
+    if (settledButOvershot) this.sourceCameraState = 3;
 
     return this.sourceCameraState;
   }
@@ -496,26 +500,41 @@ function rotateTrailTowardXZ(current: THREE.Vector3, target: THREE.Vector3, maxR
   return Math.abs(delta) > maxRadians;
 }
 
+/** True when the lock target sits nearer the eye than the interest point along the camera's
+ *  own forward axis — the condition FUN_8000cb8c re-enters state 3 on. A degenerate
+ *  eye->interest direction has no forward axis to test, so it never re-enters. */
 function shouldState4ReenterLockFollow(
   eye: THREE.Vector3,
   interest: THREE.Vector3,
   lockTarget: THREE.Vector3,
 ): boolean {
   _forward.set(interest.x - eye.x, 0, interest.z - eye.z);
-  if (_forward.lengthSq() <= MODE1_TRAIL_EPSILON_DERIVED * MODE1_TRAIL_EPSILON_DERIVED) return false;
-  _forward.normalize();
-  const interestDepth = (interest.x - eye.x) * _forward.x + (interest.z - eye.z) * _forward.z;
-  const targetDepth = (lockTarget.x - eye.x) * _forward.x + (lockTarget.z - eye.z) * _forward.z;
-  return targetDepth < interestDepth;
+  const degenerate = _forward.lengthSq() <= MODE1_TRAIL_EPSILON_DERIVED * MODE1_TRAIL_EPSILON_DERIVED;
+  let reenter = false;
+  if (!degenerate) {
+    _forward.normalize();
+    const interestDepth = (interest.x - eye.x) * _forward.x + (interest.z - eye.z) * _forward.z;
+    const targetDepth = (lockTarget.x - eye.x) * _forward.x + (lockTarget.z - eye.z) * _forward.z;
+    reenter = targetDepth < interestDepth;
+  }
+  return reenter;
 }
 
+/** DERIVED FUN_8000d11c: the state-4 blend weight ramps DOWN with distance — close in the
+ *  camera snaps onto the target (cap), far out it barely moves (floor), and between the two
+ *  it interpolates linearly. */
 function transitionNewWeight(distance: number): number {
-  if (distance >= MODE1_TRANSITION_DISTANCE_HIGH_DERIVED) return MODE1_TRANSITION_NEW_WEIGHT_FLOOR_DERIVED;
-  if (distance <= MODE1_TRANSITION_DISTANCE_LOW_DERIVED) return MODE1_TRANSITION_NEW_WEIGHT_CAP_DERIVED;
-  return (
-    MODE1_TRANSITION_NEW_WEIGHT_SLOPE_DERIVED * (distance - MODE1_TRANSITION_DISTANCE_LOW_DERIVED) +
-    MODE1_TRANSITION_NEW_WEIGHT_CAP_DERIVED
-  );
+  let weight: number;
+  if (distance >= MODE1_TRANSITION_DISTANCE_HIGH_DERIVED) {
+    weight = MODE1_TRANSITION_NEW_WEIGHT_FLOOR_DERIVED;
+  } else if (distance <= MODE1_TRANSITION_DISTANCE_LOW_DERIVED) {
+    weight = MODE1_TRANSITION_NEW_WEIGHT_CAP_DERIVED;
+  } else {
+    weight =
+      MODE1_TRANSITION_NEW_WEIGHT_SLOPE_DERIVED * (distance - MODE1_TRANSITION_DISTANCE_LOW_DERIVED) +
+      MODE1_TRANSITION_NEW_WEIGHT_CAP_DERIVED;
+  }
+  return weight;
 }
 
 function wrapRadians(radians: number): number {

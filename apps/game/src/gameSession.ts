@@ -183,6 +183,11 @@ export class InvalidSessionEventError extends Error {
 
 const GF_SOURCE_STRICT: boolean = readSourceStrictFlag();
 
+/** Challenge VM mode-4 sub-mode: the post-battle gate that advances the win counter. */
+const VM_SUBMODE_POST_BATTLE = 2;
+/** Sentinel stage byte meaning "no stage rolled yet" (rerollStage picks the first one). */
+const STAGE_BYTE_UNSET = 0xff;
+
 /** Opt-in enforcement. When true, the VM/dispatcher mappings become authoritative
  *  (an unmapped mode or unrecognized front-end screen throws instead of warning +
  *  falling back). Read via Vite's import.meta.env (GF_SOURCE_STRICT /
@@ -210,17 +215,31 @@ const CHALLENGE_VM_MODE_TO_GAME_SCREEN: Readonly<Record<number, GameScreen | nul
   [CHALLENGE_FLOW_MODE.EXIT]: "menu",
 };
 
-/** GF-energy budget → ROM difficulty index (DAT_804356d0 row: 5/10/15 battles).
- *  1500=Normal(0), 2000=Tuff(1), 2500=Insane(2). */
+/** ROM difficulty indices (DAT_804356d0 rows: 5/10/15 battles). */
+const DIFFICULTY_NORMAL = 0;
+const DIFFICULTY_TUFF = 1;
+const DIFFICULTY_INSANE = 2;
+/** GF-energy budgets the SelectDifficulty screen offers, per difficulty row. */
+const NORMAL_BUDGET = 1500;
+const TUFF_BUDGET = 2000;
+
+/** GF-energy budget → ROM difficulty index. */
 function budgetToDifficulty(budget: number): number {
-  if (budget <= 1500) return 0;
-  if (budget <= 2000) return 1;
-  return 2;
+  let difficulty = DIFFICULTY_INSANE;
+  if (budget <= NORMAL_BUDGET) difficulty = DIFFICULTY_NORMAL;
+  else if (budget <= TUFF_BUDGET) difficulty = DIFFICULTY_TUFF;
+  return difficulty;
 }
 
-/** Human player count → ROM controller slot bitmask (bit s = slot s is human). */
+/** ROM controller slot bitmask (bit s = slot s is human). */
+const CONTROLLER_MASK_1P = 0x01;
+const CONTROLLER_MASK_2P = 0x03;
+/** Challenge only ever offers FIGHT ALONE / TEAM UP. */
+const MAX_LOCAL_PLAYERS = 2;
+
+/** Human player count → ROM controller slot bitmask. */
 function playerCountToControllerMask(playerCount: number): number {
-  return playerCount >= 2 ? 0x03 : 0x01;
+  return playerCount >= MAX_LOCAL_PLAYERS ? CONTROLLER_MASK_2P : CONTROLLER_MASK_1P;
 }
 
 /** ROM numeric borg id (family<<8|variant, e.g. 0x0615 G RED) → pl#### string id
@@ -324,7 +343,11 @@ export function createGameSession<TStageRenderState>(
   let challengeVm: ChallengeFlowVm | null = null;
   // Stage selection stashed by the VM sink's rerollStage (mutated, not replaced,
   // so the sink and builder share one reference); read by buildBattleConfigFromVmSetup.
-  let challengeStageState: SessionChallengeStageState = { stageByte: 0xff, stageSubtable: 0, stageVariant: 0 };
+  let challengeStageState: SessionChallengeStageState = {
+    stageByte: STAGE_BYTE_UNSET,
+    stageSubtable: 0,
+    stageVariant: 0,
+  };
   // Session-local global-menu dispatcher mirror, used only to query
   // `getRenderState()` at front-end screen transitions. main.ts hosts the
   // authoritative per-frame dispatcher; this one is never rendered through.
@@ -361,17 +384,11 @@ export function createGameSession<TStageRenderState>(
    *  should render ("briefing" when a battle is queued, "menu" otherwise) so the
    *  force-slot-confirm handler can route it through the Challenge VM. */
   function beginRun(): GameScreen {
-    const humanPlayerCount = Math.max(1, Math.min(playerCount, 2));
-    const playerForces = Array.from({ length: humanPlayerCount }, (_, player) => {
-      const slot = player === 0
-        ? selectedSlot()
-        : forceSlots[(selectedForceSlot + player) % forceSlots.length] ?? selectedSlot();
-      return { player, borgIds: dependencies.forceFromSlot(slot) };
-    });
+    const playerForces = humanPlayerForces();
     updateSelectedForce(playerForces[0]?.borgIds ?? []);
     run = dependencies.createRun({
       budget,
-      playerCount: humanPlayerCount,
+      playerCount: playerForces.length,
       playerForces,
       borgs: dependencies.borgs,
     });
@@ -407,13 +424,20 @@ export function createGameSession<TStageRenderState>(
     return [...effects, { type: "render", screen }];
   }
 
+  /** How many local humans this run has: the chosen count, clamped to what Challenge
+   *  supports. Single-sourced so beginRun, humanPlayerForces and prepareBattle cannot
+   *  disagree on the roster size. */
+  function humanPlayerCount(): number {
+    return Math.max(1, Math.min(playerCount, MAX_LOCAL_PLAYERS));
+  }
+
   /** Human players' chosen forces (ordered by player index), shared by beginRun
    *  (@gf/missions seeding) and the VM roster converter. Human side-0 slots carry
    *  no VM-rolled roster — the VM only rolls CPU slots — so their borg ids come
-   *  from the player's selected force. */
+   *  from the player's selected force. Player 0 uses the selected slot; each further
+   *  player takes the next slot in the list. */
   function humanPlayerForces(): { player: number; borgIds: string[] }[] {
-    const humanPlayerCount = Math.max(1, Math.min(playerCount, 2));
-    return Array.from({ length: humanPlayerCount }, (_, player) => {
+    return Array.from({ length: humanPlayerCount() }, (_, player) => {
       const slot = player === 0
         ? selectedSlot()
         : forceSlots[(selectedForceSlot + player) % forceSlots.length] ?? selectedSlot();
@@ -479,20 +503,19 @@ export function createGameSession<TStageRenderState>(
    *  back to the @gf/missions config left by beginRun) when the VM is absent,
    *  lastSetup is null, or the tick throws. */
   function applyVmBattleBuild(): boolean {
-    if (!challengeVm) return false;
+    if (!challengeVm) return false; // guard clause: no VM to consult
+    let setup: ChallengeBattleSetup | null = null;
     try {
       challengeVm.state.mode = CHALLENGE_FLOW_MODE.BATTLE_BUILD;
       challengeVm.state.subFlag = 0;
       challengeVm.tick(); // mode_buildBattle → lastSetup populated, mode→IN_BATTLE
+      setup = challengeVm.state.lastSetup;
     } catch (error) {
       if (GF_SOURCE_STRICT) throw error;
       console.warn("[challenge-flow] VM battle build failed; using @gf/missions roster", error);
-      return false;
     }
-    const setup = challengeVm.state.lastSetup;
-    if (!setup) return false;
-    pendingBattleConfig = buildBattleConfigFromVmSetup(setup);
-    return true;
+    if (setup) pendingBattleConfig = buildBattleConfigFromVmSetup(setup);
+    return setup !== null;
   }
 
   /** Tick the VM's mode-4 post-battle gate (sub 2) on a win so it increments
@@ -500,18 +523,19 @@ export function createGameSession<TStageRenderState>(
    *  (clear, reached battleTotal). Returns the resulting mode, or null when no
    *  VM is active (caller uses the @gf/missions results-on-any-win fallback). */
   function advanceVmWin(): number | null {
-    if (!challengeVm) return null;
+    if (!challengeVm) return null; // guard clause: no VM to advance
+    let nextMode: number | null = null;
     try {
       challengeVm.state.battleTotal = challengeBattleCount(challengeVm.state.difficulty as 0 | 1 | 2);
       challengeVm.state.mode = CHALLENGE_FLOW_MODE.IN_BATTLE;
-      challengeVm.state.subMode = 2; // sub_postBattle gate
+      challengeVm.state.subMode = VM_SUBMODE_POST_BATTLE;
       challengeVm.tick();
-      return challengeVm.state.mode;
+      nextMode = challengeVm.state.mode;
     } catch (error) {
       if (GF_SOURCE_STRICT) throw error;
       console.warn("[challenge-flow] VM win-counter advance failed; falling back", error);
-      return null;
     }
+    return nextMode;
   }
 
   /** Construct + enter the Challenge VM (INIT → MENU_POLL via one genuine
@@ -521,7 +545,7 @@ export function createGameSession<TStageRenderState>(
     try {
       const difficulty = budgetToDifficulty(budget);
       const borgEnergyById = new Map(dependencies.borgStats.map((b) => [b.id, b.energy] as const));
-      challengeStageState.stageByte = 0xff;
+      challengeStageState.stageByte = STAGE_BYTE_UNSET;
       challengeStageState.stageSubtable = 0;
       challengeStageState.stageVariant = 0;
       challengeVm = createChallengeFlowVm(
@@ -549,23 +573,25 @@ export function createGameSession<TStageRenderState>(
    *  authority for Challenge screen selection). Unmapped mode → fallback (strict:
    *  throw). Returns the fallback unchanged when no VM is active. */
   function resolveChallengeScreen(fallback: GameScreen): GameScreen {
-    if (!challengeVm) return fallback;
-    try {
-      const mode = challengeVm.state.mode;
-      const mapped = CHALLENGE_VM_MODE_TO_GAME_SCREEN[mode] ?? null;
-      if (mapped === null) {
-        if (GF_SOURCE_STRICT) {
-          throw new Error(`challenge VM mode ${mode} has no GameScreen binding`);
+    let screenName = fallback;
+    if (challengeVm) {
+      try {
+        const mode = challengeVm.state.mode;
+        const mapped = CHALLENGE_VM_MODE_TO_GAME_SCREEN[mode] ?? null;
+        if (mapped === null) {
+          if (GF_SOURCE_STRICT) {
+            throw new Error(`challenge VM mode ${mode} has no GameScreen binding`);
+          }
+          console.warn(`[challenge-flow] VM mode ${mode} unmapped; falling back to "${fallback}"`);
+        } else {
+          screenName = mapped;
         }
-        console.warn(`[challenge-flow] VM mode ${mode} unmapped; falling back to "${fallback}"`);
-        return fallback;
+      } catch (error) {
+        if (GF_SOURCE_STRICT) throw error;
+        console.warn("[challenge-flow] VM screen resolution failed; falling back to", fallback, error);
       }
-      return mapped;
-    } catch (error) {
-      if (GF_SOURCE_STRICT) throw error;
-      console.warn("[challenge-flow] VM screen resolution failed; falling back to", fallback, error);
-      return fallback;
     }
+    return screenName;
   }
 
   /** Advisory: confirm the front-end screen is one the ROM global-menu
@@ -605,6 +631,52 @@ export function createGameSession<TStageRenderState>(
       if (GF_SOURCE_STRICT) throw error;
       console.warn(`[global-menu] render-state capture failed for screen "${screenName}"`, error);
     }
+  }
+
+  /**
+   * A LOSS always ends the run: mode 6 (FAIL) and the results screen.
+   */
+  function settleLoss(): readonly GameSessionEffect[] {
+    setChallengeVmMode(CHALLENGE_FLOW_MODE.FAIL);
+    return render(resolveChallengeScreen("results"));
+  }
+
+  /**
+   * An INTERMEDIATE win (VM mode 3, "rebuild"): the ROM shows no per-battle results, so
+   * score the battle through the run, tear the battle down, rebuild the next config (VM
+   * roster primary, @gf/missions fallback) and go straight back to the briefing. With no
+   * next battle to build, the run is over and the session lands on the menu.
+   */
+  function rebuildAfterWin(settled: PostBattleState): readonly GameSessionEffect[] {
+    const progress = run ? run.next(settled.battleResults) : null;
+    const effects: GameSessionEffect[] = [{ type: "teardown-battle" }];
+    postBattle = null;
+    const vmBuilt = applyVmBattleBuild();
+    if (!vmBuilt && progress?.action === "advance") {
+      pendingBattleConfig = cloneMissionBattleConfigOrNull(progress.nextBattle);
+    }
+    if (pendingBattleConfig) {
+      setChallengeVmMode(CHALLENGE_FLOW_MODE.BATTLE_BUILD);
+      screen = "briefing";
+    } else {
+      menuMode = "challenge";
+      screen = "menu";
+    }
+    return [...effects, { type: "render", screen }];
+  }
+
+  /**
+   * Route a WIN through the VM's mode-4 post-battle gate, which owns the
+   * battleIndex/battleTotal progression counter. Mode 5 (CLEAR) means the run reached its
+   * battle total, so the end-of-run results show; mode 3 means another battle follows. A
+   * null mode means no VM is active, which keeps the port's original results-on-any-win UX.
+   */
+  function settleWin(settled: PostBattleState): readonly GameSessionEffect[] {
+    const nextMode = advanceVmWin();
+    const intermediate = nextMode !== null && nextMode !== CHALLENGE_FLOW_MODE.CLEAR;
+    if (intermediate) return rebuildAfterWin(settled);
+    setChallengeVmMode(CHALLENGE_FLOW_MODE.CLEAR);
+    return render(resolveChallengeScreen("results"));
   }
 
   return {
@@ -651,7 +723,7 @@ export function createGameSession<TStageRenderState>(
           return render("players");
         case "players-select":
           if (screen !== "players") return reject(event);
-          playerCount = Math.max(1, Math.min(event.playerCount, 2));
+          playerCount = Math.max(1, Math.min(event.playerCount, MAX_LOCAL_PLAYERS));
           if (challengeVm) challengeVm.state.controllerMask = playerCountToControllerMask(playerCount);
           setChallengeVmMode(CHALLENGE_FLOW_MODE.BOX_LOAD);
           return render(resolveChallengeScreen("load-box"));
@@ -725,41 +797,7 @@ export function createGameSession<TStageRenderState>(
             battleResults: cloneBattleResults(event.battleResults),
             drops: event.drops.map((drop) => ({ ...drop })),
           };
-          if (postBattle.result === "win") {
-            // Route the win through the VM's mode-4 post-battle gate so the VM's
-            // battleIndex/battleTotal counter is the progression authority.
-            const nextMode = advanceVmWin();
-            if (nextMode !== CHALLENGE_FLOW_MODE.CLEAR) {
-              // null = no VM active → keep the original results-on-any-win UX.
-              if (nextMode === null) {
-                setChallengeVmMode(CHALLENGE_FLOW_MODE.CLEAR);
-                return render(resolveChallengeScreen("results"));
-              }
-              // VM says rebuild (mode 3): an intermediate win. Score via the run,
-              // tear the battle down, rebuild the next config (VM primary), and go
-              // straight to briefing — the ROM shows no per-battle results here.
-              const progress = run ? run.next(postBattle.battleResults) : null;
-              const effects: GameSessionEffect[] = [{ type: "teardown-battle" }];
-              postBattle = null;
-              const vmBuilt = applyVmBattleBuild();
-              if (!vmBuilt && progress?.action === "advance") {
-                pendingBattleConfig = cloneMissionBattleConfigOrNull(progress.nextBattle);
-              }
-              if (pendingBattleConfig) {
-                setChallengeVmMode(CHALLENGE_FLOW_MODE.BATTLE_BUILD);
-                screen = "briefing";
-                return [...effects, { type: "render", screen: "briefing" }];
-              }
-              menuMode = "challenge";
-              screen = "menu";
-              return [...effects, { type: "render", screen }];
-            }
-            // VM reached battleTotal → mode 5 (clear): show the end-of-run results.
-            setChallengeVmMode(CHALLENGE_FLOW_MODE.CLEAR);
-            return render(resolveChallengeScreen("results"));
-          }
-          setChallengeVmMode(CHALLENGE_FLOW_MODE.FAIL);
-          return render(resolveChallengeScreen("results"));
+          return postBattle.result === "win" ? settleWin(postBattle) : settleLoss();
         case "advance":
           if (screen === "results" && (postBattle?.drops.length ?? 0) > 0) return render("gets");
           if (screen === "results" || screen === "gets") {
@@ -812,8 +850,7 @@ export function createGameSession<TStageRenderState>(
           ...(stageAssets.collision ? { collision: stageAssets.collision } : {}),
         });
         const battle = createBattle(combatConfig, dependencies.borgStats);
-        const humanPlayerCount = Math.max(1, Math.min(playerCount, 2));
-        const localPlayerIds = Array.from({ length: humanPlayerCount }, (_, player) => playerIdFor(player));
+        const localPlayerIds = Array.from({ length: humanPlayerCount() }, (_, player) => playerIdFor(player));
         return {
           battle,
           config: cloneMissionBattleConfig(config),

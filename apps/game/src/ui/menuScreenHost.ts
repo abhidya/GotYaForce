@@ -91,11 +91,13 @@ export function createMenuScreenHost(
       return target;
     },
     closeOverlay(handle) {
+      // Search from the top: overlays are a stack, so the newest match is the one meant.
       let index = overlays.length - 1;
       while (index >= 0 && overlays[index]?.target !== handle) index -= 1;
-      if (index < 0) return;
-      const [managed] = overlays.splice(index, 1);
-      managed!.destroy();
+      if (index >= 0) {
+        const [managed] = overlays.splice(index, 1);
+        managed!.destroy();
+      }
     },
     destroy() {
       if (destroyed) return;

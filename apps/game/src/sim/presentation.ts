@@ -21,7 +21,7 @@ const BOOST_FUEL_FRAMES = JUMP.BOOST_FUEL_FRAMES;
  * the snapshot (battleAudioEvents' edge) and the HUD state must agree on the threshold, or
  * the cue fires on a frame the roundel is not lit. TUNED (no ROM threshold is decoded).
  */
-export const LOW_ENERGY_ALERT_FRACTION = 0.25;
+const LOW_ENERGY_ALERT_FRACTION = 0.25;
 
 /**
  * Fallbacks used only when the focus borg's action profile could not be resolved (unknown
@@ -189,6 +189,9 @@ export function battleAudioEvents(before: BattleAudioSnapshot, after: BattleAudi
   return events;
 }
 
+/** Roster ids are `pl` plus a four-hex-digit family/variant pair (e.g. pl0615 = G RED). */
+const BORG_ID_PATTERN = /^pl[0-9a-fA-F]{4}$/;
+
 /**
  * Map a borg id to one of its two per-family voice-cue manifest keys.
  *
@@ -201,9 +204,8 @@ export function battleAudioEvents(before: BattleAudioSnapshot, after: BattleAudi
  * pending an SE/voice-dispatch trace. Returns null for a non-`pl####` id.
  */
 export function voiceKeyForBorgId(borgId: string, variant: 0 | 1): string | null {
-  if (!/^pl[0-9a-fA-F]{4}$/.test(borgId)) return null;
-  const family = borgId.slice(2, 4).toLowerCase();
-  return `pl${family}_00_0${variant}`;
+  const family = BORG_ID_PATTERN.test(borgId) ? borgId.slice(2, 4).toLowerCase() : null;
+  return family === null ? null : `pl${family}_00_0${variant}`;
 }
 
 /**
@@ -315,6 +317,10 @@ export function battleSceneState(battle: Battle, focus: BattleActorObservation |
  *
  * `localPlayerId` selects the slot; when the battle predates slot telemetry the
  * team-aggregate fallbacks keep the screen non-degenerate (documented approximation).
+ *
+ * Two exits by design: the DERIVED slot path and the pre-slot fallback build the same
+ * 12-field outcome from different sources, so a single exit would mean assembling one of
+ * them into a temporary just to return it from the bottom.
  */
 export function battleOutcomeFromState(battle: Battle, localPlayerId?: string): BattleOutcome {
   const st = battle.observe();
@@ -385,19 +391,23 @@ export function battlePresentationState(input: BattlePresentationInput): BattleP
   };
 }
 
+/**
+ * The borg the HUD and camera frame: the player's own active borg while it lives, otherwise
+ * a live ally. FIGHT ALONE can leave the player slot empty while a CPU ally is still up, so
+ * the fallback prefers the player's own team before settling for anyone still standing.
+ */
 function focusBorg(
   battle: Battle,
   active: BattleActorObservation | null,
 ): BattleActorObservation | null {
-  if (active?.alive) return active;
-
-  // FIGHT ALONE can leave the player slot empty while a CPU ally is still alive.
-  const fallbackTeam = active?.team ?? 0;
-  return (
-    battle.observe().actors.find((b) => b.alive && b.team === fallbackTeam) ??
-    battle.observe().actors.find((b) => b.alive) ??
-    null
-  );
+  let focus = active?.alive ? active : null;
+  if (!focus) {
+    const actors = battle.observe().actors;
+    const fallbackTeam = active?.team ?? 0;
+    focus =
+      actors.find((b) => b.alive && b.team === fallbackTeam) ?? actors.find((b) => b.alive) ?? null;
+  }
+  return focus;
 }
 
 export function battleHudState(input: BattleHudPresentationInput): HudState {
@@ -536,10 +546,13 @@ function focusHasMeleeRangeTarget(
   focus: BattleActorObservation | null,
   actionProfile: BorgActionProfile | null,
 ): boolean {
-  if (!focus?.lockTarget) return false;
-  const target = battle.observe().actors.find((b) => b.uid === focus.lockTarget && b.alive);
-  if (!target) return false;
-  if (actionProfile && !actionProfile.melee) return false; // sim cannot select melee for this borg
+  // A RESOLVED profile without a melee def can never be selected into melee by the sim, so
+  // it never flips the reticle; an unresolved profile falls back to the shared window.
+  const canMelee = !actionProfile || Boolean(actionProfile.melee);
+  const target =
+    canMelee && focus?.lockTarget
+      ? battle.observe().actors.find((b) => b.uid === focus.lockTarget && b.alive) ?? null
+      : null;
   const meleeDef = actionProfile?.melee ?? MELEE_DEF_HUD_FALLBACK;
-  return targetWithinMeleeEngage(focus.pos, target.pos, meleeDef);
+  return focus !== null && target !== null && targetWithinMeleeEngage(focus.pos, target.pos, meleeDef);
 }

@@ -59,8 +59,29 @@ export interface ThreeViewport {
   captureFrame(type?: string, quality?: number): string;
 }
 
+/** Cap for window.devicePixelRatio: a 3x-DPI backbuffer costs fill rate without adding
+ *  fidelity to GameCube-era art. Callers override with `pixelRatioLimit`. */
+const DEFAULT_PIXEL_RATIO_LIMIT = 2;
+
+/** Fallback view for a host that passes no camera. Every real caller supplies its own
+ *  (the game seeds from the stage's exported CObj), so these only frame a bare scene. */
+const DEFAULT_CAMERA: NonNullable<ThreeViewportOptions["camera"]> = {
+  fov: 45,
+  near: 0.1,
+  far: 100000,
+  position: [0, 900, 1800],
+};
+
+/** Default orbit pivot: torso height at the arena origin. */
+const DEFAULT_TARGET: readonly [number, number, number] = [0, 80, 0];
+
+/** Fallback clear color for a host that passes no clearColor. */
+const DEFAULT_CLEAR_COLOR = 0x101820;
+
 export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeViewportOptions = {}): ThreeViewport {
   const backend = options.backend ?? "webgl";
+  // Guard clause: the option exists so a future backend has a name to claim, but only the
+  // WebGL path is implemented.
   if (backend !== "webgl") throw new Error(`Unsupported render backend: ${backend}`);
   const debugCapture = options.debugCapture ?? false;
   const renderer = new THREE.WebGLRenderer({
@@ -68,7 +89,7 @@ export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeVie
     antialias: options.antialias ?? true,
     preserveDrawingBuffer: debugCapture,
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, options.pixelRatioLimit ?? 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, options.pixelRatioLimit ?? DEFAULT_PIXEL_RATIO_LIMIT));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   // GX (GameCube) has NO tone mapping: TEV output goes to the framebuffer directly, so the
@@ -78,14 +99,9 @@ export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeVie
   renderer.toneMapping = THREE.NoToneMapping;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(options.clearColor ?? 0x101820);
+  scene.background = new THREE.Color(options.clearColor ?? DEFAULT_CLEAR_COLOR);
 
-  const cameraOptions = options.camera ?? {
-    fov: 45,
-    near: 0.1,
-    far: 100000,
-    position: [0, 900, 1800],
-  };
+  const cameraOptions = options.camera ?? DEFAULT_CAMERA;
   const camera = new THREE.PerspectiveCamera(
     cameraOptions.fov,
     window.innerWidth / window.innerHeight,
@@ -96,7 +112,7 @@ export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeVie
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  controls.target.set(0, 80, 0);
+  controls.target.set(DEFAULT_TARGET[0], DEFAULT_TARGET[1], DEFAULT_TARGET[2]);
 
   return {
     backend,
@@ -203,14 +219,13 @@ export function prepareImportedModel(model: THREE.Object3D, options: ImportedMod
   });
 }
 
+/** Skinned meshes deform past their static bounds, so frustum culling pops them out of the
+ *  frame mid-animation; "skinned-disabled" exempts exactly those. */
 function applyCullingPolicy(mesh: THREE.Mesh | THREE.SkinnedMesh, policy: MeshCullingPolicy): void {
-  if (policy === "disabled") {
-    mesh.frustumCulled = false;
-  } else if (policy === "skinned-disabled") {
-    mesh.frustumCulled = !(mesh instanceof THREE.SkinnedMesh);
-  } else {
-    mesh.frustumCulled = true;
-  }
+  let culled = true;
+  if (policy === "disabled") culled = false;
+  else if (policy === "skinned-disabled") culled = !(mesh instanceof THREE.SkinnedMesh);
+  mesh.frustumCulled = culled;
 }
 
 function getRenderDiagnostics(renderer: THREE.WebGLRenderer, debugCapture: boolean): RenderDiagnostics {
@@ -255,6 +270,25 @@ function getRenderDiagnostics(renderer: THREE.WebGLRenderer, debugCapture: boole
  * name permutations. The mesh world transform is preserved, so the rest pose is
  * unchanged; once parented, each mesh inherits its bone's relative animation.
  */
+/** The JOBJ root is the only bone with no JOBJ ancestor (it sits under the scene root, not
+ *  under another bone). */
+function findJobjRoot(jobjBones: ReadonlySet<THREE.Object3D>): THREE.Object3D | null {
+  let root: THREE.Object3D | null = null;
+  for (const bone of jobjBones) {
+    let ancestor = bone.parent;
+    let nested = false;
+    while (ancestor && !nested) {
+      nested = jobjBones.has(ancestor);
+      ancestor = ancestor.parent;
+    }
+    if (!nested) {
+      root = bone;
+      break;
+    }
+  }
+  return root;
+}
+
 function reparentMeshesToBones(model: THREE.Object3D): void {
   const jobjBones = new Set<THREE.Object3D>();
   const meshesToReparent: Array<{ node: THREE.Object3D; jointIndex: number }> = [];
@@ -271,25 +305,8 @@ function reparentMeshesToBones(model: THREE.Object3D): void {
   });
   if (jobjBones.size === 0 || meshesToReparent.length === 0) return;
 
-  // The JOBJ root is the only bone with no JOBJ ancestor (it sits under the scene
-  // root, not under another bone).
-  let root: THREE.Object3D | null = null;
-  for (const bone of jobjBones) {
-    let ancestor = bone.parent;
-    let nested = false;
-    while (ancestor) {
-      if (jobjBones.has(ancestor)) {
-        nested = true;
-        break;
-      }
-      ancestor = ancestor.parent;
-    }
-    if (!nested) {
-      root = bone;
-      break;
-    }
-  }
-  if (!root) return;
+  const root = findJobjRoot(jobjBones);
+  if (!root) return; // guard clause: no skeleton root, so there is no joint table to rebuild
 
   // DFS the JOBJ tree in preserved child order → HSD joint index per bone.
   const dfsIndexToBone = new Map<number, THREE.Object3D>();

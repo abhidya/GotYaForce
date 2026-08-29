@@ -296,28 +296,38 @@ interface BankFxLayer {
   anim?: EfctBankAnimJson | undefined;
 }
 
+/** HSD AOBJ interpolation codes carried by the generated MatAnim keys. */
+const HSD_A_OP_CON = 1;
+const HSD_A_OP_LINEAR = 2;
+
 /**
  * Evaluate one MatAnim track at `frame`. interpCode 1 (HSD_A_OP_CON) holds the left key's
  * value (step); every other code is evaluated linearly (spline tangents were dropped by the
  * generator — documented TUNED approximation). Out-of-range frames clamp to the end keys.
  */
 function evalBankTrack(keys: number[][] | undefined, frame: number, rest: number): number {
-  if (!keys || keys.length === 0) return rest;
-  const first = keys[0];
-  if (!first || frame <= (first[0] ?? 0)) return first?.[1] ?? rest;
-  for (let i = 0; i + 1 < keys.length; i++) {
-    const k0 = keys[i];
-    const k1 = keys[i + 1];
-    if (!k0 || !k1) break;
-    const f0 = k0[0] ?? 0;
-    const f1 = k1[0] ?? 0;
-    if (frame < f1) {
-      if ((k0[2] ?? 2) === 1 || f1 <= f0) return k0[1] ?? rest; // CON = step
-      const t = (frame - f0) / (f1 - f0);
-      return (k0[1] ?? 0) + ((k1[1] ?? 0) - (k0[1] ?? 0)) * t;
+  const first = keys?.[0];
+  if (!first) return rest; // guard clause: no track, so the material's rest value stands
+
+  let value = keys?.[keys.length - 1]?.[1] ?? rest; // past the last key: hold the end
+  if (frame <= (first[0] ?? 0)) {
+    value = first[1] ?? rest;
+  } else {
+    for (let i = 0; keys && i + 1 < keys.length; i++) {
+      const k0 = keys[i];
+      const k1 = keys[i + 1];
+      if (!k0 || !k1) break;
+      const f0 = k0[0] ?? 0;
+      const f1 = k1[0] ?? 0;
+      if (frame < f1) {
+        const step = (k0[2] ?? HSD_A_OP_LINEAR) === HSD_A_OP_CON || f1 <= f0;
+        const t = (frame - f0) / (f1 - f0);
+        value = step ? k0[1] ?? rest : (k0[1] ?? 0) + ((k1[1] ?? 0) - (k0[1] ?? 0)) * t;
+        break;
+      }
     }
   }
-  return keys[keys.length - 1]?.[1] ?? rest;
+  return value;
 }
 
 /**
@@ -331,16 +341,18 @@ function sampleBankAnim(
   outColor: THREE.Color,
 ): { opacity: number } {
   const anim = layer.anim;
-  if (!anim) {
+  let opacity = layer.baseOpacity;
+  if (anim) {
+    outColor.setRGB(
+      evalBankTrack(anim.r, frame, layer.color.r),
+      evalBankTrack(anim.g, frame, layer.color.g),
+      evalBankTrack(anim.b, frame, layer.color.b),
+    );
+    opacity = evalBankTrack(anim.a, frame, layer.baseOpacity);
+  } else {
     outColor.copy(layer.color);
-    return { opacity: layer.baseOpacity };
   }
-  outColor.setRGB(
-    evalBankTrack(anim.r, frame, layer.color.r),
-    evalBankTrack(anim.g, frame, layer.color.g),
-    evalBankTrack(anim.b, frame, layer.color.b),
-  );
-  return { opacity: evalBankTrack(anim.a, frame, layer.baseOpacity) };
+  return { opacity };
 }
 
 /**
@@ -545,10 +557,8 @@ function resolveTunedFlightVisual(
   projectile: BattleProjectileObservation,
   actors: ReadonlyMap<string, { borgId: string }>,
 ): { bankTexId: number; teamTint: boolean; launchFxId: number | null } | null {
-  const owner = actors.get(projectile.ownerUid);
-  const borgId = owner?.borgId;
-  if (!borgId) return null;
-  const tuned = TUNED_FLIGHT_VISUALS[borgId];
+  const borgId = actors.get(projectile.ownerUid)?.borgId;
+  const tuned = borgId ? TUNED_FLIGHT_VISUALS[borgId] : undefined;
   return tuned ? { ...tuned } : null;
 }
 
@@ -659,6 +669,21 @@ const HIT_BURST_MIN_PARTICLES = 16;
 const HIT_BURST_PARTICLE_SPREAD = 7;
 const HIT_BURST_JITTER = 52;
 
+/**
+ * DERIVED hit-impact effect ids — the damage record's u8 +0x09, resolved through the
+ * 4-byte table at 0x802c7ed0 into a variant handler (see the spawnHitFx doc block for the
+ * full chain). Ids outside this set only appear on table-extent-overshoot rows and fall
+ * through to the variant-1 burst.
+ */
+const IMPACT_ID_FLASH = 0;
+const IMPACT_ID_DEFAULT_BURST = 1;
+const IMPACT_ID_DIRECTIONAL_FIRST = 2;
+const IMPACT_ID_DIRECTIONAL_LAST = 7;
+const IMPACT_ID_SLASH = 8;
+/** DERIVED suppression: record[+0x09] === 0xff spawns no contact effect at all
+ *  (resolve_hitbox_target_effects_and_damage @0x8002e2a8, chunk_0003.c:8087-8088). */
+const IMPACT_ID_SUPPRESSED = 0xff;
+
 export class BattleScene {
   private actors = new Map<string, Actor>();
   private projectileActors = new Map<string, ProjectileActor>();
@@ -723,31 +748,19 @@ export class BattleScene {
     this.camera = camera;
   }
 
-  /** Map a sim state/action to one of the exported game animation groups. */
+  /**
+   * Map a sim state/action to one of the exported game animation groups.
+   *
+   * A dash overrides every state (it is a cooldown, not a state), so it is checked first;
+   * everything else is a direct state -> slot mapping with two states that split further.
+   */
   private slotForBorg(b: BattleActorView): AnimSlot {
-    if (b.dashActiveFrames > 0) return dashSlotForBorg(b);
-    if (b.state === "death") return "death";
-    if (b.state === "down") return "down";
-    if (b.state === "hit") return "hit";
-    if (b.state === "spawn") return "spawn";
-    if (b.state === "special") return "special";
-    if (b.state === "attack") {
-      if (b.anim === "charge_shot") return "charge_shot";
-      if (b.anim === "shoot") return "shoot";
-      if (b.anim === "melee") return "melee";
-      return "attack";
-    }
-    if (b.state === "fly") return "fly";
-    if (b.state === "jump") {
-      // Rising vs falling: the sim keeps state "jump" for the whole airborne arc while
-      // gravity (JUMP.GRAVITY 0.42/frame) drives vel.y negative after the apex. -0.6
-      // (~1.5 frames past apex) keeps apex jitter and boost-thrust oscillation from
-      // flip-flopping the slot. "fall" maps to the exported jump_land bank and falls
-      // back to jump/fly for borgs without one.
-      return b.vel.y < FALL_VELOCITY_Y ? "fall" : "jump";
-    }
-    if (b.state === "move") return "move";
-    return "idle";
+    let slot: AnimSlot;
+    if (b.dashActiveFrames > 0) slot = dashSlotForBorg(b);
+    else if (b.state === "attack") slot = attackSlotForBorg(b);
+    else if (b.state === "jump") slot = airborneSlotForBorg(b);
+    else slot = STATE_ANIM_SLOTS[b.state] ?? "idle";
+    return slot;
   }
 
   /** Reconcile the scene with the current list of live borgs. Call once per frame. */
@@ -1325,8 +1338,10 @@ export class BattleScene {
   }
 
   private spawnProjectile(projectile: BattleProjectileObservation): ProjectileActor {
+    // Guard clause: a resolved efct00 bank visual replaces the sprite/beam stand-in wholesale.
     const bankActor = this.buildBankProjectileActor(projectile);
     if (bankActor) return bankActor;
+
     const kind = projectile.visualKind;
     const colors = PROJECTILE_COLORS[kind];
     const color = projectile.team === 0 ? colors.ally : colors.enemy;
@@ -1577,128 +1592,139 @@ export class BattleScene {
     attackerTeam: number | undefined,
     yaw?: number,
   ): void {
-    const id = impactEffectId ?? 1;
-    if (id === 0xff) return; // DERIVED: -1 suppresses the contact effect entirely.
-    const at = position;
-    if (id === 0) {
-      // Variant 0 — single swelling flash: texId 21 (bank spike-star mesh), 20f, scale
-      // keys 1 -> 2@f4 -> 3@f20 approximated linearly 1 -> 3 (same policy as before).
-      if (
-        !this.spawnBankFx(21, at, {
-          ttl: framesToSeconds(20),
-          startScale: 1,
-          endScale: 3,
-          opacity: 1,
-        })
-      ) {
-        this.spawnBurstSprite(this.hitSparkTexture, at, {
-          ttl: framesToSeconds(20),
-          startScale: 36,
-          endScale: 108,
-          opacity: 1,
-          blending: THREE.AdditiveBlending,
-        });
-      }
-      return;
+    const id = impactEffectId ?? IMPACT_ID_DEFAULT_BURST;
+    if (id === IMPACT_ID_SUPPRESSED) return; // DERIVED: -1 suppresses the contact effect
+
+    if (id === IMPACT_ID_FLASH) this.spawnImpactFlash(position);
+    else if (id >= IMPACT_ID_DIRECTIONAL_FIRST && id <= IMPACT_ID_DIRECTIONAL_LAST) {
+      this.spawnDirectionalImpact(position, yaw);
+    } else if (id === IMPACT_ID_SLASH) this.spawnSlashImpact(position, yaw);
+    // Out-of-table ids share variant 1's burst: they only appear on familyDamageRecords rows
+    // that are table-extent overshoot (the same corrupt rows isSaneStatusRecord filters).
+    else this.spawnImpactBurst(position, attackerTeam);
+  }
+
+  /** Variant 0 — one swelling flash: texId 21 (bank spike-star mesh), 20f, ROM scale keys
+   *  1 -> 2@f4 -> 3@f20 approximated linearly 1 -> 3. */
+  private spawnImpactFlash(at: THREE.Vector3): void {
+    const drawn = this.spawnBankFx(21, at, {
+      ttl: framesToSeconds(20),
+      startScale: 1,
+      endScale: 3,
+      opacity: 1,
+    });
+    if (!drawn) {
+      this.spawnBurstSprite(this.hitSparkTexture, at, {
+        ttl: framesToSeconds(20),
+        startScale: 36,
+        endScale: 108,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+      });
     }
-    if (id >= 2 && id <= 7) {
-      // Variant 2 — three-layer directional impact: texIds 144 (flash shell) / 145 (core
-      // shell) / 146 (delayed flat ring). The ROM orients the layer basis by the
-      // attacker->contact direction; `yaw` is the port's TUNED stand-in for that basis.
-      const okFlash = this.spawnBankFx(144, at, { ttl: framesToSeconds(7), startScale: 1, endScale: 0, opacity: 1, ...(yaw !== undefined ? { yaw } : {}) });
-      const okCore = this.spawnBankFx(145, at, { ttl: framesToSeconds(10), startScale: 1, endScale: 0, opacity: 1, ...(yaw !== undefined ? { yaw } : {}) });
-      const okRing = this.spawnBankFx(146, at, {
+  }
+
+  /** Variant 2 — three-layer directional impact: texIds 144 (flash shell) / 145 (core shell)
+   *  / 146 (delayed flat ring). The ROM orients the layer basis by the attacker->contact
+   *  direction; `yaw` is the port's TUNED stand-in for that basis. */
+  private spawnDirectionalImpact(at: THREE.Vector3, yaw: number | undefined): void {
+    const facing = yaw !== undefined ? { yaw } : {};
+    const okFlash = this.spawnBankFx(144, at, { ttl: framesToSeconds(7), startScale: 1, endScale: 0, opacity: 1, ...facing });
+    const okCore = this.spawnBankFx(145, at, { ttl: framesToSeconds(10), startScale: 1, endScale: 0, opacity: 1, ...facing });
+    const okRing = this.spawnBankFx(146, at, {
+      ttl: framesToSeconds(10),
+      startScale: 1,
+      endScale: 1.5,
+      opacity: 1,
+      delay: framesToSeconds(3),
+      ...facing,
+    });
+    if (!okFlash) {
+      this.spawnBurstSprite(this.hitSparkTexture, at, {
+        ttl: framesToSeconds(7),
+        startScale: 52,
+        endScale: 0,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+      });
+    }
+    if (!okCore) {
+      this.spawnBurstSprite(this.hitSparkTexture, at, {
         ttl: framesToSeconds(10),
-        startScale: 1,
-        endScale: 1.5,
-        opacity: 1,
+        startScale: 40,
+        endScale: 0,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+      });
+    }
+    if (!okRing) {
+      this.spawnBurstSprite(this.ringTexture, at, {
+        ttl: framesToSeconds(10),
+        startScale: 0,
+        endScale: 66,
+        opacity: 0.9,
         delay: framesToSeconds(3),
-        ...(yaw !== undefined ? { yaw } : {}),
       });
-      if (!okFlash) {
-        this.spawnBurstSprite(this.hitSparkTexture, at, {
-          ttl: framesToSeconds(7),
-          startScale: 52,
-          endScale: 0,
-          opacity: 1,
-          blending: THREE.AdditiveBlending,
-        });
-      }
-      if (!okCore) {
-        this.spawnBurstSprite(this.hitSparkTexture, at, {
-          ttl: framesToSeconds(10),
-          startScale: 40,
-          endScale: 0,
-          opacity: 0.9,
-          blending: THREE.AdditiveBlending,
-        });
-      }
-      if (!okRing) {
-        this.spawnBurstSprite(this.ringTexture, at, {
-          ttl: framesToSeconds(10),
-          startScale: 0,
-          endScale: 66,
-          opacity: 0.9,
-          delay: framesToSeconds(3),
-        });
-      }
-      return;
     }
-    if (id === 8) {
-      // Variant 3 — two-layer slash flash: texId 53 (spike-star core, scale 0.5 -> 1@f2 ->
-      // 0@f10 approximated 1 -> 0) + texId 54 (the cross mesh) with the ROM's ANISOTROPIC
-      // keys (x,y,z) (0,1.5,1.5) -> (1,1,1)@f2 -> (1.5,0,0)@f6 approximated linearly.
-      const okCore = this.spawnBankFx(53, at, { ttl: framesToSeconds(10), startScale: 1, endScale: 0, opacity: 1, ...(yaw !== undefined ? { yaw } : {}) });
-      const okCross = this.spawnBankFx(54, at, {
-        ttl: framesToSeconds(6),
-        startScale: { x: 0, y: 1.5, z: 1.5 },
-        endScale: { x: 1.5, y: 0, z: 0 },
+  }
+
+  /** Variant 3 — two-layer slash flash: texId 53 (spike-star core, ROM scale 0.5 -> 1@f2 ->
+   *  0@f10 approximated 1 -> 0) plus texId 54 (the cross mesh) with the ROM's ANISOTROPIC
+   *  keys (x,y,z) (0,1.5,1.5) -> (1,1,1)@f2 -> (1.5,0,0)@f6, approximated linearly. */
+  private spawnSlashImpact(at: THREE.Vector3, yaw: number | undefined): void {
+    const facing = yaw !== undefined ? { yaw } : {};
+    const okCore = this.spawnBankFx(53, at, { ttl: framesToSeconds(10), startScale: 1, endScale: 0, opacity: 1, ...facing });
+    const okCross = this.spawnBankFx(54, at, {
+      ttl: framesToSeconds(6),
+      startScale: { x: 0, y: 1.5, z: 1.5 },
+      endScale: { x: 1.5, y: 0, z: 0 },
+      opacity: 1,
+      ...facing,
+    });
+    if (!okCore) {
+      this.spawnBurstSprite(this.dashStarTexture, at, {
+        ttl: framesToSeconds(10),
+        startScale: 44,
+        endScale: 0,
         opacity: 1,
-        ...(yaw !== undefined ? { yaw } : {}),
+        blending: THREE.AdditiveBlending,
       });
-      if (!okCore) {
-        this.spawnBurstSprite(this.dashStarTexture, at, {
-          ttl: framesToSeconds(10),
-          startScale: 44,
-          endScale: 0,
-          opacity: 1,
-          blending: THREE.AdditiveBlending,
-        });
-      }
-      if (!okCross) {
-        this.spawnBurstSprite(this.hitSparkTexture, at, {
-          ttl: framesToSeconds(6),
-          startScale: { x: 0, y: 66 },
-          endScale: { x: 66, y: 0 },
-          opacity: 1,
-          blending: THREE.AdditiveBlending,
-        });
-      }
-      return;
     }
-    // Variant 1 (id 1, the dominant record effect) + out-of-table fallback: particle burst,
-    // 16..22 particles (DERIVED (8..11)+(8..11)), life 10f. Particle visual = bank texId 2
-    // (white-core disc, BLUE rim) for attacker row 0 or texId 3 (PINK rim) for row 1 —
-    // the ROM keys the row by the attacker's player index (+0x88); the port maps team 0/1
-    // onto rows 0/1 (closest available fact). The rim colors now come from the REAL bank
-    // vertex colors, replacing the old TUNED tint constants.
+    if (!okCross) {
+      this.spawnBurstSprite(this.hitSparkTexture, at, {
+        ttl: framesToSeconds(6),
+        startScale: { x: 0, y: 66 },
+        endScale: { x: 66, y: 0 },
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+      });
+    }
+  }
+
+  /**
+   * Variant 1 (the dominant record effect) — a particle burst, life 10f. The particle visual
+   * is bank texId 2 (white-core disc, BLUE rim) for attacker row 0 or texId 3 (PINK rim) for
+   * row 1: the ROM keys the row by the attacker's player index (+0x88), and the port maps
+   * team 0/1 onto rows 0/1 (the closest available fact). The rim colors come from the REAL
+   * bank vertex colors; the sprite fallback keeps the older TUNED tints.
+   */
+  private spawnImpactBurst(at: THREE.Vector3, attackerTeam: number | undefined): void {
     const count = HIT_BURST_MIN_PARTICLES + Math.floor(Math.random() * HIT_BURST_PARTICLE_SPREAD);
     const burstTexId = attackerTeam === 1 ? 3 : 2;
+    const tint = attackerTeam === undefined ? 0xffffff : attackerTeam === 0 ? 0xbfe4ff : 0xffc9a1;
     for (let i = 0; i < count; i++) {
       const jitter = new THREE.Vector3(
         at.x + (Math.random() - 0.5) * HIT_BURST_JITTER,
         at.y + (Math.random() - 0.5) * HIT_BURST_JITTER,
         at.z + (Math.random() - 0.5) * HIT_BURST_JITTER,
       );
-      if (
-        !this.spawnBankFx(burstTexId, jitter, {
-          ttl: framesToSeconds(10),
-          startScale: 0.7 + Math.random() * 0.7,
-          endScale: 1.8,
-          opacity: 1,
-        })
-      ) {
-        const tint = attackerTeam === undefined ? 0xffffff : attackerTeam === 0 ? 0xbfe4ff : 0xffc9a1;
+      const drawn = this.spawnBankFx(burstTexId, jitter, {
+        ttl: framesToSeconds(10),
+        startScale: 0.7 + Math.random() * 0.7,
+        endScale: 1.8,
+        opacity: 1,
+      });
+      if (!drawn) {
         this.spawnBurstSprite(this.hitSparkTexture, jitter, {
           ttl: framesToSeconds(10),
           startScale: 10 + Math.random() * 10,
@@ -2114,21 +2140,58 @@ function orientBeam(node: THREE.Object3D, projectile: BattleProjectileObservatio
   }
 }
 
+/**
+ * States that map straight to one slot. "attack" and "jump" are absent: each splits further
+ * (by the resolved attack anim, and by vertical velocity) — see slotForBorg.
+ */
+const STATE_ANIM_SLOTS: Partial<Record<BattleActorView["state"], AnimSlot>> = {
+  death: "death",
+  down: "down",
+  hit: "hit",
+  spawn: "spawn",
+  special: "special",
+  fly: "fly",
+  move: "move",
+  idle: "idle",
+};
+
+/** The sim's resolved attack anim picks the slot; an unrecognized one keeps the generic
+ *  "attack" bank. */
+function attackSlotForBorg(b: BattleActorView): AnimSlot {
+  let slot: AnimSlot = "attack";
+  if (b.anim === "charge_shot") slot = "charge_shot";
+  else if (b.anim === "shoot") slot = "shoot";
+  else if (b.anim === "melee") slot = "melee";
+  return slot;
+}
+
+/**
+ * Rising vs falling. The sim keeps state "jump" for the whole airborne arc while gravity
+ * (JUMP.GRAVITY 0.42/frame) drives vel.y negative after the apex; FALL_VELOCITY_Y sits far
+ * enough past the apex that jitter and boost-thrust oscillation cannot flip-flop the slot.
+ * "fall" maps to the exported jump_land bank and falls back to jump/fly for borgs without
+ * one (SLOT_FALLBACKS in borgPresentationAssets.ts).
+ */
+function airborneSlotForBorg(b: BattleActorView): AnimSlot {
+  return b.vel.y < FALL_VELOCITY_Y ? "fall" : "jump";
+}
+
+/** Pick the dash bank from the borg's velocity in its OWN facing frame: whichever axis
+ *  dominates wins, and a near-stalled dash reads as forward. */
 function dashSlotForBorg(b: BattleActorView): AnimSlot {
   const vx = b.vel.x;
   const vz = b.vel.z;
   const speedSq = vx * vx + vz * vz;
-  if (speedSq < DASH_DIRECTION_MIN_SPEED_SQ) return "dash_fwd";
-
   const sin = Math.sin(b.rotY);
   const cos = Math.cos(b.rotY);
   const forwardDot = vx * sin + vz * cos;
   const rightDot = vx * cos - vz * sin;
 
-  if (Math.abs(forwardDot) >= Math.abs(rightDot)) {
-    return forwardDot >= 0 ? "dash_fwd" : "dash_back";
-  }
-  return rightDot >= 0 ? "dash_right" : "dash_left";
+  let slot: AnimSlot;
+  if (speedSq < DASH_DIRECTION_MIN_SPEED_SQ) slot = "dash_fwd";
+  else if (Math.abs(forwardDot) >= Math.abs(rightDot)) slot = forwardDot >= 0 ? "dash_fwd" : "dash_back";
+  else slot = rightDot >= 0 ? "dash_right" : "dash_left";
+  return slot;
 }
 
 function disposeMesh(obj: THREE.Object3D): void {

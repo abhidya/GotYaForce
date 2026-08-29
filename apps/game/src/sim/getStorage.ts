@@ -31,36 +31,15 @@ export function createBrowserGotchaBoxPersistence(
 
   return {
     load(): GotchaBoxState {
-      if (initialized) return cloneState(cached);
+      // Guard clause: the first load owns the read; later loads serve the cache, which also
+      // covers the no-storage case (the cache IS the session's state then).
+      if (initialized || !storage) {
+        initialized = true;
+        return cloneState(cached);
+      }
       initialized = true;
-      if (!storage) return cloneState(cached);
-
       try {
-        const current = storage.getItem(GOTCHA_BOX_STORAGE_KEY);
-        if (current !== null) {
-          const parsed = parseState(current);
-          if (parsed) {
-            cached = parsed;
-            return cloneState(cached);
-          }
-          // parseState is all-or-nothing: isPool and isCollection use .every,
-          // and the version is compared exactly. So one malformed row -- or any
-          // future GOTCHA_BOX_STATE_VERSION bump -- discarded the entire
-          // collection, and the next save() wrote that empty state straight over
-          // it. Park the original bytes first so the loss is recoverable.
-          preserveUnreadable(storage, current);
-          cached = createGotchaBoxState();
-          return cloneState(cached);
-        }
-
-        const legacy = parseLegacy(
-          storage.getItem(LEGACY_POOL_STORAGE_KEY),
-          storage.getItem(LEGACY_COLLECTION_STORAGE_KEY),
-        );
-        if (legacy) {
-          cached = legacy;
-          trySave(storage, cached);
-        }
+        cached = readState(storage);
       } catch {
         cached = createGotchaBoxState();
       }
@@ -75,6 +54,37 @@ export function createBrowserGotchaBoxPersistence(
   };
 }
 
+/**
+ * Read the persisted state: the current payload if it parses, otherwise the migrated legacy
+ * pair, otherwise a fresh empty state.
+ *
+ * parseState is all-or-nothing (isPool/isCollection use .every, and the version is compared
+ * exactly), so one malformed row -- or any future GOTCHA_BOX_STATE_VERSION bump -- discards
+ * the whole collection and the next save() would write that empty state straight over it.
+ * The original bytes are parked first so the loss stays recoverable.
+ */
+function readState(storage: StorageLike): GotchaBoxState {
+  const current = storage.getItem(GOTCHA_BOX_STORAGE_KEY);
+  let state: GotchaBoxState;
+  if (current !== null) {
+    const parsed = parseState(current);
+    if (parsed) {
+      state = parsed;
+    } else {
+      preserveUnreadable(storage, current);
+      state = createGotchaBoxState();
+    }
+  } else {
+    const legacy = parseLegacy(
+      storage.getItem(LEGACY_POOL_STORAGE_KEY),
+      storage.getItem(LEGACY_COLLECTION_STORAGE_KEY),
+    );
+    state = legacy ?? createGotchaBoxState();
+    if (legacy) trySave(storage, legacy);
+  }
+  return state;
+}
+
 function defaultStorage(): StorageLike | null {
   try {
     return typeof window === "undefined" ? null : window.localStorage;
@@ -87,8 +97,9 @@ function defaultStorage(): StorageLike | null {
  *  the earliest copy is the one closest to the player's real collection. */
 function preserveUnreadable(storage: StorageLike, raw: string): void {
   try {
-    if (storage.getItem(GOTCHA_BOX_UNREADABLE_KEY) !== null) return;
-    storage.setItem(GOTCHA_BOX_UNREADABLE_KEY, raw);
+    if (storage.getItem(GOTCHA_BOX_UNREADABLE_KEY) === null) {
+      storage.setItem(GOTCHA_BOX_UNREADABLE_KEY, raw);
+    }
   } catch {
     // Storage refused the backup; the session still continues on the empty state.
   }
@@ -103,26 +114,35 @@ function trySave(storage: StorageLike, state: GotchaBoxState): void {
 }
 
 function parseState(raw: string): GotchaBoxState | null {
+  let state: GotchaBoxState | null = null;
   try {
     const value: unknown = JSON.parse(raw);
-    if (!isRecord(value) || value.version !== GOTCHA_BOX_STATE_VERSION) return null;
-    if (!isPool(value.pool) || !isCollection(value.collection)) return null;
-    return cloneState(value as unknown as GotchaBoxState);
+    const valid =
+      isRecord(value) &&
+      value.version === GOTCHA_BOX_STATE_VERSION &&
+      isPool(value.pool) &&
+      isCollection(value.collection);
+    if (valid) state = cloneState(value as unknown as GotchaBoxState);
   } catch {
-    return null;
+    // Not JSON, or not our shape; the caller parks the bytes and starts empty.
   }
+  return state;
 }
 
 function parseLegacy(poolRaw: string | null, collectionRaw: string | null): GotchaBoxState | null {
+  // Guard clause: neither legacy key is present, so there is nothing to migrate.
   if (poolRaw === null && collectionRaw === null) return null;
+  let state: GotchaBoxState | null = null;
   try {
     const pool: unknown = poolRaw === null ? { entries: [] } : JSON.parse(poolRaw);
     const collection: unknown = collectionRaw === null ? [] : JSON.parse(collectionRaw);
-    if (!isPool(pool) || !isCollection(collection)) return null;
-    return cloneState({ version: GOTCHA_BOX_STATE_VERSION, pool, collection });
+    if (isPool(pool) && isCollection(collection)) {
+      state = cloneState({ version: GOTCHA_BOX_STATE_VERSION, pool, collection });
+    }
   } catch {
-    return null;
+    // Unparseable legacy payload; the caller starts from an empty state.
   }
+  return state;
 }
 
 function isPool(value: unknown): value is GetPool {

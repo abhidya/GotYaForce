@@ -26,32 +26,37 @@ import { publicUrl } from "./publicUrl.js";
  * absolute against the page origin, so pull the pathname out and route through
  * publicUrl. Non-http inputs (already-relative paths, data: URLs) pass through.
  */
+/** Absolute (http(s):// or protocol-relative) catalog URLs need their pathname pulled back
+ *  out before re-prefixing; anything already relative goes straight through publicUrl. */
+const ABSOLUTE_URL = /^https?:\/\//;
+
 function reprefix(url: string): string {
-  if (!/^https?:\/\//.test(url) && !url.startsWith("//")) return publicUrl(url);
-  try {
-    const parsed = new URL(url);
-    return publicUrl(`${parsed.pathname}${parsed.search}`);
-  } catch {
-    return publicUrl(url);
+  let pathAndQuery = url;
+  if (ABSOLUTE_URL.test(url) || url.startsWith("//")) {
+    try {
+      const parsed = new URL(url);
+      pathAndQuery = `${parsed.pathname}${parsed.search}`;
+    } catch {
+      // Not parseable as a URL after all; publicUrl handles it as a plain path.
+    }
   }
+  return publicUrl(pathAndQuery);
+}
+
+/** Fetch a catalog URL through the BASE_URL re-prefix, failing loudly on a non-2xx so a
+ *  404'd manifest surfaces as an error instead of a JSON parse failure further downstream. */
+async function fetchOk(url: string, what: string): Promise<Response> {
+  const response = await fetch(reprefix(url));
+  if (!response.ok) {
+    throw new Error(`Failed to load asset ${what} ${url}: ${response.status} ${response.statusText}`);
+  }
+  return response;
 }
 
 export function createGameAssetCatalog(): PublicAssetCatalog {
   const inner = createPublicAssetCatalog({
-    fetchJson: (url) =>
-      fetch(reprefix(url)).then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load asset JSON ${url}: ${response.status} ${response.statusText}`);
-        }
-        return response.json();
-      }),
-    fetchArrayBuffer: (url) =>
-      fetch(reprefix(url)).then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load asset bytes ${url}: ${response.status} ${response.statusText}`);
-        }
-        return response.arrayBuffer();
-      }),
+    fetchJson: (url) => fetchOk(url, "JSON").then((response) => response.json()),
+    fetchArrayBuffer: (url) => fetchOk(url, "bytes").then((response) => response.arrayBuffer()),
   });
 
   return {
