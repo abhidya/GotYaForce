@@ -16,7 +16,7 @@
 // render asset loader, and the baked-clip builder are REUSED.
 
 import * as THREE from "three";
-import { bootRomDamage } from "./sim/romDamageBoot";
+import { installRomDamageCore } from "./sim/romDamageBoot";
 import { DEFAULT_PILOT_FRAMES, bootComposedModule, onGameFrame as onComposedGameFrame } from "./rom/composedBoot";
 
 import { type StageAssets } from "@gf/assets";
@@ -390,9 +390,16 @@ type StageRenderState = {
 };
 
 const uiElement = document.getElementById("ui");
+const chromeElement = document.getElementById("gf-chrome");
 const canvas = document.getElementById("app") as HTMLCanvasElement;
 if (!uiElement) throw new Error("Missing #ui");
+// Persistent chrome layer (index.html). REQUIRED, not optional: #ui is the screen host's
+// root and every mount calls replaceChildren() on it, so anything that must survive a
+// screen change cannot live there. Falling back to #ui here would silently reintroduce the
+// detached-overlay bug, so a missing layer is a build error, not a degraded default.
+if (!chromeElement) throw new Error("Missing #gf-chrome");
 const ui = uiElement;
+const chromeLayer = chromeElement;
 const screenHost = createMenuScreenHost(ui);
 ui.style.pointerEvents = "auto"; // the UI component library uses real buttons.
 const urlParams = new URLSearchParams(window.location.search);
@@ -409,32 +416,84 @@ const LOADING_MESSAGE_CSS =
 // ATK-015: minimal read-only debug overlay (sim state readout for the focused borg). Mounted
 // once at startup, hidden by default; toggled with the backtick key or ?debugOverlay=1. See
 // apps/game/src/ui/hud/DebugOverlay.ts and research/tasks/attack-port/ATK-015-debug-overlay-fields.md.
-const debugOverlay: DebugOverlayHandle = createDebugOverlay(ui);
+// Mounted into the CHROME layer, not #ui: the first screen mount replaces #ui's children, so
+// an overlay parented there was detached before it could ever be toggled on.
+const debugOverlay: DebugOverlayHandle = createDebugOverlay(chromeLayer);
+
+/**
+ * Persistent, unmissable notice pinned to the chrome layer.
+ *
+ * Used for facts a player/operator must not be able to miss — today: the damage core is not
+ * the ROM's. Deliberately NOT the debug overlay, which is hidden by default: a downgrade
+ * only visible behind a debug toggle is still a silent downgrade.
+ */
+function showChromeBanner(id: string, text: string, accent: string): void {
+  const existing = chromeLayer.querySelector(`[data-gf-banner="${id}"]`);
+  if (existing) existing.remove();
+  const box = document.createElement("div");
+  box.dataset["gfBanner"] = id;
+  box.textContent = text;
+  box.style.cssText =
+    "position:absolute;left:50%;bottom:10px;transform:translateX(-50%);max-width:92vw;" +
+    `padding:6px 12px;border-radius:4px;border:1px solid ${accent};background:rgba(0,0,0,0.82);` +
+    `color:${accent};font:600 12px/1.4 'Consolas','Menlo',monospace;text-align:center;` +
+    "pointer-events:none;z-index:70;";
+  chromeLayer.appendChild(box);
+}
 
 // ROM-wasm damage core (the 1:1 port, live in the game): fetch + fidelity-gate
 // against the TS reference + install into sourceDamage's override seam.
 // Default ON; `?romwasm=0` forces the TS implementation; `?romwasm=threads`
 // loads the threads-target relink (imported shared memory, step 8) — the
 // exported-memory build stays the default until switching is separately
-// reviewed.
+// reviewed. An unrecognised value is rejected rather than silently defaulted.
+//
+// The result is never swallowed: romDamageBoot publishes it to
+// window.__romDamageStatus + <html data-gf-rom-damage>, and anything other than
+// a live ROM core also raises a banner here and annotates the debug overlay, so
+// a build serving the wrong core cannot look identical to a correct one.
 const ROM_WASM_FIDELITY_CASES = 256;
-const romWasmFlag = urlParams.get("romwasm");
-if (romWasmFlag !== "0") {
-  void bootRomDamage(ROM_WASM_FIDELITY_CASES, romWasmFlag === "threads" ? "threads" : "default").then((r) => {
-    if (!r.active) console.warn(`[rom-wasm] TS port active (${r.detail})`);
-  });
-}
+void installRomDamageCore(urlParams.get("romwasm"), ROM_WASM_FIDELITY_CASES).then((status) => {
+  if (status.state === "rom-live") {
+    debugOverlay.setProvenance([`damage: ROM wasm (${status.variant})`]);
+    return;
+  }
+  const forced = status.state === "ts-port-forced";
+  debugOverlay.setProvenance([
+    `damage: TS PORT — NOT the ROM core${forced ? " (?romwasm=0)" : ""}`,
+    `reason: ${status.detail}`,
+  ]);
+  showChromeBanner(
+    "rom-damage",
+    forced
+      ? "TS DAMAGE PORT (?romwasm=0) — the ROM damage core is not serving this session"
+      : `ROM DAMAGE CORE NOT LIVE — running degraded on the TS port: ${status.detail}`,
+    forced ? "#ffd479" : "#ff6b6b",
+  );
+});
 
 // Composed-module dispatch pilot (docs/composed-pilot.md): boots the real
 // assembly-gate rung-0 module in a rom-runtime worker and drives it from the
 // render loop below, with every out-of-window call crossing the H2 bridge.
 // OFF by default — it reserves 2GB of shared memory and parks a worker thread.
 // `?composed=1` uses the default frame budget; `?composed=<n>` drives n frames.
+//
+// The pilot's adapters are SYNTHETIC stand-ins with no capture behind them and
+// the module's units have no post-relink verification, so whenever it is up the
+// app says so on screen — its numbers must never be read as gameplay evidence.
 const composedFlag = urlParams.get("composed");
 if (composedFlag !== null && composedFlag !== "0") {
   const requested = Number.parseInt(composedFlag, 10);
   void bootComposedModule(Number.isFinite(requested) && requested > 1 ? requested : DEFAULT_PILOT_FRAMES).then((r) => {
-    if (!r.active) console.warn(`[composed-rom] pilot not active (${r.detail})`);
+    if (!r.active) {
+      console.warn(`[composed-rom] pilot not active (${r.detail})`);
+      return;
+    }
+    showChromeBanner(
+      "composed-pilot",
+      "COMPOSED-MODULE PILOT ACTIVE — synthetic adapters, unverified units, NO behavioural claim",
+      "#ffd479",
+    );
   });
 }
 
@@ -591,24 +650,30 @@ let sfxKeys: ReadonlySet<string> = new Set();
 function initAudio(): Promise<GotchaAudioManager | null> {
   if (!audioManagerPromise) {
     audioManagerPromise = (async () => {
+      // BOTH manifests are shipped assets under apps/game/public and are REQUIRED. A
+      // failure here is a broken build, not a runtime condition to absorb: it silences
+      // every cue in the game. It used to be swallowed whole — `.catch(() => null)` with
+      // no log — so a deploy that lost /audio/manifest.json played in total silence and
+      // looked exactly like a correct one. The game still continues without audio (audio
+      // is not load-bearing for play), but it says so at console.error, which the
+      // production smoke treats as fatal.
       const manifest = await loadAudioManifest(publicUrl("/audio/manifest.json"));
-      // Merge the DERIVED combat-SE manifest (real GameCube soundbank samples, id-keyed
-      // se_<hex> cues, exported by scripts/export-combat-se.py from afs_data.afs
-      // snd_com01/02/03). Optional: when absent, the se_* COMBAT_SFX entries simply
-      // resolve to nothing and playSfx swallows them.
-      try {
-        const se = await loadAudioManifest(publicUrl("/audio/se/manifest.json"));
-        manifest.files = [...manifest.files, ...se.files];
-      } catch {
-        // combat-SE manifest not exported; fall through with the base manifest only
-      }
+      // The DERIVED combat-SE manifest (real GameCube soundbank samples, id-keyed se_<hex>
+      // cues, exported by scripts/export-combat-se.py from afs_data.afs snd_com01/02/03).
+      // Also shipped, also required: without it every DERIVED combat cue resolves to
+      // nothing and the battle loses its real hit/dash/shoot samples.
+      const se = await loadAudioManifest(publicUrl("/audio/se/manifest.json"));
+      manifest.files = [...manifest.files, ...se.files];
       // Build the resolver keyset once from the merged manifest. resolveCueToAsset
       // intersects the ROM guard (soundId < 0x180, bank/sample arithmetic from
       // zz_00efb3c_) with the exported se_* keys; TITLE_SOUND_IDS stays as the
       // last-resort fallback at the onSound call site so this never regresses.
       sfxKeys = collectManifestPlayKeys(manifest);
       return createAudioManager({ manifest });
-    })().catch(() => null);
+    })().catch((error: unknown) => {
+      console.error("[audio] manifest load FAILED — the session will run with NO audio:", error);
+      return null;
+    });
   }
   return audioManagerPromise;
 }
@@ -861,12 +926,17 @@ function mountSelectForce(state: SessionState): void {
 }
 
 function mountForceBuilder(state: SessionState): void {
+  // createGameSession refuses to construct without at least one force slot, so a missing
+  // slot here is a broken invariant, not a case to render around. Editing an EMPTY force
+  // (the old `slot ? ... : []`) silently discards whatever the player had and looks like a
+  // wiped save; failing names the real fault instead.
   const slot = state.forceSlots[state.selectedForceSlot] ?? state.forceSlots[0];
+  if (!slot) throw new Error(`Force Builder has no slot to edit (selected ${state.selectedForceSlot})`);
   screenHost.mount((root) =>
     createForceBuilder(root, {
       catalog: FORCE_CATALOG,
       limit: state.budget,
-      initialForce: slot ? forceFromSlot(slot) : [],
+      initialForce: forceFromSlot(slot),
       onConfirm: (borgIds) => confirmWith({ type: "force-editor-confirm", borgIds })(),
       onQuit: () => {
         playBackSfx();

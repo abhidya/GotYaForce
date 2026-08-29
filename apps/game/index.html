@@ -49,12 +49,19 @@
       /* The on-screen GameCube overlay styles itself, including its safe-area insets;
          see apps/game/src/ui/touch/gcTouchOverlay.ts. */
       #ui { position: fixed; inset: 0; pointer-events: none; color: #e9f2ff; font-family: "Trebuchet MS", system-ui, sans-serif; }
+      /* Persistent app chrome that must OUTLIVE screen changes. #ui is the screen host's
+         root and createScreenHost.clear() calls root.replaceChildren() on every mount, so
+         anything appended straight to #ui is silently detached by the first screen (that is
+         what used to strand the debug overlay before its first use). Chrome that has to
+         stay — the debug overlay and the ROM-damage status badge — lives here instead. */
+      #gf-chrome { position: fixed; inset: 0; pointer-events: none; color: #e9f2ff; font-family: "Trebuchet MS", system-ui, sans-serif; }
       button, input, select { font: inherit; }
     </style>
   </head>
   <body>
     <canvas id="app"></canvas>
     <div id="ui"></div>
+    <div id="gf-chrome"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

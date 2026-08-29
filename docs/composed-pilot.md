@@ -110,13 +110,24 @@ put in the arena, which a stub cannot fake by returning zero.
 
 With `?composed=1` (or `?composed=<n>` for n frames) on the game page:
 
-- `window.__gf.composedPilot()` — the gate's own record: artifact sha256, rung,
-  units, table size, shared-memory size, boot timings, per-frame results with
-  every state check, and the verification-status disclaimer.
+- `window.__gf.composedPilot()` — the gate's own record. Its first two fields are
+  `behaviouralClaim` (always `NONE. ...` for this pilot) and `verified: false`,
+  ahead of any number; then artifact sha256, rung, units, table size,
+  shared-memory size, boot timings, the registered adapter roster, and per-frame
+  results with every state check. The per-frame and overall verdicts are named
+  `declaredChecksPass`, **not** `pass`: they say the pilot's own declared
+  expectations held, which is a mechanism check and not a verification result.
+- `<html data-gf-composed-pilot="synthetic-no-behavioural-claim">` — set as soon
+  as the pilot boots, plus an on-screen banner, so a live page carrying pilot
+  numbers cannot be mistaken for a normal run.
 - `window.__gf.bridgeLedger()` — per-frame crossings, per-symbol totals,
   declared servicing errors (H2/I2).
-- `window.__gf.bridgeAdapters()` — the adapters registered, each with its
-  evidence string.
+- `window.__gf.bridgeAdapters()` — `{ behaviouralClaim, adapters }`. Each adapter
+  carries its evidence string **and** an `evidenceClass` of `verified` or
+  `synthetic`. `synthetic` adapters are refused by `AdapterRegistry` unless the
+  host was opened with `admitSyntheticAdapters: true` — which only this pilot
+  and the rom-runtime self-test do, so a stand-in cannot service a frame
+  anywhere else.
 - `window.__gf.bridgeImports()` — the **declared** boundary: all 31 symbols that
   *can* cross, with signature and address source. The adapter roster is the
   subset the ledger proves is *hit* (I1's work-queue relationship, visible).

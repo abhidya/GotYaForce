@@ -23,7 +23,14 @@
 //
 // Addresses are parameterizable ONLY as a test affordance (the browser
 // self-test runs the same adapter logic inside a small synthetic-arena
-// module); production registration uses the ROM addresses below.
+// module); a real registration would use the ROM addresses below.
+//
+// STATUS, stated plainly: nothing registers these two in a running game yet. Their only
+// caller today is the rom-runtime browser self-test (src/selftest/selftestMain.ts). They are
+// the two EVIDENCE-BACKED adapters in the package — the reference for what an I1 adapter
+// looks like next to the composed pilot's synthetic stand-ins — but the composed module is
+// not wired to gameplay, so "production registration" is a description of the intended
+// shape, not of something that happens.
 // =============================================================================
 
 import { applyHpDamage, lookupTypeCategory, type SourceDamageTarget } from "@gf/combat";
@@ -51,6 +58,7 @@ export function createApplyHpDamageAdapter(gcAddr: number = GC_APPLY_HP_DAMAGE_A
     evidence:
       "oracle-verified seam contract: packages/combat/src/rom/wasmDamageCore.ts applyHpDamage " +
       "(research/decomp/data/oracle-results/damage-core.json); source chunk_0004.c:6832-6860",
+    evidenceClass: "verified",
     retClass: FrameValueClass.VOID,
     service(ctx) {
       const targetPtr = ctx.frame.u32Arg(0);
@@ -92,6 +100,7 @@ export function createLookupTypeCategoryAdapter(
     evidence:
       "oracle-verified seam contract: packages/combat/src/rom/wasmDamageCore.ts lookupTypeCategory " +
       "(research/decomp/data/oracle-results/damage-core.json); source chunk_0008.c:2976-2982",
+    evidenceClass: "verified",
     retClass: FrameValueClass.I32,
     service(ctx) {
       const ptr = ctx.frame.u32Arg(0);

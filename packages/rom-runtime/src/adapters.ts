@@ -22,6 +22,24 @@ import type { DispatchFrame } from "./frame.js";
 import { FrameValueClass } from "./frame.js";
 import type { GcMemory } from "./memory.js";
 
+/**
+ * How much an adapter's memory contract is actually worth (I1).
+ *
+ * This is a TYPE-LEVEL distinction on purpose. Before it existed, a pilot
+ * stand-in written by hand with no capture behind it was indistinguishable
+ * from a trace-backed adapter: both were `BridgedCalleeAdapter`s carrying a
+ * free-text `evidence` string that nothing read. The registry now refuses
+ * SYNTHETIC adapters unless the host was explicitly opened for them, so a
+ * stub cannot drift into a path that services real frames.
+ *
+ *  - "verified":  derived from an oracle-verified seam contract or a real
+ *                 Dolphin trace capture. May service anything.
+ *  - "synthetic": DECLARED by hand, no capture. Carries NO behavioural claim
+ *                 about its symbol and is admissible only on a host that was
+ *                 opened for pilot work (`admitSyntheticAdapters`).
+ */
+export type AdapterEvidenceClass = "verified" | "synthetic";
+
 /** What an adapter gets to service ONE bridged call. */
 export interface BridgedCallContext {
   /** GC address of the bridged callee (the miss/bridge key). */
@@ -62,6 +80,8 @@ export interface BridgedCalleeAdapter {
   /** Where this adapter's memory contract comes from (trace file, verified
    *  seam, spec) — I1: an adapter without evidence is not a valid adapter. */
   readonly evidence: string;
+  /** Whether that evidence is real. Enforced by AdapterRegistry, not advisory. */
+  readonly evidenceClass: AdapterEvidenceClass;
   /** The symbol's DECLARED return class. After servicing, the host compares
    *  the frame's written ret_class against this and surfaces any disagreement
    *  in the ledger (RET_CLASS_MISMATCH — the host-detectable mis-marshal
@@ -70,12 +90,32 @@ export interface BridgedCalleeAdapter {
   service(ctx: BridgedCallContext): number;
 }
 
-/** Address-keyed adapter registry — the main-thread service table. */
+/**
+ * Address-keyed adapter registry — the main-thread service table.
+ *
+ * Refuses SYNTHETIC adapters unless it was constructed with
+ * `admitSynthetic: true`. That flag is the ONLY way a stand-in with no capture
+ * behind it can reach a service table, and the composed-module pilot is the
+ * only caller that sets it (apps/game/src/rom/composedBoot.ts, behind the
+ * opt-in `?composed=` switch).
+ */
 export class AdapterRegistry {
   #byAddr = new Map<number, BridgedCalleeAdapter>();
+  readonly admitSynthetic: boolean;
+
+  constructor(options: { admitSynthetic?: boolean } = {}) {
+    this.admitSynthetic = options.admitSynthetic ?? false;
+  }
 
   register(adapter: BridgedCalleeAdapter): void {
     const key = adapter.gcAddr >>> 0;
+    if (adapter.evidenceClass === "synthetic" && !this.admitSynthetic) {
+      throw new Error(
+        `refusing SYNTHETIC adapter ${adapter.name} at 0x${key.toString(16)}: it has no capture behind it ` +
+          `and carries no behavioural claim, so it may not service frames on this host. Open the host with ` +
+          `admitSyntheticAdapters:true if this really is pilot work (${adapter.evidence})`,
+      );
+    }
     const existing = this.#byAddr.get(key);
     if (existing && existing !== adapter) {
       throw new Error(
@@ -89,12 +129,19 @@ export class AdapterRegistry {
     return this.#byAddr.get(gcAddr >>> 0);
   }
 
-  list(): Array<{ gcAddr: string; name: string; evidence: string }> {
+  /** True once any registered adapter is a synthetic stand-in — i.e. this
+   *  host's results carry no behavioural claim. */
+  get hasSyntheticAdapters(): boolean {
+    return [...this.#byAddr.values()].some((a) => a.evidenceClass === "synthetic");
+  }
+
+  list(): Array<{ gcAddr: string; name: string; evidenceClass: AdapterEvidenceClass; evidence: string }> {
     return [...this.#byAddr.entries()]
       .sort((a, b) => a[0] - b[0])
       .map(([addr, a]) => ({
         gcAddr: (addr >>> 0).toString(16).padStart(8, "0"),
         name: a.name,
+        evidenceClass: a.evidenceClass,
         evidence: a.evidence,
       }));
   }
@@ -128,6 +175,7 @@ export class TraceDeltaAdapter implements BridgedCalleeAdapter {
   readonly gcAddr: number;
   readonly name: string;
   readonly evidence: string;
+  readonly evidenceClass: AdapterEvidenceClass;
   readonly retClass: FrameValueClass;
   #calls: TraceDeltaCall[];
   #cursor = 0;
@@ -137,11 +185,16 @@ export class TraceDeltaAdapter implements BridgedCalleeAdapter {
     name: string;
     /** Trace provenance (capture file / DTM id) — required by I1. */
     evidence: string;
+    /** "verified" only for records that came out of a real capture. A fixture
+     *  whose write set was hand-declared is "synthetic" — the class mechanism
+     *  works either way, but only one of the two says anything about the ROM. */
+    evidenceClass: AdapterEvidenceClass;
     calls: TraceDeltaCall[];
   }) {
     this.gcAddr = options.gcAddr >>> 0;
     this.name = options.name;
     this.evidence = options.evidence;
+    this.evidenceClass = options.evidenceClass;
     this.#calls = options.calls;
     const classes = new Set(
       options.calls.map((c) =>
@@ -193,11 +246,14 @@ export class TraceDeltaAdapter implements BridgedCalleeAdapter {
   }
 }
 
-/** Small helper for hand-written adapters. */
+/** Small helper for hand-written adapters. `evidenceClass` is required: an
+ *  adapter author has to state, at the definition site, whether anything is
+ *  actually behind the contract they just wrote. */
 export function defineAdapter(options: {
   gcAddr: number;
   name: string;
   evidence: string;
+  evidenceClass: AdapterEvidenceClass;
   retClass: FrameValueClass;
   service: (ctx: BridgedCallContext) => number;
 }): BridgedCalleeAdapter {
@@ -205,6 +261,7 @@ export function defineAdapter(options: {
     gcAddr: options.gcAddr >>> 0,
     name: options.name,
     evidence: options.evidence,
+    evidenceClass: options.evidenceClass,
     retClass: options.retClass,
     service: options.service,
   };

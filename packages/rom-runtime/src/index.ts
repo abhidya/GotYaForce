@@ -49,6 +49,7 @@ export {
   AdapterRegistry,
   TraceDeltaAdapter,
   defineAdapter,
+  type AdapterEvidenceClass,
   type BridgedCalleeAdapter,
   type BridgedCallContext,
   type TraceDeltaCall,

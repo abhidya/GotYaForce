@@ -219,7 +219,8 @@ async function waitFor(cdp, expression, label, timeoutMs = 30_000) {
     await delay(100);
   }
   const snapshot = await evaluate(cdp, `({
-    runtime: document.documentElement.dataset.gfRuntime,
+    runtime: document.documentElement?.dataset.gfRuntime,
+    romDamage: document.documentElement?.dataset.gfRomDamage,
     screen: window.__gf?.navigation?.screen,
     body: document.body?.innerText?.slice(0, 1000)
   })`);
@@ -307,6 +308,45 @@ async function waitForNetworkIdle(pendingRequests, lastActivity, idleMs = 750, t
   throw new Error(`network did not become idle; pending requests: ${JSON.stringify(pending)}`);
 }
 
+/**
+ * Prove the ROM-damage seam is LOUD when it is not serving.
+ *
+ * The positive assertions later in the route only prove the happy path stays green. This
+ * exercises the other branch on the same production bundle: `?romwasm=0` is the deliberate
+ * opt-out, and the app must publish it — status seam, DOM marker, and an on-screen banner —
+ * exactly as it would publish a real failure. Without this, the surfacing that stops a
+ * downgraded build from looking correct is itself untested, which is the mistake that put
+ * the silent fallback there in the first place.
+ */
+async function assertRomDamageDowngradeIsVisible(cdp, baseUrl) {
+  await cdp.send("Page.navigate", { url: `${baseUrl}?romwasm=0` });
+  await waitFor(
+    cdp,
+    `document.documentElement?.dataset.gfRomDamage &&
+     document.documentElement.dataset.gfRomDamage !== "booting" &&
+     Boolean(document.querySelector('[data-gf-banner="rom-damage"]'))`,
+    "the ?romwasm=0 opt-out to publish a damage-core status and banner",
+    60_000,
+  );
+  const opted = await evaluate(cdp, `({
+    dataset: document.documentElement.dataset.gfRomDamage,
+    status: window.__romDamageStatus ?? null,
+    romDamageGlobal: Boolean(window.__romDamage),
+    banner: document.querySelector('[data-gf-banner="rom-damage"]')?.textContent ?? null
+  })`);
+  if (opted.dataset !== "ts-port-forced" || opted.status?.state !== "ts-port-forced") {
+    throw new Error(`?romwasm=0 did not publish the forced-TS state: ${JSON.stringify(opted)}`);
+  }
+  // The seam contract: window.__romDamage exists if and only if the ROM core is installed.
+  if (opted.romDamageGlobal) {
+    throw new Error("window.__romDamage was set while the ROM core was not installed");
+  }
+  if (!opted.banner) {
+    throw new Error("no on-screen banner while the ROM damage core was not serving — the downgrade is silent");
+  }
+  return opted;
+}
+
 // `url` is what the browser navigates to (may carry ?romwasm=threads);
 // `assetBase` is the query-less serving base the media-cancellation gate
 // matches asset URLs against.
@@ -388,9 +428,13 @@ async function drivePlayableRoute(cdp, url, assetBase = url) {
   });
   await cdp.send("Page.navigate", { url });
 
+  // `document.documentElement?` — Page.navigate resolves before the new document is
+  // committed, so an evaluate can land while documentElement is still null and blow up with
+  // "Cannot read properties of null" instead of simply polling again. Optional chaining makes
+  // "not there yet" a falsy poll, which is what this loop is for.
   await waitFor(
     cdp,
-    `document.documentElement.dataset.gfRuntime === "boot-ready" && window.__gf?.navigation?.screen === "title"`,
+    `document.documentElement?.dataset.gfRuntime === "boot-ready" && window.__gf?.navigation?.screen === "title"`,
     "asset-backed boot-ready title",
     60_000,
   );
@@ -547,10 +591,31 @@ async function drivePlayableRoute(cdp, url, assetBase = url) {
     live: Boolean(window.__romDamage),
     calls: window.__romDamage ? { ...window.__romDamage.callCounts } : null,
     shims: window.__romDamage ? { ...window.__romDamage.shimCounts } : null,
-    memory: window.__romDamage?.memoryInfo ?? null
+    memory: window.__romDamage?.memoryInfo ?? null,
+    status: window.__romDamageStatus ?? null,
+    dataset: document.documentElement.dataset.gfRomDamage ?? null,
+    degradedBanner: document.querySelector('[data-gf-banner="rom-damage"]')?.textContent ?? null
   })`);
   if (!romDamage.live) {
     throw new Error("ROM-wasm damage core is not live — the game fell back to the TS port");
+  }
+  // The boot seam must not merely BE live; it must SAY so, on every surface a human or a
+  // script would look at. A build that served the wrong core used to look identical to a
+  // correct one (one console.warn, nothing in the page), which is what these three assert
+  // against — the published status, the DOM marker, and the absence of a degraded banner.
+  if (romDamage.status?.state !== "rom-live" || romDamage.status?.romCoreLive !== true) {
+    throw new Error(`window.__romDamageStatus does not report a live ROM core: ${JSON.stringify(romDamage.status)}`);
+  }
+  if (romDamage.dataset !== "rom-live") {
+    throw new Error(`<html data-gf-rom-damage> is ${JSON.stringify(romDamage.dataset)}, expected "rom-live"`);
+  }
+  if (romDamage.degradedBanner !== null) {
+    throw new Error(`the app is showing a ROM-damage degradation banner: ${romDamage.degradedBanner}`);
+  }
+  if (romWasmVariant !== "default" && romDamage.status.variant !== romWasmVariant) {
+    throw new Error(
+      `status reports variant ${JSON.stringify(romDamage.status.variant)}, expected ${romWasmVariant}`,
+    );
   }
   // Step-8 threads proof (GF_SMOKE_ROMWASM=threads): the battle above must have
   // been served by the threads-target relink — imported SHARED memory, which
@@ -660,9 +725,12 @@ try {
   cdp = await CdpClient.connect(debuggerUrl, WebSocket);
   const routeUrl = romWasmVariant === "threads" ? `${started.url}?romwasm=threads` : started.url;
   const state = await drivePlayableRoute(cdp, routeUrl, started.url);
+  // Runs LAST, on the same bundle: it navigates away from the played route on purpose.
+  const downgrade = await assertRomDamageDowngradeIsVisible(cdp, started.url);
   process.stdout.write(
     `Browser smoke PASS (romwasm=${romWasmVariant}): ${path.basename(browser)} production title -> Challenge -> Normal -> 1P -> box -> force -> briefing -> unpaused battle HUD ${JSON.stringify(state)}\n`,
   );
+  process.stdout.write(`ROM damage downgrade is VISIBLE: ${JSON.stringify(downgrade)}\n`);
 } finally {
   if (cdp) {
     try { await cdp.send("Browser.close"); } catch { /* browser may already be gone */ }

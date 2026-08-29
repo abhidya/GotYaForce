@@ -11,7 +11,6 @@ export * from "./camera/sourceCamera.js";
 export * from "./camera/sourceCameraThree.js";
 
 export interface ThreeViewportOptions {
-  backend?: "webgl";
   antialias?: boolean;
   /**
    * Keeps the backbuffer readable for screenshot verification. Leave off during play;
@@ -19,13 +18,20 @@ export interface ThreeViewportOptions {
    */
   debugCapture?: boolean;
   pixelRatioLimit?: number;
-  camera?: {
+  /**
+   * REQUIRED. The viewport does not invent a camera: fov/near/far are the stage's own
+   * exported HSD CObj values (main.ts seeds them from DEFAULT_RENDER_STATE and each stage
+   * overwrites them). A built-in default here would silently frame the world with numbers
+   * that came from nowhere and look like a rendering bug rather than a missing argument.
+   */
+  camera: {
     fov: number;
     near: number;
     far: number;
     position: [number, number, number];
   };
-  clearColor?: number;
+  /** REQUIRED, same reason: the clear color is the stage's exported fog color. */
+  clearColor: number;
 }
 
 export interface RenderDiagnostics {
@@ -63,26 +69,10 @@ export interface ThreeViewport {
  *  fidelity to GameCube-era art. Callers override with `pixelRatioLimit`. */
 const DEFAULT_PIXEL_RATIO_LIMIT = 2;
 
-/** Fallback view for a host that passes no camera. Every real caller supplies its own
- *  (the game seeds from the stage's exported CObj), so these only frame a bare scene. */
-const DEFAULT_CAMERA: NonNullable<ThreeViewportOptions["camera"]> = {
-  fov: 45,
-  near: 0.1,
-  far: 100000,
-  position: [0, 900, 1800],
-};
-
 /** Default orbit pivot: torso height at the arena origin. */
 const DEFAULT_TARGET: readonly [number, number, number] = [0, 80, 0];
 
-/** Fallback clear color for a host that passes no clearColor. */
-const DEFAULT_CLEAR_COLOR = 0x101820;
-
-export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeViewportOptions = {}): ThreeViewport {
-  const backend = options.backend ?? "webgl";
-  // Guard clause: the option exists so a future backend has a name to claim, but only the
-  // WebGL path is implemented.
-  if (backend !== "webgl") throw new Error(`Unsupported render backend: ${backend}`);
+export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeViewportOptions): ThreeViewport {
   const debugCapture = options.debugCapture ?? false;
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -99,9 +89,9 @@ export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeVie
   renderer.toneMapping = THREE.NoToneMapping;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(options.clearColor ?? DEFAULT_CLEAR_COLOR);
+  scene.background = new THREE.Color(options.clearColor);
 
-  const cameraOptions = options.camera ?? DEFAULT_CAMERA;
+  const cameraOptions = options.camera;
   const camera = new THREE.PerspectiveCamera(
     cameraOptions.fov,
     window.innerWidth / window.innerHeight,
@@ -115,7 +105,7 @@ export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeVie
   controls.target.set(DEFAULT_TARGET[0], DEFAULT_TARGET[1], DEFAULT_TARGET[2]);
 
   return {
-    backend,
+    backend: "webgl",
     renderer,
     scene,
     camera,

@@ -1,51 +1,37 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import ts from "typescript";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { emitInlineModuleGraph } from "./lib/ts-inline-module.mjs";
 
-function transpile(source, fileName) {
-  return ts.transpileModule(source, {
-    compilerOptions: {
-      module: ts.ModuleKind.ESNext,
-      target: ts.ScriptTarget.ES2022,
-    },
-    fileName,
-  }).outputText;
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const intro = path.join(root, "apps/game/src/ui/intro");
+const outRoot = path.join(root, ".tmp", "selfcheck-title-frontend");
+
+/**
+ * Import one title-front-end module with its real dependency graph.
+ *
+ * This used to transpile each file alone and text-substitute exactly ONE specifier
+ * (`../titleIntroScript.generated.js`) into a data: URL. When titlePropController grew an
+ * import of `../../constants.js` the substitution knew nothing about it, the specifier
+ * survived into a data: module that cannot resolve relative paths, and the whole script died
+ * on ERR_UNSUPPORTED_RESOLVE_REQUEST — the same rot that had already disabled
+ * selfcheck:menu-flow and selfcheck:game-session. emitInlineModuleGraph follows the real
+ * graph instead, and errors by name on any dependency it cannot place.
+ */
+function importTitleModule(entry) {
+  const graph = emitInlineModuleGraph({
+    label: `selfcheck-title-frontend:${path.basename(entry)}`,
+    entry,
+    outDir: path.join(outRoot, path.basename(entry, ".ts")),
+  });
+  return import(graph.url);
 }
 
-function dataUrl(source) {
-  return `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`;
-}
-
-const generatedPath = new URL(
-  "../apps/game/src/ui/titleIntroScript.generated.ts",
-  import.meta.url,
-);
-const generatedUrl = dataUrl(
-  transpile(await readFile(generatedPath, "utf8"), "titleIntroScript.generated.ts"),
-);
-const generated = await import(generatedUrl);
-
-async function importTitleModule(path, fileName) {
-  const source = await readFile(path, "utf8");
-  const js = transpile(source, fileName).replace(
-    /\.\.\/titleIntroScript\.generated\.js/g,
-    generatedUrl,
-  );
-  return import(dataUrl(js));
-}
-
-const { createTitleVm } = await importTitleModule(
-  new URL("../apps/game/src/ui/intro/titleVm.ts", import.meta.url),
-  "titleVm.ts",
-);
-const { createTitlePropController } = await importTitleModule(
-  new URL("../apps/game/src/ui/intro/titlePropController.ts", import.meta.url),
-  "titlePropController.ts",
-);
-const { createPhysicalMenuController } = await importTitleModule(
-  new URL("../apps/game/src/ui/intro/physicalMenuController.ts", import.meta.url),
-  "physicalMenuController.ts",
-);
+const generated = await importTitleModule(path.join(root, "apps/game/src/ui/titleIntroScript.generated.ts"));
+const { createTitleVm } = await importTitleModule(path.join(intro, "titleVm.ts"));
+const { createTitlePropController } = await importTitleModule(path.join(intro, "titlePropController.ts"));
+const { createPhysicalMenuController } = await importTitleModule(path.join(intro, "physicalMenuController.ts"));
 
 assert.deepEqual(
   generated.TITLE_INTRO_WIDGET_DESCRIPTORS
@@ -214,15 +200,13 @@ assert.ok(
   "all eight source screws/nuts complete their staggered drop",
 );
 
-const titlePath = new URL("../apps/game/src/ui/screens/TitleIntro.ts", import.meta.url);
-const menuPath = new URL("../apps/game/src/ui/screens/MainMenu.ts", import.meta.url);
-const menuScenePath = new URL(
-  "../apps/game/src/ui/intro/physicalMenuScene.ts",
-  import.meta.url,
-);
-const mainPath = new URL("../apps/game/src/main.ts", import.meta.url);
 const [titleSource, menuSource, menuSceneSource, mainSource] = await Promise.all(
-  [titlePath, menuPath, menuScenePath, mainPath].map((path) => readFile(path, "utf8")),
+  [
+    "apps/game/src/ui/screens/TitleIntro.ts",
+    "apps/game/src/ui/screens/MainMenu.ts",
+    "apps/game/src/ui/intro/physicalMenuScene.ts",
+    "apps/game/src/main.ts",
+  ].map((relative) => readFile(path.join(root, relative), "utf8")),
 );
 
 for (const forbidden of [
@@ -264,15 +248,28 @@ for (const captureFallback of ["CHALLENGE_MENU_CAPTURE", "STORY_MENU_CAPTURE", "
 }
 assert.ok(menuSceneSource.includes("PHYSICAL_MENU_MODEL_TRIPLETS"));
 assert.ok(menuSceneSource.includes("PHYSICAL_MENU_CURSOR_MODEL_ID"));
-assert.ok(menuSceneSource.includes("PHYSICAL_MENU_ANGULAR_STEPS"));
+// PHYSICAL_MENU_ANGULAR_STEPS moved out of the scene and into the widget system when the
+// per-widget update kinds were ported; the scene now only draws what that system computes.
+// This assertion still pins "the ROM angular-step table is what drives the spin" — it just
+// has to look where the table is actually consumed. (Retargeted 2026-08-29, together with
+// the fix that made this script executable again; it had been asserting against a file the
+// constant left long before.)
+const widgetSystemSource = await readFile(path.join(root, "apps/game/src/ui/intro/menuWidgetSystem.ts"), "utf8");
+assert.ok(
+  widgetSystemSource.includes("PHYSICAL_MENU_ANGULAR_STEPS"),
+  "the ROM angular-step table drives the menu widget spin",
+);
 assert.ok(menuSceneSource.includes("0.1, 32768"), "stff near/far planes remain exact");
 assert.ok(
-  menuSceneSource.includes("selectionPivot.visible = drawable.menuIndex === selectedIndex"),
-  "source selection drawable gating remains wired",
+  menuSceneSource.includes("entry.selectionPivot.visible = selectionVisible"),
+  "source selection drawable gating remains wired (FUN_801cdbe0 update kind 0)",
 );
+// main.ts routes menu selections through confirmWith/editWith (play the cue, then dispatch)
+// rather than calling dispatchSession inline; the assertion follows that refactor. Intent is
+// unchanged: choosing Challenge dispatches menu-select and the session has a difficulty arm.
 assert.ok(
   mainSource.includes('mode === "challenge"') &&
-    mainSource.includes('dispatchSession({ type: "menu-select", mode })') &&
+    /confirmWith\(\{ type: "menu-select", mode \}\)/.test(mainSource) &&
     mainSource.includes('case "difficulty"'),
   "Challenge selection enters the existing Challenge controller path",
 );

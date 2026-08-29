@@ -57,6 +57,14 @@ export interface RomRuntimeHostOptions {
   trampolineFrameBase?: number;
   /** Nested trampoline frames the region holds. */
   trampolineFrameSlots?: number;
+  /**
+   * Open this host's adapter registry to SYNTHETIC adapters — hand-declared
+   * stand-ins with no capture behind them (adapters.ts AdapterEvidenceClass).
+   * Default false: a host services frames with evidence-backed adapters only.
+   * Set it ONLY for declared pilot work, and say so at the call site; results
+   * from a host that admitted synthetics carry no behavioural claim.
+   */
+  admitSyntheticAdapters?: boolean;
 }
 
 interface InvokeJob {
@@ -69,7 +77,7 @@ interface InvokeJob {
 const statusName = (code: number): string => BRIDGE_STATUS_NAMES[code] ?? `status_${code}`;
 
 export class RomRuntimeHost {
-  readonly adapters = new AdapterRegistry();
+  readonly adapters: AdapterRegistry;
   readonly ledger = new BridgeLedger();
   readonly memory: GcMemory;
 
@@ -96,6 +104,7 @@ export class RomRuntimeHost {
     options: RomRuntimeHostOptions,
   ) {
     this.#bootTimings = bootTimings ?? { memoryMs: 0, compileMs: 0, instantiateMs: 0, arenaMs: 0 };
+    this.adapters = new AdapterRegistry({ admitSynthetic: options.admitSyntheticAdapters ?? false });
     this.#worker = worker;
     this.#i32 = new Int32Array(ctrl);
     this.#exportNames = exportNames;
@@ -475,7 +484,14 @@ export function exposeBridgeLedger(host: RomRuntimeHost): void {
   };
   w.__gf = w.__gf ?? {};
   w.__gf["bridgeLedger"] = () => host.ledger.snapshot();
-  w.__gf["bridgeAdapters"] = () => host.adapters.list();
+  w.__gf["bridgeAdapters"] = () => ({
+    // Stated first and unconditionally: a roster containing a synthetic adapter
+    // makes every frame this host serviced evidence-free, whatever the numbers say.
+    behaviouralClaim: host.adapters.hasSyntheticAdapters
+      ? "NONE — at least one registered adapter is a synthetic stand-in with no capture behind it"
+      : "adapters are evidence-backed; the claim is each adapter's own cited evidence",
+    adapters: host.adapters.list(),
+  });
   // The DECLARED out-of-window boundary: every symbol that CAN cross. The
   // adapter roster above is the subset the ledger has proved is HIT (I1).
   w.__gf["bridgeImports"] = () =>

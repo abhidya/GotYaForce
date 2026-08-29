@@ -46,11 +46,34 @@ export class GcMemory {
     this.energyAddr = (options.energyAddr ?? GC_ENERGY_ADDR) >>> 0;
   }
 
+  /**
+   * Fail on an address outside the arena instead of pretending it read/wrote.
+   *
+   * The DataView accessors below already throw RangeError of their own accord; the
+   * Uint8Array ones do not — an out-of-range `u8[addr]` yields `undefined` and an
+   * out-of-range `u8[addr] = v` is a silent no-op. Both used to pass straight through here
+   * (`?? 0` on the read), which turns the single most likely adapter bug — a mis-marshalled
+   * GC pointer — into "the arena happened to be zero there". `assertRegionClear` in the
+   * composed pilot is built on exactly these reads, so a region outside the arena would have
+   * been certified CLEAR by reading nothing at all.
+   */
+  #assertInBounds(addr: number, length: number, op: string): void {
+    if (addr < 0 || length < 0 || addr + length > this.u8.length) {
+      throw new RangeError(
+        `GcMemory.${op}: [0x${(addr >>> 0).toString(16)}, +${length}) is outside the ${this.u8.length}-byte arena`,
+      );
+    }
+  }
+
   readU8(addr: number): number {
-    return this.u8[addr >>> 0] ?? 0;
+    const a = addr >>> 0;
+    this.#assertInBounds(a, 1, "readU8");
+    return this.u8[a] as number;
   }
   writeU8(addr: number, value: number): void {
-    this.u8[addr >>> 0] = value & 0xff;
+    const a = addr >>> 0;
+    this.#assertInBounds(a, 1, "writeU8");
+    this.u8[a] = value & 0xff;
   }
   readU16(addr: number): number {
     return this.dv.getUint16(addr >>> 0, true);
@@ -84,10 +107,16 @@ export class GcMemory {
   }
   readBytes(addr: number, length: number): Uint8Array {
     const a = addr >>> 0;
+    // Bounds-checked rather than clamped: `slice` past the end returns a SHORT array, and
+    // every caller that scans `bytes.length` (assertRegionClear) would then find nothing
+    // wrong with a region it never actually looked at.
+    this.#assertInBounds(a, length, "readBytes");
     return this.u8.slice(a, a + length);
   }
   writeBytes(addr: number, bytes: Uint8Array): void {
-    this.u8.set(bytes, addr >>> 0);
+    const a = addr >>> 0;
+    this.#assertInBounds(a, bytes.length, "writeBytes");
+    this.u8.set(bytes, a);
   }
 
   // --- bss live-state accessors the damage seam models -----------------------

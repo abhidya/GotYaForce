@@ -118,6 +118,10 @@ const NO_TRACE_EVIDENCE =
   "PILOT STUB — no Dolphin capture exists for this symbol. Declared write set only; " +
   "not a valid I1 adapter and carries no behavioural claim (docs/composed-pilot.md).";
 
+/** The fixture schema this pilot knows how to read. A fixture that does not
+ *  declare it is rejected rather than half-interpreted. */
+export const PILOT_FIXTURE_SCHEMA = "pilot-trace-delta-fixture-1";
+
 export interface PilotFrameResult {
   frame: number;
   /** Bridged crossings the ledger recorded for this frame. */
@@ -126,7 +130,15 @@ export interface PilotFrameResult {
   reentrantResult: number;
   /** Declared frame-boundary state checks (NOT a DTM comparison). */
   state: Array<{ name: string; expected: number; actual: number; pass: boolean }>;
-  pass: boolean;
+  /**
+   * Whether the DECLARED expectations above held. Named for what it is: this
+   * is a mechanism check, not a verification result. A frame where every
+   * declaredChecksPass is true still says nothing about whether these five
+   * units behave like the ROM — the adapters are stand-ins and the fixture is
+   * hand-authored. A bare `pass` here read as a green light, which is exactly
+   * the confusion this pilot must not create.
+   */
+  declaredChecksPass: boolean;
 }
 
 /** Mutable channel the reentrant adapter reports through. Keeping it explicit
@@ -137,10 +149,27 @@ export interface PilotState {
 
 /** One recorded call of the trace-delta fixture, as it ships on disk. */
 export interface PilotFixture {
+  schema: string;
   symbol: string;
   gcAddr: number;
   evidence: string;
   calls: Array<{ writes: Array<{ addr: number; bytes: number[] }> }>;
+}
+
+/**
+ * Reject a fixture this pilot cannot read instead of half-interpreting it.
+ * A missing `calls` array or an unknown schema used to sail through and only
+ * surface later as a puzzling state mismatch.
+ */
+export function assertPilotFixture(fixture: PilotFixture): void {
+  if (fixture.schema !== PILOT_FIXTURE_SCHEMA) {
+    throw new Error(
+      `pilot fixture declares schema ${JSON.stringify(fixture.schema)}, expected ${PILOT_FIXTURE_SCHEMA}`,
+    );
+  }
+  if (!Array.isArray(fixture.calls) || fixture.calls.length === 0) {
+    throw new Error("pilot fixture has no recorded calls — nothing for the trace-delta adapter to replay");
+  }
 }
 
 function hex(addr: number): string {
@@ -167,6 +196,7 @@ export function createPilotAdapters(
     gcAddr: GC_ZZ_0085E00,
     name: "zz_0085e00_",
     evidence: NO_TRACE_EVIDENCE,
+    evidenceClass: "synthetic",
     retClass: FrameValueClass.VOID,
     service: (ctx) => {
       const structPtr = ctx.frame.u32Arg(1);
@@ -183,6 +213,7 @@ export function createPilotAdapters(
     gcAddr: GC_ZZ_008AFF0,
     name: "zz_008aff0_",
     evidence: NO_TRACE_EVIDENCE,
+    evidenceClass: "synthetic",
     retClass: FrameValueClass.VOID,
     service: (ctx) => {
       const actor = ctx.frame.u32Arg(0);
@@ -208,6 +239,11 @@ export function createPilotAdapters(
     gcAddr: fixture.gcAddr,
     name: fixture.symbol,
     evidence: fixture.evidence,
+    // Hard-coded, NOT read from the fixture: the shipped fixture is
+    // hand-declared, and letting a JSON file assert its own trustworthiness is
+    // precisely the door this gate exists to shut. A real capture gets a real
+    // loader that vouches for it, not a field in the file.
+    evidenceClass: "synthetic",
     calls,
   });
 
@@ -308,6 +344,6 @@ export async function drivePilotFrame(
     bridgedCalls: ledgerFrame?.bridgedCallCount ?? 0,
     reentrantResult: pilotState.lastReentrantResult,
     state,
-    pass: state.every((c) => c.pass) && (ledgerFrame?.errors.length ?? 0) === 0,
+    declaredChecksPass: state.every((c) => c.pass) && (ledgerFrame?.errors.length ?? 0) === 0,
   };
 }

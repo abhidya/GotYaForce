@@ -59,9 +59,22 @@ function note(message) {
   notes.push(message);
 }
 
-const hudSrc = readFileSync(hudPath, "utf8");
-const presentationSrc = readFileSync(presentationPath, "utf8");
-const assetsSrc = readFileSync(assetsPath, "utf8");
+/**
+ * Read a source file with LF line endings.
+ *
+ * This script's structural checks anchor on `\n`. The repo checks out CRLF on Windows, so
+ * every `\n  };\n}`-style anchor silently failed to match there — check (c) reported
+ * "could not find battleHudState()'s return block to parse", which reads like the function
+ * was renamed rather than like a line-ending mismatch. Normalising on read makes the checks
+ * platform-independent; nothing here cares about the original bytes.
+ */
+function readSource(file) {
+  return readFileSync(file, "utf8").replace(/\r\n/g, "\n");
+}
+
+const hudSrc = readSource(hudPath);
+const presentationSrc = readSource(presentationPath);
+const assetsSrc = readSource(assetsPath);
 
 // ---------------------------------------------------------------------------
 // Check (a): dynamic HUD values render through the bitmap font, not raw text.
@@ -107,8 +120,17 @@ note(`BattleHud.ts: ${hudTextVars.length} hudText() node(s) checked, all routed 
 // Check (b): every HUD asset path referenced actually exists on disk.
 // ---------------------------------------------------------------------------
 
+/**
+ * The public path an ASSETS constant resolves to.
+ *
+ * Every entry is wrapped in `publicUrl("/ui/...")` so the Vite production base is applied at
+ * runtime. This used to match only a bare `name: "..."` literal, so after the publicUrl
+ * wrapping landed it found NOTHING and check (b) failed with "asset constant not found" for
+ * every asset — a stale parser reported as a missing file. Both spellings are accepted now;
+ * publicUrl only ever prefixes a base, so the literal inside it is the path to check.
+ */
 function assetConstPath(constName) {
-  const re = new RegExp(`${constName}\\s*:\\s*"([^"]+)"`);
+  const re = new RegExp(`${constName}\\s*:\\s*(?:publicUrl\\(\\s*)?"([^"]+)"`);
   const m = re.exec(assetsSrc);
   return m ? m[1] : null;
 }
@@ -142,7 +164,10 @@ if (!/ASSETS\.faceMarkerRoundel/.test(hudSrc)) {
 if (!/borgBannerPath/.test(hudSrc)) {
   fail("BattleHud.ts: expected a reference to borgBannerPath (per-borg name banner) but found none");
 } else {
-  const bannerTemplateMatch = /borgBannerPath\(id: string\): string \{\s*return `([^`]+)`/.exec(assetsSrc);
+  // Same publicUrl-wrapping story as assetConstPath above: the body is
+  // `return publicUrl(\`/ui/tpl/bn${borgUiCode(id)}/...\`)`.
+  const bannerTemplateMatch =
+    /borgBannerPath\(id: string\): string \{\s*return (?:publicUrl\(\s*)?`([^`]+)`/.exec(assetsSrc);
   if (!bannerTemplateMatch) {
     fail("assets.ts: could not find borgBannerPath()'s template string to spot-check");
   } else {

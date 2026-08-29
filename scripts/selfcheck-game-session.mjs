@@ -3,29 +3,56 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
+import { emitInlineModuleGraph } from "./lib/ts-inline-module.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const modulePath = path.join(root, "apps/game/src/gameSession.ts");
 const mainPath = path.join(root, "apps/game/src/main.ts");
-const compiled = ts.transpileModule(readFileSync(modulePath, "utf8"), {
-  compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
-  reportDiagnostics: true,
+
+// gameSession.ts runs here as REAL source, together with its real app-local dependencies
+// (the ported Challenge-flow VM, the global-menu dispatcher and the generated DOL tables) —
+// emitted as a real module graph, so the session exercises the actual ported state machines.
+// Only the cross-package @gf/* runtime values are faked, and only the handful it calls.
+//
+// The old version rewrote imports with one hand-written regex per import statement, pinned
+// to the exact named-binding list each import happened to have. The @gf/missions import grew
+// past that list, the regex stopped matching, the import survived into a `data:` module, and
+// the script died on module resolution — a selfcheck that could not run while still looking
+// like coverage in package.json. emitInlineModuleGraph rewrites specifiers by AST position
+// and HARD-ERRORS on any dependency that is neither mapped nor stubbed, so the next added
+// import fails here with a readable message instead of silently disabling this check.
+const graph = emitInlineModuleGraph({
+  label: "selfcheck-game-session",
+  entry: modulePath,
+  outDir: path.join(root, ".tmp", "selfcheck-game-session"),
+  stubs: {
+    // Types only at runtime.
+    "@gf/assets": "export {};",
+    // Focused fakes for the cross-package runtime VALUES gameSession calls. Kept
+    // deliberately small: a fake that grows into a second implementation stops testing
+    // the real one.
+    "@gf/combat": [
+      "export const DEFAULT_BOUNDS = { x: 500, z: 400 };",
+      "export const createBattle = (config, borgStats) => ({ config, borgStats });",
+    ].join("\n"),
+    "@gf/missions": [
+      "export const playerIdFor = (player) => `p${player}`;",
+      "export const stageIdForBattleConfig = (config) => config.arena;",
+      "export const toCombatBattleConfig = (config, stage) => ({ ...config, stage });",
+      "export const CHALLENGE_GROUP_ROSTERS = {};",
+      "export const challengeBattleCount = () => 2;",
+      "export const challengeStageId = () => 'st00';",
+      "export const selectChallengeStage = () => 'st00';",
+    ].join("\n"),
+  },
 });
-assert.deepEqual(compiled.diagnostics ?? [], []);
-const executable = compiled.outputText
-  .replace(/import \{ createBattle, DEFAULT_BOUNDS,? \} from "@gf\/combat";/, [
-    "const DEFAULT_BOUNDS = { x: 500, z: 400 };",
-    "const createBattle = (config, borgStats) => ({ config, borgStats });",
-  ].join("\n"))
-  .replace(/import \{ playerIdFor, stageIdForBattleConfig, toCombatBattleConfig,? \} from "@gf\/missions";/, [
-    "const playerIdFor = (player) => `p${player}`;",
-    "const stageIdForBattleConfig = (config) => config.arena;",
-    "const toCombatBattleConfig = (config, stage) => ({ ...config, stage });",
-  ].join("\n"));
-assert.doesNotMatch(executable, /from "@gf\//, "runtime imports replaced with focused fakes");
-const url = `data:text/javascript;base64,${Buffer.from(executable).toString("base64")}`;
-const { createGameSession, InvalidSessionEventError } = await import(url);
+const { createGameSession, InvalidSessionEventError } = await import(graph.url);
+assert.equal(typeof createGameSession, "function", "createGameSession must be the real implementation");
+
+// The global-menu dispatcher logs its per-screen ROM render-state on every front-end
+// transition — a browser diagnostic, and ~1500 lines across the routes below. Silence
+// console.info ONLY (warnings and errors still surface) so a failure here is readable.
+console.info = () => {};
 
 const battle = (index) => ({
   arena: `st0${index}`,
@@ -42,8 +69,8 @@ const result = (outcome) => ({ outcome, attack: 1, hitRatio: 0.5, dodgeRatio: 0.
 const stats = { attack: 1, hitRatio: 50, dodgeRatio: 25, enemyBorgsDefeated: 1,
   enemyTotalCost: 100, playerBorgsDefeated: 0, playerTotalCost: 0, allyBorgsDefeated: 0, grandTotal: 100 };
 
-function fakeRun(options, count = 2, onNext = () => {}, configs = null) {
-  const battles = configs ?? Array.from({ length: count }, (_, index) => battle(index));
+function fakeRun(options, count = 2, onNext = () => {}) {
+  const battles = Array.from({ length: count }, (_, index) => battle(index));
   return { budget: options.budget, mode: 0, playerCount: options.playerCount, battles, total: count,
     current: 0, score: 0, ended: false,
     getCurrentBattle() { return this.ended ? null : this.battles[this.current] ?? null; },
@@ -62,17 +89,19 @@ function makeSession({
   battles = 2,
   load = async () => ({ renderState: {}, modelUrls: [] }),
   onNext,
-  configs,
   initialForceSlots = [
     { no: 1, name: "ONE", borgIds: ["a"] },
     { no: 2, name: "TWO", borgIds: ["b"] },
   ],
 } = {}) {
+  // No `configs` option any more: the Challenge VM builds the pending battle config, so a
+  // caller-supplied battle list never reached the session and the option only made the
+  // harness look like it controlled something it did not.
   return createGameSession({
     initialForceSlots,
     forceFromSlot: (slot) => [...slot.borgIds],
     validForce: (ids) => ids.filter((id) => id !== "bad"),
-    createRun: (options) => fakeRun(options, battles, onNext, configs),
+    createRun: (options) => fakeRun(options, battles, onNext),
     borgs: { borgs: [] }, stageCatalog: {}, borgStats: [], loadStageAssets: load,
   });
 }
@@ -161,17 +190,34 @@ async function enterBattle(session) {
   session.dispatch({ type: "briefing-confirm" }); await session.prepareBattle(); session.dispatch({ type: "battle-started" });
 }
 
-// Win without drops advances, win with drops routes through Gets, final win completes, loss exits.
+// Run routing, as the ported Challenge VM actually drives it (gameSession settleWin /
+// rebuildAfterWin). These expectations were rewritten on 2026-08-29: while this script
+// could not execute, gameSession moved to the VM's mode-4 post-battle gate and an
+// INTERMEDIATE win stopped showing a per-battle Results screen — the ROM shows none — so
+// it now tears the battle down and returns straight to the briefing. The old assertions
+// still described the pre-VM routing and had never once run against the code.
+//
+// Intermediate win: no Results, straight back to the briefing, battle torn down.
 const wins = makeSession(); await enterBattle(wins);
-wins.dispatch({ type: "battle-resolved", battleResults: result("WIN"), stats, drops: [] });
-wins.dispatch({ type: "advance" }); assert.equal(wins.snapshot().screen, "briefing");
+const intermediateWin = wins.dispatch({ type: "battle-resolved", battleResults: result("WIN"), stats, drops: [] });
+assert.deepEqual(
+  intermediateWin.map((effect) => effect.type),
+  ["teardown-battle", "render"],
+  "an intermediate win tears the battle down before rendering the next briefing",
+);
+assert.equal(wins.snapshot().screen, "briefing", "an intermediate win returns to the briefing, not Results");
+assert.throws(() => wins.dispatch({ type: "advance" }), InvalidSessionEventError, "no advance to consume at the briefing");
+// Final win of the run (the VM reaches CLEAR): Results, then Gets for the drops, then menu.
 wins.dispatch({ type: "briefing-confirm" }); await wins.prepareBattle(); wins.dispatch({ type: "battle-started" });
 wins.dispatch({ type: "battle-resolved", battleResults: result("WIN"), stats, drops: [{ borgId: "x", kind: "unit", partIndex: 0 }] });
+assert.equal(wins.snapshot().screen, "results", "the run-clearing win shows Results");
 wins.dispatch({ type: "advance" }); assert.equal(wins.snapshot().screen, "gets");
 wins.dispatch({ type: "advance" }); assert.equal(wins.snapshot().screen, "menu");
 
+// A loss always ends the run: Results (VM mode 6 FAIL), then out to the menu.
 const loss = makeSession(); await enterBattle(loss);
 loss.dispatch({ type: "battle-resolved", battleResults: result("LOSE"), stats, drops: [] });
+assert.equal(loss.snapshot().screen, "results", "a loss shows Results");
 loss.dispatch({ type: "advance" }); assert.equal(loss.snapshot().screen, "menu");
 
 const abandoned = makeSession(); await enterBattle(abandoned);
@@ -190,39 +236,57 @@ isolatedSnapshot.forceSlots[0].borgIds[0] = "snapshot-mutated";
 assert.equal(slotIsolation.snapshot().forceSlots[0].name, "CALLER");
 assert.deepEqual(slotIsolation.snapshot().forceSlots[0].borgIds, ["a"]);
 
-const callerConfig = battle(0);
+// Battle-config isolation. NOTE (2026-08-29): the first battle's config is now built by the
+// ported Challenge VM (gameSession applyVmBattleBuild), NOT taken from the run's battle
+// list, so the old half of this check — "mutate the config object the caller handed to
+// createRun" — no longer has a path into the session at all. What still matters, and what
+// this now checks, is that neither a returned SNAPSHOT nor a returned PREPARED boot is a
+// live handle on session state.
 let loadedStage = null;
 const configIsolation = makeSession({
-  configs: [callerConfig, battle(1)],
   load: async (stageId) => { loadedStage = stageId; return { renderState: {}, modelUrls: [] }; },
 });
 toSelectForce(configIsolation);
 configIsolation.dispatch({ type: "force-slot-confirm", slot: configIsolation.snapshot().forceSlots[0] });
-callerConfig.arena = "caller-mutated";
-callerConfig.forces[0].borgIds[0] = "caller-mutated";
-callerConfig.meta.enemyGroupChoices[0] = 99;
+const builtConfig = configIsolation.snapshot().pendingBattleConfig;
+assert.equal(builtConfig.arena, "st00", "the VM built the pending battle config");
+assert.deepEqual(builtConfig.forces[0].borgIds, ["a"], "the player force comes from the selected slot");
 isolatedSnapshot = configIsolation.snapshot();
 isolatedSnapshot.pendingBattleConfig.arena = "snapshot-mutated";
 isolatedSnapshot.pendingBattleConfig.forces[0].borgIds[0] = "snapshot-mutated";
-isolatedSnapshot.pendingBattleConfig.meta.enemyGroupChoices[0] = 88;
+isolatedSnapshot.pendingBattleConfig.label = "snapshot-mutated";
 assert.equal(configIsolation.snapshot().pendingBattleConfig.arena, "st00");
 assert.deepEqual(configIsolation.snapshot().pendingBattleConfig.forces[0].borgIds, ["a"]);
-assert.deepEqual(configIsolation.snapshot().pendingBattleConfig.meta.enemyGroupChoices, [1, 2]);
+assert.equal(configIsolation.snapshot().pendingBattleConfig.label, builtConfig.label);
 configIsolation.dispatch({ type: "briefing-confirm" });
 const isolatedBoot = await configIsolation.prepareBattle();
-assert.equal(loadedStage, "st00", "snapshot/caller config mutation cannot redirect preparation");
+assert.equal(loadedStage, "st00", "snapshot mutation cannot redirect preparation");
 assert.equal(isolatedBoot.config.arena, "st00");
 isolatedBoot.config.arena = "prepared-mutated";
 assert.equal(configIsolation.snapshot().pendingBattleConfig.arena, "st00");
 
+// Result/drop ingress isolation. The intermediate win scores through run.next() and clears
+// postBattle (no per-battle Results), so the ingress copy is checked on THAT hop; the
+// surviving postBattle snapshot is checked on the run-clearing win that follows.
 let nextInput = null;
 const resultIsolation = makeSession({ onNext: (last) => { nextInput = { ...last }; } });
 await enterBattle(resultIsolation);
 const callerResult = result("WIN");
-const callerDrops = [{ borgId: "drop", kind: "unit", partIndex: 0 }];
-resultIsolation.dispatch({ type: "battle-resolved", battleResults: callerResult, stats, drops: callerDrops });
+resultIsolation.dispatch({ type: "battle-resolved", battleResults: callerResult, stats, drops: [] });
 callerResult.outcome = "LOSE";
 callerResult.grandTotal = -999;
+assert.equal(nextInput.outcome, "WIN", "a caller mutating its result object after dispatch cannot rescore the run");
+assert.equal(nextInput.grandTotal, 100);
+assert.equal(resultIsolation.snapshot().screen, "briefing", "mutated caller result cannot turn win into loss");
+
+resultIsolation.dispatch({ type: "briefing-confirm" });
+await resultIsolation.prepareBattle();
+resultIsolation.dispatch({ type: "battle-started" });
+const finalResult = result("WIN");
+const callerDrops = [{ borgId: "drop", kind: "unit", partIndex: 0 }];
+resultIsolation.dispatch({ type: "battle-resolved", battleResults: finalResult, stats, drops: callerDrops });
+finalResult.outcome = "LOSE";
+finalResult.grandTotal = -999;
 callerDrops[0].borgId = "caller-mutated";
 isolatedSnapshot = resultIsolation.snapshot();
 isolatedSnapshot.postBattle.battleResults.outcome = "LOSE";
@@ -236,9 +300,7 @@ assert.equal(resultIsolation.snapshot().postBattle.drops[0].borgId, "drop");
 resultIsolation.dispatch({ type: "advance" });
 assert.equal(resultIsolation.snapshot().screen, "gets");
 resultIsolation.dispatch({ type: "advance" });
-assert.equal(resultIsolation.snapshot().screen, "briefing", "mutated caller result cannot turn win into loss");
-assert.equal(nextInput.outcome, "WIN");
-assert.equal(nextInput.grandTotal, 100);
+assert.equal(resultIsolation.snapshot().screen, "menu");
 
 assert.throws(() => loss.dispatch({ type: "back" }), InvalidSessionEventError);
 assert.throws(() => makeSession().dispatch({ type: "force-slot-selected", slotIndex: 9 }), InvalidSessionEventError);

@@ -34,6 +34,7 @@ import { publicUrl } from "../publicUrl";
 import {
   PILOT_ACTOR_ADDR,
   PILOT_REGION_BYTES,
+  assertPilotFixture,
   assertRegionClear,
   createPilotAdapters,
   drivePilotFrame,
@@ -41,6 +42,18 @@ import {
   type PilotFrameResult,
   type PilotState,
 } from "./composedPilot";
+
+/**
+ * What this pilot is allowed to claim, stated once and repeated everywhere it
+ * reports. Its adapters are synthetic stand-ins, its fixture is hand-declared,
+ * and the threads relink suspends every rung-0 unit's verification — so no
+ * number this pilot produces is evidence about the ROM's behaviour.
+ */
+const NO_BEHAVIOURAL_CLAIM =
+  "NONE. Synthetic hand-written adapters + a hand-declared fixture, driving units whose " +
+  "oracle/boundary verification is SUSPENDED by the threads relink (docs/threads-relink-" +
+  "reverify.md). These numbers prove the dispatch/bridge MECHANISM works; they prove nothing " +
+  "about what these five units compute. See docs/composed-pilot.md.";
 
 const COMPOSED_WASM_PATH = "/rom/composed-rung0.threads.wasm";
 const COMPOSED_PROVENANCE_PATH = "/rom/composed-rung0.provenance.json";
@@ -129,6 +142,7 @@ export async function bootComposedModule(frames = DEFAULT_PILOT_FRAMES): Promise
     const arena = (await arenaRes.json()) as ArenaFile;
     const provenance = (await provRes.json()) as ProvenanceFile;
     const fixture = (await fixtureRes.json()) as PilotFixture;
+    assertPilotFixture(fixture);
 
     const worker = new Worker(new URL("./composedWorker.ts", import.meta.url), {
       type: "module",
@@ -143,6 +157,11 @@ export async function bootComposedModule(frames = DEFAULT_PILOT_FRAMES): Promise
       bridgeAllImports: true,
       trampolineFrameBase: trampolineFrameBase(FRAME_SIZE),
       trampolineFrameSlots: TRAMPOLINE_FRAME_SLOTS,
+      // DECLARED pilot work: this host is deliberately opened to the synthetic
+      // stand-in adapters in composedPilot.ts. No other host in the app sets
+      // this, so a stub cannot service a frame anywhere else — the registry
+      // throws instead (packages/rom-runtime AdapterRegistry).
+      admitSyntheticAdapters: true,
     });
     const instantiateMs = Math.round(performance.now() - started);
 
@@ -173,6 +192,11 @@ export async function bootComposedModule(frames = DEFAULT_PILOT_FRAMES): Promise
     };
     exposeComposedControls();
 
+    // Runtime provenance, published where a human and a script both trip over
+    // it, not only in a console line that scrolls away.
+    const root = globalThis.document?.documentElement;
+    if (root) root.dataset["gfComposedPilot"] = "synthetic-no-behavioural-claim";
+
     const t = host.bootTimings;
     console.info(
       `[composed-rom] rung ${provenance.ladder.rung} (${provenance.ladder.n} units, ${provenance.companion.table_size}-thunk table) ` +
@@ -181,6 +205,7 @@ export async function bootComposedModule(frames = DEFAULT_PILOT_FRAMES): Promise
         `${host.bridgedImports.length} out-of-window symbols bound to the bridge. ` +
         `Pilot budget ${handle.budget} frames. NOTE: ${provenance.link.verification_status}`,
     );
+    console.warn(`[composed-rom] BEHAVIOURAL CLAIM: ${NO_BEHAVIOURAL_CLAIM}`);
     return { active: true, detail: `rung0 live (${instantiateMs} ms, ${host.bridgedImports.length} bridged imports)`, host };
   } catch (error) {
     console.error("[composed-rom] boot failed — the game is unaffected:", error);
@@ -207,12 +232,12 @@ export function onGameFrame(): void {
   void drivePilotFrame(h.host, h.pilotState, record?.addr ?? 0, record?.bytes[0] ?? 0)
     .then((result) => {
       h.results.push(result);
-      if (!result.pass) {
+      if (!result.declaredChecksPass) {
         console.error(`[composed-rom] pilot frame ${result.frame} FAILED`, result.state.filter((c) => !c.pass));
       }
       if (h.results.length >= h.budget) {
         h.finished = true;
-        const passed = h.results.filter((r) => r.pass).length;
+        const passed = h.results.filter((r) => r.declaredChecksPass).length;
         console.info(
           `[composed-rom] dispatch pilot done: ${passed}/${h.results.length} frames pass, ` +
             `${h.host.ledger.snapshot().totals.bridgedCalls} bridged crossings recorded ` +
@@ -246,9 +271,14 @@ function exposeComposedControls(): void {
     if (!h) return null;
     return {
       gate: "composed-module dispatch pilot",
+      // First two fields on purpose: anything reading this object sees what it
+      // is NOT allowed to conclude before it sees a single number.
+      behaviouralClaim: NO_BEHAVIOURAL_CLAIM,
+      verified: false,
       scope:
         "host-driven dispatch into the composed module from the game frame loop; " +
         "NOT control inversion (run_main_game_loop is not in the window)",
+      adapters: h.host.adapters.list(),
       module: {
         artifact: h.provenance.artifact,
         sha256: h.provenance.link.threads_sha256,
@@ -266,7 +296,11 @@ function exposeComposedControls(): void {
       finished: h.finished,
       frames: h.results,
       errors: h.errors,
-      pass: h.results.length > 0 && h.results.every((r) => r.pass) && h.errors.length === 0,
+      // NOT `pass`. This says the pilot's own DECLARED expectations held — a
+      // mechanism check. `pass` invited exactly the misreading ("the composed
+      // module passed") that this pilot can never support.
+      declaredChecksPass:
+        h.results.length > 0 && h.results.every((r) => r.declaredChecksPass) && h.errors.length === 0,
     };
   };
   w.__gf["composedRun"] = (count: number) => runComposedFrames(count);

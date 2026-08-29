@@ -91,7 +91,14 @@ async function main(): Promise<void> {
   const wasmBytes = await wasmResponse.arrayBuffer();
 
   const worker = new Worker(new URL("./rom-runtime-worker.js", import.meta.url), { type: "module" });
-  const host = await RomRuntimeHost.start(worker, wasmBytes, { nestingCap: 4 });
+  // admitSyntheticAdapters: this harness's whole point is exercising the bridge
+  // mechanism against a synthetic fixture module at made-up test addresses. Its
+  // adapters are declared "synthetic" and say nothing about the ROM; only the
+  // two damage adapters registered below are evidence-backed.
+  const host = await RomRuntimeHost.start(worker, wasmBytes, {
+    nestingCap: 4,
+    admitSyntheticAdapters: true,
+  });
   exposeBridgeLedger(host);
 
   // --- adapter registrations (the main-thread service registry) --------------
@@ -103,6 +110,7 @@ async function main(): Promise<void> {
       gcAddr: 0xd0000001,
       name: "rt_double",
       evidence: "self-test synthetic",
+      evidenceClass: "synthetic",
       retClass: FrameValueClass.I32,
       service(ctx) {
         ctx.mem.writeI32(0x104000, 7); // side effect into GC memory
@@ -115,6 +123,7 @@ async function main(): Promise<void> {
       gcAddr: 0xd0000002,
       name: "rt_reentrant",
       evidence: "self-test synthetic (I2 reentrant pilot case)",
+      evidenceClass: "synthetic",
       retClass: FrameValueClass.I32,
       service(ctx) {
         // The deadlock I2 exists to prevent: this runs ON the main thread
@@ -130,6 +139,7 @@ async function main(): Promise<void> {
       gcAddr: 0xd0000003,
       name: "rt_overflow",
       evidence: "self-test synthetic (nesting-cap probe)",
+      evidenceClass: "synthetic",
       retClass: FrameValueClass.I32,
       service(ctx) {
         return ctx.frame.setRetI32(ctx.invoke("overflow_probe", [ctx.frame.i32Arg(0)]));
@@ -141,6 +151,7 @@ async function main(): Promise<void> {
       gcAddr: 0xd0000004,
       name: "rt_async",
       evidence: "self-test synthetic (async-servicing violation)",
+      evidenceClass: "synthetic",
       retClass: FrameValueClass.I32,
       // Deliberate violation: bridged callees must be synchronous.
       service: (() => Promise.resolve(1)) as unknown as (ctx: BridgedCallContext) => number,
@@ -150,6 +161,7 @@ async function main(): Promise<void> {
     gcAddr: 0xd0000005,
     name: "rt_tracedelta",
     evidence: "self-test synthetic capture (hand-authored, spine-synth style)",
+    evidenceClass: "synthetic",
     calls: [
       { writes: [{ addr: 0x104010, bytes: [5, 0, 0, 0] }], ret: { class: "i32", value: 11 } },
       { writes: [{ addr: 0x104010, bytes: [9, 0, 0, 0] }], ret: { class: "i32", value: 22 } },
@@ -161,6 +173,7 @@ async function main(): Promise<void> {
       gcAddr: 0xd0000006,
       name: "rt_i64",
       evidence: "self-test synthetic (PPC r3 high-word rule, companion review)",
+      evidenceClass: "synthetic",
       retClass: FrameValueClass.I64,
       service(ctx) {
         return ctx.frame.setRetI64(0x0000_0007_0000_002an);
@@ -172,6 +185,7 @@ async function main(): Promise<void> {
       gcAddr: 0xd0000007,
       name: "rt_retclass",
       evidence: "self-test synthetic (ret_class mismatch signal)",
+      evidenceClass: "synthetic",
       retClass: FrameValueClass.I32, // declared I32 ...
       service(ctx) {
         return ctx.frame.setRetVoid(); // ... but marshals VOID
