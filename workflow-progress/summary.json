@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-29T18:51:22.788201Z",
-  "run_id": "2026-08-29T18:51:22.615936Z",
+  "generated_at": "2026-08-29T18:57:11.720492Z",
+  "run_id": "2026-08-29T18:57:10.990585Z",
   "total_units": 1396,
   "green": 3,
   "staged": 104,
@@ -19,13 +19,13 @@
   "repeated_failure_classes": [],
   "health": "blocked",
   "machine": {
-    "workflow_state": "starting",
+    "workflow_state": "leased-out",
     "driver_status": "stopped",
     "manual_paused": false,
     "block_reason": "chat contract preflight failed: HTTPConnectionPool(host='127.0.0.1', port=8888): Read timed out. (read timeout=120)",
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Manual pause lifted; resuming heavy work."
+    "detail": "GPU leased to omr-sweep (priority 2); slot drained and free."
   }
 }
