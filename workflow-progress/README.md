@@ -1,6 +1,6 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-29T21:24:22.038146Z - machine-written, do not edit.*
+*Generated 2026-08-29T21:29:50.608532Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 107/1396 settled (3 green, 104 staged) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1132 |
-| **Last transition** | 2026-08-29T21:24:22.038146Z |
+| **Last transition** | 2026-08-29T21:29:50.608532Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `-` @ - ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-29T21:29:50.608532Z | `-` | leased-out | machine | 0 | Rehydrated an active GPU lease to omr-sweep across a restart; the slot is the lessee's, not the port's to reap |
 | 2026-08-29T21:24:22.038146Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
 | 2026-08-29T21:22:04.190118Z | `auto-c0030-014` | deferred | compile-fix | 4 | provider unavailable, unit not blamed: Custom API stream error: Lost connection to the model server. It may ha |
 | 2026-08-29T21:18:27.295999Z | `-` | yielding | machine | 0 | Yielding the GPU to omr-sweep at the next port unit boundary. |
@@ -70,4 +71,3 @@
 | 2026-08-26T02:42:43.837447Z | `auto-c0046-004` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:42:30.877631Z | `auto-c0046-003` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:42:17.985867Z | `auto-c0046-002` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:42:04.775671Z | `auto-c0044-002` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |

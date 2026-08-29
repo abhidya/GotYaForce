@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-29T21:24:22.217221Z",
-  "run_id": "2026-08-29T21:24:22.038146Z",
+  "generated_at": "2026-08-29T21:29:51.395697Z",
+  "run_id": "2026-08-29T21:29:50.608532Z",
   "total_units": 1396,
   "green": 3,
   "staged": 104,
@@ -26,6 +26,6 @@
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "GPU leased to omr-sweep (priority 1); slot drained and free."
+    "detail": "Rehydrated an active GPU lease to omr-sweep across a restart; the slot is the lessee's, not the port's to reap."
   }
 }
