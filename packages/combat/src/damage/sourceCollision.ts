@@ -776,9 +776,15 @@ export function runSourceCollisionSelfTests(assert: SourceCollisionAssert): void
   // Delegation happened.
   assert(res.delegatedDamage, "resolver delegated to computeBaseDamage (delegatedDamage)");
   assert(res.delegatedKnockback, "resolver delegated to computeKnockbackLaunchDirection");
-  // Damage matches a direct computeBaseDamage call (same neutral inputs).
+  // Damage matches a direct computeBaseDamage call (same inputs). The pair above is CROSS-TEAM
+  // (attacker team 0, defender team 1), so the expected call must be too: defaultSourceDamageActor
+  // returns team 0 for both, which trips the same-team x0.25 friendly-fire divisor
+  // (FLOAT_80437024, chunk_0004.c:6811-6813) and made this assertion compare 44 against 11.
+  // Never executed, so the mismatch went unnoticed.
+  const expectedDefender = defaultSourceDamageActor(0x0701, 200);
+  expectedDefender.team = 1;
   const expectedDmg = computeBaseDamage(
-    defaultSourceDamageActor(0x0b00), defaultSourceDamageActor(0x0701, 200),
+    defaultSourceDamageActor(0x0b00), expectedDefender,
     40, defaultSourceDamageContext(),
   );
   assert(res.damage === expectedDmg, `resolver damage === computeBaseDamage direct (${res.damage} vs ${expectedDmg})`);

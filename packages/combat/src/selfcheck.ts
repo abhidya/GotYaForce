@@ -1849,9 +1849,14 @@ function assertMeleeHitsOncePerSwing(borgs: BorgStats[]): void {
     pumpAttackFrame(attacker, profile, false, [attacker, enemy], profiles);
   }
   const damage = enemy.maxHp - enemy.hp;
-  // Generous single-hit ceiling (1.5x covers type-matrix boosts) — the old bug applied the
-  // hit on EVERY active frame (~6-9x), which this bound catches.
-  const singleHitCap = (MELEE.DMG_BASE + profile.attack * MELEE.DMG_PER_STAT) * meleeDef.damageMultiplier * 1.5;
+  // Generous single-hit ceiling (1.5x covers the type matrix's 1.25 max) — the old bug applied
+  // the hit on EVERY active frame (~6-9x), which this bound catches. The ceiling is now derived
+  // from the SAME record the runtime swing uses (stepAttacks: exact family record, else
+  // archetype record 1), whose +0x00 hpDamage IS the formula's `*param_1` seed. It used to be
+  // `MELEE.DMG_BASE + attack * MELEE.DMG_PER_STAT` — an invented linear stat model that no
+  // damage path has used since applyHit moved to zz_003cd5c_.
+  const swingRecord = exact?.damageRecord ?? damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
+  const singleHitCap = swingRecord.hpDamage * meleeDef.damageMultiplier * 1.5;
   if (damage <= 0 || damage > singleHitCap) {
     throw new Error(`[selfcheck] melee swing did not hit exactly once: damage=${damage}, singleHitCap=${singleHitCap}`);
   }

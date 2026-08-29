@@ -219,24 +219,84 @@ function buildUpperBodyTable(): StateHandler[] {
   for (let s = 23; s <= 31; s++) {
     t[s] = tickStreamWithPhysicsHandler(0x2, 0, ROM_STATE_FLOAT.AIM_GRAVITY, "lockYaw", { phaseSlotIndex: 1 });
   }
-  // [32, 48, 57, 58, 59] partner/phase machines — TODO(port). Slots 32-43 and 45-59 are
-  // still the noopHandler this table was filled with: a `for (s = 32..60) if (!t[s]) …`
-  // stub-fill used to sit here, but `.fill(noopHandler)` above makes every slot truthy,
-  // so the guard never fired and the stub never applied. Removed rather than "fixed" —
-  // enabling it now would give 27 unported states a stream+physics body they have never
-  // had. The gap is real and unchanged; it just no longer hides behind dead code.
+  // [32-43, 45-59] partner/phase machines — NOT PORTED. These 27 slots keep the
+  // noopHandler the table was filled with, which is HONEST (the real handlers are
+  // untranscribed) but was invisible: a filled table looks complete. The gap is now
+  // enumerated in UNPORTED_UPPER_BODY_STATES below and asserted by
+  // assertRomStateTableCoverage(), so it is counted rather than merely commented.
   t[44] = transitionHandler(0xd);
   t[60] = tickStreamHandler(0xf, 0, 0, 1);
-  t[62] = (a, _c) => {
-    // zz_005c694_ — TODO(port): the camera/lock-update helper. Stubbed to noop.
-    void a;
-  };
-  t[63] = (a, _c) => {
-    // zz_005bccc_ — TODO(port): the death state handler. Stubbed to noop.
-    void a;
-  };
+  // [62] zz_005c694_ (camera/lock update) and [63] zz_005bccc_ (death state) — NOT PORTED.
+  // These were `(a, _c) => { void a; }` closures: functionally the noop, but distinct object
+  // identities, so the table read as "handler present" while doing nothing. Assigned the shared
+  // noopHandler so UNPORTED_UPPER_BODY_STATES / assertRomStateTableCoverage can see them.
+  t[62] = noopHandler;
+  t[63] = noopHandler;
   // [64-70] unverifiable from corpus (inside FUN_80060864 range); stubbed noop.
   return t;
+}
+
+// ============================================================================
+// THE PORT GAP, STATED OUT LOUD.
+//
+// `new Array(n).fill(noopHandler)` makes every slot callable, so a caller cannot tell a
+// ported state from an unported one — the table LOOKS 100% covered. The ROM's own
+// PTR_LAB_802d37a8 entries for these upper-body slots are real handlers (partner/phase
+// machines and the two named-but-unported helpers below); the port has none of them, and
+// running the closest-matching factory instead would invent a stream+physics body these
+// states have never had. So the noop stays and the gap is enumerated here.
+//
+// Anything that consumes the tables can assert on this list; assertRomStateTableCoverage()
+// below fails if a slot named here quietly stops being a noop (it was ported and this list
+// went stale) or if a slot NOT named here becomes one (a regression that silently drops a
+// ported state).
+// ============================================================================
+
+/** Upper-body slots whose ROM handler is not ported: 32-43 and 45-59 (the partner/phase
+ *  machines), plus 62 (zz_005c694_, the camera/lock-update helper) and 63 (zz_005bccc_, the
+ *  death-state handler) — both named in the corpus but with untranscribed bodies. Slots
+ *  64-70 sit inside the FUN_80060864 range and are unverifiable from the corpus at all. */
+export const UNPORTED_UPPER_BODY_STATES: readonly number[] = Object.freeze([
+  ...Array.from({ length: 12 }, (_, i) => 32 + i), // 32..43
+  ...Array.from({ length: 15 }, (_, i) => 45 + i), // 45..59
+  61,                                              // no PTR_LAB_802d37a8 entry ported
+  62,                                              // zz_005c694_ camera/lock update
+  63,                                              // zz_005bccc_ death state
+  ...Array.from({ length: 7 }, (_, i) => 64 + i),  // 64..70 unverifiable from corpus
+]);
+
+/** Full-body slots left as the noop: 0 is the ROM's real `blr` idle, the rest are the
+ *  TODO(port) entries called out inline above (6, 7, 9, 23, 56) plus the never-reached
+ *  62/63 pair and every slot the ROM table does not populate. Only the genuinely UNPORTED
+ *  ones are listed — slot 0 is not a gap. */
+export const UNPORTED_FULL_BODY_STATES: readonly number[] = Object.freeze([6, 7, 9, 23, 56]);
+
+/**
+ * Coverage assertion for the ROM state tables. Fails when the enumerated gap and the built
+ * tables disagree in either direction:
+ *   - a slot listed as unported is NOT a noop  -> it was ported; drop it from the list
+ *   - a slot not listed IS a noop              -> a ported state was silently lost
+ * `assert` matches the runXxxSelfTests(assert) convention used across the package.
+ */
+export function assertRomStateTableCoverage(assert: (cond: boolean, msg: string) => void): void {
+  const { fullBody, upperBody } = createRomStateTables();
+  const ubGap = new Set(UNPORTED_UPPER_BODY_STATES);
+  for (let s = 0; s < upperBody.length; s += 1) {
+    const isNoop = upperBody[s] === noopHandler;
+    if (s === 0) continue; // UB slot 0 is the ROM's own no-op idle, not a gap
+    assert(
+      isNoop === ubGap.has(s),
+      `upper-body state ${s}: ${isNoop ? "noop" : "ported"} but listed as ${ubGap.has(s) ? "unported" : "ported"}`,
+    );
+  }
+  const fbGap = new Set(UNPORTED_FULL_BODY_STATES);
+  for (const s of fbGap) {
+    assert(fullBody[s] === noopHandler, `full-body state ${s} is listed as unported but has a handler`);
+  }
+  assert(
+    UNPORTED_UPPER_BODY_STATES.length === 37,
+    `upper-body gap is ${UNPORTED_UPPER_BODY_STATES.length} states (27 partner/phase + 61/62/63 + 64-70)`,
+  );
 }
 
 /** Build the complete state-table pair consumed by `stepActor`. */

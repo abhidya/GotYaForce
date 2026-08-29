@@ -1367,14 +1367,18 @@ function runSourceCollisionPasses(
     return fresh;
   };
 
-  // Narrow-phase contact stand-in for the unported hitbox-shape queries. The ROM's
-  // +0x54 shape/transform records are undumped, so each active object carries the SAME
-  // reach the legacy hit tests use (melee reach for a swinging borg, hitRadius for a
-  // projectile). PLACEHOLDER (not ROM-derived): a proximity capsule, not the real
-  // per-move hitbox shape — but the RANGES themselves reuse the existing per-borg /
-  // per-projectile reach data, so contact only forms where the legacy paths would also
-  // register a hit. Replaces the old forcing stub, whose `overlap: true` admitted every
-  // attacker x victim pair ARENA-WIDE and melted whole battles in seconds.
+  // Narrow-phase contact stand-in for the unported hitbox-shape queries: a proximity capsule,
+  // not the real per-move hitbox shape. PLACEHOLDER (not ROM-derived) — but note WHAT is
+  // actually missing, because the previous wording ("the ROM's +0x54 shape/transform records
+  // are undumped") is no longer true: data/attackHitTables.json carries per-record shapeKind /
+  // localOffset / halfExtent / radius for all 208 borgs (4258 records, extracted from
+  // pl####hit.bin by scripts/gen-attack-hit-tables.mjs). The blocker is the BINDING, not the
+  // geometry — this pass has no read of which hit KIND a borg has armed on the current frame
+  // (see the archetype-record TODO just below, which is the same gap), so it cannot pick the
+  // record whose shape to test. Until that lands each active object carries the same reach the
+  // legacy hit tests use (melee reach for a swinging borg, hitRadius for a projectile), so
+  // contact only forms where the legacy paths would also register a hit. Replaces the old
+  // forcing stub, whose `overlap: true` admitted every attacker x victim pair ARENA-WIDE.
   const contactShape = new WeakMap<SourceCollisionObject, { radius: number; yBand: number }>();
 
   // Active list (DAT_803c477c): borgs mid-attack + in-flight projectiles.

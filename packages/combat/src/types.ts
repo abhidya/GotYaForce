@@ -560,7 +560,7 @@ export interface Projectile {
   damage: number;
   hitstun: number;
   /** Per-move knockback MULTIPLIER (applyHit derives the base magnitude from the hit's
-   *  damage record strength byte — see gauges.ts knockbackVelocityForRecord). */
+   *  damage record strength byte — see damage/sourceKnockback.ts launchVelocityMagnitude). */
   knockback: number;
   /** EXACT per-borg family damage record (familyDamageData.ts), bound at spawn from the
    *  shooter's kind-0 hitbox record. When absent, stepProjectiles falls back to the
