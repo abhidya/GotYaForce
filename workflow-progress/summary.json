@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-29T21:22:32.084734Z",
-  "run_id": "2026-08-29T21:02:11.792914Z",
+  "generated_at": "2026-08-29T21:24:22.217221Z",
+  "run_id": "2026-08-29T21:24:22.038146Z",
   "total_units": 1396,
   "green": 3,
   "staged": 104,
@@ -17,15 +17,15 @@
   "last_green_unit": "auto-c0053-013",
   "last_product_commit": "218911ab5e2455c447e5beec8efe9e95e7c8f2ec",
   "repeated_failure_classes": [],
-  "health": "provider_paused",
+  "health": "idle",
   "machine": {
-    "workflow_state": "provider_paused",
-    "driver_status": "running",
+    "workflow_state": "leased-out",
+    "driver_status": "stopped",
     "manual_paused": false,
     "block_reason": null,
-    "active_model": "unsloth/Qwen3.8-27B-GGUF",
-    "context_length": 60000,
+    "active_model": null,
+    "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": ""
+    "detail": "GPU leased to omr-sweep (priority 1); slot drained and free."
   }
 }
