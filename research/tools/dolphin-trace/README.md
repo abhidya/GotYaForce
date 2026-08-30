@@ -422,6 +422,80 @@ five callee call sites, not the same-line edit
 `research/decomp/corpus-correction-loop.md` describes — an owner decision, not
 an agent one.
 
+### Corrected run (2026-08-30): `run_main_game_loop` IS `boundary_green`
+
+The owner authorised the signature correction. It was proved from the ROM before
+being applied, not assumed.
+
+**Disassembly (boot.dol inside the retail ISO, capstone PPC32-BE, symbols
+`research/symbols/GG4E-CSM-20220412.map`).** `0x800527d8` is `0x60` bytes — 24
+instructions, entire: `stwu r1,-0x10(r1)`; `mflr r0`; `stw r0,0x14(r1)`; 19 `bl`;
+`stw r3,-0x5410(r13)` at `0x80052804`; `b 0x800527ec` at `0x80052834`. There is
+no `mr`, no `fmr`, no load, and **no store into the outgoing parameter area at
+`r1+8`** — the `0x10` frame leaves only 8 bytes there and never writes them, so
+Ghidra's `param_15`/`param_16` were uninitialised stack, which is why the first
+divergence the failing run named was `stack+8`. Nothing reads `r3-r10` or
+`f1-f13` before defining it. The function takes no arguments.
+
+Each of the five callees Ghidra fed `param_N` is itself `void(void)` by its own
+disassembly: `zz_002a3e4_` `@0x8002a3e4` and `zz_002a638_` `@0x8002a638` define
+`r3-r6` with `li`/`lis`/`lwz` before every use; `zz_00e9994_` `@0x800e9994` and
+`zz_002a4d4_` `@0x8002a4d4` read only `r13`-relative state; `zz_0018b10_`
+`@0x80018b10` likewise (its `int` result reaches `r3` from `r31`); `zz_00efda8_`
+`@0x800efda8` is a single `bl` and reads nothing.
+
+**The correction** is in `research/decomp/ghidra-export/chunk_0006.c`
+lines 5790-5833, line count preserved (44 in, 44 out) because queue extractions
+are line-pinned, with inline `/* CORPUS CORRECTION 2026-08-30: ... */`
+provenance. Blast radius, measured by re-extracting every queue-pinned range in
+that chunk: **1 of 149 blocks changed sha** — `auto-c0006-013:5790-5833`
+(`9c66263b…` → `61ff3ed9…`); the other 148 are byte-identical. `auto-c0006-013`
+is `pending` with 0 attempts, so **no `revoke-unit` was needed**. The queue's
+generated prelude prototype for the unit was corrected in the same commit to
+`void zz_00527d8_(void);` — exactly what `port_unit_generator.signature_of`
+re-derives from the corrected block, and required because the driver concatenates
+that prelude ahead of the extraction.
+
+**Result**, same recipe, fresh cold-boot capture, K=16, 274 calls:
+
+```
+SPINE TOTAL calls=274/274 iterations=16 DIVERGENCE: none VERDICT: BOUNDARY_GREEN
+```
+
+This is the project's first `boundary_green` spine. Read its strength honestly:
+with the ABI corrected there are **zero argument slots to compare** (the ROM
+passes none), and `DAT_80436190` held `00000000` at all 274 boundaries and at the
+cut during the boot window, so the owned-write channel was exercised but not
+varied. The assertion that carries this verdict is the **274/274 exact call
+sequence** — which is also the whole of what this function observably does. A
+negative control confirms the harness still discriminates: swapping the adjacent
+`zz_008c2dc_`/`zz_008c344_` calls in the module reports
+`call divergence at i=15 … VERDICT: FAIL`.
+
+**How many more spines are in this class: zero.** The corpus has **68** blocks
+Ghidra rendered as `do{...}while(true)`, but only **4** are nonterminating in the
+ROM (backward branch *and* no `blr` — the condition `capture_spine.py sites`
+screens for). Of those four, `gnt4_PPCHalt` `@0x801fea1c` is already declared
+`void(void)` and is 5 instructions that read nothing; `gnt4_Reset_bl`
+`@0x80204800` genuinely reads `r3` (`stw r3,0x24(r8)` at `0x80204854`) before
+defining it, so its one `undefined4 param_1` is real; `FUN_80291c24`
+`@0x80291c24` reads `r3` and `r4` in its first two loads, so its `(uint*, uint*)`
+is real — and it is a false positive of the "no `blr`" screen anyway, having no
+map size entry so only its first `0x400` bytes were decoded. `run_main_game_loop`
+was the only spine with invented parameters. (Scope note: this measures the
+*spine* class only. The wider "Ghidra declared parameters the ROM never reads"
+class is not measured here — capstone's `regs_access()` is unsupported for PPC in
+this build, so any such survey needs a hand-written read-set decoder.)
+
+**Still uncorrected, same defect class, caller side:** `start` `@0x80003154`
+(`research/decomp/ghidra-export/chunk_0000.c` line 41) is the ROM entry point and
+therefore also takes no arguments, yet Ghidra gave it 8 `param_N` plus
+`in_r7..in_r10`, and its line 127 call passes all 16 of them into the spine. That
+block belongs to `auto-c0000-000` (also `pending`, 0 attempts) and was left alone
+here to keep this correction's blast radius to the one block it proved. It will
+matter at whole-program link, where the import signature must agree with the
+export.
+
 ### Where the spine wasm comes from
 
 `0x800527d8` is **not staged**. The queue's unit for it is `auto-c0006-013`
