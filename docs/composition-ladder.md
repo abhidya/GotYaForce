@@ -523,3 +523,53 @@ revoke-and-rebuild:
 - `auto-c0019-013` -- carries the `(uint)` cast line; its build is unaffected
   either way (`-Wno-int-conversion` is set in both the per-unit and the assembly
   compile), so this one is provenance hygiene, not a blocker.
+
+### Rung 2 re-measured against the corrected registry (2026-08-29)
+
+Run in scratch as the gate's canonicalization stage only -- real
+`build_assembly_bundle` + real `plan_canonicalization`, pinned Clang, dispatch
+companion on, SDK canon seed read fresh -- with the product root (registry +
+chunk corpus) pointed at the corrected worktree and no emcc/wasm-ld/node.
+Measured cost for N=20: **~8 min** for the scoped owner snapshot (317 owners of
+1970 referenced identifiers) plus **~11 min** for the planner. The earlier
+"still walking after 3 hours" figure was an unscoped load, not the real cost.
+
+| variant | result |
+|---|---|
+| A -- window exactly as staged today | REFUSED `owner_variant_abi_incompatible`, symbol `zz_007c800_`, **at `auto-c0011-012/unit.c`** |
+| B -- same window, `auto-c0011-012` rebuilt from the corrected chunk | REFUSED `owner_variant_abi_incompatible`, symbol **`zz_007c844_`**, at `auto-c0011-011/gnt4_shim.h` |
+
+Read those two rows together with the pre-change control:
+
+- **before**: refused on `zz_007c800_` at `auto-c0011-011/gnt4_shim.h` -- the
+  CONSUMER side, `extern int zz_007c800_();` unsupersedable against a void owner.
+- **A**: the consumer-side refusal is gone. What refuses now is
+  `auto-c0011-012`'s own staged `unit.c`, which still carries the
+  pre-correction `void zz_007c800_(int,uint)` definition. That is the ordering
+  rule in `research/decomp/corpus-correction-loop.md` step 3, not a new defect.
+- **B**: with that one artifact rebuilt, `zz_007c800_` clears completely and the
+  window refuses on the NEXT symbol.
+
+`zz_007c844_` is a different animal and must not be mistaken for an eleventh
+value carrier. It has exactly ONE call site in the entire corpus
+(`chunk_0011.c:3189`), a bare statement that discards the result, so no consumer
+anywhere depends on its r3 and `void` is the correct canonical ABI. It refuses
+for a structural reason: `_every_call_discards_the_result` returns **false for
+`auto-c0011-012`**, the unit that DEFINES it and never calls it -- measured
+directly, both as-staged and rebuilt. Bundle-wide `result_unused` is therefore
+false for every void symbol whose owner unit is in the window, the carve-out
+fires unconditionally, and `auto-c0011-011`'s seed-era placeholder
+`extern int zz_007c844_();` goes to the probe and loses. `zz_007c9ac_` has the
+identical shape and is queued behind it.
+
+The fix for that class is a rebuild, not an ABI decision: a rebuilt
+`auto-c0011-011` gets `extern void zz_007c844_(int param_1);` synced from the
+registry instead of the `int f()` fallback, and there is then nothing to
+supersede and no probe.
+
+**Honest ceiling: still rung 1 (N=10).** This change removes the value-carrier
+wall -- that is proven, and it was genuinely the wall -- but rung 2 needs two
+more rebuilds behind it (`auto-c0011-012`, then `auto-c0011-011`), and the
+window may well surface another placeholder of the `zz_007c844_` shape after
+that. Rung 2 is now a rebuild-scheduling problem rather than an owner decision,
+which it was not before.
