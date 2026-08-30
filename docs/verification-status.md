@@ -1,0 +1,372 @@
+# Verification status — what is proven, what is not, and what cannot be
+
+**Date: 2026-08-30.** This is the single page to read before repeating any number about
+this project's port. It is deliberately not a design document and not a roadmap: it
+records the *claim state* — which standards exist, what each one does and does not
+establish, how much of the ROM can ever reach each one, and where each area actually
+stands today.
+
+Its companions, and the division of labour:
+
+- [`docs/playable-port-design.md`](playable-port-design.md) — the normative design
+  contract (v1 → v5, PASS verdict). It says what SHOULD happen. This page says what HAS.
+- [`CONTRIBUTING.md`](../CONTRIBUTING.md) §"Evidence and promotion terms" — the binding
+  vocabulary rules for anyone writing in this repo.
+- [`docs/audits/`](audits/README.md) — dated findings about specific defects.
+- [`research/decomp/data/verification-tier-survey.json`](../research/decomp/data/verification-tier-survey.json)
+  — the machine-readable measurement this page's §2 quotes, with input digests.
+
+> [!IMPORTANT]
+> Nothing here is a projection. Every number is either read out of a committed artifact
+> or re-derived by a script named beside it. Where a number is untracked or
+> machine-local, it says so and is not treated as evidence.
+
+---
+
+## 1. The tier vocabulary
+
+Four standards exist for wasm port units. They are **not a ladder of confidence in one
+thing** — they verify different things, and the weaker ones can never be totalled with
+the stronger one.
+
+| Tier | What a result MEANS | What it does **NOT** claim |
+| --- | --- | --- |
+| `compile_only` | The unit's C compiled and linked to wasm. | **Anything at all about behaviour.** This is inventory. At least one `compile_only` unit is proven behaviourally wrong. |
+| `oracle_green` | Every function's full captured corpus replays **byte-exact, per call**, including the **memory write set**, against console-derived evidence. | Any input outside the replayed corpus. Coverage is bounded by the capture, not by the function. |
+| `boundary_green` | For a **nonterminating spine** function: over K captured iterations the port emits the identical **callee-boundary sequence** — same callees, same order, same arguments — and the identical spine-owned writes up to the cut. | It is **not** `oracle_green` and never upgrades into one. Nothing outside the declared owned regions is compared; the callees are stubs replaying captured values. |
+| `transcript_green` | For an ordinary returning function: the port emits the identical **out-of-unit call transcript** (set, order, arguments) **and returns the identical value**, over N recorded cases; owned-region bytes are compared where the corpus declares them. | **No write-set comparison.** Reads are constrained only insofar as they change an argument or the return value. Callee behaviour is stubbed, not verified. |
+
+Three vocabulary traps, all of which have bitten:
+
+1. **`oracle_divergent` is a flag, not a tier.** When a replay FAILs, by design it raises
+   `oracle_divergent` and **changes no tier**. `auto-c0035-002` is byte-exact on 6,250 of
+   20,000 cases and is *still recorded as a green `compile_only` unit*. Read the tier,
+   never the colour, and never the word "green" on its own.
+2. **`transcript_green` is a per-FUNCTION artifact, deliberately not a unit tier in the
+   driver ledger.** It lives in its own filename namespace
+   (`research/decomp/data/oracle-results/<unit>.<export>.transcript.json`), its verdict
+   token shares no string with the other harnesses, and its `claim` block names
+   `oracle_green` as the stronger standard in machine-readable form. See §6 for the
+   counters that would over-count it if it ever became a unit tier.
+3. **`spine_green` does not exist.** The spine standard is `boundary_green`. The uppercase
+   `BOUNDARY_GREEN` seen in commit subjects and console output is the verdict token for
+   that same standard, not a fifth tier.
+
+The GX host has a **separate, unrelated** vocabulary — `translated` / `latched` /
+`declared-nop` / unimplemented (`GxImplTier` in
+`packages/rom-runtime/src/gx/adapters.ts`). Those describe *implementation coverage of an
+API surface*. They are not verification tiers and must never be summed with the ones
+above. See §5.3.
+
+### Non-vacuity is enforced, not assumed
+
+A weaker standard is only worth having if it cannot pass on nothing. For
+`transcript_green`: zero cases cannot pass, a corpus below `--min-cases` cannot pass, and
+a case with no calls, no return value and no owned expectation fails the run outright —
+and `capture_transcript.py` refuses that shape before the emulator is even started. This
+guard exists because the vacuity it prevents **already happened** under the older
+standard; see §4.
+
+---
+
+## 2. The measured ceiling — how much of the ROM is verifiable at all
+
+Source of record:
+[`research/decomp/data/verification-tier-survey.json`](../research/decomp/data/verification-tier-survey.json),
+generated by [`research/decomp/data/build_tier_survey.py`](../research/decomp/data/build_tier_survey.py)
+from `research/tools/OGhidra/tools/survey_plan_tiers.py`. The artifact binds the sha256 of
+the oracle registry, the decompiled-C chunk corpus, and all four classification-logic
+files, so the numbers are diffable and re-derivable rather than quoted from a terminal.
+
+**This is a ceiling, not progress.** The survey is static and model-free: it asks, of each
+function's decompiled C, *could a spec of this standard be built for it at all* — never
+*has one been built* or *did it pass*. A function counted below has **not been verified**;
+it has been found **eligible**. Verified units are counted in §5, from committed artifacts.
+
+Over **10,954 functions in 1,396 units**:
+
+| Strongest standard reachable | Functions | Share |
+| --- | ---: | ---: |
+| `oracle_green` (auto-derivable write-comparison spec) | **652** | **6.0 %** |
+| `transcript_green` (call sequence + arguments + return value + owned regions) | **8,197** | **74.8 %** |
+| **Verifiable by some tier** | **8,849** | **80.8 %** |
+| Unverifiable by any existing standard | **2,105** | **19.2 %** |
+
+Per unit, requiring **full export coverage** (a unit promotion demands every export;
+a unit whose exports land on a mix of standards is reported mixed, never rounded up):
+
+| Per-unit state | Units | Share |
+| --- | ---: | ---: |
+| All exports `oracle_green`-eligible | 2 | 0.1 % |
+| All exports `transcript_green`-eligible | 257 | 18.4 % |
+| All exports covered, **mixed tiers** | 119 | 8.5 % |
+| **Full export coverage (any tier)** | **378** | **27.1 %** |
+| Has at least one unverifiable export | 1,018 | 72.9 % |
+
+For scale: before `transcript_green` existed, units with full export coverage numbered
+**2**. The second standard moved that to **378**. It did not make 376 units verified — it
+made them *reachable*.
+
+### The number that motivated the second standard
+
+Under the write-comparison ceiling alone, **4,455 functions (40.7 %) store nothing a
+capture could compare.** For those the byte-exact standard is not hard, it is **empty**: a
+spec over them passes vacuously. That is not a hypothetical — see §4.
+
+---
+
+## 3. What is unverifiable, and why
+
+The 2,105 functions that reach neither standard split cleanly. This split is computed from
+the survey's per-function dump, not from its refusal counters (a function can have an empty
+transcript and still be `oracle_green`-eligible, so the raw refusal counts are larger).
+
+**1,602 — dispatch through a ROM function-pointer table.** The C is
+`(*(code *)...)()`; emcc lowers that `bctrl` to a `call_indirect` on the **module's own
+table**. No import shim can observe it, so the captured transcript would have a hole
+exactly where the interesting behaviour is. `capture_transcript.py` refuses this shape
+rather than producing a transcript that silently omits the dispatch.
+
+**503 — empty transcript.** No out-of-unit call and no return value. There is genuinely
+nothing observable at the import boundary to compare. These are not "hard"; under every
+standard that exists they are unobservable, and a spec over them would be the vacuity in §4
+by construction.
+
+Both classes are **standard-relative, not permanent**. A third standard that instrumented
+the module's own table, or that compared internal state directly, would move them. No such
+standard is designed, and until one is, 19.2 % of the ROM has no route to a claim.
+
+---
+
+## 4. The defect `transcript_green` caught on its first outing
+
+`auto-c0020-007.FUN_800c4448` — a function Ghidra typed with 9 parameters, seven of them
+invented `double`s, plus one real pointer. Its `oracle_green` corpus
+(`research/decomp/oracle-harness/corpora/auto-c0020-007.FUN_800c4448.dolphin-trace.jsonl`)
+holds **15 cases, and all 15 record `"reads": [], "writes": []`.** The unit result
+`auto-c0020-007.json` records it as 15/15 passing, with the note that it "stores nothing,
+so it has no write set to compare."
+
+**A 15/15 pass on nothing.** That is the vacuity the ceiling number in §2 predicts, caught
+in the wild. Its `transcript_green` run
+(`research/decomp/data/oracle-results/auto-c0020-007.FUN_800c4448.transcript.json`) is a
+real `pass` — 12 cases, 12 calls matched, `claim.established: true` — and it is the first
+non-vacuous statement anyone has been able to make about that function.
+
+Its neighbour `FUN_800c4468` is the harsher lesson and is frequently confused with it. That
+is the function Ghidra gave **16 parameters** (seven invented `double`s, then eight
+integer slots); its corpus has **200 cases, none vacuous**, and it passed 200/200 under the
+old standard. Its `transcript_green` run **FAILS**: `cases_passed: 0`, `calls_matched: 0`,
+`claim.established: false`, diverging at case 0 argument 0, with the artifact recording
+that "NO owned-region bytes were reached: the corpus declares 3 watch region(s) but the run
+stopped before any case completed."
+
+Two functions, two different failures of the old standard: one passed on nothing, one
+passed on a corpus that the stronger boundary check rejects outright. Neither was visible
+before.
+
+---
+
+## 5. Where each area actually stands
+
+### 5.1 The spine — first `boundary_green`
+
+**Reached.** `run_main_game_loop` (`0x800527d8`, export `zz_00527d8_`) is the first and
+only `boundary_green` result:
+
+- Artifact: `research/decomp/data/oracle-results/spine-run-main-game-loop.boundary.json` —
+  `standard: "boundary_green"`, **274 / 274 calls matched**, 16 iterations, terminator
+  `call_cap`, `divergence: null`, `verdict: "pass"`.
+- Corpus: `research/decomp/oracle-harness/corpora/spine-run-main-game-loop.boundary.jsonl`
+  (274 call records, 15 back-edges retired). Harness:
+  `research/decomp/oracle-harness/run-spine.mjs`.
+- It required correcting **Ghidra's invented 16-parameter signature to `void(void)`**,
+  proven from DOL disassembly; the correction landed in
+  `research/decomp/ghidra-export/chunk_0006.c` (lines 5790-5833) via the sanctioned
+  [corpus-correction loop](../research/decomp/corpus-correction-loop.md). Narrative and the
+  disassembly proof: `research/tools/dolphin-trace/README.md`.
+
+**What it is worth, stated plainly.** With the ABI corrected there are **zero argument
+slots to compare** — the ROM passes none — and the single owned region (`0x80436190`,
+4 bytes) held `00000000` at all 274 boundaries and at the cut: the owned-write channel was
+exercised but never varied. The entire verdict rests on the **274/274 exact call
+sequence**. A negative control (swapping two adjacent callees) does correctly report FAIL,
+so the check is not degenerate — but it is one call sequence, not a behavioural proof of
+the spine.
+
+**Windows gotcha before anyone re-runs it:** the recorded corpus sha256 is the **LF**
+digest. A CRLF checkout will compute a different hash for the same file. That is a checkout
+artifact, not tampering.
+
+### 5.2 The composition ladder — ceiling is rung 1
+
+`research/decomp/data/composition-ladder.json` holds exactly two rungs: rung 0 (N=5,
+passed, 0 conflicts, 40 companion thunks) and rung 1 (**N=10**, passed, 0 conflicts,
+`new_contested / new_linked = 0 / 38`, 78 companion thunks), checked 2026-08-29.
+
+**Rung 2 has not been reached.** Per [`docs/composition-ladder.md`](composition-ladder.md),
+the value-carrier wall that blocked it is removed and that was genuinely the wall — but
+rung 2 needs two rebuilds behind it (`auto-c0011-012`, then `auto-c0011-011`), and the
+window may surface another placeholder of the same shape after that. **Rung 2 is now a
+rebuild-scheduling problem rather than an ABI/owner decision**, which is a real change in
+kind, not a change in the ceiling. The ceiling is still N=10.
+
+### 5.3 The GX HLE host — 87.1 % translated, 0 % verified
+
+From [`docs/gx-hle-host.md`](gx-hle-host.md), recomputable from
+`research/decomp/data/gx-call-inventory.json` against
+`packages/rom-runtime/src/gx/adapters.ts`:
+
+| | Entry points | ROM call sites | Share of 502 |
+| --- | ---: | ---: | ---: |
+| `translated` | 49 / 76 | 437 | **87.1 %** |
+| + `latched` | 50 | 438 | 87.3 % |
+| + `declared-nop` | 56 | 468 | 93.2 % |
+| unimplemented | 20 | 34 | 6.8 % |
+
+**Verification is exactly 0 %, and coverage is not a proxy for it.** No GX trace capture
+exists, no reference framebuffer exists, no frame from this path has ever been compared
+against a real GameCube frame. Every adapter is registered `evidenceClass: "synthetic"`
+and the smoke phase **fails** if any adapter ever claims `"verified"`. The pixel assertions
+in the end-to-end proof are predicted from the same understanding that wrote the adapters,
+so they are self-consistency checks and cannot detect a shared misunderstanding.
+
+Write-gather-pipe lowering is real and is exercised on the ROM's own draw function
+`zz_0027c34_` (`0x80027c34`) — the browser leg drives the **assembly gate's own output**
+(`packages/rom-runtime/test/fixtures/gx-rom-unit/`), not a hand-written fixture. Two
+caveats the doc itself carries: the lowering is **opt-in and off by default**
+(`OGHIDRA_PORT_WGPIPE_LOWERING=1`), and the run evidence lands in untracked
+`.tmp/gx-host-smoke/evidence/`, so the recorded counts are a doc transcription rather than
+a committed artifact.
+
+Ceiling note, permanent: the standard for this boundary is **"framebuffer-equivalent, never
+pixel-identical"** (design V3 non-fatal note 1). WebGL rasterization cannot match Flipper —
+EFB copy semantics, fixed-point rasterization, the 24-bit depth comparison, texture filter
+kernels, and the TEV's signed 10-bit per-stage rounding all differ. Translating more of the
+pipeline moves this path closer to that ceiling; it does not raise it. No document, log
+line, or test name may quietly upgrade it.
+
+### 5.4 Capture coverage — the real bottleneck
+
+Verification is bounded by what has actually been captured off the console, and that
+inventory is small:
+
+| | Count | Where |
+| --- | ---: | --- |
+| Dolphin-captured corpus files | 18 (+1 TS-differential POC, `damage-core-poc.jsonl`) | `research/decomp/oracle-harness/corpora/` |
+| — distinct units they cover | 5 (`auto-c0001-005`, `-007`, `auto-c0020-007`, `auto-c0035-000`, `auto-c0050-000`) plus the spine | |
+| Committed result artifacts | 11 | `research/decomp/data/oracle-results/` |
+| — unit-level (`run-unit.mjs`) verdicts | 7: 2 `pass`, 3 `partial`, 2 `fail` | `<unit>.json` |
+| — `transcript_green` | 3: 2 `pass`, 1 `fail` | `*.transcript.json` |
+| — `boundary_green` | 1: `pass` | `spine-run-main-game-loop.boundary.json` |
+| Promoted units | 3 — `damage-core`, `collision-core`, `knockback-core` | `research/decomp/port-units/` |
+| Units in production | 1 — `damage-core` (+ its threads relink) | `apps/game/public/rom/` |
+| Staged units, **all `compile_only` (UNVERIFIED)** | 112 | `research/decomp/port-units-staging/*/provenance.json` |
+
+Three of those 18 Dolphin corpora record **zero cases** (`FUN_800c4308`, `FUN_800c4838`,
+`zz_00c4704_`): the capture ran and the function was never reached. They are inventory, not
+evidence, and the harnesses refuse them rather than passing on nothing.
+
+Against a corpus of **1,396 units / 10,954 functions**, and against an *eligibility*
+ceiling of 8,849 functions. The gap between "could be verified" (§2) and "has been
+verified" (this table) is the honest shape of the project: three orders of magnitude.
+
+The one unambiguous end-to-end success remains `damage-core`: 4 functions, **26,232 /
+26,232 replayed cases byte-exact**, relinked for shared memory and re-verified with a
+byte-identical verdict, serving the live game.
+
+---
+
+## 6. Standing claim-honesty rules
+
+These are not style preferences. Each one exists because it was violated and the violation
+cost time.
+
+1. **`compile_only` is UNVERIFIED inventory, never progress.** Never describe a
+   `compile_only` unit as ported, done, working, or finished. A staged-unit count is a
+   queue depth, not an achievement.
+2. **A FAIL changes no tier.** A unit can be simultaneously "green" in the driver's status
+   field and *proven behaviourally wrong*. Report the tier and the verdict, never the
+   status word alone.
+3. **Weaker standards are never totalled with `oracle_green`.** `boundary_green` and
+   `transcript_green` are callee-boundary claims. Never count a `transcript_green` function
+   toward write-verified coverage, and never report either as `oracle_green`.
+4. **GX coverage is not verification.** "87.1 % of call sites translated" and "0 % verified"
+   are both true and must be printed together. The same rule applies to any future
+   percentage of an API surface.
+5. **"Framebuffer-equivalent, never pixel-identical."** The graphics boundary has a ceiling
+   below byte-exactness and always will. Do not let a passing render test be written up as
+   a pixel match.
+6. **A ceiling is not a result.** The §2 numbers describe eligibility. Writing "80.8 % of
+   the ROM is verifiable" is correct; writing "80.8 % verified" is a fabrication of three
+   orders of magnitude.
+7. **Machine-local numbers are not repository evidence.** The driver's queue state lives in
+   gitignored `research/decomp/generated/finish-game-port/`. Numbers from it cannot be
+   reproduced from a clone and must be labelled machine-local wherever they are quoted.
+8. **Relinking invalidates a verdict.** A verified unit relinked for shared memory has
+   different bytes than what was verified; it does not carry its `oracle_green` /
+   `boundary_green` status across until the full corpus replays byte-equal against the new
+   binary. See [`docs/threads-relink-reverify.md`](threads-relink-reverify.md).
+
+### Known defect: two driver counters are fail-OPEN on tier
+
+Recorded here rather than fixed, because the driver lives in the separate, unvendored
+OGhidra checkout. Verified against that tree on 2026-08-30:
+
+- `src/port_contract.py:125` —
+  `counts["staged" if (record or {}).get("tier") == "compile_only" else "green"] += 1`
+- `src/port_progress.py:209` — `if record.get("tier") == "compile_only": … else: counts["green"] += 1`
+
+Both test **"is `compile_only`"** and route *everything else* — including `None`, a typo,
+or a future `transcript_green` — into `green`. The predicate is "not `compile_only`", not
+"is `oracle_green`".
+
+**Currently latent, not live.** `transcript_green` exists nowhere in the driver's `src/`;
+every write path emits only `compile_only` or `oracle_green`, and every promotion gate is
+an explicit allowlist (`ELIGIBLE_CANONICAL_TIERS = {"compile_only", "oracle_green"}`), i.e.
+fail-*closed*. So no record can carry the tier today.
+
+**The exposure.** The first commit that teaches the driver to record `transcript_green`
+inflates, silently and without tripping any gate or test: `progress/current.json`
+(`queue.green`), `progress/summary.json` (`green` / `staged`), the generated README table,
+the **health state** (`remaining = total − green − staged`, so a corpus of transcript
+results would report complete), progress-branch commit subjects, and the contract probe's
+`counts` that the rig supervisor reads to decide relaunches. Note the asymmetry that makes
+this dangerous: `run-state.json`'s `units_verified` uses the **correct** positive predicate
+(`tier == "oracle_green"`), so two files published by the same run would disagree — and the
+looser number is the one in the README banner.
+
+**The fix, when it is made:** invert both to positive tests against an explicit
+verified-tier set, and add a test that asserts an unknown tier string does not land in
+`green`.
+
+---
+
+## 7. Reproducing the numbers on this page
+
+```bash
+# §2 — the ceiling. Requires the OGhidra checkout (not vendored; clone separately).
+python research/decomp/data/build_tier_survey.py
+python research/decomp/data/build_tier_survey.py --check   # drift check, writes nothing
+
+# §5.1 — replay the spine capture (no emulator needed)
+node research/decomp/oracle-harness/run-spine.mjs \
+  --capture research/decomp/oracle-harness/corpora/spine-run-main-game-loop.boundary.jsonl
+
+# §5.4 — replay a unit corpus, and a transcript corpus
+node research/decomp/oracle-harness/run-unit.mjs --unit damage-core
+node research/decomp/oracle-harness/run-transcript.mjs   # see its --help for corpus args
+```
+
+`--check` re-derives the survey and diffs it against the committed artifact, ignoring only
+the timestamp and the tool commit. A non-zero exit means the tree no longer produces the
+numbers above and this page is stale.
+
+---
+
+## Provenance
+
+Written 2026-08-30. Every figure was measured against the tree on that date, not carried
+forward from an earlier document. Where a claim in an existing document disagreed with the
+measurement, the measurement won and the other document was corrected — the corrections are
+listed in the commit that introduced this page.

@@ -4315,7 +4315,7 @@ void FUN_80085dc0(undefined8 param_1,double param_2,double param_3,double param_
 
 // ==== 80085e00  zz_0085e00_ ====
 
-void zz_0085e00_(int param_1,undefined4 *param_2,undefined1 param_3)
+void * zz_0085e00_(int param_1,undefined4 *param_2,undefined1 param_3)  /* CORPUS CORRECTION 2026-08-29: 0x80085e00 DELIVERS a value -- PPC has no void. It calls zz_0088aa0_ ('void *') at 0x80085e38 and then NEVER writes r3 again: the NULL test 'cmplwi r3,0 / beq 0x80085f0c' branches straight to the epilogue, every store in the body uses r3 as its base register, and the epilogue restores r0/r31/r30/r29 only. It therefore returns the allocation result -- NULL on failure, the new object on success. The ROM epilogue never writes r3, so the callee's r3 flows out through this function's blr; the true return type is void *. Ghidra printed 'void' because the decompiled body has no explicit 'return <expr>;', which is necessary but NOT sufficient for a no-result procedure. Evidence: disassembly of the DOL text section (boot.dol, symbol map GG4E-CSM-20220412) + the terminal function's own decompiled signature; corpus consumers assign and branch on the result. */
 
 {
   undefined1 *puVar1;
@@ -4350,7 +4350,7 @@ void zz_0085e00_(int param_1,undefined4 *param_2,undefined1 param_3)
     *(undefined4 *)(puVar1 + 0xc4) = *(undefined4 *)(param_1 + 0xc4);
     puVar1[0xd0] = *(undefined1 *)(param_1 + 0xd0);
   }
-  return;
+  return puVar1;
 }
 
 

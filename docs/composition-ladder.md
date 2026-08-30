@@ -11,6 +11,12 @@ dispatch companion enabled. The normative budget is V4 E1:
 A rising rate is the hard stop: the ladder halts and ABI unification is
 redesigned before any further scaling (G3 stop rule).
 
+**Current state, in one line:** the ceiling is **rung 1 (N=10)**, passed clean —
+`substitution: null`, `conflicts: []`, ratio 0/38, 78 companion thunks, checked
+2026-08-29. Rung 2 is blocked on two rebuilds, not on an ABI or owner decision; §"Rung 2
+re-measured against the corrected registry" has the detail. This line is mirrored in
+[`docs/verification-status.md`](verification-status.md) §5.2 alongside the other areas.
+
 ## Ledger
 
 `research/decomp/data/composition-ladder.json` — one entry per rung:

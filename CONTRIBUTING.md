@@ -54,8 +54,10 @@ For wasm port units the recorded tiers are `compile_only`, `oracle_green`,
 compiled and linked and nothing else** — it is inventory, not progress, and at
 least one `compile_only` unit is proven behaviorally wrong. Never describe a
 `compile_only` unit as ported, done, or working. The tier vocabulary is defined
-in the root `README.md` and in the
-[atlas porting guide](docs-site/contributing/porting.md).
+in the root `README.md`, in the
+[atlas porting guide](docs-site/contributing/porting.md), and — with the measured
+ceiling for each tier and the current per-area state — in
+[`docs/verification-status.md`](docs/verification-status.md).
 
 `oracle_green` is the only byte-exact write-comparison claim. `boundary_green`
 and `transcript_green` are **callee-boundary** claims and are strictly weaker:
@@ -64,8 +66,11 @@ value), not the memory it wrote. Never report either as `oracle_green`, and
 never count a `transcript_green` function toward write-verified coverage. A
 `transcript_green` result is a per-FUNCTION artifact
 (`research/decomp/data/oracle-results/<unit>.<export>.transcript.json`) and is
-deliberately **not** a unit tier in the driver's ledger — several counters treat
-"tier is not `compile_only`" as verified, which would over-count it.
+deliberately **not** a unit tier in the driver's ledger — two counters
+(`src/port_contract.py:125` and `src/port_progress.py:209` in the OGhidra checkout)
+treat "tier is not `compile_only`" as verified, which would over-count it. That defect
+is latent today and is recorded in full, with its blast radius, in
+[`docs/verification-status.md`](docs/verification-status.md) §6.
 
 Unknown behavior stays `PARTIAL`, `TUNED`, or `BLOCKED`. Do not replace missing
 evidence with plausible constants and label it exact.

@@ -6,6 +6,13 @@ omr-sweep) and may not run again until this design is reviewed and approved.
 Date: 2026-08-25. Author: orchestrator session. Everything below is grounded in measured
 session evidence, cited inline.
 
+> This document is **normative and layered**: v1 states the design, and the V2-V5 amendment
+> rounds below supersede parts of it in place rather than rewriting it, so an earlier
+> section may be historically accurate and currently wrong. It says what SHOULD happen.
+> For what HAS happened — which standards have actually been reached, by what, and what
+> each result is worth — read [`docs/verification-status.md`](verification-status.md),
+> which is re-measured against the tree rather than carried forward.
+
 ## 1. The problem with the port as it ran
 
 The driver optimized for the wrong terminal state. Its loop was:
@@ -60,6 +67,18 @@ Amendments (both bounded, both from measured failure classes):
    read as a hardware queue, not failures.
 
 ### Stage B — Verify (build; this is the pivot)
+
+> [!NOTE]
+> **Superseded in part by V5 I3.** The v1 text below defines verification as a single
+> standard: byte-exact **write comparison** (`oracle_green`). That is no longer the whole
+> mechanism, and reading only this section will understate what the pipeline can reach and
+> overstate what a pass is worth. Two callee-boundary standards were added later in this
+> document — `boundary_green` for nonterminating spine functions and `transcript_green` for
+> ordinary returning ones — because the write-comparison standard is *empty* for 40.7 % of
+> the ROM, not merely hard. Read **V5 I3** ("Spine verification: `oracle_green` is
+> unreachable for nonterminating functions")
+> and its `transcript_green` subsection before acting on this stage. The current measured
+> state of all three standards is [`docs/verification-status.md`](verification-status.md).
 
 The TS-differential route is exhausted — measured: only 2 of 133 eligible units have
 every function port-grade, both already verified. The ~1,300 remaining units have no TS

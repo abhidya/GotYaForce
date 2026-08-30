@@ -95,6 +95,26 @@ The general rule the sweep argues for: preserve durable evidence as a small sche
 source revision/hash, tool revision, lawful input hash, command/config with secrets
 removed, oracle cases/result, output hashes, and the product commit that consumes it.
 
+### 4.1 The first file built to that rule — `verification-tier-survey.json` (2026-08-30)
+
+The same defect class was found in a worse form: the **verification-tier ceiling** — the
+numbers that decide what the port pipeline is even attempting — existed **only as the
+stdout of `research/tools/OGhidra/tools/survey_plan_tiers.py`**, a script in the
+unvendored tool checkout. They were transcribed into design documents by hand and were
+neither diffable nor re-derivable from a clone.
+
+Closed by `research/decomp/data/build_tier_survey.py` →
+`research/decomp/data/verification-tier-survey.json`, which is the first generated file
+here to satisfy §4's rule in full: it binds the sha256 of the oracle registry, a rolled
+sha256 over all 80 decompiled-C chunk files the survey actually reads, and the sha256 of
+each of the four classification-logic files in the tool checkout, plus that checkout's
+commit. It also ships the missing half of the rule — a **`--check` mode** that re-derives
+the survey and exits non-zero if the tree no longer produces the committed numbers, so
+staleness is detectable rather than inferred. The reading of those numbers is
+[`docs/verification-status.md`](../verification-status.md).
+
+Status: **FIXED** for this file. The pattern is the one the two OPEN files above need.
+
 ---
 
 ## 5. Oracle registry schema — FIXED

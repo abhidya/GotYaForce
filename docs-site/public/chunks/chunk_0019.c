@@ -2215,7 +2215,7 @@ void FUN_800bda78(undefined8 param_1,double param_2,double param_3,double param_
   undefined4 in_r9;
   undefined4 in_r10;
   int iVar4;
-  undefined8 uVar5;
+  undefined8 uVar5 = 0;  /* CORPUS CORRECTION 2026-08-29: r3/r4 residue, not a return value (see line 2230). It flows only into the dead first-parameter slots of zz_0007030_/zz_0007c54_, which never read param_1, so a deterministic 0 replaces undefined register content. */
   
   fVar1 = FLOAT_80438588;
   *(char *)(param_9 + 0x18) = *(char *)(param_9 + 0x18) + '\x01';
@@ -2227,15 +2227,15 @@ void FUN_800bda78(undefined8 param_1,double param_2,double param_3,double param_
   iVar4 = *(int *)(param_9 + 0x90);
   *(undefined *)(param_9 + 0x89) = (&DAT_80433af8)[*(char *)(param_9 + 0x13)];
   *(code **)(param_9 + 0x100) = FUN_80047aa4;
-  uVar5 = zz_0089100_(param_9,(int)*(char *)(iVar4 + 0x3e4) + 0x10,1);
+  zz_0089100_(param_9,(int)*(char *)(iVar4 + 0x3e4) + 0x10,1);  /* CORPUS CORRECTION 2026-08-29: 0x80089100 returns NO value -- its own decompiled body (chunk_0013.c:65) is void and every exit is a bare "return;"; the same defect was corrected at chunk_0025.c:717 and this chunk's sibling zz_0104b38_ (chunk_0029.c:337) already calls it bare. Evidence: docs/composition-ladder.md, "zz_0089100_ resolution" and "Correction to the 12 corpus fixes estimate"; the result is never branched on, stored or returned anywhere in the corpus -- it only reaches dead first-parameter slots. */
   iVar4 = zz_0006f98_(iVar4);
-  uVar5 = zz_0007030_(uVar5,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
+  zz_0007030_(uVar5,param_2,param_3,param_4,param_5,param_6,param_7,param_8,  /* CORPUS CORRECTION 2026-08-29: 0x80007030 returns NO value -- its own decompiled body (chunk_0000.c:1548) is void, ending in stores plus a bare "return;". Same Ghidra r3/r4-residue threading as the merged chunk_0025.c:734 correction; the residue is still passed on, because the callee never reads param_1. Evidence: docs/composition-ladder.md, "zz_0089100_ resolution" and "Correction to the 12 corpus fixes estimate"; the result is never branched on, stored or returned anywhere in the corpus -- it only reaches dead first-parameter slots. */
                       *(int *)(iVar4 + 0x600),*(int *)(param_9 + 0xe0),
                       *(int *)(&DAT_80433afc + *(char *)(param_9 + 0x13) * 4),iVar4 + 0xc28,in_r7,
                       in_r8,in_r9,in_r10);
   iVar3 = iVar4 + 0xc28;
   iVar2 = *(int *)(&DAT_80433afc + *(char *)(param_9 + 0x13) * 4);
-  uVar5 = zz_0007030_(uVar5,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
+  zz_0007030_(uVar5,param_2,param_3,param_4,param_5,param_6,param_7,param_8,  /* CORPUS CORRECTION 2026-08-29: r3/r4-residue assignment removed, see line 2232. */
                       *(int *)(iVar4 + 0x600),*(int *)(param_9 + 0xe4),iVar2,iVar3,in_r7,in_r8,in_r9
                       ,in_r10);
   zz_0007c54_(uVar5,param_2,param_3,param_4,param_5,param_6,param_7,param_8,*(int *)(param_9 + 0xe4)
@@ -3149,7 +3149,7 @@ uint FUN_800bee1c(int param_1)
           return 0;
         }
         *(undefined1 *)(param_1 + 0x18) = 2;
-        uVar6 = zz_0085e00_(param_1,(undefined4 *)(param_1 + 0x20),(&DAT_80301b16)[iVar4]);
+        uVar6 = (uint)zz_0085e00_(param_1,(undefined4 *)(param_1 + 0x20),(&DAT_80301b16)[iVar4]);  /* CORPUS CORRECTION 2026-08-29: explicit cast added because zz_0085e00_ is now correctly typed 'void *' (chunk_0012.c:4318). The ROM is unchanged: FUN_800bee1c returns r3 from zz_0085e00_ verbatim, and the cast only makes the existing pointer-to-uint narrowing explicit. */
         cVar2 = (&DAT_80301b17)[iVar4];
         if (cVar2 == '\x02') {
           bVar7 = zz_0183730_(param_1,3,0xff);
