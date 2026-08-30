@@ -64,13 +64,20 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createHash } from "node:crypto";
-import { execSync } from "node:child_process";
 import { loadUnit, importedMemoryLimits } from "./lib/wasm.mjs";
+// The value/format/compare machinery below is SHARED with run-transcript.mjs
+// (standard transcript_green) so the two callee-boundary standards cannot drift
+// apart in what "same callee" or "same argument" means. The divergence wording,
+// the verdict token and the result `standard` field stay HERE — nothing shared
+// can make boundary_green evidence readable as another standard's.
+import {
+  sha256, hex, unbox, valueEq, fmtArgs, decodeRet, applyDeltas,
+  parseAddr as parseAddrShared, makeBoundaryShimProxy, firstOwnedMismatch,
+  fmtByte, readCaptureJsonl, gitRevOf, relPosix,
+} from "./lib/boundary.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..", "..", "..");
-const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
 
 // ---- args ----
 const args = process.argv.slice(2);
@@ -93,46 +100,7 @@ class SpineMismatch extends Error {
   constructor(detail) { super(detail.report); this.detail = detail; }
 }
 
-const hex = (v) => "0x" + (v >>> 0).toString(16);
-const parseAddr = (s) => {
-  const v = typeof s === "number" ? s : Number.parseInt(s, 16);
-  if (!Number.isInteger(v) || v < 0) fail(`bad address ${s}`);
-  return v >>> 0;
-};
-
-/**
- * spine_schema 1 BOXED float: {"t":"f64"|"f32","bits":"<hex>"}. JSON cannot
- * spell NaN or Infinity, and a PowerPC argument register carrying residue is
- * routinely one of them (`run_main_game_loop` sets NO register between its
- * calls, so every arg it passes is residue) — so a non-finite captured float
- * travels bit-exact in this box and is unboxed here. NOTE: JS canonicalises
- * NaN, so a boxed NaN can only ever be compared as "both are NaN"; the payload
- * bits are not observable across the wasm/JS import boundary.
- */
-const boxView = new DataView(new ArrayBuffer(8));
-const unbox = (v) => {
-  if (v === null || typeof v !== "object" || typeof v.bits !== "string") return v;
-  if (v.t === "f64") { boxView.setBigUint64(0, BigInt("0x" + v.bits)); return boxView.getFloat64(0); }
-  if (v.t === "f32") { boxView.setUint32(0, Number.parseInt(v.bits, 16)); return boxView.getFloat32(0); }
-  return v;
-};
-
-/** Captured-vs-actual value equality: i32 mod 2^32, i64 via BigInt, floats via Object.is. */
-const valueEq = (boxed, actual) => {
-  const expected = unbox(boxed);
-  if (typeof actual === "bigint") {
-    return BigInt.asUintN(64, BigInt(expected)) === BigInt.asUintN(64, actual);
-  }
-  if (typeof expected === "number" && Number.isInteger(expected) && Number.isInteger(actual)) {
-    return (expected >>> 0) === (actual >>> 0);
-  }
-  return Object.is(expected, actual);
-};
-
-const fmtArgs = (a) => `(${a.map((v) => {
-  const u = unbox(v);
-  return typeof u === "bigint" ? `${u}n` : (v !== u ? `${u}[0x${v.bits}]` : String(u));
-}).join(", ")})`;
+const parseAddr = (s) => parseAddrShared(s, fail);
 
 try {
   await main();
@@ -150,9 +118,7 @@ function resultsDir() {
 async function main() {
   // ---- capture load + shape validation ----
   const captureAbs = path.resolve(capturePath);
-  if (!fs.existsSync(captureAbs)) fail(`no capture file at ${captureAbs}`);
-  const captureRaw = fs.readFileSync(captureAbs);
-  const lines = captureRaw.toString("utf8").split("\n").filter((l) => l.length > 0);
+  const { raw: captureRaw, lines } = readCaptureJsonl(captureAbs, fail);
   const header = JSON.parse(lines[0]);
   if (header.kind !== "header" || header.spine_schema !== 1) {
     fail("capture has no valid spine_schema 1 header record — an unbound capture proves nothing");
@@ -199,19 +165,13 @@ async function main() {
   let shimMem = null; // loadUnit's memCtx — u8 is live for both memory models
   const checkOwned = (owned, atCall) => {
     if (!owned) return;
-    for (const o of owned) {
-      const addr = parseAddr(o.addr);
-      const expect = Buffer.from(o.b64, "base64");
-      for (let k = 0; k < expect.length; k++) {
-        const got = shimMem.u8[addr + k];
-        if (got !== expect[k]) {
-          throw new SpineMismatch({
-            i: atCall, kind: "owned_write",
-            report: `owned-write divergence at ${atCall === -1 ? "end-of-capture cut" : `call i=${atCall}`}: ` +
-              `addr ${hex(addr + k)} expected 0x${expect[k].toString(16).padStart(2, "0")} got 0x${got.toString(16).padStart(2, "0")}`,
-          });
-        }
-      }
+    const bad = firstOwnedMismatch(shimMem.u8, owned, fail);
+    if (bad != null) {
+      throw new SpineMismatch({
+        i: atCall, kind: "owned_write",
+        report: `owned-write divergence at ${atCall === -1 ? "end-of-capture cut" : `call i=${atCall}`}: ` +
+          `addr ${hex(bad.addr)} expected ${fmtByte(bad.expected)} got ${fmtByte(bad.got)}`,
+      });
     }
   };
   const onBoundaryCall = (name, actualArgs) => {
@@ -233,22 +193,13 @@ async function main() {
           `expected ${fmtArgs(rec.args)}, got ${fmtArgs(actualArgs)}`,
       });
     }
-    for (const d of rec.deltas ?? []) {
-      shimMem.u8.set(Buffer.from(d.b64, "base64"), parseAddr(d.addr));
-    }
+    applyDeltas(shimMem.u8, rec.deltas, fail);
     state.i++;
-    const ret = rec.ret;
-    if (ret == null) return undefined;
-    if (typeof ret === "object" && ret.t === "i64") return BigInt(ret.v);
-    return ret;
+    return decodeRet(rec.ret);
   };
   const makeShims = (ctx) => {
     shimMem = ctx;
-    return new Proxy({}, {
-      get: (t, k) => typeof k === "string"
-        ? (...a) => onBoundaryCall(k, a)
-        : undefined,
-    });
+    return makeBoundaryShimProxy(onBoundaryCall);
   };
 
   const { ex, wasmBytes } = await loadUnit({ wasmPath, arenaPath, makeShims });
@@ -292,8 +243,7 @@ async function main() {
   }
 
   // ---- result artifact — standard boundary_green, distinct from oracle_green ----
-  let gitRev = "unknown";
-  try { gitRev = execSync("git rev-parse HEAD", { cwd: root }).toString().trim(); } catch { /* evidence field only */ }
+  const gitRev = gitRevOf(root);
   const result = {
     result_schema: 1,
     standard: "boundary_green",
@@ -305,8 +255,8 @@ async function main() {
       sha256: sha256(fs.readFileSync(path.join(here, "run-spine.mjs"))),
     },
     wasm: { path: wasmPath, sha256: sha256(wasmBytes), memory_model: memoryModel },
-    arena: { path: path.relative(root, arenaPath).replace(/\\/g, "/"), sha256: sha256(fs.readFileSync(arenaPath)) },
-    capture: { file: path.relative(root, captureAbs).replace(/\\/g, "/"), sha256: sha256(captureRaw),
+    arena: { path: relPosix(root, arenaPath), sha256: sha256(fs.readFileSync(arenaPath)) },
+    capture: { file: relPosix(root, captureAbs), sha256: sha256(captureRaw),
       calls: records.length, iterations: header.iterations, terminator: header.terminator.mode },
     spine: { export: header.spine.export, gc_addr: header.spine.gc_addr },
     owned_regions: ownedRegions.map((r) => ({ addr: hex(r.addr), size: r.size })),
