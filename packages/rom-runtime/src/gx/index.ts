@@ -8,8 +8,10 @@
 //   - the claim ceiling for this path even once verified is
 //     "framebuffer-equivalent, never pixel-identical";
 //   - the ROM's real vertex submission goes through the write-gather pipe at
-//     0xCC008000, and the assembly gate does not lower those stores yet, so no
-//     real ROM unit can submit geometry through this path today.
+//     0xCC008000; the assembly gate DOES lower those stores now (opt-in behind
+//     OGHIDRA_PORT_WGPIPE_LOWERING=1), and a gate-lowered ROM draw function
+//     drives this path in the browser — but that proves the seam, not the
+//     pixels.
 // =============================================================================
 
 export {
@@ -40,12 +42,64 @@ export {
 } from "./enums.js";
 
 export {
+  GXAlphaOp,
+  GXAttnFn,
+  GXDiffuseFn,
+  GXTevAlphaArg,
+  GXTevBias,
+  GXTevColorArg,
+  GXTevColorChan,
+  GXTevKColorSel,
+  GXTevMode,
+  GXTevOp,
+  GXTevRegID,
+  GXTevScale,
+  GXTexFilter,
+  GXTexFmt,
+  GXTexGenSrc,
+  GXTexGenType,
+  GXTexWrapMode,
+  GXTlutFmt,
+  GX_LIGHT_OBJ_BYTES,
+  GX_MAX_LIGHT,
+  GX_PTIDENTITY,
+  GX_PTTEXMTX_BASE,
+} from "./enums.js";
+
+export {
   GxState,
   type GxArrayBinding,
+  type GxChanCtrl,
   type GxDrawState,
+  type GxLight,
+  type GxTexGen,
   type GxTexObj,
+  type GxTlutObj,
   type GxVatEntry,
 } from "./state.js";
+
+export {
+  DEFAULT_ALPHA_COMPARE,
+  DEFAULT_SWAP_TABLE,
+  defaultTevStage,
+  generateTevShader,
+  tevStageFromOp,
+  type GxAlphaCompare,
+  type GxSwapRow,
+  type GxTevOpState,
+  type GxTevShaderConfig,
+  type GxTevShaderResult,
+  type GxTevStage,
+} from "./tev.js";
+
+export {
+  GxTextureError,
+  decodeTextureBytes,
+  decodeTextureFromMemory,
+  gxImageBytes,
+  texFormatName,
+  type GxDecodedTexture,
+} from "./texture.js";
 
 export { GxFifo, GxFifoError, type GxPrimitive as GxPrimitiveData, type GxPrimitiveSink } from "./fifo.js";
 

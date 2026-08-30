@@ -5,9 +5,11 @@
      crossOriginIsolated); app.js / rom-runtime-worker.js are esbuild bundles
      of src/gx/selftest/gxSelftestMain.ts and src/worker-entry.ts.
 
-     The canvas below is the actual GX framebuffer: the purpose-built ROM-side
-     draw module's GX calls cross the Atomics bridge into the GX adapters,
-     decode through the write-gather-pipe decoder, and rasterize here. -->
+     The canvas below is the actual GX framebuffer. Two modules drive it: a
+     purpose-built ROM-side draw module, and the assembly gate's own lowering of
+     the ROM's own draw function zz_0027c34_. Both send their GX calls across the
+     Atomics bridge into the GX adapters, decode through the write-gather-pipe
+     decoder, and rasterize here. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -31,10 +33,15 @@
     <figure style="margin: 0">
       <canvas id="gx-canvas" width="640" height="448"></canvas>
       <figcaption>
-        GX framebuffer &mdash; drawn by a ROM-side wasm module's GX calls through the HLE host.
-        Blue: an orthographic GX_QUADS screen quad (S16 XY + RGBA8 direct).
-        Green: a GX_TRIANGLESTRIP (F32 XYZ + RGBA8 direct).
-        Amber outline: a 0xb0 line primitive with INDEX8 attributes fetched through GXSetArray.
+        GX framebuffer &mdash; drawn through the HLE host. The run draws many frames over this
+        one canvas and the LAST one is what remains: the frame produced by
+        <strong>zz_0027c34_</strong>, the ROM's own draw function as the assembly gate lowered it,
+        executing through the Atomics bridge. Its colour is the ROM's own RGBA8 word blended by
+        the ROM's own GXSetBlendMode(GX_BM_BLEND, SRCALPHA, INVSRCALPHA) over a cleared frame.
+        Earlier frames &mdash; the S16/F32/INDEX8 primitives, the TEV konst and register-chain
+        draws, the decoded GX_TF_RGBA8 texture and the lit quad &mdash; are captured separately as
+        <code>gx-framebuffer-fixture.png</code>. Every one of them is checked by readPixels in the
+        table below, and none of them has been compared against a real GameCube frame.
       </figcaption>
     </figure>
     <div id="results"><h1 data-status="running">GX HLE host self-test: loading&hellip;</h1></div>

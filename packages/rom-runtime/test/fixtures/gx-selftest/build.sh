@@ -12,7 +12,7 @@ set -e
 cd "$(dirname "$0")"
 source ../../../../../research/tools/emsdk/emsdk_env.sh >/dev/null 2>&1
 
-EXPORTS=_gx_draw_fullscreen_quad,_gx_draw_strip,_gx_draw_indexed,_gx_call_unimplemented,_gx_set_perspective
+EXPORTS=_gx_draw_fullscreen_quad,_gx_draw_strip,_gx_draw_indexed,_gx_call_unimplemented,_gx_set_perspective,_gx_draw_tev_konst,_gx_draw_tev_two_stage,_gx_draw_alpha_compare_discard,_gx_draw_textured,_gx_draw_lit,_gx_program_rom_tev,_gx_call_tex_offsets_disabled
 
 # Threads-target shape, identical to the bridge fixture: -sSHARED_MEMORY=1
 # -sIMPORTED_MEMORY=1 gives threads codegen with a shared IMPORTED env.memory

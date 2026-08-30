@@ -382,3 +382,417 @@ export function directComponentBytes(attr: number, cnt: number, type: number): n
   }
   return null;
 }
+
+// =============================================================================
+// TEV — the programmable fixed-function fragment combiner.
+//
+// Everything below was settled against the decompiled SDK bodies in
+// research/decomp/ghidra-export/chunk_0067.c, which are unusually generous
+// here: they pack their arguments straight into the hardware's BP registers,
+// so the FIELD WIDTHS, the FIELD POSITIONS and the ARGUMENT ORDER are all
+// directly readable. What the bodies cannot show is what a given field VALUE
+// means to the silicon — that part stays [SDK], and it is labelled per enum.
+// =============================================================================
+
+/**
+ * TEV colour-combiner input selectors (GXTevColorArg).
+ * [SDK numbering, CORPUS width, CORPUS-corroborated by usage]
+ *
+ * WIDTH IS CORPUS: gnt4_GXSetTevColorIn_bl @0x80229c38 packs its four
+ * arguments as `d & 0xf | (c & 0xf) << 4 | (b & 0xf) << 8 | (a & 0xf) << 0xc`,
+ * so each selector is exactly 4 bits (16 possible values) and the argument
+ * order is (stage, a, b, c, d) with `a` in the highest field. Both facts are
+ * read off the shipped binary, not assumed.
+ *
+ * NUMBERING IS SDK, corroborated by the ROM's own 4-stage program in
+ * chunk_0003.c: `GXSetTevColorIn(0, 0xf, 8, 0xe, 2)` pairs one-for-one with
+ * `GXSetTevAlphaIn(0, 7, 4, 6, 1)` — ZERO/ZERO, TEXC/TEXA, KONST/KONST,
+ * C0/A0 — across two enums with DIFFERENT widths (4-bit vs 3-bit). That the
+ * documented values line up in all four positions across both enums is strong
+ * corroboration, but it is not proof: no captured frame has confirmed it.
+ */
+export enum GXTevColorArg {
+  CPREV = 0,
+  APREV = 1,
+  C0 = 2,
+  A0 = 3,
+  C1 = 4,
+  A1 = 5,
+  C2 = 6,
+  A2 = 7,
+  TEXC = 8,
+  TEXA = 9,
+  RASC = 10,
+  RASA = 11,
+  ONE = 12,
+  HALF = 13,
+  KONST = 14,
+  ZERO = 15,
+}
+
+/**
+ * TEV alpha-combiner input selectors (GXTevAlphaArg).
+ * [SDK numbering, CORPUS width]
+ *
+ * gnt4_GXSetTevAlphaIn_bl @0x80229c7c packs with `& 7` at shifts 4/7/10/13 —
+ * 3-bit fields, argument order (stage, a, b, c, d) with `a` highest, and the
+ * low nibble left alone because it holds the swap-mode selectors.
+ */
+export enum GXTevAlphaArg {
+  APREV = 0,
+  A0 = 1,
+  A1 = 2,
+  A2 = 3,
+  TEXA = 4,
+  RASA = 5,
+  KONST = 6,
+  ZERO = 7,
+}
+
+/**
+ * TEV combiner operations (GXTevOp).
+ * [CORPUS for ADD/SUB and for the compare-op ENCODING; SDK for which
+ *  comparison each compare value names]
+ *
+ * gnt4_GXSetTevColorOp_bl @0x80229cc0 branches on `op < 2`: values 0 and 1
+ * take the ordinary path where bias and scale are the caller's, and the op's
+ * low bit becomes the register's subtract bit. So **ADD = 0 and SUB = 1 are
+ * corpus-settled**. Values >= 2 force the bias field to 3 (`| 0x30000`) and
+ * put `op & 6` into the scale field — which is exactly how the hardware
+ * encodes the compare ops, so the compare BLOCK is corpus-settled too. Which
+ * of the four comparison widths `op & 6` selects (R8 / GR16 / BGR24 / RGB8)
+ * is [SDK]: the field's meaning lives in the silicon, not in this body.
+ */
+export enum GXTevOp {
+  ADD = 0,
+  SUB = 1,
+  COMP_R8_GT = 2,
+  COMP_R8_EQ = 3,
+  COMP_GR16_GT = 4,
+  COMP_GR16_EQ = 5,
+  COMP_BGR24_GT = 6,
+  COMP_BGR24_EQ = 7,
+  COMP_RGB8_GT = 8,
+  COMP_RGB8_EQ = 9,
+}
+/** Alpha aliases for the two 8-bit compare ops. [SDK] */
+export const GX_TEV_COMP_A8_GT = GXTevOp.COMP_RGB8_GT;
+export const GX_TEV_COMP_A8_EQ = GXTevOp.COMP_RGB8_EQ;
+
+/**
+ * TEV bias (GXTevBias) — 2-bit field at register bits 16-17. [CORPUS width,
+ * SDK meaning]
+ *
+ * gnt4_GXSetTevColorOp_bl writes `(bias & 3) << 0x10`. Value 3 is reserved by
+ * the hardware for "this stage is a compare op", which the same body confirms
+ * by forcing it (`| 0x30000`) on the compare path — so only 0/1/2 are ever
+ * meaningful biases, and that bound IS corpus-settled.
+ */
+export enum GXTevBias {
+  ZERO = 0,
+  ADDHALF = 1,
+  SUBHALF = 2,
+  /** Not a bias: the hardware's compare-op marker. [CORPUS] */
+  COMPARE = 3,
+}
+
+/**
+ * TEV output scale (GXTevScale) — 2-bit field at register bits 20-21.
+ * [CORPUS width, SDK meaning]
+ */
+export enum GXTevScale {
+  SCALE_1 = 0,
+  SCALE_2 = 1,
+  SCALE_4 = 2,
+  DIVIDE_2 = 3,
+}
+
+/**
+ * TEV output registers (GXTevRegID) — 2-bit field at register bits 22-23.
+ * [CORPUS width and identity, SDK ordering]
+ *
+ * gnt4_GXSetTevColorOp_bl writes `(out_reg & 3) << 0x16`, so there are exactly
+ * four. gnt4_GXSetTevColor_bl @0x80229d90 addresses them as
+ * `(reg * 2 + 0xe0)` / `(reg * 2 + 0xe1)` BP register pairs — two registers
+ * per colour, RA then BG — which independently confirms the count and that
+ * register 0 is the first of the bank. That register 0 is the one the TEV
+ * uses as its running result (GX_TEVPREV) is [SDK].
+ */
+export enum GXTevRegID {
+  TEVPREV = 0,
+  TEVREG0 = 1,
+  TEVREG1 = 2,
+  TEVREG2 = 3,
+}
+
+/**
+ * The five canned TEV programs GXSetTevOp installs (GXTevMode).
+ * [CORPUS count and stage rule; CORPUS-corroborated for MODULATE and PASSCLR;
+ *  SDK for DECAL/BLEND/REPLACE]
+ *
+ * gnt4_GXSetTevOp_bl @0x80229bac indexes two pairs of tables by `mode * 4`,
+ * and the two pairs are 0x14 = 20 = 5 entries apart, so **there are exactly 5
+ * modes** — corpus-settled. The body also branches on `stage == 0` to pick the
+ * first pair, which is the SDK's documented rule that stage 0 combines against
+ * the RASTERIZED colour while later stages combine against the previous
+ * stage's output; that branch is corpus-settled too.
+ *
+ * Mode 0 and mode 4 are corroborated by ROM usage: mode 4 appears only
+ * alongside `GXSetTevOrder(stage, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, ...)`
+ * (7 sites) — a mode that ignores the texture, i.e. PASSCLR — and mode 0 only
+ * alongside a real texmap (6 sites), i.e. MODULATE. The table CONTENTS live at
+ * DAT_803aad30/0x803aad58 which are not in the C export, so the three
+ * remaining modes are expanded from the documented SDK definition.
+ */
+export enum GXTevMode {
+  MODULATE = 0,
+  DECAL = 1,
+  BLEND = 2,
+  REPLACE = 3,
+  PASSCLR = 4,
+}
+
+/**
+ * Konstant-colour selector for a TEV stage (GXTevKColorSel).
+ * [CORPUS width, SDK numbering, CORPUS-corroborated by usage]
+ *
+ * gnt4_GXSetTevKColorSel_bl @0x80229efc writes a 5-bit field (`& 0x1f`) into
+ * the KSEL register — bits 4-8 for an even stage, 14-18 for an odd one — so
+ * the selector space is 32 wide. The ROM's 4-stage program selects 0xc, 0xd,
+ * 0xe, 0xf for stages 0..3 while selecting 0x1c, 0x1d, 0x1e, 0x1f for the
+ * same stages' ALPHA konstants, which is exactly the documented
+ * "K0..K3 rgb" / "K0..K3 alpha" pair of runs.
+ */
+export enum GXTevKColorSel {
+  CONST_1 = 0x00,
+  CONST_7_8 = 0x01,
+  CONST_3_4 = 0x02,
+  CONST_5_8 = 0x03,
+  CONST_1_2 = 0x04,
+  CONST_3_8 = 0x05,
+  CONST_1_4 = 0x06,
+  CONST_1_8 = 0x07,
+  K0 = 0x0c,
+  K1 = 0x0d,
+  K2 = 0x0e,
+  K3 = 0x0f,
+  K0_R = 0x10,
+  K1_R = 0x11,
+  K2_R = 0x12,
+  K3_R = 0x13,
+  K0_G = 0x14,
+  K1_G = 0x15,
+  K2_G = 0x16,
+  K3_G = 0x17,
+  K0_B = 0x18,
+  K1_B = 0x19,
+  K2_B = 0x1a,
+  K3_B = 0x1b,
+  K0_A = 0x1c,
+  K1_A = 0x1d,
+  K2_A = 0x1e,
+  K3_A = 0x1f,
+}
+
+/**
+ * TEV swap-table channel selector (GXTevColorChan). [CORPUS width, SDK
+ * numbering]
+ *
+ * gnt4_GXSetTevSwapModeTable_bl @0x80229ffc writes four 2-bit fields across a
+ * pair of KSEL registers — (r, g) into `ksel[table*2]` bits 0-1 / 2-3 and
+ * (b, a) into `ksel[table*2+1]` — confirming both the 2-bit width and the
+ * argument order (table, r, g, b, a).
+ */
+export enum GXTevColorChan {
+  RED = 0,
+  GREEN = 1,
+  BLUE = 2,
+  ALPHA = 3,
+}
+
+/**
+ * Alpha-compare combine operator (GXAlphaOp). [CORPUS width, SDK numbering]
+ *
+ * gnt4_GXSetAlphaCompare_bl @0x8022a07c packs
+ * `(op & 3) << 0x16 | (comp1 & 7) << 0x13 | (comp0 & 7) << 0x10 |
+ *  (ref1 & 0xff) << 8 | ref0 & 0xff`, which settles the ARGUMENT ORDER
+ * (comp0, ref0, op, comp1, ref1) from the corpus. The ROM's only two call
+ * sites pass `(7, 0, 0, 7, 0)` — both comparisons ALWAYS, which is a no-op
+ * filter.
+ */
+export enum GXAlphaOp {
+  AND = 0,
+  OR = 1,
+  XOR = 2,
+  XNOR = 3,
+}
+
+// =============================================================================
+// Texture pipeline
+// =============================================================================
+
+/**
+ * Texture formats (GXTexFmt). [CORPUS — settled, not assumed]
+ *
+ * This is the strongest corpus result in this file. gnt4_GXInitTexObj_bl
+ * @0x80228b74 switches on `format & 0xf` and, for each case, writes BOTH the
+ * texel-block shift pair AND a bytes-per-texel class byte at offset 0x1e of
+ * the texture object:
+ *
+ *   case 0, 8      -> 8x8 blocks, class 1  => the two 4-bit formats  (I4, C4)
+ *   case 1, 2, 9   -> 8x4 blocks, class 2  => the three 8-bit ones (I8, IA4, C8)
+ *   case 3,4,5,10  -> 4x4 blocks, class 2  => the four 16-bit ones
+ *                                             (IA8, RGB565, RGB5A3, C14X2)
+ *   case 6         -> 4x4 blocks, class 3  => the one 32-bit format (RGBA8)
+ *   case 0xe       -> 8x8 blocks, class 0  => the one compressed format (CMPR)
+ *
+ * Block geometry plus bit depth identifies every GameCube texture format
+ * uniquely, so each value above is pinned by the shipped binary. The Z
+ * formats are pinned separately by gnt4_GXSetZTexture_bl @0x8022a0c0, which
+ * maps 0x11 -> 8-bit, 0x13 -> 16-bit and 0x16 -> 24-bit Z. The ROM's own
+ * GXInitTexObj call sites use 6 (a 640x224 RGBA8 framebuffer capture), 1 and 3.
+ */
+export enum GXTexFmt {
+  I4 = 0,
+  I8 = 1,
+  IA4 = 2,
+  IA8 = 3,
+  RGB565 = 4,
+  RGB5A3 = 5,
+  RGBA8 = 6,
+  C4 = 8,
+  C8 = 9,
+  C14X2 = 0xa,
+  CMPR = 0xe,
+  Z8 = 0x11,
+  Z16 = 0x13,
+  Z24X8 = 0x16,
+}
+
+/** Texture wrap modes (GXTexWrapMode). [CORPUS width, SDK numbering]
+ *  gnt4_GXInitTexObj_bl stores wrap_s as `& 3` at bits 0-1 and wrap_t at
+ *  bits 2-3, which settles the argument order and the 2-bit width. Every ROM
+ *  call site passes 0 for both. */
+export enum GXTexWrapMode {
+  CLAMP = 0,
+  REPEAT = 1,
+  MIRROR = 2,
+}
+
+/** Texture filter modes (GXTexFilter). [SDK]
+ *  gnt4_GXInitTexObjLOD_bl indexes a translation table at DAT_80435db8 with
+ *  the filter argument, and that table is not in the C export. The ROM passes
+ *  0 and 1 only. */
+export enum GXTexFilter {
+  NEAR = 0,
+  LINEAR = 1,
+  NEAR_MIP_NEAR = 2,
+  LIN_MIP_NEAR = 3,
+  NEAR_MIP_LIN = 4,
+  LIN_MIP_LIN = 5,
+}
+
+/** Texture-lookup-table formats (GXTlutFmt). [SDK]
+ *  gnt4_GXInitTlutObj_bl stores `fmt & 3` at bits 10-11; the 2-bit width is
+ *  corpus, the meaning is the documented IA8/RGB565/RGB5A3 triple. */
+export enum GXTlutFmt {
+  IA8 = 0,
+  RGB565 = 1,
+  RGB5A3 = 2,
+}
+
+// =============================================================================
+// Texture coordinate generation
+// =============================================================================
+
+/**
+ * Texgen functions (GXTexGenType). [CORPUS]
+ *
+ * gnt4_GXSetTexCoordGen2_bl @0x80226aec dispatches on the function argument:
+ *  - 0 sets the register's "3 output components" bit (`| 2`), 1 does not, so
+ *    0 = MTX3x4 and 1 = MTX2x4;
+ *  - 2..9 take the bump-map path, writing `(func - 2)` into the bump light
+ *    field and `(src - 0xc)` into the bump source-texcoord field, so
+ *    BUMP0..BUMP7 = 2..9 and GX_TG_TEXCOORD0 = 0xc;
+ *  - 10 takes the colour-strgbc path, so SRTG = 10.
+ * The ROM uses 0 and 1 only.
+ */
+export enum GXTexGenType {
+  MTX3x4 = 0,
+  MTX2x4 = 1,
+  BUMP0 = 2,
+  BUMP7 = 9,
+  SRTG = 10,
+}
+
+/**
+ * Texgen sources (GXTexGenSrc). [CORPUS]
+ *
+ * Read straight out of gnt4_GXSetTexCoordGen2_bl's source switch, which maps
+ * the caller's value to the hardware's input-row index:
+ *   0 -> row 0 (position, 3-component input form)
+ *   1 -> row 1 (normal, 3-component)
+ *   2 -> row 3, 3 -> row 4 (binormal / tangent, 3-component)
+ *   4..0xb -> rows 5..0xc (the eight texcoord inputs, 2-component)
+ *   0x13, 0x14 -> row 2 (the two colour channels)
+ * The bump branch's `src - 0xc` arithmetic pins GX_TG_TEXCOORD0 at 0xc.
+ * The ROM uses 4 (GX_TG_TEX0) at every game-code call site.
+ */
+export enum GXTexGenSrc {
+  POS = 0,
+  NRM = 1,
+  BINRM = 2,
+  TANGENT = 3,
+  TEX0 = 4,
+  TEX7 = 11,
+  TEXCOORD0 = 12,
+  COLOR0 = 0x13,
+  COLOR1 = 0x14,
+}
+
+/** Post-transform texture matrices start at 0x40 and GX_PTIDENTITY is the last
+ *  slot. [CORPUS] gnt4_GXSetTexCoordGen2_bl writes `postmtx - 0x40 & 0x3f`,
+ *  and every ROM call site passes 0x7d — the identity slot, 0x7d - 0x40 = 0x3d. */
+export const GX_PTTEXMTX_BASE = 0x40;
+export const GX_PTIDENTITY = 0x7d;
+
+// =============================================================================
+// Lighting
+// =============================================================================
+
+/**
+ * Diffuse lighting functions (GXDiffuseFn). [CORPUS width, SDK numbering]
+ *
+ * gnt4_GXSetChanCtrl_bl @0x80228898 writes `(diff_fn & 3) << 7`. The ROM's
+ * unlit paths pass 0 and its one lit path passes 2.
+ */
+export enum GXDiffuseFn {
+  NONE = 0,
+  SIGN = 1,
+  CLAMP = 2,
+}
+
+/**
+ * Light attenuation functions (GXAttnFn). [CORPUS]
+ *
+ * gnt4_GXSetChanCtrl_bl derives two separate register bits from this one
+ * argument: an ENABLE bit that is set for values 1 and 2 and clear for 0, and
+ * a SELECT bit that is set for 0 and 1 and clear for 2. It also opens with
+ * `if (attn_fn == 0) diff_fn = 0`. Only one assignment satisfies all three:
+ * 0 = SPEC (specular attenuation, which the hardware requires be paired with
+ * no diffuse function), 1 = SPOT, 2 = NONE. Every ROM call site passes 2.
+ */
+export enum GXAttnFn {
+  SPEC = 0,
+  SPOT = 1,
+  NONE = 2,
+}
+
+/** Bytes in a GXLightObj as the SDK lays it out. [CORPUS]
+ *  gnt4_GXLoadLightObjImm_bl @0x80228600 streams offsets 0x0c through 0x3c
+ *  inclusive to the XF light region, and gnt4_GXInitLightDir_bl writes the
+ *  NEGATED direction to 0x34/0x38/0x3c, so the object is 0x40 bytes with
+ *  colour at 0x0c, distance attenuation at 0x10-0x18, angle attenuation at
+ *  0x1c-0x24, position at 0x28-0x30 and negated direction at 0x34-0x3c. */
+export const GX_LIGHT_OBJ_BYTES = 0x40;
+export const GX_MAX_LIGHT = 8;

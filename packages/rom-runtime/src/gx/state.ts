@@ -17,17 +17,35 @@
 import {
   GXAttr,
   GXAttrType,
+  GXAttnFn,
   GXBlendFactor,
   GXBlendMode,
   GXCompCnt,
   GXCompType,
   GXCompare,
   GXCullMode,
+  GXColorSrc,
+  GXDiffuseFn,
   GXProjectionType,
+  GXTexFilter,
+  GXTexGenSrc,
+  GXTexGenType,
+  GXTlutFmt,
   GX_IDENTITY_MTX,
+  GX_MAX_LIGHT,
   GX_MAX_TEXMAP,
+  GX_PTIDENTITY,
   GX_TEXMAP_NULL,
+  GX_TEXMTX0,
 } from "./enums.js";
+import {
+  DEFAULT_ALPHA_COMPARE,
+  DEFAULT_SWAP_TABLE,
+  defaultTevStage,
+  type GxAlphaCompare,
+  type GxSwapRow,
+  type GxTevStage,
+} from "./tev.js";
 
 /** One attribute's VAT (vertex attribute table) entry. */
 export interface GxVatEntry {
@@ -53,12 +71,99 @@ export interface GxTexObj {
   imageAddr: number;
   width: number;
   height: number;
-  /** GXTexFmt as passed by the ROM. Not decoded — see decodedFormat. */
+  /** GXTexFmt as passed by the ROM. Decoded by gx/texture.ts. */
   format: number;
   wrapS: number;
   wrapT: number;
   mipmap: number;
+  /** GXInitTexObjLOD min/mag filters. */
+  minFilter: number;
+  magFilter: number;
+  /** GC address of the TLUT image data for a paletted format, if one was
+   *  loaded through GXLoadTlut, else null. */
+  tlutAddr: number | null;
+  /** GXTlutFmt of that palette. */
+  tlutFormat: number;
+  /** Palette entry count, from GXInitTlutObj. */
+  tlutEntries: number;
 }
+
+/** A GX TLUT object (GXInitTlutObj) and its loaded TMEM binding. */
+export interface GxTlutObj {
+  objAddr: number;
+  imageAddr: number;
+  format: number;
+  entries: number;
+}
+
+/** One texture-coordinate generator (GXSetTexCoordGen2). */
+export interface GxTexGen {
+  /** GXTexGenType. */
+  type: number;
+  /** GXTexGenSrc. */
+  src: number;
+  /** Texture-matrix row id, or GX_IDENTITY_MTX. */
+  mtx: number;
+  normalize: boolean;
+  /** Post-transform matrix id; GX_PTIDENTITY means none. */
+  postMtx: number;
+}
+
+/** One light object as GXLoadLightObjImm streams it. Layout is [CORPUS] —
+ *  see GX_LIGHT_OBJ_BYTES in enums.ts. */
+export interface GxLight {
+  /** rgba 0-255. */
+  color: Uint8Array;
+  /** Angle (cosine) attenuation a0, a1, a2 — object offsets 0x10/0x14/0x18. */
+  angleAttn: Float32Array;
+  /** Distance attenuation k0, k1, k2 — object offsets 0x1c/0x20/0x24. */
+  distAttn: Float32Array;
+  /** Position — object offsets 0x28/0x2c/0x30. */
+  position: Float32Array;
+  /** The object stores the NEGATED direction at 0x34/0x38/0x3c; this field
+   *  holds it exactly as stored, negation included. */
+  negDirection: Float32Array;
+}
+
+/** One colour channel's GXSetChanCtrl configuration. */
+export interface GxChanCtrl {
+  enabled: boolean;
+  /** GXColorSrc for the ambient term. */
+  ambSrc: number;
+  /** GXColorSrc for the material term. */
+  matSrc: number;
+  /** 8-bit light enable mask. */
+  lightMask: number;
+  /** GXDiffuseFn. */
+  diffFn: number;
+  /** GXAttnFn. */
+  attnFn: number;
+}
+
+const defaultChanCtrl = (): GxChanCtrl => ({
+  enabled: false,
+  ambSrc: GXColorSrc.VERTEX,
+  matSrc: GXColorSrc.VERTEX,
+  lightMask: 0,
+  diffFn: GXDiffuseFn.NONE,
+  attnFn: GXAttnFn.NONE,
+});
+
+const defaultLight = (): GxLight => ({
+  color: Uint8Array.from([255, 255, 255, 255]),
+  angleAttn: Float32Array.from([1, 0, 0]),
+  distAttn: Float32Array.from([1, 0, 0]),
+  position: Float32Array.from([0, 0, 0]),
+  negDirection: Float32Array.from([0, 0, 0]),
+});
+
+const defaultTexGen = (): GxTexGen => ({
+  type: GXTexGenType.MTX2x4,
+  src: GXTexGenSrc.TEX0,
+  mtx: GX_IDENTITY_MTX,
+  normalize: false,
+  postMtx: GX_PTIDENTITY,
+});
 
 /** Immutable snapshot of everything a draw call depends on. */
 export interface GxDrawState {
@@ -98,6 +203,35 @@ export interface GxDrawState {
   matSrcVertex: boolean;
   /** GXSetChanCtrl's channel-enable bit (lighting on/off for the channel). */
   chanEnabled: boolean;
+
+  // --- TEV -------------------------------------------------------------------
+  /** The 16 TEV stages as the ROM programmed them. */
+  tevStages: GxTevStage[];
+  /** The four TEV colour registers, rgba in 0-1 float (GX_TEVPREV first).
+   *  Float rather than byte because GXSetTevColorS10 can set values outside
+   *  [0,1] and clamping them at latch time would lose what the ROM asked for. */
+  tevRegs: Float32Array;
+  /** The four konstant colour registers, rgba 0-1. */
+  tevKColors: Float32Array;
+  /** The 4-row TEV swap table. */
+  swapTable: GxSwapRow[];
+  alphaCompare: GxAlphaCompare;
+
+  // --- texgen ----------------------------------------------------------------
+  /** The 8 texture-coordinate generators. */
+  texGens: GxTexGen[];
+  /** Texture matrices, keyed by row id, snapshotted so a draw is self-contained. */
+  texMtx: Map<number, Float32Array>;
+
+  // --- lighting --------------------------------------------------------------
+  /** Per-channel GXSetChanCtrl for channels 0..3. */
+  chanCtrl: GxChanCtrl[];
+  /** The 8 light objects. */
+  lights: GxLight[];
+  /** Material colours for channels 0 and 1, rgba 0-255. */
+  matColors: Uint8Array[];
+  /** Ambient colours for channels 0 and 1, rgba 0-255. */
+  ambColors: Uint8Array[];
 }
 
 const identity3x4 = (): Float32Array =>
@@ -161,10 +295,46 @@ export class GxState {
   readonly textures: Array<GxTexObj | null> = Array.from({ length: GX_MAX_TEXMAP }, () => null);
   /** Texture objects the ROM has initialized, keyed by their GXTexObj address. */
   readonly texObjs = new Map<number, GxTexObj>();
+  /** TLUT objects the ROM has initialized, keyed by their GXTlutObj address. */
+  readonly tlutObjs = new Map<number, GxTlutObj>();
+  /** TLUTs loaded into a TMEM region, keyed by GXTlut name. The host models
+   *  TMEM as a name -> palette map rather than as an address space, because it
+   *  does not emulate texture memory at all. */
+  readonly loadedTluts = new Map<number, GxTlutObj>();
+  /** The most recently loaded TLUT, which a paletted texture binds against
+   *  when the ROM does not name a region. Reported when it is guessed. */
+  lastLoadedTlut: GxTlutObj | null = null;
+
+  // --- TEV -------------------------------------------------------------------
+  /** The 16 TEV stages. Reset to the GXSetTevOp(stage, GX_PASSCLR) expansion —
+   *  see defaultTevStage in tev.ts for why that default and not another. */
+  readonly tevStages: GxTevStage[] = Array.from({ length: 16 }, (_, i) => defaultTevStage(i));
+  /** GX_TEVPREV, GX_TEVREG0..2 as rgba floats. */
+  tevRegs = new Float32Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  /** GX_KCOLOR0..3 as rgba floats. Reset to opaque white so an unprogrammed
+   *  konst multiplies by one rather than blacking a draw out. */
+  tevKColors = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+  swapTable: GxSwapRow[] = DEFAULT_SWAP_TABLE.map((r) => [...r] as GxSwapRow);
+  alphaCompare: GxAlphaCompare = { ...DEFAULT_ALPHA_COMPARE };
+
+  // --- texgen ----------------------------------------------------------------
+  readonly texGens: GxTexGen[] = Array.from({ length: 8 }, () => defaultTexGen());
+
+  // --- lighting --------------------------------------------------------------
+  readonly chanCtrl: GxChanCtrl[] = Array.from({ length: 4 }, () => defaultChanCtrl());
+  readonly lights: GxLight[] = Array.from({ length: GX_MAX_LIGHT }, () => defaultLight());
+  readonly matColors: Uint8Array[] = [Uint8Array.from([255, 255, 255, 255]), Uint8Array.from([255, 255, 255, 255])];
+  readonly ambColors: Uint8Array[] = [Uint8Array.from([0, 0, 0, 255]), Uint8Array.from([0, 0, 0, 255])];
 
   constructor() {
     this.posMtxMem.set(GX_IDENTITY_MTX, identity3x4());
     this.posMtxMem.set(0, identity3x4());
+    // GX_IDENTITY is a real slot in the shared matrix memory, not a sentinel:
+    // gnt4_GXLoadTexMtxImm_bl maps id 0x3c to the last 3x4 row of the 64-row
+    // region (0x3c*4 + 12 == 256, exactly filling it). A texgen that names it
+    // without a load is asking for the identity, so seeding it here is the
+    // hardware's own behaviour rather than a convenience default.
+    this.texMtxMem.set(GX_IDENTITY_MTX, identity3x4());
   }
 
   /** GXClearVtxDesc: every attribute back to GX_NONE. */
@@ -264,6 +434,29 @@ export class GxState {
       ambColor: Uint8Array.from(this.ambColor),
       matSrcVertex: this.matSrcVertex,
       chanEnabled: this.chanEnabled,
+      tevStages: this.tevStages.map((s) => ({
+        ...s,
+        colorIn: [...s.colorIn] as [number, number, number, number],
+        alphaIn: [...s.alphaIn] as [number, number, number, number],
+        colorOp: { ...s.colorOp },
+        alphaOp: { ...s.alphaOp },
+      })),
+      tevRegs: Float32Array.from(this.tevRegs),
+      tevKColors: Float32Array.from(this.tevKColors),
+      swapTable: this.swapTable.map((r) => [...r] as GxSwapRow),
+      alphaCompare: { ...this.alphaCompare },
+      texGens: this.texGens.map((g) => ({ ...g })),
+      texMtx: new Map([...this.texMtxMem].map(([k, v]) => [k, Float32Array.from(v)])),
+      chanCtrl: this.chanCtrl.map((c) => ({ ...c })),
+      lights: this.lights.map((l) => ({
+        color: Uint8Array.from(l.color),
+        angleAttn: Float32Array.from(l.angleAttn),
+        distAttn: Float32Array.from(l.distAttn),
+        position: Float32Array.from(l.position),
+        negDirection: Float32Array.from(l.negDirection),
+      })),
+      matColors: this.matColors.map((c) => Uint8Array.from(c)),
+      ambColors: this.ambColors.map((c) => Uint8Array.from(c)),
     };
   }
 
@@ -279,4 +472,4 @@ export class GxState {
   }
 }
 
-export { GXAttr, GXAttrType, GXCompCnt, GXCompType };
+export { GXAttr, GXAttrType, GXCompCnt, GXCompType, GXTexFilter, GXTlutFmt, GX_TEXMTX0 };

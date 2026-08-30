@@ -71,6 +71,41 @@ extern void gnt4_GXSetTevOp_bl(u32 stage, u32 mode);
 extern void gnt4_GXInvalidateVtxCache_bl(void);
 extern void gnt4_GXBegin_bl(u32 prim, u32 vtxfmt, u32 nverts);
 
+/* ---- TEV, texture, texgen and lighting entry points ----------------------
+ * Argument orders here are the DECOMPILED SDK's, not the published SDK's:
+ * gnt4_GXSetTevColorOp_bl takes (stage, op, bias, scale, clamp, out_reg) and
+ * gnt4_GXSetTevOrder_bl takes (stage, coord, map, color), both settled from
+ * the register packings in research/decomp/ghidra-export/chunk_0067.c. The
+ * colour arguments are POINTERS because those bodies dereference them (see
+ * readColor in packages/rom-runtime/src/gx/adapters.ts). GXInitTexObjLOD and
+ * the GXInitLight* helpers take their floating-point arguments FIRST because
+ * PPC passes them in FPRs and Ghidra recovered the signature that way. */
+extern void gnt4_GXSetTevColorIn_bl(u32 stage, u32 a, u32 b, u32 c, u32 d);
+extern void gnt4_GXSetTevAlphaIn_bl(u32 stage, u32 a, u32 b, u32 c, u32 d);
+extern void gnt4_GXSetTevColorOp_bl(u32 stage, u32 op, u32 bias, u32 scale, u32 clamp, u32 out_reg);
+extern void gnt4_GXSetTevAlphaOp_bl(u32 stage, u32 op, u32 bias, u32 scale, u32 clamp, u32 out_reg);
+extern void gnt4_GXSetTevKColor_bl(u32 reg, const u8 *color);
+extern void gnt4_GXSetTevColor_bl(u32 reg, const u8 *color);
+extern void gnt4_GXSetTevKColorSel_bl(u32 stage, u32 sel);
+extern void gnt4_GXSetTevKAlphaSel_bl(u32 stage, u32 sel);
+extern void gnt4_GXSetTevSwapMode_bl(u32 stage, u32 ras_sel, u32 tex_sel);
+extern void gnt4_GXSetTevSwapModeTable_bl(u32 table, u32 r, u32 g, u32 b, u32 a);
+extern void gnt4_GXSetAlphaCompare_bl(u32 comp0, u32 ref0, u32 op, u32 comp1, u32 ref1);
+extern void gnt4_GXInitTexObj_bl(void *obj, void *image, u32 width, u32 height,
+                                 u32 format, u32 wrap_s, u32 wrap_t, char mipmap);
+extern void gnt4_GXInitTexObjLOD_bl(double min_lod, double max_lod, double lod_bias, void *obj,
+                                    int min_filt, int mag_filt, u32 bias_clamp, char do_edge_lod,
+                                    u32 max_aniso);
+extern void gnt4_GXLoadTexObj_bl(void *obj, int map);
+extern void gnt4_GXSetTexCoordGen2_bl(int dst, int func, int src, u32 mtx, u32 normalize, int postmtx);
+extern void gnt4_GXLoadTexMtxImm_bl(float *mtx, int id, int type);
+extern void gnt4_GXLoadNrmMtxImm_bl(float *mtx, int id);
+extern void gnt4_GXInitLightColor_bl(void *light, const u8 *color);
+extern void gnt4_GXInitLightPos_bl(double x, double y, double z, void *light);
+extern void gnt4_GXLoadLightObjImm_bl(void *light, u32 light_mask);
+extern void gnt4_GXSetChanMatColor_bl(int chan, const u8 *color, u32 pad0, u32 pad1);
+extern void gnt4_GXSetChanAmbColor_bl(int chan, const u8 *color, u32 pad0, u32 pad1);
+
 /* An entry point the host deliberately does not implement. */
 extern void gnt4_GXSetFog_bl(u32 type, float startz, float endz, float nearz, float farz, u32 color);
 
@@ -273,4 +308,345 @@ void gx_set_perspective(void)
 {
     build_persp();
     gnt4_GXSetProjection_bl(persp_mtx, 0);
+}
+
+/* =========================================================================
+ * 5. The TEV combiner.
+ *
+ * The draws below exist so the generated fragment shader can be checked
+ * against a value the page can PREDICT EXACTLY, rather than against "it drew
+ * something". Each one deliberately makes the vertex colour DIFFERENT from
+ * the expected output, so a combiner that silently fell back to passing the
+ * rasterized colour through would fail rather than pass by accident.
+ *
+ * As everywhere in this fixture: these are GX call sequences a ROM could
+ * make, not ported ROM code, and they carry no behavioural claim.
+ * ========================================================================= */
+
+/* Selector values, named so the call sites read as GX rather than as magic.
+ * Provenance for every one of these is in
+ * packages/rom-runtime/src/gx/enums.ts, labelled [CORPUS] or [SDK]. */
+#define CC_C0     2
+#define CC_TEXC   8
+#define CC_RASC  10
+#define CC_KONST 14
+#define CC_ZERO  15
+#define CA_A0     1
+#define CA_TEXA   4
+#define CA_RASA   5
+#define CA_KONST  6
+#define CA_ZERO   7
+#define TEV_ADD   0
+#define TB_ZERO   0
+#define CS_SCALE_1 0
+#define TEVPREV   0
+#define TEVREG0   1
+#define KCSEL_K0  0x0c
+#define KCSEL_K1  0x0d
+#define KASEL_K0_A 0x1c
+#define KASEL_K1_A 0x1d
+
+static u8 konst0[4];
+static u8 konst1[4];
+
+/* A screen-space quad in the same S16 XY + RGBA8 layout as zz_0027c34_'s. */
+static void emit_quad(u32 rgba, u32 x0, u32 y0, u32 x1, u32 y1)
+{
+    gnt4_GXBegin_bl(0x80, 0, 4);
+    __gf_gx_wgpipe_u16(x0); __gf_gx_wgpipe_u16(y0); __gf_gx_wgpipe_u32(rgba);
+    __gf_gx_wgpipe_u16(x1); __gf_gx_wgpipe_u16(y0); __gf_gx_wgpipe_u32(rgba);
+    __gf_gx_wgpipe_u16(x1); __gf_gx_wgpipe_u16(y1); __gf_gx_wgpipe_u32(rgba);
+    __gf_gx_wgpipe_u16(x0); __gf_gx_wgpipe_u16(y1); __gf_gx_wgpipe_u32(rgba);
+}
+
+static void quad_state_2d(void)
+{
+    build_ortho();
+    build_identity();
+    gnt4_GXSetCullMode_bl(0);
+    gnt4_GXSetBlendMode_bl(0, 0, 0, 0);
+    gnt4_GXSetZMode_bl(1, 7, 0);
+    gnt4_GXSetProjection_bl(ortho_mtx, 1);
+    gnt4_GXLoadPosMtxImm_bl(identity_mtx, 0);
+    gnt4_GXSetCurrentMtx_bl(0);
+    gnt4_GXClearVtxDesc_bl();
+    gnt4_GXSetVtxDesc_bl(9, 1);
+    gnt4_GXSetVtxDesc_bl(0xb, 1);
+    gnt4_GXSetVtxAttrFmt_bl(0, 9, 0, 3, 0);
+    gnt4_GXSetVtxAttrFmt_bl(0, 0xb, 1, 5, 0);
+    gnt4_GXSetNumChans_bl(1);
+    gnt4_GXSetNumTexGens_bl(0);
+    gnt4_GXSetChanCtrl_bl(4, 0, 1, 1, 0, 0, 2);
+}
+
+/* 5a. One stage whose ONLY colour input is the konstant register.
+ *     out = d = KONST(K0). The vertex colour is passed in and must NOT win. */
+void gx_draw_tev_konst(u32 vertex_rgba, u32 kr, u32 kg, u32 kb, u32 ka)
+{
+    konst0[0] = (u8)kr; konst0[1] = (u8)kg; konst0[2] = (u8)kb; konst0[3] = (u8)ka;
+    quad_state_2d();
+    gnt4_GXSetNumTevStages_bl(1);
+    gnt4_GXSetTevOrder_bl(0, 0xff, 0xff, 4);
+    gnt4_GXSetTevKColor_bl(0, konst0);
+    gnt4_GXSetTevKColorSel_bl(0, KCSEL_K0);
+    gnt4_GXSetTevKAlphaSel_bl(0, KASEL_K0_A);
+    gnt4_GXSetTevColorIn_bl(0, CC_ZERO, CC_ZERO, CC_ZERO, CC_KONST);
+    gnt4_GXSetTevAlphaIn_bl(0, CA_ZERO, CA_ZERO, CA_ZERO, CA_KONST);
+    gnt4_GXSetTevColorOp_bl(0, TEV_ADD, TB_ZERO, CS_SCALE_1, 1, TEVPREV);
+    gnt4_GXSetTevAlphaOp_bl(0, TEV_ADD, TB_ZERO, CS_SCALE_1, 1, TEVPREV);
+    emit_quad(vertex_rgba, 0, 0, 640, 448);
+}
+
+/* 5b. Two stages that chain THROUGH A REGISTER.
+ *     stage 0 writes K1 into GX_TEVREG0 and nothing else;
+ *     stage 1 reads it back as GX_CC_C0 and passes it to the framebuffer.
+ *     A combiner that ignored out_reg, or that ignored stage 1's inputs,
+ *     produces a different pixel. */
+void gx_draw_tev_two_stage(u32 vertex_rgba, u32 kr, u32 kg, u32 kb, u32 ka)
+{
+    konst1[0] = (u8)kr; konst1[1] = (u8)kg; konst1[2] = (u8)kb; konst1[3] = (u8)ka;
+    quad_state_2d();
+    gnt4_GXSetNumTevStages_bl(2);
+    gnt4_GXSetTevKColor_bl(1, konst1);
+
+    gnt4_GXSetTevOrder_bl(0, 0xff, 0xff, 4);
+    gnt4_GXSetTevKColorSel_bl(0, KCSEL_K1);
+    gnt4_GXSetTevKAlphaSel_bl(0, KASEL_K1_A);
+    gnt4_GXSetTevColorIn_bl(0, CC_ZERO, CC_ZERO, CC_ZERO, CC_KONST);
+    gnt4_GXSetTevAlphaIn_bl(0, CA_ZERO, CA_ZERO, CA_ZERO, CA_KONST);
+    gnt4_GXSetTevColorOp_bl(0, TEV_ADD, TB_ZERO, CS_SCALE_1, 1, TEVREG0);
+    gnt4_GXSetTevAlphaOp_bl(0, TEV_ADD, TB_ZERO, CS_SCALE_1, 1, TEVREG0);
+
+    gnt4_GXSetTevOrder_bl(1, 0xff, 0xff, 4);
+    gnt4_GXSetTevColorIn_bl(1, CC_ZERO, CC_ZERO, CC_ZERO, CC_C0);
+    gnt4_GXSetTevAlphaIn_bl(1, CA_ZERO, CA_ZERO, CA_ZERO, CA_A0);
+    gnt4_GXSetTevColorOp_bl(1, TEV_ADD, TB_ZERO, CS_SCALE_1, 1, TEVPREV);
+    gnt4_GXSetTevAlphaOp_bl(1, TEV_ADD, TB_ZERO, CS_SCALE_1, 1, TEVPREV);
+    emit_quad(vertex_rgba, 0, 0, 640, 448);
+}
+
+/* 5c. The alpha test. GX_GREATER against a reference the fragment's alpha
+ *     does not clear, so the quad must be DISCARDED and the background must
+ *     survive. A host that latched GXSetAlphaCompare without generating the
+ *     discard would paint over it. */
+void gx_draw_alpha_compare_discard(u32 vertex_rgba)
+{
+    quad_state_2d();
+    gnt4_GXSetNumTevStages_bl(1);
+    gnt4_GXSetTevOrder_bl(0, 0xff, 0xff, 4);
+    gnt4_GXSetTevOp_bl(0, 4);                       /* GX_PASSCLR */
+    /* (GX_GREATER, 0x80, GX_AOP_AND, GX_ALWAYS, 0) */
+    gnt4_GXSetAlphaCompare_bl(4, 0x80, 0, 7, 0);
+    emit_quad(vertex_rgba, 0, 0, 640, 448);
+    gnt4_GXSetAlphaCompare_bl(7, 0, 0, 7, 0);       /* back to always-pass */
+}
+
+/* =========================================================================
+ * 6. Texture sampling.
+ *
+ * One 4x4 RGBA8 texel block, built here in the module's own memory so the
+ * host has to read it back out of the arena at the address GXInitTexObj was
+ * given and de-tile it. RGBA8 is the format whose block layout is least
+ * forgiving — 4x4 texels in TWO 32-byte halves, AR pairs then GB pairs — so
+ * a decoder that treated the block as linear produces visibly wrong colours
+ * rather than nearly-right ones.
+ * ========================================================================= */
+static u8 tex_rgba8_block[64];
+static u32 tex_obj[8];      /* GXTexObj is 32 bytes; the host only reads the
+                             * address, but the size is the SDK's. */
+
+static void build_texture(u32 r, u32 g, u32 b, u32 a)
+{
+    int i;
+    for (i = 0; i < 16; i++) {
+        tex_rgba8_block[i * 2 + 0]      = (u8)a;   /* first half: A, R */
+        tex_rgba8_block[i * 2 + 1]      = (u8)r;
+        tex_rgba8_block[32 + i * 2 + 0] = (u8)g;   /* second half: G, B */
+        tex_rgba8_block[32 + i * 2 + 1] = (u8)b;
+    }
+}
+
+void gx_draw_textured(u32 tr, u32 tg, u32 tb, u32 ta)
+{
+    build_texture(tr, tg, tb, ta);
+    build_ortho();
+    build_identity();
+
+    gnt4_GXInitTexObj_bl(tex_obj, tex_rgba8_block, 4, 4, 6 /* GX_TF_RGBA8 */, 0, 0, 0);
+    gnt4_GXInitTexObjLOD_bl(0.0, 0.0, 0.0, tex_obj, 0 /* GX_NEAR */, 0 /* GX_NEAR */, 0, 0, 0);
+    gnt4_GXLoadTexObj_bl(tex_obj, 0 /* GX_TEXMAP0 */);
+
+    gnt4_GXSetCullMode_bl(0);
+    gnt4_GXSetBlendMode_bl(0, 0, 0, 0);
+    gnt4_GXSetZMode_bl(1, 7, 0);
+    gnt4_GXSetProjection_bl(ortho_mtx, 1);
+    gnt4_GXLoadPosMtxImm_bl(identity_mtx, 0);
+    gnt4_GXSetCurrentMtx_bl(0);
+    gnt4_GXLoadTexMtxImm_bl(identity_mtx, 0x3c /* GX_IDENTITY */, 0);
+
+    gnt4_GXClearVtxDesc_bl();
+    gnt4_GXSetVtxDesc_bl(9, 1);      /* POS  DIRECT */
+    gnt4_GXSetVtxDesc_bl(0xb, 1);    /* CLR0 DIRECT */
+    gnt4_GXSetVtxDesc_bl(0xd, 1);    /* TEX0 DIRECT */
+    gnt4_GXSetVtxAttrFmt_bl(0, 9, 0, 3, 0);      /* POS  XY  S16   */
+    gnt4_GXSetVtxAttrFmt_bl(0, 0xb, 1, 5, 0);    /* CLR0 RGBA8     */
+    gnt4_GXSetVtxAttrFmt_bl(0, 0xd, 1, 4, 0);    /* TEX0 ST  F32   */
+
+    gnt4_GXSetNumChans_bl(1);
+    gnt4_GXSetChanCtrl_bl(4, 0, 1, 1, 0, 0, 2);
+    gnt4_GXSetNumTexGens_bl(1);
+    /* (GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, no normalize,
+     *  GX_PTIDENTITY) — the exact shape of the ROM's own 6 call sites, which
+     *  differ only in naming GX_TEXMTX0 instead of GX_IDENTITY. */
+    gnt4_GXSetTexCoordGen2_bl(0, 1, 4, 0x3c, 0, 0x7d);
+    gnt4_GXSetNumTevStages_bl(1);
+    /* (stage 0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0) then GX_MODULATE —
+     *  the ROM's own textured pairing. White vertices make the product the
+     *  texel, so the readback checks the DECODE, not the multiply. */
+    gnt4_GXSetTevOrder_bl(0, 0, 0, 4);
+    gnt4_GXSetTevOp_bl(0, 0);
+
+    gnt4_GXBegin_bl(0x80, 0, 4);
+    __gf_gx_wgpipe_u16(0);   __gf_gx_wgpipe_u16(0);   __gf_gx_wgpipe_u32(0xffffffffu);
+    __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(0.0f);
+    __gf_gx_wgpipe_u16(640); __gf_gx_wgpipe_u16(0);   __gf_gx_wgpipe_u32(0xffffffffu);
+    __gf_gx_wgpipe_f32(1.0f); __gf_gx_wgpipe_f32(0.0f);
+    __gf_gx_wgpipe_u16(640); __gf_gx_wgpipe_u16(448); __gf_gx_wgpipe_u32(0xffffffffu);
+    __gf_gx_wgpipe_f32(1.0f); __gf_gx_wgpipe_f32(1.0f);
+    __gf_gx_wgpipe_u16(0);   __gf_gx_wgpipe_u16(448); __gf_gx_wgpipe_u32(0xffffffffu);
+    __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(1.0f);
+}
+
+/* =========================================================================
+ * 7. Lighting.
+ *
+ * One directional-ish point light placed straight in front of a screen-space
+ * quad whose normals face it, so the diffuse term is exactly 1 and the lit
+ * colour is the light's own colour. Material white, ambient black, so nothing
+ * else can contribute.
+ * ========================================================================= */
+static u32 light_obj[16];   /* GXLightObj is 0x40 bytes (corpus-settled). */
+static u8 light_rgba[4];
+static u8 white_rgba[4];
+static u8 black_rgba[4];
+
+void gx_draw_lit(u32 lr, u32 lg, u32 lb)
+{
+    light_rgba[0] = (u8)lr; light_rgba[1] = (u8)lg; light_rgba[2] = (u8)lb; light_rgba[3] = 255;
+    white_rgba[0] = 255; white_rgba[1] = 255; white_rgba[2] = 255; white_rgba[3] = 255;
+    black_rgba[0] = 0; black_rgba[1] = 0; black_rgba[2] = 0; black_rgba[3] = 255;
+
+    build_ortho();
+    build_identity();
+
+    gnt4_GXInitLightColor_bl(light_obj, light_rgba);
+    /* Screen space: the quad sits on z = 0 with normals pointing at +z, so a
+     * light far out along +z is head-on. GX lights PER VERTEX and the raster
+     * interpolates, so the distance is deliberately large: it makes cos(theta)
+     * ~= 1 at all four corners, which makes the expected pixel exactly the
+     * light colour instead of a corner-dependent fraction the page would have
+     * to approximate. */
+    gnt4_GXInitLightPos_bl(320.0, 224.0, 100000.0, light_obj);
+    gnt4_GXLoadLightObjImm_bl(light_obj, 1 /* GX_LIGHT0 — a MASK, not an index */);
+
+    gnt4_GXSetCullMode_bl(0);
+    gnt4_GXSetBlendMode_bl(0, 0, 0, 0);
+    gnt4_GXSetZMode_bl(1, 7, 0);
+    gnt4_GXSetProjection_bl(ortho_mtx, 1);
+    gnt4_GXLoadPosMtxImm_bl(identity_mtx, 0);
+    gnt4_GXLoadNrmMtxImm_bl(identity_mtx, 0);
+    gnt4_GXSetCurrentMtx_bl(0);
+
+    gnt4_GXClearVtxDesc_bl();
+    gnt4_GXSetVtxDesc_bl(9, 1);      /* POS DIRECT */
+    gnt4_GXSetVtxDesc_bl(10, 1);     /* NRM DIRECT */
+    gnt4_GXSetVtxAttrFmt_bl(0, 9, 0, 3, 0);      /* POS XY  S16 */
+    gnt4_GXSetVtxAttrFmt_bl(0, 10, 0, 4, 0);     /* NRM XYZ F32 */
+
+    gnt4_GXSetNumChans_bl(1);
+    gnt4_GXSetChanMatColor_bl(4, white_rgba, 0, 0);
+    gnt4_GXSetChanAmbColor_bl(4, black_rgba, 0, 0);
+    /* (GX_COLOR0A0, lighting ON, amb from REG, mat from REG, light 0,
+     *  GX_DF_CLAMP, GX_AF_NONE) */
+    gnt4_GXSetChanCtrl_bl(4, 1, 0, 0, 1, 2, 2);
+    gnt4_GXSetNumTexGens_bl(0);
+    gnt4_GXSetNumTevStages_bl(1);
+    gnt4_GXSetTevOrder_bl(0, 0xff, 0xff, 4);
+    gnt4_GXSetTevOp_bl(0, 4);        /* GX_PASSCLR */
+
+    gnt4_GXBegin_bl(0x80, 0, 4);
+    __gf_gx_wgpipe_u16(0);   __gf_gx_wgpipe_u16(0);
+    __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(1.0f);
+    __gf_gx_wgpipe_u16(640); __gf_gx_wgpipe_u16(0);
+    __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(1.0f);
+    __gf_gx_wgpipe_u16(640); __gf_gx_wgpipe_u16(448);
+    __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(1.0f);
+    __gf_gx_wgpipe_u16(0);   __gf_gx_wgpipe_u16(448);
+    __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(0.0f); __gf_gx_wgpipe_f32(1.0f);
+}
+
+/* =========================================================================
+ * 8. The ROM's OWN four-stage TEV program, reproduced call for call.
+ *
+ * Transcribed from research/decomp/ghidra-export/chunk_0003.c:5670-5720 — the
+ * game's most elaborate combiner program, four stages with per-stage konstant
+ * selection, per-stage swap modes and a three-row swap table. It sets state
+ * only and draws nothing: without the two textures its stages 0-2 name, a draw
+ * would prove nothing about pixels. What it DOES prove is that the whole
+ * multi-stage entry-point surface accepts the ROM's real argument values and
+ * lands them where the shader generator reads them.
+ * ========================================================================= */
+void gx_program_rom_tev(u32 map_a, u32 map_b)
+{
+    gnt4_GXSetNumTevStages_bl(4);
+
+    gnt4_GXSetTevOrder_bl(0, 0, map_b, 0xff);
+    gnt4_GXSetTevColorIn_bl(0, 0xf, 8, 0xe, 2);
+    gnt4_GXSetTevColorOp_bl(0, 0, 0, 0, 0, 0);
+    gnt4_GXSetTevAlphaIn_bl(0, 7, 4, 6, 1);
+    gnt4_GXSetTevAlphaOp_bl(0, 1, 0, 0, 0, 0);
+    gnt4_GXSetTevKColorSel_bl(0, 0xc);
+    gnt4_GXSetTevKAlphaSel_bl(0, 0x1c);
+    gnt4_GXSetTevSwapMode_bl(0, 0, 1);
+
+    gnt4_GXSetTevOrder_bl(1, 1, map_a, 0xff);
+    gnt4_GXSetTevColorIn_bl(1, 0xf, 8, 0xe, 0);
+    gnt4_GXSetTevColorOp_bl(1, 0, 0, 1, 0, 0);
+    gnt4_GXSetTevAlphaIn_bl(1, 7, 4, 6, 0);
+    gnt4_GXSetTevAlphaOp_bl(1, 0, 0, 1, 0, 0);
+    gnt4_GXSetTevKColorSel_bl(1, 0xd);
+    gnt4_GXSetTevKAlphaSel_bl(1, 0x1d);
+    gnt4_GXSetTevSwapMode_bl(1, 0, 0);
+
+    gnt4_GXSetTevOrder_bl(2, 0, map_b, 0xff);
+    gnt4_GXSetTevColorIn_bl(2, 0xf, 8, 0xe, 0);
+    gnt4_GXSetTevColorOp_bl(2, 0, 0, 0, 1, 0);
+    gnt4_GXSetTevAlphaIn_bl(2, 7, 4, 6, 0);
+    gnt4_GXSetTevAlphaOp_bl(2, 1, 0, 0, 1, 0);
+    gnt4_GXSetTevKColorSel_bl(2, 0xe);
+    gnt4_GXSetTevKAlphaSel_bl(2, 0x1e);
+    gnt4_GXSetTevSwapMode_bl(2, 0, 2);
+
+    gnt4_GXSetTevOrder_bl(3, 0xff, 0xff, 0xff);
+    gnt4_GXSetTevColorIn_bl(3, 0, 1, 0xe, 0xf);
+    gnt4_GXSetTevColorOp_bl(3, 0, 0, 0, 1, 0);
+    gnt4_GXSetTevAlphaIn_bl(3, 7, 7, 7, 7);
+    gnt4_GXSetTevAlphaOp_bl(3, 0, 0, 0, 1, 0);
+    gnt4_GXSetTevSwapMode_bl(3, 0, 0);
+    gnt4_GXSetTevKColorSel_bl(3, 0xf);
+
+    gnt4_GXSetTevSwapModeTable_bl(0, 0, 1, 2, 3);
+    gnt4_GXSetTevSwapModeTable_bl(1, 0, 3, 3, 3);
+    gnt4_GXSetTevSwapModeTable_bl(2, 0, 0, 3, 0);
+}
+
+/* A GXEnableTexOffsets call with the offsets DISABLED, exactly as all 16 of
+ * the ROM's own call sites pass them. The host declares this a nop only in
+ * that case and throws when either generator is enabled, so this proves the
+ * common path rather than the refusal. */
+extern void gnt4_GXEnableTexOffsets_bl(u32 coord, u32 line_offset, u32 point_offset);
+void gx_call_tex_offsets_disabled(void)
+{
+    u32 i;
+    for (i = 0; i < 8; i++) gnt4_GXEnableTexOffsets_bl(i, 0, 0);
 }

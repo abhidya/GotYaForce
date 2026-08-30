@@ -16,13 +16,18 @@
 //   A host that intercepts only GX FUNCTION CALLS therefore sees GXBegin and
 //   never sees a single vertex.
 //
-// CONSEQUENCE FOR THE COMPOSED MODULE (open, not solved — see
-// docs/gx-hle-host.md): 0xCC008000 is hardware MMIO, and the composed module's
-// linear memory is 0x807A0000 bytes, so a literal store to that address is out
-// of bounds and traps. Lowering `DAT_cc008000` stores to the WGPipe import
-// this decoder consumes is a REQUIRED assembly-gate amendment that does not
-// exist yet. Until it lands, no real ROM unit can submit geometry, and this
-// decoder is exercised only by the purpose-built fixture.
+// CONSEQUENCE FOR THE COMPOSED MODULE (CLOSED — 2026-08-29): 0xCC008000 is
+// hardware MMIO, and the composed module's linear memory is 0x807A0000 bytes,
+// so a literal store to that address is out of bounds and traps. Lowering
+// `DAT_cc008000` stores to the WGPipe imports this decoder consumes was a
+// required assembly-gate amendment, and it now EXISTS: OGhidra's
+// src/port_wgpipe_lowering.py rewrites each pipe store into a
+// `__gf_gx_wgpipe_u8/u16/u32/f32` call at window link time, opt-in behind
+// OGHIDRA_PORT_WGPIPE_LOWERING=1, failing closed on any store it cannot lower.
+// The gate's own output for the ROM's own draw function `zz_0027c34_` is
+// committed at packages/rom-runtime/test/fixtures/gx-rom-unit/ and drives this
+// decoder through the H2 bridge in the browser, so this file is no longer
+// exercised only by a hand-written fixture. See docs/gx-hle-host.md §3.
 //
 // This file is otherwise self-contained: it takes WGPipe writes plus the
 // latched GxState, assembles vertices per the active VCD/VAT, and hands
