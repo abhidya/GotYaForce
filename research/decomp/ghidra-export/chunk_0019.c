@@ -3149,7 +3149,7 @@ uint FUN_800bee1c(int param_1)
           return 0;
         }
         *(undefined1 *)(param_1 + 0x18) = 2;
-        uVar6 = zz_0085e00_(param_1,(undefined4 *)(param_1 + 0x20),(&DAT_80301b16)[iVar4]);
+        uVar6 = (uint)zz_0085e00_(param_1,(undefined4 *)(param_1 + 0x20),(&DAT_80301b16)[iVar4]);  /* CORPUS CORRECTION 2026-08-29: explicit cast added because zz_0085e00_ is now correctly typed 'void *' (chunk_0012.c:4318). The ROM is unchanged: FUN_800bee1c returns r3 from zz_0085e00_ verbatim, and the cast only makes the existing pointer-to-uint narrowing explicit. */
         cVar2 = (&DAT_80301b17)[iVar4];
         if (cVar2 == '\x02') {
           bVar7 = zz_0183730_(param_1,3,0xff);

@@ -423,3 +423,153 @@ Rung 2 (N=20) was NOT re-run: its refusal is already characterised
 in the window), `zz_007c800_` is a value carrier per the section above, and the
 run costs hours. Projected ceiling stands at rung 1 until the owner-prototype
 decision lands.
+
+## The owner-prototype decision, taken (2026-08-29)
+
+The ten value carriers named above are no longer a pending owner decision. Each
+was re-verified against the DOL text section itself -- `boot.dol` disassembled
+with capstone PPC32-BE against `research/symbols/GG4E-CSM-20220412.map` -- not
+from the decompiled C, and all ten are now recorded non-void in
+`research/decomp/data/oracle-registry.json`.
+
+The rule the disassembly settles: **an epilogue never writes r3.** Every
+`lwz r0,N(r1) / lwz r31,... / mtlr r0 / addi r1,r1,N / blr` sequence restores
+lr, the saved GPRs and the stack pointer and leaves r3 exactly as the last call
+left it. So a function whose last action is `bl` delivers its callee's result,
+and a function that calls something and then never writes r3 again delivers
+that result too. "void body with no `return <expr>;`" is necessary but not
+sufficient for a no-result procedure.
+
+| symbol | ROM evidence | terminal | recorded |
+|---|---|---|---|
+| `zz_006d144_` | `bl 800669d0` @`8006d18c`, epilogue clean | `FUN_80066a30` `li r3,0`/`li r3,1` | `undefined4` |
+| `zz_006d0dc_` | `bl 800669d0` @`8006d124`, epilogue clean | same | `undefined4` |
+| `FUN_800669d0` | `bl 80066a30` @`80066a1c`, epilogue clean | `FUN_80066a30` | `undefined4` |
+| `zz_007c800_` | `bl 800669d0` @`8007c828`, epilogue clean | same | `undefined4` |
+| `zz_00679d0_` | `bl zz_00677b0_` @`800679e4`, r3 never rewritten on any path | `zz_00677b0_` | `undefined4` |
+| `zz_008ae10_` | `bl zz_008ae60_` @`8008ae28`, epilogue clean | `mr r3,r28; blr` | `undefined4` |
+| `zz_01b1fb8_` | `bl zz_01b1014_` @`801b1fc4`, epilogue clean | `mr r3,r31; blr` | `int` |
+| `zz_01f1280_` | `bctrl` @`801f12b4`, epilogue clean | all 4 table handlers `undefined4`, shared tail `li r3,1` @`801f16ac` | `undefined4` |
+| `zz_0085e00_` | `bl zz_0088aa0_` @`80085e38`; NULL test branches to the epilogue, r3 never rewritten | `zz_0088aa0_` `void *` | `void *` |
+| `zz_008aff0_` | leaf; NO instruction in `8008aff0`-`8008b00c` writes r3 | -- returns param_1 | `int` |
+
+Two of these had been provisionally filed as genuine no-result procedures. The
+disassembly says otherwise for both, and that settles their consumer
+`uint FUN_800bee1c` without any reasoning about *its* callers: on the
+`zz_0085e00_` path it forwards the allocation result, on the `zz_008aff0_` path
+it forwards a live object pointer (never zero), and its other exits are
+`return 0;` and `return (uint)bVar7;`. FUN_800bee1c is a predicate and stays
+`uint`, unchanged.
+
+### Why this is the wall, and exactly where it stood
+
+`plan_canonicalization` supersedes an unprototyped placeholder declaration
+(`extern int f();` -- 201 of 239 owner-symbol variants have that shape) with the
+owner prototype and never probes it. There is one carve-out:
+
+```python
+if supersede and owner.projection.abi_tuple.return_type == "void" and not result_unused:
+    substitute = None if owner_defined_here else _import_safe_prototype(owner)
+```
+
+A **void** owner whose result some unit **consumes**, when the owner's own unit
+is **in the window**, cannot be superseded -- substitution is refused and the
+pair goes to the Clang probe, where `int f()` against `void f(int,uint)` is
+incompatible. That is the whole of rung 2's refusal, and it is a return-type
+fact, which is why no corpus correction could reach it: the registry's canonical
+ABI had to change.
+
+With the owner return type no longer `void`, the carve-out does not fire and the
+placeholder is superseded silently. Verified symbol by symbol against the real
+`ClangDeclaratorParser` and the real helpers, over the N=20 window:
+
+- **before** (main registry): `zz_007c800_` @ `auto-c0011-011`,
+  `extern int zz_007c800_();` vs `void zz_007c800_(int, uint);` -> probed ->
+  **incompatible**. This reproduces the recorded rung-2 refusal exactly.
+- **after** (corrected registry): that same site is `SUPERSEDED`, and so is
+  every other placeholder/spelling-only variant of the ten in the window.
+
+### The header-disagreement table is not the unlock, and never was
+
+The tuple-equality table over unit headers barely moves, because it measures
+header-vs-header divergence and the registry change does not rewrite any staged
+header:
+
+| N | baseline | after the 2 required rebuilds | at full convergence |
+|---:|---:|---:|---:|
+| 10 | 0 | 0 | 0 |
+| 20 | 27 | 28 | 23 |
+| 40 | 42 | 43 | 38 |
+| 80 | 57 | 57 | 51 |
+| 82 | 61 | 61 | 55 |
+
+It even ticks *up* at N=20/40 after a partial rebuild, because a rebuilt unit's
+synced declaration diverges from its unrebuilt neighbours'. Six symbols leave
+the disagreeing set at N=82 (`FUN_800669d0`, `zz_00679d0_`, `zz_006d0dc_`,
+`zz_006d144_`, `zz_0085e00_`, `zz_008aff0_`); the residue is a different
+population of symbols entirely. Treat that table as the lower bound it always
+was and read the owner/variant path instead.
+
+### What still has to happen
+
+Of the ten units whose queue-pinned blocks changed sha, **eight are still
+`pending`** and will pick up the corrected corpus on their first build with no
+intervention. Only two are green and need the corpus-correction loop's
+revoke-and-rebuild:
+
+- `auto-c0011-012` -- owner of `zz_007c800_`; its staged `unit.c` still carries
+  the pre-correction `void zz_007c800_(int,uint)` definition, which now
+  contradicts the corrected owner. **This is what rung 2 waits on.**
+- `auto-c0019-013` -- carries the `(uint)` cast line; its build is unaffected
+  either way (`-Wno-int-conversion` is set in both the per-unit and the assembly
+  compile), so this one is provenance hygiene, not a blocker.
+
+### Rung 2 re-measured against the corrected registry (2026-08-29)
+
+Run in scratch as the gate's canonicalization stage only -- real
+`build_assembly_bundle` + real `plan_canonicalization`, pinned Clang, dispatch
+companion on, SDK canon seed read fresh -- with the product root (registry +
+chunk corpus) pointed at the corrected worktree and no emcc/wasm-ld/node.
+Measured cost for N=20: **~8 min** for the scoped owner snapshot (317 owners of
+1970 referenced identifiers) plus **~11 min** for the planner. The earlier
+"still walking after 3 hours" figure was an unscoped load, not the real cost.
+
+| variant | result |
+|---|---|
+| A -- window exactly as staged today | REFUSED `owner_variant_abi_incompatible`, symbol `zz_007c800_`, **at `auto-c0011-012/unit.c`** |
+| B -- same window, `auto-c0011-012` rebuilt from the corrected chunk | REFUSED `owner_variant_abi_incompatible`, symbol **`zz_007c844_`**, at `auto-c0011-011/gnt4_shim.h` |
+
+Read those two rows together with the pre-change control:
+
+- **before**: refused on `zz_007c800_` at `auto-c0011-011/gnt4_shim.h` -- the
+  CONSUMER side, `extern int zz_007c800_();` unsupersedable against a void owner.
+- **A**: the consumer-side refusal is gone. What refuses now is
+  `auto-c0011-012`'s own staged `unit.c`, which still carries the
+  pre-correction `void zz_007c800_(int,uint)` definition. That is the ordering
+  rule in `research/decomp/corpus-correction-loop.md` step 3, not a new defect.
+- **B**: with that one artifact rebuilt, `zz_007c800_` clears completely and the
+  window refuses on the NEXT symbol.
+
+`zz_007c844_` is a different animal and must not be mistaken for an eleventh
+value carrier. It has exactly ONE call site in the entire corpus
+(`chunk_0011.c:3189`), a bare statement that discards the result, so no consumer
+anywhere depends on its r3 and `void` is the correct canonical ABI. It refuses
+for a structural reason: `_every_call_discards_the_result` returns **false for
+`auto-c0011-012`**, the unit that DEFINES it and never calls it -- measured
+directly, both as-staged and rebuilt. Bundle-wide `result_unused` is therefore
+false for every void symbol whose owner unit is in the window, the carve-out
+fires unconditionally, and `auto-c0011-011`'s seed-era placeholder
+`extern int zz_007c844_();` goes to the probe and loses. `zz_007c9ac_` has the
+identical shape and is queued behind it.
+
+The fix for that class is a rebuild, not an ABI decision: a rebuilt
+`auto-c0011-011` gets `extern void zz_007c844_(int param_1);` synced from the
+registry instead of the `int f()` fallback, and there is then nothing to
+supersede and no probe.
+
+**Honest ceiling: still rung 1 (N=10).** This change removes the value-carrier
+wall -- that is proven, and it was genuinely the wall -- but rung 2 needs two
+more rebuilds behind it (`auto-c0011-012`, then `auto-c0011-011`), and the
+window may well surface another placeholder of the `zz_007c844_` shape after
+that. Rung 2 is now a rebuild-scheduling problem rather than an owner decision,
+which it was not before.

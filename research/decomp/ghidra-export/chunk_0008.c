@@ -3371,16 +3371,16 @@ double FUN_80066958(int param_1)
 
 // ==== 800669d0  FUN_800669d0 ====
 
-void FUN_800669d0(int param_1,uint param_2)
+undefined4 FUN_800669d0(int param_1,uint param_2)  /* CORPUS CORRECTION 2026-08-29: 0x800669d0 DELIVERS a value -- PPC has no void. Its last action is 'bl 0x80066a30' at 0x80066a1c; FUN_80066a30 is 'undefined4' and ends in li r3,0 / li r3,1 (chunk_0008.c:3390). The ROM epilogue never writes r3, so the callee's r3 flows out through this function's blr; the true return type is undefined4. Ghidra printed 'void' because the decompiled body has no explicit 'return <expr>;', which is necessary but NOT sufficient for a no-result procedure. Evidence: disassembly of the DOL text section (boot.dol, symbol map GG4E-CSM-20220412) + the terminal function's own decompiled signature; corpus consumers assign and branch on the result. */
 
 {
-  FUN_80066a30(param_1,param_2,
+  return FUN_80066a30(param_1,param_2,
                (short)(int)((float)((double)CONCAT44(0x43300000,
                                                      (int)*(short *)(*(int *)(param_1 + 0x4ac) +
                                                                      (param_2 & 0xf) * 2 + 0xac) ^
                                                      0x80000000) - DOUBLE_804375c8) *
                            *(float *)(param_1 + 0x1dc8)));
-  return;
+  /* CORPUS CORRECTION 2026-08-29: the bare 'return;' is subsumed by the tail-call return above. */
 }
 
 
@@ -4059,7 +4059,7 @@ undefined4 zz_00677b0_(int param_1)
 
 // ==== 800679d0  zz_00679d0_ ====
 
-void zz_00679d0_(int param_1)
+undefined4 zz_00679d0_(int param_1)  /* CORPUS CORRECTION 2026-08-29: 0x800679d0 DELIVERS a value -- PPC has no void. It calls zz_00677b0_ ('undefined4') at 0x800679e4 and then NEVER writes r3 again on any path to its blr (the guarded stores at 0x800679fc-0x80067a10 use r4/r0/r31 only, and the epilogue restores r0/r31 only). The ROM epilogue never writes r3, so the callee's r3 flows out through this function's blr; the true return type is undefined4. Ghidra printed 'void' because the decompiled body has no explicit 'return <expr>;', which is necessary but NOT sufficient for a no-result procedure. Evidence: disassembly of the DOL text section (boot.dol, symbol map GG4E-CSM-20220412) + the terminal function's own decompiled signature; corpus consumers assign and branch on the result. */
 
 {
   int iVar1;
@@ -4070,7 +4070,7 @@ void zz_00679d0_(int param_1)
     *(undefined4 *)(param_1 + 0x24) = *(undefined4 *)(param_1 + 0x30);
     *(undefined4 *)(param_1 + 0x28) = *(undefined4 *)(param_1 + 0x34);
   }
-  return;
+  return iVar1;
 }
 
 

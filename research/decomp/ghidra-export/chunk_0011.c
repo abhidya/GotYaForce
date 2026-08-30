@@ -3406,12 +3406,12 @@ void FUN_8007c7a4(int param_1)
 
 // ==== 8007c800  zz_007c800_ ====
 
-void zz_007c800_(int param_1,uint param_2)
+undefined4 zz_007c800_(int param_1,uint param_2)  /* CORPUS CORRECTION 2026-08-29: 0x8007c800 DELIVERS a value -- PPC has no void. Its last action is 'bl 0x800669d0' at 0x8007c828, which tail-calls FUN_80066a30 (0x80066a30, 'undefined4', li r3,0 / li r3,1). The ROM epilogue never writes r3, so the callee's r3 flows out through this function's blr; the true return type is undefined4. Ghidra printed 'void' because the decompiled body has no explicit 'return <expr>;', which is necessary but NOT sufficient for a no-result procedure. Evidence: disassembly of the DOL text section (boot.dol, symbol map GG4E-CSM-20220412) + the terminal function's own decompiled signature; corpus consumers assign and branch on the result. */
 
 {
   zz_006660c_(param_1);
-  FUN_800669d0(param_1,param_2);
-  return;
+  return FUN_800669d0(param_1,param_2);
+  /* CORPUS CORRECTION 2026-08-29: the bare 'return;' is subsumed by the tail-call return above. */
 }
 
 

@@ -3663,12 +3663,12 @@ void FUN_801f1188(int param_1)
 
 // ==== 801f1280  zz_01f1280_ ====
 
-void zz_01f1280_(void)
+undefined4 zz_01f1280_(void)  /* CORPUS CORRECTION 2026-08-29: 0x801f1280 DELIVERS a value -- PPC has no void. Its last action is the indirect 'bctrl' at 0x801f12b4 and the epilogue never writes r3. The dispatch table at 0x803a17e0 holds exactly four distinct handlers (0x801f1310, 0x801f143c, 0x801f1550, 0x801f1694); ALL four are 'undefined4' in the registry and all four exit through the shared tail 'li r3,1; blr' at 0x801f16ac, so the delivered type is undefined4 on every table entry. Evidence: DOL text + data disassembly (boot.dol, symbol map GG4E-CSM-20220412). */
 
 {
   *(undefined2 *)(PTR_DAT_80435a30 + 6) = 0;
-  (*(code *)(&PTR_FUN_803a17e0)[*(short *)(PTR_DAT_80435a30 + 2)])();
-  return;
+  return (*(undefined4 (*)())(&PTR_FUN_803a17e0)[*(short *)(PTR_DAT_80435a30 + 2)])();
+  /* CORPUS CORRECTION 2026-08-29: the bare 'return;' is subsumed by the tail-call return above. */
 }
 
 
