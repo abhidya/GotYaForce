@@ -1416,11 +1416,11 @@ undefined4 zz_008ac80_(int param_1,int param_2)
 
 // ==== 8008ae10  zz_008ae10_ ====
 
-void zz_008ae10_(int param_1,byte param_2)
+undefined4 zz_008ae10_(int param_1,byte param_2)  /* CORPUS CORRECTION 2026-08-29: 0x8008ae10 DELIVERS a value -- PPC has no void. Its last action is 'bl 0x8008ae60' at 0x8008ae28; zz_008ae60_ is 'undefined4' and ends 'mr r3,r28; blr' (chunk_0013.c:1441). The ROM epilogue never writes r3, so the callee's r3 flows out through this function's blr; the true return type is undefined4. Ghidra printed 'void' because the decompiled body has no explicit 'return <expr>;', which is necessary but NOT sufficient for a no-result procedure. Evidence: disassembly of the DOL text section (boot.dol, symbol map GG4E-CSM-20220412) + the terminal function's own decompiled signature; corpus consumers assign and branch on the result. */
 
 {
-  zz_008ae60_(param_1,param_1,param_2,0);
-  return;
+  return zz_008ae60_(param_1,param_1,param_2,0);
+  /* CORPUS CORRECTION 2026-08-29: the bare 'return;' is subsumed by the tail-call return above. */
 }
 
 
@@ -1500,14 +1500,14 @@ undefined4 zz_008ae60_(int param_1,int param_2,byte param_3,int param_4)
 
 // ==== 8008aff0  zz_008aff0_ ====
 
-void zz_008aff0_(int param_1)
+int zz_008aff0_(int param_1)  /* CORPUS CORRECTION 2026-08-29: 0x8008aff0 DELIVERS a value -- PPC has no void. It is a leaf with no prologue and NO instruction in 0x8008aff0-0x8008b00c writes r3, so r3 at both blr sites (the 'bnelr' early exit at 0x8008affc and the final blr at 0x8008b00c) still holds the incoming first argument. The ROM therefore returns param_1 unchanged -- always non-zero for a live object pointer -- which is exactly what its consumer 'uint FUN_800bee1c' returns on that path (chunk_0019.c:3180). Evidence: DOL text disassembly (boot.dol, symbol map GG4E-CSM-20220412). */
 
 {
   if ((*(char *)(param_1 + 2) != '\x03') && (*(char *)(param_1 + 2) != '\0')) {
-    return;
+    return param_1;
   }
   *(undefined1 *)(param_1 + 0x1d8) = 1;
-  return;
+  return param_1;
 }
 
 

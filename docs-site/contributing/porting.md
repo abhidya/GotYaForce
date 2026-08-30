@@ -28,10 +28,21 @@ normative document is `docs/playable-port-design.md` (v5, PASS verdict).
 |---|---|---|
 | `compile_only` | Compiles and links | **Anything about behavior.** Inventory, not progress |
 | `oracle_green` | Full corpus replays byte-exact against an independent oracle, per call | Coverage beyond the replayed corpus |
-| `boundary_green` | For a nonterminating spine, every captured callee boundary and spine-owned write is byte-exact to the cut | The same as `oracle_green`; it never upgrades into one |
+| `boundary_green` | For a nonterminating spine, every captured callee boundary and spine-owned write is byte-exact to the cut | The same as `oracle_green`; it never upgrades into one. Nothing outside the declared owned regions; callees are stubs replaying captured values |
+| `transcript_green` | For an ordinary returning function, the identical out-of-unit call transcript (set, order, arguments) **and** the identical return value, over N recorded cases | **No write-set comparison.** Strictly weaker than `oracle_green`, never upgrades into one, and is a per-**function** artifact rather than a unit tier |
 
-`boundary_green` currently exists as design, the `run-spine.mjs` harness, and synthetic test
-fixtures. No real spine capture exists and the driver cannot yet record the tier.
+`boundary_green` was first reached on 2026-08-30 by `run_main_game_loop` (274/274 calls,
+`research/decomp/data/oracle-results/spine-run-main-game-loop.boundary.json`). The driver
+still cannot record either weaker tier in unit state — both are per-artifact standards.
+
+::: tip How much of the ROM can ever be verified
+**652 of 10,954 functions (6.0 %)** can carry an `oracle_green` write-comparison spec at
+all; **8,197 (74.8 %)** are reachable by `transcript_green`; **2,105 (19.2 %)** by neither.
+Units with full export coverage: **378 of 1,396 (27.1 %)**. Those are *eligibility*
+ceilings, not results. The measurement is
+`research/decomp/data/verification-tier-survey.json` and the honest reading of it is
+`docs/verification-status.md`.
+:::
 
 ::: warning A green build is not a working port
 `auto-c0035-002` compiles, links, and passed an N=5 assembly gate. Replayed against its
@@ -47,6 +58,7 @@ Replay an existing corpus (no emulator needed):
 ```bash
 node research/decomp/oracle-harness/run-unit.mjs --unit <name>
 node research/decomp/oracle-harness/run-spine.mjs --capture <capture.jsonl>
+node research/decomp/oracle-harness/run-transcript.mjs --help
 ```
 
 Capture a fresh corpus from the real game (needs a lawfully obtained disc and the bundled
@@ -58,6 +70,11 @@ python research/tools/dolphin-trace/capture_oracle.py capture \
   --plan research/tools/dolphin-trace/plans/<unit>.<fn>.json --n 120 --out <out.jsonl>
 python research/tools/dolphin-trace/capture_oracle.py stop
 ```
+
+For a function with no capturable write set, capture the callee-boundary transcript
+instead (`research/tools/dolphin-trace/capture_transcript.py`). It refuses a function that
+would produce an empty transcript rather than emitting a corpus that can only pass
+vacuously.
 
 The driver verbs (`verify-unit`, `verify-sweep`, `reverify-unit`, `assembly-gate`,
 `settle-unit`, …) live in the **OGhidra** checkout, which is not vendored into this

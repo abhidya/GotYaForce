@@ -15,6 +15,8 @@
     ·
     <a href="docs/playable-port-design.md">Port design contract</a>
     ·
+    <a href="docs/verification-status.md">Verification status</a>
+    ·
     <a href="research/decomp/PORT-1TO1-STATUS.md">Subsystem tracker</a>
   </p>
 
@@ -115,13 +117,26 @@ PASS verdict** — is [`docs/playable-port-design.md`](docs/playable-port-design
 | --- | --- | --- |
 | `compile_only` | The unit compiles and links to wasm | **Nothing about behavior.** This is inventory, not progress |
 | `oracle_green` | Its full corpus replays byte-exact against an independent oracle, per call | Coverage beyond the replayed corpus |
-| `boundary_green` | For a nonterminating spine function, every captured callee boundary and spine-owned write is byte-exact up to the cut | The same as `oracle_green` — it never upgrades into one. **Not yet reached by any real unit** |
+| `boundary_green` | For a nonterminating spine function, every captured callee boundary and spine-owned write is byte-exact up to the cut | The same as `oracle_green` — it never upgrades into one. Nothing outside the declared owned regions; the callees are stubs replaying captured values |
+| `transcript_green` | For an ordinary returning function, the port emits the identical out-of-unit call transcript (set, order, arguments) and returns the identical value over N recorded cases | **No write-set comparison at all.** Strictly weaker than `oracle_green` and never upgrades into one. A per-**function** artifact, deliberately not a unit tier in the driver's ledger |
 
-`boundary_green` currently exists as design, a harness (`run-spine.mjs`), and synthetic test
-fixtures only. No real spine capture exists, no `*.boundary.json` artifact has been written,
-and the driver has no code path to record the tier in unit state.
+`boundary_green` was **first reached on 2026-08-30** by `run_main_game_loop` — 274/274
+calls, `research/decomp/data/oracle-results/spine-run-main-game-loop.boundary.json`. What
+that verdict is and is not worth (the ROM passes it no arguments, and its one owned region
+never varied) is written out in
+[`docs/verification-status.md`](docs/verification-status.md) §5.1. The driver still has no
+code path to record either weaker tier in unit state; both are per-artifact standards today.
 
-### Current state (2026-08-29)
+> **How much of the ROM can ever be verified.** Measured, not projected: **652 of 10,954
+> functions (6.0 %)** can carry an auto-derived `oracle_green` write-comparison spec at all,
+> **8,197 (74.8 %)** are reachable by `transcript_green`, **8,849 (80.8 %)** by some tier,
+> and **2,105 (19.2 %)** by none. Units with full export coverage: **378 of 1,396 (27.1 %)**.
+> These are *eligibility* ceilings, not results. Artifact:
+> [`research/decomp/data/verification-tier-survey.json`](research/decomp/data/verification-tier-survey.json);
+> the full picture with the caveats is
+> [`docs/verification-status.md`](docs/verification-status.md).
+
+### Current state (2026-08-30)
 
 Repository-verifiable, from committed artifacts:
 
@@ -130,8 +145,10 @@ Repository-verifiable, from committed artifacts:
 | Staged unit artifacts, **all tier `compile_only` (UNVERIFIED)** | **112** | `research/decomp/port-units-staging/*/provenance.json` |
 | Promoted units | **3** — `damage-core`, `collision-core`, `knockback-core` | `research/decomp/port-units/` |
 | Units in production | **1** — `damage-core` (+ its threads relink) | `apps/game/public/rom/` |
-| Oracle verdicts on record | 1 `pass`, 2 `partial`, 2 `fail` | `research/decomp/data/oracle-results/` |
-| Real Dolphin-trace corpora | **3** | `research/decomp/oracle-harness/corpora/` |
+| Unit-level oracle verdicts on record | 2 `pass`, 3 `partial`, 2 `fail` | `research/decomp/data/oracle-results/*.json` |
+| `transcript_green` results | 3 — 2 `pass`, 1 `fail` | `research/decomp/data/oracle-results/*.transcript.json` |
+| `boundary_green` results | 1 `pass` — `run_main_game_loop`, 274/274 calls | `research/decomp/data/oracle-results/spine-run-main-game-loop.boundary.json` |
+| Dolphin-captured corpora | **18** (+1 TS-differential POC), covering 5 units and the spine | `research/decomp/oracle-harness/corpora/` |
 
 Queue-level, from the driver's own state file — **machine-local and untracked**, so these
 numbers are not reproducible from a clone (`research/decomp/generated/finish-game-port/`
@@ -231,12 +248,17 @@ python scripts/composition_ladder.py ledger --scratch <dir> --rungs "rung0;rung1
   ([`docs/composition-ladder.md`](docs/composition-ladder.md),
   [`research/decomp/data/composition-ladder.json`](research/decomp/data/composition-ladder.json))
   Rung 0 (N=5) linked clean — 40-thunk dispatch table, zero contested symbols. Rung 1 (N=10)
-  links only after substituting one unit, and that substitution costs a contested symbol:
-  ratio 1/38 against rung 0's 0/40. The E1 budget rule says a rising contested-symbol rate is
-  a hard stop, so the ladder halts pending ABI unification. It is stopped **by design**, not
-  by accident — but rung 1 of a 5 → 10 → 20 → 40 → … → 1,396 sequence is very early, and the
-  whole run happened in a scratch lane, never the live pipeline.
-- **Verification does not scale yet.** 1,396 units queued, 3 verified. Trace capture needs
+  now also passes clean after the registry correction of 2026-08-29: `substitution: null`,
+  `conflicts: []`, ratio **0/38** against rung 0's 0/40, 78 companion thunks. Rung 2 has not
+  been attempted successfully: it needs two rebuilds behind it (`auto-c0011-012`, then
+  `auto-c0011-011`), so **rung 2 is now a rebuild-scheduling problem, not an ABI or owner
+  decision** — a real change in kind, but the ceiling is still N=10. Rung 1 of a
+  5 → 10 → 20 → 40 → … → 1,396 sequence is very early, and the whole run happened in a
+  scratch lane, never the live pipeline.
+- **Verification does not scale yet.** 1,396 units queued, 3 `oracle_green`. Of the 10,954
+  functions, **80.8 % are eligible** for some verification standard and 19.2 % are eligible
+  for none ([`docs/verification-status.md`](docs/verification-status.md)) — eligibility, not
+  results; the gap between the two is three orders of magnitude. Trace capture needs
   the real game running in Dolphin with a user-supplied disc, which is the throughput
   ceiling. A 90-second scout across 201 callee-free staged functions in a live 2v2 fight
   found exactly **two** that fire at all.

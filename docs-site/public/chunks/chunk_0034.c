@@ -4826,7 +4826,7 @@ void FUN_80130330(undefined8 param_1,double param_2,double param_3,double param_
   undefined4 extraout_r4;
   undefined4 extraout_r4_00;
   int unaff_r28;
-  undefined8 uVar4;
+  undefined8 uVar4 = 0;  /* CORPUS CORRECTION 2026-08-29: r3/r4 residue, not a return value (see line 4841). It flows only into zz_0007c30_'s dead first-parameter slot, which is forwarded and never read, so a deterministic 0 replaces undefined register content. */
   
   sVar1 = *(short *)(param_9 + 1000);
   if ((sVar1 == 0x106) || (sVar1 == 0x107)) {
@@ -4838,14 +4838,14 @@ void FUN_80130330(undefined8 param_1,double param_2,double param_3,double param_
     }
     iVar3 = zz_0006f98_(param_9);
     iVar2 = unaff_r28 * 4;
-    uVar4 = zz_00086b8_((double)FLOAT_80439e78,param_2,param_3,param_4,param_5,param_6,param_7,
+    zz_00086b8_((double)FLOAT_80439e78,param_2,param_3,param_4,param_5,param_6,param_7,  /* CORPUS CORRECTION 2026-08-29: 0x800086b8 returns NO value -- its own decompiled body (chunk_0000.c:2994) is void and ends in a call to the void gnt4_HSD_JObjReqAnimAll plus a bare "return;", and the oracle-registry owner prototype is void. Same Ghidra r3/r4-residue threading as the merged chunk_0025.c:717/734 corrections; uVar4 only reaches zz_0007c30_'s dead param_1 slot. Evidence: docs/composition-ladder.md, "zz_0089100_ resolution" + this sweep's consumption audit (the result is never branched on, stored or returned anywhere in the corpus -- it only reaches dead first-parameter slots). */
                         param_8,*(int *)(iVar3 + 0x600),
                         *(int *)(iVar3 + *(int *)(&DAT_804345c8 + iVar2) * 4 + 0x708),param_11,
                         param_12,param_13,param_14,param_15,param_16);
     zz_0007c30_(uVar4,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
                 *(int *)(iVar3 + *(int *)(&DAT_804345c8 + iVar2) * 4 + 0x708),extraout_r4,param_11,
                 param_12,param_13,param_14,param_15,param_16);
-    uVar4 = zz_00086b8_((double)FLOAT_80439e78,param_2,param_3,param_4,param_5,param_6,param_7,
+    zz_00086b8_((double)FLOAT_80439e78,param_2,param_3,param_4,param_5,param_6,param_7,  /* CORPUS CORRECTION 2026-08-29: r3/r4-residue assignment removed, see line 4841. */
                         param_8,*(int *)(iVar3 + 0x600),
                         *(int *)(iVar3 + *(int *)(&DAT_804345c8 + iVar2) * 4 + 0x788),param_11,
                         param_12,param_13,param_14,param_15,param_16);

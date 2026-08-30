@@ -10,6 +10,10 @@
 > and verifying them against the ROM — which this file does not cover at all. For that,
 > read, in order:
 >
+> - [`docs/verification-status.md`](../../docs/verification-status.md) — **what is actually
+>   proven** on the wasm track: the tier vocabulary, the measured ceiling (80.8 % of the
+>   10,954 functions are eligible for *some* verification standard, 19.2 % for none), and
+>   the per-area state. Read this before quoting any port number.
 > - [`docs/playable-port-design.md`](../../docs/playable-port-design.md) — the design
 >   contract (v1→v5, PASS verdict). The normative document.
 > - [`research/decomp/corpus-correction-loop.md`](corpus-correction-loop.md) — how a
@@ -22,8 +26,13 @@
 > **Do not read a staged wasm unit as a ported subsystem.** 112 units are staged at tier
 > `compile_only` — they compile and link, and nothing more is claimed. Three units
 > (`damage-core`, `collision-core`, `knockback-core`) are `oracle_green`. One
-> (`auto-c0035-002`) replayed **behaviorally divergent** against its reference. See the
-> root [`README.md`](../../README.md) "Verification tiers" section for the vocabulary.
+> (`auto-c0035-002`) replayed **behaviorally divergent** against its reference. Two weaker,
+> callee-boundary standards now also exist and must never be totalled with `oracle_green`:
+> `boundary_green` (first reached 2026-08-30 by `run_main_game_loop`, 274/274 calls) and
+> `transcript_green` (3 per-function results on record). See the root
+> [`README.md`](../../README.md) "Verification tiers" section for the vocabulary and
+> [`docs/verification-status.md`](../../docs/verification-status.md) for what each result
+> is actually worth.
 
 Authoritative per-subsystem tracker: current port state, ROM/decomp source mapping, and the
 ranked next action to reach 1:1. Maintained alongside `behavior-notes.md` (the lab notebook,

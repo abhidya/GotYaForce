@@ -716,6 +716,13 @@ selector numbering is wrong, both the shader and the prediction are wrong togeth
 the check still passes. Only a trace oracle can break that circularity, which is why it
 is now §7.1.
 
+One further trap, because two unrelated vocabularies now live in the same repository: the
+`GxImplTier` values here (`translated` / `latched` / `declared-nop`) describe **coverage of
+an API surface** and have nothing to do with the wasm-unit verification tiers
+(`compile_only` / `oracle_green` / `boundary_green` / `transcript_green`). They must never
+be summed, cross-quoted, or presented in the same column. The rule and the current numbers
+for both live in [`docs/verification-status.md`](verification-status.md).
+
 ---
 
 ## 7. What the next agent should do, in order

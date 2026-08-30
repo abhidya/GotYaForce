@@ -1,0 +1,120 @@
+{
+  "schema": "gf.verification-tier-survey.v1",
+  "generated_utc": "2026-08-30T06:29:31Z",
+  "survey_tool_commit": "debd7ef46cb81c4822f9cbd26fea9b19115925ae",
+  "generator": "research/decomp/data/build_tier_survey.py",
+  "survey_tool": "research/tools/OGhidra/tools/survey_plan_tiers.py",
+  "measurement_kind": "ceiling",
+  "claims": {
+    "is": "Static, model-free eligibility: could a spec of this standard be built for this function at all.",
+    "is_not": "Not a verification result. A function counted here has NOT been verified; verified units are counted from committed result artifacts, never from this file.",
+    "oracle_green": "Byte-exact per-call write comparison (research/decomp/oracle-harness/run-unit.mjs).",
+    "transcript_green": "Callee-boundary call sequence, arguments and return value (research/decomp/oracle-harness/run-transcript.mjs). STRICTLY WEAKER than oracle_green: no write set is compared. It never upgrades into an oracle_green claim.",
+    "combined": "Per function, the STRONGEST standard it can reach. A unit whose exports land on a MIX of standards is reported mixed, never rounded up to the stronger one."
+  },
+  "inputs": {
+    "oracle_registry": {
+      "path": "research/decomp/data/oracle-registry.json",
+      "bytes": 8665713,
+      "sha256": "8bbdaa7091aa8964df48de95b89abfc9aee3f6426a2e50f26dbcd52f6472976b"
+    },
+    "chunk_corpus": {
+      "files_referenced": 80,
+      "files_present": 80,
+      "sha256_rolled": "75e0828aa4d05b3fb0d52666342533eb93bc1561c8a49e42c2a79d358240b62f"
+    },
+    "classification_logic": [
+      {
+        "path": "tools/survey_plan_tiers.py",
+        "bytes": 14789,
+        "sha256": "30142f6c38076ca137dcab9d983cbfd45168876971adfdd739dcfab6b1f77182"
+      },
+      {
+        "path": "src/port_c_evidence.py",
+        "bytes": 26409,
+        "sha256": "a78cda11cbd4edd39b3111e94cedcbf0b7c0695951c02051ed5d0c55795dff85"
+      },
+      {
+        "path": "src/port_spec_emit.py",
+        "bytes": 30672,
+        "sha256": "6da5ba9c73637fe9143b182549e87532d2c634a1a2ae291547db7c3a8cfe4d50"
+      },
+      {
+        "path": "src/port_plan_derive.py",
+        "bytes": 48557,
+        "sha256": "d58132842fa9549b2a65f8e5c489da62349036d58f840ec7b6b4ca1c916b0177"
+      }
+    ]
+  },
+  "totals": {
+    "functions": 10954,
+    "units": 1396
+  },
+  "per_function": {
+    "oracle_green": {
+      "count": 652,
+      "pct": 6.0
+    },
+    "transcript_green": {
+      "count": 8197,
+      "pct": 74.8
+    },
+    "verifiable_by_some_tier": {
+      "count": 8849,
+      "pct": 80.8
+    },
+    "unverifiable": {
+      "count": 2105,
+      "pct": 19.2,
+      "reasons": {
+        "rom_function_pointer_dispatch": 1602,
+        "empty_transcript": 503
+      }
+    }
+  },
+  "per_unit": {
+    "all_exports_oracle_green": 2,
+    "all_exports_transcript_green": 257,
+    "all_exports_covered_mixed_tiers": 119,
+    "has_unverifiable_export": 1018,
+    "full_export_coverage": {
+      "count": 378,
+      "pct": 27.1
+    }
+  },
+  "write_set_ceiling": {
+    "note": "The ORIGINAL oracle_green-only ceiling, before transcript_green existed. Kept because its dominant refusal -- 'stores nothing a capture could compare' -- is the fact that motivated the second standard: for those functions a write comparison is not hard, it is EMPTY, and a spec over them passes vacuously.",
+    "per_function_tier": {
+      "human": 5847,
+      "mechanical": 634,
+      "no_write_set": 4455,
+      "shimmed": 18
+    },
+    "human_reasons": {
+      "calls SDK helper": 125,
+      "calls external ROM callee": 4279,
+      "dispatches through a ROM function-pointer table": 622,
+      "function stores nothing a capture could compare": 4455,
+      "some stores go through a non-argument base": 32,
+      "stores only through a non-argument base": 789
+    },
+    "per_unit_rollup": {
+      "all_exports_auto": 2,
+      "none_auto": 969,
+      "partially_auto": 425
+    }
+  },
+  "transcript_eligibility_raw": {
+    "note": "Transcript eligibility taken ALONE, before combining with the write-set ceiling. These refusal counts are deliberately larger than per_function.unverifiable.reasons: a function can have an empty transcript and still be oracle_green-eligible.",
+    "eligible": 8328,
+    "refused": {
+      "empty_transcript": 1024,
+      "rom_function_pointer_dispatch": 1602
+    }
+  },
+  "plan_size": {
+    "5-12": 2332,
+    "<=4": 6128,
+    ">12": 2494
+  }
+}

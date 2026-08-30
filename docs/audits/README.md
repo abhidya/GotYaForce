@@ -13,6 +13,12 @@ These documents are **findings**, not design. The governing design contract is
 [`AGENTS.md`](../../AGENTS.md). Where an audit conclusion has since been folded into
 either of those, the audit page says so and defers.
 
+For **current state** rather than dated findings — which verification standards exist, what
+each result is worth, and how much of the ROM can ever reach one — the page is
+[`docs/verification-status.md`](../verification-status.md). It is re-measured against the
+tree, not carried forward, and it is where the claim-honesty rules these audits keep
+rediscovering are written down once.
+
 ## The pages
 
 | Page | Subject |

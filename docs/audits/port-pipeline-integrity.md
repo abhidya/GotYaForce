@@ -451,8 +451,9 @@ the port outright.)
 
 ## 7. Standing defect classes in the driver
 
-Recorded 2026-08-21 to 2026-08-23. These are in the nested OGhidra repo; none was
-re-verified on 2026-08-29.
+Recorded 2026-08-21 to 2026-08-23. These are in the nested OGhidra repo; none of §7.1-7.10
+was re-verified on 2026-08-29. §7.11 was added and verified against that checkout on
+2026-08-30.
 
 ### 7.1 Reverification does not verify the committed bytes
 
@@ -572,6 +573,36 @@ The driver hard-codes a private Node fallback; queue tools default to `D:\GotYaF
 committed oracle results embedded absolute `D:\GotYaForce` paths. Builds assume a vendored
 `research/tools/emsdk` and Git Bash at fixed Windows locations. `oracle.log` is globally
 ignored, so a reviewer cannot audit the log that supposedly supports a verdict.
+
+### 7.11 Two progress counters are fail-OPEN on tier — OPEN (latent), verified 2026-08-30
+
+Every gate that guards *promotion* is an explicit allowlist and therefore fail-closed
+(`ELIGIBLE_CANONICAL_TIERS = frozenset({"compile_only", "oracle_green"})`,
+`src/port_assembly_gate.py:1025`). Two *reporting* counters are written the opposite way:
+
+- `src/port_contract.py:125` —
+  `counts["staged" if (record or {}).get("tier") == "compile_only" else "green"] += 1`
+- `src/port_progress.py:209` — `if record.get("tier") == "compile_only": … else: counts["green"] += 1`
+
+The predicate is **"is not `compile_only`"**, not "is `oracle_green`". Anything else —
+`None`, a typo, or the new `transcript_green` — falls into `green`.
+
+**Latent today.** `transcript_green` appears nowhere in the driver's `src/`; every tier
+write path emits only `compile_only` or `oracle_green`, so no state record can carry it.
+
+**Exposure.** The first commit that teaches the driver to record `transcript_green` inflates
+`progress/current.json` (`queue.green`), `progress/summary.json`, the generated README
+table, the health state (`remaining = total − green − staged`, so a corpus of transcript
+results would report complete), progress-branch commit subjects, and the contract probe's
+`counts` that the rig supervisor reads — without tripping any gate or existing test. Note
+the asymmetry: `run-state.json`'s `units_verified` (`src/port_wasm_units.py:1658`) uses the
+correct positive predicate, so two files from the same run would disagree, and the looser
+number is the one in the README banner.
+
+**Fix:** invert both to positive tests against an explicit verified-tier set, and add a test
+asserting an unknown tier string does not land in `green`. Not applied here — the driver is
+in the separate, unvendored OGhidra checkout. Claim rules:
+[`../verification-status.md`](../verification-status.md) §6.
 
 ---
 
