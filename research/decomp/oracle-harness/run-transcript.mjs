@@ -72,7 +72,12 @@
 //          "params":["i32",..],"results":["i32"]|[]},
 //    "wasm":<path relative to the capture file>,
 //    "arena":<path relative to the capture file>,
-//    "owned_regions":[{"addr":"0x..","size":N},..],   // may be [] — see guard 3
+//    "owned_regions":[{"addr":"0x..","size":N,"cases":K},..],  // ADVISORY: the
+//        UNION of the per-case watch windows with a per-address case count. A
+//        window is derived from a POINTER ARGUMENT, so cases legitimately watch
+//        different addresses; the authoritative per-case addresses live in each
+//        case's `owned_end`, and this harness counts only the bytes it actually
+//        verified. May be [] — see guard 3
 //    "counts":{"case":N,"call":M},
 //    "source":{..capture provenance + exclusions..}}
 // Lines 2..N+1 — one record per captured CALL of the function:
@@ -268,6 +273,12 @@ async function main() {
   // ---- replay, case by case; stop at the first divergent case ----
   let divergence = null;
   let casesPassed = 0, callsMatched = 0, retsChecked = 0, seededBytes = 0;
+  // Owned-region coverage is counted from the CASES THAT ACTUALLY PASSED, never
+  // from the header: a watch window is derived per case from that case's pointer
+  // arguments, so the header's list is a union over the corpus and would
+  // overstate what each case verified.
+  let ownedBytesChecked = 0;
+  const ownedAddrsChecked = new Set();
   for (const c of cases) {
     state.caseIdx = c.n;
     state.callIdx = 0;
@@ -325,6 +336,10 @@ async function main() {
         if (e instanceof TranscriptMismatch) { divergence = e.detail; break; }
         throw e;
       }
+      for (const o of c.owned_end) {
+        ownedBytesChecked += Buffer.from(o.b64, "base64").length;
+        ownedAddrsChecked.add(parseAddr(o.addr));
+      }
     }
     casesPassed++;
     callsMatched += c.calls.length;
@@ -361,13 +376,20 @@ async function main() {
     fn: header.fn.export,
     generated_at: new Date().toISOString(),
     claim: {
+      // Whether this RUN established the claim. A `claim` block on a failed run
+      // describes the standard, not an achievement.
+      established: pass,
       summary: `same out-of-unit call transcript and return value as the console on ${cases.length} recorded cases`,
       verifies: [
         "the set, order and arguments of every out-of-unit callee call",
         "the function's own return value",
-        ownedRegions.length > 0
-          ? `byte-exactness of ${ownedRegions.length} declared owned region(s)`
-          : "no memory regions (this capture declares none)",
+        ownedBytesChecked > 0
+          ? `byte-exactness of ${ownedBytesChecked} owned-region bytes at return, `
+            + `over ${ownedAddrsChecked.size} distinct address(es), on the cases that passed`
+          : ownedRegions.length > 0
+            ? `NO owned-region bytes were reached: the corpus declares ${ownedRegions.length} `
+              + `watch region(s) but the run stopped before any case completed`
+            : "no memory bytes (no case in this corpus carried an owned-region expectation)",
       ],
       does_not_verify: [
         "memory writes outside the declared owned regions",
@@ -401,8 +423,12 @@ async function main() {
       params: header.fn.params ?? null, results,
       void: isVoid,
     },
-    owned_regions: ownedRegions.map((r) => ({ addr: hex(r.addr), size: r.size })),
-    owned_bytes: ownedRegions.reduce((n, r) => n + r.size, 0),
+    // ADVISORY, straight from the capture header: the union of watch windows
+    // over the corpus, NOT a set every case checked.
+    declared_owned_regions: ownedRegions.map((r) => ({ addr: hex(r.addr), size: r.size })),
+    // What this run actually verified.
+    owned_bytes_checked: ownedBytesChecked,
+    owned_addresses_checked: ownedAddrsChecked.size,
     seeded_bytes: seededBytes,
     cases_passed: casesPassed,
     calls_matched: callsMatched,

@@ -3,13 +3,14 @@
  "standard": "transcript_green",
  "unit": "auto-c0020-007",
  "fn": "FUN_800c4448",
- "generated_at": "2026-08-30T05:55:03.844Z",
+ "generated_at": "2026-08-30T06:02:36.629Z",
  "claim": {
+  "established": true,
   "summary": "same out-of-unit call transcript and return value as the console on 12 recorded cases",
   "verifies": [
    "the set, order and arguments of every out-of-unit callee call",
    "the function's own return value",
-   "no memory regions (this capture declares none)"
+   "no memory bytes (no case in this corpus carried an owned-region expectation)"
   ],
   "does_not_verify": [
    "memory writes outside the declared owned regions",
@@ -27,8 +28,8 @@
  },
  "harness": {
   "entry": "research/decomp/oracle-harness/run-transcript.mjs",
-  "git_rev": "1baec022d18d524a98e079c6a8d19f3695674883",
-  "sha256": "964a3c96307a53457c64dffaead1d7b32ffaf3fbf156960a492d60510b16fe9f",
+  "git_rev": "9ba05a8846e2adb4a7a017d83e8dcf3f6c9127d6",
+  "sha256": "31679b92c20a8f78156d71190d1f1250e38e48748d0c4a64890bcbd03c22c8dc",
   "min_cases": 8
  },
  "wasm": {
@@ -96,8 +97,9 @@
   "results": [],
   "void": true
  },
- "owned_regions": [],
- "owned_bytes": 0,
+ "declared_owned_regions": [],
+ "owned_bytes_checked": 0,
+ "owned_addresses_checked": 0,
  "seeded_bytes": 0,
  "cases_passed": 12,
  "calls_matched": 12,

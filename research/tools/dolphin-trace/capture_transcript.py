@@ -575,9 +575,20 @@ def cmd_capture(a: argparse.Namespace) -> int:
                 raw = d.rsp.read_mem(w["addr"], w["size"])
                 seed.append({"addr": f"0x{w['addr']:08x}",
                              "b64": window_bytes(raw, a.seed_elem_width, field_widths)})
-            if windows and not watch_meta:
-                watch_meta = [{"addr": f"0x{w['addr']:08x}", "size": w["size"],
-                               "from_arg": w["arg"]} for w in windows]
+            # UNION across cases, with the count: a window is derived from a
+            # POINTER ARGUMENT, so different cases legitimately watch different
+            # addresses. Recording only the first case's set would overstate what
+            # every case checked; the per-case `seed`/`owned_end` records remain
+            # the authoritative addresses, and run-transcript.mjs counts the
+            # bytes it ACTUALLY verified from those, not from this header.
+            for w in windows:
+                key = f"0x{w['addr']:08x}"
+                hit = next((m for m in watch_meta if m["addr"] == key), None)
+                if hit is None:
+                    watch_meta.append({"addr": key, "size": w["size"],
+                                       "from_arg": w["arg"], "cases": 1})
+                else:
+                    hit["cases"] += 1
 
             # ---- walk the body to the return ----
             d.set_bp(lr)
@@ -659,10 +670,20 @@ def cmd_capture(a: argparse.Namespace) -> int:
                "params": plan["fn"]["params"], "results": plan["fn"]["results"]},
         "wasm": a.wasm_rel,
         "arena": a.arena_rel,
-        # The watch windows double as the owned regions: bytes the port must
-        # leave byte-exact at the return. They are NOT a write set -- see the
-        # exclusions.
+        # ADVISORY. The watch windows double as owned regions -- bytes the port
+        # must leave byte-exact at the return -- but they are derived per case
+        # from that case's pointer arguments, so this is the UNION over the
+        # corpus with a per-address case count, not a set every case checked.
+        # The authoritative per-case addresses are in each case's `owned_end`.
+        # They are NOT a write set -- see the exclusions.
         "owned_regions": watch_meta,
+        "watch_policy": {
+            "rule": f"one {a.watch_args}-byte window at each MEM1-valued i32 "
+                    f"pointer argument of the entry signature, per case",
+            "note": "addresses vary per case; `owned_regions` is the union with "
+                    "a case count, and the replay counts only the bytes it "
+                    "actually verified",
+        },
         "counts": {"case": len(cases), "call": call_total},
         "source": {
             "standard": STANDARD,

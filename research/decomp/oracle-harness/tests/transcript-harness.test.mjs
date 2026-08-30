@@ -65,7 +65,9 @@ test("transcript_green: the correct no-write function passes", () => {
   assert.equal(result.returns_checked, 2);
   assert.equal(result.divergence, null);
   // The fixture function writes nothing — the standard's whole reason to exist.
-  assert.equal(result.owned_bytes, 0);
+  assert.equal(result.owned_bytes_checked, 0);
+  assert.deepEqual(result.declared_owned_regions, []);
+  assert.equal(result.claim.established, true);
   assert.equal(result.wasm.memory_model, "exported");
 });
 
@@ -96,6 +98,7 @@ test("transcript_green: call-order mutant fails naming the first divergent call"
   assert.match(log, /call divergence in case n=0 at i=1: expected stub_beta@0x80002100\(8, 100\), got stub_gamma\(100\)/, log);
   assert.doesNotMatch(log, /TRANSCRIPT_GREEN/, log);
   assert.equal(result.verdict, "fail");
+  assert.equal(result.claim.established, false, "a failed run must not read as an established claim");
   assert.equal(result.divergence.kind, "callee");
   assert.equal(result.divergence.n, 0);
   assert.equal(result.divergence.i, 1);
