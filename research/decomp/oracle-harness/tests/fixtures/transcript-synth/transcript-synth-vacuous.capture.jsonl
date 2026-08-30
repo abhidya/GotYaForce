@@ -1,0 +1,4 @@
+{"kind":"header","transcript_schema":1,"unit":"transcript-synth-vacuous","fn":{"export":"fn_vacuous","gc_addr":"0x80001100","params":[],"results":[]},"wasm":"transcript_synth.wasm","arena":"transcript-synth.arena.json","owned_regions":[],"counts":{"case":2,"call":0},"source":{"standard":"transcript_green","capture_tool":"hand-authored from transcript_synth.c — no Dolphin involved","note":"DELIBERATELY VACUOUS: fn_vacuous makes no calls, returns nothing and writes nothing. The harness must REFUSE this rather than hand out a free green."}}
+{"kind":"case","n":0,"args":[],"calls":[],"ret":null}
+{"kind":"case","n":1,"args":[],"calls":[],"ret":null}
+{"kind":"end","counts":{"case":2,"call":0}}

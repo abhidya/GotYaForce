@@ -57,6 +57,17 @@ export function importedMemoryLimits(wasmBytes) {
 }
 
 /**
+ * Write a parsed arena's segments into linear memory at their ORIGINAL GameCube
+ * addresses. Split out of loadUnit so a multi-case harness (run-transcript.mjs)
+ * can RE-apply the arena between cases: each captured case is an independent
+ * observation of the console, so replaying case n+1 on top of case n's residue
+ * would compare the port against a state the console never had.
+ */
+export function applyArenaSegments(u8, arena) {
+  for (const s of arena.segments) u8.set(Buffer.from(s.b64, "base64"), s.addr >>> 0);
+}
+
+/**
  * Load a wasm unit + arena.
  * @param wasmPath  path to the unit wasm
  * @param arenaPath path to the DOL-sourced arena JSON ({segments:[{addr,b64}]})
@@ -100,7 +111,7 @@ export async function loadUnit({ wasmPath, arenaPath, makeShims, flipByte = null
   memCtx.dv = new DataView(mem.buffer);
 
   const arena = JSON.parse(fs.readFileSync(arenaPath, "utf8"));
-  for (const s of arena.segments) memCtx.u8.set(Buffer.from(s.b64, "base64"), s.addr >>> 0);
+  applyArenaSegments(memCtx.u8, arena);
   if (flipByte != null) {
     const a = flipByte >>> 0;
     memCtx.u8[a] ^= 0xff;

@@ -1,0 +1,6 @@
+{
+  "note": "synthetic arena for the transcript_green self-test: zeroes BETA_CELL (0x104000) — see transcript_synth.c. Re-applied by run-transcript.mjs before every case, so no case can inherit the previous case's residue.",
+  "segments": [
+    { "addr": 1064960, "b64": "AAAAAA==" }
+  ]
+}
