@@ -2,15 +2,15 @@
  "result_schema": 1,
  "standard": "boundary_green",
  "unit": "spine-run-main-game-loop",
- "generated_at": "2026-08-29T21:41:30.697Z",
+ "generated_at": "2026-08-30T05:31:26.681Z",
  "harness": {
   "entry": "research/decomp/oracle-harness/run-spine.mjs",
-  "git_rev": "c0e604d520a128ff953b6eab60f4a2cfad95a85b",
+  "git_rev": "7303891a6cee2c90c14811cb6362a11a643e4eaf",
   "sha256": "08a6f027b256494a1d14fd5db41bda2aefc308d0ab12055b8415e63a0c81aa10"
  },
  "wasm": {
-  "path": "D:\\GotYaForce\\.tmp\\spine-worktree\\research\\decomp\\spine-boundary\\unit.wasm",
-  "sha256": "babf66fde0fdb360d4112689676046567803d07b21329c64da38e2454ebd1467",
+  "path": "D:\\GotYaForce\\.claude\\worktrees\\agent-a70469abbc7c9c6db\\research\\decomp\\spine-boundary\\unit.wasm",
+  "sha256": "b14efa83358750e1e26c2dfaf1c394698ca312db1c52208ced1d3be4d50400cb",
   "memory_model": "exported"
  },
  "arena": {
@@ -19,7 +19,7 @@
  },
  "capture": {
   "file": "research/decomp/oracle-harness/corpora/spine-run-main-game-loop.boundary.jsonl",
-  "sha256": "640f64fd5082ddbb482ccb360644319bbe40d13111f346dd97ba642d574ea98e",
+  "sha256": "db3b5279a4767963ef39f2293a4e4b54e9f00aa4afb60fcf4092ac43863c956f",
   "calls": 274,
   "iterations": 16,
   "terminator": "call_cap"
@@ -35,11 +35,7 @@
   }
  ],
  "owned_bytes": 4,
- "calls_matched": 0,
- "divergence": {
-  "i": 0,
-  "kind": "args",
-  "report": "arg divergence at i=0 (iter 0) zz_002a3e4_@0x8002a3e4: expected (0, 0, 0, 0, 0, 0, 0, 0, 0, 2147483648, 404999992, 0, 1, 0, 2151994656, 2149610612), got (0n, 0, 0, 0, 0, 0, 0, 0, 0, -2147483648, 404999992, 0, 1, 0, 0, -2147470308)"
- },
- "verdict": "fail"
+ "calls_matched": 274,
+ "divergence": null,
+ "verdict": "pass"
 }

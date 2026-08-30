@@ -29,7 +29,14 @@
 # (research/tools/OGhidra/src/port_wasm_units.py), except for the export list.
 set -e
 cd "$(dirname "$0")"
-source ../../tools/emsdk/emsdk_env.sh >/dev/null 2>&1
+# emsdk is untracked and lives in the MAIN checkout only, so a git worktree has
+# no ../../tools/emsdk. Fall back to the main checkout (git-common-dir's parent)
+# so this evidence build is reproducible from a worktree with identical flags.
+EMSDK_ENV=../../tools/emsdk/emsdk_env.sh
+if [ ! -f "$EMSDK_ENV" ]; then
+  EMSDK_ENV="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/research/tools/emsdk/emsdk_env.sh"
+fi
+source "$EMSDK_ENV" >/dev/null 2>&1
 
 emcc unit.c -O1 -fno-strict-aliasing --no-entry \
   -Wno-implicit-function-declaration -Wno-int-conversion \
