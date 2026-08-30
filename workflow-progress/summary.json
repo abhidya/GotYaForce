@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-08-30T06:31:13.138920Z",
-  "run_id": "2026-08-30T06:31:12.438687Z",
+  "generated_at": "2026-08-30T06:32:04.776488Z",
+  "run_id": "2026-08-30T06:32:04.168944Z",
   "total_units": 1396,
   "green": 3,
   "staged": 103,
@@ -19,13 +19,13 @@
   "repeated_failure_classes": [],
   "health": "idle",
   "machine": {
-    "workflow_state": "starting",
+    "workflow_state": "leased-out",
     "driver_status": "stopped",
     "manual_paused": false,
     "block_reason": null,
     "active_model": null,
     "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Manual pause lifted; resuming heavy work."
+    "detail": "GPU leased to omr-sweep (priority 1); slot drained and free."
   }
 }

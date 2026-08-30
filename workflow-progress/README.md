@@ -1,6 +1,6 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-30T06:31:12.438687Z - machine-written, do not edit.*
+*Generated 2026-08-30T06:32:04.169944Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 106/1396 settled (3 green, 103 staged) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1133 |
-| **Last transition** | 2026-08-30T06:31:12.438687Z |
+| **Last transition** | 2026-08-30T06:32:04.169944Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `-` @ - ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-30T06:32:04.169944Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
 | 2026-08-30T06:31:12.438687Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-30T06:30:06.668411Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-30T06:28:39.724335Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
@@ -70,4 +71,3 @@
 | 2026-08-26T04:33:53.400740Z | `auto-c0053-006` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0053-006 declares zz_008 |
 | 2026-08-26T04:01:34.891104Z | `auto-c0053-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T03:37:17.602528Z | `auto-c0053-004` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0011-012 declares FUN_80 |
-| 2026-08-26T03:12:01.813822Z | `auto-c0053-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
