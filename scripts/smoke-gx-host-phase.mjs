@@ -80,6 +80,12 @@ async function bundlePage(outDir) {
     path.join(pkgRoot, "test", "fixtures", "gx-selftest", "gx_selftest.threads.wasm"),
     path.join(outDir, "gx_selftest.threads.wasm"),
   );
+  // The gate-lowered REAL ROM unit (test/fixtures/gx-rom-unit/build.sh): the
+  // assembly gate's own output for zz_0027c34_, not a hand-written fixture.
+  fs.copyFileSync(
+    path.join(pkgRoot, "test", "fixtures", "gx-rom-unit", "gx_rom_unit.threads.wasm"),
+    path.join(outDir, "gx_rom_unit.threads.wasm"),
+  );
 }
 
 // COOP/COEP-isolated static server: the runtime NEEDS crossOriginIsolated
@@ -289,6 +295,18 @@ export async function runGxHostPhase() {
     if (typeof canvasPng === "string" && canvasPng.length > 0) {
       fs.writeFileSync(path.join(evidenceDir, "gx-framebuffer.png"), Buffer.from(canvasPng, "base64"));
     }
+    // Two framebuffers, because the two legs draw over the same canvas: the
+    // fixture frame (hand-written ROM-shaped call sequences) and the frame the
+    // GATE-LOWERED ROM unit produced.
+    for (const [field, file] of [
+      ["fixtureFramebufferPng", "gx-framebuffer-fixture.png"],
+      ["romFramebufferPng", "gx-framebuffer-rom-unit.png"],
+    ]) {
+      const dataUrl = state?.[field];
+      if (typeof dataUrl === "string" && dataUrl.includes(",")) {
+        fs.writeFileSync(path.join(evidenceDir, file), Buffer.from(dataUrl.split(",")[1], "base64"));
+      }
+    }
     const screenshot = await cdp.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true });
     fs.writeFileSync(path.join(evidenceDir, "gx-selftest.png"), Buffer.from(screenshot.data, "base64"));
     fs.writeFileSync(path.join(evidenceDir, "console.log"), consoleLines.join("\n") + "\n");
@@ -317,6 +335,28 @@ export async function runGxHostPhase() {
     requireCheck("corner pixel B == fullscreen quad B");              // proof 3
     requireCheck("unimplemented GXSetFog rejects with ADAPTER_THREW"); // proof 4
     requireCheck("the loud failure is in the bridged-call ledger");   // proof 4
+    requireCheck("TEV konst-only stage: R is GX_KCOLOR0");            // proof 5 (TEV combiner)
+    requireCheck("stage 1 read it back as GX_CC_C0");                 // proof 5 (TEV registers)
+    requireCheck("GXSetAlphaCompare discarded the failing fragment"); // proof 5 (alpha test)
+    requireCheck("GX_TF_RGBA8 texel R decoded out of the arena");     // proof 6 (texture sampling)
+    requireCheck("lit channel R == the light's own R");               // proof 7 (lighting)
+    requireCheck("the ROM's 4-stage program set the stage count");    // proof 8 (real ROM TEV program)
+    // proof 9 — the browser leg finally driving GATE-LOWERED REAL ROM CODE
+    // rather than a purpose-built fixture.
+    requireCheck("the gate-lowered ROM unit submitted exactly one primitive");
+    requireCheck("the ROM's own RGBA8 colour word reached the framebuffer path");
+    requireCheck("ROM unit framebuffer centre R");
+
+    // The gate-lowered ROM unit is the whole point of the browser leg now: a
+    // green run that quietly skipped it would be exactly the kind of false
+    // progress this phase exists to prevent.
+    const romUnit = state.report?.romUnit;
+    if (!romUnit || romUnit.primitives !== 1 || romUnit.droppedFifoBytes !== 0) {
+      throw new Error(`the gate-lowered ROM unit leg did not run cleanly: ${JSON.stringify(romUnit)}`);
+    }
+    if (romUnit.verified !== false || !String(romUnit.behaviouralClaim ?? "").startsWith("NONE")) {
+      throw new Error("the gate-lowered ROM unit report failed to state that it carries no behavioural claim");
+    }
 
     if (!ledger || typeof ledger.totals?.bridgedCalls !== "number" || ledger.totals.bridgedCalls < 60) {
       throw new Error(`GX bridged-call ledger implausibly small: ${JSON.stringify(ledger?.totals)}`);
@@ -350,6 +390,11 @@ export async function runGxHostPhase() {
       primitives: state.report?.fifo?.primitives,
       droppedFifoBytes: state.report?.fifo?.droppedBytes,
       unimplementedHits: state.report?.unimplementedHits,
+      gateLoweredRomUnit: {
+        primitives: state.report?.romUnit?.primitives,
+        droppedFifoBytes: state.report?.romUnit?.droppedFifoBytes,
+        gxCalls: Array.isArray(state.report?.romUnit?.calls) ? state.report.romUnit.calls.length : null,
+      },
       coverage: {
         translated: `${coverage.translated.implementedSymbols}/${coverage.translated.totalSymbols} entry points, ` +
           `${coverage.translated.callSitePct}% of ROM call sites`,
