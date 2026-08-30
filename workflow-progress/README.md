@@ -1,6 +1,6 @@
 # Port workflow: IDLE
 
-*Generated 2026-08-30T06:28:18.673772Z - machine-written, do not edit.*
+*Generated 2026-08-30T06:28:39.724335Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **Queue progress** | 106/1396 settled (3 green, 103 staged) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1133 |
-| **Last transition** | 2026-08-30T06:28:18.673772Z |
+| **Last transition** | 2026-08-30T06:28:39.724335Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `-` @ - ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-08-30T06:28:39.724335Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
 | 2026-08-30T06:28:18.673772Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-30T05:30:20.332652Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-08-29T22:34:15.787776Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
@@ -70,4 +71,3 @@
 | 2026-08-26T03:12:01.813822Z | `auto-c0053-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T02:44:01.567665Z | `auto-c0053-002` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
 | 2026-08-26T02:43:48.704874Z | `auto-c0053-001` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
-| 2026-08-26T02:43:35.615442Z | `auto-c0053-000` | retryable | compile-fix | 1 | compile-fix LLM: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8888/v1/chat/completions \| |
