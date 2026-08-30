@@ -1,0 +1,136 @@
+{
+ "result_schema": 1,
+ "standard": "transcript_green",
+ "unit": "auto-c0020-007",
+ "fn": "FUN_800c4468",
+ "generated_at": "2026-08-30T05:55:04.004Z",
+ "claim": {
+  "summary": "same out-of-unit call transcript and return value as the console on 12 recorded cases",
+  "verifies": [
+   "the set, order and arguments of every out-of-unit callee call",
+   "the function's own return value",
+   "byte-exactness of 3 declared owned region(s)"
+  ],
+  "does_not_verify": [
+   "memory writes outside the declared owned regions",
+   "memory reads (constrained only insofar as they change an argument or the return value)",
+   "the behaviour of the callees themselves — they are stubs replaying captured values",
+   "live console memory: the port runs on the static DOL arena plus the itemised seed bytes",
+   "any input outside the recorded corpus"
+  ],
+  "weaker_than": "oracle_green",
+  "weaker_because": "oracle_green compares the function's memory write set byte-for-byte; transcript_green compares only the observable call transcript and return value, which is all that exists for a function with no capturable write set. A transcript_green result must never be recorded, counted or reported as oracle_green.",
+  "bounded_by_corpus": {
+   "cases": 12,
+   "calls": 24
+  }
+ },
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-transcript.mjs",
+  "git_rev": "1baec022d18d524a98e079c6a8d19f3695674883",
+  "sha256": "964a3c96307a53457c64dffaead1d7b32ffaf3fbf156960a492d60510b16fe9f",
+  "min_cases": 8
+ },
+ "wasm": {
+  "path": "D:\\GotYaForce\\.tmp\\wt-transcript\\research\\decomp\\port-units-staging\\auto-c0020-007\\unit.wasm",
+  "sha256": "016bbe4393aa4aa794d3a6b56ea67d93d09d300ed7d69c978f37f5d91e4a1317",
+  "memory_model": "exported"
+ },
+ "arena": {
+  "path": "research/decomp/oracle-harness/arena-trace-empty.json",
+  "sha256": "a382e7401f2192cc3ce7990e05ca1947ad744f07a23b3f9bfe5452ca3fd19632"
+ },
+ "capture": {
+  "file": "research/decomp/oracle-harness/corpora/auto-c0020-007.FUN_800c4468.transcript.jsonl",
+  "sha256": "c75337e1aff0c6af0fc50aa3cc65472f86e7e46fae8def80a902c770defb66c9",
+  "cases": 12,
+  "calls": 24,
+  "source": {
+   "standard": "transcript_green",
+   "capture_tool": "research/tools/dolphin-trace/capture_transcript.py",
+   "control_strategy": "breakpoint the function entry, every out-of-unit call site in its in-unit closure, the instruction after each, and the entry LR; terminate the case at the return with a stack-pointer guard",
+   "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Null video, CPU only",
+   "stub": "gdb-rsp 127.0.0.1:55555",
+   "dumped_at": "2026-08-30T05:50:25.089444Z",
+   "game_state": "2v2 sav + circling stick with B/X/A press-release edges",
+   "plan": "research/tools/dolphin-trace/plans/auto-c0020-007.FUN_800c4468.transcript.json",
+   "in_unit_closure": [
+    "FUN_800c4468"
+   ],
+   "watch_args_bytes": 512,
+   "seed_elem_width": 4,
+   "field_widths": {
+    "0xe0": 4
+   },
+   "field_width_conflicts": [],
+   "pad_injection": "combat:b,x,a",
+   "injected_frames": 22,
+   "scenario": "battle-2v2-combat",
+   "scenario_setup": null,
+   "misses": 0,
+   "exclusions": [
+    "transcript_green is STRICTLY WEAKER than oracle_green: it compares the observable call transcript and the return value, not the function's memory write set",
+    "memory is watch-set-scoped: only the seed/watch windows are read; a full MEM1 diff cannot run at frame rate over GDB-RSP",
+    "seed bytes are GIVEN to the port, not derived by it -- the wasm arena holds the static DOL image, not the live console heap",
+    "seed windows are byte-swapped FIELD-WISE using the width map the console's own load instructions state (see source.field_widths); bytes no load in the function touches keep the default 4-byte swap. A width the map gets wrong can only cause a FALSE RED, never a false green",
+    "console stack addresses are excluded (the wasm module has its own linear stack)",
+    "in-unit calls are followed but NOT recorded: they are internal wasm calls no import shim can observe",
+    "the claim is bounded by this corpus -- N recorded cases, never all inputs"
+   ],
+   "notes": [],
+   "elapsed_s": 10.8
+  }
+ },
+ "function": {
+  "export": "FUN_800c4468",
+  "gc_addr": "0x800c4468",
+  "params": [
+   "i64",
+   "f64",
+   "f64",
+   "f64",
+   "f64",
+   "f64",
+   "f64",
+   "f64",
+   "i32",
+   "i32",
+   "i32",
+   "i32",
+   "i32",
+   "i32",
+   "i32",
+   "i32"
+  ],
+  "results": [],
+  "void": true
+ },
+ "owned_regions": [
+  {
+   "addr": "0x803bb150",
+   "size": 512
+  },
+  {
+   "addr": "0x803c0000",
+   "size": 512
+  },
+  {
+   "addr": "0x803f53a0",
+   "size": 512
+  }
+ ],
+ "owned_bytes": 1536,
+ "seeded_bytes": 1536,
+ "cases_passed": 0,
+ "calls_matched": 0,
+ "returns_checked": 0,
+ "vacuous_cases": [],
+ "divergence": {
+  "n": 0,
+  "i": 0,
+  "kind": "args",
+  "report": "arg divergence in case n=0 at i=0 zz_00076d0_@0x800076d0: expected (9253893519723317012, 0, 0, 0, 0, 1, 342, 160, 2151395664, 2151415808, 224, 661, 7, 2151633824, 4, 2154153472), got (-9194725358753304228n, 0, 0, 0, 0, 1, 342, 160, 0, -2143571356, 224, 661, 7, -2143333472, 0, -2143573980)"
+ },
+ "verdict_note": null,
+ "verdict": "fail"
+}

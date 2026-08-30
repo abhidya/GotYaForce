@@ -49,12 +49,23 @@ command you ran, its result, and the product behavior it proves.
 - **Playable:** the browser acceptance route reaches and operates the intended
   game state; compilation alone never establishes this.
 
-For wasm port units the recorded tiers are `compile_only`, `oracle_green`, and
-`boundary_green`. **`compile_only` means the unit compiled and linked and nothing
-else** — it is inventory, not progress, and at least one `compile_only` unit is
-proven behaviorally wrong. Never describe a `compile_only` unit as ported, done,
-or working. The tier vocabulary is defined in the root `README.md` and in the
+For wasm port units the recorded tiers are `compile_only`, `oracle_green`,
+`boundary_green`, and `transcript_green`. **`compile_only` means the unit
+compiled and linked and nothing else** — it is inventory, not progress, and at
+least one `compile_only` unit is proven behaviorally wrong. Never describe a
+`compile_only` unit as ported, done, or working. The tier vocabulary is defined
+in the root `README.md` and in the
 [atlas porting guide](docs-site/contributing/porting.md).
+
+`oracle_green` is the only byte-exact write-comparison claim. `boundary_green`
+and `transcript_green` are **callee-boundary** claims and are strictly weaker:
+they verify the calls a function makes (and, for `transcript_green`, its return
+value), not the memory it wrote. Never report either as `oracle_green`, and
+never count a `transcript_green` function toward write-verified coverage. A
+`transcript_green` result is a per-FUNCTION artifact
+(`research/decomp/data/oracle-results/<unit>.<export>.transcript.json`) and is
+deliberately **not** a unit tier in the driver's ledger — several counters treat
+"tier is not `compile_only`" as verified, which would over-count it.
 
 Unknown behavior stays `PARTIAL`, `TUNED`, or `BLOCKED`. Do not replace missing
 evidence with plausible constants and label it exact.

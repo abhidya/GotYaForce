@@ -805,6 +805,54 @@ the full capture library remains the step-10 deliverable.
 iterations before the control-inversion step runs; the K, the callee-boundary
 corpus, and the stub exclusions are recorded in its result artifact.
 
+### The same mechanism at fleet scale: `transcript_green`
+
+The spine is not the only function `oracle_green` cannot reach, and it is not
+even the common case. **Measured** over the whole ROM
+(`research/tools/OGhidra/tools/survey_plan_tiers.py`, 10,954 functions): only
+**652 (6.0%)** can carry an auto-derived write-comparison spec at all, and
+**4,455 (40.7%) store nothing a capture could compare.** For those the
+write-comparison standard is not hard, it is EMPTY — a spec over them would pass
+vacuously, and the existing corpus shows exactly that (every one of the 15 cases
+in `corpora/auto-c0020-007.FUN_800c4448.dolphin-trace.jsonl` records
+`"reads": [], "writes": []`).
+
+A function with no writes is not unobservable. It still has a **return value**, a
+**call sequence to its out-of-unit callees with concrete arguments**, and
+**reads** that flow into both. `transcript_green` is `boundary_green`'s
+machinery generalised from the spine to ordinary returning functions:
+
+- **Capture** (`research/tools/dolphin-trace/capture_transcript.py`): breakpoint
+  the function's entry, every out-of-unit call site in its transitive in-unit
+  closure, the instruction after each, and the entry LR; record N independent
+  cases; terminate each at the function's own return, guarded by the stack
+  pointer so a shared or recursive return address cannot close a case early.
+- **Replay** (`research/decomp/oracle-harness/run-transcript.mjs`): stub every
+  callee with its captured boundary behaviour and assert the port emits the
+  identical call sequence with identical arguments **and returns the identical
+  value**.
+- **Weaker, and said so.** `transcript_green` does NOT compare a write set. Its
+  result artifact carries `standard: "transcript_green"` plus a machine-readable
+  `claim` block naming `oracle_green` as the stronger standard and listing what
+  is not verified; it lives in its own filename namespace
+  (`<unit>.<export>.transcript.json`) and its verdict token shares no string
+  with either other harness. It is a per-function artifact, deliberately not a
+  unit tier in the driver ledger.
+- **Non-vacuity is enforced, not assumed.** A weaker standard is only worth
+  having if it cannot pass on nothing: zero cases cannot pass, a corpus below
+  `--min-cases` cannot pass, and a case with no calls, no return value and no
+  owned expectation fails the run outright. The capture tool refuses the same
+  shape before the emulator is even started.
+
+**The re-measured ceiling.** With `transcript_green` available, **8,849 of
+10,954 functions (80.8%)** are verifiable by some tier — 652 by `oracle_green`,
+8,197 by `transcript_green` — and units with full export coverage rise from
+**2 to 378 of 1,396 (27.1%)**. The remaining 2,105 split as 1,602 that dispatch
+through a ROM function-pointer table (`bctrl`; emcc lowers it to
+`call_indirect` on the module's own table, which no import shim can observe, so
+the transcript would have a hole) and 503 with an empty transcript — no
+out-of-unit call and no return value, i.e. genuinely nothing to compare.
+
 ## Non-fatal review notes (normative)
 
 1. **H3's uniform ABI trades traps for potential silent mis-marshalling.** With
