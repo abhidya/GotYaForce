@@ -1363,4 +1363,36 @@ export function registerWgPipeAdapters(
   host.registerAdapter(define("__gf_gx_wgpipe_f32", (v) => gx.fifo.writeF32(v), true));
 }
 
+/**
+ * Bind `gnt4_PSMTXIdentity_bl`.
+ *
+ * Not a GX entry point — it is the SDK's matrix library, which is equally
+ * out-of-window and equally host-provided, and the ROM's own draw functions
+ * call it to build the position matrix they then load. It lives here rather
+ * than in each consumer because BOTH the browser self-test and the GX
+ * call-stream oracle drive real ROM units that call it, and two copies of one
+ * adapter is exactly how two consumers drift into disagreeing about what the
+ * host does.
+ */
+export function registerPsmtxIdentityAdapter(host: {
+  registerAdapter(adapter: BridgedCalleeAdapter): void;
+}): void {
+  host.registerAdapter(
+    defineAdapter({
+      gcAddr: gcAddressForSymbol("gnt4_PSMTXIdentity_bl").gcAddr,
+      name: "gnt4_PSMTXIdentity_bl",
+      evidence:
+        "PSMTX matrix library, out-of-window like GX; writes a 3x4 row-major identity. " +
+        "Synthetic: no trace verification (docs/gx-hle-host.md)",
+      evidenceClass: "synthetic",
+      retClass: FrameValueClass.VOID,
+      service(ctx) {
+        const out = ctx.frame.u32Arg(0) >>> 0;
+        for (let i = 0; i < 12; i++) ctx.mem.writeF32(out + i * 4, i === 0 || i === 5 || i === 10 ? 1 : 0);
+        return ctx.frame.setRetVoid();
+      },
+    }),
+  );
+}
+
 export { attrName, gxCoverage, GX_CALL_INVENTORY };

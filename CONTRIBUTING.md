@@ -72,6 +72,18 @@ treat "tier is not `compile_only`" as verified, which would over-count it. That 
 is latent today and is recorded in full, with its blast radius, in
 [`docs/verification-status.md`](docs/verification-status.md) §6.
 
+The **GX HLE host** has two further console-derived standards, added 2026-08-31:
+`gx_callstream_green` (the SDK-seam call and write-gather-pipe stream) and
+`gx_framebuffer_equivalent` (one draw's contribution to a real console frame,
+within a declared per-channel tolerance). They are **orthogonal** to the four
+tiers above, not weaker or stronger: they compare things a write set, a callee
+boundary and a return value cannot see. Never total a GX result with a wasm-unit
+tier, and never let `gx_framebuffer_equivalent` be written up as a pixel match —
+the ceiling for that boundary is "framebuffer-equivalent, never pixel-identical"
+and no result may quietly upgrade it. A GX adapter's `evidenceClass` stays
+`"synthetic"` until *that adapter's own* behaviour is checked; neither standard
+does that, and the browser smoke phase fails if one ever claims otherwise.
+
 Unknown behavior stays `PARTIAL`, `TUNED`, or `BLOCKED`. Do not replace missing
 evidence with plausible constants and label it exact.
 

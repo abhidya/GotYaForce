@@ -1,0 +1,690 @@
+{
+ "gx_plan_schema": 1,
+ "generated_by": "research/tools/dolphin-trace/capture_gx.py sites",
+ "generated_at": "2026-08-31T21:39:28.910434Z",
+ "function": {
+  "gc_addr": "0x80027c34",
+  "end": "0x80027dbc",
+  "export": "zz_0027c34_",
+  "params": [],
+  "results": [],
+  "entry_args": []
+ },
+ "wasm": "packages/rom-runtime/test/fixtures/gx-rom-unit/gx_rom_unit.threads.wasm",
+ "shape": {
+  "start": "0x80027c34",
+  "end": "0x80027dbc",
+  "calls": [
+   {
+    "at": "0x80027c60",
+    "target": "0x8022782c",
+    "callee": "gnt4_GXSetCullMode_bl",
+    "wasm_params": [
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027c74",
+    "target": "0x8022a808",
+    "callee": "gnt4_GXSetBlendMode_bl",
+    "wasm_params": [
+     "i32",
+     "i32",
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     },
+     {
+      "i": 2,
+      "t": "i32",
+      "src": "r5"
+     },
+     {
+      "i": 3,
+      "t": "i32",
+      "src": "r6"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027c84",
+    "target": "0x8022a8b4",
+    "callee": "gnt4_GXSetZMode_bl",
+    "wasm_params": [
+     "i32",
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     },
+     {
+      "i": 2,
+      "t": "i32",
+      "src": "r5"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027c94",
+    "target": "0x8022bce8",
+    "callee": "gnt4_GXSetProjection_bl",
+    "wasm_params": [
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027c9c",
+    "target": "0x8020aefc",
+    "callee": "gnt4_PSMTXIdentity_bl",
+    "wasm_params": [
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027ca8",
+    "target": "0x8022be60",
+    "callee": "gnt4_GXLoadPosMtxImm_bl",
+    "wasm_params": [
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027cb0",
+    "target": "0x8022bf00",
+    "callee": "gnt4_GXSetCurrentMtx_bl",
+    "wasm_params": [
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027cb4",
+    "target": "0x802261ac",
+    "callee": "gnt4_GXClearVtxDesc_bl",
+    "wasm_params": [],
+    "args": [],
+    "ret": null
+   },
+   {
+    "at": "0x80027cc0",
+    "target": "0x80225894",
+    "callee": "gnt4_GXSetVtxDesc_bl",
+    "wasm_params": [
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027ccc",
+    "target": "0x80225894",
+    "callee": "gnt4_GXSetVtxDesc_bl",
+    "wasm_params": [
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027ce4",
+    "target": "0x802261e4",
+    "callee": "gnt4_GXSetVtxAttrFmt_bl",
+    "wasm_params": [
+     "i32",
+     "i32",
+     "i32",
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     },
+     {
+      "i": 2,
+      "t": "i32",
+      "src": "r5"
+     },
+     {
+      "i": 3,
+      "t": "i32",
+      "src": "r6"
+     },
+     {
+      "i": 4,
+      "t": "i32",
+      "src": "r7"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027cfc",
+    "target": "0x802261e4",
+    "callee": "gnt4_GXSetVtxAttrFmt_bl",
+    "wasm_params": [
+     "i32",
+     "i32",
+     "i32",
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     },
+     {
+      "i": 2,
+      "t": "i32",
+      "src": "r5"
+     },
+     {
+      "i": 3,
+      "t": "i32",
+      "src": "r6"
+     },
+     {
+      "i": 4,
+      "t": "i32",
+      "src": "r7"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027d04",
+    "target": "0x8022885c",
+    "callee": "gnt4_GXSetNumChans_bl",
+    "wasm_params": [
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027d0c",
+    "target": "0x80226d6c",
+    "callee": "gnt4_GXSetNumTexGens_bl",
+    "wasm_params": [
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027d14",
+    "target": "0x8022a2e8",
+    "callee": "gnt4_GXSetNumTevStages_bl",
+    "wasm_params": [
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027d34",
+    "target": "0x80228898",
+    "callee": "gnt4_GXSetChanCtrl_bl",
+    "wasm_params": [
+     "i32",
+     "i32",
+     "i32",
+     "i32",
+     "i32",
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     },
+     {
+      "i": 2,
+      "t": "i32",
+      "src": "r5"
+     },
+     {
+      "i": 3,
+      "t": "i32",
+      "src": "r6"
+     },
+     {
+      "i": 4,
+      "t": "i32",
+      "src": "r7"
+     },
+     {
+      "i": 5,
+      "t": "i32",
+      "src": "r8"
+     },
+     {
+      "i": 6,
+      "t": "i32",
+      "src": "r9"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027d48",
+    "target": "0x8022a14c",
+    "callee": "gnt4_GXSetTevOrder_bl",
+    "wasm_params": [
+     "i32",
+     "i32",
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     },
+     {
+      "i": 2,
+      "t": "i32",
+      "src": "r5"
+     },
+     {
+      "i": 3,
+      "t": "i32",
+      "src": "r6"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027d54",
+    "target": "0x80229bac",
+    "callee": "gnt4_GXSetTevOp_bl",
+    "wasm_params": [
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "at": "0x80027d64",
+    "target": "0x8022760c",
+    "callee": "gnt4_GXBegin_bl",
+    "wasm_params": [
+     "i32",
+     "i32",
+     "i32"
+    ],
+    "args": [
+     {
+      "i": 0,
+      "t": "i32",
+      "src": "r3"
+     },
+     {
+      "i": 1,
+      "t": "i32",
+      "src": "r4"
+     },
+     {
+      "i": 2,
+      "t": "i32",
+      "src": "r5"
+     }
+    ],
+    "ret": null
+   }
+  ],
+  "stores": [
+   {
+    "at": "0x80027d80",
+    "op": "sth",
+    "width": 2,
+    "src_reg": "r5",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027d84",
+    "op": "sth",
+    "width": 2,
+    "src_reg": "r5",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027d88",
+    "op": "stw",
+    "width": 4,
+    "src_reg": "r6",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027d8c",
+    "op": "sth",
+    "width": 2,
+    "src_reg": "r3",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027d90",
+    "op": "sth",
+    "width": 2,
+    "src_reg": "r5",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027d94",
+    "op": "stw",
+    "width": 4,
+    "src_reg": "r6",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027d98",
+    "op": "sth",
+    "width": 2,
+    "src_reg": "r3",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027d9c",
+    "op": "sth",
+    "width": 2,
+    "src_reg": "r0",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027da0",
+    "op": "stw",
+    "width": 4,
+    "src_reg": "r6",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027da4",
+    "op": "sth",
+    "width": 2,
+    "src_reg": "r5",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027da8",
+    "op": "sth",
+    "width": 2,
+    "src_reg": "r0",
+    "base_reg": "r4",
+    "disp": -32768
+   },
+   {
+    "at": "0x80027dac",
+    "op": "stw",
+    "width": 4,
+    "src_reg": "r6",
+    "base_reg": "r4",
+    "disp": -32768
+   }
+  ],
+  "conditional_branches": [
+   "0x80027c4c",
+   "0x80027c58"
+  ],
+  "indirect_calls": [],
+  "returns": [
+   "0x80027dbc"
+  ]
+ },
+ "binding": {
+  "strategy": "first-use order of distinct ROM call targets zipped with the module's non-wgpipe imports",
+  "map": {
+   "0x8022782c": "gnt4_GXSetCullMode_bl",
+   "0x8022a808": "gnt4_GXSetBlendMode_bl",
+   "0x8022a8b4": "gnt4_GXSetZMode_bl",
+   "0x8022bce8": "gnt4_GXSetProjection_bl",
+   "0x8020aefc": "gnt4_PSMTXIdentity_bl",
+   "0x8022be60": "gnt4_GXLoadPosMtxImm_bl",
+   "0x8022bf00": "gnt4_GXSetCurrentMtx_bl",
+   "0x802261ac": "gnt4_GXClearVtxDesc_bl",
+   "0x80225894": "gnt4_GXSetVtxDesc_bl",
+   "0x802261e4": "gnt4_GXSetVtxAttrFmt_bl",
+   "0x8022885c": "gnt4_GXSetNumChans_bl",
+   "0x80226d6c": "gnt4_GXSetNumTexGens_bl",
+   "0x8022a2e8": "gnt4_GXSetNumTevStages_bl",
+   "0x80228898": "gnt4_GXSetChanCtrl_bl",
+   "0x8022a14c": "gnt4_GXSetTevOrder_bl",
+   "0x80229bac": "gnt4_GXSetTevOp_bl",
+   "0x8022760c": "gnt4_GXBegin_bl"
+  },
+  "cross_checked_against_gx_inventory": [
+   "gnt4_GXBegin_bl",
+   "gnt4_GXClearVtxDesc_bl",
+   "gnt4_GXLoadPosMtxImm_bl",
+   "gnt4_GXSetBlendMode_bl",
+   "gnt4_GXSetChanCtrl_bl",
+   "gnt4_GXSetCullMode_bl",
+   "gnt4_GXSetCurrentMtx_bl",
+   "gnt4_GXSetNumChans_bl",
+   "gnt4_GXSetNumTevStages_bl",
+   "gnt4_GXSetNumTexGens_bl",
+   "gnt4_GXSetProjection_bl",
+   "gnt4_GXSetTevOp_bl",
+   "gnt4_GXSetTevOrder_bl",
+   "gnt4_GXSetVtxAttrFmt_bl",
+   "gnt4_GXSetVtxDesc_bl",
+   "gnt4_GXSetZMode_bl"
+  ]
+ },
+ "wgpipe_imports": [
+  "__gf_gx_wgpipe_u16",
+  "__gf_gx_wgpipe_u32"
+ ],
+ "wgpipe_window": [
+  "0xcc008000",
+  "0xcc008020"
+ ],
+ "reads": [
+  {
+   "name": "PTR_DAT_80433930",
+   "addr": "0x80433930",
+   "size": 4,
+   "elem_width": 4,
+   "c": "GC_IPTR(0x80433930) -- the guard object pointer"
+  },
+  {
+   "name": "guard_flag",
+   "deref": "PTR_DAT_80433930",
+   "off": 56,
+   "size": 4,
+   "elem_width": 4,
+   "c": "*(int *)(PTR_DAT_80433930 + 0x38) -- must be 0 for the draw to happen"
+  },
+  {
+   "name": "DAT_80436108",
+   "addr": "0x80436108",
+   "size": 4,
+   "elem_width": 4,
+   "c": "DAT_80436108 != 0 -- second half of the guard"
+  },
+  {
+   "name": "DAT_8043610c",
+   "addr": "0x8043610c",
+   "size": 4,
+   "elem_width": 4,
+   "c": "GC_U32P(0x8043610c) -- pointer to the fade colour word"
+  },
+  {
+   "name": "fade_color",
+   "deref": "DAT_8043610c",
+   "off": 0,
+   "size": 4,
+   "elem_width": 4,
+   "c": "uVar1 = *DAT_8043610c -- the RGBA8 word every vertex carries"
+  },
+  {
+   "name": "DAT_803c0f40",
+   "addr": "0x803c0f40",
+   "size": 64,
+   "elem_width": 4,
+   "c": "the projection matrix passed by pointer to gnt4_GXSetProjection_bl"
+  }
+ ]
+}

@@ -115,6 +115,7 @@ export {
   WGPIPE_SYMBOLS,
   gxTieredCoverage,
   registerGxAdapters,
+  registerPsmtxIdentityAdapter,
   registerWgPipeAdapters,
   type GxImplTier,
 } from "./adapters.js";

@@ -21,6 +21,7 @@ try {
     path.join(here, "replay-gate.test.mjs"),
     path.join(here, "spine-harness.test.mjs"),
     path.join(here, "transcript-harness.test.mjs"),
+    path.join(here, "gx-callstream-harness.test.mjs"),
   ], {
     cwd: root,
     env: {
