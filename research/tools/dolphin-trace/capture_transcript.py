@@ -644,9 +644,26 @@ def swap_fields(raw: bytes, field_widths: dict[int, int], default_width: int) ->
     instruction touches keep the default-width swap; nothing reads them, and
     the capture declares the fact rather than hiding it.
     """
-    out = bytearray(swap_elems(raw, default_width))
     n = len(raw)
+    out = bytearray(swap_elems(raw, default_width))
+    # A default-width block that contains ANY declared narrower field is not a
+    # default-width value, so the whole block has to be rebuilt -- not just the
+    # declared bytes patched. Patching only the declared bytes was the bug:
+    # zz_01a39a4_ declares a byte at +0x547, and leaving the rest of the word
+    # 0x544..0x547 reversed put the console's 0x547 byte at arena 0x544, which
+    # the replay reported as an owned-write divergence at exactly that offset
+    # (expected 0x01 got 0x00) even after the store width was known.
+    # Bytes inside such a block that no instruction touches are left IDENTITY:
+    # nothing reads them at any width, so no width is defensible for them, and
+    # identity is the only choice that cannot move a declared neighbour.
+    dirty: set[int] = set()
     for off, w in field_widths.items():
+        if 0 <= off and off + w <= n and w != default_width:
+            dirty.add(off - off % default_width)
+    for block in sorted(dirty):
+        stop = min(block + default_width, n)
+        out[block:stop] = raw[block:stop]          # identity by default
+    for off, w in sorted(field_widths.items()):
         if 0 <= off and off + w <= n and w != default_width:
             out[off:off + w] = raw[off:off + w][::-1]
     return bytes(out)
