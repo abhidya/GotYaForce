@@ -143,6 +143,37 @@ def addr_name_candidates(addr: int) -> list[str]:
     return [f"zz_{addr & 0x0FFFFFFF:07x}_", f"FUN_{addr:08x}"]
 
 
+def sdk_import_names(repo_root: Path) -> dict[int, str]:
+    """address -> the ``gnt4_*`` wasm import name for that SDK helper.
+
+    The SDK is never ported (design stage 1): a unit's shim header declares each
+    SDK helper by a HAND-AUTHORED name (``gnt4_PSVECMag_bl``), not by address,
+    and the oracle registry has no entry for the SDK's addresses. So neither of
+    the two shapes ``addr_name_candidates`` knows, nor the registry lookup,
+    could bind a ROM ``bl`` into the SDK -- and every staged export that calls
+    one was refused as "binds to no wasm import". Measured 2026-08-31 over all
+    810 exports of the 103 staged compile-only units: 115 exports carried such
+    a site.
+
+    The table is committed at ``research/decomp/data/sdk-symbol-addresses.json``
+    with its derivation and its one known hole; it is DERIVED from the corpus,
+    not hand-listed here, so this function only reads it. Absent file -> empty
+    map -> the previous refusal behaviour, never a guess.
+    """
+    path = repo_root / "research/decomp/data/sdk-symbol-addresses.json"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    out: dict[int, str] = {}
+    for address, name in (payload.get("map") or {}).items():
+        try:
+            out[int(str(address), 16)] = str(name)
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
 def registry_names(repo_root: Path) -> dict[int, str]:
     """address -> Ghidra symbol, from the oracle registry when it is present.
 
@@ -194,11 +225,61 @@ def decode_function(dol: Dol, start: int, end: int) -> dict:
     returns: list[int] = []
     stores: list[dict] = []
     loads: list[dict] = []
+    # ---- GLOBAL READS (see cmd_sites' `globals`) ----------------------------
+    # A tiny, deliberately conservative constant tracker over the GPRs, just
+    # enough to resolve the two shapes the ROM uses to reach a static global:
+    #   lis rX, hi        ; lfs f1, lo(rX)          -> absolute hi<<16 + lo
+    #   <disp>(r2) / (r13)                          -> small-data-area relative
+    # Anything else invalidates the register. Over-invalidation only loses a
+    # global (which then reads as zero at replay, the pre-existing behaviour);
+    # UNDER-invalidation would seed the port a wrong address, so every opcode
+    # this walker does not model is treated as clobbering its plausible
+    # destinations, and a branch clears the whole map (no cross-block claims).
+    const: dict[int, int] = {}
+    globals_read: list[dict] = []
+    seen_globals: set[tuple] = set()
+
+    def note_global(entry: dict) -> None:
+        key = tuple(sorted(entry.items()))
+        if key not in seen_globals:
+            seen_globals.add(key)
+            globals_read.append(entry)
+
     for addr in range(start, end, 4):
         w = dol.word(addr)
         if w is None:
             raise SystemExit(f"function walk left mapped ROM at {addr:#010x}")
         op = w >> 26
+        # --- constant tracking, before the dispatch below consumes the word ---
+        if op == 15:                                    # addis rD, rA, SIMM
+            rd, ra = (w >> 21) & 31, (w >> 16) & 31
+            if ra == 0:
+                const[rd] = (w & 0xFFFF) << 16
+            elif ra in const:
+                const[rd] = (const[ra] + (s16(w & 0xFFFF) << 16)) & 0xFFFFFFFF
+            else:
+                const.pop(rd, None)
+        elif op == 14:                                  # addi rD, rA, SIMM
+            rd, ra = (w >> 21) & 31, (w >> 16) & 31
+            if ra == 0:
+                const[rd] = s16(w & 0xFFFF) & 0xFFFFFFFF
+            elif ra in const:
+                const[rd] = (const[ra] + s16(w & 0xFFFF)) & 0xFFFFFFFF
+            else:
+                const.pop(rd, None)
+        elif op == 24:                                  # ori rA, rS, UIMM
+            ra, rs = (w >> 16) & 31, (w >> 21) & 31
+            if rs in const:
+                const[ra] = const[rs] | (w & 0xFFFF)
+            else:
+                const.pop(ra, None)
+        elif op in (BRANCH_OP, BC_OP, BCLR_OP):
+            const.clear()                               # control-flow merge
+        elif op in LOAD_OPS and op < 48:                # integer load: writes rD
+            const.pop((w >> 21) & 31, None)
+        elif op not in LOAD_OPS and op not in STORE_OPS:
+            const.pop((w >> 21) & 31, None)
+            const.pop((w >> 16) & 31, None)
         if op == BRANCH_OP:
             target, is_call = branch_target(addr, w)
             if is_call:
@@ -224,14 +305,28 @@ def decode_function(dol: Dol, start: int, end: int) -> dict:
         elif op in LOAD_OPS:
             name, width = LOAD_OPS[op]
             rd, ra, d = (w >> 21) & 31, (w >> 16) & 31, s16(w & 0xFFFF)
-            if ra in (1, 2, 13):
-                continue            # stack / TOC / small-data base, not an argument object
+            if ra in (2, 13):
+                # Small-data-area relative: r2/r13 are set once at boot, so the
+                # address is only knowable from the live console. Recorded as a
+                # DISPLACEMENT and resolved at capture time.
+                note_global({"kind": f"r{ra}", "disp": d, "width": width,
+                             "at": f"0x{addr:08x}", "op": name})
+                continue
+            if ra == 1:
+                continue                # stack slot, not observable state
+            if ra in const:
+                target = (const[ra] + d) & 0xFFFFFFFF
+                if is_mem1(target):
+                    note_global({"kind": "abs", "addr": f"0x{target:08x}",
+                                 "width": width, "at": f"0x{addr:08x}",
+                                 "op": name})
+                continue
             loads.append({"at": f"0x{addr:08x}", "op": name, "width": width,
                           "base_reg": f"r{ra}", "disp": d})
     return {"start": f"0x{start:08x}", "end": f"0x{end:08x}",
             "calls": calls, "indirect_calls": indirect,
             "returns": [f"0x{a:08x}" for a in returns], "stores": stores,
-            "loads": loads}
+            "loads": loads, "globals": globals_read}
 
 
 def sweep_extent(dol: Dol, start: int, limit: int = 0x4000) -> int:
@@ -306,12 +401,18 @@ def cmd_sites(a: argparse.Namespace) -> int:
         sys.exit(f"{a.wasm} does not export {a.fn}")
 
     reg = registry_names(REPO_ROOT)
+    sdk = sdk_import_names(REPO_ROOT)
 
     def bind_callee(target: int) -> str | None:
         for cand in addr_name_candidates(target):
             if cand in import_by_name:
                 return cand
         nm = reg.get(target)
+        if nm and nm in import_by_name:
+            return nm
+        # The SDK is imported under shim names, not by address: last resort, and
+        # still only when the module really declares that import.
+        nm = sdk.get(target)
         if nm and nm in import_by_name:
             return nm
         return None
@@ -391,6 +492,36 @@ def cmd_sites(a: argparse.Namespace) -> int:
             else:
                 field_widths[ld["disp"]] = ld["width"]
 
+    # ---- STATIC GLOBALS THE BODY READS --------------------------------------
+    # WHY (measured 2026-08-31): the wasm arena the replay starts from is
+    # `arena-trace-empty.json` -- EMPTY -- so every `DAT_`/`FLOAT_` the ROM keeps
+    # in static memory reads back as ZERO in the port while the console reads the
+    # real constant. The first two divergences the sweep produced were exactly
+    # this and NOT port defects: `FUN_80079b08` passes `FLOAT_804378f0` (-1.0 in
+    # the DOL) to `zz_004beb8_` and the port passed 0.0; `zz_0079d54_` passes
+    # `FLOAT_804378f8` (1.0) to `FUN_80067310` and the port passed 0.0. Left
+    # unfixed, the standard reds every function that hands a ROM constant to a
+    # callee, which is most of them.
+    #
+    # These addresses are read from the LIVE CONSOLE at capture time, not from
+    # the DOL image: a global may have been written since boot, and the claim
+    # must rest on what the console actually held. They are seeded into the port
+    # exactly like the pointer-argument windows -- bytes the port is GIVEN, never
+    # bytes it produced -- and are itemised in the header.
+    plan_globals = []
+    for f in closure:
+        for g in shapes[f].get("globals") or []:
+            plan_globals.append(dict(g, **{"in": by_addr[f]}))
+    # dedupe on (kind, address-or-displacement, width); keep the first witness
+    seen_g: set[tuple] = set()
+    globals_out = []
+    for g in plan_globals:
+        key = (g["kind"], g.get("addr"), g.get("disp"), g["width"])
+        if key in seen_g:
+            continue
+        seen_g.add(key)
+        globals_out.append(g)
+
     sig = exports[a.fn]
     ret_spec = eabi_return(sig["results"])
     # Non-vacuity, checked BEFORE the emulator is ever touched: a function that
@@ -422,6 +553,9 @@ def cmd_sites(a: argparse.Namespace) -> int:
         "unbound_call_sites": unbound,
         "return_sites": sorted({r for f in closure for r in shapes[f]["returns"]}),
         "stores": [dict(st, **{"in": by_addr[f]}) for f in closure for st in shapes[f]["stores"]],
+        # static globals the body reads: absolute (lis/addi-resolved) or
+        # small-data-area relative (r2/r13, resolved from the live console)
+        "globals": globals_out,
         # offset -> width, from the console's own load instructions; the seed
         # windows are byte-swapped field-wise with this map.
         "field_widths": {f"0x{off:x}": w for off, w in sorted(field_widths.items())},
@@ -448,6 +582,26 @@ def cmd_sites(a: argparse.Namespace) -> int:
 # --------------------------------------------------------------------------
 # capture
 # --------------------------------------------------------------------------
+
+def global_address(g: dict, regs) -> int | None:
+    """Absolute address of one plan `globals` entry.
+
+    ``abs`` entries were resolved from the ROM's own ``lis``/``addi`` pair at
+    plan time. ``r2``/``r13`` entries are small-data-area relative: those bases
+    are established at boot and are not in the DOL image, so the address only
+    exists on the live console and is resolved here, per case.
+    """
+    kind = g.get("kind")
+    if kind == "abs":
+        try:
+            return int(str(g["addr"]), 16)
+        except (KeyError, TypeError, ValueError):
+            return None
+    if kind in ("r2", "r13"):
+        base = regs.gpr(2 if kind == "r2" else 13)
+        return (base + int(g["disp"])) & 0xFFFFFFFF
+    return None
+
 
 def snapshot_windows(rsp, windows: list[dict]) -> dict[int, bytes]:
     return {w["addr"]: rsp.read_mem(w["addr"], w["size"]) for w in windows}
@@ -519,6 +673,7 @@ def cmd_capture(a: argparse.Namespace) -> int:
     notes: list[str] = []
     misses = 0
     watch_meta: list[dict] = []
+    seeded_globals: dict[str, dict] = {}
     d = StubDriver(a.port)
     setup_report = None
     t0 = time.monotonic()
@@ -571,6 +726,23 @@ def cmd_capture(a: argparse.Namespace) -> int:
                         windows.append({"addr": base, "size": a.watch_args,
                                         "arg": spec["i"]})
             seed = []
+            # ---- static globals the body reads (see the plan's `globals`) ----
+            # Read from the live console per case and swapped at the width the
+            # console's OWN load instruction used, so a f32 constant is swapped
+            # at 4 and a f64 at 8 -- a uniform swap would corrupt both.
+            for g in plan.get("globals") or []:
+                address = global_address(g, regs)
+                if address is None or not is_mem1(address):
+                    continue
+                raw = d.rsp.read_mem(address, g["width"])
+                seed.append({"addr": f"0x{address:08x}",
+                             "b64": base64.b64encode(
+                                 swap_elems(raw, g["width"])).decode()})
+                key = f"0x{address:08x}"
+                if key not in seeded_globals:
+                    seeded_globals[key] = {"addr": key, "width": g["width"],
+                                           "kind": g["kind"], "at": g["at"],
+                                           "in": g.get("in")}
             for w in windows:
                 raw = d.rsp.read_mem(w["addr"], w["size"])
                 seed.append({"addr": f"0x{w['addr']:08x}",
@@ -677,6 +849,10 @@ def cmd_capture(a: argparse.Namespace) -> int:
         # The authoritative per-case addresses are in each case's `owned_end`.
         # They are NOT a write set -- see the exclusions.
         "owned_regions": watch_meta,
+        # Static ROM globals the body reads, snapshotted from the live console
+        # and GIVEN to the port (never compared). Without them every function
+        # that hands a ROM constant to a callee reds falsely -- see the plan.
+        "seeded_globals": sorted(seeded_globals.values(), key=lambda g: g["addr"]),
         "watch_policy": {
             "rule": f"one {a.watch_args}-byte window at each MEM1-valued i32 "
                     f"pointer argument of the entry signature, per case",
