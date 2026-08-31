@@ -27,6 +27,16 @@ rule); pure stdlib.
   capture side for NONTERMINATING spine functions (design I3), which
   `capture_oracle.py`'s run-to-LR strategy structurally cannot handle. See
   "Spine capture" below.
+- `capture_gx.py` — CLI: `sites` / `scout` / `capture` / `surface` /
+  `framebuffer`. The **GX** capture side (standards `gx_callstream_green` and
+  `gx_framebuffer_equivalent`, `docs/gx-hle-host.md` §6.3). A GX draw
+  function's observable behaviour is CALLS INTERLEAVED WITH WRITE-GATHER-PIPE
+  STORES, and a pipe store is neither a call nor a MEM1 write, so none of the
+  three tools above can see it. `sites`/`capture` record that one ordered
+  stream per invocation; `surface` breakpoints a chosen set of GX entry points
+  and reports live call frequency plus the distinct argument tuples the ROM
+  passes; `framebuffer` dumps one console XFB out of emulated RAM. Replayed by
+  `oracle-harness/run-gx-callstream.mjs` and `run-gx-framebuffer.mjs`.
 - `merge_fixtures.py` — combine the per-export fixtures of one unit into the
   single corpus `run-unit.mjs` loads (`spec.meta.fixture`). Needed by any spec
   covering MORE THAN ONE export, because capture emits one fixture per export
@@ -81,6 +91,28 @@ rule); pure stdlib.
    savestate here; it is instead re-derived from the base savestate by a
    scenario `setup` block on every boot (a few seconds), which is also
    versionable text rather than a 20 MB blob.
+6c. **The stub refuses MMIO, and the XFB is only in RAM under one backend**
+   (measured 2026-08-31, for `capture_gx.py framebuffer`). `m cc00201c,4`
+   returns `E00`, so the VI registers that hold the external framebuffer's
+   address are NOT readable; get it from the ROM instead —
+   `gnt4_VISetNextFrameBuffer` @0x80212284 takes it in r3. And the video
+   backend string must be exactly `Software Renderer`: with `Null`, and with an
+   unrecognised string (which silently falls back), both XFBs read back as ALL
+   ZERO because Dolphin keeps XFB copies host-side. The software renderer is a
+   CPU rasterizer, so it respects the GPU-lease rule exactly as Null does.
+6d. **A stub session lasts about 40 s.** Measured repeatedly across scout,
+   capture and a dedicated probe: the connection is reset by the peer after
+   roughly 40 s of wall time or a few hundred breakpoint stops, whichever comes
+   first, with the emulator still alive afterwards. Design captures to finish in
+   seconds and to save whatever completed. To reach a GUARDED code path, run at
+   FULL speed with no breakpoints and poll the guard (`capture_gx.py capture
+   --arm-on <read>`) rather than waiting under a breakpoint loop, which is
+   roughly 15x slower than real time.
+6e. **Port 55555 and `user-data/dolphin-oracle` are shared with other work on
+   this rig.** A second tenant launched its own Dolphin onto that port
+   mid-session on 2026-08-31, which made one capture ambiguous about which
+   instance it had attached to. For anything whose provenance must be exact,
+   pass `--port` and `--user-dir` of your own.
 7. `scout` empirics (90 s, 201 callee-free staged functions, live 2v2 +
    injection): only `FUN_8000fc2c` and `zz_0010980_` fire (4/frame each —
    per-player camera/UI updates). Family-specific actor helpers need their
