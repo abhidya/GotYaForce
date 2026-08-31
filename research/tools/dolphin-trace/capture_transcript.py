@@ -310,7 +310,8 @@ def decode_function(dol: Dol, start: int, end: int) -> dict:
             if ra == 1:
                 continue                # stack slot, not observable state
             stores.append({"at": f"0x{addr:08x}", "op": name, "width": width,
-                           "src_reg": f"r{rs}", "addr_expr": f"r{ra}{d:+#x}"})
+                           "src_reg": f"r{rs}", "base_reg": f"r{ra}", "disp": d,
+                           "addr_expr": f"r{ra}{d:+#x}"})
         elif op in LOAD_OPS:
             name, width = LOAD_OPS[op]
             rd, ra, d = (w >> 21) & 31, (w >> 16) & 31, s16(w & 0xFFFF)
@@ -486,11 +487,22 @@ def cmd_sites(a: argparse.Namespace) -> int:
     # at `disp(rA)` states the width at each offset, so that is what is used.
     # A single offset read at two widths is a genuine conflict and is REPORTED,
     # not silently resolved.
+    #
+    # STORES COUNT TOO (measured 2026-08-31). The map used to be built from
+    # loads alone, which silently mis-swapped every field the body only WRITES.
+    # auto-c0050-004.zz_01a39a4_ stores a byte at +0x547 and never loads
+    # anything in that word, so the word fell back to the default 4-byte swap
+    # and the console's byte at +0x547 landed at arena +0x544 -- the replay then
+    # reported an owned-write divergence "at 0x...544 expected 0x01 got 0x00",
+    # which is the byte-order artifact, not the port. A store states the field's
+    # width exactly as authoritatively as a load does.
     field_widths: dict[int, int] = {}
     width_conflicts: list[dict] = []
     for f in closure:
-        for ld in shapes[f]["loads"]:
-            if ld["disp"] < 0:
+        for ld in list(shapes[f]["loads"]) + list(shapes[f]["stores"]):
+            if ld.get("disp") is None or ld["disp"] < 0:
+                continue
+            if ld.get("base_reg") in ("r1", "r2", "r13"):
                 continue
             prev = field_widths.get(ld["disp"])
             if prev is not None and prev != ld["width"]:
@@ -622,10 +634,15 @@ def swap_fields(raw: bytes, field_widths: dict[int, int], default_width: int) ->
     A uniform element-wise swap (capture_spine.py's rule, which is right for a
     region of one declared width) is WRONG for a raw struct window, where a u16
     field and a u32 field sit side by side. `field_widths` is offset -> width,
-    read straight off the console's own load instructions by `sites`, so each
-    field the code actually reads is swapped at the width it is read at. Bytes
-    no load touches keep the default-width swap; nothing reads them, and the
-    capture declares the fact rather than hiding it.
+    read straight off the console's own LOAD AND STORE instructions by `sites`,
+    so each field the code actually touches is swapped at the width it is
+    touched at. Stores matter as much as loads: a field the body only WRITES
+    (auto-c0050-004.zz_01a39a4_ stores a byte at +0x547 and loads nothing in
+    that word) would otherwise fall back to the default 4-byte swap, which puts
+    the console's byte at a different arena offset and reds the replay with an
+    owned-write divergence that is pure byte order, not behaviour. Bytes no
+    instruction touches keep the default-width swap; nothing reads them, and
+    the capture declares the fact rather than hiding it.
     """
     out = bytearray(swap_elems(raw, default_width))
     n = len(raw)
