@@ -1,0 +1,437 @@
+{
+  "generatedBy": "scripts/hle-call-inventory.mjs",
+  "family": "audio",
+  "title": "Audio (AI / AR / ARQ / DSP / OS audio system)",
+  "corpus": "research/decomp/ghidra-export",
+  "method": "static call-site counts attributed to the enclosing function; 'game' = caller is ROM game code, 'sdk-internal' = caller is itself a gnt4_* SDK/HSD function. MMIO counts are static register mentions classified read/write by whether the register appears on the left of an assignment. NOT a runtime frequency measurement.",
+  "totals": {
+    "symbolsInDol": 26,
+    "symbolsCalledAnywhere": 23,
+    "symbolsCalledByGameCode": 20,
+    "gameCallSites": 40,
+    "sdkInternalCallSites": 11,
+    "bridgedSymbolsCalledByGameCode": 5,
+    "bridgedGameCallSites": 6,
+    "inWindowSymbolsCalledByGameCode": 15,
+    "inWindowGameCallSites": 34,
+    "mmioRegisters": 18,
+    "mmioReads": 403,
+    "mmioWrites": 342
+  },
+  "entries": [
+    {
+      "symbol": "AISetStreamVolLeft",
+      "romAddr": "802149c0",
+      "seam": "in-window",
+      "gameCalls": 10,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 6
+    },
+    {
+      "symbol": "AIInitDMA",
+      "romAddr": "80214634",
+      "seam": "in-window",
+      "gameCalls": 4,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "__AI_SRC_INIT",
+      "romAddr": "80214cd8",
+      "seam": "in-window",
+      "gameCalls": 3,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "AIGetStreamPlayState",
+      "romAddr": "802149b0",
+      "seam": "in-window",
+      "gameCalls": 3,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "ARAlloc",
+      "romAddr": "80214ff0",
+      "seam": "in-window",
+      "gameCalls": 3,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "AISetStreamPlayState",
+      "romAddr": "802146d4",
+      "seam": "in-window",
+      "gameCalls": 2,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4___OSStopAudioSystem_bl",
+      "romAddr": "80200518",
+      "seam": "bridged",
+      "gameCalls": 2,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "__AI_set_stream_sample_rate",
+      "romAddr": "802148b0",
+      "seam": "in-window",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "__AICallbackStackSwitch",
+      "romAddr": "80214c80",
+      "seam": "in-window",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "__ARChecksize",
+      "romAddr": "80215208",
+      "seam": "in-window",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "AIGetDSPSampleRate",
+      "romAddr": "8021489c",
+      "seam": "in-window",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "AIInit",
+      "romAddr": "802149ec",
+      "seam": "in-window",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "AISetDSPSampleRate",
+      "romAddr": "802147bc",
+      "seam": "in-window",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "AIStartDMA",
+      "romAddr": "802146bc",
+      "seam": "in-window",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "ARFree",
+      "romAddr": "80215058",
+      "seam": "in-window",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "ARInit",
+      "romAddr": "802150cc",
+      "seam": "in-window",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4___OSInitAudioSystem_bl",
+      "romAddr": "8020035c",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_ARQInit_bl",
+      "romAddr": "80216bcc",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_OSGetSoundMode_bl",
+      "romAddr": "80205750",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_OSSetSoundMode_bl",
+      "romAddr": "802057d0",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_ARStartDMA",
+      "romAddr": "80214f00",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 8,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___ARQServiceQueueLo_bl",
+      "romAddr": "802169fc",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_ARRegisterDMACallback",
+      "romAddr": "80214ebc",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    }
+  ],
+  "registers": [
+    {
+      "register": "0xcc005028",
+      "window": "DSP",
+      "reads": 105,
+      "writes": 107,
+      "total": 212,
+      "functions": [
+        "8020035c gnt4-__OSInitAudioSystem-bl",
+        "80214f00 gnt4-ARStartDMA",
+        "80215208 __ARChecksize"
+      ]
+    },
+    {
+      "register": "0xcc00500a",
+      "window": "DSP",
+      "reads": 95,
+      "writes": 53,
+      "total": 148,
+      "functions": [
+        "8020035c gnt4-__OSInitAudioSystem-bl",
+        "80200518 gnt4-__OSStopAudioSystem-bl",
+        "802038a4 gnt4-SetInterruptMask-bl",
+        "80203c8c gnt4-__OSDispatchInterrupt-bl",
+        "80214bd4 FUN_80214bd4",
+        "80215190 FUN_80215190",
+        "80215208 __ARChecksize",
+        "8021c678 zz_021c678_",
+        "8021c7b4 zz_021c7b4_",
+        "8021c8cc FUN_8021c8cc"
+      ]
+    },
+    {
+      "register": "0xcc005020",
+      "window": "DSP",
+      "reads": 72,
+      "writes": 72,
+      "total": 144,
+      "functions": [
+        "8020035c gnt4-__OSInitAudioSystem-bl",
+        "802017b8 gnt4-__OSUnhandledException-bl",
+        "80214f00 gnt4-ARStartDMA",
+        "80215208 __ARChecksize"
+      ]
+    },
+    {
+      "register": "0xcc005024",
+      "window": "DSP",
+      "reads": 70,
+      "writes": 72,
+      "total": 142,
+      "functions": [
+        "8020035c gnt4-__OSInitAudioSystem-bl",
+        "80214f00 gnt4-ARStartDMA",
+        "80215208 __ARChecksize"
+      ]
+    },
+    {
+      "register": "0xcc006c00",
+      "window": "AI",
+      "reads": 29,
+      "writes": 21,
+      "total": 50,
+      "functions": [
+        "802038a4 gnt4-SetInterruptMask-bl",
+        "80203c8c gnt4-__OSDispatchInterrupt-bl",
+        "802146d4 AISetStreamPlayState",
+        "802147ac zz_02147ac_",
+        "802147bc AISetDSPSampleRate",
+        "8021489c AIGetDSPSampleRate",
+        "802148b0 __AI_set_stream_sample_rate",
+        "80214984 zz_0214984_",
+        "802149ec AIInit",
+        "80214b58 FUN_80214b58",
+        "80214cd8 __AI_SRC_INIT"
+      ]
+    },
+    {
+      "register": "0xcc006c04",
+      "window": "AI",
+      "reads": 6,
+      "writes": 4,
+      "total": 10,
+      "functions": [
+        "80214994 zz_0214994_",
+        "802149b0 AIGetStreamPlayState",
+        "802149c0 AISetStreamVolLeft",
+        "802149dc zz_02149dc_",
+        "802149ec AIInit"
+      ]
+    },
+    {
+      "register": "0xcc005004",
+      "window": "DSP",
+      "reads": 6,
+      "writes": 0,
+      "total": 6,
+      "functions": [
+        "8020035c gnt4-__OSInitAudioSystem-bl",
+        "80200518 gnt4-__OSStopAudioSystem-bl",
+        "8021c63c zz_021c63c_",
+        "8021c64c zz_021c64c_"
+      ]
+    },
+    {
+      "register": "0xcc005036",
+      "window": "DSP",
+      "reads": 3,
+      "writes": 3,
+      "total": 6,
+      "functions": [
+        "80200518 gnt4-__OSStopAudioSystem-bl",
+        "80214634 AIInitDMA",
+        "802146bc AIStartDMA"
+      ]
+    },
+    {
+      "register": "0xcc006c08",
+      "window": "AI",
+      "reads": 5,
+      "writes": 0,
+      "total": 5,
+      "functions": [
+        "80214b58 FUN_80214b58",
+        "80214cd8 __AI_SRC_INIT"
+      ]
+    },
+    {
+      "register": "0xcc005000",
+      "window": "DSP",
+      "reads": 1,
+      "writes": 3,
+      "total": 4,
+      "functions": [
+        "8020035c gnt4-__OSInitAudioSystem-bl",
+        "80200518 gnt4-__OSStopAudioSystem-bl",
+        "8021c62c zz_021c62c_",
+        "8021c664 zz_021c664_"
+      ]
+    },
+    {
+      "register": "0xcc005012",
+      "window": "DSP",
+      "reads": 2,
+      "writes": 2,
+      "total": 4,
+      "functions": [
+        "8020035c gnt4-__OSInitAudioSystem-bl",
+        "80215208 __ARChecksize"
+      ]
+    },
+    {
+      "register": "0xcc00501a",
+      "window": "DSP",
+      "reads": 2,
+      "writes": 1,
+      "total": 3,
+      "functions": [
+        "802150cc ARInit"
+      ]
+    },
+    {
+      "register": "0xcc005030",
+      "window": "DSP",
+      "reads": 2,
+      "writes": 1,
+      "total": 3,
+      "functions": [
+        "802017b8 gnt4-__OSUnhandledException-bl",
+        "80214634 AIInitDMA"
+      ]
+    },
+    {
+      "register": "0xcc005032",
+      "window": "DSP",
+      "reads": 2,
+      "writes": 1,
+      "total": 3,
+      "functions": [
+        "802017b8 gnt4-__OSUnhandledException-bl",
+        "80214634 AIInitDMA"
+      ]
+    },
+    {
+      "register": "0xcc005006",
+      "window": "DSP",
+      "reads": 2,
+      "writes": 0,
+      "total": 2,
+      "functions": [
+        "8020035c gnt4-__OSInitAudioSystem-bl",
+        "8021c64c zz_021c64c_"
+      ]
+    },
+    {
+      "register": "0xcc005002",
+      "window": "DSP",
+      "reads": 0,
+      "writes": 1,
+      "total": 1,
+      "functions": [
+        "8021c664 zz_021c664_"
+      ]
+    },
+    {
+      "register": "0xcc005016",
+      "window": "DSP",
+      "reads": 1,
+      "writes": 0,
+      "total": 1,
+      "functions": [
+        "80215208 __ARChecksize"
+      ]
+    },
+    {
+      "register": "0xcc006c0c",
+      "window": "AI",
+      "reads": 0,
+      "writes": 1,
+      "total": 1,
+      "functions": [
+        "802149ec AIInit"
+      ]
+    }
+  ],
+  "neverCalled": [
+    "gnt4_ARQPostRequest_bl",
+    "gnt4___ARQCallbackHack_bl",
+    "gnt4___ARQInterruptServiceRoutine_bl"
+  ]
+}

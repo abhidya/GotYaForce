@@ -1,0 +1,36 @@
+<!doctype html>
+<!-- Browser self-test page for the AUDIO and DVD halves of the HLE host
+     (packages/rom-runtime/src/audio, packages/rom-runtime/src/dvd). Served by
+     scripts/smoke-audio-dvd-host-phase.mjs with COOP/COEP headers
+     (SharedArrayBuffer + shared wasm memory require crossOriginIsolated);
+     app.js / rom-runtime-worker.js are esbuild bundles of
+     src/selftest/hleSelftestMain.ts and src/worker-entry.ts.
+
+     Two wasm modules drive this page: hand-written ROM-shaped call sequences,
+     and the verbatim decompilation of seven ROM bodies with their AI/DSP
+     register accesses lowered. Both send their calls across the Atomics bridge
+     into the DVD and audio adapters. There is no canvas here because audio has
+     no framebuffer: the evidence is the check table, the recorded DMA blocks,
+     and the WebAudio buffer the second leg hands the device. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Audio/DVD HLE host self-test</title>
+    <style>
+      body { font-family: ui-monospace, Consolas, monospace; background: #101418; color: #d8dee6; margin: 1.5rem; }
+      h1[data-status="pass"] { color: #4caf50; }
+      h1[data-status="fail"] { color: #ef5350; }
+      h1[data-status="running"] { color: #ffb300; }
+      table { border-collapse: collapse; margin-top: 1rem; }
+      td, th { border: 1px solid #2c3540; padding: 0.3rem 0.6rem; text-align: left; }
+      tr.pass td:last-child { color: #4caf50; }
+      tr.fail td:last-child { color: #ef5350; font-weight: bold; }
+      .error { color: #ef5350; white-space: pre-wrap; }
+      .claim { color: #ffb300; max-width: 80ch; line-height: 1.4; border-left: 3px solid #ffb300; padding-left: 0.8rem; }
+    </style>
+  </head>
+  <body>
+    <div id="results"><h1 data-status="running">Audio/DVD HLE host self-test: loading&hellip;</h1></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
