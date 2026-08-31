@@ -1,6 +1,6 @@
 # Verification status — what is proven, what is not, and what cannot be
 
-**Date: 2026-08-30.** This is the single page to read before repeating any number about
+**Date: 2026-08-31.** This is the single page to read before repeating any number about
 this project's port. It is deliberately not a design document and not a roadmap: it
 records the *claim state* — which standards exist, what each one does and does not
 establish, how much of the ROM can ever reach each one, and where each area actually
@@ -57,6 +57,14 @@ The GX host has a **separate, unrelated** vocabulary — `translated` / `latched
 `packages/rom-runtime/src/gx/adapters.ts`). Those describe *implementation coverage of an
 API surface*. They are not verification tiers and must never be summed with the ones
 above. See §5.3.
+
+The GX host also has its own two **verification** standards, added 2026-08-31 —
+`gx_callstream_green` and `gx_framebuffer_equivalent`. They are console-derived, they carry
+their own verdict tokens and their own artifact filename namespaces
+(`*.gx-callstream.json`, `*.gx-framebuffer.json`), and they are **orthogonal to the four
+tiers above rather than weaker or stronger than them**: they compare a function's GRAPHICS
+SEAM EMISSION and one draw's PIXELS, neither of which a write set, a callee boundary or a
+return value can see. Never total a GX result with a wasm-unit tier. See §5.3.
 
 ### Non-vacuity is enforced, not assumed
 
@@ -211,7 +219,7 @@ window may surface another placeholder of the same shape after that. **Rung 2 is
 rebuild-scheduling problem rather than an ABI/owner decision**, which is a real change in
 kind, not a change in the ceiling. The ceiling is still N=10.
 
-### 5.3 The GX HLE host — 87.1 % translated, 0 % verified
+### 5.3 The GX HLE host — 87.1 % translated; one seam and one draw verified, 0 adapters verified
 
 From [`docs/gx-hle-host.md`](gx-hle-host.md), recomputable from
 `research/decomp/data/gx-call-inventory.json` against
@@ -224,20 +232,82 @@ From [`docs/gx-hle-host.md`](gx-hle-host.md), recomputable from
 | + `declared-nop` | 56 | 468 | 93.2 % |
 | unimplemented | 20 | 34 | 6.8 % |
 
-**Verification is exactly 0 %, and coverage is not a proxy for it.** No GX trace capture
-exists, no reference framebuffer exists, no frame from this path has ever been compared
-against a real GameCube frame. Every adapter is registered `evidenceClass: "synthetic"`
-and the smoke phase **fails** if any adapter ever claims `"verified"`. The pixel assertions
-in the end-to-end proof are predicted from the same understanding that wrote the adapters,
-so they are self-consistency checks and cannot detect a shared misunderstanding.
+**Coverage is still not verification, and the two must still be quoted together.** What
+changed on 2026-08-31 is that the verification column is no longer the single number 0.
+It is four numbers, and collapsing them into one percentage would be exactly the error
+this page exists to prevent:
+
+| what is compared against the console | before 2026-08-31 | now |
+| --- | ---: | ---: |
+| GX adapters at `evidenceClass: "verified"` | 0 / 56 | **0 / 56** |
+| entry points whose SEAM EMISSION is console-compared | 0 / 76 | **16 / 76 (21.1 %)** |
+| ROM draw functions whose RASTERIZED RESULT is console-compared | 0 | **1 of the 1 that is ported** |
+| console pixels compared against a host prediction | 0 | **286,720** |
+
+The first row is the one to quote when asked whether the GX host is verified. It has not
+moved, and the smoke phase still **fails** if any adapter claims `"verified"`. An adapter
+earns that class when *its own* behaviour is checked; neither standard below does that for
+any individual entry point.
+
+Two GX standards now exist, both console-derived, both with their own filename namespace
+and their own verdict token, and **neither is a wasm-unit tier**:
+
+| Standard | Verdict token | Artifact | What a pass MEANS | What it does **NOT** claim |
+| --- | --- | --- | --- | --- |
+| `gx_callstream_green` | `GX_CALLSTREAM_GREEN` | `oracle-results/<name>.<fn>.gx-callstream.json` | The gate-lowered wasm build of one ROM draw function emits the **identical SDK-seam stream** to the console — same GX calls in the same order with the same arguments, and the same write-gather-pipe writes at the same widths with the same values. | **Any pixel.** No framebuffer is read. Also not the MEANING of any argument: a 7 is compared as the number 7. |
+| `gx_framebuffer_equivalent` | `GX_FRAMEBUFFER_EQUIVALENT` | `oracle-results/<name>.<fn>.gx-framebuffer.json` | The difference between two real console frames that differ only in whether one ROM draw ran is **framebuffer-equivalent** to what the host predicts from its own decoded geometry, decoded vertex colour and blend-enum reading, within a **declared** 4/255 per 8-bit RGB channel. | The rest of the frame (controlled for by the differential, not reproduced). The WebGL backend — no GL context is created. Any textured, TEV-programmed, lit or depth-interacting draw. |
+
+Measured results, both on `zz_0027c34_` (`0x80027c34`), 2026-08-31:
+
+- **call stream** — 4/4 invocations, 124/124 events (76 GX/SDK calls, 48 pipe writes,
+  128 pipe bytes), no divergence. The console's own vertex bytes additionally decoded
+  through the host's FIFO with 0 dropped and 0 pending.
+- **framebuffer** — host-predicted touched region `x [0,640) y [0,448)` matched the
+  console's changed region exactly, **0** pixels changed outside it; per-channel |Δ| mean
+  0.78, p50 1, p95 2, p99 3, max 7 over 860,160 channel samples; 99.80 % within 4/255.
+
+That second measurement **settles an `[SDK]` item**: `GXSetBlendMode`'s factor numbering,
+labelled "[SDK] — NOT settled from the corpus" in `gx/enums.ts`, is discriminated
+decisively by the console — reading factor 5 as `SRCALPHA` rather than `INVSRCALPHA` would
+have scaled the frame by 7/255 instead of 248/255. It does not settle the hardware's exact
+rounding divisor, and the doc says so.
+
+**The ceiling is unchanged**: "framebuffer-equivalent, never pixel-identical"
+(`playable-port-design.md` V3 non-fatal note 1). Nothing in these results may be quoted as
+bit-exactness, and a p99 of 3/255 over one alpha-blended untextured quad says nothing about
+a textured one.
+
+**Non-vacuity is enforced, not assumed**, as for `transcript_green`:
+`research/decomp/oracle-harness/tests/gx-callstream-harness.test.mjs` (16 tests, run by
+`pnpm test:oracle`) drives both harnesses against mutants of the committed console
+captures — wrong argument, wrong pipe value, wrong pipe width, wrong call order, an extra
+event, a stack pointer replaced by a static address, a wrong blend-factor reading, a wrong
+decoded quad extent — and against the guards: a capture whose guard never opened cannot
+pass, an empty capture cannot pass, header counts that drift cannot pass, two identical
+console frames cannot pass, and frames from different frame indices are refused outright.
+
+**What the oracle found wrong.** The runtime call-frequency ranking that
+`docs/gx-hle-host.md` §2 said "does not exist" now does
+(`research/decomp/data/gx-surface/`), and it **inverts the static ranking**: over 32.2 s of
+a live 2v2 battle the ROM made **507 calls to entry points the host does not implement**,
+each of which its loud-unimplemented adapter would throw on. `GXSetFog` alone accounts for
+220 of them while ranking 45th by static call sites. The EFB copy path
+(`GXCopyTex`/`GXSetTexCopySrc`/`Dst`/`GXSetCopyFilter`) is confirmed live rather than
+hypothetical. Separately, 20 of 21 observed `GXSetTexCoordGen2` calls name a
+post-transform matrix the host does not apply, and 5 of 21 ask for a normalized source it
+does not apply either — both previously listed as reported approximations, now measured as
+the normal case. Full detail and the corrected work order in `docs/gx-hle-host.md` §6.4
+and §7.
 
 Write-gather-pipe lowering is real and is exercised on the ROM's own draw function
-`zz_0027c34_` (`0x80027c34`) — the browser leg drives the **assembly gate's own output**
-(`packages/rom-runtime/test/fixtures/gx-rom-unit/`), not a hand-written fixture. Two
-caveats the doc itself carries: the lowering is **opt-in and off by default**
-(`OGHIDRA_PORT_WGPIPE_LOWERING=1`), and the run evidence lands in untracked
-`.tmp/gx-host-smoke/evidence/`, so the recorded counts are a doc transcription rather than
-a committed artifact.
+`zz_0027c34_` — the browser leg drives the **assembly gate's own output**
+(`packages/rom-runtime/test/fixtures/gx-rom-unit/`), not a hand-written fixture, and the
+call-stream oracle now compares that same unit against the console. Two caveats the doc
+itself carries: the lowering is **opt-in and off by default**
+(`OGHIDRA_PORT_WGPIPE_LOWERING=1`), and the browser run evidence still lands in untracked
+`.tmp/gx-host-smoke/evidence/`, so the smoke phase's recorded counts remain a doc
+transcription. The two console standards above are the opposite: their captures and their
+result artifacts are committed, so their numbers are re-derivable rather than transcribed.
 
 Ceiling note, permanent: the standard for this boundary is **"framebuffer-equivalent, never
 pixel-identical"** (design V3 non-fatal note 1). WebGL rasterization cannot match Flipper —
@@ -255,10 +325,14 @@ inventory is small:
 | --- | ---: | --- |
 | Dolphin-captured corpus files | 18 (+1 TS-differential POC, `damage-core-poc.jsonl`) | `research/decomp/oracle-harness/corpora/` |
 | — distinct units they cover | 5 (`auto-c0001-005`, `-007`, `auto-c0020-007`, `auto-c0035-000`, `auto-c0050-000`) plus the spine | |
-| Committed result artifacts | 11 | `research/decomp/data/oracle-results/` |
+| Committed result artifacts | 13 | `research/decomp/data/oracle-results/` |
 | — unit-level (`run-unit.mjs`) verdicts | 7: 2 `pass`, 3 `partial`, 2 `fail` | `<unit>.json` |
 | — `transcript_green` | 3: 2 `pass`, 1 `fail` | `*.transcript.json` |
 | — `boundary_green` | 1: `pass` | `spine-run-main-game-loop.boundary.json` |
+| — `gx_callstream_green` | 1: `pass` | `*.gx-callstream.json` |
+| — `gx_framebuffer_equivalent` | 1: `pass` | `*.gx-framebuffer.json` |
+| GX console captures | 3 (1 call stream + 2 console frames) | `research/decomp/oracle-harness/corpora/gx-rom-unit.*` |
+| GX runtime surface samples | 2 (one game state) | `research/decomp/data/gx-surface/` |
 | Promoted units | 3 — `damage-core`, `collision-core`, `knockback-core` | `research/decomp/port-units/` |
 | Units in production | 1 — `damage-core` (+ its threads relink) | `apps/game/public/rom/` |
 | Staged units, **all `compile_only` (UNVERIFIED)** | 112 | `research/decomp/port-units-staging/*/provenance.json` |
@@ -291,9 +365,11 @@ cost time.
 3. **Weaker standards are never totalled with `oracle_green`.** `boundary_green` and
    `transcript_green` are callee-boundary claims. Never count a `transcript_green` function
    toward write-verified coverage, and never report either as `oracle_green`.
-4. **GX coverage is not verification.** "87.1 % of call sites translated" and "0 % verified"
-   are both true and must be printed together. The same rule applies to any future
-   percentage of an API surface.
+4. **GX coverage is not verification.** "87.1 % of call sites translated" and "0 of 56
+   adapters verified" are both true and must be printed together. Since 2026-08-31 the GX
+   verification figure is no longer a single number (§5.3) — quote the four rows, never a
+   blended percentage, and never let "one draw compared against the console" become "the
+   renderer is verified". The same rule applies to any future percentage of an API surface.
 5. **"Framebuffer-equivalent, never pixel-identical."** The graphics boundary has a ceiling
    below byte-exactness and always will. Do not let a passing render test be written up as
    a pixel match.

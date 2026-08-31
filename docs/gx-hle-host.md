@@ -1,12 +1,35 @@
 # The GX HLE host — the browser standing in for the GameCube's graphics hardware
 
-Status: **UNVERIFIED.** The seam is proven and the pipeline is now mostly translated
-rather than mostly stubbed; the pixels are still unverified against any real frame.
-Date: 2026-08-30 (previous revision 2026-08-29). Design authority:
+Status: **PARTIALLY VERIFIED — one seam and one draw, against the console; everything else
+is still self-validated.** The seam is proven, the pipeline is mostly translated rather
+than mostly stubbed, and as of 2026-08-31 a GX trace oracle exists and one ROM draw has
+been compared against real GameCube pixels. **No individual adapter is `verified`** and
+none of the coverage figures below is a verification figure.
+Date: 2026-08-31 (previous revisions 2026-08-30, 2026-08-29). Design authority:
 `docs/playable-port-design.md` (V2 F2 "Stage D — SDK seam", V3 non-fatal note 1's claim
 bar, V4 H2's bridge, V5 I1's adapter contract).
 
-**What changed on 2026-08-30**, since a reader of the previous revision will be looking
+**What changed on 2026-08-31** — the previous revision's §7.1, "get a GX trace oracle", is
+the whole of it:
+
+* **`gx_callstream_green`** (§6.3.1): the console's own GX call stream and
+  write-gather-pipe byte stream for `zz_0027c34_`, captured from the real game and replayed
+  through the gate-lowered wasm unit. **4/4 invocations, 124/124 events identical.** It
+  verifies the lowering, the call sequence and argument marshalling; it verifies no pixel;
+* **`gx_framebuffer_equivalent`** (§6.3.2): two console frames differing only in whether
+  that draw ran, compared against the host's own prediction over **286,720 pixels**.
+  Touched region matches EXACTLY, 0 pixels changed outside it, per-channel |Δ| p99 = 3/255.
+  This **settles the `[SDK]` blend-factor numbering** against the console;
+* both harnesses have a **16-test deliberate-red rehearsal** and non-vacuity guards
+  (§6.3.3), so neither can pass on nothing;
+* the **runtime call-frequency ranking** §2 said did not exist now does (§6.4), and it
+  **inverts the static ranking**: 507 calls in 32 s to entry points the host does not
+  implement, fog first — which is why §7's order changed;
+* §6.5 records the Dolphin rig facts this cost: the stub refuses MMIO, the backend string
+  must be exactly `Software Renderer` or the XFB reads back all zero, and a stub session
+  lasts about 40 s.
+
+**What changed on 2026-08-30**, kept because a reader of that revision will be looking
 for it:
 
 * the **TEV combiner** is implemented as SHADER GENERATION from latched state (§6.1 was
@@ -701,91 +724,304 @@ tolerated:
 * **TEV arithmetic is float, not fixed point.** GX combines in a signed 10-bit space with
   per-stage rounding. Even a structurally exact combiner is not bit-exact.
 
-### 6.3 Verification — still zero, and now the dominant gap
+### 6.3 Verification — no longer zero, and here is exactly how much it is
 
-There is none. No GX trace capture exists, no reference framebuffer exists, and no
-comparison has been made. **This has not improved at all**, and the gap between coverage
-and verification is now much wider than it was: 87.1% of call sites are translated and
-0% of them are checked against the console.
+**This section previously read "still zero, and now the dominant gap". That is no longer
+true, and the temptation to over-read the change is why the numbers below are given as
+four separate rows that must never be collapsed into one percentage.**
 
-Say this precisely, because the new pixel assertions invite the opposite reading: §5's
-predicted pixels were predicted from the SAME understanding of GX that produced the
-implementation. They prove the implementation is self-consistent and that the plumbing
-carries values end to end. They cannot detect a shared misunderstanding — if the TEV
-selector numbering is wrong, both the shader and the prediction are wrong together and
-the check still passes. Only a trace oracle can break that circularity, which is why it
-is now §7.1.
+Two console-derived standards now exist. Both capture from the real game in the bundled
+Dolphin through the existing `research/tools/dolphin-trace/` machinery — `capture_gx.py`
+imports `capture_common.py` and `capture_oracle.py` unchanged.
 
-One further trap, because two unrelated vocabularies now live in the same repository: the
-`GxImplTier` values here (`translated` / `latched` / `declared-nop`) describe **coverage of
-an API surface** and have nothing to do with the wasm-unit verification tiers
-(`compile_only` / `oracle_green` / `boundary_green` / `transcript_green`). They must never
-be summed, cross-quoted, or presented in the same column. The rule and the current numbers
-for both live in [`docs/verification-status.md`](verification-status.md).
+| what is compared against the console | before | now |
+|---|---|---|
+| GX adapters at `evidenceClass: "verified"` | 0 / 56 | **0 / 56** |
+| entry points whose SEAM EMISSION is console-compared | 0 / 76 | **16 / 76 (21.1%)** |
+| ROM draw functions whose RASTERIZED RESULT is console-compared | 0 | **1 of the 1 that is ported** |
+| console pixels compared against a host prediction | 0 | **286,720 (860,160 channel samples)** |
 
----
+The first row has not moved and is the one to quote when someone asks whether the host is
+verified. Nothing below promotes a single adapter: an adapter is `"verified"` only when
+**its own** behaviour has been checked, and neither standard does that for any individual
+entry point. The smoke phase still fails if any adapter claims otherwise.
+
+#### 6.3.1 `gx_callstream_green` — the seam, verified against the console
+
+`research/decomp/oracle-harness/run-gx-callstream.mjs`, artifact
+`research/decomp/data/oracle-results/gx-rom-unit.zz_0027c34_.gx-callstream.json`.
+
+`capture_gx.py capture` breakpoints the ROM function's entry, its `blr`, every `bl` site
+and every store site, and records ONE ORDERED STREAM per invocation: each GX call with its
+arguments read out of the PowerPC EABI registers, and each store whose RESOLVED effective
+address lands in the write-gather-pipe window, with its width and value. That interleaving
+is the shape none of the other three capture tools can see — a pipe store is neither a call
+nor a MEM1 write — which is why this is a fourth tool rather than a flag on an existing one.
+
+The harness then runs **the assembly gate's own wasm build of the same ROM function**
+against the real GX adapters, seeded with the console's own memory at the addresses the
+plan declares, and requires the stream the host receives to be identical.
+
+**Measured 2026-08-31** on `zz_0027c34_` (0x80027c34), from a live 2v2 battle savestate:
+
+```
+GX CALLSTREAM TOTAL invocations=4/4 events=124/124 DIVERGENCE: none VERDICT: GX_CALLSTREAM_GREEN
+```
+
+4 invocations, **76 GX/SDK calls and 48 write-gather-pipe writes (128 bytes)**, every
+event identical in kind, order, arity and value; 336 bytes of console memory seeded. The
+19 ROM call sites bind to 17 distinct callees by first-use order, and 16 of those bindings
+were **cross-checked against the measured GX inventory's own ROM addresses** before the
+capture ran.
+
+The console's own vertex byte stream was additionally pushed through the host's FIFO
+decoder — the first time that decoder has been fed bytes it did not also generate. It
+consumed all 32 bytes with **0 dropped and 0 pending** and assembled `GX_QUADS`, 4
+vertices, at (0,0) (640,0) (640,448) (0,448), colour `00 00 00 07`, with no diagnostics.
+
+**What this verifies**: the write-gather-pipe LOWERING (which store became which
+`__gf_gx_wgpipe_*` import, at which width, in which order, carrying which value), the GX
+call sequence and its ARGUMENT MARSHALLING, the guard the ROM function evaluates, and the
+GameCube-address-to-linear-memory mapping for every static pointer it passes.
+**What it does not**: any pixel, and the MEANING of any argument — a 7 is compared as the
+number 7, not as a depth-compare function.
+
+One honesty note, carried in the artifact rather than only here: the capture STAGED one
+word of game state (`DAT_80436108 = 1`, the ROM's own fade-active flag) at the function's
+entry, because the sampled battle state never opens that guard. Every instruction
+executed, every call and every pipe byte is the ROM's; the guard's value was not.
+`source.state_staging` records it and the harness surfaces it in `does_not_verify`.
+
+#### 6.3.2 `gx_framebuffer_equivalent` — real console pixels, at a declared tolerance
+
+`research/decomp/oracle-harness/run-gx-framebuffer.mjs`, artifact
+`research/decomp/data/oracle-results/gx-rom-unit.zz_0027c34_.gx-framebuffer.json`.
+
+A whole-frame comparison is **structurally unreachable**, and the reason is porting
+progress rather than tooling: this host renders the output of ONE ROM function while a
+console frame is the output of the whole game, so there is no host frame to put beside it.
+What is reachable is a DIFFERENTIAL: two console frames from the same savestate at the
+same frame index, differing only in whether the ROM's own draw path ran. Their difference
+is exactly what Flipper did with the call stream captured above, and the host predicts that
+difference from its OWN decoded geometry, its OWN decoded vertex colour and its OWN reading
+of the blend enums.
+
+**Measured 2026-08-31** (`--tolerance 4`, declared before the numbers were read and not
+moved afterwards):
+
+| | |
+|---|---|
+| host-predicted touched region, from its decoded vertices | `x [0,640) y [0,448)` |
+| region the console actually changed | `x [0,640) y [0,448)` — **exact match** |
+| console pixels changed OUTSIDE the host's prediction | **0** |
+| per-channel abs delta (8-bit RGB): mean / p50 / p95 / p99 / max | **0.78 / 1 / 2 / 3 / 7** |
+| channel samples within 4/255 | **99.80 %** |
+| attenuation fitted from the console frames (median, p05–p95) | **0.9706** (0.9604–0.9767) |
+| attenuation the host predicts from its blend reading | **0.9725** = 248/255 |
+
+**This settles an `[SDK]` item.** `GXSetBlendMode`'s factor numbering is labelled
+"[SDK] — NOT settled from the corpus" in `enums.ts`. The ROM's call is
+`GXSetBlendMode(1, 4, 5, 0)` and its vertex colour is `00 00 00 07`. Reading factor 5 as
+`INVSRCALPHA` predicts the frame is scaled by 248/255; reading it as `SRCALPHA` predicts a
+scale of 7/255, i.e. an almost black frame. The console scaled by 0.9706. The measurement
+therefore **discriminates decisively** between the candidate readings and is consistent
+only with `4 = SRCALPHA`, `5 = INVSRCALPHA`, `mode 1 = BLEND`. It does **not** settle the
+hardware's exact rounding divisor: the fitted 0.9706 sits between 248/255 (0.97255) and
+248/256 (0.96875), and the residual p99 of 3/255 is the size of that ambiguity.
+
+Note what the region match is worth on its own. The host derived `x [0,640) y [0,448)`
+from the console's own vertex bytes, through its FIFO decoder, and the console painted
+exactly that rectangle of a 640x480 XFB and nothing else — 0 pixels changed outside it.
+That is the rasterized-coverage comparison, on a real frame.
+
+**Ceiling, unchanged and not raised by any of this**: "framebuffer-equivalent, never
+pixel-identical". A p99 of 3/255 over one alpha-blended untextured quad says nothing about
+a textured, TEV-programmed, depth-interacting draw, and this measurement creates no GL
+context at all — the prediction is evaluated from latched state and the decoded primitive,
+so shader generation, texture sampling and depth handling are untouched by it.
+
+#### 6.3.3 Both harnesses are proven able to FAIL
+
+`research/decomp/oracle-harness/tests/gx-callstream-harness.test.mjs`, 16 tests, run by
+`pnpm test:oracle`. It drives both harnesses against the committed console captures and
+against mutants of them — wrong argument value, wrong pipe VALUE, wrong pipe WIDTH, wrong
+call order, an extra event, a stack pointer replaced by a static address, a wrong
+blend-factor reading, a wrong decoded quad extent — plus the non-vacuity guards: a capture
+whose guard never opened cannot pass, an empty capture cannot pass, header counts that
+drift from the records cannot pass, two identical console frames cannot pass, and frames
+from different frame indices are refused outright.
+
+#### 6.3.4 What is still self-validated
+
+Everything not named above, which is most of the host: the TEV shader generator, texture
+decoding and sampling, texgen, lighting, the depth remap, quad expansion, and every
+approximation in §6.2. §5's predicted pixels are still predicted from the same
+understanding that wrote the implementation. The circularity is broken **at one seam and
+for one draw**, not in general.
+
+### 6.4 The runtime call surface — measured, and it inverts the static ranking
+
+§2's ranking is by STATIC call sites, and §2 says a per-frame frequency ranking "requires a
+Dolphin trace and does not exist". It exists now:
+`research/decomp/data/gx-surface/battle-2v2.*.gx-surface.json`, produced by
+`capture_gx.py surface`, which breakpoints a chosen set of GX entry points in the live game
+and records both counts and the DISTINCT ARGUMENT TUPLES the ROM passes.
+
+**The headline is a defect, not a statistic.** Over 32.2 s of a live 2v2 battle the ROM
+made **507 calls to entry points this host does not implement** — every one of which the
+loud-unimplemented adapter would throw on, failing the frame:
+
+| entry point | calls in 32.2 s | §2.1 rank | static sites |
+|---|---:|---:|---:|
+| `GXSetFog` | 220 | 45 | 2 |
+| `GXSetFogRangeAdj` | 130 | 46 | 2 |
+| `GXSetLineWidth` | 69 | 51 | 2 |
+| `GXSetPointSize` | 69 | 52 | 2 |
+| `GXSetTexCopySrc` | 5 | 56 | 2 |
+| `GXSetTexCopyDst` | 5 | 55 | 2 |
+| `GXCopyTex` | 5 | 53 | 2 |
+| `GXSetCopyFilter` | 4 | 67 | 1 |
+
+Fog is ranked 45th and 46th by static call sites — 4 sites, 0.8 % — and is by a wide margin
+the most-called unimplemented entry point at runtime. **Static call-site share is not a
+usable proxy for what a frame needs**, and §7's ordering is corrected below because of it.
+
+The EFB block is confirmed LIVE rather than hypothetical, with its real parameters:
+`GXSetTexCopySrc(0, 0xe0, 0x280, 0xe0)` and `(0, 0, 0x280, 0xe0)` — the top and bottom
+640x224 halves of the EFB — `GXSetTexCopyDst(0x280, 0xe0, 6, 0)` (`GX_TF_RGBA8`, no
+mipmap), and `GXCopyTex(0x810341c0, 0)`.
+
+A second 45.2 s sample over 20 enum-critical IMPLEMENTED entry points (720 calls, 18
+symbols observed) makes four more measurements the host should be read against:
+
+* **Post-transform texture matrices are the norm, not an edge case.** 20 of 21 observed
+  `GXSetTexCoordGen2` calls name post-matrix `0x40` (`GX_PTTEXMTX0`); §6.2 lists
+  "post-transform texture matrices are not applied" as a reported approximation. It fires
+  on essentially every textured draw in real gameplay.
+* **Normalized texgen sources are used.** 5 of 21 calls pass `normalize = 1` with source
+  `GX_TG_NRM` and matrix `GX_TEXMTX0` — the environment-mapping shape. Also unapplied, also
+  only reported.
+* **Every observed texture is `CMPR`.** All 20 `GXInitTexObj` calls pass format `0xe` at
+  128x128 or 256x256, `GX_CLAMP` wrap, no mipmaps. `texture.ts` decodes CMPR, so this is
+  corroboration rather than a gap — but it means CMPR is the format whose texel bit layout
+  (still `[SDK]`) carries essentially all of the risk.
+* `GXSetZMode` was observed with compare functions **3 and 7 only** and `GXSetAlphaCompare`
+  only as `(7, 0, 0, 7, 0)`, both matching what §4.1 and §4.4 claim statically.
+  `GXEnableTexOffsets` was not called at all in the sampled window, so its conditional-nop
+  condition remains unexercised by console evidence.
+
+`arg_tuples` records the first 6–8 GPRs verbatim, so an entry point with fewer arguments
+carries register residue in the rest; the artifact says so in its own `arg_note`. Both
+samples are ONE game state — a live 2v2 battle — and a menu, a stage transition or a
+different borg family may call a different set.
+
+### 6.5 Rig facts the next agent needs before touching Dolphin
+
+All measured on this rig on 2026-08-31, all of them things that cost time to rediscover.
+
+* **The GDB stub refuses the hardware window.** `m cc00201c,4` returns `E00`, so the VI
+  registers that hold the XFB base are NOT readable. The XFB address comes from the ROM
+  instead: `gnt4_VISetNextFrameBuffer` @0x80212284 takes it in `r3` (0x8131D560 /
+  0x813B3560 here — double-buffered, 640x480 YUY2).
+* **The video backend string is `Software Renderer`, exactly.** With `Null` — and with an
+  unrecognised string, which silently falls back — both XFBs read back as **all zero**,
+  because Dolphin keeps XFB copies host-side. With `Software Renderer` the same addresses
+  hold real YUY2. The software renderer is a CPU rasterizer, so this respects the
+  GPU-lease rule exactly as `Null` does.
+* **A stub session is short.** Measured repeatedly: the connection is reset by the peer
+  after roughly 40 s of wall time or a few hundred breakpoint stops, whichever comes first.
+  Both capture paths therefore keep a session to a few seconds of work and record whatever
+  completed rather than assuming a long session. A guarded draw path is reached with
+  `--arm-on` — run at FULL speed with no breakpoints installed and poll the guard — rather
+  than by waiting under a breakpoint loop, which is roughly 15x slower.
+* **Port 55555 and `user-data/dolphin-oracle` are shared with other work on this rig.** A
+  second tenant launched a `Null`-backend Dolphin onto the same port mid-session. The
+  framebuffer captures were re-run on `--port 55600 --user-dir user-data/dolphin-gx` for
+  that reason; do the same.
 
 ## 7. What the next agent should do, in order
 
-The previous revision's §7.1 (lower `DAT_cc008000` in the assembly gate) and §7.4 (settle
-the arena byte order) are DONE — see §3 and §4.2. §7.3 (implement the TEV combiner) is
-done — see §4.4. What remains, re-ordered by what now blocks what:
+The previous revision's §7.1 (get a GX trace oracle) is **DONE** — see §6.3, §6.4 and §8.
+Its §7.2/§7.3/§7.4 ordering was derived from STATIC call-site share, and §6.4 measured that
+that share is not a usable proxy for what a frame needs. The order below is re-derived from
+the runtime measurement.
 
-### 7.1 Get a GX trace oracle — now the top item
+### 7.1 Fog — 350 live calls in 32 s, and the host throws on the first of them
 
-It was §7.2 and it has been promoted because it is the only thing that can turn any of
-this from plumbing into evidence, and because everything built since makes the missing
-verification a larger liability rather than a smaller one.
+`GXSetFog` (220 calls) and `GXSetFogRangeAdj` (130) are the most-called unimplemented entry
+points in real gameplay by a wide margin, and they are ranked 45th and 46th by static call
+sites, which is why they were last on the previous list. A host that throws on
+`GXSetFog` cannot render one frame of a battle.
 
-The Stage-B Dolphin GDB machinery already exists. Breakpointing the GX entry points and
-recording `(args, referenced memory)` per call yields a call-sequence corpus that can be
-replayed against these adapters — which is what would let individual adapters move from
-`evidenceClass: "synthetic"` to `"verified"`. A framebuffer dump at the same trace points
-gives the framebuffer-equivalence comparison the claim bar actually names.
+The console evidence is already captured
+(`research/decomp/data/gx-surface/battle-2v2.unimplemented.gx-surface.json`): the ROM
+passes fog type `2` with a colour pointer, and type `0` to disable; every observed
+`GXSetFogRangeAdj` call passes its enable argument as `0`. The decompiled body of
+`gnt4_GXSetFog_bl` packs its arguments straight into the fog BP registers, so the state is
+readable from the corpus rather than from the SDK. `GXSetFogRangeAdj` is a candidate for
+the `GXEnableTexOffsets` treatment — a CONDITIONAL declared-nop that throws on the
+condition the console has never been observed to take — but note that "never observed" is
+one 32 s sample of one game state, and the condition must stay loud.
 
-Start with what a trace would settle cheaply and what it would settle most: the TEV
-selector numbering (§4.1's largest remaining `[SDK]` block), the blend factor numbering,
-the depth compare numbering, and the three `GXSetTevOp` tuples whose tables are not in the
-C export. All four are places where a wrong value produces a wrong frame with no failure
-signal at all.
+### 7.2 The EFB model and `GXCopyTex` — confirmed live, with its real parameters
 
-### 7.2 The EFB model and `GXCopyTex`
+`GXCopyTex` fired 5 times in the same 32 s window, so this is a mechanism the game
+actually uses rather than a call-site count. §6.4 records the parameters the console
+passes, which is most of the specification: source boxes `(0, 224, 640, 224)` and
+`(0, 0, 640, 224)`, destination `640x224` in `GX_TF_RGBA8` with no mipmap, destination
+address `0x810341c0`, `clear = 0`, and `GXSetCopyFilter(0, ..., 1, ...)`.
 
-The largest remaining MECHANISM (§6.1). It is 7 call sites, which understates it: a
-render-to-texture effect is simply absent today, not approximated. It needs a framebuffer
-object, the EFB-to-texture copy formats, and `GXSetTexCopySrc/Dst` box handling.
+### 7.3 Post-transform texture matrices and normalized texgen
 
-### 7.3 Per-vertex position matrices (skinning)
+Both are listed in §6.2 as reported approximations, and §6.4 measured that the first fires
+on 20 of 21 observed texgen calls and the second on 5 of 21. They are not edge cases; they
+are what the game's textured draws do. `GX_PTTEXMTX0` (0x40) is the post-matrix the ROM
+names, and the normalized case is the environment-mapping shape (`GX_TG_NRM` source,
+`GX_TEXMTX0`, `normalize = 1`).
+
+### 7.4 Per-vertex position matrices (skinning)
 
 `GX_VA_PNMTXIDX` is already decoded per vertex and already reported per draw; what is
 missing is uploading the position-matrix memory as an array and indexing it in the vertex
 shader. Nothing about character geometry can be right until this exists, and it is the
 cheapest of the remaining rendering features.
 
-### 7.4 Scissor, fog, and the boot plumbing decisions
+### 7.5 Extend the oracle to a SECOND, harder ROM draw function
 
-Scissor is one call site and one `gl.scissor` away. Fog is four call sites and a
-depth-curve blend. The nine FIFO/boot entry points want a deliberate per-entry-point
-decision, not a blanket one — the `GXEnableTexOffsets` treatment (conditional nop, loud on
-the condition the ROM never exercises) is the pattern to copy.
+§6.3 verifies one function, and that function is the smallest and simplest one: an
+untextured, unlit, single-stage, alpha-blended quad. The two harnesses are function-generic
+— `capture_gx.py sites` takes any terminating ROM function and binds it to any
+single-function wasm build — so the cost of a second one is a gate-lowered unit, not new
+tooling. A window containing a TEXTURED or MULTI-STAGE draw is what would put the TEV
+shader generator and the texture decoder in front of the console for the first time; today
+neither has ever been compared against anything.
 
-### 7.5 Batching, and moving rendering to an OffscreenCanvas in the worker
+The framebuffer differential also generalises, but only to draws that can be switched off
+by staging one word of the ROM's own state. Finding that switch is the per-function cost.
+
+### 7.6 Scissor, line width, point size, and the boot-plumbing decisions
+
+Scissor is one call site and one `gl.scissor` away. `GXSetLineWidth` and `GXSetPointSize`
+were observed 69 times each, always as `(6, 0)`; they want a deliberate decision rather
+than a blanket one. The nine FIFO/boot entry points likewise — the `GXEnableTexOffsets`
+treatment (conditional nop, loud on the condition the ROM never exercises) is the pattern
+to copy, and the surface capture is how to find out which condition that is.
+
+### 7.7 Batching, and moving rendering to an OffscreenCanvas in the worker
 
 One draw call per primitive is fine for a proof and will not be fine for a frame. The
 adapters currently run on the main thread, which is where `RomRuntimeHost` services bridged
 calls, so a main-thread canvas is correct today. Design G1 wants the worker-side GX shim
 submitting through an OffscreenCanvas, and design E2's dual-canvas compositor governs the
-hybrid period where `packages/render/`'s three.js canvas and the GX canvas coexist.
-Neither is built.
+hybrid period where `packages/render/`'s three.js canvas and the GX canvas coexist. Neither
+is built.
 
-### 7.6 More gate-lowered ROM units
+### 7.8 Widen the surface capture beyond one game state
 
-§5.2 drives exactly ONE gate-lowered ROM function, and it is the smallest one. The next
-step is a window containing a textured or multi-stage draw path, which is what would
-exercise the TEV and texture work against real ROM state rather than against a fixture.
-That is gated on the porting pipeline reaching those functions, not on this host.
-
----
+§6.4's two samples are both a live 2v2 battle. A menu, the attract sequence, a stage
+transition and a different borg family will call a different set, and the `scenarios/`
+machinery (`force_navigator.py cover`) already exists to stage them. The runtime ranking
+should be re-measured across several before it is treated as the ranking.
 
 ## 8. Reproducing everything here
 
@@ -796,6 +1032,56 @@ node scripts/smoke-gx-host-phase.mjs        # the GX phase alone
 packages/rom-runtime/test/fixtures/gx-selftest/build.sh  # rebuild the hand-written fixture
 packages/rom-runtime/test/fixtures/gx-rom-unit/build.sh  # relink the gate-lowered ROM unit
 ```
+
+### 8.1 The console oracles (§6.3, §6.4)
+
+Replaying committed evidence needs no emulator and no emsdk:
+
+```bash
+pnpm test:oracle                            # includes the 16-test GX rehearsal
+node research/decomp/oracle-harness/run-gx-callstream.mjs \
+  --capture research/decomp/oracle-harness/corpora/gx-rom-unit.zz_0027c34_.gx-callstream.jsonl
+node research/decomp/oracle-harness/run-gx-framebuffer.mjs \
+  --control  research/decomp/oracle-harness/corpora/gx-rom-unit.zz_0027c34_.xfb-control.json \
+  --treatment research/decomp/oracle-harness/corpora/gx-rom-unit.zz_0027c34_.xfb-treatment.json \
+  --capture  research/decomp/oracle-harness/corpora/gx-rom-unit.zz_0027c34_.gx-callstream.jsonl
+```
+
+RE-CAPTURING from the console needs Dolphin, and §6.5's rig facts apply — one stub
+connection per boot, and relaunch between every attaching step:
+
+```bash
+# the plan is derived from the ROM + the built module; no emulator
+python research/tools/dolphin-trace/capture_gx.py sites --fn 0x80027c34 \
+  --wasm packages/rom-runtime/test/fixtures/gx-rom-unit/gx_rom_unit.threads.wasm \
+  --export zz_0027c34_ \
+  --reads research/tools/dolphin-trace/plans/gx.zz_0027c34_.reads.json \
+  --out research/tools/dolphin-trace/plans/gx.zz_0027c34_.json
+
+# the call stream (Null video is fine here — nothing reads a framebuffer)
+python research/tools/dolphin-trace/capture_oracle.py launch \
+  --save-state "2v2 gred cotrolled players no cpu.sav" --wait 150
+python research/tools/dolphin-trace/capture_gx.py capture \
+  --plan research/tools/dolphin-trace/plans/gx.zz_0027c34_.json --n 4 \
+  --stage 0x80436108=1 --out <out.jsonl>
+
+# the runtime surface (one boot per sample)
+python research/tools/dolphin-trace/capture_gx.py surface --only <symbols> \
+  --args 8 --seconds 45 --out <out.json>
+
+# the framebuffer differential: TWO boots, Software Renderer, private port
+python research/tools/dolphin-trace/capture_oracle.py launch --port 55600 \
+  --user-dir user-data/dolphin-gx --gfx "Software Renderer" \
+  --save-state "2v2 gred cotrolled players no cpu.sav" --wait 180
+python research/tools/dolphin-trace/capture_gx.py framebuffer --port 55600 \
+  --label control --settle 8 --out <control.json>
+# ... relaunch identically, then:
+python research/tools/dolphin-trace/capture_gx.py framebuffer --port 55600 \
+  --label treatment --settle 8 --fn 0x80027c34 --stage 0x80436108=1 --out <treatment.json>
+```
+
+The two console frames MUST come from the same savestate at the same `--settle` index; the
+harness refuses a pair whose recorded frame indices differ.
 
 Both `build.sh` scripts document the Windows invocation (the pinned emsdk has no
 `emsdk_env.sh` path there) in their own headers. `gx-rom-unit/build.sh` also records how
