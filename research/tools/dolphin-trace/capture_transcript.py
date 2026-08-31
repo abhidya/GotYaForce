@@ -128,6 +128,15 @@ from rsp_client import RspError  # noqa: E402
 TRANSCRIPT_SCHEMA = 1
 STANDARD = "transcript_green"
 
+# Upper bound on a derived seed window. A window is re-read from the console at
+# EVERY call boundary of every case, in 256-byte RSP chunks, so its size
+# multiplies straight into stub traffic -- and this stub drops the connection
+# under sustained load (README, "Transcript capture"). 8 KB covers the deepest
+# field-width map measured in the staged corpus (auto-c0011-006.FUN_80079c3c
+# reaches +0x1cf0) while keeping a case bounded. A plan whose reads go past the
+# cap records that in `watch_policy.size_basis` rather than silently truncating.
+WATCH_WINDOW_CAP = 0x2000
+
 
 # --------------------------------------------------------------------------
 # callee naming: ROM address -> the name the unit's wasm imports it under
@@ -662,6 +671,28 @@ def cmd_capture(a: argparse.Namespace) -> int:
     # closes the pending call first and then opens the new one.
     after_by_addr = {int(s["at"], 16) + 4: s for s in plan["call_sites"]}
 
+    # ---- HOW BIG THE SEED WINDOW MUST BE ------------------------------------
+    # WHY THIS IS DERIVED (measured 2026-08-31): the window used to be a fixed
+    # 512 bytes at each pointer argument. auto-c0011-006.FUN_80079c3c branches on
+    # `*(char *)(param_1 + 0x1cef)` and `+0x1cf0` -- 7.4 KB into the actor struct
+    # -- so the port read 0 there, took the short path and returned after 1 of the
+    # console's 3 calls. That reds as a transcript divergence while being nothing
+    # but an undersized window. The plan ALREADY states how far the body reads:
+    # `field_widths` is built from the console's own load instructions, so the
+    # largest `offset + width` in it is exactly the window the body needs.
+    watch_args = a.watch_args
+    watch_basis = "explicit --watch-args"
+    if watch_args < 0:
+        needed = max((off + w for off, w in field_widths.items()), default=0)
+        watch_args = max(0x200, min(WATCH_WINDOW_CAP, needed))
+        watch_args = (watch_args + a.seed_elem_width - 1) // a.seed_elem_width             * a.seed_elem_width
+        watch_basis = (f"derived from the plan's field_widths: the body's "
+                       f"furthest load reaches +0x{needed:x}")
+        if needed > WATCH_WINDOW_CAP:
+            watch_basis += (f", CAPPED at 0x{WATCH_WINDOW_CAP:x} -- fields past "
+                            f"the cap are NOT seeded and can red falsely")
+    a.watch_args = watch_args
+
     scenario = load_scenario(a.scenario) if a.scenario else None
     if scenario and not a.inject:
         a.inject = scenario.get("inject")
@@ -859,6 +890,7 @@ def cmd_capture(a: argparse.Namespace) -> int:
             "note": "addresses vary per case; `owned_regions` is the union with "
                     "a case count, and the replay counts only the bytes it "
                     "actually verified",
+            "size_basis": watch_basis,
         },
         "counts": {"case": len(cases), "call": call_total},
         "source": {
@@ -945,9 +977,10 @@ def main() -> int:
                     help="header `wasm`: path RELATIVE TO THE CAPTURE FILE")
     cp.add_argument("--arena-rel", default="../oracle-harness/arena-trace-empty.json",
                     help="header `arena`: path RELATIVE TO THE CAPTURE FILE")
-    cp.add_argument("--watch-args", type=int, default=0x200,
+    cp.add_argument("--watch-args", type=int, default=-1,
                     help="bytes to seed/watch at each MEM1-valued pointer argument "
-                         "(0 disables; the bytes are GIVEN to the port and are "
+                         "(0 disables; -1 = derive from the plan's field_widths, "
+                         "the default; the bytes are GIVEN to the port and are "
                          "itemised in the result artifact)")
     cp.add_argument("--seed-elem-width", type=int, default=4)
     cp.add_argument("--stop-timeout", type=float, default=20.0)
