@@ -45,13 +45,16 @@
 // docs/gx-hle-host.md §6.3.
 // =============================================================================
 
-import { GxHost, GX_NO_BEHAVIOURAL_CLAIM, registerGxAdapters, registerWgPipeAdapters } from "../adapters.js";
+import {
+  GxHost,
+  GX_NO_BEHAVIOURAL_CLAIM,
+  registerGxAdapters,
+  registerPsmtxIdentityAdapter,
+  registerWgPipeAdapters,
+} from "../adapters.js";
 import { GxWebglBackend } from "../webgl.js";
 import { GXProjectionType } from "../enums.js";
 import { RomRuntimeHost, exposeBridgeLedger } from "../../host.js";
-import { defineAdapter } from "../../adapters.js";
-import { gcAddressForSymbol } from "../../composed.js";
-import { FrameValueClass } from "../../frame.js";
 import { BridgeCallError, BridgeStatus } from "../../protocol.js";
 
 /** Canvas size: the ROM's own frame extent (zz_0027c34_ draws 0x280 x 0x1c0). */
@@ -401,23 +404,10 @@ async function runGateLoweredRomUnit(
     registerWgPipeAdapters(host, gx);
     // gnt4_PSMTXIdentity_bl is not a GX entry point — it is the SDK's matrix
     // library, which is equally out-of-window and equally host-provided. The
-    // ROM function calls it to build the position matrix it then loads.
-    host.registerAdapter(
-      defineAdapter({
-        gcAddr: gcAddressForSymbol("gnt4_PSMTXIdentity_bl").gcAddr,
-        name: "gnt4_PSMTXIdentity_bl",
-        evidence:
-          "PSMTX matrix library, out-of-window like GX; writes a 3x4 row-major identity. " +
-          "Synthetic: no trace verification (docs/gx-hle-host.md)",
-        evidenceClass: "synthetic",
-        retClass: FrameValueClass.VOID,
-        service(ctx) {
-          const out = ctx.frame.u32Arg(0) >>> 0;
-          for (let i = 0; i < 12; i++) ctx.mem.writeF32(out + i * 4, i === 0 || i === 5 || i === 10 ? 1 : 0);
-          return ctx.frame.setRetVoid();
-        },
-      }),
-    );
+    // ROM function calls it to build the position matrix it then loads. The
+    // adapter itself lives in ../adapters.ts so this page and the GX
+    // call-stream oracle drive the SAME definition.
+    registerPsmtxIdentityAdapter(host);
 
     // --- the arena state the ROM function reads -----------------------------
     // Every one of these is a GameCube address the gate's merged shim resolves

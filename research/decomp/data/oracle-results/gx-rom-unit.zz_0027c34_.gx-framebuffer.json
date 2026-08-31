@@ -1,0 +1,188 @@
+{
+ "result_schema": 1,
+ "standard": "gx_framebuffer_equivalent",
+ "standard_note": "gx_framebuffer_equivalent measures ONE draw's contribution to a real console frame against the GX host's prediction. It is NOT a wasm-unit verification tier and is NOT gx_callstream_green.",
+ "name": "gx-rom-unit",
+ "fn": "zz_0027c34_",
+ "generated_at": "2026-08-31T22:13:01.687Z",
+ "claim": {
+  "established": true,
+  "summary": "the difference between two console frames that differ only in whether zz_0027c34_'s draw path ran is FRAMEBUFFER-EQUIVALENT to what the GX host predicts from its own decoded geometry, decoded vertex colour and blend-enum reading, within 4/255 per 8-bit RGB channel",
+  "ceiling": "framebuffer-equivalent, NEVER pixel-identical (docs/playable-port-design.md V3 non-fatal note 1). WebGL rasterization cannot match Flipper; this measurement does not raise that ceiling and no result here may be quoted as bit-exactness.",
+  "verifies": [
+   "the RASTERIZED COVERAGE of the ROM's own quad against the console: which pixels of a real console frame this draw touched, compared with the extent the host's FIFO decoder derives from the console's own vertex bytes",
+   "that the draw touched NOTHING outside that extent on the console",
+   "the host's BLEND-ENUM READING against the console: the measured per-pixel attenuation is compared with the host's own interpretation of GXSetBlendMode's factor arguments, which packages/rom-runtime/src/gx/enums.ts still labels [SDK — NOT settled from the corpus]",
+   "the decoded vertex COLOUR and its alpha, since both enter the prediction"
+  ],
+  "does_not_verify": [
+   "the rest of the frame. Everything the console drew that the port has not ported is CONTROLLED FOR by the differential, not reproduced by the host.",
+   "the WebGL backend. The prediction is evaluated from the host's latched state and decoded primitive; no GL context is created here, so shader generation, texture sampling and depth handling are untouched by this measurement.",
+   "any draw with a texture, a TEV program beyond GX_PASSCLR, lighting, or depth interaction — this draw has none of those.",
+   "determinism beyond what was observed: control and treatment are two runs of one savestate at the same frame index, and the measurement itself reports whether anything outside the draw's extent moved between them."
+  ],
+  "behavioural_claim_of_the_adapters": "NONE. Every GX adapter is a synthetic stand-in written from API semantics and decompiled call sites; no frame produced by this path has ever been compared against a real GameCube frame, and the path has no trace verification behind it. The ceiling even once verified is 'framebuffer-equivalent, never pixel-identical'. This is scaffolding — see docs/gx-hle-host.md."
+ },
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-gx-framebuffer.mjs",
+  "git_rev": "cdd535f43f15f973d372f62abe5a885b41ef9762",
+  "sha256": "1ab6441dcd03a4afc6aee0074404d561f0cfd03506aee0aa6268789f85033dca",
+  "tolerance_per_channel": 4,
+  "tolerance_note": "DECLARED BEFORE THE MEASUREMENT and not moved afterwards. It is the slack a chroma-subsampled YUV 4:2:2 round trip plus one 8-bit fixed-point blend rounding can produce on their own.",
+  "colour_space": "XFB is YUY2 4:2:2, BT.601 studio swing; both frames are converted with the same coefficients, so the conversion error is common-mode"
+ },
+ "frames": {
+  "control": {
+   "file": "../../.tmp/xfb-control.json",
+   "sha256": "40630968fa480396c93796ded078d48833e9125f474d3b513ca2b4898d6ef6a2",
+   "source": {
+    "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Software Renderer (CPU), CPU only",
+    "xfb_located_via": "gnt4_VISetNextFrameBuffer @0x80212284, r3 -- Dolphin's GDB stub refuses the 0xCC000000 hardware window, so the VI registers are not readable",
+    "save_state": "2v2 gred cotrolled players no cpu.sav",
+    "scenario": null,
+    "game_state": "live 2v2 battle savestate, no input, NO staging (control)",
+    "settle_frames": 8,
+    "state_staging": null,
+    "staged_at": null,
+    "staging_applications": 0,
+    "first_staging_report": null,
+    "elapsed_s": 10.1,
+    "notes": []
+   }
+  },
+  "treatment": {
+   "file": "../../.tmp/xfb-treatment.json",
+   "sha256": "89d49329d35316de2e816ef91879e82d5f56b9b2d597a1497b985e6b78b74821",
+   "source": {
+    "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Software Renderer (CPU), CPU only",
+    "xfb_located_via": "gnt4_VISetNextFrameBuffer @0x80212284, r3 -- Dolphin's GDB stub refuses the 0xCC000000 hardware window, so the VI registers are not readable",
+    "save_state": "2v2 gred cotrolled players no cpu.sav",
+    "scenario": null,
+    "game_state": "live 2v2 battle savestate, no input, DAT_80436108 staged to 1 at every zz_0027c34_ entry",
+    "settle_frames": 8,
+    "state_staging": [
+     {
+      "addr": "0x80436108",
+      "size": 4,
+      "value": "0x1"
+     }
+    ],
+    "staged_at": "0x80027c34",
+    "staging_applications": 9,
+    "first_staging_report": [
+     {
+      "addr": "0x80436108",
+      "size": 4,
+      "was": "00000000",
+      "now": "00000001"
+     }
+    ],
+    "elapsed_s": 12.3,
+    "notes": []
+   }
+  },
+  "width": 640,
+  "height": 480,
+  "xfb_addr": "0x813b3560",
+  "vi_hit": 9
+ },
+ "capture": {
+  "file": "research/decomp/oracle-harness/corpora/gx-rom-unit.zz_0027c34_.gx-callstream.jsonl",
+  "sha256": "36292931c62287f243b819b50e10945c0522164ff1343ec03e3b1ce20aba1898",
+  "invocation": 0
+ },
+ "host_prediction": {
+  "primitive": {
+   "frame": 1,
+   "primitive": "QUADS",
+   "primitiveByte": 128,
+   "vertexCount": 4,
+   "hasNormals": false,
+   "hasColors": true,
+   "hasTexcoords": false,
+   "firstVertex": [
+    0,
+    0,
+    0
+   ],
+   "firstColor": [
+    0,
+    0,
+    0,
+    7
+   ],
+   "currentMtxId": 0,
+   "projectionType": 1,
+   "cullMode": 2,
+   "texMap": 255
+  },
+  "quad_extent": {
+   "x0": 0,
+   "y0": 0,
+   "x1": 640,
+   "y1": 448
+  },
+  "vertex_colour_rgba": [
+   0,
+   0,
+   0,
+   7
+  ],
+  "blend": {
+   "mode": 1,
+   "src": 4,
+   "dst": 5,
+   "srcFactorValue": 0.027450980392156862,
+   "dstFactorValue": 0.9725490196078431
+  },
+  "diagnostics": []
+ },
+ "measured_change_region": {
+  "x0": 0,
+  "y0": 0,
+  "x1": 640,
+  "y1": 448,
+  "changedPixels": 282618
+ },
+ "region_matches_host_prediction": true,
+ "pixels_changed_outside_host_prediction": 0,
+ "deltas": {
+  "channel_samples": 860160,
+  "mean_abs": 0.7777,
+  "p50": 1,
+  "p90": 2,
+  "p95": 2,
+  "p99": 3,
+  "max": 7,
+  "within_tolerance": 858450,
+  "within_tolerance_pct": 99.8012,
+  "histogram_0_to_15": [
+   333940,
+   405102,
+   106411,
+   12646,
+   351,
+   84,
+   80,
+   1546,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "console_fitted_attenuation": {
+  "samples": 393676,
+  "median": 0.970588,
+  "p05": 0.960396,
+  "p95": 0.976744
+ },
+ "host_predicted_attenuation": 0.972549,
+ "vacuity_failures": [],
+ "verdict": "pass",
+ "verdict_token": "GX_FRAMEBUFFER_EQUIVALENT"
+}

@@ -1,0 +1,251 @@
+{
+ "result_schema": 1,
+ "standard": "gx_callstream_green",
+ "standard_note": "gx_callstream_green is the GX SDK-seam standard. It is NOT one of the wasm-unit verification tiers (compile_only / oracle_green / boundary_green / transcript_green), is not comparable with them, and must never be summed with or reported as any of them.",
+ "name": "gx-rom-unit",
+ "fn": "zz_0027c34_",
+ "generated_at": "2026-08-31T21:56:03.647Z",
+ "claim": {
+  "established": true,
+  "summary": "the gate-lowered wasm build of zz_0027c34_ emits the SAME SDK-seam stream as the console — same GX calls in the same order with the same arguments, and the same write-gather-pipe writes at the same widths with the same values — over 4 recorded invocation(s)",
+  "verifies": [
+   "the write-gather-pipe LOWERING: which stores became which __gf_gx_wgpipe_* import, at which width, in which order, carrying which value (48 write(s), 128 byte(s))",
+   "the GX call sequence and its ARGUMENT MARSHALLING (76 call(s) compared value-for-value)",
+   "the guard the ROM function evaluates, replayed against the console's own memory",
+   "the GameCube-address to linear-memory mapping for every static pointer the function passes",
+   "that the host's FIFO decoder consumes the console's OWN vertex byte stream completely (no dropped bytes, no bytes left buffered) and assembles a primitive from it"
+  ],
+  "does_not_verify": [
+   "ANY PIXEL. No framebuffer is read on either side. A matching call stream means the host is FED correctly; it says nothing about what the adapters, the TEV shader generator, the texture decoder or the WebGL rasterizer DO with what they are fed.",
+   "the MEANING of any argument value: a 7 is compared as the number 7, not as a depth-compare function. Every [SDK]-labelled enum value in gx/enums.ts is untouched by this standard.",
+   "the behaviour of the GX entry points themselves — what the console's SDK did with these arguments is outside the capture",
+   "any ROM function other than this one, and any game state other than the one captured",
+   "an UNSTAGED observation: this capture staged game state to open the function's guard (source.state_staging). The executed code, its call stream and its pipe bytes are the ROM's own; the guard's value was not."
+  ],
+  "relationship_to_other_standards": "orthogonal, not weaker or stronger. oracle_green / boundary_green / transcript_green compare a ported function's write set, callee boundary or return value against the console. This compares one function's GRAPHICS SEAM EMISSION, which none of them can see, because a write-gather-pipe store is neither a call nor a MEM1 write.",
+  "bounded_by_corpus": {
+   "invocations": 4,
+   "calls": 76,
+   "wgpipe_writes": 48,
+   "wgpipe_bytes": 128,
+   "drawing_invocations": 4
+  },
+  "behavioural_claim_of_the_adapters": "NONE. Every GX adapter is a synthetic stand-in written from API semantics and decompiled call sites; no frame produced by this path has ever been compared against a real GameCube frame, and the path has no trace verification behind it. The ceiling even once verified is 'framebuffer-equivalent, never pixel-identical'. This is scaffolding — see docs/gx-hle-host.md."
+ },
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-gx-callstream.mjs",
+  "git_rev": "cdd535f43f15f973d372f62abe5a885b41ef9762",
+  "sha256": "9a233aa430eeb6e063f0846dc4624eb55a82f1ae5fc7bf3b0aac8451e49d45d3",
+  "gx_host_entry": "packages/rom-runtime/src/gx/oracle/gxCallstreamHost.ts",
+  "gx_host_sha256": "6f943ee78a3e58f7480b336341b68285c44d9b5d75e0cedd272c9915ce4c33df",
+  "min_invocations": 1
+ },
+ "wasm": {
+  "path": "packages/rom-runtime/test/fixtures/gx-rom-unit/gx_rom_unit.threads.wasm",
+  "sha256": "6430cac075a03231696b6eb92516653e80aebe21814c147d57d20447f25ebdda",
+  "memory_pages": {
+   "initial": 32890,
+   "maximum": 32890,
+   "shared": true
+  }
+ },
+ "capture": {
+  "file": "research/decomp/oracle-harness/corpora/gx-rom-unit.zz_0027c34_.gx-callstream.jsonl",
+  "sha256": "36292931c62287f243b819b50e10945c0522164ff1343ec03e3b1ce20aba1898",
+  "invocations": 4,
+  "counts": {
+   "invocation": 4,
+   "call": 76,
+   "wgpipe": 48,
+   "store": 0
+  },
+  "binding": {
+   "strategy": "first-use order of distinct ROM call targets zipped with the module's non-wgpipe imports",
+   "map": {
+    "0x8022782c": "gnt4_GXSetCullMode_bl",
+    "0x8022a808": "gnt4_GXSetBlendMode_bl",
+    "0x8022a8b4": "gnt4_GXSetZMode_bl",
+    "0x8022bce8": "gnt4_GXSetProjection_bl",
+    "0x8020aefc": "gnt4_PSMTXIdentity_bl",
+    "0x8022be60": "gnt4_GXLoadPosMtxImm_bl",
+    "0x8022bf00": "gnt4_GXSetCurrentMtx_bl",
+    "0x802261ac": "gnt4_GXClearVtxDesc_bl",
+    "0x80225894": "gnt4_GXSetVtxDesc_bl",
+    "0x802261e4": "gnt4_GXSetVtxAttrFmt_bl",
+    "0x8022885c": "gnt4_GXSetNumChans_bl",
+    "0x80226d6c": "gnt4_GXSetNumTexGens_bl",
+    "0x8022a2e8": "gnt4_GXSetNumTevStages_bl",
+    "0x80228898": "gnt4_GXSetChanCtrl_bl",
+    "0x8022a14c": "gnt4_GXSetTevOrder_bl",
+    "0x80229bac": "gnt4_GXSetTevOp_bl",
+    "0x8022760c": "gnt4_GXBegin_bl"
+   },
+   "cross_checked_against_gx_inventory": [
+    "gnt4_GXBegin_bl",
+    "gnt4_GXClearVtxDesc_bl",
+    "gnt4_GXLoadPosMtxImm_bl",
+    "gnt4_GXSetBlendMode_bl",
+    "gnt4_GXSetChanCtrl_bl",
+    "gnt4_GXSetCullMode_bl",
+    "gnt4_GXSetCurrentMtx_bl",
+    "gnt4_GXSetNumChans_bl",
+    "gnt4_GXSetNumTevStages_bl",
+    "gnt4_GXSetNumTexGens_bl",
+    "gnt4_GXSetProjection_bl",
+    "gnt4_GXSetTevOp_bl",
+    "gnt4_GXSetTevOrder_bl",
+    "gnt4_GXSetVtxAttrFmt_bl",
+    "gnt4_GXSetVtxDesc_bl",
+    "gnt4_GXSetZMode_bl"
+   ]
+  },
+  "source": {
+   "standard": "gx_callstream_green",
+   "capture_tool": "research/tools/dolphin-trace/capture_gx.py",
+   "control_strategy": "breakpoint the function entry, its blr, every bl site and every store site; each stop appends one ordered event; a store is classified as a write-gather-pipe write by its RESOLVED effective address, not by static constant propagation",
+   "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Null video backend, CPU only",
+   "stub": "gdb-rsp 127.0.0.1:55555",
+   "dumped_at": "2026-08-31T21:49:19.585219Z",
+   "game_state": "live 2v2 battle savestate; the ROM's own fade-active flag DAT_80436108 staged to 1 at each entry so the guarded draw path executes",
+   "plan": "research/tools/dolphin-trace/plans/gx.zz_0027c34_.json",
+   "pad_injection": null,
+   "injected_frames": 0,
+   "scenario": null,
+   "scenario_setup": null,
+   "entries_seen": 4,
+   "armed_on": null,
+   "armed_after_s": null,
+   "state_staging": [
+    {
+     "addr": "0x80436108",
+     "size": 4,
+     "value": "0x1"
+    }
+   ],
+   "exclusions": [
+    "NO FRAMEBUFFER IS READ. This capture is the SDK-seam call stream only; it says nothing about the pixels either side produces.",
+    "a stack-relative pointer argument is recorded as an offset from r1 and compared structurally, not by value -- the console stack and the wasm linear stack are different address spaces",
+    "memory reads are limited to the plan's declared read set; a load the plan does not declare is neither captured nor seeded",
+    "the callees themselves are not observed: what a GX entry point DID with these arguments on the console is outside this capture",
+    "input is savestate + synthesized pad injection, not a DTM, so each capture is a fresh sample rather than a replayable trace"
+   ],
+   "notes": [],
+   "elapsed_s": 9.4
+  }
+ },
+ "state_staging": [
+  {
+   "addr": "0x80436108",
+   "size": 4,
+   "value": "0x1"
+  }
+ ],
+ "seeded_bytes": 336,
+ "invocations_matched": 4,
+ "events_matched": 124,
+ "events_captured": 124,
+ "per_invocation": [
+  {
+   "n": 0,
+   "console_events": 31,
+   "port_events": 31,
+   "guard_open": true,
+   "matched": true,
+   "divergence": null
+  },
+  {
+   "n": 1,
+   "console_events": 31,
+   "port_events": 31,
+   "guard_open": true,
+   "matched": true,
+   "divergence": null
+  },
+  {
+   "n": 2,
+   "console_events": 31,
+   "port_events": 31,
+   "guard_open": true,
+   "matched": true,
+   "divergence": null
+  },
+  {
+   "n": 3,
+   "console_events": 31,
+   "port_events": 31,
+   "guard_open": true,
+   "matched": true,
+   "divergence": null
+  }
+ ],
+ "console_stream_decoded_by_host": {
+  "invocation": 0,
+  "fifo": {
+   "primitives": 1,
+   "droppedBytes": 0,
+   "pendingBytes": 0
+  },
+  "records": [
+   {
+    "primitive": "QUADS",
+    "primitiveByte": 128,
+    "vertexCount": 4,
+    "firstVertex": [
+     0,
+     0,
+     0
+    ],
+    "firstColor": [
+     0,
+     0,
+     0,
+     7
+    ],
+    "cullMode": 2,
+    "projectionType": 1
+   }
+  ],
+  "vertices": [
+   {
+    "positions": [
+     0,
+     0,
+     0,
+     640,
+     0,
+     0,
+     640,
+     448,
+     0,
+     0,
+     448,
+     0
+    ],
+    "colors": [
+     0,
+     0,
+     0,
+     7,
+     0,
+     0,
+     0,
+     7,
+     0,
+     0,
+     0,
+     7,
+     0,
+     0,
+     0,
+     7
+    ]
+   }
+  ],
+  "diagnostics": []
+ },
+ "decode_faults": [],
+ "vacuity_failures": [],
+ "divergence": null,
+ "verdict": "pass",
+ "verdict_token": "GX_CALLSTREAM_GREEN"
+}
