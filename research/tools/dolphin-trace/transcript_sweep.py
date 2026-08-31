@@ -296,6 +296,7 @@ def cmd_capture(a: argparse.Namespace) -> int:
     results = []
     for row in rows:
         out = out_dir / f"{row['unit']}.{row['fn']}.transcript.jsonl"
+        keep = out.with_suffix(".best.tmp")
         best: dict = {"cases": 0}
         for attempt in range(a.attempts):
             got = capture_once(row["plan"], scout["scenario"], a.n, out,
@@ -305,8 +306,17 @@ def cmd_capture(a: argparse.Namespace) -> int:
                   f"notes={got.get('notes')}", flush=True)
             if got.get("cases", 0) > best["cases"]:
                 best = got
+                # Each attempt OVERWRITES the corpus, so a later, worse boot
+                # would otherwise leave the weaker file on disk under a report
+                # that quotes the better count. Park the best one.
+                if out.is_file():
+                    keep.write_bytes(out.read_bytes())
             if got.get("cases", 0) >= a.min_cases:
                 break
+        if keep.is_file():
+            if best.get("cases", 0):
+                out.write_bytes(keep.read_bytes())
+            keep.unlink()
         results.append({"unit": row["unit"], "fn": row["fn"],
                         "hits": row["hits"], "cases": best.get("cases", 0),
                         "calls": best.get("calls"), "out": str(out),
@@ -314,7 +324,8 @@ def cmd_capture(a: argparse.Namespace) -> int:
     stop()
     Path(a.report).write_text(
         json.dumps({"kind": "transcript_capture_sweep",
-                    "scenario": scout["scenario"], "results": results},
+                    "scenario": scout["scenario"], "results": results,
+                    "skipped_too_rare": skipped},
                    indent=1) + "\n", encoding="utf-8")
     print(json.dumps({"captured": sum(1 for r in results if r["cases"]),
                       "attempted": len(results),
