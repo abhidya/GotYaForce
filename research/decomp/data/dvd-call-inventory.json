@@ -1,0 +1,524 @@
+{
+  "generatedBy": "scripts/hle-call-inventory.mjs",
+  "family": "dvd",
+  "title": "DVD / disc file access",
+  "corpus": "research/decomp/ghidra-export",
+  "method": "static call-site counts attributed to the enclosing function; 'game' = caller is ROM game code, 'sdk-internal' = caller is itself a gnt4_* SDK/HSD function. MMIO counts are static register mentions classified read/write by whether the register appears on the left of an assignment. NOT a runtime frequency measurement.",
+  "totals": {
+    "symbolsInDol": 47,
+    "symbolsCalledAnywhere": 44,
+    "symbolsCalledByGameCode": 15,
+    "gameCallSites": 41,
+    "sdkInternalCallSites": 120,
+    "bridgedSymbolsCalledByGameCode": 15,
+    "bridgedGameCallSites": 41,
+    "inWindowSymbolsCalledByGameCode": 0,
+    "inWindowGameCallSites": 0,
+    "mmioRegisters": 10,
+    "mmioReads": 27,
+    "mmioWrites": 57
+  },
+  "entries": [
+    {
+      "symbol": "gnt4_DVDGetCommandBlockStatus_bl",
+      "romAddr": "8020f7d0",
+      "seam": "bridged",
+      "gameCalls": 11,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 5
+    },
+    {
+      "symbol": "gnt4_DVDGetDriveStatus_bl",
+      "romAddr": "8020f81c",
+      "seam": "bridged",
+      "gameCalls": 7,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 5
+    },
+    {
+      "symbol": "gnt4_DVDCheckDisk_bl",
+      "romAddr": "8020fc7c",
+      "seam": "bridged",
+      "gameCalls": 5,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_DVDInit_bl",
+      "romAddr": "8020d798",
+      "seam": "bridged",
+      "gameCalls": 3,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 3
+    },
+    {
+      "symbol": "gnt4_DVDCancel_bl",
+      "romAddr": "8020fba4",
+      "seam": "bridged",
+      "gameCalls": 2,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_DVDClose_bl",
+      "romAddr": "8020d2b4",
+      "seam": "bridged",
+      "gameCalls": 2,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_DVDOpen_bl",
+      "romAddr": "8020d1ec",
+      "seam": "bridged",
+      "gameCalls": 2,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 2
+    },
+    {
+      "symbol": "gnt4_DVDReadAbsAsyncPrio_bl",
+      "romAddr": "8020f380",
+      "seam": "bridged",
+      "gameCalls": 2,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_DVDGetCurrentDiskID_bl",
+      "romAddr": "8020fc74",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4___DVDPrepareResetAsync_bl",
+      "romAddr": "8020fd74",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_DVDInquiryAsync_bl",
+      "romAddr": "8020f6bc",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_DVDReadPrio_bl",
+      "romAddr": "8020d5ec",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_DVDResume_bl",
+      "romAddr": "8020f8d8",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_DVDSetAutoInvalidation",
+      "romAddr": "8020f8c8",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4_HSD_DVDInit",
+      "romAddr": "80253bbc",
+      "seam": "bridged",
+      "gameCalls": 1,
+      "sdkInternalCalls": 0,
+      "distinctGameCallers": 1
+    },
+    {
+      "symbol": "gnt4___DVDStoreErrorCode_bl",
+      "romAddr": "802101a4",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 22,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDReset_bl",
+      "romAddr": "8020f78c",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 17,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowStopMotor_bl",
+      "romAddr": "8020ca1c",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 15,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowRequestError_bl",
+      "romAddr": "8020caa8",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 7,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___DVDClearWaitingQueue_bl",
+      "romAddr": "8020fe90",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 5,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___DVDPushWaitingQueue_bl",
+      "romAddr": "8020fec8",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 5,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowRequestAudioStatus_bl",
+      "romAddr": "8020cc68",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 5,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowSeek_bl",
+      "romAddr": "8020c8b8",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 5,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowWaitCoverClose_bl",
+      "romAddr": "8020c94c",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 5,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowRead_bl",
+      "romAddr": "8020c620",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 4,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDCancelAsync_bl",
+      "romAddr": "8020f928",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 3,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___DVDFSInit_bl",
+      "romAddr": "8020cec0",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___DVDPopWaitingQueue_bl",
+      "romAddr": "8020ff30",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowAudioBufferConfig_bl",
+      "romAddr": "8020ccf4",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowAudioStream_bl",
+      "romAddr": "8020cbd0",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowReadDiskID",
+      "romAddr": "8020c978",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDReadDiskID_bl",
+      "romAddr": "8020f52c",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 2,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___DVDCheckWaitingQueue_bl",
+      "romAddr": "8020ffd0",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___DVDDequeueWaitingQueue_bl",
+      "romAddr": "80210028",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___DVDInitWA_bl",
+      "romAddr": "8020c07c",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___DVDLowSetWAType_bl",
+      "romAddr": "8020ce7c",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4___DVDPrintFatalMessage_bl",
+      "romAddr": "80210414",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDCompareDiskID_bl",
+      "romAddr": "80210220",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDGetCurrentDir_bl",
+      "romAddr": "8020d438",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowBreak_bl",
+      "romAddr": "8020ce4c",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowClearCallback_bl",
+      "romAddr": "8020ce60",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowInquiry_bl",
+      "romAddr": "8020cb34",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDLowReset_bl",
+      "romAddr": "8020cd90",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    },
+    {
+      "symbol": "gnt4_DVDReadAbsAsyncForBS_bl",
+      "romAddr": "8020f45c",
+      "seam": "bridged",
+      "gameCalls": 0,
+      "sdkInternalCalls": 1,
+      "distinctGameCallers": 0
+    }
+  ],
+  "registers": [
+    {
+      "register": "0xcc006004",
+      "window": "DI",
+      "reads": 17,
+      "writes": 21,
+      "total": 38,
+      "functions": [
+        "8020c0bc gnt4-__DVDInterruptHandler-bl",
+        "8020c94c gnt4-DVDLowWaitCoverClose-bl",
+        "8020cd90 gnt4-DVDLowReset-bl",
+        "8020ce60 gnt4-DVDLowClearCallback-bl",
+        "8020d798 gnt4-DVDInit-bl",
+        "8020e714 gnt4-cbForStateMotorStopped-bl",
+        "8020ea28 gnt4-stateBusy-bl",
+        "8020f78c gnt4-DVDReset-bl",
+        "8020fc7c gnt4-DVDCheckDisk-bl"
+      ]
+    },
+    {
+      "register": "0xcc006008",
+      "window": "DI",
+      "reads": 0,
+      "writes": 9,
+      "total": 9,
+      "functions": [
+        "8020c490 gnt4-Read-bl",
+        "8020c8b8 gnt4-DVDLowSeek-bl",
+        "8020c978 gnt4-DVDLowReadDiskID",
+        "8020ca1c gnt4-DVDLowStopMotor-bl",
+        "8020caa8 gnt4-DVDLowRequestError-bl",
+        "8020cb34 gnt4-DVDLowInquiry-bl",
+        "8020cbd0 gnt4-DVDLowAudioStream-bl",
+        "8020cc68 gnt4-DVDLowRequestAudioStatus-bl",
+        "8020ccf4 gnt4-DVDLowAudioBufferConfig-bl"
+      ]
+    },
+    {
+      "register": "0xcc00601c",
+      "window": "DI",
+      "reads": 0,
+      "writes": 9,
+      "total": 9,
+      "functions": [
+        "8020c490 gnt4-Read-bl",
+        "8020c8b8 gnt4-DVDLowSeek-bl",
+        "8020c978 gnt4-DVDLowReadDiskID",
+        "8020ca1c gnt4-DVDLowStopMotor-bl",
+        "8020caa8 gnt4-DVDLowRequestError-bl",
+        "8020cb34 gnt4-DVDLowInquiry-bl",
+        "8020cbd0 gnt4-DVDLowAudioStream-bl",
+        "8020cc68 gnt4-DVDLowRequestAudioStatus-bl",
+        "8020ccf4 gnt4-DVDLowAudioBufferConfig-bl"
+      ]
+    },
+    {
+      "register": "0xcc006018",
+      "window": "DI",
+      "reads": 2,
+      "writes": 4,
+      "total": 6,
+      "functions": [
+        "8020c490 gnt4-Read-bl",
+        "8020c620 gnt4-DVDLowRead-bl",
+        "8020c978 gnt4-DVDLowReadDiskID",
+        "8020cb34 gnt4-DVDLowInquiry-bl",
+        "8020d728 zz_020d728_",
+        "8020ed48 gnt4-cbForStateBusy-bl"
+      ]
+    },
+    {
+      "register": "0xcc006020",
+      "window": "DI",
+      "reads": 5,
+      "writes": 0,
+      "total": 5,
+      "functions": [
+        "8020db40 gnt4-cbForStateGettingError-bl",
+        "8020de3c gnt4-cbForUnrecoveredErrorRetry-bl",
+        "8020ed48 gnt4-cbForStateBusy-bl"
+      ]
+    },
+    {
+      "register": "0xcc006000",
+      "window": "DI",
+      "reads": 1,
+      "writes": 3,
+      "total": 4,
+      "functions": [
+        "8020c0bc gnt4-__DVDInterruptHandler-bl",
+        "8020d798 gnt4-DVDInit-bl",
+        "8020f78c gnt4-DVDReset-bl"
+      ]
+    },
+    {
+      "register": "0xcc00600c",
+      "window": "DI",
+      "reads": 0,
+      "writes": 4,
+      "total": 4,
+      "functions": [
+        "8020c490 gnt4-Read-bl",
+        "8020c8b8 gnt4-DVDLowSeek-bl",
+        "8020c978 gnt4-DVDLowReadDiskID",
+        "8020cbd0 gnt4-DVDLowAudioStream-bl"
+      ]
+    },
+    {
+      "register": "0xcc006010",
+      "window": "DI",
+      "reads": 0,
+      "writes": 4,
+      "total": 4,
+      "functions": [
+        "8020c490 gnt4-Read-bl",
+        "8020c978 gnt4-DVDLowReadDiskID",
+        "8020cb34 gnt4-DVDLowInquiry-bl",
+        "8020cbd0 gnt4-DVDLowAudioStream-bl"
+      ]
+    },
+    {
+      "register": "0xcc006014",
+      "window": "DI",
+      "reads": 1,
+      "writes": 3,
+      "total": 4,
+      "functions": [
+        "802017b8 gnt4-__OSUnhandledException-bl",
+        "8020c490 gnt4-Read-bl",
+        "8020c978 gnt4-DVDLowReadDiskID",
+        "8020cb34 gnt4-DVDLowInquiry-bl"
+      ]
+    },
+    {
+      "register": "0xcc006024",
+      "window": "DI",
+      "reads": 1,
+      "writes": 0,
+      "total": 1,
+      "functions": [
+        "801ff59c gnt4-__OSGetDIConfig-bl"
+      ]
+    }
+  ],
+  "neverCalled": [
+    "gnt4_DVDConvertPathToEntrynum_bl",
+    "gnt4_DVDReadAsyncPrio_bl",
+    "gnt4___DVDInterruptHandler_bl"
+  ]
+}

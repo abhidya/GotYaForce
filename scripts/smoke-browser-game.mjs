@@ -811,3 +811,20 @@ if (process.env.GF_SMOKE_GX_HOST === "1") {
   await (await import("./smoke-gx-host-phase.mjs")).runGxHostPhase();
 }
 // >>> END GX HLE-HOST PHASE ==================================================
+
+// ============================================================================
+// >>> AUDIO/DVD HLE-HOST PHASE (opt-in; separate, self-contained — keep at end
+// of file). Drives two ROM-side wasm modules through the DVD and audio adapter
+// sets: DVD calls cross the Atomics bridge and resolve against a real GameCube
+// FST, an async read's completion callback comes back as an invoke-request at
+// a worker park point, an unimplemented DVD entry point fails LOUDLY, and
+// VERBATIM ROM CODE (AIInitDMA/AIStartDMA and gcCiGetFileSize, MMIO-lowered)
+// moves DSP-ADPCM-decoded PCM into a WebAudio buffer. SEAM PROOF ONLY — no
+// behavioural claim, and the MIXER IS ABSENT (MusyX runs on the GameCube DSP);
+// see docs/audio-dvd-hle-host.md. Opt in with GF_SMOKE_AUDIO_DVD_HOST=1 (or
+// run scripts/smoke-audio-dvd-host-phase.mjs standalone).
+// ============================================================================
+if (process.env.GF_SMOKE_AUDIO_DVD_HOST === "1") {
+  await (await import("./smoke-audio-dvd-host-phase.mjs")).runAudioDvdHostPhase();
+}
+// >>> END AUDIO/DVD HLE-HOST PHASE ===========================================

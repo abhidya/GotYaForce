@@ -316,6 +316,59 @@ kernels, and the TEV's signed 10-bit per-stage rounding all differ. Translating 
 pipeline moves this path closer to that ceiling; it does not raise it. No document, log
 line, or test name may quietly upgrade it.
 
+### 5.3a The DVD HLE host — 80.5 % translated, 0 % verified
+
+From [`docs/audio-dvd-hle-host.md`](audio-dvd-hle-host.md), recomputable from
+`research/decomp/data/dvd-call-inventory.json` against
+`packages/rom-runtime/src/dvd/adapters.ts`:
+
+| | Entry points | ROM call sites | Share of 41 |
+| --- | ---: | ---: | ---: |
+| `translated` | 9 / 15 | 33 | **80.5 %** |
+| + `latched` | 10 | 34 | 82.9 % |
+| + `declared-nop` | 13 | 39 | 95.1 % |
+| unimplemented | 2 | 2 | 4.9 % |
+
+**Verification is exactly 0 %.** No DVD trace exists and no read has been compared against
+a real drive. Two further caveats belong next to that number, and neither is a coverage
+question: **this repository contains no disc bytes** (`research/disc/` holds one
+`.gitkeep`), so the default disc is one the host builds in memory; and the **timing model
+is knowingly wrong** — reads complete inside their adapter call, so the ROM's
+`DVDGetCommandBlockStatus` spin loops exit on their first iteration where real hardware
+would take milliseconds. The host reports that as
+`DVD_READS_COMPLETE_SYNCHRONOUSLY` on every report.
+
+### 5.3b The audio HLE host — the mixer is ABSENT, and no coverage number says so
+
+From [`docs/audio-dvd-hle-host.md`](audio-dvd-hle-host.md) §3, recomputable from
+`research/decomp/data/audio-call-inventory.json`. Audio has **two seams** and reporting one
+number over both would be a claim rather than a measurement:
+
+| surface | implemented | total | ROM call sites |
+| --- | ---: | ---: | ---: |
+| **bridged** entry points (adapters can cover these) | 5 / 5 | 5 | 6 / 6 |
+| **in-window** entry points (adapters cannot) | — | 15 | 34 |
+| **MMIO registers** acted on / stored only / measured | 9 | 9 | 18 |
+
+**The dominant fact is not on that table.** Gotcha Force mixes audio in MusyX microcode
+executing on the GameCube DSP. That microcode is not PowerPC code, is not in the DOL, and
+is uploaded over a mailbox as a binary blob — there is nothing for any porting pipeline to
+translate. This host carries a PCM buffer to the speakers and models the AI/DSP registers
+the ROM's own code drives; **it cannot fill that buffer**, so a composed module running
+today DMAs silence. The host reports `dspMicrocodeAbsent: true` on every report and the
+smoke phase fails if it ever stops.
+
+Second-order gaps, all reported as named diagnostics rather than left to be discovered:
+ARAM DMA is stored and not performed (`ARAM_DMA_NOT_MODELLED`; those are the busiest audio
+registers in the corpus at 247 reads / 251 writes), and the **assembly gate does not lower
+AI/DSP MMIO at all** (`AI_MMIO_NOT_GATE_LOWERED`) — the ROM-unit fixture applies that
+rewrite by hand, unlike the GX fixture whose lowering is genuine gate output.
+
+One thing on this path IS checked against something other than itself: the new TypeScript
+DSP-ADPCM decoder is compared sample-for-sample against `decode_dsp_adpcm` in
+`scripts/export-combat-se.py`, the Python implementation that produced the combat-SE OGGs
+the game ships. That is an independent second implementation, not console capture.
+
 ### 5.4 Capture coverage — the real bottleneck
 
 Verification is bounded by what has actually been captured off the console, and that
