@@ -1,0 +1,88 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:39.186321Z",
+ "unit": "auto-c0033-011",
+ "fn": {
+  "name": "FUN_80125bcc",
+  "gc_addr": "0x80125bcc",
+  "end": "0x80125c48",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0033-011\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80125bcc",
+   "addr": "0x80125bcc",
+   "end": "0x80125c48"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80125c44"
+ ],
+ "stores": [
+  {
+   "at": "0x80125c14",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6430,
+   "addr_expr": "r3+0x191e",
+   "in": "FUN_80125bcc"
+  },
+  {
+   "at": "0x80125c3c",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6362,
+   "addr_expr": "r3+0x18da",
+   "in": "FUN_80125bcc"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -19984,
+   "width": 8,
+   "at": "0x80125bec",
+   "op": "lfd",
+   "in": "FUN_80125bcc"
+  },
+  {
+   "kind": "r2",
+   "disp": -19992,
+   "width": 4,
+   "at": "0x80125bf4",
+   "op": "lfs",
+   "in": "FUN_80125bcc"
+  }
+ ],
+ "field_widths": {
+  "0x5e0": 4,
+  "0x18da": 2,
+  "0x191e": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_80125bcc has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

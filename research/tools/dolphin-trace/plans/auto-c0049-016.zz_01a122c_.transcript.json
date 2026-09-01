@@ -1,0 +1,38 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:14.692457Z",
+ "unit": "auto-c0049-016",
+ "fn": {
+  "name": "zz_01a122c_",
+  "gc_addr": "0x801a122c",
+  "end": "0x801a1230",
+  "params": [],
+  "results": [],
+  "entry_args": [],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0049-016\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_01a122c_",
+   "addr": "0x801a122c",
+   "end": "0x801a1230"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801a122c"
+ ],
+ "stores": [],
+ "globals": [],
+ "field_widths": {},
+ "field_width_conflicts": [],
+ "refusals": [
+  "zz_01a122c_ has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

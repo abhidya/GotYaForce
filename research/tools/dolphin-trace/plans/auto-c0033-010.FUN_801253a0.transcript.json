@@ -1,0 +1,83 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:37.577115Z",
+ "unit": "auto-c0033-010",
+ "fn": {
+  "name": "FUN_801253a0",
+  "gc_addr": "0x801253a0",
+  "end": "0x80125400",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0033-010\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_801253a0",
+   "addr": "0x801253a0",
+   "end": "0x80125400"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801253fc"
+ ],
+ "stores": [
+  {
+   "at": "0x801253bc",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6370,
+   "addr_expr": "r3+0x18e2",
+   "in": "FUN_801253a0"
+  },
+  {
+   "at": "0x801253c8",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6362,
+   "addr_expr": "r3+0x18da",
+   "in": "FUN_801253a0"
+  },
+  {
+   "at": "0x801253d4",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6400,
+   "addr_expr": "r3+0x1900",
+   "in": "FUN_801253a0"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x581": 1,
+  "0x18da": 2,
+  "0x18e2": 2,
+  "0x1900": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_801253a0 dispatches through a ROM function-pointer table at 0x801253ec (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole",
+  "FUN_801253a0 has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

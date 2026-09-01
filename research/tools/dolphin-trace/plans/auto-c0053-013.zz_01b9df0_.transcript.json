@@ -1,0 +1,263 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:43.817219Z",
+ "unit": "auto-c0053-013",
+ "fn": {
+  "name": "zz_01b9df0_",
+  "gc_addr": "0x801b9df0",
+  "end": "0x801b9f0c",
+  "params": [
+   "i32",
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   },
+   {
+    "i": 1,
+    "t": "i32",
+    "src": "r4"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0053-013\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_01b9df0_",
+   "addr": "0x801b9df0",
+   "end": "0x801b9f0c"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801b9e6c",
+   "target": "0x8020ba9c",
+   "in": "zz_01b9df0_",
+   "callee": "gnt4_PSQUATScale_bl",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  },
+  {
+   "at": "0x801b9e74",
+   "target": "0x8020bb14",
+   "in": "zz_01b9df0_",
+   "callee": "gnt4_PSVECMag_bl",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "f64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "f64",
+    "src": "f1"
+   }
+  },
+  {
+   "at": "0x801b9e98",
+   "target": "0x8020ba9c",
+   "in": "zz_01b9df0_",
+   "callee": "gnt4_PSQUATScale_bl",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801b9f08"
+ ],
+ "stores": [
+  {
+   "at": "0x801b9e20",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 25,
+   "addr_expr": "r31+0x19",
+   "in": "zz_01b9df0_"
+  },
+  {
+   "at": "0x801b9e2c",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 28,
+   "addr_expr": "r31+0x1c",
+   "in": "zz_01b9df0_"
+  },
+  {
+   "at": "0x801b9ea4",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 56,
+   "addr_expr": "r31+0x38",
+   "in": "zz_01b9df0_"
+  },
+  {
+   "at": "0x801b9ea8",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 60,
+   "addr_expr": "r31+0x3c",
+   "in": "zz_01b9df0_"
+  },
+  {
+   "at": "0x801b9eb0",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 64,
+   "addr_expr": "r31+0x40",
+   "in": "zz_01b9df0_"
+  },
+  {
+   "at": "0x801b9eec",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 200,
+   "addr_expr": "r31+0xc8",
+   "in": "zz_01b9df0_"
+  },
+  {
+   "at": "0x801b9ef0",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 626,
+   "addr_expr": "r31+0x272",
+   "in": "zz_01b9df0_"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -12228,
+   "width": 4,
+   "at": "0x801b9e38",
+   "op": "lfs",
+   "in": "zz_01b9df0_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12160,
+   "width": 4,
+   "at": "0x801b9e58",
+   "op": "lfs",
+   "in": "zz_01b9df0_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12156,
+   "width": 4,
+   "at": "0x801b9e78",
+   "op": "lfs",
+   "in": "zz_01b9df0_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12224,
+   "width": 4,
+   "at": "0x801b9ec8",
+   "op": "lfs",
+   "in": "zz_01b9df0_"
+  }
+ ],
+ "field_widths": {
+  "0x11": 1,
+  "0x19": 1,
+  "0x1c": 2,
+  "0x2c": 4,
+  "0x38": 4,
+  "0x3c": 4,
+  "0x40": 4,
+  "0x50": 4,
+  "0xb4": 4,
+  "0xc8": 4,
+  "0x1cc": 4,
+  "0x1d0": 4,
+  "0x1d4": 4,
+  "0x272": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

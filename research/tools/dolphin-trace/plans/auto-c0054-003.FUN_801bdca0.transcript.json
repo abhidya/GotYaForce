@@ -1,0 +1,50 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:55.926412Z",
+ "unit": "auto-c0054-003",
+ "fn": {
+  "name": "FUN_801bdca0",
+  "gc_addr": "0x801bdca0",
+  "end": "0x801bdcdc",
+  "params": [],
+  "results": [],
+  "entry_args": [],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0054-003\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_801bdca0",
+   "addr": "0x801bdca0",
+   "end": "0x801bdcdc"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801bdcd8"
+ ],
+ "stores": [],
+ "globals": [
+  {
+   "kind": "r13",
+   "disp": -23408,
+   "width": 4,
+   "at": "0x801bdcb4",
+   "op": "lwz",
+   "in": "FUN_801bdca0"
+  }
+ ],
+ "field_widths": {
+  "0x16": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_801bdca0 dispatches through a ROM function-pointer table at 0x801bdcc8 (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole",
+  "FUN_801bdca0 has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

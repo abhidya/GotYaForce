@@ -1,0 +1,165 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:49.341075Z",
+ "unit": "auto-c0035-004",
+ "fn": {
+  "name": "FUN_80132974",
+  "gc_addr": "0x80132974",
+  "end": "0x80132a00",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-004\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80132974",
+   "addr": "0x80132974",
+   "end": "0x80132a00"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801329a4",
+   "target": "0x80132f30",
+   "in": "FUN_80132974",
+   "callee": "zz_0132f30_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801329bc",
+   "target": "0x80133358",
+   "in": "FUN_80132974",
+   "callee": "FUN_80133358",
+   "wasm_params": [
+    "f64",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801329e4",
+   "target": "0x80132f9c",
+   "in": "FUN_80132974",
+   "callee": "zz_0132f9c_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801329fc"
+ ],
+ "stores": [
+  {
+   "at": "0x801329b4",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 28,
+   "addr_expr": "r30+0x1c",
+   "in": "FUN_80132974"
+  },
+  {
+   "at": "0x801329d8",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r30",
+   "disp": 25,
+   "addr_expr": "r30+0x19",
+   "in": "FUN_80132974"
+  },
+  {
+   "at": "0x801329dc",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 28,
+   "addr_expr": "r30+0x1c",
+   "in": "FUN_80132974"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x12": 1,
+  "0x19": 1,
+  "0x1c": 2
+ },
+ "field_width_conflicts": [
+  {
+   "offset": "0x1c",
+   "widths": [
+    2,
+    4
+   ],
+   "at": "0x801329b8",
+   "in": "FUN_80132974"
+  }
+ ],
+ "refusals": [],
+ "capturable": true
+}

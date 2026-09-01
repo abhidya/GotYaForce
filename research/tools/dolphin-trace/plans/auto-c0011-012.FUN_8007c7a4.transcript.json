@@ -1,0 +1,137 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:29.955794Z",
+ "unit": "auto-c0011-012",
+ "fn": {
+  "name": "FUN_8007c7a4",
+  "gc_addr": "0x8007c7a4",
+  "end": "0x8007c800",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0011-012\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_8007c7a4",
+   "addr": "0x8007c7a4",
+   "end": "0x8007c800"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x8007c7d4",
+   "target": "0x8006a5a4",
+   "in": "FUN_8007c7a4",
+   "callee": "zz_006a5a4_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x8007c7ec",
+   "target": "0x8006a474",
+   "in": "FUN_8007c7a4",
+   "callee": "zz_006a474_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": null
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x8007c7fc"
+ ],
+ "stores": [
+  {
+   "at": "0x8007c7b4",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 6362,
+   "addr_expr": "r3+0x18da",
+   "in": "FUN_8007c7a4"
+  },
+  {
+   "at": "0x8007c7c4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 1855,
+   "addr_expr": "r3+0x73f",
+   "in": "FUN_8007c7a4"
+  },
+  {
+   "at": "0x8007c7d0",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1504,
+   "addr_expr": "r3+0x5e0",
+   "in": "FUN_8007c7a4"
+  },
+  {
+   "at": "0x8007c7dc",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 1855,
+   "addr_expr": "r3+0x73f",
+   "in": "FUN_8007c7a4"
+  },
+  {
+   "at": "0x8007c7e8",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1504,
+   "addr_expr": "r3+0x5e0",
+   "in": "FUN_8007c7a4"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x547": 1,
+  "0x5e0": 4,
+  "0x73f": 1,
+  "0x18da": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

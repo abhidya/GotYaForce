@@ -1,0 +1,116 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:26.291563Z",
+ "unit": "auto-c0031-015",
+ "fn": {
+  "name": "FUN_80116c30",
+  "gc_addr": "0x80116c30",
+  "end": "0x80116d28",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0031-015\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80116c30",
+   "addr": "0x80116c30",
+   "end": "0x80116d28"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80116d24"
+ ],
+ "stores": [
+  {
+   "at": "0x80116c40",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 1422,
+   "addr_expr": "r3+0x58e",
+   "in": "FUN_80116c30"
+  },
+  {
+   "at": "0x80116c44",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1864,
+   "addr_expr": "r3+0x748",
+   "in": "FUN_80116c30"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -21040,
+   "width": 8,
+   "at": "0x80116c60",
+   "op": "lfd",
+   "in": "FUN_80116c30"
+  },
+  {
+   "kind": "r2",
+   "disp": -21052,
+   "width": 4,
+   "at": "0x80116c68",
+   "op": "lfs",
+   "in": "FUN_80116c30"
+  },
+  {
+   "kind": "r2",
+   "disp": -21056,
+   "width": 4,
+   "at": "0x80116c70",
+   "op": "lfs",
+   "in": "FUN_80116c30"
+  },
+  {
+   "kind": "r2",
+   "disp": -21048,
+   "width": 4,
+   "at": "0x80116cb0",
+   "op": "lfs",
+   "in": "FUN_80116c30"
+  },
+  {
+   "kind": "r2",
+   "disp": -21044,
+   "width": 4,
+   "at": "0x80116d0c",
+   "op": "lfs",
+   "in": "FUN_80116c30"
+  }
+ ],
+ "field_widths": {
+  "0x144": 4,
+  "0x148": 4,
+  "0x14c": 4,
+  "0x150": 4,
+  "0x58e": 1,
+  "0x6f6": 2,
+  "0x748": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_80116c30 has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

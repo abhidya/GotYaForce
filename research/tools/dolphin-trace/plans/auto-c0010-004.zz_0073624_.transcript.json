@@ -1,0 +1,68 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:09.144420Z",
+ "unit": "auto-c0010-004",
+ "fn": {
+  "name": "zz_0073624_",
+  "gc_addr": "0x80073624",
+  "end": "0x80073648",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0010-004\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_0073624_",
+   "addr": "0x80073624",
+   "end": "0x80073648"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x80073634",
+   "target": "0x801618ac",
+   "in": "zz_0073624_",
+   "callee": "zz_01618ac_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80073644"
+ ],
+ "stores": [],
+ "globals": [],
+ "field_widths": {},
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

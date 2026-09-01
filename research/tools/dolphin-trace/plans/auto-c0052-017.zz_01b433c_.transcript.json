@@ -1,0 +1,166 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:33.274227Z",
+ "unit": "auto-c0052-017",
+ "fn": {
+  "name": "zz_01b433c_",
+  "gc_addr": "0x801b433c",
+  "end": "0x801b43c8",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0052-017\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_01b433c_",
+   "addr": "0x801b433c",
+   "end": "0x801b43c8"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801b4368",
+   "target": "0x8006d0dc",
+   "in": "zz_01b433c_",
+   "callee": "zz_006d0dc_",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801b43b0",
+   "target": "0x8004beb8",
+   "in": "zz_01b433c_",
+   "callee": "zz_004beb8_",
+   "wasm_params": [
+    "i64",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i64",
+     "src": "r3:r4"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r5"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r6"
+    },
+    {
+     "i": 3,
+     "t": "i32",
+     "src": "r7"
+    },
+    {
+     "i": 4,
+     "t": "i32",
+     "src": "r8"
+    },
+    {
+     "i": 5,
+     "t": "i32",
+     "src": "r9"
+    },
+    {
+     "i": 6,
+     "t": "i32",
+     "src": "r10"
+    }
+   ],
+   "ret": null
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801b43c4"
+ ],
+ "stores": [
+  {
+   "at": "0x801b43a0",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1344,
+   "addr_expr": "r31+0x540",
+   "in": "zz_01b433c_"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -12436,
+   "width": 4,
+   "at": "0x801b4378",
+   "op": "lfs",
+   "in": "zz_01b433c_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12432,
+   "width": 4,
+   "at": "0x801b4390",
+   "op": "lfs",
+   "in": "zz_01b433c_"
+  }
+ ],
+ "field_widths": {
+  "0x540": 1,
+  "0x558": 4,
+  "0x1dc8": 4
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

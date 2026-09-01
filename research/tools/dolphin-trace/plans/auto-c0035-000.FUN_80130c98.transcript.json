@@ -1,0 +1,152 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:42.028228Z",
+ "unit": "auto-c0035-000",
+ "fn": {
+  "name": "FUN_80130c98",
+  "gc_addr": "0x80130c98",
+  "end": "0x80130d34",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-000\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80130c98",
+   "addr": "0x80130c98",
+   "end": "0x80130d34"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x80130d14",
+   "target": "0x8004beb8",
+   "in": "FUN_80130c98",
+   "callee": "zz_004beb8_",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 3,
+     "t": "i32",
+     "src": "r5"
+    },
+    {
+     "i": 4,
+     "t": "i32",
+     "src": "r6"
+    },
+    {
+     "i": 5,
+     "t": "i32",
+     "src": "r7"
+    },
+    {
+     "i": 6,
+     "t": "i32",
+     "src": "r8"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x80130d1c",
+   "target": "0x8013138c",
+   "in": "FUN_80130c98",
+   "callee": "zz_013138c_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80130d30"
+ ],
+ "stores": [
+  {
+   "at": "0x80130cc0",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1344,
+   "addr_expr": "r31+0x540",
+   "in": "FUN_80130c98"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -19344,
+   "width": 4,
+   "at": "0x80130d00",
+   "op": "lfs",
+   "in": "FUN_80130c98"
+  }
+ ],
+ "field_widths": {
+  "0x3e8": 2,
+  "0x540": 1,
+  "0x5e0": 4,
+  "0x6ee": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

@@ -1,0 +1,318 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:16.573488Z",
+ "unit": "auto-c0029-002",
+ "fn": {
+  "name": "zz_0105144_",
+  "gc_addr": "0x80105144",
+  "end": "0x80105240",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0029-002\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_0105144_",
+   "addr": "0x80105144",
+   "end": "0x80105240"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x8010523c"
+ ],
+ "stores": [
+  {
+   "at": "0x8010515c",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1204,
+   "addr_expr": "r3+0x4b4",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105164",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1208,
+   "addr_expr": "r3+0x4b8",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x8010516c",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1212,
+   "addr_expr": "r3+0x4bc",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105174",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1216,
+   "addr_expr": "r3+0x4c0",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x8010517c",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1220,
+   "addr_expr": "r3+0x4c4",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105184",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1224,
+   "addr_expr": "r3+0x4c8",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x8010518c",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1228,
+   "addr_expr": "r3+0x4cc",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105194",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1232,
+   "addr_expr": "r3+0x4d0",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x8010519c",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1236,
+   "addr_expr": "r3+0x4d4",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x801051a4",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1240,
+   "addr_expr": "r3+0x4d8",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x801051ac",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1244,
+   "addr_expr": "r3+0x4dc",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x801051b4",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1248,
+   "addr_expr": "r3+0x4e0",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x801051bc",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1252,
+   "addr_expr": "r3+0x4e4",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x801051c4",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1256,
+   "addr_expr": "r3+0x4e8",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x801051cc",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1260,
+   "addr_expr": "r3+0x4ec",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x801051d4",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1264,
+   "addr_expr": "r3+0x4f0",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105208",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1196,
+   "addr_expr": "r3+0x4ac",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105218",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1200,
+   "addr_expr": "r3+0x4b0",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105228",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r8",
+   "base_reg": "r3",
+   "disp": 7552,
+   "addr_expr": "r3+0x1d80",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x8010522c",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r7",
+   "base_reg": "r3",
+   "disp": 7556,
+   "addr_expr": "r3+0x1d84",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105230",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r6",
+   "base_reg": "r3",
+   "disp": 7560,
+   "addr_expr": "r3+0x1d88",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105234",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r5",
+   "base_reg": "r3",
+   "disp": 7564,
+   "addr_expr": "r3+0x1d8c",
+   "in": "zz_0105144_"
+  },
+  {
+   "at": "0x80105238",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 636,
+   "addr_expr": "r3+0x27c",
+   "in": "zz_0105144_"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x0": 4,
+  "0x4": 4,
+  "0x8": 4,
+  "0xc": 4,
+  "0x10": 4,
+  "0x14": 4,
+  "0x18": 4,
+  "0x1c": 4,
+  "0x20": 4,
+  "0x24": 4,
+  "0x28": 4,
+  "0x2c": 4,
+  "0x30": 4,
+  "0x34": 4,
+  "0x38": 4,
+  "0x3c": 4,
+  "0x27c": 4,
+  "0x3e7": 1,
+  "0x4ac": 4,
+  "0x4b0": 4,
+  "0x4b4": 4,
+  "0x4b8": 4,
+  "0x4bc": 4,
+  "0x4c0": 4,
+  "0x4c4": 4,
+  "0x4c8": 4,
+  "0x4cc": 4,
+  "0x4d0": 4,
+  "0x4d4": 4,
+  "0x4d8": 4,
+  "0x4dc": 4,
+  "0x4e0": 4,
+  "0x4e4": 4,
+  "0x4e8": 4,
+  "0x4ec": 4,
+  "0x4f0": 4,
+  "0x1d80": 4,
+  "0x1d84": 4,
+  "0x1d88": 4,
+  "0x1d8c": 4
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "zz_0105144_ has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

@@ -1,0 +1,121 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:11.566137Z",
+ "unit": "auto-c0046-001",
+ "fn": {
+  "name": "FUN_80185618",
+  "gc_addr": "0x80185618",
+  "end": "0x801856d4",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0046-001\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80185618",
+   "addr": "0x80185618",
+   "end": "0x801856d4"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801856d0"
+ ],
+ "stores": [
+  {
+   "at": "0x80185628",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 1422,
+   "addr_expr": "r3+0x58e",
+   "in": "FUN_80185618"
+  },
+  {
+   "at": "0x8018562c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1864,
+   "addr_expr": "r3+0x748",
+   "in": "FUN_80185618"
+  },
+  {
+   "at": "0x80185678",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6362,
+   "addr_expr": "r3+0x18da",
+   "in": "FUN_80185618"
+  },
+  {
+   "at": "0x801856a0",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6368,
+   "addr_expr": "r3+0x18e0",
+   "in": "FUN_80185618"
+  },
+  {
+   "at": "0x801856c8",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6370,
+   "addr_expr": "r3+0x18e2",
+   "in": "FUN_80185618"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -15064,
+   "width": 8,
+   "at": "0x8018564c",
+   "op": "lfd",
+   "in": "FUN_80185618"
+  },
+  {
+   "kind": "r2",
+   "disp": -15072,
+   "width": 4,
+   "at": "0x80185654",
+   "op": "lfs",
+   "in": "FUN_80185618"
+  }
+ ],
+ "field_widths": {
+  "0x58e": 1,
+  "0x5e0": 4,
+  "0x748": 1,
+  "0x18da": 2,
+  "0x18e0": 2,
+  "0x18e2": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_80185618 has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

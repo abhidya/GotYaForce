@@ -1,0 +1,179 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:47.511579Z",
+ "unit": "auto-c0019-010",
+ "fn": {
+  "name": "zz_00bdb80_",
+  "gc_addr": "0x800bdb80",
+  "end": "0x800bdc90",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0019-010\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_00bdb80_",
+   "addr": "0x800bdb80",
+   "end": "0x800bdc90"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x800bdc60",
+  "0x800bdc6c",
+  "0x800bdc78",
+  "0x800bdc84",
+  "0x800bdc8c"
+ ],
+ "stores": [
+  {
+   "at": "0x800bdba4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 324,
+   "addr_expr": "r3+0x144",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdba8",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 132,
+   "addr_expr": "r3+0x84",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdbbc",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 326,
+   "addr_expr": "r3+0x146",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdbc8",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 326,
+   "addr_expr": "r3+0x146",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdbf0",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 324,
+   "addr_expr": "r3+0x144",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdbf4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 132,
+   "addr_expr": "r3+0x84",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdc08",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 326,
+   "addr_expr": "r3+0x146",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdc14",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 326,
+   "addr_expr": "r3+0x146",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdc28",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 132,
+   "addr_expr": "r3+0x84",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdc48",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 116,
+   "addr_expr": "r3+0x74",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdc68",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 116,
+   "addr_expr": "r3+0x74",
+   "in": "zz_00bdb80_"
+  },
+  {
+   "at": "0x800bdc80",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 116,
+   "addr_expr": "r3+0x74",
+   "in": "zz_00bdb80_"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x13": 1,
+  "0x74": 2,
+  "0x84": 1,
+  "0x90": 4,
+  "0x144": 1,
+  "0x146": 2,
+  "0x6e8": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "zz_00bdb80_ has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

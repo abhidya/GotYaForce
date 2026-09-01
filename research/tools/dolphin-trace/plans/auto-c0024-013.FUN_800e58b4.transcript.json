@@ -1,0 +1,138 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:03.029437Z",
+ "unit": "auto-c0024-013",
+ "fn": {
+  "name": "FUN_800e58b4",
+  "gc_addr": "0x800e58b4",
+  "end": "0x800e5920",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0024-013\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_800e58b4",
+   "addr": "0x800e58b4",
+   "end": "0x800e5920"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x800e58cc",
+   "target": "0x8004cd24",
+   "in": "FUN_800e58b4",
+   "callee": "zz_004cd24_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x800e58f8",
+   "target": "0x8006a750",
+   "in": "FUN_800e58b4",
+   "callee": "zz_006a750_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x800e591c"
+ ],
+ "stores": [
+  {
+   "at": "0x800e58e4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1855,
+   "addr_expr": "r31+0x73f",
+   "in": "FUN_800e58b4"
+  },
+  {
+   "at": "0x800e58f4",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1504,
+   "addr_expr": "r31+0x5e0",
+   "in": "FUN_800e58b4"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -23456,
+   "width": 4,
+   "at": "0x800e58fc",
+   "op": "lfs",
+   "in": "FUN_800e58b4"
+  }
+ ],
+ "field_widths": {
+  "0x5e0": 4,
+  "0x73f": 1,
+  "0x1cee": 1,
+  "0x1dc8": 4
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

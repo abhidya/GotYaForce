@@ -1,0 +1,156 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:10.124931Z",
+ "unit": "auto-c0010-009",
+ "fn": {
+  "name": "FUN_80074ae8",
+  "gc_addr": "0x80074ae8",
+  "end": "0x80074bb8",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0010-009\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80074ae8",
+   "addr": "0x80074ae8",
+   "end": "0x80074bb8"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80074bb4"
+ ],
+ "stores": [
+  {
+   "at": "0x80074b00",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 324,
+   "addr_expr": "r3+0x144",
+   "in": "FUN_80074ae8"
+  },
+  {
+   "at": "0x80074b04",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 325,
+   "addr_expr": "r3+0x145",
+   "in": "FUN_80074ae8"
+  },
+  {
+   "at": "0x80074b08",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 326,
+   "addr_expr": "r3+0x146",
+   "in": "FUN_80074ae8"
+  },
+  {
+   "at": "0x80074b0c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 327,
+   "addr_expr": "r3+0x147",
+   "in": "FUN_80074ae8"
+  },
+  {
+   "at": "0x80074b10",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 328,
+   "addr_expr": "r3+0x148",
+   "in": "FUN_80074ae8"
+  },
+  {
+   "at": "0x80074b5c",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6362,
+   "addr_expr": "r3+0x18da",
+   "in": "FUN_80074ae8"
+  },
+  {
+   "at": "0x80074b84",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6368,
+   "addr_expr": "r3+0x18e0",
+   "in": "FUN_80074ae8"
+  },
+  {
+   "at": "0x80074bac",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6370,
+   "addr_expr": "r3+0x18e2",
+   "in": "FUN_80074ae8"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -29216,
+   "width": 8,
+   "at": "0x80074b30",
+   "op": "lfd",
+   "in": "FUN_80074ae8"
+  },
+  {
+   "kind": "r2",
+   "disp": -29224,
+   "width": 4,
+   "at": "0x80074b38",
+   "op": "lfs",
+   "in": "FUN_80074ae8"
+  }
+ ],
+ "field_widths": {
+  "0x144": 1,
+  "0x145": 1,
+  "0x146": 1,
+  "0x147": 1,
+  "0x148": 1,
+  "0x5e0": 4,
+  "0x774": 2,
+  "0x78e": 2,
+  "0x18da": 2,
+  "0x18e0": 2,
+  "0x18e2": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_80074ae8 has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

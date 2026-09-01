@@ -1,0 +1,74 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:51.114855Z",
+ "unit": "auto-c0019-013",
+ "fn": {
+  "name": "FUN_800bf144",
+  "gc_addr": "0x800bf144",
+  "end": "0x800bf210",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0019-013\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_800bf144",
+   "addr": "0x800bf144",
+   "end": "0x800bf210"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x800bf190",
+  "0x800bf1fc",
+  "0x800bf20c"
+ ],
+ "stores": [
+  {
+   "at": "0x800bf208",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 18,
+   "addr_expr": "r3+0x12",
+   "in": "FUN_800bf144"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -25712,
+   "width": 4,
+   "at": "0x800bf178",
+   "op": "lfs",
+   "in": "FUN_800bf144"
+  }
+ ],
+ "field_widths": {
+  "0x0": 4,
+  "0x4": 4,
+  "0x8": 4,
+  "0xc": 4,
+  "0x12": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_800bf144 has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

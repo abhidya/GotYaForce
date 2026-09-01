@@ -1,0 +1,121 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:19.581457Z",
+ "unit": "auto-c0029-012",
+ "fn": {
+  "name": "FUN_80107510",
+  "gc_addr": "0x80107510",
+  "end": "0x80107590",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0029-012\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80107510",
+   "addr": "0x80107510",
+   "end": "0x80107590"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x8010752c",
+   "target": "0x800840b8",
+   "in": "FUN_80107510",
+   "callee": "zz_00840b8_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x80107548",
+   "target": "0x8006de10",
+   "in": "FUN_80107510",
+   "callee": "zz_006de10_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x8010758c"
+ ],
+ "stores": [
+  {
+   "at": "0x80107540",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 326,
+   "addr_expr": "r31+0x146",
+   "in": "FUN_80107510"
+  },
+  {
+   "at": "0x80107574",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 557,
+   "addr_expr": "r30+0x22d",
+   "in": "FUN_80107510"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x18": 1,
+  "0x90": 4,
+  "0x146": 1,
+  "0x148": 1,
+  "0x22d": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_80107510 dispatches through a ROM function-pointer table at 0x8010756c (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole"
+ ],
+ "capturable": false
+}

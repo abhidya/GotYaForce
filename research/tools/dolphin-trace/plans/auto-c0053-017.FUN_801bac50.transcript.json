@@ -1,0 +1,89 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:48.202751Z",
+ "unit": "auto-c0053-017",
+ "fn": {
+  "name": "FUN_801bac50",
+  "gc_addr": "0x801bac50",
+  "end": "0x801bac88",
+  "params": [],
+  "results": [],
+  "entry_args": [],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0053-017\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_801bac50",
+   "addr": "0x801bac50",
+   "end": "0x801bac88"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801bac74",
+   "target": "0x80027aac",
+   "in": "FUN_801bac50",
+   "callee": "zz_0027aac_",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": null
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801bac84"
+ ],
+ "stores": [
+  {
+   "at": "0x801bac6c",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r5",
+   "disp": 20,
+   "addr_expr": "r5+0x14",
+   "in": "FUN_801bac50"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r13",
+   "disp": -23408,
+   "width": 4,
+   "at": "0x801bac68",
+   "op": "lwz",
+   "in": "FUN_801bac50"
+  }
+ ],
+ "field_widths": {
+  "0x14": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

@@ -1,0 +1,244 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:40.210104Z",
+ "unit": "auto-c0019-005",
+ "fn": {
+  "name": "FUN_800bbd80",
+  "gc_addr": "0x800bbd80",
+  "end": "0x800bbde8",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0019-005\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_800bbd80",
+   "addr": "0x800bbd80",
+   "end": "0x800bbde8"
+  },
+  {
+   "name": "FUN_800bbff0",
+   "addr": "0x800bbff0",
+   "end": "0x800bc070"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x800bbda4",
+   "target": "0x8006d0dc",
+   "in": "FUN_800bbd80",
+   "callee": "zz_006d0dc_",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x800bbdc0",
+   "target": "0x80067310",
+   "in": "FUN_800bbd80",
+   "callee": "FUN_80067310",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x800bbdc8",
+   "target": "0x800679d0",
+   "in": "FUN_800bbd80",
+   "callee": "zz_00679d0_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [
+  {
+   "in": "FUN_800bbd80",
+   "at": "0x800bbd94",
+   "callee": "FUN_800bbff0"
+  }
+ ],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x800bbde4",
+  "0x800bc06c"
+ ],
+ "stores": [
+  {
+   "at": "0x800bbdb8",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1504,
+   "addr_expr": "r31+0x5e0",
+   "in": "FUN_800bbd80"
+  },
+  {
+   "at": "0x800bc008",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1344,
+   "addr_expr": "r3+0x540",
+   "in": "FUN_800bbff0"
+  },
+  {
+   "at": "0x800bc010",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 1346,
+   "addr_expr": "r3+0x542",
+   "in": "FUN_800bbff0"
+  },
+  {
+   "at": "0x800bc01c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1771,
+   "addr_expr": "r3+0x6eb",
+   "in": "FUN_800bbff0"
+  },
+  {
+   "at": "0x800bc038",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1771,
+   "addr_expr": "r3+0x6eb",
+   "in": "FUN_800bbff0"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -25836,
+   "width": 4,
+   "at": "0x800bbdb0",
+   "op": "lfs",
+   "in": "FUN_800bbd80"
+  },
+  {
+   "kind": "r2",
+   "disp": -25844,
+   "width": 4,
+   "at": "0x800bbdcc",
+   "op": "lfs",
+   "in": "FUN_800bbd80"
+  },
+  {
+   "kind": "r2",
+   "disp": -25832,
+   "width": 4,
+   "at": "0x800bbffc",
+   "op": "lfs",
+   "in": "FUN_800bbff0"
+  },
+  {
+   "kind": "r2",
+   "disp": -25828,
+   "width": 4,
+   "at": "0x800bc02c",
+   "op": "lfs",
+   "in": "FUN_800bbff0"
+  }
+ ],
+ "field_widths": {
+  "0x3e8": 2,
+  "0x540": 1,
+  "0x542": 1,
+  "0x581": 1,
+  "0x5ae": 2,
+  "0x5e0": 4,
+  "0x6eb": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_800bbff0 dispatches through a ROM function-pointer table at 0x800bc05c (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole"
+ ],
+ "capturable": false
+}

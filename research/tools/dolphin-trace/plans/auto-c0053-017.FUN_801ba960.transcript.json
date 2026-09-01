@@ -1,0 +1,109 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:47.569641Z",
+ "unit": "auto-c0053-017",
+ "fn": {
+  "name": "FUN_801ba960",
+  "gc_addr": "0x801ba960",
+  "end": "0x801ba9ec",
+  "params": [],
+  "results": [
+   "i32"
+  ],
+  "entry_args": [],
+  "ret": {
+   "t": "i32",
+   "src": "r3"
+  }
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0053-017\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_801ba960",
+   "addr": "0x801ba960",
+   "end": "0x801ba9ec"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801ba97c",
+   "target": "0x801bef70",
+   "in": "FUN_801ba960",
+   "callee": "zz_01bef70_",
+   "wasm_params": [],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801ba9d0",
+   "target": "0x801beda4",
+   "in": "FUN_801ba960",
+   "callee": "zz_01beda4_",
+   "wasm_params": [],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801ba9d4",
+   "target": "0x801beec0",
+   "in": "FUN_801ba960",
+   "callee": "zz_01beec0_",
+   "wasm_params": [],
+   "wasm_results": [],
+   "args": [],
+   "ret": null
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801ba9e8"
+ ],
+ "stores": [
+  {
+   "at": "0x801ba9a4",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r5",
+   "disp": 24,
+   "addr_expr": "r5+0x18",
+   "in": "FUN_801ba960"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r13",
+   "disp": -23408,
+   "width": 4,
+   "at": "0x801ba96c",
+   "op": "lwz",
+   "in": "FUN_801ba960"
+  }
+ ],
+ "field_widths": {
+  "0x12": 2,
+  "0x18": 2,
+  "0x148": 1,
+  "0x16d": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_801ba960 dispatches through a ROM function-pointer table at 0x801ba9bc (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole"
+ ],
+ "capturable": false
+}

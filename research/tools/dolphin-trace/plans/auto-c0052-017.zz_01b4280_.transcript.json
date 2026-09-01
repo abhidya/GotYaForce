@@ -1,0 +1,78 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:32.860452Z",
+ "unit": "auto-c0052-017",
+ "fn": {
+  "name": "zz_01b4280_",
+  "gc_addr": "0x801b4280",
+  "end": "0x801b42f4",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0052-017\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_01b4280_",
+   "addr": "0x801b4280",
+   "end": "0x801b42f4"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801b42f0"
+ ],
+ "stores": [
+  {
+   "at": "0x801b42c8",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 7676,
+   "addr_expr": "r3+0x1dfc",
+   "in": "zz_01b4280_"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -12448,
+   "width": 8,
+   "at": "0x801b428c",
+   "op": "lfd",
+   "in": "zz_01b4280_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12456,
+   "width": 8,
+   "at": "0x801b4298",
+   "op": "lfd",
+   "in": "zz_01b4280_"
+  }
+ ],
+ "field_widths": {
+  "0x540": 1,
+  "0x1dfc": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "zz_01b4280_ dispatches through a ROM function-pointer table at 0x801b42e0 (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole",
+  "zz_01b4280_ has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

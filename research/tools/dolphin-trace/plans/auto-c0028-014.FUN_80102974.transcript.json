@@ -1,0 +1,110 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:06.199995Z",
+ "unit": "auto-c0028-014",
+ "fn": {
+  "name": "FUN_80102974",
+  "gc_addr": "0x80102974",
+  "end": "0x801029e4",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0028-014\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80102974",
+   "addr": "0x80102974",
+   "end": "0x801029e4"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801029e0"
+ ],
+ "stores": [
+  {
+   "at": "0x80102988",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1783,
+   "addr_expr": "r3+0x6f7",
+   "in": "FUN_80102974"
+  },
+  {
+   "at": "0x801029a0",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 6400,
+   "addr_expr": "r3+0x1900",
+   "in": "FUN_80102974"
+  },
+  {
+   "at": "0x801029a8",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 6424,
+   "addr_expr": "r3+0x1918",
+   "in": "FUN_80102974"
+  },
+  {
+   "at": "0x801029d8",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6362,
+   "addr_expr": "r3+0x18da",
+   "in": "FUN_80102974"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -22144,
+   "width": 8,
+   "at": "0x801029a4",
+   "op": "lfd",
+   "in": "FUN_80102974"
+  },
+  {
+   "kind": "r2",
+   "disp": -22152,
+   "width": 4,
+   "at": "0x801029ac",
+   "op": "lfs",
+   "in": "FUN_80102974"
+  }
+ ],
+ "field_widths": {
+  "0x5e0": 4,
+  "0x6f7": 1,
+  "0x18da": 2,
+  "0x1900": 2,
+  "0x1918": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_80102974 has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

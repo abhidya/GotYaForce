@@ -1,0 +1,108 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:23.473789Z",
+ "unit": "auto-c0029-014",
+ "fn": {
+  "name": "FUN_8010821c",
+  "gc_addr": "0x8010821c",
+  "end": "0x80108250",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0029-014\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_8010821c",
+   "addr": "0x8010821c",
+   "end": "0x80108250"
+  },
+  {
+   "name": "FUN_80108250",
+   "addr": "0x80108250",
+   "end": "0x80108294"
+  },
+  {
+   "name": "FUN_80108508",
+   "addr": "0x80108508",
+   "end": "0x80108530"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x8010851c",
+   "target": "0x8010c9d8",
+   "in": "FUN_80108508",
+   "callee": "zz_010c9d8_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [
+  {
+   "in": "FUN_8010821c",
+   "at": "0x80108234",
+   "callee": "FUN_80108508"
+  },
+  {
+   "in": "FUN_8010821c",
+   "at": "0x8010823c",
+   "callee": "FUN_80108250"
+  }
+ ],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x8010824c",
+  "0x80108290",
+  "0x8010852c"
+ ],
+ "stores": [
+  {
+   "at": "0x80108268",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 6362,
+   "addr_expr": "r3+0x18da",
+   "in": "FUN_80108250"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x3e8": 2,
+  "0x540": 1,
+  "0x18da": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_80108250 dispatches through a ROM function-pointer table at 0x80108280 (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole"
+ ],
+ "capturable": false
+}

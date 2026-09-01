@@ -1,0 +1,116 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:50.836505Z",
+ "unit": "auto-c0035-005",
+ "fn": {
+  "name": "zz_0132f30_",
+  "gc_addr": "0x80132f30",
+  "end": "0x80132f9c",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-005\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_0132f30_",
+   "addr": "0x80132f30",
+   "end": "0x80132f9c"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80132f98"
+ ],
+ "stores": [
+  {
+   "at": "0x80132f74",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 324,
+   "addr_expr": "r3+0x144",
+   "in": "zz_0132f30_"
+  },
+  {
+   "at": "0x80132f78",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 328,
+   "addr_expr": "r3+0x148",
+   "in": "zz_0132f30_"
+  },
+  {
+   "at": "0x80132f7c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 363,
+   "addr_expr": "r3+0x16b",
+   "in": "zz_0132f30_"
+  },
+  {
+   "at": "0x80132f84",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 204,
+   "addr_expr": "r3+0xcc",
+   "in": "zz_0132f30_"
+  },
+  {
+   "at": "0x80132f8c",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 200,
+   "addr_expr": "r3+0xc8",
+   "in": "zz_0132f30_"
+  },
+  {
+   "at": "0x80132f94",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 208,
+   "addr_expr": "r3+0xd0",
+   "in": "zz_0132f30_"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x0": 1,
+  "0x18": 1,
+  "0xc8": 4,
+  "0xcc": 4,
+  "0xd0": 1,
+  "0x144": 4,
+  "0x148": 4,
+  "0x16b": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "zz_0132f30_ has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}
