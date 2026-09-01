@@ -1,0 +1,301 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:21.541831Z",
+ "unit": "auto-c0011-007",
+ "fn": {
+  "name": "FUN_8007a1f8",
+  "gc_addr": "0x8007a1f8",
+  "end": "0x8007a250",
+  "params": [
+   "f64",
+   "f64",
+   "f64",
+   "f64",
+   "f64",
+   "f64",
+   "f64",
+   "f64",
+   "i32",
+   "i32",
+   "i32",
+   "i32",
+   "i32",
+   "i32",
+   "i32",
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "f64",
+    "src": "f1"
+   },
+   {
+    "i": 1,
+    "t": "f64",
+    "src": "f2"
+   },
+   {
+    "i": 2,
+    "t": "f64",
+    "src": "f3"
+   },
+   {
+    "i": 3,
+    "t": "f64",
+    "src": "f4"
+   },
+   {
+    "i": 4,
+    "t": "f64",
+    "src": "f5"
+   },
+   {
+    "i": 5,
+    "t": "f64",
+    "src": "f6"
+   },
+   {
+    "i": 6,
+    "t": "f64",
+    "src": "f7"
+   },
+   {
+    "i": 7,
+    "t": "f64",
+    "src": "f8"
+   },
+   {
+    "i": 8,
+    "t": "i32",
+    "src": "r3"
+   },
+   {
+    "i": 9,
+    "t": "i32",
+    "src": "r4"
+   },
+   {
+    "i": 10,
+    "t": "i32",
+    "src": "r5"
+   },
+   {
+    "i": 11,
+    "t": "i32",
+    "src": "r6"
+   },
+   {
+    "i": 12,
+    "t": "i32",
+    "src": "r7"
+   },
+   {
+    "i": 13,
+    "t": "i32",
+    "src": "r8"
+   },
+   {
+    "i": 14,
+    "t": "i32",
+    "src": "r9"
+   },
+   {
+    "i": 15,
+    "t": "i32",
+    "src": "r10"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0011-007\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_8007a1f8",
+   "addr": "0x8007a1f8",
+   "end": "0x8007a250"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x8007a210",
+   "target": "0x8004cd24",
+   "in": "FUN_8007a1f8",
+   "callee": "zz_004cd24_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x8007a238",
+   "target": "0x8006a668",
+   "in": "FUN_8007a1f8",
+   "callee": "zz_006a668_",
+   "wasm_params": [
+    "f64",
+    "f64",
+    "f64",
+    "f64",
+    "f64",
+    "f64",
+    "f64",
+    "f64",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "f64",
+     "src": "f2"
+    },
+    {
+     "i": 2,
+     "t": "f64",
+     "src": "f3"
+    },
+    {
+     "i": 3,
+     "t": "f64",
+     "src": "f4"
+    },
+    {
+     "i": 4,
+     "t": "f64",
+     "src": "f5"
+    },
+    {
+     "i": 5,
+     "t": "f64",
+     "src": "f6"
+    },
+    {
+     "i": 6,
+     "t": "f64",
+     "src": "f7"
+    },
+    {
+     "i": 7,
+     "t": "f64",
+     "src": "f8"
+    },
+    {
+     "i": 8,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 9,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 10,
+     "t": "i32",
+     "src": "r5"
+    },
+    {
+     "i": 11,
+     "t": "i32",
+     "src": "r6"
+    },
+    {
+     "i": 12,
+     "t": "i32",
+     "src": "r7"
+    },
+    {
+     "i": 13,
+     "t": "i32",
+     "src": "r8"
+    },
+    {
+     "i": 14,
+     "t": "i32",
+     "src": "r9"
+    },
+    {
+     "i": 15,
+     "t": "i32",
+     "src": "r10"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x8007a24c"
+ ],
+ "stores": [
+  {
+   "at": "0x8007a224",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1855,
+   "addr_expr": "r31+0x73f",
+   "in": "FUN_8007a1f8"
+  },
+  {
+   "at": "0x8007a234",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1504,
+   "addr_expr": "r31+0x5e0",
+   "in": "FUN_8007a1f8"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x5e0": 4,
+  "0x73f": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

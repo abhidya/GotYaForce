@@ -1,0 +1,549 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:49.091525Z",
+ "unit": "auto-c0035-004",
+ "fn": {
+  "name": "FUN_801327ac",
+  "gc_addr": "0x801327ac",
+  "end": "0x80132974",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-004\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_801327ac",
+   "addr": "0x801327ac",
+   "end": "0x80132974"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801327e0",
+   "target": "0x80132f30",
+   "in": "FUN_801327ac",
+   "callee": "zz_0132f30_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x8013282c",
+   "target": "0x80083244",
+   "in": "FUN_801327ac",
+   "callee": "zz_0083244_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x8013287c",
+   "target": "0x8006ebb4",
+   "in": "FUN_801327ac",
+   "callee": "zz_006ebb4_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801328a8",
+   "target": "0x8020ba78",
+   "in": "FUN_801327ac",
+   "callee": "gnt4_PSVECSubtract_bl",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x801328b4",
+   "target": "0x8006ebb4",
+   "in": "FUN_801327ac",
+   "callee": "zz_006ebb4_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801328c4",
+   "target": "0x8020ba9c",
+   "in": "FUN_801327ac",
+   "callee": "gnt4_PSQUATScale_bl",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  },
+  {
+   "at": "0x801328d4",
+   "target": "0x8020ba9c",
+   "in": "FUN_801327ac",
+   "callee": "gnt4_PSQUATScale_bl",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  },
+  {
+   "at": "0x801328e4",
+   "target": "0x8020ba54",
+   "in": "FUN_801327ac",
+   "callee": "gnt4_PSVECAdd_bl",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  },
+  {
+   "at": "0x801328f4",
+   "target": "0x8020ba9c",
+   "in": "FUN_801327ac",
+   "callee": "gnt4_PSQUATScale_bl",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  },
+  {
+   "at": "0x80132904",
+   "target": "0x8020ba54",
+   "in": "FUN_801327ac",
+   "callee": "gnt4_PSVECAdd_bl",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  },
+  {
+   "at": "0x80132918",
+   "target": "0x80083874",
+   "in": "FUN_801327ac",
+   "callee": "FUN_80083874",
+   "wasm_params": [
+    "f64",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x80132944",
+   "target": "0x8006d228",
+   "in": "FUN_801327ac",
+   "callee": "zz_006d228_",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x8013294c",
+   "target": "0x801332dc",
+   "in": "FUN_801327ac",
+   "callee": "zz_01332dc_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x80132954",
+   "target": "0x80132f9c",
+   "in": "FUN_801327ac",
+   "callee": "zz_0132f9c_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80132970"
+ ],
+ "stores": [
+  {
+   "at": "0x801327f0",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 28,
+   "addr_expr": "r31+0x1c",
+   "in": "FUN_801327ac"
+  },
+  {
+   "at": "0x8013283c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 25,
+   "addr_expr": "r31+0x19",
+   "in": "FUN_801327ac"
+  },
+  {
+   "at": "0x8013288c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 459,
+   "addr_expr": "r31+0x1cb",
+   "in": "FUN_801327ac"
+  },
+  {
+   "at": "0x801328a4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 459,
+   "addr_expr": "r31+0x1cb",
+   "in": "FUN_801327ac"
+  },
+  {
+   "at": "0x80132938",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r31",
+   "disp": 25,
+   "addr_expr": "r31+0x19",
+   "in": "FUN_801327ac"
+  },
+  {
+   "at": "0x8013293c",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 28,
+   "addr_expr": "r31+0x1c",
+   "in": "FUN_801327ac"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -19248,
+   "width": 4,
+   "at": "0x801328bc",
+   "op": "lfs",
+   "in": "FUN_801327ac"
+  }
+ ],
+ "field_widths": {
+  "0x4": 2,
+  "0xc": 4,
+  "0x12": 1,
+  "0x14": 4,
+  "0x18": 4,
+  "0x19": 1,
+  "0x1c": 2,
+  "0x44": 4,
+  "0xb4": 4,
+  "0xc8": 4,
+  "0xcc": 4,
+  "0xd0": 1,
+  "0x1c6": 2,
+  "0x1cb": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

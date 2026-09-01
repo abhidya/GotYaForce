@@ -1,0 +1,127 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:29.024843Z",
+ "unit": "auto-c0033-005",
+ "fn": {
+  "name": "FUN_80123534",
+  "gc_addr": "0x80123534",
+  "end": "0x801235d0",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0033-005\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80123534",
+   "addr": "0x80123534",
+   "end": "0x801235d0"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801235a4",
+   "target": "0x8012b59c",
+   "in": "FUN_80123534",
+   "callee": "zz_012b59c_",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801235cc"
+ ],
+ "stores": [
+  {
+   "at": "0x80123558",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 324,
+   "addr_expr": "r3+0x144",
+   "in": "FUN_80123534"
+  },
+  {
+   "at": "0x80123564",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r29",
+   "disp": 325,
+   "addr_expr": "r29+0x145",
+   "in": "FUN_80123534"
+  },
+  {
+   "at": "0x80123568",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r29",
+   "disp": 1236,
+   "addr_expr": "r29+0x4d4",
+   "in": "FUN_80123534"
+  },
+  {
+   "at": "0x8012356c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r29",
+   "disp": 1783,
+   "addr_expr": "r29+0x6f7",
+   "in": "FUN_80123534"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x144": 1,
+  "0x145": 1,
+  "0x3e8": 2,
+  "0x4d4": 4,
+  "0x6f7": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

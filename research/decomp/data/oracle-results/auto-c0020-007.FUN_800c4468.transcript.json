@@ -3,10 +3,10 @@
  "standard": "transcript_green",
  "unit": "auto-c0020-007",
  "fn": "FUN_800c4468",
- "generated_at": "2026-08-30T06:02:36.798Z",
+ "generated_at": "2026-09-01T00:17:36.193Z",
  "claim": {
   "established": false,
-  "summary": "same out-of-unit call transcript and return value as the console on 12 recorded cases",
+  "summary": "same out-of-unit call transcript and return value as the console on 24 recorded cases",
   "verifies": [
    "the set, order and arguments of every out-of-unit callee call",
    "the function's own return value",
@@ -22,18 +22,18 @@
   "weaker_than": "oracle_green",
   "weaker_because": "oracle_green compares the function's memory write set byte-for-byte; transcript_green compares only the observable call transcript and return value, which is all that exists for a function with no capturable write set. A transcript_green result must never be recorded, counted or reported as oracle_green.",
   "bounded_by_corpus": {
-   "cases": 12,
-   "calls": 24
+   "cases": 24,
+   "calls": 48
   }
  },
  "harness": {
   "entry": "research/decomp/oracle-harness/run-transcript.mjs",
-  "git_rev": "9ba05a8846e2adb4a7a017d83e8dcf3f6c9127d6",
-  "sha256": "31679b92c20a8f78156d71190d1f1250e38e48748d0c4a64890bcbd03c22c8dc",
+  "git_rev": "2e5c66aecd9c72f9c65649e70383df610ebf8877",
+  "sha256": "b9e29802b674c638aaa2a42db3bd9ab57bb38722fb4ae339c585d8990bc6b154",
   "min_cases": 8
  },
  "wasm": {
-  "path": "D:\\GotYaForce\\.tmp\\wt-transcript\\research\\decomp\\port-units-staging\\auto-c0020-007\\unit.wasm",
+  "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0020-007\\unit.wasm",
   "sha256": "016bbe4393aa4aa794d3a6b56ea67d93d09d300ed7d69c978f37f5d91e4a1317",
   "memory_model": "exported"
  },
@@ -43,18 +43,18 @@
  },
  "capture": {
   "file": "research/decomp/oracle-harness/corpora/auto-c0020-007.FUN_800c4468.transcript.jsonl",
-  "sha256": "c75337e1aff0c6af0fc50aa3cc65472f86e7e46fae8def80a902c770defb66c9",
-  "cases": 12,
-  "calls": 24,
+  "sha256": "8a31f34907f4d7257d83e84817f3c689656ccd8c8409a75b7faf34386a16ddb4",
+  "cases": 24,
+  "calls": 48,
   "source": {
    "standard": "transcript_green",
    "capture_tool": "research/tools/dolphin-trace/capture_transcript.py",
    "control_strategy": "breakpoint the function entry, every out-of-unit call site in its in-unit closure, the instruction after each, and the entry LR; terminate the case at the return with a stack-pointer guard",
    "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Null video, CPU only",
    "stub": "gdb-rsp 127.0.0.1:55555",
-   "dumped_at": "2026-08-30T05:50:25.089444Z",
-   "game_state": "2v2 sav + circling stick with B/X/A press-release edges",
-   "plan": "research/tools/dolphin-trace/plans/auto-c0020-007.FUN_800c4468.transcript.json",
+   "dumped_at": "2026-09-01T00:06:28.585656Z",
+   "game_state": "2v2 sav + circle+b injection",
+   "plan": "D:/GotYaForce/research/tools/dolphin-trace/plans/auto-c0020-007.FUN_800c4468.transcript.json",
    "in_unit_closure": [
     "FUN_800c4468"
    ],
@@ -64,9 +64,9 @@
     "0xe0": 4
    },
    "field_width_conflicts": [],
-   "pad_injection": "combat:b,x,a",
-   "injected_frames": 22,
-   "scenario": "battle-2v2-combat",
+   "pad_injection": "circle+b",
+   "injected_frames": 28,
+   "scenario": "battle-2v2-circle",
    "scenario_setup": null,
    "misses": 0,
    "exclusions": [
@@ -79,7 +79,7 @@
     "the claim is bounded by this corpus -- N recorded cases, never all inputs"
    ],
    "notes": [],
-   "elapsed_s": 10.8
+   "elapsed_s": 19
   }
  },
  "function": {

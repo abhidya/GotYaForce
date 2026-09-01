@@ -1,0 +1,107 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:27.505391Z",
+ "unit": "auto-c0050-005",
+ "fn": {
+  "name": "zz_01a41b8_",
+  "gc_addr": "0x801a41b8",
+  "end": "0x801a4244",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0050-005\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_01a41b8_",
+   "addr": "0x801a41b8",
+   "end": "0x801a4244"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801a4240"
+ ],
+ "stores": [
+  {
+   "at": "0x801a4200",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 24,
+   "addr_expr": "r3+0x18",
+   "in": "zz_01a41b8_"
+  },
+  {
+   "at": "0x801a4204",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 27,
+   "addr_expr": "r3+0x1b",
+   "in": "zz_01a41b8_"
+  },
+  {
+   "at": "0x801a4208",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 26,
+   "addr_expr": "r3+0x1a",
+   "in": "zz_01a41b8_"
+  },
+  {
+   "at": "0x801a420c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 25,
+   "addr_expr": "r3+0x19",
+   "in": "zz_01a41b8_"
+  },
+  {
+   "at": "0x801a4210",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 130,
+   "addr_expr": "r3+0x82",
+   "in": "zz_01a41b8_"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x18": 1,
+  "0x19": 1,
+  "0x1a": 1,
+  "0x1b": 1,
+  "0x82": 1,
+  "0x90": 4,
+  "0x94": 2,
+  "0x3e8": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "zz_01a41b8_ dispatches through a ROM function-pointer table at 0x801a4230 (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole",
+  "zz_01a41b8_ has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

@@ -1,0 +1,287 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:33.907418Z",
+ "unit": "auto-c0053-003",
+ "fn": {
+  "name": "zz_01b5840_",
+  "gc_addr": "0x801b5840",
+  "end": "0x801b5980",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0053-003\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_01b5840_",
+   "addr": "0x801b5840",
+   "end": "0x801b5980"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801b5858",
+   "target": "0x8004cd24",
+   "in": "zz_01b5840_",
+   "callee": "zz_004cd24_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801b5880",
+   "target": "0x800670dc",
+   "in": "zz_01b5840_",
+   "callee": "zz_00670dc_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x801b58ac",
+   "target": "0x8006d144",
+   "in": "zz_01b5840_",
+   "callee": "zz_006d144_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801b5940",
+   "target": "0x800b2190",
+   "in": "zz_01b5840_",
+   "callee": "zz_00b2190_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x801b5960",
+   "target": "0x8004beb8",
+   "in": "zz_01b5840_",
+   "callee": "zz_004beb8_",
+   "wasm_params": [
+    "i64",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i64",
+     "src": "r3:r4"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r5"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r6"
+    },
+    {
+     "i": 3,
+     "t": "i32",
+     "src": "r7"
+    },
+    {
+     "i": 4,
+     "t": "i32",
+     "src": "r8"
+    },
+    {
+     "i": 5,
+     "t": "i32",
+     "src": "r9"
+    },
+    {
+     "i": 6,
+     "t": "i32",
+     "src": "r10"
+    }
+   ],
+   "ret": null
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801b597c"
+ ],
+ "stores": [
+  {
+   "at": "0x801b58c8",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1344,
+   "addr_expr": "r31+0x540",
+   "in": "zz_01b5840_"
+  },
+  {
+   "at": "0x801b5968",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1346,
+   "addr_expr": "r31+0x542",
+   "in": "zz_01b5840_"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -12368,
+   "width": 4,
+   "at": "0x801b5864",
+   "op": "lfs",
+   "in": "zz_01b5840_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12420,
+   "width": 4,
+   "at": "0x801b5888",
+   "op": "lfs",
+   "in": "zz_01b5840_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12436,
+   "width": 4,
+   "at": "0x801b588c",
+   "op": "lfs",
+   "in": "zz_01b5840_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12440,
+   "width": 4,
+   "at": "0x801b5910",
+   "op": "lfs",
+   "in": "zz_01b5840_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12404,
+   "width": 4,
+   "at": "0x801b5920",
+   "op": "lfs",
+   "in": "zz_01b5840_"
+  },
+  {
+   "kind": "r2",
+   "disp": -12432,
+   "width": 4,
+   "at": "0x801b5944",
+   "op": "lfs",
+   "in": "zz_01b5840_"
+  }
+ ],
+ "field_widths": {
+  "0x44": 4,
+  "0x4c": 4,
+  "0xcc": 4,
+  "0x540": 1,
+  "0x542": 1,
+  "0x54e": 2,
+  "0x558": 4,
+  "0x584": 1,
+  "0x760": 4,
+  "0x764": 4,
+  "0x868": 4
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

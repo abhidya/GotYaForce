@@ -1,0 +1,132 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:15.231627Z",
+ "unit": "auto-c0011-004",
+ "fn": {
+  "name": "zz_007933c_",
+  "gc_addr": "0x8007933c",
+  "end": "0x80079410",
+  "params": [
+   "i32",
+   "i32"
+  ],
+  "results": [
+   "i32"
+  ],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   },
+   {
+    "i": 1,
+    "t": "i32",
+    "src": "r4"
+   }
+  ],
+  "ret": {
+   "t": "i32",
+   "src": "r3"
+  }
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0011-004\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_007933c_",
+   "addr": "0x8007933c",
+   "end": "0x80079410"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x8007940c"
+ ],
+ "stores": [
+  {
+   "at": "0x800793b4",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r5",
+   "base_reg": "r3",
+   "disp": 1454,
+   "addr_expr": "r3+0x5ae",
+   "in": "zz_007933c_"
+  },
+  {
+   "at": "0x800793c0",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r5",
+   "base_reg": "r3",
+   "disp": 114,
+   "addr_expr": "r3+0x72",
+   "in": "zz_007933c_"
+  },
+  {
+   "at": "0x800793cc",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1450,
+   "addr_expr": "r3+0x5aa",
+   "in": "zz_007933c_"
+  },
+  {
+   "at": "0x800793ec",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r5",
+   "base_reg": "r3",
+   "disp": 1454,
+   "addr_expr": "r3+0x5ae",
+   "in": "zz_007933c_"
+  },
+  {
+   "at": "0x800793f8",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r5",
+   "base_reg": "r3",
+   "disp": 114,
+   "addr_expr": "r3+0x72",
+   "in": "zz_007933c_"
+  },
+  {
+   "at": "0x80079400",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1450,
+   "addr_expr": "r3+0x5aa",
+   "in": "zz_007933c_"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -29152,
+   "width": 8,
+   "at": "0x80079348",
+   "op": "lfd",
+   "in": "zz_007933c_"
+  }
+ ],
+ "field_widths": {
+  "0x72": 2,
+  "0xac": 2,
+  "0x4ac": 4,
+  "0x5aa": 2,
+  "0x5ae": 2,
+  "0x1dc8": 4
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

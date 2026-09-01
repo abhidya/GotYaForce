@@ -1,0 +1,114 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:47.121237Z",
+ "unit": "auto-c0035-003",
+ "fn": {
+  "name": "zz_0131ecc_",
+  "gc_addr": "0x80131ecc",
+  "end": "0x8013201c",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-003\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_0131ecc_",
+   "addr": "0x80131ecc",
+   "end": "0x8013201c"
+  }
+ ],
+ "call_sites": [],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80132018"
+ ],
+ "stores": [],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -19300,
+   "width": 4,
+   "at": "0x80131f20",
+   "op": "lfs",
+   "in": "zz_0131ecc_"
+  },
+  {
+   "kind": "r2",
+   "disp": -19312,
+   "width": 4,
+   "at": "0x80131f2c",
+   "op": "lfs",
+   "in": "zz_0131ecc_"
+  },
+  {
+   "kind": "r2",
+   "disp": -19296,
+   "width": 4,
+   "at": "0x80131f70",
+   "op": "lfs",
+   "in": "zz_0131ecc_"
+  },
+  {
+   "kind": "r2",
+   "disp": -19308,
+   "width": 4,
+   "at": "0x80131f7c",
+   "op": "lfs",
+   "in": "zz_0131ecc_"
+  },
+  {
+   "kind": "r2",
+   "disp": -19288,
+   "width": 8,
+   "at": "0x80131f98",
+   "op": "lfd",
+   "in": "zz_0131ecc_"
+  },
+  {
+   "kind": "r2",
+   "disp": -19280,
+   "width": 8,
+   "at": "0x80131fa0",
+   "op": "lfd",
+   "in": "zz_0131ecc_"
+  }
+ ],
+ "field_widths": {
+  "0x11": 1,
+  "0x12": 1,
+  "0x90": 4,
+  "0x144": 1,
+  "0x148": 4,
+  "0x14c": 4,
+  "0x6e8": 1,
+  "0x6e9": 1
+ },
+ "field_width_conflicts": [
+  {
+   "offset": "0x144",
+   "widths": [
+    1,
+    4
+   ],
+   "at": "0x80132000",
+   "in": "zz_0131ecc_"
+  }
+ ],
+ "refusals": [
+  "zz_0131ecc_ has an EMPTY transcript: no out-of-unit call and no return value. Nothing about it is observable at the import boundary, so transcript_green cannot claim anything about it"
+ ],
+ "capturable": false
+}

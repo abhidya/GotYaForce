@@ -1,0 +1,410 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:58.836875Z",
+ "unit": "auto-c0020-007",
+ "fn": {
+  "name": "zz_00c4540_",
+  "gc_addr": "0x800c4540",
+  "end": "0x800c4704",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0020-007\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_00c4540_",
+   "addr": "0x800c4540",
+   "end": "0x800c4704"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x800c4578",
+   "target": "0x8020bab8",
+   "in": "zz_00c4540_",
+   "callee": "gnt4_PSVECNormalize_bl",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x800c4588",
+   "target": "0x8020ba9c",
+   "in": "zz_00c4540_",
+   "callee": "gnt4_PSQUATScale_bl",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  },
+  {
+   "at": "0x800c45c0",
+   "target": "0x8020b7a8",
+   "in": "zz_00c4540_",
+   "callee": "gnt4_PSMTXMultVec_bl",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  },
+  {
+   "at": "0x800c45d0",
+   "target": "0x8020ba78",
+   "in": "zz_00c4540_",
+   "callee": "gnt4_PSVECSubtract_bl",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x800c45d8",
+   "target": "0x8020bafc",
+   "in": "zz_00c4540_",
+   "callee": "gnt4_PSVECSquareMag_bl",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "f64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "f64",
+    "src": "f1"
+   }
+  },
+  {
+   "at": "0x800c45fc",
+   "target": "0x8020bb58",
+   "in": "zz_00c4540_",
+   "callee": "gnt4_PSQUATDotProduct_bl",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "f64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "f64",
+    "src": "f1"
+   }
+  },
+  {
+   "at": "0x800c464c",
+   "target": "0x8006c440",
+   "in": "zz_00c4540_",
+   "callee": "zz_006c440_",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x800c4654",
+   "target": "0x800833a4",
+   "in": "zz_00c4540_",
+   "callee": "zz_00833a4_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x800c4684",
+   "target": "0x8020ba54",
+   "in": "zz_00c4540_",
+   "callee": "gnt4_PSVECAdd_bl",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i64",
+    "src": "r3:r4"
+   }
+  },
+  {
+   "at": "0x800c4690",
+   "target": "0x8020bc88",
+   "in": "zz_00c4540_",
+   "callee": "gnt4_PSVECSquareDistance_bl",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "f64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "f64",
+    "src": "f1"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x800c4700"
+ ],
+ "stores": [
+  {
+   "at": "0x800c4628",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r4",
+   "base_reg": "r30",
+   "disp": 459,
+   "addr_expr": "r30+0x1cb",
+   "in": "zz_00c4540_"
+  },
+  {
+   "at": "0x800c4644",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 459,
+   "addr_expr": "r30+0x1cb",
+   "in": "zz_00c4540_"
+  },
+  {
+   "at": "0x800c4660",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 200,
+   "addr_expr": "r30+0xc8",
+   "in": "zz_00c4540_"
+  },
+  {
+   "at": "0x800c466c",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 200,
+   "addr_expr": "r30+0xc8",
+   "in": "zz_00c4540_"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -25308,
+   "width": 4,
+   "at": "0x800c4600",
+   "op": "lfs",
+   "in": "zz_00c4540_"
+  },
+  {
+   "kind": "r2",
+   "disp": -25304,
+   "width": 8,
+   "at": "0x800c46a4",
+   "op": "lfd",
+   "in": "zz_00c4540_"
+  },
+  {
+   "kind": "r2",
+   "disp": -25296,
+   "width": 8,
+   "at": "0x800c46a8",
+   "op": "lfd",
+   "in": "zz_00c4540_"
+  }
+ ],
+ "field_widths": {
+  "0x11": 1,
+  "0x1f": 1,
+  "0x20": 4,
+  "0x28": 4,
+  "0x44": 4,
+  "0x64": 4,
+  "0x68": 4,
+  "0x6c": 4,
+  "0xc8": 4,
+  "0x1cb": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

@@ -1,0 +1,157 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:46.865685Z",
+ "unit": "auto-c0053-015",
+ "fn": {
+  "name": "FUN_801ba474",
+  "gc_addr": "0x801ba474",
+  "end": "0x801ba4f8",
+  "params": [],
+  "results": [],
+  "entry_args": [],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0053-015\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_801ba474",
+   "addr": "0x801ba474",
+   "end": "0x801ba4f8"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801ba4b4",
+   "target": "0x8002a5f4",
+   "in": "FUN_801ba474",
+   "callee": "zz_002a5f4_",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    },
+    {
+     "i": 3,
+     "t": "i32",
+     "src": "r6"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801ba4c4",
+   "target": "0x8000540c",
+   "in": "FUN_801ba474",
+   "callee": "gnt4_memset",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801ba4f4"
+ ],
+ "stores": [
+  {
+   "at": "0x801ba498",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r4",
+   "disp": 1,
+   "addr_expr": "r4+0x1",
+   "in": "FUN_801ba474"
+  },
+  {
+   "at": "0x801ba4b0",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r7",
+   "disp": 64,
+   "addr_expr": "r7+0x40",
+   "in": "FUN_801ba474"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r13",
+   "disp": -31856,
+   "width": 4,
+   "at": "0x801ba480",
+   "op": "lwz",
+   "in": "FUN_801ba474"
+  },
+  {
+   "kind": "r13",
+   "disp": -23408,
+   "width": 4,
+   "at": "0x801ba4b8",
+   "op": "lwz",
+   "in": "FUN_801ba474"
+  }
+ ],
+ "field_widths": {
+  "0x0": 2,
+  "0x1": 1,
+  "0x40": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_801ba474 dispatches through a ROM function-pointer table at 0x801ba4e4 (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole"
+ ],
+ "capturable": false
+}

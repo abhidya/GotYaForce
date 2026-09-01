@@ -1,0 +1,169 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:08.466786Z",
+ "unit": "auto-c0043-018",
+ "fn": {
+  "name": "FUN_80172e80",
+  "gc_addr": "0x80172e80",
+  "end": "0x80172f3c",
+  "params": [
+   "i32",
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   },
+   {
+    "i": 1,
+    "t": "i32",
+    "src": "r4"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0043-018\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80172e80",
+   "addr": "0x80172e80",
+   "end": "0x80172f3c"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x80172f14",
+   "target": "0x80167334",
+   "in": "FUN_80172e80",
+   "callee": "zz_0167334_",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80172f38"
+ ],
+ "stores": [
+  {
+   "at": "0x80172eac",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r5",
+   "base_reg": "r3",
+   "disp": 2,
+   "addr_expr": "r3+0x2",
+   "in": "FUN_80172e80"
+  },
+  {
+   "at": "0x80172eb8",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r5",
+   "base_reg": "r30",
+   "disp": 61,
+   "addr_expr": "r30+0x3d",
+   "in": "FUN_80172e80"
+  },
+  {
+   "at": "0x80172ec4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r5",
+   "base_reg": "r30",
+   "disp": 61,
+   "addr_expr": "r30+0x3d",
+   "in": "FUN_80172e80"
+  },
+  {
+   "at": "0x80172ec8",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r4",
+   "base_reg": "r3",
+   "disp": 4,
+   "addr_expr": "r3+0x4",
+   "in": "FUN_80172e80"
+  },
+  {
+   "at": "0x80172ef4",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r3",
+   "base_reg": "r30",
+   "disp": 6,
+   "addr_expr": "r30+0x6",
+   "in": "FUN_80172e80"
+  },
+  {
+   "at": "0x80172ef8",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 100,
+   "addr_expr": "r30+0x64",
+   "in": "FUN_80172e80"
+  },
+  {
+   "at": "0x80172f04",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 101,
+   "addr_expr": "r30+0x65",
+   "in": "FUN_80172e80"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x2": 1,
+  "0x4": 2,
+  "0x6": 2,
+  "0x29": 1,
+  "0x3c": 1,
+  "0x3d": 1,
+  "0x40": 4,
+  "0x4c": 1,
+  "0x61": 1,
+  "0x64": 1,
+  "0x65": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

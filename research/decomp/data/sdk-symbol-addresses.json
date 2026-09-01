@@ -1,0 +1,423 @@
+{
+ "schema": "gf.sdk-symbol-addresses.v1",
+ "generated_utc": "2026-08-31T00:00:00Z",
+ "what": "ROM address -> the gnt4_* wasm IMPORT NAME the staged port units declare for that SDK helper.",
+ "why": "research/tools/dolphin-trace/capture_transcript.py `sites` binds a ROM `bl` target to a wasm import by NAME SHAPE (zz_<addr>_ / FUN_<addr>) or by an oracle-registry lookup. The SDK helpers are imported under hand-authored shim names instead (gnt4_PSVECMag_bl, ...) and the registry has no entry for their addresses, so every staged export that calls one was refused as 'binds to no wasm import'. Measured 2026-08-31 over all 810 exports of the 103 staged compile-only units: 115 exports carried such a site, i.e. 14% of the staged surface was unreachable for transcript_green purely for want of this table.",
+ "derivation": "Model-free and self-validating. For each staged function, the ORDERED out-of-unit `bl` targets decoded from the ROM are zipped against the ORDERED out-of-unit callee names in the unit's verbatim Ghidra C, only when the two lists have equal length. The zip is ACCEPTED only if every self-describing position (a zz_<addr>_ / FUN_<addr> name) agrees with the ROM target at that position; one disagreement discards the whole function. A function with no self-describing position is discarded in the first pass and re-tested in a second pass using already-accepted entries as induced anchors -- which refuted one function rather than confirming it. A mapping is taken only when the address votes for exactly one name AND that name votes for exactly one address.",
+ "evidence": {
+  "functions_decoded": 810,
+  "functions_contributing": 91,
+  "functions_discarded_by_anchor_check": 75,
+  "conflicts": 0,
+  "cross_check": "The 103 staged unit.wasm modules import exactly 17 distinct gnt4_* names; all 17 are mapped, each to exactly one address, so the table is a bijection over the SDK import surface the corpus actually declares.",
+  "weakest_entries": [
+   "0x8020bafc (one witness function, 2 genuine anchors)",
+   "0x8023c240 (one witness function, validated only by induced anchors)"
+  ]
+ },
+ "known_hole": {
+  "address": "0x80008998",
+  "detail": "One unbound site remains unnamed: auto-c0019-016/FUN_800c028c makes 4 out-of-unit calls in the ROM but its Ghidra C names only 3, so no evidence exists for this target. That export stays refused rather than being bound by guess."
+ },
+ "map": {
+  "0x8000540c": "gnt4_memset",
+  "0x8020af28": "gnt4_PSMTXCopy_bl",
+  "0x8020af5c": "gnt4_PSMTXConcat_bl",
+  "0x8020b238": "gnt4_PSMTXRotRad_bl",
+  "0x8020b478": "gnt4_PSMTXTrans_bl",
+  "0x8020b4f8": "gnt4_PSMTXScale_bl",
+  "0x8020b7a8": "gnt4_PSMTXMultVec_bl",
+  "0x8020ba54": "gnt4_PSVECAdd_bl",
+  "0x8020ba78": "gnt4_PSVECSubtract_bl",
+  "0x8020ba9c": "gnt4_PSQUATScale_bl",
+  "0x8020bab8": "gnt4_PSVECNormalize_bl",
+  "0x8020bafc": "gnt4_PSVECSquareMag_bl",
+  "0x8020bb14": "gnt4_PSVECMag_bl",
+  "0x8020bb58": "gnt4_PSQUATDotProduct_bl",
+  "0x8020bc88": "gnt4_PSVECSquareDistance_bl",
+  "0x8023c240": "gnt4_atan",
+  "0x8023cb38": "gnt4_acos_bl"
+ },
+ "witnesses": {
+  "0x8000540c": {
+   "name": "gnt4_memset",
+   "witness_functions": 2,
+   "witnesses": [
+    {
+     "unit": "auto-c0053-015",
+     "fn": "FUN_801ba474",
+     "anchors": 1
+    },
+    {
+     "unit": "auto-c0053-015",
+     "fn": "FUN_801ba4f8",
+     "anchors": "induced",
+     "induced_anchors": 1
+    }
+   ]
+  },
+  "0x8020af28": {
+   "name": "gnt4_PSMTXCopy_bl",
+   "witness_functions": 3,
+   "witnesses": [
+    {
+     "unit": "auto-c0035-004",
+     "fn": "FUN_8013237c",
+     "anchors": 10
+    },
+    {
+     "unit": "auto-c0046-000",
+     "fn": "FUN_80185068",
+     "anchors": 3
+    },
+    {
+     "unit": "auto-c0035-007",
+     "fn": "FUN_80133b04",
+     "anchors": "induced",
+     "induced_anchors": 11
+    }
+   ]
+  },
+  "0x8020af5c": {
+   "name": "gnt4_PSMTXConcat_bl",
+   "witness_functions": 8,
+   "witnesses": [
+    {
+     "unit": "auto-c0020-012",
+     "fn": "FUN_800c715c",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0035-003",
+     "fn": "FUN_8013204c",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0035-004",
+     "fn": "FUN_8013237c",
+     "anchors": 10
+    },
+    {
+     "unit": "auto-c0035-006",
+     "fn": "zz_01330cc_",
+     "anchors": 4
+    }
+   ]
+  },
+  "0x8020b238": {
+   "name": "gnt4_PSMTXRotRad_bl",
+   "witness_functions": 7,
+   "witnesses": [
+    {
+     "unit": "auto-c0029-001",
+     "fn": "zz_0104ce8_",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0035-004",
+     "fn": "FUN_8013237c",
+     "anchors": 10
+    },
+    {
+     "unit": "auto-c0035-006",
+     "fn": "zz_01330cc_",
+     "anchors": 4
+    },
+    {
+     "unit": "auto-c0035-006",
+     "fn": "FUN_80133358",
+     "anchors": 1
+    }
+   ]
+  },
+  "0x8020b478": {
+   "name": "gnt4_PSMTXTrans_bl",
+   "witness_functions": 2,
+   "witnesses": [
+    {
+     "unit": "auto-c0019-011",
+     "fn": "FUN_800be23c",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0050-007",
+     "fn": "zz_01a4a40_",
+     "anchors": 4
+    }
+   ]
+  },
+  "0x8020b4f8": {
+   "name": "gnt4_PSMTXScale_bl",
+   "witness_functions": 3,
+   "witnesses": [
+    {
+     "unit": "auto-c0020-012",
+     "fn": "FUN_800c715c",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0035-003",
+     "fn": "FUN_8013204c",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0035-007",
+     "fn": "FUN_80133b04",
+     "anchors": "induced",
+     "induced_anchors": 11
+    }
+   ]
+  },
+  "0x8020b7a8": {
+   "name": "gnt4_PSMTXMultVec_bl",
+   "witness_functions": 15,
+   "witnesses": [
+    {
+     "unit": "auto-c0019-007",
+     "fn": "FUN_800bcbb0",
+     "anchors": 4
+    },
+    {
+     "unit": "auto-c0019-013",
+     "fn": "zz_00be948_",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0020-007",
+     "fn": "zz_00c4540_",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0029-012",
+     "fn": "FUN_80107590",
+     "anchors": 7
+    }
+   ]
+  },
+  "0x8020ba54": {
+   "name": "gnt4_PSVECAdd_bl",
+   "witness_functions": 35,
+   "witnesses": [
+    {
+     "unit": "auto-c0019-000",
+     "fn": "FUN_800ba51c",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0019-000",
+     "fn": "FUN_800ba61c",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0019-003",
+     "fn": "FUN_800bb160",
+     "anchors": 3
+    },
+    {
+     "unit": "auto-c0019-003",
+     "fn": "FUN_800bb220",
+     "anchors": 9
+    }
+   ]
+  },
+  "0x8020ba78": {
+   "name": "gnt4_PSVECSubtract_bl",
+   "witness_functions": 51,
+   "witnesses": [
+    {
+     "unit": "auto-c0010-004",
+     "fn": "zz_0073330_",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0010-011",
+     "fn": "zz_0075104_",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0010-011",
+     "fn": "zz_00752e8_",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0011-004",
+     "fn": "zz_007978c_",
+     "anchors": 8
+    }
+   ]
+  },
+  "0x8020ba9c": {
+   "name": "gnt4_PSQUATScale_bl",
+   "witness_functions": 41,
+   "witnesses": [
+    {
+     "unit": "auto-c0019-000",
+     "fn": "FUN_800ba51c",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0019-000",
+     "fn": "FUN_800ba61c",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0019-003",
+     "fn": "FUN_800bb160",
+     "anchors": 3
+    },
+    {
+     "unit": "auto-c0019-003",
+     "fn": "FUN_800bb220",
+     "anchors": 9
+    }
+   ]
+  },
+  "0x8020bab8": {
+   "name": "gnt4_PSVECNormalize_bl",
+   "witness_functions": 8,
+   "witnesses": [
+    {
+     "unit": "auto-c0019-013",
+     "fn": "zz_00be948_",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0019-013",
+     "fn": "FUN_800becb8",
+     "anchors": 7
+    },
+    {
+     "unit": "auto-c0020-007",
+     "fn": "zz_00c4540_",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0029-012",
+     "fn": "FUN_80107978",
+     "anchors": 4
+    }
+   ]
+  },
+  "0x8020bafc": {
+   "name": "gnt4_PSVECSquareMag_bl",
+   "witness_functions": 1,
+   "witnesses": [
+    {
+     "unit": "auto-c0020-007",
+     "fn": "zz_00c4540_",
+     "anchors": 2
+    }
+   ]
+  },
+  "0x8020bb14": {
+   "name": "gnt4_PSVECMag_bl",
+   "witness_functions": 26,
+   "witnesses": [
+    {
+     "unit": "auto-c0010-004",
+     "fn": "zz_0073330_",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0011-009",
+     "fn": "FUN_8007aea0",
+     "anchors": 8
+    },
+    {
+     "unit": "auto-c0011-010",
+     "fn": "FUN_8007b388",
+     "anchors": 6
+    },
+    {
+     "unit": "auto-c0011-010",
+     "fn": "FUN_8007b844",
+     "anchors": 6
+    }
+   ]
+  },
+  "0x8020bb58": {
+   "name": "gnt4_PSQUATDotProduct_bl",
+   "witness_functions": 4,
+   "witnesses": [
+    {
+     "unit": "auto-c0020-007",
+     "fn": "zz_00c4540_",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0029-001",
+     "fn": "zz_0104ce8_",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0011-012",
+     "fn": "zz_007c844_",
+     "anchors": "induced",
+     "induced_anchors": 4
+    },
+    {
+     "unit": "auto-c0050-005",
+     "fn": "zz_01a3e98_",
+     "anchors": "induced",
+     "induced_anchors": 4
+    }
+   ]
+  },
+  "0x8020bc88": {
+   "name": "gnt4_PSVECSquareDistance_bl",
+   "witness_functions": 3,
+   "witnesses": [
+    {
+     "unit": "auto-c0020-007",
+     "fn": "FUN_800c4308",
+     "anchors": 1
+    },
+    {
+     "unit": "auto-c0020-007",
+     "fn": "zz_00c4540_",
+     "anchors": 2
+    },
+    {
+     "unit": "auto-c0029-012",
+     "fn": "FUN_80107978",
+     "anchors": 4
+    }
+   ]
+  },
+  "0x8023c240": {
+   "name": "gnt4_atan",
+   "witness_functions": 1,
+   "witnesses": [
+    {
+     "unit": "auto-c0053-013",
+     "fn": "zz_01b9be0_",
+     "anchors": "induced",
+     "induced_anchors": 2
+    }
+   ]
+  },
+  "0x8023cb38": {
+   "name": "gnt4_acos_bl",
+   "witness_functions": 3,
+   "witnesses": [
+    {
+     "unit": "auto-c0029-001",
+     "fn": "zz_0104ce8_",
+     "anchors": 5
+    },
+    {
+     "unit": "auto-c0011-012",
+     "fn": "zz_007c844_",
+     "anchors": "induced",
+     "induced_anchors": 4
+    },
+    {
+     "unit": "auto-c0050-005",
+     "fn": "zz_01a3e98_",
+     "anchors": "induced",
+     "induced_anchors": 4
+    }
+   ]
+  }
+ }
+}

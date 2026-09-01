@@ -1,0 +1,74 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:56.809859Z",
+ "unit": "auto-c0020-000",
+ "fn": {
+  "name": "FUN_800c0e2c",
+  "gc_addr": "0x800c0e2c",
+  "end": "0x800c0e80",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0020-000\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_800c0e2c",
+   "addr": "0x800c0e2c",
+   "end": "0x800c0e80"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x800c0e44",
+   "target": "0x800660e8",
+   "in": "FUN_800c0e2c",
+   "callee": "zz_00660e8_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x800c0e7c"
+ ],
+ "stores": [],
+ "globals": [],
+ "field_widths": {
+  "0x18": 1,
+  "0x90": 4
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_800c0e2c dispatches through a ROM function-pointer table at 0x800c0e68 (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole"
+ ],
+ "capturable": false
+}

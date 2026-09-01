@@ -542,3 +542,86 @@ The boundary_green target is instead a **single-function preflight build**,
 verbatim extraction, export `_zz_00527d8_` only). It is evidence, never a
 promoted unit: no driver lock, no driver state, nothing written under
 `port-units/` or `port-units-staging/`.
+
+## Transcript capture — `transcript_green` at scale (2026-08-31)
+
+`capture_transcript.py` (`sites` / `capture`) is the returning-function analogue of
+the spine capture, replayed by `research/decomp/oracle-harness/run-transcript.mjs`.
+Its own module docstring covers what it records and what it refuses. This section
+records what running it across the whole staged corpus cost and taught.
+
+### Recipe
+
+```sh
+# 1. derive the plan from the ROM + the built module (model-free, ~0.5 s)
+python research/tools/dolphin-trace/capture_transcript.py sites \
+  --unit auto-c0011-006 --fn zz_0079d54_ \
+  --wasm research/decomp/port-units-staging/auto-c0011-006/unit.wasm \
+  --out research/tools/dolphin-trace/plans/auto-c0011-006.zz_0079d54_.transcript.json
+
+# 2. boot, capture (the scenario's `setup` runs on attach)
+python research/tools/dolphin-trace/capture_oracle.py launch \
+  --scenario battle-roster-0x80079410 --wait 90
+python research/tools/dolphin-trace/capture_transcript.py capture \
+  --plan <plan> --n 24 --scenario battle-roster-0x80079410 --max-seconds 150 \
+  --wasm-rel ../../port-units-staging/auto-c0011-006/unit.wasm \
+  --arena-rel ../../oracle-harness/arena-trace-empty.json \
+  --out research/decomp/oracle-harness/corpora/auto-c0011-006.zz_0079d54_.transcript.jsonl
+
+# 3. replay
+node research/decomp/oracle-harness/run-transcript.mjs --capture <out>
+```
+
+**`--wasm-rel` / `--arena-rel` are not optional in practice.** Their defaults still
+contain the literal placeholder `UNIT`, so a corpus written without them records a
+module path that does not exist and the replay dies with ENOENT. Corpora live in
+`research/decomp/oracle-harness/corpora/`, so the module is
+`../../port-units-staging/<unit>/unit.wasm`.
+
+Use `transcript_sweep.py` rather than hand-driving the loop for more than a couple
+of functions: it scouts which exports actually fire before spending boots, skips
+targets whose measured rate cannot reach `--min-cases`, and relaunches when the
+stub drops.
+
+### Two capture defects found and fixed by the first full sweep
+
+1. **SDK call sites bound to no import.** 115 of the 810 staged exports were
+   refused as "binds to no wasm import" because the SDK helpers are imported under
+   hand-authored `gnt4_*` shim names rather than by address, and the oracle
+   registry has no entry for their addresses.
+   `research/decomp/data/sdk-symbol-addresses.json` (derived, self-validating —
+   see its own `derivation` field) closes it. Capturable staged exports 485 -> 598.
+
+2. **ROM globals read as zero at replay.** The corpus header points `arena` at
+   `arena-trace-empty.json`, which has no segments, while `run-transcript.mjs`
+   documents the port as running on "the static DOL arena". Every `DAT_`/`FLOAT_`
+   therefore read back as 0 in the port while the console read the real constant,
+   and any function handing a ROM constant to a callee reds falsely. Two of the
+   first six divergences were exactly this: `FUN_80079b08` passes
+   `FLOAT_804378f0` (**-1.0** in the DOL) and the port passed 0.0; `zz_0079d54_`
+   passes `FLOAT_804378f8` (**1.0**) and the port passed 0.0. `sites` now recovers
+   those addresses from the ROM (a conservative GPR constant tracker for
+   `lis`/`addi` absolutes, plus r2/r13 small-data displacements) and `capture`
+   snapshots each from the LIVE CONSOLE per case, byte-swapped at the width the
+   console's own load used. After the fix `zz_0079d54_` replays
+   **24/24 cases, 48/48 calls, TRANSCRIPT_GREEN**. Seeded globals are bytes the
+   port is GIVEN, never bytes it produced, and are itemised in the header as
+   `seeded_globals`.
+
+### Operational facts this sweep added
+
+- **The stub connection dies mid-session, and it is not our doing.** After
+  30-270 s Dolphin's stub closes the TCP connection (`WinError 10054`) while
+  `Dolphin.exe` keeps running. Reproduced on the base scenario with no `setup`
+  block and on roster scenarios; a pad-injection-only session ran 937 stops over
+  300 s cleanly while a session with **no breakpoints at all** that only polled
+  memory died at 268 s. Budget each boot and relaunch; do not try to hold one.
+- **`capture_oracle.py stop` does not reap orphans.** It kills only what its pid
+  file tracks, so a boot whose stub died stays alive holding port 55555 — after
+  which the next `launch` silently fails to bind and the next attach lands on the
+  previous, wrongly-staged instance. Two orphans were found alive mid-sweep, and
+  a run that overlapped them recorded several zero-case corpora that looked like
+  "the function never fired". `transcript_sweep.py stop` reaps them.
+- **Most staged exports never fire, by a wide margin.** Base 2v2 savestate: 5 of
+  33 scouted exports fired. Roster `0x80079410`: 10 of 64. Roster `0x801a10e8`:
+  18 of 62. Scout before capturing.

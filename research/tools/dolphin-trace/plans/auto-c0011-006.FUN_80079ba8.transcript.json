@@ -1,0 +1,135 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:18.648194Z",
+ "unit": "auto-c0011-006",
+ "fn": {
+  "name": "FUN_80079ba8",
+  "gc_addr": "0x80079ba8",
+  "end": "0x80079c3c",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0011-006\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80079ba8",
+   "addr": "0x80079ba8",
+   "end": "0x80079c3c"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x80079bdc",
+   "target": "0x8004cd24",
+   "in": "FUN_80079ba8",
+   "callee": "zz_004cd24_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x80079bfc",
+   "target": "0x8006d0dc",
+   "in": "FUN_80079ba8",
+   "callee": "zz_006d0dc_",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80079c38"
+ ],
+ "stores": [
+  {
+   "at": "0x80079c24",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1344,
+   "addr_expr": "r31+0x540",
+   "in": "FUN_80079ba8"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -28984,
+   "width": 4,
+   "at": "0x80079c0c",
+   "op": "lfs",
+   "in": "FUN_80079ba8"
+  }
+ ],
+ "field_widths": {
+  "0x540": 1,
+  "0x558": 4,
+  "0x1cef": 1,
+  "0x1cf0": 1,
+  "0x1dc8": 4
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

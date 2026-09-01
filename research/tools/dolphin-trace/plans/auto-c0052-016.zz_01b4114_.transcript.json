@@ -1,0 +1,128 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:30.692910Z",
+ "unit": "auto-c0052-016",
+ "fn": {
+  "name": "zz_01b4114_",
+  "gc_addr": "0x801b4114",
+  "end": "0x801b4178",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0052-016\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_01b4114_",
+   "addr": "0x801b4114",
+   "end": "0x801b4178"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801b4128",
+   "target": "0x801b3d68",
+   "in": "zz_01b4114_",
+   "callee": "zz_01b3d68_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801b4150",
+   "target": "0x80162f78",
+   "in": "zz_01b4114_",
+   "callee": "zz_0162f78_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x801b4160",
+   "target": "0x80162f78",
+   "in": "zz_01b4114_",
+   "callee": "zz_0162f78_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801b4174"
+ ],
+ "stores": [],
+ "globals": [],
+ "field_widths": {
+  "0x3e8": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

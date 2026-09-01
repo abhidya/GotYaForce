@@ -1,0 +1,178 @@
+{
+ "result_schema": 1,
+ "standard": "transcript_green",
+ "unit": "auto-c0011-005",
+ "fn": "FUN_80079978",
+ "generated_at": "2026-09-01T00:17:34.756Z",
+ "claim": {
+  "established": true,
+  "summary": "same out-of-unit call transcript and return value as the console on 24 recorded cases",
+  "verifies": [
+   "the set, order and arguments of every out-of-unit callee call",
+   "the function's own return value",
+   "byte-exactness of 12288 owned-region bytes at return, over 4 distinct address(es), on the cases that passed"
+  ],
+  "does_not_verify": [
+   "memory writes outside the declared owned regions",
+   "memory reads (constrained only insofar as they change an argument or the return value)",
+   "the behaviour of the callees themselves — they are stubs replaying captured values",
+   "live console memory: the port runs on the static DOL arena plus the itemised seed bytes",
+   "any input outside the recorded corpus"
+  ],
+  "weaker_than": "oracle_green",
+  "weaker_because": "oracle_green compares the function's memory write set byte-for-byte; transcript_green compares only the observable call transcript and return value, which is all that exists for a function with no capturable write set. A transcript_green result must never be recorded, counted or reported as oracle_green.",
+  "bounded_by_corpus": {
+   "cases": 24,
+   "calls": 24
+  }
+ },
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-transcript.mjs",
+  "git_rev": "2e5c66aecd9c72f9c65649e70383df610ebf8877",
+  "sha256": "b9e29802b674c638aaa2a42db3bd9ab57bb38722fb4ae339c585d8990bc6b154",
+  "min_cases": 8
+ },
+ "wasm": {
+  "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0011-005\\unit.wasm",
+  "sha256": "b0d971dfc0bfa00bf75c90b00a90847d138c9e88d9b65bf47d0359064543bf6d",
+  "memory_model": "exported"
+ },
+ "arena": {
+  "path": "research/decomp/oracle-harness/arena-trace-empty.json",
+  "sha256": "a382e7401f2192cc3ce7990e05ca1947ad744f07a23b3f9bfe5452ca3fd19632"
+ },
+ "capture": {
+  "file": "research/decomp/oracle-harness/corpora/auto-c0011-005.FUN_80079978.transcript.jsonl",
+  "sha256": "82c39e7f72c0524bae798905316788d35790cdd8a0cf91e0db1fec3833788b0e",
+  "cases": 24,
+  "calls": 24,
+  "source": {
+   "standard": "transcript_green",
+   "capture_tool": "research/tools/dolphin-trace/capture_transcript.py",
+   "control_strategy": "breakpoint the function entry, every out-of-unit call site in its in-unit closure, the instruction after each, and the entry LR; terminate the case at the return with a stack-pointer guard",
+   "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Null video, CPU only",
+   "stub": "gdb-rsp 127.0.0.1:55555",
+   "dumped_at": "2026-08-31T23:48:10.784260Z",
+   "game_state": "2v2 sav reloaded with a pl0900 roster in slots [0, 1, 2, 3] (roster depth 6) + B/X/A press-release edges",
+   "plan": "D:/GotYaForce/research/tools/dolphin-trace/plans/auto-c0011-005.FUN_80079978.transcript.json",
+   "in_unit_closure": [
+    "FUN_80079978"
+   ],
+   "watch_args_bytes": 512,
+   "seed_elem_width": 4,
+   "field_widths": {},
+   "field_width_conflicts": [],
+   "pad_injection": "combat:b,x,a",
+   "injected_frames": 5,
+   "scenario": "battle-roster-0x80079410",
+   "scenario_setup": {
+    "assignment": {
+     "0": "pl0900",
+     "1": "pl0900",
+     "2": "pl0900",
+     "3": "pl0900"
+    },
+    "expect_families": [
+     "0x80079410"
+    ],
+    "constructors_hit": {
+     "0x80079410": 1
+    },
+    "constructors_fired": true,
+    "battle_live": true,
+    "settled": true,
+    "status": {
+     "battle_phase_T0": 2,
+     "battle_state_T0x45": 4,
+     "win_mask_T0x1f": 0,
+     "actor0": "0x805dbdc0",
+     "actor0_alive": 1,
+     "actor0_borg_id": "0x0900"
+    },
+    "frames_run": 180,
+    "slot_ids_before": [
+     "pl0615",
+     "pl0615",
+     "pl0615",
+     "pl0615",
+     "plffff",
+     "plffff"
+    ],
+    "slot_ids_after": [
+     "pl0900",
+     "pl0900",
+     "pl0900",
+     "pl0900",
+     "plffff",
+     "plffff"
+    ],
+    "actor_borg_ids": [
+     "0x0900",
+     "0x0900",
+     "0x0900",
+     "0x0900",
+     "0x0000",
+     "0x0000"
+    ],
+    "actors_on_target": 4,
+    "archive_slot_records": [
+     "0x806cbe60",
+     "0x806cbe80",
+     "0x806cbea0",
+     "0x806cbec0",
+     "0x00000000",
+     "0x00000000"
+    ]
+   },
+   "misses": 0,
+   "exclusions": [
+    "transcript_green is STRICTLY WEAKER than oracle_green: it compares the observable call transcript and the return value, not the function's memory write set",
+    "memory is watch-set-scoped: only the seed/watch windows are read; a full MEM1 diff cannot run at frame rate over GDB-RSP",
+    "seed bytes are GIVEN to the port, not derived by it -- the wasm arena holds the static DOL image, not the live console heap",
+    "seed windows are byte-swapped FIELD-WISE using the width map the console's own load instructions state (see source.field_widths); bytes no load in the function touches keep the default 4-byte swap. A width the map gets wrong can only cause a FALSE RED, never a false green",
+    "console stack addresses are excluded (the wasm module has its own linear stack)",
+    "in-unit calls are followed but NOT recorded: they are internal wasm calls no import shim can observe",
+    "the claim is bounded by this corpus -- N recorded cases, never all inputs"
+   ],
+   "notes": [],
+   "elapsed_s": 47.3
+  }
+ },
+ "function": {
+  "export": "FUN_80079978",
+  "gc_addr": "0x80079978",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "void": true
+ },
+ "declared_owned_regions": [
+  {
+   "addr": "0x805ddbc0",
+   "size": 512
+  },
+  {
+   "addr": "0x805dbdc0",
+   "size": 512
+  },
+  {
+   "addr": "0x805e17c0",
+   "size": 512
+  },
+  {
+   "addr": "0x805df9c0",
+   "size": 512
+  }
+ ],
+ "owned_bytes_checked": 12288,
+ "owned_addresses_checked": 4,
+ "seeded_bytes": 12288,
+ "cases_passed": 24,
+ "calls_matched": 24,
+ "returns_checked": 0,
+ "vacuous_cases": [],
+ "divergence": null,
+ "verdict_note": null,
+ "verdict": "pass"
+}

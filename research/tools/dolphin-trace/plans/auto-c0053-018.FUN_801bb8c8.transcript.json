@@ -1,0 +1,178 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:45:49.893676Z",
+ "unit": "auto-c0053-018",
+ "fn": {
+  "name": "FUN_801bb8c8",
+  "gc_addr": "0x801bb8c8",
+  "end": "0x801bb990",
+  "params": [],
+  "results": [],
+  "entry_args": [],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0053-018\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_801bb8c8",
+   "addr": "0x801bb8c8",
+   "end": "0x801bb990"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x801bb8d4",
+   "target": "0x80027adc",
+   "in": "FUN_801bb8c8",
+   "callee": "zz_0027adc_",
+   "wasm_params": [],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x801bb98c"
+ ],
+ "stores": [
+  {
+   "at": "0x801bb8f8",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r3",
+   "base_reg": "r4",
+   "disp": 18,
+   "addr_expr": "r4+0x12",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb900",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 329,
+   "addr_expr": "r3+0x149",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb918",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r3",
+   "base_reg": "r4",
+   "disp": 18,
+   "addr_expr": "r4+0x12",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb920",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 329,
+   "addr_expr": "r3+0x149",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb938",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r3",
+   "base_reg": "r4",
+   "disp": 18,
+   "addr_expr": "r4+0x12",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb940",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 329,
+   "addr_expr": "r3+0x149",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb958",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r3",
+   "base_reg": "r4",
+   "disp": 18,
+   "addr_expr": "r4+0x12",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb960",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 329,
+   "addr_expr": "r3+0x149",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb968",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 344,
+   "addr_expr": "r3+0x158",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb974",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 20,
+   "addr_expr": "r3+0x14",
+   "in": "FUN_801bb8c8"
+  },
+  {
+   "at": "0x801bb97c",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 22,
+   "addr_expr": "r3+0x16",
+   "in": "FUN_801bb8c8"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r13",
+   "disp": -23408,
+   "width": 4,
+   "at": "0x801bb8e0",
+   "op": "lwz",
+   "in": "FUN_801bb8c8"
+  }
+ ],
+ "field_widths": {
+  "0x12": 2,
+  "0x14": 2,
+  "0x16": 2,
+  "0x149": 1,
+  "0x158": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

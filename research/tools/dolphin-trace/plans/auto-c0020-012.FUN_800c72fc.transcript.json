@@ -1,0 +1,260 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:00.842326Z",
+ "unit": "auto-c0020-012",
+ "fn": {
+  "name": "FUN_800c72fc",
+  "gc_addr": "0x800c72fc",
+  "end": "0x800c7350",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0020-012\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_800c72fc",
+   "addr": "0x800c72fc",
+   "end": "0x800c7350"
+  },
+  {
+   "name": "FUN_800c7350",
+   "addr": "0x800c7350",
+   "end": "0x800c74c0"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x800c7424",
+   "target": "0x800c6a94",
+   "in": "FUN_800c7350",
+   "callee": "FUN_800c6a94",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    },
+    {
+     "i": 3,
+     "t": "i32",
+     "src": "r6"
+    },
+    {
+     "i": 4,
+     "t": "i32",
+     "src": "r7"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [
+  {
+   "in": "FUN_800c72fc",
+   "at": "0x800c733c",
+   "callee": "FUN_800c7350"
+  }
+ ],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x800c734c",
+  "0x800c74bc"
+ ],
+ "stores": [
+  {
+   "at": "0x800c7318",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 24,
+   "addr_expr": "r3+0x18",
+   "in": "FUN_800c72fc"
+  },
+  {
+   "at": "0x800c7320",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r5",
+   "base_reg": "r3",
+   "disp": 28,
+   "addr_expr": "r3+0x1c",
+   "in": "FUN_800c72fc"
+  },
+  {
+   "at": "0x800c7324",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 30,
+   "addr_expr": "r3+0x1e",
+   "in": "FUN_800c72fc"
+  },
+  {
+   "at": "0x800c7338",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 137,
+   "addr_expr": "r3+0x89",
+   "in": "FUN_800c72fc"
+  },
+  {
+   "at": "0x800c73a0",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 25,
+   "addr_expr": "r30+0x19",
+   "in": "FUN_800c7350"
+  },
+  {
+   "at": "0x800c73bc",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r3",
+   "base_reg": "r30",
+   "disp": 328,
+   "addr_expr": "r30+0x148",
+   "in": "FUN_800c7350"
+  },
+  {
+   "at": "0x800c73c0",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 336,
+   "addr_expr": "r30+0x150",
+   "in": "FUN_800c7350"
+  },
+  {
+   "at": "0x800c7434",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 336,
+   "addr_expr": "r30+0x150",
+   "in": "FUN_800c7350"
+  },
+  {
+   "at": "0x800c7438",
+   "op": "stw",
+   "width": 4,
+   "src_reg": "r28",
+   "base_reg": "r30",
+   "disp": 328,
+   "addr_expr": "r30+0x148",
+   "in": "FUN_800c7350"
+  },
+  {
+   "at": "0x800c7474",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 24,
+   "addr_expr": "r30+0x18",
+   "in": "FUN_800c7350"
+  },
+  {
+   "at": "0x800c7484",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r3",
+   "base_reg": "r30",
+   "disp": 30,
+   "addr_expr": "r30+0x1e",
+   "in": "FUN_800c7350"
+  },
+  {
+   "at": "0x800c7494",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r30",
+   "disp": 24,
+   "addr_expr": "r30+0x18",
+   "in": "FUN_800c7350"
+  },
+  {
+   "at": "0x800c7498",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r30",
+   "disp": 130,
+   "addr_expr": "r30+0x82",
+   "in": "FUN_800c7350"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -25128,
+   "width": 4,
+   "at": "0x800c73f8",
+   "op": "lfs",
+   "in": "FUN_800c7350"
+  }
+ ],
+ "field_widths": {
+  "0x0": 4,
+  "0x13": 1,
+  "0x18": 1,
+  "0x19": 1,
+  "0x1c": 2,
+  "0x1e": 2,
+  "0x82": 1,
+  "0x89": 1,
+  "0x90": 4,
+  "0x148": 4,
+  "0x14c": 2,
+  "0x150": 4,
+  "0x1ae0": 4,
+  "0x1afc": 1,
+  "0x1afd": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

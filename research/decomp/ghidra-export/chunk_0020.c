@@ -2511,15 +2511,15 @@ void FUN_800c4448(undefined8 param_1,double param_2,double param_3,double param_
 
 // ==== 800c4468  FUN_800c4468 ====
 
-void FUN_800c4468(undefined8 param_1,double param_2,double param_3,double param_4,double param_5,
-                 double param_6,double param_7,double param_8,int param_9,undefined4 param_10,
-                 undefined *param_11,undefined4 param_12,undefined4 param_13,undefined4 param_14,
-                 undefined4 param_15,undefined4 param_16)
-
+void FUN_800c4468(int param_9)   /* CORPUS CORRECTION 2026-08-31: Ghidra typed this with 16
+   params (undefined8 + seven invented doubles + eight integer slots). The DOL at 0x800c4468
+   is 15 instructions and reads ONLY r3 -- mr r31,r3; addi r4,r31,0x114; lwz r3,0xe0(r3);
+   bl 0x800076d0; lwz r3,0xe0(r31); li r4,0x44; bl 0x800097b4; blr -- so no FPR is read and
+   no argument past r3 exists. Ghidra propagated the PPC varargs register footprint it gave
+   the ROM's varargs assert helper (chunk_0000.c zz_00076d0_) back into every caller. Proof:
+   research/decomp/data/oracle-results/auto-c0020-007.FUN_800c4468.transcript.json, 0/12. */
 {
-  zz_00076d0_(param_1,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
-              *(int *)(param_9 + 0xe0),(float *)(param_9 + 0x114),param_11,param_12,param_13,
-              param_14,param_15,param_16);
+  zz_00076d0_(*(int *)(param_9 + 0xe0),(float *)(param_9 + 0x114));
   zz_00097b4_(*(int *)(param_9 + 0xe0),0x44);
   return;
 }

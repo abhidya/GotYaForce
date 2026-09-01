@@ -1,0 +1,232 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:53.630082Z",
+ "unit": "auto-c0019-017",
+ "fn": {
+  "name": "FUN_800c066c",
+  "gc_addr": "0x800c066c",
+  "end": "0x800c07f0",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0019-017\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_800c066c",
+   "addr": "0x800c066c",
+   "end": "0x800c07f0"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x800c06fc",
+   "target": "0x8001ab6c",
+   "in": "FUN_800c066c",
+   "callee": "zz_001ab6c_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x800c0714",
+   "target": "0x8001ab6c",
+   "in": "FUN_800c066c",
+   "callee": "zz_001ab6c_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x800c07ec"
+ ],
+ "stores": [
+  {
+   "at": "0x800c06c0",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 324,
+   "addr_expr": "r31+0x144",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c06e4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 175,
+   "addr_expr": "r31+0xaf",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c0720",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 175,
+   "addr_expr": "r31+0xaf",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c072c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 324,
+   "addr_expr": "r31+0x144",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c074c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 324,
+   "addr_expr": "r31+0x144",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c0788",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 325,
+   "addr_expr": "r31+0x145",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c0794",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 325,
+   "addr_expr": "r31+0x145",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c07a0",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 325,
+   "addr_expr": "r31+0x145",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c07b4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 325,
+   "addr_expr": "r31+0x145",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c07bc",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 325,
+   "addr_expr": "r31+0x145",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c07c4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 1768,
+   "addr_expr": "r31+0x6e8",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c07c8",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 1769,
+   "addr_expr": "r31+0x6e9",
+   "in": "FUN_800c066c"
+  },
+  {
+   "at": "0x800c07d8",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 7572,
+   "addr_expr": "r31+0x1d94",
+   "in": "FUN_800c066c"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0xaf": 1,
+  "0x144": 1,
+  "0x145": 1,
+  "0x3e8": 2,
+  "0x6e8": 1,
+  "0x6e9": 1,
+  "0x1d94": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

@@ -191,14 +191,24 @@ class RspClient:
         """f<n> as the raw 64-bit ieee754 bit pattern (stub returns 16 hex)."""
         return self.read_reg(32 + n) & 0xFFFFFFFFFFFFFFFF
 
+    # Dolphin's stub answers `m` out of a fixed command buffer, and a reply is
+    # TWO hex characters per byte, so a large single read can overrun it. Every
+    # read is therefore split into requests of at most this many BYTES.
+    MEM_CHUNK = 256
+
     def read_mem(self, addr: int, length: int) -> bytes:
-        raw = self.cmd(f"m{addr:x},{length:x}".encode(), discard_stops=True)
-        if raw.startswith(b"E") and len(raw) <= 3:
-            raise RspError(f"m{addr:x},{length:x} -> {raw!r}")
-        data = bytes.fromhex(raw.decode())
-        if len(data) != length:
-            raise RspError(f"short mem read at {addr:#x}: {len(data)}/{length}")
-        return data
+        out = bytearray()
+        while len(out) < length:
+            want = min(self.MEM_CHUNK, length - len(out))
+            at = addr + len(out)
+            raw = self.cmd(f"m{at:x},{want:x}".encode(), discard_stops=True)
+            if raw.startswith(b"E") and len(raw) <= 3:
+                raise RspError(f"m{at:x},{want:x} -> {raw!r}")
+            data = bytes.fromhex(raw.decode())
+            if len(data) != want:
+                raise RspError(f"short mem read at {at:#x}: {len(data)}/{want}")
+            out += data
+        return bytes(out)
 
     def write_mem(self, addr: int, data: bytes) -> None:
         resp = self.cmd(f"M{addr:x},{len(data):x}:".encode() + data.hex().encode(),

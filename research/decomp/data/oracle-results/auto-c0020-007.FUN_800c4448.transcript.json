@@ -3,7 +3,7 @@
  "standard": "transcript_green",
  "unit": "auto-c0020-007",
  "fn": "FUN_800c4448",
- "generated_at": "2026-08-30T06:02:36.629Z",
+ "generated_at": "2026-09-01T00:17:36.016Z",
  "claim": {
   "established": true,
   "summary": "same out-of-unit call transcript and return value as the console on 12 recorded cases",
@@ -28,12 +28,12 @@
  },
  "harness": {
   "entry": "research/decomp/oracle-harness/run-transcript.mjs",
-  "git_rev": "9ba05a8846e2adb4a7a017d83e8dcf3f6c9127d6",
-  "sha256": "31679b92c20a8f78156d71190d1f1250e38e48748d0c4a64890bcbd03c22c8dc",
+  "git_rev": "2e5c66aecd9c72f9c65649e70383df610ebf8877",
+  "sha256": "b9e29802b674c638aaa2a42db3bd9ab57bb38722fb4ae339c585d8990bc6b154",
   "min_cases": 8
  },
  "wasm": {
-  "path": "D:\\GotYaForce\\.tmp\\wt-transcript\\research\\decomp\\port-units-staging\\auto-c0020-007\\unit.wasm",
+  "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0020-007\\unit.wasm",
   "sha256": "016bbe4393aa4aa794d3a6b56ea67d93d09d300ed7d69c978f37f5d91e4a1317",
   "memory_model": "exported"
  },
@@ -43,7 +43,7 @@
  },
  "capture": {
   "file": "research/decomp/oracle-harness/corpora/auto-c0020-007.FUN_800c4448.transcript.jsonl",
-  "sha256": "5d493f0dd148cbc2432303b73e676c8f7963d350d3d6518b22f05ef83b3c817f",
+  "sha256": "c9903c625aacb92d917dfcb4eaf3d0e4617ad91e01d8c39049752b057b2fec05",
   "cases": 12,
   "calls": 12,
   "source": {

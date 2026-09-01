@@ -128,6 +128,15 @@ from rsp_client import RspError  # noqa: E402
 TRANSCRIPT_SCHEMA = 1
 STANDARD = "transcript_green"
 
+# Upper bound on a derived seed window. A window is re-read from the console at
+# EVERY call boundary of every case, in 256-byte RSP chunks, so its size
+# multiplies straight into stub traffic -- and this stub drops the connection
+# under sustained load (README, "Transcript capture"). 8 KB covers the deepest
+# field-width map measured in the staged corpus (auto-c0011-006.FUN_80079c3c
+# reaches +0x1cf0) while keeping a case bounded. A plan whose reads go past the
+# cap records that in `watch_policy.size_basis` rather than silently truncating.
+WATCH_WINDOW_CAP = 0x2000
+
 
 # --------------------------------------------------------------------------
 # callee naming: ROM address -> the name the unit's wasm imports it under
@@ -141,6 +150,37 @@ def addr_name_candidates(addr: int) -> list[str]:
     (see research/decomp/port-units-staging/*/unit.c prototypes).
     """
     return [f"zz_{addr & 0x0FFFFFFF:07x}_", f"FUN_{addr:08x}"]
+
+
+def sdk_import_names(repo_root: Path) -> dict[int, str]:
+    """address -> the ``gnt4_*`` wasm import name for that SDK helper.
+
+    The SDK is never ported (design stage 1): a unit's shim header declares each
+    SDK helper by a HAND-AUTHORED name (``gnt4_PSVECMag_bl``), not by address,
+    and the oracle registry has no entry for the SDK's addresses. So neither of
+    the two shapes ``addr_name_candidates`` knows, nor the registry lookup,
+    could bind a ROM ``bl`` into the SDK -- and every staged export that calls
+    one was refused as "binds to no wasm import". Measured 2026-08-31 over all
+    810 exports of the 103 staged compile-only units: 115 exports carried such
+    a site.
+
+    The table is committed at ``research/decomp/data/sdk-symbol-addresses.json``
+    with its derivation and its one known hole; it is DERIVED from the corpus,
+    not hand-listed here, so this function only reads it. Absent file -> empty
+    map -> the previous refusal behaviour, never a guess.
+    """
+    path = repo_root / "research/decomp/data/sdk-symbol-addresses.json"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    out: dict[int, str] = {}
+    for address, name in (payload.get("map") or {}).items():
+        try:
+            out[int(str(address), 16)] = str(name)
+        except (TypeError, ValueError):
+            continue
+    return out
 
 
 def registry_names(repo_root: Path) -> dict[int, str]:
@@ -194,11 +234,61 @@ def decode_function(dol: Dol, start: int, end: int) -> dict:
     returns: list[int] = []
     stores: list[dict] = []
     loads: list[dict] = []
+    # ---- GLOBAL READS (see cmd_sites' `globals`) ----------------------------
+    # A tiny, deliberately conservative constant tracker over the GPRs, just
+    # enough to resolve the two shapes the ROM uses to reach a static global:
+    #   lis rX, hi        ; lfs f1, lo(rX)          -> absolute hi<<16 + lo
+    #   <disp>(r2) / (r13)                          -> small-data-area relative
+    # Anything else invalidates the register. Over-invalidation only loses a
+    # global (which then reads as zero at replay, the pre-existing behaviour);
+    # UNDER-invalidation would seed the port a wrong address, so every opcode
+    # this walker does not model is treated as clobbering its plausible
+    # destinations, and a branch clears the whole map (no cross-block claims).
+    const: dict[int, int] = {}
+    globals_read: list[dict] = []
+    seen_globals: set[tuple] = set()
+
+    def note_global(entry: dict) -> None:
+        key = tuple(sorted(entry.items()))
+        if key not in seen_globals:
+            seen_globals.add(key)
+            globals_read.append(entry)
+
     for addr in range(start, end, 4):
         w = dol.word(addr)
         if w is None:
             raise SystemExit(f"function walk left mapped ROM at {addr:#010x}")
         op = w >> 26
+        # --- constant tracking, before the dispatch below consumes the word ---
+        if op == 15:                                    # addis rD, rA, SIMM
+            rd, ra = (w >> 21) & 31, (w >> 16) & 31
+            if ra == 0:
+                const[rd] = (w & 0xFFFF) << 16
+            elif ra in const:
+                const[rd] = (const[ra] + (s16(w & 0xFFFF) << 16)) & 0xFFFFFFFF
+            else:
+                const.pop(rd, None)
+        elif op == 14:                                  # addi rD, rA, SIMM
+            rd, ra = (w >> 21) & 31, (w >> 16) & 31
+            if ra == 0:
+                const[rd] = s16(w & 0xFFFF) & 0xFFFFFFFF
+            elif ra in const:
+                const[rd] = (const[ra] + s16(w & 0xFFFF)) & 0xFFFFFFFF
+            else:
+                const.pop(rd, None)
+        elif op == 24:                                  # ori rA, rS, UIMM
+            ra, rs = (w >> 16) & 31, (w >> 21) & 31
+            if rs in const:
+                const[ra] = const[rs] | (w & 0xFFFF)
+            else:
+                const.pop(ra, None)
+        elif op in (BRANCH_OP, BC_OP, BCLR_OP):
+            const.clear()                               # control-flow merge
+        elif op in LOAD_OPS and op < 48:                # integer load: writes rD
+            const.pop((w >> 21) & 31, None)
+        elif op not in LOAD_OPS and op not in STORE_OPS:
+            const.pop((w >> 21) & 31, None)
+            const.pop((w >> 16) & 31, None)
         if op == BRANCH_OP:
             target, is_call = branch_target(addr, w)
             if is_call:
@@ -220,18 +310,33 @@ def decode_function(dol: Dol, start: int, end: int) -> dict:
             if ra == 1:
                 continue                # stack slot, not observable state
             stores.append({"at": f"0x{addr:08x}", "op": name, "width": width,
-                           "src_reg": f"r{rs}", "addr_expr": f"r{ra}{d:+#x}"})
+                           "src_reg": f"r{rs}", "base_reg": f"r{ra}", "disp": d,
+                           "addr_expr": f"r{ra}{d:+#x}"})
         elif op in LOAD_OPS:
             name, width = LOAD_OPS[op]
             rd, ra, d = (w >> 21) & 31, (w >> 16) & 31, s16(w & 0xFFFF)
-            if ra in (1, 2, 13):
-                continue            # stack / TOC / small-data base, not an argument object
+            if ra in (2, 13):
+                # Small-data-area relative: r2/r13 are set once at boot, so the
+                # address is only knowable from the live console. Recorded as a
+                # DISPLACEMENT and resolved at capture time.
+                note_global({"kind": f"r{ra}", "disp": d, "width": width,
+                             "at": f"0x{addr:08x}", "op": name})
+                continue
+            if ra == 1:
+                continue                # stack slot, not observable state
+            if ra in const:
+                target = (const[ra] + d) & 0xFFFFFFFF
+                if is_mem1(target):
+                    note_global({"kind": "abs", "addr": f"0x{target:08x}",
+                                 "width": width, "at": f"0x{addr:08x}",
+                                 "op": name})
+                continue
             loads.append({"at": f"0x{addr:08x}", "op": name, "width": width,
                           "base_reg": f"r{ra}", "disp": d})
     return {"start": f"0x{start:08x}", "end": f"0x{end:08x}",
             "calls": calls, "indirect_calls": indirect,
             "returns": [f"0x{a:08x}" for a in returns], "stores": stores,
-            "loads": loads}
+            "loads": loads, "globals": globals_read}
 
 
 def sweep_extent(dol: Dol, start: int, limit: int = 0x4000) -> int:
@@ -306,12 +411,18 @@ def cmd_sites(a: argparse.Namespace) -> int:
         sys.exit(f"{a.wasm} does not export {a.fn}")
 
     reg = registry_names(REPO_ROOT)
+    sdk = sdk_import_names(REPO_ROOT)
 
     def bind_callee(target: int) -> str | None:
         for cand in addr_name_candidates(target):
             if cand in import_by_name:
                 return cand
         nm = reg.get(target)
+        if nm and nm in import_by_name:
+            return nm
+        # The SDK is imported under shim names, not by address: last resort, and
+        # still only when the module really declares that import.
+        nm = sdk.get(target)
         if nm and nm in import_by_name:
             return nm
         return None
@@ -376,11 +487,22 @@ def cmd_sites(a: argparse.Namespace) -> int:
     # at `disp(rA)` states the width at each offset, so that is what is used.
     # A single offset read at two widths is a genuine conflict and is REPORTED,
     # not silently resolved.
+    #
+    # STORES COUNT TOO (measured 2026-08-31). The map used to be built from
+    # loads alone, which silently mis-swapped every field the body only WRITES.
+    # auto-c0050-004.zz_01a39a4_ stores a byte at +0x547 and never loads
+    # anything in that word, so the word fell back to the default 4-byte swap
+    # and the console's byte at +0x547 landed at arena +0x544 -- the replay then
+    # reported an owned-write divergence "at 0x...544 expected 0x01 got 0x00",
+    # which is the byte-order artifact, not the port. A store states the field's
+    # width exactly as authoritatively as a load does.
     field_widths: dict[int, int] = {}
     width_conflicts: list[dict] = []
     for f in closure:
-        for ld in shapes[f]["loads"]:
-            if ld["disp"] < 0:
+        for ld in list(shapes[f]["loads"]) + list(shapes[f]["stores"]):
+            if ld.get("disp") is None or ld["disp"] < 0:
+                continue
+            if ld.get("base_reg") in ("r1", "r2", "r13"):
                 continue
             prev = field_widths.get(ld["disp"])
             if prev is not None and prev != ld["width"]:
@@ -390,6 +512,36 @@ def cmd_sites(a: argparse.Namespace) -> int:
                 field_widths[ld["disp"]] = min(prev, ld["width"])
             else:
                 field_widths[ld["disp"]] = ld["width"]
+
+    # ---- STATIC GLOBALS THE BODY READS --------------------------------------
+    # WHY (measured 2026-08-31): the wasm arena the replay starts from is
+    # `arena-trace-empty.json` -- EMPTY -- so every `DAT_`/`FLOAT_` the ROM keeps
+    # in static memory reads back as ZERO in the port while the console reads the
+    # real constant. The first two divergences the sweep produced were exactly
+    # this and NOT port defects: `FUN_80079b08` passes `FLOAT_804378f0` (-1.0 in
+    # the DOL) to `zz_004beb8_` and the port passed 0.0; `zz_0079d54_` passes
+    # `FLOAT_804378f8` (1.0) to `FUN_80067310` and the port passed 0.0. Left
+    # unfixed, the standard reds every function that hands a ROM constant to a
+    # callee, which is most of them.
+    #
+    # These addresses are read from the LIVE CONSOLE at capture time, not from
+    # the DOL image: a global may have been written since boot, and the claim
+    # must rest on what the console actually held. They are seeded into the port
+    # exactly like the pointer-argument windows -- bytes the port is GIVEN, never
+    # bytes it produced -- and are itemised in the header.
+    plan_globals = []
+    for f in closure:
+        for g in shapes[f].get("globals") or []:
+            plan_globals.append(dict(g, **{"in": by_addr[f]}))
+    # dedupe on (kind, address-or-displacement, width); keep the first witness
+    seen_g: set[tuple] = set()
+    globals_out = []
+    for g in plan_globals:
+        key = (g["kind"], g.get("addr"), g.get("disp"), g["width"])
+        if key in seen_g:
+            continue
+        seen_g.add(key)
+        globals_out.append(g)
 
     sig = exports[a.fn]
     ret_spec = eabi_return(sig["results"])
@@ -422,6 +574,9 @@ def cmd_sites(a: argparse.Namespace) -> int:
         "unbound_call_sites": unbound,
         "return_sites": sorted({r for f in closure for r in shapes[f]["returns"]}),
         "stores": [dict(st, **{"in": by_addr[f]}) for f in closure for st in shapes[f]["stores"]],
+        # static globals the body reads: absolute (lis/addi-resolved) or
+        # small-data-area relative (r2/r13, resolved from the live console)
+        "globals": globals_out,
         # offset -> width, from the console's own load instructions; the seed
         # windows are byte-swapped field-wise with this map.
         "field_widths": {f"0x{off:x}": w for off, w in sorted(field_widths.items())},
@@ -449,6 +604,26 @@ def cmd_sites(a: argparse.Namespace) -> int:
 # capture
 # --------------------------------------------------------------------------
 
+def global_address(g: dict, regs) -> int | None:
+    """Absolute address of one plan `globals` entry.
+
+    ``abs`` entries were resolved from the ROM's own ``lis``/``addi`` pair at
+    plan time. ``r2``/``r13`` entries are small-data-area relative: those bases
+    are established at boot and are not in the DOL image, so the address only
+    exists on the live console and is resolved here, per case.
+    """
+    kind = g.get("kind")
+    if kind == "abs":
+        try:
+            return int(str(g["addr"]), 16)
+        except (KeyError, TypeError, ValueError):
+            return None
+    if kind in ("r2", "r13"):
+        base = regs.gpr(2 if kind == "r2" else 13)
+        return (base + int(g["disp"])) & 0xFFFFFFFF
+    return None
+
+
 def snapshot_windows(rsp, windows: list[dict]) -> dict[int, bytes]:
     return {w["addr"]: rsp.read_mem(w["addr"], w["size"]) for w in windows}
 
@@ -459,14 +634,36 @@ def swap_fields(raw: bytes, field_widths: dict[int, int], default_width: int) ->
     A uniform element-wise swap (capture_spine.py's rule, which is right for a
     region of one declared width) is WRONG for a raw struct window, where a u16
     field and a u32 field sit side by side. `field_widths` is offset -> width,
-    read straight off the console's own load instructions by `sites`, so each
-    field the code actually reads is swapped at the width it is read at. Bytes
-    no load touches keep the default-width swap; nothing reads them, and the
-    capture declares the fact rather than hiding it.
+    read straight off the console's own LOAD AND STORE instructions by `sites`,
+    so each field the code actually touches is swapped at the width it is
+    touched at. Stores matter as much as loads: a field the body only WRITES
+    (auto-c0050-004.zz_01a39a4_ stores a byte at +0x547 and loads nothing in
+    that word) would otherwise fall back to the default 4-byte swap, which puts
+    the console's byte at a different arena offset and reds the replay with an
+    owned-write divergence that is pure byte order, not behaviour. Bytes no
+    instruction touches keep the default-width swap; nothing reads them, and
+    the capture declares the fact rather than hiding it.
     """
-    out = bytearray(swap_elems(raw, default_width))
     n = len(raw)
+    out = bytearray(swap_elems(raw, default_width))
+    # A default-width block that contains ANY declared narrower field is not a
+    # default-width value, so the whole block has to be rebuilt -- not just the
+    # declared bytes patched. Patching only the declared bytes was the bug:
+    # zz_01a39a4_ declares a byte at +0x547, and leaving the rest of the word
+    # 0x544..0x547 reversed put the console's 0x547 byte at arena 0x544, which
+    # the replay reported as an owned-write divergence at exactly that offset
+    # (expected 0x01 got 0x00) even after the store width was known.
+    # Bytes inside such a block that no instruction touches are left IDENTITY:
+    # nothing reads them at any width, so no width is defensible for them, and
+    # identity is the only choice that cannot move a declared neighbour.
+    dirty: set[int] = set()
     for off, w in field_widths.items():
+        if 0 <= off and off + w <= n and w != default_width:
+            dirty.add(off - off % default_width)
+    for block in sorted(dirty):
+        stop = min(block + default_width, n)
+        out[block:stop] = raw[block:stop]          # identity by default
+    for off, w in sorted(field_widths.items()):
         if 0 <= off and off + w <= n and w != default_width:
             out[off:off + w] = raw[off:off + w][::-1]
     return bytes(out)
@@ -508,6 +705,28 @@ def cmd_capture(a: argparse.Namespace) -> int:
     # closes the pending call first and then opens the new one.
     after_by_addr = {int(s["at"], 16) + 4: s for s in plan["call_sites"]}
 
+    # ---- HOW BIG THE SEED WINDOW MUST BE ------------------------------------
+    # WHY THIS IS DERIVED (measured 2026-08-31): the window used to be a fixed
+    # 512 bytes at each pointer argument. auto-c0011-006.FUN_80079c3c branches on
+    # `*(char *)(param_1 + 0x1cef)` and `+0x1cf0` -- 7.4 KB into the actor struct
+    # -- so the port read 0 there, took the short path and returned after 1 of the
+    # console's 3 calls. That reds as a transcript divergence while being nothing
+    # but an undersized window. The plan ALREADY states how far the body reads:
+    # `field_widths` is built from the console's own load instructions, so the
+    # largest `offset + width` in it is exactly the window the body needs.
+    watch_args = a.watch_args
+    watch_basis = "explicit --watch-args"
+    if watch_args < 0:
+        needed = max((off + w for off, w in field_widths.items()), default=0)
+        watch_args = max(0x200, min(WATCH_WINDOW_CAP, needed))
+        watch_args = (watch_args + a.seed_elem_width - 1) // a.seed_elem_width             * a.seed_elem_width
+        watch_basis = (f"derived from the plan's field_widths: the body's "
+                       f"furthest load reaches +0x{needed:x}")
+        if needed > WATCH_WINDOW_CAP:
+            watch_basis += (f", CAPPED at 0x{WATCH_WINDOW_CAP:x} -- fields past "
+                            f"the cap are NOT seeded and can red falsely")
+    a.watch_args = watch_args
+
     scenario = load_scenario(a.scenario) if a.scenario else None
     if scenario and not a.inject:
         a.inject = scenario.get("inject")
@@ -519,6 +738,7 @@ def cmd_capture(a: argparse.Namespace) -> int:
     notes: list[str] = []
     misses = 0
     watch_meta: list[dict] = []
+    seeded_globals: dict[str, dict] = {}
     d = StubDriver(a.port)
     setup_report = None
     t0 = time.monotonic()
@@ -571,6 +791,23 @@ def cmd_capture(a: argparse.Namespace) -> int:
                         windows.append({"addr": base, "size": a.watch_args,
                                         "arg": spec["i"]})
             seed = []
+            # ---- static globals the body reads (see the plan's `globals`) ----
+            # Read from the live console per case and swapped at the width the
+            # console's OWN load instruction used, so a f32 constant is swapped
+            # at 4 and a f64 at 8 -- a uniform swap would corrupt both.
+            for g in plan.get("globals") or []:
+                address = global_address(g, regs)
+                if address is None or not is_mem1(address):
+                    continue
+                raw = d.rsp.read_mem(address, g["width"])
+                seed.append({"addr": f"0x{address:08x}",
+                             "b64": base64.b64encode(
+                                 swap_elems(raw, g["width"])).decode()})
+                key = f"0x{address:08x}"
+                if key not in seeded_globals:
+                    seeded_globals[key] = {"addr": key, "width": g["width"],
+                                           "kind": g["kind"], "at": g["at"],
+                                           "in": g.get("in")}
             for w in windows:
                 raw = d.rsp.read_mem(w["addr"], w["size"])
                 seed.append({"addr": f"0x{w['addr']:08x}",
@@ -677,12 +914,17 @@ def cmd_capture(a: argparse.Namespace) -> int:
         # The authoritative per-case addresses are in each case's `owned_end`.
         # They are NOT a write set -- see the exclusions.
         "owned_regions": watch_meta,
+        # Static ROM globals the body reads, snapshotted from the live console
+        # and GIVEN to the port (never compared). Without them every function
+        # that hands a ROM constant to a callee reds falsely -- see the plan.
+        "seeded_globals": sorted(seeded_globals.values(), key=lambda g: g["addr"]),
         "watch_policy": {
             "rule": f"one {a.watch_args}-byte window at each MEM1-valued i32 "
                     f"pointer argument of the entry signature, per case",
             "note": "addresses vary per case; `owned_regions` is the union with "
                     "a case count, and the replay counts only the bytes it "
                     "actually verified",
+            "size_basis": watch_basis,
         },
         "counts": {"case": len(cases), "call": call_total},
         "source": {
@@ -769,9 +1011,10 @@ def main() -> int:
                     help="header `wasm`: path RELATIVE TO THE CAPTURE FILE")
     cp.add_argument("--arena-rel", default="../oracle-harness/arena-trace-empty.json",
                     help="header `arena`: path RELATIVE TO THE CAPTURE FILE")
-    cp.add_argument("--watch-args", type=int, default=0x200,
+    cp.add_argument("--watch-args", type=int, default=-1,
                     help="bytes to seed/watch at each MEM1-valued pointer argument "
-                         "(0 disables; the bytes are GIVEN to the port and are "
+                         "(0 disables; -1 = derive from the plan's field_widths, "
+                         "the default; the bytes are GIVEN to the port and are "
                          "itemised in the result artifact)")
     cp.add_argument("--seed-elem-width", type=int, default=4)
     cp.add_argument("--stop-timeout", type=float, default=20.0)

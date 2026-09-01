@@ -2,7 +2,7 @@
  "transcript_plan_schema": 1,
  "standard": "transcript_green",
  "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
- "generated_at": "2026-08-30T05:57:53.485711Z",
+ "generated_at": "2026-08-31T23:45:18.756764Z",
  "unit": "auto-c0050-000",
  "fn": {
   "name": "zz_01a1bbc_",
@@ -26,7 +26,7 @@
    "src": "r3"
   }
  },
- "wasm": "research/decomp/port-units-staging/auto-c0050-000/unit.wasm",
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0050-000\\unit.wasm",
  "in_unit_closure": [
   {
    "name": "zz_01a1bbc_",
@@ -83,6 +83,7 @@
   "0x801a1c10"
  ],
  "stores": [],
+ "globals": [],
  "field_widths": {
   "0x3e8": 2,
   "0x5b4": 4

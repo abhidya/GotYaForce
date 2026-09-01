@@ -1,0 +1,121 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:30.729423Z",
+ "unit": "auto-c0033-006",
+ "fn": {
+  "name": "FUN_80123a44",
+  "gc_addr": "0x80123a44",
+  "end": "0x80123ab0",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0033-006\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_80123a44",
+   "addr": "0x80123a44",
+   "end": "0x80123ab0"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x80123a5c",
+   "target": "0x8004cd24",
+   "in": "FUN_80123a44",
+   "callee": "zz_004cd24_",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x80123a84",
+   "target": "0x8006ea9c",
+   "in": "FUN_80123a44",
+   "callee": "zz_006ea9c_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80123aac"
+ ],
+ "stores": [
+  {
+   "at": "0x80123a98",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1344,
+   "addr_expr": "r31+0x540",
+   "in": "FUN_80123a44"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -20104,
+   "width": 4,
+   "at": "0x80123a68",
+   "op": "lfs",
+   "in": "FUN_80123a44"
+  }
+ ],
+ "field_widths": {
+  "0x540": 1,
+  "0x558": 4,
+  "0x1dc8": 4
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

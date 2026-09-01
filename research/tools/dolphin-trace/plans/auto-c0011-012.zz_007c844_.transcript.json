@@ -1,0 +1,252 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:30.396052Z",
+ "unit": "auto-c0011-012",
+ "fn": {
+  "name": "zz_007c844_",
+  "gc_addr": "0x8007c844",
+  "end": "0x8007c9ac",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0011-012\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_007c844_",
+   "addr": "0x8007c844",
+   "end": "0x8007c9ac"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x8007c878",
+   "target": "0x8020bab8",
+   "in": "zz_007c844_",
+   "callee": "gnt4_PSVECNormalize_bl",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x8007c884",
+   "target": "0x8020bab8",
+   "in": "zz_007c844_",
+   "callee": "gnt4_PSVECNormalize_bl",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": null
+  },
+  {
+   "at": "0x8007c890",
+   "target": "0x8020bb58",
+   "in": "zz_007c844_",
+   "callee": "gnt4_PSQUATDotProduct_bl",
+   "wasm_params": [
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "f64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    }
+   ],
+   "ret": {
+    "t": "f64",
+    "src": "f1"
+   }
+  },
+  {
+   "at": "0x8007c8b8",
+   "target": "0x8023cb38",
+   "in": "zz_007c844_",
+   "callee": "gnt4_acos_bl",
+   "wasm_params": [
+    "f64"
+   ],
+   "wasm_results": [
+    "f64"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    }
+   ],
+   "ret": {
+    "t": "f64",
+    "src": "f1"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x8007c9a8"
+ ],
+ "stores": [
+  {
+   "at": "0x8007c8ec",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 6362,
+   "addr_expr": "r31+0x18da",
+   "in": "zz_007c844_"
+  },
+  {
+   "at": "0x8007c91c",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 6362,
+   "addr_expr": "r31+0x18da",
+   "in": "zz_007c844_"
+  },
+  {
+   "at": "0x8007c930",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 6362,
+   "addr_expr": "r31+0x18da",
+   "in": "zz_007c844_"
+  },
+  {
+   "at": "0x8007c954",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 6362,
+   "addr_expr": "r31+0x18da",
+   "in": "zz_007c844_"
+  },
+  {
+   "at": "0x8007c980",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 6362,
+   "addr_expr": "r31+0x18da",
+   "in": "zz_007c844_"
+  },
+  {
+   "at": "0x8007c994",
+   "op": "sth",
+   "width": 2,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 6362,
+   "addr_expr": "r31+0x18da",
+   "in": "zz_007c844_"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -28984,
+   "width": 4,
+   "at": "0x8007c84c",
+   "op": "lfs",
+   "in": "zz_007c844_"
+  },
+  {
+   "kind": "r2",
+   "disp": -28968,
+   "width": 4,
+   "at": "0x8007c894",
+   "op": "lfs",
+   "in": "zz_007c844_"
+  },
+  {
+   "kind": "r2",
+   "disp": -28976,
+   "width": 4,
+   "at": "0x8007c8a8",
+   "op": "lfs",
+   "in": "zz_007c844_"
+  },
+  {
+   "kind": "r2",
+   "disp": -28844,
+   "width": 4,
+   "at": "0x8007c8d8",
+   "op": "lfs",
+   "in": "zz_007c844_"
+  },
+  {
+   "kind": "r2",
+   "disp": -28856,
+   "width": 8,
+   "at": "0x8007c8e8",
+   "op": "lfd",
+   "in": "zz_007c844_"
+  }
+ ],
+ "field_widths": {
+  "0x38": 4,
+  "0x3c": 4,
+  "0x40": 4,
+  "0x18da": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

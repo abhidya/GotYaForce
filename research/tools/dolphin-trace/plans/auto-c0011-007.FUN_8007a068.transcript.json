@@ -1,0 +1,134 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:21.073696Z",
+ "unit": "auto-c0011-007",
+ "fn": {
+  "name": "FUN_8007a068",
+  "gc_addr": "0x8007a068",
+  "end": "0x8007a0b4",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0011-007\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_8007a068",
+   "addr": "0x8007a068",
+   "end": "0x8007a0b4"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x8007a0a0",
+   "target": "0x8004beb8",
+   "in": "FUN_8007a068",
+   "callee": "zz_004beb8_",
+   "wasm_params": [
+    "f64",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "f64",
+     "src": "f1"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 3,
+     "t": "i32",
+     "src": "r5"
+    },
+    {
+     "i": 4,
+     "t": "i32",
+     "src": "r6"
+    },
+    {
+     "i": 5,
+     "t": "i32",
+     "src": "r7"
+    },
+    {
+     "i": 6,
+     "t": "i32",
+     "src": "r8"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x8007a0b0"
+ ],
+ "stores": [
+  {
+   "at": "0x8007a098",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r3",
+   "disp": 1344,
+   "addr_expr": "r3+0x540",
+   "in": "FUN_8007a068"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -28964,
+   "width": 4,
+   "at": "0x8007a070",
+   "op": "lfs",
+   "in": "FUN_8007a068"
+  },
+  {
+   "kind": "r2",
+   "disp": -28976,
+   "width": 4,
+   "at": "0x8007a080",
+   "op": "lfs",
+   "in": "FUN_8007a068"
+  }
+ ],
+ "field_widths": {
+  "0x540": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [],
+ "capturable": true
+}

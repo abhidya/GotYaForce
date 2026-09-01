@@ -1,0 +1,167 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:43:07.706977Z",
+ "unit": "auto-c0010-004",
+ "fn": {
+  "name": "zz_007320c_",
+  "gc_addr": "0x8007320c",
+  "end": "0x80073330",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0010-004\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "zz_007320c_",
+   "addr": "0x8007320c",
+   "end": "0x80073330"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x800732a4",
+   "target": "0x8006c674",
+   "in": "zz_007320c_",
+   "callee": "zz_006c674_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x800732b8",
+   "target": "0x8006a3d0",
+   "in": "zz_007320c_",
+   "callee": "zz_006a3d0_",
+   "wasm_params": [
+    "i32",
+    "i32",
+    "i32",
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    },
+    {
+     "i": 1,
+     "t": "i32",
+     "src": "r4"
+    },
+    {
+     "i": 2,
+     "t": "i32",
+     "src": "r5"
+    },
+    {
+     "i": 3,
+     "t": "i32",
+     "src": "r6"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x8007332c"
+ ],
+ "stores": [
+  {
+   "at": "0x800732c4",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 1344,
+   "addr_expr": "r31+0x540",
+   "in": "zz_007320c_"
+  },
+  {
+   "at": "0x800732d0",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 1346,
+   "addr_expr": "r31+0x542",
+   "in": "zz_007320c_"
+  },
+  {
+   "at": "0x800732e8",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r3",
+   "base_reg": "r31",
+   "disp": 6916,
+   "addr_expr": "r31+0x1b04",
+   "in": "zz_007320c_"
+  }
+ ],
+ "globals": [
+  {
+   "kind": "r2",
+   "disp": -29328,
+   "width": 4,
+   "at": "0x800732cc",
+   "op": "lfs",
+   "in": "zz_007320c_"
+  },
+  {
+   "kind": "r2",
+   "disp": -29324,
+   "width": 4,
+   "at": "0x800732d4",
+   "op": "lfs",
+   "in": "zz_007320c_"
+  }
+ ],
+ "field_widths": {
+  "0x540": 1,
+  "0x542": 1,
+  "0x581": 1,
+  "0x5e0": 4,
+  "0x5e4": 1,
+  "0x1b04": 1,
+  "0x1b44": 1
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "zz_007320c_ dispatches through a ROM function-pointer table at 0x80073314 (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole"
+ ],
+ "capturable": false
+}

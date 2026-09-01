@@ -1,0 +1,120 @@
+{
+ "transcript_plan_schema": 1,
+ "standard": "transcript_green",
+ "generated_by": "research/tools/dolphin-trace/capture_transcript.py sites",
+ "generated_at": "2026-08-31T23:44:47.969795Z",
+ "unit": "auto-c0035-004",
+ "fn": {
+  "name": "FUN_801322dc",
+  "gc_addr": "0x801322dc",
+  "end": "0x8013237c",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "entry_args": [
+   {
+    "i": 0,
+    "t": "i32",
+    "src": "r3"
+   }
+  ],
+  "ret": null
+ },
+ "wasm": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0035-004\\unit.wasm",
+ "in_unit_closure": [
+  {
+   "name": "FUN_801322dc",
+   "addr": "0x801322dc",
+   "end": "0x8013237c"
+  }
+ ],
+ "call_sites": [
+  {
+   "at": "0x80132330",
+   "target": "0x8008aff0",
+   "in": "FUN_801322dc",
+   "callee": "zz_008aff0_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  },
+  {
+   "at": "0x80132340",
+   "target": "0x801330b4",
+   "in": "FUN_801322dc",
+   "callee": "zz_01330b4_",
+   "wasm_params": [
+    "i32"
+   ],
+   "wasm_results": [
+    "i32"
+   ],
+   "args": [
+    {
+     "i": 0,
+     "t": "i32",
+     "src": "r3"
+    }
+   ],
+   "ret": {
+    "t": "i32",
+    "src": "r3"
+   }
+  }
+ ],
+ "in_unit_calls": [],
+ "unbound_call_sites": [],
+ "return_sites": [
+  "0x80132378"
+ ],
+ "stores": [
+  {
+   "at": "0x8013232c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 24,
+   "addr_expr": "r31+0x18",
+   "in": "FUN_801322dc"
+  },
+  {
+   "at": "0x8013233c",
+   "op": "stb",
+   "width": 1,
+   "src_reg": "r0",
+   "base_reg": "r31",
+   "disp": 130,
+   "addr_expr": "r31+0x82",
+   "in": "FUN_801322dc"
+  }
+ ],
+ "globals": [],
+ "field_widths": {
+  "0x18": 1,
+  "0x82": 1,
+  "0x90": 4,
+  "0x94": 2,
+  "0x3e8": 2
+ },
+ "field_width_conflicts": [],
+ "refusals": [
+  "FUN_801322dc dispatches through a ROM function-pointer table at 0x80132364 (bctrl) -- emcc lowers that to call_indirect on the module's own table, which no import shim can observe, so the transcript would have a hole"
+ ],
+ "capturable": false
+}
