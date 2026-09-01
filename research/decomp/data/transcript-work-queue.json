@@ -7,9 +7,9 @@
   "staged_exports": 810,
   "capturable_exports": 598,
   "units_all_exports_capturable": 10,
-  "units_scouted": 16,
-  "exports_measured_firing": 28,
-  "exports_capturable_and_firing": 19
+  "units_scouted": 44,
+  "exports_measured_firing": 34,
+  "exports_capturable_and_firing": 25
  },
  "units": [
   {
@@ -135,6 +135,133 @@
       "rate": 0.0,
       "scenario": "battle-roster-0x801a10e8",
       "scout_seconds": 150.1
+     }
+    }
+   ]
+  },
+  {
+   "unit": "auto-c0020-007",
+   "scenario": "battle-2v2-circle",
+   "families": [
+    "0x800c04c0"
+   ],
+   "exports": 8,
+   "capturable": 7,
+   "full_coverage": false,
+   "scouted": true,
+   "observed_firing": 5,
+   "ready_now": 5,
+   "rows": [
+    {
+     "export": "FUN_800c42bc",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 2,
+     "measured": {
+      "hits": 10,
+      "rate": 0.067,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
+    },
+    {
+     "export": "FUN_800c4308",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 3,
+     "returns_value": false,
+     "globals": 6,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
+    },
+    {
+     "export": "FUN_800c4448",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 0,
+     "measured": {
+      "hits": 1,
+      "rate": 0.007,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
+    },
+    {
+     "export": "FUN_800c4468",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 2,
+     "returns_value": false,
+     "globals": 0,
+     "measured": {
+      "hits": 126,
+      "rate": 0.84,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
+    },
+    {
+     "export": "zz_00c44a8_",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 4,
+     "returns_value": false,
+     "globals": 0,
+     "measured": {
+      "hits": 66,
+      "rate": 0.44,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
+    },
+    {
+     "export": "zz_00c4540_",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 10,
+     "returns_value": false,
+     "globals": 3,
+     "measured": {
+      "hits": 53,
+      "rate": 0.353,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
+    },
+    {
+     "export": "zz_00c4704_",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 2,
+     "returns_value": true,
+     "globals": 0,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
+    },
+    {
+     "export": "FUN_800c4838",
+     "capturable": false,
+     "refusal": "indirect_dispatch",
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 0,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
      }
     }
    ]
@@ -614,6 +741,133 @@
       "hits": 0,
       "rate": 0.0,
       "scenario": "battle-roster-0x801a10e8",
+      "scout_seconds": 150.1
+     }
+    }
+   ]
+  },
+  {
+   "unit": "auto-c0053-015",
+   "scenario": "battle-roster-0x801ba020",
+   "families": [
+    "0x801ba020"
+   ],
+   "exports": 8,
+   "capturable": 7,
+   "full_coverage": false,
+   "scouted": true,
+   "observed_firing": 1,
+   "ready_now": 1,
+   "rows": [
+    {
+     "export": "FUN_801ba3c0",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 0,
+     "measured": {
+      "hits": 382,
+      "rate": 2.546,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
+    },
+    {
+     "export": "FUN_801ba3e4",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 0,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
+    },
+    {
+     "export": "FUN_801ba408",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 0,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
+    },
+    {
+     "export": "FUN_801ba42c",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 0,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
+    },
+    {
+     "export": "FUN_801ba450",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 0,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
+    },
+    {
+     "export": "FUN_801ba474",
+     "capturable": false,
+     "refusal": "indirect_dispatch",
+     "call_sites": 2,
+     "returns_value": false,
+     "globals": 2,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
+    },
+    {
+     "export": "FUN_801ba4f8",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 5,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
+    },
+    {
+     "export": "FUN_801ba5e4",
+     "capturable": true,
+     "refusal": null,
+     "call_sites": 1,
+     "returns_value": false,
+     "globals": 1,
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
       "scout_seconds": 150.1
      }
     }
@@ -1312,7 +1566,7 @@
    "exports": 8,
    "capturable": 8,
    "full_coverage": true,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -1323,7 +1577,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bcd88",
@@ -1332,7 +1591,12 @@
      "call_sites": 3,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bce18",
@@ -1341,7 +1605,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bcea0",
@@ -1350,7 +1619,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bcf48",
@@ -1359,7 +1633,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd008",
@@ -1368,7 +1647,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd02c",
@@ -1377,7 +1661,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd050",
@@ -1386,7 +1675,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -1836,7 +2130,7 @@
    "exports": 8,
    "capturable": 7,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -1847,7 +2141,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_80017b78",
@@ -1856,7 +2155,12 @@
      "call_sites": 8,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_80017c2c",
@@ -1865,7 +2169,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "zz_0017cc4_",
@@ -1874,7 +2183,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_80017dbc",
@@ -1883,7 +2197,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_80017dfc",
@@ -1892,7 +2211,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_80017e9c",
@@ -1901,7 +2225,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_80017f94",
@@ -1910,7 +2239,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     }
    ]
   },
@@ -2137,7 +2471,7 @@
    "exports": 8,
    "capturable": 7,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -2148,7 +2482,12 @@
      "call_sites": 3,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bc72c",
@@ -2157,7 +2496,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bc81c",
@@ -2166,7 +2510,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bc8ac",
@@ -2175,7 +2524,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bc930",
@@ -2184,7 +2538,12 @@
      "call_sites": 11,
      "returns_value": false,
      "globals": 5,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bcb08",
@@ -2193,7 +2552,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bcb60",
@@ -2202,7 +2566,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bcbb0",
@@ -2211,7 +2580,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 5,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -2297,93 +2671,6 @@
      "refusal": null,
      "call_sites": 0,
      "returns_value": true,
-     "globals": 0,
-     "measured": null
-    }
-   ]
-  },
-  {
-   "unit": "auto-c0020-007",
-   "scenario": "battle-2v2-circle",
-   "families": [
-    "0x800c04c0"
-   ],
-   "exports": 8,
-   "capturable": 7,
-   "full_coverage": false,
-   "scouted": false,
-   "observed_firing": 0,
-   "ready_now": 0,
-   "rows": [
-    {
-     "export": "FUN_800c42bc",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 1,
-     "returns_value": false,
-     "globals": 2,
-     "measured": null
-    },
-    {
-     "export": "FUN_800c4308",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 3,
-     "returns_value": false,
-     "globals": 6,
-     "measured": null
-    },
-    {
-     "export": "FUN_800c4448",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 1,
-     "returns_value": false,
-     "globals": 0,
-     "measured": null
-    },
-    {
-     "export": "FUN_800c4468",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 2,
-     "returns_value": false,
-     "globals": 0,
-     "measured": null
-    },
-    {
-     "export": "zz_00c44a8_",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 4,
-     "returns_value": false,
-     "globals": 0,
-     "measured": null
-    },
-    {
-     "export": "zz_00c4540_",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 10,
-     "returns_value": false,
-     "globals": 3,
-     "measured": null
-    },
-    {
-     "export": "zz_00c4704_",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 2,
-     "returns_value": true,
-     "globals": 0,
-     "measured": null
-    },
-    {
-     "export": "FUN_800c4838",
-     "capturable": false,
-     "refusal": "indirect_dispatch",
-     "call_sites": 1,
-     "returns_value": false,
      "globals": 0,
      "measured": null
     }
@@ -2747,7 +3034,7 @@
    "exports": 8,
    "capturable": 7,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -2758,7 +3045,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80132ce0",
@@ -2767,7 +3059,12 @@
      "call_sites": 13,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80132e3c",
@@ -2776,7 +3073,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80132e94",
@@ -2785,7 +3087,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80132ef4",
@@ -2794,7 +3101,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_0132f30_",
@@ -2803,7 +3115,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_0132f9c_",
@@ -2812,7 +3129,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80132fcc",
@@ -2821,7 +3143,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -2834,7 +3161,7 @@
    "exports": 8,
    "capturable": 7,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -2845,7 +3172,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_801336f8",
@@ -2854,7 +3186,12 @@
      "call_sites": 21,
      "returns_value": false,
      "globals": 5,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_0133980_",
@@ -2863,7 +3200,12 @@
      "call_sites": 3,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80133ae4",
@@ -2872,7 +3214,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80133b04",
@@ -2881,7 +3228,12 @@
      "call_sites": 11,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80133cbc",
@@ -2890,7 +3242,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_0133df4_",
@@ -2899,7 +3256,12 @@
      "call_sites": 3,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_0133e90_",
@@ -2908,7 +3270,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -3517,93 +3884,6 @@
    ]
   },
   {
-   "unit": "auto-c0053-015",
-   "scenario": "battle-roster-0x801ba020",
-   "families": [
-    "0x801ba020"
-   ],
-   "exports": 8,
-   "capturable": 7,
-   "full_coverage": false,
-   "scouted": false,
-   "observed_firing": 0,
-   "ready_now": 0,
-   "rows": [
-    {
-     "export": "FUN_801ba3c0",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 1,
-     "returns_value": false,
-     "globals": 0,
-     "measured": null
-    },
-    {
-     "export": "FUN_801ba3e4",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 1,
-     "returns_value": false,
-     "globals": 0,
-     "measured": null
-    },
-    {
-     "export": "FUN_801ba408",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 1,
-     "returns_value": false,
-     "globals": 0,
-     "measured": null
-    },
-    {
-     "export": "FUN_801ba42c",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 1,
-     "returns_value": false,
-     "globals": 0,
-     "measured": null
-    },
-    {
-     "export": "FUN_801ba450",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 1,
-     "returns_value": false,
-     "globals": 0,
-     "measured": null
-    },
-    {
-     "export": "FUN_801ba474",
-     "capturable": false,
-     "refusal": "indirect_dispatch",
-     "call_sites": 2,
-     "returns_value": false,
-     "globals": 2,
-     "measured": null
-    },
-    {
-     "export": "FUN_801ba4f8",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 1,
-     "returns_value": false,
-     "globals": 5,
-     "measured": null
-    },
-    {
-     "export": "FUN_801ba5e4",
-     "capturable": true,
-     "refusal": null,
-     "call_sites": 1,
-     "returns_value": false,
-     "globals": 1,
-     "measured": null
-    }
-   ]
-  },
-  {
    "unit": "auto-c0054-002",
    "scenario": "battle-roster-0x801ba020",
    "families": [
@@ -3612,7 +3892,7 @@
    "exports": 8,
    "capturable": 7,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -3623,7 +3903,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bd248",
@@ -3632,7 +3917,12 @@
      "call_sites": 8,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bd468",
@@ -3641,7 +3931,12 @@
      "call_sites": 9,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bd684",
@@ -3650,7 +3945,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bd724",
@@ -3659,7 +3959,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bd760",
@@ -3668,7 +3973,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bd854",
@@ -3677,7 +3987,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bd88c",
@@ -3686,7 +4001,12 @@
      "call_sites": 12,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     }
    ]
   },
@@ -3857,7 +4177,7 @@
    "exports": 6,
    "capturable": 5,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -3868,7 +4188,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bb2d0",
@@ -3877,7 +4202,12 @@
      "call_sites": 13,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bb69c",
@@ -3886,7 +4216,12 @@
      "call_sites": 8,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bb8c8",
@@ -3895,7 +4230,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bb990",
@@ -3904,7 +4244,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bb9cc",
@@ -3913,7 +4258,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     }
    ]
   },
@@ -4521,7 +4871,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -4532,7 +4882,12 @@
      "call_sites": 9,
      "returns_value": true,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd7e4",
@@ -4541,7 +4896,12 @@
      "call_sites": 7,
      "returns_value": false,
      "globals": 6,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_00bd918_",
@@ -4550,7 +4910,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bda24",
@@ -4559,7 +4924,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bda78",
@@ -4568,7 +4938,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_00bdb80_",
@@ -4577,7 +4952,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bdcfc",
@@ -4586,7 +4966,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bdd1c",
@@ -4595,7 +4980,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -4608,7 +4998,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -4619,7 +5009,12 @@
      "call_sites": 1,
      "returns_value": true,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bdec4",
@@ -4628,7 +5023,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bdf00",
@@ -4637,7 +5037,12 @@
      "call_sites": 8,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800be0a4",
@@ -4646,7 +5051,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800be184",
@@ -4655,7 +5065,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800be1cc",
@@ -4664,7 +5079,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800be1f4",
@@ -4673,7 +5093,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800be23c",
@@ -4682,7 +5107,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -4695,7 +5125,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -4706,7 +5136,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800be8ec",
@@ -4715,7 +5150,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_00be948_",
@@ -4724,7 +5164,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bec20",
@@ -4733,7 +5178,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800becb8",
@@ -4742,7 +5192,12 @@
      "call_sites": 24,
      "returns_value": false,
      "globals": 6,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bee1c",
@@ -4751,7 +5206,12 @@
      "call_sites": 15,
      "returns_value": true,
      "globals": 5,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bf144",
@@ -4760,7 +5220,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bf210",
@@ -4769,7 +5234,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -4782,7 +5252,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -4793,7 +5263,12 @@
      "call_sites": 12,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "zz_00c0d0c_",
@@ -4802,7 +5277,12 @@
      "call_sites": 0,
      "returns_value": true,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "zz_00c0d3c_",
@@ -4811,7 +5291,12 @@
      "call_sites": 1,
      "returns_value": true,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c0e2c",
@@ -4820,7 +5305,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c0e80",
@@ -4829,7 +5319,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c0fb4",
@@ -4838,7 +5333,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c1038",
@@ -4847,7 +5347,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c1058",
@@ -4856,7 +5361,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     }
    ]
   },
@@ -4869,7 +5379,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -4880,7 +5390,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c7100",
@@ -4889,7 +5404,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c713c",
@@ -4898,7 +5418,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c715c",
@@ -4907,7 +5432,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "zz_00c71c0_",
@@ -4916,7 +5446,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c72c0",
@@ -4925,7 +5460,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c72fc",
@@ -4934,7 +5474,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c7350",
@@ -4943,7 +5488,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     }
    ]
   },
@@ -5654,7 +6204,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -5665,7 +6215,12 @@
      "call_sites": 9,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_801309b8",
@@ -5674,7 +6229,12 @@
      "call_sites": 8,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80130ad0",
@@ -5683,7 +6243,12 @@
      "call_sites": 11,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80130c5c",
@@ -5692,7 +6257,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80130c98",
@@ -5701,7 +6271,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80130d34",
@@ -5710,7 +6285,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80130e50",
@@ -5719,7 +6299,12 @@
      "call_sites": 8,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131038",
@@ -5728,7 +6313,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -5741,7 +6331,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -5752,7 +6342,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 5,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131184",
@@ -5761,7 +6356,12 @@
      "call_sites": 17,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_801312b4",
@@ -5770,7 +6370,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_013138c_",
@@ -5779,7 +6384,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_01313bc_",
@@ -5788,7 +6398,12 @@
      "call_sites": 11,
      "returns_value": true,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131598",
@@ -5797,7 +6412,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_801315d4",
@@ -5806,7 +6426,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131604",
@@ -5815,7 +6440,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -5828,7 +6458,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -5839,7 +6469,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131664",
@@ -5848,7 +6483,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131688",
@@ -5857,7 +6497,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_01316e0_",
@@ -5866,7 +6511,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131834",
@@ -5875,7 +6525,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_801318a8",
@@ -5884,7 +6539,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_801318f8",
@@ -5893,7 +6553,12 @@
      "call_sites": 7,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131a00",
@@ -5902,7 +6567,12 @@
      "call_sites": 10,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -5915,7 +6585,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -5926,7 +6596,12 @@
      "call_sites": 8,
      "returns_value": false,
      "globals": 5,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_0131c14_",
@@ -5935,7 +6610,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131d24",
@@ -5944,7 +6624,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80131d78",
@@ -5953,7 +6638,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 7,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_0131ecc_",
@@ -5962,7 +6652,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 6,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_8013202c",
@@ -5971,7 +6666,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_8013204c",
@@ -5980,7 +6680,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_013212c_",
@@ -5989,7 +6694,12 @@
      "call_sites": 2,
      "returns_value": true,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -6002,7 +6712,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -6013,7 +6723,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_8013237c",
@@ -6022,7 +6737,12 @@
      "call_sites": 21,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80132674",
@@ -6031,7 +6751,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_801326d8",
@@ -6040,7 +6765,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_0132734_",
@@ -6049,7 +6779,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_801327ac",
@@ -6058,7 +6793,12 @@
      "call_sites": 14,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80132974",
@@ -6067,7 +6807,12 @@
      "call_sites": 3,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80132a00",
@@ -6076,7 +6821,12 @@
      "call_sites": 13,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -6089,7 +6839,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -6100,7 +6850,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_01330cc_",
@@ -6109,7 +6864,12 @@
      "call_sites": 12,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_01332dc_",
@@ -6118,7 +6878,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80133358",
@@ -6127,7 +6892,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 5,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80133504",
@@ -6136,7 +6906,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80133510",
@@ -6145,7 +6920,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_80133530",
@@ -6154,7 +6934,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_013358c_",
@@ -6163,7 +6948,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801301f8",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -6438,7 +7228,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -6449,7 +7239,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bbaf8",
@@ -6458,7 +7253,12 @@
      "call_sites": 10,
      "returns_value": false,
      "globals": 11,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bbfdc",
@@ -6467,7 +7267,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bc018",
@@ -6476,7 +7281,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bc0d0",
@@ -6485,7 +7295,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bc324",
@@ -6494,7 +7309,12 @@
      "call_sites": 7,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bc5b4",
@@ -6503,7 +7323,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bc608",
@@ -6512,7 +7337,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     }
    ]
   },
@@ -6525,7 +7355,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -6536,7 +7366,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bc738",
@@ -6545,7 +7380,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bc770",
@@ -6554,7 +7394,12 @@
      "call_sites": 12,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bcb80",
@@ -6563,7 +7408,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bcbbc",
@@ -6572,7 +7422,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bcc74",
@@ -6581,7 +7436,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bcec8",
@@ -6590,7 +7450,12 @@
      "call_sites": 7,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bd158",
@@ -6599,7 +7464,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     }
    ]
   },
@@ -6612,7 +7482,7 @@
    "exports": 8,
    "capturable": 6,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -6623,7 +7493,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bdcdc",
@@ -6632,7 +7507,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bdd90",
@@ -6641,7 +7521,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bdfe0",
@@ -6650,7 +7535,12 @@
      "call_sites": 7,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801be26c",
@@ -6659,7 +7549,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801be2a8",
@@ -6668,7 +7563,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801be35c",
@@ -6677,7 +7577,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801be4f0",
@@ -6686,7 +7591,12 @@
      "call_sites": 9,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     }
    ]
   },
@@ -6699,7 +7609,7 @@
    "exports": 6,
    "capturable": 4,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -6710,7 +7620,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c095c",
@@ -6719,7 +7634,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c0980",
@@ -6728,7 +7648,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c09a4",
@@ -6737,7 +7662,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c09e0",
@@ -6746,7 +7676,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c0a2c",
@@ -6755,7 +7690,12 @@
      "call_sites": 7,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     }
    ]
   },
@@ -7255,7 +8195,7 @@
    "exports": 8,
    "capturable": 5,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -7266,7 +8206,12 @@
      "call_sites": 8,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bbc90",
@@ -7275,7 +8220,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bbd38",
@@ -7284,7 +8234,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bbd80",
@@ -7293,7 +8248,12 @@
      "call_sites": 3,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bbde8",
@@ -7302,7 +8262,12 @@
      "call_sites": 8,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bbee8",
@@ -7311,7 +8276,12 @@
      "call_sites": 5,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bbff0",
@@ -7320,7 +8290,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bc070",
@@ -7329,7 +8304,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },
@@ -7342,7 +8322,7 @@
    "exports": 8,
    "capturable": 5,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -7353,7 +8333,12 @@
      "call_sites": 6,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c064c",
@@ -7362,7 +8347,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c066c",
@@ -7371,7 +8361,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c0800",
@@ -7380,7 +8375,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c086c",
@@ -7389,7 +8389,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c08a8",
@@ -7398,7 +8403,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c08f0",
@@ -7407,7 +8417,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     },
     {
      "export": "FUN_800c0914",
@@ -7416,7 +8431,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-2v2-circle",
+      "scout_seconds": 150.0
+     }
     }
    ]
   },
@@ -8474,7 +9494,7 @@
    "exports": 8,
    "capturable": 5,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -8485,7 +9505,12 @@
      "call_sites": 3,
      "returns_value": true,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801ba9ec",
@@ -8494,7 +9519,12 @@
      "call_sites": 4,
      "returns_value": false,
      "globals": 6,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801babbc",
@@ -8503,7 +9533,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 2,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bac50",
@@ -8512,7 +9547,12 @@
      "call_sites": 1,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bac88",
@@ -8521,7 +9561,12 @@
      "call_sites": 2,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bacd8",
@@ -8530,7 +9575,12 @@
      "call_sites": 13,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801baf6c",
@@ -8539,7 +9589,12 @@
      "call_sites": 11,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     },
     {
      "export": "FUN_801bb1e0",
@@ -8548,7 +9603,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 1,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x801ba020",
+      "scout_seconds": 150.1
+     }
     }
    ]
   },
@@ -8736,7 +9796,7 @@
    "exports": 8,
    "capturable": 4,
    "full_coverage": false,
-   "scouted": false,
+   "scouted": true,
    "observed_firing": 0,
    "ready_now": 0,
    "rows": [
@@ -8747,7 +9807,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd0b0",
@@ -8756,7 +9821,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd12c",
@@ -8765,7 +9835,12 @@
      "call_sites": 7,
      "returns_value": false,
      "globals": 5,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd220",
@@ -8774,7 +9849,12 @@
      "call_sites": 13,
      "returns_value": false,
      "globals": 5,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd3a8",
@@ -8783,7 +9863,12 @@
      "call_sites": 10,
      "returns_value": false,
      "globals": 4,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd5a4",
@@ -8792,7 +9877,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "zz_00bd5c4_",
@@ -8801,7 +9891,12 @@
      "call_sites": 0,
      "returns_value": false,
      "globals": 0,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     },
     {
      "export": "FUN_800bd600",
@@ -8810,7 +9905,12 @@
      "call_sites": 7,
      "returns_value": false,
      "globals": 3,
-     "measured": null
+     "measured": {
+      "hits": 0,
+      "rate": 0.0,
+      "scenario": "battle-roster-0x800bb390",
+      "scout_seconds": 0.0
+     }
     }
    ]
   },

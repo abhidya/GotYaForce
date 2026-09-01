@@ -1,16 +1,16 @@
 {
  "result_schema": 1,
  "standard": "transcript_green",
- "unit": "auto-c0020-007",
- "fn": "FUN_800c4468",
- "generated_at": "2026-09-01T00:17:36.193Z",
+ "unit": "auto-c0011-006",
+ "fn": "FUN_80079d00",
+ "generated_at": "2026-09-01T00:17:35.461Z",
  "claim": {
-  "established": false,
+  "established": true,
   "summary": "same out-of-unit call transcript and return value as the console on 24 recorded cases",
   "verifies": [
    "the set, order and arguments of every out-of-unit callee call",
    "the function's own return value",
-   "NO owned-region bytes were reached: the corpus declares 3 watch region(s) but the run stopped before any case completed"
+   "byte-exactness of 44544 owned-region bytes at return, over 1 distinct address(es), on the cases that passed"
   ],
   "does_not_verify": [
    "memory writes outside the declared owned regions",
@@ -23,7 +23,7 @@
   "weaker_because": "oracle_green compares the function's memory write set byte-for-byte; transcript_green compares only the observable call transcript and return value, which is all that exists for a function with no capturable write set. A transcript_green result must never be recorded, counted or reported as oracle_green.",
   "bounded_by_corpus": {
    "cases": 24,
-   "calls": 48
+   "calls": 24
   }
  },
  "harness": {
@@ -33,8 +33,8 @@
   "min_cases": 8
  },
  "wasm": {
-  "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0020-007\\unit.wasm",
-  "sha256": "016bbe4393aa4aa794d3a6b56ea67d93d09d300ed7d69c978f37f5d91e4a1317",
+  "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0011-006\\unit.wasm",
+  "sha256": "9ecbb9ebd178b979d7c8d10bf403a886838b7add6c87f377c4f69854ccedd1b2",
   "memory_model": "exported"
  },
  "arena": {
@@ -42,32 +42,91 @@
   "sha256": "a382e7401f2192cc3ce7990e05ca1947ad744f07a23b3f9bfe5452ca3fd19632"
  },
  "capture": {
-  "file": "research/decomp/oracle-harness/corpora/auto-c0020-007.FUN_800c4468.transcript.jsonl",
-  "sha256": "8a31f34907f4d7257d83e84817f3c689656ccd8c8409a75b7faf34386a16ddb4",
+  "file": "research/decomp/oracle-harness/corpora/auto-c0011-006.FUN_80079d00.transcript.jsonl",
+  "sha256": "de4d7f22e86baf00ba872ef0d03c4b0cf337b113bcea248d7dab66871fd250f0",
   "cases": 24,
-  "calls": 48,
+  "calls": 24,
   "source": {
    "standard": "transcript_green",
    "capture_tool": "research/tools/dolphin-trace/capture_transcript.py",
    "control_strategy": "breakpoint the function entry, every out-of-unit call site in its in-unit closure, the instruction after each, and the entry LR; terminate the case at the return with a stack-pointer guard",
    "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Null video, CPU only",
    "stub": "gdb-rsp 127.0.0.1:55555",
-   "dumped_at": "2026-09-01T00:06:28.585656Z",
-   "game_state": "2v2 sav + circle+b injection",
-   "plan": "D:/GotYaForce/research/tools/dolphin-trace/plans/auto-c0020-007.FUN_800c4468.transcript.json",
+   "dumped_at": "2026-08-31T23:50:16.803975Z",
+   "game_state": "2v2 sav reloaded with a pl0900 roster in slots [0, 1, 2, 3] (roster depth 6) + B/X/A press-release edges",
+   "plan": "D:/GotYaForce/research/tools/dolphin-trace/plans/auto-c0011-006.FUN_80079d00.transcript.json",
    "in_unit_closure": [
-    "FUN_800c4468"
+    "FUN_80079d00"
    ],
-   "watch_args_bytes": 512,
+   "watch_args_bytes": 1856,
    "seed_elem_width": 4,
    "field_widths": {
-    "0xe0": 4
+    "0x5e0": 4,
+    "0x73f": 1
    },
    "field_width_conflicts": [],
-   "pad_injection": "circle+b",
-   "injected_frames": 28,
-   "scenario": "battle-2v2-circle",
-   "scenario_setup": null,
+   "pad_injection": "combat:b,x,a",
+   "injected_frames": 32,
+   "scenario": "battle-roster-0x80079410",
+   "scenario_setup": {
+    "assignment": {
+     "0": "pl0900",
+     "1": "pl0900",
+     "2": "pl0900",
+     "3": "pl0900"
+    },
+    "expect_families": [
+     "0x80079410"
+    ],
+    "constructors_hit": {
+     "0x80079410": 1
+    },
+    "constructors_fired": true,
+    "battle_live": true,
+    "settled": true,
+    "status": {
+     "battle_phase_T0": 2,
+     "battle_state_T0x45": 4,
+     "win_mask_T0x1f": 0,
+     "actor0": "0x805dbdc0",
+     "actor0_alive": 1,
+     "actor0_borg_id": "0x0900"
+    },
+    "frames_run": 180,
+    "slot_ids_before": [
+     "pl0615",
+     "pl0615",
+     "pl0615",
+     "pl0615",
+     "plffff",
+     "plffff"
+    ],
+    "slot_ids_after": [
+     "pl0900",
+     "pl0900",
+     "pl0900",
+     "pl0900",
+     "plffff",
+     "plffff"
+    ],
+    "actor_borg_ids": [
+     "0x0900",
+     "0x0900",
+     "0x0900",
+     "0x0900",
+     "0x0000",
+     "0x0000"
+    ],
+    "actors_on_target": 4,
+    "archive_slot_records": [
+     "0x806cbe60",
+     "0x806cbe80",
+     "0x806cbea0",
+     "0x806cbec0",
+     "0x00000000",
+     "0x00000000"
+    ]
+   },
    "misses": 0,
    "exclusions": [
     "transcript_green is STRICTLY WEAKER than oracle_green: it compares the observable call transcript and the return value, not the function's memory write set",
@@ -79,28 +138,13 @@
     "the claim is bounded by this corpus -- N recorded cases, never all inputs"
    ],
    "notes": [],
-   "elapsed_s": 19
+   "elapsed_s": 58.8
   }
  },
  "function": {
-  "export": "FUN_800c4468",
-  "gc_addr": "0x800c4468",
+  "export": "FUN_80079d00",
+  "gc_addr": "0x80079d00",
   "params": [
-   "i64",
-   "f64",
-   "f64",
-   "f64",
-   "f64",
-   "f64",
-   "f64",
-   "f64",
-   "i32",
-   "i32",
-   "i32",
-   "i32",
-   "i32",
-   "i32",
-   "i32",
    "i32"
   ],
   "results": [],
@@ -108,31 +152,18 @@
  },
  "declared_owned_regions": [
   {
-   "addr": "0x803bb150",
-   "size": 512
-  },
-  {
-   "addr": "0x803c0000",
-   "size": 512
-  },
-  {
-   "addr": "0x803f53a0",
-   "size": 512
+   "addr": "0x805dbdc0",
+   "size": 1856
   }
  ],
- "owned_bytes_checked": 0,
- "owned_addresses_checked": 0,
- "seeded_bytes": 1536,
- "cases_passed": 0,
- "calls_matched": 0,
+ "owned_bytes_checked": 44544,
+ "owned_addresses_checked": 1,
+ "seeded_bytes": 44544,
+ "cases_passed": 24,
+ "calls_matched": 24,
  "returns_checked": 0,
  "vacuous_cases": [],
- "divergence": {
-  "n": 0,
-  "i": 0,
-  "kind": "args",
-  "report": "arg divergence in case n=0 at i=0 zz_00076d0_@0x800076d0: expected (9253893519723317012, 0, 0, 0, 0, 1, 342, 160, 2151395664, 2151415808, 224, 661, 7, 2151633824, 4, 2154153472), got (-9194725358753304228n, 0, 0, 0, 0, 1, 342, 160, 0, -2143571356, 224, 661, 7, -2143333472, 0, -2143573980)"
- },
+ "divergence": null,
  "verdict_note": null,
- "verdict": "fail"
+ "verdict": "pass"
 }

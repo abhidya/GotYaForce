@@ -3,14 +3,14 @@
  "standard": "transcript_green",
  "unit": "auto-c0050-000",
  "fn": "zz_01a1bbc_",
- "generated_at": "2026-08-30T06:02:36.953Z",
+ "generated_at": "2026-09-01T00:17:37.191Z",
  "claim": {
   "established": true,
-  "summary": "same out-of-unit call transcript and return value as the console on 16 recorded cases",
+  "summary": "same out-of-unit call transcript and return value as the console on 24 recorded cases",
   "verifies": [
    "the set, order and arguments of every out-of-unit callee call",
    "the function's own return value",
-   "byte-exactness of 24576 owned-region bytes at return, over 1 distinct address(es), on the cases that passed"
+   "byte-exactness of 35136 owned-region bytes at return, over 1 distinct address(es), on the cases that passed"
   ],
   "does_not_verify": [
    "memory writes outside the declared owned regions",
@@ -22,18 +22,18 @@
   "weaker_than": "oracle_green",
   "weaker_because": "oracle_green compares the function's memory write set byte-for-byte; transcript_green compares only the observable call transcript and return value, which is all that exists for a function with no capturable write set. A transcript_green result must never be recorded, counted or reported as oracle_green.",
   "bounded_by_corpus": {
-   "cases": 16,
+   "cases": 24,
    "calls": 0
   }
  },
  "harness": {
   "entry": "research/decomp/oracle-harness/run-transcript.mjs",
-  "git_rev": "9ba05a8846e2adb4a7a017d83e8dcf3f6c9127d6",
-  "sha256": "31679b92c20a8f78156d71190d1f1250e38e48748d0c4a64890bcbd03c22c8dc",
+  "git_rev": "2e5c66aecd9c72f9c65649e70383df610ebf8877",
+  "sha256": "b9e29802b674c638aaa2a42db3bd9ab57bb38722fb4ae339c585d8990bc6b154",
   "min_cases": 8
  },
  "wasm": {
-  "path": "D:\\GotYaForce\\.tmp\\wt-transcript\\research\\decomp\\port-units-staging\\auto-c0050-000\\unit.wasm",
+  "path": "D:\\GotYaForce\\research\\decomp\\port-units-staging\\auto-c0050-000\\unit.wasm",
   "sha256": "1c25f2189d9e09e751542e00bbd57450fd437417c4093d182255605d48de129e",
   "memory_model": "exported"
  },
@@ -43,8 +43,8 @@
  },
  "capture": {
   "file": "research/decomp/oracle-harness/corpora/auto-c0050-000.zz_01a1bbc_.transcript.jsonl",
-  "sha256": "ba9d35a66f631bf5d4749529452aacae2131fcdde7cb9f17ad8130b9e5f16806",
-  "cases": 16,
+  "sha256": "dd2b8553551d62488c407e799f1ca1fcb843744de5a9987d85210687dc95b894",
+  "cases": 24,
   "calls": 0,
   "source": {
    "standard": "transcript_green",
@@ -52,13 +52,13 @@
    "control_strategy": "breakpoint the function entry, every out-of-unit call site in its in-unit closure, the instruction after each, and the entry LR; terminate the case at the return with a stack-pointer guard",
    "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Null video, CPU only",
    "stub": "gdb-rsp 127.0.0.1:55555",
-   "dumped_at": "2026-08-30T05:48:49.652470Z",
+   "dumped_at": "2026-08-31T23:56:27.104016Z",
    "game_state": "2v2 sav reloaded with a pl0906 roster in slots [0, 1, 2, 3] (roster depth 6) + B/X/A press-release edges",
-   "plan": "research/tools/dolphin-trace/plans/auto-c0050-000.zz_01a1bbc_.transcript.json",
+   "plan": "D:/GotYaForce/research/tools/dolphin-trace/plans/auto-c0050-000.zz_01a1bbc_.transcript.json",
    "in_unit_closure": [
     "zz_01a1bbc_"
    ],
-   "watch_args_bytes": 1536,
+   "watch_args_bytes": 1464,
    "seed_elem_width": 4,
    "field_widths": {
     "0x3e8": 2,
@@ -66,7 +66,7 @@
    },
    "field_width_conflicts": [],
    "pad_injection": "combat:b,x,a",
-   "injected_frames": 119,
+   "injected_frames": 127,
    "scenario": "battle-roster-0x801a10e8",
    "scenario_setup": {
     "assignment": {
@@ -138,7 +138,7 @@
     "the claim is bounded by this corpus -- N recorded cases, never all inputs"
    ],
    "notes": [],
-   "elapsed_s": 74.8
+   "elapsed_s": 82.3
   }
  },
  "function": {
@@ -155,15 +155,15 @@
  "declared_owned_regions": [
   {
    "addr": "0x805dbdc0",
-   "size": 1536
+   "size": 1464
   }
  ],
- "owned_bytes_checked": 24576,
+ "owned_bytes_checked": 35136,
  "owned_addresses_checked": 1,
- "seeded_bytes": 24576,
- "cases_passed": 16,
+ "seeded_bytes": 35136,
+ "cases_passed": 24,
  "calls_matched": 0,
- "returns_checked": 16,
+ "returns_checked": 24,
  "vacuous_cases": [],
  "divergence": null,
  "verdict_note": null,
