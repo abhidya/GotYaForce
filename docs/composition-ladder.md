@@ -579,3 +579,218 @@ more rebuilds behind it (`auto-c0011-012`, then `auto-c0011-011`), and the
 window may well surface another placeholder of the `zz_007c844_` shape after
 that. Rung 2 is now a rebuild-scheduling problem rather than an owner decision,
 which it was not before.
+
+## The frontier lane (2026-09-02) — correction X1, implemented
+
+`docs/one-to-one-completion-spec.md` §5 X1 / §6 killed the recency-plus-doubling
+model: the ladder selects windows with `select_recent_green_units` (the last N
+eligible units) and grows by doubling N, and neither rule has any relation to
+`run_main_game_loop`. Design H2 gate (a) makes the ROM's own loop a hard
+prerequisite of control inversion, so no number of doublings reaches the gate.
+§6 replaced it with a **frontier model**: ring 0 is the spine *alone*, everything
+it calls is bridged, the frontier is a **compile ranking** rather than a linking
+ladder, and growth is measured by **bridged calls per frame falling**.
+
+That is now implemented in `scripts/spine_frontier.py`, recorded in
+`research/decomp/data/spine-frontier.json`, and folded into this ladder's ledger
+by `scripts/composition_ladder.py frontier` as schema `composition-ladder-2`.
+
+### The metric, and where each number comes from
+
+A **frame** is one iteration of the spine's `do { ... } while(true)` body
+(`research/decomp/ghidra-export/chunk_0006.c:5790-5833`).
+
+    B(L) = SUM over edges (f -> g), f in L, g not in L, of rate(f -> g)
+
+`B` is exactly what `packages/rom-runtime/src/ledger.ts` counts:
+`BridgeLedger.recordCall` fires once per worker-to-main crossing, and
+`LedgerFrameSnapshot.bridgedCallCount` *is* `B` for that frame. The tool predicts
+that number statically so the compile queue can be ordered before the module
+exists; `--ledger <snapshot>` folds a real `window.__gf.bridgeLedger()` payload
+in on top, and live measurement always wins.
+
+Edge rates come from two places, and rows never average them together:
+
+- **measured** — the BOUNDARY_GREEN capture
+  `research/decomp/oracle-harness/corpora/spine-run-main-game-loop.boundary.jsonl`
+  (274 calls over 16 loop iterations, verdict `pass`,
+  `research/decomp/data/oracle-results/spine-run-main-game-loop.boundary.json`).
+  It resolves every edge out of the spine: **17 loop callees at exactly 1.0/frame
+  (16/16 iterations each), and 2 prologue callees at 0.0/frame** — `zz_002a3e4_`
+  and `zz_002a638_` appear only in iteration 0, so they are one-time init, not
+  per-frame. **`B(ring 0) = 17.0`, measured, not the 19 a naive static call-site
+  count reports.**
+- **static** — call-site counts scanned from the chunk corpus over the line
+  ranges the registry pins, with `freq` propagated multiplicatively along
+  depth-increasing edges (cap depth 6). The assumption is that every call site in
+  a body executes once per invocation: it over-counts guarded calls and
+  under-counts calls in inner loops. Every deeper-than-ring-1 number is this.
+
+The call graph is scanned from the chunks, **not** from the registry's
+`external_callees` lists. Those lists are distinct-callee sets with no call-site
+counts, and they drop edges to renamed functions — the spine's own call to
+`dispatch_global_menu_mode` is missing from its `external_callees`, and it is one
+of the 17. The scan recovers it and cross-checks itself against the registry:
+66 edges the registry misses, 2 the scan misses (`FUN_800bda78 -> zz_0104b38_`,
+`zz_0104b38_ -> zz_00091e4_`, both non-textual call forms). SDK `gnt4-*` callees
+are satisfied by the shim seed at link time, never bridged, and are not nodes.
+
+### Ring 0 is `research/decomp/spine-boundary/`, not `auto-c0006-013`
+
+§6 left this open as owner item 5. It is decided here, on measurement:
+
+1. **The queue unit bundles TWO of the spine's own loop callees, not one.**
+   `research/tools/dolphin-trace/README.md:531-544` says one; the registry says
+   `auto-c0006-013` contains `zz_00527d8_`, `zz_0052838_` **and** `zz_00528b4_`,
+   and the capture shows both at 16/16 iterations. Linking the queue unit makes
+   both calls internal, so the ledger would report **15** bridged calls per frame
+   where the ROM makes **17**. That corrupts the shrink metric's own denominator
+   at rung 0 and makes the BOUNDARY_GREEN result unreproducible against it.
+2. **The queue unit does not exist.** `auto-c0006-013` is `status: pending`,
+   `attempts: 0` — never compiled. With the model server down there is no way to
+   produce it, so it is not a candidate artifact today at all.
+3. **The forfeiture §6 feared does not actually occur.** The concern was that
+   the preflight build "forfeits the regenerate-from-the-queue property the
+   corpus-correction loop depends on." That loop's stated invariant is
+   *"unit.c is regenerated output, the chunk is the source of truth"*
+   (`research/decomp/corpus-correction-loop.md`). `spine-boundary/unit.c` is
+   `#include "gnt4_shim.h"` plus a byte-identical copy of
+   `chunk_0006.c:5790-5833` — verified — so the chunk remains its source of
+   truth and a corpus correction still propagates. What is forfeited is only the
+   *driver's automated rebuild through the queue partition*, which is a
+   scheduling property, not a provenance one.
+
+Ring 0's artifact is `research/decomp/spine-boundary/unit.wasm`, sha256
+`b14efa83358750e1e26c2dfaf1c394698ca312db1c52208ced1d3be4d50400cb` —
+byte-identical to the wasm the BOUNDARY_GREEN verdict was issued against.
+
+### Measured: the recency ladder eliminates zero bridged calls
+
+Recorded as `frontier` blocks on rungs 0 and 1 in the ledger:
+
+| rung | N | units | on the spine frontier | bridged calls/frame eliminated |
+|---|---|---|---|---|
+| 0 | 5 | `auto-c0054-000..003`, `auto-c0053-013` | none | **0.0** |
+| 1 | 10 | + `auto-c0019-016`, `auto-c0053-003/005/017/018` | none | **0.0** |
+
+And the stronger version, measured against the gate's own eligibility helper run
+in scratch (canonical state sha256 `7441ccc6…`): **of the 82 gate-eligible units,
+zero intersect the 93 units reachable from the spine.** Not "few" — zero.
+Doubling N over that population cannot ever reach the loop, which is X1's claim,
+now a measurement rather than an argument.
+
+### `B` is not maximal at ring 0 — the shrink rule needs a correction
+
+§6 states that ring 0 "starts the S1 shrink metric at its maximum." **That is
+false.** Linking a loop callee removes one crossing and publishes that callee's
+own outbound calls in its place. Linking all 13 units that own the spine's 19
+direct callees takes `B` from **17.0 to 46.0**. `B` reaches 0 iff the per-frame
+graph is closed, so *"bridged calls per frame falling"* is a **terminal**
+objective, not a monotone greedy one.
+
+The per-rung rule is therefore stated on the marginal quantities:
+
+    eliminated(U) = SUM_{f in L, g in U} rate(f -> g)
+    exposed(U)    = SUM_{g in U, h not in L|U} rate(g -> h)
+    net(U)        = eliminated(U) - exposed(U)
+
+A frontier rung is scored on `net`, and the ladder must accept rungs that raise
+`B` when they raise it by less than the static bound predicts. Greedy-by-`net`
+from ring 0 gets four steps before every remaining candidate is a net loss:
+`auto-c0000-015` then `auto-c0003-006` then `auto-c0012-002` then
+`auto-c0013-008`, taking `B` from 17 to 13.
+
+**E1 is unchanged.** The conflict budget keeps operating on whatever unit set a
+rung actually links, in either lane, and every `composition-ladder-1` field keeps
+its v1 value — no v1 number was recomputed.
+
+### The compile queue (top 20)
+
+Ordered by `(min_depth, -inbound)`: a deep unit's inbound calls do not stop
+crossing until its callers are linked, so raw hotness is not "the order that
+shrinks the bridged-call count fastest". Full table in
+`research/decomp/data/spine-frontier.json` (`compile_queue`, 61 ranked units).
+
+| # | unit | depth | in/frame | of which measured | out/frame | net | basis | status |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `auto-c0025-004` | 1 | 7 | 1 | 14 | -7 | mixed | red_retryable |
+| 2 | `auto-c0013-009` | 1 | 3 | 2 | 4 | -1 | mixed | pending |
+| 3 | `auto-c0026-001` | 1 | 3 | 1 | 3 | 0 | mixed | pending |
+| 4 | `auto-c0003-011` | 1 | 2 | 2 | 2 | 0 | measured | pending |
+| 5 | `auto-c0012-002` | 1 | 2 | 2 | 1 | 1 | measured | pending |
+| 6 | `auto-c0013-008` | 1 | 2 | 1 | 0 | 2 | mixed | pending |
+| 7 | `auto-c0000-015` | 1 | 1 | 1 | 0 | 1 | measured | pending |
+| 8 | `auto-c0002-003` | 1 | 1 | 1 | 11 | -10 | measured | pending |
+| 9 | `auto-c0003-006` | 1 | 1 | 1 | 0 | 1 | measured | pending |
+| 10 | `auto-c0013-010` | 1 | 1 | 1 | 1 | 0 | measured | pending |
+| 11 | `auto-c0013-013` | 1 | 1 | 1 | 2 | -1 | measured | pending |
+| 12 | `auto-c0030-009` | 1 | 1 | 1 | 9 | -8 | measured | pending |
+| 13 | `auto-c0025-003` | 2 | 13 | 0 | 7 | 6 | static | red_retryable |
+| 14 | `auto-c0006-011` | 2 | 12 | 0 | 10 | 2 | static | pending |
+| 15 | `auto-c0067-000` | 2 | 6 | 0 | 22 | -16 | static | pending |
+| 16 | `auto-c0003-007` | 2 | 4 | 0 | 0 | 4 | static | pending |
+| 17 | `auto-c0030-010` | 2 | 4 | 0 | 0 | 4 | static | pending |
+| 18 | `auto-c0013-006` | 2 | 3 | 0 | 2 | 1 | static | pending |
+| 19 | `auto-c0025-014` | 2 | 2 | 0 | 2 | 0 | static | pending |
+| 20 | `auto-c0026-004` | 2 | 2 | 0 | 2 | 0 | static | pending |
+
+Reading the table:
+
+- **Rows 1–12 are ring 1** — the 12 units that own the spine's 17 measured loop
+  callees. Their `of which measured` column is elimination straight out of the
+  capture; only their `out/frame` (exposure) is estimated. `auto-c0006-013` is a
+  13th ring-1 owner but is excluded from the queue: its inbound edge is the
+  spine's call to functions it already contains, so linking it eliminates nothing
+  ring 0 does not already have.
+- **`in/frame` above the measured column at depth 1** (rows 1, 2, 3, 6) is static
+  inbound from *deeper* functions in the same unit. `auto-c0025-004` tops the
+  queue at 7/frame, but only 1.0 of that is measured; the rest is its other
+  functions' estimated depth-3 inbound.
+- **Rows 13+ are static throughout.** They are a potential, not a saving: nothing
+  is eliminated until their callers are linked.
+- **`status` is the finding that matters**: every row is `pending`,
+  `red_retryable`, or `structural_ineligible`. **Not one frontier unit has ever
+  been compiled.** The ranking is a compile queue and nothing else — no rung
+  above F0 can be linked until the driver produces these units, which needs the
+  model server that is currently down.
+
+### ABI: the ring-1 seam is clean; the registry is stale
+
+Checked directly against the corpus — every one of the spine's 19 call sites
+passes zero arguments, and every callee's chunk definition takes `void`:
+`zz_008dbe0_`, `zz_000a004_`, `zz_0018b10_` return `int` (the first's result is
+the `DAT_80436190` store the boundary result verifies as the spine's one owned
+write), the other 16 return `void`. **Zero arity mismatches**, so linking any
+ring-1 unit onto ring 0 exposes no ABI conflict at the seam and nothing needed
+substituting.
+
+One stale-state blocker, recorded rather than worked around:
+`research/decomp/data/oracle-registry.json` was regenerated `2026-08-29`
+(`647c4fe0`) and the spine's corpus correction landed `2026-08-30` (`1f3cd77e`),
+so the registry still records `zz_00527d8_` with the Ghidra-invented
+**16-parameter** signature and `has_pointer_args: true`, contradicting the
+corrected chunk. Nothing in the frontier tool reads registry signatures — it
+takes line ranges, addresses and unit membership only, and reads every signature
+from the chunk, which is the source of truth. But any consumer that *does* read
+registry signatures (`build_unit_priority.py`, the spec emitters) is reading a
+signature the ROM disproves. **Symbol: `zz_00527d8_` @ `0x800527d8`; unit:
+`auto-c0006-013`. Fix: regenerate the registry.**
+
+### Running it
+
+    python scripts/spine_frontier.py rank --repo . \
+        --state <scratch>/wasm-units-state.json \
+        [--ledger <bridgeLedger snapshot.json>] \
+        --out research/decomp/data/spine-frontier.json
+
+    python scripts/spine_frontier.py metric --repo . --units a,b,c
+
+    python scripts/composition_ladder.py select --scratch <scratch> > <scratch>/select.json
+    python scripts/composition_ladder.py frontier --repo . \
+        --ledger research/decomp/data/composition-ladder.json \
+        --frontier research/decomp/data/spine-frontier.json \
+        --eligible <scratch>/select.json \
+        --out research/decomp/data/composition-ladder.json
+
+Neither tool compiles, links, takes the driver lock, or writes into the live
+pipeline tree; `spine_frontier.py` needs no toolchain at all.

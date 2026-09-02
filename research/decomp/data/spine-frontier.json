@@ -1,0 +1,4617 @@
+{
+  "schema": "spine-frontier-1",
+  "design": "docs/one-to-one-completion-spec.md section 6, correction X1: ring 0 is the spine alone, everything it calls is bridged; the frontier is a COMPILE RANKING, not an N-doubling ladder; growth is bridged-calls-per-frame falling, not unit count rising",
+  "generated_from": {
+    "registry": "research/decomp/data/oracle-registry.json",
+    "chunks": "research/decomp/ghidra-export/chunk_*.c (line ranges pinned by the registry)",
+    "spine_capture": "research/decomp/oracle-harness/corpora/spine-run-main-game-loop.boundary.jsonl",
+    "spine_result": "research/decomp/data/oracle-results/spine-run-main-game-loop.boundary.json",
+    "live_ledger": null,
+    "unit_state": "C:/Users/manny/AppData/Local/Temp/claude/D--GotYaForce/255e1a69-b80d-4f87-a718-a9e991ad8481/scratchpad/frontier-scratch/wasm-units-state.json"
+  },
+  "frame_definition": "one iteration of the spine's do{...}while(true) body at research/decomp/ghidra-export/chunk_0006.c:5790-5833; the capture's 16 iterations are 16 frames",
+  "root": {
+    "function": "zz_00527d8_",
+    "gc_addr": "0x800527d8",
+    "queue_unit": "auto-c0006-013",
+    "queue_unit_status": {
+      "status": "pending",
+      "tier": null,
+      "attempts": 0,
+      "linkable_today": false
+    },
+    "ring0_module": "research/decomp/spine-boundary/",
+    "ring0_module_verdict": "pass",
+    "loop_callees_measured": [
+      "dispatch_global_menu_mode",
+      "zz_000a004_",
+      "zz_0018b10_",
+      "zz_0027c34_",
+      "zz_002a4b0_",
+      "zz_002a4d4_",
+      "zz_0052838_",
+      "zz_00528b4_",
+      "zz_0080278_",
+      "zz_00802a8_",
+      "zz_008c088_",
+      "zz_008c2dc_",
+      "zz_008c344_",
+      "zz_008dbe0_",
+      "zz_00e9994_",
+      "zz_00efda8_",
+      "zz_010d450_"
+    ],
+    "loop_callees_bundled_into_queue_unit": [
+      "zz_0052838_",
+      "zz_00528b4_"
+    ],
+    "ring0_decision": "ring 0 is research/decomp/spine-boundary/ (the single-function module), NOT the queue unit auto-c0006-013.  auto-c0006-013 owns 2 of the spine's own loop callees (zz_0052838_, zz_00528b4_), so linking it makes those calls INTERNAL: the ledger would read 15 bridged calls per frame instead of the measured 17, and boundary_green could not be reproduced against it.  The queue unit is also status=pending -- never compiled -- so it is not an available artifact either."
+  },
+  "measurement": {
+    "spine_capture": {
+      "calls": {
+        "call": 274
+      },
+      "iterations": 16,
+      "verdict": "pass",
+      "calls_matched": 274,
+      "corpus_sha256": "db3b5279a4767963ef39f2293a4e4b54e9f00aa4afb60fcf4092ac43863c956f"
+    },
+    "live_ledger_functions": [],
+    "measured_edges": [
+      "dispatch_global_menu_mode",
+      "zz_000a004_",
+      "zz_0018b10_",
+      "zz_0027c34_",
+      "zz_002a3e4_",
+      "zz_002a4b0_",
+      "zz_002a4d4_",
+      "zz_002a638_",
+      "zz_0052838_",
+      "zz_00528b4_",
+      "zz_0080278_",
+      "zz_00802a8_",
+      "zz_008c088_",
+      "zz_008c2dc_",
+      "zz_008c344_",
+      "zz_008dbe0_",
+      "zz_00e9994_",
+      "zz_00efda8_",
+      "zz_010d450_"
+    ]
+  },
+  "graph_cross_check": {
+    "registry_only_edges": 2,
+    "registry_only_examples": [
+      "FUN_800bda78 -> zz_0104b38_",
+      "zz_0104b38_ -> zz_00091e4_"
+    ],
+    "scan_only_edges": 66,
+    "note": "scan_only edges are overwhelmingly calls to RENAMED functions, which the registry's external_callees never lists; registry_only edges are call sites the text scan could not see (function-pointer or macro forms)",
+    "unresolved_call_identifiers_distinct": 411,
+    "unresolved_top": [
+      [
+        "if",
+        30660
+      ],
+      [
+        "CONCAT44",
+        1983
+      ],
+      [
+        "while",
+        1905
+      ],
+      [
+        "gnt4_PSQUATScale_bl",
+        956
+      ],
+      [
+        "for",
+        860
+      ],
+      [
+        "gnt4_PSVECSubtract_bl",
+        828
+      ],
+      [
+        "gnt4_PSVECAdd_bl",
+        733
+      ],
+      [
+        "gnt4_PSMTXMultVec_bl",
+        378
+      ],
+      [
+        "gnt4_PSMTXConcat_bl",
+        342
+      ],
+      [
+        "gnt4_PSVECMag_bl",
+        336
+      ],
+      [
+        "gnt4_memset",
+        327
+      ],
+      [
+        "gnt4_PSVECNormalize_bl",
+        321
+      ]
+    ]
+  },
+  "baseline_bridged_calls_per_frame": 17.0,
+  "baseline_basis": "measured",
+  "monotonicity": {
+    "bridged_calls_per_frame_ring0": 17.0,
+    "bridged_calls_per_frame_ring0_plus_all_ring1_units": 46.0,
+    "ring1_units": [
+      "auto-c0012-002",
+      "auto-c0003-011",
+      "auto-c0013-009",
+      "auto-c0006-013",
+      "auto-c0000-015",
+      "auto-c0003-006",
+      "auto-c0013-008",
+      "auto-c0013-010",
+      "auto-c0013-013",
+      "auto-c0026-001",
+      "auto-c0030-009",
+      "auto-c0002-003",
+      "auto-c0025-004"
+    ],
+    "finding": "B is NOT maximal at ring 0.  Linking the units that own the spine's 17 loop callees replaces 17 crossings with those callees' own outbound calls, so B rises before it falls.  'bridged calls per frame falling' is a TERMINAL objective (B -> 0 iff the per-frame graph is closed), not a monotone greedy one; a rung must therefore be scored on NET and the ladder must accept rungs that raise B when they raise it by less than the static bound predicts."
+  },
+  "estimator": {
+    "edge_rate_rule": "rate(f->g) = MEASURED per-frame count where a capture covers the edge, else freq(f) * static call sites (f->g)",
+    "freq_rule": "freq(spine) = 1/frame by the frame definition; the spine's 19 direct callees are MEASURED (17 at 1.0/frame; 2 prologue calls at 0.0/frame -- they appear only in iteration 0 of the capture); deeper freq is STATIC, propagated along depth-increasing edges only, capped at depth 6",
+    "static_assumption": "every call site in a body executes once per invocation: OVER-counts guarded calls, UNDER-counts calls in inner loops",
+    "sdk_calls": "gnt4-* SDK callees (the registry's 996 sdk_prefix exclusions) are satisfied by the shim seed at link time, never bridged; they are not graph nodes and never count toward B"
+  },
+  "availability_summary": {
+    "reachable_units": 93,
+    "reachable_unit_names": [
+      "auto-c0000-001",
+      "auto-c0000-002",
+      "auto-c0000-015",
+      "auto-c0002-003",
+      "auto-c0003-006",
+      "auto-c0003-007",
+      "auto-c0003-011",
+      "auto-c0003-012",
+      "auto-c0003-014",
+      "auto-c0006-010",
+      "auto-c0006-011",
+      "auto-c0006-012",
+      "auto-c0006-013",
+      "auto-c0012-002",
+      "auto-c0012-017",
+      "auto-c0013-006",
+      "auto-c0013-008",
+      "auto-c0013-009",
+      "auto-c0013-010",
+      "auto-c0013-013",
+      "auto-c0014-018",
+      "auto-c0025-003",
+      "auto-c0025-004",
+      "auto-c0025-014",
+      "auto-c0025-015",
+      "auto-c0025-016",
+      "auto-c0025-017",
+      "auto-c0025-018",
+      "auto-c0026-000",
+      "auto-c0026-001",
+      "auto-c0026-004",
+      "auto-c0026-005",
+      "auto-c0026-006",
+      "auto-c0030-009",
+      "auto-c0030-010",
+      "auto-c0030-011",
+      "auto-c0053-008",
+      "auto-c0062-008",
+      "auto-c0063-000",
+      "auto-c0063-001",
+      "auto-c0063-002",
+      "auto-c0063-003",
+      "auto-c0063-004",
+      "auto-c0063-005",
+      "auto-c0064-000",
+      "auto-c0064-001",
+      "auto-c0065-000",
+      "auto-c0065-001",
+      "auto-c0065-002",
+      "auto-c0065-003",
+      "auto-c0065-004",
+      "auto-c0065-005",
+      "auto-c0065-007",
+      "auto-c0065-008",
+      "auto-c0065-009",
+      "auto-c0065-010",
+      "auto-c0065-012",
+      "auto-c0065-013",
+      "auto-c0065-014",
+      "auto-c0065-015",
+      "auto-c0066-002",
+      "auto-c0066-006",
+      "auto-c0066-007",
+      "auto-c0066-011",
+      "auto-c0066-012",
+      "auto-c0067-000",
+      "auto-c0068-012",
+      "auto-c0069-001",
+      "auto-c0069-003",
+      "auto-c0070-001",
+      "auto-c0071-001",
+      "auto-c0073-012",
+      "auto-c0073-013",
+      "auto-c0073-014",
+      "auto-c0073-018",
+      "auto-c0074-000",
+      "auto-c0074-001",
+      "auto-c0074-003",
+      "auto-c0074-004",
+      "auto-c0074-008",
+      "auto-c0074-009",
+      "auto-c0074-010",
+      "auto-c0074-013",
+      "auto-c0074-015",
+      "auto-c0074-016",
+      "auto-c0074-017",
+      "auto-c0075-000",
+      "auto-c0075-006",
+      "auto-c0075-007",
+      "auto-c0075-008",
+      "auto-c0075-009",
+      "auto-c0075-011",
+      "knockback-core"
+    ],
+    "reachable_depth_cap": 6,
+    "ranked_units": 61,
+    "linkable_today": [],
+    "note": "linkable_today means the unit has a green artifact in a tier the assembly gate links (oracle_green or compile_only).  An empty list means the whole frontier is uncompiled and the ranking is a COMPILE queue only -- no rung above ring 0 can be linked until the driver produces these units."
+  },
+  "compile_queue": [
+    {
+      "position": 1,
+      "unit": "auto-c0025-004",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 7.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 6.0,
+      "outbound_calls_per_frame": 14.0,
+      "net_calls_per_frame": -7.0,
+      "elimination_basis": "mixed",
+      "availability": {
+        "status": "red_retryable",
+        "tier": null,
+        "attempts": 1,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 2,
+      "unit": "auto-c0013-009",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 2.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 4.0,
+      "net_calls_per_frame": -1.0,
+      "elimination_basis": "mixed",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 3,
+      "unit": "auto-c0026-001",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 3.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "mixed",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 4,
+      "unit": "auto-c0003-011",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 2.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "measured",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 5,
+      "unit": "auto-c0012-002",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 2.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "measured",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 6,
+      "unit": "auto-c0013-008",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "mixed",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 7,
+      "unit": "auto-c0000-015",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "measured",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 8,
+      "unit": "auto-c0002-003",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 11.0,
+      "net_calls_per_frame": -10.0,
+      "elimination_basis": "measured",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 9,
+      "unit": "auto-c0003-006",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "measured",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 10,
+      "unit": "auto-c0013-010",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "measured",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 11,
+      "unit": "auto-c0013-013",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": -1.0,
+      "elimination_basis": "measured",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 12,
+      "unit": "auto-c0030-009",
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 9.0,
+      "net_calls_per_frame": -8.0,
+      "elimination_basis": "measured",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 13,
+      "unit": "auto-c0025-003",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 13.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 13.0,
+      "outbound_calls_per_frame": 7.0,
+      "net_calls_per_frame": 6.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "red_retryable",
+        "tier": null,
+        "attempts": 2,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 14,
+      "unit": "auto-c0006-011",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 12.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 12.0,
+      "outbound_calls_per_frame": 10.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 15,
+      "unit": "auto-c0067-000",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 6.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 6.0,
+      "outbound_calls_per_frame": 22.0,
+      "net_calls_per_frame": -16.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 16,
+      "unit": "auto-c0003-007",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 4.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 4.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 4.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 17,
+      "unit": "auto-c0030-010",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 4.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 4.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 4.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 18,
+      "unit": "auto-c0013-006",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 3.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 19,
+      "unit": "auto-c0025-014",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 20,
+      "unit": "auto-c0026-004",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 21,
+      "unit": "auto-c0053-008",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "structural_ineligible",
+        "tier": null,
+        "attempts": 1,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 22,
+      "unit": "auto-c0065-000",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 23,
+      "unit": "auto-c0000-001",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 24,
+      "unit": "auto-c0000-002",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 25,
+      "unit": "auto-c0006-010",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 26,
+      "unit": "auto-c0014-018",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 27,
+      "unit": "auto-c0064-000",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 28,
+      "unit": "auto-c0066-002",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 29,
+      "unit": "auto-c0066-007",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 3.0,
+      "net_calls_per_frame": -2.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 30,
+      "unit": "auto-c0071-001",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 31,
+      "unit": "auto-c0074-009",
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 32,
+      "unit": "auto-c0066-011",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 16.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 16.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 16.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 33,
+      "unit": "auto-c0063-002",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 8.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 8.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 8.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 34,
+      "unit": "auto-c0025-015",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 7.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 7.0,
+      "outbound_calls_per_frame": 18.0,
+      "net_calls_per_frame": -11.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 35,
+      "unit": "auto-c0065-010",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 4.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 4.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 4.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 36,
+      "unit": "auto-c0063-003",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 3.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 37,
+      "unit": "auto-c0026-005",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 14.0,
+      "net_calls_per_frame": -12.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 38,
+      "unit": "auto-c0065-013",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 39,
+      "unit": "knockback-core",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "green",
+        "tier": null,
+        "attempts": 1,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 40,
+      "unit": "auto-c0063-000",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 41,
+      "unit": "auto-c0063-001",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 42,
+      "unit": "auto-c0066-006",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 3.0,
+      "net_calls_per_frame": -2.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 43,
+      "unit": "auto-c0074-004",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 44,
+      "unit": "auto-c0075-007",
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 45,
+      "unit": "auto-c0006-012",
+      "min_depth": 4,
+      "inbound_calls_per_frame": 10.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 10.0,
+      "outbound_calls_per_frame": 16.0,
+      "net_calls_per_frame": -6.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 46,
+      "unit": "auto-c0026-000",
+      "min_depth": 4,
+      "inbound_calls_per_frame": 10.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 10.0,
+      "outbound_calls_per_frame": 8.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 47,
+      "unit": "auto-c0068-012",
+      "min_depth": 4,
+      "inbound_calls_per_frame": 6.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 6.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 6.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 48,
+      "unit": "auto-c0025-018",
+      "min_depth": 4,
+      "inbound_calls_per_frame": 4.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 4.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 3.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 49,
+      "unit": "auto-c0063-004",
+      "min_depth": 4,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 3.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 3.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 50,
+      "unit": "auto-c0073-014",
+      "min_depth": 4,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 51,
+      "unit": "auto-c0025-017",
+      "min_depth": 4,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 52,
+      "unit": "auto-c0074-003",
+      "min_depth": 4,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": -1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 53,
+      "unit": "auto-c0065-009",
+      "min_depth": 5,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 3.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 3.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 54,
+      "unit": "auto-c0065-005",
+      "min_depth": 5,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 55,
+      "unit": "auto-c0069-003",
+      "min_depth": 5,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 56,
+      "unit": "auto-c0074-010",
+      "min_depth": 5,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 57,
+      "unit": "auto-c0075-008",
+      "min_depth": 5,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 58,
+      "unit": "auto-c0066-012",
+      "min_depth": 6,
+      "inbound_calls_per_frame": 6.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 6.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 6.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 59,
+      "unit": "auto-c0025-016",
+      "min_depth": 6,
+      "inbound_calls_per_frame": 5.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 5.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 5.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 60,
+      "unit": "auto-c0069-001",
+      "min_depth": 6,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "position": 61,
+      "unit": "auto-c0075-011",
+      "min_depth": 6,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    }
+  ],
+  "ranking_frontier_hotness": [
+    {
+      "unit": "auto-c0066-011",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 4,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 16.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 16.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 16.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_022aebc_",
+        "zz_022b7a0_",
+        "zz_022b9f0_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0225b00_",
+          "addr": "0x80225b00",
+          "depth": 6,
+          "freq_per_frame": 6.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_022611c_",
+          "addr": "0x8022611c",
+          "depth": 6,
+          "freq_per_frame": 6.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_0225f68_",
+          "addr": "0x80225f68",
+          "depth": 6,
+          "freq_per_frame": 4.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0224094_",
+          "addr": "0x80224094",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 1
+    },
+    {
+      "unit": "auto-c0025-003",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 13.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 13.0,
+      "outbound_calls_per_frame": 7.0,
+      "net_calls_per_frame": 6.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "FUN_800e9654",
+        "zz_00e9994_",
+        "zz_00e99c8_",
+        "zz_00e9ac0_",
+        "zz_00e9b08_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00e91d4_",
+          "addr": "0x800e91d4",
+          "depth": 3,
+          "freq_per_frame": 6.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00e9340_",
+          "addr": "0x800e9340",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00e95a4_",
+          "addr": "0x800e95a4",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "red_retryable",
+        "tier": null,
+        "attempts": 2,
+        "linkable_today": false
+      },
+      "rank": 2
+    },
+    {
+      "unit": "auto-c0006-011",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 5,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 12.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 12.0,
+      "outbound_calls_per_frame": 10.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0050d78_",
+        "zz_0050f80_",
+        "zz_005116c_",
+        "zz_00514cc_",
+        "zz_0051658_",
+        "zz_00528b4_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0050a00_",
+          "addr": "0x80050a00",
+          "depth": 5,
+          "freq_per_frame": 14.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0050800_",
+          "addr": "0x80050800",
+          "depth": 2,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_0050988_",
+          "addr": "0x80050988",
+          "depth": 3,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 7
+        },
+        {
+          "name": "zz_0050a50_",
+          "addr": "0x80050a50",
+          "depth": 4,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_0050bf4_",
+          "addr": "0x80050bf4",
+          "depth": 4,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 3
+    },
+    {
+      "unit": "auto-c0006-012",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 5,
+      "min_depth": 4,
+      "inbound_calls_per_frame": 10.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 10.0,
+      "outbound_calls_per_frame": 16.0,
+      "net_calls_per_frame": -6.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0050988_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0050d78_",
+          "addr": "0x80050d78",
+          "depth": 4,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 4
+        },
+        {
+          "name": "zz_0050f80_",
+          "addr": "0x80050f80",
+          "depth": 4,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_005116c_",
+          "addr": "0x8005116c",
+          "depth": 4,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00514cc_",
+          "addr": "0x800514cc",
+          "depth": 4,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_0051658_",
+          "addr": "0x80051658",
+          "depth": 4,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 4
+    },
+    {
+      "unit": "auto-c0026-000",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 4,
+      "inbound_calls_per_frame": 10.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 10.0,
+      "outbound_calls_per_frame": 8.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00eda40_",
+        "zz_00ef1a8_",
+        "zz_00f0f14_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00efac8_",
+          "addr": "0x800efac8",
+          "depth": 6,
+          "freq_per_frame": 8.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00ef1e4_",
+          "addr": "0x800ef1e4",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ef28c_",
+          "addr": "0x800ef28c",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 5
+    },
+    {
+      "unit": "auto-c0063-002",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 8.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 8.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 8.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00efac8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0205c4c_",
+          "addr": "0x80205c4c",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0205c78_",
+          "addr": "0x80205c78",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 6
+    },
+    {
+      "unit": "auto-c0025-004",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 7,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 7.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 6.0,
+      "outbound_calls_per_frame": 14.0,
+      "net_calls_per_frame": -7.0,
+      "elimination_basis": "mixed",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0018b10_",
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00e9b08_",
+          "addr": "0x800e9b08",
+          "depth": 2,
+          "freq_per_frame": 6.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "FUN_800e9654",
+          "addr": "0x800e9654",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 3
+        },
+        {
+          "name": "zz_00e9784_",
+          "addr": "0x800e9784",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00e9994_",
+          "addr": "0x800e9994",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 3
+        },
+        {
+          "name": "zz_00e99c8_",
+          "addr": "0x800e99c8",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 3
+        },
+        {
+          "name": "zz_00e9ac0_",
+          "addr": "0x800e9ac0",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_00e9914_",
+          "addr": "0x800e9914",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "red_retryable",
+        "tier": null,
+        "attempts": 1,
+        "linkable_today": false
+      },
+      "rank": 7
+    },
+    {
+      "unit": "auto-c0025-015",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 6,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 7.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 7.0,
+      "outbound_calls_per_frame": 18.0,
+      "net_calls_per_frame": -11.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00ed058_",
+        "zz_00f1238_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00ed684_",
+          "addr": "0x800ed684",
+          "depth": 5,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ed6f4_",
+          "addr": "0x800ed6f4",
+          "depth": 5,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ed764_",
+          "addr": "0x800ed764",
+          "depth": 5,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00eda40_",
+          "addr": "0x800eda40",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 5
+        },
+        {
+          "name": "zz_00edc60_",
+          "addr": "0x800edc60",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 4
+        },
+        {
+          "name": "zz_00ede6c_",
+          "addr": "0x800ede6c",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 11
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 8
+    },
+    {
+      "unit": "auto-c0067-000",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 6,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 6.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 6.0,
+      "outbound_calls_per_frame": 22.0,
+      "net_calls_per_frame": -16.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0050d78_"
+      ],
+      "functions": [
+        {
+          "name": "zz_022b588_",
+          "addr": "0x8022b588",
+          "depth": 6,
+          "freq_per_frame": 12.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_022ab08_",
+          "addr": "0x8022ab08",
+          "depth": 6,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 4
+        },
+        {
+          "name": "zz_022aebc_",
+          "addr": "0x8022aebc",
+          "depth": 5,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 3
+        },
+        {
+          "name": "zz_022b7a0_",
+          "addr": "0x8022b7a0",
+          "depth": 5,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 11
+        },
+        {
+          "name": "zz_022b9f0_",
+          "addr": "0x8022b9f0",
+          "depth": 5,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 4
+        },
+        {
+          "name": "zz_02278c8_",
+          "addr": "0x802278c8",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 9
+    },
+    {
+      "unit": "auto-c0068-012",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 4,
+      "inbound_calls_per_frame": 6.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 6.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 6.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00e91d4_"
+      ],
+      "functions": [
+        {
+          "name": "__va_arg",
+          "addr": "0x80232870",
+          "depth": 4,
+          "freq_per_frame": 6.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 10
+    },
+    {
+      "unit": "auto-c0066-012",
+      "functions_total": 3,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 6,
+      "inbound_calls_per_frame": 6.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 6.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 6.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_022aebc_",
+        "zz_022b7a0_",
+        "zz_022b9f0_"
+      ],
+      "functions": [
+        {
+          "name": "zz_02269dc_",
+          "addr": "0x802269dc",
+          "depth": 6,
+          "freq_per_frame": 6.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 11
+    },
+    {
+      "unit": "auto-c0025-016",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 4,
+      "min_depth": 6,
+      "inbound_calls_per_frame": 5.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 5.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 5.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00ede6c_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00ee11c_",
+          "addr": "0x800ee11c",
+          "depth": 6,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ee19c_",
+          "addr": "0x800ee19c",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ee614_",
+          "addr": "0x800ee614",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ee6a4_",
+          "addr": "0x800ee6a4",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 12
+    },
+    {
+      "unit": "auto-c0003-007",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 4,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 4.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 4.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 4.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_008c2dc_",
+        "zz_008c344_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0027e60_",
+          "addr": "0x80027e60",
+          "depth": 2,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_0027fc4_",
+          "addr": "0x80027fc4",
+          "depth": 2,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_0028094_",
+          "addr": "0x80028094",
+          "depth": 3,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0028154_",
+          "addr": "0x80028154",
+          "depth": 3,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 13
+    },
+    {
+      "unit": "auto-c0030-010",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 4.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 4.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 4.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_010d450_"
+      ],
+      "functions": [
+        {
+          "name": "zz_010d97c_",
+          "addr": "0x8010d97c",
+          "depth": 2,
+          "freq_per_frame": 4.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_010d9ac_",
+          "addr": "0x8010d9ac",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_010dc5c_",
+          "addr": "0x8010dc5c",
+          "depth": 5,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 4
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 14
+    },
+    {
+      "unit": "auto-c0065-010",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 5,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 4.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 4.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 4.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00ede6c_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0219a44_",
+          "addr": "0x80219a44",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0219b54_",
+          "addr": "0x80219b54",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0219bf8_",
+          "addr": "0x80219bf8",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0219d28_",
+          "addr": "0x80219d28",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0219d94_",
+          "addr": "0x80219d94",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 15
+    },
+    {
+      "unit": "auto-c0025-018",
+      "functions_total": 6,
+      "functions_reachable_from_spine": 6,
+      "min_depth": 4,
+      "inbound_calls_per_frame": 4.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 4.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 3.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00eda40_",
+        "zz_00edc60_",
+        "zz_00ee800_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00eef30_",
+          "addr": "0x800eef30",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00eef60_",
+          "addr": "0x800eef60",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_00eefb0_",
+          "addr": "0x800eefb0",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ef070_",
+          "addr": "0x800ef070",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ef178_",
+          "addr": "0x800ef178",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ef1a8_",
+          "addr": "0x800ef1a8",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 2
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 16
+    },
+    {
+      "unit": "auto-c0013-009",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 2.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 4.0,
+      "net_calls_per_frame": -1.0,
+      "elimination_basis": "mixed",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_",
+        "zz_00528b4_"
+      ],
+      "functions": [
+        {
+          "name": "zz_008c154_",
+          "addr": "0x8008c154",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_008c2dc_",
+          "addr": "0x8008c2dc",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_008c344_",
+          "addr": "0x8008c344",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 2
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 17
+    },
+    {
+      "unit": "auto-c0026-001",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 3.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "mixed",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_",
+        "zz_00f094c_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00efcb8_",
+          "addr": "0x800efcb8",
+          "depth": 3,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00efda8_",
+          "addr": "0x800efda8",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00efd70_",
+          "addr": "0x800efd70",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 2
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 18
+    },
+    {
+      "unit": "auto-c0013-006",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 3.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0052838_",
+        "zz_010d450_"
+      ],
+      "functions": [
+        {
+          "name": "FUN_8008b73c",
+          "addr": "0x8008b73c",
+          "depth": 2,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_008b650_",
+          "addr": "0x8008b650",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_008b7c8_",
+          "addr": "0x8008b7c8",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 19
+    },
+    {
+      "unit": "auto-c0063-003",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 3.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0220f58_",
+        "zz_0221858_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0207c68_",
+          "addr": "0x80207c68",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0207ed8_",
+          "addr": "0x80207ed8",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_0208098_",
+          "addr": "0x80208098",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 20
+    },
+    {
+      "unit": "auto-c0063-004",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 4,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 3.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 3.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0207ed8_",
+        "zz_0220f58_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0208ae4_",
+          "addr": "0x80208ae4",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0208b24_",
+          "addr": "0x80208b24",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 21
+    },
+    {
+      "unit": "auto-c0065-009",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 4,
+      "min_depth": 5,
+      "inbound_calls_per_frame": 3.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 3.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 3.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00ede6c_",
+        "zz_02170a8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_02193ec_",
+          "addr": "0x802193ec",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_021962c_",
+          "addr": "0x8021962c",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_021974c_",
+          "addr": "0x8021974c",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_021942c_",
+          "addr": "0x8021942c",
+          "depth": 5,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 22
+    },
+    {
+      "unit": "auto-c0003-011",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 2.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_002a4b0_",
+          "addr": "0x8002a4b0",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_002a4d4_",
+          "addr": "0x8002a4d4",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_002a3e4_",
+          "addr": "0x8002a3e4",
+          "depth": 1,
+          "freq_per_frame": 0.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 8
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 23
+    },
+    {
+      "unit": "auto-c0012-002",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 5,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 2.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "FUN_80080494",
+          "addr": "0x80080494",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 3
+        },
+        {
+          "name": "FUN_800805a8",
+          "addr": "0x800805a8",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "FUN_80080678",
+          "addr": "0x80080678",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0080278_",
+          "addr": "0x80080278",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00802a8_",
+          "addr": "0x800802a8",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 24
+    },
+    {
+      "unit": "auto-c0013-008",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "mixed",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0018b10_",
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_008c088_",
+          "addr": "0x8008c088",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_008c0b4_",
+          "addr": "0x8008c0b4",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_008bbd0_",
+          "addr": "0x8008bbd0",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 2
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 25
+    },
+    {
+      "unit": "auto-c0025-014",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 5,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00eda40_",
+        "zz_00efda8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00ed058_",
+          "addr": "0x800ed058",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00ed570_",
+          "addr": "0x800ed570",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00ecf60_",
+          "addr": "0x800ecf60",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 16
+        },
+        {
+          "name": "zz_00ed1cc_",
+          "addr": "0x800ed1cc",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ed4c4_",
+          "addr": "0x800ed4c4",
+          "depth": 4,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 4
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 26
+    },
+    {
+      "unit": "auto-c0026-004",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0018b10_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00f094c_",
+          "addr": "0x800f094c",
+          "depth": 2,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00f0a34_",
+          "addr": "0x800f0a34",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00f0a60_",
+          "addr": "0x800f0a60",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 27
+    },
+    {
+      "unit": "auto-c0053-008",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0018b10_"
+      ],
+      "functions": [
+        {
+          "name": "zz_01b77f8_",
+          "addr": "0x801b77f8",
+          "depth": 3,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_01b786c_",
+          "addr": "0x801b786c",
+          "depth": 2,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "structural_ineligible",
+        "tier": null,
+        "attempts": 1,
+        "linkable_today": false
+      },
+      "rank": 28
+    },
+    {
+      "unit": "auto-c0065-000",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 5,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_010d450_"
+      ],
+      "functions": [
+        {
+          "name": "ClampCircle",
+          "addr": "0x8021286c",
+          "depth": 3,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "PADClampCircle",
+          "addr": "0x80212a14",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_021379c_",
+          "addr": "0x8021379c",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0213584_",
+          "addr": "0x80213584",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_0213bec_",
+          "addr": "0x80213bec",
+          "depth": 4,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 29
+    },
+    {
+      "unit": "auto-c0026-005",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 4,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 14.0,
+      "net_calls_per_frame": -12.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00efcb8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00f0f14_",
+          "addr": "0x800f0f14",
+          "depth": 5,
+          "freq_per_frame": 8.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00f1238_",
+          "addr": "0x800f1238",
+          "depth": 4,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 7
+        },
+        {
+          "name": "zz_00f0f38_",
+          "addr": "0x800f0f38",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_00f1500_",
+          "addr": "0x800f1500",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 30
+    },
+    {
+      "unit": "auto-c0065-013",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00ed570_",
+        "zz_027954c_"
+      ],
+      "functions": [
+        {
+          "name": "zz_021a514_",
+          "addr": "0x8021a514",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_021c4c8_",
+          "addr": "0x8021c4c8",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_021c4fc_",
+          "addr": "0x8021c4fc",
+          "depth": 4,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 31
+    },
+    {
+      "unit": "knockback-core",
+      "functions_total": 2,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 2.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "FUN_8008b73c"
+      ],
+      "functions": [
+        {
+          "name": "FUN_800452a0",
+          "addr": "0x800452a0",
+          "depth": 3,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "green",
+        "tier": null,
+        "attempts": 1,
+        "linkable_today": false
+      },
+      "rank": 32
+    },
+    {
+      "unit": "auto-c0073-014",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 4,
+      "inbound_calls_per_frame": 2.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 2.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_026e77c_",
+        "zz_026ee64_"
+      ],
+      "functions": [
+        {
+          "name": "zz_026a274_",
+          "addr": "0x8026a274",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_026a1f4_",
+          "addr": "0x8026a1f4",
+          "depth": 6,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 3
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 33
+    },
+    {
+      "unit": "auto-c0000-015",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_000a004_",
+          "addr": "0x8000a004",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0009f98_",
+          "addr": "0x80009f98",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_000a144_",
+          "addr": "0x8000a144",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 34
+    },
+    {
+      "unit": "auto-c0002-003",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 11.0,
+      "net_calls_per_frame": -10.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0018ab8_",
+          "addr": "0x80018ab8",
+          "depth": 2,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0018b10_",
+          "addr": "0x80018b10",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 13
+        },
+        {
+          "name": "zz_0018a80_",
+          "addr": "0x80018a80",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 35
+    },
+    {
+      "unit": "auto-c0003-006",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0027c34_",
+          "addr": "0x80027c34",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 36
+    },
+    {
+      "unit": "auto-c0013-010",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "dispatch_global_menu_mode",
+          "addr": "0x8008c3ac",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 37
+    },
+    {
+      "unit": "auto-c0013-013",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": -1.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_008dbe0_",
+          "addr": "0x8008dbe0",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_008de04_",
+          "addr": "0x8008de04",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_008db4c_",
+          "addr": "0x8008db4c",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 38
+    },
+    {
+      "unit": "auto-c0030-009",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 1,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 1.0,
+      "inbound_static_calls_per_frame": 0.0,
+      "outbound_calls_per_frame": 9.0,
+      "net_calls_per_frame": -8.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00527d8_"
+      ],
+      "functions": [
+        {
+          "name": "zz_010d450_",
+          "addr": "0x8010d450",
+          "depth": 1,
+          "freq_per_frame": 1.0,
+          "freq_basis": "measured",
+          "outbound_callsites_static": 9
+        },
+        {
+          "name": "zz_010d360_",
+          "addr": "0x8010d360",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 39
+    },
+    {
+      "unit": "auto-c0000-001",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00528b4_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0005668_",
+          "addr": "0x80005668",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 40
+    },
+    {
+      "unit": "auto-c0000-002",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00528b4_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00058d0_",
+          "addr": "0x800058d0",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 41
+    },
+    {
+      "unit": "auto-c0006-010",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 4,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00528b4_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0050560_",
+          "addr": "0x80050560",
+          "depth": 3,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0050604_",
+          "addr": "0x80050604",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 2
+        },
+        {
+          "name": "zz_005042c_",
+          "addr": "0x8005042c",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 4
+        },
+        {
+          "name": "zz_00505a8_",
+          "addr": "0x800505a8",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 6
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 42
+    },
+    {
+      "unit": "auto-c0014-018",
+      "functions_total": 6,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "dispatch_global_menu_mode"
+      ],
+      "functions": [
+        {
+          "name": "FUN_80097560",
+          "addr": "0x80097560",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_009751c_",
+          "addr": "0x8009751c",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_009752c_",
+          "addr": "0x8009752c",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 2
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 43
+    },
+    {
+      "unit": "auto-c0064-000",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 4,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_010d450_"
+      ],
+      "functions": [
+        {
+          "name": "zz_020ab98_",
+          "addr": "0x8020ab98",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_020ace4_",
+          "addr": "0x8020ace4",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_020ad08_",
+          "addr": "0x8020ad08",
+          "depth": 5,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_020adec_",
+          "addr": "0x8020adec",
+          "depth": 4,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 44
+    },
+    {
+      "unit": "auto-c0066-002",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 3,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0221858_"
+      ],
+      "functions": [
+        {
+          "name": "zz_021e07c_",
+          "addr": "0x8021e07c",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_021df90_",
+          "addr": "0x8021df90",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 3
+        },
+        {
+          "name": "zz_021e044_",
+          "addr": "0x8021e044",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 45
+    },
+    {
+      "unit": "auto-c0066-007",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 3.0,
+      "net_calls_per_frame": -2.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_008dbe0_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0221858_",
+          "addr": "0x80221858",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 3
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 46
+    },
+    {
+      "unit": "auto-c0071-001",
+      "functions_total": 5,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_002a4d4_"
+      ],
+      "functions": [
+        {
+          "name": "zz_025426c_",
+          "addr": "0x8025426c",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0253a80_",
+          "addr": "0x80253a80",
+          "depth": 2,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 47
+    },
+    {
+      "unit": "auto-c0074-009",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 2,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_002a4d4_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0271224_",
+          "addr": "0x80271224",
+          "depth": 2,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=2)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_0271264_",
+          "addr": "0x80271264",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 7
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 48
+    },
+    {
+      "unit": "auto-c0063-000",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "FUN_8020360c"
+      ],
+      "functions": [
+        {
+          "name": "zz_0202750_",
+          "addr": "0x80202750",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_0202a60_",
+          "addr": "0x80202a60",
+          "depth": 3,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 49
+    },
+    {
+      "unit": "auto-c0063-001",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "FUN_80080494"
+      ],
+      "functions": [
+        {
+          "name": "FUN_8020360c",
+          "addr": "0x8020360c",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 50
+    },
+    {
+      "unit": "auto-c0066-006",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 3.0,
+      "net_calls_per_frame": -2.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_008de04_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0220e8c_",
+          "addr": "0x80220e8c",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0220f58_",
+          "addr": "0x80220f58",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 4
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 51
+    },
+    {
+      "unit": "auto-c0074-004",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00e9784_"
+      ],
+      "functions": [
+        {
+          "name": "zz_026ee64_",
+          "addr": "0x8026ee64",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 52
+    },
+    {
+      "unit": "auto-c0075-007",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 4,
+      "min_depth": 3,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0271224_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0277d14_",
+          "addr": "0x80277d14",
+          "depth": 3,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=3)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0277ec4_",
+          "addr": "0x80277ec4",
+          "depth": 4,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0277ed4_",
+          "addr": "0x80277ed4",
+          "depth": 4,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_0278018_",
+          "addr": "0x80278018",
+          "depth": 4,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 53
+    },
+    {
+      "unit": "auto-c0025-017",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 7,
+      "min_depth": 4,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00eda40_"
+      ],
+      "functions": [
+        {
+          "name": "zz_00eec5c_",
+          "addr": "0x800eec5c",
+          "depth": 5,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00eee10_",
+          "addr": "0x800eee10",
+          "depth": 5,
+          "freq_per_frame": 2.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00ee800_",
+          "addr": "0x800ee800",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 9
+        },
+        {
+          "name": "zz_00ee9ac_",
+          "addr": "0x800ee9ac",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00eeaa8_",
+          "addr": "0x800eeaa8",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00eeb84_",
+          "addr": "0x800eeb84",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "zz_00eed24_",
+          "addr": "0x800eed24",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 54
+    },
+    {
+      "unit": "auto-c0074-003",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 4,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 2.0,
+      "net_calls_per_frame": -1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00e95a4_"
+      ],
+      "functions": [
+        {
+          "name": "zz_026e77c_",
+          "addr": "0x8026e77c",
+          "depth": 4,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=4)",
+          "outbound_callsites_static": 2
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 55
+    },
+    {
+      "unit": "auto-c0065-005",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 5,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_00edc60_"
+      ],
+      "functions": [
+        {
+          "name": "zz_02170a8_",
+          "addr": "0x802170a8",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 1
+        },
+        {
+          "name": "zz_021721c_",
+          "addr": "0x8021721c",
+          "depth": 5,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 56
+    },
+    {
+      "unit": "auto-c0069-003",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 2,
+      "min_depth": 5,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_026a274_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0238cbc_",
+          "addr": "0x80238cbc",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        },
+        {
+          "name": "strlen",
+          "addr": "0x80238db8",
+          "depth": 5,
+          "freq_per_frame": 0.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 0
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 57
+    },
+    {
+      "unit": "auto-c0074-010",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 5,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_026e77c_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0271414_",
+          "addr": "0x80271414",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 58
+    },
+    {
+      "unit": "auto-c0075-008",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 5,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_026a274_"
+      ],
+      "functions": [
+        {
+          "name": "zz_02785ec_",
+          "addr": "0x802785ec",
+          "depth": 5,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=5)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 59
+    },
+    {
+      "unit": "auto-c0069-001",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 6,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_02785ec_"
+      ],
+      "functions": [
+        {
+          "name": "zz_0236910_",
+          "addr": "0x80236910",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 1
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 60
+    },
+    {
+      "unit": "auto-c0075-011",
+      "functions_total": 8,
+      "functions_reachable_from_spine": 1,
+      "min_depth": 6,
+      "inbound_calls_per_frame": 1.0,
+      "inbound_measured_calls_per_frame": 0.0,
+      "inbound_static_calls_per_frame": 1.0,
+      "outbound_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "elimination_basis": "static",
+      "exposure_basis": "static",
+      "callers_reachable": [
+        "zz_0271414_"
+      ],
+      "functions": [
+        {
+          "name": "zz_027954c_",
+          "addr": "0x8027954c",
+          "depth": 6,
+          "freq_per_frame": 1.0,
+          "freq_basis": "static(depth=6)",
+          "outbound_callsites_static": 3
+        }
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 61
+    }
+  ],
+  "ranking_marginal_against_ring0": [
+    {
+      "unit": "auto-c0012-002",
+      "eliminated_calls_per_frame": 2.0,
+      "exposed_calls_per_frame": 1.0,
+      "net_calls_per_frame": 1.0,
+      "bridged_calls_per_frame_after": 16.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_0080278_",
+        "zz_00802a8_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 1
+    },
+    {
+      "unit": "auto-c0003-011",
+      "eliminated_calls_per_frame": 2.0,
+      "exposed_calls_per_frame": 2.0,
+      "net_calls_per_frame": 0.0,
+      "bridged_calls_per_frame_after": 17.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_002a3e4_",
+        "zz_002a4b0_",
+        "zz_002a4d4_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 2
+    },
+    {
+      "unit": "auto-c0013-009",
+      "eliminated_calls_per_frame": 2.0,
+      "exposed_calls_per_frame": 4.0,
+      "net_calls_per_frame": -2.0,
+      "bridged_calls_per_frame_after": 19.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_008c2dc_",
+        "zz_008c344_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 3
+    },
+    {
+      "unit": "auto-c0006-013",
+      "eliminated_calls_per_frame": 2.0,
+      "exposed_calls_per_frame": 22.0,
+      "net_calls_per_frame": -20.0,
+      "bridged_calls_per_frame_after": 22.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_0052838_",
+        "zz_00528b4_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 4
+    },
+    {
+      "unit": "auto-c0000-015",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "bridged_calls_per_frame_after": 16.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_000a004_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 5
+    },
+    {
+      "unit": "auto-c0003-006",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "bridged_calls_per_frame_after": 16.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_0027c34_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 6
+    },
+    {
+      "unit": "auto-c0013-008",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "bridged_calls_per_frame_after": 16.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_008c088_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 7
+    },
+    {
+      "unit": "auto-c0013-010",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 1.0,
+      "net_calls_per_frame": 0.0,
+      "bridged_calls_per_frame_after": 17.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "dispatch_global_menu_mode"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 8
+    },
+    {
+      "unit": "auto-c0013-013",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 2.0,
+      "net_calls_per_frame": -1.0,
+      "bridged_calls_per_frame_after": 18.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_008dbe0_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 9
+    },
+    {
+      "unit": "auto-c0026-001",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 3.0,
+      "net_calls_per_frame": -2.0,
+      "bridged_calls_per_frame_after": 19.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_00efda8_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 10
+    },
+    {
+      "unit": "auto-c0030-009",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 9.0,
+      "net_calls_per_frame": -8.0,
+      "bridged_calls_per_frame_after": 25.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_010d450_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 11
+    },
+    {
+      "unit": "auto-c0002-003",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 11.0,
+      "net_calls_per_frame": -10.0,
+      "bridged_calls_per_frame_after": 27.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_0018b10_"
+      ],
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      },
+      "rank": 12
+    },
+    {
+      "unit": "auto-c0025-004",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 14.0,
+      "net_calls_per_frame": -13.0,
+      "bridged_calls_per_frame_after": 30.0,
+      "elimination_basis": "measured",
+      "exposure_basis": "static",
+      "spine_callees_owned": [
+        "zz_00e9994_"
+      ],
+      "availability": {
+        "status": "red_retryable",
+        "tier": null,
+        "attempts": 1,
+        "linkable_today": false
+      },
+      "rank": 13
+    }
+  ],
+  "greedy_compile_queue_by_net": [
+    {
+      "step": 1,
+      "unit": "auto-c0000-015",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "bridged_calls_per_frame_before": 17.0,
+      "bridged_calls_per_frame_after": 16.0,
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "step": 2,
+      "unit": "auto-c0003-006",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "bridged_calls_per_frame_before": 16.0,
+      "bridged_calls_per_frame_after": 15.0,
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "step": 3,
+      "unit": "auto-c0012-002",
+      "eliminated_calls_per_frame": 2.0,
+      "exposed_calls_per_frame": 1.0,
+      "net_calls_per_frame": 1.0,
+      "bridged_calls_per_frame_before": 15.0,
+      "bridged_calls_per_frame_after": 14.0,
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    },
+    {
+      "step": 4,
+      "unit": "auto-c0013-008",
+      "eliminated_calls_per_frame": 1.0,
+      "exposed_calls_per_frame": 0.0,
+      "net_calls_per_frame": 1.0,
+      "bridged_calls_per_frame_before": 14.0,
+      "bridged_calls_per_frame_after": 13.0,
+      "availability": {
+        "status": "pending",
+        "tier": null,
+        "attempts": 0,
+        "linkable_today": false
+      }
+    }
+  ]
+}
