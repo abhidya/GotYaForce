@@ -31,6 +31,23 @@ E1 budget bookkeeping (ratio computation across rungs) is done by the
 research/decomp/data/composition-ladder.json from the per-rung dumps.
 All timestamps in the ledger come from the gate results (checked_at),
 never from a fresh clock.
+
+The `frontier` subcommand re-scores that ledger under the spine-rooted
+metric of docs/one-to-one-completion-spec.md section 6 (correction X1) and
+rewrites it as schema `composition-ladder-2`.  It ADDS a `frontier` block
+to every existing rung and a `frontier_lane` whose ring 0 is the spine
+alone; it never recomputes a composition-ladder-1 field.  Two lanes, two
+pass rules, both on the record:
+
+  * recency lane -- windows from select_recent_green_units, growth by N
+    doubling, E1 conflict-ratio budget.  UNCHANGED.
+  * frontier lane -- ring 0 is `run_main_game_loop` alone with every
+    callee bridged, a rung is a frontier prefix, growth is
+    `bridged_calls_per_frame` falling.  E1 still applies, on whatever unit
+    set the rung links.
+
+The metric itself lives in scripts/spine_frontier.py; `frontier` imports it
+and reads nothing but tracked corpus files plus the `select` output.
 """
 
 from __future__ import annotations
@@ -363,6 +380,236 @@ def cmd_ledger(scratch: Path, rung_specs: list[str], out_path: Path) -> int:
     return 0
 
 
+def cmd_frontier(repo: Path, ledger_path: Path, frontier_path: Path,
+                 eligible_path: Path, out_path: Path) -> int:
+    """Re-score the tracked rung ledger under the X1 frontier metric.
+
+    Reads the schema `composition-ladder-1` ledger produced by `ledger`, adds
+    the spine-rooted metric to every rung WITHOUT changing any existing field
+    or any existing number, prepends the ring-0 rung of the frontier lane, and
+    writes it back as schema `composition-ladder-2`.
+
+    Two lanes, two rules, both recorded:
+
+      recency lane (`rungs`)  -- unchanged.  Windows selected by
+        `select_recent_green_units`, growth by N doubling, pass rule is E1:
+        new_contested_symbols / new_symbols_linked <= previous rung ratio.
+        The E1 budget keeps operating on exactly the unit set each rung links.
+
+      frontier lane (`frontier_lane.rungs`) -- ring 0 is the spine alone, every
+        callee bridged; a rung is a FRONTIER PREFIX (nested, so rung-to-rung
+        comparison is valid); growth is `bridged_calls_per_frame` falling.
+        E1 applies here too, on whatever unit set the rung links.
+
+    Every rung in BOTH lanes gets a `frontier` block, so the recency lane's
+    relationship to the ROM's frame loop is on the record rather than assumed.
+    """
+    import io as _io
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from spine_frontier import (
+        SPINE_FUNCTION,
+        bridged_calls_per_frame,
+        build_call_graph,
+        compute_frequency,
+        load_spine_measurement,
+    )
+
+    graph = build_call_graph(repo)
+    edges = graph["edges"]
+    by_name = graph["by_name"]
+    measured = load_spine_measurement(repo)["rates"]
+    depth, freq, basis, rate, rate_basis = compute_frequency(edges, measured)
+    members: dict = {}
+    for name, fn in by_name.items():
+        members.setdefault(fn["unit"], set()).add(name)
+
+    ring0 = {SPINE_FUNCTION}
+    baseline = bridged_calls_per_frame(edges, rate, ring0)
+
+    frontier = json.loads(frontier_path.read_text("utf-8"))
+    reachable_units = set(frontier["availability_summary"]["reachable_unit_names"])
+
+    # Gate-eligibility evidence: the `select` subcommand's own output, run in
+    # scratch against a copy of the canonical state.  This is what makes
+    # "no frontier unit is linkable" a MEASUREMENT rather than an inference.
+    eligibility = {
+        "gate_eligible_units_on_frontier": None,
+        "eligibility_evidence": None,
+    }
+    if eligible_path is not None and eligible_path.is_file():
+        raw = eligible_path.read_text("utf-8")
+        selection = json.loads(raw[raw.index("{"):])
+        eligible = {u["name"] for u in selection["eligible_oldest_first"]}
+        eligibility = {
+            "gate_eligible_units_total": len(eligible),
+            "gate_eligible_units_on_frontier": sorted(eligible & reachable_units),
+            "eligibility_evidence": {
+                "source": "scripts/composition_ladder.py select (scratch copy)",
+                "canonical_state_sha256": selection["canonical_state_sha256"],
+                "excluded_units": len(selection.get("excluded") or {}),
+            },
+        }
+
+    def score(units, include_ring0):
+        linked = set(ring0) if include_ring0 else set()
+        for unit in units:
+            linked |= members.get(unit, set())
+        value = bridged_calls_per_frame(edges, rate, linked)
+        touching = sorted(u for u in units if u in reachable_units)
+        return {
+            "metric": "bridged_calls_per_frame",
+            "ring0_baseline": round(baseline, 4),
+            "bridged_calls_per_frame": round(value, 4) if include_ring0 else None,
+            "bridged_calls_per_frame_eliminated": (
+                round(baseline - value, 4) if include_ring0 else 0.0
+            ),
+            "units_intersecting_spine_frontier": touching,
+            "functions_linked_reachable_from_spine": sorted(
+                f
+                for unit in units
+                for f in members.get(unit, set())
+                if f in depth
+            ),
+            "reaches_run_main_game_loop": SPINE_FUNCTION in {
+                f for unit in units for f in members.get(unit, set())
+            },
+            "basis": "measured ring-0 baseline (274 calls / 16 iterations); static delta",
+        }
+
+    ledger = json.loads(ledger_path.read_text("utf-8"))
+    for rung in ledger.get("rungs", []):
+        units = rung.get("units") or []
+        block = score(units, include_ring0=False)
+        block["note"] = (
+            "recency-selected window; the spine is not in it, so this rung is "
+            "not composed with ring 0 and B is undefined for it. "
+            "bridged_calls_per_frame_eliminated is the fall it would cause if "
+            "it WERE composed with ring 0."
+        )
+        rung["frontier"] = block
+
+    ring0_rung = {
+        "rung": "F0",
+        "lane": "frontier",
+        "n": 1,
+        "units": [],
+        "module": "research/decomp/spine-boundary/",
+        "module_sha256": _sha256_file(
+            repo / "research/decomp/spine-boundary/unit.wasm"
+        ),
+        "module_is_queue_unit": False,
+        "queue_unit_for_spine": by_name[SPINE_FUNCTION]["unit"],
+        "substitution": None,
+        "passed": True,
+        "link_passed": True,
+        "stage": "pass",
+        "checked_at": json.loads(
+            (
+                repo
+                / "research/decomp/data/oracle-results/"
+                  "spine-run-main-game-loop.boundary.json"
+            ).read_text("utf-8")
+        )["generated_at"],
+        "conflicts": [],
+        "new_contested_symbols": 0,
+        "new_symbols_linked": 1,
+        "ratio": 0.0,
+        "budget_ok": True,
+        "attempt_tags": ["spine-boundary"],
+        "verdict": "boundary_green",
+        "verdict_evidence": (
+            "research/decomp/data/oracle-results/"
+            "spine-run-main-game-loop.boundary.json (274/274 calls matched)"
+        ),
+        "frontier": score([], include_ring0=True),
+    }
+
+    ledger["schema"] = "composition-ladder-2"
+    ledger["schema_note"] = (
+        "v2 = v1 plus a `frontier` block on every rung and a `frontier_lane`. "
+        "Every composition-ladder-1 field keeps its v1 meaning and its v1 value; "
+        "no v1 number was recomputed."
+    )
+    ledger["metrics"] = {
+        "e1_conflict_budget": {
+            "rule": ledger.get("budget_rule"),
+            "applies_to": "the unit set each rung actually links, in either lane",
+            "status": "unchanged from composition-ladder-1",
+        },
+        "frontier_shrink": {
+            "rule": (
+                "a frontier rung passes iff its window links AND "
+                "bridged_calls_per_frame falls relative to the previous "
+                "frontier rung"
+            ),
+            "baseline": round(baseline, 4),
+            "baseline_basis": "measured",
+            "source": "research/decomp/data/spine-frontier.json",
+            "caveat": (
+                "B is not monotone under greedy unit addition: linking a loop "
+                "callee replaces one crossing with that callee's own outbound "
+                "calls.  Linking ALL of ring 1 takes B from 17 to 46 by the "
+                "static bound.  B falling is a TERMINAL objective; per-rung "
+                "scoring must use net = eliminated - exposed."
+            ),
+        },
+    }
+    ledger["frontier_lane"] = {
+        "design": (
+            "docs/one-to-one-completion-spec.md section 6, correction X1: ring 0 "
+            "is the spine alone, everything it calls is bridged; a rung is a "
+            "frontier prefix"
+        ),
+        "root": {
+            "function": SPINE_FUNCTION,
+            "gc_addr": "0x800527d8",
+            "module": "research/decomp/spine-boundary/",
+        },
+        "ranking": "research/decomp/data/spine-frontier.json",
+        "rungs": [ring0_rung],
+        "blocked": {
+            "reason": (
+                "no unit on the spine frontier has ever been compiled, so no "
+                "frontier rung above F0 can be linked"
+            ),
+            "frontier_units_reachable": len(reachable_units),
+            "frontier_units_linkable_today": frontier["availability_summary"][
+                "linkable_today"
+            ],
+            **eligibility,
+        },
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with _io.open(str(out_path), "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(ledger, indent=2) + "\n")
+    print(
+        json.dumps(
+            {
+                "out": str(out_path),
+                "schema": ledger["schema"],
+                "recency_rungs": len(ledger.get("rungs", [])),
+                "frontier_rungs": len(ledger["frontier_lane"]["rungs"]),
+                "ring0_bridged_calls_per_frame": round(baseline, 4),
+                "recency_rungs_eliminating_bridged_calls": [
+                    r.get("rung")
+                    for r in ledger.get("rungs", [])
+                    if r["frontier"]["bridged_calls_per_frame_eliminated"]
+                ],
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def _sha256_file(path: Path) -> str:
+    import hashlib
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -379,7 +626,35 @@ def main(argv: list[str] | None = None) -> int:
     p_ledger.add_argument("--scratch", required=True)
     p_ledger.add_argument("--rungs", required=True, help="TAG[:ATTEMPTS] csv")
     p_ledger.add_argument("--out", required=True)
+    p_frontier = sub.add_parser("frontier")
+    p_frontier.add_argument(
+        "--ledger",
+        default=str(LIVE_REPO / "research/decomp/data/composition-ladder.json"),
+    )
+    p_frontier.add_argument(
+        "--frontier",
+        default=str(LIVE_REPO / "research/decomp/data/spine-frontier.json"),
+    )
+    p_frontier.add_argument(
+        "--repo",
+        default=str(Path(__file__).resolve().parent.parent),
+        help="checkout to read the tracked corpus/registry/capture from",
+    )
+    p_frontier.add_argument(
+        "--eligible",
+        default=None,
+        help="output of `composition_ladder.py select` (gate eligibility evidence)",
+    )
+    p_frontier.add_argument("--out", required=True)
     args = parser.parse_args(argv)
+    if args.command == "frontier":
+        return cmd_frontier(
+            Path(args.repo).resolve(),
+            Path(args.ledger).resolve(),
+            Path(args.frontier).resolve(),
+            Path(args.eligible).resolve() if args.eligible else None,
+            Path(args.out).resolve(),
+        )
     scratch = Path(args.scratch).resolve()
     if args.command == "init":
         cmd_init(scratch)

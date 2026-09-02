@@ -1,5 +1,5 @@
 {
-  "schema": "composition-ladder-1",
+  "schema": "composition-ladder-2",
   "design": "docs/playable-port-design.md G3 + E1 (V5 verdict)",
   "budget_rule": "a rung passes iff its window links AND new_contested_symbols/new_symbols_linked <= previous rung ratio",
   "dispatch_companion": true,
@@ -38,6 +38,17 @@
         "dispatch_export_present": true,
         "arity_mismatch_export_present": true,
         "miss_import_present": true
+      },
+      "frontier": {
+        "metric": "bridged_calls_per_frame",
+        "ring0_baseline": 17.0,
+        "bridged_calls_per_frame": null,
+        "bridged_calls_per_frame_eliminated": 0.0,
+        "units_intersecting_spine_frontier": [],
+        "functions_linked_reachable_from_spine": [],
+        "reaches_run_main_game_loop": false,
+        "basis": "measured ring-0 baseline (274 calls / 16 iterations); static delta",
+        "note": "recency-selected window; the spine is not in it, so this rung is not composed with ring 0 and B is undefined for it. bridged_calls_per_frame_eliminated is the fall it would cause if it WERE composed with ring 0."
       }
     },
     {
@@ -79,7 +90,91 @@
         "dispatch_export_present": true,
         "arity_mismatch_export_present": true,
         "miss_import_present": true
+      },
+      "frontier": {
+        "metric": "bridged_calls_per_frame",
+        "ring0_baseline": 17.0,
+        "bridged_calls_per_frame": null,
+        "bridged_calls_per_frame_eliminated": 0.0,
+        "units_intersecting_spine_frontier": [],
+        "functions_linked_reachable_from_spine": [],
+        "reaches_run_main_game_loop": false,
+        "basis": "measured ring-0 baseline (274 calls / 16 iterations); static delta",
+        "note": "recency-selected window; the spine is not in it, so this rung is not composed with ring 0 and B is undefined for it. bridged_calls_per_frame_eliminated is the fall it would cause if it WERE composed with ring 0."
       }
     }
-  ]
+  ],
+  "schema_note": "v2 = v1 plus a `frontier` block on every rung and a `frontier_lane`. Every composition-ladder-1 field keeps its v1 meaning and its v1 value; no v1 number was recomputed.",
+  "metrics": {
+    "e1_conflict_budget": {
+      "rule": "a rung passes iff its window links AND new_contested_symbols/new_symbols_linked <= previous rung ratio",
+      "applies_to": "the unit set each rung actually links, in either lane",
+      "status": "unchanged from composition-ladder-1"
+    },
+    "frontier_shrink": {
+      "rule": "a frontier rung passes iff its window links AND bridged_calls_per_frame falls relative to the previous frontier rung",
+      "baseline": 17.0,
+      "baseline_basis": "measured",
+      "source": "research/decomp/data/spine-frontier.json",
+      "caveat": "B is not monotone under greedy unit addition: linking a loop callee replaces one crossing with that callee's own outbound calls.  Linking ALL of ring 1 takes B from 17 to 46 by the static bound.  B falling is a TERMINAL objective; per-rung scoring must use net = eliminated - exposed."
+    }
+  },
+  "frontier_lane": {
+    "design": "docs/one-to-one-completion-spec.md section 6, correction X1: ring 0 is the spine alone, everything it calls is bridged; a rung is a frontier prefix",
+    "root": {
+      "function": "zz_00527d8_",
+      "gc_addr": "0x800527d8",
+      "module": "research/decomp/spine-boundary/"
+    },
+    "ranking": "research/decomp/data/spine-frontier.json",
+    "rungs": [
+      {
+        "rung": "F0",
+        "lane": "frontier",
+        "n": 1,
+        "units": [],
+        "module": "research/decomp/spine-boundary/",
+        "module_sha256": "b14efa83358750e1e26c2dfaf1c394698ca312db1c52208ced1d3be4d50400cb",
+        "module_is_queue_unit": false,
+        "queue_unit_for_spine": "auto-c0006-013",
+        "substitution": null,
+        "passed": true,
+        "link_passed": true,
+        "stage": "pass",
+        "checked_at": "2026-08-30T05:31:26.681Z",
+        "conflicts": [],
+        "new_contested_symbols": 0,
+        "new_symbols_linked": 1,
+        "ratio": 0.0,
+        "budget_ok": true,
+        "attempt_tags": [
+          "spine-boundary"
+        ],
+        "verdict": "boundary_green",
+        "verdict_evidence": "research/decomp/data/oracle-results/spine-run-main-game-loop.boundary.json (274/274 calls matched)",
+        "frontier": {
+          "metric": "bridged_calls_per_frame",
+          "ring0_baseline": 17.0,
+          "bridged_calls_per_frame": 17.0,
+          "bridged_calls_per_frame_eliminated": 0.0,
+          "units_intersecting_spine_frontier": [],
+          "functions_linked_reachable_from_spine": [],
+          "reaches_run_main_game_loop": false,
+          "basis": "measured ring-0 baseline (274 calls / 16 iterations); static delta"
+        }
+      }
+    ],
+    "blocked": {
+      "reason": "no unit on the spine frontier has ever been compiled, so no frontier rung above F0 can be linked",
+      "frontier_units_reachable": 93,
+      "frontier_units_linkable_today": [],
+      "gate_eligible_units_total": 82,
+      "gate_eligible_units_on_frontier": [],
+      "eligibility_evidence": {
+        "source": "scripts/composition_ladder.py select (scratch copy)",
+        "canonical_state_sha256": "7441ccc6e41f6a90a8f4ba042c8965508c4c191036ce15d6ecf93494b5b48822",
+        "excluded_units": 33
+      }
+    }
+  }
 }
