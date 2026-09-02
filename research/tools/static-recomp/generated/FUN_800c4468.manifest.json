@@ -1,0 +1,21 @@
+{
+  "entry": "0x800c4468",
+  "end": "0x800c44a8",
+  "instructions": 16,
+  "cname": "fn_800c4468",
+  "labels": [],
+  "forms_used": {
+    "lwz": 4,
+    "stw": 2,
+    "addi": 2,
+    "bl": 2,
+    "stwu": 1,
+    "mflr": 1,
+    "mr": 1,
+    "li": 1,
+    "mtlr": 1,
+    "blr": 1
+  },
+  "source": "generated/FUN_800c4468.c",
+  "rom_name": "FUN_800c4468"
+}

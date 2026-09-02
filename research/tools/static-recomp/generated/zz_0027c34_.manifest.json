@@ -1,0 +1,27 @@
+{
+  "entry": "0x80027c34",
+  "end": "0x80027dc0",
+  "instructions": 99,
+  "cname": "fn_80027c34",
+  "labels": [
+    "0x80027db0"
+  ],
+  "forms_used": {
+    "li": 47,
+    "bl": 19,
+    "sth": 8,
+    "lwz": 6,
+    "stw": 5,
+    "addi": 4,
+    "cmpwi": 2,
+    "lis": 2,
+    "stwu": 1,
+    "mflr": 1,
+    "bne": 1,
+    "beq": 1,
+    "mtlr": 1,
+    "blr": 1
+  },
+  "source": "generated/zz_0027c34_.c",
+  "rom_name": "zz_0027c34_"
+}

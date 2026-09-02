@@ -1,0 +1,27 @@
+{
+  "dol_offset": "0x1f700",
+  "fst_offset": "0x3d4f00",
+  "fst_size": 89,
+  "entries": 4,
+  "files": 3,
+  "extension_histogram": {
+    ".afs": 2,
+    ".bnr": 1
+  },
+  "rel_modules": [],
+  "largest_files": [
+    {
+      "name": "afs_data.afs",
+      "size": 455866368
+    },
+    {
+      "name": "poq_adx_usa.afs",
+      "size": 354742272
+    },
+    {
+      "name": "opening.bnr",
+      "size": 6496
+    }
+  ],
+  "total_file_bytes": 810615136
+}
