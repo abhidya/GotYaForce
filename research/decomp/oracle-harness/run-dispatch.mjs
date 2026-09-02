@@ -108,8 +108,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadUnit, importedMemoryLimits, applyArenaSegments } from "./lib/wasm.mjs";
 import {
-  sha256, hex, unbox, valueEq, fmtArgs, fmtVal, parseAddr as parseAddrShared,
-  firstOwnedMismatch, fmtByte, readCaptureJsonl, gitRevOf, relPosix,
+  sha256, hex, unbox, valueEq, fmtArgs, fmtVal, decodeRet, applyDeltas,
+  parseAddr as parseAddrShared, firstOwnedMismatch, fmtByte, readCaptureJsonl,
+  gitRevOf, relPosix,
 } from "./lib/boundary.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -462,12 +463,9 @@ async function main() {
     state.evIdx++;
   };
 
-  const applyDeltasIfAny = (rec) => {
-    for (const d of rec?.deltas ?? []) {
-      const b = Buffer.from(d.b64, "base64");
-      shimMem.u8.set(b, parseAddr(d.addr));
-    }
-  };
+  // Shared with run-transcript.mjs and run-spine.mjs so the three standards
+  // cannot drift apart in how a stubbed callee's side effects reach the arena.
+  const applyDeltasIfAny = (rec) => applyDeltas(shimMem.u8, rec?.deltas, fail);
 
   const onMiss = (gcAddr, argptr) => {
     const p = state.stack[state.stack.length - 1];
@@ -500,8 +498,7 @@ async function main() {
     }
     applyDeltasIfAny(rec);
     state.evIdx++;
-    if (rec.ret == null) return undefined;
-    return unbox(rec.ret);
+    return decodeRet(rec.ret);
   };
 
   const makeShims = (ctx) => {

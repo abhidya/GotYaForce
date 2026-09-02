@@ -3,7 +3,7 @@
  "standard": "dispatch_green",
  "unit": "auto-c0011-005",
  "fn": "FUN_80079a40",
- "generated_at": "2026-09-02T18:37:07.090Z",
+ "generated_at": "2026-09-02T18:39:55.249Z",
  "claim": {
   "established": true,
   "summary": "the port performed the same ROM function-pointer dispatches as the console — same sites, same order, same RESOLVED GAMECUBE TARGETS, same frame arguments — on 24 recorded cases",
@@ -49,8 +49,8 @@
  },
  "harness": {
   "entry": "research/decomp/oracle-harness/run-dispatch.mjs",
-  "git_rev": "e4079dd8e47a4523c15a613a930073984c3c35b3",
-  "sha256": "e7d815469cff24d712309594c79d69de3fe703bb6800df84850fecaa24807878",
+  "git_rev": "43f54556e1c443b03ad3982a21508b6bf96ff034",
+  "sha256": "6c0ed5cc1334f63630a618f98d26063dbcb9c3441280f2ce7c55acf82dca2e12",
   "min_cases": 1
  },
  "wasm": {
