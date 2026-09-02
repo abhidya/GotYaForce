@@ -1,7 +1,7 @@
 {
   "schema": "gf.verification-tier-survey.v1",
-  "generated_utc": "2026-08-30T06:29:31Z",
-  "survey_tool_commit": "debd7ef46cb81c4822f9cbd26fea9b19115925ae",
+  "generated_utc": "2026-09-02T19:02:16Z",
+  "survey_tool_commit": "954efd3d7e566129bdd37152d6a0922bf7656aa8",
   "generator": "research/decomp/data/build_tier_survey.py",
   "survey_tool": "research/tools/OGhidra/tools/survey_plan_tiers.py",
   "measurement_kind": "ceiling",
@@ -10,6 +10,7 @@
     "is_not": "Not a verification result. A function counted here has NOT been verified; verified units are counted from committed result artifacts, never from this file.",
     "oracle_green": "Byte-exact per-call write comparison (research/decomp/oracle-harness/run-unit.mjs).",
     "transcript_green": "Callee-boundary call sequence, arguments and return value (research/decomp/oracle-harness/run-transcript.mjs). STRICTLY WEAKER than oracle_green: no write set is compared. It never upgrades into an oracle_green claim.",
+    "dispatch_green": "ROM function-pointer dispatch stream: the site, the RESOLVED GameCube target, the uniform-frame arguments and the return of every indirect call (research/decomp/oracle-harness/run-dispatch.mjs), against the address the console's own branch register held. ORTHOGONAL to the two above, not a rung of the same ladder: it observes a channel they cannot see and is blind to channels they check, and it is never totalled with either. It requires the module to be built with the gate's indirect-call lowering.",
     "combined": "Per function, the STRONGEST standard it can reach. A unit whose exports land on a MIX of standards is reported mixed, never rounded up to the stronger one."
   },
   "inputs": {
@@ -21,13 +22,13 @@
     "chunk_corpus": {
       "files_referenced": 80,
       "files_present": 80,
-      "sha256_rolled": "75e0828aa4d05b3fb0d52666342533eb93bc1561c8a49e42c2a79d358240b62f"
+      "sha256_rolled": "b93ec77d5056ca76dfe3aa427d8e47fffb2e50e1a3be0b0649e0bcd549b986b5"
     },
     "classification_logic": [
       {
         "path": "tools/survey_plan_tiers.py",
-        "bytes": 14789,
-        "sha256": "30142f6c38076ca137dcab9d983cbfd45168876971adfdd739dcfab6b1f77182"
+        "bytes": 18667,
+        "sha256": "d3925d2bfde28d2fc889f163d6ea81a8b48762a997571728f202bf854010271f"
       },
       {
         "path": "src/port_c_evidence.py",
@@ -43,6 +44,11 @@
         "path": "src/port_plan_derive.py",
         "bytes": 48557,
         "sha256": "d58132842fa9549b2a65f8e5c489da62349036d58f840ec7b6b4ca1c916b0177"
+      },
+      {
+        "path": "src/port_indirect_lowering.py",
+        "bytes": 26665,
+        "sha256": "2475f2a3dc9a00a4ab6d1a5b51620361e8e3ac77b04d90aab98a5a759b9a447a"
       }
     ]
   },
@@ -59,15 +65,19 @@
       "count": 8197,
       "pct": 74.8
     },
+    "dispatch_green": {
+      "count": 1534,
+      "pct": 14.0
+    },
     "verifiable_by_some_tier": {
-      "count": 8849,
-      "pct": 80.8
+      "count": 10383,
+      "pct": 94.8
     },
     "unverifiable": {
-      "count": 2105,
-      "pct": 19.2,
+      "count": 571,
+      "pct": 5.2,
       "reasons": {
-        "rom_function_pointer_dispatch": 1602,
+        "rom_function_pointer_dispatch": 68,
         "empty_transcript": 503
       }
     }
@@ -75,11 +85,11 @@
   "per_unit": {
     "all_exports_oracle_green": 2,
     "all_exports_transcript_green": 257,
-    "all_exports_covered_mixed_tiers": 119,
-    "has_unverifiable_export": 1018,
+    "all_exports_covered_mixed_tiers": 840,
+    "has_unverifiable_export": 297,
     "full_export_coverage": {
-      "count": 378,
-      "pct": 27.1
+      "count": 1099,
+      "pct": 78.7
     }
   },
   "write_set_ceiling": {
@@ -111,6 +121,15 @@
       "empty_transcript": 1024,
       "rom_function_pointer_dispatch": 1602
     }
+  },
+  "dispatch_eligibility": {
+    "note": "What dispatch_green did to the class that had no route at all. The residue is functions whose indirect call RESULT IS USED: the uniform frame's i32 result is only a VIEW of the return slot and an indirect site has no callee prototype to derive the true return class from, so the lowering refuses them rather than narrowing a return silently.",
+    "requires": "a module built with the gate's indirect-call lowering (research/tools/OGhidra/src/port_indirect_lowering.py) and the dispatch companion in trace mode; a standalone unit built the ordinary way is still unobservable.",
+    "not_checked_statically": "the capture plan also audits the ROM's bctrl count against the lowered C's site count per function. That needs the DOL, so a function counted eligible here can still be refused at plan time.",
+    "class_size": 1602,
+    "reachable": 1534,
+    "still_unverifiable": 68,
+    "lowerable_call_sites": 1661
   },
   "plan_size": {
     "5-12": 2332,

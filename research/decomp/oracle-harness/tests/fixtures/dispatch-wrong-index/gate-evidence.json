@@ -1,0 +1,159 @@
+{
+ "schema": "gf.dispatch-unit-build.v1",
+ "unit": "auto-c0011-005",
+ "source": "research/decomp/port-units-staging/auto-c0011-005/unit.c",
+ "built_by": "research/tools/OGhidra/tools/build_dispatch_unit.py",
+ "trace": true,
+ "claims": {
+  "is": "A single staged unit rebuilt with the gate's indirect-call lowering and dispatch companion, so its ROM function-pointer dispatches go through the address-keyed table and are observable at two declared imports.",
+  "is_not": "Not a verification result and not a promotion. The module is inventory until run-dispatch.mjs compares it against a console capture."
+ },
+ "indirect_lowering": {
+  "version": 1,
+  "header": "gf_indirect_lowering.h",
+  "sites_manifest": "gf_indirect_sites.json",
+  "dispatch_entry": "__gf_dispatch_at",
+  "sites": 3,
+  "sites_by_shape": {
+   "code_ptr": 3
+  },
+  "non_call_casts": 0,
+  "functions": [
+   "FUN_80079a40",
+   "FUN_80079a7c",
+   "FUN_80079ab8"
+  ],
+  "table": [
+   {
+    "unit": "auto-c0011-005",
+    "source": "auto-c0011-005.c",
+    "function": "FUN_80079a40",
+    "site": "80079a40:0",
+    "site_kind": "gc_address",
+    "shape": "code_ptr",
+    "arg_count": 0,
+    "target_expr": "(&PTR_FUN_802d65b0)[*(char *)(param_1 + 0x580)]"
+   },
+   {
+    "unit": "auto-c0011-005",
+    "source": "auto-c0011-005.c",
+    "function": "FUN_80079a7c",
+    "site": "80079a7c:0",
+    "site_kind": "gc_address",
+    "shape": "code_ptr",
+    "arg_count": 0,
+    "target_expr": "(&PTR_FUN_802d65bc)[*(char *)(param_1 + 0x581)]"
+   },
+   {
+    "unit": "auto-c0011-005",
+    "source": "auto-c0011-005.c",
+    "function": "FUN_80079ab8",
+    "site": "80079ab8:0",
+    "site_kind": "gc_address",
+    "shape": "code_ptr",
+    "arg_count": 0,
+    "target_expr": "(&PTR_FUN_802d65d0)[*(char *)(param_1 + 0x541)]"
+   }
+  ],
+  "manifest_sha256": "c40c5bd196bc7f9ade8efce2899d0c3a6f8a301852ff1d9a715ed185d47d883a"
+ },
+ "dispatch": {
+  "dispatch_at_export": "__gf_dispatch_at",
+  "trace_imports": [
+   "__gf_dispatch_enter",
+   "__gf_dispatch_exit"
+  ],
+  "trace_claim": "observation only: the trace imports report the site, resolved GC target, argument frame and return of every lowered indirect call. They make no comparison and establish no tier.",
+  "frame_abi_version": 1,
+  "frame_header": "gf_dispatch_frame.h",
+  "companion": "gf_dispatch_companion.c",
+  "companion_sha256": "9e276a71559c54c3c2b4ca88828a2805325dcd41729772a2a8a306d950cf8eff",
+  "dispatch_export": "__gf_dispatch",
+  "miss_import": "__gf_dispatch_miss",
+  "arity_export": "__gf_dispatch_arity_mismatches",
+  "functions": 8,
+  "table": [
+   {
+    "symbol": "FUN_80079978",
+    "unit": "auto-c0011-005",
+    "gc_address": "80079978",
+    "address_source": "marker",
+    "return_class": "void",
+    "param_classes": [
+     "i32"
+    ]
+   },
+   {
+    "symbol": "FUN_800799ac",
+    "unit": "auto-c0011-005",
+    "gc_address": "800799ac",
+    "address_source": "marker",
+    "return_class": "void",
+    "param_classes": [
+     "i32"
+    ]
+   },
+   {
+    "symbol": "FUN_800799cc",
+    "unit": "auto-c0011-005",
+    "gc_address": "800799cc",
+    "address_source": "marker",
+    "return_class": "void",
+    "param_classes": [
+     "i32"
+    ]
+   },
+   {
+    "symbol": "FUN_800799ec",
+    "unit": "auto-c0011-005",
+    "gc_address": "800799ec",
+    "address_source": "marker",
+    "return_class": "void",
+    "param_classes": [
+     "i32",
+     "i32"
+    ]
+   },
+   {
+    "symbol": "FUN_80079a40",
+    "unit": "auto-c0011-005",
+    "gc_address": "80079a40",
+    "address_source": "marker",
+    "return_class": "void",
+    "param_classes": [
+     "i32"
+    ]
+   },
+   {
+    "symbol": "FUN_80079a7c",
+    "unit": "auto-c0011-005",
+    "gc_address": "80079a7c",
+    "address_source": "marker",
+    "return_class": "void",
+    "param_classes": [
+     "i32"
+    ]
+   },
+   {
+    "symbol": "FUN_80079ab8",
+    "unit": "auto-c0011-005",
+    "gc_address": "80079ab8",
+    "address_source": "marker",
+    "return_class": "void",
+    "param_classes": [
+     "i32"
+    ]
+   },
+   {
+    "symbol": "FUN_80079b08",
+    "unit": "auto-c0011-005",
+    "gc_address": "80079b08",
+    "address_source": "marker",
+    "return_class": "void",
+    "param_classes": [
+     "i32"
+    ]
+   }
+  ]
+ }
+}

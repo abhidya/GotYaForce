@@ -27,6 +27,14 @@ rule); pure stdlib.
   capture side for NONTERMINATING spine functions (design I3), which
   `capture_oracle.py`'s run-to-LR strategy structurally cannot handle. See
   "Spine capture" below.
+- `capture_transcript.py` — CLI: `sites` / `capture` / `dispatch-sites` /
+  `dispatch-capture`. The **transcript_green** capture side for ordinary
+  returning functions with no capturable write set, and — through the two
+  `dispatch-*` subcommands, which reuse all of its machinery rather than
+  forking it — the **dispatch_green** capture side for the 1,602 functions
+  that dispatch through a ROM function-pointer table. See "Dispatch capture"
+  below. Replayed by `oracle-harness/run-transcript.mjs` and
+  `run-dispatch.mjs`.
 - `capture_gx.py` — CLI: `sites` / `scout` / `capture` / `surface` /
   `framebuffer`. The **GX** capture side (standards `gx_callstream_green` and
   `gx_framebuffer_equivalent`, `docs/gx-hle-host.md` §6.3). A GX draw
@@ -625,3 +633,147 @@ stub drops.
 - **Most staged exports never fire, by a wide margin.** Base 2v2 savestate: 5 of
   33 scouted exports fired. Roster `0x80079410`: 10 of 64. Roster `0x801a10e8`:
   18 of 62. Scout before capturing.
+
+---
+
+## Dispatch capture — `dispatch_green` for the ROM function-pointer class (2026-09-02)
+
+### The premise this removes
+
+`capture_transcript.py sites` **refuses** any function containing a `bctrl`, and says why:
+emcc lowers the decompiled `(*(code *)...)()` to a `call_indirect` on the module's own
+table, which no import shim can observe, so the transcript would have a hole exactly where
+the interesting behaviour is. Measured over the corpus that refusal covers **1,602
+functions — 14.6 %**, the single largest class with no route to any claim
+(`docs/verification-status.md` §3).
+
+Every word of that is true of a module built the ordinary way. It is not true of a module
+built by the **assembly gate**, because the table a composed module dispatches on is one
+the gate generated: the design's uniform dispatch ABI (V4 H3) already emitted an
+address-keyed table of adapter thunks, `__gf_dispatch`, and the declared
+`__gf_dispatch_miss` import. A thunk is a function the gate wrote, and a function the gate
+wrote can be watched.
+
+What was missing was the **outbound** direction — the companion let something call *into* a
+ROM function by address, but nothing rewrote the ROM's own call sites to go *out* through
+it. `research/tools/OGhidra/src/port_indirect_lowering.py` is that rewrite:
+
+    (*(code *)(&PTR_FUN_802d65b0)[*(char *)(param_1 + 0x580)])();
+
+becomes a frame build plus `__gf_dispatch_at(site, target, frameptr, classptr)`, and in the
+companion's **trace** mode that entry brackets the dispatch with two declared imports,
+`__gf_dispatch_enter` / `__gf_dispatch_exit`.
+
+### What is observable at the thunk boundary, exactly
+
+Measured on the built module, not asserted:
+
+| Observable | How |
+| --- | --- |
+| the **site** | the enclosing function's GC address + a per-function ordinal, packed into the `site` word |
+| the **resolved GameCube target** | the `gc_addr` the ROM's own code computed, before any lookup |
+| whether it resolved **in-table or bridged** | the `resolved` flag; a bridge miss is also visible as the `__gf_dispatch_miss` import |
+| the **arguments** | `arg_count` + the 16 uniform-frame slots at `argptr`, **plus a per-slot value class** the lowering records with `_Generic` — so the observer never has to assume a signature |
+| the **return** | the frame's `ret_class` + return slot, and the i32 view as `__gf_dispatch_exit`'s `result` |
+| an **in-table callee's own out-of-unit calls** | ordinary import shims, because the real ROM function runs |
+
+**Not** observable there, and each of these is written into every result artifact:
+
+- **which C function the thunk actually calls.** The table is the only authority at the
+  thunk, so a wrong address-to-thunk mapping produces a self-consistent, wrong stream. This
+  is the blindness the capture side exists to close (below).
+- **memory writes** beyond the declared watch windows.
+- a `bctrl` in code the lowering **refused** (a call whose result is used — 68 functions).
+- a **bridged** callee's behaviour: the harness replays the console's recorded return and
+  memory deltas, so those are inputs, not results.
+
+### Closing the wrong-thunk blindness — the capture-side change
+
+A transcript taken at the thunk cannot tell you the thunk resolved to the right function.
+So the capture records **the address the console's own branch actually jumped to**: at a
+breakpoint placed *on* the `bctrl` (which stops before the branch executes) it reads
+**CTR** — or **LR** for `blrl` — through `rsp_client.read_reg`, whose register map already
+had `REG_CTR = 68` and had never been used. `capture_common.Regs` gained `ctr()`, `lr()`
+and `branch_target(kind)`; the value lands in every event as `resolved_target`, and
+`run-dispatch.mjs` asserts the port dispatched to that address. Agreement with a second
+machine is something self-consistency cannot fake.
+
+Two further checks sit beside it, both grounded outside the companion, and all three are
+recorded per artifact under `claim.wrong_thunk_defence`:
+
+- the emitted table is **audited against `oracle-registry.json`** — derived from the DOL,
+  not from the window's sources — and a contradiction fails the run before any replay;
+- the module's **in-table/bridged answer** must match what that audited table contains.
+
+And the plan itself carries a fourth, independent of all of them: it **counts the ROM's
+`bctrl` instructions per function and refuses if the lowered C has a different number of
+sites**. That is the machine code checking the decompiler, and it means a site binding is
+never a guess.
+
+### What the capture also has to hand the port, and why that is not circular
+
+The ROM's function-pointer **tables** are seeded from the live console (a 0x200-byte window
+at each MEM1 base the site's target expression names, itemised in the header as
+`seeded_dispatch_tables`). The arena holds the DOL image, and a table the game has written
+since boot would otherwise read back stale. What the port is *not* given is the **index** —
+selecting the entry is the behaviour under test, and it is derived from the actor state in
+the seeded pointer-argument window.
+
+### Recipe
+
+```sh
+# 0. rebuild the unit with the lowering + companion trace (offline, model-free)
+python research/tools/OGhidra/tools/build_dispatch_unit.py \
+  --repo-root D:/GotYaForce --unit auto-c0011-005 \
+  --out research/decomp/port-units-dispatch/auto-c0011-005
+
+# 1. decode the function, bind its bctrls to the lowered sites (offline, no emulator)
+python research/tools/dolphin-trace/capture_transcript.py dispatch-sites \
+  --unit auto-c0011-005 --fn FUN_80079ab8 \
+  --wasm research/decomp/port-units-dispatch/auto-c0011-005/unit.wasm \
+  --sites-manifest research/decomp/port-units-dispatch/auto-c0011-005/gf_indirect_sites.json \
+  --out research/tools/dolphin-trace/plans/auto-c0011-005.FUN_80079ab8.dispatch.json
+
+# 2. boot, capture (~70 s for 40 cases incl. the roster setup), stop
+python research/tools/dolphin-trace/capture_oracle.py launch \
+  --scenario battle-roster-0x80079410 --wait 150
+python research/tools/dolphin-trace/capture_transcript.py dispatch-capture \
+  --plan research/tools/dolphin-trace/plans/auto-c0011-005.FUN_80079ab8.dispatch.json \
+  --n 40 --scenario battle-roster-0x80079410 \
+  --wasm-rel ../../port-units-dispatch/auto-c0011-005/unit.wasm \
+  --arena-rel ../arena-trace-empty.json \
+  --out research/decomp/oracle-harness/corpora/auto-c0011-005.FUN_80079ab8.dispatch.jsonl
+python research/tools/dolphin-trace/capture_oracle.py stop
+
+# 3. replay
+node research/decomp/oracle-harness/run-dispatch.mjs \
+  --capture research/decomp/oracle-harness/corpora/auto-c0011-005.FUN_80079ab8.dispatch.jsonl
+```
+
+`dispatch-sites` / `dispatch-capture` are **subcommands of `capture_transcript.py`**, not a
+fork of it: the ROM reader, the function decoder, the in-unit closure, the field-width map,
+the seed windows, the scenario plumbing and the non-vacuity discipline are the same code,
+so the two standards cannot drift apart in how they read an argument or bind a call site.
+
+### First real runs (2026-09-02)
+
+Four functions, two units, four `pass` verdicts — and the columns matter more than the
+verdict. `auto-c0011-005/FUN_80079ab8` dispatched to **four different** GameCube addresses
+over 40 cases with a direct call interleaved in every one; `auto-c0050-003/zz_01a31d8_`
+compared **40 argument slots**; `FUN_80079a40` and `zz_01a31a0_` reached a single target
+each, which is a much weaker statement and the artifacts say so. Two of the four would be
+**vacuous under `transcript_green`** — no out-of-unit call and no return value — so their
+entire observable behaviour is the dispatch. Full table, limits and the mutant suite:
+`docs/verification-status.md` §5.1a.
+
+### Operational facts this capture added
+
+- **`REG_CTR = 68` worked first time.** The stub's `p44` packet returns CTR at a `bctrl`
+  breakpoint with no extra plumbing; the constant had sat unused in `rsp_client.py` since
+  the file was written.
+- **A dispatch capture costs one boot per function, like every other capture**: ~15 s
+  relaunch + ~45 s roster setup + ~70 s for 40 cases.
+- **The state byte that indexes the table does not vary much per boot.** Two of the four
+  captures saw exactly one target across 40 cases on `battle-roster-*` with
+  `combat:b,x,a`. Target *diversity*, not case count, is what makes a dispatch result
+  worth anything — check `distinct_targets` in the capture's own stdout before replaying.

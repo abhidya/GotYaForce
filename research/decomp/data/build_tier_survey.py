@@ -74,6 +74,10 @@ LOGIC_RELPATHS = (
     "src/port_c_evidence.py",
     "src/port_spec_emit.py",
     "src/port_plan_derive.py",
+    # dispatch_green's eligibility predicate IS the lowering's own parser: a
+    # function is reachable exactly when every indirect call site in its
+    # closure can be rewritten. A change to the parser moves the number.
+    "src/port_indirect_lowering.py",
 )
 
 # Refusal strings emitted by survey_plan_tiers.transcript_tier_of, mapped to stable
@@ -207,6 +211,27 @@ def unverifiable_breakdown(dump: dict) -> dict:
     return out
 
 
+def dispatch_breakdown(dump: dict) -> dict:
+    """What became of the ROM-function-pointer-dispatch class.
+
+    Before dispatch_green existed the whole class was unverifiable. It is now
+    split: the functions whose every indirect call site the gate's lowering can
+    rewrite, and the residue it refuses -- overwhelmingly because the call's
+    RESULT IS USED, which the uniform frame's i32 return view cannot carry
+    without silently narrowing it (design C8).
+    """
+    reachable = sum(1 for r in dump.values() if r.get("combined") == "dispatch_green")
+    residue = sum(1 for r in dump.values()
+                  if r.get("combined") == "unverifiable" and r.get("indirect"))
+    sites = sum(int(r.get("dispatch_sites") or 0) for r in dump.values())
+    return {
+        "class_size": reachable + residue,
+        "reachable": reachable,
+        "still_unverifiable": residue,
+        "lowerable_call_sites": sites,
+    }
+
+
 def map_refusals(refusals: dict) -> dict:
     out: dict[str, int] = {}
     for text, count in refusals.items():
@@ -233,6 +258,7 @@ def build(oghidra_root: Path, repo_root: Path, python: str) -> dict:
 
     oracle_auto = combined_fn.get("oracle_green_auto", 0)
     transcript = combined_fn.get("transcript_green", 0)
+    dispatch = combined_fn.get("dispatch_green", 0)
     unverifiable = combined_fn.get("unverifiable", 0)
     verifiable = total_fn - unverifiable
 
@@ -262,6 +288,16 @@ def build(oghidra_root: Path, repo_root: Path, python: str) -> dict:
                                 "run-transcript.mjs). STRICTLY WEAKER than "
                                 "oracle_green: no write set is compared. It never "
                                 "upgrades into an oracle_green claim.",
+            "dispatch_green": "ROM function-pointer dispatch stream: the site, the "
+                              "RESOLVED GameCube target, the uniform-frame arguments "
+                              "and the return of every indirect call "
+                              "(research/decomp/oracle-harness/run-dispatch.mjs), "
+                              "against the address the console's own branch register "
+                              "held. ORTHOGONAL to the two above, not a rung of the "
+                              "same ladder: it observes a channel they cannot see and "
+                              "is blind to channels they check, and it is never "
+                              "totalled with either. It requires the module to be "
+                              "built with the gate's indirect-call lowering.",
             "combined": "Per function, the STRONGEST standard it can reach. A unit "
                         "whose exports land on a MIX of standards is reported mixed, "
                         "never rounded up to the stronger one.",
@@ -279,6 +315,7 @@ def build(oghidra_root: Path, repo_root: Path, python: str) -> dict:
             "oracle_green": {"count": oracle_auto, "pct": pct(oracle_auto, total_fn)},
             "transcript_green": {"count": transcript,
                                  "pct": pct(transcript, total_fn)},
+            "dispatch_green": {"count": dispatch, "pct": pct(dispatch, total_fn)},
             "verifiable_by_some_tier": {"count": verifiable,
                                         "pct": pct(verifiable, total_fn)},
             "unverifiable": {
@@ -316,6 +353,24 @@ def build(oghidra_root: Path, repo_root: Path, python: str) -> dict:
                     "empty transcript and still be oracle_green-eligible.",
             "eligible": summary["transcript_green"]["verifiable"],
             "refused": map_refusals(summary["transcript_green"]["refusals"]),
+        },
+        "dispatch_eligibility": {
+            "note": "What dispatch_green did to the class that had no route at all. "
+                    "The residue is functions whose indirect call RESULT IS USED: the "
+                    "uniform frame's i32 result is only a VIEW of the return slot and "
+                    "an indirect site has no callee prototype to derive the true "
+                    "return class from, so the lowering refuses them rather than "
+                    "narrowing a return silently.",
+            "requires": "a module built with the gate's indirect-call lowering "
+                        "(research/tools/OGhidra/src/port_indirect_lowering.py) and "
+                        "the dispatch companion in trace mode; a standalone unit "
+                        "built the ordinary way is still unobservable.",
+            "not_checked_statically": "the capture plan also audits the ROM's bctrl "
+                                      "count against the lowered C's site count per "
+                                      "function. That needs the DOL, so a function "
+                                      "counted eligible here can still be refused at "
+                                      "plan time.",
+            **dispatch_breakdown(dump),
         },
         "plan_size": dict(sorted(summary["plan_size"].items())),
     }
