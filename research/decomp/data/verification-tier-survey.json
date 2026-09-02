@@ -1,7 +1,7 @@
 {
   "schema": "gf.verification-tier-survey.v1",
-  "generated_utc": "2026-09-02T18:25:47Z",
-  "survey_tool_commit": "debd7ef46cb81c4822f9cbd26fea9b19115925ae",
+  "generated_utc": "2026-09-02T19:02:16Z",
+  "survey_tool_commit": "954efd3d7e566129bdd37152d6a0922bf7656aa8",
   "generator": "research/decomp/data/build_tier_survey.py",
   "survey_tool": "research/tools/OGhidra/tools/survey_plan_tiers.py",
   "measurement_kind": "ceiling",
@@ -47,8 +47,8 @@
       },
       {
         "path": "src/port_indirect_lowering.py",
-        "bytes": 24338,
-        "sha256": "613780682b8fd8e325a272a2e2cbffeccbfcab8cdcd778969a9ec9f90a3247ad"
+        "bytes": 26665,
+        "sha256": "2475f2a3dc9a00a4ab6d1a5b51620361e8e3ac77b04d90aab98a5a759b9a447a"
       }
     ]
   },
