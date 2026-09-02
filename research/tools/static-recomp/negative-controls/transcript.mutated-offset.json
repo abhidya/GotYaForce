@@ -1,0 +1,33 @@
+{
+  "result_schema": 1,
+  "standard": "transcript_green",
+  "standard_note": "transcript_green is STRICTLY WEAKER than oracle_green: it compares the observable call transcript and the return value, not the function's memory write set.",
+  "route": "static_recompilation",
+  "route_note": "The module under test was produced by research/tools/static-recomp/ppc_recomp.py from boot.dol: one C statement per PowerPC instruction word, emitted by table lookup. No decompiler output, no inferred signature, no hand-authored spec, no human review.",
+  "fn": "FUN_800c4468",
+  "gc_addr": "0x800c4468",
+  "capture": {
+    "file": "../../decomp/transcript-preflight/auto-c0020-007-FUN_800c4468/auto-c0020-007.FUN_800c4468.transcript.jsonl",
+    "cases": 24,
+    "counts": {
+      "case": 24,
+      "call": 48
+    }
+  },
+  "port_module": "build/neg/transcript_mut.cjs",
+  "cases_passed": 0,
+  "calls_matched": 0,
+  "vacuous_cases": [],
+  "divergence": {
+    "n": 0,
+    "i": 0,
+    "kind": "args",
+    "report": "case 0 call 0 (zz_00076d0_) arg 0: console 2154589984, port 0"
+  },
+  "verdict": "fail",
+  "does_not_verify": [
+    "the function's memory WRITE SET -- this standard compares the callee boundary, not writes.",
+    "out-of-unit callee behaviour: the callee is stubbed and its recorded memory delta is replayed, exactly as run-transcript.mjs does.",
+    "any input outside the 24 recorded cases."
+  ]
+}

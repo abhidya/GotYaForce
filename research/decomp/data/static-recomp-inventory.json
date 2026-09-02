@@ -1,0 +1,1722 @@
+{
+  "schema": 1,
+  "iso": "D:/GotYaForce/Gotcha Force.iso",
+  "entry": "0x80003154",
+  "bss": {
+    "addr": "0x803af140",
+    "size": 582632
+  },
+  "text_sections": [
+    {
+      "file_off": 256,
+      "addr": "0x80003100",
+      "size": 9440,
+      "instructions": 2360
+    },
+    {
+      "file_off": 9696,
+      "addr": "0x800055e0",
+      "size": 2796416,
+      "instructions": 699104
+    }
+  ],
+  "data_sections": [
+    {
+      "file_off": 2806112,
+      "addr": "0x802b0160",
+      "size": 32
+    },
+    {
+      "file_off": 2806144,
+      "addr": "0x802b0180",
+      "size": 32
+    },
+    {
+      "file_off": 2806176,
+      "addr": "0x802b01a0",
+      "size": 44224
+    },
+    {
+      "file_off": 2850400,
+      "addr": "0x802bae60",
+      "size": 1000128
+    },
+    {
+      "file_off": 3850528,
+      "addr": "0x804335a0",
+      "size": 11040
+    },
+    {
+      "file_off": 3861568,
+      "addr": "0x80436a20",
+      "size": 27360
+    }
+  ],
+  "total_text_words": 701464,
+  "padding_words": 1636,
+  "total_text_instructions": 699828,
+  "distinct_mnemonics": 244,
+  "capstone_rejected_words": 5578,
+  "class_histogram": {
+    "EASY": 525020,
+    "BRANCH": 65253,
+    "CALL": 41349,
+    "SPR": 24582,
+    "FPU_IEEE": 20971,
+    "RETURN": 14685,
+    "PAIRED_SINGLE": 2877,
+    "INDIRECT": 2728,
+    "FMA": 1800,
+    "PADDING": 1636,
+    "FP_NONIEEE": 216,
+    "SUPERVISOR": 148,
+    "CACHE": 131,
+    "SYNC": 53,
+    "UNKNOWN": 12,
+    "SYSCALL": 3
+  },
+  "hard_instruction_count": 3256,
+  "hard_classes": [
+    "ATOMIC",
+    "FP_NONIEEE",
+    "PAIRED_SINGLE",
+    "SUPERVISOR",
+    "SYSCALL",
+    "UNKNOWN"
+  ],
+  "attention_instruction_count": 29241,
+  "attention_classes": [
+    "CACHE",
+    "FMA",
+    "INDIRECT",
+    "SPR"
+  ],
+  "mnemonic_histogram": [
+    {
+      "mnemonic": "lwz",
+      "count": 66553,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "addi",
+      "count": 60981,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "li",
+      "count": 53436,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stw",
+      "count": 51456,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "bl",
+      "count": 41348,
+      "class": "CALL"
+    },
+    {
+      "mnemonic": "mr",
+      "count": 34322,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lfs",
+      "count": 31389,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lbz",
+      "count": 24375,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stb",
+      "count": 21156,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "b",
+      "count": 18692,
+      "class": "BRANCH"
+    },
+    {
+      "mnemonic": "cmpwi",
+      "count": 18676,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stfs",
+      "count": 18344,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "beq",
+      "count": 17318,
+      "class": "BRANCH"
+    },
+    {
+      "mnemonic": "lis",
+      "count": 14331,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "blr",
+      "count": 14107,
+      "class": "RETURN"
+    },
+    {
+      "mnemonic": "bne",
+      "count": 13443,
+      "class": "BRANCH"
+    },
+    {
+      "mnemonic": "sth",
+      "count": 12262,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stwu",
+      "count": 10542,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "extsb",
+      "count": 10410,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mtlr",
+      "count": 10370,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mflr",
+      "count": 10233,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "lha",
+      "count": 9808,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "add",
+      "count": 8843,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "slwi",
+      "count": 6567,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "cmplwi",
+      "count": 6522,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "bge",
+      "count": 6448,
+      "class": "BRANCH"
+    },
+    {
+      "mnemonic": "lfd",
+      "count": 6209,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "extsb.",
+      "count": 4865,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fsubs",
+      "count": 4095,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "fcmpo",
+      "count": 3930,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "fmuls",
+      "count": 3832,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "blt",
+      "count": 3641,
+      "class": "BRANCH"
+    },
+    {
+      "mnemonic": "mtctr",
+      "count": 3377,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mulli",
+      "count": 3352,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "ble",
+      "count": 3256,
+      "class": "BRANCH"
+    },
+    {
+      "mnemonic": "rlwinm.",
+      "count": 3146,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lwzx",
+      "count": 2966,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "rlwinm",
+      "count": 2810,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lhz",
+      "count": 2754,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "cmpw",
+      "count": 2717,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stfd",
+      "count": 2624,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "bctrl",
+      "count": 2457,
+      "class": "INDIRECT"
+    },
+    {
+      "mnemonic": "fmul",
+      "count": 2440,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "xoris",
+      "count": 1960,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fadds",
+      "count": 1934,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "srwi",
+      "count": 1844,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "ori",
+      "count": 1737,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "subf",
+      "count": 1686,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "bgt",
+      "count": 1673,
+      "class": "BRANCH"
+    },
+    {
+      "mnemonic": "<padding>",
+      "count": 1636,
+      "class": "PADDING"
+    },
+    {
+      "mnemonic": "srawi",
+      "count": 1518,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "cror",
+      "count": 1480,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "clrlwi",
+      "count": 1470,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fmr",
+      "count": 1330,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "slw",
+      "count": 1301,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "psq_l",
+      "count": 1264,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "rlwimi",
+      "count": 1199,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "or",
+      "count": 1184,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "psq_st",
+      "count": 1142,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "lbzx",
+      "count": 1105,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fdivs",
+      "count": 975,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "mullw",
+      "count": 967,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lmw",
+      "count": 962,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stmw",
+      "count": 960,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "extsh",
+      "count": 895,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "cmplw",
+      "count": 847,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fmadds",
+      "count": 810,
+      "class": "FMA"
+    },
+    {
+      "mnemonic": "fctiwz",
+      "count": 792,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "bdnz",
+      "count": 781,
+      "class": "BRANCH"
+    },
+    {
+      "mnemonic": "and.",
+      "count": 779,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "clrlwi.",
+      "count": 696,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lfsx",
+      "count": 649,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fnmsub",
+      "count": 645,
+      "class": "FMA"
+    },
+    {
+      "mnemonic": "or.",
+      "count": 630,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "extsh.",
+      "count": 582,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "neg",
+      "count": 559,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "crclr",
+      "count": 557,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "addis",
+      "count": 509,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "and",
+      "count": 507,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "frsp",
+      "count": 488,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "mulhw",
+      "count": 483,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "subfic",
+      "count": 482,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stfsx",
+      "count": 438,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fneg",
+      "count": 411,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "xor",
+      "count": 391,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stwx",
+      "count": 376,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stbx",
+      "count": 371,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "cntlzw",
+      "count": 339,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lhax",
+      "count": 315,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lbzu",
+      "count": 311,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fcmpu",
+      "count": 271,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "mtspr",
+      "count": 259,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "addic.",
+      "count": 252,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "andc",
+      "count": 233,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "frsqrte",
+      "count": 213,
+      "class": "FP_NONIEEE"
+    },
+    {
+      "mnemonic": "fsub",
+      "count": 213,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "andi.",
+      "count": 209,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "srw",
+      "count": 202,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "addze",
+      "count": 201,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "beqlr",
+      "count": 186,
+      "class": "RETURN"
+    },
+    {
+      "mnemonic": "mfspr",
+      "count": 184,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "oris",
+      "count": 179,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fmadd",
+      "count": 179,
+      "class": "FMA"
+    },
+    {
+      "mnemonic": "bnelr",
+      "count": 177,
+      "class": "RETURN"
+    },
+    {
+      "mnemonic": "lwzu",
+      "count": 170,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "subfe",
+      "count": 170,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "subfc",
+      "count": 163,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "divw",
+      "count": 146,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "blrl",
+      "count": 138,
+      "class": "INDIRECT"
+    },
+    {
+      "mnemonic": "bctr",
+      "count": 133,
+      "class": "INDIRECT"
+    },
+    {
+      "mnemonic": "fadd",
+      "count": 131,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "ps_add",
+      "count": 130,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "mulhwu",
+      "count": 122,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fnmsubs",
+      "count": 117,
+      "class": "FMA"
+    },
+    {
+      "mnemonic": "xori",
+      "count": 95,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "sthx",
+      "count": 95,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "rotlwi",
+      "count": 94,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "nor",
+      "count": 92,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "adde",
+      "count": 91,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "bgelr",
+      "count": 81,
+      "class": "RETURN"
+    },
+    {
+      "mnemonic": "fabs",
+      "count": 81,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "lhzx",
+      "count": 80,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "eqv",
+      "count": 76,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stbu",
+      "count": 73,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lfdx",
+      "count": 69,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "subf.",
+      "count": 68,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "divwu",
+      "count": 66,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "bgtlr",
+      "count": 57,
+      "class": "RETURN"
+    },
+    {
+      "mnemonic": "dcbz",
+      "count": 56,
+      "class": "CACHE"
+    },
+    {
+      "mnemonic": "addc",
+      "count": 55,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mfmsr",
+      "count": 54,
+      "class": "SUPERVISOR"
+    },
+    {
+      "mnemonic": "mfcr",
+      "count": 52,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "add.",
+      "count": 49,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "fdiv",
+      "count": 48,
+      "class": "FPU_IEEE"
+    },
+    {
+      "mnemonic": "ps_mul",
+      "count": 48,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "neg.",
+      "count": 46,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "nop",
+      "count": 45,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "dcbt",
+      "count": 44,
+      "class": "CACHE"
+    },
+    {
+      "mnemonic": "stfdx",
+      "count": 43,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "ps_sub",
+      "count": 42,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "bltlr",
+      "count": 40,
+      "class": "RETURN"
+    },
+    {
+      "mnemonic": "blelr",
+      "count": 37,
+      "class": "RETURN"
+    },
+    {
+      "mnemonic": "ps_muls0",
+      "count": 37,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "rfi",
+      "count": 35,
+      "class": "SUPERVISOR"
+    },
+    {
+      "mnemonic": "sync",
+      "count": 33,
+      "class": "SYNC"
+    },
+    {
+      "mnemonic": "sraw",
+      "count": 33,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "ps_mr",
+      "count": 31,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "fmsubs",
+      "count": 30,
+      "class": "FMA"
+    },
+    {
+      "mnemonic": "mtmsr",
+      "count": 27,
+      "class": "SUPERVISOR"
+    },
+    {
+      "mnemonic": "sthbrx",
+      "count": 27,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "addic",
+      "count": 26,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "stfdu",
+      "count": 24,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "psq_lu",
+      "count": 22,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "lwzux",
+      "count": 21,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "isync",
+      "count": 20,
+      "class": "SYNC"
+    },
+    {
+      "mnemonic": "ps_merge00",
+      "count": 20,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "ps_madd",
+      "count": 20,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "andis.",
+      "count": 19,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "ps_sum0",
+      "count": 19,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "fmsub",
+      "count": 18,
+      "class": "FMA"
+    },
+    {
+      "mnemonic": "lhzu",
+      "count": 17,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "divw.",
+      "count": 16,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lhau",
+      "count": 16,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mfsr",
+      "count": 16,
+      "class": "SUPERVISOR"
+    },
+    {
+      "mnemonic": "mtsr",
+      "count": 16,
+      "class": "SUPERVISOR"
+    },
+    {
+      "mnemonic": "psq_stu",
+      "count": 16,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "dcbi",
+      "count": 15,
+      "class": "CACHE"
+    },
+    {
+      "mnemonic": "ps_msub",
+      "count": 15,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "andc.",
+      "count": 13,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "<undecoded>",
+      "count": 12,
+      "class": "UNKNOWN"
+    },
+    {
+      "mnemonic": "rlwnm",
+      "count": 12,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mtdbatu",
+      "count": 12,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mtibatu",
+      "count": 12,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "ps_merge10",
+      "count": 12,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "subfze",
+      "count": 12,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lfsu",
+      "count": 11,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mtcrf",
+      "count": 9,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "ps_madds1",
+      "count": 9,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "ps_merge11",
+      "count": 9,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "sthu",
+      "count": 8,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "orc",
+      "count": 8,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mtdbatl",
+      "count": 8,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mtibatl",
+      "count": 8,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "ps_sel",
+      "count": 8,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "ps_madds0",
+      "count": 7,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "lfdux",
+      "count": 7,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mtxer",
+      "count": 6,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mftb",
+      "count": 6,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "ps_nmsub",
+      "count": 6,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "ps_sum1",
+      "count": 6,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "addze.",
+      "count": 6,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "dcbz_l",
+      "count": 6,
+      "class": "CACHE"
+    },
+    {
+      "mnemonic": "stwbrx",
+      "count": 5,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mfctr",
+      "count": 5,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mfxer",
+      "count": 5,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mftbu",
+      "count": 5,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "lfdu",
+      "count": 5,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "icbi",
+      "count": 4,
+      "class": "CACHE"
+    },
+    {
+      "mnemonic": "mfdar",
+      "count": 4,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "stfsu",
+      "count": 4,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "srawi.",
+      "count": 4,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "twui",
+      "count": 4,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mfibatu",
+      "count": 4,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mfibatl",
+      "count": 4,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mfdbatu",
+      "count": 4,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mfdbatl",
+      "count": 4,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "subfe.",
+      "count": 4,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "dcbst",
+      "count": 3,
+      "class": "CACHE"
+    },
+    {
+      "mnemonic": "sc",
+      "count": 3,
+      "class": "SYSCALL"
+    },
+    {
+      "mnemonic": "mffs",
+      "count": 3,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mtfsf",
+      "count": 3,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mfdsisr",
+      "count": 3,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "dcbf",
+      "count": 3,
+      "class": "CACHE"
+    },
+    {
+      "mnemonic": "ps_merge01",
+      "count": 3,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "fres",
+      "count": 3,
+      "class": "FP_NONIEEE"
+    },
+    {
+      "mnemonic": "ps_neg",
+      "count": 3,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "ps_muls1",
+      "count": 3,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "mtdsisr",
+      "count": 3,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mtdar",
+      "count": 3,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "adde.",
+      "count": 2,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "rlwnm.",
+      "count": 2,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "subfc.",
+      "count": 2,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "ps_cmpo0",
+      "count": 2,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "ps_nmadd",
+      "count": 2,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "mullw.",
+      "count": 2,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "rotlwi.",
+      "count": 2,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "lwbrx",
+      "count": 2,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "bdnz-",
+      "count": 1,
+      "class": "BRANCH"
+    },
+    {
+      "mnemonic": "psq_lx",
+      "count": 1,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "mnemonic": "fnmadds",
+      "count": 1,
+      "class": "FMA"
+    },
+    {
+      "mnemonic": "mtfsb1",
+      "count": 1,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "bla",
+      "count": 1,
+      "class": "CALL"
+    },
+    {
+      "mnemonic": "mfpvr",
+      "count": 1,
+      "class": "SPR"
+    },
+    {
+      "mnemonic": "mficcr",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mfesr",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mfdear",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mttbl",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mttbu",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mticcr",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mtesr",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "mtdear",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "xor.",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "divwu.",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "mnemonic": "slw.",
+      "count": 1,
+      "class": "EASY"
+    }
+  ],
+  "class_examples": {
+    "SPR": [
+      {
+        "addr": "0x80003100",
+        "mn": "mflr"
+      },
+      {
+        "addr": "0x80003138",
+        "mn": "mtlr"
+      },
+      {
+        "addr": "0x800031f0",
+        "mn": "mtlr"
+      },
+      {
+        "addr": "0x8000322c",
+        "mn": "mtctr"
+      },
+      {
+        "addr": "0x80003340",
+        "mn": "mflr"
+      },
+      {
+        "addr": "0x800033f8",
+        "mn": "mtlr"
+      }
+    ],
+    "EASY": [
+      {
+        "addr": "0x80003104",
+        "mn": "lis"
+      },
+      {
+        "addr": "0x80003108",
+        "mn": "stw"
+      },
+      {
+        "addr": "0x8000310c",
+        "mn": "stwu"
+      },
+      {
+        "addr": "0x80003110",
+        "mn": "lhz"
+      },
+      {
+        "addr": "0x80003114",
+        "mn": "andi."
+      },
+      {
+        "addr": "0x80003118",
+        "mn": "cmpwi"
+      }
+    ],
+    "BRANCH": [
+      {
+        "addr": "0x8000311c",
+        "mn": "bne"
+      },
+      {
+        "addr": "0x80003190",
+        "mn": "beq"
+      },
+      {
+        "addr": "0x80003198",
+        "mn": "b"
+      },
+      {
+        "addr": "0x800031ac",
+        "mn": "beq"
+      },
+      {
+        "addr": "0x800031c4",
+        "mn": "beq"
+      },
+      {
+        "addr": "0x800031d0",
+        "mn": "beq"
+      }
+    ],
+    "CALL": [
+      {
+        "addr": "0x8000312c",
+        "mn": "bl"
+      },
+      {
+        "addr": "0x80003154",
+        "mn": "bl"
+      },
+      {
+        "addr": "0x80003158",
+        "mn": "bl"
+      },
+      {
+        "addr": "0x8000316c",
+        "mn": "bl"
+      },
+      {
+        "addr": "0x800031e0",
+        "mn": "bl"
+      },
+      {
+        "addr": "0x80003260",
+        "mn": "bl"
+      }
+    ],
+    "RETURN": [
+      {
+        "addr": "0x8000313c",
+        "mn": "blr"
+      },
+      {
+        "addr": "0x80003148",
+        "mn": "blr"
+      },
+      {
+        "addr": "0x80003150",
+        "mn": "blr"
+      },
+      {
+        "addr": "0x8000333c",
+        "mn": "blr"
+      },
+      {
+        "addr": "0x800033fc",
+        "mn": "blr"
+      },
+      {
+        "addr": "0x80003420",
+        "mn": "blr"
+      }
+    ],
+    "INDIRECT": [
+      {
+        "addr": "0x800031f4",
+        "mn": "blrl"
+      },
+      {
+        "addr": "0x80008d68",
+        "mn": "bctrl"
+      },
+      {
+        "addr": "0x80008d7c",
+        "mn": "bctrl"
+      },
+      {
+        "addr": "0x80009e88",
+        "mn": "bctrl"
+      },
+      {
+        "addr": "0x80009e9c",
+        "mn": "bctrl"
+      },
+      {
+        "addr": "0x80009f00",
+        "mn": "bctrl"
+      }
+    ],
+    "SUPERVISOR": [
+      {
+        "addr": "0x80003400",
+        "mn": "mfmsr"
+      },
+      {
+        "addr": "0x80003408",
+        "mn": "mtmsr"
+      },
+      {
+        "addr": "0x800036d8",
+        "mn": "mfmsr"
+      },
+      {
+        "addr": "0x800036f4",
+        "mn": "rfi"
+      },
+      {
+        "addr": "0x800037c0",
+        "mn": "mfmsr"
+      },
+      {
+        "addr": "0x800037dc",
+        "mn": "rfi"
+      }
+    ],
+    "CACHE": [
+      {
+        "addr": "0x80003438",
+        "mn": "dcbst"
+      },
+      {
+        "addr": "0x80003440",
+        "mn": "icbi"
+      },
+      {
+        "addr": "0x800036b4",
+        "mn": "icbi"
+      },
+      {
+        "addr": "0x800036bc",
+        "mn": "dcbi"
+      },
+      {
+        "addr": "0x80200620",
+        "mn": "dcbi"
+      },
+      {
+        "addr": "0x8020064c",
+        "mn": "dcbf"
+      }
+    ],
+    "SYNC": [
+      {
+        "addr": "0x8000343c",
+        "mn": "sync"
+      },
+      {
+        "addr": "0x80003450",
+        "mn": "isync"
+      },
+      {
+        "addr": "0x800044cc",
+        "mn": "sync"
+      },
+      {
+        "addr": "0x800044d4",
+        "mn": "sync"
+      },
+      {
+        "addr": "0x800045cc",
+        "mn": "sync"
+      },
+      {
+        "addr": "0x800045d4",
+        "mn": "sync"
+      }
+    ],
+    "UNKNOWN": [
+      {
+        "addr": "0x800034ac",
+        "mn": "<undecoded>"
+      },
+      {
+        "addr": "0x8000554c",
+        "mn": "<undecoded>"
+      },
+      {
+        "addr": "0x80005558",
+        "mn": "<undecoded>"
+      },
+      {
+        "addr": "0x80005564",
+        "mn": "<undecoded>"
+      },
+      {
+        "addr": "0x80005570",
+        "mn": "<undecoded>"
+      },
+      {
+        "addr": "0x8000557c",
+        "mn": "<undecoded>"
+      }
+    ],
+    "PADDING": [
+      {
+        "addr": "0x800034dc",
+        "mn": "<padding>"
+      },
+      {
+        "addr": "0x800034e0",
+        "mn": "<padding>"
+      },
+      {
+        "addr": "0x800034e4",
+        "mn": "<padding>"
+      },
+      {
+        "addr": "0x800034e8",
+        "mn": "<padding>"
+      },
+      {
+        "addr": "0x800034ec",
+        "mn": "<padding>"
+      },
+      {
+        "addr": "0x800034f0",
+        "mn": "<padding>"
+      }
+    ],
+    "FPU_IEEE": [
+      {
+        "addr": "0x800056fc",
+        "mn": "fmr"
+      },
+      {
+        "addr": "0x80005704",
+        "mn": "fmr"
+      },
+      {
+        "addr": "0x8000571c",
+        "mn": "fsubs"
+      },
+      {
+        "addr": "0x80005728",
+        "mn": "fsubs"
+      },
+      {
+        "addr": "0x80005830",
+        "mn": "fneg"
+      },
+      {
+        "addr": "0x80005894",
+        "mn": "fmr"
+      }
+    ],
+    "PAIRED_SINGLE": [
+      {
+        "addr": "0x80005b04",
+        "mn": "psq_st"
+      },
+      {
+        "addr": "0x80005b0c",
+        "mn": "psq_st"
+      },
+      {
+        "addr": "0x80005fbc",
+        "mn": "psq_l"
+      },
+      {
+        "addr": "0x80005fc4",
+        "mn": "psq_l"
+      },
+      {
+        "addr": "0x80008dac",
+        "mn": "psq_st"
+      },
+      {
+        "addr": "0x80008db4",
+        "mn": "psq_st"
+      }
+    ],
+    "FMA": [
+      {
+        "addr": "0x80005e6c",
+        "mn": "fmadds"
+      },
+      {
+        "addr": "0x80005ef4",
+        "mn": "fmadds"
+      },
+      {
+        "addr": "0x80005f80",
+        "mn": "fmadds"
+      },
+      {
+        "addr": "0x8000605c",
+        "mn": "fnmsubs"
+      },
+      {
+        "addr": "0x80006070",
+        "mn": "fnmsubs"
+      },
+      {
+        "addr": "0x800060d4",
+        "mn": "fnmsubs"
+      }
+    ],
+    "FP_NONIEEE": [
+      {
+        "addr": "0x8000bca4",
+        "mn": "frsqrte"
+      },
+      {
+        "addr": "0x8000d9f8",
+        "mn": "frsqrte"
+      },
+      {
+        "addr": "0x8000db04",
+        "mn": "frsqrte"
+      },
+      {
+        "addr": "0x8000e8e8",
+        "mn": "frsqrte"
+      },
+      {
+        "addr": "0x8000ea7c",
+        "mn": "frsqrte"
+      },
+      {
+        "addr": "0x8000fd58",
+        "mn": "frsqrte"
+      }
+    ],
+    "SYSCALL": [
+      {
+        "addr": "0x801fea14",
+        "mn": "sc"
+      },
+      {
+        "addr": "0x80200658",
+        "mn": "sc"
+      },
+      {
+        "addr": "0x80200688",
+        "mn": "sc"
+      }
+    ]
+  }
+}

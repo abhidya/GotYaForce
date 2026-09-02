@@ -1,0 +1,1034 @@
+{
+  "instructions": 699828,
+  "distinct_encoding_forms": 169,
+  "forms_needed_for_coverage": {
+    "90%": 24,
+    "99%": 65,
+    "99.9%": 109,
+    "99.99%": 147,
+    "100%": 169
+  },
+  "hard_class_location": {
+    "PAIRED_SINGLE @ main text": 2877,
+    "FP_NONIEEE @ main text": 216,
+    "SUPERVISOR @ main text": 89,
+    "SUPERVISOR @ init/OS boot": 59,
+    "SYSCALL @ main text": 3
+  },
+  "form_histogram": [
+    {
+      "form": "14",
+      "name": "li",
+      "count": 114417,
+      "class": "EASY"
+    },
+    {
+      "form": "32",
+      "name": "lwz",
+      "count": 66553,
+      "class": "EASY"
+    },
+    {
+      "form": "18",
+      "name": "bl",
+      "count": 60041,
+      "class": "CALL"
+    },
+    {
+      "form": "36",
+      "name": "stw",
+      "count": 51456,
+      "class": "EASY"
+    },
+    {
+      "form": "16",
+      "name": "bne",
+      "count": 46561,
+      "class": "BRANCH"
+    },
+    {
+      "form": "31/444",
+      "name": "mr",
+      "count": 36136,
+      "class": "EASY"
+    },
+    {
+      "form": "48",
+      "name": "lfs",
+      "count": 31389,
+      "class": "EASY"
+    },
+    {
+      "form": "34",
+      "name": "lbz",
+      "count": 24375,
+      "class": "EASY"
+    },
+    {
+      "form": "38",
+      "name": "stb",
+      "count": 21156,
+      "class": "EASY"
+    },
+    {
+      "form": "11",
+      "name": "cmpwi",
+      "count": 18676,
+      "class": "EASY"
+    },
+    {
+      "form": "52",
+      "name": "stfs",
+      "count": 18344,
+      "class": "EASY"
+    },
+    {
+      "form": "21",
+      "name": "rlwinm",
+      "count": 16629,
+      "class": "EASY"
+    },
+    {
+      "form": "31/954",
+      "name": "extsb",
+      "count": 15275,
+      "class": "EASY"
+    },
+    {
+      "form": "15",
+      "name": "lis",
+      "count": 14840,
+      "class": "EASY"
+    },
+    {
+      "form": "19/16",
+      "name": "blr",
+      "count": 14823,
+      "class": "RETURN"
+    },
+    {
+      "form": "31/467",
+      "name": "mtlr",
+      "count": 14063,
+      "class": "SPR"
+    },
+    {
+      "form": "44",
+      "name": "sth",
+      "count": 12262,
+      "class": "EASY"
+    },
+    {
+      "form": "37",
+      "name": "stwu",
+      "count": 10542,
+      "class": "EASY"
+    },
+    {
+      "form": "31/339",
+      "name": "mflr",
+      "count": 10454,
+      "class": "SPR"
+    },
+    {
+      "form": "42",
+      "name": "lha",
+      "count": 9808,
+      "class": "EASY"
+    },
+    {
+      "form": "31/266",
+      "name": "add",
+      "count": 8892,
+      "class": "EASY"
+    },
+    {
+      "form": "10",
+      "name": "cmplwi",
+      "count": 6522,
+      "class": "EASY"
+    },
+    {
+      "form": "50",
+      "name": "lfd",
+      "count": 6209,
+      "class": "EASY"
+    },
+    {
+      "form": "59/A20",
+      "name": "fsubs",
+      "count": 4095,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "63/32",
+      "name": "fcmpo",
+      "count": 3930,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "59/A25",
+      "name": "fmuls",
+      "count": 3832,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "7",
+      "name": "mulli",
+      "count": 3352,
+      "class": "EASY"
+    },
+    {
+      "form": "31/23",
+      "name": "lwzx",
+      "count": 2966,
+      "class": "EASY"
+    },
+    {
+      "form": "40",
+      "name": "lhz",
+      "count": 2754,
+      "class": "EASY"
+    },
+    {
+      "form": "31/0",
+      "name": "cmpw",
+      "count": 2717,
+      "class": "EASY"
+    },
+    {
+      "form": "54",
+      "name": "stfd",
+      "count": 2624,
+      "class": "EASY"
+    },
+    {
+      "form": "19/528",
+      "name": "bctrl",
+      "count": 2590,
+      "class": "INDIRECT"
+    },
+    {
+      "form": "63/A25",
+      "name": "fmul",
+      "count": 2440,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "27",
+      "name": "xoris",
+      "count": 1960,
+      "class": "EASY"
+    },
+    {
+      "form": "59/A21",
+      "name": "fadds",
+      "count": 1934,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "24",
+      "name": "ori",
+      "count": 1782,
+      "class": "EASY"
+    },
+    {
+      "form": "31/40",
+      "name": "subf",
+      "count": 1754,
+      "class": "EASY"
+    },
+    {
+      "form": "31/824",
+      "name": "srawi",
+      "count": 1522,
+      "class": "EASY"
+    },
+    {
+      "form": "19/449",
+      "name": "cror",
+      "count": 1480,
+      "class": "EASY"
+    },
+    {
+      "form": "31/922",
+      "name": "extsh",
+      "count": 1477,
+      "class": "EASY"
+    },
+    {
+      "form": "63/72",
+      "name": "fmr",
+      "count": 1330,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "31/24",
+      "name": "slw",
+      "count": 1302,
+      "class": "EASY"
+    },
+    {
+      "form": "31/28",
+      "name": "and",
+      "count": 1286,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/psq_l",
+      "name": "psq_l",
+      "count": 1264,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "20",
+      "name": "rlwimi",
+      "count": 1199,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/psq_st",
+      "name": "psq_st",
+      "count": 1142,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "31/87",
+      "name": "lbzx",
+      "count": 1105,
+      "class": "EASY"
+    },
+    {
+      "form": "59/A18",
+      "name": "fdivs",
+      "count": 975,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "31/235",
+      "name": "mullw",
+      "count": 969,
+      "class": "EASY"
+    },
+    {
+      "form": "46",
+      "name": "lmw",
+      "count": 962,
+      "class": "EASY"
+    },
+    {
+      "form": "47",
+      "name": "stmw",
+      "count": 960,
+      "class": "EASY"
+    },
+    {
+      "form": "31/32",
+      "name": "cmplw",
+      "count": 847,
+      "class": "EASY"
+    },
+    {
+      "form": "59/A29",
+      "name": "fmadds",
+      "count": 810,
+      "class": "FMA"
+    },
+    {
+      "form": "63/15",
+      "name": "fctiwz",
+      "count": 792,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "31/535",
+      "name": "lfsx",
+      "count": 649,
+      "class": "EASY"
+    },
+    {
+      "form": "63/A30",
+      "name": "fnmsub",
+      "count": 645,
+      "class": "FMA"
+    },
+    {
+      "form": "31/104",
+      "name": "neg",
+      "count": 605,
+      "class": "EASY"
+    },
+    {
+      "form": "19/193",
+      "name": "crclr",
+      "count": 557,
+      "class": "EASY"
+    },
+    {
+      "form": "63/12",
+      "name": "frsp",
+      "count": 488,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "31/75",
+      "name": "mulhw",
+      "count": 483,
+      "class": "EASY"
+    },
+    {
+      "form": "8",
+      "name": "subfic",
+      "count": 482,
+      "class": "EASY"
+    },
+    {
+      "form": "31/663",
+      "name": "stfsx",
+      "count": 438,
+      "class": "EASY"
+    },
+    {
+      "form": "63/40",
+      "name": "fneg",
+      "count": 411,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "31/316",
+      "name": "xor",
+      "count": 392,
+      "class": "EASY"
+    },
+    {
+      "form": "31/151",
+      "name": "stwx",
+      "count": 376,
+      "class": "EASY"
+    },
+    {
+      "form": "31/215",
+      "name": "stbx",
+      "count": 371,
+      "class": "EASY"
+    },
+    {
+      "form": "31/26",
+      "name": "cntlzw",
+      "count": 339,
+      "class": "EASY"
+    },
+    {
+      "form": "31/343",
+      "name": "lhax",
+      "count": 315,
+      "class": "EASY"
+    },
+    {
+      "form": "35",
+      "name": "lbzu",
+      "count": 311,
+      "class": "EASY"
+    },
+    {
+      "form": "63/0",
+      "name": "fcmpu",
+      "count": 271,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "13",
+      "name": "addic.",
+      "count": 252,
+      "class": "EASY"
+    },
+    {
+      "form": "31/60",
+      "name": "andc",
+      "count": 246,
+      "class": "EASY"
+    },
+    {
+      "form": "63/A26",
+      "name": "frsqrte",
+      "count": 213,
+      "class": "FP_NONIEEE"
+    },
+    {
+      "form": "63/A20",
+      "name": "fsub",
+      "count": 213,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "28",
+      "name": "andi.",
+      "count": 209,
+      "class": "EASY"
+    },
+    {
+      "form": "31/202",
+      "name": "addze",
+      "count": 207,
+      "class": "EASY"
+    },
+    {
+      "form": "31/536",
+      "name": "srw",
+      "count": 202,
+      "class": "EASY"
+    },
+    {
+      "form": "25",
+      "name": "oris",
+      "count": 179,
+      "class": "EASY"
+    },
+    {
+      "form": "63/A29",
+      "name": "fmadd",
+      "count": 179,
+      "class": "FMA"
+    },
+    {
+      "form": "31/136",
+      "name": "subfe",
+      "count": 174,
+      "class": "EASY"
+    },
+    {
+      "form": "33",
+      "name": "lwzu",
+      "count": 170,
+      "class": "EASY"
+    },
+    {
+      "form": "31/8",
+      "name": "subfc",
+      "count": 165,
+      "class": "EASY"
+    },
+    {
+      "form": "31/491",
+      "name": "divw",
+      "count": 162,
+      "class": "EASY"
+    },
+    {
+      "form": "63/A21",
+      "name": "fadd",
+      "count": 131,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "gekko/ps_add",
+      "name": "ps_add",
+      "count": 130,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "31/11",
+      "name": "mulhwu",
+      "count": 122,
+      "class": "EASY"
+    },
+    {
+      "form": "59/A30",
+      "name": "fnmsubs",
+      "count": 117,
+      "class": "FMA"
+    },
+    {
+      "form": "26",
+      "name": "xori",
+      "count": 95,
+      "class": "EASY"
+    },
+    {
+      "form": "31/407",
+      "name": "sthx",
+      "count": 95,
+      "class": "EASY"
+    },
+    {
+      "form": "31/138",
+      "name": "adde.",
+      "count": 93,
+      "class": "EASY"
+    },
+    {
+      "form": "31/124",
+      "name": "nor",
+      "count": 92,
+      "class": "EASY"
+    },
+    {
+      "form": "63/264",
+      "name": "fabs",
+      "count": 81,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "31/279",
+      "name": "lhzx",
+      "count": 80,
+      "class": "EASY"
+    },
+    {
+      "form": "31/284",
+      "name": "eqv",
+      "count": 76,
+      "class": "EASY"
+    },
+    {
+      "form": "39",
+      "name": "stbu",
+      "count": 73,
+      "class": "EASY"
+    },
+    {
+      "form": "31/599",
+      "name": "lfdx",
+      "count": 69,
+      "class": "EASY"
+    },
+    {
+      "form": "31/459",
+      "name": "divwu",
+      "count": 67,
+      "class": "EASY"
+    },
+    {
+      "form": "31/1014",
+      "name": "dcbz",
+      "count": 56,
+      "class": "CACHE"
+    },
+    {
+      "form": "31/10",
+      "name": "addc",
+      "count": 55,
+      "class": "EASY"
+    },
+    {
+      "form": "31/83",
+      "name": "mfmsr",
+      "count": 54,
+      "class": "SUPERVISOR"
+    },
+    {
+      "form": "31/19",
+      "name": "mfcr",
+      "count": 52,
+      "class": "SPR"
+    },
+    {
+      "form": "63/A18",
+      "name": "fdiv",
+      "count": 48,
+      "class": "FPU_IEEE"
+    },
+    {
+      "form": "gekko/ps_mul",
+      "name": "ps_mul",
+      "count": 48,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "31/278",
+      "name": "dcbt",
+      "count": 44,
+      "class": "CACHE"
+    },
+    {
+      "form": "31/727",
+      "name": "stfdx",
+      "count": 43,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/ps_sub",
+      "name": "ps_sub",
+      "count": 42,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "gekko/ps_muls0",
+      "name": "ps_muls0",
+      "count": 37,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "19/50",
+      "name": "rfi",
+      "count": 35,
+      "class": "SUPERVISOR"
+    },
+    {
+      "form": "31/598",
+      "name": "sync",
+      "count": 33,
+      "class": "SYNC"
+    },
+    {
+      "form": "31/792",
+      "name": "sraw",
+      "count": 33,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/ps_mr",
+      "name": "ps_mr",
+      "count": 31,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "59/A28",
+      "name": "fmsubs",
+      "count": 30,
+      "class": "FMA"
+    },
+    {
+      "form": "31/146",
+      "name": "mtmsr",
+      "count": 27,
+      "class": "SUPERVISOR"
+    },
+    {
+      "form": "31/918",
+      "name": "sthbrx",
+      "count": 27,
+      "class": "EASY"
+    },
+    {
+      "form": "12",
+      "name": "addic",
+      "count": 26,
+      "class": "EASY"
+    },
+    {
+      "form": "55",
+      "name": "stfdu",
+      "count": 24,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/psq_lu",
+      "name": "psq_lu",
+      "count": 22,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "31/55",
+      "name": "lwzux",
+      "count": 21,
+      "class": "EASY"
+    },
+    {
+      "form": "19/150",
+      "name": "isync",
+      "count": 20,
+      "class": "SYNC"
+    },
+    {
+      "form": "gekko/ps_merge00",
+      "name": "ps_merge00",
+      "count": 20,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "gekko/ps_madd",
+      "name": "ps_madd",
+      "count": 20,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "29",
+      "name": "andis.",
+      "count": 19,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/ps_sum0",
+      "name": "ps_sum0",
+      "count": 19,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "63/A28",
+      "name": "fmsub",
+      "count": 18,
+      "class": "FMA"
+    },
+    {
+      "form": "41",
+      "name": "lhzu",
+      "count": 17,
+      "class": "EASY"
+    },
+    {
+      "form": "43",
+      "name": "lhau",
+      "count": 16,
+      "class": "EASY"
+    },
+    {
+      "form": "31/595",
+      "name": "mfsr",
+      "count": 16,
+      "class": "SUPERVISOR"
+    },
+    {
+      "form": "31/210",
+      "name": "mtsr",
+      "count": 16,
+      "class": "SUPERVISOR"
+    },
+    {
+      "form": "gekko/psq_stu",
+      "name": "psq_stu",
+      "count": 16,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "31/470",
+      "name": "dcbi",
+      "count": 15,
+      "class": "CACHE"
+    },
+    {
+      "form": "gekko/ps_msub",
+      "name": "ps_msub",
+      "count": 15,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "23",
+      "name": "rlwnm",
+      "count": 14,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/ps_merge10",
+      "name": "ps_merge10",
+      "count": 12,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "31/200",
+      "name": "subfze",
+      "count": 12,
+      "class": "EASY"
+    },
+    {
+      "form": "0",
+      "name": "?",
+      "count": 11,
+      "class": "EASY"
+    },
+    {
+      "form": "49",
+      "name": "lfsu",
+      "count": 11,
+      "class": "EASY"
+    },
+    {
+      "form": "31/371",
+      "name": "mftb",
+      "count": 11,
+      "class": "SPR"
+    },
+    {
+      "form": "31/144",
+      "name": "mtcrf",
+      "count": 9,
+      "class": "SPR"
+    },
+    {
+      "form": "gekko/ps_madds1",
+      "name": "ps_madds1",
+      "count": 9,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "gekko/ps_merge11",
+      "name": "ps_merge11",
+      "count": 9,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "45",
+      "name": "sthu",
+      "count": 8,
+      "class": "EASY"
+    },
+    {
+      "form": "31/412",
+      "name": "orc",
+      "count": 8,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/ps_sel",
+      "name": "ps_sel",
+      "count": 8,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "gekko/ps_madds0",
+      "name": "ps_madds0",
+      "count": 7,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "31/631",
+      "name": "lfdux",
+      "count": 7,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/ps_nmsub",
+      "name": "ps_nmsub",
+      "count": 6,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "gekko/ps_sum1",
+      "name": "ps_sum1",
+      "count": 6,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "gekko/dcbz_l",
+      "name": "dcbz_l",
+      "count": 6,
+      "class": "CACHE"
+    },
+    {
+      "form": "31/662",
+      "name": "stwbrx",
+      "count": 5,
+      "class": "EASY"
+    },
+    {
+      "form": "51",
+      "name": "lfdu",
+      "count": 5,
+      "class": "EASY"
+    },
+    {
+      "form": "31/982",
+      "name": "icbi",
+      "count": 4,
+      "class": "CACHE"
+    },
+    {
+      "form": "53",
+      "name": "stfsu",
+      "count": 4,
+      "class": "EASY"
+    },
+    {
+      "form": "3",
+      "name": "twui",
+      "count": 4,
+      "class": "EASY"
+    },
+    {
+      "form": "31/54",
+      "name": "dcbst",
+      "count": 3,
+      "class": "CACHE"
+    },
+    {
+      "form": "17",
+      "name": "sc",
+      "count": 3,
+      "class": "SYSCALL"
+    },
+    {
+      "form": "63/583",
+      "name": "mffs",
+      "count": 3,
+      "class": "SPR"
+    },
+    {
+      "form": "63/711",
+      "name": "mtfsf",
+      "count": 3,
+      "class": "SPR"
+    },
+    {
+      "form": "31/86",
+      "name": "dcbf",
+      "count": 3,
+      "class": "CACHE"
+    },
+    {
+      "form": "gekko/ps_merge01",
+      "name": "ps_merge01",
+      "count": 3,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "59/A24",
+      "name": "fres",
+      "count": 3,
+      "class": "FP_NONIEEE"
+    },
+    {
+      "form": "gekko/ps_neg",
+      "name": "ps_neg",
+      "count": 3,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "gekko/ps_muls1",
+      "name": "ps_muls1",
+      "count": 3,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "gekko/ps_cmpo0",
+      "name": "ps_cmpo0",
+      "count": 2,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "gekko/ps_nmadd",
+      "name": "ps_nmadd",
+      "count": 2,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "31/534",
+      "name": "lwbrx",
+      "count": 2,
+      "class": "EASY"
+    },
+    {
+      "form": "19/569",
+      "name": "?",
+      "count": 1,
+      "class": "EASY"
+    },
+    {
+      "form": "gekko/psq_lx",
+      "name": "psq_lx",
+      "count": 1,
+      "class": "PAIRED_SINGLE"
+    },
+    {
+      "form": "59/A31",
+      "name": "fnmadds",
+      "count": 1,
+      "class": "FMA"
+    },
+    {
+      "form": "63/38",
+      "name": "mtfsb1",
+      "count": 1,
+      "class": "SPR"
+    }
+  ]
+}

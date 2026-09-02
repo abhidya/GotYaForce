@@ -1,0 +1,19 @@
+{
+  "sampled_functions": 1500,
+  "sampled_instructions": 101229,
+  "wasm_bytes_total": 5294051,
+  "wasm_code_section_bytes": 5276458,
+  "bytes_per_instruction_code_section": 52.124,
+  "bytes_per_instruction_total_module": 52.298,
+  "dol_text_instructions": 699828,
+  "projected_code_section_bytes_whole_dol": 36477818,
+  "projected_module_bytes_whole_dol": 36599444,
+  "paired_single_functions": 608,
+  "paired_single_instructions": 2883,
+  "corpus_entry_points": 11972,
+  "optimisation": "-O2",
+  "wasm_gzip_bytes": 573097,
+  "gzip_bytes_per_instruction": 5.661,
+  "projected_gzip_bytes_whole_dol": 3962000,
+  "note_paired_single": "corrected against risk_probe.py; the earlier value double-counted overlapping function extents"
+}

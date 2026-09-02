@@ -1,0 +1,47 @@
+{
+  "indirect_control_flow": {
+    "bctr": 133,
+    "bctrl": 2457,
+    "blrl": 138,
+    "bctr_ctr_source_shapes": {
+      "switch table (lwzx from an indexed table)": 133
+    }
+  },
+  "code_pointers_in_data_sections": {
+    "words_pointing_into_text": 11539,
+    "of_those_a_known_function_entry": 6914,
+    "of_those_NOT_a_known_entry": 4625,
+    "distinct_non_entry_targets": 2839,
+    "top_non_entry_targets": {
+      "0x8028d2b8": 64,
+      "0x802914e8": 64,
+      "0x802956f0": 64,
+      "0x802352b4": 52,
+      "0x80238800": 38,
+      "0x8022899c": 34,
+      "0x80228af0": 34,
+      "0x8017dea8": 33,
+      "0x8005f238": 32,
+      "0x8017ea34": 31
+    }
+  },
+  "self_modifying_code_signals": {
+    "icbi_sites": [
+      "0x80003440",
+      "0x800036b4",
+      "0x802006d8",
+      "0x8022f4d0"
+    ],
+    "dcbst_sites": [
+      "0x80003438",
+      "0x8020067c",
+      "0x8022f4c4"
+    ],
+    "note": "icbi is the only legal way to run code written at runtime on PowerPC. A handful of sites inside the SDK's cache library is the OS's own ICInvalidateRange, not an overlay loader."
+  },
+  "paired_single": {
+    "instructions": 2883,
+    "functions_containing_at_least_one": 608,
+    "share_of_corpus_functions": 0.0508
+  }
+}

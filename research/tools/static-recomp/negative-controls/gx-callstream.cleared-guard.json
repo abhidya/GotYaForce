@@ -1,0 +1,94 @@
+{
+  "result_schema": 1,
+  "standard": "gx_callstream_green",
+  "standard_note": "gx_callstream_green is the GX SDK-seam standard. It is NOT one of the wasm-unit verification tiers and must never be summed with or reported as any of them.",
+  "route": "static_recompilation",
+  "route_note": "The module under test was produced by research/tools/static-recomp/ppc_recomp.py: one C statement per PowerPC instruction word, emitted by table lookup from boot.dol. No decompiler output, no type inference, no hand-authored spec and no per-function human review was involved. The comparison rules are those of research/decomp/oracle-harness/run-gx-callstream.mjs.",
+  "fn": "zz_0027c34_",
+  "gc_addr": "0x80027c34",
+  "capture": {
+    "file": "../../decomp/oracle-harness/corpora/gx-rom-unit.zz_0027c34_.gx-callstream.jsonl",
+    "invocations": 4,
+    "counts": {
+      "invocation": 4,
+      "call": 76,
+      "wgpipe": 48,
+      "store": 0
+    }
+  },
+  "port_module": "build/neg/spike_guard0.cjs",
+  "invocations_matched": 0,
+  "events_compared": {
+    "call": 0,
+    "wgpipe": 0,
+    "sp_arg": 0
+  },
+  "per_invocation": [
+    {
+      "n": 0,
+      "console_events": 31,
+      "port_events": 0,
+      "console_entry_sp": "0x8044d510",
+      "port_entry_sp": "0x81200000",
+      "match": false,
+      "divergence": {
+        "kind": "length",
+        "report": "console emitted 31 event(s), port emitted 0"
+      }
+    },
+    {
+      "n": 1,
+      "console_events": 31,
+      "port_events": 0,
+      "console_entry_sp": "0x8044d510",
+      "port_entry_sp": "0x81200000",
+      "match": false,
+      "divergence": {
+        "kind": "length",
+        "report": "console emitted 31 event(s), port emitted 0"
+      }
+    },
+    {
+      "n": 2,
+      "console_events": 31,
+      "port_events": 0,
+      "console_entry_sp": "0x8044d510",
+      "port_entry_sp": "0x81200000",
+      "match": false,
+      "divergence": {
+        "kind": "length",
+        "report": "console emitted 31 event(s), port emitted 0"
+      }
+    },
+    {
+      "n": 3,
+      "console_events": 31,
+      "port_events": 0,
+      "console_entry_sp": "0x8044d510",
+      "port_entry_sp": "0x81200000",
+      "match": false,
+      "divergence": {
+        "kind": "length",
+        "report": "console emitted 31 event(s), port emitted 0"
+      }
+    }
+  ],
+  "divergence": {
+    "kind": "length",
+    "report": "console emitted 31 event(s), port emitted 0",
+    "invocation": 0
+  },
+  "verdict": "fail",
+  "does_not_verify": [
+    "ANY PIXEL. No framebuffer is read on either side.",
+    "the MEANING of any argument value.",
+    "any ROM function other than this one, and any game state other than the captured one.",
+    "that the recompiler is correct for instructions this function does not use -- it implements 14 of the 268 forms in the DOL.",
+    "an UNSEEDED run: the console's own memory at the six addresses it read was replayed into the recompiler's MEM1, and the guard flag the original capture staged was staged in that seed too."
+  ],
+  "what_it_does_verify": [
+    "that a MECHANICAL, table-driven translation of 99 PowerPC instructions reproduces the console's SDK-seam behaviour exactly: the same 19 calls in the same order at the same call sites with the same arguments, and the same 12 write-gather-pipe writes at the same widths with the same values from the same store sites.",
+    "that the write-gather pipe needs no static source-lowering pass: the store's effective address is resolved at runtime inside the memory accessor.",
+    "that a stack-local pointer argument -- the class the existing pipeline records as un-verifiable for 56 exports across 39 units -- lands at the correct offset from the port's own stack pointer even though that stack pointer was deliberately chosen to differ from the console's."
+  ]
+}

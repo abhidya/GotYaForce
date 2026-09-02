@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "undecoded_words": 7380,
+  "all_zero_words": 1636,
+  "by_primary_opcode": {
+    "63": 3930,
+    "0": 1647,
+    "56": 1264,
+    "60": 295,
+    "4": 205,
+    "57": 22,
+    "61": 16,
+    "19": 1
+  },
+  "paired_single_total": 1796,
+  "gekko_op4_total_including_dcbz_l": 1802,
+  "dcbz_l": 6,
+  "paired_single_by_mnemonic": {
+    "psq_l": 1264,
+    "psq_st": 295,
+    "ps_mul": 48,
+    "ps_muls0": 37,
+    "ps_mr": 31,
+    "psq_lu": 22,
+    "ps_madd": 20,
+    "ps_sum0": 19,
+    "psq_stu": 16,
+    "ps_msub": 15,
+    "ps_madds1": 9,
+    "ps_madds0": 7,
+    "ps_sum1": 6,
+    "dcbz_l": 6,
+    "ps_neg": 3,
+    "ps_muls1": 3,
+    "psq_lx": 1
+  },
+  "non_gekko_undecoded": 5578,
+  "non_gekko_examples": {
+    "19": [
+      {
+        "addr": "0x800034ac",
+        "word": "0x4d657472"
+      }
+    ],
+    "0": [
+      {
+        "addr": "0x800034dc",
+        "word": "0x00000000"
+      },
+      {
+        "addr": "0x800034e0",
+        "word": "0x00000000"
+      },
+      {
+        "addr": "0x800034e4",
+        "word": "0x00000000"
+      },
+      {
+        "addr": "0x800034e8",
+        "word": "0x00000000"
+      },
+      {
+        "addr": "0x800034ec",
+        "word": "0x00000000"
+      },
+      {
+        "addr": "0x800034f0",
+        "word": "0x00000000"
+      },
+      {
+        "addr": "0x800034f4",
+        "word": "0x00000000"
+      },
+      {
+        "addr": "0x800034f8",
+        "word": "0x00000000"
+      }
+    ],
+    "63": [
+      {
+        "addr": "0x80006360",
+        "word": "0xfc000840"
+      },
+      {
+        "addr": "0x80008174",
+        "word": "0xfc010040"
+      },
+      {
+        "addr": "0x8000825c",
+        "word": "0xfc010040"
+      },
+      {
+        "addr": "0x800083f8",
+        "word": "0xfc010040"
+      },
+      {
+        "addr": "0x80008e14",
+        "word": "0xfc1ef840"
+      },
+      {
+        "addr": "0x8000bc9c",
+        "word": "0xfc01f840"
+      },
+      {
+        "addr": "0x8000c35c",
+        "word": "0xfc010040"
+      },
+      {
+        "addr": "0x8000c3c4",
+        "word": "0xfc010040"
+      }
+    ]
+  }
+}
