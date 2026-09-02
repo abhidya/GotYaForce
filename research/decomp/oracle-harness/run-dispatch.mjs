@@ -536,16 +536,22 @@ async function main() {
 
   let divergence = null;
   let casesPassed = 0, eventsMatched = 0, retsChecked = 0, seededBytes = 0;
-  let ownedBytesChecked = 0, ownedBytesAfterReplay = 0;
+  let ownedBytesChecked = 0, ownedBytesAfterReplay = 0, ownedBytesMoved = 0;
   const ownedAddrsChecked = new Set();
   for (const c of cases) {
     state.caseIdx = c.n; state.evIdx = 0; state.events = c.events;
     state.nested = 0; state.stack = []; state.caseReplayedBytes = 0;
     applyArenaSegments(shimMem.u8, arena);
+    // Remember what was SEEDED, address by address. An owned-region byte at
+    // return that still equals the byte this harness put there is not evidence
+    // about the port: it is the harness's own input read back. The two are
+    // counted separately below and only the second is claimed.
+    const seededAt = new Map();
     for (const s of c.seed ?? []) {
       const b = Buffer.from(s.b64, "base64");
       shimMem.u8.set(b, parseAddr(s.addr));
       seededBytes += b.length;
+      seededAt.set(parseAddr(s.addr), b);
     }
     if (stackSave != null && typeof ex._emscripten_stack_restore === "function") {
       ex._emscripten_stack_restore(stackSave);
@@ -596,9 +602,19 @@ async function main() {
       // bytes there. Count those separately so the artifact can never present
       // replayed bytes as verified ones.
       for (const o of c.owned_end) {
-        const len = Buffer.from(o.b64, "base64").length;
-        if (state.caseReplayedBytes > 0) ownedBytesAfterReplay += len;
-        else { ownedBytesChecked += len; ownedAddrsChecked.add(parseAddr(o.addr)); }
+        const expect = Buffer.from(o.b64, "base64");
+        if (state.caseReplayedBytes > 0) { ownedBytesAfterReplay += expect.length; continue; }
+        ownedBytesChecked += expect.length;
+        ownedAddrsChecked.add(parseAddr(o.addr));
+        // How many of those bytes the CASE ACTUALLY MOVED. A window the console
+        // never wrote to comes back byte-identical to the seed, and comparing
+        // it proves nothing at all -- it is the same vacuity the other
+        // standards guard against, one level down.
+        const seed = seededAt.get(parseAddr(o.addr));
+        if (seed == null) { ownedBytesMoved += expect.length; continue; }
+        const n = Math.min(seed.length, expect.length);
+        for (let k = 0; k < n; k++) if (seed[k] !== expect[k]) ownedBytesMoved++;
+        if (expect.length > n) ownedBytesMoved += expect.length - n;
       }
     }
     casesPassed++;
@@ -659,8 +675,13 @@ async function main() {
         "the interleaving of dispatches with the function's direct out-of-unit calls",
         "the function's own return value",
         ownedBytesChecked > 0
-          ? `byte-exactness of ${ownedBytesChecked} owned-region bytes at return over ` +
-            `${ownedAddrsChecked.size} distinct address(es)`
+          ? (ownedBytesMoved > 0
+              ? `byte-exactness of ${ownedBytesMoved} owned-region bytes THE CASES ` +
+                `ACTUALLY CHANGED, of ${ownedBytesChecked} compared at return over ` +
+                `${ownedAddrsChecked.size} distinct address(es)`
+              : `NOTHING about memory: all ${ownedBytesChecked} owned-region bytes ` +
+                `compared at return were byte-identical to what the harness SEEDED, ` +
+                `so the comparison read back its own input`)
           : ownedBytesAfterReplay > 0
             ? `NO owned-region bytes: every case had ${ownedBytesAfterReplay} byte(s) of its ` +
               `watch window REPLAYED from the console during the case, so the window at ` +
@@ -731,6 +752,10 @@ async function main() {
     dispatch_returns_compared: state.retsCompared,
     nested_unobserved_calls: state.nestedUnobserved,
     owned_bytes_checked: ownedBytesChecked,
+    // Of the bytes compared, how many the case actually CHANGED from what the
+    // harness seeded. This is the only owned-memory figure that says anything
+    // about the port; the rest is the seed read back.
+    owned_bytes_moved: ownedBytesMoved,
     owned_bytes_not_counted_after_replay: ownedBytesAfterReplay,
     owned_addresses_checked: ownedAddrsChecked.size,
     seeded_bytes: seededBytes,

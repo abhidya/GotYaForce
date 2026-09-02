@@ -304,13 +304,16 @@ Three further honest limits, all recorded in each artifact rather than only here
   table is serviced by the harness from the console's `r3`, so its return is an *input*;
   only an in-table resolution has its return compared. `auto-c0011-005/FUN_80079ab8`
   reaches one in-table target (`0x80079b08`) and three bridged ones.
-- **Watch-window bytes are counted twice over, on purpose.** Bytes the harness *replayed*
-  into the arena are reported separately from bytes it *compared*
-  (`owned_bytes_checked` vs `owned_bytes_not_counted_after_replay` /
-  `bridged_replayed_bytes` / `in_table_bytes_replayed_because_nested`). For
-  `auto-c0050-003` both functions report **0** compared bytes and all of their window
-  replayed — the memory half of those two results establishes nothing, and the artifact
-  states that instead of quoting one blended number.
+- **The memory half of all four results establishes nothing, and they say so.**
+  Watch-window bytes are counted three ways on purpose: bytes the harness *replayed*
+  into the arena, bytes it *compared* at return, and — the only one that means
+  anything — bytes the case actually **moved** away from what was seeded. All four
+  artifacts report `owned_bytes_moved: 0`. For `auto-c0050-003` the whole window was
+  replayed (`owned_bytes_checked: 0`); for `auto-c0011-005` 29,652 and 49,876 bytes
+  *were* compared and every one of them came back byte-identical to the seed, so the
+  comparison read back its own input. The `claim.verifies` line for those two says
+  **"NOTHING about memory"** in those words rather than quoting the byte count. What
+  these four results establish is the dispatch stream, and only that.
 
 **Negative controls.** `research/decomp/oracle-harness/tests/dispatch-harness.test.mjs`
 (20 tests, run by `pnpm test:oracle`) drives the harness against mutants of the committed

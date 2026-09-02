@@ -3,7 +3,7 @@
  "standard": "dispatch_green",
  "unit": "auto-c0011-005",
  "fn": "FUN_80079ab8",
- "generated_at": "2026-09-02T18:32:39.868Z",
+ "generated_at": "2026-09-02T18:37:07.463Z",
  "claim": {
   "established": true,
   "summary": "the port performed the same ROM function-pointer dispatches as the console — same sites, same order, same RESOLVED GAMECUBE TARGETS, same frame arguments — on 40 recorded cases",
@@ -15,7 +15,7 @@
    "no watch-window bytes across a dispatch (every observed dispatch was bridged, and a bridged callee's side effects are REPLAYED into the arena, never checked)",
    "the interleaving of dispatches with the function's direct out-of-unit calls",
    "the function's own return value",
-   "byte-exactness of 49876 owned-region bytes at return over 1 distinct address(es)",
+   "NOTHING about memory: all 49876 owned-region bytes compared at return were byte-identical to what the harness SEEDED, so the comparison read back its own input",
    "the emitted dispatch table: all 8 entries agree with oracle-registry.json on which function lives at each GC address"
   ],
   "does_not_verify": [
@@ -49,8 +49,8 @@
  },
  "harness": {
   "entry": "research/decomp/oracle-harness/run-dispatch.mjs",
-  "git_rev": "7e1256915763e70606dde3d4b01ef25d844a2bef",
-  "sha256": "bad4b52933c89bdaacf6b17e69676d03fd5ee90b9c2618145882da072c452a19",
+  "git_rev": "e4079dd8e47a4523c15a613a930073984c3c35b3",
+  "sha256": "e7d815469cff24d712309594c79d69de3fe703bb6800df84850fecaa24807878",
   "min_cases": 1
  },
  "wasm": {
@@ -213,6 +213,7 @@
  "dispatch_returns_compared": 0,
  "nested_unobserved_calls": 2,
  "owned_bytes_checked": 49876,
+ "owned_bytes_moved": 0,
  "owned_bytes_not_counted_after_replay": 4044,
  "owned_addresses_checked": 1,
  "seeded_bytes": 74400,
