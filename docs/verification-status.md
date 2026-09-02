@@ -42,12 +42,15 @@ Three vocabulary traps, all of which have bitten:
    `oracle_divergent` and **changes no tier**. `auto-c0035-002` is byte-exact on 6,250 of
    20,000 cases and is *still recorded as a green `compile_only` unit*. Read the tier,
    never the colour, and never the word "green" on its own.
-2. **`transcript_green` is a per-FUNCTION artifact, deliberately not a unit tier in the
-   driver ledger.** It lives in its own filename namespace
-   (`research/decomp/data/oracle-results/<unit>.<export>.transcript.json`), its verdict
-   token shares no string with the other harnesses, and its `claim` block names
-   `oracle_green` as the stronger standard in machine-readable form. See §6 for the
-   counters that would over-count it if it ever became a unit tier.
+2. **`transcript_green` is a per-FUNCTION artifact.** It lives in its own filename
+   namespace (`research/decomp/data/oracle-results/<unit>.<export>.transcript.json`), its
+   verdict token shares no string with the other harnesses, and its `claim` block names
+   `oracle_green` as the stronger standard in machine-readable form. Since 2026-09-02 it
+   **is** also a unit tier the driver can record, but only through a rollup that requires
+   **every export** of the unit to have a passing result bound by `wasm.sha256` to the
+   staged bytes; a unit whose exports land on more than one standard is reported `mixed`
+   and does not promote. Partial coverage reaches no tier. See §6 for the counters that
+   had to be fixed first.
 3. **`spine_green` does not exist.** The spine standard is `boundary_green`. The uppercase
    `BOUNDARY_GREEN` seen in commit subjects and console output is the verdict token for
    that same standard, not a fifth tier.
@@ -437,37 +440,51 @@ cost time.
    `boundary_green` status across until the full corpus replays byte-equal against the new
    binary. See [`docs/threads-relink-reverify.md`](threads-relink-reverify.md).
 
-### Known defect: two driver counters are fail-OPEN on tier
+### Fixed 2026-09-02: two driver counters were fail-OPEN on tier
 
-Recorded here rather than fixed, because the driver lives in the separate, unvendored
-OGhidra checkout. Verified against that tree on 2026-08-30:
+The defect, in the unvendored OGhidra checkout, as it stood on 2026-08-30:
 
 - `src/port_contract.py:125` —
   `counts["staged" if (record or {}).get("tier") == "compile_only" else "green"] += 1`
 - `src/port_progress.py:209` — `if record.get("tier") == "compile_only": … else: counts["green"] += 1`
 
-Both test **"is `compile_only`"** and route *everything else* — including `None`, a typo,
-or a future `transcript_green` — into `green`. The predicate is "not `compile_only`", not
-"is `oracle_green`".
+Both tested **"is `compile_only`"** and routed *everything else* — including `None`, a
+typo, or a future `transcript_green` — into `green`. The predicate was "not `compile_only`",
+not "is `oracle_green`".
 
-**Currently latent, not live.** `transcript_green` exists nowhere in the driver's `src/`;
-every write path emits only `compile_only` or `oracle_green`, and every promotion gate is
-an explicit allowlist (`ELIGIBLE_CANONICAL_TIERS = {"compile_only", "oracle_green"}`), i.e.
-fail-*closed*. So no record can carry the tier today.
+**It was live, not latent, and the earlier text on this page was wrong about that.** The
+driver ledger carries **two `status: green` records with no `tier` field at all** —
+`damage-core` and `knockback-core` (machine-local, `wasm-units-state.json`, re-measured
+2026-09-02) — and both counters were already reporting them as verified. Measured on the
+live ledger: the old predicate gave **green = 3**, while `run-state.json`'s
+`units_verified` (the correct positive test) gave **1**. Two files published by the same
+run disagreed, and the looser number is the one in the README banner. The remaining
+exposure was real too: the first commit teaching the driver a new tier would additionally
+have inflated `progress/current.json` (`queue.green`), `progress/summary.json`, the
+generated README table, the health state (`remaining = total − green − staged`), progress-
+branch commit subjects, and the contract probe's `counts` that the rig supervisor reads.
 
-**The exposure.** The first commit that teaches the driver to record `transcript_green`
-inflates, silently and without tripping any gate or test: `progress/current.json`
-(`queue.green`), `progress/summary.json` (`green` / `staged`), the generated README table,
-the **health state** (`remaining = total − green − staged`, so a corpus of transcript
-results would report complete), progress-branch commit subjects, and the contract probe's
-`counts` that the rig supervisor reads to decide relaunches. Note the asymmetry that makes
-this dangerous: `run-state.json`'s `units_verified` uses the **correct** positive predicate
-(`tier == "oracle_green"`), so two files published by the same run would disagree — and the
-looser number is the one in the README banner.
+**The fix, as made** (OGhidra branch `driver-tier-vocabulary`):
 
-**The fix, when it is made:** invert both to positive tests against an explicit
-verified-tier set, and add a test that asserts an unknown tier string does not land in
-`green`.
+- `src/port_tiers.py` is the single tier vocabulary. `VERIFIED_TIERS =
+  {transcript_green, boundary_green, oracle_green}` and `WRITE_VERIFIED_TIERS =
+  {oracle_green}` are explicit allowlists; `classify_tier` answers
+  `verified` / `staged` / **`unknown`**, and every predicate is a positive membership test.
+- Both counters, plus `run-state.json`'s `units_verified` / `units_staged` and the
+  unverified-inventory invariant, now use that one predicate. A green record whose tier the
+  driver cannot classify lands in a new `unknown_tier` bucket — never in `green`, and never
+  quietly in `staged` either. It is published in `summary.json`, `current.json` and the
+  README line, and it is deliberately **not** subtracted from health's `remaining`, so an
+  unclassifiable record keeps a run from reporting COMPLETE.
+- `units_verified` is accompanied by `units_verified_by_tier` and `units_write_verified`,
+  so rule 3 (never total the weaker standards with `oracle_green`) is expressible in the
+  machine output rather than only in prose.
+- Regression tests assert that `None`, `"oracle-green"`, `"ORACLE_GREEN"`, `"spine_green"`,
+  `"mixed"` and an arbitrary future tier all classify as `unknown` and none of them lands
+  in `green`, in both files and in the run-state writer.
+
+**Under the corrected counters the live ledger reads: green (verified) = 1, staged = 103,
+unknown_tier = 2** — where it previously read green = 3, staged = 103.
 
 ---
 
