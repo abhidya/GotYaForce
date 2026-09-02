@@ -185,6 +185,23 @@ prototype from which to derive the true return class. Lowering those would narro
 silently, which is exactly the "signature traps become silent mis-marshalling" risk the
 design records as C8. They stay unverifiable rather than becoming quietly wrong.
 
+**The ceiling above is the lowering's PARSER. The compiler was measured separately.**
+All **112** staged units were run through the lowering: 90 contain a lowerable indirect
+call site, 22 contain none, and **0 were refused**. All 90 were then rebuilt end to end —
+lowering, companion, `emcc` with flags byte-identical to the production per-unit build —
+and **90 of 90 compiled and linked**, 173 lowered call sites in total, every one of the 90
+modules importing `__gf_dispatch_enter` / `__gf_dispatch_exit` and exporting
+`__gf_dispatch_at`. That is a compile-and-observability rate, not a verification rate: what
+it establishes is that the rewrite survives the toolchain at corpus scale, which is the one
+thing a static survey cannot say.
+
+**Site binding is exact for almost all of it.** Of the 1,534, **1,484 (96.7 %)** have
+exactly one indirect call site, so their capture binds the ROM's `bctrl` to the port's
+lowered site unambiguously. The other 50 have 2–12 sites and fall back to naming the
+enclosing *function* rather than the site, because Ghidra's structured C need not order
+sites the way the machine code does — the plan records which binding it used and the
+result artifact carries it.
+
 Two limits on how far the 1,534 can be read:
 
 - **It requires the lowering.** A standalone unit built the ordinary way is still
