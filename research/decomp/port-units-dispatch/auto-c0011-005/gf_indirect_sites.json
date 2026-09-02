@@ -1,0 +1,37 @@
+{
+ "indirect_sites_schema": 1,
+ "generated_by": "src/port_indirect_lowering.py",
+ "dispatch_entry": "__gf_dispatch_at",
+ "sites": [
+  {
+   "unit": "auto-c0011-005",
+   "source": "auto-c0011-005.c",
+   "function": "FUN_80079a40",
+   "site": "80079a40:0",
+   "site_kind": "gc_address",
+   "shape": "code_ptr",
+   "arg_count": 0,
+   "target_expr": "(&PTR_FUN_802d65b0)[*(char *)(param_1 + 0x580)]"
+  },
+  {
+   "unit": "auto-c0011-005",
+   "source": "auto-c0011-005.c",
+   "function": "FUN_80079a7c",
+   "site": "80079a7c:0",
+   "site_kind": "gc_address",
+   "shape": "code_ptr",
+   "arg_count": 0,
+   "target_expr": "(&PTR_FUN_802d65bc)[*(char *)(param_1 + 0x581)]"
+  },
+  {
+   "unit": "auto-c0011-005",
+   "source": "auto-c0011-005.c",
+   "function": "FUN_80079ab8",
+   "site": "80079ab8:0",
+   "site_kind": "gc_address",
+   "shape": "code_ptr",
+   "arg_count": 0,
+   "target_expr": "(&PTR_FUN_802d65d0)[*(char *)(param_1 + 0x540)]"
+  }
+ ]
+}

@@ -50,7 +50,7 @@ command you ran, its result, and the product behavior it proves.
   game state; compilation alone never establishes this.
 
 For wasm port units the recorded tiers are `compile_only`, `oracle_green`,
-`boundary_green`, and `transcript_green`. **`compile_only` means the unit
+`boundary_green`, `transcript_green`, and `dispatch_green`. **`compile_only` means the unit
 compiled and linked and nothing else** — it is inventory, not progress, and at
 least one `compile_only` unit is proven behaviorally wrong. Never describe a
 `compile_only` unit as ported, done, or working. The tier vocabulary is defined
@@ -71,6 +71,21 @@ deliberately **not** a unit tier in the driver's ledger — two counters
 treat "tier is not `compile_only`" as verified, which would over-count it. That defect
 is latent today and is recorded in full, with its blast radius, in
 [`docs/verification-status.md`](docs/verification-status.md) §6.
+
+`dispatch_green` (added 2026-09-02) is a fifth, **orthogonal** console-derived
+standard for the class that had no route to any claim at all: the 1,602
+functions whose behaviour goes through a ROM function-pointer table. It compares
+the port's indirect-dispatch stream — the site, the **resolved GameCube target**,
+the uniform-frame arguments and the return of every indirect call — against the
+address the console's own branch register held at the branch. It is **not a rung
+of the oracle/boundary/transcript ladder**: it sees a channel none of them can
+see and is blind to channels they check, so it is never totalled with any of
+them and never reported as one of them. It also **requires a module built with
+the assembly gate's indirect-call lowering** — an ordinary unit build is still
+unobservable, and the harness refuses one rather than passing. Results are
+per-FUNCTION artifacts
+(`research/decomp/data/oracle-results/<unit>.<export>.dispatch.json`,
+verdict token `DISPATCH_GREEN`).
 
 The **GX HLE host** has two further console-derived standards, added 2026-08-31:
 `gx_callstream_green` (the SDK-seam call and write-gather-pipe stream) and

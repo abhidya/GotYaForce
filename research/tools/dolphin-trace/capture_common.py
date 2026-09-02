@@ -23,7 +23,12 @@ it reads the ROM, parses wasm, allocates registers, and formats values.
 from __future__ import annotations
 
 import struct
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from rsp_client import REG_CTR, REG_LR  # noqa: E402
 
 
 # --------------------------------------------------------------------------
@@ -77,6 +82,7 @@ BRANCH_OP = 18       # b / bl / ba / bla
 BCLR_OP = 19         # bclr / bcctr (+ lk forms: blrl / bctrl)
 BC_OP = 16           # bc (conditional)
 BLR_XO = 16          # extended opcode of bclr within op 19
+BCCTR_XO = 528       # extended opcode of bcctr within op 19 (bctrl when LK=1)
 
 
 def branch_target(addr: int, w: int) -> tuple[int, bool]:
@@ -257,6 +263,7 @@ class Regs:
         self.rsp = rsp
         self._g: dict[int, int] = {}
         self._f: dict[int, int] = {}
+        self._s: dict[str, int] = {}
 
     def gpr(self, n: int) -> int:
         if n not in self._g:
@@ -267,6 +274,59 @@ class Regs:
         if n not in self._f:
             self._f[n] = self.rsp.read_fpr_raw(n)
         return self._f[n]
+
+    # ---- branch registers -------------------------------------------------
+    # WHY THESE EXIST (added for the dispatch standard, 2026-09-02). A ROM
+    # function-pointer dispatch is `bctrl` (target in CTR) or `blrl` (target in
+    # LR). At a breakpoint ON the branch instruction the branch has NOT yet
+    # executed, so the register still holds the address the console is ABOUT TO
+    # jump to. That address -- the RESOLVED TARGET -- is the one thing a
+    # thunk-side transcript cannot tell you about itself: a wrong
+    # address-to-thunk mapping produces a self-consistent, wrong stream. See
+    # research/decomp/oracle-harness/run-dispatch.mjs and the Y2 correction in
+    # docs/one-to-one-completion-spec.md.
+    def ctr(self) -> int:
+        if "ctr" not in self._s:
+            self._s["ctr"] = self.rsp.read_reg(REG_CTR) & 0xFFFFFFFF
+        return self._s["ctr"]
+
+    def lr(self) -> int:
+        if "lr" not in self._s:
+            self._s["lr"] = self.rsp.read_reg(REG_LR) & 0xFFFFFFFF
+        return self._s["lr"]
+
+    def branch_target(self, kind: str) -> int:
+        """The address the pending indirect branch will jump to.
+
+        `bctrl`/`bcctrl` take CTR; `blrl` takes LR. Anything else is a decode
+        bug upstream and must be loud, never defaulted to one of the two.
+        """
+        if kind in ("bctrl", "bcctrl"):
+            return self.ctr()
+        if kind == "blrl":
+            return self.lr()
+        raise ValueError(f"not an indirect-branch kind: {kind!r}")
+
+    def snapshot_gprs(self, first: int = 3, last: int = 10) -> dict[str, int]:
+        """r3..r10 as the console holds them at this stop.
+
+        Recorded RAW and class-agnostically on purpose: the EABI slot a given
+        argument occupies depends on the argument CLASSES, and at an indirect
+        call site the console has no prototype to state them. The port declares
+        its own classes at replay time and the harness allocates against this
+        snapshot, so the console side never has to assume a signature -- and a
+        port that marshals an argument into the wrong class reads the wrong
+        register and goes red.
+        """
+        return {f"r{n}": self.gpr(n) for n in range(first, last + 1)}
+
+    def snapshot_fprs(self, first: int = 1, last: int = 8) -> dict[str, str]:
+        """f1..f8 as raw 64-bit IEEE754 bit patterns, hex.
+
+        Bits, not floats: a PPC argument register full of residue is routinely
+        a NaN, which JSON cannot carry as a number.
+        """
+        return {f"f{n}": f"{self.fpr_bits(n):016x}" for n in range(first, last + 1)}
 
 
 def box_float(v: float, t: str) -> object:

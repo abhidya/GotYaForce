@@ -1,0 +1,226 @@
+{
+ "result_schema": 1,
+ "standard": "dispatch_green",
+ "unit": "auto-c0050-003",
+ "fn": "zz_01a31a0_",
+ "generated_at": "2026-09-02T18:32:40.267Z",
+ "claim": {
+  "established": true,
+  "summary": "the port performed the same ROM function-pointer dispatches as the console — same sites, same order, same RESOLVED GAMECUBE TARGETS, same frame arguments — on 40 recorded cases",
+  "verifies": [
+   "the resolved GameCube target of 40 dispatch(es), against the address the console's own branch register held at the branch",
+   "1 distinct target address(es) reached",
+   "0 argument slot(s), allocated per the PowerPC EABI from the value classes the port itself declared",
+   "no dispatch return value (every observed dispatch was BRIDGED, and a bridged return is supplied by the harness, never verified)",
+   "no watch-window bytes across a dispatch (every observed dispatch was bridged, and a bridged callee's side effects are REPLAYED into the arena, never checked)",
+   "the interleaving of dispatches with the function's direct out-of-unit calls",
+   "the function's own return value",
+   "NO owned-region bytes: every case had 56480 byte(s) of its watch window REPLAYED from the console during the case, so the window at return is the harness's input, not the port's output",
+   "the emitted dispatch table: all 8 entries agree with oracle-registry.json on which function lives at each GC address"
+  ],
+  "does_not_verify": [
+   "any memory write set — this standard is ORTHOGONAL to oracle_green and never totals with it",
+   "the CONTENTS of the ROM's function-pointer table: the capture seeds them from the live console. What is verified is which entry the port selects",
+   "a BRIDGED dispatch's return value, which this harness supplies from the console's r3 word",
+   "the watch window across 56480 byte(s) of in-table dispatch: those dispatches serviced nested calls from this harness, so their bytes were REPLAYED rather than compared",
+   "a bridged callee's non-i32 return width, which the bridge does not reproduce",
+   "the behaviour of any dispatched callee; 40 call(s) made from inside an in-table target were serviced without comparison",
+   "the arity of a call site, which comes from the decompiled C — the port's own substrate",
+   "site identity beyond the enclosing function, for any function with more than one indirect call (Ghidra's structured C need not order sites as the machine code does)",
+   "any input outside the recorded corpus"
+  ],
+  "orthogonal_to": [
+   "oracle_green",
+   "transcript_green",
+   "boundary_green"
+  ],
+  "not_a_ladder": "dispatch_green observes a channel the other standards cannot see and is blind to channels they check. It is never an upgrade of, and never totals with, any of them.",
+  "wrong_thunk_defence": {
+   "console_resolved_target": true,
+   "table_audited_against_registry": true,
+   "resolution_class_checked": true,
+   "why": "a transcript taken at the thunk is self-consistent with a WRONG address-to-thunk mapping. These three checks are each grounded outside the companion: the console's own branch register, the DOL-derived oracle registry, and the emitted table itself."
+  },
+  "bounded_by_corpus": {
+   "cases": 40,
+   "events": 40,
+   "dispatches": 40
+  }
+ },
+ "harness": {
+  "entry": "research/decomp/oracle-harness/run-dispatch.mjs",
+  "git_rev": "7e1256915763e70606dde3d4b01ef25d844a2bef",
+  "sha256": "bad4b52933c89bdaacf6b17e69676d03fd5ee90b9c2618145882da072c452a19",
+  "min_cases": 1
+ },
+ "wasm": {
+  "path": "D:\\GotYaForce\\.tmp\\wt-dispatch\\research\\decomp\\port-units-dispatch\\auto-c0050-003\\unit.wasm",
+  "sha256": "bfff6cd9585d6f888c4370bba0ab65def9e1fa0e6b77ddb39ca7c69d88de4117",
+  "memory_model": "exported"
+ },
+ "arena": {
+  "path": "research/decomp/oracle-harness/arena-trace-empty.json",
+  "sha256": "a382e7401f2192cc3ce7990e05ca1947ad744f07a23b3f9bfe5452ca3fd19632"
+ },
+ "capture": {
+  "file": "research/decomp/oracle-harness/corpora/auto-c0050-003.zz_01a31a0_.dispatch.jsonl",
+  "sha256": "c361ed2b6860cd25c0f885aecb2c46f54c6c118faf5a89d90f6743ccc90f57fb",
+  "cases": 40,
+  "events": 40,
+  "dispatches": 40,
+  "source": {
+   "standard": "dispatch_green",
+   "capture_tool": "research/tools/dolphin-trace/capture_transcript.py",
+   "control_strategy": "breakpoint the function entry, every out-of-unit call site AND every indirect branch in its in-unit closure, the instruction after each, and the entry LR; read CTR (bctrl) or LR (blrl) at the branch, before it executes, to record the RESOLVED TARGET; terminate the case at the return with a stack-pointer guard",
+   "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Null video, CPU only",
+   "stub": "gdb-rsp 127.0.0.1:55555",
+   "dumped_at": "2026-09-02T18:16:10.367235Z",
+   "game_state": "2v2 sav reloaded with a pl0906 roster in slots [0, 1, 2, 3] (roster depth 6) + B/X/A press-release edges",
+   "plan": "research/tools/dolphin-trace/plans/auto-c0050-003.zz_01a31a0_.dispatch.json",
+   "sites_manifest": "research/decomp/port-units-dispatch/auto-c0050-003/gf_indirect_sites.json",
+   "in_unit_closure": [
+    "zz_01a31a0_"
+   ],
+   "watch_args_bytes": 1412,
+   "seed_elem_width": 4,
+   "field_widths": {
+    "0x581": 1
+   },
+   "pad_injection": "combat:b,x,a",
+   "injected_frames": 56,
+   "scenario": "battle-roster-0x801a10e8",
+   "scenario_setup": {
+    "assignment": {
+     "0": "pl0906",
+     "1": "pl0906",
+     "2": "pl0906",
+     "3": "pl0906"
+    },
+    "expect_families": [
+     "0x801a10e8"
+    ],
+    "constructors_hit": {
+     "0x801a10e8": 1
+    },
+    "constructors_fired": true,
+    "battle_live": true,
+    "settled": true,
+    "status": {
+     "battle_phase_T0": 2,
+     "battle_state_T0x45": 4,
+     "win_mask_T0x1f": 0,
+     "actor0": "0x805dbdc0",
+     "actor0_alive": 1,
+     "actor0_borg_id": "0x0906"
+    },
+    "frames_run": 180,
+    "slot_ids_before": [
+     "pl0615",
+     "pl0615",
+     "pl0615",
+     "pl0615",
+     "plffff",
+     "plffff"
+    ],
+    "slot_ids_after": [
+     "pl0906",
+     "pl0906",
+     "pl0906",
+     "pl0906",
+     "plffff",
+     "plffff"
+    ],
+    "actor_borg_ids": [
+     "0x0906",
+     "0x0906",
+     "0x0906",
+     "0x0906",
+     "0x0000",
+     "0x0000"
+    ],
+    "actors_on_target": 4,
+    "archive_slot_records": [
+     "0x806cbe60",
+     "0x806cbe80",
+     "0x806cbea0",
+     "0x806cbec0",
+     "0x00000000",
+     "0x00000000"
+    ]
+   },
+   "misses": 0,
+   "exclusions": [
+    "dispatch_green is ORTHOGONAL to oracle_green and STRICTLY WEAKER than it: no memory write set is compared",
+    "the ROM's function-pointer TABLES are seeded from the live console (see seeded_dispatch_tables) -- bytes the port is GIVEN. What the port must derive on its own is WHICH ENTRY it selects, which is the behaviour under test",
+    "a dispatched callee's own behaviour is NOT verified: an in-window target runs the port's own code, an out-of-window target is a stub replaying the console's return registers",
+    "a bridged (out-of-window) return is supplied to the port as the console's r3 word only; a non-i32 return width crossing the bridge is NOT reproduced",
+    "argument registers are recorded RAW (r3-r10, f1-f8). The EABI slot each frame argument occupies is allocated at replay time from the CLASSES THE PORT ITSELF DECLARES, so a wrong class reads a wrong register and goes red",
+    "site binding is EXACT only for a function with exactly one indirect call; with two or more the comparison names the function, because Ghidra's structured C need not order sites as the machine code does",
+    "console stack addresses are excluded (the wasm module has its own linear stack)",
+    "the claim is bounded by this corpus -- N recorded cases, never all inputs"
+   ],
+   "notes": [],
+   "elapsed_s": 71.5
+  }
+ },
+ "function": {
+  "export": "zz_01a31a0_",
+  "gc_addr": "0x801a31a0",
+  "params": [
+   "i32"
+  ],
+  "results": [],
+  "void": true
+ },
+ "dispatch_sites": [
+  {
+   "at": "0x801a31c4",
+   "kind": "bctrl",
+   "in": "zz_01a31a0_",
+   "rom_ordinal": 0,
+   "port_site": "801a31a0:0",
+   "site_match": "exact",
+   "target_expr": "(&DAT_80435758 + *(char *)(param_1 + 0x581) * 4)",
+   "arg_count": 0,
+   "table_windows": [
+    "0x80435758"
+   ]
+  }
+ ],
+ "seeded_dispatch_tables": [
+  {
+   "addr": "0x80435758",
+   "size": 512,
+   "elem_width": 4
+  }
+ ],
+ "table_audit": {
+  "status": "pass",
+  "entries": 8,
+  "cross_checked": 8,
+  "authority": "research/decomp/data/oracle-registry.json",
+  "mismatches": [],
+  "why": "the companion derives a thunk's GC address from the window's own sources; the registry derives it from the DOL. A disagreement means the table routes an address to the wrong function, which a thunk-side transcript would record faithfully."
+ },
+ "resolved_targets": [
+  "0x801a31d8"
+ ],
+ "targets_compared": 40,
+ "arg_slots_compared": 0,
+ "dispatch_returns_compared": 0,
+ "nested_unobserved_calls": 40,
+ "owned_bytes_checked": 0,
+ "owned_bytes_not_counted_after_replay": 56480,
+ "owned_addresses_checked": 0,
+ "seeded_bytes": 76960,
+ "dispatch_owned_bytes_compared": 0,
+ "bridged_replayed_bytes": 0,
+ "in_table_bytes_replayed_because_nested": 56480,
+ "cases_passed": 40,
+ "events_matched": 40,
+ "returns_checked": 0,
+ "vacuous_cases": [],
+ "divergence": null,
+ "verdict_note": null,
+ "verdict": "pass"
+}

@@ -106,6 +106,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import re
 import struct
 import sys
 import time
@@ -127,6 +128,23 @@ from rsp_client import RspError  # noqa: E402
 
 TRANSCRIPT_SCHEMA = 1
 STANDARD = "transcript_green"
+
+# ---------------------------------------------------------------------------
+# dispatch_green -- the third standard, for the class this file used to refuse
+# ---------------------------------------------------------------------------
+# Everything above this line is transcript_green and is UNCHANGED. The
+# `dispatch-sites` / `dispatch-capture` subcommands below reuse all of it --
+# the ROM reader, the function decoder, the in-unit closure, the field-width
+# map, the seed windows, the scenario plumbing -- and add exactly one thing:
+# the INDIRECT call sites this tool refuses under transcript_green are
+# breakpointed and recorded instead of being a refusal.
+#
+# They are a separate schema, a separate standard name and a separate
+# filename namespace, for the same reason transcript_green is separate from
+# oracle_green: a dispatch capture is evidence about a DIFFERENT thing, and
+# nothing may total the two.
+DISPATCH_SCHEMA = 1
+DISPATCH_STANDARD = "dispatch_green"
 
 # Upper bound on a derived seed window. A window is re-read from the console at
 # EVERY call boundary of every case, in 256-byte RSP chunks, so its size
@@ -987,6 +1005,637 @@ def cmd_capture(a: argparse.Namespace) -> int:
     return 0 if cases and not notes else 1
 
 
+# ==========================================================================
+# dispatch_green: the ROM function-pointer dispatch class
+# ==========================================================================
+# `cmd_sites` above REFUSES any function containing a `bctrl`, because emcc
+# lowers the C `(*(code *)...)()` to a `call_indirect` on the module's own
+# table and no import shim can observe it. 1602 functions -- 14.6 % of the
+# corpus and the single largest unverifiable class -- are refused for exactly
+# that reason (docs/verification-status.md section 3).
+#
+# The gate's indirect-call lowering (OGhidra src/port_indirect_lowering.py)
+# removes the premise: it rewrites each such site into a frame build plus a
+# call to `__gf_dispatch_at`, the companion's site-tagged entry to the
+# address-keyed table. In trace mode that entry calls two DECLARED IMPORTS,
+# so the dispatch a `call_indirect` hid is now an ordinary observable call.
+#
+# What this capture must therefore record, per indirect call:
+#
+#   site             which `bctrl`, bound to the port's lowered site id
+#   resolved_target  THE ACTUAL ADDRESS THE CONSOLE'S bctrl JUMPED TO, read
+#                    out of CTR (or LR for `blrl`) at a breakpoint ON the
+#                    branch, before it executes.
+#   args             the console's r3..r10 / f1..f8, RAW and class-agnostic
+#   return           r3, r3:r4 and f1 at the instruction after the branch
+#
+# `resolved_target` is the field that closes the wrong-thunk blindness the
+# spec's second review (Y2) names. A transcript taken at the thunk sees only
+# what the module's own table did; if the table maps an address to the wrong
+# thunk, the module produces a self-consistent, WRONG stream and the
+# transcript agrees with it. Recording the console's resolved PC makes the
+# replay assert `the port dispatched to the same GameCube address`, which no
+# amount of internal self-consistency can fake.
+
+# `PTR_FUN_802d65b0`, `DAT_80435758`, `0x802c3970` -- the MEM1 address a
+# dispatch site's target expression is built from. Used to derive the window
+# of the ROM's own function-pointer TABLE that must be seeded into the arena.
+# NOTE the lookarounds rather than \b: the address usually arrives as the TAIL
+# OF A SYMBOL NAME (`PTR_FUN_802d65b0`, `DAT_80435758`), where `_` is a word
+# character and \b would never fire. What must be excluded is a longer hex
+# run, so the guard is "not adjacent to another hex digit".
+_MEM1_LITERAL = re.compile(r"(?<![0-9A-Fa-f])(8[0-9A-Fa-f]{7})(?![0-9A-Fa-f])")
+
+# How much of a function-pointer table to seed. Each entry is 4 bytes, so this
+# is 128 entries -- wider than any index this corpus derives from a single
+# state byte (a `char` index is at most 127) and bounded so the RSP traffic per
+# case stays inside the stub's ~40 s session.
+DISPATCH_TABLE_WINDOW = 0x200
+
+
+def dispatch_target_windows(target_expr: str) -> list[int]:
+    """MEM1 base addresses a site's target expression reads its pointer from.
+
+    DERIVED from the expression the port itself compiles, never hand-listed:
+    `(&PTR_FUN_802d65b0)[i]` yields 0x802d65b0. The BYTES at that address come
+    from the live console and are seeded into the arena; what the port has to
+    do on its own is compute the INDEX. See the capture header's exclusions.
+    """
+    out = []
+    for match in _MEM1_LITERAL.finditer(target_expr):
+        value = int(match.group(1), 16)
+        if is_mem1(value) and value not in out:
+            out.append(value)
+    return out
+
+
+def load_site_manifest(path: Path) -> dict:
+    """The lowering's own site manifest (`gf_indirect_sites.json`).
+
+    This is the PORT's list of lowered call sites. The plan cross-checks it
+    against the ROM's own `bctrl` instructions, which is an independent audit
+    of the lowering: a function whose C has a different number of indirect
+    calls than its machine code has `bctrl`s is a mis-lift or a missed
+    rewrite, and the plan refuses rather than binding sites by position.
+    """
+    payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    if payload.get("indirect_sites_schema") != 1:
+        sys.exit(f"{path} is not indirect_sites_schema 1")
+    return payload
+
+
+def cmd_dispatch_sites(a: argparse.Namespace) -> int:
+    dol = Dol.from_iso(Path(a.iso))
+    fns = unit_functions(a.unit)
+    if not fns:
+        sys.exit(f"unit {a.unit} has no function markers")
+    by_addr = {addr: name for addr, name in fns}
+    by_name = {name: addr for addr, name in fns}
+    if a.fn not in by_name:
+        sys.exit(f"{a.fn} is not a function of unit {a.unit} "
+                 f"(markers: {sorted(by_name)})")
+    entry = by_name[a.fn]
+    ends = function_extents(fns, dol)
+
+    imports, exports = wasm_signatures(Path(a.wasm))
+    import_by_name = {i["name"]: i for i in imports}
+    if a.fn not in exports:
+        sys.exit(f"{a.wasm} does not export {a.fn}")
+    for needed in ("__gf_dispatch_enter", "__gf_dispatch_exit"):
+        if needed not in import_by_name:
+            sys.exit(f"{a.wasm} does not import {needed}: this module was not "
+                     f"built with the gate's indirect-call lowering in TRACE "
+                     f"mode, so its indirect calls are still invisible")
+
+    reg = registry_names(REPO_ROOT)
+    sdk = sdk_import_names(REPO_ROOT)
+    manifest = load_site_manifest(Path(a.sites_manifest))
+    port_sites_by_fn: dict[str, list[dict]] = {}
+    for site in manifest.get("sites") or []:
+        port_sites_by_fn.setdefault(site.get("function") or "", []).append(site)
+
+    def bind_callee(target: int) -> str | None:
+        for cand in addr_name_candidates(target):
+            if cand in import_by_name:
+                return cand
+        nm = reg.get(target)
+        if nm and nm in import_by_name:
+            return nm
+        nm = sdk.get(target)
+        if nm and nm in import_by_name:
+            return nm
+        return None
+
+    # in-unit closure, exactly as transcript_green computes it
+    closure: list[int] = []
+    pending = [entry]
+    shapes: dict[int, dict] = {}
+    while pending:
+        f = pending.pop()
+        if f in closure:
+            continue
+        closure.append(f)
+        shape = decode_function(dol, f, ends[f])
+        shapes[f] = shape
+        for c in shape["calls"]:
+            t = int(c["target"], 16)
+            if t in by_addr and t not in closure:
+                pending.append(t)
+
+    refusals: list[str] = []
+    call_sites: list[dict] = []
+    dispatch_sites: list[dict] = []
+    unbound: list[dict] = []
+    in_unit_calls: list[dict] = []
+    for f in closure:
+        sh = shapes[f]
+        symbol = by_addr[f]
+        rom_indirect = sh["indirect_calls"]
+        port_indirect = port_sites_by_fn.get(symbol, [])
+        # ---- INDEPENDENT AUDIT OF THE LOWERING ---------------------------
+        # The ROM's machine code and the port's C are two descriptions of one
+        # function. If they disagree on HOW MANY indirect calls it makes, one
+        # of them is wrong and any site binding would be a guess.
+        if len(rom_indirect) != len(port_indirect):
+            refusals.append(
+                f"{symbol}: the ROM has {len(rom_indirect)} indirect branch(es) "
+                f"but the lowered C has {len(port_indirect)} lowered site(s). "
+                f"The decompiled C does not describe this function's dispatch, "
+                f"or the lowering missed a site; binding sites by position "
+                f"would be a guess")
+            continue
+        for ordinal, ic in enumerate(sorted(rom_indirect, key=lambda x: x["at"])):
+            port = port_indirect[ordinal] if len(port_indirect) == 1 else None
+            # Ordinal binding is EXACT only when the function has exactly one
+            # indirect call. Ghidra's C is structured, not linear, so with two
+            # or more sites the text order need not be the address order, and
+            # this refuses to pretend otherwise: the comparison then names the
+            # FUNCTION rather than the site, which is recorded in the plan and
+            # carried into the result artifact.
+            dispatch_sites.append({
+                "at": ic["at"], "kind": ic["kind"], "in": symbol,
+                "rom_ordinal": ordinal,
+                "port_site": (port or {}).get("site"),
+                "site_match": "exact" if port is not None else "function",
+                "target_expr": (port or {}).get("target_expr"),
+                "arg_count": (port or {}).get("arg_count"),
+                "table_windows": [
+                    f"0x{addr:08x}"
+                    for addr in dispatch_target_windows(
+                        (port or {}).get("target_expr") or "")],
+            })
+        for c in sh["calls"]:
+            t = int(c["target"], 16)
+            if t in by_addr:
+                in_unit_calls.append({"in": symbol, "at": c["at"],
+                                      "callee": by_addr[t]})
+                continue
+            name = bind_callee(t)
+            if name is None:
+                unbound.append({"in": symbol, "at": c["at"], "target": c["target"]})
+                continue
+            imp = import_by_name[name]
+            call_sites.append({"at": c["at"], "target": c["target"], "in": symbol,
+                               "callee": name,
+                               "wasm_params": imp["params"],
+                               "wasm_results": imp["results"],
+                               "args": eabi_allocate(imp["params"]),
+                               "ret": eabi_return(imp["results"])})
+    if unbound:
+        refusals.append(
+            f"{len(unbound)} ROM call site(s) bind to no wasm import "
+            f"(first: {unbound[0]['target']} from {unbound[0]['in']})")
+    if not dispatch_sites:
+        refusals.append(
+            f"{a.fn} makes NO indirect call. dispatch_green has nothing to "
+            f"claim about it; use transcript_green (capture_transcript.py sites)")
+
+    # field widths + globals, reused verbatim from transcript_green
+    field_widths: dict[int, int] = {}
+    width_conflicts: list[dict] = []
+    for f in closure:
+        for ld in list(shapes[f]["loads"]) + list(shapes[f]["stores"]):
+            if ld.get("disp") is None or ld["disp"] < 0:
+                continue
+            if ld.get("base_reg") in ("r1", "r2", "r13"):
+                continue
+            prev = field_widths.get(ld["disp"])
+            if prev is not None and prev != ld["width"]:
+                width_conflicts.append({"offset": f"0x{ld['disp']:x}",
+                                        "widths": sorted({prev, ld["width"]}),
+                                        "at": ld["at"], "in": by_addr[f]})
+                field_widths[ld["disp"]] = min(prev, ld["width"])
+            else:
+                field_widths[ld["disp"]] = ld["width"]
+    plan_globals = []
+    seen_g: set[tuple] = set()
+    for f in closure:
+        for g in shapes[f].get("globals") or []:
+            key = (g["kind"], g.get("addr"), g.get("disp"), g["width"])
+            if key in seen_g:
+                continue
+            seen_g.add(key)
+            plan_globals.append(dict(g, **{"in": by_addr[f]}))
+
+    sig = exports[a.fn]
+    plan = {
+        "dispatch_plan_schema": DISPATCH_SCHEMA,
+        "standard": DISPATCH_STANDARD,
+        "generated_by": "research/tools/dolphin-trace/capture_transcript.py dispatch-sites",
+        "generated_at": now_iso(),
+        "unit": a.unit,
+        "fn": {"name": a.fn, "gc_addr": f"0x{entry:08x}",
+               "end": f"0x{ends[entry]:08x}",
+               "params": sig["params"], "results": sig["results"],
+               "entry_args": eabi_allocate(sig["params"]),
+               "ret": eabi_return(sig["results"])},
+        "wasm": a.wasm,
+        "sites_manifest": str(Path(a.sites_manifest).as_posix()),
+        "in_unit_closure": [{"name": by_addr[f], "addr": f"0x{f:08x}",
+                             "end": shapes[f]["end"]} for f in closure],
+        "call_sites": call_sites,
+        "dispatch_sites": dispatch_sites,
+        "in_unit_calls": in_unit_calls,
+        "unbound_call_sites": unbound,
+        "return_sites": sorted({r for f in closure for r in shapes[f]["returns"]}),
+        "globals": plan_globals,
+        "field_widths": {f"0x{off:x}": w for off, w in sorted(field_widths.items())},
+        "field_width_conflicts": width_conflicts,
+        "dispatch_table_window_bytes": DISPATCH_TABLE_WINDOW,
+        "refusals": refusals,
+        "capturable": not refusals,
+    }
+    out = Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(plan, indent=1) + "\n", encoding="utf-8")
+    print(json.dumps({
+        "out": str(out), "fn": a.fn, "gc_addr": plan["fn"]["gc_addr"],
+        "in_unit_closure": [by_addr[f] for f in closure],
+        "dispatch_sites": len(dispatch_sites),
+        "exact_site_binding": sum(1 for s in dispatch_sites
+                                  if s["site_match"] == "exact"),
+        "out_of_unit_call_sites": len(call_sites),
+        "capturable": plan["capturable"], "refusals": refusals,
+    }, indent=2))
+    return 0 if plan["capturable"] else 2
+
+
+def cmd_dispatch_capture(a: argparse.Namespace) -> int:
+    plan = json.loads(Path(a.plan).read_text(encoding="utf-8"))
+    if plan.get("dispatch_plan_schema") != DISPATCH_SCHEMA:
+        sys.exit("plan is not dispatch_plan_schema 1")
+    if not plan.get("capturable") and not a.force:
+        sys.exit("plan is marked NOT capturable:\n  - "
+                 + "\n  - ".join(plan.get("refusals", []))
+                 + "\n(pass --force only to produce evidence you will NOT promote)")
+
+    entry = int(plan["fn"]["gc_addr"], 16)
+    field_widths = {int(k, 16): v for k, v in (plan.get("field_widths") or {}).items()}
+    site_by_addr = {int(s["at"], 16): s for s in plan["call_sites"]}
+    after_by_addr = {int(s["at"], 16) + 4: s for s in plan["call_sites"]}
+    disp_by_addr = {int(s["at"], 16): s for s in plan["dispatch_sites"]}
+    disp_after = {int(s["at"], 16) + 4: s for s in plan["dispatch_sites"]}
+
+    # The ROM's own function-pointer TABLES, seeded from the live console.
+    # These are bytes the port is GIVEN (itemised in the header, exactly like
+    # the static globals): the arena holds the DOL image, and a table the game
+    # has written since boot would otherwise read back stale. What the port is
+    # NOT given is the INDEX -- selecting the entry is the behaviour under test.
+    table_windows: list[int] = []
+    for s in plan["dispatch_sites"]:
+        for addr in s.get("table_windows") or []:
+            value = int(addr, 16)
+            if value not in table_windows:
+                table_windows.append(value)
+    table_size = int(plan.get("dispatch_table_window_bytes") or DISPATCH_TABLE_WINDOW)
+
+    watch_args = a.watch_args
+    watch_basis = "explicit --watch-args"
+    if watch_args < 0:
+        needed = max((off + w for off, w in field_widths.items()), default=0)
+        watch_args = max(0x200, min(WATCH_WINDOW_CAP, needed))
+        watch_args = (watch_args + a.seed_elem_width - 1) // a.seed_elem_width \
+            * a.seed_elem_width
+        watch_basis = (f"derived from the plan's field_widths: the body's "
+                       f"furthest load reaches +0x{needed:x}")
+        if needed > WATCH_WINDOW_CAP:
+            watch_basis += (f", CAPPED at 0x{WATCH_WINDOW_CAP:x} -- fields past "
+                            f"the cap are NOT seeded and can red falsely")
+    a.watch_args = watch_args
+
+    scenario = load_scenario(a.scenario) if a.scenario else None
+    if scenario and not a.inject:
+        a.inject = scenario.get("inject")
+    if scenario and a.game_state == "unspecified":
+        a.game_state = scenario.get("game_state") or "unspecified"
+    injector = parse_inject_arg(a.inject)
+    reg = registry_names(REPO_ROOT)
+
+    cases: list[dict] = []
+    notes: list[str] = []
+    misses = 0
+    watch_meta: list[dict] = []
+    seeded_globals: dict[str, dict] = {}
+    seeded_tables: dict[str, dict] = {}
+    d = StubDriver(a.port)
+    setup_report = None
+    t0 = time.monotonic()
+    deadline = t0 + a.max_seconds
+    try:
+        d.halt()
+        setup_report = apply_scenario_setup(scenario, d)
+        d.set_bp(entry)
+        if injector is not None:
+            d.set_bp(PAD_INJECT_BP)
+        for addr in (list(site_by_addr) + list(after_by_addr)
+                     + list(disp_by_addr) + list(disp_after)):
+            d.set_bp(addr)
+
+        while len(cases) < a.n and time.monotonic() < deadline:
+            hit = False
+            while time.monotonic() < deadline:
+                stop = d.cont_until_stop(timeout=min(
+                    a.stop_timeout, max(0.5, deadline - time.monotonic())))
+                if stop is None:
+                    notes.append("stub stop timeout waiting for entry")
+                    break
+                pc = stop_pc(stop) or d.rsp.read_pc()
+                if injector is not None and pc == PAD_INJECT_BP:
+                    injector.on_hit(d.rsp)
+                    continue
+                if pc == entry:
+                    hit = True
+                    break
+            if not hit:
+                break
+
+            regs = Regs(d.rsp)
+            entry_args = [read_arg(regs, s) for s in plan["fn"]["entry_args"]]
+            lr = d.rsp.read_lr()
+            entry_sp = regs.gpr(1)
+
+            windows = []
+            if a.watch_args > 0:
+                seen = set()
+                for spec in plan["fn"]["entry_args"]:
+                    if spec["t"] != "i32" or not spec["src"].startswith("r"):
+                        continue
+                    v = regs.gpr(int(spec["src"][1:]))
+                    base = v & ~(a.seed_elem_width - 1)
+                    if is_mem1(base) and is_mem1(base + a.watch_args - 1) \
+                            and base not in seen:
+                        seen.add(base)
+                        windows.append({"addr": base, "size": a.watch_args,
+                                        "arg": spec["i"]})
+            seed = []
+            for g in plan.get("globals") or []:
+                address = global_address(g, regs)
+                if address is None or not is_mem1(address):
+                    continue
+                raw = d.rsp.read_mem(address, g["width"])
+                seed.append({"addr": f"0x{address:08x}",
+                             "b64": base64.b64encode(
+                                 swap_elems(raw, g["width"])).decode()})
+                key = f"0x{address:08x}"
+                if key not in seeded_globals:
+                    seeded_globals[key] = {"addr": key, "width": g["width"],
+                                           "kind": g["kind"], "at": g["at"],
+                                           "in": g.get("in")}
+            for base in table_windows:
+                if not is_mem1(base) or not is_mem1(base + table_size - 1):
+                    continue
+                raw = d.rsp.read_mem(base, table_size)
+                seed.append({"addr": f"0x{base:08x}",
+                             "b64": base64.b64encode(swap_elems(raw, 4)).decode()})
+                key = f"0x{base:08x}"
+                if key not in seeded_tables:
+                    seeded_tables[key] = {"addr": key, "size": table_size,
+                                          "elem_width": 4}
+            for w in windows:
+                raw = d.rsp.read_mem(w["addr"], w["size"])
+                seed.append({"addr": f"0x{w['addr']:08x}",
+                             "b64": window_bytes(raw, a.seed_elem_width, field_widths)})
+            for w in windows:
+                key = f"0x{w['addr']:08x}"
+                found = next((m for m in watch_meta if m["addr"] == key), None)
+                if found is None:
+                    watch_meta.append({"addr": key, "size": w["size"],
+                                       "from_arg": w["arg"], "cases": 1})
+                else:
+                    found["cases"] += 1
+
+            d.set_bp(lr)
+            events: list[dict] = []
+            pending = None
+            pre = snapshot_windows(d.rsp, windows) if windows else {}
+            ret_val = None
+            closed = False
+            case_deadline = min(deadline, time.monotonic() + a.case_timeout)
+            while time.monotonic() < case_deadline:
+                stop = d.cont_until_stop(timeout=min(
+                    a.stop_timeout, max(0.5, case_deadline - time.monotonic())))
+                if stop is None:
+                    notes.append(f"case {len(cases)}: stub stop timeout mid-body")
+                    break
+                pc = stop_pc(stop) or d.rsp.read_pc()
+                if injector is not None and pc == PAD_INJECT_BP:
+                    injector.on_hit(d.rsp)
+                    continue
+                r = Regs(d.rsp)
+
+                # close a pending event first. The stack-pointer guard is not
+                # cosmetic: an indirect target may re-enter this very unit, and
+                # a nested hit of the same `bctrl+4` must not close the outer
+                # call. r1 is back at the branch's own frame only for OUR call.
+                if pending is not None and (pc in after_by_addr or pc in disp_after
+                                            or pc == lr):
+                    if pending["kind"] == "dispatch":
+                        # Only OUR call returns here: a dispatched callee that
+                        # re-enters this unit can hit the same `bctrl+4` with a
+                        # deeper frame, and closing on that would attribute the
+                        # inner callee's return registers to the outer call.
+                        if r.gpr(1) == pending["_sp"]:
+                            pending.pop("_sp")
+                            pending["ret_regs"] = {
+                                "r3": r.gpr(3), "r4": r.gpr(4),
+                                "f1": f"{r.fpr_bits(1):016x}"}
+                            if windows:
+                                post = snapshot_windows(d.rsp, windows)
+                                pending["deltas"] = diff_windows(
+                                    pre, post, a.seed_elem_width, field_widths)
+                                pre = post
+                            events.append(pending)
+                            pending = None
+                    else:
+                        pending["ret"] = read_ret(r, pending.pop("_ret_spec"))
+                        if windows:
+                            post = snapshot_windows(d.rsp, windows)
+                            pending["deltas"] = diff_windows(
+                                pre, post, a.seed_elem_width, field_widths)
+                            pre = post
+                        events.append(pending)
+                        pending = None
+
+                if pc == lr:
+                    if r.gpr(1) != entry_sp:
+                        continue
+                    ret_val = read_ret(r, plan["fn"]["ret"])
+                    closed = True
+                    break
+                if pc in disp_by_addr:
+                    s = disp_by_addr[pc]
+                    if pending is not None:
+                        notes.append(f"case {len(cases)}: dispatch at {s['at']} "
+                                     f"opened while another event was pending")
+                        events.append(pending)
+                        pending = None
+                    target = r.branch_target(s["kind"])
+                    pending = {
+                        "kind": "dispatch", "i": len(events),
+                        "site": s.get("port_site"), "at": s["at"],
+                        "in": s["in"], "site_match": s["site_match"],
+                        "branch": s["kind"],
+                        # THE FIELD THAT CLOSES THE WRONG-THUNK BLINDNESS.
+                        "resolved_target": f"0x{target:08x}",
+                        "resolved_name": reg.get(target),
+                        "arg_regs": r.snapshot_gprs(),
+                        "arg_fprs": r.snapshot_fprs(),
+                        "arg_count": s.get("arg_count"),
+                        "ret_regs": None, "deltas": [], "_sp": r.gpr(1),
+                    }
+                    continue
+                if pc in site_by_addr:
+                    s = site_by_addr[pc]
+                    if pending is not None:
+                        notes.append(f"case {len(cases)}: call at {s['at']} opened "
+                                     f"while another event was pending")
+                        events.append(pending)
+                        pending = None
+                    pending = {"kind": "call", "i": len(events),
+                               "callee": s["callee"], "callee_addr": s["target"],
+                               "args": [read_arg(r, spec) for spec in s["args"]],
+                               "ret": None, "deltas": [], "owned": [],
+                               "_ret_spec": s["ret"]}
+            d.clear_bp(lr)
+            if not closed:
+                misses += 1
+                continue
+            for e in events:
+                e.pop("_ret_spec", None)
+                e.pop("_sp", None)
+            case = {"kind": "case", "n": len(cases), "args": entry_args,
+                    "events": events, "ret": ret_val}
+            if seed:
+                case["seed"] = seed
+            if windows:
+                case["owned_end"] = [
+                    {"addr": f"0x{addr:08x}",
+                     "b64": window_bytes(raw, a.seed_elem_width, field_widths)}
+                    for addr, raw in snapshot_windows(d.rsp, windows).items()]
+            cases.append(case)
+    except (RspError, OSError) as e:
+        notes.append(f"stub session died: {e}")
+    finally:
+        d.cleanup()
+
+    event_total = sum(len(c["events"]) for c in cases)
+    dispatch_total = sum(1 for c in cases for e in c["events"]
+                         if e["kind"] == "dispatch")
+    targets = sorted({e["resolved_target"] for c in cases for e in c["events"]
+                      if e["kind"] == "dispatch"})
+    header = {
+        "kind": "header", "dispatch_schema": DISPATCH_SCHEMA,
+        "unit": plan["unit"],
+        "fn": {"export": plan["fn"]["name"], "gc_addr": plan["fn"]["gc_addr"],
+               "params": plan["fn"]["params"], "results": plan["fn"]["results"]},
+        "wasm": a.wasm_rel,
+        "arena": a.arena_rel,
+        "owned_regions": watch_meta,
+        "seeded_globals": sorted(seeded_globals.values(), key=lambda g: g["addr"]),
+        # The ROM's own function-pointer tables, GIVEN to the port.
+        "seeded_dispatch_tables": sorted(seeded_tables.values(),
+                                         key=lambda g: g["addr"]),
+        "dispatch_sites": plan["dispatch_sites"],
+        "distinct_targets": targets,
+        "watch_policy": {
+            "rule": f"one {a.watch_args}-byte window at each MEM1-valued i32 "
+                    f"pointer argument of the entry signature, per case",
+            "size_basis": watch_basis,
+        },
+        "counts": {"case": len(cases), "event": event_total,
+                   "dispatch": dispatch_total},
+        "source": {
+            "standard": DISPATCH_STANDARD,
+            "capture_tool": "research/tools/dolphin-trace/capture_transcript.py",
+            "control_strategy": "breakpoint the function entry, every out-of-unit "
+                                "call site AND every indirect branch in its in-unit "
+                                "closure, the instruction after each, and the entry "
+                                "LR; read CTR (bctrl) or LR (blrl) at the branch, "
+                                "before it executes, to record the RESOLVED TARGET; "
+                                "terminate the case at the return with a "
+                                "stack-pointer guard",
+            "emulator": "bundled Dolphin 2606-97 (dolphin/Dolphin.exe), Null video, CPU only",
+            "stub": f"gdb-rsp 127.0.0.1:{a.port}",
+            "dumped_at": now_iso(),
+            "game_state": a.game_state,
+            "plan": str(Path(a.plan).as_posix()),
+            "sites_manifest": plan.get("sites_manifest"),
+            "in_unit_closure": [c["name"] for c in plan["in_unit_closure"]],
+            "watch_args_bytes": a.watch_args,
+            "seed_elem_width": a.seed_elem_width,
+            "field_widths": plan.get("field_widths") or {},
+            "pad_injection": a.inject or None,
+            "injected_frames": injector.frame if injector else 0,
+            "scenario": a.scenario or None,
+            "scenario_setup": setup_report,
+            "misses": misses,
+            "exclusions": [
+                "dispatch_green is ORTHOGONAL to oracle_green and STRICTLY "
+                "WEAKER than it: no memory write set is compared",
+                "the ROM's function-pointer TABLES are seeded from the live "
+                "console (see seeded_dispatch_tables) -- bytes the port is "
+                "GIVEN. What the port must derive on its own is WHICH ENTRY it "
+                "selects, which is the behaviour under test",
+                "a dispatched callee's own behaviour is NOT verified: an "
+                "in-window target runs the port's own code, an out-of-window "
+                "target is a stub replaying the console's return registers",
+                "a bridged (out-of-window) return is supplied to the port as "
+                "the console's r3 word only; a non-i32 return width crossing "
+                "the bridge is NOT reproduced",
+                "argument registers are recorded RAW (r3-r10, f1-f8). The EABI "
+                "slot each frame argument occupies is allocated at replay time "
+                "from the CLASSES THE PORT ITSELF DECLARES, so a wrong class "
+                "reads a wrong register and goes red",
+                "site binding is EXACT only for a function with exactly one "
+                "indirect call; with two or more the comparison names the "
+                "function, because Ghidra's structured C need not order sites "
+                "as the machine code does",
+                "console stack addresses are excluded (the wasm module has its "
+                "own linear stack)",
+                "the claim is bounded by this corpus -- N recorded cases, never "
+                "all inputs",
+            ],
+            "notes": notes,
+            "elapsed_s": round(time.monotonic() - t0, 1),
+        },
+    }
+    out = Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(header) + "\n")
+        for c in cases:
+            f.write(json.dumps(c) + "\n")
+        f.write(json.dumps({"kind": "end",
+                            "counts": {"case": len(cases), "event": event_total,
+                                       "dispatch": dispatch_total}}) + "\n")
+    print(json.dumps({"out": str(out), "cases": len(cases),
+                      "events": event_total, "dispatches": dispatch_total,
+                      "distinct_targets": targets, "misses": misses,
+                      "notes": notes,
+                      "elapsed_s": round(time.monotonic() - t0, 1)}, indent=2))
+    return 0 if cases and dispatch_total and not notes else 1
+
+
 # --------------------------------------------------------------------------
 
 def main() -> int:
@@ -1028,6 +1677,48 @@ def main() -> int:
                     help="capture despite plan refusals -- produces evidence that "
                          "must NOT be promoted")
     cp.set_defaults(func=cmd_capture)
+
+    # ---- dispatch_green -------------------------------------------------
+    dsp = sub.add_parser(
+        "dispatch-sites",
+        help="decode a function that DISPATCHES through a ROM function-pointer "
+             "table and bind its indirect branches to the port's lowered sites")
+    dsp.add_argument("--unit", required=True)
+    dsp.add_argument("--fn", required=True, help="the function's wasm export name")
+    dsp.add_argument("--wasm", required=True,
+                     help="the module built WITH the gate's indirect-call "
+                          "lowering in trace mode (it must import "
+                          "__gf_dispatch_enter / __gf_dispatch_exit)")
+    dsp.add_argument("--sites-manifest", required=True,
+                     help="gf_indirect_sites.json emitted beside that module")
+    dsp.add_argument("--iso", default=str(ASSET_ROOT / "Gotcha Force.iso"))
+    dsp.add_argument("--out", required=True)
+    dsp.set_defaults(func=cmd_dispatch_sites)
+
+    dcp = sub.add_parser(
+        "dispatch-capture",
+        help="record N cases of the function's INDIRECT-DISPATCH stream, with "
+             "the console's resolved branch target per call")
+    dcp.add_argument("--plan", required=True)
+    dcp.add_argument("--n", type=int, default=8, help="cases to record")
+    dcp.add_argument("--out", required=True)
+    dcp.add_argument("--wasm-rel", default="../port-units-staging/UNIT/unit.wasm",
+                     help="header `wasm`: path RELATIVE TO THE CAPTURE FILE")
+    dcp.add_argument("--arena-rel", default="../oracle-harness/arena-trace-empty.json",
+                     help="header `arena`: path RELATIVE TO THE CAPTURE FILE")
+    dcp.add_argument("--watch-args", type=int, default=-1)
+    dcp.add_argument("--seed-elem-width", type=int, default=4)
+    dcp.add_argument("--stop-timeout", type=float, default=20.0)
+    dcp.add_argument("--case-timeout", type=float, default=60.0)
+    dcp.add_argument("--max-seconds", type=float, default=600.0)
+    dcp.add_argument("--game-state", default="unspecified")
+    dcp.add_argument("--inject", default=None)
+    dcp.add_argument("--scenario", default=None)
+    dcp.add_argument("--port", type=int, default=DEFAULT_PORT)
+    dcp.add_argument("--force", action="store_true",
+                     help="capture despite plan refusals -- produces evidence "
+                          "that must NOT be promoted")
+    dcp.set_defaults(func=cmd_dispatch_capture)
 
     a = p.parse_args()
     return a.func(a)
