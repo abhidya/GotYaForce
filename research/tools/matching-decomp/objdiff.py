@@ -17,7 +17,7 @@ so the loop has no external dependency:
   2. Everything not covered by a relocation must be byte-identical.  There is
      no tolerance, no similarity threshold, no "close enough".
 
-Two verdicts are produced and they are not the same claim:
+Three verdicts are produced and they are not the same claim:
 
     exact        every byte identical, relocations included.  Only meaningful
                  when comparing retail against retail, or against an already
@@ -25,9 +25,25 @@ Two verdicts are produced and they are not the same claim:
     MATCH        every byte identical after relocation masking, AND every
                  relocation names the symbol the retail call/reference goes to.
                  This is what a decomp project means by "matched".
+    MATCH_UNVERIFIED
+                 the bytes agree but at least one relocated operand could not
+                 be resolved on one side or the other, so the masking is doing
+                 work nothing checked.  NOT a match; never recorded.
 
 Anything else is a MISMATCH, and the report names the first differing
 instruction, which is what feeds back into the next LLM iteration.
+
+RELOCATION SYMBOL CHECKING comes in two halves, and both are required:
+
+  * BRANCH relocations (`R_PPC_REL24`) resolve through the link map --
+    `match.py.expected_symbols` supplies `expected_syms`.
+  * DATA relocations (`R_PPC_ADDR16_HA/LO/HI`, `R_PPC_ADDR32`,
+    `R_PPC_EMB_SDA21`) resolve through `datareloc.py`, which reads the
+    absolute address out of the RETAIL encoding and the candidate's address
+    out of the relocation's symbol name.  Pass `retail_addrs` and
+    `resolve_symbol` to turn that half on.  Without them, a data-relocated
+    operand is masked and unchecked, and the verdict is downgraded to
+    MATCH_UNVERIFIED rather than silently accepted.
 
 Candidate input may be:
     * an ELF32 big-endian relocatable object (what mwcceppc emits), via --obj
@@ -163,14 +179,27 @@ def words(blob):
 
 
 def compare(retail, cand, cand_relocs=None, base_addr=0,
-            retail_relocs=None, expected_syms=None):
+            retail_relocs=None, expected_syms=None,
+            retail_addrs=None, resolve_symbol=None):
     """The oracle.  Returns a verdict dict.
 
     retail        bytes from the DOL
     cand          bytes of the candidate's .text
     cand_relocs   [(offset, type, sym, addend)] from the candidate object
     expected_syms {offset: symbol_name} the retail call/ref at that offset
-                  should resolve to; if given, relocation SYMBOLS are checked.
+                  should resolve to; if given, branch relocation SYMBOLS are
+                  checked.
+    retail_addrs  {offset: (address, how)} from
+                  `datareloc.retail_data_addresses` -- the absolute address the
+                  RETAIL bytes name at each data-referencing offset.
+    resolve_symbol  callable name -> (address|None, source, note), normally
+                  `datareloc.SymbolResolver`.  Given both of these, every data
+                  relocation is address-checked; a candidate naming a
+                  different global is a MISMATCH, and one naming a symbol
+                  neither side can resolve is MATCH_UNVERIFIED.
+
+    A relocated operand that NOTHING checked always downgrades the verdict.
+    No argument to this function can turn a MISMATCH into a MATCH.
     """
     cand_relocs = cand_relocs or []
     rmap = {}
@@ -208,17 +237,49 @@ def compare(retail, cand, cand_relocs=None, base_addr=0,
     size_ok = len(rw) == len(cw)
     verdict = "MATCH" if (size_ok and not diffs) else "MISMATCH"
 
-    # symbol check on relocations
+    # symbol check on BRANCH relocations
     sym_errors = []
+    checked_offsets = set()
     if expected_syms:
         for off, rtype, nm, add in cand_relocs:
             want = expected_syms.get(off)
-            if want is not None and want != nm:
-                sym_errors.append({"offset": off, "expected": want, "got": nm})
+            if want is not None:
+                checked_offsets.add(off)
+                if want != nm:
+                    sym_errors.append({"offset": off, "expected": want,
+                                       "got": nm})
         if sym_errors:
             verdict = "MISMATCH"
 
-    return {
+    # address check on DATA relocations
+    import datareloc                                        # noqa: E402
+    data_verified, data_errors, data_unverified = [], [], []
+    if resolve_symbol is not None and retail_addrs is not None:
+        r = datareloc.check_data_relocs(
+            retail, base_addr, cand_relocs, retail_addrs, resolve_symbol,
+            skip_offsets=checked_offsets)
+        data_verified, data_errors, data_unverified = (
+            r["verified"], r["errors"], r["unverified"])
+        checked_offsets |= {x["offset"] for x in data_verified}
+        if data_errors:
+            verdict = "MISMATCH"
+    else:
+        for off, rtype, nm, add in cand_relocs:
+            if off in checked_offsets or rtype in datareloc.BENIGN_RELOC_TYPES:
+                continue
+            data_unverified.append({
+                "offset": off, "type": datareloc._rel_name(rtype),
+                "symbol": nm,
+                "reason": "no data-relocation resolver was supplied, so this "
+                          "operand was masked and never checked"})
+
+    # Anything still unchecked leaves masked bits nothing proved.  That is not
+    # a match, and it is not a mismatch either -- it is an unproved claim.
+    unchecked = [x for x in data_unverified]
+    if verdict == "MATCH" and unchecked:
+        verdict = "MATCH_UNVERIFIED"
+
+    out = {
         "verdict": verdict,
         "exact_bytes": exact,
         "retail_insns": len(rw),
@@ -230,7 +291,17 @@ def compare(retail, cand, cand_relocs=None, base_addr=0,
         "diffs": diffs,
         "relocations": reloc_notes,
         "reloc_symbol_errors": sym_errors,
+        "data_relocs_verified": data_verified,
+        "data_reloc_errors": data_errors,
+        "unchecked_relocs": unchecked,
     }
+    if unchecked and verdict == "MATCH_UNVERIFIED":
+        out["unverified_reason"] = (
+            "%d relocated operand(s) were masked and never checked: %s"
+            % (len(unchecked),
+               "; ".join("+0x%03x %s" % (x["offset"], x["reason"])
+                         for x in unchecked[:4])))
+    return out
 
 
 def render_diff(v, retail, cand, base_addr):
@@ -311,7 +382,17 @@ def main():
         struct.pack_into(">I", b, i * 4, w)
         cand = bytes(b)
 
-    v = compare(retail, cand, cand_relocs, base)
+    # Resolve both halves of the relocation check: branch targets through the
+    # link map, data references through datareloc.  Without these a relocated
+    # operand is masked and unproved, and the verdict says so.
+    import datareloc
+    from match import expected_symbols
+    exp = expected_symbols(smap, retail, base)
+    expd = datareloc.retail_data_addresses(
+        retail, base, datareloc.bases_only(dol, smap))
+    resolver = datareloc.SymbolResolver(dol, smap, repo=a.repo)
+    v = compare(retail, cand, cand_relocs, base, expected_syms=exp,
+                retail_addrs=expd, resolve_symbol=resolver)
     v["function"] = rec["name"]
     v["address"] = "0x%08x" % base
     v["retail_size"] = rec["size"]
@@ -324,6 +405,14 @@ def main():
         for r in v["relocations"]:
             print("  reloc +0x%03x %-20s -> %s%+d" % (
                 r["offset"], r["type"], r["symbol"], r["addend"]))
+        for r in v["data_relocs_verified"]:
+            print("  VERIFIED +0x%03x %-18s %s = retail %s (%s)"
+                  % (r["offset"], r["type"], r["symbol"], r["retail_addr"],
+                     r["symbol_source"]))
+        for r in v["data_reloc_errors"]:
+            print("  WRONG GLOBAL +0x%03x %s" % (r["offset"], r["reason"]))
+        for r in v["unchecked_relocs"]:
+            print("  UNVERIFIED +0x%03x %s" % (r["offset"], r["reason"]))
         print("\nVERDICT %s   %d/%d instructions   %.2f%%   exact_bytes=%s"
               % (v["verdict"], v["matched_insns"], max(v["retail_insns"],
                  v["cand_insns"]), v["match_pct"], v["exact_bytes"]))
