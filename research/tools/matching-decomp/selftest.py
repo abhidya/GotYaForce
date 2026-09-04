@@ -19,6 +19,10 @@ harness bug and this script exits non-zero.
     T5  wrong length            truncated candidate             -> MISMATCH
     T6  relocated object        synthetic ELF32-BE .o w/ REL24  -> MATCH (reloc masked)
         T6b same, wrong symbol                                  -> MISMATCH (symbol check)
+    T8  DATA relocation         synthetic .o w/ EMB_SDA21       -> MATCH (address check)
+        T8b same, DIFFERENT global                              -> MISMATCH
+        T8c same, unresolvable symbol                           -> MATCH_UNVERIFIED
+        T8d same, no resolver supplied                          -> MATCH_UNVERIFIED
 
 T2 is NOT evidence that the function is matchable from C.  It writes the same
 instructions twice.  Its claim is only that the encode->compare path works.
@@ -213,6 +217,43 @@ def main():
     check("T7 without relocs -> MISMATCH at the bl",
           v["verdict"] == "MISMATCH" and v["first_diff"]["offset"] == 12,
           str(v["first_diff"] and v["first_diff"]["addr"]))
+
+    print("\n== T8  DATA relocation: the half of the oracle a linked DOL "
+          "cannot name-check ==")
+    import datareloc
+    bases = datareloc.bases_only(dol, smap)
+    check("T8 SDA bases derived and cross-checked",
+          bases[13] == 0x8043B5A0 and bases[2] == 0x8043EA20,
+          "r13=0x%08x r2=0x%08x" % (bases[13], bases[2]))
+    rec8, retail8 = function_bytes(dol, smap, "zz_0005984_")
+    print("       target %s @ 0x%08x -- `stw r3, -0x54e0(r13); blr`, i.e. the "
+          "global at 0x804360c0" % (rec8["name"], rec8["addr"]))
+    refs8 = datareloc.retail_data_addresses(retail8, rec8["addr"], bases)
+    check("T8 retail reference resolved from the encoding",
+          refs8.get(0) == (0x804360C0, "sda"), str(refs8.get(0)))
+    # A fresh .o: `stw r3, sym@sda21(r0)` -- base register and displacement
+    # both zero, both owned by the relocation.
+    fresh8 = struct.pack(">II", 0x90600000, 0x4E800020)
+    resolver = datareloc.SymbolResolver(dol, smap, repo=str(REPO))
+    for tag, sym, want in (("T8", "DAT_804360c0", "MATCH"),
+                           ("T8b", "DAT_804360c4", "MISMATCH"),
+                           ("T8c", "not_a_known_symbol", "MATCH_UNVERIFIED")):
+        obj8 = make_elf32be_obj(fresh8, [(0, 109, 2)],
+                                ["", "zz_0005984_", sym])
+        e8 = Elf32BE(obj8)
+        rel8 = e8.relocs_for(".text")
+        v = compare(retail8, e8.data(e8.section(".text")), rel8, rec8["addr"],
+                    expected_syms={}, retail_addrs=refs8,
+                    resolve_symbol=resolver)
+        check("%s %-20s -> %s" % (tag, sym, want), v["verdict"] == want,
+              v["verdict"])
+    obj8 = make_elf32be_obj(fresh8, [(0, 109, 2)],
+                            ["", "zz_0005984_", "DAT_804360c0"])
+    e8 = Elf32BE(obj8)
+    v = compare(retail8, e8.data(e8.section(".text")), e8.relocs_for(".text"),
+                rec8["addr"], expected_syms={})
+    check("T8d no resolver supplied -> MATCH_UNVERIFIED, never MATCH",
+          v["verdict"] == "MATCH_UNVERIFIED", v["verdict"])
 
     print("\n" + "=" * 66)
     if FAILURES:

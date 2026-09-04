@@ -1,7 +1,8 @@
 # The matching-decompilation loop
 
-**Date: 2026-09-04.** Status: **BUILT AND RUN. 392 new functions are byte-identical to
-retail, and the loop that produced them never called a model.**
+**Date: 2026-09-04.** Status: **BUILT AND RUN. 468 new functions are byte-identical to
+retail, and nothing that produced them ever called a model.** (392 from the loop itself;
+76 more once data relocations became verifiable — §2.3.1.)
 
 Companion documents: [`docs/matching-decompilation-spike.md`](matching-decompilation-spike.md)
 (the feasibility spike this implements, whose §4.1 sketched the loop and whose §4.2
@@ -17,6 +18,7 @@ priced it at 2.6 GPU-years) and
 > | **The free-win fraction corpus-wide is 6.9 % of functions and 0.25 % of instructions** | Seed-only across all 5,897 link-map functions. §5.2's warning about counting functions is now attached to this loop's own numbers. §5 |
 > | **The 2.6 GPU-year figure barely moves: 2.63 → 2.62** | The free stages remove **41 of 23,024 GPU-hours — 0.18 %** — because 96 % of that cost is the *moderate*, *hard* and *research* tiers, which this loop cannot touch. §7 |
 > | **The oracle had a second hole, and it is now closed** | A candidate whose match rests on a data relocation has that operand *masked and never name-checked* — it would accept any global in the game. Such verdicts are now `MATCH_UNVERIFIED` and are never recorded. §2.3 |
+> | **…and then made verifiable instead of merely refused** | The retail bytes name the address; the candidate's symbol name encodes one; the oracle now requires them to be **equal**. **76 of the 104 refused functions are now real matches**, the corpus goes 405 → **481** functions and 1,773 → **2,024** instructions, and a candidate naming a *different* global is a hard red. §2.3.1 |
 > | **No model was run, and the reason is on the record** | The server answers on `127.0.0.1:8888` but reports `"loaded": false` for every model; `nvidia-smi` shows 968 MiB and 2 % on a leased 1080 Ti. A completion would have forced a 27B load onto that GPU. **Every model number below is labelled recorded, not live.** §6 |
 
 Nothing here touched the GPU, the supervisor, the port driver, or any pipeline state.
@@ -136,10 +138,105 @@ Running the loop at scale exposed the **remaining half of that same hole**:
 `loop.py` therefore downgrades any such verdict to **`MATCH_UNVERIFIED`** and never writes
 it to `src-match/`. The `leaf` seeder refuses `r2`/`r13`-based loads and stores outright for
 the same reason — **104 functions corpus-wide, 32 of them in the shape-shared class** —
-which is why the corpus contains no global accessors even though `lwz r3, d(r13); blr` is
-among the easiest shapes in the binary. **That is a deliberate 104-function loss taken to
+which is why the corpus contained no global accessors even though `lwz r3, d(r13); blr` is
+among the easiest shapes in the binary. **That was a deliberate 104-function loss taken to
 keep the corpus honest**, and it is the price of the standard the spike set: byte equality,
 no tolerance, no "close enough".
+
+### 2.3.1 Closing it properly: data relocations are now address-checked
+
+Refusing was right, but it was not the *only* honest option, and the sentence above
+contains its own answer: the claim was that the harness "cannot resolve" a data
+relocation. **The retail bytes can.** `lwz rX, d(r13)` names exactly one absolute address.
+So does a `lis`/`addi` pair. And the candidate side is resolvable too, because every global
+name this corpus uses carries its own address — `DAT_80436498`, `PTR_DAT_8043393c`,
+`FLOAT_80436a20` — and `research/decomp/data/oracle-registry.json` enumerates them.
+
+[`research/tools/matching-decomp/datareloc.py`](../research/tools/matching-decomp/datareloc.py)
+implements that, and `objdiff.compare` now applies it. **The rule:**
+
+> For every data relocation the candidate carries at offset `O` —
+> `R_PPC_ADDR16_HA/LO/HI`, `R_PPC_ADDR32`, `R_PPC_EMB_SDA21` —
+> **`want`** is the absolute address the *retail* encoding at `O` names, read out of the
+> retail bytes alone; **`got`** is `resolve(relocation symbol) + addend`, resolved from the
+> link map, the address encoded in the symbol name, or the oracle registry.
+> `got == want` → verified. `got != want` → **MISMATCH**. Either side unresolvable →
+> **`MATCH_UNVERIFIED`**, with the reason named. Nothing this check does can turn a
+> MISMATCH into a MATCH, and a relocation nothing checked *still* downgrades the verdict —
+> that part of §2.3 has not been weakened, it has been extended.
+
+**The small-data bases are not a guess.** Two independent derivations, cross-checked at
+load time; `datareloc` refuses to produce bases at all if they disagree.
+
+```
+a)  the ROM's own boot code, the tail of __init_registers:
+      8000332c  3c408043  lis  r2,  0x8043     8043ea20 = _SDA2_BASE_
+      80003330  6042ea20  ori  r2,  r2, 0xea20
+      80003334  3da08043  lis  r13, 0x8043     8043b5a0 = _SDA_BASE_
+      80003338  61adb5a0  ori  r13, r13, 0xb5a0
+b)  the DOL section table -- the EABI linker centres each base 0x8000 into its section:
+      .sdata  @ 0x804335a0  ->  0x8043b5a0   (r13)
+      .sdata2 @ 0x80436a20  ->  0x8043ea20   (r2)
+```
+
+A third corroboration comes from a tool that was never consulted for the bases at all:
+`zz_0010b50_` stores through `r13 - 0x54c4 / -0x54c6 / -0x54c8`, which under these bases
+are 0x804360DC / 0x804360DA / 0x804360D8 — **exactly** the `DAT_804360dc`, `DAT_804360da`,
+`DAT_804360d8` that `oracle-registry.json` records for that function from Ghidra's own
+pass.
+
+**The mutation test, run the way the spike ran T6b.** The first row is not hypothetical: it
+is a candidate that was written by hand during this work and *did* report `MATCH 100.00%`
+before the check existed.
+
+| candidate for `zz_000a144_` / `zz_0005984_` | verdict |
+| --- | --- |
+| the globals the retail bytes name (`DAT_804360cc`, `DAT_804360c8`) | `MATCH` |
+| **different** globals at plausible addresses (`DAT_804360c8`, `DAT_804360c4`) | **`MISMATCH`** |
+| the neighbouring global, off by four (`DAT_804360c4`) | **`MISMATCH`** |
+| symbols that resolve to no address (`g_someGlobal`) | `MATCH_UNVERIFIED` |
+| a name encoding an address in no DOL section and not in bss (`DAT_deadbeef`) | `MATCH_UNVERIFIED` |
+| a data relocation with **no resolver supplied at all** | `MATCH_UNVERIFIED` |
+
+The first five are permanent controls in `src-match/verify.py --control`; the sixth, plus a
+compiler-free synthetic-object version of the first three, is `selftest.py` **T8/T8b/T8c/T8d**
+— the data-relocation counterpart of T6b. `verify.py --control` is **489 ok, 0 failed**: the
+405 original matches and the 76 new ones all re-prove, and every control lands on its stated
+verdict.
+
+**What it recovered.** `research/tools/matching-decomp/sda_recover.py` re-derives C for the
+104 refused functions with a small-data-aware version of the same symbolic evaluator and
+records only what the strengthened oracle calls `MATCH`. `loop.py`'s own seeders are
+untouched; the seeder lane lifts its refusal by calling `datareloc.global_symbol` /
+`global_decl` / `sda_bases`, documented at the foot of `datareloc.py`.
+
+```
+$ python research/tools/matching-decomp/sda_recover.py --record
+
+SMALL-DATA RECOVERY  targets=104
+_SDA_BASE_ (r13) = 0x8043b5a0   _SDA2_BASE_ (r2) = 0x8043ea20
+  BUILD_FAILED             2
+  MATCH                   76
+  MISMATCH                 5
+  MATCH_UNVERIFIED         0
+  NO_SEED                 21
+  TOTAL                  104   compiles=123  wall=4.6s
+```
+
+**76 of the 104 recovered**, 251 instructions, 116 data relocations address-checked (93 of
+the symbols corroborated by `oracle-registry.json`, 23 resolved by the name encoding alone).
+Zero `MATCH_UNVERIFIED` — every recorded match is address-checked, not masked. The
+remainder is honestly classified and none of it is this check's failure:
+
+| count | why not | owner |
+| ---: | --- | --- |
+| 21 | opcode outside this seeder's envelope (`lis`, `cmpwi`, `cmplwi`, `addi`, `or`, `bnelr`) | the seeder lane |
+| 5 | retail hoists a constant above the stores — the §4 code-generator class, not a C difference | `mwcc-rs` |
+| 2 | `mwcc-rs` roadmap refusal (*"a run of stores that mwcc latency-schedules needs the scheduler"*) | `mwcc-rs` |
+
+Six of the 21 are `lis`-built **absolute** data references, which this check also covers
+(`R_PPC_ADDR16_HA`/`LO`); only the seeder does not yet model `lis`. They are recoverable the
+moment it does, with no further oracle work.
 
 ### 2.4 Recording
 
@@ -289,14 +386,17 @@ than by shape lookup. The largest single contributor is the 118 functions that a
 
 **Totals for the matched corpus:**
 
-| | before this work | after |
-| --- | ---: | ---: |
-| functions | 13 | **405** |
-| instructions | 43 | **1,773** |
-| share of `.init` + `.text` (701,464 instructions) | 0.0061 % | **0.2528 %** |
-| share of the 5,897 link-map `.text` functions | 0.22 % | **6.87 %** |
+| | before this work | after the loop | after §2.3.1 |
+| --- | ---: | ---: | ---: |
+| functions | 13 | 405 | **481** |
+| instructions | 43 | 1,773 | **2,024** |
+| share of `.init` + `.text` (701,464 instructions) | 0.0061 % | 0.2528 % | **0.2885 %** |
+| share of the 5,897 link-map `.text` functions | 0.22 % | 6.87 % | **8.16 %** |
 
 Of the 405: **390 are game code, 15 are SDK** (`gnt4-` prefixed, kept in `src-match/sdk/`).
+The 76 that §2.3.1 recovered are 53 game and 23 SDK, taking the corpus to **444 game, 37
+SDK**. The third column is the number to quote; the second is what the loop reached while
+data relocations were unverifiable.
 
 ### 5.1 Why the other 5,477 got no seed
 
@@ -306,7 +406,7 @@ Of the 405: **390 are game code, 15 are SDK** (`gnt4-` prefixed, kept in `src-ma
 | 176 | a decoded instruction the leaf seeder does not model (`lis`, `lfs`, `stfs`, `or`, `addi`, …) |
 | 174 | more than one `bl` (2 calls: 82, 3: 35, 4: 14, 5+: 43) |
 | 132 | argument setup the wrapper seeder does not model (`lis`, `lwz`, `addi`, `li`) |
-| 104 | r13/r2 small-data access — the integrity refusal of §2.3 |
+| 104 | r13/r2 small-data access — the integrity refusal of §2.3. **76 of these are now matched**, §2.3.1 |
 | 70 | the callee's name is not a C identifier, or its address is in no map symbol |
 | 57 | no single LR spill (a different frame shape) |
 | 43 | other (no `blr` terminator, non-Metrowerks prologue/epilogue, base register not an argument) |
@@ -316,18 +416,21 @@ Of the 405: **390 are game code, 15 are SDK** (`gnt4-` prefixed, kept in `src-ma
 the compiler and not about the binary. The corpus-wide free-win fraction measured here —
 6.9 % of functions, 0.25 % of instructions — is the ceiling of a mechanical seeder that
 models 21 opcode forms, and it would rise with every form added. It is **not** an estimate
-of how much of the game is matchable.
+of how much of the game is matchable. §2.3.1 is that claim being cashed: adding small-data
+globals to the same evaluator moved it to **8.16 % of functions, 0.2885 % of instructions**
+without touching the compiler.
 
 ### 5.2 The instruction-weighted view, as §5.2 of the spike demands
 
 > **405 functions is 6.87 % of the link map's entry points and 0.2528 % of the
-> instructions.**
+> instructions.** With §2.3.1's 76: **481 functions, 8.16 % of the entry points and
+> 0.2885 % of the instructions.**
 
-Thirty-one times the functions the spike matched, and still a quarter of one percent of the
-game. The spike warned that a loop which only solves short functions can report a large
+Thirty-seven times the functions the spike matched, and still under three tenths of one
+percent of the game. The spike warned that a loop which only solves short functions can report a large
 function-percentage having touched almost none of the code. **This loop is the extreme case
-of that warning**: its mean matched function is 4.4 instructions against a corpus mean of
-58.2. Report this work by instructions.
+of that warning**: its mean matched function is 4.4 instructions — 4.2 with §2.3.1's 76 —
+against a corpus mean of 58.2. Report this work by instructions.
 
 ---
 
