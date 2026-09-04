@@ -985,6 +985,20 @@ def record_match(rec, retail, src, meta):
 # the loop
 # ---------------------------------------------------------------------------
 
+def _shape_field(sh, outcome):
+    """The shape as the ledger stores it.
+
+    The shape is what the seeder keys on, so it is worth recording -- but a
+    400-instruction function the seeder never touched contributes 3 KB of
+    mnemonics nobody will read.  Full shape when the row reached the compiler,
+    a prefix otherwise.  `matched.json` always keeps the full shape.
+    """
+    keep = 24 if (outcome or "").startswith(("MATCH", "UNMATCHED")) else 8
+    if len(sh) <= keep:
+        return " ".join(sh)
+    return " ".join(sh[:keep]) + " ...(+%d)" % (len(sh) - keep)
+
+
 def run_one(oracle, name, exemplars, model=None, budget=3, do_permute=True,
             record=True):
     t0 = time.time()
@@ -993,7 +1007,8 @@ def run_one(oracle, name, exemplars, model=None, budget=3, do_permute=True,
         return {"function": name, "outcome": "NOT_IN_MAP"}
     sh = shape_of(retail, rec["addr"])
     row = {"function": name, "addr": "0x%08x" % rec["addr"],
-           "insns": rec["size"] // 4, "shape": " ".join(sh),
+           "insns": rec["size"] // 4, "shape": _shape_field(sh, None),
+           "_shape_full": list(sh),
            "iterations": 0, "model_calls": 0, "permuter_steps": 0,
            "compiles": 0, "seed": None, "outcome": None,
            "best_match_pct": 0.0, "first_diff": None,
@@ -1386,6 +1401,9 @@ def cmd_run(a, oracle):
                       budget=a.budget)
         row["ts"] = time.strftime("%Y-%m-%dT%H:%M:%S")
         row["run"] = a.tag
+        full = row.pop("_shape_full", None)
+        if full:
+            row["shape"] = _shape_field(full, row["outcome"])
         led.write(row)
         outcome[row["outcome"]] += 1
         insns[row["outcome"]] += row.get("insns", 0)

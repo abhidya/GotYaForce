@@ -343,6 +343,12 @@ of that warning**: its mean matched function is 4.4 instructions against a corpu
 | whole link map, seed + permuter, 5,492 functions | **30.5 s wall**, 595 compiles |
 | cost per match | **~26 ms of CPU** |
 
+These were taken on a shared machine — a parallel compile-ability census was running
+`--jobs 10` for part of the window — so treat them as an upper bound on cost, not a
+benchmark. The conclusion they support does not depend on the precision: the mechanical
+stages cost milliseconds and the model stage costs minutes, and that ratio is what §7 turns
+on.
+
 **Recorded, not live — the model step.** The server answers on `127.0.0.1:8888`, but:
 
 ```
