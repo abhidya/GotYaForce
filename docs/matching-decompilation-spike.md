@@ -2,6 +2,23 @@
 
 **Date: 2026-09-03.** Status: **SPIKE RESULT, then TEST RUN the same day.**
 
+> **SUPERSEDED IN PART, 2026-09-04 — read [`docs/matching-loop.md`](matching-loop.md)
+> alongside this.** §4.1's loop was built and run. The matched corpus is now **405
+> functions / 1,773 instructions (0.2528 % of the code)**, not 13 / 43, and **392 of the
+> new ones were produced with zero model calls** by a mechanical seeder. Three of this
+> document's numbers move and one does not:
+>
+> * §3.1.5's "233 functions share a matched shape" measures as **234**; **171 of the 221
+>   not already matched were matched at iteration 0**, in 4.5 seconds of CPU.
+> * §3.1's "1.08 iterations per function" becomes **1.00 over 405**, for the class whose C
+>   is derivable from the encodings — still not §4.2's *moderate*-tier number.
+> * §4.1's permuter idea measures **zero**: 580 mechanical mutants closed nothing, because
+>   all 15 near-misses were compiler limits, not C differences — §3.1.3's finding at scale.
+> * **§4.2's 2.6 GPU-years does NOT move**: 23,024 → 22,983 GPU-hours, a 0.18 % reduction,
+>   because 96 % of that bill is the *moderate*/*hard*/*research* tiers.
+>
+> §6.2.1's step 0 — contributing lowerings to `mwcc-rs` — is confirmed as the binding item.
+
 > ### The decisive test ran, and thirteen functions of Gotcha Force are matched.
 >
 > This document was written when there was no PowerPC compiler on the machine. There is
