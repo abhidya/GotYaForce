@@ -34,8 +34,55 @@ FORK = HERE / "mwcc-rs-fork"
 DEFAULT_TREE = REPO / ".tools" / "mwcc-rs"
 
 CODEGEN = "crates/pipeline/mwcc-syntax-trees-to-machine-code/src"
+PARSER = "crates/pipeline/mwcc-tokens-to-syntax-trees/src"
 MACHINE = "crates/representations/mwcc-machine-code/src"
 VREG = "crates/representations/mwcc-vreg/src"
+
+# fix 3, kept out of INSERTIONS' inline text only because it is long.
+FUNCTION_TYPEDEF_ANCHOR = """\
+                // `typedef RET (*name)(params);` (function pointer, a 4-byte word
+                // pointer) or `typedef T (*name)[N];` (pointer to array — a ROW
+                // pointer whose subscript strides by N elements).
+                if *self.peek() == Token::ParenOpen
+                    && self.tokens.get(self.position + 1) == Some(&Token::Star)
+                {
+"""
+FUNCTION_TYPEDEF_REPLACEMENT = """\
+                // `typedef RET (name)(params);` — a function TYPE alias, NOT a
+                // function POINTER alias: the declarator is parenthesized but
+                // carries no `*`. Ghidra emits exactly this as the header of
+                // every export (`typedef void (code)();`) and then spells every
+                // indirect dispatch as `(**(code **)(*this + 0x30))(this)`.
+                // Without this branch the alias is never registered, so `code`
+                // is not a type name, the cast is not recognized as a cast, and
+                // the call fails to parse at the `)` of `(code **)`.
+                //
+                // A function type occupies no storage — only its pointer forms
+                // are objects — so it registers as `void`, which makes `code *`
+                // a pointer and `code **` a pointer to one. That is precisely
+                // the type the cast needs, and it is what a plain
+                // `typedef void code;` already produced.
+                if *self.peek() == Token::ParenOpen
+                    && matches!(self.tokens.get(self.position + 1), Some(Token::Identifier(_)))
+                    && self.tokens.get(self.position + 2) == Some(&Token::ParenClose)
+                    && self.tokens.get(self.position + 3) == Some(&Token::ParenOpen)
+                {
+                    let return_identity = self.take_cxx_type_identity(aliased, false);
+                    self.advance(); // `(`
+                    let alias = self.parse_identifier()?;
+                    self.expect(Token::ParenClose)?;
+                    let _signature = self.parse_cxx_function_type(return_identity)?;
+                    self.expect(Token::Semicolon)?;
+                    self.typedefs.insert(alias, Type::Void);
+                    return Ok(());
+                }
+                // `typedef RET (*name)(params);` (function pointer, a 4-byte word
+                // pointer) or `typedef T (*name)[N];` (pointer to array — a ROW
+                // pointer whose subscript strides by N elements).
+                if *self.peek() == Token::ParenOpen
+                    && self.tokens.get(self.position + 1) == Some(&Token::Star)
+                {
+"""
 
 # Whole files this project authored or rewrote, copied over the pinned tree.
 WHOLE_FILES = [
@@ -101,6 +148,12 @@ INSERTIONS = [
         "    ) {\n"
         "        return Ok(output);\n"
         "    }\n",
+    ),
+    # ---- fix 3: `typedef RET (name)(params);` was never registered ----------
+    (
+        PARSER + "/items/mod.rs",
+        FUNCTION_TYPEDEF_ANCHOR,
+        FUNCTION_TYPEDEF_REPLACEMENT,
     ),
 ]
 

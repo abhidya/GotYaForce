@@ -157,6 +157,8 @@ compiled; whether the bytes match retail is a separate question answered in
 | ~~**`*(u32 *)&struct.member`**~~ | ~~**refused**: `pointer leaf access needs a pointer variable (roadmap)`~~ — **FIXED by §5.2.** |
 | **Routing an index computation through the scratch register `r0`** | not reproduced — see `zz_0298b20_` in `matched.json` |
 | Comparison of a value against a large constant | **refused**: `this comparison needs the branchless compare idioms (roadmap)` |
+| ~~**`typedef RET (name)(params);` — a function TYPE alias**~~ | ~~silently unregistered, so `(code **)` did not parse~~ — **FIXED by §5.3.** This is Ghidra's `code` typedef and every virtual dispatch in the export depended on it. |
+| An indirect call through a function-pointer variable | works — `mr r12; mtctr r12; bctrl`. **Not** a gap, contrary to the reading of the census's front-end row. |
 
 The project has a standing rule it keeps: **it fails honestly.** Every one of those
 refusals is a diagnostic, never plausible-but-wrong bytes. That makes `BUILD_FAILED`
@@ -355,7 +357,61 @@ The value of this change is the SDK, not the corpus: it is 9.8 % of the DOL
 (1,065 functions) whose sources are public, and the blocker on using them was
 this. Reporting it as a corpus win would be a lie by construction.
 
-### 5.3 Investigated and NOT closed: the scaled-index register choice
+### 5.3 `typedef RET (name)(params);` was never registered as a type
+
+*File:* `crates/pipeline/mwcc-tokens-to-syntax-trees/src/items/mod.rs` (one new
+branch beside the existing function-POINTER typedef branch).
+
+**This is the largest single change in the fork, and it is eleven lines.**
+
+Every Ghidra export opens with `typedef void (code)();` — a function *type*
+alias, parenthesized declarator, no `*` — and then spells every C++ virtual
+dispatch as `(**(code **)(*this + 0x30))(this)`. The pinned parser handled
+`typedef RET (*name)(params);` (function POINTER) and nothing else, so `code`
+was silently never registered. `token_starts_type` then said `code` is not a
+type, `(code **)` was not recognized as a cast, and the call failed to parse at
+its closing paren:
+
+```
+mwcc: expected an expression, found ParenClose at token 23 (line 5, column 16)
+      (**(code **)(*p + 0x30))(p);
+                 ^
+```
+
+A function type occupies no storage — only its pointer forms are objects — so
+the alias registers as `void`, which makes `code *` a pointer and `code **` a
+pointer to one. That is exactly the type the cast needs, and exactly what a
+plain `typedef void code;` already produced (which is how the diagnosis was
+made: the same body with `code` spelled as `void` parsed and reached codegen).
+
+**Measured, by re-running `census.py` over all 12,062 entry points:**
+
+| | before | after | delta |
+| --- | ---: | ---: | ---: |
+| `expected an expression, found ParenClose` | 2,535 fns / 138,420 insns | **2 / 44** | −2,533 fns |
+| `FRONT_END_REFUSAL` (all causes) | 2,711 fns / 165,399 insns | 227 / 36,335 | −2,484 fns |
+| **`COMPILES`** | 2,866 fns / 71,123 insns | **3,110 / 86,001** | **+244 fns** |
+
+244 functions become compilable outright; the other 2,227 move into
+`CODEGEN_UNSUPPORTED`, where they land on the gaps that were hiding behind the
+parse error. **That re-ranks the roadmap**, and the new ranking is the true one:
+
+| gap | before | after |
+| --- | ---: | ---: |
+| `this long long shape is not modeled yet` | 2,210 / 150,293 | **2,638 / 196,122** |
+| `pointer leaf access needs a pointer variable` | 1,088 / 77,250 | **1,335 / 91,196** |
+| `a signed char load promoted to int needs a sign-extension` | 1,296 / 81,022 | **1,333 / 84,687** |
+| `local reassignment mixed with stores/calls` | 218 / 31,223 | 245 / 36,157 |
+| `expected a general-register leaf` | 9 / 681 | 47 / 6,248 |
+
+**The indirect-call lowering already exists** and is not a gap: a call through a
+function-pointer variable compiles today to the correct `mr r12; mtctr r12;
+bctrl` sequence, and a `CallThrough` whose target is a pointer variable
+(`(**v)(p)`) compiles too. What remains in front of the vtable idiom is
+`*(code **)(*this + 0x30)` — the *address* computation — which is the
+`pointer leaf access` row above, i.e. the second entry in the new ranking.
+
+### 5.4 Investigated and NOT closed: the scaled-index register choice
 
 `zz_0298b20_` @ `0x80298b20` compiles; the register allocator diverges on the
 first instruction and only there:
