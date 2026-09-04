@@ -7,7 +7,7 @@
  * ---------------------------------------------------------------------------
  * PROVENANCE -- READ THIS BEFORE REUSING ANYTHING IN THIS DIRECTORY.
  *
- * The private `__GXLightObjInt_struct` layout below is taken from
+ * The struct layout and the function body below are the genuine source from
  * `libs/dolphin/src/gx/GXLight.c` in github.com/zeldaret/tp, which carries a
  * CC0-1.0 dedication at its repository root with no per-directory carve-out.
  * CC0 dedicates the contributors' OWN rights; it cannot dedicate rights they
@@ -20,50 +20,64 @@
  * section 5.3.
  *
  * ---------------------------------------------------------------------------
- * WHAT THIS FILE IS, AND WHAT IT IS NOT.
+ * WHAT THIS FILE IS.
  *
- * The genuine CC0 source body is:
+ * On 2026-09-03 this file was a REWRITE, because the genuine body did not
+ * compile.  It does now, and this is that body, matching the retail bytes as
+ * written -- so the free-SDK path of spike doc section 5.3 is proven end to end
+ * on this function, not merely argued.
  *
- *     void GXInitLightColor(GXLightObj* lt_obj, GXColor color) {
- *         __GXLightObjInt_struct* obj;
- *         ASSERTMSGLINE(462, lt_obj != NULL, "Light Object Pointer is null");
- *         obj = (__GXLightObjInt_struct*)lt_obj;
- *         CHECK_GXBEGIN(463, "GXInitLightColor");
- *         *(u32*)&obj->Color = *(u32*)&color;
- *     }
+ * The two refusals it used to hit were the same mistake twice: mwcc-rs read
+ * `*(u32 *)&X` as an address computation rather than as a re-typing of storage
+ * that already has an address.
  *
- * That body DOES NOT COMPILE under mwcc-rs: taking the address of a
- * by-reference struct parameter (`&color`) makes it spill the incoming
- * pointer to a stack home and reload it, which real MWCC does not do, and
- * `*(u32*)&obj->Color` is rejected outright ("pointer leaf access needs a
- * pointer variable (roadmap)").  Both diagnostics are reproduced verbatim in
- * the spike doc.
+ *   *(u32 *)&obj->Color   ->  "pointer leaf access needs a pointer variable
+ *                              (roadmap)" -- refused outright.
+ *   *(u32 *)&color        ->  compiled, but gave the by-REFERENCE struct
+ *                              parameter a stack home and emitted
+ *                              `stwu; stw r3,8(r1); lwz r3,8(r1); addi r1; blr`
+ *                              -- a spill and reload of a pointer already in a
+ *                              register.  Real MWCC does neither.
  *
- * So this file is a REWRITE that reaches the same three retail instructions
- * through the subset mwcc-rs implements.  It proves the retail bytes are
- * reachable; it does NOT prove the free SDK path works end to end, because
- * the blocker there is the compiler, not the source.  Treat it accordingly.
+ * This project's fork normalises `*(T *)&aggregate` into an ordinary T-typed
+ * member access at the aggregate's own offset before lowering, which is what
+ * makes both sides collapse to the retail `lwz` / `stw` pair with the 0xc
+ * folded into the store displacement.  See
+ * research/tools/matching-decomp/mwcc_fork.py, the module
+ * `punned_aggregate_access.rs`, and TOOLCHAIN.md section 5.
  *
- * Iterations to match: 1 for the rewrite; the genuine source is at 0 of 2
- * attempts and is blocked by a compiler capability gap, not by the C.
+ * The ASSERTMSGLINE / CHECK_GXBEGIN macros of the original compile to nothing
+ * in a release build and are shown, commented, where they stood.
+ *
+ * Iterations to match: 1, on the genuine source, once the compiler could take
+ * it.  It was 0 of 2 before that, and the blocker was never the C.
  */
 
+typedef unsigned char u8;
 typedef unsigned int u32;
+
+typedef struct GXColor {
+    u8 r, g, b, a;
+} GXColor;
 
 typedef struct GXLightObj {
     u32 dummy[16];
 } GXLightObj;
 
 typedef struct __GXLightObjInt_struct {
-    u32   reserved[3];
-    u32   Color;
-    float a[3];
-    float k[3];
-    float lpos[3];
-    float ldir[3];
+    u32     reserved[3];
+    GXColor Color;
+    float   a[3];
+    float   k[3];
+    float   lpos[3];
+    float   ldir[3];
 } __GXLightObjInt_struct;
 
-void f(GXLightObj *lt_obj, u32 *color)
+void f(GXLightObj *lt_obj, GXColor color)
 {
-    ((__GXLightObjInt_struct *)lt_obj)->Color = *color;
+    __GXLightObjInt_struct *obj;
+    /* ASSERTMSGLINE(462, lt_obj != NULL, "Light Object Pointer is null"); */
+    obj = (__GXLightObjInt_struct *)lt_obj;
+    /* CHECK_GXBEGIN(463, "GXInitLightColor"); */
+    *(u32 *)&obj->Color = *(u32 *)&color;
 }

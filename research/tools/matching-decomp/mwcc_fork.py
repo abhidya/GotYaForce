@@ -6,7 +6,7 @@ The compiler lives in gitignored `.tools/mwcc-rs`, extracted from the tarball of
 TOOLCHAIN.md).  It is NOT vendored.  What IS committed is this file plus
 `mwcc-rs-fork/`, which together reconstruct the fork exactly:
 
-  * `mwcc-rs-fork/**` holds the source files this project wrote in full,
+  * `mwcc-rs-fork/**` holds the two source files this project wrote in full,
     dropped over the pinned tree;
   * `INSERTIONS` below holds every other change as an exact string replacement,
     each anchored on text unique in the pinned file.
@@ -40,6 +40,7 @@ VREG = "crates/representations/mwcc-vreg/src"
 # Whole files this project authored or rewrote, copied over the pinned tree.
 WHOLE_FILES = [
     CODEGEN + "/expressions/materialized_bitand_constant.rs",
+    CODEGEN + "/punned_aggregate_access.rs",
 ]
 
 # (path, anchor, replacement).  The anchor must appear EXACTLY ONCE in the
@@ -71,6 +72,35 @@ INSERTIONS = [
         "| XorImmediateShifted { a, s, .. }",
         "| XorImmediate { a, s, .. } | AndImmediateRecord { a, s, .. } "
         "| AndImmediateShiftedRecord { a, s, .. } | XorImmediateShifted { a, s, .. }",
+    ),
+    # ---- fix 2: the type-punning normalisation pass -------------------------
+    (
+        CODEGEN + "/lib.rs",
+        "mod placement;\n",
+        "mod placement;\nmod punned_aggregate_access;\n",
+    ),
+    (
+        CODEGEN + "/lib.rs",
+        "    if let Some(output) = body::lower_register_inline_asm_wrapper(\n"
+        "        function,\n"
+        "        &Behavior::resolve(&config),\n"
+        "        config.flags.cpp_exceptions,\n"
+        "    ) {\n"
+        "        return Ok(output);\n"
+        "    }\n",
+        "    // `*(T *)&aggregate` is a re-typing of storage, not an address computation.\n"
+        "    // Normalise it into an ordinary typed member access before anything else\n"
+        "    // looks at the body; see `punned_aggregate_access`. No clone unless the\n"
+        "    // idiom is actually present.\n"
+        "    let punned_normalized = punned_aggregate_access::normalize(function);\n"
+        "    let function = punned_normalized.as_ref().unwrap_or(function);\n"
+        "    if let Some(output) = body::lower_register_inline_asm_wrapper(\n"
+        "        function,\n"
+        "        &Behavior::resolve(&config),\n"
+        "        config.flags.cpp_exceptions,\n"
+        "    ) {\n"
+        "        return Ok(output);\n"
+        "    }\n",
     ),
 ]
 

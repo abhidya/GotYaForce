@@ -153,8 +153,8 @@ compiled; whether the bytes match retail is a separate question answered in
 | **`while (a && b)` pointer walks** | **refused**: `loop codegen is not implemented yet (roadmap)` |
 | ~~**`AND` with a 32-bit constant that is not an `rlwinm` mask**~~ | ~~**refused**~~ — **FIXED by this project's fork, §5.1.** Was: `a general register was requested for a non-leaf expression: IntegerLiteral(...)`. |
 | **Load/store with update (`lbzu`, `lwzu`)** | not generated |
-| **`&param` on a by-reference struct parameter** | compiles, but spills the incoming pointer to a stack home and reloads it; real MWCC uses the register directly |
-| **`*(u32 *)&struct.member`** | **refused**: `pointer leaf access needs a pointer variable (roadmap)` |
+| ~~**`&param` on a by-reference struct parameter**~~ | ~~spills the incoming pointer to a stack home and reloads it~~ — **FIXED for the `*(T *)&param` form by §5.2.** A bare `&param` in other positions is unchanged. |
+| ~~**`*(u32 *)&struct.member`**~~ | ~~**refused**: `pointer leaf access needs a pointer variable (roadmap)`~~ — **FIXED by §5.2.** |
 | **Routing an index computation through the scratch register `r0`** | not reproduced — see `zz_0298b20_` in `matched.json` |
 | Comparison of a value against a large constant | **refused**: `this comparison needs the branchless compare idioms (roadmap)` |
 
@@ -303,3 +303,54 @@ this fork against the committed baseline moves the diagnostic
 functions. Eight functions become compilable; three others clear this gap and
 stop at the next one. The remaining 104 are outside the leaf/full-width subset
 this change covers.
+
+### 5.2 `*(T *)&aggregate` — the Dolphin SDK's type-punning idiom
+
+*Files:* `crates/pipeline/mwcc-syntax-trees-to-machine-code/src/punned_aggregate_access.rs`
+(new), `.../src/lib.rs` (declare the module; run the pass at the top of
+`lower_function_body`).
+
+Two of the spike's five blockers were the same mistake twice: mwcc-rs read
+`*(T *)&X` as an *address computation* when it is only a *re-typing of storage
+that already has an address*.
+
+* `*(u32 *)&obj->Color` — refused, `pointer leaf access needs a pointer variable
+  (roadmap)`, because the address operand is a `Member`, not a pointer variable.
+* `*(u32 *)&color` on a struct parameter the EABI passes **by reference** —
+  compiled, but gave the parameter a stack home:
+  `stwu; stw r3,8(r1); lwz r3,8(r1); addi r1,r1,16; blr`, a spill and reload of
+  a pointer that was already in a register. Real MWCC emits `lwz r3,0(r3); blr`.
+
+The fork normalises the idiom away before lowering. `*(T *)&X`, where `X` is an
+aggregate lvalue whose size equals `sizeof(T)`, becomes an ordinary `T`-typed
+member access at `X`'s own offset — which every existing load/store path already
+handles, folding the offset into the instruction displacement the way retail
+does. A `Member` keeps its offset; a struct-valued `Variable` becomes the member
+at offset zero, which is exactly what a by-reference parameter is.
+
+Scope is deliberately narrow: only when the punned-through lvalue is a
+`Type::Struct` (a `float`→`u32` pun is a different question with its own
+lowering in `float/punned.rs`, which this must not steal), only on an exact size
+match, and only for a scalar target type. **Every shape it fires on previously
+produced a hard diagnostic or the spill above**, so it cannot silently change
+code that already compiled — which is the argument that made a whole-function
+AST pass safe to add.
+
+*Proof:* `src-match/sdk/GXInitLightColor.c` now carries the **genuine CC0 body**
+from `zeldaret/tp` — `*(u32*)&obj->Color = *(u32*)&color;` — and matches the
+retail three instructions as written. It had been a rewrite. This is the first
+end-to-end confirmation of the spike's §5.3 free-SDK path: the source exists
+under a clear grant *and* the compiler can now take it.
+
+*Measured corpus impact on the GAME, honestly: essentially none.* Re-running
+`census.py` moves `pointer leaf access needs a pointer variable` from 1,086
+functions to 1,088 — it goes **up**, by two functions that this fork's §5.1
+change unblocked and which then stop here. Ghidra's C almost never spells the
+idiom (a scan of the whole export finds 6 functions with a `*(T *)&` cast), so
+the 77,044 instructions behind that diagnostic are a *different* shape —
+`*(T *)(p + k)` on a non-pointer variable — which this pass does not touch and
+which remains the fourth-largest gap in `docs/matching-compiler-census.md`.
+
+The value of this change is the SDK, not the corpus: it is 9.8 % of the DOL
+(1,065 functions) whose sources are public, and the blocker on using them was
+this. Reporting it as a corpus win would be a lie by construction.
