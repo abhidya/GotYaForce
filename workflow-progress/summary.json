@@ -1,17 +1,17 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-04T03:31:54.405996Z",
-  "run_id": "2026-09-04T03:31:53.990771Z",
+  "generated_at": "2026-09-04T03:35:15.663901Z",
+  "run_id": "2026-09-04T03:35:15.380784Z",
   "total_units": 1396,
   "green": 1,
   "staged": 103,
   "unknown_tier": 2,
   "retryable": 147,
-  "untouched": 1133,
+  "untouched": 1132,
   "deferred": 0,
   "structural_ineligible": 10,
-  "active": 0,
-  "total_attempts": 370,
+  "active": 1,
+  "total_attempts": 371,
   "transitions_last_hour": 0,
   "greens_last_hour": 0,
   "last_green_at": "2026-08-26T07:34:28.953704Z",
@@ -20,13 +20,13 @@
   "repeated_failure_classes": [],
   "health": "possibly_stuck",
   "machine": {
-    "workflow_state": "running",
+    "workflow_state": "yielding",
     "driver_status": "running",
     "manual_paused": false,
     "block_reason": null,
-    "active_model": "unsloth/Qwen3.8-27B-GGUF",
-    "context_length": 60000,
+    "active_model": null,
+    "context_length": null,
     "configured_model": "unsloth/Qwen3.8-27B-GGUF",
-    "detail": "Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx."
+    "detail": "Yielding the GPU to omr-sweep at the next port unit boundary."
   }
 }
