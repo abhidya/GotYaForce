@@ -1992,11 +1992,14 @@ void zz_000761c_(undefined8 param_1,double param_2,double param_3,double param_4
 
 /* WARNING: Removing unreachable block (ram,0x80007740) */
 
-void zz_00076d0_(undefined8 param_1,double param_2,double param_3,double param_4,double param_5,
-                double param_6,double param_7,double param_8,int param_9,float *param_10,
-                undefined *param_11,undefined4 param_12,undefined4 param_13,undefined4 param_14,
-                undefined4 param_15,undefined4 param_16)
-
+void zz_00076d0_(int param_9,float *param_10)
+/* CORPUS CORRECTION 2026-08-31: Ghidra typed this with 16 params (undefined8 + seven invented
+   doubles + eight integer slots) and propagated that shape into its callers (FUN_800c4468,
+   chunk_0020.c). DOL 0x800076d0..0x80007794 reads ONLY r3 and r4 (mr r30,r4; lwz r31,0xc(r3));
+   its three out-of-unit calls take 3, 2 and 1 argument: bl 0x80264290 (r3,r4,r5=file,0x495,
+   expr); bl 0x8020af28 (r3=r30,r4=r31+0x44); bl 0x80251b80 (r3=r31). The invented FPR footprint
+   is the varargs assert helper's. Ghidra's trailing slots are PRESERVED below as zeros, so the
+   only thing this correction changes is this function's ABI. */
 {
   bool bVar1;
   uint uVar2;
@@ -2005,15 +2008,13 @@ void zz_00076d0_(undefined8 param_1,double param_2,double param_3,double param_4
   
   iVar3 = *(int *)(param_9 + 0xc);
   if (iVar3 == 0) {
-    param_11 = &DAT_80436a58;
-    param_1 = gnt4___assert_bl(param_1,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
-                               &DAT_80436a50,0x495,&DAT_80436a58,param_12,param_13,param_14,param_15
-                               ,param_16);
+    gnt4___assert_bl(0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+                     &DAT_80436a50,0x495,&DAT_80436a58,0,0,0,0
+                     ,0);
   }
   if (param_10 == (float *)0x0) {
-    param_11 = &DAT_80436a60;
-    gnt4___assert_bl(param_1,param_2,param_3,param_4,param_5,param_6,param_7,param_8,&DAT_80436a50,
-                     0x496,&DAT_80436a60,param_12,param_13,param_14,param_15,param_16);
+    gnt4___assert_bl(0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,&DAT_80436a50,
+                     0x496,&DAT_80436a60,0,0,0,0,0);
   }
   uVar4 = gnt4_PSMTXCopy_bl(param_10,(float *)(iVar3 + 0x44));
   *(uint *)(iVar3 + 0x14) = *(uint *)(iVar3 + 0x14) | 0x3800000;
@@ -2025,8 +2026,7 @@ void zz_00076d0_(undefined8 param_1,double param_2,double param_3,double param_4
     }
     if (!bVar1) {
       gnt4_HSD_JObjSetMtxDirtySub_bl
-                (uVar4,param_2,param_3,param_4,param_5,param_6,param_7,param_8,iVar3,uVar2,param_11,
-                 param_12,param_13,param_14,param_15,param_16);
+                (uVar4,0.0,0.0,0.0,0.0,0.0,0.0,0.0,iVar3,uVar2,(undefined *)0x0,0,0,0,0,0);
     }
   }
   return;
