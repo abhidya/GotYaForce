@@ -13,7 +13,7 @@
     ·
     <a href="https://abhidya.github.io/GotYaForce/">Research Atlas</a>
     ·
-    <a href="docs/playable-port-design.md">Port design contract</a>
+    <a href="docs/matching-decompilation-spike.md">Port route: matching decompilation</a>
     ·
     <a href="docs/verification-status.md">Verification status</a>
     ·
@@ -42,15 +42,27 @@
 The repository runs two efforts at once. Conflating them is the single easiest way to
 misread this project's status.
 
-| | **Track 1 — TypeScript recreation** | **Track 2 — wasm-unit port pipeline** |
+| | **Track 1 — TypeScript recreation** | **Track 2 — port route (matching decompilation)** |
 | --- | --- | --- |
-| What it is | Hand-written TS/three.js game, each system transcribed from ROM evidence | Decompiled C recompiled to WebAssembly units, verified against the real console |
-| Status | **Playable.** This is what ships to GitHub Pages | **Research-stage.** 1,396 units queued, 112 staged, 3 verified |
-| Governing doc | [`research/decomp/PORT-1TO1-STATUS.md`](research/decomp/PORT-1TO1-STATUS.md) | [`docs/playable-port-design.md`](docs/playable-port-design.md) |
-| In production today | The whole game | One unit: the ROM damage core |
+| What it is | Hand-written TS/three.js game, each system transcribed from ROM evidence | Compile candidate C with a PowerPC compiler and diff against retail bytes until byte-identical, driven by a local model. Route chosen 2026-09-04, superseding the wasm-unit pipeline below |
+| Status | **Playable.** This is what ships to GitHub Pages | **Research-stage.** 405 functions byte-identical (0.2528 % of the game's instructions); the older wasm-unit pipeline's verified tiers (below) are historical, not the active route |
+| Governing doc | [`research/decomp/PORT-1TO1-STATUS.md`](research/decomp/PORT-1TO1-STATUS.md) | [`docs/matching-decompilation-spike.md`](docs/matching-decompilation-spike.md), [`docs/matching-loop.md`](docs/matching-loop.md); [`docs/playable-port-design.md`](docs/playable-port-design.md) is the superseded-in-part predecessor |
+| In production today | The whole game | One wasm unit (the ROM damage core, still live — see below) |
 
 Track 2's long-term goal is to replace Track 1 subsystem by subsystem with byte-exact
 recompiled ROM code. It has done that exactly once so far.
+
+> [!IMPORTANT]
+> **Route decision, 2026-09-04: Track 2's port route is now matching decompilation, not
+> the wasm-unit pipeline described below.** The owner chose this after two feasibility
+> spikes —
+> [`docs/static-recompilation-spike.md`](docs/static-recompilation-spike.md) and
+> [`docs/matching-decompilation-spike.md`](docs/matching-decompilation-spike.md). Read
+> "Track 2 — matching decompilation" below for what that is, what it retires, and the
+> current numbers. **The Ghidra + compile-fix wasm-unit driver
+> (`finish-port --drive`) is obsolete on this route and must not be relaunched** — the
+> verified-tier record further down this file (`damage-core`, `boundary_green`,
+> `dispatch_green`, and so on) is kept as history, not as the active pipeline.
 
 Known defects and open findings for both tracks live in
 [`docs/audits/`](docs/audits/README.md) — a defect ledger for the game app, the port
@@ -103,7 +115,93 @@ a value still waiting on ROM or trace evidence; `DERIVED` means the evidence is 
 
 ---
 
-## Track 2 — the wasm-unit port pipeline
+## Track 2 — matching decompilation (the port route)
+
+**What it is.** Write C, compile it with a PowerPC compiler, diff the object code against
+the retail GameCube image until it is byte-identical. A matched function is not *argued*
+to be the same program; within the limits recorded below, it **is** the same program — and
+because the artifact is ordinary C, it compiles for any target afterward, wasm included.
+
+**Why this route, not the wasm-unit pipeline described further down.** Two feasibility
+spikes ran on 2026-09-02/03: [`docs/static-recompilation-spike.md`](docs/static-recompilation-spike.md)
+(mechanical PowerPC→C translation — technically strong, but a transliteration, which the
+owner's brief explicitly excludes) and
+[`docs/matching-decompilation-spike.md`](docs/matching-decompilation-spike.md) (matching
+decompilation — the only route that produces what was asked for: real, compilable,
+byte-exact source). The owner chose matching decompilation. What it retires: the Ghidra +
+compile-fix wasm-unit driver (`finish-port --drive` in the OGhidra checkout) is **obsolete
+on this route and must not be relaunched** — its 1,396-unit queue, the compile-fix LLM
+loop, per-unit specs, the composition ladder, and the assembly gate all become obsolete
+machinery under matching decomp (see the spike's §5.3 for the full list of what
+disappears and why). The verification-tier work recorded further down this section
+(`damage-core`, `boundary_green`, `dispatch_green`, and the rest) stays true as history
+and `damage-core` stays live in production; nothing about it is retracted, but it is no
+longer where new port work happens.
+
+**Current numbers, with their honesty caveats.** The matched corpus:
+[`src-match/`](src-match/README.md), registry `src-match/matched.json`.
+
+| | |
+| --- | ---: |
+| Matched functions | **405** |
+| Matched instructions | **1,773** |
+| Share of `.init` + `.text` (701,464 instructions) | **0.2528 %** |
+| Share of the 5,897 link-map `.text` functions | 6.87 % |
+| Produced with zero model calls (mechanical seeders) | 392 of 405 |
+
+Two honest discounts, stated in the registry's own README and repeated here because they
+are easy to lose: **118 of the 405 (29 % of the functions, 6.7 % of the instructions) are
+a single `blr`**, matched by `void f(void) {}` — true about the bytes, thin about the
+program. And **no global accessor is in this corpus** — a candidate resting on a data
+relocation (`r13`/`r2`-relative access) has that relocation's *symbol* masked and never
+checked by the oracle, so it would match any global in the game; such verdicts are
+recorded `MATCH_UNVERIFIED` and are never written to `src-match/` (104 functions refused
+on this ground alone). Also: every match here is `mwcc-rs`-exact, not genuine-MWCC-exact
+(`mwcceppc.exe` was never obtained; see
+[`research/tools/matching-decomp/TOOLCHAIN.md`](research/tools/matching-decomp/TOOLCHAIN.md)).
+
+**What bounds the route today is the compiler, not the model or the C.**
+[`docs/matching-compiler-census.md`](docs/matching-compiler-census.md) compiled every one
+of the 12,062 entry points' verbatim Ghidra C against `mwcc-rs`: only **10.07 % of the
+game's instructions compile**; **87.2 % is compiler-blocked** (63.6 % the code generator
+refusing to lower something it parsed, 23.6 % a front-end parse/typecheck refusal), behind
+four diagnostics that together hold 63.7 % of the code. That is the binding constraint —
+not GPU throughput, not model quality.
+
+**Commands:**
+
+```bash
+# Re-verify the whole matched corpus + negative controls (408 ok, 0 failed)
+python src-match/verify.py --control
+
+# Which compiler build/flags each matched function discriminates
+python src-match/verify.py --sweep
+
+# Regenerate the compiler-capability census; --check re-derives and diffs, writes nothing
+MWCC_RS=<path>/target/release/mwcc.exe python research/tools/matching-decomp/census.py
+python research/tools/matching-decomp/census.py --check
+
+# The mechanical seeder + permuter loop (no model calls; see docs/matching-loop.md)
+python research/tools/matching-decomp/loop.py selftest
+python research/tools/matching-decomp/loop.py run --class shape-shared --no-llm
+python research/tools/matching-decomp/loop.py run --all-compilable --max-insns 9999 --no-llm
+```
+
+Full detail, including why the local 27B model on the project's GPU cannot drive the LLM
+step at any usable rate (2.6 GPU-years for 25 % of the code, versus published frontier-model
+loops reaching 88.78 % of a same-sized GameCube title in ~7 months) is in the spike's §4 and
+§6.2, and the mechanical-loop results (392 free matches, the permuter's measured
+zero-contribution finding) are in [`docs/matching-loop.md`](docs/matching-loop.md).
+
+---
+
+## Track 2, historical — the wasm-unit port pipeline
+
+> [!NOTE]
+> **Superseded as the port route by matching decompilation, 2026-09-04** (see above). This
+> section is kept because the verified results below are real and `damage-core` is still
+> live in the shipped game — not because the pipeline they came from is still how new port
+> work happens. Do not relaunch `finish-port --drive`.
 
 The pipeline takes decompiled PowerPC-derived C out of the Ghidra corpus, slices it into
 compilable units, drives a local LLM to make each unit compile against a shim seed, links it

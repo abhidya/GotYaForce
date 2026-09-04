@@ -9,7 +9,12 @@ stands today.
 Its companions, and the division of labour:
 
 - [`docs/playable-port-design.md`](playable-port-design.md) — the normative design
-  contract (v1 → v5, PASS verdict). It says what SHOULD happen. This page says what HAS.
+  contract (v1 → v5, PASS verdict) for the wasm-unit pipeline. It says what SHOULD happen.
+  This page says what HAS. **Superseded in part 2026-09-04** — see that document's own
+  status note; the pipeline it designs is no longer the active port route (below, §5.5).
+- [`docs/matching-decompilation-spike.md`](matching-decompilation-spike.md) and
+  [`docs/matching-loop.md`](matching-loop.md) — the spike and the mechanical loop for the
+  route that replaced it. §5.5 records the current standard and numbers.
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md) §"Evidence and promotion terms" — the binding
   vocabulary rules for anyone writing in this repo.
 - [`docs/audits/`](audits/README.md) — dated findings about specific defects.
@@ -76,6 +81,32 @@ their own verdict tokens and their own artifact filename namespaces
 tiers above rather than weaker or stronger than them**: they compare a function's GRAPHICS
 SEAM EMISSION and one draw's PIXELS, neither of which a write set, a callee boundary or a
 return value can see. Never total a GX result with a wasm-unit tier. See §5.3.
+
+**Matching decompilation has its own standard, added 2026-09-04, and it is not a sixth
+rung of the ladder above — it is a different kind of test entirely.** `MATCH` means the
+candidate C, compiled with the project's PowerPC compiler, is **byte-identical** to the
+retail object after masking relocated operand fields (and checking the relocation's
+*symbol* against what the link map says the retail branch resolves to). There is no
+capture, no console, no run-time behaviour involved at all — it is a static compile-and-diff
+against the shipped binary. Verdict token `MATCH` (or `MATCH_UNVERIFIED` — see below);
+artifact `src-match/matched.json`; the standard's own writeup is
+[`docs/matching-loop.md`](matching-loop.md) and the reproduction commands are
+[`src-match/README.md`](../src-match/README.md). **It must never be summed with
+`compile_only`, `oracle_green`, `boundary_green`, `transcript_green`, `dispatch_green`, or
+either GX standard** — none of those observe compiled bytes against the retail image, and
+this standard observes nothing else. Its honest unit is **both** a function count and an
+instruction share, for the same reason `transcript_green`'s ceiling and the GX coverage
+numbers are — a matched-function percentage alone hides how much of the game it actually
+covers (§5.5).
+
+`MATCH_UNVERIFIED` is a **held-not-counted** result, not a weaker pass. A candidate whose
+match rests on a **data** relocation (`R_PPC_ADDR16_HA/LO`, `R_PPC_EMB_SDA21`) has that
+operand masked exactly like a branch relocation, but the oracle has no data symbol table to
+check the masked value's *symbol* against — so such a candidate would report MATCH against
+**any** global in the game. Rather than accept that, the loop downgrades the verdict to
+`MATCH_UNVERIFIED` and never records it in `src-match/`. It does not count toward the 405
+matched functions below, and no future page may promote it into the corpus without first
+closing the underlying hole (a data-relocation symbol check `match.py` does not yet have).
 
 ### Non-vacuity is enforced, not assumed
 
@@ -570,6 +601,49 @@ The one unambiguous end-to-end success remains `damage-core`: 4 functions, **26,
 26,232 replayed cases byte-exact**, relinked for shared memory and re-verified with a
 byte-identical verdict, serving the live game.
 
+### 5.5 Matching decompilation — a different standard, its own corpus
+
+**This is not part of the ladder in §1–§5.4 and none of its counts belong in those
+totals.** It is a static compile-and-diff against the retail image, produced by
+[`research/tools/matching-decomp/loop.py`](../research/tools/matching-decomp/loop.py) and
+recorded in [`src-match/matched.json`](../src-match/matched.json), re-provable at any time
+with `python src-match/verify.py --control`.
+
+| | Count | Share |
+| --- | ---: | ---: |
+| Matched functions (`MATCH`) | **405** | 6.87 % of the 5,897 link-map `.text` functions |
+| Matched instructions | **1,773** | **0.2528 %** of `.init` + `.text` (701,464 instructions) |
+| Produced with zero model calls | 392 / 405 | — |
+| Held as `MATCH_UNVERIFIED` (data relocation, symbol unchecked) | not counted above | — |
+
+**Report this by instructions, not by function count** — the same rule §5.2 states for the
+`transcript_green` ceiling applies here with more force, because this corpus is the extreme
+case of it: its mean matched function is 4.4 instructions against a corpus mean of 58.2.
+Two honesty discounts apply directly to the 405/1,773 above, both recorded in
+[`src-match/README.md`](../src-match/README.md):
+
+- **118 of the 405 (29 % of the functions, 6.7 % of the instructions) are a single `blr`**,
+  matched by `void f(void) {}`. True about the bytes; thin about the program.
+- **No global accessor is in this corpus.** 104 candidates that would otherwise be among
+  the easiest shapes in the binary (`lwz r3, d(r13); blr`) were refused rather than
+  recorded `MATCH`, because the oracle cannot check a data relocation's symbol — see the
+  `MATCH_UNVERIFIED` definition in §1.
+
+A separate measurement — [`docs/matching-compiler-census.md`](matching-compiler-census.md)
+— compiled every one of the 12,062 entry points' verbatim (uncorrected) Ghidra C against
+the same compiler, to find the ceiling this route is actually working against: **10.07 %
+of the game's instructions compile at all**; **87.2 % is blocked by the compiler itself**
+(63.6 % code-generator refusals, 23.6 % front-end parse/typecheck refusals), concentrated
+behind four diagnostics. A compile is not a match — 10.07 % compiles, 0.61 % of that
+matches on the first try with no iteration at all (the census's own §3) — but it is the
+number that says the binding constraint here is compiler capability, not model throughput
+or GPU time.
+
+Every match in this corpus is `mwcc-rs`-exact, not genuine-Metrowerks-exact: `mwcceppc.exe`
+was never obtained, and there is currently no way on this machine to check where `mwcc-rs`
+might diverge from it. See
+[`research/tools/matching-decomp/TOOLCHAIN.md`](../research/tools/matching-decomp/TOOLCHAIN.md).
+
 ---
 
 ## 6. Standing claim-honesty rules
@@ -611,6 +685,13 @@ cost time.
    different bytes than what was verified; it does not carry its `oracle_green` /
    `boundary_green` status across until the full corpus replays byte-equal against the new
    binary. See [`docs/threads-relink-reverify.md`](threads-relink-reverify.md).
+9. **Matching-decomp `MATCH` counts are never summed with any trace-based tier, and never
+   with each other across the `MATCH` / `MATCH_UNVERIFIED` distinction.** A compile-and-diff
+   against retail bytes and a console capture verify different things — one is proof the
+   compiled object equals the shipped one, the other is proof the port behaves like a
+   running console. Report matching-decomp progress by instructions (§5.5), never folded
+   into the wasm-unit ceiling in §2, and never with `MATCH_UNVERIFIED` results included in
+   the matched count.
 
 ### Fixed 2026-09-02: two driver counters were fail-OPEN on tier
 

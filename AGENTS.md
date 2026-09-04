@@ -1,5 +1,12 @@
 # AGENTS.md — GotYaForce port: operating runbook for agents
 
+> [!IMPORTANT]
+> **Retired on the current route, 2026-09-04.** The owner chose matching decompilation as
+> the port route (`docs/matching-decompilation-spike.md`, `docs/matching-loop.md`), which
+> makes the wasm-unit driver this runbook operates (`finish-port --drive`) obsolete — do
+> not relaunch it. This file is kept as history and as the correct procedure if the driver
+> is ever revived; it is not the active operating instructions for new port work.
+
 This machine runs an unattended LLM port pipeline. Three cooperating pieces:
 
 - **rig supervisor** — Windows scheduled task `rig supervisor` (`D:\rig\supervisor\`).

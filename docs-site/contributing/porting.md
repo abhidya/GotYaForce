@@ -13,14 +13,64 @@ step is load-bearing:
 3. **Integrated** — production code selects the verified implementation.
 4. **Playable** — a browser acceptance route exercises the intended game state.
 
-Two pipelines produce port artifacts. They use different tooling and are at different
+Three pipelines produce port artifacts. They use different tooling and are at different
 maturities.
 
-## A. The wasm-unit pipeline (current frontier)
+## A. Matching decompilation (the current port route, since 2026-09-04)
+
+Write C, compile it with a PowerPC compiler, diff the compiled object against the retail
+GameCube image until it is byte-identical. Chosen over the wasm-unit pipeline in §B because
+it is the only route that produces real, compilable, byte-exact source instead of a
+mechanical transliteration — see `docs/static-recompilation-spike.md` and
+`docs/matching-decompilation-spike.md`.
+
+### Standard
+
+| Verdict | Proven | Not proven |
+|---|---|---|
+| `MATCH` | The compiled candidate is byte-identical to the retail object (relocated operands masked and symbol-checked) | Anything about run-time behavior. No console, no capture, no execution at all |
+| `MATCH_UNVERIFIED` | Nothing — a **held, not-counted** result | Rests on a data relocation the oracle cannot symbol-check, so it would match any global; never recorded in `src-match/` |
+
+**Never total a `MATCH` with any wasm-unit tier below or any GX standard** — none of them
+observe compiled bytes against retail, and this standard observes nothing else. See
+`docs/verification-status.md` §5.5.
+
+<ClaimTrail
+  :steps="[
+    { label: 'Matched functions', value: '405', status: 'verified' },
+    { label: 'Matched instructions (of 701,464)', value: '1,773 (0.2528%)', status: 'verified' },
+    { label: 'Corpus instructions compiler-blocked', value: '87.2%', status: 'observed' }
+  ]"
+/>
+
+::: warning Two honest discounts
+118 of the 405 matches are a single `blr` (`void f(void) {}`) — 29% of the functions, 6.7%
+of the instructions. No global accessor is in the corpus at all (see the `MATCH_UNVERIFIED`
+row above). Report this work by instructions, never by function count.
+:::
+
+### Verifying
+
+```bash
+python src-match/verify.py --control     # re-proves all 405 + 3 negative controls
+python src-match/verify.py --sweep       # which compiler build/flags each one discriminates
+MWCC_RS=<path>/mwcc.exe python research/tools/matching-decomp/census.py --check
+python research/tools/matching-decomp/loop.py run --class shape-shared --no-llm
+```
+
+Full detail: `docs/matching-decompilation-spike.md`, `docs/matching-loop.md`,
+`docs/matching-compiler-census.md`, `research/tools/matching-decomp/TOOLCHAIN.md`,
+`src-match/README.md`.
+
+## B. The wasm-unit pipeline (superseded as the route, kept as history)
 
 Decompiled ROM C is sliced into compilable units, made to compile against a shim seed,
 linked to WebAssembly, and then — separately — verified against the real console. The
-normative document is `docs/playable-port-design.md` (v5, PASS verdict).
+normative document is `docs/playable-port-design.md` (v5, PASS verdict; **superseded in
+part 2026-09-04** — see its own status note). Its driver (`finish-port --drive`) is
+**obsolete on the current route and must not be relaunched**; the results below are real
+and `damage-core` is still live in production, but this is no longer where new port work
+happens.
 
 ### Tiers
 
@@ -94,7 +144,7 @@ A threads-target relink changes module bytes, so `docs/threads-relink-reverify.m
 the unit's verified status until its full corpus replays byte-equal against the relinked
 module. A compile-only threads build is inventory, not progress.
 
-## B. The OGhidra artifact importer
+## C. The OGhidra artifact importer
 
 The earlier single-function path, still used and still tested. Use the checked-in fixture to
 exercise the deterministic importer without private Ghidra state or a local model:
@@ -108,7 +158,7 @@ The test must exit zero. The import command writes a generated candidate, report
 automatic verification record; review `git status` and retain only intentional evidence. A
 fallback exits `2` and is **not** a promotion.
 
-## Rules that hold for both
+## Rules that hold for all three
 
 - Never hand-edit autonomous queue verdicts. Every settle, revoke, or carry goes through a
   journal-emitting code path; the state file and the event log have already disagreed once

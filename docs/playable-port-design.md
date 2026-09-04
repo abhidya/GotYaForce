@@ -6,6 +6,33 @@ omr-sweep) and may not run again until this design is reviewed and approved.
 Date: 2026-08-25. Author: orchestrator session. Everything below is grounded in measured
 session evidence, cited inline.
 
+> [!IMPORTANT]
+> **Superseded in part, 2026-09-04 — the owner chose matching decompilation as the port
+> route**, not the wasm-unit pipeline this document designs. Read
+> [`docs/static-recompilation-spike.md`](static-recompilation-spike.md) and
+> [`docs/matching-decompilation-spike.md`](matching-decompilation-spike.md) for why, and
+> [`docs/matching-loop.md`](matching-loop.md) for the mechanical loop the new route runs on.
+>
+> - **Superseded — this is a retired design, not the active plan.** The 13-step revised
+>   order of work at the end of the V5 amendments, and every step before it superseded in
+>   place (Stage A/B/C, the composition ladder G3, control inversion G1, the dispatch ABI
+>   H3, the bridged-callee contract I1–I3) are all steps *in the wasm-unit driver*
+>   (`finish-port --drive`), which is **obsolete on this route and must not be relaunched**.
+>   The matching spike's §6.1 and the static-recomp spike's §5.3 each enumerate what
+>   becomes obsolete and why, item by item.
+> - **Still stands.** The HLE-host material this document's review rounds produced —
+>   the GX host, the bridge/reentrancy mechanics for a hosted execution model, the
+>   dispatch-table reasoning behind what became `dispatch_green` — describes work that is
+>   route-independent: both spikes say the GX/DVD/audio hosts are untouched by the route
+>   change and remain the same work either way. The claim-honesty discipline this document
+>   models (adversarial review to a PASS verdict, residual risks stated rather than
+>   hidden, normative requirements R1–R3) also stands as a method, independent of which
+>   pipeline it is applied to.
+>
+> Nothing below this note has been edited to reflect the route change; it is preserved as
+> the record of the design that was reviewed to a PASS verdict and then superseded by a
+> route decision, not by a design defect.
+
 > This document is **normative and layered**: v1 states the design, and the V2-V5 amendment
 > rounds below supersede parts of it in place rather than rewriting it, so an earlier
 > section may be historically accurate and currently wrong. It says what SHOULD happen.

@@ -50,10 +50,44 @@ covering damage profiles, status effects, hyper state, fusion shells, healing, l
 **Swarm (task-01..07)** — source `research/tasks/swarm/2026-06-30/`. Asset-inventory and
 stage-geometry sweep; see `status.md` in that folder for live progress.
 
-## 2. wasm-unit port pipeline — research-stage
+## 2. Matching decompilation — the port route (since 2026-09-04)
 
-Recompiling the decompiled ROM C into WebAssembly units and proving each one behaves like the
-real console. The design contract is `docs/playable-port-design.md` (v5, PASS verdict).
+Write C, compile it with a PowerPC compiler (`mwcc-rs`, see `research/tools/matching-decomp/TOOLCHAIN.md`),
+diff the object code against the retail image until it is byte-identical. Chosen over the
+wasm-unit pipeline below (§3) because it is the only route that produces real, compilable,
+byte-exact source rather than a mechanical transliteration — see `docs/static-recompilation-spike.md`
+and `docs/matching-decompilation-spike.md`.
+
+<ClaimTrail
+  :steps="[
+    { label: 'Matched functions', value: '405', status: 'verified' },
+    { label: 'Matched instructions (of 701,464)', value: '1,773 (0.2528%)', status: 'verified' },
+    { label: 'Produced with zero model calls', value: '392 / 405', status: 'verified' },
+    { label: 'Corpus instructions that compile at all', value: '10.07%', status: 'observed' },
+    { label: 'Corpus instructions compiler-blocked', value: '87.2%', status: 'observed' }
+  ]"
+/>
+
+::: warning Two honest discounts
+118 of the 405 matched functions (29% of the functions, 6.7% of the instructions) are a
+single `blr` matched by `void f(void) {}`. And no global accessor is in the corpus: a
+candidate resting on a data relocation would match any global in the game, so such results
+are held as `MATCH_UNVERIFIED` and never counted. See `docs/matching-loop.md`.
+:::
+
+The binding constraint is the compiler, not the model or the GPU: `docs/matching-compiler-census.md`
+compiled every entry point's verbatim Ghidra C and found 87.2% of the game's instructions
+blocked by the compiler itself. Reproduce with `python src-match/verify.py --control` and
+`python research/tools/matching-decomp/census.py --check`.
+
+## 3. wasm-unit port pipeline — superseded as the route, kept as history
+
+Recompiled the decompiled ROM C into WebAssembly units and proved each one behaves like the
+real console. The design contract is `docs/playable-port-design.md` (v5, PASS verdict,
+superseded in part 2026-09-04 — see its own status note). Its Ghidra + compile-fix driver
+(`finish-port --drive`) is obsolete on the current route and must not be relaunched; the
+results below are real and `damage-core` is still live in the shipped game, but this is no
+longer where new port work happens.
 
 ### Read the tier, not the word "green"
 

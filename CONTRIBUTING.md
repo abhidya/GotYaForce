@@ -49,6 +49,13 @@ command you ran, its result, and the product behavior it proves.
 - **Playable:** the browser acceptance route reaches and operates the intended
   game state; compilation alone never establishes this.
 
+**The port route changed 2026-09-04**: new port work is matching decompilation (compile
+candidate C and diff against retail bytes until byte-identical — `docs/matching-decompilation-spike.md`,
+`docs/matching-loop.md`, verdict tokens `MATCH` / `MATCH_UNVERIFIED`, never summed with any
+tier below), not the wasm-unit pipeline. The vocabulary below still describes the record
+left by that pipeline, which stays real (`damage-core` is still live), but its driver
+(`finish-port --drive`) must not be relaunched.
+
 For wasm port units the recorded tiers are `compile_only`, `oracle_green`,
 `boundary_green`, `transcript_green`, and `dispatch_green`. **`compile_only` means the unit
 compiled and linked and nothing else** — it is inventory, not progress, and at

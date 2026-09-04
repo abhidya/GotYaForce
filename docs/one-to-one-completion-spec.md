@@ -3,6 +3,37 @@
 **Date: 2026-09-01.** Status: **DRAFT FOR OWNER REVIEW.** This document proposes; it does
 not record. Nothing in it has been implemented and nothing in it is a claim about the port.
 
+> [!IMPORTANT]
+> **Superseded in part, 2026-09-04 — the owner chose matching decompilation as the port
+> route.** Read [`docs/static-recompilation-spike.md`](static-recompilation-spike.md) and
+> [`docs/matching-decompilation-spike.md`](matching-decompilation-spike.md) first; the
+> mechanical loop that route runs on is
+> [`docs/matching-loop.md`](matching-loop.md). This document was written for, and
+> everywhere below assumes, the wasm-unit pipeline that route retires. Read it accordingly:
+>
+> - **Superseded — do not act on these as written.** §4's critical path (P0–P7) and its
+>   revisions in §6/§6a, all of which are steps *in the wasm-unit driver*; the composition
+>   ladder as a route to a running game (§3.1, §3.8, gaps **C1/C2/C7/C9**); every gap and
+>   option keyed to the driver's queue, the assembly gate, or per-unit specs (**E5**, **E6**,
+>   **E11**'s framing as a port-pipeline defect rather than a decompiler-inference problem);
+>   §9's owner-decision list insofar as it assumes the driver is what gets decided about.
+>   The static-recompilation spike's §5.3 and the matching spike's §6.1 both enumerate, item
+>   by item, what becomes obsolete — read those tables against this document's gap list
+>   before reusing any of it.
+> - **Still stands.** The HLE host material is route-independent and unaffected: §3.5 (H4,
+>   audio has no mixer), §3.6 (H1/H2, the GX host cannot render a battle frame), §3.7 (H7/H5,
+>   DVD and audio MMIO) — the static-recomp spike's §5.1 says this in as many words ("the
+>   largest single body of work in the project... is untouched"). The claim-honesty
+>   vocabulary and rules throughout (never total a weaker standard with a stronger one, a
+>   ceiling is not a result, machine-local numbers are not repository evidence) apply
+>   unchanged to whatever standard is in use, matching decomp's `MATCH` included — see
+>   [`docs/verification-status.md`](verification-status.md) §5.5 and §6 rule 9. §9's
+>   supplied-inputs list (a DTM, disc/save-state legality) and the general shape of "the
+>   owner decides scope, an agent does not" also stand.
+>
+> Nothing below this note has been edited to reflect the route change; it is preserved as
+> the record of the plan that was reviewed and superseded.
+
 ## How to read this, and what it is for
 
 Three documents already exist and this one does not replace any of them:
