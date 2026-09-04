@@ -354,3 +354,57 @@ which remains the fourth-largest gap in `docs/matching-compiler-census.md`.
 The value of this change is the SDK, not the corpus: it is 9.8 % of the DOL
 (1,065 functions) whose sources are public, and the blocker on using them was
 this. Reporting it as a corpus win would be a lie by construction.
+
+### 5.3 Investigated and NOT closed: the scaled-index register choice
+
+`zz_0298b20_` @ `0x80298b20` compiles; the register allocator diverges on the
+first instruction and only there:
+
+```
+retail    mulli r0, r4, 0x74      add r3,r3,r0   lwz r3,0x114c(r3)   blr
+mwcc-rs   mulli r4, r4, 0x74      add r3,r3,r4   lwz r3,0x114c(r3)   blr
+```
+
+**Measured on the retail image — this is the finding.**
+`python research/tools/matching-decomp/blocker_census.py --scaled-index` counts
+every `mulli` and every power-of-two `slwi` whose product is consumed by an
+address computation within four instructions — i.e. the value is an *address
+temporary*, not a program value — across all 12,062 functions:
+
+| where the scaled index lands | `mulli` sites | `slwi` sites | combined | share |
+| --- | ---: | ---: | ---: | ---: |
+| **`r0`, the scratch** | 1,413 | 3,293 | **4,706** | **66.4 %** |
+| the index's own register (mwcc-rs's default) | 498 | 510 | 1,008 | 14.2 % |
+| a third register | 714 | 657 | 1,371 | 19.4 % |
+| total | 2,625 | 4,460 | 7,085 | |
+
+> mwcc-rs's default — reuse the index register when its value dies — is the
+> choice MWCC makes **14 % of the time**. Two thirds of the corpus stages the
+> scaled index through `r0`.
+
+That is not a tie-break to tune; it is the wrong default. But it is also not a
+one-line flip, and this was tested rather than assumed. Upstream already has one
+special case that forces `r0` here (`MEMBER_ARRAY_CALL_CURSOR_PREFIX`, in
+`expressions/members.rs`, `try_emit_embedded_member_array_element_address`).
+**Forcing that preference to `GENERAL_SCRATCH` unconditionally, building, and
+re-running `zz_0298b20_` changed nothing** — so this function's `mulli` is not
+emitted by that path at all, and the divergence is spread across the ~40 sites
+that scale an index, each with its own register reasoning. Reverted.
+
+**Class size, and why it is the top of the roadmap.** `blocker_census.py` counts
+3,987 functions (325,969 instructions) whose retail code stages *something*
+through `r0` as an index, of which 1,424 (112,095 instructions) have no other
+known gap. `docs/matching-compiler-census.md` sees the same wall from the
+compiler side under several names — `expression needs the full register
+allocator (roadmap M1)`, `a value live across a call needs the callee-saved
+register allocator`, `a repeated common sub-expression needs the register
+allocator's CSE`, and more.
+
+**What a fix would have to be**: a single register-assignment model for address
+temporaries, applied at every scaling site at once, not a per-site preference.
+mwcc-rs's README already names matching MWCC's register colouring as the core
+research target. Treat this as a known ceiling: a candidate that differs *only*
+in which register holds a scaled index is not a bad candidate, and an LLM loop
+must not be allowed to burn iterations rewriting C against it. `match.py`'s
+`first_diff` names the instruction, so the loop can recognise the signature —
+same mnemonic, same immediate, different destination register — and stop.

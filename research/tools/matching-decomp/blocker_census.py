@@ -364,12 +364,89 @@ TAG_DESC = {
 }
 
 
+def scaled_index_report():
+    """Where does retail put a scaled array index -- r0, the index's own
+    register, or a third one?
+
+    This is the zz_0298b20_ divergence measured over the whole binary.  mwcc-rs
+    reuses the index register when its value dies; retail overwhelmingly does
+    not.  Counted: every `mulli` and every power-of-two `slwi` whose result is
+    consumed by an address `add`/`subf` or an indexed load within four
+    instructions -- i.e. the value is an ADDRESS TEMPORARY, not a program value.
+    """
+    dol, _sym = load()
+    census = json.loads(CENSUS.read_text())["functions"]
+    ADDR_X = {266, 40, 23, 87, 151, 215, 279, 343, 407, 439, 535, 599, 663, 727}
+    counts = {"mulli": Counter(), "slwi": Counter()}
+    fns = {"r0": set(), "same": set(), "other": set()}
+
+    for rec in census:
+        addr = int(rec["addr"], 16)
+        n = rec["insns"]
+        blob = dol.read(addr, n * 4)
+        if blob is None or len(blob) < n * 4:
+            continue
+        words = struct.unpack(">%dI" % n, blob)
+        for i, w in enumerate(words):
+            op = OP(w)
+            if op == 7:                                  # mulli rD, rA, SIMM
+                kind, dst, src = "mulli", RT(w), RA(w)
+            elif op == 21:                               # rlwinm, slwi form
+                sh, mb, me = RB(w), (w >> 6) & 31, (w >> 1) & 31
+                if sh == 0 or mb != 0 or me != 31 - sh:
+                    continue
+                kind, dst, src = "slwi", RA(w), RT(w)
+            else:
+                continue
+            consumed = False
+            for j in range(i + 1, min(i + 5, n)):
+                v = words[j]
+                if OP(v) != 31 or XO10(v) not in ADDR_X:
+                    continue
+                if RA(v) == dst or RB(v) == dst:
+                    consumed = True
+                    break
+            if not consumed:
+                continue
+            where = "r0" if dst == 0 else ("same" if dst == src else "other")
+            counts[kind][where] += 1
+            fns[where].add(rec["name"])
+
+    print("WHERE RETAIL PUTS A SCALED ARRAY INDEX")
+    print("(every mulli / power-of-two slwi whose product feeds an address")
+    print(" computation within four instructions -- an address temporary)")
+    print()
+    total = sum(sum(c.values()) for c in counts.values())
+    print("%-34s %8s %8s %9s %8s" % ("destination", "mulli", "slwi", "combined", "share"))
+    print("-" * 72)
+    for where, label in (("r0", "r0, the scratch"),
+                         ("same", "the index's own register"),
+                         ("other", "a third register")):
+        m, s = counts["mulli"][where], counts["slwi"][where]
+        print("%-34s %8d %8d %9d %7.1f%%"
+              % (label, m, s, m + s, 100.0 * (m + s) / total if total else 0.0))
+    print("-" * 72)
+    print("%-34s %8d %8d %9d" % ("total", sum(counts["mulli"].values()),
+                                 sum(counts["slwi"].values()), total))
+    print()
+    print("mwcc-rs's default is `the index's own register` -- reuse it when the")
+    print("value dies there.  That is the MINORITY choice in this binary, and it")
+    print("is the zz_0298b20_ mismatch.  See TOOLCHAIN.md section 5.3.")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--json")
     ap.add_argument("--sample", nargs=2, metavar=("TAG", "N"))
     ap.add_argument("--no-typepun", action="store_true")
+    ap.add_argument("--scaled-index", action="store_true",
+                    help="where retail puts a scaled array index (the "
+                         "zz_0298b20_ register-allocator divergence)")
     args = ap.parse_args()
+
+    if args.scaled_index:
+        return scaled_index_report()
 
     dol, _sym = load()
     census = json.loads(CENSUS.read_text())["functions"]
