@@ -1,19 +1,19 @@
 # Port workflow: RUNNING
 
-*Generated 2026-09-04T03:35:15.380784Z - machine-written, do not edit.*
+*Generated 2026-09-04T03:55:12.038129Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (possibly_stuck) |
+| **State** | `RUNNING` (active_no_green) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 104/1396 settled (1 verified, 103 staged [compile_only, UNVERIFIED], 2 unknown tier) |
-| **Retries outstanding** | 147 |
+| **Retries outstanding** | 148 |
 | **Untouched** | 1132 |
-| **Last transition** | 2026-09-04T03:35:15.380784Z |
+| **Last transition** | 2026-09-04T03:55:12.038129Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
 
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-09-04T03:55:12.038129Z | `auto-c0030-014` | gate_failed | assembly | 5 | assembly gate merge failed before promotion: header merge refused: 2 contested conflict(s); no silent winner i |
 | 2026-09-04T03:35:15.380784Z | `-` | yielding | machine | 0 | Yielding the GPU to omr-sweep at the next port unit boundary. |
 | 2026-09-04T03:31:54.004750Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-09-04T00:04:24.402438Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
@@ -70,4 +71,3 @@
 | 2026-08-26T06:09:41.009476Z | `auto-c0053-018` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T06:05:10.220254Z | `auto-c0053-017` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T06:00:09.601311Z | `auto-c0053-016` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_01ba750_ declared void but their results are assigned; no header edit ca |
-| 2026-08-26T06:00:06.178042Z | `auto-c0053-008` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_01b7894_ declared void but their results are assigned; no header edit ca |

@@ -2,12 +2,12 @@
   "schema": 1,
   "unit": "auto-c0030-014",
   "unit_id": "auto-c0030-014",
-  "timestamp": "2026-08-29T21:22:04.190118Z",
-  "run_id": "2026-08-29T21:02:11.792914Z",
-  "result": "deferred",
-  "stage": "compile-fix",
-  "attempt": 4,
-  "detail": "provider unavailable, unit not blamed: Custom API stream error: Lost connection to the model server. It may have crashed -- try reloading the model.",
+  "timestamp": "2026-09-04T03:55:12.038129Z",
+  "run_id": "2026-09-04T03:31:53.922573Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 5,
+  "detail": "assembly gate merge failed before promotion: header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
   "product_commit": null,
   "product_pushed": null,
   "product_effect": "no product-tree change by design",
@@ -15,9 +15,95 @@
   "oracle_summary": null,
   "model": "unsloth/Qwen3.8-27B-GGUF",
   "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0030-014.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: apply_actor_param_tier_delta_127"
+        ],
+        "fingerprint": "860d5f086924609b29eefa72c5231f9be6721883ff0101861fb3661ca688fc5d"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013",
+        "auto-c0030-014"
+      ],
+      "stage": "merge",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSVECAdd_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0030-014",
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003"
+          ],
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0053-013": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0030-014": "undefined8 gnt4_PSVECAdd_bl(float*,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSVECAdd_bl"
+        },
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0030-014",
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003"
+          ],
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0053-013": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0030-014": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSQUATScale_bl"
+        }
+      ],
+      "detail": "header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "candidate": {
+        "name": "auto-c0030-014",
+        "sha256": "cc9519ee4050728397e0d57d4b315ad3f52a628c88f3fee91b14484a0def92d8"
+      },
+      "expected_candidate": {
+        "name": "auto-c0030-014",
+        "sha256": "cc9519ee4050728397e0d57d4b315ad3f52a628c88f3fee91b14484a0def92d8"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "74d7495a0ace36c3c06bd26324731d1f70694011",
+      "prompt_version": "3",
+      "registry_version": "168"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
   "driver_record": {
-    "status": "pending",
-    "attempts": 4,
+    "status": "red_retryable",
+    "attempts": 5,
     "symbol_set": [
       "DAT_803c74c4",
       "FUN_8010f420",
@@ -56,58 +142,94 @@
     "prompt_version": 3,
     "registry_holdout": false,
     "registry_deviations": [],
-    "registry_version_used": 167,
-    "model_requests": 5,
-    "rounds": [],
+    "registry_version_used": 168,
+    "model_requests": 6,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0030-014.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: apply_actor_param_tier_delta_127"
+        ],
+        "fingerprint": "860d5f086924609b29eefa72c5231f9be6721883ff0101861fb3661ca688fc5d"
+      }
+    ],
     "assembly_gate": {
       "passed": false,
       "n": 5,
       "units": [
-        "auto-c0029-012",
-        "auto-c0020-007",
-        "auto-c0052-017",
-        "auto-c0011-012",
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013",
         "auto-c0030-014"
       ],
-      "stage": "canonicalize",
+      "stage": "merge",
       "conflicts": [
         {
-          "symbol": "apply_actor_param_tier_delta_127",
-          "class": "canonicalization_refused",
+          "symbol": "gnt4_PSVECAdd_bl",
+          "class": "collision_stub",
           "units": [
-            "auto-c0011-012",
-            "auto-c0020-007",
-            "auto-c0029-012",
             "auto-c0030-014",
-            "auto-c0052-017"
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003"
           ],
-          "variants": {},
-          "detail": "owner_variant_abi_incompatible: Clang rejected apply_actor_param_tier_delta_127 owner/variant pair at auto-c0030-014/gnt4_shim.h"
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0053-013": "void gnt4_PSVECAdd_bl(float*,float*,float*);",
+            "auto-c0030-014": "undefined8 gnt4_PSVECAdd_bl(float*,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSVECAdd_bl"
+        },
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0030-014",
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003"
+          ],
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0053-013": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0030-014": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSQUATScale_bl"
         }
       ],
-      "detail": "owner_variant_abi_incompatible: Clang rejected apply_actor_param_tier_delta_127 owner/variant pair at auto-c0030-014/gnt4_shim.h",
+      "detail": "header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
       "candidate": {
         "name": "auto-c0030-014",
-        "sha256": "ed483a807824d4571d9c108737bd7ef90281223b754cd309c0455d4bc2dd2104"
+        "sha256": "cc9519ee4050728397e0d57d4b315ad3f52a628c88f3fee91b14484a0def92d8"
       },
       "expected_candidate": {
         "name": "auto-c0030-014",
-        "sha256": "ed483a807824d4571d9c108737bd7ef90281223b754cd309c0455d4bc2dd2104"
+        "sha256": "cc9519ee4050728397e0d57d4b315ad3f52a628c88f3fee91b14484a0def92d8"
       },
       "attempt_cleanup": "removed"
     },
     "world_version": {
       "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
       "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
-      "driver_rev": "12eaf8a09a94e5cba4ba8b96c3e654cfbddd0faf",
+      "driver_rev": "74d7495a0ace36c3c06bd26324731d1f70694011",
       "prompt_version": "3",
-      "registry_version": "151"
+      "registry_version": "168"
     },
     "failure_domain": "pipeline-control",
     "diagnosis_eligible": false,
-    "error": "provider unavailable: Custom API stream error: Lost connection to the model server. It may have crashed -- try reloading the model.",
-    "last_stage": "compile-fix",
-    "source_failure_id": null,
+    "error": "assembly gate merge failed before promotion: header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+    "last_stage": "assembly",
     "sdk_decl_sync": {
       "injected": [],
       "superseded": [],
@@ -115,7 +237,10 @@
     },
     "owner_decl_sync": {
       "injected": [],
-      "superseded": [],
+      "superseded": [
+        "zz_00679d0_",
+        "zz_006d144_"
+      ],
       "unresolved": []
     },
     "interruptions": 1,
@@ -160,6 +285,14 @@
       "stage": "compile-fix",
       "attempt": 4,
       "detail": "provider unavailable, unit not blamed: Custom API stream error: Lost connection to the model server. It may have crashed -- try reloading the model.",
+      "product_commit": null
+    },
+    {
+      "timestamp": "2026-09-04T03:55:12.038129Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 5,
+      "detail": "assembly gate merge failed before promotion: header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
       "product_commit": null
     }
   ]
