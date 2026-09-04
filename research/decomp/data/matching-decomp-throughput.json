@@ -1,0 +1,60 @@
+{
+ "decode_tok_s": 2.5,
+ "prefill_tok_s": 40.0,
+ "overhead_s": 0.4,
+ "tiers": [
+  {
+   "tier": "trivial",
+   "functions": 656,
+   "instructions": 4010,
+   "iters": 3,
+   "p_success": 0.9,
+   "seconds_per_iteration": 67.9,
+   "gpu_hours": 37.1,
+   "matched": 590
+  },
+  {
+   "tier": "easy",
+   "functions": 4313,
+   "instructions": 86985,
+   "iters": 8,
+   "p_success": 0.7,
+   "seconds_per_iteration": 89.7,
+   "gpu_hours": 859.3,
+   "matched": 3019
+  },
+  {
+   "tier": "moderate",
+   "functions": 2762,
+   "instructions": 143269,
+   "iters": 25,
+   "p_success": 0.4,
+   "seconds_per_iteration": 138.8,
+   "gpu_hours": 2662.3,
+   "matched": 1105
+  },
+  {
+   "tier": "hard",
+   "functions": 2317,
+   "instructions": 201763,
+   "iters": 60,
+   "p_success": 0.15,
+   "seconds_per_iteration": 193.4,
+   "gpu_hours": 7467.4,
+   "matched": 348
+  },
+  {
+   "tier": "research",
+   "functions": 949,
+   "instructions": 196465,
+   "iters": 120,
+   "p_success": 0.03,
+   "seconds_per_iteration": 379.3,
+   "gpu_hours": 11998.1,
+   "matched": 28
+  }
+ ],
+ "total_gpu_hours": 23024.2,
+ "total_matched": 5090,
+ "modelled_functions": 10997
+}

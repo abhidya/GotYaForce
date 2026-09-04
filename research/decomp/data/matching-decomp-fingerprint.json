@@ -1,0 +1,658 @@
+{
+  "iso": "D:/GotYaForce/Gotcha Force.iso",
+  "entry": 2147496276,
+  "text": [
+    [
+      256,
+      2147496192,
+      9440
+    ],
+    [
+      9696,
+      2147505632,
+      2796416
+    ]
+  ],
+  "data": [
+    [
+      2806112,
+      2150302048,
+      32
+    ],
+    [
+      2806144,
+      2150302080,
+      32
+    ],
+    [
+      2806176,
+      2150302112,
+      44224
+    ],
+    [
+      2850400,
+      2150346336,
+      1000128
+    ],
+    [
+      3850528,
+      2151888288,
+      11040
+    ],
+    [
+      3861568,
+      2151901728,
+      27360
+    ]
+  ],
+  "string_evidence": {
+    "nintendo": [
+      [
+        2150304404,
+        "Nintendo GameCube Instruction   "
+      ],
+      [
+        2150304684,
+        "Licensed by Nintendo"
+      ],
+      [
+        2151305822,
+        "Nintendo GameCube Instruction Booklet"
+      ],
+      [
+        2151305950,
+        "Nintendo GameCube"
+      ],
+      [
+        2151306047,
+        "Bitte schalten Sie den NINTENDO GAMECUBE"
+      ],
+      [
+        2151306239,
+        "manuel d'instructions NINTENDO GAMECUBE"
+      ],
+      [
+        2151306383,
+        "de instrucciones de NINTENDO GAMECUBE"
+      ],
+      [
+        2151306518,
+        "d'istruzioni del NINTENDO GAMECUBE"
+      ],
+      [
+        2151306610,
+        "Zet de NINTENDO GAMECUBE uit en"
+      ],
+      [
+        2151306674,
+        "Nintendo GameCube voor nadere"
+      ]
+    ],
+    "source_filename": [
+      [
+        2150319036,
+        "12professor.S"
+      ],
+      [
+        2150321440,
+        "GCN_Mem_Alloc.c : InitDefaultHeap. No Heap Available"
+      ],
+      [
+        2151335320,
+        "object.h"
+      ],
+      [
+        2151335500,
+        "object.h"
+      ],
+      [
+        2151336316,
+        "object.h"
+      ],
+      [
+        2151337456,
+        "object.h"
+      ],
+      [
+        2151337952,
+        "displayfunc.c"
+      ],
+      [
+        2151338000,
+        "initialize.c"
+      ],
+      [
+        2151338328,
+        "objalloc.c"
+      ],
+      [
+        2151338476,
+        "object.h"
+      ],
+      [
+        2151339424,
+        "memory.c"
+      ],
+      [
+        2151339536,
+        "bytecode.c"
+      ],
+      [
+        2151340992,
+        "texpdag.c"
+      ],
+      [
+        2151898288,
+        "dvdfs.c"
+      ],
+      [
+        2151898345,
+        ":VPvi.c"
+      ],
+      [
+        2151898584,
+        "dobj.c"
+      ],
+      [
+        2151898608,
+        "tobj.c"
+      ],
+      [
+        2151898680,
+        "mobj.c"
+      ],
+      [
+        2151898712,
+        "aobj.c"
+      ],
+      [
+        2151898728,
+        "lobj.c"
+      ],
+      [
+        2151898740,
+        "lobj.h"
+      ],
+      [
+        2151898776,
+        "cobj.c"
+      ],
+      [
+        2151898800,
+        "fobj.c"
+      ],
+      [
+        2151898816,
+        "pobj.c"
+      ],
+      [
+        2151898832,
+        "jobj.h"
+      ],
+      [
+        2151898856,
+        "jobj.h"
+      ],
+      [
+        2151898872,
+        "jobj.c"
+      ],
+      [
+        2151898932,
+        "jobj.h"
+      ],
+      [
+        2151898976,
+        "video.c"
+      ],
+      [
+        2151899000,
+        "util.c"
+      ],
+      [
+        2151899024,
+        "robj.c"
+      ],
+      [
+        2151899032,
+        "jobj.h"
+      ],
+      [
+        2151899088,
+        "wobj.c"
+      ],
+      [
+        2151899108,
+        "jobj.h"
+      ],
+      [
+        2151899152,
+        "perf.c"
+      ],
+      [
+        2151899168,
+        "list.c"
+      ],
+      [
+        2151899224,
+        "class.c"
+      ],
+      [
+        2151899232,
+        "hash.c"
+      ],
+      [
+        2151899240,
+        "texp.c"
+      ],
+      [
+        2151901776,
+        "jobj.h"
+      ],
+      [
+        2151901816,
+        "aobj.h"
+      ],
+      [
+        2151901836,
+        "lobj.h"
+      ],
+      [
+        2151902596,
+        "jobj.h"
+      ],
+      [
+        2151903496,
+        "jobj.h"
+      ],
+      [
+        2151903512,
+        "aobj.h"
+      ],
+      [
+        2151903904,
+        "jobj.h"
+      ],
+      [
+        2151904784,
+        "jobj.h"
+      ],
+      [
+        2151906260,
+        "jobj.h"
+      ],
+      [
+        2151906392,
+        "cobj.h"
+      ],
+      [
+        2151909032,
+        "jobj.h"
+      ],
+      [
+        2151910612,
+        "jobj.h"
+      ],
+      [
+        2151910736,
+        "jobj.h"
+      ],
+      [
+        2151911136,
+        "jobj.h"
+      ],
+      [
+        2151911388,
+        "jobj.h"
+      ],
+      [
+        2151912208,
+        "jobj.h"
+      ],
+      [
+        2151912880,
+        "jobj.h"
+      ],
+      [
+        2151913676,
+        "jobj.h"
+      ],
+      [
+        2151913756,
+        "jobj.h"
+      ],
+      [
+        2151914164,
+        "jobj.h"
+      ],
+      [
+        2151915536,
+        "jobj.h"
+      ],
+      [
+        2151915928,
+        "jobj.h"
+      ],
+      [
+        2151916012,
+        "jobj.h"
+      ],
+      [
+        2151918356,
+        "jobj.h"
+      ],
+      [
+        2151920260,
+        "jobj.h"
+      ],
+      [
+        2151923728,
+        "jobj.h"
+      ],
+      [
+        2151923980,
+        "jobj.h"
+      ],
+      [
+        2151924880,
+        "jobj.h"
+      ],
+      [
+        2151925764,
+        "jobj.h"
+      ]
+    ],
+    "metrowerks": [
+      [
+        2150321496,
+        "Metrowerks CW runtime library initializing default heap"
+      ]
+    ],
+    "build_date": [
+      [
+        2150322841,
+        "ADXT/GC Ver.8.57 Build:Feb  6 2003 18:03:46"
+      ],
+      [
+        2150322961,
+        "SKG/GC Ver.0.61 Build:Feb  6 2003 18:03:49"
+      ],
+      [
+        2150327201,
+        "ADXGC Ver.1.21 Build:Feb  6 2003 18:04:00"
+      ],
+      [
+        2150327305,
+        "ADXGCSDK Ver.05Sep2002 Build:Feb  6 2003 18:04:01"
+      ],
+      [
+        2150327449,
+        "ADXF/GC Ver.7.01 Build:Feb  6 2003 18:02:45"
+      ],
+      [
+        2150328961,
+        "CVFS/GC Ver.2.33 Build:Feb  6 2003 18:02:35"
+      ],
+      [
+        2150331969,
+        "GCCI Ver.1.09 Build:Feb  6 2003 18:02:33"
+      ],
+      [
+        2150332737,
+        "LSC/GC Ver.2.10 Build:Feb  6 2003 18:02:32"
+      ],
+      [
+        2150332833,
+        "SJ/GC Ver.6.10 Build:Feb  6 2003 18:02:53"
+      ],
+      [
+        2150332897,
+        "SVM/GC Ver.1.51 Build:Feb  6 2003 18:02:51"
+      ],
+      [
+        2150333321,
+        "MFCI/GC Ver.1.04 Build:Feb  6 2003 18:03:11"
+      ],
+      [
+        2150333985,
+        "AXRNA Ver.1.02 Build:Feb  6 2003 18:03:43"
+      ],
+      [
+        2150334569,
+        "CRI SUD/GC Ver.0.02 Build:Feb  6 2003 14:30:18"
+      ],
+      [
+        2150335665,
+        "CRI SFX/GC Ver.1.22 Build:Feb  6 2003 14:30:16"
+      ],
+      [
+        2150336033,
+        "CRI DCT/GC Ver.1.803 Build:Feb  6 2003 14:28:46"
+      ],
+      [
+        2150336209,
+        "CRI MPS/GC Ver.1.669 Build:Feb  6 2003 14:28:50"
+      ],
+      [
+        2150336713,
+        "CRI MPV/GC Ver.1.840 Build:Feb  6 2003 14:28:53"
+      ],
+      [
+        2150337225,
+        "CRI SFD/GC Ver.1.842 Build:Feb  6 2003 14:29:53"
+      ],
+      [
+        2150338673,
+        "CRI SFH/GC Ver.1.12 Build:Feb  6 2003 14:30:00"
+      ],
+      [
+        2150343337,
+        "MWSFD/GC Ver.2.62 Build:Feb  6 2003 14:28:42"
+      ],
+      [
+        2150346233,
+        "CRI CFT/GC Ver.1.24 Build:Feb  6 2003 14:28:33"
+      ],
+      [
+        2151297748,
+        "release build: Apr 17 2003 12:33:06 (0x2301) >>"
+      ],
+      [
+        2151304125,
+        "release build: Apr 17 2003 12:33:17 (0x2301) >>"
+      ],
+      [
+        2151304396,
+        "release build: Apr 17 2003 12:33:19 (0x2301) >>"
+      ],
+      [
+        2151305213,
+        "release build: Apr 22 2003 15:49:00 (0x2301) >>"
+      ],
+      [
+        2151306852,
+        "release build: Apr 17 2003 12:33:22 (0x2301) >>"
+      ],
+      [
+        2151307829,
+        "release build: Apr 17 2003 12:33:44 (0x2301) >>"
+      ],
+      [
+        2151307916,
+        "release build: Apr 17 2003 12:33:54 (0x2301) >>"
+      ],
+      [
+        2151307988,
+        "release build: Apr 17 2003 12:33:55 (0x2301) >>"
+      ],
+      [
+        2151308061,
+        "release build: Apr 17 2003 12:33:56 (0x2301) >>"
+      ],
+      [
+        2151308132,
+        "release build: Apr 17 2003 12:33:57 (0x2301) >>"
+      ],
+      [
+        2151326037,
+        "release build: Apr 17 2003 12:34:16 (0x2301) >>"
+      ],
+      [
+        2151326486,
+        "release build: Apr 17 2003 12:34:19 (0x2301) >>"
+      ],
+      [
+        2151326996,
+        "release build: Apr 21 2003 14:55:46 (0x2301) >>"
+      ]
+    ],
+    "sdk_banner": [
+      [
+        2151084907,
+        "$0000111122223333@@@@1111222233334444BBBB5555666677778888AAAA2222333344446666CCCC@5557D7788E8:::@BBBB99E9;D;;<<B<A======="
+      ],
+      [
+        2151297727,
+        "8<< Dolphin SDK - OS"
+      ],
+      [
+        2151304103,
+        "O<< Dolphin SDK - EXI"
+      ],
+      [
+        2151304376,
+        "<< Dolphin SDK - SI"
+      ],
+      [
+        2151305192,
+        "<< Dolphin SDK - DVD"
+      ],
+      [
+        2151306832,
+        "<< Dolphin SDK - VI"
+      ],
+      [
+        2151307808,
+        "<< Dolphin SDK - PAD"
+      ],
+      [
+        2151307896,
+        "<< Dolphin SDK - AI"
+      ],
+      [
+        2151307968,
+        "<< Dolphin SDK - AR"
+      ],
+      [
+        2151308040,
+        "<< Dolphin SDK - ARQ"
+      ],
+      [
+        2151308112,
+        "<< Dolphin SDK - AX"
+      ],
+      [
+        2151326016,
+        "<< Dolphin SDK - DSP"
+      ],
+      [
+        2151326464,
+        "<< Dolphin SDK - CARD"
+      ],
+      [
+        2151326976,
+        "<< Dolphin SDK - GX"
+      ]
+    ],
+    "dolphin_sdk": [
+      [
+        2151297727,
+        "8<< Dolphin SDK - OS"
+      ],
+      [
+        2151304103,
+        "O<< Dolphin SDK - EXI"
+      ],
+      [
+        2151304376,
+        "<< Dolphin SDK - SI"
+      ],
+      [
+        2151305192,
+        "<< Dolphin SDK - DVD"
+      ],
+      [
+        2151306832,
+        "<< Dolphin SDK - VI"
+      ],
+      [
+        2151307808,
+        "<< Dolphin SDK - PAD"
+      ],
+      [
+        2151307896,
+        "<< Dolphin SDK - AI"
+      ],
+      [
+        2151307968,
+        "<< Dolphin SDK - AR"
+      ],
+      [
+        2151308040,
+        "<< Dolphin SDK - ARQ"
+      ],
+      [
+        2151308112,
+        "<< Dolphin SDK - AX"
+      ],
+      [
+        2151326016,
+        "<< Dolphin SDK - DSP"
+      ],
+      [
+        2151326464,
+        "<< Dolphin SDK - CARD"
+      ],
+      [
+        2151326976,
+        "<< Dolphin SDK - GX"
+      ]
+    ],
+    "trk": [
+      [
+        2151298108,
+        ">>> OSINIT: exception %d commandeered by TRK"
+      ]
+    ],
+    "sdk_source_filename": [
+      [
+        2151898288,
+        "dvdfs.c"
+      ],
+      [
+        2151898345,
+        ":VPvi.c"
+      ],
+      [
+        2151898976,
+        "video.c"
+      ]
+    ]
+  },
+  "idiom_census": {
+    "total_instructions": 701464,
+    "mflr_r0": 10223,
+    "mtlr_r0": 10222,
+    "blr": 14107,
+    "prologue_mflr_stw_stwu": 277,
+    "prologue_mflr_other": 5387,
+    "epilogue_mtlr_then_addi_r1": 9759,
+    "epilogue_mtlr_then_lwz_r1": 0,
+    "sda_r2_refs": 16055,
+    "sda_r13_refs": 8995,
+    "paired_single": 2883,
+    "nop_run_histogram": {
+      "1": 45
+    }
+  }
+}
