@@ -35,8 +35,15 @@ research/disc/*/
 !research/disc/.gitkeep
 
 # --- Externally cloned tooling (NOT vendored into this repo) ---
-# tools/ is populated by another agent cloning NeoGF etc.; dolphin/ is a local install.
-tools/
+# /tools/ is populated by another agent cloning NeoGF etc.; dolphin/ is a local install.
+#
+# ANCHORED DELIBERATELY. This rule was written unanchored as `tools/`, and an
+# unanchored directory pattern matches at EVERY level -- so it was also hiding
+# `research/tools/`, where this repo's own harnesses live. Existing files there
+# stayed visible only because they were already tracked; every NEW file added
+# under research/tools/ was silently ignored. Found 2026-09-03 when
+# research/tools/matching-decomp/TOOLCHAIN.md would not stage.
+/tools/
 dolphin/
 .tools/
 GameCubeLoader/
@@ -115,3 +122,7 @@ research/decomp/oracle-harness/corpora/*.dolphin-trace.jsonl
 
 # Unsloth (LLM fine-tuning) compiled cache — local ML artifact, not source.
 unsloth_compiled_cache/
+
+# Matching-decompilation scratch: candidates mid-iteration and the negative
+# controls verify.py writes. Results live in src-match/{game,sdk,blocked}/.
+src-match/work/

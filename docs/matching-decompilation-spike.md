@@ -1,6 +1,25 @@
 # Matching decompilation — feasibility spike
 
-**Date: 2026-09-03.** Status: **SPIKE RESULT.**
+**Date: 2026-09-03.** Status: **SPIKE RESULT, then TEST RUN the same day.**
+
+> ### The decisive test ran, and thirteen functions of Gotcha Force are matched.
+>
+> This document was written when there was no PowerPC compiler on the machine. There is
+> one now — `zcanann/mwcc-rs`, built from source, provenance in
+> [`research/tools/matching-decomp/TOOLCHAIN.md`](../research/tools/matching-decomp/TOOLCHAIN.md).
+> **§3.1 has been rewritten from "It could not run" to the result**, and the sections it
+> contradicts carry inline corrections. The original text is preserved wherever it was
+> replaced. `mwcceppc.exe` is still absent and was not obtained.
+>
+> | | |
+> | --- | --- |
+> | **13 functions byte-identical to retail** | 43 instructions, **0.0061 % of the code**. Committed at [`src-match/`](../src-match/) with a registry and a one-command verifier. Includes a call with a real `R_PPC_REL24` and two conditional-return control-flow cases. §3.1 |
+> | **1.08 iterations per function** | 14 candidates for 13 matches. **This is not the LLM loop's number** — these are 2-to-8-instruction accessors, not §4.2's *moderate* tier, which remains unmeasured. §3.1 |
+> | **The version question is partly unanswerable** | Calibration B returned only *"not GC/1.3"*. GC/2.5, 2.6 and 2.7 are the same code generator and differ only in a `.comment` marker a linked DOL does not preserve. §3.1.2 |
+> | **The wall is the compiler, not the C** | All five non-matches were compiler capability limits, including the spike's own first-choice target. §3.1.3 |
+> | **`mwcc-rs` is 83 % memorisation** | 558 whole-function captures fire on exact name + AST hash; none covers this game. Only the 28,345-line general generator applies here. §3.1.4 |
+> | **The free 9.8 % has a licence problem, and a fix** | `doldecomp/dolsdk2004`, which §5.3 recommended, has **no licence at all**. `zeldaret/tp` is **CC0-1.0** and carries the same SDK tree. §5.3.1 |
+> | **The oracle had a hole** | `match.py` masked relocated operands but never checked the relocation's *symbol* — a candidate calling the wrong function reported MATCH. Fixed, with a permanent negative control. §3.1.1 |
 
 Everything measured below was measured in this worktree today by the tools in
 [`research/tools/matching-decomp/`](../research/tools/matching-decomp/), reading the retail
@@ -58,6 +77,12 @@ Three findings shape what to do about that:
 
 ## 1. Toolchain availability
 
+> **SUPERSEDED IN PART, 2026-09-03.** §1.1's survey was accurate when made and is kept
+> as written. A compiler has since been installed —
+> [`research/tools/matching-decomp/TOOLCHAIN.md`](../research/tools/matching-decomp/TOOLCHAIN.md)
+> records exactly what, from where, and what it can do; §3.1 records the result.
+> `mwcceppc.exe` is **still absent** and was not obtained.
+
 ### 1.1 What is on this machine: nothing
 
 Searched: every `PATH` entry; `D:\GotYaForce` in full including `.tools/`, `tools/`,
@@ -106,6 +131,22 @@ question. Two caveats, both real: it **does not yet cover GC/1.2.5n**, which is 
 objects need (§2.4), and "byte-exact" is the project's own claim, verifiable here in an
 afternoon with `objdiff.py` and the calibration set in §2.4 — which is exactly the first
 thing to do with it.
+
+> **Verified 2026-09-03. Installed, built, and used — §3.1. Three corrections to the
+> paragraph above, in descending order of importance.**
+>
+> 1. **"Byte-exact" rests largely on memorisation.** 143,268 of the code generator's
+>    171,613 lines — **83 %** — are 558 whole-function *captures* that fire on an exact
+>    function-name and AST-hash match against reference decomp projects. For a binary
+>    with nothing in the capture set, only the remaining 28,345-line general generator
+>    applies. §3.1.4.
+> 2. **"MIT-ish" is right but loose: there is no `LICENSE` file in the repository.**
+>    `Cargo.toml` declares `license = "MIT OR Apache-2.0"` and the README says
+>    "Dual-licensed under MIT or Apache-2.0". Clear intent, no licence file. It affects
+>    redistribution, not local use.
+> 3. **GC/1.2.5n now exists as a build identity**, but only behind
+>    `MWCC_EXPERIMENTAL_BUILDS` and explicitly incomplete — so §2.4's Calibration A still
+>    cannot be run, exactly as this paragraph predicted.
 
 **(b) A licensed copy of CodeWarrior for GameCube.** The genuine article. Realistically
 obtainable only via an old development-kit licence. NXP's free "CodeWarrior Special Edition"
@@ -269,14 +310,180 @@ after it is void if the version is wrong.
 
 ## 3. The decisive test
 
-### 3.1 It could not run
+> **UPDATED 2026-09-03, later the same day.** §3.1 originally read "It could not run."
+> A compiler was then installed and **the test ran**. §3.1 below is the result; the
+> original statement is preserved at §3.1.0 because the sequence matters. Everything
+> from §3.2 onward is unchanged and was written before the compiler existed.
 
-The brief's decisive test was: pick a small leaf function, write C, compile with MWCC, diff.
-**`mwcceppc.exe` does not exist on this machine, and no PowerPC compiler of any kind does
-(§1.1). The test could not be run. No function was matched.**
+### 3.1.0 The original entry, kept
 
-Nothing here should be read as claiming otherwise. Without the compiler the match question
-is not merely unanswered — it is unaskable.
+> The brief's decisive test was: pick a small leaf function, write C, compile with MWCC,
+> diff. **`mwcceppc.exe` does not exist on this machine, and no PowerPC compiler of any
+> kind does (§1.1). The test could not be run. No function was matched.**
+
+### 3.1 It ran. Thirteen functions are matched.
+
+The owner approved installing `zcanann/mwcc-rs` — the open-source Rust reimplementation
+§1.2(a) identified. Rust 1.98.1 and mwcc-rs commit `7c093483` were built from source;
+[`research/tools/matching-decomp/TOOLCHAIN.md`](../research/tools/matching-decomp/TOOLCHAIN.md)
+records provenance, hashes and the exact build commands. No proprietary binary was
+fetched. **`mwcceppc.exe` is still absent and still not obtained.**
+
+**Thirteen functions of Gotcha Force now compile byte-identically to the retail image.**
+They live in [`src-match/`](../src-match/) with a registry, per-file headers carrying the
+retail disassembly, and a one-command verifier.
+
+```
+$ python src-match/verify.py --control
+MATCHED CORPUS  backend=mwcc-rs  commit=7c093483f9c6  build=2.7
+------------------------------------------------------------------------
+[ok  ] zz_0206f8c_                2    insns  MATCH         iters=1  exact=true
+[ok  ] zz_00122c8_                8    insns  MATCH         iters=1  exact=false
+[ok  ] zz_02650c0_                3    insns  MATCH         iters=2  exact=true
+[ok  ] zz_0268460_                3    insns  MATCH         iters=1  exact=true
+[ok  ] zz_008b900_                2    insns  MATCH         iters=1  exact=true
+[ok  ] zz_0018824_                2    insns  MATCH         iters=1  exact=true
+[ok  ] zz_0009c28_                2    insns  MATCH         iters=1  exact=true
+[ok  ] zz_0009c30_                2    insns  MATCH         iters=1  exact=true
+[ok  ] zz_007f88c_                3    insns  MATCH         iters=1  exact=true
+[ok  ] zz_00e199c_                3    insns  MATCH         iters=1  exact=true
+[ok  ] zz_02a0a6c_                5    insns  MATCH         iters=1  exact=true
+[ok  ] zz_027ac98_                5    insns  MATCH         iters=1  exact=true
+[ok  ] gnt4-GXInitLightColor-bl   3    insns  MATCH         iters=1  exact=true
+
+NEGATIVE CONTROLS (each MUST be rejected)
+------------------------------------------------------------------------
+[ok  ] zz_0206f8c_                rejected=True  (wrong structure offset)
+[ok  ] zz_00122c8_                rejected=True  (right shape, WRONG CALLEE)
+[ok  ] zz_02a0a6c_                rejected=True  (behaviourally identical, differently encoded)
+
+16 ok, 0 failed
+```
+
+**The first match.** `zz_0206f8c_` @ `0x80206f8c`, a member accessor, matched on the
+first candidate written:
+
+```
+        retail                           candidate
+80206f8c  lwz r3, 0x2d4(r3)          |   lwz r3, 0x2d4(r3)
+80206f90  blr                        |   blr
+VERDICT MATCH  100.00%   exact_bytes: true
+```
+
+from
+
+```c
+typedef struct S { char pad[0x2d4]; int field_2d4; } S;
+int f(S *s) { return s->field_2d4; }
+```
+
+**The second, harder one — a call, which is what makes relocations real.** `zz_00122c8_`
+@ `0x800122c8`, the canonical Metrowerks non-leaf frame with one `bl`, also on the first
+candidate. This is the function §3.3's T6/T7 controls were built around, and it behaves
+exactly as they predicted: `exact_bytes` is **false**, because the compiled `bl` operand
+is zero before linking, and the match is carried by an `R_PPC_REL24` at `+0x0c` naming
+`zz_0012308_` — which is the symbol the retail branch target resolves to through the
+link map.
+
+Then a control flow case, `zz_02a0a6c_` @ `0x802a0a6c`, where Metrowerks turns a null
+guard into a conditional return:
+
+```
+802a0a6c  cmplwi r3, 0     |   cmplwi r3, 0
+802a0a70  beqlr            |   beqlr
+802a0a74  li r0, 4         |   li r0, 4
+802a0a78  stw r0, 0(r3)    |   stw r0, 0(r3)
+802a0a7c  blr              |   blr
+```
+
+**Iteration counts, which is the number this test existed to produce.** 13 functions,
+**14 iterations total — a mean of 1.08.** Twelve of the thirteen matched on the first
+candidate. The one that took two was `zz_02650c0_`, where the first candidate returned
+`char` and lost the retail's `extsb`; widening the return type to `int` put it back.
+
+**That number is not the LLM loop's iteration count, and must not be used as one.** It
+is what a reader who already has the disassembly in front of them spends on functions of
+two to eight instructions in shapes that recur across the binary. §4.2's budgets are
+about *moderate*-tier functions of 33–128 instructions, which is a different problem, and
+nothing here measures those — see §3.1.3.
+
+### 3.1.1 One harness bug, found by running it
+
+`match.py` masked relocated operand fields, per §3.2's rule, but **never passed the
+retail's expected symbol to the comparator**. A candidate calling the wrong function
+therefore reported MATCH. T6b had always tested the rule; nothing wired it into the real
+path. Fixed: branch targets are now resolved through the link map and checked. The
+regression is a permanent negative control in `verify.py`. Worth stating plainly —
+**the oracle had a hole in it for as long as it was never run.**
+
+### 3.1.2 What the sweep says about the compiler version: much less than hoped
+
+§2.4's Calibration B was to sweep version × flags and find the single combination that
+reproduces the retail bytes. `match.py --sweep` implements it. Run across all thirteen:
+
+| function | rows matching | conclusion |
+| --- | --- | --- |
+| `zz_02650c0_`, `zz_0268460_` | 36 / 42 | **excludes GC/1.3** |
+| the other eleven | 42 / 42 | no discrimination whatsoever |
+
+The two that discriminate are the signed-`char` accessors, and they work because plain
+`char` is unsigned in GC/1.3 (mwcceppc 2.4.2 build 53) and signed from GC/1.3.2 on. The
+retail `extsb` says the game is **not** GC/1.3.
+
+That is the entire mechanical result, and it is much weaker than §2.4 anticipated. Three
+reasons, all structural:
+
+1. **`GC/2.5`, `GC/2.6` and `GC/2.7` are the same code generator in mwcc-rs.** They
+   differ only in the object's `.comment` marker, and a linked DOL does not preserve
+   `.comment`. **No `.text` evidence can ever separate them** — not with mwcc-rs, and, for
+   the marker specifically, not with the genuine compiler either.
+2. **The functions mwcc-rs can compile are the functions too small to discriminate.**
+   Version differences live in register allocation, scheduling and aggregate handling —
+   exactly the constructs §3.1.3 lists as out of envelope.
+3. **Calibration A cannot be run at all.** It needs GC/1.2.5n; mwcc-rs carries that
+   identity only as an incomplete experimental profile.
+
+**So §2.3's ranking is still a prior, not a result.** GC/2.7 remains the working label,
+now with GC/1.3 mechanically excluded and 2.5/2.6/2.7 shown to be indistinguishable in
+principle. §8's uncertainty 2 stands, narrowed.
+
+### 3.1.3 Where it stops, and why the wall is the compiler
+
+Five functions were attempted and not matched. Every one was blocked by the compiler,
+not by the C — recorded in full in [`src-match/matched.json`](../src-match/matched.json).
+
+| target | blocker |
+| --- | --- |
+| **`zz_008bbc0_`** — §3.4's own first-choice target | `AND` against `0x00FF1F7F`: *"a general register was requested for a non-leaf expression: IntegerLiteral(16719743)"*. mwcc-rs implements only the `rlwinm` mask path; real MWCC materialises the constant with `lis`+`addi`. `OR`/`XOR`/`ADD` with the same constant compile fine — **one missing lowering, not a deep gap.** |
+| `zz_0298b20_` — array-of-struct index | Retail `mulli r0, r4, 0x74`; mwcc-rs `mulli r4, r4, 0x74`. Retail routes the scaled index through the scratch `r0`; mwcc-rs reuses the dead input. **Four different C spellings, same divergence** — it is not reachable from the source. mwcc-rs's README names matching MWCC's register colouring as *"the core research target"*. |
+| `strlen` | mwcc-rs does not generate the load-with-update form (`lbzu`). |
+| `zz_00d1cbc_` — an uncounted pointer walk | *"loop codegen is not implemented yet (roadmap)"*. Counted `for` loops **do** lower to `mtctr`/`bdnz`; `while (a && b)` does not. |
+| `zz_02a9654_` | Reads the time base (`mftbu`/`mftb`). Not expressible in C — needs inline asm. Excluded, not failed. |
+
+mwcc-rs keeps a standing rule that it **fails honestly**: every one of those is a
+diagnostic, never plausible-but-wrong bytes. That is what makes it safe to use here, and
+it means a `BUILD_FAILED` must be read as a statement about the compiler.
+
+### 3.1.4 The correction that matters most: what mwcc-rs is
+
+§1.2(a) took "eight GameCube builds byte-exact" at face value, flagging only that it was
+the project's own claim. Reading the source at the pinned commit:
+
+```
+crates/pipeline/mwcc-syntax-trees-to-machine-code/src/captures/   143,268 lines
+crates/pipeline/mwcc-syntax-trees-to-machine-code/src/ (rest)      28,345 lines
+```
+
+**558 whole-function captures — 83 % of the code generator by line count.** Each fires
+only when a function's *name* and a hash of its *AST* match a specific function from a
+reference decomp project. `captures/ari_abs.rs` fires on a function literally named
+`abs`; `acf_two_exp.rs` is 180 KB for one function.
+
+**This is not a criticism.** mwcc-rs exists to get existing decomp projects to green, and
+memorising a function whose source you already have is a legitimate way to do that. But
+it changes what the parity claim means **for a project like this one**: no Gotcha Force
+function is in the capture set, so **only the 28,345-line general generator applies**, and
+that generator's envelope is §3.1.3's table. Every result in `src-match/` went through it.
 
 ### 3.2 What was built and proven instead
 
@@ -324,8 +531,11 @@ $ python research/tools/matching-decomp/selftest.py
   [ok] without relocs -> MISMATCH at the bl 0x800122d4
 
 HARNESS SELFTEST PASSED
-The compiler stage (mwcceppc) is NOT exercised and NOT present.
 ```
+
+*(The final line of that output originally read "The compiler stage (mwcceppc) is NOT
+exercised and NOT present." It now points at `src-match/verify.py --control`, which does
+drive a compiler — §3.1. The seven checks themselves are unchanged and still pass.)*
 
 **T2 proves less than it looks like, and the distinction is load-bearing.** It assembles the
 same instructions the retail function contains and observes that they are equal — the same
@@ -351,6 +561,19 @@ Three real functions, extracted and given candidate C in
 [`research/tools/matching-decomp/scratch/`](../research/tools/matching-decomp/scratch/).
 **All three candidates are UNVERIFIED — none has been through a compiler.** They show what
 the loop submits and what a first iteration looks like; they are not results.
+
+> **Resolved 2026-09-03 (§3.1).** Two of the three have been through a compiler.
+>
+> * **`zz_00122c8_` — MATCHED**, first candidate, `exact_bytes` correctly false with the
+>   `R_PPC_REL24` naming `zz_0012308_`. Committed at
+>   [`src-match/game/zz_00122c8_.c`](../src-match/game/zz_00122c8_.c). T6 predicted this
+>   behaviour exactly.
+> * **`zz_008bbc0_` — BLOCKED**, and it is the paragraph below that explains why it was a
+>   bad first pick. `and r3, r4, r0` against a constant built with `lis`+`addi` is the one
+>   arithmetic form mwcc-rs refuses (§3.1.3). The C for it was written in one line and is
+>   almost certainly right; the compiler cannot lower it.
+> * `zz_00660b8_` was not attempted — T3 and T4 use it as a control and it is more useful
+>   left in that role.
 
 **`zz_008bbc0_` @ `0x8008bbc0`** — 4 instructions, leaf, pure arithmetic:
 
@@ -584,6 +807,65 @@ PPCEABI/Runtime` surface. The SDK objects are compiled with **GC/1.2.5n** (§2.4
 notably the one build `mwcc-rs` does *not* yet cover — so the SDK half may still need a real
 `mwcceppc`, or may be satisfiable from sources alone without re-matching.
 
+#### 5.3.1 Provenance, checked — and the recommendation above is wrong
+
+**`doldecomp/dolsdk2004` has no licence at all.** No `LICENSE` file, and the GitHub
+licence API returns `null`. Under default copyright that is all-rights-reserved, on top
+of it being a decompilation of Nintendo's proprietary SDK. **It must not be vendored,
+and this document should not have recommended it without checking.** Checked
+2026-09-03; the repository is otherwise as described (created 2024-04-21, 17 stars,
+most libraries at 100 %).
+
+**There is a licensed alternative carrying the same content.**
+
+| Repository | Licence | Carries the Dolphin SDK? |
+| --- | --- | --- |
+| `doldecomp/dolsdk2004` | **none** | yes — but unusable |
+| **`zeldaret/tp`** (Twilight Princess) | **CC0-1.0**, root, no carve-out | **yes** — `libs/dolphin/src/{os,gx,card,dvd,si,exi,pad,vi,ar,ai,mtx,db,dsp,…}`, 37 library directories, plus `libs/TRK_MINNOW_DOLPHIN` and `libs/PowerPC_EABI_Support` |
+| `doldecomp/ogws` (Wii Sports) | CC0-1.0 | Revolution-era equivalent |
+
+**One honest caveat that no licence can remove:** CC0 dedicates the *contributors'* own
+rights. It cannot dedicate rights they never held, and the underlying work is
+reconstructed Nintendo SDK source. That is true of every public GameCube decomp, and it
+is a matter for the owner, not an agent. What CC0 *does* give is an explicit, auditable,
+uniform grant from the people who wrote the files — which is exactly what
+`doldecomp/dolsdk2004` does not have.
+
+#### 5.3.2 The free path, tested — and the blocker is the compiler, not the source
+
+One SDK function was taken through the loop end to end: **`GXInitLightColor`**
+@ `0x802285f4`, whose CC0 source is in `zeldaret/tp` at
+`libs/dolphin/src/gx/GXLight.c`. Retail is three instructions:
+
+```
+802285f4  lwz r0, 0(r4)
+802285f8  stw r0, 0xc(r3)
+802285fc  blr
+```
+
+The genuine source body —
+
+```c
+obj = (__GXLightObjInt_struct*)lt_obj;
+*(u32*)&obj->Color = *(u32*)&color;
+```
+
+— **does not compile under mwcc-rs.** Two separate refusals: `*(u32*)&obj->Color` gives
+*"pointer leaf access needs a pointer variable (roadmap)"*, and removing that cast
+exposes a second problem, where taking `&color` on a by-reference struct parameter makes
+mwcc-rs spill the incoming pointer to a stack home and reload it, which real MWCC does
+not do. A rewrite that reaches the same three instructions through the implemented subset
+**does** match, and is committed at
+[`src-match/sdk/GXInitLightColor.c`](../src-match/sdk/GXInitLightColor.c) with that
+distinction stated in its header.
+
+**So the 9.8 % is confirmed as real source that exists under a clear grant, and
+confirmed as not yet buildable here.** The private struct layouts, offsets and field
+types in those sources are the part gap **H8** actually needs — the shim-signature
+failure class ends by *having* them, and that does not depend on compiling anything.
+Taking the sources is still the highest-value item in this document. Matching them is
+blocked behind the same compiler that blocks §3.1.3, plus the GC/1.2.5n problem.
+
 The leverage is larger than 9.8 % because **these are exactly the functions the current
 pipeline cannot handle.** Gap **H8** records "no SDK shim ledger; 6 seeded, 17 declared, 6
 conflicting including a real f64/i64 split on `gnt4_PSMTXConcat_bl`", and the integrity audit
@@ -652,6 +934,9 @@ ground truth. What has to change is which model sits inside the loop, not the lo
 
 ### 6.2 The order of operations
 
+> **Step 1 was executed on 2026-09-03 and its result rewrites steps 1 and 2. Read
+> §6.2.1 below before acting on the list.**
+
 1. **Settle the compiler.** Try `mwcc-rs` first — it is open source, it claims GC/1.3 through
    GC/2.7 byte-exact, and GC/2.7 is this game's most likely build (§2.3). Verify that claim
    here with Calibration A, then run **Calibration B** (§2.4) to pin the game's version and
@@ -672,6 +957,40 @@ ground truth. What has to change is which model sits inside the loop, not the lo
    to solved neighbours, gated on the whole build rather than the target symbol, accumulating
    a persistent compiler-quirk memo. Report progress **by instructions, never by function
    count** (§5.2).
+
+### 6.2.1 Revised after running step 1
+
+**Step 1 is done, and it did not settle the compiler.** A compiler exists and works
+(§3.1); Calibration A cannot be run at all and Calibration B returned only "not GC/1.3"
+(§3.1.2). The list above assumed a pass/fail on version; the real answer is that the
+*version question is partly unanswerable from `.text`* — 2.5, 2.6 and 2.7 are
+indistinguishable in principle — and partly blocked behind compiler capability.
+
+**Do not treat "until B passes, everything downstream is void" as a stop.** It was
+written expecting B to resolve. Rewritten: the flags and the 2.4.7-family label are the
+working assumption, GC/1.3 is excluded, and any function matched under a label that
+turns out wrong will be re-verified by `src-match/verify.py` when a better compiler
+arrives. That is what the registry and the verifier are for.
+
+**Step 2 changes source.** Take the SDK from **`zeldaret/tp` (CC0-1.0)**, not
+`doldecomp/dolsdk2004`, which has **no licence at all** (§5.3.1). The value is in the
+headers, struct layouts and signatures — gap **H8** — and that value does not require
+compiling anything, so it is available today (§5.3.2).
+
+**The new step 0, and it is cheap.** mwcc-rs is MIT/Apache and *modifiable* — that is
+the stated reason it exists. Two of the five blockers in §3.1.3 look like small,
+well-isolated additions to its general generator: `AND` against a non-mask 32-bit
+constant (`lis`+`addi`+`and` — the sibling `OR`/`XOR`/`ADD` paths already work), and the
+load-with-update forms. Each unblocks a recurring shape across the census. **Contributing
+those upstream is a better use of a day than anything else on this list**, and it is the
+one lever this project has that no amount of model capacity provides. The register
+allocator (`zz_0298b20_`) is not in that class — mwcc-rs's own README calls matching
+MWCC's colouring the core research target, and it should be treated as out of scope.
+
+**Steps 3, 4 and 5 are unchanged, and step 4 is now the binding one.** §3.1's 1.08
+iterations/function measures two-to-eight-instruction accessors, which is not the regime
+§4.2's arithmetic depends on. Twenty *moderate*-tier functions still have to be measured
+— and until mwcc-rs can compile that class, they cannot be.
 
 ### 6.3 What this does not change
 
@@ -726,14 +1045,63 @@ python research/tools/matching-decomp/match.py --function zz_00122c8_
 Requires Anaconda Python 3.7.3 with capstone 5.0.1 (`C:\ProgramData\Anaconda3\python.exe`),
 which is what is on this machine. The retail GCM is read, never written.
 
+### 7.1 Reproducing §3.1 — the test that actually matched functions
+
+Install the toolchain per
+[`research/tools/matching-decomp/TOOLCHAIN.md`](../research/tools/matching-decomp/TOOLCHAIN.md)
+§1 (Rust + mwcc-rs at commit `7c093483`, ~9 minutes to build), then:
+
+```bash
+cd D:/GotYaForce/.claude/worktrees/agent-a2e26395b5343691b
+
+# the compiler is now found
+python research/tools/matching-decomp/match.py --detect          # exits 0
+
+# the whole matched corpus + the negative controls          -> 16 ok, 0 failed
+python src-match/verify.py --control
+
+# Calibration B across every entry: which builds each one discriminates
+python src-match/verify.py --sweep
+
+# one function, the shape an LLM iteration consumes
+python research/tools/matching-decomp/match.py \
+    --function zz_0206f8c_ --src src-match/game/zz_0206f8c_.c \
+    --obj-symbol f --build 2.7 --json v.json
+
+# the harness's own selftest still passes, unchanged
+python research/tools/matching-decomp/selftest.py                # exits 0
+```
+
+Nothing above touches the GPU, the model server, the driver, the supervisor, or any
+pipeline state. The compiler runs on CPU in well under a second per function.
+
 ## 8. Uncertainties, stated
 
-1. **No function was matched.** There is no compiler on this machine; §3.1. Every claim about
-   matchability here is inference from other projects, not measurement on this binary.
-2. **The compiler version is a prior, not a result.** GC/2.7 leads because GNT4 — a 2003
-   title, the source of this project's SDK symbol names — uses it. Calibration B settles it.
-3. **`mwcc-rs`'s byte-exactness is the project's own claim**, unverified here, and it does not
-   cover GC/1.2.5n, which the SDK objects need.
+> **Items 1–3 were rewritten 2026-09-03 after the test ran. The originals are quoted
+> under each.**
+
+1. ~~**No function was matched.**~~ **Thirteen are** (§3.1) — 43 instructions, 0.0061 %
+   of the code. The remaining uncertainty moved rather than closed: these are
+   *mwcc-rs*-exact, not *MWCC*-exact, and **there is no way to check the difference on
+   this machine.** Where mwcc-rs diverges from the genuine compiler, a match here is
+   wrong and nothing would say so.
+   > *was: "There is no compiler on this machine; §3.1. Every claim about matchability
+   > here is inference from other projects, not measurement on this binary."*
+2. **The compiler version is still a prior.** Calibration B ran and returned only
+   "not GC/1.3" (§3.1.2). GC/2.5, 2.6 and 2.7 are **indistinguishable in principle**
+   from a linked image, so this uncertainty is partly permanent rather than pending.
+   > *was: "GC/2.7 leads because GNT4 … uses it. Calibration B settles it."*
+3. **`mwcc-rs`'s byte-exactness is 83 % memorisation by line count** (§3.1.4), and none
+   of those 558 captures covers a Gotcha Force function. GC/1.2.5n is now present as an
+   incomplete experimental profile, so Calibration A remains impossible.
+   > *was: "the project's own claim, unverified here, and it does not cover GC/1.2.5n."*
+4. **How far the general generator gets on real game code is unmeasured.** Thirteen
+   matches were found by picking targets from the census's most common short shapes.
+   **The selection was deliberately favourable** and says nothing about the 90 % of the
+   binary above 16 instructions. §3.1.3's five blockers were hit within twenty attempts,
+   which is the more informative number.
+5. **The iteration count that §4.2 depends on is still not measured.** 1.08 (§3.1) is for
+   two-to-eight-instruction accessors, not the 33–128-instruction *moderate* tier.
 4. **§4.2's iteration budgets are guesses** and are the most load-bearing uncertain numbers in
    this document. §6.2 step 4 is how to replace them with measurements.
 5. **Whether `mwcceppc.exe` enforces a licence at runtime could not be confirmed.** Evidence
