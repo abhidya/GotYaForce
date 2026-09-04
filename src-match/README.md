@@ -5,9 +5,13 @@ and proved **byte-identical** against the retail GameCube image. A file in this 
 not *argued* to be the original function; within the limits recorded below, it **is** the
 original function.
 
-Created 2026-09-03 by the matching-decompilation spike's decisive test.
+Created 2026-09-03 by the matching-decompilation spike's decisive test with 13 entries.
+Grown to **405** on 2026-09-04 by
+[`research/tools/matching-decomp/loop.py`](../research/tools/matching-decomp/loop.py),
+which derives candidate 0 mechanically from the retail encodings — see
+[`docs/matching-loop.md`](../docs/matching-loop.md).
 See [`docs/matching-decompilation-spike.md`](../docs/matching-decompilation-spike.md) §3
-for the result and [`research/tools/matching-decomp/TOOLCHAIN.md`](../research/tools/matching-decomp/TOOLCHAIN.md)
+for the original result and [`research/tools/matching-decomp/TOOLCHAIN.md`](../research/tools/matching-decomp/TOOLCHAIN.md)
 for the compiler.
 
 ## Layout
@@ -43,8 +47,8 @@ python src-match/verify.py --control    # every entry + the negative controls
 python src-match/verify.py --sweep      # which compiler builds each one discriminates
 ```
 
-`verify.py` re-runs the compiler; it never trusts the registry. All 13 entries match and
-all 3 controls are correctly rejected. The controls matter more than the matches: a
+`verify.py` re-runs the compiler; it never trusts the registry. All 405 entries match and
+all 3 controls are correctly rejected — **408 ok, 0 failed**. The controls matter more than the matches: a
 wrong structure offset, a **wrong callee behind a correct-looking `bl`**, and a
 behaviourally-identical-but-differently-encoded rewrite are each rejected. That last one
 would pass every behavioural standard this project currently has.
@@ -60,16 +64,21 @@ would pass every behavioural standard this project currently has.
 
 ## Scale, stated plainly
 
-13 functions, 43 instructions, 14 iterations in total. The census counts **12,062 entry
-points and 701,464 instructions**. This corpus is **0.0061 % of the code**. It exists to
-prove the loop runs end to end and to measure what an iteration costs — not to represent
-progress.
+**405 functions, 1,773 instructions.** The census counts **12,062 entry points and
+701,464 instructions**, so this corpus is **0.2528 % of the code** — up from 0.0061 % when
+it held thirteen. It is 6.87 % of the 5,897 functions the link map names, which is exactly
+the divergence the spike warned about: report this work **by instructions, never by
+function count** (spike doc §5.2).
 
-**233 further functions share the exact mnemonic shape of one of these thirteen** — the
-near-certain next matches, 114 of them the single-call wrapper that needs nothing but its
-callee's name. That is 1.93 % of the entry points and **0.169 % of the instructions**.
-Eighteen times the functions, still under a fifth of one percent of the game
-(spike doc §3.1.5).
+Provenance of the 405: 13 hand-written by the spike, **392 produced mechanically by
+`loop.py` with zero model calls** — 140 by its leaf seeder, 134 by its wrapper seeder, and
+118 by the trivial `blr` seeder. 390 are game code, 15 are SDK.
 
-Report progress on this work by instructions, never by function count
-(spike doc §5.2).
+Two honest discounts a reader should apply:
+
+* **118 of the 405 are a single `blr`** matched by `void f(void) {}`. True about the bytes,
+  thin about the program — 29 % of the functions and 6.7 % of the instructions here.
+* **No global accessor is in this corpus**, although `lwz r3, d(r13); blr` is one of the
+  easiest shapes in the binary. A candidate for one carries a data relocation whose operand
+  the oracle masks and cannot name-check, so it would match *any* global. 104 such functions
+  were refused on purpose (`docs/matching-loop.md` §2.3).
