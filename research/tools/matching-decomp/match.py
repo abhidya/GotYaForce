@@ -46,6 +46,7 @@ sys.path.insert(0, str(HERE))
 from dolsym import load, function_bytes  # noqa: E402
 from ppcdis import render, disasm  # noqa: E402
 from objdiff import Elf32BE, compare, render_diff  # noqa: E402
+import datareloc  # noqa: E402
 
 # Where a licensed CodeWarrior for GameCube would be unpacked.  Nothing is
 # downloaded by this tool; these are searched, and their absence is reported.
@@ -204,24 +205,30 @@ def context_block(dol, smap, rec, retail, neighbours=2):
         for a, t, n in calls:
             lines.append("  0x%08x  bl -> 0x%08x  %s" % (a, t, n))
         lines.append("")
-    sda = []
-    for a, w, t in disasm(retail, rec["addr"]):
-        op = w >> 26
-        if 32 <= op <= 55:
-            ra = (w >> 16) & 31
-            if ra in (2, 13):
-                d = w & 0xFFFF
-                if d & 0x8000:
-                    d -= 0x10000
-                base = 0x8043EA20 if ra == 2 else 0x8043B5A0
-                sda.append((a, ra, base + d))
-    if sda:
-        lines.append("SMALL-DATA-AREA REFERENCES (r2=0x8043EA20, r13=0x8043B5A0,")
-        lines.append("from the ROM's own __init_registers @ 0x800032b0):")
-        for a, ra, tgt in sda:
-            r2 = smap.lookup(tgt)
-            lines.append("  0x%08x  r%-2d -> 0x%08x %s"
-                         % (a, ra, tgt, r2["name"] if r2 else ""))
+    bases = datareloc.bases_only(dol, smap)
+    refs = datareloc.retail_data_addresses(retail, rec["addr"], bases)
+    resolver = datareloc.SymbolResolver(dol, smap)
+    # `abs-r0` rows whose address is outside the image are plain immediates
+    # (`li r0, 0` decodes as `addi r0, r0, 0`); they matter to the oracle --
+    # a candidate relocating there is taking a global's address where retail
+    # loads a constant -- but they are noise in a prompt.
+    shown = {o: v for o, v in refs.items()
+             if v[1] != "abs-r0" or resolver.in_image(v[0])}
+    if shown:
+        lines.append("DATA REFERENCES (r2=_SDA2_BASE_=0x%08x, "
+                     "r13=_SDA_BASE_=0x%08x, both derived from the ROM's own"
+                     % (bases[2], bases[13]))
+        lines.append("__init_registers and cross-checked against the DOL "
+                     "section table -- see datareloc.py).")
+        lines.append("A candidate MUST name the symbol at the stated address: "
+                     "the oracle now checks it.")
+        for off in sorted(shown):
+            tgt, how = shown[off]
+            hit = smap.lookup(tgt)
+            lines.append("  0x%08x  %-8s -> 0x%08x  %s"
+                         % (rec["addr"] + off, how, tgt,
+                            hit["name"] if hit else
+                            resolver.name_for_address(tgt)))
         lines.append("")
     prev = [r for r in smap.order if r["addr"] < rec["addr"]][-neighbours:]
     nxt = [r for r in smap.order if r["addr"] > rec["addr"]][:neighbours]
@@ -237,10 +244,11 @@ def expected_symbols(smap, retail, base_addr):
 
     Without this, objdiff.compare masks a relocated `bl` operand and accepts
     ANY callee -- a candidate that calls the wrong function would MATCH.
-    Selftest T6b is the control for exactly this.  Only REL24 branch targets
-    are resolvable from a linked image plus the link map; data references
-    (ADDR16_HA/LO, EMB_SDA21) are reported but cannot be name-checked here,
-    because the DOL has no data symbol table.
+    Selftest T6b is the control for exactly this.
+
+    This covers REL24 branch targets only.  The other half -- data references
+    (ADDR16_HA/LO, ADDR32, EMB_SDA21), which the DOL's missing data symbol
+    table once made unverifiable -- is `expected_data()` below.
     """
     out = {}
     for a, w, _t in disasm(retail, base_addr):
@@ -255,8 +263,27 @@ def expected_symbols(smap, retail, base_addr):
     return out
 
 
+def expected_data(dol, smap, retail, base_addr):
+    """{offset: (address, how)} the retail DATA references resolve to.
+
+    The companion to `expected_symbols`, and the fix for the oracle's second
+    hole.  A `lwz rX, d(r13)` or a `lis`/`addi` pair in the retail bytes names
+    ONE absolute address; `datareloc` reads it out of the encoding, and
+    `objdiff.compare` then requires the candidate's data relocation to name a
+    symbol at that same address.  See `datareloc.py` for how the small-data
+    bases are established (two independent derivations, cross-checked).
+    """
+    return datareloc.retail_data_addresses(
+        retail, base_addr, datareloc.bases_only(dol, smap))
+
+
+def data_resolver(dol, smap, repo=None):
+    """Candidate symbol name -> absolute address.  Fail-closed; see datareloc."""
+    return datareloc.SymbolResolver(dol, smap, repo=repo)
+
+
 def try_one(src, includes, kind, mwcc, cflags, build, rec, retail, obj_symbol,
-            expected_syms=None):
+            expected_syms=None, retail_addrs=None, resolve_symbol=None):
     """Compile one candidate and run it through the oracle. Returns a verdict."""
     wd = tempfile.mkdtemp(prefix="mdec_")
     # The compile runs in a scratch cwd, so the source and every include path
@@ -280,13 +307,16 @@ def try_one(src, includes, kind, mwcc, cflags, build, rec, retail, obj_symbol,
                       if sy["value"] <= o < sy["value"] + sy["size"]]
             break
 
-    v = compare(retail, cand, relocs, rec["addr"], expected_syms=expected_syms)
+    v = compare(retail, cand, relocs, rec["addr"], expected_syms=expected_syms,
+                retail_addrs=retail_addrs, resolve_symbol=resolve_symbol)
     v["function"] = rec["name"]
     v["address"] = "0x%08x" % rec["addr"]
     v["compiler"] = str(mwcc)
     v["backend"] = kind
     v["expected_symbols"] = {("0x%03x" % k): s
                              for k, s in (expected_syms or {}).items()}
+    v["expected_data"] = {("0x%03x" % k): "0x%08x (%s)" % val
+                          for k, val in (retail_addrs or {}).items()}
     if kind == "mwcc-rs":
         v["build"] = build
     v["cflags"] = cflags
@@ -303,13 +333,14 @@ SWEEP_OPTS = ["-O4,p", "-O4", "-O3", "-O2", "-O1", "-O0"]
 
 
 def sweep(src, includes, kind, mwcc, rec, retail, obj_symbol, base_cflags,
-          expected_syms=None):
+          expected_syms=None, retail_addrs=None, resolve_symbol=None):
     rows = []
     for build in SWEEP_BUILDS:
         for opt in SWEEP_OPTS:
             flags = [f for f in base_cflags if not f.startswith("-O")] + [opt]
             v, _ = try_one(src, includes, kind, mwcc, flags, build,
-                           rec, retail, obj_symbol, expected_syms)
+                           rec, retail, obj_symbol, expected_syms,
+                           retail_addrs, resolve_symbol)
             rows.append({"build": build, "opt": opt,
                          "verdict": v["verdict"],
                          "match_pct": v.get("match_pct", 0.0)})
@@ -381,10 +412,12 @@ def main():
         cflags = DEFAULT_CFLAGS_RS if kind == "mwcc-rs" else DEFAULT_CFLAGS
 
     exp = expected_symbols(smap, retail, rec["addr"])
+    expd = expected_data(dol, smap, retail, rec["addr"])
+    resolver = data_resolver(dol, smap, repo=a.repo)
 
     if a.sweep:
         rows = sweep(a.src, a.include, kind, mwcc, rec, retail,
-                     a.obj_symbol, cflags, exp)
+                     a.obj_symbol, cflags, exp, expd, resolver)
         hits = [r for r in rows if r["verdict"] == "MATCH"]
         print("CALIBRATION SWEEP  %s @ 0x%08x  backend=%s"
               % (rec["name"], rec["addr"], kind))
@@ -406,13 +439,23 @@ def main():
         return 0 if hits else 1
 
     v, _ = try_one(a.src, a.include, kind, mwcc, cflags, a.build,
-                   rec, retail, a.obj_symbol, exp)
+                   rec, retail, a.obj_symbol, exp, expd, resolver)
     if v["verdict"] == "BUILD_FAILED":
         print(json.dumps(v, indent=1))
         if a.json:
             Path(a.json).write_text(json.dumps(v, indent=1))
         return 2
     print(v["diff_text"])
+    for r in v.get("data_relocs_verified") or []:
+        print("DATA RELOC  +0x%03x %-18s %-22s -> %s  (%s, %s)  VERIFIED"
+              % (r["offset"], r["type"], r["symbol"], r["retail_addr"],
+                 r["retail_how"], r["symbol_source"]))
+    for r in v.get("data_reloc_errors") or []:
+        print("DATA RELOC  +0x%03x %-18s WRONG GLOBAL: %s"
+              % (r["offset"], r["type"], r["reason"]))
+    for r in v.get("unchecked_relocs") or []:
+        print("UNVERIFIED  +0x%03x %-18s %s"
+              % (r["offset"], r["type"], r["reason"]))
     print("\nVERDICT %s  %.2f%%" % (v["verdict"], v["match_pct"]))
     if v["verdict"] != "MATCH" and v.get("first_diff"):
         fd = v["first_diff"]

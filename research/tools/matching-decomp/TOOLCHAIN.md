@@ -206,6 +206,39 @@ regression: `zz_00122c8_` with `some_other_function()` in place of `zz_0012308_`
 rejected with `reloc_symbol_errors`. Selftest T6b always tested this rule; nothing was
 wiring it into the real path.
 
+### The other half of the same bug, and its fix
+
+That fix covered `R_PPC_REL24` only, because a linked DOL has no data symbol table — so a
+candidate whose match rested on a **data** relocation (`R_PPC_ADDR16_HA/LO/HI`,
+`R_PPC_ADDR32`, `R_PPC_EMB_SDA21`) had that operand masked and never checked, and would
+have matched **any global in the game**.
+
+[`datareloc.py`](datareloc.py) closes it, and does so without weakening anything:
+
+* the **retail encoding** names one absolute address — `d(r13)` against `_SDA_BASE_`, or a
+  `lis`/`addi` pair — and `datareloc.retail_data_addresses` reads it out of the bytes;
+* the **candidate's** relocation symbol names one absolute address, resolved from the link
+  map, the address encoded in the name (`DAT_80436498`, `PTR_DAT_8043393c`), or
+  `research/decomp/data/oracle-registry.json`;
+* `objdiff.compare` requires them to be **equal**. Different → `MISMATCH`. Either side
+  unresolvable → `MATCH_UNVERIFIED`, never `MATCH`.
+
+The two small-data bases are derived twice and cross-checked — from the ROM's own
+`__init_registers` and from the DOL section table (`.sdata`/`.sdata2` start + 0x8000) — and
+`datareloc` refuses to produce them at all if the derivations disagree. Run
+`python research/tools/matching-decomp/datareloc.py --bases` to see both, or add a function
+name to list every data reference in it.
+
+Regressions: selftest **T8/T8b/T8c/T8d** (compiler-free, synthetic `EMB_SDA21` object) and
+five compiler-driven `DATA_RELOC_CONTROLS` in `src-match/verify.py --control`. The
+`zz_000a144_` control naming `DAT_804360c8`/`DAT_804360c4` instead of
+`DAT_804360cc`/`DAT_804360c8` reported `MATCH 100.00%` before this existed.
+
+`sda_recover.py` is the recovery driver that used it: it re-derives C for the 104 functions
+`loop.seed_leaf` refuses for r2/r13 access and records the 76 that match. `loop.py`'s own
+seeders are untouched; a seeder lifts its refusal by calling `datareloc.global_symbol`,
+`global_decl` and `sda_bases`.
+
 ---
 
 ## 4. Still missing

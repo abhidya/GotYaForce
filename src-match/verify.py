@@ -10,6 +10,17 @@
 This is the regression gate for the matched corpus.  A matched function is
 matched forever ONLY if the toolchain is pinned, so this re-runs the compiler
 rather than trusting the registry.
+
+The controls come in two families and both must hold:
+
+  * CONTROLS -- deliberately wrong candidates that must be REJECTED.
+  * DATA_RELOC_CONTROLS -- candidates that exercise the data-relocation
+    address check (`research/tools/matching-decomp/datareloc.py`).  These
+    assert the exact verdict, not merely rejection, because the distinction
+    between MISMATCH (the candidate names a DIFFERENT global) and
+    MATCH_UNVERIFIED (nothing could resolve the symbol, so nothing is
+    claimed) is the whole content of that check.  Before it existed, the
+    first of these reported `MATCH 100.00%`.
 """
 from __future__ import annotations
 
@@ -48,6 +59,35 @@ CONTROLS = [
      "behaviourally identical, differently encoded (signed vs unsigned compare)"),
 ]
 
+# The data-relocation control set.  `zz_000a144_` stores 0 to the two globals
+# at 0x804360cc and 0x804360c8 (r13 - 0x54d4 and r13 - 0x54d8); `zz_0005984_`
+# stores its argument to the global at 0x804360c0.  Each case states the
+# verdict the oracle must return, and why.
+DATA_RELOC_CONTROLS = [
+    ("zz_000a144_", "f",
+     "extern int DAT_804360cc;\nextern int DAT_804360c8;\n"
+     "void f(void) { DAT_804360cc = 0; DAT_804360c8 = 0; }\n",
+     "MATCH", "the globals the retail bytes actually name"),
+    ("zz_000a144_", "f",
+     "extern int DAT_804360c8;\nextern int DAT_804360c4;\n"
+     "void f(void) { DAT_804360c8 = 0; DAT_804360c4 = 0; }\n",
+     "MISMATCH",
+     "DIFFERENT globals at plausible addresses -- this is the candidate that "
+     "reported MATCH 100.00% before the data-relocation check existed"),
+    ("zz_0005984_", "f",
+     "extern int DAT_804360c4;\nvoid f(int p0) { DAT_804360c4 = p0; }\n",
+     "MISMATCH", "the neighbouring global, off by four"),
+    ("zz_000a144_", "f",
+     "extern int g_someGlobal;\nextern int g_otherGlobal;\n"
+     "void f(void) { g_someGlobal = 0; g_otherGlobal = 0; }\n",
+     "MATCH_UNVERIFIED",
+     "symbols that resolve to no address -- unproved, so not a match"),
+    ("zz_0005984_", "f",
+     "extern int DAT_deadbeef;\nvoid f(int p0) { DAT_deadbeef = p0; }\n",
+     "MATCH_UNVERIFIED",
+     "a name encoding an address in no DOL section and not in bss"),
+]
+
 
 def run(function, src, sym, build, extra=()):
     out = subprocess.run(
@@ -56,6 +96,13 @@ def run(function, src, sym, build, extra=()):
          "--build", build, "--backend", "mwcc-rs"] + list(extra),
         capture_output=True, cwd=str(ROOT))
     return out.returncode, (out.stdout + out.stderr).decode("latin1", "replace")
+
+
+def verdict_of(rc, log):
+    for line in log.splitlines():
+        if line.startswith("VERDICT "):
+            return line.split()[1]
+    return "BUILD_FAILED" if rc == 2 else ("NO_COMPILER" if rc == 3 else "?")
 
 
 def main():
@@ -92,6 +139,21 @@ def main():
             good = rc != 0
             print("[%s] %-26s rejected=%s  (%s)"
                   % ("ok  " if good else "FAIL", fn, rc != 0, why))
+            ok += good
+            bad += not good
+
+        print()
+        print("DATA-RELOCATION CONTROLS (the verdict must be EXACTLY as stated)")
+        print("-" * 72)
+        for i, (fn, sym, src, want, why) in enumerate(DATA_RELOC_CONTROLS):
+            p = tmp / ("datareloc_%d.c" % i)
+            p.write_text(src)
+            rc, log = run(fn, p, sym, build)
+            got = verdict_of(rc, log)
+            good = got == want
+            print("[%s] %-22s want %-17s got %-17s"
+                  % ("ok  " if good else "FAIL", fn, want, got))
+            print("       %s" % why)
             ok += good
             bad += not good
 
