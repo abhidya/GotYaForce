@@ -46,17 +46,37 @@ cargo build --release -p mwcc --manifest-path .tools\mwcc-rs\Cargo.toml
 Produces `.tools/mwcc-rs/target/release/mwcc.exe` (~24 MB). `match.py` finds it
 automatically; `MWCC_RS=<path>` overrides.
 
+**Step 3.5 — apply this project's fork.** The checkout is no longer the pinned
+commit as-is; §5 lists what this project changed and why. One command, idempotent:
+
+```powershell
+python research\tools\matching-decomp\mwcc_fork.py --apply   # then rebuild
+python research\tools\matching-decomp\mwcc_fork.py --check   # verify, writes nothing
+```
+
 ### Install health
 
 ```
-cargo test --release --workspace --exclude mwcc-oracle
-    1,984 passed, 1 failed
+cargo test --release --workspace --exclude mwcc-oracle --no-fail-fast
+    2,510 passed, 3 failed        # pinned commit, before this project's fork
+    2,514 passed, 3 failed        # with the fork (4 new tests, same 3 failures)
 ```
 
-The one failure is upstream and pre-existing at this commit:
-`inline_expansion::tests::composes_zero_argument_embedded_asm_at_a_nested_call_site`,
-which concerns inline embedded assembly at a nested call site. Nothing in `src-match/`
-touches that path. Recorded so a future run does not mistake it for local damage.
+**Correction to the original entry, which read "1,984 passed, 1 failed."** That
+run was fail-fast: cargo stopped at the first failing crate, so the crates after
+it never ran and their tests were never counted. With `--no-fail-fast` the pinned
+commit has **three** pre-existing failures, not one:
+
+| test | crate |
+| --- | --- |
+| `inline_expansion::tests::composes_zero_argument_embedded_asm_at_a_nested_call_site` | `mwcc-syntax-trees-to-machine-code` |
+| `tests::recovers_friend_bearing_layouts_and_expression_template_arguments` | `mwcc-tokens-to-syntax-trees` |
+| `tests::retains_brace_initialized_aggregate_image_from_discarded_inline` | `mwcc-tokens-to-syntax-trees` |
+
+All three are upstream. The two in `mwcc-tokens-to-syntax-trees` are in a crate
+this project's fork does not touch at all, which is how they are known to be
+pre-existing rather than damage. Nothing in `src-match/` exercises any of them.
+Always use `--no-fail-fast` here: a fail-fast total is not a measurement.
 
 `mwcc-oracle` is excluded because it is the *differential* harness: it compiles each
 canary with **both** mwcc-rs and the real `mwcceppc`, and needs a decomp checkout with
@@ -131,7 +151,7 @@ compiled; whether the bytes match retail is a separate question answered in
 | Struct parameters passed by hidden pointer (the MWCC ABI) | works |
 | Counted `for` loops → `mtctr`/`bdnz` | works |
 | **`while (a && b)` pointer walks** | **refused**: `loop codegen is not implemented yet (roadmap)` |
-| **`AND` with a 32-bit constant that is not an `rlwinm` mask** | **refused**: `a general register was requested for a non-leaf expression: IntegerLiteral(...)`. `OR`/`XOR`/`ADD` with the same constant are fine. |
+| ~~**`AND` with a 32-bit constant that is not an `rlwinm` mask**~~ | ~~**refused**~~ — **FIXED by this project's fork, §5.1.** Was: `a general register was requested for a non-leaf expression: IntegerLiteral(...)`. |
 | **Load/store with update (`lbzu`, `lwzu`)** | not generated |
 | **`&param` on a by-reference struct parameter** | compiles, but spills the incoming pointer to a stack home and reloads it; real MWCC uses the register directly |
 | **`*(u32 *)&struct.member`** | **refused**: `pointer leaf access needs a pointer variable (roadmap)` |
@@ -216,3 +236,70 @@ wiring it into the real path.
 | **`objdiff-cli`** | Not installed. `objdiff.py` remains the oracle. Worth adding for whole-project reports. |
 | **`decomp-toolkit` (`dtk`)** | Not installed. It is what turns per-function matching into per-translation-unit matching, and there is no substitute. |
 | **A GC/1.2.5n-capable compiler** | Needed for Calibration A (the SDK objects). mwcc-rs's `1.2.5n` is experimental and incomplete. |
+
+---
+
+## 5. This project's fork of the code generator
+
+**The compiler in `.tools/mwcc-rs` is no longer the pinned commit.** It is the
+pinned commit plus the changes below. Nothing is vendored: `.tools/` stays
+gitignored and what is committed is
+[`mwcc_fork.py`](mwcc_fork.py) plus [`mwcc-rs-fork/`](mwcc-rs-fork/), which
+together reconstruct the fork from a fresh extract of the pinned tarball.
+
+```powershell
+python research\tools\matching-decomp\mwcc_fork.py --check   # writes nothing
+python research\tools\matching-decomp\mwcc_fork.py --apply   # then rebuild
+python research\tools\matching-decomp\mwcc_fork.py --capture # dev: live tree -> git
+```
+
+Whole files this project wrote live under `mwcc-rs-fork/` at their tree-relative
+paths and are copied over; every other change is an exact string replacement
+anchored on text that occurs **once** in the pinned file, so `--apply` either
+reproduces the fork byte for byte or names the anchor that no longer matches.
+Verified: extracting the pinned tarball and running `--apply` yields a tree whose
+every file hashes equal to the live checkout.
+
+Reading and writing use `newline=""` throughout. Without that, Python's text mode
+rewrites the pinned tree's LF endings as CRLF on this Windows host and every
+touched file differs from its reference copy for no reason.
+
+### 5.1 `AND` against a constant that is not an `rlwinm` mask
+
+*Files:* `crates/pipeline/mwcc-syntax-trees-to-machine-code/src/expressions/materialized_bitand_constant.rs`
+(rewritten), `crates/representations/mwcc-machine-code/src/{instruction,encoding}.rs`
+and `crates/representations/mwcc-vreg/src/description.rs` (one line each, adding
+`andis.`).
+
+`rlwinm` can only express a mask that is one contiguous run of set bits. The
+pinned generator had that path, and a sibling for a negative mask that fits `li`,
+and nothing else — so `x & 0x00FF1F7F` was a hard diagnostic while `|`, `^` and
+`+` with the same constant compiled. The fork adds the three forms mwcc actually
+uses, which `blocker_census.py` identified by counting them in the retail image:
+
+| constant | form | retail sites |
+| --- | --- | ---: |
+| fits 16 bits | `andi. rA,rS,UIMM` | 144 |
+| low half zero | `andis. rA,rS,UIMM` | 16 |
+| both halves set | `lis free,ha; addi r0,free,lo; and rA,rS,r0` | 190 |
+| negative, fits `li` | `li r0,SIMM; and rA,rS,r0` (already present) | 80 |
+
+The three-instruction form is specified by retail `zz_008bbc0_` @ `0x8008bbc0`
+(`lis r3,0xff; addi r0,r3,0x1f7f; and r3,r4,r0`) and corroborated by the
+wide-constant `mullw` path already in the pinned tree, which builds its constant
+exactly the same way. Only a full-width (32-bit) leaf takes the new paths: a
+narrow leaf needs the promotion reasoning the surrounding code deliberately
+defers on, and a wrong `andi.` on an un-extended signed byte is a silent
+miscompile, which is the one outcome this compiler must never produce.
+
+*Proof:* `src-match/game/zz_008bbc0_.c` matches byte-identically, on the same C
+that had been committed under `blocked/`. Four unit tests in the module cover the
+three new forms plus a control that a contiguous mask still takes `rlwinm`.
+
+*Measured corpus impact:* re-running `census.py` over all 12,062 entry points with
+this fork against the committed baseline moves the diagnostic
+"AND/arith against a constant that is not an `rlwinm` mask" from **115 functions /
+8,507 instructions** to **104 / 7,635**, and `COMPILES` from 2,858 to 2,866
+functions. Eight functions become compilable; three others clear this gap and
+stop at the next one. The remaining 104 are outside the leaf/full-width subset
+this change covers.

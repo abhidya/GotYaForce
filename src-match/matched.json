@@ -16,6 +16,8 @@
   "backend": "mwcc-rs",
   "source": "https://github.com/zcanann/mwcc-rs",
   "commit": "7c093483f9c6c5775eb856a1a343a5dc6671233b",
+  "fork": "research/tools/matching-decomp/mwcc_fork.py",
+  "fork_note": "This project extends the pinned commit. `python research/tools/matching-decomp/mwcc_fork.py --check` says whether the checkout at .tools/mwcc-rs carries the changes; --apply installs them over a fresh extract of the pinned tarball, byte for byte. TOOLCHAIN.md section 5 lists what each change does and what it unlocks. Entries below marked `needs_fork` do NOT match on the unmodified pinned commit.",
   "build_label": "2.7",
   "build_label_note": "GC/2.5, GC/2.6 and GC/2.7 are the SAME code generator in mwcc-rs; they differ only in the object .comment marker, which a linked DOL does not preserve. The label is the spike's prior, not a measured result.",
   "cflags": ["-proc", "gekko", "-fp", "hardware", "-O4,p", "-enum", "int",
@@ -51,12 +53,15 @@
   {"name": "gnt4-GXInitLightColor-bl", "addr": "0x802285f4", "insns": 3,
    "src": "sdk/GXInitLightColor.c", "sym": "f", "iterations": 1, "exact_bytes": true,
    "shape": "Dolphin SDK GX light colour setter",
-   "provenance_note": "a REWRITE, not the CC0 source; the genuine source does not compile under mwcc-rs. See the file header."}
+   "provenance_note": "a REWRITE, not the CC0 source; the genuine source does not compile under mwcc-rs. See the file header."},
+  {"name": "zz_008bbc0_", "addr": "0x8008bbc0", "insns": 4,
+   "src": "game/zz_008bbc0_.c", "sym": "f", "iterations": 1, "exact_bytes": true,
+   "shape": "AND against a 32-bit non-mask constant (lis+addi+and)",
+   "needs_fork": "materialized_bitand_constant",
+   "discriminates": "nothing; every build lowers it the same way",
+   "provenance_note": "Blocked 2026-09-03, matched 2026-09-04 with the SAME C. The fork adds mwcc's three AND-with-constant forms (andi. / andis. / materialise-and-AND) beside the rlwinm path that was already there."}
  ],
  "attempted_and_blocked": [
-  {"name": "zz_008bbc0_", "addr": "0x8008bbc0", "insns": 4,
-   "blocker": "mwcc-rs: `a general register was requested for a non-leaf expression: IntegerLiteral(16719743)`",
-   "detail": "AND against a 32-bit constant that is not an rlwinm mask. mwcc-rs implements only the rlwinm path; real MWCC materialises the constant with lis+addi and uses `and`. OR/XOR/ADD with the same constant compile fine, so this is one missing lowering, not a deep gap. This was the spike's own first-choice target."},
   {"name": "zz_0298b20_", "addr": "0x80298b20", "insns": 4,
    "blocker": "register allocation: retail `mulli r0, r4, 0x74`, mwcc-rs `mulli r4, r4, 0x74`",
    "detail": "Retail routes the scaled array index through the scratch register r0; mwcc-rs reuses the dead input r4. Four different C spellings produced the same divergence, so it is not reachable from the source. mwcc-rs's own README names matching MWCC's register colouring as `the core research target`."},
