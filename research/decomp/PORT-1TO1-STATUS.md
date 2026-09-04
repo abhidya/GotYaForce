@@ -5,15 +5,24 @@
 > subsystem by subsystem, DONE / PARTIAL / MISSING / STUB against ROM evidence. Its last
 > synthesis wave is **2026-08-03**; entries below that date are historical.
 >
-> It is no longer the whole story. Since then the project's active frontier is the
-> **automated wasm-unit port pipeline** — recompiling decompiled C into WebAssembly units
-> and verifying them against the ROM — which this file does not cover at all. For that,
-> read, in order:
+> It is no longer the whole story. From 2026-08-03 to 2026-09-04 the project's active
+> frontier was the **automated wasm-unit port pipeline** — recompiling decompiled C into
+> WebAssembly units and verifying them against the ROM. **As of 2026-09-04 the port route
+> is matching decompilation instead** (`docs/matching-decompilation-spike.md`,
+> `docs/matching-loop.md`) — write C, compile it, diff against retail bytes until
+> byte-identical; the wasm-unit driver (`finish-port --drive`) is obsolete on this route
+> and must not be relaunched. This file covers neither pipeline. For the wasm-unit
+> pipeline's historical record, and for the current route, read, in order:
 >
+> - [`docs/matching-decompilation-spike.md`](../../docs/matching-decompilation-spike.md) and
+>   [`docs/matching-loop.md`](../../docs/matching-loop.md) — the **current route**: 405
+>   functions byte-identical to retail (0.2528 % of the game's instructions), and why the
+>   compiler, not the model, is the binding constraint.
 > - [`docs/verification-status.md`](../../docs/verification-status.md) — **what is actually
 >   proven** on the wasm track: the tier vocabulary, the measured ceiling (80.8 % of the
 >   10,954 functions are eligible for *some* verification standard, 19.2 % for none), and
->   the per-area state. Read this before quoting any port number.
+>   the per-area state — plus §5.5 for the matching-decomp standard. Read this before
+>   quoting any port number.
 > - [`docs/playable-port-design.md`](../../docs/playable-port-design.md) — the design
 >   contract (v1→v5, PASS verdict). The normative document.
 > - [`research/decomp/corpus-correction-loop.md`](corpus-correction-loop.md) — how a
