@@ -221,7 +221,10 @@ def main():
         return 1
     print("HARNESS SELFTEST PASSED -- all checks, including both negative")
     print("controls and the relocation-symbol control.")
-    print("The compiler stage (mwcceppc) is NOT exercised and NOT present.")
+    print("This exercises the extractor, encoder and comparator only -- NO")
+    print("compiler is invoked.  For the compiler stage, run:")
+    print("    python src-match/verify.py --control")
+    print("which drives mwcc-rs over the matched corpus (see TOOLCHAIN.md).")
     return 0
 
 

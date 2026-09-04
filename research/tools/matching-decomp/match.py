@@ -14,6 +14,20 @@ exit 0 = MATCH, 1 = MISMATCH, 2 = did not build, 3 = no compiler.
 `--detect` reports the toolchain state and exits.  `--context` prints the
 prompt block for a target function (disassembly + neighbours + map facts)
 without needing a compiler, which is the half of the loop that works today.
+
+TWO COMPILER BACKENDS are supported and they are not interchangeable:
+
+  * `mwcceppc.exe` -- the genuine Metrowerks binary.  Not present on this
+    machine and not obtained by this project (proprietary; see the spike
+    doc s1.2).  Selected automatically if it ever appears.
+  * `mwcc-rs`      -- zcanann/mwcc-rs, an open-source from-scratch Rust
+    reimplementation (MIT OR Apache-2.0).  Built from source under
+    `.tools/mwcc-rs`; see `TOOLCHAIN.md`.  Selected with `--backend mwcc-rs`
+    or automatically when mwcceppc is absent.  Takes `--build <label>`
+    (1.3 / 1.3.2 / 2.0 / 2.0p1 / 2.5 / 2.6 / 2.7) instead of one binary per
+    version.  It FAILS HONESTLY on constructs it does not implement -- a
+    BUILD_FAILED verdict from it is a *compiler capability* statement, not a
+    statement about the candidate C.
 """
 from __future__ import annotations
 
@@ -45,6 +59,16 @@ MWCC_SEARCH = [
     "C:/Program Files/Metrowerks/CodeWarrior/PowerPC_EABI_Tools/Command_Line_Tools/mwcceppc.exe",
 ]
 
+# Where the mwcc-rs build lands.  `.tools/` is gitignored: externally built
+# tooling is NOT vendored into this repository.  See TOOLCHAIN.md.
+REPO_DEFAULT = "D:/GotYaForce"
+MWCC_RS_SEARCH = [
+    os.environ.get("MWCC_RS"),
+    str(Path(__file__).resolve().parents[3] / ".tools" / "mwcc-rs"
+        / "target" / "release" / "mwcc.exe"),
+    "D:/GotYaForce/.tools/mwcc-rs/target/release/mwcc.exe",
+]
+
 # The flag set 2003-era GameCube decomp projects converge on. Confirmed per
 # game by calibrating against known SDK functions -- see the spike doc §2.
 DEFAULT_CFLAGS = [
@@ -61,6 +85,23 @@ DEFAULT_CFLAGS = [
     "-c",
 ]
 
+# mwcc-rs takes the same switch vocabulary minus the mwcceppc-only
+# diagnostics flags, and adds `--build`.  `-c` is a value-taking flag here
+# (`-c <file>`), so it is supplied by the driver, not the flag list.
+DEFAULT_CFLAGS_RS = [
+    "-proc", "gekko",
+    "-fp", "hardware",
+    "-O4,p",
+    "-enum", "int",
+    "-nodefaults",
+    "-inline", "auto",
+    "-sdata", "8", "-sdata2", "8",
+    "-str", "reuse",
+    "-func_align", "4",
+]
+
+DEFAULT_BUILD = "2.7"
+
 
 def find_mwcc():
     for p in MWCC_SEARCH:
@@ -70,8 +111,32 @@ def find_mwcc():
     return Path(w) if w else None
 
 
+def find_mwcc_rs():
+    for p in MWCC_RS_SEARCH:
+        if p and Path(p).exists():
+            return Path(p)
+    w = shutil.which("mwcc")
+    return Path(w) if w else None
+
+
+def pick_backend(requested=None):
+    """Return (kind, path). kind is 'mwcceppc' or 'mwcc-rs'."""
+    if requested == "mwcceppc":
+        m = find_mwcc()
+        return ("mwcceppc", m) if m else ("mwcceppc", None)
+    if requested == "mwcc-rs":
+        m = find_mwcc_rs()
+        return ("mwcc-rs", m) if m else ("mwcc-rs", None)
+    m = find_mwcc()
+    if m:
+        return "mwcceppc", m
+    m = find_mwcc_rs()
+    return ("mwcc-rs", m) if m else ("mwcceppc", None)
+
+
 def detect():
     out = {"mwcceppc": None, "candidates_searched": [p for p in MWCC_SEARCH if p],
+           "mwcc_rs": None,
            "objdiff_cli": shutil.which("objdiff-cli"),
            "dtk": shutil.which("dtk"),
            "devkitppc": None, "wine": shutil.which("wine")}
@@ -84,18 +149,33 @@ def detect():
                 "latin1", "replace").strip()[:400]
         except Exception as ex:
             out["mwcceppc_version"] = "could not run: %s" % ex
+    rs = find_mwcc_rs()
+    if rs:
+        out["mwcc_rs"] = str(rs)
+        out["mwcc_rs_builds"] = ["1.3", "1.3.2", "1.3.2r", "2.0",
+                                 "2.0p1", "2.5", "2.6", "2.7"]
+        out["mwcc_rs_experimental"] = ["1.1", "1.1p1", "1.2.5", "1.2.5n",
+                                       "3.0a3", "3.0a3p1", "Wii/1.0"]
     dk = Path("C:/devkitPro/devkitPPC/bin/powerpc-eabi-gcc.exe")
     if dk.exists():
         out["devkitppc"] = str(dk)
+    out["backend"] = pick_backend()[0] if (m or rs) else None
     return out
 
 
-def compile_candidate(src, mwcc, cflags, includes, workdir):
+def compile_candidate(src, mwcc, cflags, includes, workdir,
+                      kind="mwcceppc", build=DEFAULT_BUILD):
     obj = Path(workdir) / "cand.o"
-    cmd = [str(mwcc)] + list(cflags)
-    for i in includes:
-        cmd += ["-i", str(i)]
-    cmd += ["-o", str(obj), str(src)]
+    if kind == "mwcc-rs":
+        cmd = [str(mwcc), "-c", str(src), "-o", str(obj), "--build", build]
+        cmd += list(cflags)
+        for i in includes:
+            cmd += ["-i", str(i)]
+    else:
+        cmd = [str(mwcc)] + list(cflags)
+        for i in includes:
+            cmd += ["-i", str(i)]
+        cmd += ["-o", str(obj), str(src)]
     r = subprocess.run(cmd, capture_output=True, cwd=workdir)
     log = (r.stdout + r.stderr).decode("latin1", "replace")
     return (obj if (r.returncode == 0 and obj.exists()) else None), log, cmd
@@ -152,6 +232,90 @@ def context_block(dol, smap, rec, retail, neighbours=2):
     return "\n".join(lines)
 
 
+def expected_symbols(smap, retail, base_addr):
+    """{offset: symbol} the retail branch at that offset resolves to.
+
+    Without this, objdiff.compare masks a relocated `bl` operand and accepts
+    ANY callee -- a candidate that calls the wrong function would MATCH.
+    Selftest T6b is the control for exactly this.  Only REL24 branch targets
+    are resolvable from a linked image plus the link map; data references
+    (ADDR16_HA/LO, EMB_SDA21) are reported but cannot be name-checked here,
+    because the DOL has no data symbol table.
+    """
+    out = {}
+    for a, w, _t in disasm(retail, base_addr):
+        if (w >> 26) == 18 and (w & 1):          # bl / bla
+            li = w & 0x03FFFFFC
+            if li & 0x02000000:
+                li -= 0x04000000
+            tgt = a + li if not (w & 2) else li  # absolute for bla
+            hit = smap.lookup(tgt)
+            if hit:
+                out[a - base_addr] = hit["name"]
+    return out
+
+
+def try_one(src, includes, kind, mwcc, cflags, build, rec, retail, obj_symbol,
+            expected_syms=None):
+    """Compile one candidate and run it through the oracle. Returns a verdict."""
+    wd = tempfile.mkdtemp(prefix="mdec_")
+    # The compile runs in a scratch cwd, so the source and every include path
+    # must be absolute or the compiler will not find them.
+    obj, log, cmd = compile_candidate(
+        Path(src).resolve(), mwcc, cflags,
+        [Path(i).resolve() for i in includes], wd, kind=kind, build=build)
+    if obj is None:
+        return {"verdict": "BUILD_FAILED", "function": rec["name"],
+                "backend": kind, "build": build, "match_pct": 0.0,
+                "command": cmd, "compiler_log": log[-4000:]}, None
+
+    e = Elf32BE(obj.read_bytes())
+    cand = e.data(e.section(".text"))
+    relocs = e.relocs_for(".text")
+    sym = obj_symbol or rec["name"]
+    for sy in e.symbols():
+        if sy["name"] == sym and sy["size"]:
+            cand = cand[sy["value"]:sy["value"] + sy["size"]]
+            relocs = [(o - sy["value"], t, n, ad) for o, t, n, ad in relocs
+                      if sy["value"] <= o < sy["value"] + sy["size"]]
+            break
+
+    v = compare(retail, cand, relocs, rec["addr"], expected_syms=expected_syms)
+    v["function"] = rec["name"]
+    v["address"] = "0x%08x" % rec["addr"]
+    v["compiler"] = str(mwcc)
+    v["backend"] = kind
+    v["expected_symbols"] = {("0x%03x" % k): s
+                             for k, s in (expected_syms or {}).items()}
+    if kind == "mwcc-rs":
+        v["build"] = build
+    v["cflags"] = cflags
+    v["compiler_log"] = log[-2000:]
+    v["diff_text"] = render_diff(v, retail, cand, rec["addr"])
+    return v, cand
+
+
+# Calibration B (spike doc §2.4): exactly one (version, flags) combination
+# should reproduce the retail bytes.  A candidate that matches under EVERY
+# combination has no discriminating power and settles nothing.
+SWEEP_BUILDS = ["1.3", "1.3.2", "2.0", "2.0p1", "2.5", "2.6", "2.7"]
+SWEEP_OPTS = ["-O4,p", "-O4", "-O3", "-O2", "-O1", "-O0"]
+
+
+def sweep(src, includes, kind, mwcc, rec, retail, obj_symbol, base_cflags,
+          expected_syms=None):
+    rows = []
+    for build in SWEEP_BUILDS:
+        for opt in SWEEP_OPTS:
+            flags = [f for f in base_cflags if not f.startswith("-O")] + [opt]
+            v, _ = try_one(src, includes, kind, mwcc, flags, build,
+                           rec, retail, obj_symbol, expected_syms)
+            rows.append({"build": build, "opt": opt,
+                         "verdict": v["verdict"],
+                         "match_pct": v.get("match_pct", 0.0)})
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--function")
@@ -163,6 +327,15 @@ def main():
     ap.add_argument("--include", action="append", default=[])
     ap.add_argument("--cflags")
     ap.add_argument("--json")
+    ap.add_argument("--backend", choices=["mwcceppc", "mwcc-rs"],
+                    help="which compiler to drive; default: mwcceppc if "
+                         "present, else mwcc-rs")
+    ap.add_argument("--build", default=DEFAULT_BUILD,
+                    help="mwcc-rs compiler build label (default 2.7)")
+    ap.add_argument("--sweep", action="store_true",
+                    help="Calibration B: compile the candidate under every "
+                         "supported build x optimisation level and report "
+                         "which combinations reproduce the retail bytes")
     a = ap.parse_args()
 
     if a.detect:
@@ -170,7 +343,7 @@ def main():
         print(json.dumps(d, indent=1))
         if a.json:
             Path(a.json).write_text(json.dumps(d, indent=1))
-        return 0 if d["mwcceppc"] else 3
+        return 0 if (d["mwcceppc"] or d["mwcc_rs"]) else 3
 
     if not a.function:
         ap.error("--function is required")
@@ -185,52 +358,66 @@ def main():
         if not a.src:
             return 0
 
-    mwcc = find_mwcc()
+    kind, mwcc = pick_backend(a.backend)
     if mwcc is None:
         msg = {
             "verdict": "NO_COMPILER",
             "function": rec["name"],
-            "detail": ("mwcceppc.exe was not found. The matching oracle cannot "
-                       "run without it. Searched: %s"
-                       % ", ".join(p for p in MWCC_SEARCH if p)),
+            "backend": kind,
+            "detail": ("no PowerPC compiler found. The matching oracle cannot "
+                       "run without one. mwcceppc searched: %s. mwcc-rs "
+                       "searched: %s"
+                       % (", ".join(p for p in MWCC_SEARCH if p),
+                          ", ".join(p for p in MWCC_RS_SEARCH if p))),
         }
         print(json.dumps(msg, indent=1), file=sys.stderr)
         if a.json:
             Path(a.json).write_text(json.dumps(msg, indent=1))
         return 3
 
-    cflags = a.cflags.split() if a.cflags else DEFAULT_CFLAGS
-    wd = tempfile.mkdtemp(prefix="mdec_")
-    obj, log, cmd = compile_candidate(Path(a.src), mwcc, cflags, a.include, wd)
-    if obj is None:
-        v = {"verdict": "BUILD_FAILED", "function": rec["name"],
-             "command": cmd, "compiler_log": log[-4000:]}
+    if a.cflags:
+        cflags = a.cflags.split()
+    else:
+        cflags = DEFAULT_CFLAGS_RS if kind == "mwcc-rs" else DEFAULT_CFLAGS
+
+    exp = expected_symbols(smap, retail, rec["addr"])
+
+    if a.sweep:
+        rows = sweep(a.src, a.include, kind, mwcc, rec, retail,
+                     a.obj_symbol, cflags, exp)
+        hits = [r for r in rows if r["verdict"] == "MATCH"]
+        print("CALIBRATION SWEEP  %s @ 0x%08x  backend=%s"
+              % (rec["name"], rec["addr"], kind))
+        print("%-8s %-8s %-14s %s" % ("build", "opt", "verdict", "match%"))
+        for r in rows:
+            print("%-8s %-8s %-14s %6.2f"
+                  % (r["build"], r["opt"], r["verdict"], r["match_pct"]))
+        print("\n%d of %d combinations MATCH" % (len(hits), len(rows)))
+        if len(hits) == len(rows):
+            print("DISCRIMINATION: NONE -- this function does not distinguish "
+                  "any build or optimisation level.")
+        elif hits:
+            print("DISCRIMINATING: matches only " +
+                  ", ".join("%s/%s" % (r["build"], r["opt"]) for r in hits))
+        out = {"function": rec["name"], "address": "0x%08x" % rec["addr"],
+               "backend": kind, "rows": rows, "matching": hits}
+        if a.json:
+            Path(a.json).write_text(json.dumps(out, indent=1))
+        return 0 if hits else 1
+
+    v, _ = try_one(a.src, a.include, kind, mwcc, cflags, a.build,
+                   rec, retail, a.obj_symbol, exp)
+    if v["verdict"] == "BUILD_FAILED":
         print(json.dumps(v, indent=1))
         if a.json:
             Path(a.json).write_text(json.dumps(v, indent=1))
         return 2
-
-    e = Elf32BE(obj.read_bytes())
-    sec = e.section(".text")
-    cand = e.data(sec)
-    relocs = e.relocs_for(".text")
-    sym = a.obj_symbol or rec["name"]
-    for sy in e.symbols():
-        if sy["name"] == sym and sy["size"]:
-            cand = cand[sy["value"]:sy["value"] + sy["size"]]
-            relocs = [(o - sy["value"], t, n, ad) for o, t, n, ad in relocs
-                      if sy["value"] <= o < sy["value"] + sy["size"]]
-            break
-
-    v = compare(retail, cand, relocs, rec["addr"])
-    v["function"] = rec["name"]
-    v["address"] = "0x%08x" % rec["addr"]
-    v["compiler"] = str(mwcc)
-    v["cflags"] = cflags
-    v["compiler_log"] = log[-2000:]
-    v["diff_text"] = render_diff(v, retail, cand, rec["addr"])
     print(v["diff_text"])
     print("\nVERDICT %s  %.2f%%" % (v["verdict"], v["match_pct"]))
+    if v["verdict"] != "MATCH" and v.get("first_diff"):
+        fd = v["first_diff"]
+        print("FIRST DIFF %s  retail: %-30s candidate: %s"
+              % (fd["addr"], fd["retail"], fd["cand"]))
     if a.json:
         Path(a.json).write_text(json.dumps(v, indent=1))
     return 0 if v["verdict"] == "MATCH" else 1
