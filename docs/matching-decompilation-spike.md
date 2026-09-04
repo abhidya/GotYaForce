@@ -19,6 +19,7 @@
 > | **The wall is the compiler, not the C** | All five non-matches were compiler capability limits, including the spike's own first-choice target. §3.1.3 |
 > | **`mwcc-rs` is 83 % memorisation** | 558 whole-function captures fire on exact name + AST hash; none covers this game. Only the 28,345-line general generator applies here. §3.1.4 |
 > | **The free 9.8 % has a licence problem, and a fix** | `doldecomp/dolsdk2004`, which §5.3 recommended, has **no licence at all**. `zeldaret/tp` is **CC0-1.0** and carries the same SDK tree. §5.3.1 |
+> | **233 functions share a matched shape** | The near-certain next matches — 1.93 % of entry points but **0.169 % of instructions**. §5.2's warning, with real numbers. §3.1.5 |
 > | **The oracle had a hole** | `match.py` masked relocated operands but never checked the relocation's *symbol* — a candidate calling the wrong function reported MATCH. Fixed, with a permanent negative control. §3.1.1 |
 
 Everything measured below was measured in this worktree today by the tools in
@@ -484,6 +485,39 @@ memorising a function whose source you already have is a legitimate way to do th
 it changes what the parity claim means **for a project like this one**: no Gotcha Force
 function is in the capture set, so **only the 28,345-line general generator applies**, and
 that generator's envelope is §3.1.3's table. Every result in `src-match/` went through it.
+
+### 3.1.5 What the thirteen unlock — and a fresh illustration of §5.2
+
+A *shape* is a function's ordered tuple of mnemonics. Two functions of the same shape
+differ only in operands, so a matched function is a worked example for every other
+function that shares its shape — these are the near-certain next matches. Counting
+them over the census (all 3,066 functions of ≤ 16 instructions, exact shape match):
+
+| functions | instructions | shape | matched exemplar |
+| ---: | ---: | --- | --- |
+| **114** | 912 | `stwu mflr stw bl lwz mtlr addi blr` | `zz_00122c8_` |
+| 47 | 94 | `lwz blr` | `zz_0206f8c_` |
+| 26 | 52 | `li blr` | `zz_008b900_` |
+| 22 | 44 | `stw blr` | `zz_0009c28_` |
+| 12 | 40 | `li stb blr` | `zz_007f88c_` |
+| 5 | 15 | `lwz stw blr` | `gnt4-GXInitLightColor-bl` |
+| 4 | 20 | `cmplwi beqlr li stw blr` | `zz_02a0a6c_` |
+| 3 | 9 | `lbz extsb blr` | `zz_02650c0_` |
+| **233** | **1,186** | **total** | |
+
+The 114-function bucket is the single-call wrapper, and each one needs nothing but its
+callee's name — which `match.py --context` already resolves through the link map. **They
+are close to free.**
+
+And then the number that matters:
+
+> **233 functions is 1.93 % of the entry points and 0.169 % of the instructions.**
+
+Eighteen times the functions this test matched, and still under a fifth of one percent of
+the game. §5.2 warned that a loop which only ever solves short functions can report
+"46 % matched" having touched 13 % of the code. **Here is that warning with real numbers
+attached, from real matches, on the first day the loop existed.** Report this work by
+instructions.
 
 ### 3.2 What was built and proven instead
 

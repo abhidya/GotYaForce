@@ -46,6 +46,25 @@ cargo build --release -p mwcc --manifest-path .tools\mwcc-rs\Cargo.toml
 Produces `.tools/mwcc-rs/target/release/mwcc.exe` (~24 MB). `match.py` finds it
 automatically; `MWCC_RS=<path>` overrides.
 
+### Install health
+
+```
+cargo test --release --workspace --exclude mwcc-oracle
+    1,984 passed, 1 failed
+```
+
+The one failure is upstream and pre-existing at this commit:
+`inline_expansion::tests::composes_zero_argument_embedded_asm_at_a_nested_call_site`,
+which concerns inline embedded assembly at a nested call site. Nothing in `src-match/`
+touches that path. Recorded so a future run does not mistake it for local damage.
+
+`mwcc-oracle` is excluded because it is the *differential* harness: it compiles each
+canary with **both** mwcc-rs and the real `mwcceppc`, and needs a decomp checkout with
+`wibo`, the proprietary compiler set, and `powerpc-eabi-objdump`. None of that exists
+here and none of it will be obtained. **This project's oracle is the retail DOL, not
+`mwcceppc`** — which is a different and, for these purposes, better standard: it is the
+actual target, not a proxy for it.
+
 ### Licence — a correction to the spike
 
 The spike called mwcc-rs *"MIT-ish"*. Precisely:

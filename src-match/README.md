@@ -65,5 +65,11 @@ points and 701,464 instructions**. This corpus is **0.0061 % of the code**. It e
 prove the loop runs end to end and to measure what an iteration costs — not to represent
 progress.
 
+**233 further functions share the exact mnemonic shape of one of these thirteen** — the
+near-certain next matches, 114 of them the single-call wrapper that needs nothing but its
+callee's name. That is 1.93 % of the entry points and **0.169 % of the instructions**.
+Eighteen times the functions, still under a fifth of one percent of the game
+(spike doc §3.1.5).
+
 Report progress on this work by instructions, never by function count
 (spike doc §5.2).
