@@ -65,6 +65,7 @@ from dolsym import load, function_bytes                      # noqa: E402
 from ppcdis import disasm, render                            # noqa: E402
 from objdiff import Elf32BE, compare, render_diff            # noqa: E402
 import match as MATCH                                        # noqa: E402
+import seed_cfg as SEED_CFG                                  # noqa: E402
 
 LEDGER_DEFAULT = REPO / "research" / "decomp" / "data" / "matching-loop-ledger.jsonl"
 RESULTS_DEFAULT = REPO / "research" / "decomp" / "data" / "matching-loop-results.json"
@@ -184,6 +185,28 @@ class Oracle(object):
     def available(self):
         return self.compiler is not None
 
+    def data_resolver(self):
+        if not hasattr(self, "_dres"):
+            try:
+                self._dres = MATCH.data_resolver(self.dol, self.smap)
+            except Exception:                                # noqa: BLE001
+                self._dres = None
+        return self._dres
+
+    def retail_addrs(self, retail, addr):
+        """{offset: (address, how)} for the retail bytes' own data references.
+        Cached per function -- a corpus sweep re-checks the same function once
+        per spec variant."""
+        if not hasattr(self, "_raddr"):
+            self._raddr = {}
+        if addr not in self._raddr:
+            try:
+                self._raddr[addr] = MATCH.expected_data(
+                    self.dol, self.smap, retail, addr)
+            except Exception:                                # noqa: BLE001
+                self._raddr[addr] = None
+        return self._raddr[addr]
+
     def target(self, name):
         rec, retail = function_bytes(self.dol, self.smap, name)
         return rec, retail
@@ -218,18 +241,16 @@ class Oracle(object):
                           if sy["value"] <= o < sy["value"] + sy["size"]]
                 break
         exp = MATCH.expected_symbols(self.smap, retail, rec["addr"])
-        v = compare(retail, cand, relocs, rec["addr"], expected_syms=exp)
-
-        unchecked = [{"offset": o, "type": t, "symbol": n}
-                     for o, t, n, _a in relocs if o not in exp]
-        v["unchecked_relocs"] = unchecked
-        if v["verdict"] == "MATCH" and unchecked:
-            v["verdict"] = "MATCH_UNVERIFIED"
-            v["unverified_reason"] = (
-                "the candidate carries %d relocation(s) at offsets the harness "
-                "cannot resolve through the link map; their operands were "
-                "masked and never name-checked, so this verdict would accept "
-                "any target" % len(unchecked))
+        # Data relocations are ADDRESS-checked now (`datareloc`): the retail
+        # encoding names one absolute address at each referencing offset, and
+        # the candidate's relocation symbol has to resolve to that same
+        # address.  `compare` marks anything neither check reached as
+        # MATCH_UNVERIFIED itself, so this file no longer second-guesses it --
+        # the one thing that must stay true is that no argument here can turn a
+        # MISMATCH into a MATCH, and none can.
+        v = compare(retail, cand, relocs, rec["addr"], expected_syms=exp,
+                    retail_addrs=self.retail_addrs(retail, rec["addr"]),
+                    resolve_symbol=self.data_resolver())
         if want_diff:
             v["diff_text"] = render_diff(v, retail, cand, rec["addr"])
         v["compiler_log"] = log[-1200:]
@@ -247,7 +268,10 @@ CTYPE = {(1, True): "char", (1, False): "unsigned char",
 
 
 class SeedFail(Exception):
-    pass
+    """`cls` says WHO the refusal belongs to: 'integrity' (a match here would
+    rest on a relocation the harness cannot name-check), 'compiler' (a shape
+    mwcc-rs is measured to refuse), or 'seeder' (this tier's own envelope)."""
+    cls = "seeder"
 
 
 def _base_fail(what, ra):
@@ -256,13 +280,18 @@ def _base_fail(what, ra):
     operand the oracle MASKS and cannot name-check -- so such a "match" would
     accept any global in the game.  Refusing here is the honest outcome, not a
     gap to be closed by trying harder."""
-    if ra == 2:
-        return "%s through r2 (sdata2): would need an unverifiable data relocation" % what
-    if ra == 13:
-        return "%s through r13 (sdata): would need an unverifiable data relocation" % what
+    if ra in (2, 13):
+        # This was an INTEGRITY refusal while `match.py` name-checked only
+        # R_PPC_REL24 -- a small-data match would have accepted any global.
+        # `datareloc` address-checks data relocations now, so the refusal is
+        # just this seeder's envelope: the `cfg` tier names the global and
+        # emits it.
+        return SeedFail("%s through r%d (small data): the leaf seeder does "
+                        "not model globals; the cfg tier does"
+                        % (what, ra))
     if ra == 0:
-        return "%s through r0/absolute address" % what
-    return "%s through a non-argument base register r%d" % (what, ra)
+        return SeedFail("%s through r0/absolute address" % what)
+    return SeedFail("%s through a non-argument base register r%d" % (what, ra))
 
 
 class Expr(object):
@@ -362,7 +391,7 @@ def seed_leaf(rec, retail, smap, spec=None):
         elif mn in ("lwz", "lbz", "lhz", "lha"):
             base = regs.get(i["ra"])
             if base is None or base.kind != "arg":
-                raise SeedFail(_base_fail("load", i["ra"]))
+                raise _base_fail("load", i["ra"])
             sgn = i["signed"]
             nxt = body[k + 1] if k + 1 < len(body) else None
             if i["width"] == 1:
@@ -380,7 +409,7 @@ def seed_leaf(rec, retail, smap, spec=None):
         elif mn in ("stw", "stb", "sth"):
             base = regs.get(i["ra"])
             if base is None or base.kind != "arg":
-                raise SeedFail(_base_fail("store", i["ra"]))
+                raise _base_fail("store", i["ra"])
             val = regs.get(i["rs"])
             if val is None:
                 raise SeedFail("store of an undefined register")
@@ -540,7 +569,39 @@ def seed_empty(rec, retail, smap, spec=None):
     return "void f(void)\n{\n}\n"
 
 
-SEEDERS = [("empty", seed_empty), ("wrapper", seed_wrapper), ("leaf", seed_leaf)]
+def seed_cfg_tier(rec, retail, smap, spec=None):
+    """The control-flow tier: a CFG over the retail bytes, structured into
+    `if`/`else`/early-return/`&&`/`||`, with the symbolic evaluator carried
+    across `bl` boundaries.  Lives in `seed_cfg.py` -- see its docstring for
+    the envelope and for why each refusal is classed `integrity`, `compiler`
+    or `seeder`."""
+    try:
+        return SEED_CFG.seed_cfg(rec, retail, smap, spec)
+    except SEED_CFG.SeedFail as ex:
+        e = SeedFail(str(ex))
+        e.cls = getattr(ex, "cls", "seeder")
+        raise e
+
+
+SEEDERS = [("empty", seed_empty), ("wrapper", seed_wrapper),
+           ("leaf", seed_leaf), ("cfg", seed_cfg_tier)]
+
+# Which seeder OWNS a function is decided by its own prologue and graph, so
+# that a refusal names the tier that should have applied rather than the last
+# one tried.  `cfg` owns anything with a branch; `wrapper` owns the Metrowerks
+# non-leaf frame; `leaf` owns the rest.
+def _owner(retail, addr):
+    words = [w for _a, w, _t in disasm(retail, addr)]
+    for w in words:
+        op = w >> 26
+        if op == 16 or (op == 18 and not (w & 1)) or \
+                (op == 19 and ((w >> 1) & 0x3FF) in (16, 528)
+                 and not (w == 0x4E800020)):
+            return "cfg"
+    first = decode(words[0]) if words else None
+    if first and first["mn"] == "stwu":
+        return "wrapper"
+    return "leaf"
 
 
 def seed(rec, retail, smap, spec=None):
@@ -548,21 +609,26 @@ def seed(rec, retail, smap, spec=None):
 
     The refusal carries `reasons` per seeder and a `primary` -- the reason
     from the seeder that SHOULD have applied, chosen by the function's own
-    prologue -- because "empty: not a bare blr" tells a reader nothing about
-    why an 8-instruction wrapper was refused.
+    prologue and control-flow graph -- because "empty: not a bare blr" tells a
+    reader nothing about why an 8-instruction wrapper was refused.  It also
+    carries `cls`, the refusal class of the owning tier, which is what splits
+    the corpus-wide remainder into the compiler lane's queue and this one's.
     """
     why = {}
+    cls = {}
     for nm, fn in SEEDERS:
         try:
             return fn(rec, retail, smap, spec), nm
         except SeedFail as ex:
             why[nm] = str(ex)
-    first = decode(struct.unpack(">I", retail[:4])[0]) if len(retail) >= 4 else None
-    primary = why.get("wrapper" if (first and first["mn"] == "stwu")
-                      else "leaf", "")
+            cls[nm] = getattr(ex, "cls", "seeder")
+    owner = _owner(retail, rec["addr"])
+    primary = why.get(owner, "")
     e = SeedFail(primary or "; ".join("%s: %s" % kv for kv in why.items()))
     e.reasons = why
     e.primary = primary
+    e.owner = owner
+    e.cls = cls.get(owner, "seeder")
     raise e
 
 
@@ -680,10 +746,11 @@ def permute(oracle, rec, retail, base_src, seeder=None, threshold=0.0,
         ThreadPoolExecutor = None
 
     cands = []
-    if seeder in ("leaf",):
+    respell = {"leaf": seed_leaf, "cfg": seed_cfg_tier}.get(seeder)
+    if respell is not None:
         for sp in spec_variants():
             try:
-                cands.append(seed_leaf(rec, retail, oracle.smap, sp))
+                cands.append(respell(rec, retail, oracle.smap, sp))
             except SeedFail:
                 pass
     cands += text_mutations(base_src)
@@ -1019,6 +1086,8 @@ def run_one(oracle, name, exemplars, model=None, budget=3, do_permute=True,
         src, seeder = seed(rec, retail, oracle.smap)
     except SeedFail as ex:
         row["seed_fail"] = str(ex)
+        row["seed_fail_class"] = getattr(ex, "cls", "seeder")
+        row["seed_owner"] = getattr(ex, "owner", None)
         if model is None:
             # Seed-only mode: a refusal is the result, not a failure to try.
             row["outcome"] = "NO_SEED"
@@ -1393,6 +1462,8 @@ def cmd_run(a, oracle):
     outcome = collections.Counter()
     insns = collections.Counter()
     classes = collections.Counter()
+    blocked = collections.Counter()
+    blocked_i = collections.Counter()
     for i, rec in enumerate(targets):
         if rec is None:
             continue
@@ -1409,9 +1480,16 @@ def cmd_run(a, oracle):
         insns[row["outcome"]] += row.get("insns", 0)
         if row["outcome"] in ("UNMATCHED", "NO_SEED", "MATCH_UNVERIFIED"):
             if row["outcome"] == "NO_SEED":
-                lbl = "seeder refused: " + row.get("seed_fail", "?")[:70]
+                lbl = "[%s] " % row.get("seed_fail_class", "seeder") \
+                    + row.get("seed_fail", "?")[:70]
+                blocked[row.get("seed_fail_class", "seeder")] += 1
+                blocked_i[row.get("seed_fail_class", "seeder")] += \
+                    row.get("insns", 0)
             else:
                 lbl = row.get("first_diff_class") or row["outcome"]
+                who = "compiler" if lbl.startswith("compiler") else "C"
+                blocked["reached the compiler / " + who] += 1
+                blocked_i["reached the compiler / " + who] += row.get("insns", 0)
             classes[lbl] += 1
         if a.progress and (i + 1) % a.progress == 0:
             print("  ... %d/%d  %s" % (i + 1, len(targets), dict(outcome)),
@@ -1435,6 +1513,15 @@ def cmd_run(a, oracle):
     if total:
         print("  throughput             %.1f functions/minute (CPU only)"
               % (60.0 * total / max(wall, 1e-9)))
+    if blocked:
+        print()
+        print("WHO OWNS THE REMAINDER")
+        print("  (a function that REACHED the compiler is the compiler lane's;")
+        print("   one refused for `integrity` needs a verifiable data")
+        print("   relocation; one refused for `seeder` is this tier's queue)")
+        for k in sorted(blocked, key=lambda x: -blocked_i[x]):
+            print("  %-28s %5d functions  %7d instructions"
+                  % (k, blocked[k], blocked_i[k]))
     if classes:
         print()
         print("FIRST-MISMATCH / REFUSAL CLASSES")
@@ -1448,6 +1535,7 @@ def cmd_run(a, oracle):
            "compiles": oracle.compiles, "compile_s": round(oracle.compile_s, 2),
            "outcomes": dict(outcome), "instructions": dict(insns),
            "classes": dict(classes),
+           "blocked_by": dict(blocked), "blocked_by_instructions": dict(blocked_i),
            "model": model.stats() if model else None,
            "ledger": str(a.ledger or LEDGER_DEFAULT)}
     out = Path(a.results or RESULTS_DEFAULT)
@@ -1603,6 +1691,164 @@ def cmd_selftest(a, oracle):
         any(m.index("field_4") < m.index("field_0")
             for m in text_mutations(two)))
     chk("spec space is bounded", len(spec_variants()) <= 64)
+
+    print("== S10 the CFG tier: graph, structuring, calls ==")
+    import seed_cfg as SC
+
+    def _asm(*words):
+        return struct.pack(">%dI" % len(words), *words)
+
+    class _M(object):
+        def __init__(self, m=None):
+            self.m = m or {}
+
+        def lookup(self, a):
+            n = self.m.get(a)
+            return {"name": n} if n else None
+
+    # -- basic blocks and edges
+    #   cmpwi r3,0 / beq +8 / stb r0,0(r3) / blr
+    blob = _asm(0x2C030000, 0x41820008, 0x98030000, 0x4E800020)
+    blocks, _ = SC.build_cfg(blob, 0x80000000)
+    chk("blocks split at a branch target and after a branch",
+        [b.addr for b in blocks] == [0x80000000, 0x80000008, 0x8000000C],
+        str([hex(b.addr) for b in blocks]))
+    chk("the conditional block has two successors",
+        len(blocks[0].succ) == 2)
+    dom = SC.dominators(blocks)
+    chk("the entry dominates every block",
+        all(0 in dom[i] for i in range(len(blocks))))
+    chk("a forward graph has no back edge",
+        SC.back_edges(blocks, dom) == [])
+
+    # -- a back edge IS found, and is the compiler's problem, not the seeder's
+    #   li r0,0 / stb r0,0(r3) / b -8
+    loopb = _asm(0x38000000, 0x98030000, 0x4BFFFFF8)
+    lb, _ = SC.build_cfg(loopb, 0x80000000)
+    chk("a backward branch is a back edge",
+        len(SC.back_edges(lb, SC.dominators(lb))) == 1)
+    try:
+        SC.seed_cfg({"name": "l", "addr": 0x80000000, "size": len(loopb)},
+                    loopb, _M())
+        chk("a loop is refused as a COMPILER limit", False, "it produced a seed")
+    except SC.SeedFail as ex:
+        chk("a loop is refused as a COMPILER limit",
+            ex.cls == "compiler" and "loop codegen" in str(ex), str(ex))
+
+    # -- if / early return
+    #   lbz r0,0x10(r3) / extsb. r0,r0 / beq +8 / stb r0,0x11(r3) / blr
+    ifb = _asm(0x88030010, 0x7C000775, 0x41820008, 0x98030011, 0x4E800020)
+    src = SC.seed_cfg({"name": "i", "addr": 0x80000000, "size": len(ifb)},
+                      ifb, _M())
+    chk("recovers the if", "if (p0->field_10 != 0)" in src, src)
+    chk("emits the guarded store", "p0->field_11 = p0->field_10;" in src, src)
+    chk("emits no goto", "goto" not in src, src)
+
+    # -- && short circuit
+    #   lbz r0,4(r3) / cmpwi r0,0 / bne +0x14 / lbz r0,5(r3) / cmpwi r0,0
+    #   / bne +8 / stb r0,6(r3) / blr
+    andb = _asm(0x88030004, 0x2C000000, 0x40820014, 0x88030005,
+                0x2C000000, 0x40820008, 0x98030006, 0x4E800020)
+    src = SC.seed_cfg({"name": "a", "addr": 0x80000000, "size": len(andb)},
+                      andb, _M())
+    chk("recovers a && chain", "&&" in src and "||" not in src, src)
+
+    # -- a call: name from the map, arity from the WRITTEN argument registers
+    #   stwu / mflr / stw / lwz r3,0xdc(r3) / bl / lwz / mtlr / addi / blr
+    callb = _asm(0x9421FFF0, 0x7C0802A6, 0x90010014, 0x806300DC,
+                 0x48000019, 0x80010014, 0x7C0803A6, 0x38210010, 0x4E800020)
+    src = SC.seed_cfg({"name": "c", "addr": 0x80000000, "size": len(callb)},
+                      callb, _M({0x80000028: "zz_0000028_"}))
+    chk("names the callee from the map", "zz_0000028_(" in src, src)
+    chk("passes exactly the argument the bytes set up",
+        "zz_0000028_(p0->field_dc)" in src, src)
+    chk("declares it with that arity",
+        "extern int zz_0000028_(int);" in src, src)
+
+    # -- globals: NAMED now that `match.py` address-checks data relocations,
+    #    and still fail-closed where the address cannot be named
+    real_map = getattr(oracle, "smap", None)
+    if real_map is None:
+        try:
+            real_map = load()[1]
+        except Exception:                                    # noqa: BLE001
+            real_map = None
+    if real_map is not None:
+        res, bases = SC.resolver_for(real_map)
+        chk("the SDA bases load", res is not None and bases is not None
+            and bases[13] == 0x8043B5A0 and bases[2] == 0x8043EA20,
+            str(bases))
+        #   lwz r3, 0(r13) / blr   -> the global at _SDA_BASE_
+        sda = _asm(0x806D0000, 0x4E800020)
+        src = SC.seed_cfg({"name": "s", "addr": 0x80000000, "size": len(sda)},
+                          sda, real_map)
+        want = res.name_for_address(bases[13])
+        chk("an r13 global is named, not refused",
+            ("extern" in src and want in src), src)
+        #   lis r3, hi / addi r3, r3, lo / lwz r3, 0(r3) / blr, on _SDA_BASE_
+        hi = (0x8043B5A0 + 0x8000) >> 16
+        glob = _asm(0x3C600000 | (hi & 0xFFFF),
+                    0x38630000 | ((0x8043B5A0 - (hi << 16)) & 0xFFFF),
+                    0x80630000, 0x4E800020)
+        try:
+            src = SC.seed_cfg({"name": "g", "addr": 0x80000000,
+                               "size": len(glob)}, glob, real_map)
+            chk("an absolute global is refused as a COMPILER limit",
+                not SC.ABS_GLOBAL_BLOCKED and want in src, src)
+        except SC.SeedFail as ex:
+            chk("an absolute global is refused as a COMPILER limit",
+                SC.ABS_GLOBAL_BLOCKED and ex.cls == "compiler"
+                and "ADDR16_HA" in str(ex), "%s / %s" % (ex.cls, ex))
+        #   an address in no DOL section is refused rather than named
+        offimg = _asm(0x3C601000, 0x38630000, 0x80630000, 0x4E800020)
+        saved_abs, SC.ABS_GLOBAL_BLOCKED = SC.ABS_GLOBAL_BLOCKED, False
+        try:
+            SC.seed_cfg({"name": "b", "addr": 0x80000000,
+                         "size": len(offimg)}, offimg, real_map)
+            chk("an address outside the image is refused", False, "seeded")
+        except SC.SeedFail as ex:
+            chk("an address outside the image is refused",
+                "no DOL section" in str(ex), str(ex))
+        finally:
+            SC.ABS_GLOBAL_BLOCKED = saved_abs
+    #    with `datareloc` absent the tier fails closed on INTEGRITY, exactly as
+    #    it did before that module landed
+    saved, SC.DR = SC.DR, None
+    try:
+        SC.seed_cfg({"name": "s", "addr": 0x80000000, "size": 8},
+                    _asm(0x806DEDCC, 0x4E800020), _M())
+        chk("without datareloc, r13 refuses for INTEGRITY", False, "seeded")
+    except SC.SeedFail as ex:
+        chk("without datareloc, r13 refuses for INTEGRITY",
+            ex.cls == "integrity", "%s / %s" % (ex.cls, ex))
+    finally:
+        SC.DR = saved
+
+    # -- a map symbol that spans several functions is refused, not lifted
+    two_fns = _asm(0x4E800020, 0x38600001, 0x4E800020)
+    try:
+        SC.seed_cfg({"name": "t", "addr": 0x80000000, "size": len(two_fns)},
+                    two_fns, _M())
+        chk("unreachable code is refused", False, "it produced a seed")
+    except SC.SeedFail as ex:
+        chk("unreachable code is refused", "unreachable" in str(ex), str(ex))
+
+    print("== S11 undefined8 narrowing is decided by the BYTES ==")
+    src8 = "undefined8 f(undefined8 a) { return a; }\n"
+    out, note = SC.narrow_undefined8(src8, _asm(0x7C641B78, 0x4E800020))
+    chk("narrows when nothing is 64-bit", "undefined4" in out
+        and "undefined8" not in out, out)
+    chk("the note names the evidence", note and "32-bit" in note, str(note))
+    try:
+        # `ld r3, 0(r4)` -- a real 64-bit load
+        SC.narrow_undefined8(src8, _asm(0xE8640000, 0x4E800020))
+        chk("keeps undefined8 when the bytes are 64-bit", False, "it narrowed")
+    except SC.SeedFail as ex:
+        chk("keeps undefined8 when the bytes are 64-bit",
+            "64-bit" in str(ex), str(ex))
+    chk("leaves C without undefined8 alone",
+        SC.narrow_undefined8("int f(void){return 0;}\n", b"\x4e\x80\x00\x20")
+        == ("int f(void){return 0;}\n", None))
 
     print("== S6  model step, against a RECORDED response (no network) ==")
     d = Path(tempfile.mkdtemp(prefix="mdfix_"))
