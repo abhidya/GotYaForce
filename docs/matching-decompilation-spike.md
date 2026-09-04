@@ -17,6 +17,7 @@
 > | **1.08 iterations per function** | 14 candidates for 13 matches. **This is not the LLM loop's number** — these are 2-to-8-instruction accessors, not §4.2's *moderate* tier, which remains unmeasured. §3.1 |
 > | **The version question is partly unanswerable** | Calibration B returned only *"not GC/1.3"*. GC/2.5, 2.6 and 2.7 are the same code generator and differ only in a `.comment` marker a linked DOL does not preserve. §3.1.2 |
 > | **The wall is the compiler, not the C** | All five non-matches were compiler capability limits, including the spike's own first-choice target. §3.1.3 |
+> | **…and the compiler moved. 2026-09-04** | Three gaps fixed in a local fork of the pinned commit. **15 functions matched**, two of them on C this document filed as blocked, one of those the **genuine CC0 SDK source**. The largest fix was a parser gap worth **19.7 % of the game**. `verify.py` 17 ok / 0 failed. [`TOOLCHAIN.md` §5](../research/tools/matching-decomp/TOOLCHAIN.md) |
 > | **`mwcc-rs` is 83 % memorisation** | 558 whole-function captures fire on exact name + AST hash; none covers this game. Only the 28,345-line general generator applies here. §3.1.4 |
 > | **The free 9.8 % has a licence problem, and a fix** | `doldecomp/dolsdk2004`, which §5.3 recommended, has **no licence at all**. `zeldaret/tp` is **CC0-1.0** and carries the same SDK tree. §5.3.1 |
 > | **233 functions share a matched shape** | The near-certain next matches — 1.93 % of entry points but **0.169 % of instructions**. §5.2's warning, with real numbers. §3.1.5 |
@@ -449,6 +450,31 @@ now with GC/1.3 mechanically excluded and 2.5/2.6/2.7 shown to be indistinguisha
 principle. §8's uncertainty 2 stands, narrowed.
 
 ### 3.1.3 Where it stops, and why the wall is the compiler
+
+> **SUPERSEDED IN PART, 2026-09-04. Two of the five are fixed, and the section's
+> premise held.** The table below said the wall was the compiler, not the C. It
+> was, and the compiler moved: `zz_008bbc0_` now matches on the *same one line*
+> of C that had been filed as blocked, and `GXInitLightColor` (§5.3.2) matches on
+> the **genuine CC0 source** instead of a rewrite. Both are now in
+> [`src-match/`](../src-match/); `verify.py` reports **17 ok / 0 failed**.
+>
+> The changes are a local fork of the pinned mwcc-rs commit, reconstructible from
+> the pinned tarball by `research/tools/matching-decomp/mwcc_fork.py --apply` and
+> documented per change in
+> [`TOOLCHAIN.md` §5](../research/tools/matching-decomp/TOOLCHAIN.md). A third
+> change, outside this table, is much larger than any of them: Ghidra's
+> `typedef void (code)();` was never registered as a type name, which broke
+> **2,533 functions — 19.7 % of the game — at the parse of `(code **)`.**
+>
+> `zz_0298b20_`'s register-allocation divergence is **not** fixed and is now a
+> *measured* ceiling rather than an anecdote: across the whole binary, 66.4 % of
+> scaled array indexes land in `r0` and only 14.2 % reuse the index register,
+> which is mwcc-rs's default. TOOLCHAIN.md §5.4.
+>
+> Read this table as the state on 2026-09-03. The ranking it implies is also
+> superseded — by [`docs/matching-compiler-census.md`](matching-compiler-census.md),
+> which runs the whole corpus through the compiler instead of finding blockers by
+> hand.
 
 Five functions were attempted and not matched. Every one was blocked by the compiler,
 not by the C — recorded in full in [`src-match/matched.json`](../src-match/matched.json).
@@ -892,6 +918,26 @@ not do. A rewrite that reaches the same three instructions through the implement
 **does** match, and is committed at
 [`src-match/sdk/GXInitLightColor.c`](../src-match/sdk/GXInitLightColor.c) with that
 distinction stated in its header.
+
+> **RESOLVED 2026-09-04. The genuine body compiles and matches as written**, and
+> the rewrite is gone from `src-match/sdk/GXInitLightColor.c` — the file now
+> carries the CC0 source above, unmodified, and the retail three instructions.
+>
+> Both refusals were one mistake twice: mwcc-rs read `*(T *)&X` as an *address
+> computation* when it is only a *re-typing of storage that already has an
+> address*. A normalisation pass in this project's fork rewrites the idiom into
+> an ordinary typed member access at the aggregate's own offset before lowering,
+> which is what folds the `0xc` into the store displacement.
+> [`TOOLCHAIN.md` §5.2](../research/tools/matching-decomp/TOOLCHAIN.md).
+>
+> **So the free-SDK path of §5.3 is now proven end to end on this function**, not
+> merely argued: the source exists under a clear grant *and* the compiler takes
+> it. The paragraph below can drop its last sentence — matching the SDK is no
+> longer blocked behind §3.1.3, only behind the GC/1.2.5n question, and the
+> per-function value stated there never depended on compiling anything at all.
+>
+> One honest limit: this is one function. Nothing here says the other 1,064 SDK
+> functions compile.
 
 **So the 9.8 % is confirmed as real source that exists under a clear grant, and
 confirmed as not yet buildable here.** The private struct layouts, offsets and field
