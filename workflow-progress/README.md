@@ -1,26 +1,27 @@
-# Port workflow: IDLE
+# Port workflow: RUNNING
 
-*Generated 2026-09-04T00:04:24.402438Z - machine-written, do not edit.*
+*Generated 2026-09-04T03:31:54.004750Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `RUNNING` (possibly_stuck) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 104/1396 settled (1 verified, 103 staged [compile_only, UNVERIFIED], 2 unknown tier) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1133 |
-| **Last transition** | 2026-09-04T00:04:24.402438Z |
+| **Last transition** | 2026-09-04T03:31:54.004750Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
-| **Active model** | `-` @ - ctx |
+| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | stopped |
+| **Driver** | running |
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-09-04T03:31:54.004750Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-09-04T00:04:24.402438Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
 | 2026-09-04T00:03:16.385323Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-30T06:32:04.169944Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
@@ -70,4 +71,3 @@
 | 2026-08-26T06:00:09.601311Z | `auto-c0053-016` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_01ba750_ declared void but their results are assigned; no header edit ca |
 | 2026-08-26T06:00:06.178042Z | `auto-c0053-008` | structural_ineligible | extract | 1 | verbatim .c is self-contradictory: zz_01b7894_ declared void but their results are assigned; no header edit ca |
 | 2026-08-26T06:00:02.714102Z | `auto-c0053-007` | gate_failed | wasm-link | 1 | not linked: .\gnt4_shim.h:188:80: error: unterminated /* comment unit.c:156:86: error: subscripted value is no |
-| 2026-08-26T04:33:53.400740Z | `auto-c0053-006` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0053-006 declares zz_008 |
