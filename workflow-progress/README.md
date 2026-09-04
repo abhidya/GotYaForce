@@ -1,16 +1,16 @@
-# Port workflow: IDLE
+# Port workflow: PAUSED
 
-*Generated 2026-08-30T06:32:04.169944Z - machine-written, do not edit.*
+*Generated 2026-09-04T00:03:16.385323Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `IDLE` (idle) |
+| **State** | `PAUSED` (provider_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
-| **Queue progress** | 106/1396 settled (3 green, 103 staged) |
+| **Queue progress** | 104/1396 settled (1 verified, 103 staged [compile_only, UNVERIFIED], 2 unknown tier) |
 | **Retries outstanding** | 147 |
 | **Untouched** | 1133 |
-| **Last transition** | 2026-08-30T06:32:04.169944Z |
+| **Last transition** | 2026-09-04T00:03:16.385323Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `-` @ - ctx |
@@ -21,6 +21,7 @@
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-09-04T00:03:16.385323Z | `-` | provider_paused | machine | 0 | Provider paused; model released until it answers. |
 | 2026-08-30T06:32:04.169944Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
 | 2026-08-30T06:31:12.438687Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-30T06:30:06.668411Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
@@ -70,4 +71,3 @@
 | 2026-08-26T06:00:02.714102Z | `auto-c0053-007` | gate_failed | wasm-link | 1 | not linked: .\gnt4_shim.h:188:80: error: unterminated /* comment unit.c:156:86: error: subscripted value is no |
 | 2026-08-26T04:33:53.400740Z | `auto-c0053-006` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0053-006 declares zz_008 |
 | 2026-08-26T04:01:34.891104Z | `auto-c0053-005` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-26T03:37:17.602528Z | `auto-c0053-004` | gate_failed | assembly | 1 | assembly gate canonicalize failed before promotion: canonical_header_ambiguous: auto-c0011-012 declares FUN_80 |
