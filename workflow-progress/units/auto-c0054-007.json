@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "unit": "auto-c0054-007",
+  "unit_id": "auto-c0054-007",
+  "timestamp": "2026-10-12T21:40:13.087479Z",
+  "run_id": "2026-10-12T20:42:07.640880Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0054-007.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_kc7f9xj8\\unit.o'' failed (returned 1)",
+          "unit.c:133:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:136:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:172:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:175:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "651bedc8ce4553fd75fc66a876df7f859863c31bdff455efc35b62d21c238cda"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013",
+        "auto-c0054-007"
+      ],
+      "stage": "merge",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003",
+            "auto-c0054-007"
+          ],
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-007": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0053-013": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSQUATScale_bl"
+        }
+      ],
+      "detail": "header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "candidate": {
+        "name": "auto-c0054-007",
+        "sha256": "78a0f93b955852bc00d5b7fcf99e5212122992723472e31163beef27a70e3d50"
+      },
+      "expected_candidate": {
+        "name": "auto-c0054-007",
+        "sha256": "78a0f93b955852bc00d5b7fcf99e5212122992723472e31163beef27a70e3d50"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "74d7495a0ace36c3c06bd26324731d1f70694011",
+      "prompt_version": "3",
+      "registry_version": "168"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "FUN_800061a8",
+        "FUN_800562b8",
+        "FUN_800e3dec",
+        "FUN_800e4f9c",
+        "zz_0006dc8_",
+        "zz_0006f98_",
+        "zz_0007c30_",
+        "zz_0007d40_",
+        "zz_00086b8_",
+        "zz_005f00c_",
+        "zz_006a8c0_",
+        "zz_00e3ca0_",
+        "zz_00e4ec4_",
+        "zz_00e5184_",
+        "zz_0120b58_",
+        "zz_01ccd2c_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "DAT_80383878",
+      "DAT_80383978",
+      "FUN_800061a8",
+      "FUN_800562b8",
+      "FUN_800e3dec",
+      "FUN_800e4f9c",
+      "FUN_801c0198",
+      "FUN_801c01b8",
+      "PTR_DAT_80435a30",
+      "code",
+      "countLeadingZeros",
+      "gnt4_PSVECSubtract_bl",
+      "uint",
+      "undefined1",
+      "undefined4",
+      "undefined8",
+      "zz_0006dc8_",
+      "zz_0006f98_",
+      "zz_0007c30_",
+      "zz_0007d40_",
+      "zz_00086b8_",
+      "zz_005f00c_",
+      "zz_006a8c0_",
+      "zz_00e3ca0_",
+      "zz_00e4ec4_",
+      "zz_00e5184_",
+      "zz_0120b58_",
+      "zz_01bfbf4_",
+      "zz_01bfc5c_",
+      "zz_01bfce0_",
+      "zz_01bfdbc_",
+      "zz_01bff90_",
+      "zz_01c0028_",
+      "zz_01ccd2c_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 168,
+    "model_requests": 1,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "compile",
+        "error_count": 5,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0054-007.h",
+        "diagnostics": [
+          "emcc: error: ''D:\\GotYaForce\\research\\tools\\emsdk/upstream/bin\\clang.exe' -target wasm32-unknown-emscripten -fignore-exceptions -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr '--sysroot=D:\\GotYaForce\\research\\tools\\emsdk\\upstream\\emscripten\\cache\\sysroot' -Xclang '-iwithsysroot/include\\fakesdl' -Xclang '-iwithsysroot/include\\compat' -O1 -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-int-conversion -Wno-deprecated-non-prototype -Wno-incompatible-pointer-types -Wno-pointer-sign -ferror-limit=0 -c unit.c -o 'C:\\Users\\manny\\AppData\\Local\\Temp\\emscripten_temp_kc7f9xj8\\unit.o'' failed (returned 1)",
+          "unit.c:133:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:136:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:172:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'",
+          "unit.c:175:11: error: assigning to 'undefined8' (aka 'unsigned long long') from incompatible type 'void'"
+        ],
+        "fingerprint": "651bedc8ce4553fd75fc66a876df7f859863c31bdff455efc35b62d21c238cda"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013",
+        "auto-c0054-007"
+      ],
+      "stage": "merge",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003",
+            "auto-c0054-007"
+          ],
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-007": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0053-013": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSQUATScale_bl"
+        }
+      ],
+      "detail": "header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "candidate": {
+        "name": "auto-c0054-007",
+        "sha256": "78a0f93b955852bc00d5b7fcf99e5212122992723472e31163beef27a70e3d50"
+      },
+      "expected_candidate": {
+        "name": "auto-c0054-007",
+        "sha256": "78a0f93b955852bc00d5b7fcf99e5212122992723472e31163beef27a70e3d50"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "74d7495a0ace36c3c06bd26324731d1f70694011",
+      "prompt_version": "3",
+      "registry_version": "168"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-10-12T21:40:13.087479Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "product_commit": null
+    }
+  ]
+}

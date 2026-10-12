@@ -1,6 +1,6 @@
 # Port workflow: RUNNING
 
-*Generated 2026-10-12T21:12:27.495553Z - machine-written, do not edit.*
+*Generated 2026-10-12T21:40:13.087479Z - machine-written, do not edit.*
 
 | | |
 |---|---|
@@ -8,19 +8,24 @@
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 104/1396 settled (1 verified, 103 staged [compile_only, UNVERIFIED], 2 unknown tier) |
-| **Retries outstanding** | 149 |
-| **Untouched** | 1131 |
-| **Last transition** | 2026-10-12T21:12:27.495553Z |
+| **Retries outstanding** | 150 |
+| **Untouched** | 1130 |
+| **Last transition** | 2026-10-12T21:40:13.087479Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
 | **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
 | **Driver** | running |
 
+**Repeated recent failure classes**
+
+- `assembly:assembly gate merge failed before promotion: header merge re` x2
+
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-10-12T21:40:13.087479Z | `auto-c0054-007` | gate_failed | assembly | 1 | assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner i |
 | 2026-10-12T21:12:27.495553Z | `auto-c0054-006` | gate_failed | assembly | 1 | assembly gate merge failed before promotion: header merge refused: 2 contested conflict(s); no silent winner i |
 | 2026-10-12T20:42:07.772880Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-09-04T03:55:46.622470Z | `-` | leased-out | machine | 0 | GPU leased to omr-sweep (priority 1); slot drained and free. |
@@ -70,4 +75,3 @@
 | 2026-08-26T06:47:47.000880Z | `auto-c0054-004` | gate_failed | assembly | 1 | assembly gate link failed before promotion: -1;       \|                                                  ~~ ~ |
 | 2026-08-26T06:26:05.318522Z | `auto-c0054-003` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
 | 2026-08-26T06:22:13.443847Z | `auto-c0054-002` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
-| 2026-08-26T06:18:06.449254Z | `auto-c0054-001` | staged | commit | 1 | compile-only staging artifact (UNVERIFIED, not integrated) |
