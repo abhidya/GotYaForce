@@ -1,0 +1,250 @@
+{
+  "schema": 1,
+  "unit": "auto-c0054-006",
+  "unit_id": "auto-c0054-006",
+  "timestamp": "2026-10-12T21:12:27.495553Z",
+  "run_id": "2026-10-12T20:42:07.640880Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate merge failed before promotion: header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0054-006.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: SQRT"
+        ],
+        "fingerprint": "af8afde6b78a084c66e5a785b6d8ba3a6a205d8b51782d1c5b117ef7308b1f07"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013",
+        "auto-c0054-006"
+      ],
+      "stage": "merge",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003",
+            "auto-c0054-006"
+          ],
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-006": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0053-013": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSQUATScale_bl"
+        },
+        {
+          "symbol": "SQRT",
+          "class": "declaration_divergence",
+          "units": [
+            "auto-c0053-013",
+            "auto-c0054-006"
+          ],
+          "variants": {
+            "auto-c0053-013": "#define SQRT(x) sqrt(x)",
+            "auto-c0054-006": "#define SQRT(x) sqrt((x))"
+          },
+          "detail": "2 divergent macro declarations of SQRT"
+        }
+      ],
+      "detail": "header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "candidate": {
+        "name": "auto-c0054-006",
+        "sha256": "acd0d010549b36b34d54917db139cd9203355be8ba993241f9b4b02ed67dcf3a"
+      },
+      "expected_candidate": {
+        "name": "auto-c0054-006",
+        "sha256": "acd0d010549b36b34d54917db139cd9203355be8ba993241f9b4b02ed67dcf3a"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "74d7495a0ace36c3c06bd26324731d1f70694011",
+      "prompt_version": "3",
+      "registry_version": "168"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [
+        "FUN_80089eb4",
+        "FUN_80089f28"
+      ],
+      "superseded": [
+        "zz_0089554_",
+        "zz_0089898_",
+        "zz_0089c00_",
+        "zz_008a16c_",
+        "zz_008c0dc_",
+        "zz_008c104_",
+        "zz_00f0468_",
+        "zz_01c13c8_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_803c71fc",
+      "DAT_803c7211",
+      "DAT_803c7212",
+      "DAT_803c7213",
+      "PTR_DAT_80435a30",
+      "SQRT",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "uint",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "zz_0089554_",
+      "zz_0089898_",
+      "zz_0089c00_",
+      "zz_008a16c_",
+      "zz_008c0dc_",
+      "zz_008c104_",
+      "zz_00f0468_",
+      "zz_01beec0_",
+      "zz_01beee4_",
+      "zz_01bef28_",
+      "zz_01bef70_",
+      "zz_01bf144_",
+      "zz_01bfa54_",
+      "zz_01bfb74_",
+      "zz_01bfbe4_",
+      "zz_01c13c8_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 168,
+    "model_requests": 1,
+    "rounds": [
+      {
+        "iteration": 1,
+        "stage": "import-gate",
+        "error_count": 0,
+        "header": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\headers\\auto-c0054-006.h",
+        "diagnostics": [
+          "(Ghidra decompiler helper idioms like CONCAT44 must behave exactly as the original PPC code did.)",
+          "link gate: these symbols are UNDEFINED and became wasm imports, but they are not gnt4_* SDK functions, so they must be DEFINED in gnt4_shim.h with correct PowerPC semantics: SQRT"
+        ],
+        "fingerprint": "af8afde6b78a084c66e5a785b6d8ba3a6a205d8b51782d1c5b117ef7308b1f07"
+      }
+    ],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013",
+        "auto-c0054-006"
+      ],
+      "stage": "merge",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003",
+            "auto-c0054-006"
+          ],
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-006": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0053-013": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSQUATScale_bl"
+        },
+        {
+          "symbol": "SQRT",
+          "class": "declaration_divergence",
+          "units": [
+            "auto-c0053-013",
+            "auto-c0054-006"
+          ],
+          "variants": {
+            "auto-c0053-013": "#define SQRT(x) sqrt(x)",
+            "auto-c0054-006": "#define SQRT(x) sqrt((x))"
+          },
+          "detail": "2 divergent macro declarations of SQRT"
+        }
+      ],
+      "detail": "header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "candidate": {
+        "name": "auto-c0054-006",
+        "sha256": "acd0d010549b36b34d54917db139cd9203355be8ba993241f9b4b02ed67dcf3a"
+      },
+      "expected_candidate": {
+        "name": "auto-c0054-006",
+        "sha256": "acd0d010549b36b34d54917db139cd9203355be8ba993241f9b4b02ed67dcf3a"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "74d7495a0ace36c3c06bd26324731d1f70694011",
+      "prompt_version": "3",
+      "registry_version": "168"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate merge failed before promotion: header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-10-12T21:12:27.495553Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate merge failed before promotion: header merge refused: 2 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "product_commit": null
+    }
+  ]
+}
