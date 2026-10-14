@@ -1,26 +1,29 @@
-# Port workflow: RUNNING
+# Port workflow: PAUSED
 
-*Generated 2026-10-14T03:29:41.346702Z - machine-written, do not edit.*
+*Generated 2026-10-14T04:25:58.261754Z - machine-written, do not edit.*
 
 | | |
 |---|---|
-| **State** | `RUNNING` (active_no_green) |
+| **State** | `PAUSED` (manual_paused) |
 | **Current unit** | `-` |
 | **Current stage** | `-` (attempt 0) |
 | **Queue progress** | 104/1396 settled (1 verified, 103 staged [compile_only, UNVERIFIED], 2 unknown tier) |
 | **Retries outstanding** | 151 |
-| **Untouched** | 1129 |
-| **Last transition** | 2026-10-14T03:29:41.346702Z |
+| **Untouched** | 1128 |
+| **Last transition** | 2026-10-14T04:25:58.261754Z |
 | **Last green** | 2026-08-26T07:34:28.953704Z (`auto-c0053-013`) |
 | **Last product commit** | `218911ab5e2455c447e5beec8efe9e95e7c8f2ec` |
-| **Active model** | `unsloth/Qwen3.8-27B-GGUF` @ 60000 ctx |
+| **Active model** | `-` @ - ctx |
 | **Configured model** | `unsloth/Qwen3.8-27B-GGUF` |
-| **Driver** | running |
+| **Driver** | stopped |
+
+> **Manually paused by the owner** (rig gate). No heavy work runs.
 
 ## Last 50 transitions
 
 | time | unit | result | stage | attempt | detail |
 |---|---|---|---|---|---|
+| 2026-10-14T04:25:58.261754Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
 | 2026-10-14T03:29:41.346702Z | `auto-c0057-007` | gate_failed | assembly | 1 | assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner i |
 | 2026-10-14T03:29:12.368309Z | `auto-c0057-006` | deferred | port | 0 | interrupted before a verdict; requeued |
 | 2026-10-14T03:29:11.665635Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
@@ -70,4 +73,3 @@
 | 2026-08-26T07:03:29.192023Z | `-` | running | machine | 0 | Driver running on unsloth/Qwen3.8-27B-GGUF @ 60000 ctx. |
 | 2026-08-26T07:00:24.960699Z | `-` | starting | machine | 0 | Manual pause lifted; resuming heavy work. |
 | 2026-08-26T06:59:22.634473Z | `auto-c0001-005` | deferred | manual-revoke | 1 | verdict revoked and requeued: behaviorally wrong vs console: 200/200 dolphin-trace captures diverge on w348 (r |
-| 2026-08-26T06:59:02.341374Z | `-` | manual_paused | machine | 0 | Manually paused by owner (rig gate). |
