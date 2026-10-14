@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "unit": "auto-c0057-007",
+  "unit_id": "auto-c0057-007",
+  "timestamp": "2026-10-14T03:29:41.346702Z",
+  "run_id": "2026-10-14T03:29:11.562633Z",
+  "result": "gate_failed",
+  "stage": "assembly",
+  "attempt": 1,
+  "detail": "assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+  "product_commit": null,
+  "product_pushed": null,
+  "product_effect": "no product-tree change by design",
+  "product_commit_failed": false,
+  "oracle_summary": null,
+  "model": "unsloth/Qwen3.8-27B-GGUF",
+  "tier": null,
+  "extra": {
+    "rounds": [],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013",
+        "auto-c0057-007"
+      ],
+      "stage": "merge",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003",
+            "auto-c0057-007"
+          ],
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0057-007": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0053-013": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSQUATScale_bl"
+        }
+      ],
+      "detail": "header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "candidate": {
+        "name": "auto-c0057-007",
+        "sha256": "0cbb9ba2bfb528fb45ca1a5870b94a442df56f063ae876a76748a971dc2060bd"
+      },
+      "expected_candidate": {
+        "name": "auto-c0057-007",
+        "sha256": "0cbb9ba2bfb528fb45ca1a5870b94a442df56f063ae876a76748a971dc2060bd"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "74d7495a0ace36c3c06bd26324731d1f70694011",
+      "prompt_version": "3",
+      "registry_version": "168"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false
+  },
+  "driver_record": {
+    "status": "red_retryable",
+    "attempts": 1,
+    "sdk_decl_sync": {
+      "injected": [
+        "gnt4_PSMTXMultVec_bl"
+      ],
+      "superseded": [],
+      "unresolved": []
+    },
+    "owner_decl_sync": {
+      "injected": [],
+      "superseded": [
+        "zz_006a53c_",
+        "zz_006bc74_",
+        "zz_006bda8_",
+        "zz_0082824_",
+        "zz_00e9ce4_",
+        "zz_00ea0f0_",
+        "zz_00ea170_",
+        "zz_01d7170_",
+        "zz_01d71d4_",
+        "zz_01d72b8_",
+        "zz_01d7d2c_",
+        "zz_01deb68_",
+        "zz_01f9fac_",
+        "zz_01fb398_",
+        "zz_01fc1b0_",
+        "zz_01fd114_"
+      ],
+      "unresolved": []
+    },
+    "symbol_set": [
+      "CONCAT44",
+      "DAT_8031a0f0",
+      "DAT_8038def4",
+      "DAT_8038def8",
+      "DAT_8038defc",
+      "DAT_8038df00",
+      "DAT_8038df04",
+      "DAT_8038df08",
+      "DAT_8038df0c",
+      "DAT_8038df10",
+      "DAT_8038df14",
+      "DAT_803c6dec",
+      "DAT_80435ae0",
+      "DAT_80436264",
+      "FUN_801d66d0",
+      "PTR_DAT_80433934",
+      "__gnt4_bitcast_f64",
+      "byte",
+      "countLeadingZeros",
+      "gnt4_PSMTXMultVec_bl",
+      "uint",
+      "undefined",
+      "undefined1",
+      "undefined2",
+      "undefined4",
+      "zz_006a53c_",
+      "zz_006bc74_",
+      "zz_006bda8_",
+      "zz_0082824_",
+      "zz_00e9ce4_",
+      "zz_00ea0f0_",
+      "zz_00ea170_",
+      "zz_01d6708_",
+      "zz_01d684c_",
+      "zz_01d69b0_",
+      "zz_01d6ad8_",
+      "zz_01d6bbc_",
+      "zz_01d6e18_",
+      "zz_01d6ff4_",
+      "zz_01d7170_",
+      "zz_01d71d4_",
+      "zz_01d72b8_",
+      "zz_01d7d2c_",
+      "zz_01deb68_",
+      "zz_01f9fac_",
+      "zz_01fb398_",
+      "zz_01fc1b0_",
+      "zz_01fd114_"
+    ],
+    "prompt_version": 3,
+    "registry_holdout": false,
+    "registry_deviations": [],
+    "registry_version_used": 168,
+    "rounds": [],
+    "assembly_gate": {
+      "passed": false,
+      "n": 5,
+      "units": [
+        "auto-c0054-001",
+        "auto-c0054-002",
+        "auto-c0054-003",
+        "auto-c0053-013",
+        "auto-c0057-007"
+      ],
+      "stage": "merge",
+      "conflicts": [
+        {
+          "symbol": "gnt4_PSQUATScale_bl",
+          "class": "collision_stub",
+          "units": [
+            "auto-c0053-013",
+            "auto-c0054-001",
+            "auto-c0054-002",
+            "auto-c0054-003",
+            "auto-c0057-007"
+          ],
+          "variants": {
+            "auto-c0054-001": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-002": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0054-003": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0057-007": "void gnt4_PSQUATScale_bl(double,float*,float*);",
+            "auto-c0053-013": "undefined8 gnt4_PSQUATScale_bl(double,float*,float*);"
+          },
+          "detail": "2 divergent function_decl declarations of gnt4_PSQUATScale_bl"
+        }
+      ],
+      "detail": "header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "candidate": {
+        "name": "auto-c0057-007",
+        "sha256": "0cbb9ba2bfb528fb45ca1a5870b94a442df56f063ae876a76748a971dc2060bd"
+      },
+      "expected_candidate": {
+        "name": "auto-c0057-007",
+        "sha256": "0cbb9ba2bfb528fb45ca1a5870b94a442df56f063ae876a76748a971dc2060bd"
+      },
+      "attempt_cleanup": "removed"
+    },
+    "world_version": {
+      "config_hash": "8cbfa2ee80c1d5f77dbfc57db42e0f715686a9a41a8bda29e475597fe13e0b3b",
+      "toolchain_hash": "dc9ed4acb1ae428c157ed5f9ec12db5ceb12b8e11d79b3a43b4bd292eb7cbcf3",
+      "driver_rev": "74d7495a0ace36c3c06bd26324731d1f70694011",
+      "prompt_version": "3",
+      "registry_version": "168"
+    },
+    "failure_domain": "pipeline-control",
+    "diagnosis_eligible": false,
+    "error": "assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+    "last_stage": "assembly"
+  },
+  "history": [
+    {
+      "timestamp": "2026-10-14T03:29:41.346702Z",
+      "result": "gate_failed",
+      "stage": "assembly",
+      "attempt": 1,
+      "detail": "assembly gate merge failed before promotion: header merge refused: 1 contested conflict(s); no silent winner is picked (section 2.11 precedence)",
+      "product_commit": null
+    }
+  ]
+}
