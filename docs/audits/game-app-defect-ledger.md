@@ -124,7 +124,7 @@ in whichever answer is already there.
 (`packages/combat/src/combat.ts:2440-2466`). All 17 X-Charge borgs are registered
 families, so their ported phase machines could never be entered.
 
-### 3.4 WebGL context and GPU-memory leaks — OPEN
+### 3.4 WebGL context and GPU-memory leaks — FIXED 2026-10-16
 
 - Actor GLB models are never disposed. Models are deep-cloned per instance, so this is a
   real leak, not shared state (`apps/game/src/sim/battleScene.ts:757-764`, `:789-805`).
@@ -137,7 +137,16 @@ families, so their ported phase machines could never be entered.
   stage GLTF geometry, materials or textures. If the fetch fails, the previous working
   stage is already gone.
 
-### 3.5 Package entry points break Node/dist consumers, and combat pulls in rendering — OPEN
+**Fix (2026-10-16):**
+- `sceneModel.ts`: added `renderer.forceContextLoss()` after `renderer.dispose()` in the
+  cleanup function — the WebGL context is now actually released instead of leaking until GC.
+- `main.ts` `loadStage`: fetch-then-swap — new stage assets load before the old stage is
+  torn down (a failed load keeps the current arena). Old stage GPU resources are disposed
+  via new `disposeObject3D()` helper (`@gf/render`) before `stageRoot.clear()`.
+- Note: `battleScene.ts` already disposes actor models correctly via `disposeMesh()` —
+  the cited lines were stale; no change needed there.
+
+### 3.5 Package entry points break Node/dist consumers, and combat pulls in rendering — FIXED 2026-10-16
 
 `packages/render`, `packages/combat` and `packages/missions` point `main` and `types` at
 `src/index.ts` (raw TypeScript). The render barrel re-exports `./camera/sourceCamera.js`.
@@ -156,6 +165,12 @@ and still points `main`/`module`/`types` at `src/index.ts`.
 
 This is **not** an unused-dependency cleanup. Fixing it means relocating the pure camera
 math to a lower, Three-free package — an architectural change.
+
+**Fix (2026-10-16):** The pure camera math moved to new package `@gf/camera-math`
+(`packages/camera-math/src/sourceCamera.ts`, zero dependencies). `@gf/combat` now
+depends on `@gf/camera-math` instead of `@gf/render`; `@gf/render` re-exports the
+camera math for backward compatibility. Verified: `pnpm --filter @gf/combat run
+test:lifecycle` passes, `node scripts/run-source-camera-tests.mjs` passes.
 
 ### 3.6 `@gf/save` is a facade — OPEN (now stated in the package itself)
 
