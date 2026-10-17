@@ -81,6 +81,9 @@ importers:
 
   packages/ai: {}
 
+  packages/camera-math:
+    dependencies: {}
+
   packages/assets:
     dependencies:
       '@gf/formats':
@@ -94,12 +97,12 @@ importers:
 
   packages/combat:
     dependencies:
+      '@gf/camera-math':
+        specifier: workspace:*
+        version: link:../camera-math
       '@gf/physics':
         specifier: workspace:*
         version: link:../physics
-      '@gf/render':
-        specifier: workspace:*
-        version: link:../render
     devDependencies:
       esbuild:
         specifier: ^0.21.5
@@ -119,6 +122,9 @@ importers:
 
   packages/render:
     dependencies:
+      '@gf/camera-math':
+        specifier: workspace:*
+        version: link:../camera-math
       three:
         specifier: ^0.169.0
         version: 0.169.0
