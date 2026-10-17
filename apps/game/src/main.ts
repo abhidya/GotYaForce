@@ -24,6 +24,7 @@ import { startFixedStepLoop, startRenderLoop } from "@gf/core";
 import {
   createThreeAssetLoader,
   createThreeViewport,
+  disposeObject3D,
   prepareImportedModel,
 } from "@gf/render";
 import {
@@ -604,10 +605,15 @@ let loadedStageAssets: StageAssets<StageRenderState> | null = null;
 async function loadStage(stageId: string): Promise<StageAssets<StageRenderState>> {
   if (!isExportedStageId(stageId)) throw new Error(`Stage is not exported: ${stageId}`);
   if (loadedStageId === stageId && loadedStageAssets) return loadedStageAssets;
-  stageRoot.clear();
+  // Fetch the new stage BEFORE tearing down the old one: if the load fails the
+  // player keeps the current arena instead of staring at an empty scene.
   const assets = await assetCatalog.loadStageAssets<StageRenderState>(stageId);
   applyStageRenderState(stageId, assets.renderState);
   const models = await Promise.all(assets.modelUrls.map((u) => renderAssets.loadGlbScene(u)));
+  // The old stage's geometries/materials/textures stay on the GPU after a bare
+  // clear() — dispose them first or every stage switch leaks the whole arena.
+  disposeObject3D(stageRoot);
+  stageRoot.clear();
   for (const model of models) {
     prepareImportedModel(model, {
       // HSD stage exports include large single-sided planes/inside-facing pieces, but the
