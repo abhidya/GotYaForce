@@ -11,8 +11,8 @@
     "test:lifecycle": "node scripts/run-lifecycle-tests.mjs"
   },
   "dependencies": {
-    "@gf/physics": "workspace:*",
-    "@gf/render": "workspace:*"
+    "@gf/camera-math": "workspace:*",
+    "@gf/physics": "workspace:*"
   },
   "devDependencies": {
     "esbuild": "^0.21.5"

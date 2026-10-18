@@ -1,0 +1,1 @@
+{"main":"src/index.ts","name":"@gf/camera-math","private":true,"scripts":{"build":"tsc -b","typecheck":"tsc -b --noEmit"},"type":"module","types":"src/index.ts","version":"0.0.0"}

@@ -101,6 +101,10 @@ export function mountUiSceneModels(host: HTMLElement, opts: UiSceneModelOptions)
     observer.disconnect();
     disposeObject(root);
     renderer.dispose();
+    // renderer.dispose() releases three.js-side GPU resources but the underlying
+    // WebGL context stays alive until GC — browsers cap live contexts (~8-16),
+    // so a leaked context per UI-scene mount eventually kills the canvas.
+    renderer.forceContextLoss();
   };
 }
 
