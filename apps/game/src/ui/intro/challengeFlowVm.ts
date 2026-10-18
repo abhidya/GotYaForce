@@ -58,6 +58,7 @@ import {
   CHALLENGE_ALLY_POOL_GROUP_TABLE,
   CHALLENGE_ENEMY_POOL_GROUP_TABLE,
 } from "../challengeFlowTables.generated.js";
+import spawnPools from "../../../../../packages/assets/data/spawn-pools.json";
 
 /** The 8-entry mode dispatch table `PTR_FUN_8036f560` (mode -> ROM fn address). */
 export const CHALLENGE_FLOW_MODE_TABLE = CHALLENGE_FLOW_MODE_DISPATCH;
@@ -690,8 +691,14 @@ function createRecordingSink(overrides: Partial<RecordingSink> = {}): RecordingS
     loadBattleScene(stageId) {
       this.scenes.push(stageId);
     },
-    drawBorgFromPool() {
-      return this.drawnBorgs[0] ?? 0x0615;
+    drawBorgFromPool(poolGroupId: number) {
+      // zz_0196eb8_ @0x80196eb8 — uniform random pick from the ROM spawn pool table
+      // (research/decomp/data/spawn-pools-80380804.json, 80 groups). Each group is a
+      // -1-terminated array of 16-bit borg spawn IDs (family << 8 | variant).
+      const group = spawnPools.groups[poolGroupId];
+      if (!group || !group.ids.length) return this.drawnBorgs[0] ?? 0x0615;
+      const idx = Math.floor(Math.random() * group.ids.length);
+      return group.ids[idx] ?? this.drawnBorgs[0] ?? 0x0615;
     },
     borgCost(id) {
       return this.borgCosts[id] ?? 300;
