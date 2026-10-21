@@ -754,22 +754,23 @@ export const DEFAULT_BOUNDS = { x: 4000, z: 4000 } as const;
 
 export const MASH = {
   /**
-   * BLOCKED-until-Q9 (ATK-017): the counter's downstream CONSUMER is UNKNOWN — attack-active
-   * handler slot 23 (`FUN_8005d494`) advances a phase once `4 < +0x550` or `+0x552 != 0`
-   * (chunk_0007.c:4809-4816, corpus read, audit), but nothing in the corpus was found to gate
-   * on the counter besides that phase advance itself, and what that phase transition actually
-   * DOES in gameplay terms is still open (research/decomp/attack-mechanics-open-questions.md
-   * Q9). Also (behavior-notes.md (an) §5): freeze status duration is guide-documented to
-   * SHORTEN with button/stick mashing — a second, still-unconfirmed candidate consumer for
-   * this same counter shape. Stays false (counting-only, no gameplay effect) until Q9
-   * resolves which consumer (if any) this feeds.
+   * Q9 RESOLVED at ROM level (2026-10-20, mash-consumer-q9-resolution-2026-10-20.md):
+   * the consumer is INSIDE slot 23's handler (`FUN_8005d494`) itself — in its phase 1,
+   * counted press edges (+0x550) past 4, or the any-button latch +0x552, or releasing
+   * the stick advance the handler's local phase (+0x544) early, starting the execute
+   * clip sooner. It is NOT extra hitbox activations. ENABLED stays
+   * false for a different reason than before: the port's swing has no evidenced mapping
+   * onto slot 23's phases, and the freeze mash-to-recover behavior (behavior-notes.md
+   * (an) item 5) remains a separate, siteless candidate. Counting-only until the port
+   * phase mapping is traced (T2 mash logging).
    */
   ENABLED: false,
   /**
-   * DERIVED — chunk_0007.c:4809-4816: the phase-advance condition is `4 < +0x550`, i.e. the
-   * counter caps its gameplay-relevant range at 5 distinct values (0-4) before the phase
-   * advances; ported as a hard clamp at 4 (count never exceeds 4, matching "more than 4"
-   * being the trigger threshold rather than continuing to climb unbounded).
+   * The ROM gate constant: the phase-advance condition is `4 < +0x550`
+   * (chunk_0007.c:4813-4816) — the ROM counter itself is UNCAPPED (increment at :4810 has
+   * no clamp); 4 is the comparison threshold, so the gate fires at 5 counted edges. The
+   * port scaffold clamps its debug counter at this value, which is fine for display but
+   * means the scaffold counter can never satisfy the ROM condition as-is.
    */
   PRESS_CAP: 4,
 } as const;

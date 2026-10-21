@@ -138,6 +138,15 @@ agent; **code** = cheap coding agent; **Fable** = needs cross-system synthesis j
 - **Next search/trace**: grep all readers of +0x550/+0x552 corpus-wide; then T2 mash logging.
 - **Expected output**: the downstream effect -> spec for ATK-017's real behavior.
 - **Agent type**: grep, then Dolphin.
+- **RESOLVED at ROM level (2026-10-20)**: the consumer is FUN_8005d494's own phase gate —
+  in phase 1, `4 < +0x550` (the counter is UNCAPPED; 4 is only the comparison constant) or
+  the +0x552 any-button latch (input +0x5b4 & 0x700) or releasing the stick advances the
+  handler's local phase +0x544 early, starting the execute clip sooner; it is NOT extra
+  hitbox activations. +0x550/+0x552 are
+  generic per-action scratch (the fusion handlers reuse them as phase timers), so the
+  resolution is scoped to slot 23. Full read: mash-consumer-q9-resolution-2026-10-20.md.
+  Still open: the port-side phase mapping and the freeze mash-to-recover candidate; the
+  settling trace is T2 mash logging as originally scoped.
 
 ## Q10. Which real moves set damage-record flagsA bit 0x1000 (friendly-fire exemption / guard interaction) and flagsB bits 0x4000/0x2000?
 
@@ -172,3 +181,11 @@ agent; **code** = cheap coding agent; **Fable** = needs cross-system synthesis j
 - **Expected output**: either candidate records (ASSET_INFERRED -> trace) or a data-backed
   CHECKED_CLOSED.
 - **Agent type**: code (script sweep), then Dolphin.
+- **SWEPT (2026-10-20)**: full sweep done (contact-damage-q12-sweep-2026-10-20.md,
+  scripts/sweep-hit-bin-persistent.mjs). 1,800 persistent (-1) records exist but are the
+  standard shot/special kind set of every borg — no contact-distinguishable carrier, and
+  the guide's 22/44 values resolve in NO claimed borg's damage table. Data-backed
+  CHECKED_CLOSED for the hit-bin carrier hypothesis; the behavior itself is observed
+  (behavior-notes (am)), so the remaining carriers are the comhit.bin global table
+  (needs user-data/) and the unread per-type dispatch — the T2 contact script is the
+  settler. Mechanic L stays disabled.

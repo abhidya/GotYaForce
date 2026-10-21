@@ -16,13 +16,18 @@
 //   - jumpImpulse (+0x48): the launch state writes +0x48 = page[+0x48] (chunk_0008.c:329).
 //   - gravityFall (+0x6c): the airborne fall gravity slot (pl0d/pl0e satellite families
 //     carry -0.1 → genuinely floaty; applied as-is).
-// NOT yet wired (exported as data only):
-//   - minTurnSpeed launch-floor / 0.5× landing-seed semantics (FLOAT_80437460=0.5);
-//   - the +0x74/+0x78/+0x7c accel-clamp triplet (actor+0x678, only active while +0x4c>0);
+// Partially wired / residual:
+//   - minTurnSpeed: exported here and forwarded by bridge.ts as minSpeed; the 0.5×
+//     landing-seed semantics (FLOAT_80437460=0.5) are not separately modeled.
+//   - the +0x74/+0x78/+0x7c accel-clamp triplet (actor+0x678, only active while +0x4c>0)
+//     — fields exist in the rom/ reference layer; no live-sim consumer yet (the one
+//     genuine residual; see research/decomp/status-velocity-writers-closure-2026-10-20.md).
 //   - status timescale (+0x5f4: haste {1.25,1.5,1.75} / slow {0.7,0.4,0.2} / freeze 0.03)
-//     and the param-tier velocity table (0x802dd5a0: tier 16=×1.0 … 20=×2.366 — the
-//     "acceleration"-style self-buff is +4 tiers for 1200f) — the tier/status WRITERS are
-//     special-move wiring, a separate slice; BorgRuntime.paramTier already carries state.
+//     and the param-tier velocity table (0x802dd5a0: tier 16=×1.0 … 20=×2.366) — WIRED:
+//     combat.ts applyHitInflictedStatus writes the hit-inflicted slow/haste/aura/freeze
+//     levels, applyHeroXBuff wires the STAR/PLANET HERO +4-tier 1200f self-buff (the
+//     "acceleration"-style buff is the HERO X special, NOT Acceleration Ninja), and
+//     timescale.ts actorVelocityScale() consumes both in movement.ts.
 //   - dash page (+0x58/+0x5c/+0x60/+0x64) — WIRED 2026-07-04 via dashPhysicsForBorgId
 //     (was mislabeled knockdownLaunch*; the dash states FUN_80061560/FUN_80063230 seed
 //     actor speed/accel/v-speed/duration verbatim from these fields).
