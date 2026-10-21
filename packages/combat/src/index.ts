@@ -54,6 +54,16 @@ export {
   type CommandButtonState,
   type ContextualBGates,
 } from "./commandDispatch.js";
+export {
+  FUSION_PAIRS,
+  fusionPairCoverage,
+  fusionPairsForBorgId,
+  fusionPartnerIdsForBorgId,
+  fusionResultForPair,
+  isFusionResultBorgId,
+  type FusionPair,
+  type FusionPairCoverage,
+} from "./fusionPairs.js";
 export { movementContextOf, type MovementContext } from "./movement.js";
 export {
   cameraParamsForBorgId,

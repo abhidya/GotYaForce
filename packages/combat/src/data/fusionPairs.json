@@ -1,0 +1,68 @@
+{
+  "schema": "gotyaforce.fusionPairs.v1",
+  "source": "research/decomp/data/fusion-pairs-802d352c.json (ROM pair table DAT_802d352c, DOL-extracted by scripts/gen_fusion_pairs.py; behavior-notes.md (aj))",
+  "generatedBy": "scripts/gen-fusion-pairs-runtime.mjs",
+  "note": "Directed pairs: `self` is the borg whose family/variant sub-list carries the entry; the ROM table lists both directions explicitly where both borgs can initiate. Only families 5 and 6 of the 17-slot table are non-null.",
+  "pairs": [
+    {
+      "self": "pl0505",
+      "partner": "pl0506",
+      "result": "pl0507"
+    },
+    {
+      "self": "pl0506",
+      "partner": "pl0505",
+      "result": "pl0507"
+    },
+    {
+      "self": "pl0511",
+      "partner": "pl0512",
+      "result": "pl0513"
+    },
+    {
+      "self": "pl0512",
+      "partner": "pl0511",
+      "result": "pl0513"
+    },
+    {
+      "self": "pl0600",
+      "partner": "pl0601",
+      "result": "pl0602"
+    },
+    {
+      "self": "pl0600",
+      "partner": "pl0609",
+      "result": "pl060c"
+    },
+    {
+      "self": "pl0601",
+      "partner": "pl0600",
+      "result": "pl0602"
+    },
+    {
+      "self": "pl0601",
+      "partner": "pl0608",
+      "result": "pl060e"
+    },
+    {
+      "self": "pl0608",
+      "partner": "pl0601",
+      "result": "pl060e"
+    },
+    {
+      "self": "pl0608",
+      "partner": "pl0609",
+      "result": "pl060a"
+    },
+    {
+      "self": "pl0609",
+      "partner": "pl0600",
+      "result": "pl060c"
+    },
+    {
+      "self": "pl0609",
+      "partner": "pl0608",
+      "result": "pl060a"
+    }
+  ]
+}
