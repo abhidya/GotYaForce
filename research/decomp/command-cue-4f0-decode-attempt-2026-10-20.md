@@ -1,94 +1,127 @@
-# actor+0x4f0 command-cue → script (group, slot) decode attempt (2026-10-20)
+# actor+0x4f0 command-cue decode attempt (2026-10-20, CORRECTED same day)
 
-Round-2 wiring pass, item #6 residual: try to decode the mapping that would
-resolve combo ladders for the borgs the seed-chain pass leaves unresolved.
-**Verdict: the chain is now fully mapped and every link is evidenced — but
-the final link's DATA does not exist in the repo for 202 of 208 borgs, and
-the alternate data source (mot event tracks / DOL banks ≥ 2) needs the
-disc extraction in user-data/, which is absent. No code changed; coverage
-is unchanged. The dead ends below are the deliverable — do not re-try them
-without new artifacts.**
+Round-2 wiring pass, item #6 residual. **This note was rewritten within the
+day: its first merged version relied on an interim census that misidentified
+what +0x4f0 holds and where the ladder gap lives. The corrected findings
+below are from a full site census plus first-hand spot checks
+(`zz_006a750_` at chunk_0009.c:859-880; `familyCueTablesFull.json` family
+count = 119).**
+
+**Verdict: the +0x4f0 layer is already fully decoded and fleet-extracted —
+and it provably cannot supply the missing (group, slot) data, because the
+cue layer carries zero slot information. The ~100 unresolved ladders fail
+at three downstream links, none of them +0x4f0. No code changed; coverage
+is unchanged.**
 
 ## Coverage baseline (measured 2026-10-20, current main)
 
 `comboLadderForBorgId` over the 208-borg roster: **91 borgs with a full
-3-step ladder, 13 with 2 steps, 4 with 1 step, 100 with no resolved
-ladder.** (The "108/208 resolved" figure from earlier passes counts any
-borg with ≥ 1 step.) The 100 zero-step borgs include the whole dragon
-family (pl0500-pl0516), pl0004, and most of families 01/03/08/09/0c/0d/0e/0f.
+3-step ladder, 17 partial (13×2 steps, 4×1 step), 100 with no resolved
+ladder** (108 with any ladder).
 
-## The chain, link by link
+## What +0x4f0 actually is (census of all 30 corpus hits; 24 actor-relevant)
 
-1. **BorgRuntime / actor+0x4f0 is an action-descriptor STREAM POINTER, not
-   a (group, slot) table.** Writers: family ctors (e.g. `zz_018ccfc_`
-   chunk_0046.c:4807-4817) and `FUN_80057b78` (chunk_0007.c:933). The
-   command layer copies the current command record's descriptor pointer
-   into it: `FUN_8006adb0` (chunk_0009.c:1170,1179-1193,1213-1217). The
-   descriptor at +0x00 carries the cue id (`zz_0067980_` reads it,
-   chunk_0009.c:1699-1704).
-2. **Cue → action request:** descriptor cue ids feed `zz_005f188_`
-   (chunk_0007.c:6061-6102), which writes `+0x5e4 = cueId`,
-   `+0x590 = 1` — an action REQUEST. The cue byte `+0x5dc` is adjusted per
-   phase in `FUN_8005a378` (chunk_0007.c:2887-2898).
-3. **Cue → (group, slot):** `FUN_800699d8` / `FUN_80069a50` /
-   `FUN_80069ad0` (chunk_0009.c:1303-1547) scan the actor's cue-script
-   stream (base `+0x1d80`, stride 0x2c, modes at +0x00, match target at
-   +0x28) and resolve the cue through per-family CUE TABLES: 8-byte rows
-   (cueId, stateTarget) at `actor+0x4ec + cueId*8 + 4`, stored by family
-   ctors (`zz_018ccfc_` chunk_0046.c:4812-4817; ninja `FUN_80072094`
-   chunk_0009.c:4091-4092). The resolved (group, slot) then selects the
-   action bank — banks at actor+0x1d80/+0x1d84, indexed
-   group*0xb4+slot*0x0c (chunk_0006.c:1702, `FUN_8004c21c`).
-4. **(group, slot) → HIT kind:** bank op-0x0a events call
-   `zz_008ac80_(actor, kind)` — already extracted as `meleeAnimKinds.json`
-   hitKinds, but WITHOUT the (group, slot) each kind was armed from.
+- A pointer, bound **only in family ctors** (13 explicit sites, e.g.
+  chunk_0046.c:4805 for G RED; most families bind it implicitly via the
+  16-word descriptor block copy into actor+0x4b4..+0x4f0), to a static
+  **96-byte cue→state-pair table**: 48 entries × 2 bytes
+  `[fullBodyState, upperBodyState]`, −1 = no transition.
+- Its only runtime readers are `zz_006a6fc_` / `zz_006a750_` /
+  `zz_006a7b4_` / `zz_006a7f4_` (chunk_0009.c:840-911), which translate a
+  cueId into the actor's current/previous body-state bytes
+  (+0x5da/+0x5db, +0x5dc/+0x5dd) and reset the phase bytes. A handful of
+  fixed-offset probes read individual cue bytes as capability checks
+  ("borg lacks this move" if −1).
+- The data is **fully dumped**: `familyCueTablesFull.json` — 119/119
+  families, 115 distinct table addresses; attack cues 44 and 45 map to
+  [61, 0] in **119/119** families. ⚠️ The older `familyCueTables.json`
+  (17 borgs, `scripts/extract-family-cue-tables.mjs`) is **corrupt**
+  (wrong addresses, float-bit garbage entries) — do not use it; the Full
+  file supersedes it.
 
-So the port's framing in `meleeExactData.ts` ("the +0x4f0 state chain is
-undecoded") is imprecise: +0x4f0's role is decoded; what's missing is the
-per-cue resolution DATA (link 3→4 joined per borg).
+## The B-press → script chain (all links DERIVED unless marked)
 
-## Why the decode cannot land from repo data
+1. Pad bits → transformed input word +0x5d4 (port: command.ts).
+2. Tester priority → command type +0x585 (`FUN_800699d8`, chunk_0009.c).
+3. Subtype/direction stage (+0x586/+0x587) via `zz_0069dd0_`.
+4. Command record selection in `zz_006a104_`: 4-byte records
+   **[cueId, stateMode, actionIndex, variantIndex]** from `actor+0x4ec`
+   tables — extraction complete (`commandMoveTables.json`, 208/208).
+5. **Cue → state pair via +0x4f0** (`zz_006a6fc_` unconditional;
+   `zz_006a750_` when stateMode == 3). Attack cues 44/45 → [61, 0]
+   fleet-uniformly. **This is the only link +0x4f0 participates in.**
+6. Per-frame state dispatch (`FUN_80055568`): state 61 = `FUN_80065dfc`
+   = the +0x4b4 family virtual — the only one of 0x50 state slots that
+   calls it.
+7. Family dispatch: +0x4b4 root → action table (+0x580) → variant table
+   (+0x581) → leaf (117 distinct roots walked by the extractor).
+8. Leaf → engine → **config seed (+0x6ea)** → stream call `zz_004beb8_`.
+   Combo re-arms auto-increment +0x6ea. **MISSING for 342/2540 leaves
+   (85 of them action-1)** — the emulator captured no stream call.
+9. Stream resolution in `zz_004beb8_`: group bit7 → shared bank +0x1d84,
+   else family bank +0x1d80; stream = bank + group/slot offset words.
+10. Hit arming: stream op-0x0a → `zz_008ac80_(actor, kind)` → hit.bin
+    remap → family damage records (the join meleeAnimKinds.json +
+    attackHitTables.json already encode).
 
-- **Cue tables exist for 6 borgs only** (`familyCueTables.json` /
-  `familyCueTablesFull.json`: pl0000, pl000a + 4 others). The other 202
-  borgs' tables live in the DOL at ctor-written pointers that were never
-  dumped; the generator that produced the six needs the disc image.
-- **meleeAnimKinds extraction covers banks 0/1 only**
-  (`scripts/gen-melee-anim-kinds.mjs` BANK_COUNT = 2). Kinds ≥ 16 in the
-  data (e.g. pl0615 arms kinds 16-31) come from literal code sites, not
-  from bank arms — so for most borgs the SECOND bank's (group, slot)
-  attribution is absent by construction.
-- **The ladder resolver doesn't consume (group, slot) anyway:**
-  `actionStreamData.ts` `comboLadderForBorgId` walks variant seeds from
-  `commandMoveTables.json` and accepts steps via `stepFromKind`, which
-  requires a kind with a usable hit window AND a family damage record.
-  A cue decode would have to replace the seed-walk's kind ordering — the
-  seeds' (group, slot) provenance is exactly what's missing.
+## Why the 100 null ladders are null (partition, sums to 100)
 
-## Dead ends tried (do not repeat)
+| Bucket | Count | Nature |
+|---|---|---|
+| No action-1 entry in actionStreamTables | 51 | command records never enumerate (a=1, ·) |
+| Action-1 v0 exists but group = null (leaf captured no stream call) | 40 | link-8 extraction gap |
+| v0 seed is runtime-conditional (`slotCandidates`) | 3 | pl0205 {0,3}, pl0209 {0,11}, pl0706 {0,6} |
+| v0 seed resolves but step-0 stream arms no kind | 6 | windup/code-driven openers |
 
-1. Treating +0x4f0 as a (group, slot) table — refuted: it's a stream
-   pointer (link 1).
-2. Extending the 6 extracted cue tables by family — the tables are stored
-   per-ctor with family-specific pointers; the ninja family's other 11
-   borgs (incl. pl0005, pl0009 — both unresolved) have NO table in the
-   extraction and no corpus site binds one for them.
-3. Using kinds ≥ 16 as second-bank ladder rungs — the arms exist
-   (pl0615: 14 such kinds) but there is no ordering evidence tying them
-   to combo steps; adding them would fabricate ladders.
-4. Recovering (group, slot) from `meleeAnimKinds.json` animSounds keys
-   (`g<group>s<slot>`) — those keys exist for SOUND events; the generator
-   did not emit the same attribution for op-0x0a HIT events. (This is the
-   cheapest future fix: re-run the generator emitting (group, slot) per
-   hitKind — but the generator reads user-data/ disc files.)
+Reframing that matters: by each borg's base type-1 command record,
+(1,0) = 45 borgs, **no type-1 records at all = 36**, (0,0) = 18,
+(2,0) = 1. For those 55 borgs there is **no action-1 B-close path in the
+ROM's own tables** — their B-close routes to the dash action (0), the
+air/charge action (2), or isn't a type-1 command. They should stop
+counting as "unresolved melee": no ladder exists to resolve.
 
-## What would unblock it
+## Dead ends — approaches the evidence rules OUT
 
-Either (a) Manny's disc extract in `user-data/` (same artifact class as
-the #9 reaction-clip blocker): re-run `gen-melee-anim-kinds.mjs` with
-bank coverage ≥ 2 and (group, slot) attribution, and dump the remaining
-families' cue tables from boot.dol ctor pointers via the existing
-binding-scan pattern; or (b) a T2 trace logging `+0x5e4` cue ids and
-`zz_008ac80_` kinds per B-press for a sample of unresolved borgs (one per
-family would generalize furthest). Until one lands, the 100 zero-step
-borgs keep the TUNED combo profile by design.
+1. **Decoding (group, slot) from the +0x4f0 cue table.** Information-
+   theoretically impossible: cue 44/45 = [61,0] in 119/119 families while
+   the 108 resolved borgs exhibit 26 distinct ladders. Zero discriminating
+   information past state 61.
+2. **Seeding ladders from non-baseline type-1 variants.** Would "improve"
+   41 borgs (33 to full 3 steps), but the subtype→variant map in validated
+   families (0→0, 1→2, 2→3, 3→1, 4→4, 5→0) shows variants 1-4 are
+   context alternates (air/dash/landing), not combo steps. Fabricates data.
+3. **Bank-only heuristic (first 3 hit-bearing g3 slots).** Validated
+   against the 91 known full ladders: exact match only 66/91 (73%).
+4. **Param-fill for bank-less leaves.** The 22 "param" leaves are two
+   phase-table DISPATCHER engines (`zz_01613fc_` chunk_0042.c:14-21;
+   `zz_010b2f4_` chunk_0030.c:1136-1143), not param-seed engines; the
+   extractor's "param" config is an artifact. Fill changed coverage by 0.
+5. **`familyCueTables.json`** as a source — corrupt (above).
+
+Also validated-but-zero-gain: replacing the resolver's hardcoded
+(action 1, variant 0) with each borg's base type-1 record reproduces
+106/106 resolvable ladders and gains 0 nulls — a relabel, not a decode.
+
+## The actual fundable gap (link 8, specific engines)
+
+The two phase-dispatcher engines above cover **17 borgs' v0 leaves**
+(pl0100 cluster ×5 via `zz_01613fc_`; pl0300 cluster ×12 via
+`zz_010b2f4_`). Their phase-0 seed setters (`FUN_8016144c` /
+`FUN_8010b344`) write the seed from an argument whose origin the Ghidra
+text export does not show, and their phase-≥1 stream plays
+(`zz_004beb8_(…, group 3, +0x6ea++)`) sit behind timer/contact forks the
+emulator didn't traverse. Supplying artifacts, either suffices:
+
+1. **boot.dol** (`user-data/GG4E/disc/sys/boot.dol` — absent from this
+   workspace): dump the phase tables 0x8034c6a8 / 0x80325a68 and extend
+   `gen-action-stream-tables.mjs` to walk phase-table dispatchers and
+   the ~21 pointer-config engines with uncaptured v0 leaves. Ceiling:
+   ~40 group-null + 3 slotCandidate borgs.
+2. **A T2 trace** per attack-mechanics-trace-plan.md §T2: per-frame log
+   of +0x540, +0x6ea, and `zz_004beb8_` (group, slot) args during a
+   standing B-mash, one representative borg per unresolved engine family.
+
+One cheap code fix independent of both: the `parseBank` sentinel-walk
+bug in `gen-melee-anim-kinds.mjs` truncates bank 0x80327440, dropping
+pl0402/pl0408 g3 s3..s7 — fixing it addresses part of the 8 "nostream"
+partial-ladder stops (the generator still needs user-data/ to re-run).
