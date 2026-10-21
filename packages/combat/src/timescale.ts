@@ -7,8 +7,10 @@
 //   (data/paramTierTables.json, dumped from boot.dol @0x802dd5a0) at row = tier byte +0x74a
 //   (default 16 → ×1.0). Row = [sizeScale, animRateScale, velocityScale]; the +4-tier
 //   self-buff (zz_011230c_, 1200f) = ×2.366 velocity + ×2.6 size — the "acceleration"
-//   special archetype. Which special applies which delta is NOT yet decoded — this module
-//   only APPLIES the tier state; nothing writes BorgRuntime.paramTier.tier ≠ 16 yet.
+//   special archetype. The writers ARE decoded and wired (status-effects-decode-2026-07-04.md
+//   §A is an exhaustive call-site census): combat.ts applyHeroXBuff writes the hero +4 delta
+//   and applyHitInflictedStatus writes hit-inflicted grow/shrink deltas; this module APPLIES
+//   the resulting tier state (closure: status-velocity-writers-closure-2026-10-20.md).
 // - Status timescale: FUN_8005a378 (chunk_0007.c:2817-2898) — base ×1.0; burst/fusion flag
 //   ×1.5 (FLOAT_804373d8 — the port's BURST.SPEED_MULTIPLIER, applied in movement.ts's
 //   existing burstMult, NOT here, to avoid double-count); haste table ×{0.1,1.25,1.5,1.75}
@@ -123,7 +125,8 @@ export function statusTimescale(b: BorgRuntime & StatusSpeedLevels): number {
 }
 
 /** Combined actor velocity scale (status × tier), excluding the separately-applied burst
- *  multiplier. ×1.0 for every borg until tier/status writers land. */
+ *  multiplier. ×1.0 at baseline (tier 16, no status); the tier/status writers are wired
+ *  in combat.ts (applyHeroXBuff / applyHitInflictedStatus). */
 export function actorVelocityScale(b: BorgRuntime & StatusSpeedLevels): number {
   return statusTimescale(b) * tierVelocityScale(b);
 }

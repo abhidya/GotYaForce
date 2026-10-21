@@ -2456,15 +2456,16 @@ export function stepAttacks(
   const pressedSpecialEdge = specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
-  // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false, BLOCKED-
-  // until-Q9): count attack-button PRESS EDGES (not held frames) into b.cooldowns["mashCount"]
-  // while an active melee swing is in progress (b.state==="attack" && b.anim==="melee" — set by
+  // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
+  // attack-button PRESS EDGES (not held frames) into b.cooldowns["mashCount"] while an
+  // active melee swing is in progress (b.state==="attack" && b.anim==="melee" — set by
   // startMeleeAttack and cleared when the swing's attackLock expires below), clamped at
-  // MASH.PRESS_CAP (4, DERIVED chunk_0007.c:4809-4816). Reset to 0 on every swing start
-  // (startMeleeAttack). This counting always runs (cheap: one comparison + one increment) —
-  // nothing reads b.cooldowns["mashCount"] for gameplay purposes yet; it exists only for the
-  // debug overlay (ATK-015 picks up all cooldowns automatically) until Q9 identifies a real
-  // consumer.
+  // MASH.PRESS_CAP for display. Q9 is RESOLVED at ROM level (2026-10-20,
+  // mash-consumer-q9-resolution-2026-10-20.md): slot 23's handler advances its own phase
+  // early once the (uncapped) counter passes 4 — but the port's swing phases have no
+  // evidenced mapping onto slot 23's, so nothing reads mashCount for gameplay yet; it
+  // exists only for the debug overlay (ATK-015 picks up all cooldowns automatically).
+  // Reset to 0 on every swing start (startMeleeAttack).
   const pressedAttackEdge = attackHeld && !prevAttackHeld;
   if (pressedAttackEdge && b.state === "attack" && b.anim === "melee") {
     b.cooldowns["mashCount"] = Math.min(MASH.PRESS_CAP, (b.cooldowns["mashCount"] ?? 0) + 1);
