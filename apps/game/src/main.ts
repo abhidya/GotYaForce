@@ -301,7 +301,7 @@ function localActiveBorgHasAuthoredSwingAudio(): boolean {
 // a list of {frame, soundId} events (ROM actor+0x4e8 table). The sim resolves them per swing
 // (BorgRuntime.meleeSounds, DERIVED end-to-end) and the slot-enter edge schedules each event
 // at its anim-clock frame (60fps). TUNED residue, labeled honestly: the schedule hangs off
-// the renderer's slot edge + wall clock (not the ROM part-anim clock), mode-1 events play the
+// the renderer's slot edge + simulation time (not the ROM part-anim clock), mode-1 events play the
 // base id only (no anim-rate id±1 variant select), and positional modes play flat.
 // "special" (X-special) added alongside melee/melee_alt/charge_shot: startSpecialAttack
 // (packages/combat combat.ts) resolves the SAME xLeaf.sounds -> BorgRuntime.meleeSounds bridge
@@ -320,12 +320,78 @@ function seKeyForSoundId(id: number): string {
   return `se_${id.toString(16).padStart(3, "0")}`;
 }
 
-function playAuthoredSwingSounds(sounds: readonly { frame: number; id: number }[]): void {
-  if (DISABLE_COMBAT_SFX) return; // guard clause: nothing below applies with SFX off
+// Browser lifetime policy, not a recovered ROM sound clock. Slots still start the
+// schedule; elapsed time is completed simulation steps. Once playSfx is dispatched,
+// browser media playback (including a pending play promise) is outside this queue
+// and is not paused/stopped. Only future authored cues are owned here. Slot edges
+// remain the existing presentation approximation: same-slot stream changes and the
+// original animation-rate operand/part clock are not reconstructed here.
+interface AuthoredSwingOwner { battle: BattleSession; uid: string }
+interface AuthoredSwingCue {
+  owner: AuthoredSwingOwner;
+  due: number;
+  key: string;
+  loading: boolean;
+  audio: GotchaAudioManager | null | undefined;
+}
+let authoredSwingTimeMs = 0;
+const authoredSwingOwners = new Map<string, AuthoredSwingOwner>();
+let authoredSwingCues: AuthoredSwingCue[] = [];
+
+function clearAuthoredSwingSounds(): void {
+  authoredSwingOwners.clear();
+  authoredSwingCues = [];
+  authoredSwingTimeMs = 0;
+}
+
+function authoredSwingCueIsCurrent(cue: AuthoredSwingCue): boolean {
+  return session === cue.owner.battle && !cue.owner.battle.resolved
+    && authoredSwingOwners.get(cue.owner.uid) === cue.owner;
+}
+
+function playAuthoredSwingSounds(sounds: readonly { frame: number; id: number }[], uid: string): void {
+  if (DISABLE_COMBAT_SFX || !session || session.resolved) return;
+  const owner: AuthoredSwingOwner = { battle: session, uid };
+  authoredSwingOwners.set(uid, owner);
   for (const sound of sounds) {
     const delayMs = Math.min(framesToMilliseconds(sound.frame), AUTHORED_MAX_DELAY_MS);
-    const key = seKeyForSoundId(sound.id);
-    window.setTimeout(() => playRateLimited(lastCombatSfxAt, key, AUTHORED_SE_MIN_GAP_MS, key), delayMs);
+    authoredSwingCues.push({ owner, due: authoredSwingTimeMs + delayMs,
+      key: seKeyForSoundId(sound.id), loading: false, audio: undefined });
+  }
+  // Stable sort preserves source order for coincident events and actor insertion order.
+  authoredSwingCues.sort((a, b) => a.due - b.due);
+}
+
+function flushAuthoredSwingSounds(): void {
+  authoredSwingCues = authoredSwingCues.filter(authoredSwingCueIsCurrent);
+  if (!session || session.paused || session.resolved) return;
+  for (const cue of authoredSwingCues) {
+    if (cue.due > authoredSwingTimeMs + 1e-7) break;
+    if (!cue.loading) {
+      cue.loading = true;
+      // Initialization can finish after pause, interruption, or teardown. Readiness
+      // alone never grants playback: the flush rechecks lifetime and pause ownership.
+      void initAudio().then(audio => {
+        cue.audio = audio;
+        flushAuthoredSwingSounds();
+      }, () => {
+        cue.audio = null;
+        flushAuthoredSwingSounds();
+      });
+    }
+  }
+  while (authoredSwingCues.length > 0) {
+    const cue = authoredSwingCues[0]!;
+    if (cue.due > authoredSwingTimeMs + 1e-7 || cue.audio === undefined) break;
+    authoredSwingCues.shift();
+    if (!cue.audio) continue;
+    // Keep the existing per-sample wall-clock floor, reserving it only at actual
+    // dispatch (not before asynchronous audio initialization).
+    const now = performance.now();
+    if (now - (lastCombatSfxAt.get(cue.key) ?? -Infinity) >= AUTHORED_SE_MIN_GAP_MS) {
+      lastCombatSfxAt.set(cue.key, now);
+      void cue.audio.playSfx(cue.key).catch(() => undefined);
+    }
   }
 }
 
@@ -558,6 +624,7 @@ const battleScene = new BattleScene(battleRoot, {
   // trigger edge itself is TUNED presentation (the ROM fires it from landing state slot 31
   // and grounded-recovery handlers, which the port's slot machine does not model 1:1).
   onSlotEnter: (_borgId, slot, uid, meleeSounds) => {
+    authoredSwingOwners.delete(uid);
     const prev = lastAnimSlotByUid.get(uid);
     lastAnimSlotByUid.set(uid, slot);
     if (prev !== undefined && LANDING_FROM_SLOTS.has(prev) && LANDING_TO_SLOTS.has(slot)) {
@@ -566,7 +633,7 @@ const battleScene = new BattleScene(battleRoot, {
     // Authored per-swing audio (DERIVED — see playAuthoredSwingSounds): replaces the TUNED
     // slot cue for THIS swing/release only; borgs without authored sounds keep the fallback.
     if (AUTHORED_SWING_SLOTS.has(slot) && meleeSounds && meleeSounds.length > 0) {
-      playAuthoredSwingSounds(meleeSounds);
+      playAuthoredSwingSounds(meleeSounds, uid);
       return;
     }
     playCombatSfx(slot);
@@ -1096,6 +1163,7 @@ async function enterBattle(): Promise<void> {
       // Mount the HUD.
       const hud = createBattleHud(ui, { showBanner: false });
 
+      clearAuthoredSwingSounds();
       session = {
         battle,
         config,
@@ -1334,6 +1402,7 @@ function endBattleToMenu(): void {
 }
 
 function teardownBattle(): void {
+  clearAuthoredSwingSounds();
   session?.hud.destroy();
   closePauseMenu();
   battleScene.clear();
@@ -1392,6 +1461,10 @@ function stepSimOnce(live: BattleSession, inputs: Record<string, PlayerInput>): 
 function syncBattlePresentation(live: BattleSession): void {
   const presentation = currentBattlePresentation();
   const sceneState = battleSceneState(live.battle, presentation?.focus ?? localFocusBorg());
+  const liveUids = new Set(sceneState.actors.map(actor => actor.uid));
+  for (const uid of authoredSwingOwners.keys()) {
+    if (!liveUids.has(uid)) authoredSwingOwners.delete(uid);
+  }
   battleScene.sync(
     sceneState.actors,
     sceneState.projectiles,
@@ -1419,8 +1492,10 @@ function stepBattle(dt: number): void {
     if (live.battle.observe().result !== "ongoing") break;
   }
 
+  authoredSwingTimeMs += steps * SIM_DT * 1000;
   syncBattlePresentation(live);
   if (live.battle.observe().result !== "ongoing") resolveBattle();
+  flushAuthoredSwingSounds();
 }
 
 /** camera+0x2e6 default: state 2 = no-lock follow (sim/camera.ts header). */
@@ -1554,6 +1629,7 @@ const PERCENT_SCALE = 100;
 function resolveBattle(): void {
   if (!session || session.resolved) return;
   session.resolved = true;
+  clearAuthoredSwingSounds();
   // DERIVED results (results-scoring-decode-2026-07-04.md): outcome = the local player's
   // slot counters; computeResults applies the decoded ROM rows/grand-total formula.
   const outcome = battleOutcomeFromState(session.battle, session.localPlayerId);
@@ -1612,7 +1688,7 @@ function tick(): void {
   if (screen === "battle" || screen === "results") {
     // Pause the battle presentation clock with the simulation. Keep sampling the render
     // clock above so resume cannot catch up paused time; results and UI keep animating.
-    // Authored audio timers are separate and are not changed by this presentation gate.
+    // Future authored audio cues use the separately pause-gated simulation clock.
     if (screen === "results" || !session?.paused) battleScene.update(dt);
     if (screen === "battle") followCamera();
   }
