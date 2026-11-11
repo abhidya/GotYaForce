@@ -13,6 +13,8 @@ export interface BattleActorView {
   pos: Vec3;
   vel: Vec3;
   rotY: number;
+  /** Simulation-owned live tier scale, relative to the normalized model. */
+  modelSizeScale: number;
   lockTarget: string | null;
   allyLockTarget: string | null;
   dashActiveFrames: number;
@@ -57,6 +59,7 @@ export function battleActorView(borg: BattleActorObservation): BattleActorView {
     pos: borg.pos,
     vel: borg.vel,
     rotY: borg.rotY,
+    modelSizeScale: borg.modelSizeScale ?? 1,
     lockTarget: borg.lockTarget,
     allyLockTarget: borg.allyLockTarget,
     dashActiveFrames: borg.cooldowns["dashActive"] ?? 0,

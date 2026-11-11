@@ -72,8 +72,7 @@ export function tierVelocityScale(b: BorgRuntime): number {
   return row && row.velocityScale > 0 ? row.velocityScale : 1;
 }
 
-/** DERIVED tier size multiplier (+0xb8 target; the ROM lerps ±0.05/frame — consumers may
- *  apply directly until the lerp is modeled). */
+/** DERIVED tier size target (+0xb8). Presentation converges separately via stepModelSize. */
 export function tierSizeScale(b: BorgRuntime): number {
   const row = tierRow(effectiveTier(b));
   return row && row.sizeScale > 0 ? row.sizeScale : 1;
@@ -129,4 +128,22 @@ export function statusTimescale(b: BorgRuntime & StatusSpeedLevels): number {
  *  in combat.ts (applyHeroXBuff / applyHitInflictedStatus). */
 export function actorVelocityScale(b: BorgRuntime & StatusSpeedLevels): number {
   return statusTimescale(b) * tierVelocityScale(b);
+}
+
+/** TUNED numeric value: research/decomp/movement-hit-decode-2026-07-04.md §1 records 0.05,
+ * but the literal has not been independently verified against retail bytes here.
+ * The fixed additive step and target clamp ARE DERIVED: zz_005bab8_,
+ * chunk_0007.c:3690-3712. This is not proportional interpolation. */
+export const MODEL_SIZE_STEP = 0.05;
+
+/** Once per simulation frame, after tier expiry. Mirrors the ordinary +0x7c9==0
+ * size path; special scripted scale overrides are not surfaced by this port yet.
+ * Kept separate from target-based damage/physics until their live-scale consumers
+ * are audited. Rendering reads this value without advancing another clock. */
+export function stepModelSize(b: BorgRuntime): void {
+  const target = tierSizeScale(b);
+  const current = b.modelSizeScale ?? 1;
+  b.modelSizeScale = current < target
+    ? Math.min(target, current + MODEL_SIZE_STEP)
+    : Math.max(target, current - MODEL_SIZE_STEP);
 }

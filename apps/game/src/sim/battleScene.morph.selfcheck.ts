@@ -12,7 +12,7 @@ function view(combatFormId?: string, uid = "same-uid", afterimageSerial = 0): Ba
   return {
     uid, borgId: "pl0604", combatFormId, team: 0, ownerPlayer: "p1",
     alive: true, state: "idle", anim: "idle", pos: { x: 1, y: 2, z: 3 },
-    vel: { x: 0, y: 0, z: 0 }, rotY: 0, lockTarget: null, allyLockTarget: null,
+    vel: { x: 0, y: 0, z: 0 }, rotY: 0, modelSizeScale: 1, lockTarget: null, allyLockTarget: null,
     dashActiveFrames: 0, chargeFrames: 0, meleeAnimStream: null, meleeSounds: null,
     lastHitImpactEffectId: undefined, lastHitAttackerTeam: undefined, slowHitTimer: 0, hasteHitTimer: 0,
     romAfterimage: afterimageSerial > 0
