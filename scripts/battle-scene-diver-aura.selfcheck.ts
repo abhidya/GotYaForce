@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { hsdJointsInTraversalOrder, prepareImportedModel } from "../packages/render/src/index.js";
 import { BattleScene } from "../apps/game/src/sim/battleScene.js";
 import { createBattle, battleStateForSelfcheck } from "../packages/combat/src/battle.js";
 import { emptyInput } from "../packages/combat/src/types.js";
@@ -193,5 +194,95 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
     assert(owner.fallbackSpecialBurst?.serial === 2 && bursts.length === count + 2, "projectile fallback creates no radial event or replay");
     scene.clear(); await Promise.resolve(); await Promise.resolve();
   }
+  await checkDiverBoneAttachment();
   console.log("Diver aura Three scene selfcheck: PASS");
+}
+
+/** Synthetic exporter-shaped rigs exercise attachment, not asset/animation parity. */
+async function checkDiverBoneAttachment(): Promise<void> {
+  const load = THREE.TextureLoader.prototype.load;
+  THREE.TextureLoader.prototype.load = function (): THREE.Texture { return new THREE.Texture(); };
+  const parent = new THREE.Group();
+  parent.position.set(400, -20, 70); parent.rotation.set(.2, .4, -.1); parent.scale.set(2, 3, 4);
+  const root = new THREE.Group();
+  root.position.set(-50, 11, 32); root.rotation.y = -.7; parent.add(root);
+  const pending: Array<{ id: string; resolve: (model: THREE.Object3D) => void }> = [];
+  const scene = new BattleScene(root, {
+    loadModel: (id) => new Promise((resolve) => pending.push({ id, resolve })),
+    loadClip: async () => null,
+  });
+  THREE.TextureLoader.prototype.load = load;
+  const internals = scene as unknown as {
+    actors: Map<string, { model: THREE.Object3D | null; mixer: THREE.AnimationMixer | null }>;
+    diverAuraActors: Map<string, { node: THREE.Group }>;
+  };
+  const battle = createBattle({ stageId: "st00", forces: [
+    { team: 0, ownerPlayer: "p1", borgIds: ["pl0805"] },
+  ], bounds: { x: 2000, z: 2000 } }, borgs.borgs as BorgStats[]);
+  const owner = { ...battleSceneState(battle, null).actors[0]!,
+    pos: { x: 10, y: 20, z: 30 }, rotY: Math.PI / 2, modelSizeScale: 1.5 };
+  const child: DiverAuraChild = { uid: "bone-aura", ownerUid: owner.uid, ownerFormId: "pl0805", team: 0,
+    subtype: 0, pos: { ...owner.pos }, remainingFrames: 1140, hitRadius: 100,
+    bankTexId: 78, visualVariant: 0, visualScale: .75 };
+  const sync = (id = "pl0805") => scene.sync([{ ...owner, combatFormId: id }], [], null, false, [], [child]);
+  const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
+  const makeRig = () => {
+    const model = new THREE.Group(); model.scale.setScalar(.02); model.position.y = 7;
+    const joints = Array.from({ length: 23 }, (_, i) => {
+      const joint = new THREE.Bone(); joint.name = `JOBJ_${(i + 9) % 23}`; return joint;
+    });
+    model.add(joints[0]!);
+    // Preserved child order, deliberately permuted names. No display meshes needed.
+    for (let i = 1; i < joints.length; i++) (i === 2 ? joints[1]! : joints[0]!).add(joints[i]!);
+    joints[12]!.position.set(800, 900, 1000);
+    joints[14]!.position.set(4, 5, 6);
+    joints[14]!.rotation.set(.3, .6, .9); joints[14]!.scale.set(5, 6, 7);
+    return { model, bone: joints[14]! };
+  };
+  const checkPosition = (node: THREE.Object3D, x: number, y: number, z: number, label: string) =>
+    assert(near(node.position.x, x) && near(node.position.y, y) && near(node.position.z, z), label);
+  sync(); scene.update(.1);
+  const aura = internals.diverAuraActors.get(child.uid)!.node;
+  checkPosition(aura, 10, 20, 30, "async load uses explicit owner-root fallback");
+  const first = makeRig();
+  const display = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+  display.name = "Joint_14_Object_0"; display.position.set(3, 8, 2); first.model.add(display);
+  const rest = display.getWorldPosition(new THREE.Vector3());
+  prepareImportedModel(first.model);
+  assert(display.parent === first.bone && display.getWorldPosition(new THREE.Vector3()).distanceTo(rest) < 1e-6,
+    "shared DFS reparent preserves mesh rest pose");
+  assert(hsdJointsInTraversalOrder(first.model)[14] === first.bone,
+    "reparented display nodes do not alter joint traversal");
+  pending.shift()!.resolve(first.model); await flush();
+  scene.update(0);
+  // local (4,5,6) normalized .02, model +7Y, owner scale1.5, yaw90, +owner pos.
+  checkPosition(aura, 10.18, 30.65, 29.88, "DFS14 translation includes normalization once and cancels transformed parents");
+  assert(aura.scale.equals(new THREE.Vector3(.75, .75, .75)) && aura.quaternion.equals(new THREE.Quaternion()),
+    "bone rotation and scale do not leak into aura");
+  const mixer = internals.actors.get(owner.uid)!.mixer!;
+  mixer.clipAction(new THREE.AnimationClip("anchor-motion", 2, [new THREE.VectorKeyframeTrack(
+    `${first.bone.uuid}.position`, [0, 1, 2], [4, 5, 6, 14, 15, 16, 4, 5, 6],
+  )])).play();
+  scene.update(.5);
+  checkPosition(aura, 10.33, 30.8, 29.73, "post-mixer sample moves aura in same rendered frame");
+  scene.update(.5);
+  checkPosition(aura, 10.48, 30.95, 29.58, "animation continues without a new simulation sync");
+  sync("pl080d"); scene.update(0);
+  checkPosition(aura, 10, 20, 30, "form swap discards old cached bone immediately");
+  child.ownerFormId = "pl080e"; sync("pl080e");
+  const stale = makeRig(); pending.shift()!.resolve(stale.model); await flush(); scene.update(0);
+  assert(!stale.model.parent, "stale async model is never attached");
+  checkPosition(aura, 10, 20, 30, "stale async result cannot reattach old bone");
+  const current = makeRig(); pending.shift()!.resolve(current.model); await flush(); scene.update(0);
+  checkPosition(aura, 10.18, 30.65, 29.88, "current Tar model resolves new anchor");
+  child.ownerFormId = "pl080d"; sync("pl080d");
+  pending.shift()!.resolve(makeRig().model); await flush(); scene.update(0);
+  checkPosition(aura, 10.18, 30.65, 29.88, "Jack model also resolves source slot12");
+  child.ownerFormId = "pl0805"; sync();
+  pending.shift()!.resolve(new THREE.Group()); await flush(); scene.update(0);
+  checkPosition(aura, 10, 20, 30, "missing skeleton falls back without guessed offset");
+  scene.sync([], [], null, false, [], [child]); scene.update(0);
+  checkPosition(aura, 10, 20, 30, "retired owner cannot retain a stale anchor");
+  scene.clear(); scene.update(.1);
+  assert(!aura.parent && internals.diverAuraActors.size === 0, "clear removes attachments permanently");
 }
