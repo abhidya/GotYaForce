@@ -258,7 +258,10 @@ def expected_symbols(smap, retail, base_addr):
                 li -= 0x04000000
             tgt = a + li if not (w & 2) else li  # absolute for bla
             hit = smap.lookup(tgt)
-            if hit:
+            # lookup also returns the symbol containing an interior address.
+            # A name-only check cannot prove such a target (symbol + addend).
+            # Leave it unresolved rather than accepting a call to its entry.
+            if hit and hit["addr"] == tgt:
                 out[a - base_addr] = hit["name"]
     return out
 

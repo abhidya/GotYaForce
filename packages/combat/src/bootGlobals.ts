@@ -8,9 +8,9 @@
 
 // Source-owned HSD CObj + the real body of zz_00059b8_ @0x800059b8 (boot view-setup).
 // sourceCamera.ts is pure TS (no three.js), so this import preserves combat's no-three
-// runtime contract; the boot CObj state + C_MTXLookAt live in @gf/render's camera layer.
-import { createSourceCamera, sourceCameraBootViewSetup } from "@gf/render";
-import type { Mtx34, SourceCamera } from "@gf/render";
+// runtime contract; the boot CObj state + C_MTXLookAt live in the THREE-free @gf/camera-math package.
+import { createSourceCamera, sourceCameraBootViewSetup } from "@gf/camera-math";
+import type { Mtx34, SourceCamera } from "@gf/camera-math";
 
 /**
  * DAT_80436498 — boot configuration byte.

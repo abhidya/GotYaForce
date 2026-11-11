@@ -1,31 +1,22 @@
 #!/usr/bin/env node
-// Runs apps/game/src/ui/intro/challengeFlowVm.ts self-tests by transpiling the VM + its
-// generated-tables dependency to ESM in a temp dir (apps/game is noEmit, so there's no
-// dist to import). Mirrors the run-burst-tests.mjs precedent but for the app package.
+// Runs Challenge VM self-tests against the real generated table dependency graph.
+// apps/game is noEmit, so emit isolated ESM modules without requiring a previous build.
 //
 //   node scripts/run-challenge-flow-tests.mjs
-import { transpileModule } from "typescript";
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { emitInlineModuleGraph } from "./lib/ts-inline-module.mjs";
 
-const SRC = "apps/game/src/ui";
-const TMP = path.join("node_modules/.cache/challenge-flow-selftest");
-
-mkdirSync(path.join(TMP, "intro"), { recursive: true });
-writeFileSync(path.join(TMP, "package.json"), JSON.stringify({ type: "module" }));
-
-const transpile = (file, out) => {
-  const src = readFileSync(file, "utf8");
-  const { outputText } = transpileModule(src, {
-    compilerOptions: { target: "es2022", module: "es2022", moduleResolution: "bundler" },
-  });
-  writeFileSync(out, outputText);
-};
-
-transpile(path.join(SRC, "challengeFlowTables.generated.ts"), path.join(TMP, "challengeFlowTables.generated.js"));
-transpile(path.join(SRC, "intro/challengeFlowVm.ts"), path.join(TMP, "intro/challengeFlowVm.js"));
-
-const mod = await import(pathToFileURL(path.join(TMP, "intro/challengeFlowVm.js")));
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const graph = emitInlineModuleGraph({
+  label: "challenge-flow-selftest",
+  entry: path.join(root, "apps/game/src/ui/intro/challengeFlowVm.ts"),
+  outDir: path.join(root, ".tmp/challenge-flow-selftest"),
+  packages: {
+    "@gf/missions": path.join(root, "packages/missions/src/challenge-spawn-pools.generated.ts"),
+  },
+});
+const mod = await import(graph.url);
 
 let failures = 0;
 let checks = 0;
@@ -45,11 +36,6 @@ const assert = {
     }
   },
 };
-
-function pathToFileURL(p) {
-  const resolved = path.resolve(p).replace(/\\/g, "/");
-  return `file:///${resolved}`;
-}
 
 mod.runChallengeFlowVmSelfTests(assert);
 

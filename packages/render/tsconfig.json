@@ -2,7 +2,19 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {
+      "@gf/camera-math": [
+        "../camera-math/dist/index.d.ts"
+      ]
+    }
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../camera-math"
+    }
+  ]
 }

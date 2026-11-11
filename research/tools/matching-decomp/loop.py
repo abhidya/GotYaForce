@@ -1793,10 +1793,10 @@ def cmd_selftest(a, oracle):
         try:
             src = SC.seed_cfg({"name": "g", "addr": 0x80000000,
                                "size": len(glob)}, glob, real_map)
-            chk("an absolute global is refused as a COMPILER limit",
+            chk("an absolute global is emitted when relocation proof is supported",
                 not SC.ABS_GLOBAL_BLOCKED and want in src, src)
         except SC.SeedFail as ex:
-            chk("an absolute global is refused as a COMPILER limit",
+            chk("an absolute global is emitted when relocation proof is supported",
                 SC.ABS_GLOBAL_BLOCKED and ex.cls == "compiler"
                 and "ADDR16_HA" in str(ex), "%s / %s" % (ex.cls, ex))
         #   an address in no DOL section is refused rather than named

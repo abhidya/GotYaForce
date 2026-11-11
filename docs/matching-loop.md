@@ -1,5 +1,13 @@
 # The matching-decompilation loop
 
+> **2026-11-11 correction:** The historical absolute-global "compiler bug" below
+> was a harness error: ELF uses `ADDR16_HA=6`, `ADDR16_LO=4`, with halfword offsets.
+> Correcting the oracle recovers 66 functions / 642 instructions in a bounded pass.
+> Current freshly verified total after the mask lane: **682 functions / 4,003 instructions (0.5707%)**.
+> Older tables and compiler-blocked classifications are historical, not current
+> totals. See [current lanes and acceptance gates](port-completion.md).
+
+
 **Date: 2026-09-04.** Status: **BUILT AND RUN. 570 new functions are byte-identical to
 retail, and the loop that produced them never called a model.**
 
@@ -250,6 +258,32 @@ remainder is honestly classified and none of it is this check's failure:
 Six of the 21 are `lis`-built **absolute** data references, which this check also covers
 (`R_PPC_ADDR16_HA`/`LO`); only the seeder does not yet model `lis`. They are recoverable the
 moment it does, with no further oracle work.
+
+### 2.3.2 Branch-relocation negative controls (2026-11-11)
+
+The name check also needs to check the relocation **type and addend**. A
+synthetic `R_PPC_REL24` naming the expected callee with addend `+4` previously
+reported `MATCH`, although the linker would branch four bytes past that callee.
+An unrelated relocation type at the same offset could also inherit the branch's
+name check. Neither is proof of a retail match.
+
+`objdiff.compare` now verifies only `R_PPC_REL24` through the branch-name path,
+requires its addend to be zero, and tracks each relocation separately rather
+than trusting every relocation at a verified offset. `match.expected_symbols`
+only supplies names for exact symbol-entry targets: a branch into the middle
+of a symbol remains unverified until the harness can prove that target.
+
+The compiler- and disc-independent regression suite is part of contributor CI:
+
+```bash
+python3 -m unittest discover -s research/tools/matching-decomp -p 'test_*.py'
+```
+
+Initial source-only validation passed 10 tests and 63 loop checks, skipping the
+compiler group. Later Windows validation now passes 24 oracle controls, the full
+71-check loop selftest, and all 674 registered functions plus eight retail controls.
+The existing user-supplied disc and pinned compiler were used in place. See the
+[current checklist](port-completion.md) for subsequent lanes and totals.
 
 ### 2.4 Recording
 
@@ -763,7 +797,7 @@ That measurement is why **the tier refuses every loop up front and classes the r
 `compiler`**. Attempting them would cost one compile each to be told the same thing, and —
 which matters more — it would file 768 functions in the wrong queue.
 
-### 10.3 Globals: an integrity rule that was lifted, and a compiler bug that replaced it
+### 10.3 Globals: verified relocations and the corrected harness diagnosis
 
 This tier was built under §2.3's rule — a match resting on a data relocation is vacuous,
 because `match.py` name-checked only `R_PPC_REL24` — and it therefore refused every r13/r2
@@ -786,33 +820,27 @@ void f(void)
 }
 ```
 
-The integrity refusal that cost 1,212 functions and 50,194 instructions before this landed
-is down to **zero**. What replaced it is smaller, sharper, and belongs to the compiler lane:
+The earlier diagnosis of a compiler relocation bug was wrong. The raw object
+values were correct; this harness assigned them the wrong ELF names. Standard
+PowerPC IDs are `ADDR16=3`, `ADDR16_LO=4`, `ADDR16_HI=5`, `ADDR16_HA=6`, and
+`ADDR14=7`, independently listed in
+[LLVM's PowerPC ELF definitions](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/BinaryFormat/ELFRelocs/PowerPC.def).
+A `lis`/`addi` pair with types 6/4 at offsets 2/6 is standard HA/LO relocation
+at immediate halfwords. The compiler needed no patch.
 
-> **mwcc-rs 2.7 emits the wrong relocation types for an absolutely addressed global.**
-> Read straight out of the object file, with the project's own flags:
->
-> | C | relocations emitted | correct? |
-> | --- | --- | --- |
-> | `extern int G; return G;` | `(+0x00, 109 R_PPC_EMB_SDA21, G)` | yes |
-> | `extern void h(void); h();` | `(+0x0c, 10 R_PPC_REL24, h)` | yes |
-> | `struct {char p[8]; int v;} G; return G.v;` | `(+0x02, 6 R_PPC_ADDR14, G)`, `(+0x06, 4 R_PPC_ADDR16_HI, G)` | **no** |
->
-> The `lis …@ha` should carry `R_PPC_ADDR16_HA` (5) and the `addi …@l` `R_PPC_ADDR16_LO`
-> (3). Both come out exactly one higher, and the offsets point at the immediate halfword
-> rather than the instruction. Two consequences, neither reachable from the C: `objdiff`
-> masks `R_PPC_ADDR14` with `0xFFFC`, so two bits of the `lis` immediate stay unmasked and
-> the word can never compare equal; and `datareloc` cannot address-check a type it does not
-> model, so even a byte-equal candidate would only be `MATCH_UNVERIFIED`.
+The corrected comparator checks the full symbol plus addend, maps each halfword
+to its instruction, and checks the actual relocated halfword against retail.
+That distinguishes HI from HA when the low half is negative. Wrong globals,
+addends, types, overflow and misaligned offsets cannot become verified matches.
+Unsupported implicit-addend `SHT_REL` objects are rejected.
 
-Small-data globals are unaffected — their `R_PPC_EMB_SDA21` is correct — and they are
-emitted normally, which is where most of this tier's new matches come from. Absolute
-globals are a **`compiler` refusal** today, in exactly the sense loops are, gated behind
-`seed_cfg.ABS_GLOBAL_BLOCKED` so that re-enabling them is one line. **713 functions and
-31,483 instructions are behind that one bug.**
-
-The `bctr` switch tables are in the same set: a jump table is reached through its own
-address, so all 117 functions and 32,934 instructions of `switch` wait on the same fix.
+With the seeder guard lifted, a CPU-only pass over 4,603 unmatched functions of
+at most 128 instructions recovered **66 functions / 642 instructions**. All 674
+registry entries and eight controls subsequently passed fresh compiler/retail
+verification. Repeating with Capstone installed recovered no further matches:
+4,221 seeder refusals and 316 compiler/C mismatches remain. This does not establish
+that all historically predicted 713 functions, or switch-table functions, are now
+recoverable. Those predictions must be remeasured.
 
 ### 10.4 Per-shape results
 
@@ -953,3 +981,19 @@ silently mistype it, and that is the error worth avoiding. Covered by selftest g
 
 CPU only. The GPU lease, the model server, the supervisor and the live pipeline state were
 not touched; nothing was downloaded; the retail GCM was read and never written.
+
+
+## Non-rotating bitmask lane (2026-11-11)
+
+`seed_cfg.Lifter.rlwinm` now models every `sh=0` mask range, including masks
+wrapping across PowerPC bit31/bit0. Exhaustive tests cover all 1,024 ranges against
+the bit-index definition and six input patterns. Existing shift handling is
+unchanged and unsupported rotated masks remain refused.
+
+The same bounded CPU-only pass (at most 128 instructions per function) recovered
+**8 functions / 102 instructions**. All **682 registered functions + 8 controls**
+passed fresh retail/compiler verification (**690 ok, 0 failed**). There are now
+**4,003/701,464 instructions proved (0.5707%)**. Remaining bounded queue:
+4,198 seeder refusals and 331 compiler/C mismatches. These are not total-game
+completion percentages. The existing high-bit signed-comparison rendering limit
+is documented in the completion checklist; no admitted source uses that case.

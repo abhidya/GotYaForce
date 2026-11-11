@@ -58,7 +58,7 @@ import {
   CHALLENGE_ALLY_POOL_GROUP_TABLE,
   CHALLENGE_ENEMY_POOL_GROUP_TABLE,
 } from "../challengeFlowTables.generated.js";
-import spawnPools from "../../../../../packages/assets/data/spawn-pools.json";
+import { CHALLENGE_GROUP_ROSTERS } from "@gf/missions";
 
 /** The 8-entry mode dispatch table `PTR_FUN_8036f560` (mode -> ROM fn address). */
 export const CHALLENGE_FLOW_MODE_TABLE = CHALLENGE_FLOW_MODE_DISPATCH;
@@ -640,6 +640,7 @@ interface RecordingSink extends ChallengeFlowEffectSink {
   boxReady: boolean;
   dismissed: boolean;
   drawnBorgs: number[];
+  random(): number;
   borgCosts: Record<number, number>;
   rerolled: number[];
 }
@@ -658,6 +659,7 @@ function createRecordingSink(overrides: Partial<RecordingSink> = {}): RecordingS
     boxReady: true,
     dismissed: true,
     drawnBorgs: [0x0615, 0x000a, 0x0101],
+    random: () => 0, // Deterministic recording tests; production RNG belongs to the host.
     borgCosts: { 0x0615: 300, 0x000a: 300, 0x0101: 300 },
     rerolled: [],
     onEnterChallenge() {},
@@ -692,13 +694,13 @@ function createRecordingSink(overrides: Partial<RecordingSink> = {}): RecordingS
       this.scenes.push(stageId);
     },
     drawBorgFromPool(poolGroupId: number) {
-      // zz_0196eb8_ @0x80196eb8 — uniform random pick from the ROM spawn pool table
-      // (research/decomp/data/spawn-pools-80380804.json, 80 groups). Each group is a
-      // -1-terminated array of 16-bit borg spawn IDs (family << 8 | variant).
-      const group = spawnPools.groups[poolGroupId];
-      if (!group || !group.ids.length) return this.drawnBorgs[0] ?? 0x0615;
-      const idx = Math.floor(Math.random() * group.ids.length);
-      return group.ids[idx] ?? this.drawnBorgs[0] ?? 0x0615;
+      // The committed Challenge subset preserves ROM order and repeated entries.
+      // Decode plHHHH back to family << 8 | variant; sample slots, not unique IDs.
+      const groups: Readonly<Record<number, readonly string[]>> = CHALLENGE_GROUP_ROSTERS;
+      const group = groups[poolGroupId];
+      if (!group?.length) return this.drawnBorgs[0] ?? 0x0615;
+      const id = group[Math.floor(this.random() * group.length)];
+      return id ? Number.parseInt(id.slice(2), 16) : this.drawnBorgs[0] ?? 0x0615;
     },
     borgCost(id) {
       return this.borgCosts[id] ?? 300;
@@ -720,6 +722,22 @@ function createRecordingSink(overrides: Partial<RecordingSink> = {}): RecordingS
 /** Run the Challenge-flow VM self-tests against the dumped tables and ROM semantics. */
 export function runChallengeFlowVmSelfTests(assert: ChallengeFlowVmSelfTestAssert): void {
   const { equal, ok } = assert;
+
+  // Generated pool shape, endpoints, duplicate weighting, and RNG consumption.
+  {
+    let draws = 0;
+    let roll = 0;
+    const sink = createRecordingSink({ random: () => { draws += 1; return roll; } });
+    equal(sink.drawBorgFromPool(48), 0x0008, "first pool slot decodes hexadecimal ID");
+    roll = 1 - Number.EPSILON;
+    equal(sink.drawBorgFromPool(48), 0x090b, "last pool slot is reachable");
+    roll = 5 / 11;
+    equal(sink.drawBorgFromPool(56), 0x0c00, "repeated pool slots preserve weighting");
+    equal(draws, 3, "one RNG draw per populated pool selection");
+    equal(sink.drawBorgFromPool(62), 0x0615, "empty pool uses recording fallback");
+    equal(sink.drawBorgFromPool(-1), 0x0615, "unknown pool uses recording fallback");
+    equal(draws, 3, "empty and missing pools do not consume RNG");
+  }
 
   // --- Mode table faithfulness (PTR_FUN_8036f560 from boot.dol) ----------------------
   equal(CHALLENGE_FLOW_MODE_TABLE[0]!.address, "0x80195fbc", "mode 0 = init_challenge_flow_state");
