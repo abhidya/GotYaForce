@@ -6,9 +6,9 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
 
 ## What is measured now
 
-- `src-match/matched.json` records **745 unique functions / 4,739 instructions**
-  (665 in `game/`, 80 in `sdk/`): **0.6756%** of the recorded 701,464-instruction census.
-  Freshly re-verified on the Windows rig: **745/745 functions + 8/8 controls**.
+- `src-match/matched.json` records **750 unique functions / 4,804 instructions**
+  (667 in `game/`, 83 in `sdk/`): **0.6849%** of the recorded 701,464-instruction census.
+  Freshly re-verified on the Windows rig: **750/750 functions + 8/8 controls**.
 - Historical 405-function and 583-function snapshots in the README and matching
   research notes describe earlier stages, not this registry inventory.
 - Fresh family audit: **232 ported / 93 partial / 0 missing** across 325 action
@@ -53,11 +53,17 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
    3,991 seeder refusals and 475 compiler/C mismatches within the 128-instruction
    bound. These aliases require explicit address bindings in a future linker;
    they do not establish a linked or playable port.
-7. **Next: one remaining compiler/seeder limitation**, with affected-function and
+7. **Bounded mechanical permutations: complete.** A 100-function pilot found
+   zero matches. The full remaining 4,466-function queue (at most 128 instructions
+   each) took 10,040 compiles and 100.5 seconds, recovering **five functions / 65
+   instructions**, with no model calls or harness changes. Full verification:
+   750 functions plus eight controls pass. Remaining bounded queue:
+   3,991 seeder refusals and 470 compiler/C mismatches.
+8. **Next: one remaining compiler/seeder limitation**, with affected-function and
    full-registry proof. This is not a whole-game finish.
 
 The coverage denominator stays 701,464 instructions. Neither a completed lane nor
-745/745 registry checks means unregistered code or gameplay is 100% complete.
+750/750 registry checks means unregistered code or gameplay is 100% complete.
 
 ## This increment
 
@@ -82,7 +88,7 @@ The coverage denominator stays 701,464 instructions. Neither a completed lane no
 
 | Work | Evidence needed | Acceptance gate |
 | --- | --- | --- |
-| Preserve registered matching C | All 745 entries verified on user-supplied GG4E and pinned fork | `python src-match/verify.py --control`; inspect every changed verdict, never delete failures to preserve a total |
+| Preserve registered matching C | All 750 entries verified on user-supplied GG4E and pinned fork | `python src-match/verify.py --control`; inspect every changed verdict, never delete failures to preserve a total |
 | Recover compiler-blocked functions | Reproduce compiler diagnostics on current fork; historical queues are in [matching-loop](matching-loop.md) | Compiler regression tests, then byte-exact retail comparisons with relocation checks |
 | Close Ninja physics gap | Compare `FUN_80067310` and host call timing with committed source and controlled traces | Dedicated helper/host tests; do not blindly use `integratePhysics`, which applies extra upper speed clamps |
 | Close remaining action state machines | Re-run `pnpm audit:family-state-machines`, select one partial action, trace its phase/dispatch/constants | Boundary tests plus ROM selfcheck; leave unknown host behavior explicitly partial |
@@ -122,7 +128,7 @@ checkout cannot establish asset delivery or visual parity.
   checks ran separately. The full-checkout GitHub contributor workflow passed on
   commit `96b3707c712fbedefef038929d6636e5f54d972d` after the absolute-global lane.
   Browser smoke and visual parity remain unmeasured.
-- Windows retail verification: **753 ok, 0 failed** (745 functions + eight controls).
+- Windows retail verification: **758 ok, 0 failed** (750 functions + eight controls).
   Independent extractor/comparator selftest passed; pinned compiler fork integrity
   passed all eight checks. No compiler modification was needed.
 - Compiler SHA-256:
@@ -134,3 +140,7 @@ Mask expression tests prove bit selection, not every surrounding C expression.
 Direct signed high-bit mask ordering now uses a target `int` cast; its meaning
 relies on the target's two's-complement conversion behavior. Compound expressions
 still need compiler/retail proof. The correction adds no claimed matching coverage.
+
+Generated matched C is compiler-specific evidence, not portable-source certification.
+Some declarations still reflect raw 32-bit ABI values or retained argument registers.
+Those signatures need explicit reconstruction before a portable gameplay build.
