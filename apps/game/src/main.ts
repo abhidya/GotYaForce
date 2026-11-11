@@ -1610,7 +1610,10 @@ function tick(): void {
   const dt = Math.min(renderClock.getDelta(), RENDER_MAX_DELTA_SECONDS);
   const screen = challengeSession.snapshot().screen;
   if (screen === "battle" || screen === "results") {
-    battleScene.update(dt);
+    // Pause the battle presentation clock with the simulation. Keep sampling the render
+    // clock above so resume cannot catch up paused time; results and UI keep animating.
+    // Authored audio timers are separate and are not changed by this presentation gate.
+    if (screen === "results" || !session?.paused) battleScene.update(dt);
     if (screen === "battle") followCamera();
   }
   updateBattleDebugDataset();
