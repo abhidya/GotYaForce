@@ -543,8 +543,21 @@ def render(e, names, prec=0):
     if k in ("bin", "cmp"):
         op = e.a[0]
         p = PREC[op]
-        s = "%s %s %s" % (render(e.a[1], names, p), op,
-                          render(e.a[2], names, p + 1))
+        left, right = e.a[1], e.a[2]
+        if k == "cmp" and e.a[3] and op in ("<", "<=", ">", ">="):
+            # A hex mask with bit31 set is unsigned in target C. Recover the
+            # signed register interpretation for ordering, without converting
+            # floating comparisons or changing unsigned/equality predicates.
+            def signed_mask(x):
+                if x.k == "bin" and x.a[0] == "&" and any(
+                        a.k == "const" and isinstance(a.a[0], int)
+                        and 0x80000000 <= a.a[0] <= 0xffffffff
+                        for a in x.a[1:]):
+                    return E("cast", "int", x)
+                return x
+            left, right = signed_mask(left), signed_mask(right)
+        s = "%s %s %s" % (render(left, names, p), op,
+                          render(right, names, p + 1))
         return "(%s)" % s if p < prec else s
     if k == "logic":
         op = e.a[0]

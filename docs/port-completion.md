@@ -33,7 +33,13 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
    PowerPC mask ranges, including wrapped ranges. Added **8 functions / 102
    instructions**. All 682 entries and eight controls pass. Remaining bounded
    queue: 4,198 seeder refusals and 331 compiler/C mismatches.
-4. **Next: one remaining compiler/seeder limitation**, with affected-function and
+4. **Signed high-bit mask ordering: corrected for direct mask operands.** Restore
+   signed register interpretation on the target without casting floating-point,
+   unsigned, or equality comparisons. A bounded dry run recovered **zero** new
+   functions; coverage is unchanged. The pinned compiler emitted identical code
+   before/after the cast for the tested sign predicate, so this is a source
+   interpretation correction, not a demonstrated codegen recovery.
+5. **Next: one remaining compiler/seeder limitation**, with affected-function and
    full-registry proof. This is not a whole-game finish.
 
 The coverage denominator stays 701,464 instructions. Neither a completed lane nor
@@ -92,7 +98,7 @@ checkout cannot establish asset delivery or visual parity.
 ## Validation for this increment
 
 - Passed: frozen install, repo policy, TypeScript build, matching negative controls
-  (27 tests), matching-loop selftest (71 checks), ROM suite, camera suite,
+  (31 tests), matching-loop selftest (71 checks), ROM suite, camera suite,
   Challenge VM (60 checks), disposal (3 tests), lifecycle, menu/session/title
   selfchecks, importer (9 tests), production game build, and atlas build with
   `GF_ATLAS_SKIP_MODELS=1`.
@@ -111,6 +117,6 @@ checkout cannot establish asset delivery or visual parity.
   game asset was downloaded or added by this work.
 
 Mask expression tests prove bit selection, not every surrounding C expression.
-The existing comparison renderer can mishandle signed ordering after a high-bit
-mask; none of the eight admitted mask functions uses that pattern. Such future
-candidates still require compiler/retail proof and must not bypass the oracle.
+Direct signed high-bit mask ordering now uses a target `int` cast; its meaning
+relies on the target's two's-complement conversion behavior. Compound expressions
+still need compiler/retail proof. The correction adds no claimed matching coverage.
