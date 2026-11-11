@@ -1041,6 +1041,20 @@ class BattleImpl implements Battle {
     const all = this.state.borgs;
     const profiles = this.profiles;
 
+    // Source order: actor status/movement consumes the previous contact phase, then
+    // battle_frame_target_action_dispatch clears +0x70c/+0x70d before new contacts
+    // (chunk_0003.c:4322/4337, 5949-5950, 6213-6215). Our actors interleave movement
+    // and attacks, so freeze only these aura inputs for EVERY actor first, then clear
+    // every contact accumulator. Clearing per actor would erase earlier actors' hits.
+    const movementAuras = new Map(all.map((b) => [b.uid, {
+      slowAuraLevel: b.slowAuraLevel ?? 0,
+      hasteAuraLevel: b.hasteAuraLevel ?? 0,
+    }]));
+    for (const b of all) {
+      b.slowAuraLevel = 0;
+      b.hasteAuraLevel = 0;
+    }
+
     // 1) Resolve an input for every active borg (player input or AI).
     const resolved = new Map<string, PlayerInput>();
     for (const force of this.forces) {
@@ -1089,9 +1103,9 @@ class BattleImpl implements Battle {
       stepInvincibility(b);
       stepGaugeWindows(b);
       // Hit-inflicted status decay (status-effects-decode-2026-07-04.md): UNCONDITIONAL,
-      // unlike stepGaugeWindows — clears aura levels for re-application this frame and ticks
-      // the discrete slow/haste/freeze/size-tier/hero-buff timers regardless of hit reaction.
-      stepHitStatus(b);
+      // unlike stepGaugeWindows. Auras were cleared globally above; only tick discrete
+      // slow/haste/freeze/size-tier/hero-buff timers here, regardless of hit reaction.
+      stepHitStatus(b, false);
 
       // Source lock-on is continuous for active borgs. R/L are edge-triggered switch-lock
       // (+0x73c = 2/3). Z is hold-ally-lock: press requests ally lock (+0x73c = 5), release
@@ -1121,7 +1135,10 @@ class BattleImpl implements Battle {
 
       const activeTargetUid = activeSourceTargetUid(b);
       const lockPos = activeTargetUid ? this.byUid.get(activeTargetUid)?.pos ?? null : null;
-      const ctx: MoveContext = { lockTargetPos: lockPos, bounds: this.bounds, collision: this.collision };
+      const ctx: MoveContext = {
+        lockTargetPos: lockPos, bounds: this.bounds, collision: this.collision,
+        auraLevels: movementAuras.get(b.uid)!,
+      };
 
       // Lethal/death lifecycle is host-owned and outranks any family action module. A ROM
       // special can own movement and attacks, but it must not consume the frame that advances

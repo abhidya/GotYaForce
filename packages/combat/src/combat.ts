@@ -2008,13 +2008,18 @@ export function stepGaugeWindows(b: BorgRuntime): void {
  * freeze while the borg is in a hit reaction (FUN_8005a378/the timer decrements chunk_0007.c:
  * 2839-2893 have no state gate). Call once per frame per borg, BEFORE that frame's hits are
  * applied, so aura levels (which carry no timer — they're re-applied per contact frame) start
- * this frame at 0 and only read as "active" if a hitbox still overlaps this frame.
+ * this frame at 0. Battle separately preserves the prior contact phase for movement;
+ * its clear is global, before any actor attacks (contact-aura-frame-order-2026-11-11.md).
  */
-export function stepHitStatus(b: BorgRuntime): void {
+export function stepHitStatus(b: BorgRuntime, clearAuras = true): void {
   // Aura levels: cleared every frame (chunk_0003.c:5949-5950); applyHitInflictedStatus
   // re-raises them later this same frame for anyone still overlapping an aura hitbox.
-  b.slowAuraLevel = 0;
-  b.hasteAuraLevel = 0;
+  // Battle snapshots and clears ALL actors before its interleaved movement/attack loop,
+  // then passes false here. Standalone callers retain the original clear behavior.
+  if (clearAuras) {
+    b.slowAuraLevel = 0;
+    b.hasteAuraLevel = 0;
+  }
 
   // Discrete slow/haste-on-hit: 900f timers, clear the level at 0 (chunk_0007.c:2839-2851).
   if ((b.slowHitTimer ?? 0) > 0) {
