@@ -467,23 +467,42 @@ export function createBorgPresentationAssets(options: BorgPresentationAssetsOpti
     pl0a0a: { special: ["attack_s7"] }, // 71f
   };
 
-  async function loadAnimIndex(id: string): Promise<AnimIndex | null> {
-    let p = animIndexCache.get(id);
+  /** Keep authoritative absence cached, but let later spawns/slot transitions retry failures.
+   * Rejections stay internal so dependent clip entries are evicted too; public clip hooks
+   * still resolve null. Identity checks cannot remove a newer attempt for the same key. */
+  function cacheAnimation<T>(cache: Map<string, Promise<T>>, key: string, load: () => Promise<T>): Promise<T> {
+    let p = cache.get(key);
     if (!p) {
-      const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
-      p = fetch(publicUrl(`/models/${sourceId}/anim_index.json`))
-        .then((r) => (r.ok ? (r.json() as Promise<AnimIndex>) : null))
-        .then((index) => index ? {
-          ...index,
-          borg: id,
-          // Only the group-2 bank identity is ROM-proven for internal forms. Do not let
-          // generic label heuristics select the base robot's group-0/1/4 animations.
-          banks: INTERNAL_MORPH_PRESENTATION[id] ? index.banks.filter((bank) => bank.group === 2) : index.banks,
-        } : null)
-        .catch(() => null);
-      animIndexCache.set(id, p);
+      p = Promise.resolve().then(load).catch((error: unknown) => {
+        if (cache.get(key) === p) cache.delete(key);
+        throw error;
+      });
+      cache.set(key, p);
     }
     return p;
+  }
+
+  async function fetchAnimationJson<T>(url: string): Promise<T | null> {
+    const response = await fetch(url);
+    if (response.status === 404) return null;
+    // Only 404 means absent. Other HTTP failures (including 429/5xx), network errors,
+    // and invalid JSON are retryable rather than permanent negative cache entries.
+    if (!response.ok) throw new Error(`Animation request failed (${response.status}): ${url}`);
+    return response.json() as Promise<T>;
+  }
+
+  function loadAnimIndex(id: string): Promise<AnimIndex | null> {
+    return cacheAnimation(animIndexCache, id, async () => {
+      const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
+      const index = await fetchAnimationJson<AnimIndex>(publicUrl(`/models/${sourceId}/anim_index.json`));
+      if (index && !Array.isArray(index.banks)) throw new Error(`Invalid animation index for ${id}`);
+      return index ? {
+        ...index,
+        borg: id,
+        // Only group 2 is ROM-proven for internal forms. Preserve the base-form filter.
+        banks: INTERNAL_MORPH_PRESENTATION[id] ? index.banks.filter((bank) => bank.group === 2) : index.banks,
+      } : null;
+    });
   }
 
   // Variant slots reuse another slot's label tables but pick the Nth distinct matching
@@ -552,42 +571,26 @@ export function createBorgPresentationAssets(options: BorgPresentationAssetsOpti
   }
 
   async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.AnimationClip | null> {
-    const key = `${id}:${slot}`;
-    let p = clipCache.get(key);
-    if (!p) {
-      p = loadAnimIndex(id)
-        .then((index) => {
-          const bank = index ? pickAnimBank(index, slot) : null;
-          const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
-          return bank ? fetch(publicUrl(`/models/${sourceId}/${bank.file}`)) : null;
-        })
-        .then((r) => (r?.ok ? (r.json() as Promise<BakedClip>) : null))
-        .then((json) => (json ? buildClip(json) : null))
-        .catch(() => null);
-      clipCache.set(key, p);
-    }
-    return p;
+    return cacheAnimation(clipCache, `${id}:${slot}`, async () => {
+      const index = await loadAnimIndex(id);
+      const bank = index ? pickAnimBank(index, slot) : null;
+      const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
+      const json = bank ? await fetchAnimationJson<BakedClip>(publicUrl(`/models/${sourceId}/${bank.file}`)) : null;
+      return json ? buildClip(json) : null;
+    }).catch(() => null);
   }
 
   async function loadBorgClipByStreamRef(
     id: string,
     ref: { group: number; slot: number },
   ): Promise<THREE.AnimationClip | null> {
-    const key = `${id}:g${ref.group}s${ref.slot}`;
-    let p = clipCache.get(key);
-    if (!p) {
-      p = loadAnimIndex(id)
-        .then((index) => {
-          const bank = index?.banks.find((b) => b.group === ref.group && b.slot === ref.slot) ?? null;
-          const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
-          return bank ? fetch(publicUrl(`/models/${sourceId}/${bank.file}`)) : null;
-        })
-        .then((r) => (r?.ok ? (r.json() as Promise<BakedClip>) : null))
-        .then((json) => (json ? buildClip(json) : null))
-        .catch(() => null);
-      clipCache.set(key, p);
-    }
-    return p;
+    return cacheAnimation(clipCache, `${id}:g${ref.group}s${ref.slot}`, async () => {
+      const index = await loadAnimIndex(id);
+      const bank = index?.banks.find((b) => b.group === ref.group && b.slot === ref.slot) ?? null;
+      const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
+      const json = bank ? await fetchAnimationJson<BakedClip>(publicUrl(`/models/${sourceId}/${bank.file}`)) : null;
+      return json ? buildClip(json) : null;
+    }).catch(() => null);
   }
 
   return {
