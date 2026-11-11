@@ -1907,35 +1907,11 @@ REFUSALS = ("integrity", "compiler", "seeder")
 
 
 # ---------------------------------------------------------------------------
-# 9. one measured compiler blocker, stated so flipping it back is one line
+# 9. absolute-global emission
 # ---------------------------------------------------------------------------
 
-# mwcc-rs build 2.7 emits the WRONG RELOCATION TYPES for an absolutely
-# addressed global.  Measured directly out of the object file:
-#
-#     extern int G;                        -> (0, 109 R_PPC_EMB_SDA21, G)   OK
-#     extern void h(void); h();            -> (12, 10 R_PPC_REL24,     h)   OK
-#     struct {char p[8]; int v;} G; G.v    -> (2,  6  R_PPC_ADDR14,    G)   WRONG
-#                                             (6,  4  R_PPC_ADDR16_HI, G)   WRONG
-#
-# The `lis @ha` should carry R_PPC_ADDR16_HA (5) and the `addi @l`
-# R_PPC_ADDR16_LO (3); both come out exactly one higher, and the offsets point
-# at the immediate halfword rather than the instruction.  Two consequences,
-# and neither is reachable from the C:
-#
-#   * `objdiff` masks R_PPC_ADDR14 with 0xFFFC, so two bits of the `lis`
-#     immediate stay unmasked and the word compares unequal no matter what the
-#     candidate says;
-#   * `datareloc.check_data_relocs` cannot address-check a type it does not
-#     model, so even a byte-equal candidate would only be MATCH_UNVERIFIED.
-#
-# So an absolutely addressed global is a COMPILER refusal today, in exactly the
-# sense loops are: attempting it costs a compile to be told the same thing.
-# Small-data (r13/r2) globals are unaffected -- their R_PPC_EMB_SDA21 is
-# correct -- and they are emitted normally.
-ABS_GLOBAL_BLOCKED = True
-ABS_GLOBAL_REASON = (
-    "an absolutely addressed global (`lis`/`addi`) at 0x%08x: mwcc-rs 2.7 tags "
-    "the pair R_PPC_ADDR14 + R_PPC_ADDR16_HI instead of ADDR16_HA + ADDR16_LO, "
-    "so the operand can be neither masked nor address-checked -- see "
-    "seed_cfg.ABS_GLOBAL_BLOCKED")
+# PowerPC ELF uses HA=6 and LO=4 at instruction halfword offsets +2.
+# Those are the standard relocations emitted by mwcc-rs, not a compiler bug.
+# objdiff/datareloc verify both the resolved target and the linker-written bits.
+ABS_GLOBAL_BLOCKED = False
+ABS_GLOBAL_REASON = "absolute-global emission is disabled at 0x%08x"

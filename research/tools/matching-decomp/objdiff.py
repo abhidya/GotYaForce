@@ -75,10 +75,12 @@ SHT_RELA, SHT_REL, SHT_SYMTAB = 4, 9, 2
 # (name, mask of the bits the relocation OWNS in the 32-bit instruction word)
 PPC_RELOC = {
     1:  ("R_PPC_ADDR32", 0xFFFFFFFF),
-    3:  ("R_PPC_ADDR16_LO", 0x0000FFFF),
-    4:  ("R_PPC_ADDR16_HI", 0x0000FFFF),
-    5:  ("R_PPC_ADDR16_HA", 0x0000FFFF),
-    6:  ("R_PPC_ADDR14", 0x0000FFFC),
+    2:  ("R_PPC_ADDR24", 0x03FFFFFC),
+    3:  ("R_PPC_ADDR16", 0x0000FFFF),
+    4:  ("R_PPC_ADDR16_LO", 0x0000FFFF),
+    5:  ("R_PPC_ADDR16_HI", 0x0000FFFF),
+    6:  ("R_PPC_ADDR16_HA", 0x0000FFFF),
+    7:  ("R_PPC_ADDR14", 0x0000FFFC),
     10: ("R_PPC_REL24", 0x03FFFFFC),
     11: ("R_PPC_REL14", 0x0000FFFC),
     26: ("R_PPC_REL32", 0xFFFFFFFF),
@@ -153,6 +155,8 @@ class Elf32BE(object):
                 continue
             if s["name"] not in (".rela" + secname, ".rel" + secname):
                 continue
+            if s["type"] == SHT_REL:
+                raise ValueError("SHT_REL implicit addends are not supported; require RELA")
             rela = s["type"] == SHT_RELA
             step = 12 if rela else 8
             d = self.data(s)
@@ -234,7 +238,7 @@ def compare(retail, cand, cand_relocs=None, base_addr=0,
                 "reloc_mask": "0x%08x" % mask,
             })
 
-    size_ok = len(rw) == len(cw)
+    size_ok = len(retail) == len(cand) and len(retail) % 4 == 0
     verdict = "MATCH" if (size_ok and not diffs) else "MISMATCH"
 
     # symbol check on BRANCH relocations

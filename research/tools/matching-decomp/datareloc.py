@@ -114,7 +114,7 @@ REPO_DEFAULT = Path("D:/GotYaForce")
 # Relocation type numbers whose operand names a DATA address.  R_PPC_REL24 /
 # REL14 are NOT here: those are branch targets and `match.py.expected_symbols`
 # already name-checks them through the link map.
-R_ADDR32, R_ADDR16, R_ADDR16_LO, R_ADDR16_HI, R_ADDR16_HA = 1, 2, 3, 4, 5
+R_ADDR32, R_ADDR16, R_ADDR16_LO, R_ADDR16_HI, R_ADDR16_HA = 1, 3, 4, 5, 6
 R_EMB_SDA21 = 109
 
 DATA_RELOC_TYPES = {R_ADDR32, R_ADDR16, R_ADDR16_LO, R_ADDR16_HI,
@@ -499,10 +499,15 @@ def check_data_relocs(retail, base_addr, cand_relocs, retail_addrs,
             continue
         if rtype == R_ADDR32:
             want = struct.unpack_from(">I", retail, off)[0] \
-                if off + 4 <= len(retail) else None
+                if off >= 0 and off % 4 == 0 and off + 4 <= len(retail) else None
             how = "addr32-word"
         else:
-            hit = retail_addrs.get(off)
+            halfword = rtype in {R_ADDR16, R_ADDR16_LO, R_ADDR16_HI, R_ADDR16_HA}
+            if not halfword and (off % 4 or off < 0 or off + 4 > len(retail)):
+                unverified.append({"offset": off, "type": rn, "symbol": name,
+                                   "reason": "invalid instruction relocation offset"})
+                continue
+            hit = retail_addrs.get(off & ~3 if halfword else off)
             want, how = (hit if hit else (None, None))
         if want is None:
             unverified.append({
@@ -522,6 +527,22 @@ def check_data_relocs(retail, base_addr, cand_relocs, retail_addrs,
         row = {"offset": off, "type": rn, "symbol": name, "addend": addend,
                "retail_addr": "0x%08x" % want, "cand_addr": "0x%08x" % got,
                "retail_how": how, "symbol_source": source}
+        if rtype in {R_ADDR16, R_ADDR16_LO, R_ADDR16_HI, R_ADDR16_HA}:
+            # ELF offsets address the immediate halfword, not the instruction.
+            # Prove the actual linker-written bits too: identical full targets
+            # alone cannot distinguish HI from HA when the low half is signed.
+            if off < 0 or off % 4 != 2 or off + 2 > len(retail):
+                unverified.append(dict(row, reason="invalid instruction halfword relocation offset"))
+                continue
+            if rtype == R_ADDR16 and not (got <= 0xffff or got >= 0xffff8000):
+                errors.append(dict(row, reason="R_PPC_ADDR16 value overflows a 16-bit field"))
+                continue
+            patched = (got >> 16) if rtype == R_ADDR16_HI else (
+                (got + 0x8000) >> 16 if rtype == R_ADDR16_HA else got)
+            actual = struct.unpack_from(">H", retail, off)[0]
+            if (patched & 0xffff) != actual:
+                errors.append(dict(row, reason="relocated halfword does not equal retail encoding"))
+                continue
         if got != want:
             errors.append(dict(row, reason=(
                 "the retail bytes reference 0x%08x; '%s'%s is 0x%08x"

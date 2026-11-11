@@ -6,9 +6,9 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
 
 ## What is measured now
 
-- `src-match/matched.json` records **608 unique functions / 3,259 instructions**
-  (562 game, 46 SDK): **0.4646%** of the recorded 701,464-instruction census.
-  This is registry inventory, **not a fresh compiler/retail re-verification**.
+- `src-match/matched.json` records **674 unique functions / 3,901 instructions**
+  (626 game, 48 SDK): **0.5561%** of the recorded 701,464-instruction census.
+  Freshly re-verified on the Windows rig: **674/674 functions + 8/8 controls**.
 - Historical 405-function and 583-function snapshots in the README and matching
   research notes describe earlier stages, not this registry inventory.
 - Fresh family audit: **232 ported / 93 partial / 0 missing** across 325 action
@@ -18,6 +18,22 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
   [PORT-1TO1-STATUS](../research/decomp/PORT-1TO1-STATUS.md). Its historical DONE
   labels must not be summed with matching-decompilation counts.
 - No full-game 1:1 result is established by the changes below.
+
+## Sequential matching lanes
+
+1. **Baseline verification: complete.** The original 608 entries and eight controls
+   passed using the user-supplied GG4E image and existing pinned compiler.
+2. **Absolute-global recovery: complete for this bounded pass.** Correct standard
+   ELF IDs and halfword offsets, prove symbol+addend and actual linked bits, and
+   re-enable the seeder. Added **66 functions / 642 instructions** without model
+   calls. All 674 entries and eight controls pass. A repeat over the remaining
+   4,537 functions of at most 128 instructions found zero extra matches:
+   4,221 seeder refusals and 316 compiler/C mismatches remain.
+3. **Next: address one remaining compiler/seeder limitation**, then rerun affected
+   matches and the full registry. This is not a whole-game finish.
+
+The coverage denominator stays 701,464 instructions. Neither a completed lane nor
+674/674 registry checks means unregistered code or gameplay is 100% complete.
 
 ## This increment
 
@@ -42,7 +58,7 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
 
 | Work | Evidence needed | Acceptance gate |
 | --- | --- | --- |
-| Re-verify registered matching C | User-supplied GG4E disc dump and pinned `mwcc-rs` fork | `python src-match/verify.py --control`; inspect every changed verdict, never delete failures to preserve a total |
+| Preserve registered matching C | All 674 entries verified on user-supplied GG4E and pinned fork | `python src-match/verify.py --control`; inspect every changed verdict, never delete failures to preserve a total |
 | Recover compiler-blocked functions | Reproduce compiler diagnostics on current fork; historical queues are in [matching-loop](matching-loop.md) | Compiler regression tests, then byte-exact retail comparisons with relocation checks |
 | Close Ninja physics gap | Compare `FUN_80067310` and host call timing with committed source and controlled traces | Dedicated helper/host tests; do not blindly use `integratePhysics`, which applies extra upper speed clamps |
 | Close remaining action state machines | Re-run `pnpm audit:family-state-machines`, select one partial action, trace its phase/dispatch/constants | Boundary tests plus ROM selfcheck; leave unknown host behavior explicitly partial |
@@ -72,14 +88,20 @@ checkout cannot establish asset delivery or visual parity.
 ## Validation for this increment
 
 - Passed: frozen install, repo policy, TypeScript build, matching negative controls
-  (10 tests), matching-loop selftest (63 checks), ROM suite, camera suite,
+  (24 tests), matching-loop selftest (71 checks), ROM suite, camera suite,
   Challenge VM (60 checks), disposal (3 tests), lifecycle, menu/session/title
   selfchecks, importer (9 tests), production game build, and atlas build with
   `GF_ATLAS_SKIP_MODELS=1`.
 - Historical oracle fixture suite: 81 passed, 1 explicitly skipped because its
   private MEM1 captures are absent. This does not verify new matched C.
-- `verify:contributor` is **not locally green**: its HUD stage requires three
-  game image assets absent from this source-only checkout. The subsequent checks
-  above were run separately. Browser smoke and asset-delivery parity were not run.
-- Retail matching corpus verification is blocked by the absent user-supplied GCM
-  and pinned compiler. No model, ROM, or proprietary SDK was downloaded.
+- The source-only local contributor gate stopped at absent HUD assets; subsequent
+  checks ran separately. The full-checkout GitHub contributor workflow passed on
+  commit `a0aaf7a101f6be71b4ca8ec7613cd7d9ddf3c37f` before this matching update.
+  Browser smoke and visual parity remain unmeasured.
+- Windows retail verification: **682 ok, 0 failed** (674 functions + eight controls).
+  Independent extractor/comparator selftest passed; pinned compiler fork integrity
+  passed all eight checks. No compiler modification was needed.
+- Compiler SHA-256:
+  `6bb0af011a5897e790e280a2caa8e439a3055cb3df55153809f1d3f2df2a5486`.
+  Existing user-supplied disc read in place. No ROM, proprietary SDK, model, or
+  game asset was downloaded or added by this work.
