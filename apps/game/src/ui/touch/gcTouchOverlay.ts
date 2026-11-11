@@ -526,7 +526,7 @@ export function createGcTouchOverlay(options: GcTouchOverlayOptions = {}): GcTou
     if (stick.trackId === ev.pointerId) releaseStick();
   }
 
-  /** Release everything — used on hide, destroy, and visibility loss. */
+  /** Release everything — used on hide, destroy, and focus/visibility loss. */
   function releaseAll(): void {
     for (const b of buttons) releaseButton(b);
     releaseDpad();
@@ -594,6 +594,9 @@ export function createGcTouchOverlay(options: GcTouchOverlayOptions = {}): GcTou
   window.addEventListener("pointermove", onPointerMove, { passive: false });
   window.addEventListener("pointerup", onPointerUp, { passive: true });
   window.addEventListener("pointercancel", onPointerUp, { passive: true });
+  // Losing focus need not hide the page (for example, another desktop window).
+  // A release there may never deliver pointerup to our window.
+  window.addEventListener("blur", releaseAll);
   document.addEventListener("visibilitychange", onVisibilityChange);
 
   layout();
@@ -614,6 +617,7 @@ export function createGcTouchOverlay(options: GcTouchOverlayOptions = {}): GcTou
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
+      window.removeEventListener("blur", releaseAll);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       root.remove();
     },
