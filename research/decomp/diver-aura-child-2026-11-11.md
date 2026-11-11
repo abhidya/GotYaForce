@@ -77,3 +77,31 @@ A semantic negative control bundles the same test with only Battle's dedicated
 spawner dispatch bypassed (imports and fields retained). It fails specifically
 `pl0805 actual X did not spawn an aura child`, proving this is not merely a
 synthetic status test or a compile-failure control.
+
+## Generic special presentation correction
+
+The scene no longer manufactures a fireball/ring when an actor merely enters the
+special animation slot. Diver entry (`FUN_80116854`, chunk_0031.c:3387-3423)
+prepares motion/animation; child creation in `FUN_80116944` follows positive stream
+contact and successful cell-2 allocation. An unconditional entry explosion falsely
+presented a radial attack before that event, including unsuccessful empty X actions.
+
+The port's actual generic radial fallback in `startSpecialAttack` now emits a
+sampled-position, monotonic-serial presentation event, after the projectile-special
+branch returns. The scene consumes that event once, independent of animation-slot
+changes. Its ring diameter follows the fallback mechanic's configured radius and
+charge multiplier. This preserves generic AoE readability without adding that
+visual to ROM actions or projectile specials. The fallback textures, fireball,
+colors and timing remain TUNED; this is not evidence of original effect parity.
+Diver mesh attachment, pulse and other approximation boundaries above are unchanged.
+
+The scene selfcheck now renders actual Battle actor views for all three Divers,
+including entry before contact, source aura creation, and repeated empty X presses.
+Isolated generic-fallback fixtures use real Battle actors, a fixture-local profile
+and no ROM driver to check event snapshots, custom/charged radius, repeated sync,
+a second attack without a rendered idle transition, and projectile suppression.
+
+A semantic negative-control bundle restores the old special-slot trigger while
+keeping all new types and event code. It fails on `pl0805 entry before contact has
+no manufactured burst`, rather than an import/compile failure. Focused scene tests,
+the scene morph/lifetime/retirement/size aggregate, and root typecheck pass.

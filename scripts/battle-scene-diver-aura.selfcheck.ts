@@ -2,6 +2,11 @@ import * as THREE from "three";
 import { BattleScene } from "../apps/game/src/sim/battleScene.js";
 import { createBattle, battleStateForSelfcheck } from "../packages/combat/src/battle.js";
 import { emptyInput } from "../packages/combat/src/types.js";
+import { stepAttacks, X_CHARGE } from "../packages/combat/src/combat.js";
+import { buildProfile } from "../packages/combat/src/stats.js";
+import { actionProfileForProfile } from "../packages/combat/src/actionProfiles.js";
+import { xChargeMoveForBorgId } from "../packages/combat/src/moveRuntime.js";
+import { CHARGE } from "../packages/combat/src/constants.js";
 import type { BorgStats } from "../packages/combat/src/stats.js";
 import borgs from "../packages/assets/data/borgs.json";
 import { battleSceneState } from "../apps/game/src/sim/presentation.js";
@@ -24,7 +29,20 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   const internals = scene as unknown as {
     diverAuraActors: Map<string, { node: THREE.Group; materials: THREE.MeshBasicMaterial[] }>;
     projectileActors: Map<string, { node: THREE.Object3D; beam: boolean }>;
-    impactActors: unknown[]; bankFxActors: unknown[];
+    ringTexture: THREE.Texture | null;
+    spawnSpecialBurst: (pos: { x: number; y: number; z: number }, radius: number) => void;
+    impactActors: Array<{ endScale: THREE.Vector2 }>; bankFxActors: unknown[];
+  };
+  internals.ringTexture = new THREE.Texture();
+  const bursts: Array<{ pos: { x: number; y: number; z: number }; radius: number }> = [];
+  const spawnBurst = internals.spawnSpecialBurst.bind(scene);
+  internals.spawnSpecialBurst = (pos, radius) => {
+    bursts.push({ pos: { ...pos }, radius }); spawnBurst(pos, radius);
+  };
+  const syncBattle = (battle: ReturnType<typeof createBattle>) => {
+    const snapshot = battleSceneState(battle, null);
+    scene.sync(snapshot.actors, snapshot.projectiles, null, false, snapshot.projectileDespawns, snapshot.diverAuras);
+    return snapshot;
   };
   // Synthetic observation exercises scale propagation, including source init .01.
   // Real X is tested below; its first observable update already uses owner scale.
@@ -95,11 +113,14 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
       p1: { ...emptyInput(), special }, p2: emptyInput(),
     });
     for (let i = 0; i < 40; i++) tick();
+    syncBattle(battle);
     tick(true);
-    for (let i = 0; i < 90 && battle.observe().diverAuras.length === 0; i++) tick();
+    syncBattle(battle);
+    assert(bursts.length === 0 && battle.observe().diverAuras.length === 0, `${id} entry before contact has no manufactured burst`);
+    for (let i = 0; i < 90 && battle.observe().diverAuras.length === 0; i++) { tick(); syncBattle(battle); }
     assert(battle.observe().diverAuras.length === 1, `${id} real X creates child`);
     const snapshot = battleSceneState(battle, null);
-    scene.sync([], snapshot.projectiles, null, false, snapshot.projectileDespawns, snapshot.diverAuras);
+    scene.sync(snapshot.actors, snapshot.projectiles, null, false, snapshot.projectileDespawns, snapshot.diverAuras);
     const actual = snapshot.diverAuras[0]!;
     const actualNode = internals.diverAuraActors.get(actual.uid)!.node;
     assert(actualNode.position.equals(new THREE.Vector3(actual.pos.x, actual.pos.y, actual.pos.z)),
@@ -108,15 +129,69 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
     owner.pos.x += 100;
     tick();
     const movedSnapshot = battleSceneState(battle, null);
-    scene.sync([], movedSnapshot.projectiles, null, false, movedSnapshot.projectileDespawns, movedSnapshot.diverAuras);
+    scene.sync(movedSnapshot.actors, movedSnapshot.projectiles, null, false, movedSnapshot.projectileDespawns, movedSnapshot.diverAuras);
     assert(internals.diverAuraActors.get(actual.uid)!.node === actualNode && actualNode.position.x === owner.pos.x,
       `${id} real child follows updated owner`);
+    assert(bursts.length === 0, `${id} authored aura has no generic burst`);
+    // Repeated empty presses: keep the real source X cell empty despite refill ticks.
+    for (let i = 0; i < 160; i++) {
+      owner.weaponCells![1]!.cur = 0;
+      tick(i % 40 === 0); syncBattle(battle);
+    }
+    assert(bursts.length === 0 && !owner.fallbackSpecialBurst, `${id} empty X never emits fallback event`);
     owner.hp = 0; owner.alive = false;
     tick();
     const deadSnapshot = battleSceneState(battle, null);
     scene.sync([], [], null, false, [], deadSnapshot.diverAuras);
     assert(!actualNode.parent, `${id} owner death removes real child visual`);
     scene.clear();
+    await Promise.resolve(); await Promise.resolve();
+  }
+  // Isolate the generic fallback producer using real Battle actors but no ROM driver.
+  // The profile belongs only to this fixture; custom radius does not alter catalog data.
+  const charged = (borgs.borgs as BorgStats[]).find((b) => xChargeMoveForBorgId(b.id) !== null)!;
+  for (const [stats, charge] of [[(borgs.borgs as BorgStats[]).find((b) => b.id === "pl0804")!, false], [charged, true]] as const) {
+    const battle = createBattle({ stageId: "st00", forces: [
+      { team: 0, ownerPlayer: "p1", borgIds: [stats.id] },
+      { team: 1, ownerPlayer: "p2", borgIds: ["pl0804"] },
+    ], bounds: { x: 2000, z: 2000 } }, borgs.borgs as BorgStats[]);
+    const owner = battleStateForSelfcheck(battle).borgs[0]!;
+    owner.romDriver = undefined;
+    const profile = buildProfile(stats);
+    const action = actionProfileForProfile(profile);
+    action.special.archetype = "aoe"; action.special.radius = 173;
+    const fire = () => {
+      battleStateForSelfcheck(battle);
+      owner.state = "idle"; owner.cooldowns = {};
+      for (const cell of owner.weaponCells ?? []) cell.cur = cell.max;
+      stepAttacks(owner, profile, false, true, [owner], new Map([[owner.uid, profile]]));
+      if (charge) {
+        owner.cooldowns["xChargeFrames"] = X_CHARGE.TIER2_FRAMES;
+        stepAttacks(owner, profile, false, false, [owner], new Map([[owner.uid, profile]]));
+      }
+    };
+    const count = bursts.length;
+    fire();
+    const event = owner.fallbackSpecialBurst;
+    assert(event?.serial === 1, "actual fallback radial branch emits event");
+    assert(near(event.radius, 173 * (charge ? CHARGE.TIER2_RADIUS_MULT : 1)), "custom/charged mechanic radius recorded");
+    const sampled = { ...event.pos };
+    const originalX = sampled.x;
+    owner.pos.x += 40; owner.pos.y += 20; owner.pos.z -= 30;
+    assert(event.pos.x === sampled.x && event.pos.y === sampled.y && event.pos.z === sampled.z,
+      "event position does not alias moving actor on any axis");
+    const snapshot = syncBattle(battle);
+    assert(bursts.length === count + 1 && bursts.at(-1)!.pos.x === originalX, "Battle snapshot/view reaches scene at sampled origin");
+    assert(snapshot.actors[0]!.fallbackSpecialBurst?.pos !== event.pos, "observation clones event position");
+    assert(near(internals.impactActors.at(-1)!.endScale.x, event.radius * 2), "rendered ring diameter follows actual custom/charged radius");
+    syncBattle(battle);
+    assert(bursts.length === count + 1, "repeated sync does not replay event");
+    fire(); syncBattle(battle);
+    assert(owner.fallbackSpecialBurst?.serial === 2 && bursts.length === count + 2, "second attack renders without intervening rendered idle");
+    action.special.archetype = "projectile";
+    fire(); syncBattle(battle);
+    assert(owner.fallbackSpecialBurst?.serial === 2 && bursts.length === count + 2, "projectile fallback creates no radial event or replay");
+    scene.clear(); await Promise.resolve(); await Promise.resolve();
   }
   console.log("Diver aura Three scene selfcheck: PASS");
 }
