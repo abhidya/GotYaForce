@@ -78,9 +78,9 @@ export interface ForceBuilderOptions {
   maxSlots?: number;
   /** Fired when the force changes (add/remove). */
   onChange?: (force: string[], totalCost: number, remain: number) => void;
-  /** Fired on confirm (A / HOLD). Only fires when TOTAL <= LIMIT. */
+  /** Fired on Save (START / P). Requires a nonempty force within LIMIT. */
   onConfirm: (force: string[]) => void;
-  /** Fired on quit/back (START / B). */
+  /** Fired on cancel/back (Escape / B). */
   onQuit?: () => void;
 }
 
@@ -182,7 +182,8 @@ export function createForceBuilder(
   const legend = el("div", { class: "gf-legend gf-force-legend" });
   const legendDefs: Array<[string, string]> = [
     ["+", "CHANGE FORCE"],
-    ["START", "QUIT"],
+    ["START / P", "SAVE"],
+    ["B / ESC", "CANCEL"],
     ["C", "TURN"],
     ["Y", "MENU"],
     ["A", "HOLD"],
@@ -196,6 +197,27 @@ export function createForceBuilder(
     legend.appendChild(el("span", { class: "gf-legend-item" }, [glyphSpan, labelSpan]));
   }
   root.appendChild(legend);
+  // Explicit commit: A/Enter still toggles the highlighted borg.
+  const saveButton = el("button", {
+    class: "gf-force-save",
+    text: "SAVE FORCE (START / P)",
+    attrs: { type: "button" },
+    onClick: save,
+  });
+  // The window menu bus otherwise interprets Enter/Space as roster toggles.
+  saveButton.addEventListener("keydown", (event) => {
+    if (event.code !== "Enter" && event.code !== "Space") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) save();
+  });
+  panel.appendChild(saveButton);
+
+  function save(): void {
+    if (force.length > 0 && force.length <= maxSlots && totalCost() <= opts.limit) {
+      opts.onConfirm([...force]);
+    }
+  }
 
   // ---------- logic ----------
   function totalCost(): number {
@@ -333,6 +355,7 @@ export function createForceBuilder(
     if (rem < 0) setBitmapText(remainVal, String(rem), { bold: true, scale: 2, tint: TINT_MENU_ALERT });
     else setBitmapText(remainVal, String(rem), { bold: true, scale: 2 });
     panel.classList.toggle("gf-over", rem < 0);
+    saveButton.disabled = force.length === 0 || rem < 0;
   }
 
   function renderAll(): void {
@@ -360,6 +383,15 @@ export function createForceBuilder(
   // maxSlots. "switch" (L/R shoulder / [ ]) swaps which panel the cursor
   // controls — the real screen's own "CHANGE FORCE"-adjacent panel toggle.
   function onMenuAction(action: MenuAction): void {
+    // Handle exit actions before the empty-catalog guard, from either panel.
+    if (action === "start") {
+      save();
+      return;
+    }
+    if (action === "back") {
+      opts.onQuit?.();
+      return;
+    }
     if (action === "switch") {
       focusSide = focusSide === "grid" ? "ring" : "grid";
       renderGrid();
@@ -378,8 +410,6 @@ export function createForceBuilder(
       } else if (action === "confirm") {
         const borg = opts.catalog[gridCursor];
         if (borg) toggle(borg.id);
-      } else if (action === "back" || action === "start") {
-        opts.onQuit?.();
       }
       return;
     }
@@ -393,8 +423,6 @@ export function createForceBuilder(
     } else if (action === "confirm") {
       const id = force[ringCursor];
       if (id !== undefined) toggle(id);
-    } else if (action === "back" || action === "start") {
-      opts.onQuit?.();
     }
   }
 
