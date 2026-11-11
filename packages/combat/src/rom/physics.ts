@@ -29,6 +29,7 @@ import {
   integratePosition,
   decayHSpeed,
   accumulateGravity,
+  applyVerticalClampLower,
   floorSnap8030,
   clampHSpeedBand,
   applyVerticalClampBand,
@@ -90,6 +91,18 @@ export function projectX(bam: number): number {
 /** Port of zz_0045238_ — projects onto Z; equals cos(yaw). */
 export function projectZ(bam: number): number {
   return Math.cos(bam16ToRad(bam));
+}
+
+/** Primary FUN_80067310 only (chunk_0008.c:3787-3828). Unlike the legacy
+ * integratePhysics compatibility entry point, populated speed limits do not select
+ * the upper-band variant. Ground collision remains supplied by the host runtime.
+ * Shared arithmetic is not a claim of bit-exact retail floating-point parity. */
+export function integratePhysicsPrimary(gravity: number, actor: RomActor, yaw: number): void {
+  integratePosition(gravity, actor, yaw);
+  groundClamp(actor);
+  decayHSpeed(actor);
+  accumulateGravity(gravity, actor);
+  applyVerticalClampLower(actor);
 }
 
 /**

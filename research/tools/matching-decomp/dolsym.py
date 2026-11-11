@@ -23,6 +23,25 @@ REPO_DEFAULT = Path("D:/GotYaForce")
 ISO_DEFAULT = REPO_DEFAULT / "Gotcha Force.iso"
 
 
+def function_c_name(record, smap):
+    """A C identifier for a map entry, or None on an alias collision.
+
+    The alias encodes the exact retail entry. A future linker must bind it to
+    that address, just like the existing address-encoded data declarations.
+    """
+    name = record["name"]
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+        return name
+    alias = "FUN_%08x" % record["addr"]
+    symbols = getattr(smap, "by_name", None)
+    if symbols is None:
+        return None  # Collision freedom cannot be established from lookup alone.
+    existing = symbols.get(alias)
+    if existing is not None and existing["addr"] != record["addr"]:
+        return None
+    return alias
+
+
 class Dol(object):
     def __init__(self, blob):
         self.blob = blob

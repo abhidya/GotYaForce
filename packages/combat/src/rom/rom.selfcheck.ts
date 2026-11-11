@@ -7,7 +7,7 @@
 //  3. The G RED family's phase-0 launch produces the documented upward impulse (Y=+4.0)
 
 import { createRomActor, type RomActor } from "./actor.js";
-import { groundClamp, integratePhysics } from "./physics.js";
+import { groundClamp, integratePhysics, integratePhysicsPrimary } from "./physics.js";
 import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
 import { createGRedDash, GRED_DASH } from "../families/gred-dash.js";
@@ -3457,6 +3457,10 @@ export function runSelfTest(): number {
   runFighterCraftTests();
   runSubagentPortTests();
   runSourceOwnedModuleTests();
+  // Run after the failure reset so these assertions contribute to the exit code.
+  runStateTableTests();
+  runBridgeTest();
+  runAccelerationNinjaMotionBridgeTest();
 
   if (failures > 0) {
     console.error(`\n[rom.selfcheck] ${failures} FAILURES`);
@@ -4121,14 +4125,6 @@ function runGirlClusterTests(): void {
   }
 }
 
-// Test 5: state tables — full-body state 1 (idle-stream) ticks without error and
-// state 0 (noop) is a bare no-op. Confirms the table is populated + dispatches.
-runStateTableTests();
-
-// Test 6: bridge — pressing X on a G RED BorgRuntime triggers the ROM phase machine
-// and produces the documented upward launch via the BorgRuntime-level sync path.
-runBridgeTest();
-
 function makeMinimalGRedBorg(): BorgRuntime {
   // Minimal BorgRuntime sufficient for the bridge — only the fields bridge.syncIn /
   // tryStartXSpecial read. Mirrors the shape battle.ts spawns.
@@ -4161,6 +4157,37 @@ function makeMinimalGRedBorg(): BorgRuntime {
     defeatAccounted: false, alive: true,
     romDriver: null,
   } as unknown as BorgRuntime;
+}
+
+// Bounded primary-integrator and live bridge regression for Acceleration Ninja.
+function runAccelerationNinjaMotionBridgeTest(): void {
+  const a = createRomActor();
+  a.hSpeed = 30; a.hDecel = 2; a.yVel = 10; a.gravityCoeff = -1;
+  a.maxHSpeed = 5; a.maxRise = 3; a.maxFall = -8;
+  const samples: number[] = [];
+  a.physicsRuntime = { clampToGround: (pos, velY) => {
+    samples.push(pos.z, pos.y, a.hSpeed, velY);
+    return { y: pos.y, velY, grounded: false };
+  } };
+  integratePhysicsPrimary(1, a, 0);
+  assert(samples.join(",") === "30,10,30,10", "primary ground callback runs after displacement and before speed/gravity updates");
+  assert(a.hSpeed === 32 && a.yVel === 9, "primary helper does not apply populated upper speed limits");
+  a.hDecel = -100; a.yVel = -20;
+  integratePhysicsPrimary(1, a, 0);
+  assert(a.hSpeed === 0 && a.yVel === -8, "primary helper retains horizontal floor and terminal fall clamp");
+
+  const b = makeMinimalGRedBorg();
+  b.borgId = "pl0004";
+  const driver = RomDriverBridge.attach(b, {});
+  assert(driver !== null, "Acceleration Ninja live bridge attaches");
+  if (!driver) return;
+  const speed = 3 * (driver.actor.descriptor?.maxHSpeed ?? 0);
+  assert(speed > 0, "Acceleration Ninja bridge supplies ROM dash speed");
+  assert(driver.tryStartXSpecial(b, [b]), "Acceleration Ninja X starts the ROM action-2 dash");
+  assert(approxEq(b.pos.z, speed), "Acceleration Ninja entry syncOut publishes one dash displacement");
+  const previousZ = b.pos.z;
+  assert(driver.tick(b, 1, [b]), "Acceleration Ninja ongoing dash owns the host frame");
+  assert(approxEq(b.pos.z - previousZ, speed), "Acceleration Ninja owned frame publishes movement instead of standing still");
 }
 
 function runBridgeTest(): void {

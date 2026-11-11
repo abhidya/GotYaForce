@@ -3,7 +3,7 @@
 > **2026-11-11 correction:** The historical absolute-global "compiler bug" below
 > was a harness error: ELF uses `ADDR16_HA=6`, `ADDR16_LO=4`, with halfword offsets.
 > Correcting the oracle recovers 66 functions / 642 instructions in a bounded pass.
-> Current freshly verified total after the mask lane: **682 functions / 4,003 instructions (0.5707%)**.
+> Current freshly verified total after permutations: **750 functions / 4,804 instructions (0.6849%)**.
 > Older tables and compiler-blocked classifications are historical, not current
 > totals. See [current lanes and acceptance gates](port-completion.md).
 
@@ -997,3 +997,82 @@ passed fresh retail/compiler verification (**690 ok, 0 failed**). There are now
 4,198 seeder refusals and 331 compiler/C mismatches. These are not total-game
 completion percentages. The existing high-bit signed-comparison rendering limit
 is documented in the completion checklist; no admitted source uses that case.
+
+
+## Counted-call loop lane (2026-11-11)
+
+The current pinned compiler does not reject every loop: integer accumulation,
+counted integer iteration, and a counted call loop compile. A pointer-store loop
+still reports the roadmap diagnostic. A back edge is therefore a seeder boundary,
+not evidence that the compiler rejected that particular function.
+
+`loop.py seed_counted_call` recognizes one complete 15-instruction shape: a saved
+r31 counter, an exact-symbol call with r3 set to that counter, a positive signed
+increment, a signed bound, and the exact frame/back edge/epilogue. Other shapes
+remain refused. Positive and negative call displacements, signed limits, every
+fixed instruction, counter registers, call kind, range validity, extra words,
+and interior/invalid callee names have portable controls.
+
+This recovered `zz_0041288_` at `0x80041288`, calling `zz_00410bc_` six times with
+indices zero through five: **one function / 15 instructions**. No model was used.
+A repeat over 4,528 remaining functions of at most 128 instructions recovered
+none: 4,198 seeder refusals and 330 compiler/C mismatches. The refusal attribution
+is 4,151 seeder and 47 compiler; the functions reaching the compiler split into
+210 compiler and 120 C mismatches. Historical blanket loop counts above are
+superseded, not evidence that hundreds of additional functions now match.
+
+Full official verification after this lane: **691 ok, 0 failed** (683 functions
+and eight controls). Portable oracle/seeder suite: **40 tests passed**. Loop
+selftest: **71 passed**. The added source hash and independent review passed.
+
+
+## Exact-entry call aliases (2026-11-11)
+
+Some link-map names, such as `gnt4-OSDisableInterrupts-bl`, are not C identifiers.
+The seeder previously refused them before compilation. `function_c_name` now
+preserves valid names and maps other exact entries to `FUN_<entry address>`.
+It requires the symbol index to check that the alias does not already name a
+different entry. Collisions, missing indexes, unknown targets, and interior
+calls remain refused or unverified.
+
+The retail branch destination is still decoded independently of the candidate.
+For an exact map entry, `match.expected_symbols` derives the canonical expected
+name using the shared naming rule. The comparator itself is unchanged: the
+candidate must use that name in a REL24 relocation with zero addend. Wrong
+address aliases cannot pass. Wrapper and CFG refusal tests cover interior
+entries and collisions directly.
+
+A bounded CPU-only pass recovered **62 functions / 721 instructions**, with no
+model calls. These are relocation-aware matches, not a linked executable:
+future linking must explicitly bind every `FUN_` alias to its encoded retail
+entry, just as address-encoded data declarations require bindings. No map names,
+retail bytes, or existing source bodies were rewritten to force a match.
+
+Full official verification after the alias lane: **753 ok, 0 failed** (745
+functions and eight controls). Portable oracle/seeder suite: **51 passed**;
+loop selftest: **71 passed**. Independent review and all 63 follow-up source
+hashes passed. Coverage remains **4,739 / 701,464 instructions (0.6756%)**, not
+a whole-game completion percentage.
+
+
+## Bounded permutation lane (2026-11-11)
+
+The unchanged mechanical permuter was run with no model over all 4,466 remaining
+map functions of at most 128 instructions. It performed 10,040 compiler invocations
+in 100.5 seconds and recovered five functions / 65 instructions. The preceding
+100-function pilot recovered none. Remaining queue: 3,991 seeder refusals and 470
+compiler/C mismatches.
+
+All 750 registered functions and eight controls pass fresh official verification:
+**758 ok, 0 failed**. Independent source/provenance review and all five new hashes
+passed. No comparator, seeder, compiler, or driver behavior changed in this lane.
+
+Registry commentary now distinguishes seed/model rounds from mechanical mutant
+indices. Parallel workers can finish more compiles than the first matching index;
+use the run ledger's compile count for actual work, not the source header's index.
+
+These remain pinned-compiler, relocation-checked matches. Generated declarations
+may still use pointer-to-integer arguments or retain an incoming argument register
+across a no-argument C call. Explicit ABI/signature reconstruction is required
+before treating them as portable gameplay C; no portable-source or linked-game
+claim follows from this lane.

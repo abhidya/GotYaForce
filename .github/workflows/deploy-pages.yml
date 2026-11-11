@@ -7,6 +7,12 @@ on:
       - 'docs-site/**'
       - 'research/**'
       - 'apps/game/**'
+      - 'packages/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig*.json'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 

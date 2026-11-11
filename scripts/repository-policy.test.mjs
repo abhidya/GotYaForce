@@ -55,3 +55,17 @@ test('pnpm lockfile importers refer to existing workspace packages', () => {
     )
   }
 })
+
+// Combat and other workspace packages are part of the shipped game bundle.
+// A merge that changes only those packages must not leave Pages on old code.
+test('Pages deploy watches shared game code and build inputs', () => {
+  const workflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/deploy-pages.yml'), 'utf8')
+  const push = workflow.match(/^  push:\r?\n([\s\S]*?)^  workflow_dispatch:/m)
+  assert.ok(push, 'Pages must deploy main pushes as well as manual runs')
+  assert.match(push[1], /branches: \[main\]/)
+  const paths = [...push[1].matchAll(/^      - '([^']+)'/gm)].map((match) => match[1])
+  for (const input of ['apps/game/**', 'packages/**', 'scripts/**', 'package.json',
+    'pnpm-lock.yaml', 'pnpm-workspace.yaml', 'tsconfig*.json']) {
+    assert.ok(paths.includes(input), `Pages push filter excludes game build input: ${input}`)
+  }
+})
