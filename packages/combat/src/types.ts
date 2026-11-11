@@ -705,7 +705,9 @@ export interface DiverAuraChild {
   hitRadius: number;
   bankTexId: number;
   visualVariant: number;
-  visualScale: number;
+  /** Source child +0xd4, advanced only by the simulation contact phase. */
+  pulsePhaseDegrees: number;
+  visualScale: Vec3;
 }
 
 export interface BattleState {

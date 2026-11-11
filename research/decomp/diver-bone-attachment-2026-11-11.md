@@ -43,9 +43,9 @@ This improves **visual positioning only**. Combat still uses its existing
 root-centered max-extent spherical approximation; a bone-anchored visual is not
 proof of source-exact hit geometry. No combat observation or hit behavior changes.
 This supersedes only the visual anchor limitation in the earlier child document.
-Source pulse constants have been decoded, but source sine conversion/rounding parity
-has not been established. No guessed sine pulse or complete bone transform is
-introduced. Existing material animation, timing and particle-tail qualifications
+The subsequent [source-backed pulse](diver-source-pulse-2026-11-11.md) uses decoded
+constants and signed-short conversion, with explicitly approximate libm behavior.
+No complete bone transform is inherited. Existing material animation, timing and particle-tail qualifications
 remain. No original model assets were added to the repository or uploaded.
 
 ## Verification

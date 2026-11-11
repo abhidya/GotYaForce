@@ -43,13 +43,12 @@ the first X does not incorrectly latch the generic impotence fallback.
   exact shape-0 volume, target body geometry and complete source collision-mask
   pairing are not reconstructed. This is an approximate boundary, not proof of a
   source-exact 700-radius sphere.
-- **Visual/timing:** source active updates copy owner base scale but additionally
-  apply an anisotropic pulse. The pulse literals and particle teardown are not
-  implemented. The initial 0.01 value is overwritten by active base scale before
-  the first observed simulation boundary; source-exact init growth/phase timing
-  is not claimed. Refresh and creation are decremented during the same browser
-  contact phase. Mesh/material selection is decoded; the complete visual curve
-  is not.
+- **Visual/timing:** the [source-backed pulse](diver-source-pulse-2026-11-11.md)
+  now applies decoded anisotropic factors at simulation cadence. JavaScript sine
+  approximates the source libm; bit-exact parity is not claimed. Initial 0.01 is
+  overwritten by the first active update before the browser observation boundary.
+  Source-exact initialization visibility and particle teardown remain unproven.
+  Refresh and creation are decremented during the same browser contact phase.
 - **Ammo:** the original PR26 emitter preserved unbound/infinite source cell 2.
   The subsequent [Diver ammo binding](diver-ammo-binding-2026-11-11.md) connects
   that cell to the browser X/HUD charge and consumes one at the stream cue.
@@ -93,7 +92,7 @@ changes. Its ring diameter follows the fallback mechanic's configured radius and
 charge multiplier. This preserves generic AoE readability without adding that
 visual to ROM actions or projectile specials. The fallback textures, fireball,
 colors and timing remain TUNED; this is not evidence of original effect parity.
-Diver mesh attachment, pulse and other approximation boundaries above are unchanged.
+See the linked bone-attachment and source-pulse follow-ups for subsequent visual work.
 
 The scene selfcheck now renders actual Battle actor views for all three Divers,
 including entry before contact, source aura creation, and repeated empty X presses.

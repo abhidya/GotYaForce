@@ -34,6 +34,7 @@ export function spawnOrRefreshDiverAura(
   }
   const hit = attackHitRecordsForKind(formId(owner), row.getInt16(4))[0];
   if (!hit || !familyDamageRecordForBorg(formId(owner), hit.damageRecordIndex)) return true;
+  const initialScale = Math.fround((owner.modelSizeScale ?? 1) * row.getFloat32(20));
   children.push({
     uid: `diver-aura-${nextRomProjectileUid()}`,
     ownerUid: owner.uid, ownerFormId: formId(owner), team: owner.team,
@@ -44,7 +45,8 @@ export function spawnOrRefreshDiverAura(
     // are unavailable to Battle. No invented bone offset or generic muzzle is used.
     hitRadius: Math.max(...hit.halfExtent, hit.radius),
     bankTexId: row.getInt16(0), visualVariant: row.getFloat32(28),
-    visualScale: (owner.modelSizeScale ?? 1) * row.getFloat32(20),
+    pulsePhaseDegrees: 0,
+    visualScale: { x: initialScale, y: initialScale, z: initialScale },
   });
   return true;
 }
@@ -60,12 +62,13 @@ export function stepDiverAuras(children: DiverAuraChild[], all: readonly BorgRun
     if (child.remainingFrames < 1) return false;
     const row = ROWS[child.subtype]!;
     child.pos = { ...owner.pos }; // APPROXIMATE root anchor, source follows bone 12
-    // Base scale only: source additionally applies an anisotropic visual pulse.
-    // Undecoded pulse literals are deliberately not guessed here.
-    child.visualScale = owner.modelSizeScale ?? 1;
+    child.pulsePhaseDegrees += 3;
+    if (child.pulsePhaseDegrees >= 360) child.pulsePhaseDegrees -= 360;
+    const baseScale = owner.modelSizeScale ?? 1;
+    child.visualScale = diverAuraPulseScale(child.pulsePhaseDegrees, baseScale);
     const hit = attackHitRecordsForKind(child.ownerFormId, row.getInt16(4))[0]!;
     const record = familyDamageRecordForBorg(child.ownerFormId, hit.damageRecordIndex)!;
-    child.hitRadius = Math.max(...hit.halfExtent, hit.radius) * child.visualScale;
+    child.hitRadius = Math.max(...hit.halfExtent, hit.radius) * baseScale;
     for (const target of all) {
       // No invented team protection: record flagsB 0x480 lacks source same-team
       // exemption 0x10. The aura writer excludes Divers, burst/carried and immunity.
@@ -77,4 +80,18 @@ export function stepDiverAuras(children: DiverAuraChild[], all: readonly BorgRun
     }
     return true;
   });
+}
+
+/** FUN_80121694 and zz_0045204_: decoded f32 literals and signed-short angle.
+ * Math.sin approximates the source gnt4_sin; this is NOT bit-exact libm parity.
+ * See research/decomp/diver-source-pulse-2026-11-11.md for evidence/bounds. */
+export function diverAuraPulseScale(phaseDegrees: number, ownerBaseScale: number): DiverAuraChild["visualScale"] {
+  const f32 = Math.fround;
+  const angle = Math.trunc(f32(182.04444885253906 * phaseDegrees));
+  const signedAngle = (angle << 16) >> 16;
+  const sine = f32(Math.sin(f32(signedAngle * 0.0000958738019107841)));
+  // Source fmadds rounds the combined expression, not the product separately.
+  const xz = f32(f32(1 + 0.04769999906420708 * sine) * ownerBaseScale);
+  const y = f32(f32(1 - 0.11110000312328339 * sine) * ownerBaseScale);
+  return { x: xz, y, z: xz };
 }
