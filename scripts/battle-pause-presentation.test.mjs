@@ -35,7 +35,7 @@ assert.deepEqual(emitted.diagnostics, []);
 
 function fixture() {
   let screen = "battle", wallTime = 0, lastRead = 0;
-  const calls = { clock: 0, camera: 0, controls: 0, render: 0, status: 0, impacts: 0 };
+  const calls = { clock: 0, camera: 0, controls: 0, render: 0, status: 0, impacts: 0, aura: 0, auraX: 0 };
   const pose = new THREE.Object3D();
   const mixer = new THREE.AnimationMixer(pose);
   const action = mixer.clipAction(new THREE.AnimationClip("attack", 1, [
@@ -56,6 +56,7 @@ function fixture() {
   const scene = new context.SceneClock();
   Object.assign(scene, { actors: new Map([["actor", actor]]),
     enemyReticle: { visible: true, rotation: { y: 0 } }, allyMarker: { visible: true, rotation: { y: 0 } },
+    updateDiverAuraPositions() { calls.aura++; calls.auraX = pose.position.x; },
     updateStatusAuras() { calls.status++; }, updateImpacts() { calls.impacts++; },
   });
   context.battleScene = scene;
@@ -78,10 +79,15 @@ test("pause freezes a mid-swing pose and battle FX for 120 frames; resume uses f
     enemy: f.scene.enemyReticle.rotation.y, ally: f.scene.allyMarker.rotation.y }, before);
   assert.equal(f.action.paused, false, "one-shot must not finish while paused");
   assert.equal(f.calls.status, 4); assert.equal(f.calls.impacts, 4);
+  assert.equal(f.calls.aura, 4, "paused frames do not resample aura position");
+  close(f.calls.auraX, before.x);
   for (const key of ["clock", "camera", "controls", "render"]) assert.equal(f.calls[key], 124, key);
   f.context.session.paused = false; f.frame();
   close(f.action.time, 0.2 + 1 / 60);
   assert.equal(f.calls.status, 5); assert.equal(f.calls.impacts, 5);
+  assert.equal(f.calls.aura, 5);
+  close(f.calls.auraX, f.pose.position.x);
+  assert.ok(f.calls.auraX > before.x, "resume samples the newly advanced pose");
 });
 
 test("repeated pause/resume preserves each paused pose and advances normally afterward", () => {
