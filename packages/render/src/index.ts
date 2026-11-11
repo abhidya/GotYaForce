@@ -280,39 +280,30 @@ function findJobjRoot(jobjBones: ReadonlySet<THREE.Object3D>): THREE.Object3D | 
   return root;
 }
 
-function reparentMeshesToBones(model: THREE.Object3D): void {
-  const jobjBones = new Set<THREE.Object3D>();
-  const meshesToReparent: Array<{ node: THREE.Object3D; jointIndex: number }> = [];
-  model.traverse((obj) => {
-    const name = obj.name ?? "";
-    if (/^JOBJ_\d+$/.test(name)) {
-      jobjBones.add(obj);
-      return;
-    }
-    const jointMatch = /^Joint_(\d+)_Object/.exec(name);
-    if (jointMatch) {
-      meshesToReparent.push({ node: obj, jointIndex: parseInt(jointMatch[1]!, 10) });
-    }
-  });
-  if (jobjBones.size === 0 || meshesToReparent.length === 0) return;
-
-  const root = findJobjRoot(jobjBones);
-  if (!root) return; // guard clause: no skeleton root, so there is no joint table to rebuild
-
-  // DFS the JOBJ tree in preserved child order → HSD joint index per bone.
-  const dfsIndexToBone = new Map<number, THREE.Object3D>();
-  const visit = (node: THREE.Object3D, cursor: { n: number }): void => {
-    dfsIndexToBone.set(cursor.n, node);
-    cursor.n += 1;
-    for (const child of node.children) {
-      if (jobjBones.has(child)) visit(child, cursor);
-    }
+/** Reconstruct exporter HSD traversal order, independently of JOBJ name suffixes. */
+export function hsdJointsInTraversalOrder(model: THREE.Object3D): THREE.Object3D[] {
+  const bones = new Set<THREE.Object3D>();
+  model.traverse((node) => { if (/^JOBJ_\d+$/.test(node.name)) bones.add(node); });
+  const root = findJobjRoot(bones);
+  const joints: THREE.Object3D[] = [];
+  const visit = (node: THREE.Object3D): void => {
+    joints.push(node);
+    for (const child of node.children) if (bones.has(child)) visit(child);
   };
-  visit(root, { n: 0 });
+  if (root) visit(root);
+  return joints;
+}
 
+function reparentMeshesToBones(model: THREE.Object3D): void {
+  const dfsIndexToBone = hsdJointsInTraversalOrder(model);
+  const meshesToReparent: Array<{ node: THREE.Object3D; jointIndex: number }> = [];
+  model.traverse((node) => {
+    const match = /^Joint_(\d+)_Object/.exec(node.name);
+    if (match) meshesToReparent.push({ node, jointIndex: parseInt(match[1]!, 10) });
+  });
   const relative = new THREE.Matrix4();
   for (const { node, jointIndex } of meshesToReparent) {
-    const targetBone = dfsIndexToBone.get(jointIndex);
+    const targetBone = dfsIndexToBone[jointIndex];
     if (!targetBone || targetBone === node.parent) continue;
     node.updateWorldMatrix(true, false);
     targetBone.updateWorldMatrix(true, false);

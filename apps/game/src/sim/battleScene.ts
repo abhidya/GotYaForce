@@ -11,6 +11,7 @@
 // duplicating them. A capsule is shown only while the production model is loading.
 
 import * as THREE from "three";
+import { hsdJointsInTraversalOrder } from "@gf/render";
 import type {
   Battle,
   BattleProjectileObservation,
@@ -92,6 +93,7 @@ interface Actor {
   /** Monotonic guard against async model/clip loads surviving a form swap or retirement. */
   modelRevision: number;
   model: THREE.Object3D | null;
+  diverAuraAnchor: THREE.Object3D | null;
   /** Owned temporary presentation, separate from reusable charge/status effects. */
   placeholder: THREE.Object3D | null;
   mixer: THREE.AnimationMixer | null;
@@ -199,6 +201,9 @@ const STATUS_FX_SLOW_ANIM_FRAME_OFFSET = 2;
 type DiverAuraObservation = ReturnType<Battle["observe"]>["diverAuras"][number];
 
 interface DiverAuraActor {
+  ownerUid: string;
+  ownerFormId: string;
+  fallbackPosition: THREE.Vector3;
   node: THREE.Group;
   materials: THREE.MeshBasicMaterial[];
 }
@@ -868,6 +873,7 @@ export class BattleScene {
     if (this.allyMarker.visible) {
       this.allyMarker.rotation.y += dt * ALLY_MARKER_SPIN_RAD_PER_S;
     }
+    this.updateDiverAuraPositions();
     this.updateStatusAuras(dt);
     this.updateImpacts(dt);
   }
@@ -951,6 +957,7 @@ export class BattleScene {
       borgId: presentationId,
       modelRevision: 0,
       model: null,
+      diverAuraAnchor: null,
       placeholder,
       mixer: null,
       actions: {},
@@ -1070,6 +1077,11 @@ export class BattleScene {
     actor.placeholder = null;
     actor.group.add(model);
     actor.model = model;
+    // Source wrapper slot 12 is HSD DFS 14, not JOBJ_12. Verified for these
+    // three 23-joint wrappers only; see diver-bone-attachment evidence.
+    const joints = hsdJointsInTraversalOrder(model);
+    actor.diverAuraAnchor = ["pl0805", "pl080d", "pl080e"].includes(borgId) && joints.length === 23
+      ? joints[14]! : null;
     actor.mixer = new THREE.AnimationMixer(model);
     actor.current = null;
     actor.isPlaceholder = false;
@@ -1090,6 +1102,7 @@ export class BattleScene {
       disposeMesh(actor.placeholder);
     }
     actor.model = null;
+    actor.diverAuraAnchor = null;
     actor.placeholder = null;
     actor.mixer = null;
     actor.actions = {};
@@ -1244,11 +1257,11 @@ export class BattleScene {
   }
 
   /** Real child observations own this lifetime, separately from ordinary projectiles.
-   * Source mesh 78 and fixed subtype MatAnim selector are retained. Position is the
-   * sim's root-anchor approximation (source bone 12 is not available); scale comes
+   * Source mesh 78 and fixed subtype MatAnim selector are retained. Position copies source-slot12 on verified loaded Diver rigs,
+   * falling back to the sim root while the bone is unavailable; scale comes
    * from the child, never an invented renderer pulse, projectile radius or velocity.
    * FUN_8012151c / FUN_80121694 (chunk_0033.c) initialize and update the source
-   * child. Its active anisotropic pulse is omitted until its literals are decoded;
+   * child. Its active anisotropic pulse is omitted pending source sine conversion/rounding parity;
    * this bounded presentation keeps the child's owner scale and fixed subtype color.
    */
   private syncDiverAuras(children: readonly DiverAuraObservation[]): void {
@@ -1274,17 +1287,35 @@ export class BattleScene {
           node.add(new THREE.Mesh(layer.geometry, material));
           materials.push(material);
         }
-        actor = { node, materials };
+        actor = { node, materials, ownerUid: child.ownerUid, ownerFormId: child.ownerFormId,
+          fallbackPosition: new THREE.Vector3() };
         this.root.add(node);
         this.diverAuraActors.set(child.uid, actor);
       }
-      actor.node.position.set(child.pos.x, child.pos.y, child.pos.z);
+      actor.ownerUid = child.ownerUid;
+      actor.ownerFormId = child.ownerFormId;
+      actor.fallbackPosition.set(child.pos.x, child.pos.y, child.pos.z);
       actor.node.scale.setScalar(child.visualScale);
     }
     for (const [uid, actor] of this.diverAuraActors) {
       if (live.has(uid)) continue;
       this.disposeDiverAura(actor);
       this.diverAuraActors.delete(uid);
+    }
+    this.updateDiverAuraPositions();
+  }
+
+  /** Sample after animation, copying translation only, in battle-root coordinates. */
+  private updateDiverAuraPositions(): void {
+    for (const aura of this.diverAuraActors.values()) {
+      aura.node.position.copy(aura.fallbackPosition);
+      const owner = this.actors.get(aura.ownerUid);
+      const anchor = owner?.borgId === aura.ownerFormId ? owner.diverAuraAnchor : null;
+      if (!anchor) continue; // pending/missing model, form change, or retired owner
+      anchor.updateWorldMatrix(true, false);
+      aura.node.position.setFromMatrixPosition(anchor.matrixWorld);
+      this.root.worldToLocal(aura.node.position);
+      // Do not inherit bone rotation/scale or apply model normalization twice.
     }
   }
 
