@@ -440,6 +440,18 @@ function keepOnStageFloor(
   velocity.z = 0;
 }
 
+/** Collision-only host policy for an already-integrated ROM movement segment.
+ * Does not apply input, gravity, timers, or floor/ledge reverts. */
+export function resolveStageMotionCollision(
+  collision: StageCollision | null,
+  previous: Vec3,
+  current: Vec3,
+  velocity: Vec3,
+): void {
+  resolveLateralCollision(collision, previous, current, velocity);
+  resolveCeilingCollision(collision, previous, current, velocity);
+}
+
 function resolveLateralCollision(
   collision: StageCollision | null,
   previous: Vec3,

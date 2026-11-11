@@ -67,7 +67,7 @@ import { stepStatus } from "./status.js";
 import { DEFAULT_BOUNDS, JUMP, MUZZLE_OFFSET, SHOT, SIM } from "./constants.js";
 import shotMuzzleSpeedData from "./data/shotMuzzleSpeed.generated.json" with { type: "json" };
 import { floorSurfaceYAt } from "@gf/physics";
-import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
+import { clearJumpLatch, resolveStageMotionCollision, stepMovement, type MoveContext } from "./movement.js";
 import { resetActorParamTier } from "./paramTier.js";
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 import {
@@ -359,6 +359,13 @@ class BattleImpl implements Battle {
         bounds: this.bounds,
         clampToGround: (pos, velY) => this.clampRomToGround(pos, velY),
         isSupported: (x, z) => floorSurfaceYAt(this.collision, x, z, 100) != null,
+        probeMotion: (previous, pos, velY) => {
+          const velocity = { x: pos.x - previous.x, y: velY, z: pos.z - previous.z };
+          resolveStageMotionCollision(this.collision, previous, pos, velocity);
+          const floor = this.clampRomToGround(pos, velocity.y);
+          pos.y = floor.y;
+          return { velY: floor.velY, grounded: floor.grounded };
+        },
       },
       allocateResource: (owner, type, count, consume) => {
         const profile = this.profiles.get(owner.uid);
