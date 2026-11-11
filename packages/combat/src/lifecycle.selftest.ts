@@ -1,3 +1,4 @@
+import { runSelfTest as runTargetLockSelfTest } from "./targetLock.selftest.js";
 import { runRomCollisionSelfTest } from "./romCollision.selftest.js";
 import { battleStateForSelfcheck, createBattle } from "./battle.js";
 import { applyHit } from "./combat.js";
@@ -202,6 +203,7 @@ function assertNonRomAirborneDeathKeepsGravity(stats: readonly BorgStats[]): voi
 }
 
 export function runSelfTest(): void {
+  runTargetLockSelfTest();
   const stats = loadStats();
   runRomCollisionSelfTest();
   assertReplacementAndExactlyOnceAccounting(stats);
