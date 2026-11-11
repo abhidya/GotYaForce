@@ -392,6 +392,12 @@ export function createGameSession<TStageRenderState>(
       playerForces,
       borgs: dependencies.borgs,
     });
+    // Force reconfirmation already starts a new host run, including after Back
+    // from a later briefing. Restart the VM and stage selection at that same
+    // boundary, retaining the current difficulty and player count. Otherwise
+    // the VM can reach CLEAR before the host run, replaying battles after Results.
+    // This preserves the port's restart behavior; it is not a retail-parity claim.
+    enterChallengeVm();
     pendingBattleConfig = cloneMissionBattleConfigOrNull(run.getCurrentBattle());
     postBattle = null;
     if (!pendingBattleConfig) {

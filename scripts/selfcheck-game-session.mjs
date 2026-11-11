@@ -376,3 +376,5 @@ const repeatRecovery = await import(storageGraph.url + "?corrupt-again");
 repeatRecovery.syncForceSlots([{no:1, name:"DEFAULT", borgIds:["a"]}]);
 assert.equal(values.get(recoveryStorage.FORCE_SLOTS_UNREADABLE_KEY), corrupt, "first unreadable backup retained");
 console.log("force-storage recovery PASS: unreadable original preserved");
+
+await import("./selfcheck-challenge-restart.mjs");
