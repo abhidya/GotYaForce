@@ -3,7 +3,7 @@
 > **2026-11-11 correction:** The historical absolute-global "compiler bug" below
 > was a harness error: ELF uses `ADDR16_HA=6`, `ADDR16_LO=4`, with halfword offsets.
 > Correcting the oracle recovers 66 functions / 642 instructions in a bounded pass.
-> Current freshly verified total after the alias lane: **745 functions / 4,739 instructions (0.6756%)**.
+> Current freshly verified total after permutations: **750 functions / 4,804 instructions (0.6849%)**.
 > Older tables and compiler-blocked classifications are historical, not current
 > totals. See [current lanes and acceptance gates](port-completion.md).
 
@@ -1053,3 +1053,26 @@ functions and eight controls). Portable oracle/seeder suite: **51 passed**;
 loop selftest: **71 passed**. Independent review and all 63 follow-up source
 hashes passed. Coverage remains **4,739 / 701,464 instructions (0.6756%)**, not
 a whole-game completion percentage.
+
+
+## Bounded permutation lane (2026-11-11)
+
+The unchanged mechanical permuter was run with no model over all 4,466 remaining
+map functions of at most 128 instructions. It performed 10,040 compiler invocations
+in 100.5 seconds and recovered five functions / 65 instructions. The preceding
+100-function pilot recovered none. Remaining queue: 3,991 seeder refusals and 470
+compiler/C mismatches.
+
+All 750 registered functions and eight controls pass fresh official verification:
+**758 ok, 0 failed**. Independent source/provenance review and all five new hashes
+passed. No comparator, seeder, compiler, or driver behavior changed in this lane.
+
+Registry commentary now distinguishes seed/model rounds from mechanical mutant
+indices. Parallel workers can finish more compiles than the first matching index;
+use the run ledger's compile count for actual work, not the source header's index.
+
+These remain pinned-compiler, relocation-checked matches. Generated declarations
+may still use pointer-to-integer arguments or retain an incoming argument register
+across a no-argument C call. Explicit ABI/signature reconstruction is required
+before treating them as portable gameplay C; no portable-source or linked-game
+claim follows from this lane.
