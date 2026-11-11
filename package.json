@@ -17,7 +17,7 @@
     "selfcheck:force-builder": "node scripts/selfcheck-force-builder.mjs",
     "selfcheck:menu-flow": "node scripts/selfcheck-menu-flow.mjs && node --test scripts/menu-key-repeat.test.mjs scripts/controller-pause-race.test.mjs scripts/bgm-transition-race.test.mjs scripts/animation-cache-recovery.test.mjs && node scripts/run-battle-scene-morph-selfcheck.mjs",
     "selfcheck:title-frontend": "node scripts/selfcheck-title-frontend.mjs",
-    "selfcheck:game-session": "node scripts/selfcheck-game-session.mjs",
+    "selfcheck:game-session": "node scripts/selfcheck-game-session.mjs && node --test scripts/affordable-force-prefix.test.mjs",
     "selfcheck:battle-input-focus": "node --test scripts/battle-input-focus.test.mjs",
     "selfcheck:battle-pause-edge": "node --test scripts/battle-pause-input-edge.test.mjs",
     "selfcheck:browser-cdp": "node --test scripts/cdp-client.test.mjs scripts/network-gate.test.mjs",

@@ -102,7 +102,9 @@ function makeSession({
     forceFromSlot: (slot) => [...slot.borgIds],
     validForce: (ids) => ids.filter((id) => id !== "bad"),
     createRun: (options) => fakeRun(options, battles, onNext),
-    borgs: { borgs: [] }, stageCatalog: {}, borgStats: [], loadStageAssets: load,
+    borgs: { borgs: [] }, stageCatalog: {},
+    borgStats: ["a", "b", "saved", "persisted", "confirmed", "default"].map(id => ({ id, energy: 200 })),
+    loadStageAssets: load,
   });
 }
 
@@ -376,3 +378,5 @@ const repeatRecovery = await import(storageGraph.url + "?corrupt-again");
 repeatRecovery.syncForceSlots([{no:1, name:"DEFAULT", borgIds:["a"]}]);
 assert.equal(values.get(recoveryStorage.FORCE_SLOTS_UNREADABLE_KEY), corrupt, "first unreadable backup retained");
 console.log("force-storage recovery PASS: unreadable original preserved");
+
+await import("./selfcheck-challenge-restart.mjs");

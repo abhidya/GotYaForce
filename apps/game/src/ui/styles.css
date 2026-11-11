@@ -698,6 +698,7 @@
 .gf-select-banner-fallback { grid-area: banner; }
 .gf-select-force-name { grid-area: force; }
 .gf-select-limit { grid-area: limit; justify-self: end; }
+.gf-select-deployment { grid-column: 1 / -1; font-size: clamp(12px, 1.4vw, 18px); color: white; text-shadow: 0 1px 3px black; }
 
 /* ============================ BATTLE INTRO ============================ */
 /*

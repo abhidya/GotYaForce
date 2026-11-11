@@ -2,7 +2,8 @@
  * SelectForce — Challenge flow screen #5, per `challenge-5-select-a-force.png`.
  *
  * The real screen selects a saved force, shows the lead borg, force number/name,
- * total COST, and exposes X = EDIT FORCE. This component presents the current
+ * COST, and exposes X = EDIT FORCE. This component presents the affordable
+ * deployment cost/count alongside the preserved saved force. It uses the current
  * force slot from browser-local roster data; the edit screen owns the 30-slot
  * force mutation.
  *
@@ -20,6 +21,7 @@
  * bitmap font (see bitmapText.ts) rather than a capture crop of one baked value.
  */
 
+import { deriveForceDeployment } from "../../forceDeployment.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { borgBannerPath, borgMiniPath } from "../assets.js";
 import { captureCropImg } from "../captureCrop.js";
@@ -72,6 +74,7 @@ export interface SelectForceOptions {
   slots: readonly ForceSlot[];
   selectedSlot: number;
   limit: number;
+  playerCount?: number;
   onSlotsSynced?: (slots: readonly ForceSlot[]) => void;
   onSelectSlot?: (slotIndex: number) => void;
   onConfirm: (slot: ForceSlot) => void;
@@ -88,6 +91,7 @@ export function createSelectForce(
   opts: SelectForceOptions,
 ): SelectForceHandle {
   const byId = new Map(opts.catalog.map((b) => [b.id, b] as const));
+  const costs = new Map(opts.catalog.map((b) => [b.id, b.energy] as const));
   const slots: ForceSlot[] =
     opts.slots.length > 0 ? (opts.slots as ForceSlot[]) : [{ no: 1, name: "GOTCHA FORCE", borgIds: [] }];
   // Restore saved BOX DATA on the first mount after a page load; persist after.
@@ -141,7 +145,7 @@ export function createSelectForce(
       // L/R force cycling: dir carries which shoulder/dpad-edge fired (see menuInput.ts).
       selectSlot(selectedSlot + (dir ?? 1));
     } else if (action === "confirm") {
-      opts.onConfirm(currentSlot());
+      if (deployments().every((force) => force.borgIds.length > 0)) opts.onConfirm(currentSlot());
     } else if (action === "edit") {
       opts.onEdit(currentSlot());
     } else if (action === "back") {
@@ -159,12 +163,18 @@ export function createSelectForce(
     renderSlot();
   }
 
+  function deployments() {
+    const count = opts.playerCount === 2 ? 2 : 1;
+    return Array.from({ length: count }, (_, player) =>
+      deriveForceDeployment(slots[(selectedSlot + player) % slots.length]!.borgIds, opts.limit, costs));
+  }
+
   function renderSlot(): void {
     const slot = currentSlot();
-    const force = slot.borgIds.filter((id) => byId.has(id));
-    const lead = force[0] ?? opts.catalog[0]?.id ?? "";
+    const previews = deployments();
+    const { borgIds: force, cost } = previews[0]!;
+    const lead = force[0] ?? "";
     const leadBorg = byId.get(lead);
-    const cost = force.reduce((sum, id) => sum + (byId.get(id)?.energy ?? 0), 0);
 
     stopLeadModel?.();
     stopLeadModel = null;
@@ -226,7 +236,19 @@ export function createSelectForce(
     setBitmapText(forceNameText, slot.name, { bold: true, scale: 3, tint: TINT_MENU_YELLOW });
     const limitText = bitmapText("gf-select-limit");
     setBitmapText(limitText, `${Math.max(0, opts.limit - cost)} REMAIN`, { bold: true, scale: 2, tint: TINT_MENU_COOL });
-    nameRoot.append(noText, forceBanner(lead, leadBorg?.name ?? slot.name), forceNameText, limitText);
+    nameRoot.append(noText);
+    if (lead) nameRoot.append(forceBanner(lead, leadBorg?.name ?? slot.name));
+    nameRoot.append(forceNameText, limitText);
+    // Plain text keeps the bounded HLE preview readable and accessible. This is
+    // deployment information, not a claim to reproduce the retail screen layout.
+    const preview = el("div", { class: "gf-select-deployment", attrs: { role: "status", "aria-live": "polite" } });
+    preview.textContent = previews.map((deployment, player) => {
+      const saved = slots[(selectedSlot + player) % slots.length]!;
+      return deployment.borgIds.length > 0
+        ? `P${player + 1}: ${deployment.borgIds.length}/${saved.borgIds.length} deploy, COST ${deployment.cost}, ${opts.limit - deployment.cost} REMAIN`
+        : `P${player + 1}: No deployable Borg. Select or edit force ${saved.no}.`;
+    }).join(" · ");
+    nameRoot.append(preview);
   }
 
   renderSlot();

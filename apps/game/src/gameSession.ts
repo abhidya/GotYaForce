@@ -1,3 +1,4 @@
+import { deriveForceDeployment } from "./forceDeployment.js";
 import type { StageAssets } from "@gf/assets";
 import {
   createBattle,
@@ -328,6 +329,7 @@ const NOOP_GLOBAL_MENU_SINK: GlobalMenuEffectSink = {
 export function createGameSession<TStageRenderState>(
   dependencies: GameSessionDependencies<TStageRenderState>,
 ): GameSession<TStageRenderState> {
+  const humanCosts = new Map(dependencies.borgStats.map((borg) => [borg.id, borg.energy] as const));
   let screen: GameScreen = "loading";
   let budget = 2000;
   let playerCount = 1;
@@ -381,17 +383,25 @@ export function createGameSession<TStageRenderState>(
   }
 
   /** Build the Challenge run + pending battle. Returns the screen the caller
-   *  should render ("briefing" when a battle is queued, "menu" otherwise) so the
+   *  should render ("select-force" for empty deployment, "briefing" when queued,
+   *  "menu" if the run supplies no battle) so the
    *  force-slot-confirm handler can route it through the Challenge VM. */
   function beginRun(): GameScreen {
     const playerForces = humanPlayerForces();
-    updateSelectedForce(playerForces[0]?.borgIds ?? []);
+    // Confirmation is read-only: battle-work copies must never replace saved slots.
+    if (playerForces.some((force) => force.borgIds.length === 0)) return "select-force";
     run = dependencies.createRun({
       budget,
       playerCount: playerForces.length,
       playerForces,
       borgs: dependencies.borgs,
     });
+    // Force reconfirmation already starts a new host run, including after Back
+    // from a later briefing. Restart the VM and stage selection at that same
+    // boundary, retaining the current difficulty and player count. Otherwise
+    // the VM can reach CLEAR before the host run, replaying battles after Results.
+    // This preserves the port's restart behavior; it is not a retail-parity claim.
+    enterChallengeVm();
     pendingBattleConfig = cloneMissionBattleConfigOrNull(run.getCurrentBattle());
     postBattle = null;
     if (!pendingBattleConfig) {
@@ -431,17 +441,17 @@ export function createGameSession<TStageRenderState>(
     return Math.max(1, Math.min(playerCount, MAX_LOCAL_PLAYERS));
   }
 
-  /** Human players' chosen forces (ordered by player index), shared by beginRun
+  /** Human players' affordable deployment copies (ordered by player index), shared by beginRun
    *  (@gf/missions seeding) and the VM roster converter. Human side-0 slots carry
    *  no VM-rolled roster — the VM only rolls CPU slots — so their borg ids come
-   *  from the player's selected force. Player 0 uses the selected slot; each further
+   *  from the saved force's leading affordable prefix. Player 0 uses the selected slot; each further
    *  player takes the next slot in the list. */
   function humanPlayerForces(): { player: number; borgIds: string[] }[] {
     return Array.from({ length: humanPlayerCount() }, (_, player) => {
       const slot = player === 0
         ? selectedSlot()
         : forceSlots[(selectedForceSlot + player) % forceSlots.length] ?? selectedSlot();
-      return { player, borgIds: dependencies.forceFromSlot(slot) };
+      return { player, borgIds: deriveForceDeployment(slot.borgIds, budget, humanCosts).borgIds };
     });
   }
 
@@ -746,6 +756,7 @@ export function createGameSession<TStageRenderState>(
           selectSlotByNo(event.slot);
           {
             const target = beginRun();
+            if (target === "select-force") return render("select-force");
             if (target === "briefing") {
               // VM roster is PRIMARY; beginRun already seeded the @gf/missions
               // fallback config, overridden here when the VM build succeeds.
