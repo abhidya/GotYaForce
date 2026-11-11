@@ -228,6 +228,47 @@ export function runDiverAuraSelfTest(): void {
     applyContactAuraStatus(f.target, rec);
     assert(Number(f.target.slowAuraLevel) === 0, "Diver exemption ignored");
   }
+  {
+    // Actual X consumes before entering paired burst. First refill sees cached1,
+    // extra10 applies immediately; the following frame uses rebuilt1.5 * 10.
+    const f = fixture("pl080d"); f.pressX();
+    for (let i = 0; i < 100 && !f.state.diverAuras?.length; i++) f.step();
+    const cell = f.owner.weaponCells![1]!;
+    assert(cell.timer === 1200 && cell.cur === 0, "burst fixture X did not consume");
+    f.owner.burstPaired = true; f.owner.burstActive = false;
+    f.step();
+    assert(Number(cell.timer) === 1190 && f.owner.sourceAmmoRefillRate === 1.5,
+      "paired onset did not use old cache with current extra10");
+    f.step(); assert(Number(cell.timer) === 1175, "paired cached1.5 did not produce rate15");
+    for (let i = 0; i < 78; i++) f.step();
+    assert(Number(cell.timer) === 5 && Number(cell.cur) === 0, "transition returned charge early");
+    f.step(); assert(Number(cell.timer) === -10 && Number(cell.cur) === 1, "transition boundary/overshoot failed");
+    const profile = buildProfile(stats.find((s) => s.id === "pl080d")!);
+    useWeaponCell(f.owner, profile, 2, 1, true);
+    f.owner.burstPaired = false;
+    f.step();
+    assert(Number(cell.timer) === 1188.5 && Number(f.owner.sourceAmmoRefillRate) === 1,
+      "paired exit must remove extra10 immediately but retain cached1.5 once");
+    f.step(); assert(Number(cell.timer) === 1187.5, "paired exit baseline cache not rebuilt");
+  }
+  {
+    const f = fixture("pl080d");
+    const cell = f.owner.weaponCells![1]!;
+    const profile = buildProfile(stats.find((s) => s.id === "pl080d")!);
+    f.owner.burstPaired = true;
+    refreshDiverAmmoRate(f.owner);
+    useWeaponCell(f.owner, profile, 2, 1, true);
+    for (let i = 0; i < 79; i++) stepAmmoRefill(f.owner, profile);
+    assert(cell.timer === 15 && cell.cur === 0, "steady paired charge returned before80");
+    stepAmmoRefill(f.owner, profile);
+    assert(Number(cell.timer) === 0 && Number(cell.cur) === 1, "steady paired 1200 debt needs80 ticks");
+    f.owner.burstPaired = false; f.owner.burstActive = true;
+    refreshDiverAmmoRate(f.owner);
+    useWeaponCell(f.owner, profile, 2, 1, true);
+    stepAmmoRefill(f.owner, profile);
+    assert(Number(cell.timer) === 1199 && Number(cell.cur) === 0,
+      "initiator-only byte must not apply either paired rate multiplier");
+  }
   for (const reason of ["death", "form"] as const) {
     const f = fixture("pl080d"); f.pressX();
     for (let i = 0; i < 100 && !f.state.diverAuras?.length; i++) f.step();

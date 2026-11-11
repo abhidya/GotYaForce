@@ -1,3 +1,4 @@
+import { runPrimaryAmmoSelfTest } from "./primaryAmmo.selftest.js";
 import { runHitDrainSelfTest } from "./hitDrain.selftest.js";
 import { runDiverAuraSelfTest } from "./diverAura.selftest.js";
 import { runContactAuraSelfTest } from "./contactAura.selftest.js";
@@ -209,6 +210,7 @@ export function runSelfTest(): void {
   runHitDrainSelfTest();
   runContactAuraSelfTest();
   runDiverAuraSelfTest();
+  runPrimaryAmmoSelfTest();
   runTargetLockSelfTest();
   const stats = loadStats();
   runRomCollisionSelfTest();
