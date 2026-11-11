@@ -1,4 +1,5 @@
-import { isDiverAmmoFamily, stepDiverXRefill } from "./diverAmmo.js";
+import { hasSourcePrimaryAmmo } from "./primaryAmmo.js";
+import { isDiverAmmoFamily, stepDiverXRefill, stepSourceAmmoRefill } from "./diverAmmo.js";
 // Combat: lock-on, melee (B), ranged shot (B for ranged borgs), special (X), projectiles
 // with homing, damage = f(attack/shot, defense), hitstun -> "hit", knockdown -> "down" ->
 // wake with invincTimer=60 (the decomp countdown, ported exactly), cooldowns + ammo/reload.
@@ -228,7 +229,8 @@ export function stepCooldowns(b: BorgRuntime): void {
 // official B/X counter split. Diver source cell 2 aliases browser X cell 1;
 // other families retain their existing mapping.
 //
-// Legacy browser refill policy (Diver X instead uses diverAmmo.ts's source timer lane):
+// Source-backed primary modes 0/1 and Diver X use diverAmmo.ts's source timer lane.
+// Other slots and unsupported/no-row profiles retain the legacy browser refill policy:
 //   - max === 0 -> infinite: the fire gate is skipped entirely (chunk_0002.c:7158-7165), cur
 //     is never decremented below 0.
 //   - refillType 1 (gradual): a per-frame TUNED rate (AMMO.REFILL_RATE_PER_FRAME — the ROM's
@@ -257,7 +259,7 @@ function initWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
     max,
     refillType,
     refillParam,
-    timer: refillType === 1 ? 0 : refillParam,
+    timer: hasSourcePrimaryAmmo(p.id, p.level) || refillType === 1 ? 0 : refillParam,
   };
   const weapon1Source = weaponOneCellSourceForBorgId(p.id, p.level);
   const weapon1: WeaponCell = weapon1Source
@@ -312,7 +314,8 @@ export function stepAmmoRefill(b: BorgRuntime, p: BorgProfile): void {
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i]!;
     if (isDiverAmmoFamily(p.id) && i === 2) continue; // aliases X, never tick twice
-    if (isDiverAmmoFamily(p.id) && i === 1) stepDiverXRefill(cell, b);
+    if (i === 0 && hasSourcePrimaryAmmo(p.id, p.level)) stepSourceAmmoRefill(cell, b, 0);
+    else if (isDiverAmmoFamily(p.id) && i === 1) stepDiverXRefill(cell, b);
     else stepWeaponCellRefill(cell);
   }
   const weapon0 = cells[0];
@@ -379,7 +382,8 @@ export function useWeaponCell(
   if (!consume) return true;
   cell.cur -= count;
   if (cell.refillType === 1) {
-    cell.timer = isDiverAmmoFamily(p.id) && (weaponIdx === 1 || weaponIdx === 2)
+    cell.timer = (weaponIdx === 0 && hasSourcePrimaryAmmo(p.id, p.level)) ||
+      (isDiverAmmoFamily(p.id) && (weaponIdx === 1 || weaponIdx === 2))
       ? Math.fround(cell.timer + cell.refillParam) : cell.timer + cell.refillParam;
   } else if (cell.refillType <= 0) {
     if (cell.cur === 0) cell.timer = cell.refillParam;
@@ -3181,7 +3185,9 @@ function startShotAttack(
   // (chunk_0002.c:7158-7165); b.ammo stays mirrored to Infinity by ensureWeaponCells in that
   // case, so this early-return is just belt-and-suspenders against stale callers.
   const cell = ensureWeaponCells(b, p)[0];
-  if (cell && cell.max > 0) {
+  if (hasSourcePrimaryAmmo(p.id, p.level)) {
+    if (!useWeaponCell(b, p, 0, 1, true)) return;
+  } else if (cell && cell.max > 0) {
     cell.cur = Math.max(0, cell.cur - 1);
     b.ammo = cell.cur;
     // Arm the all-at-once timer the instant the cell empties (mirrors zz_006dcc0_'s

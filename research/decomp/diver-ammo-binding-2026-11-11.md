@@ -63,10 +63,13 @@ an artifact of the unbound/infinite cell, not a source contract.
 
 ## Explicit remaining limitations
 
-- The extra burst refill multiplier `FLOAT_804376c8` is not in available committed
-  exports. The source applies it in addition to the cached rate's known 1.5
-  burst term. `UNRESOLVED_EXTRA_BURST_REFILL_MULTIPLIER=1` is an explicitly named
-  neutral fallback, **not a decoded literal**. Exact burst refill timing is not claimed.
+- The previously unresolved extra burst multiplier `FLOAT_804376c8` is now
+  verified from the user's GG4E DOL as f32 10.0 (bits0x41200000). See
+  `primary-ammo-binding-2026-11-11.md` for byte offsets and DOL SHA256.
+  The source gate is +0x6fc (`burstPaired`) for both this multiplier and the
+  cached known1.5 base/slow exemption, not initiator-only `burstActive`.
+  Steady paired refill is15 per step (1200 debt /15 =80 steps); paired onset
+  with old cache1 first subtracts10, then15. Live and helper tests cover both.
 - Source pause-mask plumbing defaults to zero. The explicit +0x597 writer audit
   found no writer in Diver X phases, recovery, or stream VM. No pause is invented
   from being busy or from having a deployed child. Whole-actor zero-init is not
