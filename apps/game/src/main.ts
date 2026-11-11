@@ -743,6 +743,11 @@ window.addEventListener("keydown", (e) => {
   keys.add(e.code);
 });
 window.addEventListener("keyup", (e) => keys.delete(e.code));
+// A release outside this page may never deliver keyup; do not retain held controls.
+window.addEventListener("blur", () => keys.clear());
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) keys.clear();
+});
 window.addEventListener("pointerdown", () => {
   void playPendingBgm();
 });
