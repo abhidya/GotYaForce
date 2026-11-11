@@ -1,3 +1,4 @@
+import { isDiverAmmoFamily, stepDiverXRefill } from "./diverAmmo.js";
 // Combat: lock-on, melee (B), ranged shot (B for ranged borgs), special (X), projectiles
 // with homing, damage = f(attack/shot, defense), hitstun -> "hit", knockdown -> "down" ->
 // wake with invincTimer=60 (the decomp countdown, ported exactly), cooldowns + ammo/reload.
@@ -224,9 +225,10 @@ export function stepCooldowns(b: BorgRuntime): void {
 // ROM shape: 3 weapon cells (struct+0x774/+0x77c/+0x784, stride 8; aux max/refillType/
 // refillParam at struct+0x78c stride 8). Weapon 0 drives the B shot path and mirrors
 // BorgRuntime.ammo for compat. Weapon 1 is now bound to the X/special ammo path per the
-// official B/X counter split; weapon 2 has no recovered stat-row feed and remains inert.
+// official B/X counter split. Diver source cell 2 aliases browser X cell 1;
+// other families retain their existing mapping.
 //
-// Refill semantics (zz_006dcc0_, chunk_0009.c:2909-2973):
+// Legacy browser refill policy (Diver X instead uses diverAmmo.ts's source timer lane):
 //   - max === 0 -> infinite: the fire gate is skipped entirely (chunk_0002.c:7158-7165), cur
 //     is never decremented below 0.
 //   - refillType 1 (gradual): a per-frame TUNED rate (AMMO.REFILL_RATE_PER_FRAME — the ROM's
@@ -242,9 +244,9 @@ export function stepCooldowns(b: BorgRuntime): void {
  *  fallback otherwise; see actionProfiles.ts weaponZeroRowOverrides) and the stat-row's
  *  weapon-1 slot (DERIVED where available via weaponOneCellSourceForBorgId — behavior-notes.md
  *  section (am) cross-check; see that function's doc for the row-layout citation). Weapon 1
- *  drives X/special ammo gating/decrement/refill in stepAttacks/startSpecialAttack. Weapon 2
- *  has no stat-row data at all (the ROM's per-borg row only carries 2 weapon segments) and
- *  stays fully inert (max 0 = infinite/unused). */
+ *  drives X/special ammo gating/decrement/refill in stepAttacks/startSpecialAttack.
+ *  For Divers, browser index 1 aliases source cell 2, as recovered from the
+ *  FUN_800562b8 slot-selection arithmetic; other families retain their existing mapping. */
 function initWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
   const shotDef = actionProfileForProfile(p).shot;
   const max = shotDef?.ammoMax ?? 0;
@@ -268,7 +270,9 @@ function initWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
       }
     : { cur: 0, max: 0, refillType: 0, refillParam: 0, timer: 0 };
   const weapon2: WeaponCell = { cur: 0, max: 0, refillType: 0, refillParam: 0, timer: 0 };
-  return [weapon0, weapon1, weapon2];
+  // FUN_800562b8 maps the second stat segment to ROM cell 2. Keep the
+  // browser X/HUD index 1 as an alias, not a second independently charged pool.
+  return [weapon0, weapon1, isDiverAmmoFamily(p.id) ? weapon1 : weapon2];
 }
 
 /** Ensure `b.weaponCells` exists (lazy self-heal for constructors/fakes that only set `ammo`
@@ -282,6 +286,9 @@ function ensureWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
   if (!b.weaponCells) {
     b.weaponCells = initWeaponCells(b, p);
   }
+  // Re-establish the alias after a caller/deserializer copied the array by value.
+  // Browser X is canonical; never reset its outstanding timer or charge.
+  if (isDiverAmmoFamily(p.id) && b.weaponCells[1]) b.weaponCells[2] = b.weaponCells[1];
   syncAmmoAlias(b, b.weaponCells[0]);
   return b.weaponCells;
 }
@@ -302,8 +309,11 @@ function syncAmmoAlias(b: BorgRuntime, weapon0: WeaponCell | undefined): void {
  */
 export function stepAmmoRefill(b: BorgRuntime, p: BorgProfile): void {
   const cells = ensureWeaponCells(b, p);
-  for (const cell of cells) {
-    stepWeaponCellRefill(cell);
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i]!;
+    if (isDiverAmmoFamily(p.id) && i === 2) continue; // aliases X, never tick twice
+    if (isDiverAmmoFamily(p.id) && i === 1) stepDiverXRefill(cell, b);
+    else stepWeaponCellRefill(cell);
   }
   const weapon0 = cells[0];
   if (weapon0 && weapon0.max > 0) b.ammo = weapon0.cur;
@@ -369,7 +379,8 @@ export function useWeaponCell(
   if (!consume) return true;
   cell.cur -= count;
   if (cell.refillType === 1) {
-    cell.timer += cell.refillParam;
+    cell.timer = isDiverAmmoFamily(p.id) && (weaponIdx === 1 || weaponIdx === 2)
+      ? Math.fround(cell.timer + cell.refillParam) : cell.timer + cell.refillParam;
   } else if (cell.refillType <= 0) {
     if (cell.cur === 0) cell.timer = cell.refillParam;
   } else if (cell.refillType < 4) {

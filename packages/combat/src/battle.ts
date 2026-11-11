@@ -1,3 +1,4 @@
+import { isDiverAmmoFamily, refreshDiverAmmoRate } from "./diverAmmo.js";
 import { spawnOrRefreshDiverAura, stepDiverAuras } from "./diverAura.js";
 // Battle / force flow — the deterministic orchestrator. createBattle(cfg) builds the world;
 // Battle.step(dt, inputs) advances one fixed frame.
@@ -1110,6 +1111,7 @@ class BattleImpl implements Battle {
       // unlike stepGaugeWindows. Auras were cleared globally above; only tick discrete
       // slow/haste/freeze/size-tier/hero-buff timers here, regardless of hit reaction.
       stepHitStatus(b, false);
+      if (isDiverAmmoFamily(prof.id)) refreshDiverAmmoRate(b, { all, auras: movementAuras });
 
       // Source lock-on is continuous for active borgs. R/L are edge-triggered switch-lock
       // (+0x73c = 2/3). Z is hold-ally-lock: press requests ally lock (+0x73c = 5), release
