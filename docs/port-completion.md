@@ -6,9 +6,9 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
 
 ## What is measured now
 
-- `src-match/matched.json` records **682 unique functions / 4,003 instructions**
-  (634 game, 48 SDK): **0.5707%** of the recorded 701,464-instruction census.
-  Freshly re-verified on the Windows rig: **682/682 functions + 8/8 controls**.
+- `src-match/matched.json` records **745 unique functions / 4,739 instructions**
+  (665 in `game/`, 80 in `sdk/`): **0.6756%** of the recorded 701,464-instruction census.
+  Freshly re-verified on the Windows rig: **745/745 functions + 8/8 controls**.
 - Historical 405-function and 583-function snapshots in the README and matching
   research notes describe earlier stages, not this registry inventory.
 - Fresh family audit: **232 ported / 93 partial / 0 missing** across 325 action
@@ -39,11 +39,25 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
    functions; coverage is unchanged. The pinned compiler emitted identical code
    before/after the cast for the tested sign predicate, so this is a source
    interpretation correction, not a demonstrated codegen recovery.
-5. **Next: one remaining compiler/seeder limitation**, with affected-function and
+5. **Counted-call loop: one strict shape supported.** Added `zz_0041288_`,
+   **one function / 15 instructions**, after proving the current compiler supports
+   this loop. All 683 functions and eight controls pass. General loop structuring
+   stays refused, now correctly attributed to the seeder rather than asserting
+   every loop was tested against the compiler. Remaining bounded queue:
+   4,198 refusals and 330 compiler/C mismatches.
+6. **Exact-entry call aliases: complete for this bounded pass.** Valid C names
+   stay unchanged; invalid map names receive collision-checked `FUN_<address>`
+   aliases. The retail target still independently determines the expected entry;
+   comparator type/addend/name rules are unchanged. Added **62 functions / 721
+   instructions**, with all 745 entries and eight controls passing. This pass left
+   3,991 seeder refusals and 475 compiler/C mismatches within the 128-instruction
+   bound. These aliases require explicit address bindings in a future linker;
+   they do not establish a linked or playable port.
+7. **Next: one remaining compiler/seeder limitation**, with affected-function and
    full-registry proof. This is not a whole-game finish.
 
 The coverage denominator stays 701,464 instructions. Neither a completed lane nor
-682/682 registry checks means unregistered code or gameplay is 100% complete.
+745/745 registry checks means unregistered code or gameplay is 100% complete.
 
 ## This increment
 
@@ -68,7 +82,7 @@ The coverage denominator stays 701,464 instructions. Neither a completed lane no
 
 | Work | Evidence needed | Acceptance gate |
 | --- | --- | --- |
-| Preserve registered matching C | All 682 entries verified on user-supplied GG4E and pinned fork | `python src-match/verify.py --control`; inspect every changed verdict, never delete failures to preserve a total |
+| Preserve registered matching C | All 745 entries verified on user-supplied GG4E and pinned fork | `python src-match/verify.py --control`; inspect every changed verdict, never delete failures to preserve a total |
 | Recover compiler-blocked functions | Reproduce compiler diagnostics on current fork; historical queues are in [matching-loop](matching-loop.md) | Compiler regression tests, then byte-exact retail comparisons with relocation checks |
 | Close Ninja physics gap | Compare `FUN_80067310` and host call timing with committed source and controlled traces | Dedicated helper/host tests; do not blindly use `integratePhysics`, which applies extra upper speed clamps |
 | Close remaining action state machines | Re-run `pnpm audit:family-state-machines`, select one partial action, trace its phase/dispatch/constants | Boundary tests plus ROM selfcheck; leave unknown host behavior explicitly partial |
@@ -98,7 +112,7 @@ checkout cannot establish asset delivery or visual parity.
 ## Validation for this increment
 
 - Passed: frozen install, repo policy, TypeScript build, matching negative controls
-  (31 tests), matching-loop selftest (71 checks), ROM suite, camera suite,
+  (51 tests), matching-loop selftest (71 checks), ROM suite, camera suite,
   Challenge VM (60 checks), disposal (3 tests), lifecycle, menu/session/title
   selfchecks, importer (9 tests), production game build, and atlas build with
   `GF_ATLAS_SKIP_MODELS=1`.
@@ -108,7 +122,7 @@ checkout cannot establish asset delivery or visual parity.
   checks ran separately. The full-checkout GitHub contributor workflow passed on
   commit `96b3707c712fbedefef038929d6636e5f54d972d` after the absolute-global lane.
   Browser smoke and visual parity remain unmeasured.
-- Windows retail verification: **690 ok, 0 failed** (682 functions + eight controls).
+- Windows retail verification: **753 ok, 0 failed** (745 functions + eight controls).
   Independent extractor/comparator selftest passed; pinned compiler fork integrity
   passed all eight checks. No compiler modification was needed.
 - Compiler SHA-256:
