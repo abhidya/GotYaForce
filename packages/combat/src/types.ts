@@ -401,9 +401,9 @@ export interface BorgRuntime {
   /** Haste-on-hit s16 timer (ROM +0x712), 900f seed; decrements 1/frame, clears the level at 0. */
   hasteHitTimer?: number;
   /** Contact-slow AURA level (ROM +0x70c, flagsB&0x0400): max-merged per contact frame from
-   *  the record's comboScoreValue; NO timer — cleared to 0 at the START of every frame and
-   *  re-applied only while a slow-aura hitbox still overlaps. Divers (pl0805/pl080d/pl080e)
-   *  are hard-coded exempt from receiving it. */
+   *  the record's comboScoreValue; NO timer. Battle snapshots prior contacts for movement,
+   *  clears all accumulators, then collects this frame's contacts for the next frame.
+   *  Divers (pl0805/pl080d/pl080e) are hard-coded exempt from receiving it. */
   slowAuraLevel?: number;
   /** Contact-haste AURA level (ROM +0x70d, flagsB&0x0800): fixed at 1 (×1.25) while overlapping;
    *  cleared every frame like slowAuraLevel. */

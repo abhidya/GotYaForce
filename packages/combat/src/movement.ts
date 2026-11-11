@@ -27,7 +27,7 @@ import {
 } from "@gf/physics";
 import { BURST, DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES, REACTION } from "./constants.js";
 import { dashPhysicsForBorgId, fallGravityForBorgId, groundRunSpeedForBorgId, jumpVelocityForBorgId } from "./movementData.js";
-import { actorVelocityScale } from "./timescale.js";
+import { actorVelocityScale, type ContactAuraLevels } from "./timescale.js";
 import type { BorgProfile } from "./stats.js";
 import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
 
@@ -48,6 +48,8 @@ const BARYCENTRIC_EPSILON = 1e-4;
 const DEGENERATE_TRIANGLE_EPSILON = 1e-8;
 
 export interface MoveContext {
+  /** Prior contact phase, frozen for all actors before this frame's attacks. */
+  auraLevels?: ContactAuraLevels;
   /** Resolved lock-on target position, if locked (face toward it). */
   lockTargetPos: Vec3 | null;
   bounds: RectStageBounds;
@@ -239,7 +241,7 @@ export function stepMovement(
       // actorVelocityScale = the ROM's status(+0x5f4) × tier(+0x5f8) multipliers (timescale.ts,
       // DERIVED tables) — ×1.0 until tier/status writers land. Burst ×1.5 (the same
       // FLOAT_804373d8 the ROM folds into +0x5f4) stays in burstMult, not double-applied.
-      const maxSpeed = groundSpeed(p) * (flying ? MOVE.FLY_MULT : 1) * burstMult * actorVelocityScale(b);
+      const maxSpeed = groundSpeed(p) * (flying ? MOVE.FLY_MULT : 1) * burstMult * actorVelocityScale(b, ctx.auraLevels);
       let targetVx = 0;
       let targetVz = 0;
       if (free && (horizontal.walkX !== 0 || horizontal.walkZ !== 0)) {

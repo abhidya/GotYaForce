@@ -84,6 +84,14 @@ export interface StatusSpeedLevels {
   hasteLevel?: number;
 }
 
+/** Contact accumulators sampled before Battle starts this frame's contacts. Keeping this
+ * separate from the runtime fields prevents an earlier actor's attack from changing a later
+ * actor's movement in the same frame. See contact-aura-frame-order-2026-11-11.md. */
+export interface ContactAuraLevels {
+  readonly slowAuraLevel: number;
+  readonly hasteAuraLevel: number;
+}
+
 /**
  * True while `b.freezeFrames` is counting down (ROM +0x71c > 0) — the status timescale
  * override to ×0.03 takes priority over every other multiplier (status-effects-decode-
@@ -101,7 +109,7 @@ export function isFrozen(b: BorgRuntime): boolean {
  *    ROM's +0x6fc/+0x4a0/flag-0x1000000 burst/fusion gate), overridden to ×0.03 while
  *    freezeFrames > 0. Callers pass the FULL BorgRuntime; the legacy slowLevel/hasteLevel
  *    (StatusSpeedLevels) params remain supported for any pre-existing direct caller. */
-export function statusTimescale(b: BorgRuntime & StatusSpeedLevels): number {
+export function statusTimescale(b: BorgRuntime & StatusSpeedLevels, aura?: ContactAuraLevels): number {
   if (isFrozen(b)) return DATA.statusTimescale.freezeMultiplier_804373dc || 0.03;
 
   let scale = DATA.statusTimescale.base_804373c8 || 1;
@@ -109,14 +117,14 @@ export function statusTimescale(b: BorgRuntime & StatusSpeedLevels): number {
   // Haste terms apply even to burst actors (report: "applies even to burst targets").
   const hasteHit = b.hasteHitLevel ?? b.hasteLevel ?? 0;
   if (hasteHit > 0) scale *= DATA.statusTimescale.haste_802dd58c[Math.min(3, hasteHit)] ?? 1;
-  const hasteAura = b.hasteAuraLevel ?? 0;
+  const hasteAura = aura?.hasteAuraLevel ?? b.hasteAuraLevel ?? 0;
   if (hasteAura > 0) scale *= DATA.statusTimescale.haste_802dd58c[Math.min(3, hasteAura)] ?? 1;
 
   // Slow terms are SKIPPED for burst actors (report: "slow skipped for burst/fused actors").
   if (!b.burstActive) {
     const slowHit = b.slowHitLevel ?? b.slowLevel ?? 0;
     if (slowHit > 0) scale *= DATA.statusTimescale.slow_802dd57c[Math.min(3, slowHit)] ?? 1;
-    const slowAura = b.slowAuraLevel ?? 0;
+    const slowAura = aura?.slowAuraLevel ?? b.slowAuraLevel ?? 0;
     if (slowAura > 0) scale *= DATA.statusTimescale.slow_802dd57c[Math.min(3, slowAura)] ?? 1;
   }
 
@@ -126,8 +134,8 @@ export function statusTimescale(b: BorgRuntime & StatusSpeedLevels): number {
 /** Combined actor velocity scale (status × tier), excluding the separately-applied burst
  *  multiplier. ×1.0 at baseline (tier 16, no status); the tier/status writers are wired
  *  in combat.ts (applyHeroXBuff / applyHitInflictedStatus). */
-export function actorVelocityScale(b: BorgRuntime & StatusSpeedLevels): number {
-  return statusTimescale(b) * tierVelocityScale(b);
+export function actorVelocityScale(b: BorgRuntime & StatusSpeedLevels, aura?: ContactAuraLevels): number {
+  return statusTimescale(b, aura) * tierVelocityScale(b);
 }
 
 /** TUNED numeric value: research/decomp/movement-hit-decode-2026-07-04.md §1 records 0.05,
