@@ -1261,8 +1261,8 @@ export class BattleScene {
    * falling back to the sim root while the bone is unavailable; scale comes
    * from the child, never an invented renderer pulse, projectile radius or velocity.
    * FUN_8012151c / FUN_80121694 (chunk_0033.c) initialize and update the source
-   * child. Its active anisotropic pulse is omitted pending source sine conversion/rounding parity;
-   * this bounded presentation keeps the child's owner scale and fixed subtype color.
+   * child. Simulation owns its anisotropic pulse (source libm remains approximate);
+   * renderer time never advances the phase.
    */
   private syncDiverAuras(children: readonly DiverAuraObservation[]): void {
     const live = new Set<string>();
@@ -1295,7 +1295,7 @@ export class BattleScene {
       actor.ownerUid = child.ownerUid;
       actor.ownerFormId = child.ownerFormId;
       actor.fallbackPosition.set(child.pos.x, child.pos.y, child.pos.z);
-      actor.node.scale.setScalar(child.visualScale);
+      actor.node.scale.set(child.visualScale.x, child.visualScale.y, child.visualScale.z);
     }
     for (const [uid, actor] of this.diverAuraActors) {
       if (live.has(uid)) continue;

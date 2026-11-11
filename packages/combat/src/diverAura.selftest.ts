@@ -1,3 +1,4 @@
+import { diverAuraPulseScale } from "./diverAura.js";
 import { applyContactAuraStatus, stepAmmoRefill, useWeaponCell } from "./combat.js";
 import { diverAmmoBaseRate, refreshDiverAmmoRate, stepDiverXRefill } from "./diverAmmo.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
@@ -26,12 +27,25 @@ function fixture(id: string) {
   owner.pos = { x: 0, y: 0, z: 0 };
   target.pos = { x: 100, y: 0, z: 0 };
   target.invincTimer = 0;
-  function step() { return battle.step(1 / 60, inputs); }
+  function step() {
+    const before = state.diverAuras?.[0];
+    const phase = before?.pulsePhaseDegrees;
+    const result = battle.step(1 / 60, inputs);
+    const after = state.diverAuras?.[0];
+    if (before && after?.uid === before.uid) {
+      assert(after.pulsePhaseDegrees === (phase! + 3) % 360, "simulation phase reset/skipped, including refresh");
+    }
+    return result;
+  }
   function pressX() { inputs.p1.special = true; step(); inputs.p1.special = false; }
   return { battle, inputs, state, owner, target, step, pressX };
 }
 
 export function runDiverAuraSelfTest(): void {
+  // Fixed fixtures under the bounded JS sine model: distinguish source fmadds
+  // from an incorrectly separately rounded amplitude product.
+  assert(diverAuraPulseScale(111, 1).x === 1.044533371925354, "phase111 fmadds must not round intermediate product");
+  assert(diverAuraPulseScale(123, 1).x === 1.0400058031082153, "phase123 fmadds must not round intermediate product");
   for (const [id, level] of [["pl0805", 1], ["pl080d", 3], ["pl080e", 2]] as const) {
     const f = fixture(id);
     const hp = f.target.hp;
@@ -54,6 +68,9 @@ export function runDiverAuraSelfTest(): void {
     const observed = f.battle.observe().actors.find((b) => b.uid === f.owner.uid)!;
     assert(observed.weaponCells![1]!.cur === 0 && observed.weaponCells![2]!.cur === 0, "HUD snapshot disagrees with source cell");
     assert(child.bankTexId === 78 && child.hitRadius === 700, "decoded extent / approximate boundary or visual missing");
+    assert(child.pulsePhaseDegrees === 3, "first browser observation must include same-tick active update");
+    assert(child.visualScale.x > 1 && child.visualScale.y < 1 && child.visualScale.x === child.visualScale.z,
+      "actual X did not produce anisotropic source pulse");
     const uid = child.uid;
     const immutable = f.battle.observe().diverAuras[0]!;
     f.owner.pos.x = 20;

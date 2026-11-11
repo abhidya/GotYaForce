@@ -50,7 +50,7 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   const child: DiverAuraChild = {
     uid: "aura", ownerUid: "owner", ownerFormId: "pl0a04", team: 0,
     subtype: 0, pos: { x: 10, y: 20, z: 30 }, remainingFrames: 1140,
-    hitRadius: 100, bankTexId: 78, visualVariant: 0, visualScale: 0.01,
+    hitRadius: 100, bankTexId: 78, visualVariant: 0, pulsePhaseDegrees: 0, visualScale: { x: .01, y: .01, z: .01 },
   };
   const sync = (children: DiverAuraChild[], projectiles: BattleProjectileObservation[] = []) =>
     scene.sync([], projectiles, null, false, [], children);
@@ -69,11 +69,11 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   assert(near(material.color.b, 1) && near(material.opacity, .25), "Jelly selector0 authored blue/alpha");
   assert(material.transparent && !material.depthWrite && material.blending === THREE.NormalBlending,
     "authored translucent surface");
-  const moved = { ...child, pos: { x: -70, y: 40, z: 80 }, visualScale: 1.5, remainingFrames: 1 };
+  const moved = { ...child, pos: { x: -70, y: 40, z: 80 }, visualScale: { x: 1.5, y: 1.25, z: 1.5 }, remainingFrames: 1 };
   sync([moved]); scene.update(3); sync([{ ...moved, remainingFrames: 1140 }]);
   assert(internals.diverAuraActors.get(child.uid) === aura, "refresh keeps one node");
   assert(aura.node.position.equals(new THREE.Vector3(-70, 40, 80)), "owner movement followed");
-  assert(aura.node.scale.equals(new THREE.Vector3(1.5, 1.5, 1.5)), "absolute scale does not compound/pulse");
+  assert(aura.node.scale.equals(new THREE.Vector3(1.5, 1.25, 1.5)), "absolute anisotropic scale does not compound or advance with render dt");
   assert(near(material.opacity, .25), "lifetime never applies ordinary projectile fade");
   let materialDisposals = 0, geometryDisposals = 0;
   material.addEventListener("dispose", () => { materialDisposals++; });
@@ -127,6 +127,33 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
     assert(actualNode.position.equals(new THREE.Vector3(actual.pos.x, actual.pos.y, actual.pos.z)),
       `${id} Battle child reaches scene`);
     const owner = battleStateForSelfcheck(battle).borgs[0]!;
+    assert(actual.pulsePhaseDegrees === 3 && actualNode.scale.x > 1 && actualNode.scale.y < 1,
+      `${id} first active pulse reaches scene from actual X`);
+    const initialScale = actualNode.scale.clone();
+    for (const dt of [0, 1 / 240, 1 / 15, 3]) { scene.update(dt); syncBattle(battle); }
+    assert(actualNode.scale.equals(initialScale) && battle.observe().diverAuras[0]!.pulsePhaseDegrees === 3,
+      `${id} pause/repeated render sync must not advance phase`);
+    for (let i = 1; i <= 120; i++) {
+      tick(); const frame = syncBattle(battle).diverAuras[0]!;
+      assert(frame.pulsePhaseDegrees === (3 + i * 3) % 360, `${id} 120-tick phase wrap`);
+      assert(actualNode.scale.equals(new THREE.Vector3(frame.visualScale.x, frame.visualScale.y, frame.visualScale.z)),
+        `${id} simulation anisotropy reaches scene on every tick`);
+      assert(frame.hitRadius === 700, `${id} pulse must not change collision radius`);
+      if (frame.pulsePhaseDegrees === 90) {
+        assert(near(actualNode.scale.x, 1.0477) && near(actualNode.scale.y, .8889), `${id} positive quarter pulse`);
+      }
+      if (frame.pulsePhaseDegrees === 270) {
+        assert(near(actualNode.scale.x, .9523) && near(actualNode.scale.y, 1.1111), `${id} signed-short negative quarter pulse`);
+      }
+    }
+    assert(actualNode.scale.equals(initialScale), `${id} full cycle returns same scale`);
+    owner.modelSizeScale = 1.5;
+    tick(); const scaled = syncBattle(battle).diverAuras[0]!;
+    assert(scaled.hitRadius === 700 * owner.modelSizeScale! && owner.modelSizeScale! > 1 &&
+      actualNode.scale.x > owner.modelSizeScale! && actualNode.scale.y < owner.modelSizeScale!,
+      `${id} owner base scale affects axes once and collision independently`);
+    assert(actual.pulsePhaseDegrees === 3 && actual.visualScale.x === initialScale.x,
+      `${id} old observation does not alias mutable pulse`);
     owner.pos.x += 100;
     tick();
     const movedSnapshot = battleSceneState(battle, null);
@@ -223,7 +250,7 @@ async function checkDiverBoneAttachment(): Promise<void> {
     pos: { x: 10, y: 20, z: 30 }, rotY: Math.PI / 2, modelSizeScale: 1.5 };
   const child: DiverAuraChild = { uid: "bone-aura", ownerUid: owner.uid, ownerFormId: "pl0805", team: 0,
     subtype: 0, pos: { ...owner.pos }, remainingFrames: 1140, hitRadius: 100,
-    bankTexId: 78, visualVariant: 0, visualScale: .75 };
+    bankTexId: 78, visualVariant: 0, pulsePhaseDegrees: 0, visualScale: { x: .75, y: .75, z: .75 } };
   const sync = (id = "pl0805") => scene.sync([{ ...owner, combatFormId: id }], [], null, false, [], [child]);
   const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
   const makeRig = () => {
