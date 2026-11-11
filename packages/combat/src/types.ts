@@ -217,10 +217,16 @@ export interface BorgRuntime {
    * fakes that only set `ammo` keep compiling — combat.ts's ammo helpers self-heal it from
    * the borg's action profile on first use. Weapon 0 mirrors `ammo` and drives B shot ammo;
    * weapon 1 drives X/special ammo where the extracted stat row supplies a max/refill cell.
-   * Weapon 2 remains inert because the recovered per-borg stat row only carries two weapon
-   * segments.
+   * For Divers only, indices 1 and 2 alias the same X charge: the second source
+   * segment initializes ROM cell 2. Other families retain the existing slot mapping.
    */
   weaponCells?: WeaponCell[];
+  /** ROM +0x597 refill inhibit bits; Diver X reads bit 2. No generic busy-state guess. */
+  sourceAmmoRefillPauseMask?: number;
+  /** Cached ROM +0x768: refill precedes this frame's rate rebuild. */
+  sourceAmmoRefillRate?: number;
+  /** ROM +0x5e0 bit 0x1000000 suppresses slow in the source refill-rate product. */
+  sourceAmmoSlowImmune?: boolean;
   /** Named cooldown timers (frames remaining). */
   cooldowns: Record<string, number>;
   /** Invincibility timer (struct+0x720, frames; counts down 1/frame). */
@@ -347,6 +353,8 @@ export interface BorgRuntime {
   /** ROM +0x4a0 carried-role flag, NOT the +0x4a1 fusion state above. Fusion host
    * integration is still absent; this optional seam defaults false until supplied. */
   sourceFusionCarried?: boolean;
+  /** Exact ROM +0x4a0 role, when known. Only role 2 inherits partner rate. */
+  sourceFusionRole?: number;
   /** True once the HP-zero kill event has already removed this borg's force cost. */
   defeatAccounted: boolean;
   /**

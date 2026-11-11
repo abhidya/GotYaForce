@@ -50,17 +50,12 @@ the first X does not incorrectly latch the generic impotence fallback.
   is not claimed. Refresh and creation are decremented during the same browser
   contact phase. Mesh/material selection is decoded; the complete visual curve
   is not.
-- **Ammo:** source X calls cell-2 allocation. The family now calls that existing
-  seam. Current browser cell 2 remains infinite/unused because the source-to-browser
-  slot binding has not been integrated. A subsequent audit of FUN_800562b8
-  (chunk_0007.c:60-100) verified that the two source stat segments initialize ROM
-  slots 0 and 2. All 20 exported rows for each Diver give the second segment one
-  charge, refill type 1 and parameter 1200. A separate binding/clock follow-up is
-  needed; parameter 1200 alone is not proof of a 1200-frame refill. Existing ROM X
-  starts gate on browser cell 1 but bypass the generic
-  startSpecialAttack cell-1 decrement. This lane preserves that policy: it does
-  not invent cell-2 counts or add/double-charge cell 1. Exact ammo fidelity remains
-  unresolved.
+- **Ammo:** the original PR26 emitter preserved unbound/infinite source cell 2.
+  The subsequent [Diver ammo binding](diver-ammo-binding-2026-11-11.md) connects
+  that cell to the browser X/HUD charge and consumes one at the stream cue.
+  Normal refill now follows the source timer and cached-rate ordering. The
+  additional burst multiplier and live pause/fusion/slow-immunity seams remain
+  qualified in that follow-up; full modifier parity is not claimed.
 - **Fusion:** `sourceFusionCarried` is a new optional, unpopulated host seam for
   +0x4a0. Existing `fusionState` models +0x4a1 and is not conflated with it. The
   helper's carried-role gate is tested, but live fusion-role integration is not
@@ -75,7 +70,8 @@ through Battle for all three variants. It checks real kind-9 status, repeated X
 refresh with stable UID, independent observation snapshots, root following,
 continuous contact without HP/reaction/combo changes, movement recovery after the
 one carried contact frame, expiry, owner death/form change, ally contact and
-writer immunity/burst/carried gates. Existing cell-1/cell-2 policy is asserted.
+writer immunity/burst/carried gates. The ammo follow-up replaces the original
+unlimited-repeat fixture with source charge, denial and recharge assertions.
 
 A semantic negative control bundles the same test with only Battle's dedicated
 spawner dispatch bypassed (imports and fields retained). It fails specifically

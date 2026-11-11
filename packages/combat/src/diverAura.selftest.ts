@@ -1,4 +1,5 @@
-import { applyContactAuraStatus } from "./combat.js";
+import { applyContactAuraStatus, stepAmmoRefill, useWeaponCell } from "./combat.js";
+import { diverAmmoBaseRate, refreshDiverAmmoRate, stepDiverXRefill } from "./diverAmmo.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { statusImmunityMasksForBorgId } from "./movementData.js";
 import { battleStateForSelfcheck, createBattle } from "./battle.js";
@@ -36,9 +37,11 @@ export function runDiverAuraSelfTest(): void {
     const hp = f.target.hp;
     const combo = f.target.comboAccum;
     const xBefore = f.owner.weaponCells![1]!.cur;
-    const finiteX = f.owner.weaponCells![1]!.max > 0;
+    const xCell = f.owner.weaponCells![1]!;
+    assert(xBefore === 1 && xCell.max === 1 && xCell.refillParam === 1200, `${id} missing source X row`);
+    assert(xCell === f.owner.weaponCells![2], `${id} ROM cell 2 and UI X cell must share one charge`);
     f.pressX();
-    if (finiteX) assert(f.owner.weaponCells![1]!.cur === xBefore, `${id} ROM X unexpectedly changed existing cell-1 ammo policy`);
+    assert(xCell.cur === xBefore && xCell.timer === 0, `${id} consumed before stream cue`);
     for (let i = 0; i < 100 && !f.state.diverAuras?.length; i++) f.step();
     const child = f.state.diverAuras?.[0];
     assert(child, `${id} actual X did not spawn an aura child`);
@@ -47,8 +50,9 @@ export function runDiverAuraSelfTest(): void {
     assert(f.target.hp === hp && f.target.comboAccum === combo, `${id} contact changed HP/combo`);
     assert(f.target.state !== "hit" && f.target.state !== "down", `${id} contact created a hit reaction`);
     assert(f.target.vel.x === 0 && f.target.vel.z === 0, `${id} contact created knockback`);
-    if (finiteX) assert(f.owner.weaponCells![1]!.cur === xBefore, `${id} ROM event charged browser cell 1`);
-    assert(f.owner.weaponCells![2]!.max === 0, "did not preserve unresolved cell-2 policy");
+    assert(Number(xCell.cur) === 0 && Number(xCell.timer) === 1200, `${id} cue did not consume exactly one charge`);
+    const observed = f.battle.observe().actors.find((b) => b.uid === f.owner.uid)!;
+    assert(observed.weaponCells![1]!.cur === 0 && observed.weaponCells![2]!.cur === 0, "HUD snapshot disagrees with source cell");
     assert(child.bankTexId === 78 && child.hitRadius === 700, "decoded extent / approximate boundary or visual missing");
     const uid = child.uid;
     const immutable = f.battle.observe().diverAuras[0]!;
@@ -75,6 +79,18 @@ export function runDiverAuraSelfTest(): void {
     f.inputs.p2.moveZ = 0; f.target.vel.z = 0;
     f.target.pos.x = 100; f.target.pos.z = 1000;
     for (let i = 0; i < 150; i++) f.step();
+    const beforeDenied = f.state.diverAuras![0]!.remainingFrames;
+    f.pressX();
+    for (let attempt = 0; attempt < 4; attempt++) {
+      f.pressX();
+      for (let i = 0; i < 19; i++) f.step();
+    }
+    assert(f.state.diverAuras![0]!.remainingFrames < beforeDenied && f.state.projectiles.length === 0, "empty X refreshed or emitted generic fallback");
+    // The source child lasts 1140 frames, less than baseline refill debt1200.
+    // Verified haste allows a genuine overlap/refresh without granting free ammo.
+    f.owner.hasteHitLevel = 1; f.owner.hasteHitTimer = 2000;
+    for (let i = 0; i < 1200 && xCell.cur < 1; i++) f.step();
+    assert(xCell.cur === 1 && f.state.diverAuras!.length === 1, "haste failed to refill before child expiry");
     const beforeRefresh = f.state.diverAuras![0]!.remainingFrames;
     f.pressX();
     let refreshed = false;
@@ -87,6 +103,100 @@ export function runDiverAuraSelfTest(): void {
     f.state.diverAuras![0]!.remainingFrames = 1;
     f.step();
     assert(Number(f.state.diverAuras!.length) === 0 && Number(f.target.slowAuraLevel) === 0, "expiry still applied contact");
+  }
+  {
+    const f = fixture("pl080d");
+    f.pressX();
+    for (let i = 0; i < 100 && !f.state.diverAuras?.length; i++) f.step();
+    const cell = f.owner.weaponCells![1]!;
+    for (let i = 0; i < 1199; i++) f.step();
+    assert(cell.cur === 0 && cell.timer === 1, "baseline source refill crossed boundary early/double-ticked alias");
+    assert(f.state.diverAuras!.length === 0, "baseline child should expire before charge returns");
+    f.inputs.p1.special = true;
+    f.step(); // refill precedes input gate, so this exact-boundary press must start X
+    f.inputs.p1.special = false;
+    assert(Number(cell.cur) === 1 && Number(cell.timer) === 0, "exact-boundary X consumed before cue or failed refill");
+    for (let i = 0; i < 100 && !f.state.diverAuras?.length; i++) f.step();
+    assert(Number(f.state.diverAuras!.length) === 1 && Number(cell.cur) === 0, "boundary input did not deploy after cue");
+  }
+  {
+    const f = fixture("pl080d");
+    f.pressX();
+    // Deny the allocation AFTER initiation. This legitimate no-payload completion
+    // must not permanently latch the bridge's generic projectile fallback.
+    const cell = f.owner.weaponCells![1]!;
+    cell.cur = 0; cell.timer = 1200;
+    for (let i = 0; i < 120; i++) f.step();
+    assert(!f.state.diverAuras?.length && !f.state.projectiles.length, "denied cue spawned a payload");
+    cell.cur = 1; cell.timer = 0;
+    f.pressX();
+    for (let i = 0; i < 100 && !f.state.diverAuras?.length; i++) f.step();
+    assert(f.state.diverAuras?.length === 1 && !f.state.projectiles.length, "denied cue latched generic X fallback");
+  }
+  {
+    const f = fixture("pl080d");
+    const cell = f.owner.weaponCells![1]!;
+    cell.cur = 0; cell.timer = 20;
+    f.owner.sourceAmmoRefillRate = 1.25;
+    f.owner.hasteHitLevel = 1; f.owner.hasteHitTimer = 1;
+    f.step();
+    assert(cell.timer === 18.75 && f.owner.sourceAmmoRefillRate === 1,
+      "refill did not consume cached pre-expiry rate before rebuilding");
+    f.step();
+    assert(Number(cell.timer) === 17.75, "expired haste rate carried beyond one cached frame");
+    f.owner.hasteAuraLevel = 1;
+    f.step();
+    assert(Number(cell.timer) === 16.75 && Number(f.owner.sourceAmmoRefillRate) === 1.25,
+      "contact snapshot changed refill before source rate rebuild");
+    f.step();
+    assert(Number(cell.timer) === 15.5 && Number(f.owner.sourceAmmoRefillRate) === 1,
+      "contact rate was not retained for exactly its cached frame");
+  }
+  {
+    const f = fixture("pl080d");
+    const cell = f.owner.weaponCells![1]!;
+    const profile = buildProfile(stats.find((s) => s.id === "pl080d")!);
+    assert(useWeaponCell(f.owner, profile, 2, 1, true), "source cell2 allocation failed");
+    f.owner.weaponCells = f.owner.weaponCells!.map((c) => ({ ...c }));
+    const restored = f.owner.weaponCells[1]!;
+    stepAmmoRefill(f.owner, profile);
+    assert(restored === f.owner.weaponCells[2] && restored.cur === 0 && restored.timer === 1199,
+      "copied cells were not rebound without resetting charge/timer");
+    f.owner.weaponCells = [f.owner.weaponCells[0]!, cell, cell];
+    f.owner.freezeFrames = 90;
+    stepAmmoRefill(f.owner, profile);
+    assert(cell.timer === 1199 && cell.cur === 0, "freeze incorrectly slowed ammo or granted fractions");
+    f.owner.sourceAmmoRefillPauseMask = 4;
+    stepAmmoRefill(f.owner, profile);
+    assert(cell.timer === 1199, "source slot2 pause bit ignored");
+    f.owner.sourceAmmoRefillPauseMask = 2;
+    stepAmmoRefill(f.owner, profile);
+    assert(Number(cell.timer) === 1198, "browser slot1 bit incorrectly paused source slot2");
+    f.owner.sourceAmmoRefillPauseMask = 0;
+    f.owner.hasteHitLevel = 1;
+    assert(diverAmmoBaseRate(f.owner) === 1.25, "haste rate missing");
+    refreshDiverAmmoRate(f.owner);
+    cell.timer = 1.25;
+    stepDiverXRefill(cell, f.owner);
+    assert(Number(cell.timer) === 0 && Number(cell.cur) === 1, "haste exact boundary wrong");
+    f.owner.hasteHitLevel = 0; f.owner.slowHitLevel = 1;
+    assert(Math.abs(diverAmmoBaseRate(f.owner) - 0.7) < 0.00001, "slow rate missing");
+    f.owner.sourceAmmoSlowImmune = true;
+    assert(diverAmmoBaseRate(f.owner) === 1, "source slow-suppression bit ignored");
+    f.owner.sourceAmmoSlowImmune = false; f.owner.fusionState = 1;
+    assert(diverAmmoBaseRate(f.owner) === 1, "fusion state baseline reset missing");
+    f.owner.fusionState = 0; f.owner.sourceFusionCarried = true;
+    assert(diverAmmoBaseRate(f.owner) === 1, "coarse carried flag invented role2 inheritance");
+    f.owner.sourceFusionRole = 2;
+    f.owner.fusionPartnerUid = f.target.uid; f.target.sourceAmmoRefillRate = 1.5;
+    assert(diverAmmoBaseRate(f.owner, { all: f.state.borgs, auras: new Map() }) === 1.5, "carried partner rate not inherited");
+    const other = fixture("pl0500");
+    const otherCell = other.owner.weaponCells![1]!;
+    assert(otherCell !== other.owner.weaponCells![2], "global slot remap changed other family");
+    const otherProfile = buildProfile(stats.find((s) => s.id === "pl0500")!);
+    useWeaponCell(other.owner, otherProfile, 1, 1, true);
+    stepAmmoRefill(other.owner, otherProfile);
+    assert(otherCell.cur > 0 && otherCell.cur < 1, "non-Diver gradual refill policy changed");
   }
   {
     const f = fixture("pl080d");
@@ -127,5 +237,5 @@ export function runDiverAuraSelfTest(): void {
     f.step();
     assert(Number(f.state.diverAuras!.length) === 0, `${reason} left stale child collision`);
   }
-  console.log("[diverAura.selftest] PASS: real X create/refresh, records, overlap, expiry and owner cleanup");
+  console.log("[diverAura.selftest] PASS: source X charge/cue/refill boundaries, no fallback on denial, HUD, rate frame order, aura lifecycle and non-Diver control");
 }

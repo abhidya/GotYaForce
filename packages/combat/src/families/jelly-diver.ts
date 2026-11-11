@@ -75,8 +75,8 @@ function jellyDiverXPhase1(actor: RomActor, ctx: JellyDiverFamilyCtx): void {
   if (actor.contactP0 > 0) {
     actor.contactP0 = 0;
     // Source FUN_80116944 checks/consumes cell 2 at the contact event. The browser
-    // currently models that cell as infinite/unused; do not invent a count or charge
-    // the separate browser X cell 1 a second time. Battle owns create-versus-refresh.
+    // aliases that source cell to its X/HUD cell 1. Consume once here, never
+    // on initiation. Battle owns create-versus-refresh.
     if (ctx.onAllocateResource?.(actor, JELLY_DIVER_X.AMMO_SLOT, JELLY_DIVER_X.AMMO_COST, 1) !== false) {
       ctx.onFamilyProjectile?.(actor, JELLY_DIVER_X.CHILD_SPAWNER_ADDR, childTypeForBorg(actor.borgNumber));
     }

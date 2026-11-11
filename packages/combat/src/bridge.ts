@@ -1,3 +1,4 @@
+import { isDiverAmmoFamily } from "./diverAmmo.js";
 // Bridge between the existing @gf/combat `BorgRuntime` (the canonical game state —
 // HP, lock-on, ammo, gauges, status, projectiles, results telemetry) and the ROM
 // `RomActor` runtime (the 1:1 ported state machine). The existing layer stays
@@ -897,11 +898,10 @@ function makeGRedFamilyRegistration(): FamilyRegistration {
  * BorgRuntime.weaponCells is the port's mirror of exactly those. "Refilled" is `cur >= max`,
  * with the ROM's own infinite-cell convention on top — `max <= 0` means infinite
  * (chunk_0002.c:7158-7165, types.ts WeaponCell.max), and an infinite cell is never waiting on
- * a refill. That is what slot 2 is in the port today: the recovered per-borg stat rows carry
- * only two weapon segments (types.ts weaponCells doc), so cell 2 is inert/infinite and the X
- * latch clears every frame. Consistent with satXPhase1, which already models the slot-2 ammo
- * gate as always granted for the same reason — NOT a new assumption, and the honest reading of
- * an infinite cell. It becomes a real gate the moment a third weapon segment is extracted.
+ * a refill. Satellite binding has not been migrated: its browser cell2 is still
+ * inert. FUN_800562b8 actually maps two source segments to ROM cells0/2; the
+ * Diver-specific binding now uses that fact. Satellite migration is separate work,
+ * not evidence of a missing third segment.
  */
 function makeSatelliteRegistration(borgId: "pl0d01" | "pl0d05"): FamilyRegistration {
   return {
@@ -1427,6 +1427,8 @@ export class RomDriverBridge implements RomFamilyDriver {
   private specialKind: "x" | "b" | null = null;
   /** True once the active ROM special armed a resolvable hit or fired a child projectile. */
   private specialHadEffect = false;
+  /** A source Diver resource denial is a valid no-payload outcome, not an unported X. */
+  private diverResourceDenied = false;
   /** Accumulated |Δpos| the ROM machine drove this special (movement X moves count as effect). */
   private specialMotionAccum = 0;
   /** Position at special start, for the NET displacement test in the impotence latch. */
@@ -1883,7 +1885,12 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (host.onRefreshTargetVisibility) dest.onRefreshTargetVisibility = host.onRefreshTargetVisibility;
     if (host.onMorph) dest.onMorph = host.onMorph;
     if (host.onFaceComplete) dest.onFaceComplete = host.onFaceComplete;
-    if (host.onAllocateResource) dest.onAllocateResource = host.onAllocateResource;
+    if (host.onAllocateResource) dest.onAllocateResource = (actor, type, count, mode) => {
+      const accepted = host.onAllocateResource!(actor, type, count, mode);
+      if (!accepted && type === 2 && (mode ?? 0) !== 0 &&
+          isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId)) this.diverResourceDenied = true;
+      return accepted;
+    };
     if (host.onExitFb) dest.onExitFb = host.onExitFb;
     if (host.onFaceTarget) dest.onFaceTarget = host.onFaceTarget;
     if (host.onGroundSnap) dest.onGroundSnap = host.onGroundSnap;
@@ -2047,6 +2054,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.armedHits = [];
     this.specialKind = "x";
     this.specialHadEffect = false;
+    this.diverResourceDenied = false;
     this.specialMotionAccum = 0;
     this.specialStartPos = { x: runtime.pos.x, y: runtime.pos.y, z: runtime.pos.z };
     this.streamFrame = 0;
@@ -2131,6 +2139,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.armedHits = [];
     this.specialKind = "b";
     this.specialHadEffect = false;
+    this.diverResourceDenied = false;
     this.specialMotionAccum = 0;
     this.streamFrame = 0;
     // Load pre-decoded stream events for the group-4 charge choreography (anim + fireChild).
@@ -2266,7 +2275,8 @@ export class RomDriverBridge implements RomFamilyDriver {
         // X press on this borg goes to the generic startSpecialAttack fallback instead
         // of silently doing nothing again. PLACEHOLDER policy until every family's hit
         // kinds are decoded.
-        if (this.specialKind === "x" && !this.specialHadEffect) {
+        if (this.specialKind === "x" && !this.specialHadEffect &&
+            !this.diverResourceDenied) {
           const net =
             Math.abs(runtime.pos.x - this.specialStartPos.x) +
             Math.abs(runtime.pos.y - this.specialStartPos.y) +
