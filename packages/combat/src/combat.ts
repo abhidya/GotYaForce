@@ -124,7 +124,7 @@ import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
 import { statusImmunityMasksForBorgId } from "./movementData.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
-import { tierSizeScale } from "./timescale.js";
+import { tierSizeScale, stepModelSize } from "./timescale.js";
 import type {
   BorgRuntime,
   BurstMeterState,
@@ -2058,6 +2058,7 @@ export function stepHitStatus(b: BorgRuntime): void {
       applyActorParamTierDelta127(b.paramTier, -HERO_X_BUFF.TIER_DELTA);
     }
   }
+  stepModelSize(b);
 }
 
 export function enterHit(b: BorgRuntime, stun: number): void {

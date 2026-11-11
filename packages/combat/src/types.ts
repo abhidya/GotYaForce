@@ -418,6 +418,8 @@ export interface BorgRuntime {
    *  into paramTier.deltaAccum) so combat.ts can revert exactly this contribution independent
    *  of any other tier-delta source (e.g. the hero X buff below, item 4). */
   sizeTierDelta?: number;
+  /** Live presentation size (+0xb4 ordinary tier convergence), advanced by simulation. */
+  modelSizeScale?: number;
   /** 900f auto-revert timer for sizeTierDelta (ROM +0x750 via the `_63` caller,
    *  chunk_0003.c:6248/chunk_0008.c:4475); reverts sizeTierDelta to 0 at expiry. */
   sizeTierTimer?: number;

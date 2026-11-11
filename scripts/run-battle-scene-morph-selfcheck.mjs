@@ -47,3 +47,5 @@ await runBattleSceneLoadFailureSelfcheck((trigger) => new Promise((resolve, reje
   process.once("unhandledRejection", onRejection);
   trigger();
 }));
+
+await import("./run-battle-scene-size-selfcheck.mjs");

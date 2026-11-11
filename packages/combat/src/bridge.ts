@@ -1860,6 +1860,10 @@ export class RomDriverBridge implements RomFamilyDriver {
         orig(a, delta);
         this.onParamTierDelta(delta);
       };
+    } else {
+      // Production attachToBattle has no observer. Still commit the family writer
+      // to runtime state, just as animation/projectile hooks do above.
+      host.onParamTierDelta = (_actor, delta) => this.onParamTierDelta(delta);
     }
     // Copy all hooks from host to bridge.ctx — explicit per-hook to avoid union-of-
     // function-types issue with exactOptionalPropertyTypes.

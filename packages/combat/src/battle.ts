@@ -546,6 +546,7 @@ class BattleImpl implements Battle {
       hasteAuraLevel: 0,
       freezeFrames: 0,
       sizeTierDelta: 0,
+      modelSizeScale: 1,
       sizeTierTimer: 0,
       heroTierBuffFrames: 0,
     };

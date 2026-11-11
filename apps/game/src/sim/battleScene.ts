@@ -786,6 +786,9 @@ export class BattleScene {
       // Position + facing (sim units map 1:1 to the existing world scale).
       actor.group.position.set(b.pos.x, b.pos.y, b.pos.z);
       actor.group.rotation.y = b.rotY;
+      // Absolute parent scale preserves imported-model normalization, pending loads,
+      // and actor-owned attachments. Repeated render sync never compounds growth.
+      actor.group.scale.setScalar(b.modelSizeScale);
       // Animation slot from state.
       let slot = this.slotForBorg(b);
       if (slot === "melee") {
