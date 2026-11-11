@@ -5,10 +5,24 @@
     "rootDir": "src",
     "types": [],
     "paths": {
-      "@gf/physics": ["../physics/dist/index.d.ts"],
-      "@gf/render": ["../render/dist/index.d.ts"]
+      "@gf/physics": [
+        "../physics/dist/index.d.ts"
+      ],
+      "@gf/camera-math": [
+        "../camera-math/dist/index.d.ts"
+      ]
     }
   },
-  "references": [{ "path": "../physics" }, { "path": "../render" }],
-  "include": ["src", "src/**/*.json"]
+  "references": [
+    {
+      "path": "../physics"
+    },
+    {
+      "path": "../camera-math"
+    }
+  ],
+  "include": [
+    "src",
+    "src/**/*.json"
+  ]
 }

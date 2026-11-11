@@ -10,7 +10,8 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
-    "three": "^0.169.0"
+    "three": "^0.169.0",
+    "@gf/camera-math": "workspace:*"
   },
   "devDependencies": {
     "@types/three": "^0.169.0"

@@ -251,6 +251,33 @@ Six of the 21 are `lis`-built **absolute** data references, which this check als
 (`R_PPC_ADDR16_HA`/`LO`); only the seeder does not yet model `lis`. They are recoverable the
 moment it does, with no further oracle work.
 
+### 2.3.2 Branch-relocation negative controls (2026-11-11)
+
+The name check also needs to check the relocation **type and addend**. A
+synthetic `R_PPC_REL24` naming the expected callee with addend `+4` previously
+reported `MATCH`, although the linker would branch four bytes past that callee.
+An unrelated relocation type at the same offset could also inherit the branch's
+name check. Neither is proof of a retail match.
+
+`objdiff.compare` now verifies only `R_PPC_REL24` through the branch-name path,
+requires its addend to be zero, and tracks each relocation separately rather
+than trusting every relocation at a verified offset. `match.expected_symbols`
+only supplies names for exact symbol-entry targets: a branch into the middle
+of a symbol remains unverified until the harness can prove that target.
+
+The compiler- and disc-independent regression suite is part of contributor CI:
+
+```bash
+python3 -m unittest discover -s research/tools/matching-decomp -p 'test_*.py'
+```
+
+Validation on a fresh source checkout: **10 tests pass**; the existing
+`loop.py selftest` reports **63 checks passed**, with its compiler/GCM end-to-end
+group skipped. The new controls failed before the fix. These tests prove oracle
+behavior over synthetic inputs, **not new matched functions**. The retail
+corpus has not been re-verified for this change; `src-match/verify.py --control`
+still requires the pinned compiler and a user-supplied disc dump.
+
 ### 2.4 Recording
 
 A match writes `src-match/<game|sdk>/<name>.c` with a provenance header — the retail

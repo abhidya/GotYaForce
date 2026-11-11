@@ -1,23 +1,29 @@
 #!/usr/bin/env node
-// Runner for packages/render/src/camera/sourceCamera.ts runSourceCameraSelfTests.
-// Verifies the GG4E source camera port: applyFrame interpolation + setupView matrix +
-// boot view-setup + step-driver countdown + end-frame getter.
-//
-// Requires packages/render to be built first:
-//   pnpm --filter @gf/render run build
-//   node scripts/run-source-camera-tests.mjs
+// Exercise the render compatibility path and the one pure camera implementation.
+// No prior build or browser is required.
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { emitInlineModuleGraph } from "./lib/ts-inline-module.mjs";
 
-import { runSourceCameraSelfTests } from "../packages/render/dist/camera/sourceCamera.js";
-import assert from "node:assert";
-
-let failures = 0;
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "gf-camera-selfcheck-"));
 try {
-  runSourceCameraSelfTests((cond, msg) => assert(cond, msg));
-  console.log("sourceCamera.selftest: all checks passed");
-} catch (err) {
-  failures = 1;
-  console.error("sourceCamera.selftest: FAILED —", err.message);
-  console.error(err);
+  const graph = emitInlineModuleGraph({
+    label: "sourceCamera.selftest",
+    entry: path.join(root, "packages/render/src/camera/sourceCamera.ts"),
+    outDir: path.join(scratch, "modules"),
+    packages: {
+      "@gf/camera-math": path.join(root, "packages/camera-math/src/index.ts"),
+    },
+  });
+  assert(graph.modules.includes(path.join(root, "packages/camera-math/src/sourceCamera.ts")),
+    "render compatibility path must exercise the shared camera implementation");
+  const camera = await import(graph.url);
+  camera.runSourceCameraSelfTests((condition, message) => assert(condition, message));
+  console.log("sourceCamera.selftest: all checks passed through the shared camera package");
+} finally {
+  fs.rmSync(scratch, { recursive: true, force: true });
 }
-
-process.exit(failures);

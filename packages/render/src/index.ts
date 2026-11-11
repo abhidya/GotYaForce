@@ -7,6 +7,7 @@ import { clone as cloneSkinnedObject } from "three/examples/jsm/utils/SkeletonUt
 // sourceCamera.ts stays THREE-free (preserves @gf/combat's no-three runtime contract);
 // the THREE-aware adapters (mtx34ToThreeMatrix4 / applySourceCameraToThree) live in the
 // sibling sourceCameraThree.ts and are re-exported here for three-aware hosts (TitleIntro).
+export * from "./disposeObject3D.js";
 export * from "./camera/sourceCamera.js";
 export * from "./camera/sourceCameraThree.js";
 

@@ -26,6 +26,9 @@
     "selfcheck:get-settlement": "pnpm --filter @gf/missions build && node packages/missions/dist/gotchaBoxSettlement.selfcheck.js && node scripts/selfcheck-get-storage.mjs",
     "selfcheck:hud": "node scripts/selfcheck-hud.mjs",
     "selfcheck:xammo": "node scripts/run-xammo-tests.mjs",
+    "selfcheck:challenge-flow": "node scripts/run-challenge-flow-tests.mjs",
+    "test:render-disposal": "node --test packages/render/src/disposeObject3D.test.mjs",
+    "selfcheck:camera": "node scripts/run-source-camera-tests.mjs",
     "selfcheck:rom": "node scripts/run-rom-tests.mjs",
     "selfcheck:battle-scene-morph": "tsc -p apps/game/tsconfig.json --noEmit && esbuild apps/game/src/sim/battleScene.morph.selfcheck.ts --bundle --platform=node --format=esm --define:import.meta.env.BASE_URL='\"/\"' --outfile=.tmp/battle-scene-morph-selfcheck.mjs && node scripts/run-battle-scene-morph-selfcheck.mjs",
     "selfcheck:readability-flagged-stages": "node scripts/selfcheck-readability-flagged-stages.mjs",
@@ -63,7 +66,7 @@
     "atlas:preview": "pnpm --filter gotcha-force-atlas preview",
     "test:repo-policy": "node --test scripts/repository-policy.test.mjs",
     "test:oracle": "node research/decomp/oracle-harness/tests/run-oracle-tests.mjs",
-    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm selfcheck:browser-poc-gate && pnpm selfcheck:hud && pnpm selfcheck:menu-flow && pnpm selfcheck:game-session && pnpm selfcheck:title-frontend && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
+    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm selfcheck:browser-poc-gate && pnpm selfcheck:hud && pnpm selfcheck:menu-flow && pnpm selfcheck:game-session && pnpm selfcheck:title-frontend && pnpm selfcheck:camera && pnpm selfcheck:challenge-flow && pnpm test:render-disposal && pnpm selfcheck:rom && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
     "verify:docs": "pnpm atlas:build"
   },
   "devDependencies": {

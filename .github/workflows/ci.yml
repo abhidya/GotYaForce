@@ -31,6 +31,9 @@ jobs:
       - name: Verify game and importer
         run: pnpm verify:contributor
 
+      - name: Verify matching oracle negative controls
+        run: python3 -m unittest discover -s research/tools/matching-decomp -p 'test_*.py'
+
       - name: Verify deterministic oracle evidence
         run: pnpm test:oracle
 

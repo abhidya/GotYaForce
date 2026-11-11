@@ -37,6 +37,10 @@
 
 ---
 
+> **Current completion work:** start with [the 1:1 completion checklist](docs/port-completion.md).
+> Its registry inventory is newer than the historical snapshots below. A recorded
+> match, a passing synthetic test, and a playable-parity result are separate claims.
+
 ## Two tracks, and why the distinction matters
 
 The repository runs two efforts at once. Conflating them is the single easiest way to

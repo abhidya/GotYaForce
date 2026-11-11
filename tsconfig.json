@@ -3,6 +3,7 @@
   "//": "Root build-mode project list for repo-wide typecheck. The Vite app is checked by package.json because it intentionally disables emit.",
   "files": [],
   "references": [
+    { "path": "packages/camera-math" },
     { "path": "packages/ai" },
     { "path": "packages/assets" },
     { "path": "packages/audio" },

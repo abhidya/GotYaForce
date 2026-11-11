@@ -239,33 +239,38 @@ def compare(retail, cand, cand_relocs=None, base_addr=0,
 
     # symbol check on BRANCH relocations
     sym_errors = []
-    checked_offsets = set()
+    checked_branches = set()
     if expected_syms:
         for off, rtype, nm, add in cand_relocs:
             want = expected_syms.get(off)
-            if want is not None:
-                checked_offsets.add(off)
-                if want != nm:
+            if rtype == 10 and want is not None:
+                # expected_syms names the exact target, not a containing symbol.
+                # The linker applies S + A - P: matching S alone is insufficient.
+                checked_branches.add((off, rtype, nm, add))
+                if want != nm or add != 0:
                     sym_errors.append({"offset": off, "expected": want,
-                                       "got": nm})
+                                       "got": nm, "addend": add})
         if sym_errors:
             verdict = "MISMATCH"
+
+    # Track individual relocations, not offsets: a second relocation sharing
+    # a checked branch's offset must not inherit that branch's proof.
+    remaining_relocs = [r for r in cand_relocs
+                        if tuple(r) not in checked_branches]
 
     # address check on DATA relocations
     import datareloc                                        # noqa: E402
     data_verified, data_errors, data_unverified = [], [], []
     if resolve_symbol is not None and retail_addrs is not None:
         r = datareloc.check_data_relocs(
-            retail, base_addr, cand_relocs, retail_addrs, resolve_symbol,
-            skip_offsets=checked_offsets)
+            retail, base_addr, remaining_relocs, retail_addrs, resolve_symbol)
         data_verified, data_errors, data_unverified = (
             r["verified"], r["errors"], r["unverified"])
-        checked_offsets |= {x["offset"] for x in data_verified}
         if data_errors:
             verdict = "MISMATCH"
     else:
-        for off, rtype, nm, add in cand_relocs:
-            if off in checked_offsets or rtype in datareloc.BENIGN_RELOC_TYPES:
+        for off, rtype, nm, add in remaining_relocs:
+            if rtype in datareloc.BENIGN_RELOC_TYPES:
                 continue
             data_unverified.append({
                 "offset": off, "type": datareloc._rel_name(rtype),

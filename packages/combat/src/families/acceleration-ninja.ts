@@ -74,7 +74,7 @@ const AN = {
   PHYSICS_RATE: 1.0,
   /** FLOAT_8043a8d4 = -1.0 — zz_004beb8_ stream rate. */
   STREAM_RATE: -1.0,
-  /** FLOAT_8043a8d8 = 0.9 — a0 ph2 +0x18da yaw-magnitude decay factor. */
+  /** FLOAT_8043a8d8 = 0.9 — a0 ph2 +0x18da signed-yaw decay factor. */
   A0_YAW_DECAY: 0.8999999761581421,
   /** FLOAT_8043a8dc = 0.97 — zz_006ed8c_ aim rate (a0 ph2). */
   A0_AIM_RATE: 0.9700000286102295,
@@ -197,9 +197,10 @@ function action0(actor: NinjaActor, ctx: StreamContext): void {
     }
     case 2: { // FUN_80162638 — strike + exit
       if ((actor.ninjaFlag1d9 ?? 0) !== 0) actor.ninjaStreamFlag746 = 1;
-      // +0x18da = (short)(|+0x18da| × 0.9)  (the CONCAT44 pattern is int→double→fabs)
+      // +0x18da = (short)(+0x18da × 0.9). CONCAT44 converts the signed short
+      // to double; it does not take an absolute value (chunk_0042.c:675-680).
       const cur18da = toS16(actor.ninjaYaw18da ?? 0);
-      actor.ninjaYaw18da = toS16(Math.trunc(Math.abs(cur18da) * AN.A0_YAW_DECAY));
+      actor.ninjaYaw18da = toS16(Math.trunc(Math.fround(cur18da * AN.A0_YAW_DECAY)));
       tickStream(actor, 0xf, ctx);                            // zz_004cd24_(actor, 0xf)
       // zz_006ed8c_(0.97, actor) — TODO(host) aim helper.
       // FUN_80067310(1.0, actor, +0x54a) — TODO.
@@ -408,8 +409,8 @@ function action3(actor: NinjaActor, ctx: StreamContext): void {
       if (actor.contactP0 < 1) {                              // +0x1cef < 1
         actor.ninjaTurn18dc = 0;                              // +0x18dc = 0
       } else {                                                // +0x1cef >= 1
-        // +0x18dc = -(12483 × dt − |+0x18dc|)  (the CONCAT pattern resolves to fabs)
-        const decayed = -(AN.A3_TURN_RATE * actor.dt - Math.abs(toS16(actor.ninjaTurn18dc ?? 0)));
+        // CONCAT44 is signed-short conversion, not fabs (chunk_0042.c:961-967).
+        const decayed = -(AN.A3_TURN_RATE * actor.dt - toS16(actor.ninjaTurn18dc ?? 0));
         actor.ninjaTurn18dc = toS16(decayed);
         const mainRem = actor.handlerTimer - actor.dt;        // fVar1 = +0x558 - dt
         actor.handlerTimer = mainRem;                         // +0x558 -= dt
@@ -516,6 +517,41 @@ export type AssertFn = (cond: boolean, msg: string) => void;
 
 export function runAccelerationNinjaSelfTests(assert: AssertFn): void {
   type Shot = { addr: number; type: number };
+
+  // Signed-short conversion controls from chunk_0042.c:675-680 and 961-967.
+  // Explicit results catch both the old fabs interpretation and float32 rounding
+  // before truncation (10 * FLOAT_8043a8d8 rounds to exactly 9, not 8).
+  for (const [input, expected] of [
+    [-100, -90], [100, 90], [-32768, -29491], [32767, 29490],
+    [0xffff, 0], [10, 9], [-10, -9], [0, 0],
+  ] as const) {
+    const a = createRomActor() as NinjaActor;
+    configureAccelerationNinjaFamily(a, {});
+    a.actionIndex = 0;
+    a.fbPhaseSlots[0] = 2;
+    a.ninjaYaw18da = input;
+    a.contactP0 = 0;
+    a.grounded77b0 = false;
+    a.rootAction!(a);
+    assert(a.ninjaYaw18da === expected,
+      `a0 ph2 signed yaw ${input} decays to ${expected}, got ${a.ninjaYaw18da}`);
+  }
+  for (const [input, dt, expected] of [
+    [-100, 1, -12583], [100, 1, -12383], [-100, 0.5, -6341],
+    [-32768, 1, 20285], [0xffff, 0, -1], [0, 0, 0],
+  ] as const) {
+    const a = createRomActor() as NinjaActor;
+    configureAccelerationNinjaFamily(a, {});
+    a.actionIndex = 3;
+    a.fbPhaseSlots[0] = 1;
+    a.contactP0 = 1;
+    a.handlerTimer = 100;
+    a.dt = dt;
+    a.ninjaTurn18dc = input;
+    a.rootAction!(a);
+    assert(a.ninjaTurn18dc === expected,
+      `a3 ph1 signed turn ${input} at dt ${dt} becomes ${expected}, got ${a.ninjaTurn18dc}`);
+  }
 
   // ------------------------------------------------------------------------
   console.log("[acceleration-ninja.selfcheck] ACTION 0 — dash strike (3-phase):");
