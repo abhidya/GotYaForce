@@ -88,7 +88,7 @@ export type AnimSlot =
 interface Actor {
   group: THREE.Group;
   borgId: string;
-  /** Monotonic guard against an older async model load attaching after a form swap. */
+  /** Monotonic guard against async model/clip loads surviving a form swap or retirement. */
   modelRevision: number;
   model: THREE.Object3D | null;
   mixer: THREE.AnimationMixer | null;
@@ -824,6 +824,7 @@ export class BattleScene {
     // Despawn actors whose borg is gone.
     for (const [uid, actor] of this.actors) {
       if (!live.has(uid)) {
+        actor.modelRevision += 1; // Invalidate pending clips before retiring this actor.
         actor.chargeGlow?.material.dispose();
         this.disposeActorStatusFx(actor);
         this.root.remove(actor.group);
@@ -856,6 +857,7 @@ export class BattleScene {
   /** Remove every actor (call when leaving a battle). */
   clear(): void {
     for (const actor of this.actors.values()) {
+      actor.modelRevision += 1; // Pending clips must not restart a removed actor.
       actor.chargeGlow?.material.dispose();
       this.disposeActorStatusFx(actor);
       this.root.remove(actor.group);
@@ -1104,6 +1106,8 @@ export class BattleScene {
     if (!actor.mixer) {
       return; // placeholder has no animation
     }
+    const mixer = actor.mixer;
+    const revision = actor.modelRevision;
     actor.current = slot;
     actor.lastMeleeClipKey = clipKey;
 
@@ -1116,9 +1120,9 @@ export class BattleScene {
       const loader = this.assets.loadClipByStreamRef;
       if (loader && streamRef) {
         void loader(actor.borgId, streamRef).then((clip) => {
-          if (!actor.mixer || actor.lastMeleeClipKey !== clipKey) return;
+          if (actor.modelRevision !== revision || actor.mixer !== mixer || actor.lastMeleeClipKey !== clipKey) return;
           if (clip) {
-            const action = actor.mixer.clipAction(clip);
+            const action = mixer.clipAction(clip);
             actor.streamActions[streamKey] = action;
             this.crossfadeTo(actor, action, slot);
             return;
@@ -1142,22 +1146,26 @@ export class BattleScene {
       this.crossfadeTo(actor, existing, slot);
       return;
     }
+    // Bind every completion (including idle fallback) to this presentation lifetime.
+    // A morph can request the same slot before the previous form's clip resolves.
+    const mixer = actor.mixer;
+    const revision = actor.modelRevision;
     // Lazily load the clip; apply when ready if still current.
     void this.assets.loadClip(actor.borgId, slot).then((clip) => {
-      if (!actor.mixer || actor.lastMeleeClipKey !== clipKey) return;
+      if (actor.modelRevision !== revision || actor.mixer !== mixer || actor.lastMeleeClipKey !== clipKey) return;
       if (!clip) {
         // No clip for this slot; try idle as a fallback.
         if (slot !== "idle") {
           void this.assets.loadClip(actor.borgId, "idle").then((idle) => {
-            if (!actor.mixer || actor.lastMeleeClipKey !== clipKey || !idle) return;
-            const a = actor.mixer.clipAction(idle);
+            if (actor.modelRevision !== revision || actor.mixer !== mixer || actor.lastMeleeClipKey !== clipKey || !idle) return;
+            const a = mixer.clipAction(idle);
             actor.actions[slot] = a;
             this.crossfadeTo(actor, a, slot);
           });
         }
         return;
       }
-      const action = actor.mixer.clipAction(clip);
+      const action = mixer.clipAction(clip);
       actor.actions[slot] = action;
       this.crossfadeTo(actor, action, slot);
     });

@@ -122,3 +122,97 @@ export async function runBattleSceneMorphSelfcheck(): Promise<void> {
   assert(!afterimageInternals.bankFxActors.includes(effect),
     "afterimage exits and disposes when FUN_800b2b20 reaches frame 20");
 }
+
+/** Real BattleScene sync/morph/despawn paths with deferred asset I/O and real mixers. */
+export async function runBattleSceneAnimationRaceSelfcheck(): Promise<void> {
+  THREE.TextureLoader.prototype.load = function load(): THREE.Texture { return new THREE.Texture(); };
+  type Pending = { id: string; slot: string; resolve: (clip: THREE.AnimationClip | null) => void };
+  type ActorState = {
+    mixer: THREE.AnimationMixer | null;
+    actions: Record<string, THREE.AnimationAction>;
+    streamActions: Record<string, THREE.AnimationAction>;
+  };
+  const flush = async (): Promise<void> => { await Promise.resolve(); await Promise.resolve(); };
+  let checks = 0;
+  for (const mode of ["label", "exact", "idle-fallback", "missing-label", "missing-exact"] as const) {
+    for (const lifetime of ["morph", "morph-back", "despawn", "clear"] as const) {
+      const label = `${mode}/${lifetime}`;
+      const pending: Pending[] = [];
+      const defer = (id: string, slot: string): Promise<THREE.AnimationClip | null> =>
+        new Promise(resolve => pending.push({ id, slot, resolve }));
+      const scene = new BattleScene(new THREE.Group(), {
+        async loadModel() { return new THREE.Group(); },
+        loadClip: defer,
+        loadClipByStreamRef: (id, ref) => defer(id, `g${ref.group}s${ref.slot}`),
+      });
+      const actors = (scene as unknown as { actors: Map<string, ActorState> }).actors;
+      const exact = mode === "exact" || mode === "missing-exact";
+      const frame = (form?: string): BattleActorView => ({
+        ...view(form),
+        state: exact ? "special" : mode === "label" ? "idle" : "attack",
+        anim: exact ? "special" : mode === "label" ? "idle" : "shoot",
+        meleeAnimStream: exact ? { group: 1, slot: 2 } : null,
+      });
+      const enter = async (form?: string): Promise<void> => {
+        scene.sync([frame(form)]);
+        await flush();
+        scene.sync([frame(form)]);
+        await flush();
+      };
+      await enter();
+      const oldActor = actors.get("same-uid")!;
+      const oldMixer = oldActor.mixer!;
+      assert(pending.length === 1 && pending[0]!.id === "pl0604", `${label}: old request started`);
+      let stale = pending[0]!;
+      if (mode === "idle-fallback") {
+        stale.resolve(null);
+        await flush();
+        stale = pending[pending.length - 1]!;
+        assert(stale.slot === "idle" && stale.id === "pl0604", `${label}: old nested idle started`);
+      }
+      if (lifetime === "morph" || lifetime === "morph-back") {
+        await enter("pl0605");
+        if (lifetime === "morph-back") await enter();
+      } else {
+        if (lifetime === "despawn") scene.sync([]);
+        else scene.clear();
+        await enter();
+      }
+      const current = actors.get("same-uid")!;
+      assert(current.mixer !== oldMixer, `${label}: presentation has a new mixer`);
+      const fresh = pending[pending.length - 1]!;
+      const requestCount = pending.length;
+      const oldClip = new THREE.AnimationClip(`${label}:stale`, 1, []);
+      stale.resolve(mode.startsWith("missing-") ? null : oldClip);
+      await flush();
+      assert(pending.length === requestCount, `${label}: stale completion must not start fallback I/O`);
+      for (const actor of [oldActor, current]) {
+        assert(Object.keys(actor.actions).length === 0 && Object.keys(actor.streamActions).length === 0,
+          `${label}: stale completion must not cache actions`);
+      }
+      assert(!oldMixer.existingAction(oldClip) && !current.mixer!.existingAction(oldClip),
+        `${label}: stale completion must not bind/play on either mixer`);
+      const newClip = new THREE.AnimationClip(`${label}:fresh`, 1, []);
+      if (mode === "idle-fallback" || mode === "missing-label" || mode === "missing-exact") {
+        fresh.resolve(null);
+        await flush();
+        const fallback = pending[pending.length - 1]!;
+        assert(fallback.slot === (exact ? "special" : "idle") && fallback.id === fresh.id,
+          `${label}: current fallback uses current form`);
+        fallback.resolve(newClip);
+      } else fresh.resolve(newClip);
+      await flush();
+      const action = current.mixer!.existingAction(newClip);
+      assert(action && action.isRunning(), `${label}: current completion plays normally`);
+      const cache = mode === "exact" ? current.streamActions : current.actions;
+      assert(Object.values(cache).includes(action), `${label}: current completion is cached`);
+      // Already-cached slots remain stable across another sync.
+      const finalCount = pending.length;
+      scene.sync([frame(lifetime === "morph" ? "pl0605" : undefined)]);
+      assert(pending.length === finalCount, `${label}: current cached slot does not reload`);
+      scene.clear();
+      checks += 1;
+    }
+  }
+  console.log(`battleScene animation lifetime selfcheck: ${checks} cases PASS`);
+}
