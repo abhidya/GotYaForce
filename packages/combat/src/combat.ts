@@ -5,6 +5,9 @@
 // Invincibility port (behavior-notes.md s4a, struct+0x720): each frame, if timer>0 subtract
 // 1.0 and clamp at 0. Entering the wake state sets it to 60. See stepInvincibility().
 
+import { activeSourceTarget, activeSourceTargetUid } from "./targetLock.js";
+export { activeSourceTargetUid } from "./targetLock.js";
+
 import {
   add,
   bam16YawToXZ,
@@ -462,10 +465,6 @@ export function ensureSourceTargetLockState(b: BorgRuntime): NonNullable<BorgRun
     };
   }
   return b.targetLockState;
-}
-
-export function activeSourceTargetUid(b: BorgRuntime): string | null {
-  return b.targetLockState?.activeTargetUid ?? b.lockTarget ?? null;
 }
 
 export function refreshSourceTargetLock(self: BorgRuntime, all: BorgRuntime[]): SourceTargetSelection {
@@ -3250,9 +3249,9 @@ export function homingTargetForSpawn(
   muzzlePos: Vec3,
   dir: Vec3,
 ): string | null {
-  const tgt = b.lockTarget ? all.find((o) => o.uid === b.lockTarget) : undefined;
-  return tgt && isTargetable(tgt) && withinAimCone(muzzlePos, dir, tgt.pos)
-    ? b.lockTarget
+  const tgt = activeSourceTarget(b, all);
+  return tgt && withinAimCone(muzzlePos, dir, tgt.pos)
+    ? tgt.uid
     : null;
 }
 

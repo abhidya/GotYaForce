@@ -13,6 +13,7 @@
 // BorgRuntime keeps its vec3 `vel` model; RomActor uses the ROM's scalar hSpeed +
 // yVel model. The bridge decomposes/recomposes each sync.
 
+import { activeSourceTarget } from "./targetLock.js";
 import type { BorgRuntime, PlayerInput, RomFamilyDriver } from "./types.js";
 import { OPEN_WINDOW_ACTIVE_FRAMES } from "./actionStreamData.js";
 import type { Vec3 } from "@gf/physics";
@@ -1911,8 +1912,9 @@ export class RomDriverBridge implements RomFamilyDriver {
       return { runtime: candidate, state };
     });
     a.visibilityRoster = this.visibilityBindings.map((binding) => binding.state);
-    a.visibilityTarget = runtime.lockTarget
-      ? this.visibilityBindings.find((binding) => binding.runtime.uid === runtime.lockTarget)?.state ?? null
+    const activeTarget = activeSourceTarget(runtime, all);
+    a.visibilityTarget = activeTarget
+      ? this.visibilityBindings.find((binding) => binding.runtime.uid === activeTarget.uid)?.state ?? null
       : null;
     a.pos.x = runtime.pos.x;
     a.pos.y = runtime.pos.y;
@@ -1944,29 +1946,26 @@ export class RomDriverBridge implements RomFamilyDriver {
       a.savedGroundPos.y = runtime.pos.y;
       a.savedGroundPos.z = runtime.pos.z;
     }
-    const lockUid = runtime.lockTarget;
     (a as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = null;
     (a as RomActor & { targetDistance760?: number }).targetDistance760 = 0;
-    if (lockUid) {
-      const target = all.find((b) => b.uid === lockUid);
-      if (target) {
-        (a as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = {
-          x: target.pos.x, y: target.pos.y, z: target.pos.z,
-        };
-        (a as RomActor & { targetDistance760?: number }).targetDistance760 = Math.hypot(
-          target.pos.x - runtime.pos.x,
-          target.pos.y - runtime.pos.y,
-          target.pos.z - runtime.pos.z,
-        );
-        a.targetCache5e8.x = target.pos.x;
-        a.targetCache5e8.y = target.pos.y;
-        a.targetCache5e8.z = target.pos.z;
-        // zz_006d0dc_ -> FUN_800669d0 consumes the live target bearing as BAM16.
-        // Height participates in pitch seeking, while yaw is atan2(horizontal x,z).
-        const targetYaw = radToBam(Math.atan2(target.pos.x - runtime.pos.x, target.pos.z - runtime.pos.z));
-        a.lockYaw = targetYaw;
-        a.activeYaw = targetYaw;
-      }
+    if (activeTarget) {
+      const target = activeTarget;
+      (a as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = {
+        x: target.pos.x, y: target.pos.y, z: target.pos.z,
+      };
+      (a as RomActor & { targetDistance760?: number }).targetDistance760 = Math.hypot(
+        target.pos.x - runtime.pos.x,
+        target.pos.y - runtime.pos.y,
+        target.pos.z - runtime.pos.z,
+      );
+      a.targetCache5e8.x = target.pos.x;
+      a.targetCache5e8.y = target.pos.y;
+      a.targetCache5e8.z = target.pos.z;
+      // zz_006d0dc_ -> FUN_800669d0 consumes the live target bearing as BAM16.
+      // Height participates in pitch seeking, while yaw is atan2(horizontal x,z).
+      const targetYaw = radToBam(Math.atan2(target.pos.x - runtime.pos.x, target.pos.z - runtime.pos.z));
+      a.lockYaw = targetYaw;
+      a.activeYaw = targetYaw;
     }
   }
 

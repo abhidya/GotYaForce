@@ -9,6 +9,7 @@
 // it to zz_0099e70_(actor, variant). Each borg's B-shot / B-charge / X-special uses a
 // specific variant determined by its action-script stream data.
 
+import { activeSourceTargetUid } from "./targetLock.js";
 import type { BorgRuntime, Projectile } from "./types.js";
 import { MUZZLE_OFFSET, SHOT } from "./constants.js";
 import projectileVariantData from "./data/projectileVariants.json" with { type: "json" };
@@ -149,7 +150,7 @@ export function spawnRomProjectile(
     // VALUE lives in undumped params, so SHOT.HOMING_TURN is the port's single TUNED rate.
     homingTurn: variant.flags & VARIANT_FLAG_HOMING ? SHOT.HOMING_TURN : 0,
     homingTarget: null,
-    aimedTargetUid: shooter.lockTarget,
+    aimedTargetUid: activeSourceTargetUid(shooter),
     life: variant.lifetimeFrames,
     hitRadius: SHOT.HIT_RADIUS,
     visualKind: variant.flags & VARIANT_FLAG_ENERGY_BEAM ? "energy" : "muzzle",
