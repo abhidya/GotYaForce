@@ -18,6 +18,7 @@
     "selfcheck:menu-flow": "node scripts/selfcheck-menu-flow.mjs",
     "selfcheck:title-frontend": "node scripts/selfcheck-title-frontend.mjs",
     "selfcheck:game-session": "node scripts/selfcheck-game-session.mjs",
+    "selfcheck:battle-input-focus": "node --test scripts/battle-input-focus.test.mjs",
     "selfcheck:battle-pause-edge": "node --test scripts/battle-pause-input-edge.test.mjs",
     "selfcheck:browser-cdp": "node --test scripts/cdp-client.test.mjs scripts/network-gate.test.mjs",
     "selfcheck:browser-poc-gate": "node --test scripts/finish-game-port-browser-gate.test.mjs",
@@ -67,7 +68,7 @@
     "atlas:preview": "pnpm --filter gotcha-force-atlas preview",
     "test:repo-policy": "node --test scripts/repository-policy.test.mjs",
     "test:oracle": "node research/decomp/oracle-harness/tests/run-oracle-tests.mjs",
-    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm selfcheck:browser-poc-gate && pnpm selfcheck:hud && pnpm selfcheck:menu-flow && pnpm selfcheck:force-builder && pnpm selfcheck:game-session && pnpm selfcheck:title-frontend && pnpm selfcheck:camera && pnpm selfcheck:challenge-flow && pnpm test:render-disposal && pnpm selfcheck:rom && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
+    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm selfcheck:browser-poc-gate && pnpm selfcheck:hud && pnpm selfcheck:menu-flow && pnpm selfcheck:force-builder && pnpm selfcheck:game-session && pnpm selfcheck:battle-pause-edge && pnpm selfcheck:battle-input-focus && pnpm selfcheck:title-frontend && pnpm selfcheck:camera && pnpm selfcheck:challenge-flow && pnpm test:render-disposal && pnpm selfcheck:rom && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
     "verify:docs": "pnpm atlas:build"
   },
   "devDependencies": {
