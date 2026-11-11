@@ -5,7 +5,7 @@ import { nextRomProjectileUid } from "./projectiles.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { applyContactAuraStatus } from "./combat.js";
 import { JELLY_DIVER_X } from "./families/jelly-diver.js";
-import type { BorgRuntime, DiverAuraChild } from "./types.js";
+import type { BorgRuntime, DiverAuraChild, DiverAuraTail } from "./types.js";
 import shotTables from "./data/shotVariantKinds.json" with { type: "json" };
 
 const rows = shotTables.tables["0x8032c6a0"].rows;
@@ -45,6 +45,7 @@ export function spawnOrRefreshDiverAura(
     // are unavailable to Battle. No invented bone offset or generic muzzle is used.
     hitRadius: Math.max(...hit.halfExtent, hit.radius),
     bankTexId: row.getInt16(0), visualVariant: row.getFloat32(28),
+    baseScale: owner.modelSizeScale ?? 1,
     pulsePhaseDegrees: 0,
     visualScale: { x: initialScale, y: initialScale, z: initialScale },
   });
@@ -52,14 +53,19 @@ export function spawnOrRefreshDiverAura(
 }
 
 /** Contact phase after all movement. Source disables collision on expiry/owner-stop;
- * visual particle teardown is not modeled here. Root anchor and spherical overlap are
+ * only natural expiry emits a detached tail. Root anchor and spherical overlap are
  * explicitly approximate; source table, per-frame status, refresh and lifetime are not. */
-export function stepDiverAuras(children: DiverAuraChild[], all: readonly BorgRuntime[]): DiverAuraChild[] {
+export function stepDiverAuras(children: DiverAuraChild[], all: readonly BorgRuntime[], tails: DiverAuraTail[] = []): DiverAuraChild[] {
   return children.filter((child) => {
     const owner = all.find((b) => b.uid === child.ownerUid);
     if (!owner || !owner.alive || owner.hp <= 0 || owner.state === "death" || formId(owner) !== child.ownerFormId) return false;
+    // Source copies owner base scale before dispatching the lifetime state.
+    child.baseScale = owner.modelSizeScale ?? 1;
     child.remainingFrames -= 1;
-    if (child.remainingFrames < 1) return false;
+    if (child.remainingFrames < 1) {
+      tails.push(createDiverAuraTail(child));
+      return false;
+    }
     const row = ROWS[child.subtype]!;
     child.pos = { ...owner.pos }; // APPROXIMATE root anchor, source follows bone 12
     child.pulsePhaseDegrees += 3;
@@ -94,4 +100,40 @@ export function diverAuraPulseScale(phaseDegrees: number, ownerBaseScale: number
   const xz = f32(f32(1 + 0.04769999906420708 * sine) * ownerBaseScale);
   const y = f32(f32(1 - 0.11110000312328339 * sine) * ownerBaseScale);
   return { x: xz, y, z: xz };
+}
+
+/** Source zz_0121db0_ birth / FUN_80121918 init / FUN_80121990 update. Mathematical translation,
+ * not PPC rounding parity. Isolated visual RNG intentionally does not reproduce
+ * the source global RNG stream (active mesh-79 particles remain unimplemented). */
+export function createDiverAuraTail(child: DiverAuraChild): DiverAuraTail {
+  let rng = 2166136261;
+  for (const char of child.uid) rng = Math.imul(rng ^ char.charCodeAt(0), 16777619);
+  const byte = () => { rng ^= rng << 13; rng ^= rng >>> 17; rng ^= rng << 5; return rng >>> 24; };
+  const particles = Array.from({ length: 32 }, (_, index) => {
+    const r = Array.from({ length: 6 }, byte);
+    const scale = 0.5 + r[0]! / 255;
+    const radius = 760 * child.baseScale - 90 * scale;
+    let x = radius * (r[1]! / 127.5 - 1);
+    let y = radius * (r[2]! / 127 - 1);
+    let z = radius * (r[3]! / 127.5 - 1);
+    let magnitude = Math.hypot(x, y, z);
+    if (magnitude < 0.00009999999747378752) { x = 0; y = 1; z = 0; magnitude = 1; }
+    const distance = radius * (0.75 + r[4]! / 1020) / magnitude;
+    const speed = child.baseScale * (20 + r[5]! / 51) / magnitude;
+    return { index, scale, radius, offset: { x: x * distance, y: y * distance, z: z * distance },
+      velocity: { x: x * speed, y: y * speed, z: z * speed }, opacity: 0.25 };
+  });
+  return { uid: child.uid, pos: { ...child.pos }, visualVariant: child.visualVariant, particles };
+}
+
+export function stepDiverAuraTails(tails: DiverAuraTail[]): DiverAuraTail[] {
+  return tails.filter((tail) => {
+    tail.particles = tail.particles.filter((p) => {
+      p.offset.x += p.velocity.x; p.offset.y += p.velocity.y; p.offset.z += p.velocity.z;
+      if (Math.hypot(p.offset.x, p.offset.y, p.offset.z) > p.radius)
+        p.opacity = Math.max(0, p.opacity - 0.012500000186264515);
+      return p.opacity > 0;
+    });
+    return tail.particles.length > 0;
+  });
 }

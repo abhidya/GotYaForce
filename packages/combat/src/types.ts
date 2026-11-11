@@ -708,10 +708,20 @@ export interface DiverAuraChild {
   /** Source child +0xd4, advanced only by the simulation contact phase. */
   pulsePhaseDegrees: number;
   visualScale: Vec3;
+  baseScale: number;
+}
+
+/** Detached, non-colliding natural-expiry effect. */
+export interface DiverAuraTail {
+  uid: string;
+  pos: Vec3;
+  visualVariant: number;
+  particles: { index: number; scale: number; radius: number; offset: Vec3; velocity: Vec3; opacity: number }[];
 }
 
 export interface BattleState {
   diverAuras?: DiverAuraChild[];
+  diverAuraTails?: DiverAuraTail[];
   borgs: BorgRuntime[];
   projectiles: Projectile[];
   /** Remaining energy per team = sum of not-yet-defeated on-field + not-yet-deployed borg energy.
@@ -879,6 +889,7 @@ export interface ProjectileDespawnObservation {
  */
 export interface BattleObservation {
   readonly diverAuras: readonly DeepReadonly<DiverAuraChild>[];
+  readonly diverAuraTails: readonly DeepReadonly<DiverAuraTail>[];
   readonly actors: readonly BattleActorObservation[];
   readonly projectiles: readonly BattleProjectileObservation[];
   readonly projectileDespawns: readonly ProjectileDespawnObservation[];

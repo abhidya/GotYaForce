@@ -297,6 +297,7 @@ export function battleSceneState(battle: Battle, focus: BattleActorObservation |
   actors: readonly BattleActorView[];
   projectiles: readonly BattleProjectileObservation[];
   diverAuras: ReturnType<Battle["observe"]>["diverAuras"];
+  diverAuraTails: ReturnType<Battle["observe"]>["diverAuraTails"];
   projectileDespawns: readonly ProjectileDespawnObservation[];
   focusUid: string | null;
 } {
@@ -305,6 +306,7 @@ export function battleSceneState(battle: Battle, focus: BattleActorObservation |
     actors: observation.actors.map(battleActorView),
     projectiles: observation.projectiles,
     diverAuras: observation.diverAuras,
+    diverAuraTails: observation.diverAuraTails,
     projectileDespawns: observation.projectileDespawns,
     focusUid: focus?.uid ?? null,
   };

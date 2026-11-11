@@ -1,4 +1,5 @@
-import { diverAuraPulseScale } from "./diverAura.js";
+import { createDiverAuraTail, stepDiverAuras, stepDiverAuraTails, spawnOrRefreshDiverAura, diverAuraPulseScale } from "./diverAura.js";
+import { initRng8, getRng8, resetPrng, stepPrng } from "./prng.js";
 import { applyContactAuraStatus, stepAmmoRefill, useWeaponCell } from "./combat.js";
 import { diverAmmoBaseRate, refreshDiverAmmoRate, stepDiverXRefill } from "./diverAmmo.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
@@ -294,6 +295,49 @@ export function runDiverAuraSelfTest(): void {
     else f.owner.combatFormId = "pl0615";
     f.step();
     assert(Number(f.state.diverAuras!.length) === 0, `${reason} left stale child collision`);
+    assert(!f.state.diverAuraTails?.length, `${reason} incorrectly emitted natural expiry particles`);
+  }
+  {
+    const f = fixture("pl0805"); f.pressX();
+    for (let i = 0; i < 100 && !f.state.diverAuras?.length; i++) f.step();
+    const child = f.state.diverAuras![0]!;
+    f.owner.modelSizeScale = 1.5;
+    stepDiverAuras([child], f.state.borgs);
+    assert(child.baseScale === 1.5, "active update retains latest base scale for expiry");
+    initRng8(); resetPrng(17, 39);
+    const expectedNext = stepPrng(); resetPrng(17, 39);
+    const rngBefore = JSON.stringify(getRng8());
+    const expected = createDiverAuraTail(child);
+    assert(JSON.stringify(getRng8()) === rngBefore && stepPrng() === expectedNext, "tail birth must not consume either gameplay PRNG");
+    assert(JSON.stringify(expected) === JSON.stringify(createDiverAuraTail(child)), "visual RNG deterministic");
+    child.remainingFrames = 1; f.step();
+    assert(!f.state.diverAuras!.length && f.state.diverAuraTails!.length === 1 &&
+      f.state.diverAuraTails![0]!.particles.length === 32, "actual X expiry emits 32 once");
+    assert(f.target.slowAuraLevel === 0, "expiry must not contact");
+    const frozen = JSON.stringify(f.battle.observe().diverAuraTails);
+    const observed = f.battle.observe().diverAuraTails;
+    spawnOrRefreshDiverAura(f.state.diverAuras!, f.owner, 0x801213bc, 0);
+    assert(f.state.diverAuras!.length === 1 && f.state.diverAuras![0]!.uid !== child.uid,
+      "new aura coexists without refreshing old tail");
+    f.step();
+    assert(JSON.stringify(observed) === frozen, "observation particle fields do not alias");
+    const boundary = createDiverAuraTail(child);
+    boundary.particles = [0, 1].map((index) => ({ index, scale: 1, radius: 10,
+      offset: { x: index ? 10 : 9, y: 0, z: 0 }, velocity: { x: 1, y: 0, z: 0 }, opacity: .25 }));
+    stepDiverAuraTails([boundary]);
+    assert(boundary.particles[0]!.opacity === .25 && boundary.particles[1]!.opacity === .25 - .012500000186264515,
+      "strict individual radius boundary controls fade after movement");
+    boundary.particles[1]!.opacity = .001;
+    stepDiverAuraTails([boundary]);
+    assert(boundary.particles.length === 1 && boundary.particles[0]!.index === 0, "individual dead slot removed");
+    const expiryChild = { ...child, remainingFrames: 1 };
+    const expiryTails: typeof f.state.diverAuraTails = [];
+    f.owner.modelSizeScale = 2;
+    stepDiverAuras([expiryChild], f.state.borgs, expiryTails);
+    assert(expiryTails[0]!.particles.every((p) => p.radius === 760 * 2 - 90 * p.scale), "expiry tick copies latest owner base scale before birth");
+    let tails = [expected];
+    for (let i = 0; i < 100; i++) tails = stepDiverAuraTails(tails);
+    assert(tails.length === 0, "tail freed after final particle");
   }
   console.log("[diverAura.selftest] PASS: source X charge/cue/refill boundaries, no fallback on denial, HUD, rate frame order, aura lifecycle and non-Diver control");
 }

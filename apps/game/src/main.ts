@@ -1192,6 +1192,7 @@ async function enterBattle(): Promise<void> {
         false,
         initialScene.projectileDespawns,
         initialScene.diverAuras,
+        initialScene.diverAuraTails,
       );
       const focus = localFocusBorg();
       const focusPos = focus ? battleScene.positionOf(focus.uid) : null;
@@ -1473,6 +1474,7 @@ function syncBattlePresentation(live: BattleSession): void {
     Boolean(presentation?.hud.meleeRange),
     sceneState.projectileDespawns,
     sceneState.diverAuras,
+    sceneState.diverAuraTails,
   );
   updateHud();
 }
