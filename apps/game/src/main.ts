@@ -1247,9 +1247,22 @@ function projectedTeammateMarkers(
 const pauseInputEdge = createInputEdgeLatch();
 /** Standard-mapping Start (the GameCube Start/Pause button; ui/touch publishes it here too). */
 const PAD_START_BUTTON = 9;
-function pauseControlPressed(): boolean {
-  const pad = activeGamepad();
-  return keys.has("Escape") || keys.has("Enter") || (pad?.buttons[PAD_START_BUTTON]?.pressed ?? false);
+/** Browser control ownership: every local player can pause, using combat's pad slots.
+ * This does not assert a decoded original-game pause policy.
+ */
+function pauseGamepads(): Gamepad[] {
+  const count = session?.localPlayerIds.length ?? 1;
+  const pads: Gamepad[] = [];
+  for (let playerIndex = 0; playerIndex < count; playerIndex += 1) {
+    const pad = activeGamepad(playerIndex, count === 1 && playerIndex === 0);
+    if (pad) pads.push(pad);
+  }
+  return pads;
+}
+
+function pauseControlPressed(pads = pauseGamepads()): boolean {
+  return keys.has("Escape") || keys.has("Enter") ||
+    pads.some(pad => pad.buttons[PAD_START_BUTTON]?.pressed);
 }
 
 function pollPauseToggle(): void {
@@ -1257,10 +1270,13 @@ function pollPauseToggle(): void {
   // Guard clause: with no battle (or one already resolved) the latch is deliberately NOT
   // polled, so a control held across the battle boundary cannot bank a rising edge.
   if (!live || live.resolved) return;
-  if (pauseInputEdge.poll(pauseControlPressed()) && !live.paused) {
+  const pads = pauseGamepads();
+  if (pauseInputEdge.poll(pauseControlPressed(pads)) && !live.paused) {
     // The sim and menu bus poll independently. Claim the opening Start press before
     // mounting its new recipient, or a later menu tick immediately resumes again.
-    consumeMenuGamepadStart(activeGamepad());
+    // Claim every held Start in this opening snapshot, including simultaneous local
+    // presses. Claiming player 0 instead of the opener lets player 2 instantly resume.
+    for (const pad of pads) consumeMenuGamepadStart(pad);
     pauseBattle();
   }
 }

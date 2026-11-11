@@ -55,6 +55,7 @@ const { createInputEdgeLatch } = await import(graph("pause-race-latch", "inputEd
 const mainText = fs.readFileSync(path.join(app, "main.ts"), "utf8");
 const main = ts.createSourceFile("main.ts", mainText, ts.ScriptTarget.Latest, true);
 const functions = ["activeGamepad", "pauseControlPressed", "pollPauseToggle", "pauseBattle", "resumeBattle", "closePauseMenu"];
+if (mainText.includes("function pauseGamepads(")) functions.push("pauseGamepads");
 const constants = ["pauseInputEdge", "PAD_START_BUTTON"];
 const nodes = [...functions.map(name => {
   const node = main.statements.find(n => ts.isFunctionDeclaration(n) && n.name?.text === name);
@@ -74,16 +75,17 @@ function setup(t, source, oldBehavior = false) {
   // Drop stale bus state from the previous scenario, including physical slots.
   const reset = bus.subscribeMenuInput(() => {});
   physical = [null, null, null]; menuTick(); physical = []; reset();
-  const device = pad(source === "touch" ? -1 : source === "fallback" ? 2 : 0);
+  const device = pad(source === "touch" ? -1 : source === "fallback" ? 2 : source === "second" ? 1 : 0);
   if (source === "touch") touch = device;
   else physical = Array.from({length: device.index + 1}, (_, i) => i === device.index ? device : null);
+  if (source === "second") physical[0] = pad(0);
   const host = createMenuScreenHost(new Element());
   t.after(() => host.destroy());
   const normalActions = [];
   host.set({ handleMenuInput: e => normalActions.push(e.action), destroy() {} });
   let opens = 0, resumes = 0;
   const context = vm.createContext({ navigator, touchGamepad: () => touch,
-    keys: new Set(), session: {paused: false, resolved: false, pauseHandle: null},
+    keys: new Set(), session: {paused: false, resolved: false, pauseHandle: null, localPlayerIds: source === "second" ? ["p1", "p2"] : ["p1"]},
     createInputEdgeLatch, consumeMenuGamepadStart: oldBehavior ? () => {} : bus.consumeMenuGamepadStart,
     screenHost: host, createPauseMenu: (...args) => { opens++; return createPauseMenu(...args); },
     playConfirmSfx: () => { resumes++; }, playBackSfx() {}, endBattleToMenu() {},
@@ -99,7 +101,7 @@ function opening(h, order) {
   assert.equal(h.context.session.paused, true, "opening Start must leave battle paused");
   assert.deepEqual(h.counts(), {opens: 1, resumes: 0});
 }
-for (const source of ["physical", "fallback", "touch"]) {
+for (const source of ["physical", "fallback", "touch", "second"]) {
   for (const order of [["sim", "menu"], ["menu", "sim"]]) {
     test(`${source}, ${order.join(" first: ")}: one Start press per transition`, t => {
       const h = setup(t, source); opening(h, order);
@@ -133,7 +135,7 @@ test("other buttons, sticks, normal-menu Start and keyboard remain active", t =>
   h.press(true); menuTick();
   assert.deepEqual(h.normalActions, ["start"], "Start still works outside battle");
   h.press(false); menuTick();
-  h.context.session = {paused: false, resolved: false, pauseHandle: null};
+  h.context.session = {paused: false, resolved: false, pauseHandle: null, localPlayerIds: ["p1"]};
   h.press(true); h.context.pollPauseToggle();
   h.device.buttons[13].pressed = true; menuTick();
   assert.equal(h.context.session.pauseHandle.getSelected(), "quit", "D-pad is not consumed");
@@ -151,4 +153,51 @@ test("other buttons, sticks, normal-menu Start and keyboard remain active", t =>
   h.context.keys.clear(); h.context.pollPauseToggle();
   h.context.keys.add("Escape"); key("Escape"); h.context.pollPauseToggle();
   assert.equal(h.context.session.paused, false);
+});
+
+for (const order of [["sim", "menu"], ["menu", "sim"]]) {
+  test(`two local Start presses together remain paused, ${order.join(" then ")}`, t => {
+    const h = setup(t, "second");
+    physical[0].buttons[9].pressed = true; opening(h, order);
+    h.tick(order); assert.equal(h.context.session.paused, true);
+    physical[0].buttons[9].pressed = false; h.press(false); h.tick(order);
+    physical[0].buttons[9].pressed = true; h.tick(order);
+    assert.equal(h.context.session.paused, false, "P1 can resume after both opening presses release");
+    assert.deepEqual(h.counts(), {opens: 1, resumes: 1});
+  });
+  test(`P2 pause with P1 disconnected retains exact slot, ${order.join(" then ")}`, t => {
+    const h = setup(t, "second"); physical[0] = null;
+    opening(h, order);
+    h.press(false); h.tick(order);
+    h.device.connected = false; h.tick(order);
+    assert.equal(h.context.session.paused, true, "disconnect cannot resume");
+    h.device.connected = true; h.tick(order);
+    h.press(true); h.tick(order); assert.equal(h.context.session.paused, false);
+    h.press(false); h.tick(order); h.press(true); h.tick(order);
+    assert.equal(h.context.session.paused, true);
+  });
+}
+test("P2 opener leaves P1's next independent Start available to resume", t => {
+  const h = setup(t, "second"); opening(h, ["sim", "menu"]);
+  physical[0].buttons[9].pressed = true; menuTick();
+  assert.equal(h.context.session.paused, false);
+  assert.deepEqual(h.counts(), {opens: 1, resumes: 1});
+});
+test("co-op does not steal a non-participating sparse slot; solo fallback still does", t => {
+  const h = setup(t, "fallback"); h.context.session.localPlayerIds = ["p1", "p2"];
+  h.press(true); h.tick(["sim", "menu"]);
+  assert.equal(h.context.session.paused, false, "slot 2 is not a co-op participant");
+  h.press(false); h.tick(["sim", "menu"]);
+  h.context.session.localPlayerIds = ["p1"];
+  opening(h, ["sim", "menu"]);
+});
+test("touch remains P1's co-op fallback when P1 is disconnected", t => {
+  const h = setup(t, "touch"); h.context.session.localPlayerIds = ["p1", "p2"];
+  physical = [null, pad(1)]; opening(h, ["sim", "menu"]);
+  physical[1].buttons[9].pressed = true; menuTick();
+  assert.equal(h.context.session.paused, false, "P2 can resume touch's pause");
+});
+test("a disconnected held pad cannot open pause", t => {
+  const h = setup(t, "second"); h.press(true); h.device.connected = false;
+  h.tick(["sim", "menu"]); assert.equal(h.context.session.paused, false);
 });
