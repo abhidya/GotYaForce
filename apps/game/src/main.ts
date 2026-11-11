@@ -1,3 +1,4 @@
+import { saveForceSlots, syncForceSlots } from "./forceSlotStorage.js";
 // Gotcha Force (web) — entry point.
 //
 // This wires the three finished systems into a playable CHALLENGE-mode loop:
@@ -810,8 +811,13 @@ const gotchaBox = createGotchaBoxSettlement({
 /** Challenge only ever offers FIGHT ALONE / TEAM UP; the session clamps to the same bound. */
 const MAX_LOCAL_PLAYERS = 2;
 
+// Load once before either editor entry point can modify a force.
+const initialForceSlots = BORG_CATALOG.defaultForceSlots.map(slot => ({
+  ...slot, borgIds: [...slot.borgIds],
+}));
+syncForceSlots(initialForceSlots);
 const challengeSession = createGameSession({
-  initialForceSlots: BORG_CATALOG.defaultForceSlots,
+  initialForceSlots,
   forceFromSlot,
   validForce: (borgIds) => BORG_CATALOG.rosterIndex.validIds(borgIds, { fallbackId: DEFAULT_LEAD }),
   createRun: createChallengeRun,
@@ -822,7 +828,11 @@ const challengeSession = createGameSession({
 });
 
 function dispatchSession(event: GameSessionEvent): void {
-  interpretSessionEffects(challengeSession.dispatch(event));
+  const effects = challengeSession.dispatch(event);
+  if (event.type === "force-editor-confirm") {
+    saveForceSlots(challengeSession.snapshot().forceSlots);
+  }
+  interpretSessionEffects(effects);
 }
 
 function interpretSessionEffects(effects: readonly GameSessionEffect[]): void {

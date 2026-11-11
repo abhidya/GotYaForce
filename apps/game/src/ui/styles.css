@@ -1416,3 +1416,12 @@
   -webkit-text-stroke: 0.5px var(--gf-outline);
   paint-order: stroke fill;
 }
+
+/* The editor commit control remains readable without exported bitmap assets. */
+.gf-force-save {
+  display: block; width: 100%; margin-top: 8px; padding: 8px;
+  color: #fff; background: #244c80; border: 2px solid #bcdcff;
+  font: bold 12px sans-serif; cursor: pointer;
+}
+.gf-force-save:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.gf-force-save:disabled { opacity: .5; cursor: default; }

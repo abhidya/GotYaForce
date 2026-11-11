@@ -313,3 +313,66 @@ assert.doesNotMatch(main, /from\s+["']\.\/sim\/battleBootstrap\.js["']/, "main d
 assert.equal(existsSync(path.join(root, "apps/game/src/sim/battleBootstrap.ts")), false, "battleBootstrap deleted");
 
 console.log("game-session selfcheck PASS: transitions/abandon, edits/menu focus, isolated snapshots/ingress, run routing, preparation/retry, invalid events, static guard");
+
+// Execute shared storage and real session routes together. Rendering is omitted;
+// this is the app's dispatch -> persist -> screen-mount ordering.
+const storageGraph = emitInlineModuleGraph({
+  label: "force-storage", entry: path.join(root, "apps/game/src/forceSlotStorage.ts"),
+  outDir: path.join(root, ".tmp/force-storage"),
+  stubs: { "./ui/screens/SelectForce.js": "export {};" },
+});
+const values = new Map();
+globalThis.window = { localStorage: {
+  getItem: key => values.get(key) ?? null,
+  setItem: (key, value) => values.set(key, value),
+}};
+const storage = await import(storageGraph.url);
+const storageKey = "gf-force-slots-v1";
+values.set(storageKey, JSON.stringify([{no:1, name:"OLD", borgIds:["persisted"]}, {no:2, name:"KEEP", borgIds:["b"]}]));
+const initial = [{no:1, name:"ONE", borgIds:["a"]}, {no:2, name:"TWO", borgIds:["default"]}];
+storage.syncForceSlots(initial);
+assert.deepEqual(initial[0].borgIds, ["persisted"], "restore before menu editor");
+const durable = makeSession({initialForceSlots:initial});
+durable.dispatch({type:"boot-ready"}); durable.dispatch({type:"title-enter"});
+durable.dispatch({type:"menu-select", mode:"edit-force"});
+durable.dispatch({type:"force-editor-confirm", borgIds:["saved"]});
+storage.saveForceSlots(durable.snapshot().forceSlots);
+assert.equal(durable.snapshot().screen, "menu");
+assert.deepEqual(JSON.parse(values.get(storageKey))[1], {no:2, name:"KEEP", borgIds:["b"]}, "other saved slots preserved");
+const laterSlots = durable.snapshot().forceSlots;
+storage.syncForceSlots(laterSlots);
+assert.deepEqual(laterSlots[0].borgIds, ["saved"], "first SelectForce cannot restore stale save");
+const reloadStorage = await import(storageGraph.url + "?reload");
+const reloaded = [{no:1, name:"DEFAULT", borgIds:["a"]}];
+reloadStorage.syncForceSlots(reloaded);
+assert.deepEqual(reloaded[0].borgIds, ["saved"], "main-menu save survives reload");
+const challengeEdit = makeSession({initialForceSlots:reloaded});
+toSelectForce(challengeEdit);
+challengeEdit.dispatch({type:"force-slot-edit", slot:challengeEdit.snapshot().forceSlots[0]});
+challengeEdit.dispatch({type:"force-editor-confirm", borgIds:["confirmed"]});
+reloadStorage.saveForceSlots(challengeEdit.snapshot().forceSlots);
+assert.equal(challengeEdit.snapshot().screen, "select-force");
+assert.deepEqual(JSON.parse(values.get(storageKey))[0].borgIds, ["confirmed"]);
+challengeEdit.dispatch({type:"force-slot-edit", slot:challengeEdit.snapshot().forceSlots[0]});
+const beforeCancel = values.get(storageKey);
+challengeEdit.dispatch({type:"force-editor-quit"});
+reloadStorage.syncForceSlots(challengeEdit.snapshot().forceSlots);
+assert.equal(values.get(storageKey), beforeCancel, "cancel does not change saved force");
+challengeEdit.dispatch({type:"force-slot-confirm", slot:challengeEdit.snapshot().forceSlots[0]});
+assert.equal(challengeEdit.snapshot().screen, "briefing");
+challengeEdit.dispatch({type:"briefing-confirm"});
+assert.equal(challengeEdit.snapshot().screen, "loading");
+const appSource = readFileSync(mainPath, "utf8");
+assert.ok(appSource.indexOf("syncForceSlots(initialForceSlots)") < appSource.indexOf("const challengeSession ="));
+assert.match(appSource, /event.type === "force-editor-confirm"[\s\S]*?saveForceSlots\(challengeSession.snapshot\(\).forceSlots\)/);
+console.log("force-storage integration PASS: menu/challenge save, reload, stale restore, cancel, battle entry");
+const corrupt = "{broken";
+values.set(storageKey, corrupt);
+const recoveryStorage = await import(storageGraph.url + "?corrupt");
+recoveryStorage.syncForceSlots([{no:1, name:"DEFAULT", borgIds:["a"]}]);
+assert.equal(values.get(recoveryStorage.FORCE_SLOTS_UNREADABLE_KEY), corrupt);
+values.set(storageKey, "{broken again");
+const repeatRecovery = await import(storageGraph.url + "?corrupt-again");
+repeatRecovery.syncForceSlots([{no:1, name:"DEFAULT", borgIds:["a"]}]);
+assert.equal(values.get(recoveryStorage.FORCE_SLOTS_UNREADABLE_KEY), corrupt, "first unreadable backup retained");
+console.log("force-storage recovery PASS: unreadable original preserved");
