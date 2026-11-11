@@ -52,7 +52,7 @@ import {
   stepPrng,
   stepProjectiles,
   useWeaponCell,
-  stepVampireDrain,
+  stepHitDrain,
 } from "./combat.js";
 import {
   shotKindForBorgId,
@@ -1058,6 +1058,8 @@ class BattleImpl implements Battle {
     for (const b of all) {
       b.slowAuraLevel = 0;
       b.hasteAuraLevel = 0;
+      // Tick previous-frame drain before any new contacts, independent of actor order.
+      stepHitDrain(b);
     }
 
     // 1) Resolve an input for every active borg (player input or AI).
@@ -1245,10 +1247,6 @@ class BattleImpl implements Battle {
       // CONTACT_DAMAGE.ENABLED stays false (the default) — see combat.ts stepContactDamage
       // for the evidence gap and the per-borg-data enable path.
       stepContactDamage(b, all);
-
-      // Vampire passive self-bleed (ATK-019, (ay)): 1 HP / 30 frames for ids 0x702/0x70a,
-      // floored at 1 HP. No-op for non-vampires. The steal half is applied in applyHit.
-      stepVampireDrain(b);
 
       // Advance hit/down/death/spawn timers.
       b.stateTime += 1;

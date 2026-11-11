@@ -783,19 +783,14 @@ export const HEAL = {
    *    accumulator DAT_803b0638[slot] (writer FOUND at chunk_0003.c:7982-7986), then drains
    *    that bank into its own HP capped at max (apply chunk_0003.c:6318-6323). Ported as an
    *    immediate heal-on-hit of floor(dmg/2) (equivalent in sum to bank-then-apply).
-   *  - BLEED: a passive self-drain of 1 HP every 30 frames, floored at 1 HP (never self-kills)
-   *    — drain loop FOUND at chunk_0006.c:7900-7912 (`if 1 < HP: HP -= 1` every 0x1e frames).
-   *    1 HP / 30f = 2 HP/sec at 60fps, matching the guide's "~2-3 HP/sec"
-   *    (research/decomp/data/guide-anchors-movelist.json lifestealVampire).
-   * The one TUNED element is the bleed GATE: the ROM keys it on state bytes +0x18==1/+0x19==2
-   * (an active-normal state) and the steal on a +0x83==0 byte; lacking a proven mapping for
-   * those, the port applies steal on any hit the vampire lands and bleed whenever it is alive
-   * and out of death/spawn (the guide frames both as constant passive behavior).
+   * Correction: chunk_0006.c:7899-7911 is the flagsA 0x100 hit-inflicted
+   * +0x6ba status countdown, not a vampire passive. Its writer seeds 600 frames
+   * on the victim (chunk_0003.c:8121-8127). That timer does not establish a vampire passive.
    */
   VAMPIRE_ENABLED: true,
   /** Vampire steal divisor: banked HP = floor(damageDealt / this) (ROM `dmg/2`, (ay)). */
   VAMPIRE_STEAL_DIVISOR: 2,
-  /** Vampire passive-bleed cadence: 1 HP lost every N frames, floored at 1 HP (ROM 0x1e, (ay)). */
+  /** Legacy cadence constant; passive bleed is unsupported by the cited status timer. */
   VAMPIRE_BLEED_INTERVAL_FRAMES: 30,
   /**
    * BLOCKED (ATK-019, nurse heal). Nurse healing is a SEPARATE mechanism from the vampire path

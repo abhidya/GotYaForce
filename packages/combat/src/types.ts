@@ -266,6 +266,8 @@ export interface BorgRuntime {
    *  shrink/grow, aim-scramble, transform, tether, position-swap — see research/decomp/
    *  data/guide-anchors-movelist.json statusObservations. */
   statusId: number;
+  /** Hit-inflicted HP drain (+0x6ba), seeded to 600 by damage flagsA 0x100. */
+  hitDrainFrames?: number;
   /** Status duration in frames (struct+0x71c), decrements 1/frame (chunk_0007.c:2881-2883);
    *  clears statusId at 0. Application max-merges with any running timer (never shortens). */
   statusTimer: number;

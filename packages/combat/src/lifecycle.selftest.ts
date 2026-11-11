@@ -1,3 +1,4 @@
+import { runHitDrainSelfTest } from "./hitDrain.selftest.js";
 import { runDiverAuraSelfTest } from "./diverAura.selftest.js";
 import { runContactAuraSelfTest } from "./contactAura.selftest.js";
 import { runSelfTest as runTargetLockSelfTest } from "./targetLock.selftest.js";
@@ -205,6 +206,7 @@ function assertNonRomAirborneDeathKeepsGravity(stats: readonly BorgStats[]): voi
 }
 
 export function runSelfTest(): void {
+  runHitDrainSelfTest();
   runContactAuraSelfTest();
   runDiverAuraSelfTest();
   runTargetLockSelfTest();
