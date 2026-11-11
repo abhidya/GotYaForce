@@ -1,3 +1,4 @@
+import { spawnOrRefreshDiverAura, stepDiverAuras } from "./diverAura.js";
 // Battle / force flow — the deterministic orchestrator. createBattle(cfg) builds the world;
 // Battle.step(dt, inputs) advances one fixed frame.
 //
@@ -340,6 +341,7 @@ class BattleImpl implements Battle {
     this.state = {
       borgs: [],
       projectiles: [],
+      diverAuras: [],
       energy: {},
       energyMax: {},
       defeated: {},
@@ -651,6 +653,7 @@ class BattleImpl implements Battle {
     const state = this.state;
     this.observationCache = {
       actors: state.borgs.map(snapshotActor),
+      diverAuras: structuredClone(state.diverAuras ?? []),
       projectiles: state.projectiles.map(snapshotProjectile),
       projectileDespawns: this.projectileDespawns.map((despawn) => structuredClone(despawn)),
       activeUidByPlayer: { ...state.activeUidByPlayer },
@@ -731,7 +734,8 @@ class BattleImpl implements Battle {
     *  the variant table (DAT_802f3dda) via findVariantByKind, and finally the SHOT.* tuned
     *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number): void {
-    void spawnerAddr; // row identity carried implicitly via the resolved kind (see romShotKind).
+    // Dedicated owner-following child identity must survive before the B-shot resolver.
+    if (spawnOrRefreshDiverAura(this.state.diverAuras ??= [], b, spawnerAddr, kind)) return;
 
     const profile = this.profiles.get(b.uid);
 
@@ -1253,6 +1257,10 @@ class BattleImpl implements Battle {
     }
     this.drainPowerBursts();
     this.accountPendingDefeats();
+
+    // Persistent aura contacts are rebuilt after all actor movement and the global clear.
+    // They never enter projectile travel/consumption, impact FX, or damaging hit reactions.
+    this.state.diverAuras = stepDiverAuras(this.state.diverAuras ?? [], all);
 
     // 3) Projectiles.
     const projectilesBeforeStep = this.state.projectiles;

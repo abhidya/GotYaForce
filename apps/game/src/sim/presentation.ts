@@ -296,13 +296,16 @@ export function activeBorgForPlayer(battle: Battle, playerId: string): BattleAct
 export function battleSceneState(battle: Battle, focus: BattleActorObservation | null): {
   actors: readonly BattleActorView[];
   projectiles: readonly BattleProjectileObservation[];
+  diverAuras: ReturnType<Battle["observe"]>["diverAuras"];
   projectileDespawns: readonly ProjectileDespawnObservation[];
   focusUid: string | null;
 } {
+  const observation = battle.observe();
   return {
-    actors: battle.observe().actors.map(battleActorView),
-    projectiles: battle.observe().projectiles,
-    projectileDespawns: battle.observe().projectileDespawns,
+    actors: observation.actors.map(battleActorView),
+    projectiles: observation.projectiles,
+    diverAuras: observation.diverAuras,
+    projectileDespawns: observation.projectileDespawns,
     focusUid: focus?.uid ?? null,
   };
 }

@@ -1873,7 +1873,11 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (host.onPlayAnim) dest.onPlayAnim = host.onPlayAnim;
     if (host.onFireChild) dest.onFireChild = host.onFireChild;
     if (host.onIndirect) dest.onIndirect = host.onIndirect;
-    if (host.onFamilyProjectile) dest.onFamilyProjectile = host.onFamilyProjectile;
+    if (host.onFamilyProjectile) dest.onFamilyProjectile = (actor, addr, type) => {
+      host.onFamilyProjectile!(actor, addr, type);
+      // A persistent child is a real X effect even when it arms no actor hitbox.
+      this.specialHadEffect = true;
+    };
     if (host.onParamTierDelta) dest.onParamTierDelta = host.onParamTierDelta;
     if (host.onPlayCue) dest.onPlayCue = host.onPlayCue;
     if (host.onRefreshTargetVisibility) dest.onRefreshTargetVisibility = host.onRefreshTargetVisibility;
