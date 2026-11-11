@@ -36,7 +36,7 @@ export const JELLY_DIVER_X = {
   AMMO_SLOT: 2,
   AMMO_COST: 1,
   ACTION_MODE_BITS: 0x3,
-  CHILD_SPAWNER_ADDR: 0x80113bc,
+  CHILD_SPAWNER_ADDR: 0x801213bc,
 } as const;
 
 function childTypeForBorg(borgNumber: number): number {
@@ -74,7 +74,12 @@ function jellyDiverXPhase1(actor: RomActor, ctx: JellyDiverFamilyCtx): void {
   tickStream(actor, 0xf, ctx);
   if (actor.contactP0 > 0) {
     actor.contactP0 = 0;
-    ctx.onFamilyProjectile?.(actor, JELLY_DIVER_X.CHILD_SPAWNER_ADDR, childTypeForBorg(actor.borgNumber));
+    // Source FUN_80116944 checks/consumes cell 2 at the contact event. The browser
+    // currently models that cell as infinite/unused; do not invent a count or charge
+    // the separate browser X cell 1 a second time. Battle owns create-versus-refresh.
+    if (ctx.onAllocateResource?.(actor, JELLY_DIVER_X.AMMO_SLOT, JELLY_DIVER_X.AMMO_COST, 1) !== false) {
+      ctx.onFamilyProjectile?.(actor, JELLY_DIVER_X.CHILD_SPAWNER_ADDR, childTypeForBorg(actor.borgNumber));
+    }
   }
   integratePhysics(JELLY_DIVER_X.GRAVITY, actor, actor.activeYaw);
   const streamEnded = (actor as RomActor & { streamEnded?: number }).streamEnded ?? 0;

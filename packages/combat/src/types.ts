@@ -344,6 +344,9 @@ export interface BorgRuntime {
   /** Power Burst fusion state (ROM +0x4a1 vocabulary): 0 = none, 1->2->3->5->6 locked,
    *  7 = ending. Nothing sets this yet (ATK-018 shell only; see behavior-notes.md (aj)). */
   fusionState: number;
+  /** ROM +0x4a0 carried-role flag, NOT the +0x4a1 fusion state above. Fusion host
+   * integration is still absent; this optional seam defaults false until supplied. */
+  sourceFusionCarried?: boolean;
   /** True once the HP-zero kill event has already removed this borg's force cost. */
   defeatAccounted: boolean;
   /**
@@ -676,7 +679,24 @@ export interface BurstMeterState {
   charged: boolean;
 }
 
+/** Dedicated Diver X child, not a flying/consumable projectile. Position and hitRadius
+ * use the browser's root/max-extent approximation, not decoded bone-12 world geometry. */
+export interface DiverAuraChild {
+  uid: string;
+  ownerUid: string;
+  ownerFormId: string;
+  team: number;
+  subtype: 0 | 1 | 2;
+  pos: Vec3;
+  remainingFrames: number;
+  hitRadius: number;
+  bankTexId: number;
+  visualVariant: number;
+  visualScale: number;
+}
+
 export interface BattleState {
+  diverAuras?: DiverAuraChild[];
   borgs: BorgRuntime[];
   projectiles: Projectile[];
   /** Remaining energy per team = sum of not-yet-defeated on-field + not-yet-deployed borg energy.
@@ -843,6 +863,7 @@ export interface ProjectileDespawnObservation {
  * separately by `projectileDespawns`.
  */
 export interface BattleObservation {
+  readonly diverAuras: readonly DeepReadonly<DiverAuraChild>[];
   readonly actors: readonly BattleActorObservation[];
   readonly projectiles: readonly BattleProjectileObservation[];
   readonly projectileDespawns: readonly ProjectileDespawnObservation[];

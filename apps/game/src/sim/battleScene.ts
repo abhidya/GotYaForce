@@ -12,6 +12,7 @@
 
 import * as THREE from "three";
 import type {
+  Battle,
   BattleProjectileObservation,
   ProjectileDespawnObservation,
   ProjectileVisualKind,
@@ -193,6 +194,13 @@ const STATUS_FX_STAR_SPIN = 1024;
 const STATUS_FX_SLOW_SPIN_DIVISOR = 2;
 /** DERIVED: slow adds 2 to the matAnim pulse frame (frames 0..1 haste, 2..3 slow). */
 const STATUS_FX_SLOW_ANIM_FRAME_OFFSET = 2;
+
+type DiverAuraObservation = ReturnType<Battle["observe"]>["diverAuras"][number];
+
+interface DiverAuraActor {
+  node: THREE.Group;
+  materials: THREE.MeshBasicMaterial[];
+}
 
 interface ProjectileActor {
   /** Scene node: a camera-facing Sprite for billboard kinds, the crossed-plane beam rig
@@ -688,6 +696,7 @@ const IMPACT_ID_SUPPRESSED = 0xff;
 
 export class BattleScene {
   private actors = new Map<string, Actor>();
+  private diverAuraActors = new Map<string, DiverAuraActor>();
   private projectileActors = new Map<string, ProjectileActor>();
   private impactActors: ImpactActor[] = [];
   private bankFxActors: BankFxActor[] = [];
@@ -772,6 +781,7 @@ export class BattleScene {
     localActiveUid: string | null = null,
     meleeMode = false,
     projectileDespawns: readonly ProjectileDespawnObservation[] = [],
+    diverAuras: readonly DiverAuraObservation[] = [],
   ): void {
     const live = new Set<string>();
     for (const b of borgs) {
@@ -835,6 +845,7 @@ export class BattleScene {
     }
     this.syncLockMarkers(borgs, localActiveUid, meleeMode);
     this.syncProjectiles(projectiles, projectileDespawns);
+    this.syncDiverAuras(diverAuras);
   }
 
   /** Advance all per-actor animation mixers. */
@@ -861,6 +872,8 @@ export class BattleScene {
     for (const actor of this.actors.values()) {
       this.retireActor(actor);
     }
+    for (const actor of this.diverAuraActors.values()) this.disposeDiverAura(actor);
+    this.diverAuraActors.clear();
     for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
     for (const actor of this.impactActors) this.disposeImpactActor(actor);
     for (const actor of this.bankFxActors) this.disposeBankFxActor(actor);
@@ -1222,6 +1235,57 @@ export class BattleScene {
     for (const a of Object.values(actor.streamActions)) {
       if (a && a !== action) fadeOther(a);
     }
+  }
+
+  /** Real child observations own this lifetime, separately from ordinary projectiles.
+   * Source mesh 78 and fixed subtype MatAnim selector are retained. Position is the
+   * sim's root-anchor approximation (source bone 12 is not available); scale comes
+   * from the child, never an invented renderer pulse, projectile radius or velocity.
+   * FUN_8012151c / FUN_80121694 (chunk_0033.c) initialize and update the source
+   * child. Its active anisotropic pulse is omitted until its literals are decoded;
+   * this bounded presentation keeps the child's owner scale and fixed subtype color.
+   */
+  private syncDiverAuras(children: readonly DiverAuraObservation[]): void {
+    const live = new Set<string>();
+    for (const child of children) {
+      live.add(child.uid);
+      let actor = this.diverAuraActors.get(child.uid);
+      if (!actor) {
+        const layers = bankFxTemplate(child.bankTexId);
+        // A missing bank asset must not turn an owner aura into a flying bolt.
+        if (!layers) continue;
+        const node = new THREE.Group();
+        node.name = `diver-aura:${child.uid}`;
+        const materials: THREE.MeshBasicMaterial[] = [];
+        for (const layer of layers) {
+          const color = new THREE.Color();
+          const { opacity } = sampleBankAnim(layer, child.visualVariant, color);
+          const material = new THREE.MeshBasicMaterial({
+            color, opacity, vertexColors: layer.vertexColors, transparent: true,
+            blending: layer.additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+            depthWrite: false, side: THREE.DoubleSide,
+          });
+          node.add(new THREE.Mesh(layer.geometry, material));
+          materials.push(material);
+        }
+        actor = { node, materials };
+        this.root.add(node);
+        this.diverAuraActors.set(child.uid, actor);
+      }
+      actor.node.position.set(child.pos.x, child.pos.y, child.pos.z);
+      actor.node.scale.setScalar(child.visualScale);
+    }
+    for (const [uid, actor] of this.diverAuraActors) {
+      if (live.has(uid)) continue;
+      this.disposeDiverAura(actor);
+      this.diverAuraActors.delete(uid);
+    }
+  }
+
+  private disposeDiverAura(actor: DiverAuraActor): void {
+    this.root.remove(actor.node);
+    // Geometry belongs to the shared bank template; only materials are per child.
+    for (const material of actor.materials) material.dispose();
   }
 
   private syncProjectiles(

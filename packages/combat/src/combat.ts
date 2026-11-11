@@ -823,6 +823,31 @@ function isSlowAuraExempt(borgId: string): boolean {
   return (HIT_STATUS.SLOW_AURA_EXEMPT_BORG_IDS as readonly string[]).includes(borgId.toLowerCase());
 }
 
+/** Contact-only writer for persistent non-damaging children. Unlike applyHit this does
+ * not invent damage, reaction, combo credit, or knockback for flagsB aura returns. */
+export function applyContactAuraStatus(victim: BorgRuntime, record: DamageRecord): void {
+  if (!isSaneStatusRecord(record)) return;
+  const { immunityB } = statusImmunityMasksForBorgId(victim.borgId);
+  // --- Contact-slow aura (flagsB & 0x0400) — per-contact-frame max-merge, no timer. ------
+  // The shared bit 0x400 of immunityB blocks BOTH aura types.
+  const auraBlocked = (immunityB & HIT_STATUS.AURA_SHARED_IMMUNITY_BIT) !== 0;
+  if (
+    (record.flagsB & FLAGS_B_SLOW_AURA) !== 0 &&
+    !auraBlocked &&
+    !isSlowAuraExempt(victim.borgId) &&
+    !victim.burstActive &&
+    !victim.sourceFusionCarried
+  ) {
+    victim.slowAuraLevel = Math.max(victim.slowAuraLevel ?? 0, record.comboScoreValue);
+  }
+
+  // --- Contact-haste aura (flagsB & 0x0800) — fixed level 1. -----------------------------
+  if ((record.flagsB & FLAGS_B_HASTE_AURA) !== 0 && !auraBlocked) {
+    victim.hasteAuraLevel = HIT_STATUS.AURA_HASTE_LEVEL;
+  }
+
+}
+
 /**
  * Apply the hit-inflicted status writes from `record`'s flagsA/flagsB to `victim` (and, for
  * freeze only, to `attacker` too). Called once per hit CONNECTION from applyHit, mirroring the
@@ -855,21 +880,7 @@ function applyHitInflictedStatus(
     victim.hasteHitTimer = HIT_STATUS.DISCRETE_TIMER_FRAMES;
   }
 
-  // --- Contact-slow aura (flagsB & 0x0400) — per-contact-frame max-merge, no timer. ------
-  // The shared bit 0x400 of immunityB blocks BOTH aura types.
-  const auraBlocked = (immunityB & HIT_STATUS.AURA_SHARED_IMMUNITY_BIT) !== 0;
-  if (
-    (record.flagsB & FLAGS_B_SLOW_AURA) !== 0 &&
-    !auraBlocked &&
-    !isSlowAuraExempt(victim.borgId)
-  ) {
-    victim.slowAuraLevel = Math.max(victim.slowAuraLevel ?? 0, record.comboScoreValue);
-  }
-
-  // --- Contact-haste aura (flagsB & 0x0800) — fixed level 1. -----------------------------
-  if ((record.flagsB & FLAGS_B_HASTE_AURA) !== 0 && !auraBlocked) {
-    victim.hasteAuraLevel = HIT_STATUS.AURA_HASTE_LEVEL;
-  }
+  applyContactAuraStatus(victim, record);
 
   // --- Grow/shrink (flagsA & 0x0004 / 0x0008) — shrink only when grow bit is clear. ------
   if (!victimIsBurst) {

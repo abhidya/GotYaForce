@@ -49,3 +49,5 @@ await runBattleSceneLoadFailureSelfcheck((trigger) => new Promise((resolve, reje
 }));
 
 await import("./run-battle-scene-size-selfcheck.mjs");
+
+await import("./run-battle-scene-diver-aura-selfcheck.mjs");
