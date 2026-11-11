@@ -1,6 +1,6 @@
 import { hasSourcePrimaryAmmo } from "./primaryAmmo.js";
 import { isDiverAmmoFamily, refreshDiverAmmoRate } from "./diverAmmo.js";
-import { spawnOrRefreshDiverAura, stepDiverAuras } from "./diverAura.js";
+import { spawnOrRefreshDiverAura, stepDiverAuras, stepDiverAuraTails } from "./diverAura.js";
 // Battle / force flow — the deterministic orchestrator. createBattle(cfg) builds the world;
 // Battle.step(dt, inputs) advances one fixed frame.
 //
@@ -344,6 +344,7 @@ class BattleImpl implements Battle {
       borgs: [],
       projectiles: [],
       diverAuras: [],
+      diverAuraTails: [],
       energy: {},
       energyMax: {},
       defeated: {},
@@ -656,6 +657,7 @@ class BattleImpl implements Battle {
     this.observationCache = {
       actors: state.borgs.map(snapshotActor),
       diverAuras: structuredClone(state.diverAuras ?? []),
+      diverAuraTails: structuredClone(state.diverAuraTails ?? []),
       projectiles: state.projectiles.map(snapshotProjectile),
       projectileDespawns: this.projectileDespawns.map((despawn) => structuredClone(despawn)),
       activeUidByPlayer: { ...state.activeUidByPlayer },
@@ -1261,7 +1263,8 @@ class BattleImpl implements Battle {
 
     // Persistent aura contacts are rebuilt after all actor movement and the global clear.
     // They never enter projectile travel/consumption, impact FX, or damaging hit reactions.
-    this.state.diverAuras = stepDiverAuras(this.state.diverAuras ?? [], all);
+    this.state.diverAuraTails = stepDiverAuraTails(this.state.diverAuraTails ?? []);
+    this.state.diverAuras = stepDiverAuras(this.state.diverAuras ?? [], all, this.state.diverAuraTails);
 
     // 3) Projectiles.
     const projectilesBeforeStep = this.state.projectiles;

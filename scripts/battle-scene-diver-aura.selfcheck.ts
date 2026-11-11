@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { hsdJointsInTraversalOrder, prepareImportedModel } from "../packages/render/src/index.js";
 import { BattleScene } from "../apps/game/src/sim/battleScene.js";
 import { createBattle, battleStateForSelfcheck } from "../packages/combat/src/battle.js";
+import { createDiverAuraTail } from "../packages/combat/src/diverAura.js";
 import { emptyInput } from "../packages/combat/src/types.js";
 import { stepAttacks, X_CHARGE } from "../packages/combat/src/combat.js";
 import { buildProfile } from "../packages/combat/src/stats.js";
@@ -16,6 +17,9 @@ import type { BattleProjectileObservation, DiverAuraChild } from "../packages/co
 function assert(ok: unknown, message: string): asserts ok {
   if (!ok) throw new Error(`Diver aura scene: ${message}`);
 }
+function materialColorForVariant(variant: number): THREE.Color {
+  return variant === 1 ? new THREE.Color(0, 0, .1484) : variant === 2 ? new THREE.Color(1, 0, .3984) : new THREE.Color(0, 0, 1);
+}
 const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
 
 export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
@@ -28,6 +32,7 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   });
   THREE.TextureLoader.prototype.load = load;
   const internals = scene as unknown as {
+    diverTailActors: Map<string, { node: THREE.Group; particles: Map<number, THREE.Group>; materials: THREE.MeshBasicMaterial[] }>;
     diverAuraActors: Map<string, { node: THREE.Group; materials: THREE.MeshBasicMaterial[] }>;
     projectileActors: Map<string, { node: THREE.Object3D; beam: boolean }>;
     ringTexture: THREE.Texture | null;
@@ -42,7 +47,7 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   };
   const syncBattle = (battle: ReturnType<typeof createBattle>) => {
     const snapshot = battleSceneState(battle, null);
-    scene.sync(snapshot.actors, snapshot.projectiles, null, false, snapshot.projectileDespawns, snapshot.diverAuras);
+    scene.sync(snapshot.actors, snapshot.projectiles, null, false, snapshot.projectileDespawns, snapshot.diverAuras, snapshot.diverAuraTails);
     return snapshot;
   };
   // Synthetic observation exercises scale propagation, including source init .01.
@@ -50,7 +55,7 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   const child: DiverAuraChild = {
     uid: "aura", ownerUid: "owner", ownerFormId: "pl0a04", team: 0,
     subtype: 0, pos: { x: 10, y: 20, z: 30 }, remainingFrames: 1140,
-    hitRadius: 100, bankTexId: 78, visualVariant: 0, pulsePhaseDegrees: 0, visualScale: { x: .01, y: .01, z: .01 },
+    hitRadius: 100, bankTexId: 78, baseScale: 1, visualVariant: 0, pulsePhaseDegrees: 0, visualScale: { x: .01, y: .01, z: .01 },
   };
   const sync = (children: DiverAuraChild[], projectiles: BattleProjectileObservation[] = []) =>
     scene.sync([], projectiles, null, false, [], children);
@@ -103,6 +108,16 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   assert(!finalAura.node.parent && internals.diverAuraActors.size === 0 && internals.projectileActors.size === 0,
     "battle clear removes both independent lifecycles");
   assert(clearDisposals === 1 && geometryDisposals === 0, "repeated clear is safe");
+  // A tail first observed after expiry must have an explicit root fallback.
+  const unseen = createDiverAuraTail({ ...child, uid: "unseen" });
+  scene.sync([], [], null, false, [], [], [unseen]);
+  const unseenActor = internals.diverTailActors.get(unseen.uid)!;
+  assert(unseenActor.node.position.equals(new THREE.Vector3(10, 20, 30)), "unseen aura uses root fallback");
+  let finalTailDisposals = 0;
+  for (const m of unseenActor.materials) m.addEventListener("dispose", () => { finalTailDisposals++; });
+  scene.sync([], [], null, false, [], [], []);
+  scene.sync([], [], null, false, [], [], []);
+  assert(finalTailDisposals === 32 && !unseenActor.node.parent, "final tail disappearance disposes once");
   // Real X input reaches Battle's dedicated child, immutable snapshot and app
   // presentation adapter. No injected renderer-only replacement effect.
   for (const id of ["pl0805", "pl080e", "pl080d"]) {
@@ -121,7 +136,7 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
     for (let i = 0; i < 90 && battle.observe().diverAuras.length === 0; i++) { tick(); syncBattle(battle); }
     assert(battle.observe().diverAuras.length === 1, `${id} real X creates child`);
     const snapshot = battleSceneState(battle, null);
-    scene.sync(snapshot.actors, snapshot.projectiles, null, false, snapshot.projectileDespawns, snapshot.diverAuras);
+    scene.sync(snapshot.actors, snapshot.projectiles, null, false, snapshot.projectileDespawns, snapshot.diverAuras, snapshot.diverAuraTails);
     const actual = snapshot.diverAuras[0]!;
     const actualNode = internals.diverAuraActors.get(actual.uid)!.node;
     assert(actualNode.position.equals(new THREE.Vector3(actual.pos.x, actual.pos.y, actual.pos.z)),
@@ -167,12 +182,56 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
       tick(i % 40 === 0); syncBattle(battle);
     }
     assert(bursts.length === 0 && !owner.fallbackSpecialBurst, `${id} empty X never emits fallback event`);
+    const state = battleStateForSelfcheck(battle);
+    const lastBaseScale = state.diverAuras![0]!.baseScale;
+    state.diverAuras![0]!.remainingFrames = 1;
+    const frozenAnchor = actualNode.position.clone();
+    tick(); const expiry = syncBattle(battle);
+    assert(expiry.diverAuras.length === 0 && expiry.diverAuraTails.length === 1,
+      `${id} natural expiry emits exactly one detached tail`);
+    const tail = internals.diverTailActors.get(actual.uid)!;
+    assert(!actualNode.parent && tail.particles.size === 32, `${id} main mesh gone, 32 teardown particles`);
+    const firstParticle = tail.particles.get(0)!;
+    const particleMesh = firstParticle.children[0] as THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
+    assert(particleMesh.geometry.index!.count / 3 === 135, "mesh80 topology");
+    particleMesh.geometry.computeBoundingBox();
+    assert(near(particleMesh.geometry.boundingBox!.max.x, 40) && !particleMesh.material.vertexColors,
+      "mesh80 bounds and no vertex colors");
+    assert(near(particleMesh.material.opacity, .25), "tail alpha replaces bank alpha even for Tar");
+    const expectedColor = materialColorForVariant(actual.visualVariant);
+    assert(near(particleMesh.material.color.r, expectedColor.r) && near(particleMesh.material.color.g, expectedColor.g) && near(particleMesh.material.color.b, expectedColor.b), "fixed variant color");
+    assert(near(expiry.diverAuraTails[0]!.particles[0]!.radius, 760 * lastBaseScale - 90 * expiry.diverAuraTails[0]!.particles[0]!.scale), "tail snapshots last active owner scale");
+    const firstPosition = firstParticle.position.clone();
+    owner.pos.x += 500; owner.combatFormId = "pl0615";
+    for (const dt of [0, .5, 5]) { scene.update(dt); syncBattle(battle); }
+    assert(tail.node.position.equals(frozenAnchor) && firstParticle.position.equals(firstPosition),
+      "tail freezes last rendered anchor and render time never advances it");
+    const oldTail = JSON.stringify(expiry.diverAuraTails);
+    tick(); syncBattle(battle);
+    assert(JSON.stringify(expiry.diverAuraTails) === oldTail, "nested tail observation immutable");
+    assert(!firstParticle.position.equals(firstPosition), "fixed simulation step moves particles");
     owner.hp = 0; owner.alive = false;
     tick();
     const deadSnapshot = battleSceneState(battle, null);
-    scene.sync([], [], null, false, [], deadSnapshot.diverAuras);
+    scene.sync([], [], null, false, [], deadSnapshot.diverAuras, deadSnapshot.diverAuraTails);
+    assert(tail.node.parent && tail.node.position.equals(frozenAnchor), "owner death preserves detached tail");
+    let tailMaterialDisposals = 0, tailGeometryDisposals = 0;
+    particleMesh.material.addEventListener("dispose", () => { tailMaterialDisposals++; });
+    particleMesh.geometry.addEventListener("dispose", () => { tailGeometryDisposals++; });
+    const coexist = { ...child, uid: `fresh-${id}` };
+    scene.sync([], [], null, false, [], [coexist], deadSnapshot.diverAuraTails);
+    assert(internals.diverAuraActors.has(coexist.uid) && tail.node.parent, "new aura and old tail render independently");
+    const reduced = structuredClone(deadSnapshot.diverAuraTails);
+    reduced[0]!.particles = reduced[0]!.particles.filter((p) => p.index !== 0);
+    reduced[0]!.particles[0]!.opacity = .1;
+    scene.sync([], [], null, false, [], [coexist], reduced);
+    assert(tailMaterialDisposals === 1 && tailGeometryDisposals === 0, "individual removal disposes only owned material");
+    assert(near(tail.materials[0]!.opacity, .1), "particle alpha directly replaces sampled bank alpha");
+    let remainingDisposals = 0;
+    for (const m of tail.materials) m.addEventListener("dispose", () => { remainingDisposals++; });
     assert(!actualNode.parent, `${id} owner death removes real child visual`);
-    scene.clear();
+    scene.clear(); scene.clear();
+    assert(remainingDisposals === 31 && tailMaterialDisposals === 1 && tailGeometryDisposals === 0, "repeated clear disposes each remaining material once, retains geometry");
     await Promise.resolve(); await Promise.resolve();
   }
   // Isolate the generic fallback producer using real Battle actors but no ROM driver.
@@ -250,7 +309,7 @@ async function checkDiverBoneAttachment(): Promise<void> {
     pos: { x: 10, y: 20, z: 30 }, rotY: Math.PI / 2, modelSizeScale: 1.5 };
   const child: DiverAuraChild = { uid: "bone-aura", ownerUid: owner.uid, ownerFormId: "pl0805", team: 0,
     subtype: 0, pos: { ...owner.pos }, remainingFrames: 1140, hitRadius: 100,
-    bankTexId: 78, visualVariant: 0, pulsePhaseDegrees: 0, visualScale: { x: .75, y: .75, z: .75 } };
+    bankTexId: 78, baseScale: 1, visualVariant: 0, pulsePhaseDegrees: 0, visualScale: { x: .75, y: .75, z: .75 } };
   const sync = (id = "pl0805") => scene.sync([{ ...owner, combatFormId: id }], [], null, false, [], [child]);
   const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
   const makeRig = () => {
@@ -269,7 +328,7 @@ async function checkDiverBoneAttachment(): Promise<void> {
   const checkPosition = (node: THREE.Object3D, x: number, y: number, z: number, label: string) =>
     assert(near(node.position.x, x) && near(node.position.y, y) && near(node.position.z, z), label);
   sync(); scene.update(.1);
-  const aura = internals.diverAuraActors.get(child.uid)!.node;
+  let aura = internals.diverAuraActors.get(child.uid)!.node;
   checkPosition(aura, 10, 20, 30, "async load uses explicit owner-root fallback");
   const first = makeRig();
   const display = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
@@ -294,6 +353,17 @@ async function checkDiverBoneAttachment(): Promise<void> {
   checkPosition(aura, 10.33, 30.8, 29.73, "post-mixer sample moves aura in same rendered frame");
   scene.update(.5);
   checkPosition(aura, 10.48, 30.95, 29.58, "animation continues without a new simulation sync");
+  const frozen = aura.position.clone();
+  const detached = createDiverAuraTail(child);
+  scene.sync([{ ...owner, pos: { x: 900, y: 700, z: 500 } }], [], null, false, [], [], [detached]);
+  const tailNode = root.children.find((node) => node.name === `diver-tail:${child.uid}`)!;
+  assert(tailNode.position.equals(frozen), "tail captures actual animated bone anchor, not simulation root");
+  scene.update(2);
+  assert(tailNode.position.equals(frozen), "animated owner cannot drag detached tail");
+  // Restore the active fixture for the independent morph/async tests below.
+  sync(); scene.update(0);
+  aura = internals.diverAuraActors.get(child.uid)!.node;
+  // The following checks refer to the new active node after the expiry fixture.
   sync("pl080d"); scene.update(0);
   checkPosition(aura, 10, 20, 30, "form swap discards old cached bone immediately");
   child.ownerFormId = "pl080e"; sync("pl080e");

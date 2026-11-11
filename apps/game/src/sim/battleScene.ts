@@ -200,6 +200,13 @@ const STATUS_FX_SLOW_ANIM_FRAME_OFFSET = 2;
 
 type DiverAuraObservation = ReturnType<Battle["observe"]>["diverAuras"][number];
 
+type DiverTailObservation = ReturnType<Battle["observe"]>["diverAuraTails"][number];
+interface DiverTailActor {
+  node: THREE.Group;
+  particles: Map<number, THREE.Group>;
+  materials: THREE.MeshBasicMaterial[];
+}
+
 interface DiverAuraActor {
   ownerUid: string;
   ownerFormId: string;
@@ -702,6 +709,7 @@ const IMPACT_ID_SUPPRESSED = 0xff;
 
 export class BattleScene {
   private actors = new Map<string, Actor>();
+  private diverTailActors = new Map<string, DiverTailActor>();
   private diverAuraActors = new Map<string, DiverAuraActor>();
   private projectileActors = new Map<string, ProjectileActor>();
   private impactActors: ImpactActor[] = [];
@@ -788,6 +796,7 @@ export class BattleScene {
     meleeMode = false,
     projectileDespawns: readonly ProjectileDespawnObservation[] = [],
     diverAuras: readonly DiverAuraObservation[] = [],
+    diverAuraTails: readonly DiverTailObservation[] = [],
   ): void {
     const live = new Set<string>();
     for (const b of borgs) {
@@ -855,6 +864,8 @@ export class BattleScene {
     }
     this.syncLockMarkers(borgs, localActiveUid, meleeMode);
     this.syncProjectiles(projectiles, projectileDespawns);
+    // Capture the last rendered aura anchor before removing its mesh-78 actor.
+    this.syncDiverAuraTails(diverAuraTails);
     this.syncDiverAuras(diverAuras);
   }
 
@@ -885,6 +896,8 @@ export class BattleScene {
     }
     for (const actor of this.diverAuraActors.values()) this.disposeDiverAura(actor);
     this.diverAuraActors.clear();
+    for (const actor of this.diverTailActors.values()) this.disposeDiverTail(actor);
+    this.diverTailActors.clear();
     for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
     for (const actor of this.impactActors) this.disposeImpactActor(actor);
     for (const actor of this.bankFxActors) this.disposeBankFxActor(actor);
@@ -1254,6 +1267,71 @@ export class BattleScene {
     for (const a of Object.values(actor.streamActions)) {
       if (a && a !== action) fadeOther(a);
     }
+  }
+
+  /** Detached mesh-80 tail: fixed sim samples, frozen last-rendered anchor. */
+  private syncDiverAuraTails(tails: readonly DiverTailObservation[]): void {
+    const live = new Set(tails.map((tail) => tail.uid));
+    for (const tail of tails) {
+      let actor = this.diverTailActors.get(tail.uid);
+      if (!actor) {
+        const node = new THREE.Group();
+        node.name = `diver-tail:${tail.uid}`;
+        // Copy once. Never follow owner movement, morph, or a subsequent aura.
+        const previous = this.diverAuraActors.get(tail.uid);
+        if (previous) node.position.copy(previous.node.position);
+        else node.position.set(tail.pos.x, tail.pos.y, tail.pos.z); // explicit root fallback
+        actor = { node, particles: new Map(), materials: [] };
+        this.root.add(node);
+        this.diverTailActors.set(tail.uid, actor);
+      }
+      const liveParticles = new Set(tail.particles.map((p) => p.index));
+      for (const p of tail.particles) {
+        let node = actor.particles.get(p.index);
+        if (!node) {
+          const layers = bankFxTemplate(80);
+          if (!layers) continue;
+          node = new THREE.Group();
+          node.name = `diver-tail-particle:${p.index}`;
+          for (const layer of layers) {
+            const color = new THREE.Color();
+            sampleBankAnim(layer, tail.visualVariant, color);
+            const material = new THREE.MeshBasicMaterial({ color, opacity: p.opacity,
+              vertexColors: layer.vertexColors, transparent: true,
+              blending: layer.additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+              depthWrite: false, side: THREE.DoubleSide });
+            node.add(new THREE.Mesh(layer.geometry, material));
+            actor.materials.push(material);
+          }
+          actor.node.add(node);
+          actor.particles.set(p.index, node);
+        }
+        node.position.set(p.offset.x, p.offset.y, p.offset.z);
+        node.scale.setScalar(p.scale);
+        node.rotation.set(0, 0, 0);
+        for (const mesh of node.children as THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>[])
+          mesh.material.opacity = p.opacity; // replaces, not multiplies, sampled bank alpha
+      }
+      for (const [index, node] of actor.particles) {
+        if (liveParticles.has(index)) continue;
+        actor.node.remove(node);
+        for (const mesh of node.children as THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>[]) {
+          mesh.material.dispose();
+          actor.materials.splice(actor.materials.indexOf(mesh.material), 1);
+        }
+        actor.particles.delete(index);
+      }
+    }
+    for (const [uid, actor] of this.diverTailActors) {
+      if (live.has(uid)) continue;
+      this.disposeDiverTail(actor);
+      this.diverTailActors.delete(uid);
+    }
+  }
+
+  private disposeDiverTail(actor: DiverTailActor): void {
+    this.root.remove(actor.node);
+    for (const material of actor.materials) material.dispose();
   }
 
   /** Real child observations own this lifetime, separately from ordinary projectiles.
