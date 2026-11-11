@@ -171,28 +171,13 @@ function testNurseHealAmountsAreDataOnly(): void {
 
 // --- Enabled vampire behavior (ay): bleed + steal ---------------------------------------------
 
-/** Passive self-bleed: a vampire loses 1 HP every 30 frames, floored at 1 (never self-kills). */
+/** Vampire identity alone must not activate the unrelated flagsA0x100 status. */
 function testVampireBleeds(): void {
-  const v = makeBorg({ borgId: "pl0702", hp: 100, maxHp: 200, state: "idle" });
-  // 29 frames: counter climbs, no HP loss yet.
-  for (let i = 0; i < 29; i++) stepVampireDrain(v);
-  assertEqual(v.hp, 100, "no HP lost before the 30-frame bleed interval elapses");
-  // 30th frame: exactly 1 HP lost.
-  stepVampireDrain(v);
-  assertEqual(v.hp, 99, "vampire loses exactly 1 HP on the 30th frame");
-  // Another full interval: another 1 HP.
-  for (let i = 0; i < 30; i++) stepVampireDrain(v);
-  assertEqual(v.hp, 98, "vampire loses 1 more HP after a second 30-frame interval");
-
-  // Floor at 1 HP: drive it near the floor and confirm it never reaches 0 from the bleed.
-  v.hp = 1;
-  for (let i = 0; i < 300; i++) stepVampireDrain(v);
-  assertEqual(v.hp, 1, "bleed floors at 1 HP (never self-kills)");
-
-  // A dead / spawning vampire does not bleed.
-  const dead = makeBorg({ borgId: "pl0702", hp: 50, maxHp: 200, state: "death" });
-  for (let i = 0; i < 60; i++) stepVampireDrain(dead);
-  assertEqual(dead.hp, 50, "a dead vampire does not bleed");
+  for (const borgId of ["pl0702", "pl070a"]) {
+    const v = makeBorg({ borgId, hp: 100, maxHp: 200, state: "idle" });
+    for (let i = 0; i < 600; i++) stepVampireDrain(v);
+    assertEqual(v.hp, 100, "vampire identity alone does not inflict drain");
+  }
 }
 
 /** Steal: on a landed hit, a vampire heals floor(damageDealt / 2), capped at its maxHp. */

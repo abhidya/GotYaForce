@@ -875,6 +875,21 @@ function applyHitInflictedStatus(
   const { immunityA, immunityB } = statusImmunityMasksForBorgId(victim.borgId);
   const victimIsBurst = victim.burstActive === true;
 
+  // Hit-inflicted drain, NOT vampire self-bleed: chunk_0003.c:8121-8127
+  // seeds 0x0258 frames; immunity check :7785-7787 suppresses the writer.
+  // +0x6fc is the paired burst lane, +0x4a0 is carried-role (not +0x4a1).
+  // Bound to verified clean Worm records until the other family table extents are
+  // validated. High-index overshoot rows also contain 0x100 and are not evidence.
+  const verifiedDrainRecord = attacker !== undefined &&
+    (attacker.borgId === "pl050b" || attacker.borgId === "pl0517") &&
+    [0, 2, 3, 4].some((index) => familyDamageRecordForBorg(attacker.borgId, index) === record);
+  if (verifiedDrainRecord && record.impactEffectId !== 0xff &&
+      (record.flagsA & 0x100) !== 0 && (immunityA & 0x100) === 0 &&
+      !victim.burstPaired && !(victim.sourceFusionRole ?? (victim.sourceFusionCarried ? 1 : 0))) {
+    victim.hitDrainFrames = 600;
+  }
+
+
   // --- Discrete slow-on-hit (flagsB & 0x0004) — skip for burst victims. ------------------
   if (
     (record.flagsB & FLAGS_B_SLOW_HIT) !== 0 &&
@@ -1966,28 +1981,18 @@ export function isVampireBorgId(borgId: string): boolean {
   return (HEAL_VAMPIRE_BORG_IDS as readonly string[]).includes(borgId);
 }
 
-/**
- * Vampire passive self-BLEED (ATK-019, behavior-notes (ay)). For a vampire borg (ids
- * 0x702/0x70a), lose 1 HP every HEAL.VAMPIRE_BLEED_INTERVAL_FRAMES (30) frames, floored at
- * 1 HP so it never self-kills — the ROM drain loop chunk_0006.c:7900-7912 (`if 1 < HP: HP -= 1`
- * every 0x1e frames). The steal half of the mechanic is applied in applyHit. Gate (TUNED): the
- * ROM keys the loop on state bytes +0x18==1/+0x19==2; the port bleeds whenever the vampire is
- * alive and out of the death/spawn states (the guide frames the drain as constant passive
- * behavior). No-op for non-vampires and while VAMPIRE_ENABLED is false. Called once per frame
- * from battle.ts. Uses the cooldowns map (`vampBleedFrames`) for the cadence counter — no new
- * runtime field.
- */
-export function stepVampireDrain(b: BorgRuntime): void {
-  if (!HEAL.VAMPIRE_ENABLED) return;
-  if (!isVampireBorgId(b.borgId)) return;
-  if (!b.alive || b.state === "death" || b.state === "spawn") return;
-  const next = (b.cooldowns["vampBleedFrames"] ?? 0) + 1;
-  if (next >= HEAL.VAMPIRE_BLEED_INTERVAL_FRAMES) {
-    b.cooldowns["vampBleedFrames"] = 0;
-    if (b.hp > 1) b.hp -= 1;
-  } else {
-    b.cooldowns["vampBleedFrames"] = next;
-  }
+/** Compatibility no-op: the formerly attributed vampire bleed is actually the
+ * hit-inflicted +0x6ba status timer (flagsA 0x100), not evidence for an id-gated passive. */
+export function stepVampireDrain(_b: BorgRuntime): void {}
+
+/** Source +0x6ba countdown, chunk_0006.c:7899-7911. The active lifecycle
+ * (+0x18=1/+0x19=2, FUN_80058244) includes action reactions, but not spawn/death.
+ * Damage uses the POST-decrement remainder, including the final tick at zero. */
+export function stepHitDrain(b: BorgRuntime): void {
+  if (!b.alive || b.state === "spawn" || b.state === "death") return;
+  if ((b.hitDrainFrames ?? 0) <= 0) return;
+  b.hitDrainFrames = b.hitDrainFrames! - 1;
+  if (b.hitDrainFrames % 30 === 0 && b.hp > 1) b.hp -= 1;
 }
 
 // ---------------------------------------------------------------------------------------
