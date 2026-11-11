@@ -1143,8 +1143,13 @@ class Lifter(object):
             return Bin("<<", x, Const(sh))
         if sh and me == 31 and mb == 32 - sh:             # srwi
             return Bin(">>", x, Const(32 - sh))
-        if sh == 0 and me == 31:                          # clrlwi
-            return Bin("&", x, Const((1 << (32 - mb)) - 1))
+        if sh == 0:
+            # PowerPC numbers bits from the MSB. A reversed range wraps across
+            # bit 31/0, so it keeps both ends rather than an empty interval.
+            low = 0xffffffff >> mb
+            high = (0xffffffff << (31 - me)) & 0xffffffff
+            mask = (low & high) if mb <= me else (low | high)
+            return Bin("&", x, Const(mask))
         raise _fail("seeder",
                     "rlwinm sh=%d mb=%d me=%d is not a shift or a mask"
                     % (sh, mb, me))

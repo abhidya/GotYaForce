@@ -3,7 +3,7 @@
 > **2026-11-11 correction:** The historical absolute-global "compiler bug" below
 > was a harness error: ELF uses `ADDR16_HA=6`, `ADDR16_LO=4`, with halfword offsets.
 > Correcting the oracle recovers 66 functions / 642 instructions in a bounded pass.
-> Current freshly verified total: **674 functions / 3,901 instructions (0.5561%)**.
+> Current freshly verified total after the mask lane: **682 functions / 4,003 instructions (0.5707%)**.
 > Older tables and compiler-blocked classifications are historical, not current
 > totals. See [current lanes and acceptance gates](port-completion.md).
 
@@ -279,12 +279,11 @@ The compiler- and disc-independent regression suite is part of contributor CI:
 python3 -m unittest discover -s research/tools/matching-decomp -p 'test_*.py'
 ```
 
-Validation on a fresh source checkout: **10 tests pass**; the existing
-`loop.py selftest` reports **63 checks passed**, with its compiler/GCM end-to-end
-group skipped. The new controls failed before the fix. These tests prove oracle
-behavior over synthetic inputs, **not new matched functions**. The retail
-corpus has not been re-verified for this change; `src-match/verify.py --control`
-still requires the pinned compiler and a user-supplied disc dump.
+Initial source-only validation passed 10 tests and 63 loop checks, skipping the
+compiler group. Later Windows validation now passes 24 oracle controls, the full
+71-check loop selftest, and all 674 registered functions plus eight retail controls.
+The existing user-supplied disc and pinned compiler were used in place. See the
+[current checklist](port-completion.md) for subsequent lanes and totals.
 
 ### 2.4 Recording
 
@@ -982,3 +981,19 @@ silently mistype it, and that is the error worth avoiding. Covered by selftest g
 
 CPU only. The GPU lease, the model server, the supervisor and the live pipeline state were
 not touched; nothing was downloaded; the retail GCM was read and never written.
+
+
+## Non-rotating bitmask lane (2026-11-11)
+
+`seed_cfg.Lifter.rlwinm` now models every `sh=0` mask range, including masks
+wrapping across PowerPC bit31/bit0. Exhaustive tests cover all 1,024 ranges against
+the bit-index definition and six input patterns. Existing shift handling is
+unchanged and unsupported rotated masks remain refused.
+
+The same bounded CPU-only pass (at most 128 instructions per function) recovered
+**8 functions / 102 instructions**. All **682 registered functions + 8 controls**
+passed fresh retail/compiler verification (**690 ok, 0 failed**). There are now
+**4,003/701,464 instructions proved (0.5707%)**. Remaining bounded queue:
+4,198 seeder refusals and 331 compiler/C mismatches. These are not total-game
+completion percentages. The existing high-bit signed-comparison rendering limit
+is documented in the completion checklist; no admitted source uses that case.

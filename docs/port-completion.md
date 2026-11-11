@@ -6,9 +6,9 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
 
 ## What is measured now
 
-- `src-match/matched.json` records **674 unique functions / 3,901 instructions**
-  (626 game, 48 SDK): **0.5561%** of the recorded 701,464-instruction census.
-  Freshly re-verified on the Windows rig: **674/674 functions + 8/8 controls**.
+- `src-match/matched.json` records **682 unique functions / 4,003 instructions**
+  (634 game, 48 SDK): **0.5707%** of the recorded 701,464-instruction census.
+  Freshly re-verified on the Windows rig: **682/682 functions + 8/8 controls**.
 - Historical 405-function and 583-function snapshots in the README and matching
   research notes describe earlier stages, not this registry inventory.
 - Fresh family audit: **232 ported / 93 partial / 0 missing** across 325 action
@@ -29,11 +29,15 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
    calls. All 674 entries and eight controls pass. A repeat over the remaining
    4,537 functions of at most 128 instructions found zero extra matches:
    4,221 seeder refusals and 316 compiler/C mismatches remain.
-3. **Next: address one remaining compiler/seeder limitation**, then rerun affected
-   matches and the full registry. This is not a whole-game finish.
+3. **Non-rotating masks: complete for this bounded pass.** Model all 1,024
+   PowerPC mask ranges, including wrapped ranges. Added **8 functions / 102
+   instructions**. All 682 entries and eight controls pass. Remaining bounded
+   queue: 4,198 seeder refusals and 331 compiler/C mismatches.
+4. **Next: one remaining compiler/seeder limitation**, with affected-function and
+   full-registry proof. This is not a whole-game finish.
 
 The coverage denominator stays 701,464 instructions. Neither a completed lane nor
-674/674 registry checks means unregistered code or gameplay is 100% complete.
+682/682 registry checks means unregistered code or gameplay is 100% complete.
 
 ## This increment
 
@@ -58,7 +62,7 @@ The coverage denominator stays 701,464 instructions. Neither a completed lane no
 
 | Work | Evidence needed | Acceptance gate |
 | --- | --- | --- |
-| Preserve registered matching C | All 674 entries verified on user-supplied GG4E and pinned fork | `python src-match/verify.py --control`; inspect every changed verdict, never delete failures to preserve a total |
+| Preserve registered matching C | All 682 entries verified on user-supplied GG4E and pinned fork | `python src-match/verify.py --control`; inspect every changed verdict, never delete failures to preserve a total |
 | Recover compiler-blocked functions | Reproduce compiler diagnostics on current fork; historical queues are in [matching-loop](matching-loop.md) | Compiler regression tests, then byte-exact retail comparisons with relocation checks |
 | Close Ninja physics gap | Compare `FUN_80067310` and host call timing with committed source and controlled traces | Dedicated helper/host tests; do not blindly use `integratePhysics`, which applies extra upper speed clamps |
 | Close remaining action state machines | Re-run `pnpm audit:family-state-machines`, select one partial action, trace its phase/dispatch/constants | Boundary tests plus ROM selfcheck; leave unknown host behavior explicitly partial |
@@ -88,7 +92,7 @@ checkout cannot establish asset delivery or visual parity.
 ## Validation for this increment
 
 - Passed: frozen install, repo policy, TypeScript build, matching negative controls
-  (24 tests), matching-loop selftest (71 checks), ROM suite, camera suite,
+  (27 tests), matching-loop selftest (71 checks), ROM suite, camera suite,
   Challenge VM (60 checks), disposal (3 tests), lifecycle, menu/session/title
   selfchecks, importer (9 tests), production game build, and atlas build with
   `GF_ATLAS_SKIP_MODELS=1`.
@@ -96,12 +100,17 @@ checkout cannot establish asset delivery or visual parity.
   private MEM1 captures are absent. This does not verify new matched C.
 - The source-only local contributor gate stopped at absent HUD assets; subsequent
   checks ran separately. The full-checkout GitHub contributor workflow passed on
-  commit `a0aaf7a101f6be71b4ca8ec7613cd7d9ddf3c37f` before this matching update.
+  commit `96b3707c712fbedefef038929d6636e5f54d972d` after the absolute-global lane.
   Browser smoke and visual parity remain unmeasured.
-- Windows retail verification: **682 ok, 0 failed** (674 functions + eight controls).
+- Windows retail verification: **690 ok, 0 failed** (682 functions + eight controls).
   Independent extractor/comparator selftest passed; pinned compiler fork integrity
   passed all eight checks. No compiler modification was needed.
 - Compiler SHA-256:
   `6bb0af011a5897e790e280a2caa8e439a3055cb3df55153809f1d3f2df2a5486`.
   Existing user-supplied disc read in place. No ROM, proprietary SDK, model, or
   game asset was downloaded or added by this work.
+
+Mask expression tests prove bit selection, not every surrounding C expression.
+The existing comparison renderer can mishandle signed ordering after a high-bit
+mask; none of the eight admitted mask functions uses that pattern. Such future
+candidates still require compiler/retail proof and must not bypass the oracle.
