@@ -135,8 +135,13 @@ function onWindowKeydown(ev: KeyboardEvent): void {
   if (isTextInputTarget(ev.target)) return;
   const mapped = keyToAction(ev);
   if (!mapped) return;
-  dispatch(mapped.action, "keyboard", mapped.dir);
   ev.preventDefault();
+  // Navigation may repeat, but buttons are press edges just like gamepad buttons.
+  // Suppress held confirms/exits even after the host replaces the active screen.
+  const directional = mapped.action === "up" || mapped.action === "down" ||
+    mapped.action === "left" || mapped.action === "right";
+  if (ev.repeat && !directional) return;
+  dispatch(mapped.action, "keyboard", mapped.dir);
 }
 
 function padEdgeStateFor(key: PadKey): PadEdgeState {
