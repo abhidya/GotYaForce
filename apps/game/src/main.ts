@@ -949,6 +949,7 @@ function mountSelectForce(state: SessionState): void {
       catalog: FORCE_CATALOG,
       slots,
       selectedSlot: state.selectedForceSlot,
+      playerCount: state.playerCount,
       limit: state.budget,
       onSlotsSynced: (synced) => dispatchSession({ type: "force-slots-synced", slots: synced }),
       onSelectSlot: (slotIndex) => confirmWith({ type: "force-slot-selected", slotIndex })(),
@@ -970,7 +971,7 @@ function mountForceBuilder(state: SessionState): void {
     createForceBuilder(root, {
       catalog: FORCE_CATALOG,
       limit: state.budget,
-      initialForce: forceFromSlot(slot),
+      initialForce: slot.borgIds,
       onConfirm: (borgIds) => confirmWith({ type: "force-editor-confirm", borgIds })(),
       onQuit: () => {
         playBackSfx();

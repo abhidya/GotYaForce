@@ -102,7 +102,9 @@ function makeSession({
     forceFromSlot: (slot) => [...slot.borgIds],
     validForce: (ids) => ids.filter((id) => id !== "bad"),
     createRun: (options) => fakeRun(options, battles, onNext),
-    borgs: { borgs: [] }, stageCatalog: {}, borgStats: [], loadStageAssets: load,
+    borgs: { borgs: [] }, stageCatalog: {},
+    borgStats: ["a", "b", "saved", "persisted", "confirmed", "default"].map(id => ({ id, energy: 200 })),
+    loadStageAssets: load,
   });
 }
 
