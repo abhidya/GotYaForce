@@ -84,6 +84,7 @@ import {
   isExportedStageId,
 } from "./sim/adapter.js";
 import { initializeGotchaBoxBattle } from "./sim/gotchaBoxBattleInitialization.js";
+import { consumeMenuGamepadStart } from "./ui/menuInput.js";
 import { initTouchControls, touchGamepad, watchViewport } from "./ui/touch/index.js";
 import {
   createGameSession,
@@ -1233,7 +1234,12 @@ function pollPauseToggle(): void {
   // Guard clause: with no battle (or one already resolved) the latch is deliberately NOT
   // polled, so a control held across the battle boundary cannot bank a rising edge.
   if (!live || live.resolved) return;
-  if (pauseInputEdge.poll(pauseControlPressed()) && !live.paused) pauseBattle();
+  if (pauseInputEdge.poll(pauseControlPressed()) && !live.paused) {
+    // The sim and menu bus poll independently. Claim the opening Start press before
+    // mounting its new recipient, or a later menu tick immediately resumes again.
+    consumeMenuGamepadStart(activeGamepad());
+    pauseBattle();
+  }
 }
 
 function pauseBattle(): void {

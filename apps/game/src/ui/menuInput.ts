@@ -153,6 +153,15 @@ function padEdgeStateFor(key: PadKey): PadEdgeState {
   return state;
 }
 
+/** Claim the Start edge used to open battle pause before the menu's independent poll.
+ * Physical pads use their standard slot index; the synthetic touch pad uses -1.
+ * Only Start on this pad is consumed, leaving other pads/buttons and keyboard alone.
+ */
+export function consumeMenuGamepadStart(pad: Gamepad | null): void {
+  if (!pad?.connected || !pad.buttons[9]?.pressed) return;
+  padEdgeStateFor(pad.index === -1 ? "touch" : pad.index).buttonsPressed[9] = true;
+}
+
 function pollGamepads(): void {
   if (subscribers.length === 0) return; // no screen listening; skip the work
   // The on-screen GameCube overlay (ui/touch) publishes a synthetic standard-mapping pad
