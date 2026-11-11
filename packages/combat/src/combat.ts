@@ -3005,6 +3005,14 @@ function startSpecialAttack(
     return;
   }
 
+  // Emit presentation only for this actual radial mechanic, never merely because an
+  // authored ROM action or projectile special entered the special animation slot.
+  b.fallbackSpecialBurst = {
+    serial: (b.fallbackSpecialBurst?.serial ?? 0) + 1,
+    pos: { ...b.pos },
+    radius: specialDef.radius * tier.radius,
+  };
+
   // AoE burst around the borg (default/fallback archetype — bit-for-bit the pre-existing
   // behavior at tier 0). HP damage comes from record 2 via damageFormula.ts; the special
   // multiplier remains a port-side bridge until per-special hitbox records are mapped. Tier

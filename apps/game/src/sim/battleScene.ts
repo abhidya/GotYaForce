@@ -17,7 +17,7 @@ import type {
   ProjectileDespawnObservation,
   ProjectileVisualKind,
 } from "@gf/combat";
-import { MUZZLE_OFFSET, SHOT, SPECIAL } from "@gf/combat";
+import { MUZZLE_OFFSET, SHOT } from "@gf/combat";
 import {
   ARROW_MDL_BOUNDS,
   ARROW_MDL_INDICES,
@@ -127,6 +127,7 @@ interface Actor {
   statusFx: { slow: StatusAura | null; haste: StatusAura | null };
   /** Last zz_00b22f4_ edge consumed for this actor. */
   afterimageSerial: number;
+  fallbackSpecialBurstSerial: number;
 }
 
 /**
@@ -822,7 +823,11 @@ export class BattleScene {
       // Edge-triggered battle FX (same pattern as the hit spark above).
       if (slot === "death" && slotChanged) this.spawnDeathExplosion(actor.group.position);
       if (slotChanged && slot.startsWith("dash")) this.spawnDashBurst(actor.group.position);
-      if (slot === "special" && slotChanged) this.spawnSpecialBurst(actor.group.position);
+      const burst = b.fallbackSpecialBurst;
+      if (burst && burst.serial !== actor.fallbackSpecialBurstSerial) {
+        actor.fallbackSpecialBurstSerial = burst.serial;
+        this.spawnSpecialBurst(burst.pos, burst.radius);
+      }
       if ((slot === "shoot" || slot === "charge_shot") && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY, b.team);
       this.syncChargeGlow(actor, b);
       this.syncStatusFx(actor, b);
@@ -959,6 +964,7 @@ export class BattleScene {
       chargeGlow: null,
       statusFx: { slow: null, haste: null },
       afterimageSerial: 0,
+      fallbackSpecialBurstSerial: 0,
     };
     const revision = actor.modelRevision;
     void this.attachModel(b.uid, actor, presentationId, placeholder, revision).catch((error: unknown) => {
@@ -1870,18 +1876,10 @@ export class BattleScene {
     });
   }
 
-  /**
-   * Caster-side X-special burst, edge-triggered on entry into the "special" anim slot (the
-   * same one-shot pattern as spawnDashBurst on dash entry above) so the AoE special reads at
-   * its SOURCE — previously only the victims' hit sparks were visible and the burst itself
-   * was invisible. Reuses the existing extracted cells: efct00_atlas white shockwave ring
-   * (RING_CELL) expanding to the sim's actual AoE reach, plus a ptcl00.txg#1 fireball core.
-   * The ring's end scale tracks SPECIAL.RADIUS (packages/combat constants.ts, the TUNED
-   * 110-unit XZ burst radius stepSpecials hits against) so the visual footprint matches the
-   * hit volume; every other size/color/timing here is TUNED-visual (no ROM effect->texture
-   * usage table is decoded — ptcl00.ptl/.ref are unparsed), the pixels are real assets.
-   */
-  private spawnSpecialBurst(position: THREE.Vector3): void {
+  /** TUNED fallback radial-attack visual, emitted by the simulation's actual AoE
+   * branch. ROM actions and projectile specials do not manufacture this effect.
+   * Extracted textures are reused; this is not source-exact effect reconstruction. */
+  private spawnSpecialBurst(position: Readonly<{ x: number; y: number; z: number }>, radius: number): void {
     const at = new THREE.Vector3(position.x, position.y + ACTOR_CHEST_Y, position.z);
     this.spawnBurstSprite(this.projectileTextures.get("flame") ?? null, at, {
       ttl: 0.3, // TUNED-visual: quicker than the 0.5s death fireball so it reads as a pulse
@@ -1894,9 +1892,8 @@ export class BattleScene {
     this.spawnBurstSprite(this.ringTexture, at, {
       ttl: 0.35, // TUNED-visual
       startScale: 40, // TUNED-visual
-      // Sprite scale is the full quad edge, so 2x the sim's XZ burst radius spans the
-      // actual AoE diameter (SPECIAL.RADIUS = 110, packages/combat constants.ts).
-      endScale: SPECIAL.RADIUS * 2,
+      // Quad edge spans the actual fallback attack diameter, including charge scaling.
+      endScale: radius * 2,
       opacity: 0.9, // TUNED-visual
     });
   }

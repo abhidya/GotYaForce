@@ -159,6 +159,9 @@ export interface BorgRuntime {
   targetVisibilityMask5e6?: number;
   /** Battle-local posts corresponding to zz_01cb750_(0x803bfe20,&form,+0x3ec). */
   romMorphEvents?: Array<{ eventAddress: number; borgNumber: number; slot: number }>;
+  /** Latest actual fallback radial attack. TUNED presentation, not a ROM effect.
+   * Serial increases over this actor's lifetime; position is sampled at attack time. */
+  fallbackSpecialBurst?: { serial: number; pos: Vec3; radius: number };
   /** Latest zz_00b22f4_ variant-1 presentation edge and its exact sampled transform. */
   romAfterimage?: {
     serial: number;
