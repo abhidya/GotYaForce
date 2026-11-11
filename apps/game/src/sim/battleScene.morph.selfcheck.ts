@@ -216,3 +216,161 @@ export async function runBattleSceneAnimationRaceSelfcheck(): Promise<void> {
   }
   console.log(`battleScene animation lifetime selfcheck: ${checks} cases PASS`);
 }
+
+/** Disposal events verify ownership, not GPU memory usage (no renderer is created). */
+export async function runBattleSceneRetirementSelfcheck(): Promise<void> {
+  const originalLoad = THREE.TextureLoader.prototype.load;
+  THREE.TextureLoader.prototype.load = function load(): THREE.Texture { return new THREE.Texture(); };
+  const flush = async (): Promise<void> => { await Promise.resolve(); await Promise.resolve(); };
+  function watch(resource: THREE.BufferGeometry | THREE.Material | THREE.Texture): () => number {
+    let count = 0;
+    resource.addEventListener("dispose", () => { count += 1; });
+    return () => count;
+  }
+  function watchMesh(mesh: THREE.Mesh): () => boolean {
+    const counts = [watch(mesh.geometry), ... (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).map(watch)];
+    return () => counts.every(count => count() === 1);
+  }
+  type State = {
+    group: THREE.Group; model: THREE.Object3D | null; mixer: THREE.AnimationMixer | null;
+    actions: Record<string, THREE.AnimationAction>; streamActions: Record<string, THREE.AnimationAction>;
+    chargeGlow: { sprite: THREE.Sprite; material: THREE.SpriteMaterial } | null;
+    statusFx: Record<string, { group: THREE.Group; parts: Array<{ materials: THREE.Material[] }> } | null>;
+  };
+  const cloneLoader = {
+    manager: new THREE.LoadingManager(),
+    async loadGlbScene() { throw new Error("unused"); },
+    cloneModel(source: THREE.Object3D) { return source.clone(true); },
+  } satisfies ThreeAssetLoader;
+  let cases = 0;
+  try {
+    for (const retirement of ["despawn", "clear"] as const) {
+      for (const stage of ["loaded", "morphed", "pending", "pending-morph"] as const) {
+        const label = `${retirement}/${stage}`;
+        const texture = new THREE.Texture();
+        const textureDisposals = watch(texture);
+        const source = new THREE.Mesh(new THREE.BoxGeometry(), [new THREE.MeshBasicMaterial({ map: texture }), new THREE.MeshBasicMaterial()]);
+        const sourceCounts = [watch(source.geometry), ...source.material.map(watch)];
+        const requests: Array<{ model: THREE.Mesh; disposed: () => boolean; resolve: (model: THREE.Object3D) => void }> = [];
+        const root = new THREE.Group();
+        const scene = new BattleScene(root, {
+          loadModel() {
+            const model = cloneDisposableModel(cloneLoader, source) as THREE.Mesh;
+            const disposed = watchMesh(model);
+            return new Promise(resolve => requests.push({ model, disposed, resolve }));
+          },
+          async loadClip() { return new THREE.AnimationClip("idle", 1, []); },
+        });
+        const actors = (scene as unknown as { actors: Map<string, State> }).actors;
+        const frame = (form?: string) => ({ ...view(form), chargeFrames: 40, slowHitTimer: 30, hasteHitTimer: 30 });
+        scene.sync([frame(), view(undefined, "peer")]);
+        const actor = actors.get("same-uid")!;
+        const placeholders = [actor.group.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh];
+        const placeholderDisposed = [watchMesh(placeholders[0]!)];
+        requests[1]!.resolve(requests[1]!.model);
+        if (stage === "loaded" || stage === "morphed") requests[0]!.resolve(requests[0]!.model);
+        await flush();
+        scene.sync([frame(), view(undefined, "peer")]);
+        await flush();
+        const oldMixer = actor.mixer;
+        const oldActions = Object.values(actor.actions);
+        const glow = actor.chargeGlow!;
+        const glowDisposals = watch(glow.material);
+        const status = Object.values(actor.statusFx).filter(aura => aura !== null);
+        const statusDisposals = status.flatMap(aura => aura.parts.flatMap(part => part.materials.map(watch)));
+        assert(statusDisposals.length > 0, `${label}: status effect resources observed`);
+        let form: string | undefined;
+        if (stage === "morphed" || stage === "pending-morph") {
+          form = "pl0605";
+          scene.sync([frame(form), view(undefined, "peer")]);
+          const nextPlaceholder = actor.group.children.find(child => child instanceof THREE.Mesh && !placeholders.includes(child)) as THREE.Mesh;
+          placeholders.push(nextPlaceholder);
+          placeholderDisposed.push(watchMesh(nextPlaceholder));
+          assert(placeholderDisposed[0]!() && !actor.group.children.includes(placeholders[0]!), `${label}: prior placeholder released on morph`);
+          assert(actor.group.children.includes(glow.sprite) && glowDisposals() === 0, `${label}: morph preserves charge effect`);
+          if (stage === "morphed") {
+            requests[2]!.resolve(requests[2]!.model);
+            await flush();
+            scene.sync([frame(form), view(undefined, "peer")]);
+            await flush();
+          }
+        }
+        const mixers = [oldMixer, actor.mixer].filter(mixer => mixer !== null);
+        const actions = [...oldActions, ...Object.values(actor.actions)];
+        assert(stage.startsWith("pending") || actions.some(action => action.isRunning()), `${label}: action running before retirement`);
+        if (retirement === "despawn") scene.sync([view(undefined, "peer")]);
+        else scene.clear();
+        assert(requests[0]!.disposed() || stage.startsWith("pending"), `${label}: loaded model disposed at retirement`);
+        assert(placeholderDisposed.every(disposed => disposed()), `${label}: each placeholder disposed exactly once`);
+        assert(!root.children.includes(actor.group) && actor.group.children.length === 0, `${label}: actor detached and emptied`);
+        assert(actions.every(action => !action.isRunning()) && mixers.every(mixer => actions.every(action => !mixer.existingAction(action.getClip()))), `${label}: actions stopped and uncached`);
+        assert(actor.mixer === null && actor.model === null && Object.keys(actor.actions).length === 0 && Object.keys(actor.streamActions).length === 0, `${label}: references released`);
+        assert(glowDisposals() === 1 && statusDisposals.every(count => count() === 1) && status.every(aura => !root.children.includes(aura.group)), `${label}: effects disposed once`);
+        if (retirement === "despawn") {
+          assert(!requests[1]!.disposed() && actors.get("peer")!.mixer !== null, `${label}: same-form peer remains live`);
+        }
+        // A new actor with the same UID must not receive an old pending model.
+        scene.sync([view(form), view(undefined, "peer")]);
+        const replacement = actors.get("same-uid")!;
+        for (const request of requests) request.resolve(request.model);
+        await flush();
+        assert(replacement.model !== requests[0]!.model, `${label}: late model cannot attach to reused UID`);
+        scene.clear();
+        scene.clear();
+        assert(requests.every(request => request.disposed()), `${label}: all returned models disposed exactly once`);
+        assert(placeholderDisposed.every(disposed => disposed()) && glowDisposals() === 1 && statusDisposals.every(count => count() === 1), `${label}: repeated clear does not double dispose`);
+        assert(sourceCounts.every(count => count() === 0) && textureDisposals() === 0, `${label}: cached source and shared texture remain untouched`);
+        cases += 1;
+      }
+    }
+  } finally {
+    THREE.TextureLoader.prototype.load = originalLoad;
+  }
+  console.log(`battleScene retirement selfcheck: ${cases} cases PASS`);
+}
+
+/** Preserve the existing loud load-error contract while verifying cleanup on that path. */
+export async function runBattleSceneLoadFailureSelfcheck(
+  captureUnhandled: (trigger: () => void) => Promise<unknown>,
+): Promise<void> {
+  const originalLoad = THREE.TextureLoader.prototype.load;
+  THREE.TextureLoader.prototype.load = function load(): THREE.Texture { return new THREE.Texture(); };
+  try {
+    for (const morph of [false, true]) {
+      const root = new THREE.Group();
+      const rejects: Array<(reason: unknown) => void> = [];
+      const scene = new BattleScene(root, {
+        loadModel() { return new Promise((_resolve, reject) => rejects.push(reject)); },
+        async loadClip() { return null; },
+      });
+      const actors = (scene as unknown as { actors: Map<string, { group: THREE.Group }> }).actors;
+      scene.sync([{ ...view(), chargeFrames: 40, slowHitTimer: 30 }]);
+      const actor = actors.get("same-uid")!;
+      if (morph) scene.sync([{ ...view("pl0605"), chargeFrames: 40, slowHitTimer: 30 }]);
+      const counts: Array<() => number> = [];
+      actor.group.traverse(node => {
+        if (node instanceof THREE.Mesh || node instanceof THREE.Sprite) {
+          const resources = node instanceof THREE.Mesh ? [node.geometry, ...(Array.isArray(node.material) ? node.material : [node.material])] : [node.material];
+          for (const resource of resources) {
+            let count = 0;
+            resource.addEventListener("dispose", () => { count += 1; });
+            counts.push(() => count);
+          }
+        }
+      });
+      const error = new Error("intentional model-load selfcheck failure");
+      const received = await captureUnhandled(() => rejects[rejects.length - 1]!(error));
+      assert(received === error, "load rejection remains visible to the error handler");
+      assert(actors.size === 0 && !root.children.includes(actor.group), "failed load retires actor");
+      scene.clear();
+      assert(counts.length > 0 && counts.every(count => count() === 1), "failed load disposes placeholder/effects exactly once");
+      if (morph) {
+        rejects[0]!(new Error("stale initial model failure"));
+        await Promise.resolve(); await Promise.resolve();
+      }
+    }
+  } finally {
+    THREE.TextureLoader.prototype.load = originalLoad;
+  }
+  console.log("battleScene model-load failure selfcheck: 2 cases PASS");
+}

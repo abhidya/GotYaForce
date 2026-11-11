@@ -30,7 +30,20 @@ await build({
     },
   }] : [],
 });
-const { runBattleSceneMorphSelfcheck, runBattleSceneAnimationRaceSelfcheck } = await import(pathToFileURL(outfile).href);
+const { runBattleSceneMorphSelfcheck, runBattleSceneAnimationRaceSelfcheck, runBattleSceneRetirementSelfcheck, runBattleSceneLoadFailureSelfcheck } = await import(pathToFileURL(outfile).href);
 await runBattleSceneMorphSelfcheck();
 console.log("battleScene morph selfcheck: PASS");
 await runBattleSceneAnimationRaceSelfcheck();
+await runBattleSceneRetirementSelfcheck();
+await runBattleSceneLoadFailureSelfcheck((trigger) => new Promise((resolve, reject) => {
+  const timer = setTimeout(() => {
+    process.removeListener("unhandledRejection", onRejection);
+    reject(new Error("Expected the model-load error to remain observable"));
+  }, 1000);
+  function onRejection(error) {
+    clearTimeout(timer);
+    resolve(error);
+  }
+  process.once("unhandledRejection", onRejection);
+  trigger();
+}));

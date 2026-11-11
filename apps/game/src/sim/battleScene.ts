@@ -91,6 +91,8 @@ interface Actor {
   /** Monotonic guard against async model/clip loads surviving a form swap or retirement. */
   modelRevision: number;
   model: THREE.Object3D | null;
+  /** Owned temporary presentation, separate from reusable charge/status effects. */
+  placeholder: THREE.Object3D | null;
   mixer: THREE.AnimationMixer | null;
   /** Cached actions per slot for this actor. */
   actions: Partial<Record<AnimSlot, THREE.AnimationAction>>;
@@ -824,10 +826,7 @@ export class BattleScene {
     // Despawn actors whose borg is gone.
     for (const [uid, actor] of this.actors) {
       if (!live.has(uid)) {
-        actor.modelRevision += 1; // Invalidate pending clips before retiring this actor.
-        actor.chargeGlow?.material.dispose();
-        this.disposeActorStatusFx(actor);
-        this.root.remove(actor.group);
+        this.retireActor(actor);
         this.actors.delete(uid);
       }
     }
@@ -857,10 +856,7 @@ export class BattleScene {
   /** Remove every actor (call when leaving a battle). */
   clear(): void {
     for (const actor of this.actors.values()) {
-      actor.modelRevision += 1; // Pending clips must not restart a removed actor.
-      actor.chargeGlow?.material.dispose();
-      this.disposeActorStatusFx(actor);
-      this.root.remove(actor.group);
+      this.retireActor(actor);
     }
     for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
     for (const actor of this.impactActors) this.disposeImpactActor(actor);
@@ -934,6 +930,7 @@ export class BattleScene {
       borgId: presentationId,
       modelRevision: 0,
       model: null,
+      placeholder,
       mixer: null,
       actions: {},
       streamActions: {},
@@ -950,7 +947,7 @@ export class BattleScene {
     const revision = actor.modelRevision;
     void this.attachModel(b.uid, actor, presentationId, placeholder, revision).catch((error: unknown) => {
       if (this.actors.get(b.uid) === actor && actor.modelRevision === revision) {
-        this.root.remove(group);
+        this.retireActor(actor);
         this.actors.delete(b.uid);
         throw error;
       }
@@ -1048,6 +1045,7 @@ export class BattleScene {
     }
     actor.group.remove(placeholder);
     disposeMesh(placeholder);
+    actor.placeholder = null;
     actor.group.add(model);
     actor.model = model;
     actor.mixer = new THREE.AnimationMixer(model);
@@ -1056,9 +1054,8 @@ export class BattleScene {
     actor.ready = true;
   }
 
-  /** Same-UID form reload: dispose the old model/mixer/clip actions, then attach the new
-   *  form while leaving the actor group (world transform and UID ownership) in place. */
-  private reloadPresentation(uid: string, actor: Actor, borgId: string, team: number): void {
+  /** Release only actor-owned presentation resources, never shared textures or FX. */
+  private releasePresentation(actor: Actor): void {
     actor.modelRevision += 1;
     actor.mixer?.stopAllAction();
     if (actor.model) {
@@ -1066,8 +1063,12 @@ export class BattleScene {
       actor.group.remove(actor.model);
       disposeMesh(actor.model);
     }
-    actor.borgId = borgId;
+    if (actor.placeholder) {
+      actor.group.remove(actor.placeholder);
+      disposeMesh(actor.placeholder);
+    }
     actor.model = null;
+    actor.placeholder = null;
     actor.mixer = null;
     actor.actions = {};
     actor.streamActions = {};
@@ -1076,12 +1077,30 @@ export class BattleScene {
     actor.lastMeleeClipKey = null;
     actor.ready = false;
     actor.isPlaceholder = true;
+  }
+
+  private retireActor(actor: Actor): void {
+    this.releasePresentation(actor);
+    if (actor.chargeGlow) {
+      actor.group.remove(actor.chargeGlow.sprite);
+      actor.chargeGlow.material.dispose();
+      actor.chargeGlow = null;
+    }
+    this.disposeActorStatusFx(actor);
+    this.root.remove(actor.group);
+  }
+
+  /** Keep UID/world transform and reusable FX while replacing the owned presentation. */
+  private reloadPresentation(uid: string, actor: Actor, borgId: string, team: number): void {
+    this.releasePresentation(actor);
+    actor.borgId = borgId;
     const placeholder = this.makePlaceholder(team);
+    actor.placeholder = placeholder;
     actor.group.add(placeholder);
     const revision = actor.modelRevision;
     void this.attachModel(uid, actor, borgId, placeholder, revision).catch((error: unknown) => {
       if (this.actors.get(uid) === actor && actor.modelRevision === revision) {
-        this.root.remove(actor.group);
+        this.retireActor(actor);
         this.actors.delete(uid);
         throw error;
       }
