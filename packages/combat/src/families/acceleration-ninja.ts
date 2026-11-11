@@ -35,7 +35,8 @@
 // (de)arms, sound cues, and effect triggers are ported 1:1. The following are host-
 // renderer / unsurfaced deps, marked TODO and left as no-ops (faithful behavior with
 // no host bound):
-//   FUN_80067310  — scalar-speed physics integrator (actor.ts describes; not callable)
+//   FUN_80067310  — action 2 integrates scalar motion; actions 0/3 remain TODO.
+//                   Collision/aim and original host entry timing remain partial.
 //   zz_00677b0_   — step-height ground snap; its int return is modelled via the
 //                   scratch flag grounded77b0 (host sets; defaults false)
 //   zz_006d144_   — lock-yaw rebuild from +0x5ac (distinct from helpers' stepTargetYaw)
@@ -48,6 +49,7 @@
 // Float constants read from boot.dol (sdata2 @0x8043a8xx), cited per constant.
 
 import { createRomActor, type RomActor } from "../rom/actor.js";
+import { integratePhysicsPrimary } from "../rom/physics.js";
 import { dispatchUpperBodyCue } from "../rom/dispatch.js";
 import { allocateWeapon, stepAfterimage, stepPartTargetPitch, toS16 } from "../rom/helpers.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
@@ -278,7 +280,7 @@ function action2(actor: NinjaActor, ctx: StreamContext): void {
         actor.hSpeed = AN.ZERO;                               // +0x44 = 0.0
       }
       // zz_006ed8c_(0.95, actor) — TODO(host) aim.
-      // FUN_80067310(1.0, actor, +0x5ae) — TODO.
+      integratePhysicsPrimary(AN.PHYSICS_RATE, actor, actor.lockYaw); // FUN_80067310
       if (actor.wallContact === 0) {                          // +0x1cee == 0
         if (AN.A2_SPEED_SCALE < actor.hSpeed) {               // 3.0 < +0x44 (still fast)
           // gnt4_PSMTXMultVec(+0x8d4, &DAT_8034c77c/_788, ...) + zz_00b2544_(actor, a, b)
@@ -329,7 +331,7 @@ function action2Phase1(actor: NinjaActor, ctx: StreamContext): void {
     // zz_0066ac0_(actor, 0) / zz_0066e40_(actor, 2) — TODO(host) aim.
     actor.lockYaw = actor.heading;                            // +0x5ae = +0x72
     actor.hSpeed = actor.ninjaSpeed38 ?? 0;                   // +0x44 = +0x38
-    // FUN_80067310(1.0, actor, +0x5ae) — TODO.
+    integratePhysicsPrimary(AN.PHYSICS_RATE, actor, actor.lockYaw); // FUN_80067310
     const grounded = actor.grounded77b0 ?? false;             // iVar4 = zz_00677b0_(actor)
     if (grounded) actor.yVel = AN.ZERO;                       // +0x48 = 0.0
     if (AN.ZERO < (actor.ninjaCooldown55c ?? 0)) {            // 0.0 < +0x55c
@@ -645,6 +647,28 @@ export function runAccelerationNinjaSelfTests(assert: AssertFn): void {
     assert(a.fbPhaseSlots[0] === 1, "a2 ph0 advances +0x540 to ph1");
   }
 
+  // Action-2 movement must be owned by the family, including its inline entry step.
+  for (const yaw of [0, 0x4000]) {
+    const a = createRomActor() as NinjaActor;
+    configureAccelerationNinjaFamily(a, {});
+    a.actionIndex = 2;
+    a.heading = yaw;
+    a.descriptor = { maxHSpeed: 10, handlerData6c: 0 } as never;
+    a.targetCache5e8 = { x: 10000, y: 0, z: 10000 };
+    const axis = yaw === 0 ? "z" : "x";
+    a.rootAction!(a);
+    assert(Math.abs(a.pos[axis] - 30) < 1e-9, `a2 entry integrates exactly once at yaw ${yaw}`);
+    a.rootAction!(a);
+    assert(Math.abs(a.pos[axis] - 60) < 1e-9, `a2 ongoing dash integrates once at yaw ${yaw}`);
+    a.fbPhaseSlots[0] = 2;
+    a.rootAction!(a);
+    assert(Math.abs(a.pos[axis] - 90) < 1e-9, `a2 recovery preserves motion at yaw ${yaw}`);
+    a.dashStrength1d0f = 1;
+    a.rootAction!(a);
+    assert(Math.abs(a.pos[axis] - 90) < 1e-9 && a.hSpeed === 0,
+      `a2 recovery stream reset stops motion before integration at yaw ${yaw}`);
+  }
+
   // --- a2 ph1: approach gate drains +0x560; close (distance 0 < threshold) → advance to ph2. ---
   {
     const shots: Shot[] = [];
@@ -662,8 +686,12 @@ export function runAccelerationNinjaSelfTests(assert: AssertFn): void {
     // Frames 2..: threshold = tierScale*0.5*hSpeed*timescale. ph1 sets hSpeed = ninjaSpeed38 (30).
     // threshold = 1*0.5*30*1 = 15 > distance 0 → A false → approach += dt each frame.
     // approach starts 0; needs > 10 → 11 increments → advance on the 12th ph1 frame.
-    for (let f = 0; f < 10; f += 1) root(a); // ph1 frames 2..11
+    for (let f = 0; f < 10; f += 1) {
+      Object.assign(a.targetCache5e8, a.pos); // keep the distance gate close as the dash moves
+      root(a); // ph1 frames 2..11
+    }
     assert(a.fbPhaseSlots[0] === 1, "a2 ph1 stays at ph1 while approach <= 10");
+    Object.assign(a.targetCache5e8, a.pos);
     root(a); // ph1 frame 12 → approach 11 > 10 → advance to ph2
     assert(a.fbPhaseSlots[0] === 2, "a2 ph1 advances to ph2 when approach > cap (distance gate)");
     assert(a.streamSlot >= 2, "a2 ph1→ph2 increments +0x6ea and arms stream slot");

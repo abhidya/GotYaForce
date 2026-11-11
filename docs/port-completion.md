@@ -65,8 +65,15 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
    All five refined sources still match; hashes retain original mechanical
    provenance plus the subsequent refinement. This adds **zero instructions**
    of coverage and does not reconstruct every callee return type or ABI.
-9. **Next: one remaining compiler/seeder limitation**, with affected-function and
-   full-registry proof. This is not a whole-game finish.
+9. **Browser priority: Acceleration Ninja action-2 displacement.** Restore the
+   primary lower-only physics calls during approach and recovery, which previously
+   left the ROM-owned dash stationary. Focused family and bridge regression tests
+   prove displacement; [scope and browser checklist](acceleration-ninja-dash-motion.md).
+   The Pages workflow now watches shared packages and build inputs so a combat-only
+   merge triggers deployment. Live browser behavior still needs validation.
+10. **Next: shared animation owner resolution**, using existing local reverse-
+    engineering evidence. Continue visible browser slices rather than treating
+    matching instruction coverage as playable completion.
 
 The coverage denominator stays 701,464 instructions. Neither a completed lane nor
 750/750 registry checks means unregistered code or gameplay is 100% complete.
