@@ -15,7 +15,7 @@
     "selfcheck:1p": "node scripts/selfcheck-1p-challenge.mjs",
     "selfcheck:challenge-stages": "node scripts/selfcheck-challenge-stages.mjs",
     "selfcheck:force-builder": "node scripts/selfcheck-force-builder.mjs",
-    "selfcheck:menu-flow": "node scripts/selfcheck-menu-flow.mjs",
+    "selfcheck:menu-flow": "node scripts/selfcheck-menu-flow.mjs && node --test scripts/menu-key-repeat.test.mjs scripts/controller-pause-race.test.mjs scripts/bgm-transition-race.test.mjs",
     "selfcheck:title-frontend": "node scripts/selfcheck-title-frontend.mjs",
     "selfcheck:game-session": "node scripts/selfcheck-game-session.mjs",
     "selfcheck:battle-input-focus": "node --test scripts/battle-input-focus.test.mjs",

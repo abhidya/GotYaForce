@@ -135,8 +135,13 @@ function onWindowKeydown(ev: KeyboardEvent): void {
   if (isTextInputTarget(ev.target)) return;
   const mapped = keyToAction(ev);
   if (!mapped) return;
-  dispatch(mapped.action, "keyboard", mapped.dir);
   ev.preventDefault();
+  // Navigation may repeat, but buttons are press edges just like gamepad buttons.
+  // Suppress held confirms/exits even after the host replaces the active screen.
+  const directional = mapped.action === "up" || mapped.action === "down" ||
+    mapped.action === "left" || mapped.action === "right";
+  if (ev.repeat && !directional) return;
+  dispatch(mapped.action, "keyboard", mapped.dir);
 }
 
 function padEdgeStateFor(key: PadKey): PadEdgeState {
@@ -146,6 +151,15 @@ function padEdgeStateFor(key: PadKey): PadEdgeState {
     padStates.set(key, state);
   }
   return state;
+}
+
+/** Claim the Start edge used to open battle pause before the menu's independent poll.
+ * Physical pads use their standard slot index; the synthetic touch pad uses -1.
+ * Only Start on this pad is consumed, leaving other pads/buttons and keyboard alone.
+ */
+export function consumeMenuGamepadStart(pad: Gamepad | null): void {
+  if (!pad?.connected || !pad.buttons[9]?.pressed) return;
+  padEdgeStateFor(pad.index === -1 ? "touch" : pad.index).buttonsPressed[9] = true;
 }
 
 function pollGamepads(): void {

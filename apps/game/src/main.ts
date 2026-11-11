@@ -84,6 +84,7 @@ import {
   isExportedStageId,
 } from "./sim/adapter.js";
 import { initializeGotchaBoxBattle } from "./sim/gotchaBoxBattleInitialization.js";
+import { consumeMenuGamepadStart } from "./ui/menuInput.js";
 import { initTouchControls, touchGamepad, watchViewport } from "./ui/touch/index.js";
 import {
   createGameSession,
@@ -649,6 +650,9 @@ async function loadInitialAssets(): Promise<void> {
 let audioManagerPromise: Promise<GotchaAudioManager | null> | null = null;
 let activeBgmKey: string | null = null;
 let pendingBgmKey: string | null = null;
+let requestedBgmKey: string | null = null;
+let bgmGeneration = 0;
+let bgmAttempt: { key: string; generation: number } | null = null;
 // Manifest play-keys for the ROM cue resolver (resolveCueToAsset). Built once
 // from the merged audio manifest in initAudio; sfx+voice keys only. Replaces the
 // hand-tuned TITLE_SOUND_IDS arithmetic at the title onSound boundary.
@@ -686,27 +690,41 @@ function initAudio(): Promise<GotchaAudioManager | null> {
 }
 
 function queueBgm(key: string): void {
+  if (requestedBgmKey !== key) {
+    requestedBgmKey = key;
+    bgmGeneration++;
+  }
   pendingBgmKey = key;
   void playPendingBgm();
 }
 
 async function playPendingBgm(): Promise<void> {
   const key = pendingBgmKey;
+  if (!key) return;
   if (key === activeBgmKey) {
-    // Already playing (or nothing pending); clear the request either way.
-    if (key) pendingBgmKey = null;
-  } else if (key) {
+    pendingBgmKey = null;
+    return;
+  }
+  // Input retries must not abort and restart a track that is still loading.
+  const generation = bgmGeneration;
+  if (bgmAttempt?.key === key && bgmAttempt.generation === generation) return;
+  const attempt = { key, generation };
+  bgmAttempt = attempt;
+  try {
     const audio = await initAudio();
-    try {
-      await audio?.playBgm(key);
-      if (audio) {
-        activeBgmKey = key;
-        if (pendingBgmKey === key) pendingBgmKey = null;
-      }
-    } catch {
-      // Browsers reject autoplay before the first user gesture. Keep pending and
-      // retry from the next key/click/touch event.
+    if (!audio || generation !== bgmGeneration) return;
+    // playBgm stops the previous track before awaiting the new one's playback.
+    activeBgmKey = null;
+    await audio.playBgm(key);
+    if (generation === bgmGeneration && bgmAttempt === attempt) {
+      activeBgmKey = key;
+      pendingBgmKey = null;
     }
+  } catch {
+    // Keep the latest request for the next gesture after autoplay/load failure.
+    // A superseded attempt must never change the newer track's bookkeeping.
+  } finally {
+    if (bgmAttempt === attempt) bgmAttempt = null;
   }
 }
 
@@ -1238,7 +1256,12 @@ function pollPauseToggle(): void {
   // Guard clause: with no battle (or one already resolved) the latch is deliberately NOT
   // polled, so a control held across the battle boundary cannot bank a rising edge.
   if (!live || live.resolved) return;
-  if (pauseInputEdge.poll(pauseControlPressed()) && !live.paused) pauseBattle();
+  if (pauseInputEdge.poll(pauseControlPressed()) && !live.paused) {
+    // The sim and menu bus poll independently. Claim the opening Start press before
+    // mounting its new recipient, or a later menu tick immediately resumes again.
+    consumeMenuGamepadStart(activeGamepad());
+    pauseBattle();
+  }
 }
 
 function pauseBattle(): void {
