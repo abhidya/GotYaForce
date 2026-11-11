@@ -43,7 +43,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from dolsym import load, function_bytes  # noqa: E402
+from dolsym import load, function_bytes, function_c_name  # noqa: E402
 from ppcdis import render, disasm  # noqa: E402
 from objdiff import Elf32BE, compare, render_diff  # noqa: E402
 import datareloc  # noqa: E402
@@ -262,7 +262,9 @@ def expected_symbols(smap, retail, base_addr):
             # A name-only check cannot prove such a target (symbol + addend).
             # Leave it unresolved rather than accepting a call to its entry.
             if hit and hit["addr"] == tgt:
-                out[a - base_addr] = hit["name"]
+                name = function_c_name(hit, smap)
+                if name is not None:
+                    out[a - base_addr] = name
     return out
 
 

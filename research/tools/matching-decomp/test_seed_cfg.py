@@ -1,6 +1,6 @@
 """Portable expression controls for mechanically seeded bit masks."""
 import unittest
-from seed_cfg import Arg, Lifter, SeedFail
+from seed_cfg import Arg, Lifter, SeedFail, Bin, Cmp, Const, render
 
 
 def evaluate(e, value):
@@ -33,3 +33,27 @@ class NonRotatingMaskTests(unittest.TestCase):
     def test_unsupported_rotated_mask_stays_refused(self):
         with self.assertRaises(SeedFail):
             Lifter.rlwinm(None, Arg(0), {"sh": 3, "mb": 5, "me": 12})
+
+
+class SignedMaskRenderingTests(unittest.TestCase):
+    def test_signed_order_casts_high_bit_mask(self):
+        mask = Bin("&", Arg(0), Const(0x80000000))
+        for op in ("<", "<=", ">", ">="):
+            self.assertEqual(render(Cmp(op, mask, Const(0), True), {}),
+                             "(int)(p0 & 0x80000000) %s 0" % op)
+            self.assertEqual(render(Cmp(op, Const(0), mask, True), {}),
+                             "0 %s (int)(p0 & 0x80000000)" % op)
+
+    def test_unsigned_order_preserves_unsigned_mask(self):
+        mask = Bin("&", Arg(0), Const(0x80000000))
+        self.assertEqual(render(Cmp("<", mask, Const(0), False), {}),
+                         "(p0 & 0x80000000) < 0")
+
+    def test_low_bit_mask_and_equality_do_not_need_cast(self):
+        self.assertEqual(render(Cmp("<", Bin("&", Arg(0), Const(0x40)), Const(0), True), {}),
+                         "(p0 & 0x40) < 0")
+        self.assertEqual(render(Cmp("==", Bin("&", Arg(0), Const(0x80000000)), Const(0), True), {}),
+                         "(p0 & 0x80000000) == 0")
+
+    def test_float_comparison_is_not_cast_to_integer(self):
+        self.assertEqual(render(Cmp("<", Const(1.5), Const(2.0), True), {}), "1.5f < 2.0f")

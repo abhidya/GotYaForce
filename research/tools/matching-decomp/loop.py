@@ -61,7 +61,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 REPO = HERE.parents[2]
 
-from dolsym import load, function_bytes                      # noqa: E402
+from dolsym import load, function_bytes, function_c_name                      # noqa: E402
 from ppcdis import disasm, render                            # noqa: E402
 from objdiff import Elf32BE, compare, render_diff            # noqa: E402
 import match as MATCH                                        # noqa: E402
@@ -518,9 +518,11 @@ def seed_wrapper(rec, retail, smap, spec=None):
     hit = smap.lookup(tgt)
     if hit is None:
         raise SeedFail("callee 0x%08x is not in the link map" % tgt)
-    callee = hit["name"]
-    if not _c_ident(callee):
-        raise SeedFail("callee name %r is not a C identifier" % callee)
+    if hit.get("addr") != tgt:
+        raise SeedFail("callee is not an exact link-map entry")
+    callee = function_c_name(hit, smap)
+    if callee is None:
+        raise SeedFail("callee address alias collides with another symbol")
 
     setup = [i for i in mid if i is not calls[0] and i not in lr_saves]
     args = {}
@@ -569,6 +571,44 @@ def seed_empty(rec, retail, smap, spec=None):
     return "void f(void)\n{\n}\n"
 
 
+def seed_counted_call(rec, retail, smap, spec=None):
+    """One measured loop shape: increasing signed counter passed to one call.
+
+    Match the entire frame, back edge and epilogue before emitting C. General
+    loops still belong to the CFG tier; this is not permission to ignore them.
+    """
+    if len(retail) != 60:
+        raise SeedFail("not the 15-instruction counted-call loop")
+    w = struct.unpack(">15I", retail)
+    fixed = {0: 0x9421fff0, 1: 0x7c0802a6, 2: 0x90010014,
+             3: 0x93e1000c, 5: 0x7fe3fb78, 9: 0x4180fff0,
+             10: 0x80010014, 11: 0x83e1000c, 12: 0x7c0803a6,
+             13: 0x38210010, 14: 0x4e800020}
+    if any(w[i] != value for i, value in fixed.items()) or (
+            w[4] & 0xffff0000 != 0x3be00000 or
+            w[7] & 0xffff0000 != 0x3bff0000 or
+            w[8] & 0xffff0000 != 0x2c1f0000 or
+            w[6] & 0xfc000003 != 0x48000001):
+        raise SeedFail("not the measured counted-call frame and back edge")
+    start, step, stop = _s16(w[4] & 0xffff), _s16(w[7] & 0xffff), _s16(w[8] & 0xffff)
+    if step <= 0 or start >= stop:
+        raise SeedFail("counted-call loop is not a bounded increasing range")
+    delta = w[6] & 0x03fffffc
+    if delta & 0x02000000:
+        delta -= 0x04000000
+    target = rec["addr"] + 24 + delta
+    hit = smap.lookup(target)
+    if not hit or hit.get("addr") != target:
+        raise SeedFail("counted-call target has no exact map entry")
+    callee = function_c_name(hit, smap)
+    if callee is None:
+        raise SeedFail("counted-call address alias collides with another symbol")
+    return ("extern void %s(int);\n\nvoid f(void)\n{\n"
+            "    int i = %d;\n    do {\n        %s(i);\n"
+            "        i += %d;\n    } while (i < %d);\n}\n"
+            % (callee, start, callee, step, stop))
+
+
 def seed_cfg_tier(rec, retail, smap, spec=None):
     """The control-flow tier: a CFG over the retail bytes, structured into
     `if`/`else`/early-return/`&&`/`||`, with the symbolic evaluator carried
@@ -584,7 +624,7 @@ def seed_cfg_tier(rec, retail, smap, spec=None):
 
 
 SEEDERS = [("empty", seed_empty), ("wrapper", seed_wrapper),
-           ("leaf", seed_leaf), ("cfg", seed_cfg_tier)]
+           ("leaf", seed_leaf), ("counted-call", seed_counted_call), ("cfg", seed_cfg_tier)]
 
 # Which seeder OWNS a function is decided by its own prologue and graph, so
 # that a refusal names the tier that should have applied rather than the last
@@ -1657,7 +1697,7 @@ def cmd_selftest(a, oracle):
 
     class _Map(object):
         def lookup(self, a):
-            return {"name": "zz_0012308_"} if a == 0x80012308 else None
+            return {"name": "zz_0012308_", "addr": a} if a == 0x80012308 else None
     blob = (b"\x94\x21\xff\xf0\x7c\x08\x02\xa6\x90\x01\x00\x14"
             b"\x48\x00\x00\x35\x80\x01\x00\x14\x7c\x08\x03\xa6"
             b"\x38\x21\x00\x10\x4e\x80\x00\x20")
@@ -1704,7 +1744,7 @@ def cmd_selftest(a, oracle):
 
         def lookup(self, a):
             n = self.m.get(a)
-            return {"name": n} if n else None
+            return {"name": n, "addr": a} if n else None
 
     # -- basic blocks and edges
     #   cmpwi r3,0 / beq +8 / stb r0,0(r3) / blr
@@ -1721,7 +1761,7 @@ def cmd_selftest(a, oracle):
     chk("a forward graph has no back edge",
         SC.back_edges(blocks, dom) == [])
 
-    # -- a back edge IS found, and is the compiler's problem, not the seeder's
+    # -- a back edge is found; unsupported structure is a seeder refusal
     #   li r0,0 / stb r0,0(r3) / b -8
     loopb = _asm(0x38000000, 0x98030000, 0x4BFFFFF8)
     lb, _ = SC.build_cfg(loopb, 0x80000000)
@@ -1730,10 +1770,10 @@ def cmd_selftest(a, oracle):
     try:
         SC.seed_cfg({"name": "l", "addr": 0x80000000, "size": len(loopb)},
                     loopb, _M())
-        chk("a loop is refused as a COMPILER limit", False, "it produced a seed")
+        chk("general loop structure is refused by the seeder", False, "it produced a seed")
     except SC.SeedFail as ex:
-        chk("a loop is refused as a COMPILER limit",
-            ex.cls == "compiler" and "loop codegen" in str(ex), str(ex))
+        chk("general loop structure is refused by the seeder",
+            ex.cls == "seeder" and "loop structuring" in str(ex), str(ex))
 
     # -- if / early return
     #   lbz r0,0x10(r3) / extsb. r0,r0 / beq +8 / stb r0,0x11(r3) / blr

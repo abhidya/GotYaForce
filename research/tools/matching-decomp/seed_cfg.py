@@ -27,20 +27,13 @@ WHAT IT REFUSES, AND WHY THE REFUSALS ARE THE POINT
     classes in `seed_cfg.REFUSALS`, so `loop.py run` can split the corpus-wide
     remainder into "the compiler lane's queue" and "this seeder's queue":
 
-      integrity  r13/r2 small data, and any global whose address would need an
-                 R_PPC_ADDR16_HA/LO or R_PPC_EMB_SDA21 relocation.  `match.py`
-                 name-checks only R_PPC_REL24, so such a match is vacuous --
-                 it would accept any global in the game.  This tier inherits
-                 that refusal unchanged (loop.py s2.3); another lane owns
-                 making those verifiable.
-      compiler   a shape mwcc-rs is known to refuse -- measured, not assumed:
-                 every loop form (`while`, `for`, `do`) returns
-                 "loop codegen is not implemented yet (roadmap)".  Refusing
-                 here costs nothing the compiler would not have cost anyway,
-                 and it keeps those functions in the COMPILER lane's queue
-                 rather than this one's.
-      seeder     this tier's own envelope: an opcode it does not model, an
-                 unstructured graph, a value that would need a local variable.
+      integrity  unresolved globals or address forms the oracle cannot prove.
+                 Supported SDA and absolute globals are address-checked.
+      compiler   a specific shape measured to be unsupported by the pinned fork.
+      seeder     this tier's own envelope: an opcode, an unstructured graph,
+                 a loop, or a value that would need a local variable. The fork
+                 supports some integer/call loops now; loop.py has one strict
+                 counted-call seeder. A back edge alone is not a compiler test.
 
     Nothing here decides a match.  The oracle in `loop.py` does, byte for
     byte, and a candidate this file writes is worth exactly what the oracle
@@ -70,6 +63,8 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 from ppcdis import disasm_word                                  # noqa: E402
+
+from dolsym import function_c_name
 
 try:
     import datareloc as DR                                      # noqa: E402
@@ -543,8 +538,21 @@ def render(e, names, prec=0):
     if k in ("bin", "cmp"):
         op = e.a[0]
         p = PREC[op]
-        s = "%s %s %s" % (render(e.a[1], names, p), op,
-                          render(e.a[2], names, p + 1))
+        left, right = e.a[1], e.a[2]
+        if k == "cmp" and e.a[3] and op in ("<", "<=", ">", ">="):
+            # A hex mask with bit31 set is unsigned in target C. Recover the
+            # signed register interpretation for ordering, without converting
+            # floating comparisons or changing unsigned/equality predicates.
+            def signed_mask(x):
+                if x.k == "bin" and x.a[0] == "&" and any(
+                        a.k == "const" and isinstance(a.a[0], int)
+                        and 0x80000000 <= a.a[0] <= 0xffffffff
+                        for a in x.a[1:]):
+                    return E("cast", "int", x)
+                return x
+            left, right = signed_mask(left), signed_mask(right)
+        s = "%s %s %s" % (render(left, names, p), op,
+                          render(right, names, p + 1))
         return "(%s)" % s if p < prec else s
     if k == "logic":
         op = e.a[0]
@@ -1160,10 +1168,11 @@ class Lifter(object):
         hit = self.smap.lookup(tgt)
         if hit is None:
             raise _fail("seeder", "callee 0x%08x is in no link-map symbol" % tgt)
-        name = hit["name"]
-        if not _c_ident(name):
-            raise _fail("seeder",
-                        "callee name %r is not a C identifier" % name)
+        if hit.get("addr") != tgt:
+            raise _fail("seeder", "callee is not an exact link-map entry")
+        name = function_c_name(hit, self.smap)
+        if name is None:
+            raise _fail("integrity", "callee address alias collides with another symbol")
         args, top = self.call_args(g, name, a)
         # EABI floating-point arguments live in f1..f8 and are numbered
         # independently of the GPR arguments, so their POSITION in the C
@@ -1801,10 +1810,10 @@ def seed_cfg(rec, retail, smap, spec=None):
         raise _fail("seeder", "empty function")
     L = Lifter(rec, retail, smap, spec)
     if L.loops:
-        raise _fail("compiler",
-                    "%d back edge(s): this is a loop, and mwcc-rs answers "
-                    "`loop codegen is not implemented yet (roadmap)` for every "
-                    "loop form" % len(L.loops))
+        raise _fail("seeder",
+                    "%d back edge(s): general loop structuring is outside "
+                    "this seeder; compiler support depends on the loop shape"
+                    % len(L.loops))
     S = Structurer(L)
     stmts = S.run()
     L.flush(stmts)
