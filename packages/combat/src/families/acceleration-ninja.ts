@@ -37,8 +37,8 @@
 // no host bound):
 //   FUN_80067310  — action 2 integrates scalar motion; actions 0/3 remain TODO.
 //                   Collision/aim and original host entry timing remain partial.
-//   zz_00677b0_   — step-height ground snap; its int return is modelled via the
-//                   scratch flag grounded77b0 (host sets; defaults false)
+//   zz_00677b0_   — action-2 phase-1 uses the host stage-motion probe; other sites
+//                   retain scratch grounded77b0. Full ROM slope parity is pending.
 //   zz_006d144_   — lock-yaw rebuild from +0x5ac (distinct from helpers' stepTargetYaw)
 //   zz_0066ac0_ / zz_0066e40_ / zz_006ed8c_ — aim helpers
 //   zz_00b2544_ / zz_00f0104_ / zz_00b2190_ / FUN_800061a8 — trail / afterimage-arm
@@ -331,7 +331,16 @@ function action2Phase1(actor: NinjaActor, ctx: StreamContext): void {
     // zz_0066ac0_(actor, 0) / zz_0066e40_(actor, 2) — TODO(host) aim.
     actor.lockYaw = actor.heading;                            // +0x5ae = +0x72
     actor.hSpeed = actor.ninjaSpeed38 ?? 0;                   // +0x44 = +0x38
+    const previous = { ...actor.pos };
     integratePhysicsPrimary(AN.PHYSICS_RATE, actor, actor.lockYaw); // FUN_80067310
+    // chunk_0042.c:796-798: the collision probe follows integration, including the
+    // inline phase-0 call. Use the host's existing geometry policy, not another
+    // movement step. Only this verified physical-dash site opts in; warps do not.
+    const contact = actor.physicsRuntime?.probeMotion?.(previous, actor.pos, actor.yVel);
+    if (contact) {
+      actor.yVel = contact.velY;
+      actor.grounded77b0 = contact.grounded;
+    }
     const grounded = actor.grounded77b0 ?? false;             // iVar4 = zz_00677b0_(actor)
     if (grounded) actor.yVel = AN.ZERO;                       // +0x48 = 0.0
     if (AN.ZERO < (actor.ninjaCooldown55c ?? 0)) {            // 0.0 < +0x55c

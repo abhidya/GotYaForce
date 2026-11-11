@@ -35,6 +35,9 @@ export interface RomPhysicsRuntime {
   clampToGround(pos: Vec3, velY: number): { y: number; velY: number; grounded: boolean };
   /** Battle-owned floor support query used by zz_00679d0_'s no-surface revert. */
   isSupported?(x: number, z: number): boolean;
+  /** Optional host collision approximation at explicit ROM probe call sites.
+   * Mutates position only; never integrates motion or changes horizontal ROM speed. */
+  probeMotion?(previous: Vec3, pos: Vec3, velY: number): { velY: number; grounded: boolean };
 }
 
 /**
