@@ -20,14 +20,17 @@
  *   permuter steps   : 1
  *   shape            : stwu mflr cmplwi stw beq li li bl lwz mtlr addi blr
  *   exact_bytes      : false
- *   source sha256    : ee49663ce6f36da44369efefa7a7a2b1007805c01ccddf454db4bfcef4a5fd2c
+ *   source sha256    : f28c4dc30b9f87ba9bd841328e07eff272bb2b07992d0117def6ef01474a4f00
+ *
+ * Source refined after generation: explicit pointer argument flow.
+ * Retail evidence: memset helper 0x80005464 stores through r3-derived r6.
  *
  * Re-proved by src-match/verify.py against the retail DOL; the hash
  * above covers the C below this header only.
  */
-extern int FUN_8000540c(int, int, int);
+extern int FUN_8000540c(void *, int, int);
 
-void f(unsigned int p0)
+void f(void *p0)
 {
     if (p0 != 0)
         FUN_8000540c(p0, 0, 0x258);

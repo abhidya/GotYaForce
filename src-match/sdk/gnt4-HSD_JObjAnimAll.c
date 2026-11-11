@@ -23,14 +23,17 @@
  *   permuter steps   : 3
  *   shape            : stwu mflr stw stw or. beq bl mr bl bl lwz lwz mtlr addi blr
  *   exact_bytes      : false
- *   source sha256    : bd4d3f3f7efd2cc7753ea18d2484ce24ae70e22e69b22d309729e956fad10868
+ *   source sha256    : 90b442d9e6a5f96c0da707b816b8ffe9097fa4930e2c50df7d387edcb1a8304a
+ *
+ * Source refined after generation: explicit pointer argument flow.
+ * Retail evidence: JObjAnimAll copies r3 to r31; 0x8024ec08 loads through r31.
  *
  * Re-proved by src-match/verify.py against the retail DOL; the hash
  * above covers the C below this header only.
  */
 extern int FUN_80243b24(void);
 extern int FUN_80243b34(void);
-extern int FUN_8024ebc8(int);
+extern int FUN_8024ebc8(void *);
 
 void f(void * p0)
 {

@@ -11557,7 +11557,11 @@
    "seed": "seed/cfg then permuter (1 mechanical mutants, no model call)",
    "model_calls": 0,
    "permuter_steps": 1,
-   "source_sha256": "ee49663ce6f36da44369efefa7a7a2b1007805c01ccddf454db4bfcef4a5fd2c"
+   "source_sha256": "f28c4dc30b9f87ba9bd841328e07eff272bb2b07992d0117def6ef01474a4f00",
+   "source_refinement": {
+    "change": "Explicit pointer argument flow after mechanical generation; no instruction coverage gain.",
+    "retail_evidence": "memset helper 0x80005464 stores through r3-derived r6"
+   }
   },
   {
    "name": "gnt4-HSD_TlutFree-bl",
@@ -11572,7 +11576,11 @@
    "seed": "seed/cfg then permuter (1 mechanical mutants, no model call)",
    "model_calls": 0,
    "permuter_steps": 1,
-   "source_sha256": "9609ddf78d7287f3fb21e72571ef534febf41462e3efb7d6061467e3b1811a7d"
+   "source_sha256": "5439a7fed1c355b57d4222cc5192e4963013622e0a99db7c70c8e07a0f423cc0",
+   "source_refinement": {
+    "change": "Explicit pointer argument flow after mechanical generation; no instruction coverage gain.",
+    "retail_evidence": "hsdFreeMemPiece copies r3 to r31; 0x8025cec8 stores through r31"
+   }
   },
   {
    "name": "gnt4-HSD_FObjRemove",
@@ -11587,7 +11595,11 @@
    "seed": "seed/cfg then permuter (1 mechanical mutants, no model call)",
    "model_calls": 0,
    "permuter_steps": 1,
-   "source_sha256": "7a1ee4382d3d73801ada17452fda6e51389c7fa4bec8654f8137424d43c76319"
+   "source_sha256": "7ed3fc4c56d9682bb6ccadb081c1f1d751227a4d17469d65c82e28a634339bad",
+   "source_refinement": {
+    "change": "Explicit pointer argument flow after mechanical generation; no instruction coverage gain.",
+    "retail_evidence": "HSD_FObjFree forwards r3 in r4; allocator 0x80257444 stores through r4"
+   }
   },
   {
    "name": "gnt4-HSD_JObjAnimAll",
@@ -11602,7 +11614,11 @@
    "seed": "seed/cfg then permuter (3 mechanical mutants, no model call)",
    "model_calls": 0,
    "permuter_steps": 3,
-   "source_sha256": "bd4d3f3f7efd2cc7753ea18d2484ce24ae70e22e69b22d309729e956fad10868"
+   "source_sha256": "90b442d9e6a5f96c0da707b816b8ffe9097fa4930e2c50df7d387edcb1a8304a",
+   "source_refinement": {
+    "change": "Explicit pointer argument flow after mechanical generation; no instruction coverage gain.",
+    "retail_evidence": "JObjAnimAll copies r3 to r31; 0x8024ec08 loads through r31"
+   }
   },
   {
    "name": "zz_0269590_",
@@ -11617,7 +11633,11 @@
    "seed": "seed/cfg then permuter (3 mechanical mutants, no model call)",
    "model_calls": 0,
    "permuter_steps": 3,
-   "source_sha256": "0510cb59afea04d95286351da9db0d33382d003a6dc7a28aa51e82844bcfd551"
+   "source_sha256": "6b530d50d6eb0de8acd6c4fa765b4fc9e6cba8b0fbda5e86ed2ead64d9e65455",
+   "source_refinement": {
+    "change": "Explicit pointer argument flow after mechanical generation; no instruction coverage gain.",
+    "retail_evidence": "memset helper 0x80005464 stores through r3-derived r6"
+   }
   }
  ],
  "attempted_and_blocked": [

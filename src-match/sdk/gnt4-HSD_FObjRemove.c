@@ -18,15 +18,18 @@
  *   permuter steps   : 1
  *   shape            : stwu mflr cmplwi stw beq bl lwz mtlr addi blr
  *   exact_bytes      : false
- *   source sha256    : 7a1ee4382d3d73801ada17452fda6e51389c7fa4bec8654f8137424d43c76319
+ *   source sha256    : 7ed3fc4c56d9682bb6ccadb081c1f1d751227a4d17469d65c82e28a634339bad
+ *
+ * Source refined after generation: explicit pointer argument flow.
+ * Retail evidence: HSD_FObjFree forwards r3 in r4; allocator 0x80257444 stores through r4.
  *
  * Re-proved by src-match/verify.py against the retail DOL; the hash
  * above covers the C below this header only.
  */
-extern int FUN_8024a48c(void);
+extern int FUN_8024a48c(void *);
 
-void f(unsigned int p0)
+void f(void *p0)
 {
     if (p0 != 0)
-        FUN_8024a48c();
+        FUN_8024a48c(p0);
 }

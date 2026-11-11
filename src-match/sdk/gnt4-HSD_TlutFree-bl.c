@@ -19,14 +19,17 @@
  *   permuter steps   : 1
  *   shape            : stwu mflr cmplwi stw beq li bl lwz mtlr addi blr
  *   exact_bytes      : false
- *   source sha256    : 9609ddf78d7287f3fb21e72571ef534febf41462e3efb7d6061467e3b1811a7d
+ *   source sha256    : 5439a7fed1c355b57d4222cc5192e4963013622e0a99db7c70c8e07a0f423cc0
+ *
+ * Source refined after generation: explicit pointer argument flow.
+ * Retail evidence: hsdFreeMemPiece copies r3 to r31; 0x8025cec8 stores through r31.
  *
  * Re-proved by src-match/verify.py against the retail DOL; the hash
  * above covers the C below this header only.
  */
-extern int FUN_8025ce98(int, int);
+extern int FUN_8025ce98(void *, int);
 
-void f(unsigned int p0)
+void f(void *p0)
 {
     if (p0 != 0)
         FUN_8025ce98(p0, 0x10);

@@ -59,7 +59,13 @@ Do not restart the retired `finish-port --drive` wasm-unit driver.
    instructions**, with no model calls or harness changes. Full verification:
    750 functions plus eight controls pass. Remaining bounded queue:
    3,991 seeder refusals and 470 compiler/C mismatches.
-8. **Next: one remaining compiler/seeder limitation**, with affected-function and
+8. **Explicit pointer flow in the five permutation matches.** Replace raw integer
+   pointer parameters and the retained-register no-argument call with explicit
+   pointer arguments. Retail callee paths dereference those argument values.
+   All five refined sources still match; hashes retain original mechanical
+   provenance plus the subsequent refinement. This adds **zero instructions**
+   of coverage and does not reconstruct every callee return type or ABI.
+9. **Next: one remaining compiler/seeder limitation**, with affected-function and
    full-registry proof. This is not a whole-game finish.
 
 The coverage denominator stays 701,464 instructions. Neither a completed lane nor
@@ -118,7 +124,7 @@ checkout cannot establish asset delivery or visual parity.
 ## Validation for this increment
 
 - Passed: frozen install, repo policy, TypeScript build, matching negative controls
-  (51 tests), matching-loop selftest (71 checks), ROM suite, camera suite,
+  (52 tests), matching-loop selftest (71 checks), ROM suite, camera suite,
   Challenge VM (60 checks), disposal (3 tests), lifecycle, menu/session/title
   selfchecks, importer (9 tests), production game build, and atlas build with
   `GF_ATLAS_SKIP_MODELS=1`.
