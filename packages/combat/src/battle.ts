@@ -1304,7 +1304,7 @@ class BattleImpl implements Battle {
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
       if(isSourceSwitchingX(b.borgId))stepSwitchingXInput(b,input.special);
       if(isSourceNinjaX(b.borgId)&&b.borgId!=='pl0003')stepNinjaXInput(b,input.special);
-      if(b.borgId==='pl0003')stepDoubleNinjaXInput(b,input.special,b.state==="special"&&b.command?.type===5);
+      if(b.borgId==='pl0003')stepDoubleNinjaXInput(b,input.special);
       if(isSourceTeleportX(b.borgId))stepTeleportXInput(b,input.special,b.state==="special"&&b.command?.type===5);
       if (b.borgId === "pl0106") {
         const sample = stepTimeBomberInput(b,input.special);

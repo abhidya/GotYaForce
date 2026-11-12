@@ -2667,6 +2667,7 @@ export function stepAttacks(
       if(sourceChargeInput.releasedReady&&b.command?.exact&&b.command.type===5&&b.command.actionIndex===3){
         // Retained legacy charged action3 payload, NOT source teleport/clone restoration.
         sourceChargeInput.warmup=sourceChargeInput.charge=0;
+        if(double)b.doubleNinjaLegacyChargeActive=true;
         startSpecialAttack(b,p,actionProfile,2,out,all,profiles,damageContext,xMoveForBorgId(b.borgId));
         return {projectiles:out};
       }

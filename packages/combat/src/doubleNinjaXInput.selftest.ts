@@ -28,6 +28,15 @@ export function runDoubleNinjaXInputSelfTest():void{
     stepDoubleNinjaXInput(b,true);const s=stepDoubleNinjaXInput(b,false);
     check(s.releasedReady&&s.charge===117,'paired18 qualifies but release decay uses base rate only');
   }
+  {
+    const b=fixture();b.doubleNinjaLegacyChargeActive=true;b.state='special';
+    for(let i=0;i<40;i++){
+      b.command=null;const s=stepDoubleNinjaXInput(b,true);
+      check(s.warmup===0&&s.charge===0,'admitted legacy type5 survives per-frame command changes');
+    }
+    b.state='hit';const s=stepDoubleNinjaXInput(b,true);
+    check(!b.doubleNinjaLegacyChargeActive&&s.warmup===1,'interruption clears retained action identity before next input sample');
+  }
   for(const block of ['active','flag'] as const){
     const b=fixture();for(let i=0;i<130;i++)stepDoubleNinjaXInput(b,true);
     if(block==='flag')b.sourceDoubleNinjaInputBlock58e=0x20;

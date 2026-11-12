@@ -270,6 +270,57 @@ function testShortHoldsAndChargedBoundary(): void {
   assert(Number(cell.cur) === 4, 'fresh edge after held-empty refill admits ordinary source X');
 }
 
+function testChargedActionInputLifetime(): void {
+  const charge = (t: Fixture): void => {
+    t.press(); for (let i = 1; i < 130; i++) t.tick(); t.release();
+    assert(t.owner.state === 'special' && t.owner.command?.type === 5 && t.owner.cooldowns['attackLock'] === 26,
+      'actual ready release starts the retained 26-update legacy charge action');
+  };
+  const t = setup(); charge(t);
+  const cell = t.owner.weaponCells![1]!, ammo = cell.cur;
+  // Fresh press during an active charge overwrites the current input command,
+  // but cannot overwrite the admitted action identity used by source686f0.
+  t.inputs.p1.special = true;
+  for (let elapsed = 1; elapsed <= 26; elapsed++) {
+    t.tick();
+    assert(t.owner.doubleNinjaXInput?.warmup === 0 && t.owner.doubleNinjaXInput.charge === 0,
+      `active legacy charge suppresses all ramp/bank input at update${elapsed}, even after command overwrite`);
+    assert(elapsed === 26 ? t.owner.state !== 'special' : t.owner.state === 'special',
+      `retained legacy action owns exactly26 updates, update${elapsed}`);
+    assert(cell.cur === ammo && t.events.length === 1 && [...t.seen.values()].filter(p => !p.ninjaSource).length === 1,
+      'busy re-press neither spends ammo nor queues another ordinary or charged payload');
+  }
+  // Keep the same physical hold after recovery: ramp and bank resume from zero.
+  // No new press edge means there is no second ordinary action at recovery.
+  for (let held = 1; held <= 130; held++) {
+    t.tick();
+    assert(t.owner.doubleNinjaXInput?.warmup === Math.min(held, 10) &&
+      t.owner.doubleNinjaXInput.charge === Math.max(0, held - 10),
+      `post-charge hold restarts exact source ramp10/bank120 from zero at update${held}`);
+    assert(t.owner.state !== 'special' && cell.cur === ammo && t.events.length === 1,
+      'held busy press cannot become an immediate or delayed second special after recovery');
+  }
+  t.release();
+  assert(t.owner.command?.type === 5 && t.owner.state === 'special' && cell.cur === ammo - 1 &&
+    [...t.seen.values()].filter(p => !p.ninjaSource).length === 2 && t.events.length === 1,
+    'only a newly qualified source-ready release starts the next legacy charge');
+
+  const interrupted = setup(); charge(interrupted);
+  interrupted.inputs.p1.special = true;
+  for (let i = 0; i < 5; i++) interrupted.tick();
+  // Explicit host lifecycle adjunct: interruption ends ownership of the charge.
+  // Neither the command, input bank nor source actor state is injected.
+  interrupted.owner.state = 'hit'; interrupted.owner.stateTime = 0;
+  interrupted.owner.cooldowns['hitstun'] = 20;
+  interrupted.tick();
+  assert(interrupted.owner.doubleNinjaXInput?.warmup === 1 && interrupted.owner.doubleNinjaXInput.charge === 0,
+    'hit interruption releases the admitted-charge input suppression instead of keeping a stale active latch');
+  for (let i = 1; i < 11; i++) interrupted.tick();
+  assert(Number(interrupted.owner.doubleNinjaXInput.warmup) === 10 &&
+    Number(interrupted.owner.doubleNinjaXInput.charge) === 1 && interrupted.events.length === 1,
+    'source input resumes banking while hit-owned without resurrecting the interrupted charge');
+}
+
 function testIndependentButtonLanes(): void {
   const b = setup(); b.inputs.p1.attack = true;
   for (let i = 0; i < 30; i++) b.tick();
@@ -536,6 +587,7 @@ function testOwnerDeathAndFamilyIsolation(): void {
 export function runDoubleNinjaXBattleSelfTest(): void {
   testAdmissionAndRelease();
   testShortHoldsAndChargedBoundary();
+  testChargedActionInputLifetime();
   testIndependentButtonLanes();
   testSourceRecoveryInput();
   testInputDenialsAndInterruption();
