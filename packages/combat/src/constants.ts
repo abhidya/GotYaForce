@@ -793,16 +793,15 @@ export const HEAL = {
   /** Legacy cadence constant; passive bleed is unsupported by the cited status timer. */
   VAMPIRE_BLEED_INTERVAL_FRAMES: 30,
   /**
-   * BLOCKED (ATK-019, nurse heal). Nurse healing is a SEPARATE mechanism from the vampire path
-   * above (corrected by (an) §2) — an X-attack that dashes to a target and heals a FIXED
-   * amount. No ROM code path has been isolated for it at all (OBSERVED_GUIDE only — see
-   * NURSE_HEAL_HP below and research/decomp/data/guide-anchors-movelist.json nurseHeals).
-   * Stays false until a real trace lands.
+   * Legacy guide-driven Nurse behavior remains disabled. The source-backed close
+   * allied X route now lives in nurseX.ts and the flagsA&2 contact resolver, using
+   * family damage records (200/400 allied HP, quartered across teams), not this
+   * flag or the historical guide amounts below. Far/air routes remain unsupported.
    */
   NURSE_ENABLED: false,
   /**
    * OBSERVED_GUIDE (an) §2 / guide-anchors-movelist.json `nurseHeals` — fixed X-attack heal
-   * amounts, data only (no active behavior while NURSE_ENABLED is false). Keys are the nurse
+   * amounts, historical data only (not used by the source-backed X route). Keys are the nurse
    * borg ids from HEAL_NURSE_BORG_IDS below.
    */
   NURSE_HEAL_HP: {

@@ -4,7 +4,7 @@
 // registration that maps each borg to its correct X-special config.
 //
 // Constructor groups:
-//   0x80079410 — pl0900/pl0908/pl090d (ANGEL NURSE / SNOW NURSE / HOLY NURSE)
+//   0x80079410 — pl0900/pl0908/pl090d (ANGEL NURSE / ANGEL RESCUE / NAO)
 //   0x8014d200 — pl0901 (WITCH)
 //   0x8015d674 — pl0902/pl0909 (GUARD WITCH / BASTET WITCH)
 //   0x80151790 — pl0903/pl090a (PATRA WITCH / ISIS WITCH)
@@ -12,6 +12,7 @@
 //   0x801a10e8 — pl0906/pl090b (DEATH BORG THETA / DEATH BORG IOTA)
 //   0x801b3c6c — pl0907/pl090c (BASTET WITCH / SEKHMET WITCH)
 
+import { isNurseX, stepNurseX } from "../nurseX.js";
 import type { RomActor } from "../rom/actor.js";
 import type { StreamContext } from "../rom/stream-vm.js";
 import { createSharedXSpecial, type SharedXConfig } from "./shared-x-special.js";
@@ -26,10 +27,10 @@ interface XConfig {
 
 /** ActionStreamTables-derived X configs for each pl09 borg. */
 const NURSE_X_CONFIGS = {
-  // ctor 0x80079410 (family bank 0x802c2660) — group 4 slots are runtime-conditional
-  pl0900: { groundSlot: null, airSlot: null, hasX: false },
-  pl0908: { groundSlot: null, airSlot: null, hasX: false },
-  pl090d: { groundSlot: null, airSlot: null, hasX: false },
+  // ctor 0x80079410: dedicated close-ground nurseX handler (not shared-X).
+  pl0900: { groundSlot: null, airSlot: null, hasX: true },
+  pl0908: { groundSlot: null, airSlot: null, hasX: true },
+  pl090d: { groundSlot: null, airSlot: null, hasX: true },
   // ctor 0x8014d200 (bank 0x8033ff00)
   pl0901: { groundSlot: 0, airSlot: 0, hasX: true },
   // ctor 0x8015d674 (bank 0x80347d00)
@@ -89,12 +90,15 @@ export function createNurseFamilyRootAction(
     xHandler = createSharedXSpecial(xConfig, ctx);
   }
 
-  // For borgs that only have action-0/1 streams (no X), we wire a null rootAction
+  // The three Nurses use a dedicated action2 path. For other borgs that
+  // only have action-0/1 streams (no X), we wire a null rootAction
   // for action 2 so the generic combat layer handles X. Actions 0/1 keep their
   // cue-table-driven state machines (they're not ported yet, so the cue table still
   // routes through the generic layer for unported actions).
   return (actor: RomActor) => {
-    if (actor.actionIndex === 2 && xHandler) {
+    if (actor.actionIndex === 2 && isNurseX(borgId)) {
+      stepNurseX(actor, ctx);
+    } else if (actor.actionIndex === 2 && xHandler) {
       xHandler(actor);
     }
   };

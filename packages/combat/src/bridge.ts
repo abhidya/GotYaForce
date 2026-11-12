@@ -1,3 +1,4 @@
+import { getNurseXState, isNurseX, prepareNurseX, clearNurseX, canStartNurseX } from "./nurseX.js";
 import { isArrowNinja, captureArrowAttack, spawnArrowSource } from "./arrowProjectile.js";
 import { createBeamStreamClock, tickBeamStream, type BeamStreamClock } from "./beamStream.js";
 import { createArrowStreamClock, tickArrowStream, type ArrowStreamClock } from "./arrowStream.js";
@@ -24,6 +25,7 @@ import { isDiverAmmoFamily } from "./diverAmmo.js";
 // yVel model. The bridge decomposes/recomposes each sync.
 
 import { activeSourceTarget } from "./targetLock.js";
+import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import type { BorgRuntime, PlayerInput, RomFamilyDriver } from "./types.js";
 import { OPEN_WINDOW_ACTIVE_FRAMES } from "./actionStreamData.js";
 import type { Vec3 } from "@gf/physics";
@@ -187,6 +189,7 @@ function girlDescriptorSizeScale(borgId: string): number {
 
 /** An armed hitbox window (from attackHitTables.json, looked up per kind). */
 interface ArmedHit {
+  collisionFlags: number;
   activeStart: number;
   activeEnd: number;
   reach: number;
@@ -2073,7 +2076,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       const accepted = host.onAllocateResource!(actor, type, count, mode);
       if (!accepted && type === 2 &&
           ((mode ?? 0) !== 0 || runtime.borgId === "pl0104") &&
-          (isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) ||
+          (isNurseX(runtime.borgId) || isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) ||
            runtime.borgId === "pl0101" || runtime.borgId === "pl0102" ||
            runtime.borgId === "pl0104" || isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId))) {
         this.sourceXResourceDenied = true;
@@ -2167,12 +2170,16 @@ export class RomDriverBridge implements RomFamilyDriver {
         : runtime.borgId === "pl0102" ? runtime.gatlingSavedAim
         : runtime.borgId === "pl0101" ? runtime.poweredNormalAim : undefined)
       : undefined;
-    const candidate = captured ? all.find(target => target.uid === captured.targetUid) : activeTarget;
+    const nurse = this.specialActive && a.actionIndex === 2 ? getNurseXState(a) : undefined;
+    const candidate = nurse ? all.find(target => target.uid === nurse.targetUid)
+      : captured ? all.find(target => target.uid === captured.targetUid) : activeTarget;
+    if (nurse && (!candidate || !candidate.alive || candidate.hp <= 0 ||
+        candidate.state === "death" || (candidate.targetEligibility83 ?? 0) !== 0)) nurse.targetUid = null;
     const sourceAdmission = this.specialActive && this.specialKind === "x" &&
       (runtime.command?.actionIndex ?? 2) === 2 &&
       (isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId) || runtime.borgId === "pl0102" || runtime.borgId === "pl0101");
     // All other families retain their existing current-root aiming behavior.
-    const sourceTarget = captured || sourceAdmission ? actorAimTarget(candidate) : candidate;
+    const sourceTarget = nurse ? (nurse.targetUid ? actorAimTarget(candidate) : null) : captured || sourceAdmission ? actorAimTarget(candidate) : candidate;
     const targetPos = runtime.borgId === "pl0104" && captured
       ? captured.pos : sourceTarget ? captured?.pos ?? sourceTarget.pos : null;
     if (captured && !sourceTarget) captured.targetUid = null;
@@ -2269,6 +2276,11 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  machine; subsequent `tick` calls advance it. */
   tryStartXSpecial(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean {
     if (this.specialActive) return false;
+    if (isNurseX(runtime.borgId)) {
+      const target = activeSourceTarget(runtime, all);
+      if (!canStartNurseX(runtime, target)) return false;
+      prepareNurseX(this.actor, target!.uid);
+    }
     // Impotence latch (see the field's doc): this borg's ROM X already proved to be a
     // no-payload pantomime — hand the press to the generic startSpecialAttack path.
     if (this.xImpotent) return false;
@@ -2286,7 +2298,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.streamEvents = null;
     this.streamSchedules = [];
     // Determine the special's duration from the decoded stream (default 30 frames).
-    this.specialMaxFrames = runtime.borgId === "pl0104" && actionIndex === 2 ? 240 : 30;
+    this.specialMaxFrames = (runtime.borgId === "pl0104" || isNurseX(runtime.borgId)) && actionIndex === 2 ? 240 : 30;
     // Fire frame-0 events immediately (armHit + playAnim).
     this.dispatchEvent(0);
     this.streamFrame = 1;
@@ -2524,7 +2536,7 @@ export class RomDriverBridge implements RomFamilyDriver {
         // of silently doing nothing again. PLACEHOLDER policy until every family's hit
         // kinds are decoded.
         if (this.specialKind === "x" && !this.specialHadEffect &&
-            !this.sourceXResourceDenied) {
+            !this.sourceXResourceDenied && !isNurseX(runtime.borgId)) {
           const net =
             Math.abs(runtime.pos.x - this.specialStartPos.x) +
             Math.abs(runtime.pos.y - this.specialStartPos.y) +
@@ -2589,13 +2601,17 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  (frame range), reach, and damage record. The bridge checks them each tick. */
   private onArmHit(kind: number): void {
     if (!this.runtime) return;
+    // Only this source X continuation uses kind0 as its explicit HIT clear.
+    // Nurse B also owns a real kind0 record and must retain ordinary arming.
+    if (kind === 0 && isNurseX(this.runtime.borgId) && this.actor.actionIndex === 2 &&
+        getNurseXState(this.actor)) { this.armedHits = []; return; }
     const tables = hitTablesFor(this.runtime.borgId);
     if (!tables) return;
     const recordIndices = tables.kinds[String(kind)];
     if (!recordIndices) return;
     this.armedHits = recordIndices.map((idx) => {
       const rec = tables.records[String(idx)] as {
-        activeStart: number; activeEnd: number; halfExtent: number[]; damageRecordIndex: number;
+        activeStart: number; activeEnd: number; halfExtent: number[]; damageRecordIndex: number; collisionFlags: number;
       } | undefined;
       if (!rec) return null;
       // OPEN-WINDOW sentinel normalization: attackHitTables.json encodes "active from
@@ -2610,6 +2626,7 @@ export class RomDriverBridge implements RomFamilyDriver {
           ? rec.activeStart + OPEN_WINDOW_ACTIVE_FRAMES - 1
           : rec.activeEnd;
       return {
+        collisionFlags: rec.collisionFlags,
         activeStart: rec.activeStart,
         activeEnd,
         reach: rec.halfExtent?.[0] ?? 50,
@@ -2739,22 +2756,37 @@ export class RomDriverBridge implements RomFamilyDriver {
     // 4,258 records). Advancing first made frame 0 unreachable, and advancing a
     // clock that tick() had already advanced left only even values reachable --
     // 2,282 of 4,258 windows could never fire.
-    const frame = this.armedHitFrame;
+    // Nurse HIT windows are animation frames (including continuation and HOLD),
+    // not elapsed time since armHit. Other families retain their existing clock.
+    const nurse = this.actor.actionIndex === 2 ? getNurseXState(this.actor) : undefined;
+    const frame = nurse?.stream.frame ?? this.armedHitFrame;
     this.armedHitFrame += 1;
     for (const hit of this.armedHits) {
       if (frame < hit.activeStart || frame > hit.activeEnd) continue;
+      const record = familyDamageRecordForBorg(runtime.borgId, hit.damageRecordIndex);
+      // Nurse actor HIT descriptors use list 177c (descriptor 128), whose
+      // secondary-v-borg pass permits allies: chunk_0013.c:1068-1079 and
+      // chunk_0003.c:7338-7357. Do not apply the active-object pass's flagsB16
+      // ally exclusion here. Keep other families' existing contact policy.
+      const nurseHealing = (runtime.borgId === "pl0900" || runtime.borgId === "pl0908" || runtime.borgId === "pl090d") &&
+        (hit.collisionFlags & 0x80) !== 0 && record !== null && (record.flagsA & 0x2) !== 0;
       for (const target of all) {
-        if (!target.alive || target.team === runtime.team) continue;
+        if (!target.alive || target.uid === runtime.uid || (!nurseHealing && target.team === runtime.team)) continue;
         if (hit.struck.has(target.uid)) continue;
         const dx = target.pos.x - runtime.pos.x;
         const dz = target.pos.z - runtime.pos.z;
-        const dist = Math.hypot(dx, dz);
+        // Nurse uses the existing root-radius approximation in three dimensions:
+        // admission alone cannot prevent a target moving vertically before impact.
+        // The radius is the authored HIT halfExtent, not a new tolerance.
+        const dist = nurseHealing ? Math.hypot(dx, target.pos.y - runtime.pos.y, dz) : Math.hypot(dx, dz);
         if (dist <= hit.reach) {
           hit.struck.add(target.uid);
           // Route through the host's full applyHit path for damage-formula fidelity.
           if (this.hitResolver) {
             this.hitResolver(runtime, target, hit.damageRecordIndex, 1.0);
-          } else {
+          } else if (!nurseHealing) {
+            // Healing requires the full resolver (immunity, signed HP, gauges and
+            // reactions). Never turn it into the legacy damaging fallback.
             // Fallback (no resolver wired): direct HP subtraction so hits are still visible.
             target.hp = Math.max(0, target.hp - 20);
             target.lastHitAttackerTeam = runtime.team;
@@ -2768,6 +2800,7 @@ export class RomDriverBridge implements RomFamilyDriver {
   /** Force-clear when host lifecycle (hit/down/death) outranks ROM action ownership.
    *  Deliberately leaves runtime state/animation untouched for the host lifecycle to own. */
   interrupt(): void {
+    clearNurseX(this.actor);
     const wasActive = this.specialActive || this.romOwnedSpecial;
     this.arrowStreamClock = null;
     this.arrowStreamMask = 0;
