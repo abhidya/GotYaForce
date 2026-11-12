@@ -1,4 +1,6 @@
+import { isArrowNinja, captureArrowAttack, spawnArrowSource } from "./arrowProjectile.js";
 import { createBeamStreamClock, tickBeamStream, type BeamStreamClock } from "./beamStream.js";
+import { createArrowStreamClock, tickArrowStream, type ArrowStreamClock } from "./arrowStream.js";
 import { spawnBeamSource, captureBeamAim } from "./beamProjectile.js";
 import { captureRevolverAttack, spawnRevolverSource, isRevolver } from "./revolverProjectileRuntime.js";
 import { actorAimTarget } from "./sourceAttackTarget.js";
@@ -1514,6 +1516,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (this.runtime) {
       const beam = spawnBeamSource(this.runtime, actor, spawnerAddr, type);
       if (beam !== null) { this.familyProjectiles.push(...beam); this.specialHadEffect = true; return; }
+      const arrow = spawnArrowSource(this.runtime, actor, spawnerAddr, type, this.arrowRoster);
+      if (arrow !== null) { this.familyProjectiles.push(...arrow); this.specialHadEffect = true; return; }
       const revolver = spawnRevolverSource(this.runtime, actor, spawnerAddr, type);
       if (revolver !== null) { this.familyProjectiles.push(...revolver); this.specialHadEffect = true; return; }
       const gatling = spawnGatlingSource(this.runtime, actor, spawnerAddr, type,
@@ -1557,6 +1561,8 @@ export class RomDriverBridge implements RomFamilyDriver {
   private runtime: BorgRuntime | null = null;
   private visibilityBindings: Array<{ runtime: BorgRuntime; state: RomVisibilityTarget }> = [];
   private beamStreamClock: BeamStreamClock | null = null;
+  private arrowStreamClock: ArrowStreamClock | null = null;
+  private arrowStreamMask = 0;
   private positionHistoryFrame: number | null = null;
 
   private constructor(
@@ -1571,11 +1577,35 @@ export class RomDriverBridge implements RomFamilyDriver {
       onStartStream?: (group: number, slot: number, mask: number) => boolean;
     }).onStartStream = (group, slot, mask) => this.onStartStream(group, slot, mask);
     (actor as RomActor & { onTickStreamPart?: (index: number) => boolean }).onTickStreamPart =
-      (index) => this.tickBeamStreamPart(index) || this.tickKnightStreamPart(index);
+      (index) => this.tickArrowStreamPart(index) || this.tickBeamStreamPart(index) || this.tickKnightStreamPart(index);
   }
 
   private onStartStream(group: number, slot: number, mask: number): boolean {
     if (!this.runtime) return false;
+    if ((this.runtime.borgId === "pl0002" || this.runtime.borgId === "pl000b")
+      && this.actor.actionIndex === 2 && group === 4 && (slot === 0 || slot === 1)) {
+      this.arrowStreamClock = createArrowStreamClock(slot);
+      this.arrowStreamMask = mask & this.actor.weaponPartMask;
+      this.streamSchedules = [];
+      if ((this.arrowStreamMask & 1) !== 0) {
+        this.actor.wallContact = 0;
+        this.actor.contactP0 = 0;
+        this.actor.defaultGroup = 1;
+        (this.actor.parts[0] as { c?: number }).c = 0;
+        const flags = this.actor as RomActor & { arrowFlags6e8?: number; arrowFlags6e9?: number };
+        flags.arrowFlags6e8 = 3;
+        flags.arrowFlags6e9 = 1;
+      }
+      if ((this.arrowStreamMask & 2) !== 0) {
+        this.actor.parts[1]!.stateByte = 0;
+        (this.actor.parts[1] as { c?: number }).c = 1;
+      }
+      // Source terminal waits for AOBJ end45, not the final contact event34.
+      // Ceiling only guards a corrupt state; the clock owns normal completion.
+      this.specialMaxFrames = Math.max(this.specialMaxFrames, 64);
+      this.ctx.onPlayAnim?.(this.actor, 4, slot, false);
+      return true;
+    }
     if (this.runtime.borgId === "pl0104" && this.actor.actionIndex === 2 && group === 4 && slot >= 0 && slot <= 2) {
       this.beamStreamClock = createBeamStreamClock(slot);
       this.streamSchedules = [];
@@ -1644,6 +1674,40 @@ export class RomDriverBridge implements RomFamilyDriver {
     });
     this.specialMaxFrames = Math.max(this.specialMaxFrames, this.streamFrame + maxFrame + 5);
     if (poweredSourceAction) this.dispatchEventList(events, 0);
+    return true;
+  }
+
+  private tickArrowStreamPart(index: number): boolean {
+    const clock = this.arrowStreamClock;
+    if (!clock || this.actor.actionIndex !== 2 ||
+      (this.runtime?.borgId !== "pl0002" && this.runtime?.borgId !== "pl000b")) return false;
+    if ((this.arrowStreamMask & (1 << index)) === 0) return false;
+    // All parts share this authored animation; advance once, at the first
+    // selected part. The family observes contact in this same tickStream call.
+    const firstPart = 31 - Math.clz32(this.arrowStreamMask & -this.arrowStreamMask);
+    if (index !== firstPart) return true;
+    const event = tickArrowStream(clock, this.actor.dt);
+    if (event.contact !== undefined && (this.arrowStreamMask & 1) !== 0) {
+      this.actor.contactP0 = event.contact;
+      this.actor.parts[0]!.stateByte = event.contact;
+      const flags = this.actor as RomActor & { arrowFlags6e8?: number; arrowFlags6e9?: number };
+      flags.arrowFlags6e8 = event.gate === 9 ? 1 : event.gate === 17 ? 2 : 0;
+      flags.arrowFlags6e9 = event.gate === 9 || event.gate === 34 ? 1 : 2;
+      if (clock.slot === 1 && event.gate === 17) this.actor.defaultGroup = 1;
+    }
+    if (event.gate === 21 && (this.arrowStreamMask & 2) !== 0) {
+      // Original8004c488: op3 b1/b2 write part1 state/aux; u16ffff
+      // preserves posture. Ground operand0 replaces bits4..11 with zero.
+      this.actor.parts[1]!.stateByte = clock.slot === 1 ? 0x20 : 0;
+      (this.actor.parts[1] as { c?: number }).c = 0;
+      if (clock.slot === 0) this.actor.controlWord &= ~0xff0;
+    }
+    if (event.completed) {
+      for (let part = 0; part < this.actor.parts.length; part++) {
+        if ((this.arrowStreamMask & (1 << part)) !== 0) this.actor.parts[part]!.streamPtr = -1;
+      }
+      this.arrowStreamClock = null;
+    }
     return true;
   }
 
@@ -2011,7 +2075,7 @@ export class RomDriverBridge implements RomFamilyDriver {
           ((mode ?? 0) !== 0 || runtime.borgId === "pl0104") &&
           (isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) ||
            runtime.borgId === "pl0101" || runtime.borgId === "pl0102" ||
-           runtime.borgId === "pl0104" || isRevolver(runtime.borgId))) {
+           runtime.borgId === "pl0104" || isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId))) {
         this.sourceXResourceDenied = true;
       }
       return accepted;
@@ -2042,10 +2106,13 @@ export class RomDriverBridge implements RomFamilyDriver {
     Object.assign(this.actor.savedGroundPos, runtime.pos);
   }
 
+  private arrowRoster: readonly BorgRuntime[] = [];
+
   /** Copy BorgRuntime → RomActor (before the ROM step). During an active special,
    *  velocity is NOT synced — the ROM handler owns it (syncIn would overwrite the
    *  phase machine's impulses with stale BorgRuntime.vel from before the special). */
   syncIn(runtime: BorgRuntime, all: readonly BorgRuntime[]): void {
+    this.arrowRoster = all;
     const a = this.actor;
     const slot = Math.max(0, all.indexOf(runtime));
     a.slot = slot;
@@ -2095,7 +2162,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     // verified source actions consume the global pre-movement +518 refresh.
     // Generic aimOrigin518 above retains its existing shooter-root meaning.
     const captured = this.specialActive && a.actionIndex === 2
-      ? (isRevolver(runtime.borgId) ? runtime.revolverAttack
+      ? (isArrowNinja(runtime.borgId) ? runtime.arrowAttack : isRevolver(runtime.borgId) ? runtime.revolverAttack
         : runtime.borgId === "pl0104" ? runtime.beamAim
         : runtime.borgId === "pl0102" ? runtime.gatlingSavedAim
         : runtime.borgId === "pl0101" ? runtime.poweredNormalAim : undefined)
@@ -2103,7 +2170,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     const candidate = captured ? all.find(target => target.uid === captured.targetUid) : activeTarget;
     const sourceAdmission = this.specialActive && this.specialKind === "x" &&
       (runtime.command?.actionIndex ?? 2) === 2 &&
-      (isRevolver(runtime.borgId) || runtime.borgId === "pl0102" || runtime.borgId === "pl0101");
+      (isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId) || runtime.borgId === "pl0102" || runtime.borgId === "pl0101");
     // All other families retain their existing current-root aiming behavior.
     const sourceTarget = captured || sourceAdmission ? actorAimTarget(candidate) : candidate;
     const targetPos = runtime.borgId === "pl0104" && captured
@@ -2234,6 +2301,10 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.specialActive = true;
     this.actor.controlWord = (this.actor.controlWord & ~0x3) | 0x1;
     if (runtime.borgId === "pl0104") delete runtime.beamAim;
+    if (isArrowNinja(runtime.borgId)) {
+      this.actor.controlWord = runtime.grounded ? this.actor.controlWord & ~0x40 : this.actor.controlWord | 0x40;
+      delete runtime.arrowAttack;
+    }
     if (isRevolver(runtime.borgId)) {
       this.actor.controlWord = runtime.grounded ? this.actor.controlWord & ~0x40 : this.actor.controlWord | 0x40;
       // Discard the previous action's pointer before admission sync selects the
@@ -2248,12 +2319,13 @@ export class RomDriverBridge implements RomFamilyDriver {
       const preX = runtime.pos.x;
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
+      if (isArrowNinja(runtime.borgId) && actionIndex === 2) captureArrowAttack(runtime,this.actor,all);
       if (runtime.borgId === "pl0104" && actionIndex === 2) captureBeamAim(runtime, this.actor, all);
       if (runtime.borgId === "pl0102" && actionIndex === 2) captureGatlingAim(runtime,this.actor,all);
       if (runtime.borgId === "pl0101" && actionIndex === 2) capturePoweredNormalAim(runtime,this.actor,all);
       if (isRevolver(runtime.borgId) && actionIndex === 2) captureRevolverAttack(runtime,this.actor,all);
       // Decoded ground802d4668=[44,3,2,0], air802d46a8=[45,3,2,4].
-      const airCue = (isRevolver(runtime.borgId) && variantIndex === 4) ||
+      const airCue = ((isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId)) && variantIndex === 4) ||
         (runtime.borgId === "pl0104" && (variantIndex === 3 || variantIndex === 4));
       const cueId = airCue ? 45 : 44;
       dispatchCommandRecord(this.actor, { cueId, stateMode: 3, actionIndex, variantIndex });
@@ -2697,6 +2769,8 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  Deliberately leaves runtime state/animation untouched for the host lifecycle to own. */
   interrupt(): void {
     const wasActive = this.specialActive || this.romOwnedSpecial;
+    this.arrowStreamClock = null;
+    this.arrowStreamMask = 0;
     this.beamStreamClock = null;
     if (this.runtime?.borgId === "pl0104") {
       (this.actor as RomActor & { gmBeamState6f7?: number }).gmBeamState6f7 = 0;
