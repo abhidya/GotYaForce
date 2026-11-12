@@ -1,3 +1,4 @@
+import {getNinjaXState,stepNinjaX} from '../ninjaX.js';
 // Ninja cluster — ROM-faithful 1:1 port of the THREE ninja families that share the
 // chunk_0009.c / chunk_0025.c action-script region + the shuriken/kunai spawner tables:
 //
@@ -566,7 +567,7 @@ function normalBigShurikenToss(actor: NcActor, ctx: StreamContext): void {
 
 /** Build the NORMAL NINJA root action (action 0/1 bespoke + action 2 X composed). */
 function createNormalNinjaRootAction(ctx: StreamContext): (actor: RomActor) => void {
-  // Action 2 (X) — COMPOSE with ninja.ts's X-special callback via the shared
+  // Legacy/unadmitted X composes ninja.ts's approximate callback via the shared
   // zz_00ff2bc_ machine. Config @0x80433868: u16 groundSlot=0, airSlot=1.
   const xConfig: SharedXConfig = {
     groundSlot: 0,
@@ -601,7 +602,7 @@ function createNormalNinjaRootAction(ctx: StreamContext): (actor: RomActor) => v
     switch (actor.actionIndex) {
       case 0: normalBCombo(actor, ctx); return;
       case 1: contextualB(actor); return;
-      case 2: xSpecial(base); return;
+      case 2: if(getNinjaXState(base))stepNinjaX(base,ctx);else xSpecial(base); return;
       // actions 3/4 are command-disabled for pl0000/pl000a (descriptor +0xb8 = 0xff).
       default: return;
     }

@@ -1,3 +1,5 @@
+import {advanceNinjaSource} from './ninjaProjectile.js';
+import {isSourceNinjaX,stepNinjaXInput} from './ninjaX.js';
 import {advanceGredRangedSource} from './gredRangedProjectile.js';
 import {advanceGBlackChargeSource} from './gblackChargeProjectile.js';
 import { advanceGBlackGroundWave } from './gblackGroundWaveAdapter.js';
@@ -2518,6 +2520,8 @@ export function stepAttacks(
   damageContext: DamageRuntimeContext = {},
 ): AttackResult {
   const out: Projectile[] = [];
+  const ninja=isSourceNinjaX(b.borgId)?(b.ninjaXInput?.pending?b.ninjaXInput:stepNinjaXInput(b,specialHeld)):null;
+  if(ninja)ninja.pending=false;
   const nurse = isNurseX(b.borgId) ? consumeNurseInput(b, specialHeld) : null;
   const beam = b.borgId === "pl0104"
     ? (b.beamInput?.pending ? b.beamInput : stepBeamInput(b, {
@@ -2554,7 +2558,7 @@ export function stepAttacks(
   // expiry and made an X-hold charge impossible.
   const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
   b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
-  const pressedSpecialEdge = nurse ? nurse.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld && !prevSpecialHeld;
+  const pressedSpecialEdge = ninja?ninja.pressEdge:nurse ? nurse.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
@@ -2604,7 +2608,7 @@ export function stepAttacks(
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld: nurse ? nurse.pressEdge : powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: ninja?ninja.pressEdge:nurse ? nurse.pressEdge : powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
   // Refine only the proven established walk/run lane. Other families and
@@ -2645,6 +2649,11 @@ export function stepAttacks(
       b.romDriver?.tryStartXSpecial(b, all);
     return { projectiles: out };
   }
+  if(ninja&&pressedSpecialEdge&&canStartAction&&!commandPreemptsX){
+    if(xCanFire&&(b.cooldowns["special"]??0)<=0&&b.command?.exact&&b.command.type===2&&b.command.actionIndex===2)
+      b.romDriver?.tryStartXSpecial(b,all);
+    return {projectiles:out};
+  }
   if (powered && canStartAction && !commandPreemptsX && (b.cooldowns["special"] ?? 0) <= 0) {
     if (powered.releasedReady && b.command?.type === AttackCommandType.Ranged5 && b.command.actionIndex === 3 && b.command.exact) {
       // Exact type-5/action-3 path has no ammo check or consumption.
@@ -2673,7 +2682,7 @@ export function stepAttacks(
       (b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact && b.command.type === AttackCommandType.Melee2 && b.command.actionIndex === 2) {
     if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
   }
-  if (!isNurseX(b.borgId) && !arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  if (!ninja && !isNurseX(b.borgId) && !arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
@@ -3697,6 +3706,18 @@ export function stepProjectiles(
   // not fly on their constructor frame. Other projectile families keep their old order.
   const poweredPrevious = new Map<Projectile, Vec3>();
   projectiles = projectiles.flatMap(pr => {
+    if(pr.ninjaSource)return advanceNinjaSource(pr,byUid,{
+      ...(ctx?.onSourceCue?{onCue:ctx.onSourceCue}:{}),
+      terrainImpact:(start,end)=>{
+        if(!ctx?.collision)return null;
+        let nearest:ReturnType<typeof segmentTriangleImpact>=null;
+        for(const tri of candidateTrianglesForSegment(ctx.collision,start,end)){
+          const hit=segmentTriangleImpact(tri,start,end);if(hit&&(!nearest||hit.t<nearest.t))nearest=hit;
+        }
+        return nearest?.point??null;
+      },
+      outsideBounds:pos=>!!ctx&&(pos.x<ctx.bounds.minX||pos.x>ctx.bounds.maxX||pos.z<ctx.bounds.minZ||pos.z>ctx.bounds.maxZ),
+    });
     if(pr.gredRangedSource)return advanceGredRangedSource(pr,byUid,{
       ...(ctx?.onSourceCue?{onCue:ctx.onSourceCue}:{}),
       terrainImpact:(start,end)=>{
@@ -3795,7 +3816,7 @@ export function stepProjectiles(
     return advancePoweredSource(pr, byUid, ctx?.onPoweredLaunch);
   });
   stepSourceCollision(all, profiles, damageContext, projectiles.filter(pr =>
-    !pr.gredRangedSource && !pr.gblackChargeSource && !pr.gblackGroundWaveSource && !pr.arrowSource && !pr.beamSource && (pr.timeBomberSource?.kind!=="mine" || isLiveTimeBomberMine(pr)) && poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail") && !(pr.timeBomberSource?.kind === "explosion" && pr.timeBomberSource.phase === "tail")));
+    !pr.ninjaSource && !pr.gredRangedSource && !pr.gblackChargeSource && !pr.gblackGroundWaveSource && !pr.arrowSource && !pr.beamSource && (pr.timeBomberSource?.kind!=="mine" || isLiveTimeBomberMine(pr)) && poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail") && !(pr.timeBomberSource?.kind === "explosion" && pr.timeBomberSource.phase === "tail")));
 
   // Actor attacks were staged earlier; mine movement/lifecycle MUST finish first.
   // A newly damaged mine remains registered through this collision pass and retires
@@ -3815,6 +3836,32 @@ export function stepProjectiles(
   const survivors: Projectile[] = [];
   for (const pr of projectiles) {
     pr.hitConfirmedThisFrame = false;
+    if(pr.ninjaSource){
+      const child=pr.ninjaSource;
+      const flight=child.kind==='primary'?child.flight:null;
+      if(flight?flight.hitActive:child.kind==='impact'&&child.phase!=='tail'){
+        const owner=byUid.get(pr.ownerUid),ownerProfile=profiles.get(pr.ownerUid),record=pr.damageRecord!;
+        // Host swept sphere/body centers approximate the original HIT shape pair.
+        const segment=flight?{start:flight.previousPos,end:flight.pos}:{start:pr.pos,end:pr.pos};
+        for(const target of all){
+          if(target.uid===pr.ownerUid||child.hitUids.includes(target.uid)||!isTargetable(target)||isInvincible(target)||
+            ((record.flagsA&0x80)!==0&&target.team===pr.team)||(owner&&burstAllyPassthroughBlocks(owner,target,record)))continue;
+          if(!beamPulseOverlaps(segment,target.pos,pr.hitRadius+SHOT.TARGET_BODY_RADIUS))continue;
+          const profile=profiles.get(target.uid);if(!profile)continue;
+          applyHit(target,profile,pr.damage,pr.knockback,pr.vel,segment.start,false,record,
+            owner&&ownerProfile?{attacker:owner,attackerProfile:ownerProfile,damageScale:1,aimedTargetUid:pr.aimedTargetUid??null,
+              attackerSideRank:damageContext.sideRankForTeam?.(owner.team),defenderSideRank:damageContext.sideRankForTeam?.(target.team),
+              onContactAccepted:()=>{child.hitUids.push(target.uid);if(child.kind==='primary')child.contactPending=true;
+                pr.hitConfirmedThisFrame=true;pr.lastImpactEffectId=record.impactEffectId;},
+            }:undefined,damageContext);
+        }
+        for(const mine of projectiles){
+          if(!isLiveTimeBomberMine(mine)||child.hitUids.includes(mine.uid)||!beamPulseOverlaps(segment,mine.pos,pr.hitRadius+mine.hitRadius))continue;
+          if(hitTimeBomberMineReceiver(pr,mine,byUid)){child.hitUids.push(mine.uid);if(child.kind==='primary')child.contactPending=true;}
+        }
+      }
+      survivors.push(pr);continue;
+    }
     if(pr.gredRangedSource){
       const child=pr.gredRangedSource,flight=child.flight;
       if(flight.hitActive){

@@ -1,3 +1,5 @@
+import {spawnNinjaSource} from './ninjaProjectile.js';
+import {isSourceNinjaX,getNinjaXState,prepareNinjaX,clearNinjaX,startNinjaXStream,tickNinjaXStreamPart} from './ninjaX.js';
 import {getGRedAirShotState,prepareGRedAirShot,clearGRedAirShot,startGRedAirShotStream,tickGRedAirShotStreamPart} from './gredAirShot.js';
 import {getGRedShotState,prepareGRedShot,clearGRedShot,startGRedShotStream,tickGRedShotStreamPart} from './gredShot.js';
 import {refreshTargetVisibility} from './families/shared-aimed-shot-x.js';
@@ -1565,6 +1567,8 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  drain after each tick alongside the stream's pendingProjectiles. */
   private spawnFamilyProjectile(actor: RomActor, spawnerAddr: number, type: number): void {
     if (this.runtime) {
+      const ninja=spawnNinjaSource(this.runtime,actor,spawnerAddr,type,this.visibilityBindings.map(binding=>binding.runtime));
+      if(ninja!==null){this.familyProjectiles.push(...ninja);this.specialHadEffect=true;return;}
       const ranged=spawnGredRangedSource(this.runtime,actor,spawnerAddr,type,this.visibilityBindings.map(binding=>binding.runtime));
       if(ranged!==null){this.familyProjectiles.push(...ranged);this.specialHadEffect=true;return;}
       const blackCharge=spawnGBlackChargeSource(this.runtime,actor,spawnerAddr,type);
@@ -1675,7 +1679,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       onStartStream?: (group: number, slot: number, mask: number) => boolean;
     }).onStartStream = (group, slot, mask) => this.onStartStream(group, slot, mask);
     (actor as RomActor & { onTickStreamPart?: (index: number) => boolean }).onTickStreamPart =
-      (index) => tickGRedAirShotStreamPart(this.actor,index,this.ctx) || tickGRedShotStreamPart(this.actor,index,this.ctx) || tickGBlackChargeStreamPart(this.actor,index,this.ctx) || tickGRedChargeStreamPart(this.actor,index,this.ctx) || tickGRedCrashStreamPart(this.actor,index,this.ctx) ||
+      (index) => tickNinjaXStreamPart(this.actor,index,this.ctx) || tickGRedAirShotStreamPart(this.actor,index,this.ctx) || tickGRedShotStreamPart(this.actor,index,this.ctx) || tickGBlackChargeStreamPart(this.actor,index,this.ctx) || tickGRedChargeStreamPart(this.actor,index,this.ctx) || tickGRedCrashStreamPart(this.actor,index,this.ctx) ||
         tickGRedAirMeleeStreamPart(this.actor,index,this.ctx) ||
         tickNeoGredMeleeStreamPart(this.actor,index,this.ctx) ||
         this.tickArrowStreamPart(index) || this.tickBeamStreamPart(index) || this.tickKnightStreamPart(index);
@@ -1687,6 +1691,10 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.mineMeleeOpenerStream = this.runtime.borgId === "pl0615" && this.runtime.grounded &&
       this.specialKind === "b" && this.romOwnedSpecial && this.actor.actionIndex === 1 &&
       this.actor.variantIndex === 0 && group === 3 && slot === 0 && (mask & this.actor.weaponPartMask & 1) !== 0;
+    if(getNinjaXState(this.actor)&&group===4&&(slot===0||slot===1)){
+      this.streamSchedules=[];this.armedHits=[];this.specialMaxFrames=Math.max(this.specialMaxFrames,240);
+      return startNinjaXStream(this.actor,group,slot,mask,this.ctx);
+    }
     if(getGBlackChargeState(this.actor) && group===4 && slot===3){
       this.streamSchedules=[];this.armedHits=[];this.specialMaxFrames=Math.max(this.specialMaxFrames,240);
       return startGBlackChargeStream(this.actor,group,slot,mask,this.ctx);
@@ -2224,7 +2232,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       const accepted = host.onAllocateResource!(actor, type, count, mode);
       if (!accepted && type === 2 &&
           ((mode ?? 0) !== 0 || runtime.borgId === "pl0104") &&
-          (isNurseX(runtime.borgId) || isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) ||
+          (isSourceNinjaX(runtime.borgId) || isNurseX(runtime.borgId) || isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) ||
            runtime.borgId === "pl0101" || runtime.borgId === "pl0102" || runtime.borgId === "pl0106" ||
            runtime.borgId === "pl0104" || isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId))) {
         this.sourceXResourceDenied = true;
@@ -2349,7 +2357,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     const charge=getGRedChargeState(a);
     const blackCharge=getGBlackChargeState(a);
     const crash = getGRedCrashState(a);
-    const candidate = airShot ? all.find(target=>target.uid===airShot.targetUid) : shot ? all.find(target=>target.uid===shot.targetUid) : blackCharge ? all.find(target=>target.uid===blackCharge.targetUid) : charge ? all.find(target=>target.uid===charge.targetUid) : crash ? all.find(target=>target.uid===crash.targetUid)
+    const ninja=getNinjaXState(a);
+    const candidate = ninja?all.find(target=>target.uid===ninja.targetUid): airShot ? all.find(target=>target.uid===airShot.targetUid) : shot ? all.find(target=>target.uid===shot.targetUid) : blackCharge ? all.find(target=>target.uid===blackCharge.targetUid) : charge ? all.find(target=>target.uid===charge.targetUid) : crash ? all.find(target=>target.uid===crash.targetUid)
       : airMelee ? all.find(target=>target.uid===airMelee.targetUid)
       : neo ? all.find(target => target.uid === neo.targetUid)
       : nurse ? all.find(target => target.uid === nurse.targetUid)
@@ -2360,10 +2369,11 @@ export class RomDriverBridge implements RomFamilyDriver {
       ((runtime.command?.actionIndex ?? 2) === 2 || (runtime.borgId === "pl0106" && runtime.command?.actionIndex === 0)) &&
       (isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId) || runtime.borgId === "pl0102" || runtime.borgId === "pl0106" || runtime.borgId === "pl0101");
     // All other families retain their existing current-root aiming behavior.
-    const sourceTarget = airShot ? actorAimTarget(candidate) : shot ? actorAimTarget(candidate) : blackCharge ? actorAimTarget(candidate) : charge ? (!charge.captureBlocked6b8?actorAimTarget(candidate):null) : crash ? (crash.noTargetLatch541===0 ? actorAimTarget(candidate) : null)
+    const sourceTarget = ninja ? (ninja.noTargetLatch541===0?actorAimTarget(candidate):null) : airShot ? actorAimTarget(candidate) : shot ? actorAimTarget(candidate) : blackCharge ? actorAimTarget(candidate) : charge ? (!charge.captureBlocked6b8?actorAimTarget(candidate):null) : crash ? (crash.noTargetLatch541===0 ? actorAimTarget(candidate) : null)
       : airMelee ? (airMelee.noTargetLatch541===0?actorAimTarget(candidate):null)
       : neo ? (neo.noTargetLatch541 === 0 ? actorAimTarget(candidate) : null)
       : nurse ? (nurse.targetUid ? actorAimTarget(candidate) : null) : captured || sourceAdmission ? actorAimTarget(candidate) : candidate;
+    if(ninja){if(!sourceTarget)ninja.targetUid=null;else ninja.targetPoint={...sourceTarget.pos};}
     if(airShot){
       if(!sourceTarget)airShot.targetUid=null;
       airShot.targetEligible=!!sourceTarget&&((candidate?.targetEligibility83??0)!==0||
@@ -2400,7 +2410,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       // Source recover owns +5ae (the backward recoil bearing). A global
       // +518 refresh must not overwrite it after phase1 releases the shots.
       const sourceRecover = captured && (a.fbPhaseSlots[0] ?? 0) >= 2;
-      if (!sourceRecover && !neo && !crash && !airMelee && !charge && !blackCharge && !shot && !airShot) {
+      if (!sourceRecover && !ninja && !neo && !crash && !airMelee && !charge && !blackCharge && !shot && !airShot) {
         const timeBomberKeepsMotionYaw = runtime.borgId === "pl0106" && a.actionIndex === 0 && (a.variantIndex === 1 || a.variantIndex === 3 || a.variantIndex === 4);
         if(!timeBomberKeepsMotionYaw)a.lockYaw = targetYaw;
         a.activeYaw = targetYaw;
@@ -2445,8 +2455,9 @@ export class RomDriverBridge implements RomFamilyDriver {
       this.actor.inputHeld5d8 = input && Math.max(Math.abs(input.moveX),Math.abs(input.moveZ)) >= 0x34/127 ? 0x10 : 0;
       this.actor.inputEdge5d4 = 0; // No speculative mapping of unrelated X/B buttons.
     }
+    if(getNinjaXState(this.actor))this.actor.inputHeld5d8=input&&Math.max(Math.abs(input.moveX),Math.abs(input.moveZ))>=0x34/127?0x10:0;
     this.actor.statusWord5b4 = held ? 0x200 : 0;
-    if (!getGRedAirShotState(this.actor) && !getGRedShotState(this.actor) && !getGBlackChargeState(this.actor) && !getGRedChargeState(this.actor) && !getGRedCrashState(this.actor) && !getGRedAirMeleeState(this.actor) && !getNeoGredMeleeState(this.actor) && (this.runtime?.borgId !== "pl0106" || this.actor.actionIndex !== 0))
+    if (!getNinjaXState(this.actor) && !getGRedAirShotState(this.actor) && !getGRedShotState(this.actor) && !getGBlackChargeState(this.actor) && !getGRedChargeState(this.actor) && !getGRedCrashState(this.actor) && !getGRedAirMeleeState(this.actor) && !getNeoGredMeleeState(this.actor) && (this.runtime?.borgId !== "pl0106" || this.actor.actionIndex !== 0))
       this.actor.streamHold1b03 = 0;
     if (getNeoGredMeleeState(this.actor) || getGRedAirMeleeState(this.actor)) {
       // Descriptor802d3904 count1/flags0/duration1/mask0200 consumes B's
@@ -2477,12 +2488,12 @@ export class RomDriverBridge implements RomFamilyDriver {
     runtime.pos.z = a.pos.z;
     const airShot=getGRedAirShotState(a),preserveLower=airShot?.partMode&&!airShot.physicsAdvanced;
     if(!preserveLower)runtime.rotY = bamToRad(a.heading);
-    const crash=getGRedCrashState(a);
+    const crash=getGRedCrashState(a),ninja=getNinjaXState(a);
     const airMelee=getGRedAirMeleeState(a);
-    const vel = recomposeVel(a.hSpeed, a.yVel, airShot || blackCharge || charge || crash || airMelee || (runtime.borgId === "pl0106" && a.actionIndex === 0 && a.variantIndex === 4) ? a.lockYaw : a.activeYaw);
+    const vel = recomposeVel(a.hSpeed, a.yVel, airShot || ninja || blackCharge || charge || crash || airMelee || (runtime.borgId === "pl0106" && a.actionIndex === 0 && a.variantIndex === 4) ? a.lockYaw : a.activeYaw);
     if(!preserveLower){runtime.vel.x = vel.x;runtime.vel.y = vel.y;runtime.vel.z = vel.z;}
-    if((airShot&&!preserveLower)||blackCharge || charge || crash || airMelee)runtime.grounded=(a as RomActor&{grounded?:boolean}).grounded===true;
-    const sourceStream=airShot?.stream ?? getGRedShotState(a)?.stream ?? blackCharge?.stream ?? charge?.stream ?? crash?.stream ?? airMelee?.stream ?? getNeoGredMeleeState(a)?.stream;
+    if(ninja||(airShot&&!preserveLower)||blackCharge || charge || crash || airMelee)runtime.grounded=(a as RomActor&{grounded?:boolean}).grounded===true;
+    const sourceStream=ninja?.stream ?? airShot?.stream ?? getGRedShotState(a)?.stream ?? blackCharge?.stream ?? charge?.stream ?? crash?.stream ?? airMelee?.stream ?? getNeoGredMeleeState(a)?.stream;
     if(sourceStream && runtime.sourceAnimSample)
       runtime.sourceAnimSample={serial:runtime.sourceAnimSample.serial,frame:sourceStream.frame};
     const nurse = this.specialActive ? getNurseXState(a) : undefined;
@@ -2537,7 +2548,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     }
     // Impotence latch (see the field's doc): this borg's ROM X already proved to be a
     // no-payload pantomime — hand the press to the generic startSpecialAttack path.
-    if (this.xImpotent && !(runtime.borgId === "pl0106" && runtime.command?.actionIndex === 0)) return false;
+    if (this.xImpotent && !isSourceNinjaX(runtime.borgId) && !(runtime.borgId === "pl0106" && runtime.command?.actionIndex === 0)) return false;
     const actionIndex = runtime.command?.actionIndex ?? 2;
     const variantIndex = runtime.command?.variantIndex ?? 0;
     // Original80365830 maps both v0 and v4 to18e838. Admit only the proven
@@ -2545,6 +2556,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     const admittedGRedCrash = (runtime.borgId==='pl0615'||runtime.borgId==='pl0629'||runtime.borgId==='pl062a') &&
       runtime.command?.exact===true && runtime.command.type===2 && actionIndex===2 &&
       (runtime.grounded ? variantIndex===0 : variantIndex===4 && runtime.command.subtype===4);
+    const admittedNinja=isSourceNinjaX(runtime.borgId)&&runtime.command?.exact===true&&runtime.command.type===2&&actionIndex===2&&
+      (runtime.grounded?variantIndex===0:variantIndex===4&&runtime.command.subtype===4);
     this.runtime = runtime;
     delete runtime.sourceAnimSample;
     this.armedHits = [];
@@ -2576,6 +2589,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.romOwnedSpecial = true;
     this.specialActive = true;
     this.actor.controlWord = (this.actor.controlWord & ~0x3) | 0x1;
+    clearNinjaX(this.actor);
+    if(admittedNinja)this.actor.controlWord=runtime.grounded?this.actor.controlWord&~0x40:this.actor.controlWord|0x40;
     if (runtime.borgId === "pl0104") delete runtime.beamAim;
     if (isArrowNinja(runtime.borgId)) {
       this.actor.controlWord = runtime.grounded ? this.actor.controlWord & ~0x40 : this.actor.controlWord | 0x40;
@@ -2614,16 +2629,24 @@ export class RomDriverBridge implements RomFamilyDriver {
       const airCue = (isNurseX(runtime.borgId) && variantIndex === 1) ||
         ((isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId)) && variantIndex === 4) ||
         (runtime.borgId === "pl0104" && (variantIndex === 3 || variantIndex === 4)) ||
-        (admittedGRedCrash && variantIndex===4);
+        (admittedGRedCrash && variantIndex===4) || (admittedNinja&&variantIndex===4);
       const timeBomberPart = runtime.borgId === "pl0106" && actionIndex === 0 && (variantIndex === 1 || variantIndex === 3);
       const cueId = airCue || (timeBomberPart && variantIndex === 3) ? 45 : 44;
-      if(admittedGRedCrash){
+      if(admittedGRedCrash||admittedNinja){
         // Source X selection sets585=2 before6a104 snapshots584. Its range
         // row is therefore138/144/150 indexed by the real command snapshot.
         this.actor.cmdButton=2;this.actor.cmdSubtype=runtime.command?.subtype??0;
         this.actor.cmdChargedRanged=0;
       }
       dispatchCommandRecord(this.actor, { cueId, stateMode: timeBomberPart ? 1 : 3, actionIndex, variantIndex });
+      if(admittedNinja){
+        const target=actorAimTarget(activeSourceTarget(runtime,all));
+        prepareNinjaX(this.actor,target?.uid??null,target?.pos??null);
+        // Source command admission captures identity and updates visibility before
+        // the family stream. Reuse the proven6a104 writer, never a spawn-time target.
+        prepareGredRangedEntryVisibility(this.actor);this.flushVisibilityState(this.actor);
+        this.syncIn(runtime,all);
+      }
       clearGRedCrash(this.actor);
       if(admittedGRedCrash){
         const crash=prepareGRedCrash(this.actor,activeSourceTarget(runtime,all)?.uid??null);
@@ -2656,7 +2679,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       // Y-guard: a family phase-0 reposition/impulse must never leave the borg BELOW
       // the floor surface (the ROM's own step runs zz_00677b0_ ground collide right
       // after; sword-knight's X dove through the mesh without this).
-      if (!timeBomberPart && !getGRedCrashState(this.actor) && this.groundClamp) {
+      if (!timeBomberPart && !getGRedCrashState(this.actor) && !getNinjaXState(this.actor) && this.groundClamp) {
         const clamped = this.groundClamp(runtime.pos, runtime.vel.y);
         if (clamped.y > runtime.pos.y) {
           runtime.pos.y = clamped.y;
@@ -2840,7 +2863,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       runtime.pos.x = preX;
       runtime.pos.z = preZ;
     }
-    if (!getGBlackChargeState(this.actor) && !getGRedChargeState(this.actor) && !getGRedAirMeleeState(this.actor) && this.groundClamp) {
+    if (!getGBlackChargeState(this.actor) && !getGRedChargeState(this.actor) && !getGRedAirMeleeState(this.actor) && !getNinjaXState(this.actor) && this.groundClamp) {
       const clamped = this.groundClamp(runtime.pos, runtime.vel.y);
       if (clamped.y > runtime.pos.y) {
         runtime.pos.y = clamped.y;
@@ -2969,6 +2992,7 @@ export class RomDriverBridge implements RomFamilyDriver {
         if(sourceShot)runtime.cooldowns["attackHeld"]=input?.attack?1:0;
         if(runtime.borgId === "pl0106" && this.actor.actionIndex===0 && this.actor.variantIndex===4 && this.actor.ubCue===7 && this.actor.stateTimer>0)
           this.timeBomberLandingCooldown=true;
+        clearNinjaX(this.actor);
         clearNurseX(this.actor);
         clearNeoGredMelee(this.actor);
         clearGRedCrash(this.actor);
@@ -3000,7 +3024,7 @@ export class RomDriverBridge implements RomFamilyDriver {
         // of silently doing nothing again. PLACEHOLDER policy until every family's hit
         // kinds are decoded.
         if (this.specialKind === "x" && !this.specialHadEffect &&
-            !this.sourceXResourceDenied && runtime.borgId !== "pl0106" && !isNurseX(runtime.borgId)) {
+            !this.sourceXResourceDenied && !isSourceNinjaX(runtime.borgId) && runtime.borgId !== "pl0106" && !isNurseX(runtime.borgId)) {
           const net =
             Math.abs(runtime.pos.x - this.specialStartPos.x) +
             Math.abs(runtime.pos.y - this.specialStartPos.y) +
@@ -3063,7 +3087,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       // These admitted clocks already account for blend holds, mode2 advance,
       // authored pauses and recovery resets. Only actual playAnim allocates an
       // epoch; later syncOut samples the same clock without advancing it.
-      const sourceStream=getGRedAirShotState(this.actor)?.stream ?? getGRedShotState(this.actor)?.stream ?? getGBlackChargeState(this.actor)?.stream ?? getGRedChargeState(this.actor)?.stream ?? getGRedCrashState(this.actor)?.stream ?? getGRedAirMeleeState(this.actor)?.stream ?? getNeoGredMeleeState(this.actor)?.stream;
+      const sourceStream=getNinjaXState(this.actor)?.stream ?? getGRedAirShotState(this.actor)?.stream ?? getGRedShotState(this.actor)?.stream ?? getGBlackChargeState(this.actor)?.stream ?? getGRedChargeState(this.actor)?.stream ?? getGRedCrashState(this.actor)?.stream ?? getGRedAirMeleeState(this.actor)?.stream ?? getNeoGredMeleeState(this.actor)?.stream;
       if(sourceStream)
         this.runtime.sourceAnimSample={serial:++sourceAnimationSerial,frame:sourceStream.frame};
     }
@@ -3411,6 +3435,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     clearGBlackCharge(this.actor);
     clearGRedShot(this.actor);
     clearGRedAirShot(this.actor);this.gredAirShotLocomotion=null;
+    clearNinjaX(this.actor);
     clearNurseX(this.actor);
     clearNeoGredMelee(this.actor);
     clearGRedCrash(this.actor);

@@ -1,3 +1,8 @@
+import { runNinjaProjectileSelfTest } from "./ninjaProjectile.selftest.js";
+import { runNinjaXStreamSelfTest } from "./ninjaXStream.selftest.js";
+import { runNinjaXSelfTest } from "./ninjaX.selftest.js";
+import { runNinjaXBattleSelfTest } from "./ninjaXBattle.selftest.js";
+import { runSelfTest as runNinjaShurikenFlightSelfTest } from "./ninjaShurikenFlight.selftest.js";
 import {runSharedXCarrySelfTest} from './sharedXCarry.selftest.js';
 import {runSharedXCarryBattleSelfTest} from './sharedXCarryBattle.selftest.js';
 import {runSelfTest as runGredRangedFlightSelfTest} from './gredRangedFlight.selftest.js';
@@ -266,6 +271,11 @@ function assertNonRomAirborneDeathKeepsGravity(stats: readonly BorgStats[]): voi
 }
 
 export function runSelfTest(): void {
+  runNinjaXStreamSelfTest();
+  runNinjaXSelfTest();
+  runNinjaShurikenFlightSelfTest();
+  runNinjaProjectileSelfTest();
+  runNinjaXBattleSelfTest();
   runHealingContactSelfTest();
   runNurseStreamSelfTest();
   runNurseBattleSelfTest();
