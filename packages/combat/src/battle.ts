@@ -1078,6 +1078,14 @@ class BattleImpl implements Battle {
     const all = this.state.borgs;
     const profiles = this.profiles;
 
+    // zz_0053a2c_ -> FUN_80054070 -> zz_005685c_ shifts each actor's own
+    // +0x2c/+0x5e8 position history before its action callback (chunk_0006.c:
+    // 6680-6682, 6965-6967). Keep this outside ROM ownership and lifecycle early
+    // returns: ordinary movement, airborne/hit/death frames also produce history.
+    for (const b of all) {
+      if (b.alive) b.romDriver?.beginFrame(b, this.state.frame);
+    }
+
     // Source order: actor status/movement consumes the previous contact phase, then
     // battle_frame_target_action_dispatch clears +0x70c/+0x70d before new contacts
     // (chunk_0003.c:4322/4337, 5949-5950, 6213-6215). Our actors interleave movement

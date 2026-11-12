@@ -70,7 +70,9 @@ export interface RomActor {
    *  phase 0 writes `pos -= target; pos *= 0.95`; phase 2 uses +0x38 as a magnitude).
    *  @romfield motion +0x38 vec3 */
   motion: Vec3;
-  /** +0x5e8: cached target position consumed even after +0xcc lock invalidation.
+  /** +0x5e8: older OWN position, copied from +0x2c before +0x2c receives current
+   *  +0x20 each actor frame (zz_005685c_, chunk_0007.c:201-206). Historical TS name
+   *  is retained for codec compatibility; this is never a target position.
    *  @romfield targetCache5e8 +0x5e8 vec3 */
   targetCache5e8: Vec3;
   /** +0x518: host-resolved actor aim origin consumed by zz_006e514_.
@@ -123,7 +125,8 @@ export interface RomActor {
   /** +0x868/+0x874/+0x880 action-speed rows copied from descriptor +0x134/+0x140/+0x14c.
    *  @romfield actionSpeedRows +0x868 f32, +0x874 f32, +0x880 f32 */
   actionSpeedRows: [number, number, number];
-  /** +0x2c/+0x30/+0x34 saved grounded position used by zz_00679d0_ revert.
+  /** +0x2c/+0x30/+0x34 own position at the start of this actor frame, grounded or
+   *  airborne (zz_005685c_). Also used by zz_00679d0_ revert; historical TS name.
    *  @romfield savedGroundPos +0x2c vec3 */
   savedGroundPos: Vec3;
   /** +0x73f and +0x80c housekeeping fields written by these machines.

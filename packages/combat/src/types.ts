@@ -141,6 +141,8 @@ export interface SourceTargetLockState {
 
 /** Narrow behavior exposed by the ROM-family sidecar to combat orchestration. */
 export interface RomFamilyDriver {
+  /** Advance source own-position history once, before any movement in this frame. */
+  beginFrame(runtime: BorgRuntime, frame: number): void;
   tick(runtime: BorgRuntime, dt: number, all: readonly BorgRuntime[], input?: PlayerInput | null): boolean;
   tryStartXSpecial(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
   tryStartBAttack(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
