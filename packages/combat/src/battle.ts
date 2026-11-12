@@ -1,3 +1,6 @@
+import { refreshSourceAttackTargets } from "./sourceAttackTarget.js";
+import { spawnRevolverSource, stepRevolverInput, isRevolver, type RevolverPresentationSink } from "./revolverProjectileRuntime.js";
+import type { RevolverLaunchFlash } from "./types.js";
 import { spawnGatlingSource, stepGatlingInput } from "./gatlingProjectile.js";
 import type { PoweredLaunchFlash } from "./types.js";
 import type { PoweredPresentationSink } from "./poweredProjectileRuntime.js";
@@ -238,6 +241,29 @@ interface ForceRuntime {
 class BattleImpl implements Battle {
   private state: BattleState;
   private observationCache: BattleObservation | null = null;
+  private revolverLaunchFlashes: RevolverLaunchFlash[] = [];
+  private revolverFlashSerial = 0;
+  private revolverVisualRng = 0x7265766f;
+  private readonly onRevolverLaunch: RevolverPresentationSink = (owner, event) => {
+    // Independent deterministic visual bytes; exact global FX RNG scheduling is bounded.
+    const phase = () => {
+      let random = this.revolverVisualRng;
+      random ^= random << 13;
+      random ^= random >>> 17;
+      random ^= random << 5;
+      this.revolverVisualRng = random >>> 0;
+      return (this.revolverVisualRng >>> 24) * Math.PI / 128;
+    };
+    this.revolverLaunchFlashes.push({
+      ...structuredClone(event), uid: `revolver-flash-${++this.revolverFlashSerial}`,
+      ownerUid: owner.uid, team: owner.team, effectId: 5,
+      layers: [
+        { modelId: 92, spin: phase(), ageFrames: 0, lifeFrames: 2 },
+        { modelId: 35, spin: phase(), ageFrames: 0, lifeFrames: 7 },
+      ],
+    });
+    this.onRomCue?.(6);
+  };
   private poweredLaunchFlashes: PoweredLaunchFlash[] = [];
   private poweredFlashSerial = 0;
   private poweredVisualRng = 0x706f7765;
@@ -675,6 +701,7 @@ class BattleImpl implements Battle {
     if (this.observationCache) return this.observationCache;
     const state = this.state;
     this.observationCache = {
+      revolverLaunchFlashes: structuredClone(this.revolverLaunchFlashes),
       poweredLaunchFlashes: structuredClone(this.poweredLaunchFlashes),
       actors: state.borgs.map(snapshotActor),
       diverAuras: structuredClone(state.diverAuras ?? []),
@@ -760,6 +787,8 @@ class BattleImpl implements Battle {
     *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void {
     if (actor) {
+      const revolver = spawnRevolverSource(b, actor, spawnerAddr, kind);
+      if (revolver !== null) { this.state.projectiles.push(...revolver); return; }
       const gatling = spawnGatlingSource(b, actor, spawnerAddr, kind, this.state.borgs);
       if (gatling !== null) { this.state.projectiles.push(...gatling); return; }
       const powered = spawnPoweredSource(b, actor, spawnerAddr, kind, this.state.borgs, this.onPoweredLaunch);
@@ -1065,6 +1094,11 @@ class BattleImpl implements Battle {
     if (this.state.result !== "ongoing") return this.observe();
     this.observationCache = null;
     this.projectileDespawns = [];
+    this.revolverLaunchFlashes = this.revolverLaunchFlashes
+      .map(flash => ({
+        ...flash, layers: flash.layers.map(layer => ({ ...layer, ageFrames: layer.ageFrames + 1 })),
+      }))
+      .filter(flash => flash.layers.some(layer => layer.ageFrames < layer.lifeFrames));
     this.poweredLaunchFlashes = this.poweredLaunchFlashes
       .map(flash=>({...flash,ageFrames:flash.ageFrames+1})).filter(flash=>flash.ageFrames<flash.lifeFrames);
 
@@ -1077,6 +1111,7 @@ class BattleImpl implements Battle {
 
     const all = this.state.borgs;
     const profiles = this.profiles;
+    refreshSourceAttackTargets(all, this.state.frame);
 
     // zz_0053a2c_ -> FUN_80054070 -> zz_005685c_ shifts each actor's own
     // +0x2c/+0x5e8 position history before its action callback (chunk_0006.c:
@@ -1221,6 +1256,7 @@ class BattleImpl implements Battle {
       }
 
       // Source charge bookkeeping also runs while another action owns this frame.
+      if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
       if (b.borgId === "pl0101") {
         stepPoweredCharge(b, input.special, b.state === "special" && b.command?.type === 5);
@@ -1319,6 +1355,7 @@ class BattleImpl implements Battle {
       {
         bounds: this.bounds,
         collision: this.collision,
+        onRevolverLaunch: this.onRevolverLaunch,
         onPoweredLaunch: this.onPoweredLaunch,
         onSourceCue: (cue) => this.onRomCue?.(cue),
       },

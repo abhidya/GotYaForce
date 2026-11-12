@@ -1,3 +1,4 @@
+import { actorAimTarget } from "./sourceAttackTarget.js";
 /** Gatling X, zz_007db5c row4 -> zz_0085e00 row13.
  * Original DOL/comhit byte provenance: gatling-source-x-2026-11-12.md.
  * Source timing and state are independent of renderer updates. Collision and animated
@@ -35,7 +36,7 @@ export function stepGatlingInput(owner:BorgRuntime,held:boolean){
   input.pressEdge=held&&!input.held;input.held=held;input.pending=true;return input;
 }
 export function captureGatlingAim(owner:BorgRuntime,actor:RomActor,all:readonly BorgRuntime[]):void{
-  const target=targetData(activeSourceTarget(owner,all));
+  const target=actorAimTarget(activeSourceTarget(owner,all));
   // No target: the constructor uses heading/pitch0 and never reads this aim.
   owner.gatlingSavedAim={pos:target?{...target.pos}:{...actor.pos},targetUid:target?.uid??null};
 }
@@ -52,7 +53,7 @@ export function spawnGatlingSource(owner:BorgRuntime,actor:RomActor,address:numb
   const savedUid=owner.gatlingSavedAim?.targetUid;
   const target=targetData(savedUid?all.find(b=>b.uid===savedUid):null);
   const pos=gatlingMuzzle(actor.pos,yaw,ownerScale);
-  // Source copies saved +518 and the surviving admission-time attack pointer.
+  // Source copies globally refreshed +518 and the surviving admitted attack pointer.
   const flight=createPoweredPrimary(4,pos,yaw,target,ownerScale,owner.gatlingSavedAim?.pos??target?.pos??null);
   const hit=attackHitRecordsForKind('pl0102',0)[0]!;
   const record=familyDamageRecordForBorg('pl0102',hit.damageRecordIndex)!;

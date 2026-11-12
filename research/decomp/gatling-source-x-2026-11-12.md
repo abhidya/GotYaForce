@@ -51,8 +51,12 @@ Primary row4 uses HIT0 (Gatling family damage1, extent20), speed40,
 initial gravity0.3, correction period4, gravity clamp0..7.5/slew0.15,
 life600 and visual scale2. No launch flash or proximity split. Constructor
 performs its first flight update once. Saved aim is captured on command admission;
-the admission-time target UID is retained even if the live lock changes. Windup
-can invalidate that target but never acquires a replacement (`zz_006d144_` →
+the admission-time target UID is retained even if the live lock changes. The
+Revolver follow-up audit established global006ae60 refreshes +518 before actor
+movement. Windup now uses that captured target's globally sampled pre-movement
+root, not a frozen admission position; bridge aiming follows the same identity.
+This bounded correction leaves projectile tracking on current target roots.
+Windup can invalidate that target but never acquires a replacement (`zz_006d144_` →
 `zz_006660c_`, chunk0008:3160). Only a surviving saved target enables ballistic pitch.
 No-target launches use owner heading and pitch0, without inventing an aim point.
 Live target root is the existing bounded substitute for source center.

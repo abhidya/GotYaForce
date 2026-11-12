@@ -17,6 +17,7 @@ import type {
   BattleProjectileObservation,
   ProjectileDespawnObservation,
   PoweredLaunchFlashObservation,
+  RevolverLaunchFlashObservation,
   ProjectileVisualKind,
 } from "@gf/combat";
 import { MUZZLE_OFFSET, SHOT } from "@gf/combat";
@@ -222,6 +223,12 @@ interface BankVisual {
   node: THREE.Group;
   materials: THREE.MeshBasicMaterial[];
   layerOpacity: number[];
+}
+
+interface RevolverFlashActor {
+  node: THREE.Group;
+  /** Effect-definition layers, each of which may contain several bank drawable meshes. */
+  layers: Map<92 | 35, BankVisual>;
 }
 
 interface ProjectileActor {
@@ -683,6 +690,15 @@ const MUZZLE_FLASH_ALPHA_KEYS: ReadonlyArray<readonly number[]> = [
 /** texId 35 lifetime, frames (layer-def row 0 @0x802faef8). */
 const MUZZLE_FLASH_LIFE_FRAMES = 4;
 
+/** Effect5 rows8/9 @802faf58/802faf64, tracks802fac00/802fac40.
+ * Both alpha pointers are null: preserve the sampled material alpha for the whole layer.
+ * These are not effect0's four-frame scale/alpha tracks even though both use model35.
+ * Source and original-byte provenance: revolver-source-x-audit-2026-11-12.md. */
+const REVOLVER_FLASH_SCALE_KEYS: Readonly<Record<92 | 35, ReadonlyArray<readonly number[]>>> = {
+  92: [[0, 1, 1, 1], [1, .5, .5, .5], [2, 0, 0, 0]],
+  35: [[0, 0, 0, 0], [1, 1, 1, 1], [4, 1.5, 1.5, 1.5], [7, 0, 0, 4]],
+};
+
 // ---------------------------------------------------------------------------
 // Presentation anchors and tweens shared by the battle FX/marker code below.
 // All TUNED: the ROM anchors its effects to per-borg joint matrices (gun joint
@@ -752,6 +768,8 @@ export class BattleScene {
   private poweredFlashActors = new Map<string, {
     node: THREE.Group; materials: THREE.MeshBasicMaterial[]; layerOpacity: number[];
   }>();
+  /** Effect5 layers have independent simulation-owned lifetimes and local Z phases. */
+  private revolverFlashActors = new Map<string, RevolverFlashActor>();
   private pending = new Set<string>();
   private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
   private impactPuffFrames: THREE.Texture[];
@@ -836,6 +854,7 @@ export class BattleScene {
     diverAuras: readonly DiverAuraObservation[] = [],
     diverAuraTails: readonly DiverTailObservation[] = [],
     poweredLaunchFlashes: readonly PoweredLaunchFlashObservation[] = [],
+    revolverLaunchFlashes: readonly RevolverLaunchFlashObservation[] = [],
   ): void {
     const live = new Set<string>();
     for (const b of borgs) {
@@ -907,6 +926,7 @@ export class BattleScene {
     this.syncDiverAuraTails(diverAuraTails);
     this.syncDiverAuras(diverAuras);
     this.syncPoweredLaunchFlashes(poweredLaunchFlashes);
+    this.syncRevolverLaunchFlashes(revolverLaunchFlashes);
   }
 
   /** Advance all per-actor animation mixers. */
@@ -943,6 +963,8 @@ export class BattleScene {
     for (const actor of this.bankFxActors) this.disposeBankFxActor(actor);
     for (const actor of this.poweredFlashActors.values()) this.disposePoweredFlash(actor);
     this.poweredFlashActors.clear();
+    for (const actor of this.revolverFlashActors.values()) this.disposeRevolverFlash(actor);
+    this.revolverFlashActors.clear();
     this.actors.clear();
     this.projectileActors.clear();
     this.impactActors = [];
@@ -1625,6 +1647,10 @@ export class BattleScene {
    * Returns null when the texId has no drawable bank entry so the caller keeps the sprite.
    */
   private buildBankProjectileActor(projectile: BattleProjectileObservation): ProjectileActor | null {
+    // FUN_80084790 resolves 0x400b as owner-local model11, not global efct11.
+    // That owner-bank mesh is not exported; retain the explicitly generic shell even if
+    // a caller accidentally supplies a contradictory global-bank flightVisual.
+    if (projectile.revolverSource) return null;
     // flightVisual (sim-resolved, combat shotFlightVisualForBorgId) is preferred; the TUNED
     // renderer-side table covers the ROM-family beams whose guarded attribution lands on a
     // different table shape (resolveTunedFlightVisual). Both absent => keep the energy/sprite.
@@ -2203,6 +2229,78 @@ export class BattleScene {
     this.root.remove(actor.node);
     for (const material of actor.materials) material.dispose();
     // Mesh geometry belongs to the shared bank cache, not this launch.
+  }
+
+  /** Effect5 resolves these two models from the global effect bank. Missing assets stay
+   * empty for this layer lifetime, without a sprite, wrong-bank mesh, or repeated retry. */
+  private revolverFlashLayers(modelId: 92 | 35): BankFxLayer[] | null {
+    return bankFxTemplate(modelId);
+  }
+
+  /** The source constructor captures the scaled projectile basis before HIT setup and
+   * speed normalization. Simulation supplies its normalized columns plus captured scale;
+   * the flash stays at that launch transform, independently of the moving projectile.
+   * Renderer synchronization never advances ages or draws new random phases. */
+  private syncRevolverLaunchFlashes(flashes: readonly RevolverLaunchFlashObservation[]): void {
+    const live = new Set<string>();
+    for (const flash of flashes) {
+      const liveLayers = flash.layers.filter((layer) => layer.ageFrames >= 0 && layer.ageFrames < layer.lifeFrames);
+      if (liveLayers.length === 0) continue;
+      live.add(flash.uid);
+      let actor = this.revolverFlashActors.get(flash.uid);
+      if (!actor) {
+        const node = new THREE.Group();
+        node.name = `revolver-launch-flash:${flash.uid}`;
+        actor = { node, layers: new Map() };
+        this.revolverFlashActors.set(flash.uid, actor);
+        this.root.add(node);
+      }
+      const { right, up, forward } = flash.basis;
+      actor.node.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(
+        new THREE.Vector3(right.x, right.y, right.z),
+        new THREE.Vector3(up.x, up.y, up.z),
+        new THREE.Vector3(forward.x, forward.y, forward.z),
+      ));
+      actor.node.position.set(flash.pos.x, flash.pos.y, flash.pos.z);
+      actor.node.scale.setScalar(flash.baseScale);
+      const liveModels = new Set<92 | 35>();
+      for (const layer of liveLayers) {
+        liveModels.add(layer.modelId);
+        let visual = actor.layers.get(layer.modelId);
+        if (!visual) {
+          visual = buildBankVisual(this.revolverFlashLayers(layer.modelId) ?? [], flash.team);
+          visual.node.name = `revolver-launch-layer:${flash.uid}:model${layer.modelId}`;
+          actor.layers.set(layer.modelId, visual);
+          actor.node.add(visual.node);
+        }
+        visual.node.rotation.set(0, 0, layer.spin);
+        evalRomKeys(REVOLVER_FLASH_SCALE_KEYS[layer.modelId], layer.ageFrames, BANK_KEY_SCRATCH);
+        visual.node.scale.set(BANK_KEY_SCRATCH[0]!, BANK_KEY_SCRATCH[1]!, BANK_KEY_SCRATCH[2]!);
+        // alphaTrackPtr == 0 for both rows. No authored lifetime-alpha fade is applied.
+      }
+      for (const [modelId, visual] of actor.layers) {
+        if (liveModels.has(modelId)) continue;
+        this.disposeRevolverFlashLayer(visual);
+        actor.layers.delete(modelId);
+      }
+    }
+    for (const [uid, actor] of this.revolverFlashActors) {
+      if (live.has(uid)) continue;
+      this.disposeRevolverFlash(actor);
+      this.revolverFlashActors.delete(uid);
+    }
+  }
+
+  private disposeRevolverFlashLayer(visual: BankVisual): void {
+    visual.node.removeFromParent();
+    for (const material of visual.materials) material.dispose();
+    // All geometry belongs to the shared static bank cache, not this instance.
+  }
+
+  private disposeRevolverFlash(actor: RevolverFlashActor): void {
+    actor.node.removeFromParent();
+    for (const visual of actor.layers.values()) this.disposeRevolverFlashLayer(visual);
+    actor.layers.clear();
   }
 
   /**

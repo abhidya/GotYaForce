@@ -187,17 +187,19 @@ function testNegativeControls(): void {
   assert(windup.target.hp === hp && windup.events.length === 0, 'interrupt does not leave hidden delayed damage');
 }
 
-function testSavedAimAndMuzzle(): void {
+function testCapturedAimAndMuzzle(): void {
   const test = setup();
   test.press();
   assert(test.owner.gatlingSavedAim?.targetUid === test.target.uid && test.owner.gatlingSavedAim.pos.z === 6000,
-    'admission captures source saved target aim');
+    'admission captures target identity and initial aim');
   test.target.pos = v(6000, 0, 0);
   for (let i = 0; i < 16; i++) test.tick();
   const primary = primaryFor(test);
   assert(primary.gatlingSource?.kind === 'primary', 'saved-aim fixture primary');
-  assert(Math.abs(primary.gatlingSource.flight.vel.x) < 1 && primary.gatlingSource.flight.vel.z > 20,
-    `constructor aims toward admission snapshot, not target moved during windup: ${JSON.stringify(primary.vel)}`);
+  assert(test.owner.gatlingSavedAim?.targetUid === test.target.uid && test.owner.gatlingSavedAim.pos.x === 6000,
+    'source global refresh follows the moving captured target');
+  assert(primary.gatlingSource.flight.vel.x > 20 && Math.abs(primary.gatlingSource.flight.vel.z) < 1,
+    `constructor aims toward refreshed captured target, not its admission position: ${JSON.stringify(primary.vel)}`);
   const bind = gatlingMuzzle(v(0, 0, 0), 0);
   near(bind.x, 132.59280443191528, 'static joint11 plus row4 local-X offset');
   near(bind.y, 136.1260986328125, 'static joint11 muzzle Y');
@@ -414,7 +416,7 @@ export function runGatlingBattleSelfTest(): void {
   runGatlingProjectileSelfTest();
   testAdmissionAndAmmo();
   testNegativeControls();
-  testSavedAimAndMuzzle();
+  testCapturedAimAndMuzzle();
   testTargetPointerSnapshot();
   testTerrainExplosionAndDamage();
   testContactExplosion();

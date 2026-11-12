@@ -1,3 +1,4 @@
+import { runRevolverBattleSelfTest } from "./revolverBattle.selftest.js";
 import { runPoweredChargeSelfTest } from "./poweredCharge.selftest.js";
 import { runGatlingBattleSelfTest } from "./gatlingBattle.selftest.js";
 import { runSourcePositionHistorySelfTest } from "./sourcePositionHistory.selftest.js";
@@ -216,6 +217,7 @@ export function runSelfTest(): void {
   runDiverAuraSelfTest();
   runPoweredChargeSelfTest();
   runGatlingBattleSelfTest();
+  runRevolverBattleSelfTest();
   runSourcePositionHistorySelfTest();
   runKnightWindupSelfTest();
   runPrimaryAmmoSelfTest();
