@@ -1,3 +1,6 @@
+import { runNurseStreamSelfTest } from "./nurseStream.selftest.js";
+import { runHealingContactSelfTest } from "./healingContact.selftest.js";
+import { runNurseBattleSelfTest } from "./nurseBattle.selftest.js";
 import { runArrowBattleSelfTest } from "./arrowBattle.selftest.js";
 import { runBeamBattleSelfTest } from "./beamBattle.selftest.js";
 import { runRevolverBattleSelfTest } from "./revolverBattle.selftest.js";
@@ -214,6 +217,9 @@ function assertNonRomAirborneDeathKeepsGravity(stats: readonly BorgStats[]): voi
 }
 
 export function runSelfTest(): void {
+  runHealingContactSelfTest();
+  runNurseStreamSelfTest();
+  runNurseBattleSelfTest();
   runHitDrainSelfTest();
   runContactAuraSelfTest();
   runDiverAuraSelfTest();

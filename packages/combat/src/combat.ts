@@ -1,3 +1,4 @@
+import { isNurseX, consumeNurseInput } from "./nurseInput.js";
 import { isArrowNinja, stepArrowInput, advanceArrowSource, createArrowTether, applyArrowTetherCorrections } from "./arrowProjectile.js";
 import { advanceBeamSource, beamPulseOverlaps, stepBeamInput } from "./beamProjectile.js";
 import { advanceRevolverSource, stepRevolverInput, isRevolver, type RevolverPresentationSink } from "./revolverProjectileRuntime.js";
@@ -1606,6 +1607,11 @@ export function applyHit(
   damageContext?: DamageRuntimeContext,
 ): number {
   if (!isTargetable(victim) || isInvincible(victim)) return 0;
+  const healingContact = (record.flagsA & 0x2) !== 0;
+  const victimImmunityA = statusImmunityMasksForBorgId(victim.borgId).immunityA;
+  // resolve_hitbox_target_effects_and_damage, chunk_0003.c:7529: healing
+  // immunity rejects the entire contact, before effects, counters, or gauge writes.
+  if (healingContact && (victimImmunityA & 0x2) !== 0) return 0;
 
   // Source-collision defer gate (SOURCE-PRIMARY DEFAULT): when the source pipeline already
   // resolved a pair for this victim this frame (HP synced back via stepSourceCollision),
@@ -1632,7 +1638,6 @@ export function applyHit(
   //     the header above "Damage application" and damageFormula.ts's own header for the four
   //     places the removed body disagreed with chunk_0004.c). Calling computeBaseDamage /
   //     applyHpDamage directly is also what keeps this on the ROM-wasm seam.
-  const victimImmunityA = statusImmunityMasksForBorgId(victim.borgId).immunityA;
   const attackerForceRatioIndex = source
     ? forceGaugeRatioIndex(
         damageContext?.energyByTeam?.[source.attacker.team] ?? 0,
@@ -1672,7 +1677,17 @@ export function applyHit(
     victimSpawnProtection: false, // +0x5e0 bit 0x4000000 writer untraced (spec TODO)
     cpuHalvingEnabled: damageContext?.cpuHalvingEnabled === true, // T4 item 3 / T2 gate
   };
-  const dmg = computeBaseDamage(attackerActor, defenderActor, basePower, sourceCtx);
+  // Healing is the resolver's signed record-HP branch, NOT the damage formula:
+  // chunk_0003.c:7955-7972. Non-borg targets (+0x83!=0) receive zero HP change.
+  // Enemy healing is quartered with truncation toward zero; curves, combo scaling,
+  // damageScale and CPU/force multipliers do not participate. With no source the
+  // direct helper has no cross-team context and uses the full record amount.
+  const normalHealingTarget = (victim.targetEligibility83 ?? 0) === 0;
+  const dmg = healingContact
+    ? (normalHealingTarget ? Math.trunc(-record.hpDamage * (source && source.attacker.team !== victim.team ? 0.25 : 1)) : 0)
+    : computeBaseDamage(attackerActor, defenderActor, basePower, sourceCtx);
+  if (healingContact && normalHealingTarget && (victim.hitDrainFrames ?? 0) !== 0) victim.hitDrainFrames = 1;
+  // The companion source +0x6b8 timer is not represented in BorgRuntime yet.
   // zz_003d344_ port: subtract+clamp+prevHp-mirror replaces the bare `victim.hp -= dmg`.
   const hpTarget: SourceDamageTarget = { hp: victim.hp, maxHp: victim.maxHp };
   applyHpDamage(hpTarget, dmg);
@@ -1688,7 +1703,7 @@ export function applyHit(
   // banks dmg/2 into a per-slot accumulator (chunk_0003.c:7982) then applies+caps it
   // (chunk_0003.c:6318); collapsed here to an immediate heal-on-hit (equivalent in sum). Fires
   // on the killing blow too (before the lethal-return below).
-  if (HEAL.VAMPIRE_ENABLED && source && isVampireBorgId(source.attacker.borgId)) {
+  if (dmg > 0 && HEAL.VAMPIRE_ENABLED && source && isVampireBorgId(source.attacker.borgId)) {
     const steal = Math.floor(dmg / HEAL.VAMPIRE_STEAL_DIVISOR);
     if (steal > 0 && source.attacker.alive && source.attacker.state !== "death") {
       source.attacker.hp = Math.min(source.attacker.maxHp, source.attacker.hp + steal);
@@ -1714,7 +1729,7 @@ export function applyHit(
   if (source && damageContext?.telemetry) {
     const t = damageContext.telemetry;
     const team = source.attacker.team;
-    t.damageByTeam[team] = (t.damageByTeam[team] ?? 0) + dmg;
+    t.damageByTeam[team] = (t.damageByTeam[team] ?? 0) + Math.max(0, dmg);
     t.hitsByTeam[team] = (t.hitsByTeam[team] ?? 0) + 1;
 
     // DERIVED per-slot results counters — hit-resolver accounting, resolve_hitbox_target_
@@ -1768,7 +1783,11 @@ export function applyHit(
   // FUN_8005ed38 table; a ground stagger uses the flat zz_005ec20_ table), so it must be known
   // before the knockback magnitude is picked. Value/order unchanged from the original — only
   // moved earlier.
-  const knockdown = forceKnockdown || dmg >= DAMAGE.KNOCKDOWN_DMG;
+  // flagsA&2 sets +0x1da bit0x10 and forces source reaction type0x12
+  // (chunk_0003.c:7739,6255; chunk_0007.c:4022). Its handler uses launch
+  // magnitude. Map it to the host down/launch reaction, retaining the existing
+  // host animation-duration approximation rather than dropping healing reactions.
+  const knockdown = healingContact || forceKnockdown || dmg >= DAMAGE.KNOCKDOWN_DMG;
   // T8 ANGLE TRIMS: a record with a nonzero pitch trim wants a real pitched arc even on a
   // ground-reaction hit (893/1530 records carry the modal (0,24) ~=33.75-degree-up trim) — see
   // combat-feel-gaps-decode-2026-07-05.md T8. Treat "has a pitch trim" as an additional launch
@@ -1931,6 +1950,7 @@ export function applyHit(
   // straight to dispatch_slot_action_update: HP damage and the knockback velocity above
   // still land, but there is NO hitstun and NO state change.
   const staggered =
+    healingContact ||
     victim.downGauge < 1 ||
     balanceBroke ||
     (record.reactionFlags & REACTION_FORCE_STAGGER_MASK) !== 0;
@@ -2483,6 +2503,7 @@ export function stepAttacks(
   damageContext: DamageRuntimeContext = {},
 ): AttackResult {
   const out: Projectile[] = [];
+  const nurse = isNurseX(b.borgId) ? consumeNurseInput(b, specialHeld) : null;
   const beam = b.borgId === "pl0104"
     ? (b.beamInput?.pending ? b.beamInput : stepBeamInput(b, {
       special: specialHeld, attack: attackHeld, jump: false, hyper: false,
@@ -2515,7 +2536,7 @@ export function stepAttacks(
   // expiry and made an X-hold charge impossible.
   const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
   b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
-  const pressedSpecialEdge = arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld && !prevSpecialHeld;
+  const pressedSpecialEdge = nurse ? nurse.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
@@ -2565,7 +2586,7 @@ export function stepAttacks(
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld: powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: nurse ? nurse.pressEdge : powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
 
@@ -2595,6 +2616,14 @@ export function stepAttacks(
   // outranks the X/secondary type 2 (FUN_800699d8 order) — the charge release below wins the
   // frame and the X press is not consumed.
   const commandPreemptsX = b.command?.type === AttackCommandType.Charged3;
+  // Bounded Nurse close-ground route. Unsupported targets/stances never fall
+  // through to the generic damaging X, and only the family consumes source cell2.
+  if (isNurseX(b.borgId) && pressedSpecialEdge && canStartAction && !commandPreemptsX) {
+    if ((b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact &&
+        b.command.type === AttackCommandType.Melee2 && b.command.actionIndex === 2)
+      b.romDriver?.tryStartXSpecial(b, all);
+    return { projectiles: out };
+  }
   if (powered && canStartAction && !commandPreemptsX && (b.cooldowns["special"] ?? 0) <= 0) {
     if (powered.releasedReady && b.command?.type === AttackCommandType.Ranged5 && b.command.actionIndex === 3 && b.command.exact) {
       // Exact type-5/action-3 path has no ammo check or consumption.
@@ -2613,7 +2642,7 @@ export function stepAttacks(
       (b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact && b.command.type === AttackCommandType.Melee2 && b.command.actionIndex === 2) {
     if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
   }
-  if (!arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  if (!isNurseX(b.borgId) && !arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to

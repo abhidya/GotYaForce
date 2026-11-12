@@ -1,3 +1,4 @@
+import { isNurseX, stepNurseInput } from "./nurseInput.js";
 import { isArrowNinja, spawnArrowSource, stepArrowInput, stepArrowMashInput, applyPendingArrowCorrection } from "./arrowProjectile.js";
 import { spawnBeamSource, stepBeamInput } from "./beamProjectile.js";
 import { refreshSourceAttackTargets } from "./sourceAttackTarget.js";
@@ -1263,6 +1264,7 @@ class BattleImpl implements Battle {
 
       // Source charge bookkeeping also runs while another action owns this frame.
       stepArrowMashInput(b,input);
+      if (isNurseX(b.borgId)) stepNurseInput(b, input.special);
       if (b.borgId === "pl0104") stepBeamInput(b,input);
       if (isArrowNinja(b.borgId)) stepArrowInput(b,input.special);
       if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);

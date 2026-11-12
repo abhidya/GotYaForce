@@ -145,9 +145,9 @@ function testApplyHealIgnoresNonPositiveAmount(): void {
 // --- Flag-state / non-vampire guard tests ----------------------------------------------------
 
 function testFlagState(): void {
-  // Nurse heal stays disabled (its HP-write is not in the corpus — (ay)); vampire lifesteal is
-  // now ENABLED (full path traced, (ay)).
-  assertEqual(HEAL.NURSE_ENABLED, false, "HEAL.NURSE_ENABLED stays false (nurse HP-write not found)");
+  // Legacy guide-driven Nurse behavior stays disabled. Source-backed close X uses
+  // family damage records and has separate action/contact regression coverage.
+  assertEqual(HEAL.NURSE_ENABLED, false, "legacy guide-driven Nurse behavior stays disabled");
   assertEqual(HEAL.VAMPIRE_ENABLED, true, "HEAL.VAMPIRE_ENABLED is true (vampire path traced, ay)");
 }
 

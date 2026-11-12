@@ -1,5 +1,6 @@
 // Source ammo math shared by bounded primary cell0 rows and Diver cell2.
 // See research/decomp/primary-ammo-binding-2026-11-11.md and diver-ammo-binding-2026-11-11.md.
+import { isNurseX } from "./nurseInput.js";
 import tables from "./data/paramTierTables.json" with { type: "json" };
 import type { BorgRuntime, WeaponCell } from "./types.js";
 import type { ContactAuraLevels } from "./timescale.js";
@@ -10,7 +11,7 @@ export function isDiverAmmoFamily(id: string): boolean {
 
 /** Proven X stat segment maps to source cell 2; browser cell 1 is its HUD alias. */
 export function hasSourceXAmmo(id: string): boolean {
-  return isDiverAmmoFamily(id) || id === "pl0002" || id === "pl000b" || id === "pl0101" || id === "pl0102" || id === "pl0104" || id === "pl0100" || id === "pl0108";
+  return isNurseX(id) || isDiverAmmoFamily(id) || id === "pl0002" || id === "pl000b" || id === "pl0101" || id === "pl0102" || id === "pl0104" || id === "pl0100" || id === "pl0108";
 }
 
 export interface DiverRefillContext {
