@@ -1,11 +1,12 @@
 /** Actual-input Switching Ninja ordinary X regressions.
- * All attacks enter through Battle input. Relocation/lifecycle fixtures below
- * exercise host collision and interruption seams, not original joint geometry.
+ * Attacks enter through Battle input. Explicit scheduler/helper adjuncts below
+ * do not claim to exercise original admission or damage; relocation/lifecycle
+ * fixtures exercise host collision seams, not original animated joint geometry.
  */
 import { battleStateForSelfcheck, createBattle } from './battle.js';
 import { RomDriverBridge } from './bridge.js';
 import { STATE } from './constants.js';
-import { getSwitchingXState } from './switchingX.js';
+import { getSwitchingXState, stepSwitchingX } from './switchingX.js';
 import { createSwitchingSwapPass, stageSwitchingSwap, commitSwitchingSwapPass, stepSwitchingForcedMove,
   type SwitchingForcedRomActor } from './switchingProjectile.js';
 import type { Vec3 } from './rom/actor.js';
@@ -353,19 +354,20 @@ function testForcedMoveHelperAdjuncts(): void {
   }
 }
 
+/** Explicit forced-scheduler adjunct using a live actual-input source action.
+ * The host bridge treats control lowbits0 as its action-complete gate. We test
+ * original handler restoration here without claiming that generic host gate is
+ * an original scheduler oracle. */
 function testSuspendedSourceAction(): void {
-  const t = setup({ targetId: 'pl0009' }), child = releaseField(t);
-  ticks(t, 15); t.inputs.p2.special = true; t.tick(); t.inputs.p2.special = false;
-  warningEnd(t, child);
-  assert(t.target.romDriver instanceof RomDriverBridge, 'source-action victim uses a real family bridge');
-  const rom = t.target.romDriver.actor as SwitchingForcedRomActor;
-  assert(getSwitchingXState(rom)?.stream && t.target.state === 'special', 'actual victim X remains live at the impending collision');
-  // Explicit source-control adjunct selects the original resume branch. This
-  // does not claim the generic host state label proves source5e0 lowbits.
+  const t = setup(); t.press(); t.release(); ticks(t, 10);
+  const rom = t.driver.actor as SwitchingForcedRomActor;
+  const source = getSwitchingXState(rom);
+  assert(source?.stream && t.owner.state === 'special', 'actual ordinary X supplies a live source handler for scheduler adjunct');
   rom.controlWord &= ~3;
-  t.tick();
-  const source = getSwitchingXState(rom), move = t.target.switchingForcedMove;
-  assert(source?.stream && move?.previousRom, `real incoming hit suspends the live source action: ${JSON.stringify({source:!!source,stream:source?.stream,move,hp:t.target.hp,pos:t.target.pos,field:child.pos,contact:child.switchingSource.contactPending,control:rom.controlWord,kind:rom.moveKind7c9,immune:t.target.sourceSwitchingResistance59c})}`);
+  const pass = createSwitchingSwapPass(t.state.borgs);
+  stageSwitchingSwap(pass, t.owner, t.target); commitSwitchingSwapPass(pass, t.state.borgs);
+  const move = t.owner.switchingForcedMove;
+  assert(move?.previousRom, 'helper activation suspends the live source action');
   const frame = source.stream.frame, phases = [...rom.fbPhaseSlots], saved = { ...move.previousRom };
   assert(rom.fbCue === 0x23 && rom.ubCue === 0x23 && rom.moveKind7c9 === 2 && rom.movePhase7ca === 0 && rom.flags272 === 0xffff,
     'post-pass activation binds the original forced cue/kind without running phase0 early');
@@ -378,8 +380,9 @@ function testSuspendedSourceAction(): void {
   assert(rom.fbCue === saved.fbCue && rom.ubCue === saved.ubCue && rom.fbState === saved.fbState && rom.ubState === saved.ubState &&
     Number(rom.moveKind7c9) === 0 && Number(rom.movePhase7ca) === 3 && rom.moveTimer7cb === 0 && Number(rom.flags272) === 0 && !(rom.controlWord & 0x1000),
     'fifth forced dispatch restores saved source handlers and clears only forced-move gates');
-  t.tick(); assert(getSwitchingXState(rom) === source && source.stream.frame > frame,
-    'next ordinary actor update resumes the same live source animation clock');
+  stepSwitchingX(rom, t.driver.ctx);
+  assert(getSwitchingXState(rom) === source && source.stream.frame > frame,
+    'restored original handler resumes the same animation clock when dispatched directly');
 }
 
 function testInterruptionsDeathAndResistance(): void {
@@ -419,6 +422,22 @@ function testInterruptionsDeathAndResistance(): void {
   assert(lethal.target.hp <= 0 && !lethal.target.switchingForcedMove && lethal.owner.switchingForcedMove,
     'lethal collision independently excludes dead victim while living owner still activates');
   ticks(lethal, 3); same(lethal.owner.pos, before, 'surviving participant reaches its staged destination after partner death');
+
+  for (const ownerDies of [false, true]) {
+    const t = setup({ ownerReplacement: true, targetReplacement: true }), child = releaseField(t);
+    warningEnd(t, child); t.tick();
+    const deadParticipant = ownerDies ? t.owner : t.target, survivor = ownerDies ? t.target : t.owner;
+    const destination = { ...survivor.switchingForcedMove!.destination };
+    // Explicit lifecycle adjunct after a real accepted contact, before the
+    // first forced update. No source phase, destination or contact is injected.
+    deadParticipant.hp = 0; deadParticipant.state = 'death'; deadParticipant.stateTime = 0;
+    t.tick();
+    assert(!deadParticipant.switchingForcedMove && survivor.switchingForcedMove?.dispatches === 1,
+      'participant death cancels only its own pending forced handler');
+    ticks(t, 2); same(survivor.pos, destination, 'living paired actor still relocates on its third actual dispatch');
+    ticks(t, 2); assert(!survivor.switchingForcedMove && !survivor.sourceDefenseDisabled,
+      'living paired actor restores independently on its fifth actual dispatch');
+  }
 }
 
 function testOtherFamilies(): void {
