@@ -1,3 +1,4 @@
+import { runStreamBankSelfTest } from './stream-bank.selftest.js';
 // Selfcheck for the ROM-faithful actor runtime foundation.
 // Run: pnpm build (combat) then node scripts/run-rom-tests.mjs
 //
@@ -205,6 +206,7 @@ function assert(cond: boolean, msg: string): void {
 export function runSelfTest(): number {
   failures = 0;
   runStreamFlagsSelfTest();
+  runStreamBankSelfTest();
 
   // Test 1: physics integrator — upward impulse with no gravity produces linear rise.
   console.log("[rom.selfcheck] physics.integratePhysics — Y=+4 impulse, no gravity:");
