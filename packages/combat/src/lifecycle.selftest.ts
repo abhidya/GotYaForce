@@ -1,3 +1,4 @@
+import { runKnightWindupSelfTest } from "./knightWindup.selftest.js";
 import { runPrimaryAmmoSelfTest } from "./primaryAmmo.selftest.js";
 import { runHitDrainSelfTest } from "./hitDrain.selftest.js";
 import { runDiverAuraSelfTest } from "./diverAura.selftest.js";
@@ -210,6 +211,7 @@ export function runSelfTest(): void {
   runHitDrainSelfTest();
   runContactAuraSelfTest();
   runDiverAuraSelfTest();
+  runKnightWindupSelfTest();
   runPrimaryAmmoSelfTest();
   runTargetLockSelfTest();
   const stats = loadStats();
