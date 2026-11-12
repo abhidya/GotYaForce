@@ -1,3 +1,4 @@
+import {runReactionStreamSelfTest} from './reaction-stream.selftest.js';
 import {runReactionTurnSelfTest} from './reaction-turn.selftest.js';
 import { runStreamBankSelfTest } from './stream-bank.selftest.js';
 // Selfcheck for the ROM-faithful actor runtime foundation.
@@ -209,6 +210,7 @@ export function runSelfTest(): number {
   runStreamFlagsSelfTest();
   runStreamBankSelfTest();
   runReactionTurnSelfTest();
+  runReactionStreamSelfTest();
 
   // Test 1: physics integrator — upward impulse with no gravity produces linear rise.
   console.log("[rom.selfcheck] physics.integratePhysics — Y=+4 impulse, no gravity:");
