@@ -1,4 +1,5 @@
-/** Bounded pl0104 action2 / 800e19a8 row1. See beam-source-x-2026-11-12.md.
+/** Bounded pl0104 action2 / 800e19a8 row1 plus admitted RED/NEO charge row15.
+ * See beam-source-x-2026-11-12.md and gred-charged-b-2026-11-12.md.
  * Source lifecycle and pulse cadence; static joint and capsule collision are host
  * approximations. No flying-bullet lifetime, terrain consumption or global rehit timer. */
 import type { BorgRuntime, Projectile, PlayerInput } from './types.js';
@@ -8,6 +9,7 @@ import { attackHitRecordsForKind } from './attackHitData.js';
 import { familyDamageRecordForBorg } from './familyDamageData.js';
 import { activeSourceTarget } from './targetLock.js';
 import { actorAimTarget, livingAttackTarget } from './sourceAttackTarget.js';
+import {getGRedChargeState} from './gredCharge.js';
 import type { RevolverBasis } from './revolverProjectile.js';
 export interface BeamOwnerState {
     dt: number;
@@ -18,6 +20,8 @@ export interface BeamOwnerState {
     scale: number;
 }
 export interface BeamPulse {
+    /** One source attack identity across this pulse's sphere and sweep passes. */
+    attackUid: string;
     stage: 'init' | 'sweep';
     start: Vec3;
     end: Vec3;
@@ -25,6 +29,10 @@ export interface BeamPulse {
     hitUids: string[];
 }
 export interface BeamSourceState {
+    /** Undefined retains the original Beam Gunner row1 adapter. */
+    sourceRow?: 1 | 15;
+    ownerBorgId?: string;
+    ownerFormId?: string;
     phase: 'init' | 'active' | 'tail';
     age: number;
     tailAge: number;
@@ -58,15 +66,20 @@ export const BEAM_SOURCE = {
     muzzleUp: 25,
     muzzleForward: 350,
 } as const;
+/** Original80317428/e19a8 row15. Joint1 is a verified static bind fallback,
+ * never an animated attachment. Pulse HIT27/record34 has radius20/damage31. */
+export const GRED_CHARGE_BEAM = {...BEAM_SOURCE,row:15,hitKind:27,maxScale:1,hitRadius:20,
+    jointHeight:129.60008239746094,muzzleUp:40,muzzleForward:10} as const;
+type BeamProfile=typeof BEAM_SOURCE | typeof GRED_CHARGE_BEAM;
 const addAlong = (p: Vec3, d: Vec3, n: number): Vec3 => ({
     x: p.x + d.x * n, y: p.y + d.y * n, z: p.z + d.z * n,
 });
-export function beamMuzzle(pos: Vec3, yaw: number, scale = 1): Vec3 {
-    // Original HSD joint1 preorder bind + row-local (0,25,350); animated pose unavailable.
+export function beamMuzzle(pos: Vec3, yaw: number, scale = 1, profile:BeamProfile = BEAM_SOURCE): Vec3 {
+    // Verified per-profile static joint1 bind plus row-local offset; animated pose unavailable.
     return {
-        x: pos.x + Math.sin(yaw) * BEAM_SOURCE.muzzleForward * scale,
-        y: pos.y + (BEAM_SOURCE.jointHeight + BEAM_SOURCE.muzzleUp) * scale,
-        z: pos.z + Math.cos(yaw) * BEAM_SOURCE.muzzleForward * scale,
+        x: pos.x + Math.sin(yaw) * profile.muzzleForward * scale,
+        y: pos.y + (profile.jointHeight + profile.muzzleUp) * scale,
+        z: pos.z + Math.cos(yaw) * profile.muzzleForward * scale,
     };
 }
 function basis(yaw: number): RevolverBasis {
@@ -110,36 +123,42 @@ export function captureBeamAim(owner: BorgRuntime, actor: RomActor, all: readonl
 export function spawnBeamSource(
     owner: BorgRuntime, actor: RomActor, address: number, row: number,
 ): Projectile[] | null {
-    if (owner.borgId !== 'pl0104' || actor.actionIndex !== 2 || address !== BEAM_SOURCE.spawner)
+    const charge=getGRedChargeState(actor);
+    const chargeRoute=!!charge && (owner.borgId==='pl0615'||owner.borgId==='pl0629') && actor.actionIndex===3 && actor.variantIndex===0;
+    if ((!chargeRoute && (owner.borgId !== 'pl0104' || actor.actionIndex !== 2)) || address !== BEAM_SOURCE.spawner)
         return null;
-    if (row !== BEAM_SOURCE.row)
+    const profile=chargeRoute?GRED_CHARGE_BEAM:BEAM_SOURCE;
+    if (row !== profile.row)
         return [];
     const ownerScale = actor.modelScale * actor.sizeScale, yaw = actor.heading * Math.PI / 32768;
-    const origin = beamMuzzle(actor.pos, yaw, ownerScale), drawBasis = basis(yaw);
-    const hit = attackHitRecordsForKind('pl0104', BEAM_SOURCE.hitKind)[0];
-    const damageRecord = hit && familyDamageRecordForBorg('pl0104', hit.damageRecordIndex);
+    const origin = beamMuzzle(actor.pos, yaw, ownerScale,profile), drawBasis = basis(yaw);
+    const hit = attackHitRecordsForKind(owner.borgId, profile.hitKind)[0];
+    const damageRecord = hit && familyDamageRecordForBorg(owner.borgId, hit.damageRecordIndex);
     if (!hit || !damageRecord)
         return [];
     return [{
             uid: `beam-${++serial}`, ownerUid: owner.uid, team: owner.team,
             pos: { ...origin }, vel: { x: 0, y: 0, z: 0 }, life: 1,
             damage: 1, hitstun: 0, knockback: 1, damageRecord, homingTurn: 0, homingTarget: null,
-            aimedTargetUid: owner.beamAim?.targetUid ?? null, hitRadius: 0, visualKind: 'energy', romShotKind: 10,
+            aimedTargetUid: owner.beamAim?.targetUid ?? null, hitRadius: 0, visualKind: 'energy', romShotKind: profile.hitKind,
             sourceHitCollisionFlags: hit.collisionFlags, romScale: [0, 0, 0],
-            beamSource: { phase: 'init', age: 0, tailAge: 0, scale: 0, ownerScale, origin,
+            beamSource: { ...(chargeRoute?{sourceRow:15 as const,ownerBorgId:owner.borgId,ownerFormId:owner.combatFormId??owner.borgId}:{}),phase: 'init', age: 0, tailAge: 0, scale: 0, ownerScale, origin,
                 direction: { ...drawBasis.forward },
                 drawDirection: { ...drawBasis.forward }, drawBasis, start: { ...origin },
                 end: { ...origin }, tailStartScale: 0,
                 targetUid: owner.beamAim?.targetUid ?? null, pulse: false, pulseTimer: 0, pulses: [] } }];
 }
 let serial = 0;
+let pulseSerial = 0;
 export function advanceBeamSource(pr: Projectile, byUid: Map<string, BorgRuntime>): Projectile[] {
     const s = pr.beamSource!, owner = byUid.get(pr.ownerUid), pose = owner?.beamOwner;
+    const profile=s.sourceRow===15?GRED_CHARGE_BEAM:BEAM_SOURCE;
     s.pulse = false;
     s.pulses = s.pulses.filter(pulse => pulse.stage === 'init');
     // Source death/form invalidation forces state2, skips active damage. Browser
     // disappearance cannot recompute the attachment, so keep its last transform.
-    const invalid = !livingAttackTarget(owner) || owner.borgId !== 'pl0104';
+    const invalid = !livingAttackTarget(owner) || owner.borgId !== (s.ownerBorgId??'pl0104') ||
+        (s.sourceRow===15 && (owner.combatFormId??owner.borgId)!==s.ownerFormId);
     if (invalid && s.phase !== 'tail') {
         s.phase = 'tail';
         s.tailAge = 0;
@@ -153,7 +172,7 @@ export function advanceBeamSource(pr: Projectile, byUid: Map<string, BorgRuntime
         // movement and stops bridge syncOut. Missing owners keep the last pose.
         const root = owner?.pos ?? pose.pos;
         const yaw = owner?.rotY ?? pose.yaw;
-        s.origin = beamMuzzle(root, yaw, s.ownerScale);
+        s.origin = beamMuzzle(root, yaw, s.ownerScale,profile);
         s.drawBasis = basis(yaw);
         s.drawDirection = { ...s.drawBasis.forward };
     }
@@ -161,7 +180,7 @@ export function advanceBeamSource(pr: Projectile, byUid: Map<string, BorgRuntime
         s.phase = 'active';
     }
     else if (s.phase === 'tail') {
-        s.scale = s.tailStartScale - (++s.tailAge / BEAM_SOURCE.tailFrames) * BEAM_SOURCE.maxScale;
+        s.scale = s.tailStartScale - (++s.tailAge / profile.tailFrames) * profile.maxScale;
         if (s.scale <= 0) {
             s.scale = 0;
             // Pulse children outlive the parent's visual teardown. Preserve the
@@ -180,7 +199,7 @@ export function advanceBeamSource(pr: Projectile, byUid: Map<string, BorgRuntime
             s.tailStartScale = s.scale;
         }
         else {
-            s.scale = Math.min(BEAM_SOURCE.maxScale, s.age / BEAM_SOURCE.growFrames * BEAM_SOURCE.maxScale);
+            s.scale = Math.min(profile.maxScale, s.age / profile.growFrames * profile.maxScale);
             s.direction = { ...s.drawDirection };
             const target = s.targetUid ? byUid.get(s.targetUid) : null;
             if (livingAttackTarget(target)) {
@@ -190,14 +209,14 @@ export function advanceBeamSource(pr: Projectile, byUid: Map<string, BorgRuntime
                     d.x /= n;
                     d.y /= n;
                     d.z /= n;
-                    if (d.x * s.direction.x + d.y * s.direction.y + d.z * s.direction.z > BEAM_SOURCE.aimDot)
+                    if (d.x * s.direction.x + d.y * s.direction.y + d.z * s.direction.z > profile.aimDot)
                         s.direction = d;
                 }
             }
             else
                 s.targetUid = null;
-            s.start = addAlong(s.origin, s.direction, BEAM_SOURCE.startOffset * s.scale * s.ownerScale);
-            s.end = addAlong(s.origin, s.direction, BEAM_SOURCE.endOffset * s.scale * s.ownerScale);
+            s.start = addAlong(s.origin, s.direction, profile.startOffset * s.scale * s.ownerScale);
+            s.end = addAlong(s.origin, s.direction, profile.endOffset * s.scale * s.ownerScale);
             // Source pulse countdown uses the same live dt as the owner phase timer.
             s.pulseTimer -= pose.dt;
             if (s.pulseTimer <= 0) {
@@ -213,11 +232,11 @@ export function advanceBeamSource(pr: Projectile, byUid: Map<string, BorgRuntime
         pulse.end = { ...s.end };
     }
     if (s.pulse)
-        s.pulses.push({ stage: 'init', start: { ...s.start }, end: { ...s.start },
-            radius: BEAM_SOURCE.hitRadius * s.scale * s.ownerScale, hitUids: [] });
+        s.pulses.push({ attackUid: `beam-pulse-${++pulseSerial}`, stage: 'init', start: { ...s.start }, end: { ...s.start },
+            radius: profile.hitRadius * s.scale * s.ownerScale, hitUids: [] });
     pr.pos = { ...s.origin };
     pr.vel = { ...s.direction };
-    pr.hitRadius = BEAM_SOURCE.hitRadius * s.scale * s.ownerScale;
+    pr.hitRadius = profile.hitRadius * s.scale * s.ownerScale;
     pr.romScale = [s.scale * s.ownerScale, s.scale * s.ownerScale, s.scale * s.ownerScale];
     return [pr];
 }

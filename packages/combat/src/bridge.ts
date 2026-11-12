@@ -1,3 +1,19 @@
+import {getGRedAirShotState,prepareGRedAirShot,clearGRedAirShot,startGRedAirShotStream,tickGRedAirShotStreamPart} from './gredAirShot.js';
+import {getGRedShotState,prepareGRedShot,clearGRedShot,startGRedShotStream,tickGRedShotStreamPart} from './gredShot.js';
+import {refreshTargetVisibility} from './families/shared-aimed-shot-x.js';
+import {spawnGredRangedSource,prepareGredRangedEntryVisibility} from './gredRangedProjectile.js';
+import {getGBlackChargeState,prepareGBlackCharge,clearGBlackCharge,startGBlackChargeStream,tickGBlackChargeStreamPart} from './gblackCharge.js';
+import {spawnGBlackChargeSource} from './gblackChargeProjectile.js';
+import {getGRedChargeState,prepareGRedCharge,clearGRedCharge,startGRedChargeStream,tickGRedChargeStreamPart} from './gredCharge.js';
+import { spawnGBlackGroundWaveSource } from './gblackGroundWaveAdapter.js';
+import { getGRedCrashState, prepareGRedCrash, clearGRedCrash,
+  startGRedCrashStream, tickGRedCrashStreamPart, beginGRedCrashTick,
+  acceptGRedCrashContact } from './gredCrash.js';
+import {getGRedAirMeleeState,prepareGRedAirMelee,clearGRedAirMelee,
+  startGRedAirMeleeStream,tickGRedAirMeleeStreamPart,beginGRedAirMeleeTick,
+  acceptGRedAirMeleeContact} from './gredAirMelee.js';
+import {gredAirMeleeStreamProfile} from './gredAirMeleeConfig.js';
+import { captureTimeBomberAim, spawnTimeBomberSource } from "./timeBomberProjectile.js";
 import { getNurseXState, isNurseX, prepareNurseX, clearNurseX, canStartNurseX, isCloseNurseX } from "./nurseX.js";
 import { isArrowNinja, captureArrowAttack, spawnArrowSource } from "./arrowProjectile.js";
 import { createBeamStreamClock, tickBeamStream, type BeamStreamClock } from "./beamStream.js";
@@ -9,6 +25,10 @@ import { captureGatlingAim, spawnGatlingSource } from "./gatlingProjectile.js";
 import { capturePoweredNormalAim, spawnPoweredSource } from "./poweredProjectileRuntime.js";
 import { createKnightWindupClock, tickKnightWindupClock, type KnightWindupClock } from "./rom/knight-windup-clock.js";
 import { isDiverAmmoFamily } from "./diverAmmo.js";
+import { attackHitMaxReachForKind } from "./attackHitData.js";
+import { getNeoGredMeleeState, prepareNeoGredMelee, clearNeoGredMelee,
+  startNeoGredMeleeStream, tickNeoGredMeleeStreamPart, beginNeoGredMeleeTick,
+  acceptNeoGredMeleeContact } from "./neoGredMelee.js";
 // Bridge between the existing @gf/combat `BorgRuntime` (the canonical game state —
 // HP, lock-on, ammo, gauges, status, projectiles, results telemetry) and the ROM
 // `RomActor` runtime (the 1:1 ported state machine). The existing layer stays
@@ -26,8 +46,8 @@ import { isDiverAmmoFamily } from "./diverAmmo.js";
 
 import { activeSourceTarget } from "./targetLock.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
-import type { BorgRuntime, PlayerInput, RomFamilyDriver } from "./types.js";
-import { OPEN_WINDOW_ACTIVE_FRAMES } from "./actionStreamData.js";
+import type { BorgRuntime, MineReceiverMeleeAttack, PlayerInput, RomFamilyDriver } from "./types.js";
+import { comboLadderForBorgId, OPEN_WINDOW_ACTIVE_FRAMES } from "./actionStreamData.js";
 import type { Vec3 } from "@gf/physics";
 import type { RomActor, RomPhysicsRuntime, RomVisibilityTarget } from "./rom/actor.js";
 import { createRomActor } from "./rom/actor.js";
@@ -163,7 +183,7 @@ import {
 } from "./families/unregistered-cluster.js";
 import { configureDeathBorgChiFamily } from "./families/death-borg-chi.js";
 import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
-import { HERO_X_BUFF } from "./constants.js";
+import { HERO_X_BUFF, MELEE } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
 import { spawnRomProjectile } from "./projectiles.js";
@@ -180,6 +200,9 @@ import animMetadataHopData from "./data/animMetadataHop.generated.json" with { t
 const TAU = Math.PI * 2;
 const BAM_FULL = 0x10000;
 const ACTOR_SIZE_NORMALIZER = 167.75999450683594; // FLOAT_80437620
+// Never reset with a bridge replacement: a surviving mine may retain an older
+// activation from the same owner UID (morph/rebind must not reuse that identity).
+let mineMeleeSerial = 0;
 /** zz_0068004_: max(data page +0x4c, +0x50) / FLOAT_80437620. The Girl pages
  * share 9/6 except pl0308 (25/3); values were read directly from pl####data.bin. */
 function girlDescriptorSizeScale(borgId: string): number {
@@ -189,14 +212,31 @@ function girlDescriptorSizeScale(borgId: string): number {
 
 /** An armed hitbox window (from attackHitTables.json, looked up per kind). */
 interface ArmedHit {
+  /** Only the admitted NEO chain uses activation-wave actor identity. */
+  neoActivated?: boolean;
+  /** Scoped G RED-family X HIT lifecycle. Countdown advances on active HIT
+   * updates even when mode8 freezes animation; burst/hitstop gates are unbound. */
+  crashHit?: { recordIndex: number; activated: boolean; refresh: number; countdown: number;
+    localOffset: readonly number[]; radius: number };
+  /** Admitted airborne B refresh0 volumes. BLACK's later overlapping record
+   * renews the shared actor identity for BOTH volumes before the pair pass. */
+  airMeleeHit?: {recordIndex:number;activated:boolean;shapeKind:0|2;
+    localOffset:readonly number[];halfExtent:readonly number[];radius:number};
   collisionFlags: number;
   activeStart: number;
   activeEnd: number;
   reach: number;
   damageRecordIndex: number;
-  /** Uids already struck by this window (one hit per target per window). */
+  /** Uids already struck by this window or shared source activation identity. */
   struck: Set<string>;
+  /** One identity for this supported armHit activation, shared across its active frames. */
+  mineReceiverAttackUid?: string;
 }
+let gredCrashHitSerial=0;
+let gredAirMeleeHitSerial=0;
+// One namespace across admitted B/X routes and replacement bridges. A cached
+// clip must not mistake a new animation start for an earlier source epoch.
+let sourceAnimationSerial=0;
 
 // Lazy-loaded per-borg hit-table data (attackHitTables.json). Loaded once, cached.
 const HIT_TABLES: Record<string, { kinds: Record<string, number[]>; records: Record<string, unknown> }> =
@@ -1359,6 +1399,7 @@ export type RomHitResolver = (
   victim: BorgRuntime,
   damageRecordIndex: number,
   knockbackMult: number,
+  onContactAccepted?: () => void,
 ) => number | void;
 
 /** Host-provided ground clamp — called after the ROM physics step to snap the borg
@@ -1372,9 +1413,11 @@ export interface RomBattleRuntime {
     readonly bounds: { minX: number; maxX: number; minZ: number; maxZ: number };
     isSupported(x: number, z: number): boolean;
   };
+  returnResource?(owner: BorgRuntime, cell: number): void;
   allocateResource(owner: BorgRuntime, type: number, count: number, consume: boolean): boolean;
   spawnProjectile(owner: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void;
-  resolveHit(attacker: BorgRuntime, victim: BorgRuntime, damageRecordIndex: number, knockbackMult: number): void;
+  resolveHit(attacker: BorgRuntime, victim: BorgRuntime, damageRecordIndex: number, knockbackMult: number,
+    onContactAccepted?: () => void): void;
   /** Optional observer for zz_01cb750_'s form-change event. */
   postMorphEvent?(owner: BorgRuntime, borgNumber: number, slot: number): void;
   /** ROM cue sink — port of zz_00f036c_(owner, cueId). Fired by the stream VM's
@@ -1392,6 +1435,9 @@ export interface RomBattleRuntime {
 
 /** All hooks from all family ctx types (StreamContext + family-specific extras). */
 export interface RomHostContext {
+  /** Family29 allocation seam; false means allocation failed after consuming cell0. */
+  onTimeBomberMine?: (actor: RomActor) => boolean;
+  onReturnResource?: (actor: RomActor, cell: number) => void;
   // ── StreamContext hooks ──
   onArmHit?: (actor: RomActor, kind: number, statusId: number, statusArg: number) => void;
   onPlayAnim?: (actor: RomActor, group: number, slot: number, blend: boolean) => void;
@@ -1435,6 +1481,8 @@ export class RomDriverBridge implements RomFamilyDriver {
   familyFrameUpdate: ((actor: RomActor, runtime: BorgRuntime) => void) | null = null;
   /** Armed hitbox records for the current special. */
   private armedHits: ArmedHit[] = [];
+  /** Only the observed G RED ground action1/v0 group3/slot0 stream is admitted. */
+  private mineMeleeOpenerStream = false;
   /** Which button started the active ROM machine ("x" | "b"), for the impotence latch. */
   private specialKind: "x" | "b" | null = null;
   /** True once the active ROM special armed a resolvable hit or fired a child projectile. */
@@ -1517,12 +1565,20 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  drain after each tick alongside the stream's pendingProjectiles. */
   private spawnFamilyProjectile(actor: RomActor, spawnerAddr: number, type: number): void {
     if (this.runtime) {
+      const ranged=spawnGredRangedSource(this.runtime,actor,spawnerAddr,type,this.visibilityBindings.map(binding=>binding.runtime));
+      if(ranged!==null){this.familyProjectiles.push(...ranged);this.specialHadEffect=true;return;}
+      const blackCharge=spawnGBlackChargeSource(this.runtime,actor,spawnerAddr,type);
+      if(blackCharge!==null){this.familyProjectiles.push(...blackCharge);this.specialHadEffect=true;return;}
+      const wave = spawnGBlackGroundWaveSource(this.runtime,actor,spawnerAddr,type);
+      if(wave!==null){this.familyProjectiles.push(...wave);this.specialHadEffect=true;return;}
       const beam = spawnBeamSource(this.runtime, actor, spawnerAddr, type);
       if (beam !== null) { this.familyProjectiles.push(...beam); this.specialHadEffect = true; return; }
       const arrow = spawnArrowSource(this.runtime, actor, spawnerAddr, type, this.arrowRoster);
       if (arrow !== null) { this.familyProjectiles.push(...arrow); this.specialHadEffect = true; return; }
       const revolver = spawnRevolverSource(this.runtime, actor, spawnerAddr, type);
       if (revolver !== null) { this.familyProjectiles.push(...revolver); this.specialHadEffect = true; return; }
+      const timeBomber = spawnTimeBomberSource(this.runtime, actor, spawnerAddr, type, this.visibilityBindings.map(binding => binding.runtime));
+      if (timeBomber !== null) { this.familyProjectiles.push(...timeBomber); this.specialHadEffect = true; return; }
       const gatling = spawnGatlingSource(this.runtime, actor, spawnerAddr, type,
         this.visibilityBindings.map(binding => binding.runtime));
       if (gatling !== null) { this.familyProjectiles.push(...gatling); this.specialHadEffect = true; return; }
@@ -1561,12 +1617,51 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  so battle.ts skips stepMovement/stepAttacks. False for X-specials (which compose with
    *  normal movement — tick() returns false and only layers stream events). */
   private romOwnedSpecial = false;
+  private timeBomberLandingCooldown = false;
+  /** Temporary mapping of an established host run into source control10. */
+  private timeBomberMovementControl: number | null = null;
+  private restoreTimeBomberMovementControl(): void {
+    if(this.timeBomberMovementControl === null)return;
+    this.actor.controlWord=(this.actor.controlWord&~0x30)|this.timeBomberMovementControl;
+    this.timeBomberMovementControl=null;
+  }
+  private gredAirShotLocomotion: {state:BorgRuntime['state'];anim:BorgRuntime['anim'];stateTime:number}|null=null;
+  private timeBomberLocomotion: { state:BorgRuntime['state']; anim:BorgRuntime['anim']; stateTime:number } | null = null;
+
+  /** Variants1/3 are part0 shots. Host movement stands in for the lower channel,
+   * whose state is not otherwise continuously mirrored into this bridge. */
+  runHostLocomotion(runtime:BorgRuntime, update:()=>void):void {
+    const airShot=getGRedAirShotState(this.actor);
+    if(this.specialActive&&airShot?.partMode&&this.gredAirShotLocomotion){
+      const upper={state:runtime.state,anim:runtime.anim,stateTime:runtime.stateTime};
+      Object.assign(runtime,this.gredAirShotLocomotion);update();runtime.stateTime+=1;
+      this.gredAirShotLocomotion={state:runtime.state,anim:runtime.anim,stateTime:runtime.stateTime};
+      Object.assign(runtime,upper);return;
+    }
+    if(!this.specialActive || runtime.borgId!=="pl0106" || this.actor.actionIndex!==0 ||
+       (this.actor.variantIndex!==1 && this.actor.variantIndex!==3) || !this.timeBomberLocomotion)return;
+    const presentation={state:runtime.state,anim:runtime.anim,stateTime:runtime.stateTime};
+    Object.assign(runtime,this.timeBomberLocomotion);
+    update();
+    // Battle's normal path increments the locomotion clock after movement.
+    runtime.stateTime+=1;
+    this.timeBomberLocomotion={state:runtime.state,anim:runtime.anim,stateTime:runtime.stateTime};
+    Object.assign(runtime,presentation);
+  }
+
   private runtime: BorgRuntime | null = null;
   private visibilityBindings: Array<{ runtime: BorgRuntime; state: RomVisibilityTarget }> = [];
   private beamStreamClock: BeamStreamClock | null = null;
   private arrowStreamClock: ArrowStreamClock | null = null;
   private arrowStreamMask = 0;
   private positionHistoryFrame: number | null = null;
+  private neoBWasHeld = false;
+  private neoBPressed = false;
+  private shotAWasHeld=false;
+  private shotABuffer=0;
+  private shotAActive=false;
+  private shotDirectionActive=false;
+  private neoWaveStruck = new Set<string>();
 
   private constructor(
     actor: RomActor,
@@ -1580,11 +1675,55 @@ export class RomDriverBridge implements RomFamilyDriver {
       onStartStream?: (group: number, slot: number, mask: number) => boolean;
     }).onStartStream = (group, slot, mask) => this.onStartStream(group, slot, mask);
     (actor as RomActor & { onTickStreamPart?: (index: number) => boolean }).onTickStreamPart =
-      (index) => this.tickArrowStreamPart(index) || this.tickBeamStreamPart(index) || this.tickKnightStreamPart(index);
+      (index) => tickGRedAirShotStreamPart(this.actor,index,this.ctx) || tickGRedShotStreamPart(this.actor,index,this.ctx) || tickGBlackChargeStreamPart(this.actor,index,this.ctx) || tickGRedChargeStreamPart(this.actor,index,this.ctx) || tickGRedCrashStreamPart(this.actor,index,this.ctx) ||
+        tickGRedAirMeleeStreamPart(this.actor,index,this.ctx) ||
+        tickNeoGredMeleeStreamPart(this.actor,index,this.ctx) ||
+        this.tickArrowStreamPart(index) || this.tickBeamStreamPart(index) || this.tickKnightStreamPart(index);
   }
 
   private onStartStream(group: number, slot: number, mask: number): boolean {
     if (!this.runtime) return false;
+    for (const hit of this.armedHits) delete hit.mineReceiverAttackUid;
+    this.mineMeleeOpenerStream = this.runtime.borgId === "pl0615" && this.runtime.grounded &&
+      this.specialKind === "b" && this.romOwnedSpecial && this.actor.actionIndex === 1 &&
+      this.actor.variantIndex === 0 && group === 3 && slot === 0 && (mask & this.actor.weaponPartMask & 1) !== 0;
+    if(getGBlackChargeState(this.actor) && group===4 && slot===3){
+      this.streamSchedules=[];this.armedHits=[];this.specialMaxFrames=Math.max(this.specialMaxFrames,240);
+      return startGBlackChargeStream(this.actor,group,slot,mask,this.ctx);
+    }
+    if(getGRedChargeState(this.actor) && group===4 && slot===2){
+      this.streamSchedules=[];this.armedHits=[];this.specialMaxFrames=Math.max(this.specialMaxFrames,300);
+      return startGRedChargeStream(this.actor,group,slot,mask,this.ctx);
+    }
+    if(getGRedAirShotState(this.actor)&&((group===2&&[4,5,6,7].includes(slot))||(group===0&&slot===13))){
+      this.streamSchedules=[];this.armedHits=[];
+      return startGRedAirShotStream(this.actor,group,slot,mask,this.ctx);
+    }
+    if(getGRedShotState(this.actor) && group===2 && (slot===0||slot===1)){
+      this.streamSchedules=[];this.armedHits=[];
+      return startGRedShotStream(this.actor,group,slot,mask,this.ctx);
+    }
+    const crash=getGRedCrashState(this.actor);
+    if(crash && group===4 && slot===(crash.family==='red'?0:crash.family==='neo'?1:4)){
+      this.streamSchedules=[];this.armedHits=[];
+      this.specialMaxFrames=Math.max(this.specialMaxFrames,240);
+      return startGRedCrashStream(this.actor,group,slot,mask,this.ctx);
+    }
+    const airMelee=getGRedAirMeleeState(this.actor);
+    if(airMelee && group===3 && gredAirMeleeStreamProfile(airMelee.family,slot)){
+      this.streamSchedules=[];this.armedHits=[];
+      // Safety ceiling only; source conditional stream/phase completion owns exit.
+      this.specialMaxFrames=Math.max(this.specialMaxFrames,240);
+      return startGRedAirMeleeStream(this.actor,group,slot,mask,this.ctx);
+    }
+    if (getNeoGredMeleeState(this.actor) && group === 3 && (slot === 0 || slot === 1 || slot === 2 || slot === 13 || slot === 14 || slot === 15 || slot === 25 || slot === 26 || slot === 27)) {
+      this.streamSchedules = [];
+      this.armedHits = [];
+      this.neoWaveStruck = new Set();
+      // Safety ceiling only. Source end/wait/phase transitions own normal exit.
+      this.specialMaxFrames = Math.max(this.specialMaxFrames, 240);
+      return startNeoGredMeleeStream(this.actor,group,slot,mask,this.ctx);
+    }
     if ((this.runtime.borgId === "pl0002" || this.runtime.borgId === "pl000b")
       && this.actor.actionIndex === 2 && group === 4 && (slot === 0 || slot === 1)) {
       this.arrowStreamClock = createArrowStreamClock(slot);
@@ -1766,6 +1905,11 @@ export class RomDriverBridge implements RomFamilyDriver {
       onFireChild: () => {},
       onIndirect: () => {},
       onFamilyProjectile: (a, addr, type) => { bridge.spawnFamilyProjectile(a, addr, type); },
+      onTimeBomberMine: (a) => { bridge.ctx.onFamilyProjectile?.(a,0x800e058c,2); return true; },
+      onReturnResource: (_a, cell) => {
+        const runtime=bridge.runtime, slot=runtime?.weaponCells?.[cell];
+        if(runtime && slot && slot.max>0){slot.cur=Math.min(slot.max,slot.cur+1);if(cell===0)runtime.ammo=slot.cur;}
+      },
       onParamTierDelta: () => {},
       onPlayCue: () => {},
       onRefreshTargetVisibility: (a) => bridge.flushVisibilityState(a),
@@ -1838,6 +1982,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     runtime.ammo = cells[0]!.max <= 0 ? Number.POSITIVE_INFINITY : cells[0]!.cur;
     runtime.combatFormId = formId;
     runtime.meleeAnimStream = null;
+    delete runtime.sourceAnimSample;
     (runtime.romMorphEvents ??= []).push({
       eventAddress: 0x801cb750, borgNumber: newBorgNumber, slot: actor.slot,
     });
@@ -1919,6 +2064,7 @@ export class RomDriverBridge implements RomFamilyDriver {
   /** Production construction seam: one battle runtime supplies all external facts. */
   static attachToBattle(runtime: BorgRuntime, battleRuntime: RomBattleRuntime): RomDriverBridge | null {
     const hostCtx: RomHostContext = {
+      onReturnResource: (_actor, cell) => battleRuntime.returnResource?.(runtime, cell),
       onAllocateResource: (_actor, type, count, mode) =>
         battleRuntime.allocateResource(runtime, type, count, (mode ?? 0) !== 0),
       onFamilyProjectile: (actor, addr, kind) =>
@@ -2058,6 +2204,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     // Copy all hooks from host to bridge.ctx — explicit per-hook to avoid union-of-
     // function-types issue with exactOptionalPropertyTypes.
     const dest = this.ctx;
+    if(host.onTimeBomberMine)dest.onTimeBomberMine=host.onTimeBomberMine;
+    if(host.onReturnResource)dest.onReturnResource=host.onReturnResource;
     if (host.onArmHit) dest.onArmHit = host.onArmHit;
     if (host.onPlayAnim) dest.onPlayAnim = host.onPlayAnim;
     if (host.onFireChild) dest.onFireChild = host.onFireChild;
@@ -2077,7 +2225,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       if (!accepted && type === 2 &&
           ((mode ?? 0) !== 0 || runtime.borgId === "pl0104") &&
           (isNurseX(runtime.borgId) || isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) ||
-           runtime.borgId === "pl0101" || runtime.borgId === "pl0102" ||
+           runtime.borgId === "pl0101" || runtime.borgId === "pl0102" || runtime.borgId === "pl0106" ||
            runtime.borgId === "pl0104" || isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId))) {
         this.sourceXResourceDenied = true;
       }
@@ -2105,8 +2253,28 @@ export class RomDriverBridge implements RomFamilyDriver {
   beginFrame(runtime: BorgRuntime, frame: number): void {
     if (this.positionHistoryFrame === frame) return;
     this.positionHistoryFrame = frame;
+    // 005568c runs before action dispatch. Time Bomber B and fallback landing
+    // share +694; active low action bits freeze this source timer.
+    if(runtime.borgId === "pl0106" && (this.actor.controlWord&3)===0){
+      this.actor.stateTimer=Math.max(0,this.actor.stateTimer-this.actor.dt);
+      if(this.actor.stateTimer===0)this.timeBomberLandingCooldown=false;
+    }
     Object.assign(this.actor.targetCache5e8, this.actor.savedGroundPos);
     Object.assign(this.actor.savedGroundPos, runtime.pos);
+  }
+
+  /** 801304b8 runs after action dispatch; B neither owns nor interrupts X. */
+  postAction(runtime: BorgRuntime, all: readonly BorgRuntime[], _input: PlayerInput): void {
+    if(runtime.borgId!=="pl0106" || !runtime.alive || runtime.hp<=0 || runtime.state==="death" || runtime.state==="spawn")return;
+    if(!runtime.timeBomberBInput?.pressEdge || this.actor.stateTimer>0)return;
+    this.runtime=runtime;
+    this.syncIn(runtime,all);
+    if(this.ctx.onAllocateResource?.(this.actor,0,1,1)) {
+      if(this.ctx.onTimeBomberMine?.(this.actor)===false)this.ctx.onReturnResource?.(this.actor,0);
+      this.ctx.onPlayCue?.(this.actor,235);
+    }
+    // Empty cell still arms +694. Admission of a later X resets the same timer.
+    this.actor.stateTimer=Math.fround(4+this.actor.dt);
   }
 
   private arrowRoster: readonly BorgRuntime[] = [];
@@ -2147,9 +2315,11 @@ export class RomDriverBridge implements RomFamilyDriver {
     a.heading = radToBam(runtime.rotY);
     // Only sync velocity on the FIRST entry frame (specialActive was just set).
     // Subsequent ticks: ROM handler owns velocity; skip the copy.
-    if (!this.specialActive) {
+    if (!this.specialActive || getGRedAirShotState(a)?.partMode || (runtime.borgId === "pl0106" && this.actor.actionIndex === 0 && (this.actor.variantIndex === 1 || this.actor.variantIndex === 3))) {
       a.lockYaw = a.heading;
       a.activeYaw = a.heading;
+      if(getGRedAirShotState(a)?.partMode || (runtime.borgId === "pl0106" && a.actionIndex === 0 && (a.variantIndex === 1 || a.variantIndex === 3)))
+        a.lockYaw = Math.hypot(runtime.vel.x,runtime.vel.z)>0 ? radToBam(Math.atan2(runtime.vel.x,runtime.vel.z)) : a.heading;
       const { hSpeed, yVel } = decomposeVel(runtime.vel);
       a.hSpeed = hSpeed;
       a.yVel = yVel;
@@ -2164,22 +2334,53 @@ export class RomDriverBridge implements RomFamilyDriver {
     // Source +c8/+cc freezes attack identity, not target position. Only these
     // verified source actions consume the global pre-movement +518 refresh.
     // Generic aimOrigin518 above retains its existing shooter-root meaning.
-    const captured = this.specialActive && a.actionIndex === 2
+    const captured = this.specialActive && (a.actionIndex === 2 || (runtime.borgId === "pl0106" && a.actionIndex === 0))
       ? (isArrowNinja(runtime.borgId) ? runtime.arrowAttack : isRevolver(runtime.borgId) ? runtime.revolverAttack
         : runtime.borgId === "pl0104" ? runtime.beamAim
+        : runtime.borgId === "pl0106" ? runtime.timeBomberSavedAim
         : runtime.borgId === "pl0102" ? runtime.gatlingSavedAim
         : runtime.borgId === "pl0101" ? runtime.poweredNormalAim : undefined)
       : undefined;
     const nurse = this.specialActive && a.actionIndex === 2 ? getNurseXState(a) : undefined;
-    const candidate = nurse ? all.find(target => target.uid === nurse.targetUid)
+    const neo = this.specialActive && a.actionIndex === 1 ? getNeoGredMeleeState(a) : undefined;
+    const airMelee=this.specialActive && a.actionIndex===1?getGRedAirMeleeState(a):undefined;
+    const airShot=getGRedAirShotState(a);
+    const shot=getGRedShotState(a);
+    const charge=getGRedChargeState(a);
+    const blackCharge=getGBlackChargeState(a);
+    const crash = getGRedCrashState(a);
+    const candidate = airShot ? all.find(target=>target.uid===airShot.targetUid) : shot ? all.find(target=>target.uid===shot.targetUid) : blackCharge ? all.find(target=>target.uid===blackCharge.targetUid) : charge ? all.find(target=>target.uid===charge.targetUid) : crash ? all.find(target=>target.uid===crash.targetUid)
+      : airMelee ? all.find(target=>target.uid===airMelee.targetUid)
+      : neo ? all.find(target => target.uid === neo.targetUid)
+      : nurse ? all.find(target => target.uid === nurse.targetUid)
       : captured ? all.find(target => target.uid === captured.targetUid) : activeTarget;
     if (nurse && (!candidate || !candidate.alive || candidate.hp <= 0 ||
         candidate.state === "death" || (candidate.targetEligibility83 ?? 0) !== 0)) nurse.targetUid = null;
     const sourceAdmission = this.specialActive && this.specialKind === "x" &&
-      (runtime.command?.actionIndex ?? 2) === 2 &&
-      (isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId) || runtime.borgId === "pl0102" || runtime.borgId === "pl0101");
+      ((runtime.command?.actionIndex ?? 2) === 2 || (runtime.borgId === "pl0106" && runtime.command?.actionIndex === 0)) &&
+      (isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId) || runtime.borgId === "pl0102" || runtime.borgId === "pl0106" || runtime.borgId === "pl0101");
     // All other families retain their existing current-root aiming behavior.
-    const sourceTarget = nurse ? (nurse.targetUid ? actorAimTarget(candidate) : null) : captured || sourceAdmission ? actorAimTarget(candidate) : candidate;
+    const sourceTarget = airShot ? actorAimTarget(candidate) : shot ? actorAimTarget(candidate) : blackCharge ? actorAimTarget(candidate) : charge ? (!charge.captureBlocked6b8?actorAimTarget(candidate):null) : crash ? (crash.noTargetLatch541===0 ? actorAimTarget(candidate) : null)
+      : airMelee ? (airMelee.noTargetLatch541===0?actorAimTarget(candidate):null)
+      : neo ? (neo.noTargetLatch541 === 0 ? actorAimTarget(candidate) : null)
+      : nurse ? (nurse.targetUid ? actorAimTarget(candidate) : null) : captured || sourceAdmission ? actorAimTarget(candidate) : candidate;
+    if(airShot){
+      if(!sourceTarget)airShot.targetUid=null;
+      airShot.targetEligible=!!sourceTarget&&((candidate?.targetEligibility83??0)!==0||
+        (((candidate?.targetVisibilityMask5e6??0)&a.visibilityBit)!==0));
+    }
+    if(shot&&!sourceTarget)shot.targetUid=null;
+    if(blackCharge&&!sourceTarget)blackCharge.targetUid=null;
+    if(charge){
+      if(!sourceTarget)charge.targetUid=null;
+      if(runtime.beamAim){
+        runtime.beamAim.targetUid=charge.targetUid;
+        Object.assign(charge.aimTarget524,runtime.beamAim.pos);
+      }
+    }
+    if (neo && !sourceTarget) neo.targetUid = null;
+    if (crash && !sourceTarget) crash.targetUid=null;
+    if(airMelee && !sourceTarget)airMelee.targetUid=null;
     const targetPos = runtime.borgId === "pl0104" && captured
       ? captured.pos : sourceTarget ? captured?.pos ?? sourceTarget.pos : null;
     if (captured && !sourceTarget) captured.targetUid = null;
@@ -2192,14 +2393,18 @@ export class RomDriverBridge implements RomFamilyDriver {
         target.pos.x - runtime.pos.x,
         target.pos.y - runtime.pos.y,
         target.pos.z - runtime.pos.z,
-      );
+      ) / (neo ? a.modelScale : 1);
       // zz_006d0dc_ -> FUN_800669d0 consumes the captured target bearing as BAM16.
       // Height participates in pitch seeking, while yaw is atan2(horizontal x,z).
       const targetYaw = radToBam(Math.atan2(target.pos.x - runtime.pos.x, target.pos.z - runtime.pos.z));
       // Source recover owns +5ae (the backward recoil bearing). A global
       // +518 refresh must not overwrite it after phase1 releases the shots.
       const sourceRecover = captured && (a.fbPhaseSlots[0] ?? 0) >= 2;
-      if (!sourceRecover) { a.lockYaw = targetYaw; a.activeYaw = targetYaw; }
+      if (!sourceRecover && !neo && !crash && !airMelee && !charge && !blackCharge && !shot && !airShot) {
+        const timeBomberKeepsMotionYaw = runtime.borgId === "pl0106" && a.actionIndex === 0 && (a.variantIndex === 1 || a.variantIndex === 3 || a.variantIndex === 4);
+        if(!timeBomberKeepsMotionYaw)a.lockYaw = targetYaw;
+        a.activeYaw = targetYaw;
+      }
     }
   }
 
@@ -2222,15 +2427,46 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (this.runtime?.borgId === "pl0104") {
       (this.actor as RomActor & { inputEdges5bc?: number }).inputEdges5bc = this.runtime.beamInput?.edges ?? 0;
     }
+    const charge=getGRedChargeState(this.actor);
+    if(charge)charge.freshInput5bc=this.runtime?.beamInput?.edges??0;
+    const shot=getGRedAirShotState(this.actor)??getGRedShotState(this.actor);
+    if(shot){
+      // Buffered source descriptors: B edge lasts one update; A edge lasts16.
+      shot.input5d4=(this.neoBPressed?0x20:0)|(this.shotAActive?1:0);
+      // Browser stick threshold is a bounded adapter for68980, not its full
+      // directional latch/repeat buffer. B-held must never set this word.
+      shot.input5d8=this.shotDirectionActive?0x10:0;
+      scratch.inputFlags5d4=shot.input5d4;scratch.inputFlags5d8=shot.input5d8;
+    }
     this.actor.inputEdge5d4 = input?.attack || input?.special ? 0x41 : 0;
     this.actor.inputHeld5d8 = held ? 0x10 : 0;
+    if (this.runtime?.borgId === "pl0106" && this.actor.actionIndex === 0) {
+      // Source5d8 high nibble is stick direction, never X-held.
+      this.actor.inputHeld5d8 = input && Math.max(Math.abs(input.moveX),Math.abs(input.moveZ)) >= 0x34/127 ? 0x10 : 0;
+      this.actor.inputEdge5d4 = 0; // No speculative mapping of unrelated X/B buttons.
+    }
     this.actor.statusWord5b4 = held ? 0x200 : 0;
-    this.actor.streamHold1b03 = 0;
+    if (!getGRedAirShotState(this.actor) && !getGRedShotState(this.actor) && !getGBlackChargeState(this.actor) && !getGRedChargeState(this.actor) && !getGRedCrashState(this.actor) && !getGRedAirMeleeState(this.actor) && !getNeoGredMeleeState(this.actor) && (this.runtime?.borgId !== "pl0106" || this.actor.actionIndex !== 0))
+      this.actor.streamHold1b03 = 0;
+    if (getNeoGredMeleeState(this.actor) || getGRedAirMeleeState(this.actor)) {
+      // Descriptor802d3904 count1/flags0/duration1/mask0200 consumes B's
+      // rising edge, emitting5d4bit40 in this same update. Holding never retaps.
+      this.actor.inputEdge5d4 = this.neoBPressed ? 0x40 : 0;
+      scratch.bRetapInput = this.neoBPressed;
+    }
   }
 
   /** Copy RomActor → BorgRuntime (after the ROM step). */
   syncOut(runtime: BorgRuntime): void {
     const a = this.actor;
+    const charge=getGRedChargeState(a),blackCharge=getGBlackChargeState(a);
+    if(runtime.borgId==='pl062a'){
+      const target=(a as RomActor&{lockTarget?:Vec3|null}).lockTarget;
+      const retained=runtime.gblackChargeOwner?.target518;
+      runtime.gblackChargeOwner={dt:a.dt,modelScale:a.modelScale,collisionScale:a.collisionScale??a.modelScale,
+        controlWord:a.controlWord,...(target?{target518:{...target}}:retained?{target518:{...retained}}:{})};
+    }
+    if(charge)runtime.beamOwner={dt:a.dt,state:charge.chargeState6f7,pos:{...a.pos},yaw:bamToRad(a.heading),pitch:bamToRad(a.bodyPitch),scale:a.modelScale*a.sizeScale};
     if (runtime.borgId === "pl0104") {
       const beam = a as RomActor & { gmBeamState6f7?: number };
       runtime.beamOwner = { dt: a.dt, state: beam.gmBeamState6f7 ?? 0, pos: { ...a.pos },
@@ -2239,11 +2475,16 @@ export class RomDriverBridge implements RomFamilyDriver {
     runtime.pos.x = a.pos.x;
     runtime.pos.y = a.pos.y;
     runtime.pos.z = a.pos.z;
-    runtime.rotY = bamToRad(a.heading);
-    const vel = recomposeVel(a.hSpeed, a.yVel, a.activeYaw);
-    runtime.vel.x = vel.x;
-    runtime.vel.y = vel.y;
-    runtime.vel.z = vel.z;
+    const airShot=getGRedAirShotState(a),preserveLower=airShot?.partMode&&!airShot.physicsAdvanced;
+    if(!preserveLower)runtime.rotY = bamToRad(a.heading);
+    const crash=getGRedCrashState(a);
+    const airMelee=getGRedAirMeleeState(a);
+    const vel = recomposeVel(a.hSpeed, a.yVel, airShot || blackCharge || charge || crash || airMelee || (runtime.borgId === "pl0106" && a.actionIndex === 0 && a.variantIndex === 4) ? a.lockYaw : a.activeYaw);
+    if(!preserveLower){runtime.vel.x = vel.x;runtime.vel.y = vel.y;runtime.vel.z = vel.z;}
+    if((airShot&&!preserveLower)||blackCharge || charge || crash || airMelee)runtime.grounded=(a as RomActor&{grounded?:boolean}).grounded===true;
+    const sourceStream=airShot?.stream ?? getGRedShotState(a)?.stream ?? blackCharge?.stream ?? charge?.stream ?? crash?.stream ?? airMelee?.stream ?? getNeoGredMeleeState(a)?.stream;
+    if(sourceStream && runtime.sourceAnimSample)
+      runtime.sourceAnimSample={serial:runtime.sourceAnimSample.serial,frame:sourceStream.frame};
     const nurse = this.specialActive ? getNurseXState(a) : undefined;
     if (nurse && !nurse.close && (a.fbPhaseSlots[0] ?? 0) >= 2 && (a.fbPhaseSlots[0] ?? 0) < 7) {
       Object.assign(runtime.vel, a.motion);
@@ -2280,6 +2521,15 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  machine; subsequent `tick` calls advance it. */
   tryStartXSpecial(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean {
     if (this.specialActive) return false;
+    if(runtime.borgId === "pl0106" && this.timeBomberLandingCooldown && this.actor.stateTimer>0)return false;
+    if (runtime.borgId === "pl0106") {
+      const walking = runtime.timeBomberInput?.walking === true && runtime.grounded &&
+        runtime.state === "move" && this.actor.bodyPitch === 0 && runtime.command?.subtype === 1;
+      const neutral = runtime.timeBomberInput?.neutral !== false &&
+        (runtime.grounded ? runtime.command?.variantIndex === 0 : runtime.command?.variantIndex === 3);
+      if (runtime.command?.type !== 2 || runtime.command.actionIndex !== 0 ||
+          (!walking && !neutral) || (walking && runtime.command.variantIndex !== 0 && runtime.command.variantIndex !== 1)) return false;
+    }
     if (isNurseX(runtime.borgId)) {
       const target = activeSourceTarget(runtime, all);
       if (!canStartNurseX(runtime, target)) return false;
@@ -2287,12 +2537,19 @@ export class RomDriverBridge implements RomFamilyDriver {
     }
     // Impotence latch (see the field's doc): this borg's ROM X already proved to be a
     // no-payload pantomime — hand the press to the generic startSpecialAttack path.
-    if (this.xImpotent) return false;
+    if (this.xImpotent && !(runtime.borgId === "pl0106" && runtime.command?.actionIndex === 0)) return false;
     const actionIndex = runtime.command?.actionIndex ?? 2;
     const variantIndex = runtime.command?.variantIndex ?? 0;
+    // Original80365830 maps both v0 and v4 to18e838. Admit only the proven
+    // neutral ground row or airborne subtype4 row, not contextual variants1..3.
+    const admittedGRedCrash = (runtime.borgId==='pl0615'||runtime.borgId==='pl0629'||runtime.borgId==='pl062a') &&
+      runtime.command?.exact===true && runtime.command.type===2 && actionIndex===2 &&
+      (runtime.grounded ? variantIndex===0 : variantIndex===4 && runtime.command.subtype===4);
     this.runtime = runtime;
+    delete runtime.sourceAnimSample;
     this.armedHits = [];
     this.specialKind = "x";
+    this.mineMeleeOpenerStream = false;
     this.specialHadEffect = false;
     this.sourceXResourceDenied = false;
     this.specialMotionAccum = 0;
@@ -2302,7 +2559,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.streamEvents = null;
     this.streamSchedules = [];
     // Determine the special's duration from the decoded stream (default 30 frames).
-    this.specialMaxFrames = (runtime.borgId === "pl0104" || isNurseX(runtime.borgId)) && actionIndex === 2 ? 240 : 30;
+    clearGRedShot(this.actor);clearGRedAirShot(this.actor);this.gredAirShotLocomotion=null;
+    this.specialMaxFrames = runtime.borgId === "pl0106" && actionIndex === 0 ? 120 : (runtime.borgId === "pl0104" || isNurseX(runtime.borgId)) && actionIndex === 2 ? 240 : 30;
     // Fire frame-0 events immediately (armHit + playAnim).
     this.dispatchEvent(0);
     this.streamFrame = 1;
@@ -2311,6 +2569,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     // normal state/anim setters). So the bridge MUST set runtime.state/anim here
     // or the renderer's slotForBorg keys off stale state and never plays the
     // attack clip. X-special → state "special" (slotForBorg returns "special").
+    this.timeBomberLocomotion = runtime.borgId === "pl0106" && (variantIndex === 1 || variantIndex === 3)
+      ? {state:runtime.state,anim:runtime.anim,stateTime:runtime.stateTime} : null;
     runtime.state = "special";
     runtime.anim = "special";
     this.romOwnedSpecial = true;
@@ -2326,7 +2586,15 @@ export class RomDriverBridge implements RomFamilyDriver {
       // Discard the previous action's pointer before admission sync selects the
       // currently active target. Subsequent syncs use this new captured identity.
       delete runtime.revolverAttack;
-    } else if (runtime.borgId === "pl0102") delete runtime.gatlingSavedAim;
+    } else if (runtime.borgId === "pl0106") {
+      this.actor.controlWord = runtime.grounded ? this.actor.controlWord & ~0x40 : this.actor.controlWord | 0x40;
+      delete runtime.timeBomberSavedAim;
+      if(runtime.timeBomberInput?.walking) {
+        this.timeBomberMovementControl=this.actor.controlWord&0x30;
+        this.actor.controlWord=(this.actor.controlWord&~0x30)|0x10;
+      }
+    }
+    else if (runtime.borgId === "pl0102") delete runtime.gatlingSavedAim;
     else if (runtime.borgId === "pl0101" && actionIndex === 2) delete runtime.poweredNormalAim;
     this.syncActionInput(null, true);
     // For G RED family (custom handler): also run the ROM physics for the launch arc.
@@ -2337,34 +2605,58 @@ export class RomDriverBridge implements RomFamilyDriver {
       this.syncIn(runtime, all);
       if (isArrowNinja(runtime.borgId) && actionIndex === 2) captureArrowAttack(runtime,this.actor,all);
       if (runtime.borgId === "pl0104" && actionIndex === 2) captureBeamAim(runtime, this.actor, all);
+      if (runtime.borgId === "pl0106" && actionIndex === 0) captureTimeBomberAim(runtime,this.actor,all);
       if (runtime.borgId === "pl0102" && actionIndex === 2) captureGatlingAim(runtime,this.actor,all);
       if (runtime.borgId === "pl0101" && actionIndex === 2) capturePoweredNormalAim(runtime,this.actor,all);
       if (isRevolver(runtime.borgId) && actionIndex === 2) captureRevolverAttack(runtime,this.actor,all);
       // Arrow: ground802d4668=[44,3,2,0], air802d46a8=[45,3,2,4].
-      // Nurse air802d6908/802d6910=[45,3,2,1].
+      // Nurse air802d6908/802d6910=[45,3,2,1]; G RED family80365de0=[45,3,2,4].
       const airCue = (isNurseX(runtime.borgId) && variantIndex === 1) ||
         ((isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId)) && variantIndex === 4) ||
-        (runtime.borgId === "pl0104" && (variantIndex === 3 || variantIndex === 4));
-      const cueId = airCue ? 45 : 44;
-      dispatchCommandRecord(this.actor, { cueId, stateMode: 3, actionIndex, variantIndex });
-      stepRomActor(this.actor, this.tables, this.ctx);
-      this.syncOut(runtime);
+        (runtime.borgId === "pl0104" && (variantIndex === 3 || variantIndex === 4)) ||
+        (admittedGRedCrash && variantIndex===4);
+      const timeBomberPart = runtime.borgId === "pl0106" && actionIndex === 0 && (variantIndex === 1 || variantIndex === 3);
+      const cueId = airCue || (timeBomberPart && variantIndex === 3) ? 45 : 44;
+      if(admittedGRedCrash){
+        // Source X selection sets585=2 before6a104 snapshots584. Its range
+        // row is therefore138/144/150 indexed by the real command snapshot.
+        this.actor.cmdButton=2;this.actor.cmdSubtype=runtime.command?.subtype??0;
+        this.actor.cmdChargedRanged=0;
+      }
+      dispatchCommandRecord(this.actor, { cueId, stateMode: timeBomberPart ? 1 : 3, actionIndex, variantIndex });
+      clearGRedCrash(this.actor);
+      if(admittedGRedCrash){
+        const crash=prepareGRedCrash(this.actor,activeSourceTarget(runtime,all)?.uid??null);
+        crash.onRefreshTarget=()=>{
+          const target=actorAimTarget(activeSourceTarget(runtime,this.arrowRoster));
+          crash.targetUid=target?.uid??null;
+          (this.actor as RomActor&{lockTarget?:Vec3|null}).lockTarget=target?.pos??null;
+          this.actor.visibilityTarget=this.visibilityBindings.find(b=>b.runtime.uid===crash.targetUid)?.state??null;
+        };
+        this.syncIn(runtime,all);
+      }
+      if(timeBomberPart){
+        const velocity=decomposeVel(runtime.vel);
+        this.actor.hSpeed=velocity.hSpeed;this.actor.yVel=velocity.yVel;
+        this.actor.lockYaw=Math.hypot(runtime.vel.x,runtime.vel.z)>0?radToBam(Math.atan2(runtime.vel.x,runtime.vel.z)):this.actor.heading;
+        this.actor.rootAction?.(this.actor);
+      } else {stepRomActor(this.actor, this.tables, this.ctx);this.syncOut(runtime);}
       // The shared-X movement carry (phase 0's pos += (pos−olderOwnPos)×0.95) can
       // cross the arena walls near stage edges — the ROM's own step runs the
       // ground/wall collide (zz_00677b0_) right after; the port applies the host's
       // bounds clamp + off-mesh revert here (same policy tick() documents).
-      if (this.bounds) {
+      if (!timeBomberPart && this.bounds) {
         runtime.pos.x = Math.min(this.bounds.maxX, Math.max(this.bounds.minX, runtime.pos.x));
         runtime.pos.z = Math.min(this.bounds.maxZ, Math.max(this.bounds.minZ, runtime.pos.z));
       }
-      if (this.offMeshCheck && !this.offMeshCheck(runtime.pos.x, runtime.pos.z)) {
+      if (!timeBomberPart && this.offMeshCheck && !this.offMeshCheck(runtime.pos.x, runtime.pos.z)) {
         runtime.pos.x = preX;
         runtime.pos.z = preZ;
       }
       // Y-guard: a family phase-0 reposition/impulse must never leave the borg BELOW
       // the floor surface (the ROM's own step runs zz_00677b0_ ground collide right
       // after; sword-knight's X dove through the mesh without this).
-      if (this.groundClamp) {
+      if (!timeBomberPart && !getGRedCrashState(this.actor) && this.groundClamp) {
         const clamped = this.groundClamp(runtime.pos, runtime.vel.y);
         if (clamped.y > runtime.pos.y) {
           runtime.pos.y = clamped.y;
@@ -2376,10 +2668,12 @@ export class RomDriverBridge implements RomFamilyDriver {
       || this.actor.parts.some((part) => part.streamPtr >= 0)
       || this.streamSchedules.length > 0;
     if (!handled) {
+      this.restoreTimeBomberMovementControl();
       this.specialActive = false;
       this.romOwnedSpecial = false;
       this.actor.controlWord &= ~0x3;
       this.streamSchedules = [];
+      clearGRedCrash(this.actor);
       return false;
     }
     runtime.cooldowns["romSpecialActive"] = 1;
@@ -2397,10 +2691,19 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (!runtime.command?.exact || runtime.command.actionIndex === null) return false;
     const actionIndex = runtime.command.actionIndex;
     const variantIndex = runtime.command?.variantIndex ?? 0;
+    const admittedAirShot=(runtime.borgId==='pl0615'||runtime.borgId==='pl0629'||runtime.borgId==='pl062a')&&!runtime.grounded&&runtime.command.button==='B Shot'&&runtime.command.subtype===4&&actionIndex===0&&variantIndex===3;
+    const admittedShot=(runtime.borgId==='pl0615'||runtime.borgId==='pl0629'||runtime.borgId==='pl062a')&&runtime.grounded&&runtime.command.button==='B Shot'&&runtime.command.subtype===0&&actionIndex===0&&variantIndex===0;
+    const admittedBlackCharge=runtime.borgId==='pl062a'&&runtime.command.type===3&&runtime.command.subtype===5&&actionIndex===3&&variantIndex===0;
+    const admittedCharge=(runtime.borgId==='pl0615'||runtime.borgId==='pl0629') && runtime.command.type===3 && runtime.command.subtype===5 && actionIndex===3 && variantIndex===0;
+    const admittedAirMelee=(runtime.borgId==='pl0615'||runtime.borgId==='pl062a'||runtime.borgId==='pl0629') && !runtime.grounded && runtime.command.type===1 &&
+      runtime.command.subtype===4 && actionIndex===1 && variantIndex===4;
     this.runtime = runtime;
+    this.gredAirShotLocomotion=admittedAirShot?{state:runtime.state,anim:runtime.anim,stateTime:runtime.stateTime}:null;
+    delete runtime.sourceAnimSample;
     this.romOwnedSpecial = true;
     this.armedHits = [];
     this.specialKind = "b";
+    this.mineMeleeOpenerStream = false;
     this.specialHadEffect = false;
     this.sourceXResourceDenied = false;
     this.specialMotionAccum = 0;
@@ -2429,8 +2732,105 @@ export class RomDriverBridge implements RomFamilyDriver {
     const preX = runtime.pos.x;
     const preZ = runtime.pos.z;
     this.syncIn(runtime, all);
-    dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex, variantIndex });
-    stepRomActor(this.actor, this.tables, this.ctx);
+    if(admittedAirShot){
+      this.actor.cmdButton=0;this.actor.cmdSubtype=4;this.actor.cmdChargedRanged=0;
+      // Browser airborne selection uses subtype4, but original ordinary jump
+      // posture is40 (subtype3, the same45/1/0/3 row). Do not synthesize the
+      // distinct source locomotion80 state, or stale run/step10/20 controls.
+      this.actor.controlWord=(this.actor.controlWord&~0xb0)|0x40;
+    }
+    if(admittedShot){
+      this.actor.cmdButton=0;this.actor.cmdSubtype=0;this.actor.cmdChargedRanged=0;
+      // Host posture reconciliation only: source69ea4 would select subtype3
+      // with control40, never this admitted grounded neutral row. Do not clear
+      // the bit in18d350 or on later ticks, where its branch remains meaningful.
+      this.actor.controlWord&=~0x40;
+    }
+    if(admittedCharge||admittedBlackCharge){this.actor.cmdButton=3;this.actor.cmdSubtype=5;this.actor.cmdChargedRanged=1;runtime.cooldowns["chargeFrames"]=0;}
+    if (admittedAirMelee || ((runtime.borgId === "pl0615" || runtime.borgId === "pl0629" || runtime.borgId === "pl062a") && runtime.grounded && actionIndex === 1 && variantIndex === 0)) {
+      // Source contextual B has already selected585=1/586=subtype before6a104
+      // snapshots584. Do not silently use the spawn-default row0 lunge range.
+      this.actor.cmdButton=1;this.actor.cmdSubtype=runtime.command.subtype ?? 0;
+      this.actor.cmdChargedRanged=0;
+    }
+    if((runtime.borgId==='pl0615'||runtime.borgId==='pl0629'||runtime.borgId==='pl062a')&&actionIndex===0&&(variantIndex===0||admittedAirShot)){
+      // Source6a104 populates target5e6 before cue/ammo. The generic command
+      // dispatcher omits this writer; keep this bind limited to ordinary shots.
+      prepareGredRangedEntryVisibility(this.actor,runtime.sourceGredRangedCaptureBlocked6b8??false);
+      this.flushVisibilityState(this.actor);
+    }
+    // Original G RED-family close-air row80365dc8=[45,3,1,4]. Other B routes unchanged.
+    dispatchCommandRecord(this.actor, { cueId: admittedAirMelee||admittedAirShot?45:44, stateMode: admittedAirShot?1:3, actionIndex, variantIndex });
+    clearNeoGredMelee(this.actor);
+    clearGRedAirMelee(this.actor);
+    clearGRedCharge(this.actor);
+    clearGBlackCharge(this.actor);
+    clearGRedShot(this.actor);
+    clearGRedAirShot(this.actor);
+    if(admittedAirShot){
+      const air=prepareGRedAirShot(this.actor,runtime.sourceGredRangedCaptureBlocked6b8?null:activeSourceTarget(runtime,all)?.uid??null);
+      air.onReadAmmo=()=>runtime.weaponCells?.[0]?.cur??runtime.ammo;
+      air.onCaptureTarget=()=>{
+        air.targetUid=runtime.sourceGredRangedCaptureBlocked6b8?null:activeSourceTarget(runtime,all)?.uid??null;
+        this.syncIn(runtime,all);
+        if(runtime.sourceGredRangedCaptureBlocked6b8)this.actor.visibilityTarget=null;
+        refreshTargetVisibility(this.actor);this.flushVisibilityState(this.actor);
+      };
+      air.onRedispatch=subtype=>{
+        air.targetUid=runtime.sourceGredRangedCaptureBlocked6b8?null:activeSourceTarget(runtime,all)?.uid??null;
+        this.syncIn(runtime,all);
+        prepareGredRangedEntryVisibility(this.actor,runtime.sourceGredRangedCaptureBlocked6b8??false);
+        this.flushVisibilityState(this.actor);
+        this.actor.cmdButton=0;this.actor.cmdSubtype=subtype;this.actor.cmdChargedRanged=2;
+        dispatchCommandRecord(this.actor,{cueId:subtype===4?45:44,stateMode:3,actionIndex:0,variantIndex:subtype===4?4:0});
+        if(subtype===4){air.lowerStream=null;return;}
+        clearGRedAirShot(this.actor);this.gredAirShotLocomotion=null;
+        const ground=prepareGRedShot(this.actor,air.targetUid,false);
+        ground.onReadAmmo=air.onReadAmmo;
+        ground.onCaptureTarget=()=>{
+          ground.targetUid=runtime.sourceGredRangedCaptureBlocked6b8?null:activeSourceTarget(runtime,all)?.uid??null;
+          this.syncIn(runtime,all);
+          if(runtime.sourceGredRangedCaptureBlocked6b8)this.actor.visibilityTarget=null;
+          refreshTargetVisibility(this.actor);this.flushVisibilityState(this.actor);
+        };
+      };
+      this.syncIn(runtime,all);this.syncActionInput(null,false);
+    }
+    if(admittedShot){
+      const shot=prepareGRedShot(this.actor,runtime.sourceGredRangedCaptureBlocked6b8?null:activeSourceTarget(runtime,all)?.uid??null);
+      shot.onReadAmmo=()=>runtime.weaponCells?.[0]?.cur??runtime.ammo;
+      shot.onCaptureTarget=()=>{
+        shot.targetUid=runtime.sourceGredRangedCaptureBlocked6b8?null:activeSourceTarget(runtime,all)?.uid??null;
+        this.syncIn(runtime,all);
+        if(runtime.sourceGredRangedCaptureBlocked6b8)this.actor.visibilityTarget=null;
+        refreshTargetVisibility(this.actor);this.flushVisibilityState(this.actor);
+      };
+      this.syncIn(runtime,all);this.syncActionInput(null,false);
+    }
+    if(admittedBlackCharge){prepareGBlackCharge(this.actor,activeSourceTarget(runtime,all)?.uid??null);this.syncIn(runtime,all);this.syncActionInput(null,false);}
+    if(admittedCharge){
+      // Source6bda8 captures current selection;524 remains a saved point.
+      const target=actorAimTarget(activeSourceTarget(runtime,all));
+      const oldPoint=runtime.beamAim?.pos;
+      captureBeamAim(runtime,this.actor,all);
+      if(!target && oldPoint && runtime.beamAim)runtime.beamAim.pos={...oldPoint};
+      prepareGRedCharge(this.actor,target?.uid??null,runtime.beamAim!.pos);
+      this.syncIn(runtime,all);this.syncActionInput(null,false);
+    }
+    if(admittedAirMelee){
+      prepareGRedAirMelee(this.actor,activeSourceTarget(runtime,all)?.uid??null);
+      this.syncIn(runtime,all);this.syncActionInput(null,true);
+    }
+    if ((runtime.borgId === "pl0615" || runtime.borgId === "pl0629" || runtime.borgId === "pl062a") && runtime.grounded && actionIndex === 1 && variantIndex === 0) {
+      const neo = prepareNeoGredMelee(this.actor, activeSourceTarget(runtime,all)?.uid ?? null);
+      neo.onRedispatchTarget = () => {
+        neo.targetUid = activeSourceTarget(runtime,all)?.uid ?? null;
+        this.syncIn(runtime,all);
+      };
+      this.syncIn(runtime,all);
+      this.syncActionInput(null,true);
+    }
+    if(admittedAirShot)this.actor.rootAction?.(this.actor);else stepRomActor(this.actor, this.tables, this.ctx);
     this.syncOut(runtime);
     if (this.bounds) {
       runtime.pos.x = Math.min(this.bounds.maxX, Math.max(this.bounds.minX, runtime.pos.x));
@@ -2440,7 +2840,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       runtime.pos.x = preX;
       runtime.pos.z = preZ;
     }
-    if (this.groundClamp) {
+    if (!getGBlackChargeState(this.actor) && !getGRedChargeState(this.actor) && !getGRedAirMeleeState(this.actor) && this.groundClamp) {
       const clamped = this.groundClamp(runtime.pos, runtime.vel.y);
       if (clamped.y > runtime.pos.y) {
         runtime.pos.y = clamped.y;
@@ -2470,7 +2870,18 @@ export class RomDriverBridge implements RomFamilyDriver {
     _dt: number,
     all: readonly BorgRuntime[],
     input: PlayerInput | null = null,
+    onMineReceiverMelee?: (attack: MineReceiverMeleeAttack) => void,
   ): boolean {
+    if (runtime.borgId === "pl0615" || runtime.borgId === "pl0629" || runtime.borgId === "pl062a") {
+      const held = input?.attack ?? false;
+      this.neoBPressed = held && !this.neoBWasHeld;
+      this.neoBWasHeld = held;
+      const aHeld=input?.jump??false;
+      if(aHeld&&!this.shotAWasHeld)this.shotABuffer=16;
+      this.shotAWasHeld=aHeld;this.shotAActive=this.shotABuffer>0;
+      if(this.shotABuffer>0)this.shotABuffer--;
+      this.shotDirectionActive=!!input&&Math.max(Math.abs(input.moveX),Math.abs(input.moveZ))>=0x34/127;
+    }
     // The family's +0x4bc per-frame virtual runs EVERY frame in the ROM — before, during and
     // after any action — so it must run above the action-ownership early-return below.
     this.familyFrameUpdate?.(this.actor, runtime);
@@ -2487,23 +2898,40 @@ export class RomDriverBridge implements RomFamilyDriver {
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
       this.syncActionInput(input, true);
+      beginNeoGredMeleeTick(this.actor);
+      beginGRedCrashTick(this.actor);
+      beginGRedAirMeleeTick(this.actor);
       const poweredSourceAction = (runtime.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3)) || (isRevolver(runtime.borgId) && this.actor.actionIndex === 2);
       // This source handler ticks its stream before testing +0x1cf0 in the same frame.
       if (poweredSourceAction) this.dispatchEvent(this.streamFrame);
       // State 61 and the command fields remain live after the entry dispatch. Re-dispatching
       // cue 44 here would reset +0x540..+0x543 every frame, trapping every multi-phase ROM
       // machine in phase 0 and preventing an authored +0x1cee completion from being consumed.
-      stepRomActor(this.actor, this.tables, this.ctx);
-      this.syncOut(runtime);
-      if (this.bounds) {
+      const airShotBefore=getGRedAirShotState(this.actor);
+      const timeBomberPart = runtime.borgId === "pl0106" && this.actor.actionIndex === 0 && (this.actor.variantIndex === 1 || this.actor.variantIndex === 3);
+      if(airShotBefore?.partMode){
+        // Source55568 runs the lower channel before the upper handler. The
+        // host lower update has already run; do not dispatch it again here.
+        this.actor.controlWord=runtime.grounded?this.actor.controlWord&~0x40:this.actor.controlWord|0x40;
+        this.actor.rootAction?.(this.actor);this.syncOut(runtime);
+      }else if(timeBomberPart){
+        this.actor.controlWord=runtime.grounded?this.actor.controlWord&~0x40:this.actor.controlWord|0x40;
+        this.actor.rootAction?.(this.actor);
+        if(this.actor.variantIndex!==1 && this.actor.variantIndex!==3){
+          // 006a3d0 -> 006a104 snapshots the currently selected target again.
+          captureTimeBomberAim(runtime,this.actor,all);
+          this.timeBomberLocomotion=null;
+        }
+      } else {stepRomActor(this.actor, this.tables, this.ctx);this.syncOut(runtime);}
+      if (!timeBomberPart && this.bounds) {
         runtime.pos.x = Math.min(this.bounds.maxX, Math.max(this.bounds.minX, runtime.pos.x));
         runtime.pos.z = Math.min(this.bounds.maxZ, Math.max(this.bounds.minZ, runtime.pos.z));
       }
-      if (this.offMeshCheck && !this.offMeshCheck(runtime.pos.x, runtime.pos.z)) {
+      if (!timeBomberPart && !(runtime.borgId === "pl0106" && this.actor.variantIndex === 4) && this.offMeshCheck && !this.offMeshCheck(runtime.pos.x, runtime.pos.z)) {
         runtime.pos.x = preX;
         runtime.pos.z = preZ;
       }
-      if (this.groundClamp) {
+      if (!timeBomberPart && !getGBlackChargeState(this.actor) && !getGRedChargeState(this.actor) && !getGRedCrashState(this.actor) && !getGRedAirMeleeState(this.actor) && this.groundClamp) {
         const clamped = this.groundClamp(runtime.pos, runtime.vel.y);
         if (clamped.y > runtime.pos.y) {
           runtime.pos.y = clamped.y;
@@ -2513,13 +2941,16 @@ export class RomDriverBridge implements RomFamilyDriver {
       // The host floor owns the far action's grounded presentation; +1d9 is a
       // contact byte, never a floor flag. Preserve close and other families here.
       const nurseMotion = getNurseXState(this.actor);
-      if (nurseMotion && !nurseMotion.close && this.groundClamp) {
+      if ((getNeoGredMeleeState(this.actor) || (nurseMotion && !nurseMotion.close) || (runtime.borgId === "pl0106" && this.actor.variantIndex === 4)) && this.groundClamp) {
         runtime.grounded = this.groundClamp(runtime.pos, runtime.vel.y).grounded;
       }
+      const resumedAirShot=getGRedAirShotState(this.actor);
+      if(resumedAirShot?.partMode&&resumedAirShot.physicsAdvanced)
+        this.gredAirShotLocomotion={state:runtime.grounded?'idle':'jump',anim:runtime.grounded?'idle':'jump',stateTime:0};
       // Stream events (anim + hitbox + fireChild) for this frame.
       if (!poweredSourceAction) this.dispatchEvent(this.streamFrame);
       this.streamFrame++;
-      this.resolveHits(runtime, all);
+      this.resolveHits(runtime, all, onMineReceiverMelee);
       // Payload tracking for the X impotence latch: ROM-driven motion counts as a real
       // effect (movement/reposition X moves like Fly or a launch arc have no hitboxes).
       this.specialMotionAccum +=
@@ -2527,8 +2958,27 @@ export class RomDriverBridge implements RomFamilyDriver {
       // Completion: the phase machine's phase-3 exit clears +0x5e0's action bits
       // (controlWord &= ~0x3). Detect that OR the max-frame safety timeout.
       const phaseDone = (this.actor.controlWord & 0x3) === 0 && this.streamFrame > 2;
-      if (phaseDone || (!this.hasPendingKnightWindup() && this.streamFrame >= this.specialMaxFrames)) {
+      // Resource-bounded source repeats may legitimately exceed the generic90
+      // frame ceiling. Their authored completion and interruption own exit.
+      if (phaseDone || (!getGRedShotState(this.actor) && !getGRedAirShotState(this.actor) && !this.hasPendingKnightWindup() && this.streamFrame >= this.specialMaxFrames)) {
+        const sourceAirShot=getGRedAirShotState(this.actor);
+        const sourceShot=sourceAirShot??getGRedShotState(this.actor);
+        // Generic attack edge bookkeeping is skipped while ROM-owned. Preserve
+        // the actual final held state so the next fresh B is not swallowed, and
+        // holding through cleanup cannot fabricate a second admission.
+        if(sourceShot)runtime.cooldowns["attackHeld"]=input?.attack?1:0;
+        if(runtime.borgId === "pl0106" && this.actor.actionIndex===0 && this.actor.variantIndex===4 && this.actor.ubCue===7 && this.actor.stateTimer>0)
+          this.timeBomberLandingCooldown=true;
         clearNurseX(this.actor);
+        clearNeoGredMelee(this.actor);
+        clearGRedCrash(this.actor);
+        clearGRedAirMelee(this.actor);
+        if(getGRedChargeState(this.actor)&&runtime.beamOwner)runtime.beamOwner.state=0;
+        clearGRedCharge(this.actor);
+        clearGBlackCharge(this.actor);
+        clearGRedShot(this.actor);
+        clearGRedAirShot(this.actor);
+        delete runtime.sourceAnimSample;
         this.specialActive = false;
         this.romOwnedSpecial = false;
         this.armedHits = [];
@@ -2539,7 +2989,8 @@ export class RomDriverBridge implements RomFamilyDriver {
         // the X path does the same with cooldowns["special"] below. PLACEHOLDER (not
         // ROM-derived): the ROM's post-charge recovery frame count is untraced; reuse
         // the generic shot cooldown slot at the melee-cooldown magnitude.
-        runtime.cooldowns["shot"] = Math.max(runtime.cooldowns["shot"] ?? 0, 20);
+        if (!sourceShot && (runtime.borgId !== "pl0106" || this.actor.actionIndex !== 0))
+          runtime.cooldowns["shot"] = Math.max(runtime.cooldowns["shot"] ?? 0, 20);
         // X impotence latch: this ROM X ran to completion with no armed hit and no
         // child projectile, and either barely moved OR moved-and-returned (a spin/dash
         // that ends where it began, e.g. Iron Spin/Senpuken with undecoded hit kinds)
@@ -2549,7 +3000,7 @@ export class RomDriverBridge implements RomFamilyDriver {
         // of silently doing nothing again. PLACEHOLDER policy until every family's hit
         // kinds are decoded.
         if (this.specialKind === "x" && !this.specialHadEffect &&
-            !this.sourceXResourceDenied && !isNurseX(runtime.borgId)) {
+            !this.sourceXResourceDenied && runtime.borgId !== "pl0106" && !isNurseX(runtime.borgId)) {
           const net =
             Math.abs(runtime.pos.x - this.specialStartPos.x) +
             Math.abs(runtime.pos.y - this.specialStartPos.y) +
@@ -2560,8 +3011,11 @@ export class RomDriverBridge implements RomFamilyDriver {
         // Return to idle so the renderer stops selecting the attack slot now
         // that the ROM no longer owns the borg (stepMovement will take over and
         // re-derive state from velocity next frame).
-        runtime.state = "idle";
-        runtime.anim = "idle";
+        if(sourceAirShot&&this.gredAirShotLocomotion)Object.assign(runtime,this.gredAirShotLocomotion);
+        else if(timeBomberPart && this.timeBomberLocomotion)Object.assign(runtime,this.timeBomberLocomotion);
+        else {runtime.state = "idle";runtime.anim = "idle";}
+        this.timeBomberLocomotion=null;this.gredAirShotLocomotion=null;
+        this.restoreTimeBomberMovementControl();
       }
       return true; // ROM owns this frame — skip stepMovement/stepAttacks
     }
@@ -2572,7 +3026,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.dispatchEvent(this.streamFrame);
     this.streamFrame++;
     // Resolve armed hitbox windows against nearby enemies (damage).
-    this.resolveHits(runtime, all);
+    this.resolveHits(runtime, all, onMineReceiverMelee);
     // Drain any fireChild-spawned projectiles.
     // (battle.ts drains via drainProjectiles after tick returns)
     // Check completion: if the special's frame count exceeded the stream length,
@@ -2606,6 +3060,12 @@ export class RomDriverBridge implements RomFamilyDriver {
         ? resolveAnimMetaHop(this.runtime.borgId, group, slot)
         : null;
       this.runtime.meleeAnimStream = remapped ?? { group, slot };
+      // These admitted clocks already account for blend holds, mode2 advance,
+      // authored pauses and recovery resets. Only actual playAnim allocates an
+      // epoch; later syncOut samples the same clock without advancing it.
+      const sourceStream=getGRedAirShotState(this.actor)?.stream ?? getGRedShotState(this.actor)?.stream ?? getGBlackChargeState(this.actor)?.stream ?? getGRedChargeState(this.actor)?.stream ?? getGRedCrashState(this.actor)?.stream ?? getGRedAirMeleeState(this.actor)?.stream ?? getNeoGredMeleeState(this.actor)?.stream;
+      if(sourceStream)
+        this.runtime.sourceAnimSample={serial:++sourceAnimationSerial,frame:sourceStream.frame};
     }
   }
 
@@ -2614,6 +3074,7 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  (frame range), reach, and damage record. The bridge checks them each tick. */
   private onArmHit(kind: number): void {
     if (!this.runtime) return;
+    if(kind===0 && getGRedChargeState(this.actor)){this.armedHits=[];return;}
     // Only this source X continuation uses kind0 as its explicit HIT clear.
     // Nurse B also owns a real kind0 record and must retain ordinary arming.
     if (kind === 0 && isNurseX(this.runtime.borgId) && this.actor.actionIndex === 2 &&
@@ -2622,9 +3083,21 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (!tables) return;
     const recordIndices = tables.kinds[String(kind)];
     if (!recordIndices) return;
-    this.armedHits = recordIndices.map((idx) => {
+    const neo = getNeoGredMeleeState(this.actor);
+    const crash=getGRedCrashState(this.actor);
+    const airMelee=getGRedAirMeleeState(this.actor);
+    const airStream=airMelee?.stream?gredAirMeleeStreamProfile(airMelee.family,airMelee.stream.slot):undefined;
+    const neoReach = neo ? attackHitMaxReachForKind(this.runtime.borgId,kind) : null;
+    const opener = this.mineMeleeOpenerStream && this.runtime.borgId === "pl0615" &&
+      this.actor.actionIndex === 1 && this.actor.variantIndex === 0 && kind === 1 && recordIndices.length === 1
+      ? comboLadderForBorgId(this.runtime.borgId)?.[0] : null;
+    const mineReceiverAttackUid = opener?.slot === 0 && opener.kind === 1 &&
+      opener.activeStart === 10 && opener.activeEnd === 12 && opener.damageRecord?.index === 2
+      ? `rom-melee-${this.runtime.uid}-${++mineMeleeSerial}` : undefined;
+    this.armedHits = recordIndices.map((idx): ArmedHit | null => {
       const rec = tables.records[String(idx)] as {
-        activeStart: number; activeEnd: number; halfExtent: number[]; damageRecordIndex: number; collisionFlags: number;
+        activeStart: number; activeEnd: number; halfExtent: number[]; localOffset: number[];
+        damageRecordIndex: number; collisionFlags: number; shapeKind:number; radius:number;
       } | undefined;
       if (!rec) return null;
       // OPEN-WINDOW sentinel normalization: attackHitTables.json encodes "active from
@@ -2642,9 +3115,21 @@ export class RomDriverBridge implements RomFamilyDriver {
         collisionFlags: rec.collisionFlags,
         activeStart: rec.activeStart,
         activeEnd,
-        reach: rec.halfExtent?.[0] ?? 50,
+        reach: neoReach ?? rec.halfExtent?.[0] ?? 50,
         damageRecordIndex: rec.damageRecordIndex,
         struck: new Set<string>(),
+        ...(neo ? { neoActivated: false as boolean } : {}),
+        ...(crash && (crash.family==='red'?kind===15 && (idx===33 || idx===21):kind===29 && (idx===41 || idx===42)) ? { crashHit: {
+          recordIndex: idx, activated: false, refresh: familyDamageRecordForBorg(this.runtime!.borgId,rec.damageRecordIndex)?.rehitIntervalFrames??0,
+          countdown: 0, localOffset: rec.localOffset, radius: rec.halfExtent[0]??0,
+        } } : {}),
+        ...(airStream && kind===airStream.hitKind && airStream.hitRecords.includes(idx) &&
+          (rec.shapeKind===0||rec.shapeKind===2)?{airMeleeHit:{
+          recordIndex:idx,activated:false,shapeKind:rec.shapeKind,localOffset:rec.localOffset,
+          halfExtent:rec.halfExtent,radius:rec.shapeKind===2?rec.radius:rec.halfExtent[0]??0,
+        }}:{}),
+        ...(mineReceiverAttackUid && rec.activeStart === 10 && rec.activeEnd === 12 &&
+          rec.damageRecordIndex === 2 && (rec.collisionFlags & 1) !== 0 ? { mineReceiverAttackUid } : {}),
       } satisfies ArmedHit;
     }).filter((h): h is ArmedHit => h !== null);
     // Count as a real payload only when at least one armed window can actually fire
@@ -2762,7 +3247,8 @@ export class RomDriverBridge implements RomFamilyDriver {
 
   /** Per-frame hit check: if any armed hitbox's active window is live this frame,
    *  resolve hits against nearby enemies via the host's applyHit callback. */
-  private resolveHits(runtime: BorgRuntime, all: readonly BorgRuntime[]): void {
+  private resolveHits(runtime: BorgRuntime, all: readonly BorgRuntime[],
+    onMineReceiverMelee?: (attack: MineReceiverMeleeAttack) => void): void {
     if (this.armedHits.length === 0) return;
     // Check this frame BEFORE advancing: windows are authored inclusive of frame
     // 0, which is the most common activeStart in attackHitTables.json (1,947 of
@@ -2772,11 +3258,79 @@ export class RomDriverBridge implements RomFamilyDriver {
     // Nurse HIT windows are animation frames (including continuation and HOLD),
     // not elapsed time since armHit. Other families retain their existing clock.
     const nurse = this.actor.actionIndex === 2 ? getNurseXState(this.actor) : undefined;
-    const frame = nurse?.stream.frame ?? this.armedHitFrame;
+    const neo = getNeoGredMeleeState(this.actor);
+    const crash=getGRedCrashState(this.actor);
+    const airMelee=getGRedAirMeleeState(this.actor);
+    // HIT8 dies when its animation ID changes to g0s14. Source windows use
+    // the verified NEO animation clock, including its mode1/mode2 blend behavior.
+    const frame = crash?.stream ? (crash.stream.recovery?Infinity:Math.trunc(crash.stream.frame))
+      : airMelee?.stream ? (airMelee.stream.recovery?Infinity:Math.trunc(airMelee.stream.frame))
+      : neo?.stream ? (neo.stream.recovery ? Infinity : neo.stream.frame)
+      : nurse?.stream.frame ?? this.armedHitFrame;
     this.armedHitFrame += 1;
+    if(airMelee){
+      // Source8a65c/8a5d0 stores actor26c globally. Updating the full HIT list
+      // before collision means BLACK record19's activation at17 renews the
+      // still-active record6 too; their overlap cannot hit a victim twice.
+      const newlyActive=this.armedHits.filter(hit=>hit.airMeleeHit && !hit.airMeleeHit.activated &&
+        frame>=hit.activeStart && frame<=hit.activeEnd);
+      if(newlyActive.length){
+        const history=new Set<string>();
+        for(const hit of newlyActive)hit.airMeleeHit!.activated=true;
+        for(const hit of this.armedHits)if(hit.airMeleeHit)hit.struck=history;
+        airMelee.hitActivationSerial=++gredAirMeleeHitSerial;
+        airMelee.hitRecordIndex=newlyActive[0]!.airMeleeHit!.recordIndex;
+      }
+    }
+    if (neo) {
+      const newlyActive = this.armedHits.filter(hit=>!hit.neoActivated && frame>=hit.activeStart && frame<=hit.activeEnd);
+      if(newlyActive.length) {
+        // Source8a65c: all new records in one activation pass share actor26c;
+        // later waves renew it. HIT8 windows7..9 and10..16 are separate waves,
+        // refresh0, so the same victim may receive each once.
+        this.neoWaveStruck = new Set();
+        for(const hit of newlyActive)hit.neoActivated=true;
+      }
+    }
+    if(crash){
+      // Source29434 updates the entire HIT list before running any pair pass.
+      // Simultaneous activation seeds refresh only on the FIRST actor1ca gate;
+      // subsequent records start at0. HIT29's [7,0] counters therefore renew
+      // the shared actor ID at +1,+7,+8,..., including frozen animation updates.
+      // All volumes then use one FINAL actor ID/history for this collision pass.
+      let activatedThisPass=false,renew=false;
+      for(const hit of this.armedHits){
+        if(!hit.crashHit || frame<hit.activeStart || frame>hit.activeEnd)continue;
+        const h=hit.crashHit;
+        if(!h.activated){
+          h.activated=true;h.countdown=0;
+          if(!activatedThisPass){h.countdown=h.refresh;renew=true;activatedThisPass=true;
+            crash.hitRecordIndex=h.recordIndex;crash.hitActivationSerial=++gredCrashHitSerial;}
+        } else if(h.refresh>0 && --h.countdown<1){
+          h.countdown=h.refresh;renew=true;crash.hitRenewalCount++;
+          crash.hitActivationSerial=++gredCrashHitSerial;
+        }
+      }
+      if(renew){const history=new Set<string>();for(const hit of this.armedHits)if(hit.crashHit)hit.struck=history;}
+    }
     for (const hit of this.armedHits) {
       if (frame < hit.activeStart || frame > hit.activeEnd) continue;
       const record = familyDamageRecordForBorg(runtime.borgId, hit.damageRecordIndex);
+      if (hit.mineReceiverAttackUid && record && runtime.borgId === "pl0615") {
+        // Snapshot while this actual arm is active, before later actor hits can interrupt
+        // it. Battle defers reception until AFTER every mine's child update. The
+        // admitted source animation clock supplies the original inclusive10..12 window;
+        // it no longer uses elapsed updates since HIT arming. Root reach/front/vertical
+        // geometry is bounded host glue,
+        // not animated bone1 HIT geometry. No generic, air, later-combo or NEO inference.
+        const opener = comboLadderForBorgId(runtime.borgId)![0]!;
+        onMineReceiverMelee?.({
+          uid: hit.mineReceiverAttackUid, ownerUid: runtime.uid, team: runtime.team,
+          pos: { ...runtime.pos }, forward: { x: Math.sin(runtime.rotY), y: 0, z: Math.cos(runtime.rotY) },
+          reach: opener.reach, yTolerance: MELEE.Y_TOLERANCE,
+          damage: 1, damageRecord: { ...record },
+        });
+      }
       // Nurse actor HIT descriptors use list 177c (descriptor 128), whose
       // secondary-v-borg pass permits allies: chunk_0013.c:1068-1079 and
       // chunk_0003.c:7338-7357. Do not apply the active-object pass's flagsB16
@@ -2785,20 +3339,54 @@ export class RomDriverBridge implements RomFamilyDriver {
         (hit.collisionFlags & 0x80) !== 0 && record !== null && (record.flagsA & 0x2) !== 0;
       for (const target of all) {
         if (!target.alive || target.uid === runtime.uid || (!nurseHealing && target.team === runtime.team)) continue;
-        if (hit.struck.has(target.uid)) continue;
+        const struck = neo ? this.neoWaveStruck : hit.struck;
+        if (struck.has(target.uid)) continue;
         const dx = target.pos.x - runtime.pos.x;
         const dz = target.pos.z - runtime.pos.z;
+        if (neo && (Math.abs(target.pos.y-runtime.pos.y)>MELEE.Y_TOLERANCE ||
+          dx*Math.sin(runtime.rotY)+dz*Math.cos(runtime.rotY)<0)) continue;
         // Nurse uses the existing root-radius approximation in three dimensions:
         // admission alone cannot prevent a target moving vertically before impact.
         // The radius is the authored HIT halfExtent, not a new tolerance.
-        const dist = nurseHealing ? Math.hypot(dx, target.pos.y - runtime.pos.y, dz) : Math.hypot(dx, dz);
-        if (dist <= hit.reach) {
-          hit.struck.add(target.uid);
+        let dist = nurseHealing ? Math.hypot(dx, target.pos.y - runtime.pos.y, dz) : Math.hypot(dx, dz);
+        let reach=hit.reach;
+        const sourceVolume=crash?hit.crashHit:airMelee?hit.airMeleeHit:undefined;
+        if(sourceVolume){
+          // Original shape0 radius or shape2 offset±extent capsule. Animated
+          // bone origins/orientations are replaced by root+yaw; BLACK3b304's
+          // previous/current endpoint sweep is explicitly not reproduced.
+          // Source+c0 is independent from visual scale; undefined explicitly
+          // falls back to modelScale, as in the other scoped source adapters.
+          const h=sourceVolume,scale=this.actor.collisionScale??this.actor.modelScale;
+          const [lx=0,ly=0,lz=0]=h.localOffset,yaw=runtime.rotY;
+          const cx=runtime.pos.x+(Math.cos(yaw)*lx+Math.sin(yaw)*lz)*this.actor.modelScale;
+          const cy=runtime.pos.y+ly*this.actor.modelScale;
+          const cz=runtime.pos.z+(-Math.sin(yaw)*lx+Math.cos(yaw)*lz)*this.actor.modelScale;
+          if('shapeKind' in h && h.shapeKind===2){
+            const [ex=0,ey=0,ez=0]=h.halfExtent;
+            const vx=(Math.cos(yaw)*ex+Math.sin(yaw)*ez)*this.actor.modelScale;
+            const vy=ey*this.actor.modelScale;
+            const vz=(-Math.sin(yaw)*ex+Math.cos(yaw)*ez)*this.actor.modelScale;
+            const sx=cx-vx,sy=cy-vy,sz=cz-vz;
+            const dx=2*vx,dy=2*vy,dz=2*vz,lengthSquared=dx*dx+dy*dy+dz*dz;
+            const projection=(target.pos.x-sx)*dx+(target.pos.y-sy)*dy+(target.pos.z-sz)*dz;
+            const t=lengthSquared>0?Math.max(0,Math.min(1,projection/lengthSquared)):0;
+            dist=Math.hypot(target.pos.x-sx-dx*t,target.pos.y-sy-dy*t,target.pos.z-sz-dz*t);
+          }else dist=Math.hypot(target.pos.x-cx,target.pos.y-cy,target.pos.z-cz);
+          reach=h.radius*scale;
+        }
+        if (dist <= reach) {
+          if(!neo && !crash && !airMelee)hit.struck.add(target.uid);
           // Route through the host's full applyHit path for damage-formula fidelity.
           if (this.hitResolver) {
-            const resolved = this.hitResolver(runtime, target, hit.damageRecordIndex, 1.0);
+            const resolved = this.hitResolver(runtime, target, hit.damageRecordIndex, 1.0,
+              neo ? () => { struck.add(target.uid); acceptNeoGredMeleeContact(this.actor,neo); }
+                : crash ? () => { struck.add(target.uid);if(hit.crashHit)crash.hitRecordIndex=hit.crashHit.recordIndex;
+                  acceptGRedCrashContact(this.actor,crash); }
+                : airMelee ? ()=>{struck.add(target.uid);if(hit.airMeleeHit)airMelee.hitRecordIndex=hit.airMeleeHit.recordIndex;
+                  acceptGRedAirMeleeContact(this.actor,airMelee);} : undefined);
             if (nurse && typeof resolved === "number" && resolved < 0) nurse.pendingContact |= 0x10;
-          } else if (!nurseHealing) {
+          } else if (!nurseHealing && !neo && !crash && !airMelee) {
             // Healing requires the full resolver (immunity, signed HP, gauges and
             // reactions). Never turn it into the legacy damaging fallback.
             // Fallback (no resolver wired): direct HP subtraction so hits are still visible.
@@ -2814,7 +3402,20 @@ export class RomDriverBridge implements RomFamilyDriver {
   /** Force-clear when host lifecycle (hit/down/death) outranks ROM action ownership.
    *  Deliberately leaves runtime state/animation untouched for the host lifecycle to own. */
   interrupt(): void {
+    this.restoreTimeBomberMovementControl();
+    if(this.timeBomberLandingCooldown)this.actor.stateTimer=0;
+    this.timeBomberLandingCooldown=false;
+    this.timeBomberLocomotion=null;
+    if(getGRedChargeState(this.actor)&&this.runtime?.beamOwner)this.runtime.beamOwner.state=0;
+    clearGRedCharge(this.actor);
+    clearGBlackCharge(this.actor);
+    clearGRedShot(this.actor);
+    clearGRedAirShot(this.actor);this.gredAirShotLocomotion=null;
     clearNurseX(this.actor);
+    clearNeoGredMelee(this.actor);
+    clearGRedCrash(this.actor);
+    clearGRedAirMelee(this.actor);
+    if(this.runtime)delete this.runtime.sourceAnimSample;
     const wasActive = this.specialActive || this.romOwnedSpecial;
     this.arrowStreamClock = null;
     this.arrowStreamMask = 0;
@@ -2826,6 +3427,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.specialActive = false;
     this.romOwnedSpecial = false;
     this.armedHits = [];
+    this.mineMeleeOpenerStream = false;
     this.streamEvents = null;
     this.streamSchedules = [];
     this.pendingProjectiles = [];

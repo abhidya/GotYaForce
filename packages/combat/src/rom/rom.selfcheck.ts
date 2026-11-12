@@ -6,6 +6,7 @@
 //  2. dispatch.dispatchCommandRecord transitions state 61 → rootAction
 //  3. The G RED family's phase-0 launch produces the documented upward impulse (Y=+4.0)
 
+import { runStreamFlagsSelfTest } from "./stream-flags.selftest.js";
 import { createRomActor, type RomActor } from "./actor.js";
 import { groundClamp, integratePhysics, integratePhysicsPrimary } from "./physics.js";
 import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
@@ -203,6 +204,7 @@ function assert(cond: boolean, msg: string): void {
 
 export function runSelfTest(): number {
   failures = 0;
+  runStreamFlagsSelfTest();
 
   // Test 1: physics integrator — upward impulse with no gravity produces linear rise.
   console.log("[rom.selfcheck] physics.integratePhysics — Y=+4 impulse, no gravity:");

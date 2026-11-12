@@ -46,6 +46,12 @@ export function tickStream(actor, mask, ctx = {}) {
   __seamLog.push({ seam: "stream_tick", mask });
   return false;
 }
+// Shared Time Bomber code imports this seam; existing action2 oracle domain
+// does not execute the new Time Bomber command state machine.
+export function dispatchCommandRecord(actor, record) {
+  __seamLog.push({ seam: "command_dispatch", ...record });
+  return false;
+}
 export function dispatchFullBodyCue(actor, cueId) {
   __seamLog.push({ seam: "fb_cue", cue: cueId });
   return false;

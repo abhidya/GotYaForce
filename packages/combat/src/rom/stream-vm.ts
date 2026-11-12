@@ -120,13 +120,13 @@ export function startStream(
   slot: number,
   rate: number = -1.0,
 ): void {
+  const effective = mask & actor.weaponPartMask;
+  // zz_004beb8_: reset +0x709 before resolving even an absent bank. The host
+  // callback may execute startup writes, so it must observe the cleared byte.
+  if ((effective & 2) !== 0) actor.contactFlags = 0;
   const hostScheduled = (actor as RomActor & {
     onStartStream?: (group: number, slot: number, mask: number) => boolean;
   }).onStartStream?.(group, slot, mask) === true;
-  const effective = mask & actor.weaponPartMask;
-  // NOT PORTED: for an effective mask with bit 1 set the ROM clears +0x709, the contact-slow
-  // flag (chunk_0006.c:1442-1444). That field lives on BorgRuntime's status word, not
-  // RomActor, so the bridge owns the clear.
   const streamStart = resolveStreamOffset(actor, group, slot);
   if (streamStart < 0) {
     for (let i = 0; i < actor.parts.length; i++) {
@@ -345,9 +345,11 @@ function dispatchOp(
       return;
     }
     case 0x0b: { // bit set/clear on +0x709 (b1 mode, b2 mask)
-      const flag = actor as RomActor & { contactFlags?: number };
-      const cur = flag.contactFlags ?? 0;
-      flag.contactFlags = b1 === 0 ? cur | b2 : cur & ~b2;
+      // FUN_8004c75c gates on mask&2; this walker dispatches one part at a time.
+      if (partIndex !== 1) return;
+      actor.contactFlags = (b1 !== 0
+        ? actor.contactFlags | b2
+        : actor.contactFlags & ~b2) & 0xff;
       return;
     }
     case 0x0c: { // bit set/clear on +0x57a/+0x57b

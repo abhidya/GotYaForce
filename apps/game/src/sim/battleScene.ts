@@ -122,6 +122,12 @@ interface Actor {
    * `current === slot` would otherwise short-circuit playSlot.
    */
   lastMeleeClipKey: string | null;
+  /** Invalidates clip completions across animation starts, including same-clip restarts. */
+  animationRevision: number;
+  /** Latest simulation sample, retained while an exact stream clip is loading. */
+  sourceAnimSample: BattleActorView["sourceAnimSample"];
+  /** Only an exact stream action can be owned by the simulation playhead. */
+  sourceAnimAction: THREE.AnimationAction | null;
   /** True once the (async) model has been attached. */
   ready: boolean;
   isPlaceholder: boolean;
@@ -252,6 +258,10 @@ interface ProjectileActor {
   sustainedBeam?: boolean;
   /** Arrow hit tether uses global37; flying arrow model12 is owner-local/unavailable. */
   arrowTether?: boolean;
+  /** Generic BLACK charge placeholder, never a guessed original model7/8/9. */
+  gblackCharge?: "sweep" | "impact";
+  /** Procedural source c3be0 trail, independent of the tip collision sphere. */
+  gredRanged?: boolean;
   /** Independent world-space ring, never a child of the expanding body scale. */
   gatlingRing?: BankVisual;
 }
@@ -913,7 +923,7 @@ export class BattleScene {
       }
       if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid, b.meleeSounds);
       actor.lastSeenSlot = slot;
-      if (actor.ready) this.playSlot(actor, slot, b.meleeAnimStream);
+      if (actor.ready) this.playSlot(actor, slot, b.meleeAnimStream, b.sourceAnimSample);
       // Dim/hide once dead so the death pose reads (sim culls dead borgs next frame).
       if (!b.alive) actor.group.visible = true;
     }
@@ -1047,6 +1057,9 @@ export class BattleScene {
       lastSeenSlot: null,
       meleeParity: true, // first melee entry flips this to false => plain "melee" first
       lastMeleeClipKey: null,
+      animationRevision: 0,
+      sourceAnimSample: null,
+      sourceAnimAction: null,
       ready: false,
       isPlaceholder: true,
       chargeGlow: null,
@@ -1191,6 +1204,9 @@ export class BattleScene {
     actor.current = null;
     actor.lastSeenSlot = null;
     actor.lastMeleeClipKey = null;
+    actor.animationRevision += 1;
+    actor.sourceAnimSample = null;
+    actor.sourceAnimAction = null;
     actor.ready = false;
     actor.isPlaceholder = true;
   }
@@ -1223,7 +1239,12 @@ export class BattleScene {
     });
   }
 
-  private playSlot(actor: Actor, slot: AnimSlot, meleeAnimStream?: { group: number; slot: number } | null): void {
+  private playSlot(
+    actor: Actor,
+    slot: AnimSlot,
+    meleeAnimStream?: { group: number; slot: number } | null,
+    sourceAnimSample?: BattleActorView["sourceAnimSample"],
+  ): void {
     // Per-combo-step melee anim (and, since the air-B/charge exact-data pass, charged
     // releases): the slot axis ("melee"/"melee_alt"/"charge_shot") stays constant across a
     // whole combo chain or charge, but a resolved stream ref should still swap the clip on
@@ -1237,12 +1258,24 @@ export class BattleScene {
       (slot === "melee" || slot === "melee_alt" || slot === "charge_shot" || slot === "special") && meleeAnimStream ? meleeAnimStream : null;
     const streamKey = streamRef ? `${slot}@g${streamRef.group}s${streamRef.slot}` : null;
     const clipKey = streamKey ?? slot;
-    if (actor.current === slot && actor.lastMeleeClipKey === clipKey) return;
+    const sample = streamKey && sourceAnimSample ? sourceAnimSample : null;
+    const sameEpoch = actor.sourceAnimSample?.serial === sample?.serial;
+    // Copy the newest sample even when this clip is cached or still loading. A held
+    // source frame must never inherit mixer/render time, and a repeated same-clip
+    // animation start must bypass the ordinary unchanged-slot short circuit.
+    actor.sourceAnimSample = sample ? { serial: sample.serial, frame: sample.frame } : null;
+    if (actor.current === slot && actor.lastMeleeClipKey === clipKey && sameEpoch) {
+      this.applySourceAnimSample(actor);
+      return;
+    }
     if (!actor.mixer) {
       return; // placeholder has no animation
     }
     const mixer = actor.mixer;
     const revision = actor.modelRevision;
+    const animationRevision = ++actor.animationRevision;
+    if (actor.sourceAnimAction) actor.sourceAnimAction.paused = false;
+    actor.sourceAnimAction = null;
     actor.current = slot;
     actor.lastMeleeClipKey = clipKey;
 
@@ -1250,16 +1283,19 @@ export class BattleScene {
       const existingStream = actor.streamActions[streamKey];
       if (existingStream) {
         this.crossfadeTo(actor, existingStream, slot);
+        this.ownSourceAnimAction(actor, existingStream);
         return;
       }
       const loader = this.assets.loadClipByStreamRef;
       if (loader && streamRef) {
         void loader(actor.borgId, streamRef).then((clip) => {
-          if (actor.modelRevision !== revision || actor.mixer !== mixer || actor.lastMeleeClipKey !== clipKey) return;
+          if (actor.modelRevision !== revision || actor.mixer !== mixer || actor.lastMeleeClipKey !== clipKey
+            || actor.animationRevision !== animationRevision) return;
           if (clip) {
             const action = mixer.clipAction(clip);
             actor.streamActions[streamKey] = action;
             this.crossfadeTo(actor, action, slot);
+            this.ownSourceAnimAction(actor, action);
             return;
           }
           // The exact bank isn't in this borg's baked anim_index — fall back to the plain
@@ -1285,14 +1321,17 @@ export class BattleScene {
     // A morph can request the same slot before the previous form's clip resolves.
     const mixer = actor.mixer;
     const revision = actor.modelRevision;
+    const animationRevision = actor.animationRevision;
     // Lazily load the clip; apply when ready if still current.
     void this.assets.loadClip(actor.borgId, slot).then((clip) => {
-      if (actor.modelRevision !== revision || actor.mixer !== mixer || actor.lastMeleeClipKey !== clipKey) return;
+      if (actor.modelRevision !== revision || actor.mixer !== mixer || actor.lastMeleeClipKey !== clipKey
+        || actor.animationRevision !== animationRevision) return;
       if (!clip) {
         // No clip for this slot; try idle as a fallback.
         if (slot !== "idle") {
           void this.assets.loadClip(actor.borgId, "idle").then((idle) => {
-            if (actor.modelRevision !== revision || actor.mixer !== mixer || actor.lastMeleeClipKey !== clipKey || !idle) return;
+            if (actor.modelRevision !== revision || actor.mixer !== mixer || actor.lastMeleeClipKey !== clipKey
+              || actor.animationRevision !== animationRevision || !idle) return;
             const a = mixer.clipAction(idle);
             actor.actions[slot] = a;
             this.crossfadeTo(actor, a, slot);
@@ -1304,6 +1343,33 @@ export class BattleScene {
       actor.actions[slot] = action;
       this.crossfadeTo(actor, action, slot);
     });
+  }
+
+  /** Bind source ownership only after an exact stream load, never label/idle fallback. */
+  private ownSourceAnimAction(actor: Actor, action: THREE.AnimationAction): void {
+    if (!actor.sourceAnimSample) return;
+    actor.sourceAnimAction = action;
+    this.applySourceAnimSample(actor);
+  }
+
+  private applySourceAnimSample(actor: Actor): void {
+    const action = actor.sourceAnimAction;
+    const sample = actor.sourceAnimSample;
+    if (!action || !sample || !Number.isFinite(sample.frame)) return;
+    // borgPresentationAssets.buildClip bakes every track at frame / json.fps
+    // (default SOURCE_FRAME_RATE_HZ). Use the actual exported sample times, not an
+    // assumed 60 Hz. This also preserves fractional source frames and clamps to the
+    // last available baked pose. An empty clip has no pose to seek.
+    const times = action.getClip().tracks.find((track) => track.times.length > 0)?.times;
+    if (!times) return;
+    const frame = Math.max(0, Math.min(sample.frame, times.length - 1));
+    const lower = Math.floor(frame);
+    const upper = Math.min(lower + 1, times.length - 1);
+    action.time = times[lower]! + (times[upper]! - times[lower]!) * (frame - lower);
+    // Pausing this action preserves its sampled pose while allowing the existing
+    // cosmetic mixer crossfade to finish. This is not original bone-blend parity.
+    action.paused = true;
+    actor.mixer?.update(0);
   }
 
   private crossfadeTo(actor: Actor, action: THREE.AnimationAction, slot: AnimSlot): void {
@@ -1520,11 +1586,13 @@ export class BattleScene {
     for (const projectile of projectiles) {
       live.add(projectile.uid);
       let actor = this.projectileActors.get(projectile.uid);
-      const gatling = projectile.gatlingSource;
+      const gatling = projectile.gatlingSource ?? projectile.timeBomberSource;
       const gatlingModelId = gatling?.kind === "explosion" ? (gatling.phase === "tail" ? 23 : 22) : undefined;
       if (actor && (actor.gatlingModelId !== gatlingModelId
         || Boolean(actor.sustainedBeam) !== Boolean(projectile.beamSource)
-        || Boolean(actor.arrowTether) !== (projectile.arrowSource?.kind === "tether"))) {
+        || Boolean(actor.arrowTether) !== (projectile.arrowSource?.kind === "tether")
+        || actor.gblackCharge !== projectile.gblackChargeSource?.kind
+        || Boolean(actor.gredRanged) !== Boolean(projectile.gredRangedSource))) {
         // Reconcile a changed source visual without retaining the wrong mesh for this UID.
         // Gatling keeps the explosion UID while replacing model22 with tail model23.
         this.disposeProjectileActor(actor);
@@ -1580,6 +1648,18 @@ export class BattleScene {
       } else {
         actor.material.opacity = fade;
       }
+      const groundWave=projectile.gblackGroundWaveSource;
+      if(groundWave?.kind==='child'){
+        // Generic procedural flame placeholder; no original type5 model or
+        // texture is claimed. The authored fixed-step scale anchors it to ground,
+        // independent of the much larger inherited+c0 collision radius.
+        const x=groundWave.visualScale[0]!,y=groundWave.visualScale[1]!;
+        actor.node.scale.set(150*x,150*y,1);
+        actor.node.position.y=projectile.pos.y+75*y;
+        actor.material.opacity=1;
+      }
+      if (projectile.gblackChargeSource) this.syncGBlackCharge(actor, projectile);
+      if (projectile.gredRangedSource) this.syncGredRanged(actor, projectile);
       if (actor.beam) orientBeam(actor.node, projectile);
       // Persisting projectiles (consumeOnHit === false, ATK-008) apply re-hits WITHOUT
       // despawning; the sim flags each applied hit for exactly one frame
@@ -1589,7 +1669,9 @@ export class BattleScene {
         // yaw from the projectile's flight direction — the closest available stand-in for
         // the ROM's attacker->contact basis on projectile hits.
         this.spawnHitFx(
-          actor.node.position,
+          // The c3be0 visual node sits at the trail midpoint; its contact is at
+          // the moving tip, not halfway back along the harmless drawing trail.
+          projectile.gredRangedSource ? new THREE.Vector3(projectile.pos.x,projectile.pos.y,projectile.pos.z) : actor.node.position,
           projectile.lastImpactEffectId,
           projectile.team,
           Math.atan2(projectile.vel.x, projectile.vel.z),
@@ -1662,7 +1744,7 @@ export class BattleScene {
     // That owner-bank mesh is not exported; retain the explicitly generic shell even if
     // a caller accidentally supplies a contradictory global-bank flightVisual.
     // Arrow 0x400c also resolves in the owner bank, never global efct12.
-    if (projectile.revolverSource || projectile.arrowSource) return null;
+    if (projectile.revolverSource || projectile.arrowSource || (projectile.timeBomberSource?.kind === "primary" || projectile.timeBomberSource?.kind === "mine")) return null;
     // flightVisual (sim-resolved, combat shotFlightVisualForBorgId) is preferred; the TUNED
     // renderer-side table covers the ROM-family beams whose guarded attribution lands on a
     // different table shape (resolveTunedFlightVisual). Both absent => keep the energy/sprite.
@@ -1687,13 +1769,13 @@ export class BattleScene {
   }
 
   private buildGatlingExplosionActor(projectile: BattleProjectileObservation): ProjectileActor | null {
-    const source = projectile.gatlingSource;
+    const source = projectile.gatlingSource ?? projectile.timeBomberSource;
     if (source?.kind !== "explosion") return null;
     const modelId = source.phase === "tail" ? 23 : 22;
     // The explosion row's fixed matAnim selector is 0, independent of team. The ring and
     // tail do not attach matAnim. Templates resolve synchronously, with no async lifetime.
     const body = buildBankVisual(this.gatlingLayers(modelId) ?? [], modelId === 22 ? 0 : undefined);
-    body.node.name = `gatling-explosion:${projectile.uid}:model${modelId}`;
+    body.node.name = `${projectile.timeBomberSource ? "time-bomber" : "gatling"}-explosion:${projectile.uid}:model${modelId}`;
     this.root.add(body.node);
     const actor: ProjectileActor = {
       node: body.node, material: new THREE.MeshBasicMaterial(), beam: false,
@@ -1784,7 +1866,77 @@ export class BattleScene {
       actor.node.visible ? distance / 140 : 0.009999999776482582);
   }
 
+  private buildGredRangedActor(projectile: BattleProjectileObservation): ProjectileActor | null {
+    if(!projectile.gredRangedSource)return null;
+    const color=projectile.team===0?PROJECTILE_COLORS.energy.ally:PROJECTILE_COLORS.energy.enemy;
+    // Generic crossed planes, not original model0. The simulation owns length,
+    // width and retirement; neither render time nor collision radius stretches it.
+    const material=new THREE.MeshBasicMaterial({map:this.projectileTextures.get('energy')??null,color,
+      transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    const node=new THREE.Group();node.name=`gred-ranged:${projectile.uid}`;
+    node.add(new THREE.Mesh(BEAM_PLANE_XY,material),new THREE.Mesh(BEAM_PLANE_ZY,material));this.root.add(node);
+    return {node,material,beam:false,gredRanged:true};
+  }
+
+  private syncGredRanged(actor:ProjectileActor,projectile:BattleProjectileObservation):void {
+    const source=projectile.gredRangedSource?.flight;if(!source)return;
+    actor.node.visible=source.visible;actor.material.opacity=1;
+    const direction=BEAM_DIR_SCRATCH.set(source.pos.x-source.origin.x,source.pos.y-source.origin.y,source.pos.z-source.origin.z);
+    if(direction.lengthSq()<=1e-12)direction.set(source.velocity.x,source.velocity.y,source.velocity.z);
+    direction.normalize();
+    const length=Math.max(0,source.length),width=36.959999084472656*source.widthScale;
+    actor.node.position.set(source.pos.x-direction.x*length/2,source.pos.y-direction.y*length/2,source.pos.z-direction.z*length/2);
+    actor.node.scale.set(width,length,width);
+    if(direction.lengthSq()>1e-12)actor.node.quaternion.setFromUnitVectors(BEAM_REST_AXIS,direction);
+  }
+
+  private buildGBlackChargeActor(projectile: BattleProjectileObservation): ProjectileActor | null {
+    const source=projectile.gblackChargeSource;if(!source)return null;
+    const color=projectile.team===0?PROJECTILE_COLORS.energy.ally:PROJECTILE_COLORS.energy.enemy;
+    // Procedural placeholder only. Original child models7/8/9 and effect16 are
+    // not substituted with unrelated exported assets. Lifetime/scale come from
+    // the fixed-step source child, never a renderer-owned clock.
+    if(source.kind==='impact'){
+      const material=new THREE.SpriteMaterial({map:this.projectileTextures.get('energy')??null,color,
+        transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthWrite:false});
+      const node=new THREE.Sprite(material);node.name=`gblack-charge-impact:${projectile.uid}`;this.root.add(node);
+      return {node,material,beam:false,gblackCharge:'impact'};
+    }
+    const material=new THREE.MeshBasicMaterial({map:this.projectileTextures.get('energy')??null,color,
+      transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    const node=new THREE.Group();node.name=`gblack-charge-sweep:${projectile.uid}`;
+    node.add(new THREE.Mesh(BEAM_PLANE_XY,material),new THREE.Mesh(BEAM_PLANE_ZY,material));this.root.add(node);
+    return {node,material,beam:false,gblackCharge:'sweep'};
+  }
+
+  private syncGBlackCharge(actor:ProjectileActor,projectile:BattleProjectileObservation):void {
+    const source=projectile.gblackChargeSource;if(!source)return;
+    if(source.kind==='impact'){
+      actor.node.visible=true;actor.node.scale.set(620*source.scale,620*source.scale,1);
+      actor.material.opacity=source.alpha;return;
+    }
+    actor.node.visible=source.phase!=='pending'&&source.phase!=='freed';actor.material.opacity=1;
+    const x=source.visualScale[0]!,y=source.visualScale[1]!,z=source.visualScale[2]!;
+    if(source.stage===2){
+      const direction=BEAM_DIR_SCRATCH.set(source.end.x-source.start.x,source.end.y-source.start.y,source.end.z-source.start.z);
+      const distance=direction.length();
+      actor.node.position.set((source.start.x+source.end.x)/2,(source.start.y+source.end.y)/2,(source.start.z+source.end.z)/2);
+      // Normalized source matrix makes the launch ray independent of model
+      // scale. Curve X/Y control this placeholder's width, never HIT radius.
+      actor.node.scale.set(60*x,distance,60*y);
+      if(distance>1e-6)actor.node.quaternion.setFromUnitVectors(BEAM_REST_AXIS,direction.divideScalar(distance));
+    }else{
+      actor.node.scale.set(60*x,60*z,60*y);
+      const direction=BEAM_DIR_SCRATCH.set(source.direction.x,source.direction.y,source.direction.z);
+      if(direction.lengthSq()>1e-12)actor.node.quaternion.setFromUnitVectors(BEAM_REST_AXIS,direction.normalize());
+    }
+  }
+
   private spawnProjectile(projectile: BattleProjectileObservation): ProjectileActor {
+    const ranged=this.buildGredRangedActor(projectile);
+    if(ranged)return ranged;
+    const blackCharge=this.buildGBlackChargeActor(projectile);
+    if(blackCharge)return blackCharge;
     const arrowTether = this.buildArrowTetherActor(projectile);
     if (arrowTether) return arrowTether;
     const sustainedBeam = this.buildSustainedBeamActor(projectile);
