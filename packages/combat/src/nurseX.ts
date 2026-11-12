@@ -1,5 +1,5 @@
-/** Bounded ground-close Nurse X, source8007bbe0/8007be08/8007c414/
- * 8007c4b8/8007c7a4. Far and airborne branches are deliberately not admitted.
+/** Bounded close allied Nurse X, source8007bbe0/8007be08/8007c414/
+ * 8007c4b8/8007c7a4. Far-target branches are deliberately not admitted.
  * World bone anchors/collision remain the browser's documented root abstraction. */
 import bodyHeights from './data/actorBodyHeights.json' with { type: 'json' };
 import type { BorgRuntime } from './types.js';
@@ -18,8 +18,8 @@ import { isNurseX } from './nurseInput.js';
 /** Original branch tests, with explicit host root anchors replacing +8e0/+8f0.
  * No fallback body height is invented for unknown roster entries. */
 export function canStartNurseX(owner: BorgRuntime, target: BorgRuntime | undefined | null): boolean {
-  if (!isNurseX(owner.borgId) || !owner.grounded || !owner.command?.exact ||
-      owner.command.type !== 2 || owner.command.actionIndex !== 2 || owner.command.variantIndex !== 0 ||
+  if (!isNurseX(owner.borgId) || !owner.command?.exact ||
+      owner.command.type !== 2 || owner.command.actionIndex !== 2 || owner.command.variantIndex !== (owner.grounded ? 0 : 1) ||
       !target || target.uid === owner.uid || target.team !== owner.team ||
       !target.alive || target.hp <= 0 || target.state === 'death' ||
       (target.targetEligibility83 ?? 0) !== 0) return false;
@@ -67,6 +67,9 @@ export function stepNurseX(actor: RomActor, ctx: StreamContext): void {
       actor.motion.x = actor.motion.y = actor.motion.z = 0;
       ctx.onArmHit?.(actor, 0, 0, 255);
       ctx.onPlayAnim?.(actor, 4, 2, false);
+      // Original opcode03 (PPC8004c488) replaces only bits4..11. The
+      // ground s2 descriptor writes0; airborne s5 writes40. Both play g4s2.
+      actor.controlWord = (actor.controlWord & ~0xff0) | (actor.variantIndex === 0 ? 0 : 0x40);
       stepTargetYaw(actor, 0xc0);
       state.paid = ctx.onAllocateResource?.(actor, 2, 1, 1) === true;
       break;
@@ -74,7 +77,7 @@ export function stepNurseX(actor: RomActor, ctx: StreamContext): void {
       // Source phase1 does NOT tick the stream while it settles facing.
       state.timer -= actor.dt;
       if (state.timer <= 0 || stepTargetYaw(actor, 0xc0)) {
-        if (!state.paid) { exit(actor, false); break; }
+        if (!state.paid) { exit(actor, actor.variantIndex !== 0); break; }
         actor.fbPhaseSlots[0] = 5;
         state.timer = NURSE_X.dashTimer;
         actor.hSpeed = NURSE_X.dashSpeed;
@@ -111,6 +114,9 @@ export function stepNurseX(actor: RomActor, ctx: StreamContext): void {
         actor.contactP0 = actor.contactP1 = 0;
         ctx.onArmHit?.(actor, 0, 0, 255);
         ctx.onPlayAnim?.(actor, 4, 3, false);
+        // Both variants explicitly select stream s4, whose opcode03 clears40.
+        // Do not substitute the unused s7 airborne recovery descriptor.
+        actor.controlWord &= ~0xff0;
       }
       state.airborneExit = !grounded(actor);
       if (state.stream.stage === 'done') actor.fbPhaseSlots[0] = 8;

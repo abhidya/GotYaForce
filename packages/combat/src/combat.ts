@@ -2616,7 +2616,7 @@ export function stepAttacks(
   // outranks the X/secondary type 2 (FUN_800699d8 order) — the charge release below wins the
   // frame and the X press is not consumed.
   const commandPreemptsX = b.command?.type === AttackCommandType.Charged3;
-  // Bounded Nurse close-ground route. Unsupported targets/stances never fall
+  // Bounded Nurse close-allied route. Unsupported targets never fall
   // through to the generic damaging X, and only the family consumes source cell2.
   if (isNurseX(b.borgId) && pressedSpecialEdge && canStartAction && !commandPreemptsX) {
     if ((b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact &&

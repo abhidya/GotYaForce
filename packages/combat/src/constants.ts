@@ -794,9 +794,9 @@ export const HEAL = {
   VAMPIRE_BLEED_INTERVAL_FRAMES: 30,
   /**
    * Legacy guide-driven Nurse behavior remains disabled. The source-backed close
-   * allied X route now lives in nurseX.ts and the flagsA&2 contact resolver, using
+   * allied ground/air X route now lives in nurseX.ts and the flagsA&2 contact resolver, using
    * family damage records (200/400 allied HP, quartered across teams), not this
-   * flag or the historical guide amounts below. Far/air routes remain unsupported.
+   * flag or the historical guide amounts below. Far-target routes remain unsupported.
    */
   NURSE_ENABLED: false,
   /**
