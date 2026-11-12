@@ -1,3 +1,5 @@
+import {runDoubleCloneReactionObservationSelfTest} from './doubleCloneReactionObservation.selftest.js';
+import {runDoubleCloneReactionObservationBattleSelfTest} from './doubleCloneReactionObservationBattle.selftest.js';
 import {runDoubleCloneReactionFrameSelfTest} from './doubleCloneReactionFrame.selftest.js';
 import {runDoubleCloneReactionSelfTest} from './doubleCloneReaction.selftest.js';
 import {runDoubleNinjaChargeStreamSelfTest} from './doubleNinjaChargeStream.selftest.js';
@@ -292,6 +294,8 @@ export function runSelfTest(): void {
   runDoubleCloneLifecycleSelfTest();
   runDoubleCloneReactionSelfTest();
   runDoubleCloneReactionFrameSelfTest();
+  runDoubleCloneReactionObservationBattleSelfTest();
+  runDoubleCloneReactionObservationSelfTest();
   runDoubleNinjaXEngineSelfTest();
   runDoubleNinjaChargeStreamSelfTest();
   runDoubleNinjaXInputSelfTest();

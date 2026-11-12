@@ -28,7 +28,7 @@ Healing is a concrete counterexample to clearing a clone on every browser down s
 
 The original clears reaction accumulation once per collision frame, ORs accepted record reaction bytes into6fd, and adds0xa6 on balance depletion. Classification occurs after that accumulation. The browser applies reactions per hit and resets its down gauge immediately, so reading its final state would lose source evidence.
 
-Live activation needs an ordered source reaction accumulator, rejection/deduplication handling and the actual owner post-dispatch hook. The classifier remains inert until those are supported. No blanket interrupt hook, arbitrary clone lifetime, second combat fighter or unverified damage threshold is introduced.
+Live activation needs an ordered source reaction accumulator, rejection/deduplication handling and authoritative live control at the actual owner post-dispatch hook. A collision classifier result must not be replayed as that later control value. The classifier remains inert until those are supported. No blanket interrupt hook, arbitrary clone lifetime, second combat fighter or unverified damage threshold is introduced.
 
 Sources: research/decomp/ghidra-export/chunk_0003.c collision reset, accepted-record and tail paths; chunk_0007.c functions5c290,5c694,5c15c,5f00c and the named handlers; original DOL pointer/function inspection. No original binary or asset payload is included here.
 
@@ -37,3 +37,9 @@ Sources: research/decomp/ghidra-export/chunk_0003.c collision reset, accepted-re
 The pure classifier explicitly requires completed frame aggregation, a living ordinary unpaired Double, descriptor class0, first-entry phases and an immediate dispatch opportunity. Healing/status/heavy overrides, existing reactions, falling-rehit history and unknown required terrain results return unsupported. A no-admission result preserves the prior reset bit; it is not a guarantee that the clone survives the later owner post-hook.
 
 Tests sweep all256 raw reaction-byte values across admission flags, gauge boundaries, prior control bits and terrain results, plus every collision-flag override and heavy-byte value. The lifecycle aggregate and focused strict TypeScript check pass. These are source-boundary fixture tests, not live gameplay verification.
+
+## Scheduler and live observations
+
+The normal source outer loop updates actors before running the collision tail (chunk_0003.c:4322,4337). Actor wrapper55568 runs family4bc, action dispatch, then family4c0 (chunk_0006.c:7793–7800). Collision-tail5c290 can run reaction5c694 but does not call4c0. The later callback sweep uses4e0 instead. Therefore the clone hook generally observes a collision-produced bit at the next eligible actor dispatch, after intervening code may have changed it. Skipped actors prevent a fixed one-frame rule.
+
+The pure post-hook API consequently accepts an explicit actual dispatch identity and live control5e0, independently of the collision classifier. The new Battle observer captures accepted applyHit calls and finalizes after projectile processing, but does not invoke that hook or enable clones. Its host gauge snapshots and raw damage records are diagnostic evidence, not resolved source flags or source gauge writes. The audit-only source collision pipeline is not counted as additional hits. Bounded overflow and form changes remain explicit unknowns.
