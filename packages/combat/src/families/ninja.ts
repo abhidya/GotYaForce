@@ -1,4 +1,6 @@
-// NORMAL NINJA family (ctor 0x8006f4f8) — the second ROM-faithful family port.
+// Legacy NORMAL NINJA family adapter (ctor 0x8006f4f8).
+// Production admitted Normal Ninja/Sasuke X uses ninjaX.ts: authored P0 release,
+// conditional backflip and source cell2 debit. This older fallback is not X parity.
 // Covers pl0000 (NORMAL NINJA) and pl000a (SASUKE): the ctor gives both the SAME
 // vtable/anim banks/tables and differs ONLY in the +0x4b0 descriptor (0x802d3dc8 vs
 // 0x802d3ee0), so one family module covers both. Source:
@@ -19,7 +21,8 @@
 // The X-special (actionIndex 2) delegates ALL 5 variants to the SHARED engine machine
 // zz_00ff2bc_ (families/shared-x-special.ts) with the family config block @0x80433868:
 // {ground slot 0, air slot 1, on-hit callback zz_00715f8_}. The callback is the ninja
-// signature move: on connect, BACKFLIP away and throw a shuriken.
+// legacy approximation. The original callback follows authored P0, not contact;
+// its backflip is conditional on1d0f and its throw is source-cell2 gated.
 
 import type { RomActor } from "../rom/actor.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
@@ -49,15 +52,12 @@ function shurikenTypeFor(borgNumber: number): number {
   return borgNumber === 0x00a ? 3 : 0;
 }
 
-/**
- * The family on-hit callback zz_00715f8_ @0x800715f8 (cfg ptr[+4]), invoked by the
- * shared machine's phase-1 contact transition:
- *  (a) BACKFLIP — on the stream-event flag +0x1d0f: face away 180° (+0x5ae = +0x72 −
- *      0x8000) and set the launch scalars. Our decoded stream events don't surface
- *      +0x1d0f, so the backflip applies unconditionally on hit (the flag is armed by
- *      the same streams that arm the hit — labeled approximation).
- *  (b) SHURIKEN — ammo-gated (zz_006dbe0_ slot 2, cost 1; ammo is owned by BorgRuntime,
- *      surfaced through the host hook) spawn via zz_007db5c_(actor, typeByBorg).
+/** Legacy callback adapter retained for non-admitted callers and old direct
+ * fixtures. Despite its historical name, original715f8 is invoked by authored
+ * positive P0, not an accepted hit. This fallback still applies recoil
+ * unconditionally, writes activeYaw and omits the source cell2 check; it must
+ * not be used as evidence of original X behavior. Admitted Normal/Sasuke X
+ * uses releaseNinjaX in ninjaX.ts for the verified conditional recoil and debit.
  */
 export function ninjaXOnHit(actor: RomActor, ctx: StreamContext): void {
   // (a) Backflip: +0x5ae = +0x72 − 0x8000 (face directly away), then the four scalars.
@@ -67,8 +67,8 @@ export function ninjaXOnHit(actor: RomActor, ctx: StreamContext): void {
   actor.hDecel = NINJA_X.BACKFLIP_HDECEL;
   actor.yVel = NINJA_X.BACKFLIP_YVEL;
   actor.gravityCoeff = NINJA_X.BACKFLIP_GRAVITY;
-  // (b) Shuriken. The host resolves the family table (0x802d6d68) + ammo gate; when the
-  // hook is unwired this is an honest no-op (the melee contact is the ported payload).
+  // (b) Legacy family dispatch only. This fallback does not bind source ammo or
+  // establish a melee-contact payload; the admitted route bypasses it.
   ctx.onFamilyProjectile?.(actor, NINJA_X.SHURIKEN_SPAWNER_ADDR, shurikenTypeFor(actor.borgNumber));
 }
 

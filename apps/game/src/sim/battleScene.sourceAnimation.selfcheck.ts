@@ -142,6 +142,23 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
       scene.clear();
     }
 
+    // Normal Ninja/Sasuke exact resolved X refs. Ground recovery descriptor5
+    // loops at120, but its source terminal is elapsed4; no rate5 inference.
+    for(const id of ['pl0000','pl000a']){
+      const scene=create({async loadModel(){return model();},async loadClip(){return clip('generic');},
+        async loadClipByStreamRef(_id,ref){return clip(`g${ref.group}s${ref.slot}`,60,
+          ref.group===4?(ref.slot===0?46:41):ref.slot===0?121:2);}});
+      let serial=400;
+      for(const [group,slot,sampleFrame] of [[4,0,14],[4,1,14],[0,0,0],[0,24,0]]){
+        const sample:BattleActorView={...view(serial++,0,id),meleeAnimStream:{group:group!,slot:slot!}};
+        await enter(scene,sample);const action=actor(scene).sourceAnimAction;
+        assert(action?.paused&&action.getClip().name===`g${group}s${slot}`,'Ninja source-owned resolved clip');
+        scene.sync([{...sample,sourceAnimSample:{serial:serial-1,frame:sampleFrame!}}]);scene.update(.5);
+        near(action.time,sampleFrame!/60,'Ninja authored sample never render-runs');
+      }
+      scene.clear();
+    }
+
     // All admitted actors, plus a non-60 Hz bake to reject assumed frame conversion.
     for (const [id, fps, start] of [
       ["pl0615", 60, 0], ["pl0629", 60, 36], ["pl062a", 60, 36], ["pl0629", 30, 36],

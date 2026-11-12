@@ -1,3 +1,5 @@
+import {spawnNinjaSource} from './ninjaProjectile.js';
+import {isSourceNinjaX,stepNinjaXInput} from './ninjaX.js';
 import {spawnGredRangedSource} from './gredRangedProjectile.js';
 import { spawnGBlackChargeSource } from './gblackChargeProjectile.js';
 import { spawnGBlackGroundWaveSource } from './gblackGroundWaveAdapter.js';
@@ -717,7 +719,7 @@ class BattleImpl implements Battle {
       diverAuraTails: structuredClone(state.diverAuraTails ?? []),
       // Groundwave emitters are invisible; pending/released pulse objects have no model.
       // Active pulses use the generic procedural flame, not source visual parity.
-      projectiles: state.projectiles.filter(p=>(!p.gblackGroundWaveSource||(p.gblackGroundWaveSource.kind==='child'&&p.gblackGroundWaveSource.phase==='active'))).filter(p=>p.timeBomberSource?.kind!=='mine'||p.timeBomberSource.phase==='active').map(snapshotProjectile),
+      projectiles: state.projectiles.filter(p=>p.ninjaSource?.kind!=='primary'||p.ninjaSource.flight.visible).filter(p=>(!p.gblackGroundWaveSource||(p.gblackGroundWaveSource.kind==='child'&&p.gblackGroundWaveSource.phase==='active'))).filter(p=>p.timeBomberSource?.kind!=='mine'||p.timeBomberSource.phase==='active').map(snapshotProjectile),
       projectileDespawns: this.projectileDespawns.map((despawn) => structuredClone(despawn)),
       activeUidByPlayer: { ...state.activeUidByPlayer },
       energy: { ...state.energy },
@@ -799,6 +801,8 @@ class BattleImpl implements Battle {
     *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void {
     if (actor) {
+      const ninja=spawnNinjaSource(b,actor,spawnerAddr,kind,this.state.borgs);
+      if(ninja!==null){this.state.projectiles.push(...ninja);return;}
       const ranged=spawnGredRangedSource(b,actor,spawnerAddr,kind,this.state.borgs);
       if(ranged!==null){this.state.projectiles.push(...ranged);return;}
       const charge=spawnGBlackChargeSource(b,actor,spawnerAddr,kind);
@@ -1291,6 +1295,7 @@ class BattleImpl implements Battle {
       if (isArrowNinja(b.borgId)) stepArrowInput(b,input.special);
       if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
+      if(isSourceNinjaX(b.borgId))stepNinjaXInput(b,input.special);
       if (b.borgId === "pl0106") {
         const sample = stepTimeBomberInput(b,input.special);
         sample.neutral = Math.max(Math.abs(input.moveX),Math.abs(input.moveZ)) < 0x34 / 127;

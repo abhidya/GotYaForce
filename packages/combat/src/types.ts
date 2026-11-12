@@ -276,6 +276,8 @@ export interface BorgRuntime {
    * segment initializes ROM cell 2. Other families retain the existing slot mapping.
    */
   weaponCells?: WeaponCell[];
+  /** Fresh X edge sampled even while the admitted Ninja source action owns motion. */
+  ninjaXInput?: {held:boolean;pressEdge:boolean;pending:boolean};
   /** ROM +0x597 refill inhibit bits; Diver X reads bit 2. No generic busy-state guess. */
   sourceAmmoRefillPauseMask?: number;
   /** Cached ROM +0x768: refill precedes this frame's rate rebuild. */
@@ -627,6 +629,7 @@ export type ProjectileDespawnReason =
 
 /** A homing/straight projectile in flight. */
 export interface Projectile {
+  ninjaSource?: import("./ninjaProjectile.js").NinjaSource;
   gredRangedSource?: import("./gredRangedProjectile.js").GredRangedSource;
   gblackChargeSource?: import("./gblackChargeProjectile.js").GBlackChargeSource;
   gblackGroundWaveSource?: import("./gblackGroundWaveAdapter.js").GBlackGroundWaveSource;

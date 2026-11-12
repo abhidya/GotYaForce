@@ -262,6 +262,7 @@ interface ProjectileActor {
   gblackCharge?: "sweep" | "impact";
   /** Procedural source c3be0 trail, independent of the tip collision sphere. */
   gredRanged?: boolean;
+  ninja?: "primary" | "impact";
   /** Independent world-space ring, never a child of the expanding body scale. */
   gatlingRing?: BankVisual;
 }
@@ -661,6 +662,18 @@ const PROJECTILE_FADE_FRAMES = Math.max(1, Math.round(SHOT.LIFETIME * 0.02));
  */
 const BEAM_STRETCH_FRAMES = 3;
 
+// Procedural four-blade placeholder, not extracted Ninja model14. Shared for
+// every child; actor cleanup owns materials, never this geometry.
+const NINJA_BLADE_GEOMETRY = new THREE.BufferGeometry();
+{
+  const vertices:number[]=[];
+  for(let i=0;i<4;i++){
+    const a=i*Math.PI/2,c=Math.cos(a),s=Math.sin(a);
+    for(const [x,z] of [[-3,2],[3,2],[0,14]])vertices.push(x!*c+z!*s,0,-x!*s+z!*c);
+  }
+  NINJA_BLADE_GEOMETRY.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+  NINJA_BLADE_GEOMETRY.computeVertexNormals();
+}
 /** Shared unit-plane geometries for the beam rig: two crossed planes with the long axis along
  *  local +Y (PlaneGeometry height), reused by every beam actor and never disposed per-actor. */
 const BEAM_PLANE_XY = new THREE.PlaneGeometry(1, 1);
@@ -1591,6 +1604,7 @@ export class BattleScene {
       if (actor && (actor.gatlingModelId !== gatlingModelId
         || Boolean(actor.sustainedBeam) !== Boolean(projectile.beamSource)
         || Boolean(actor.arrowTether) !== (projectile.arrowSource?.kind === "tether")
+        || actor.ninja !== projectile.ninjaSource?.kind
         || actor.gblackCharge !== projectile.gblackChargeSource?.kind
         || Boolean(actor.gredRanged) !== Boolean(projectile.gredRangedSource))) {
         // Reconcile a changed source visual without retaining the wrong mesh for this UID.
@@ -1660,6 +1674,7 @@ export class BattleScene {
       }
       if (projectile.gblackChargeSource) this.syncGBlackCharge(actor, projectile);
       if (projectile.gredRangedSource) this.syncGredRanged(actor, projectile);
+      if (projectile.ninjaSource) this.syncNinja(actor, projectile);
       if (actor.beam) orientBeam(actor.node, projectile);
       // Persisting projectiles (consumeOnHit === false, ATK-008) apply re-hits WITHOUT
       // despawning; the sim flags each applied hit for exactly one frame
@@ -1890,6 +1905,33 @@ export class BattleScene {
     if(direction.lengthSq()>1e-12)actor.node.quaternion.setFromUnitVectors(BEAM_REST_AXIS,direction);
   }
 
+  private buildNinjaActor(projectile:BattleProjectileObservation):ProjectileActor|null {
+    const source=projectile.ninjaSource;if(!source)return null;
+    const color=projectile.team===0?PROJECTILE_COLORS.energy.ally:PROJECTILE_COLORS.energy.enemy;
+    if(source.kind==='impact'){
+      const material=new THREE.SpriteMaterial({map:this.projectileTextures.get('energy')??null,color,
+        transparent:true,blending:THREE.AdditiveBlending,depthWrite:false});
+      const node=new THREE.Sprite(material);node.name=`ninja-impact:${projectile.uid}`;this.root.add(node);
+      return {node,material,beam:false,ninja:'impact'};
+    }
+    const material=new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide,transparent:true,depthWrite:false});
+    const node=new THREE.Mesh(NINJA_BLADE_GEOMETRY,material);node.name=`ninja-shuriken:${projectile.uid}`;
+    this.root.add(node);return {node,material,beam:false,ninja:'primary'};
+  }
+
+  private syncNinja(actor:ProjectileActor,projectile:BattleProjectileObservation):void {
+    const source=projectile.ninjaSource;if(!source)return;
+    if(source.kind==='impact'){
+      actor.node.visible=true;actor.node.scale.set(620*source.scale,620*source.scale,1);
+      actor.material.opacity=source.alpha;return;
+    }
+    const flight=source.flight;actor.node.visible=flight.visible;actor.material.opacity=1;
+    actor.node.scale.setScalar(flight.visualScale);
+    // Source visual spin is relative to owner yaw, not projectile velocity.
+    // No render-time clock may advance this admitted simulation sample.
+    actor.node.rotation.set(0,flight.yaw+flight.spinAngleS16*Math.PI*2/65536,0);
+  }
+
   private buildGBlackChargeActor(projectile: BattleProjectileObservation): ProjectileActor | null {
     const source=projectile.gblackChargeSource;if(!source)return null;
     const color=projectile.team===0?PROJECTILE_COLORS.energy.ally:PROJECTILE_COLORS.energy.enemy;
@@ -1933,6 +1975,8 @@ export class BattleScene {
   }
 
   private spawnProjectile(projectile: BattleProjectileObservation): ProjectileActor {
+    const ninja=this.buildNinjaActor(projectile);
+    if(ninja)return ninja;
     const ranged=this.buildGredRangedActor(projectile);
     if(ranged)return ranged;
     const blackCharge=this.buildGBlackChargeActor(projectile);
