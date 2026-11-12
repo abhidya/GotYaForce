@@ -2336,8 +2336,10 @@ export class RomDriverBridge implements RomFamilyDriver {
       if (runtime.borgId === "pl0102" && actionIndex === 2) captureGatlingAim(runtime,this.actor,all);
       if (runtime.borgId === "pl0101" && actionIndex === 2) capturePoweredNormalAim(runtime,this.actor,all);
       if (isRevolver(runtime.borgId) && actionIndex === 2) captureRevolverAttack(runtime,this.actor,all);
-      // Decoded ground802d4668=[44,3,2,0], air802d46a8=[45,3,2,4].
-      const airCue = ((isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId)) && variantIndex === 4) ||
+      // Arrow: ground802d4668=[44,3,2,0], air802d46a8=[45,3,2,4].
+      // Nurse air802d6908/802d6910=[45,3,2,1].
+      const airCue = (isNurseX(runtime.borgId) && variantIndex === 1) ||
+        ((isArrowNinja(runtime.borgId) || isRevolver(runtime.borgId)) && variantIndex === 4) ||
         (runtime.borgId === "pl0104" && (variantIndex === 3 || variantIndex === 4));
       const cueId = airCue ? 45 : 44;
       dispatchCommandRecord(this.actor, { cueId, stateMode: 3, actionIndex, variantIndex });
