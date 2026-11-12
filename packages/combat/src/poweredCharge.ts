@@ -8,10 +8,12 @@ export interface PoweredChargeState {
   releasedReady: boolean;
   held: boolean;
   releaseEdge: boolean;
+  pressEdge: boolean;
   pending: boolean;
 }
 export function stepPoweredCharge(b: BorgRuntime, held: boolean, activeCommand5 = false): PoweredChargeState {
-  const s = b.poweredCharge ??= { warmup: 0, charge: 0, ready: false, releasedReady: false, held: false, releaseEdge: false, pending: false };
+  const s = b.poweredCharge ??= { warmup: 0, charge: 0, ready: false, releasedReady: false, held: false, pressEdge: false, releaseEdge: false, pending: false };
+  s.pressEdge = !s.held && held;
   s.releaseEdge = s.held && !held;
   s.held = held;
   s.ready = false;

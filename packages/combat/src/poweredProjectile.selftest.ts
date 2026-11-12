@@ -1,4 +1,4 @@
-import { createPoweredPrimary, stepPoweredPrimary, createPoweredSecondaries, stepPoweredSecondary, beginPoweredSecondaryShrink, poweredPrimaryMuzzle, POWERED_PRIMARY_ROWS } from './poweredProjectile.js';
+import { createPoweredPrimary, stepPoweredPrimary, createPoweredSecondaries, stepPoweredSecondary, beginPoweredSecondaryShrink, poweredPrimaryMuzzle, POWERED_PRIMARY_ROWS, createPoweredNormalPort, poweredNormalMuzzle } from './poweredProjectile.js';
 const check=(condition:boolean,message:string):void=>{if(!condition)throw new Error(message);};
 const near=(a:number,b:number,message:string):void=>check(Math.abs(a-b)<1e-8,`${message}: ${a} != ${b}`);
 export function runSelfTest():void {
@@ -56,8 +56,38 @@ export function runSelfTest():void {
     });
     const sum=children.reduce((acc,c)=>({x:acc.x+c.direction.x,y:acc.y+c.direction.y,z:acc.z+c.direction.z}),{x:0,y:0,z:0});
     near(sum.x,0,'four-child cone symmetry X');near(sum.y,0,'four-child cone symmetry Y');
-    const theta=Math.PI*({4:2,5:1,6:4,7:4}[children[0]!.port])/16;
+    const theta=Math.PI*({0:2,1:1,2:4,3:4,4:2,5:1,6:4,7:4}[children[0]!.port])/16;
     near(sum.z,4*Math.cos(theta),'decoded cone angle');
+  }
+  for(const port of [0,1,2,3] as const){
+    let calls=0;const draws=[0,0,1,6,7];
+    const children=createPoweredNormalPort(port,origin,0,{x:0,y:0,z:1000},1,()=>draws[calls++]!);
+    check(calls===5&&children.length===4,'normal port consumes exact five random bytes for four children');
+    const theta=Math.PI*([2,1,4,4][port]!)/16;
+    children.forEach((child,i)=>{
+      check(child.port===port&&child.life===40&&child.phase==='flight','normal child identity and lifetime');
+      near(child.pos.x,0,'normal child constructor X');near(child.pos.y,0,'normal child constructor Y');near(child.pos.z,0,'normal child no constructor flight');
+      near(child.speed,[22.5,25,37.5,40][i]!,'normal decoded random speed');
+      near(child.acceleration,-child.speed/40,'normal deceleration');near(child.direction.z,Math.cos(theta),'normal decoded cone angle');
+      near(Math.hypot(child.direction.x,child.direction.y,child.direction.z),1,'normal direction normalized');
+      near(child.direction.x*child.reference.x+child.direction.y*child.reference.y+child.direction.z*child.reference.z,0,'normal basis orthogonal');
+      const step=stepPoweredSecondary(child).state;
+      check(step.life===39,'normal next frame decrements lifetime once');
+      near(Math.hypot(step.pos.x,step.pos.y,step.pos.z),child.speed,'normal next frame moves before deceleration');
+    });
+    const sum=children.reduce((a,c)=>({x:a.x+c.direction.x,y:a.y+c.direction.y,z:a.z+c.direction.z}),{x:0,y:0,z:0});
+    near(sum.x,0,'normal cone symmetry X');near(sum.y,0,'normal cone symmetry Y');near(sum.z,4*Math.cos(theta),'normal cone symmetry Z');
+    const scaled=createPoweredNormalPort(port,origin,0,{x:0,y:0,z:1000},2,()=>0);
+    near(scaled[0]!.scale,2,'normal owner scale');near(scaled[0]!.speed,22.5,'normal scale does not change speed');
+    const degenerate=createPoweredNormalPort(port,origin,Math.PI/2,origin,1,()=>0);
+    check(degenerate.every(c=>Object.values(c.direction).every(Number.isFinite)),'normal zero-length aim finite safeguard');
+    const muzzle=poweredNormalMuzzle(port,origin,0);
+    const right=port===1||port===3;
+    near(muzzle.x,right?185.59280443191528:-185.59277391433716,'normal attachment X');
+    near(muzzle.y,(right?136.1260986328125:136.12603759765625)+(port<2?16:-22),'normal exact row attachment Y');
+    near(muzzle.z,30+(right?-.00001393718:-.00000385384),'normal attachment Z');
+    const moved=poweredNormalMuzzle(port,{x:10,y:20,z:30},Math.PI/2,2);
+    near(moved.x,10+2*muzzle.z,'normal attachment yaw and scale X');near(moved.y,20+2*muzzle.y,'normal attachment scale Y');near(moved.z,30-2*muzzle.x,'normal attachment yaw and scale Z');
   }
   const muzzle=poweredPrimaryMuzzle(8,origin,0);near(muzzle.x,-185.59277391433716,'bone7 plus source row X');near(muzzle.y,114.12603759765625,'row8 lower muzzle');
   console.log('Powered projectile source math: passed');
