@@ -1,3 +1,4 @@
+import {stepDoubleNinjaXInput} from './doubleNinjaXInput.js';
 import {isSourceSwitchingX,stepSwitchingXInput} from './switchingX.js';
 import {advanceSwitchingSource,createSwitchingSwapPass,stageSwitchingSwap,commitSwitchingSwapPass} from './switchingProjectile.js';
 import {isSourceTeleportX,stepTeleportXInput} from './teleportX.js';
@@ -2529,7 +2530,9 @@ export function stepAttacks(
   if(switching)switching.pending=false;
   const teleport=isSourceTeleportX(b.borgId)?(b.teleportXInput?.pending?b.teleportXInput:stepTeleportXInput(b,specialHeld)):null;
   if(teleport)teleport.pending=false;
-  const ninja=isSourceNinjaX(b.borgId)?(b.ninjaXInput?.pending?b.ninjaXInput:stepNinjaXInput(b,specialHeld)):null;
+  const double=b.borgId==='pl0003'?(b.doubleNinjaXInput?.pending?b.doubleNinjaXInput:stepDoubleNinjaXInput(b,specialHeld)):null;
+  if(double)double.pending=false;
+  const ninja=isSourceNinjaX(b.borgId)&&b.borgId!=='pl0003'?(b.ninjaXInput?.pending?b.ninjaXInput:stepNinjaXInput(b,specialHeld)):null;
   if(ninja)ninja.pending=false;
   const nurse = isNurseX(b.borgId) ? consumeNurseInput(b, specialHeld) : null;
   const beam = b.borgId === "pl0104"
@@ -2567,7 +2570,7 @@ export function stepAttacks(
   // expiry and made an X-hold charge impossible.
   const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
   b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
-  const pressedSpecialEdge = switching?switching.pressEdge:teleport?teleport.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld && !prevSpecialHeld;
+  const pressedSpecialEdge = switching?switching.pressEdge:teleport?teleport.pressEdge:double?double.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
@@ -2610,14 +2613,14 @@ export function stepAttacks(
   const chargeRelease =
     releasedAttack && (b.cooldowns["chargeFrames"] ?? 0) > 0 && shotDef?.chargeable === true;
   const xChargeRelease =
-    teleport ? teleport.releasedReady : powered ? powered.releasedReady :
+    teleport ? teleport.releasedReady : double ? double.releasedReady : powered ? powered.releasedReady :
     releasedSpecial && (b.cooldowns["xChargeFrames"] ?? 0) > 0 && xChargeMoveForBorgId(b.borgId) !== null;
   // Resolve this frame's command through the ROM tester priority (RANGED > CHARGED >
   // SECONDARY > MELEE) and attach the borg's exact +0x4ec command record where decoded.
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld: switching?switching.pressEdge:teleport?teleport.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: switching?switching.pressEdge:teleport?teleport.pressEdge:double?double.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
   // Refine only the proven established walk/run lane. Other families and
@@ -2658,15 +2661,16 @@ export function stepAttacks(
       b.romDriver?.tryStartXSpecial(b, all);
     return { projectiles: out };
   }
-  if(teleport&&canStartAction&&!commandPreemptsX){
+  const sourceChargeInput=teleport??double;
+  if(sourceChargeInput&&canStartAction&&!commandPreemptsX){
     if(xCanFire&&(b.cooldowns["special"]??0)<=0){
-      if(teleport.releasedReady&&b.command?.exact&&b.command.type===5&&b.command.actionIndex===3){
-        // Deliberately retained legacy charged action3 payload, NOT source teleport restoration.
-        teleport.warmup=teleport.charge=0;
+      if(sourceChargeInput.releasedReady&&b.command?.exact&&b.command.type===5&&b.command.actionIndex===3){
+        // Retained legacy charged action3 payload, NOT source teleport/clone restoration.
+        sourceChargeInput.warmup=sourceChargeInput.charge=0;
         startSpecialAttack(b,p,actionProfile,2,out,all,profiles,damageContext,xMoveForBorgId(b.borgId));
         return {projectiles:out};
       }
-      if(teleport.pressEdge&&b.command?.exact&&b.command.type===2&&b.command.actionIndex===2){
+      if(sourceChargeInput.pressEdge&&b.command?.exact&&b.command.type===2&&b.command.actionIndex===2){
         b.romDriver?.tryStartXSpecial(b,all);return {projectiles:out};
       }
     }
@@ -2704,7 +2708,7 @@ export function stepAttacks(
       (b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact && b.command.type === AttackCommandType.Melee2 && b.command.actionIndex === 2) {
     if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
   }
-  if (!switching && !teleport && !ninja && !isNurseX(b.borgId) && !arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  if (!switching && !teleport && !double && !ninja && !isNurseX(b.borgId) && !arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
@@ -3123,7 +3127,7 @@ function startSpecialAttack(
   // fractionally each frame via stepWeaponCellRefill and don't use `timer`.
   const xCell = ensureWeaponCells(b, p)[1];
   if (xCell && xCell.max > 0) {
-    if(isSourceTeleportX(b.borgId)){
+    if(isSourceTeleportX(b.borgId)||b.borgId==='pl0003'){
       // Retained generic charged payload still spends one X unit. Its newly
       // shared cell2/HUD identity needs source debt bookkeeping, or next refill
       // would undo a bare cur--. This does not restore the charged actor engine.

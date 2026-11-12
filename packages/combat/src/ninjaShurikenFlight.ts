@@ -1,4 +1,4 @@
-/** Normal Ninja/Sasuke X shuriken, 8007db5c table802d6d68 rows0/3 ONLY.
+/** Normal/Sasuke/Double Ninja X shuriken, 8007db5c table802d6d68 rows0–3.
  * Source: research/decomp/ghidra-export/chunk_0011.c:4210–4650;
  * shared seams: chunk_0012.c:2586–2893,3244–3272. One call is one source
  * child dispatch, not a dt-scaled update. Allocation and phase0 are distinct;
@@ -12,7 +12,7 @@
  * they do not stand in for implementations of those source systems.
  */
 export interface NinjaShurikenVec3 { readonly x: number; readonly y: number; readonly z: number }
-export type NinjaShurikenRow = 0 | 3;
+export type NinjaShurikenRow = 0 | 1 | 2 | 3;
 export type NinjaShurikenPhase = 'pending' | 'active' | 'retiring' | 'released' | 'freed';
 export type NinjaShurikenRetireReason = 'lifetime' | 'bounds' | 'contact' | 'terrain' |
   'attraction' | 'owner-dead' | 'owner-changed' | 'hit-registration';
@@ -30,6 +30,8 @@ const C = NINJA_SHURIKEN_FLIGHT_CONSTANTS;
 
 export interface NinjaShurikenLaunchPose {
   readonly origin: NinjaShurikenVec3;
+  /** Only row2 adds current owner+7b0, separately at allocation and init. */
+  readonly ownerOffset7b0?: NinjaShurikenVec3;
   /** Owner's source yaw, in radians. It is not the aimed flight heading. */
   readonly yaw: number;
   readonly ownerScale?: number;
@@ -43,6 +45,8 @@ export interface NinjaShurikenLaunchPose {
 }
 export interface NinjaShurikenInitPose {
   readonly origin: NinjaShurikenVec3;
+  /** Only row2 adds current owner+7b0, separately at allocation and init. */
+  readonly ownerOffset7b0?: NinjaShurikenVec3;
   readonly yaw: number;
   /** Current owner +0xc8 gate. The saved aim and inherited scale/target remain
    * allocation snapshots, even if the owner changed target in the meantime. */
@@ -124,11 +128,16 @@ const normalizedTimes = (v: NinjaShurikenVec3, speed: number): NinjaShurikenVec3
   return { x: f(f(v.x / magnitude) * speed), y: f(f(v.y / magnitude) * speed), z: f(f(v.z / magnitude) * speed) };
 };
 
+function launchOrigin(row: NinjaShurikenRow, pose: NinjaShurikenInitPose): NinjaShurikenVec3 {
+  const offset = row === 2 ? pose.ownerOffset7b0 : undefined;
+  return offset ? {x:f(pose.origin.x+offset.x),y:f(pose.origin.y+offset.y),z:f(pose.origin.z+offset.z)} : copy(pose.origin);
+}
 /** Allocation has no flight, HIT registration, spin, lifetime, or launch effect. */
 export function createNinjaShurikenFlight(row: NinjaShurikenRow, pose: NinjaShurikenLaunchPose): NinjaShurikenFlightState {
-  if (row !== 0 && row !== 3) throw new RangeError('Ninja shuriken supports only table rows0/3');
+  if (![0, 1, 2, 3].includes(row)) throw new RangeError('Ninja shuriken supports only table rows0–3');
   const ownerScale = f(pose.ownerScale ?? 1);
-  return { row, phase: 'pending', pos: copy(pose.origin), previousPos: copy(pose.origin),
+  const origin = launchOrigin(row, pose);
+  return { row, phase: 'pending', pos: origin, previousPos: copy(origin),
     velocity: { x: 0, y: 0, z: 0 }, yaw: f(pose.yaw), spinAngleS16: 0,
     ownerScale, modelScale: ownerScale, collisionScale: f(pose.collisionScale ?? ownerScale),
     collisionScaleRatio: f(pose.collisionScaleRatio ?? 1), visualScale: ownerScale,
@@ -199,7 +208,7 @@ export function stepNinjaShurikenFlight(input: NinjaShurikenFlightState,
     if (ctx.hitRegistrationSucceeds === false) return retire('hit-registration');
     const pose = ctx.initPose?.();
     if (pose) {
-      state.pos = copy(pose.origin); state.previousPos = copy(pose.origin); state.yaw = f(pose.yaw);
+      state.pos = launchOrigin(state.row, pose); state.previousPos = copy(state.pos); state.yaw = f(pose.yaw);
     }
     state.velocity = launchVelocity(state, pose?.initialAimEnabled ?? state.initialAimPoint !== null);
     state.speed = C.speed; state.gravity = C.initialGravity;

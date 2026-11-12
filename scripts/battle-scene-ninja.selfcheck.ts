@@ -6,12 +6,13 @@ import type {BattleProjectileObservation,Projectile} from '../packages/combat/sr
 function assert(ok:unknown,msg:string):asserts ok{if(!ok)throw Error(`[ninjaScene] ${msg}`);}
 function near(a:number,b:number,msg:string){assert(Math.abs(a-b)<1e-5,`${msg}: ${a} != ${b}`);}
 export async function runNinjaSceneSelfcheck():Promise<void>{
+ for(const [row,id] of [[1,'pl0003'],[3,'pl000a']] as const){
  const load=THREE.TextureLoader.prototype.load;THREE.TextureLoader.prototype.load=function(){return new THREE.Texture();};
  const root=new THREE.Group();let scene:BattleScene;
  try{scene=new BattleScene(root,{loadModel:async()=>new THREE.Group(),loadClip:async()=>null});}
  finally{THREE.TextureLoader.prototype.load=load;}
  const internals=scene as unknown as {projectileActors:Map<string,{node:THREE.Object3D;material:THREE.Material&{opacity:number};ninja?:string}>};
- const source={kind:'primary' as const,flight:createNinjaShurikenFlight(3,{origin:{x:10,y:200,z:30},yaw:.4,ownerScale:2,collisionScale:.75}),ownerBorgId:'pl000a',ownerFormId:'pl000a',hitUids:[],contactPending:false};
+ const source={kind:'primary' as const,flight:createNinjaShurikenFlight(row,{origin:{x:10,y:200,z:30},yaw:.4,ownerScale:2,collisionScale:.75}),ownerBorgId:id,ownerFormId:id,hitUids:[],contactPending:false};
  const pr={uid:'ninja-scene',ownerUid:'owner',team:0,pos:{x:10,y:200,z:30},vel:{x:0,y:0,z:40},life:600,hitRadius:7.5,visualKind:'energy',ninjaSource:source} as Projectile;
  const sync=(rows:BattleProjectileObservation[]=[pr])=>scene.sync([],rows);
  sync();const actor=internals.projectileActors.get(pr.uid)!;
@@ -31,5 +32,6 @@ export async function runNinjaSceneSelfcheck():Promise<void>{
  impact.ninjaSource.alpha=.25;sync([impact]);near(next.material.opacity,.25,'impact simulation alpha');
  let impactDisposal=0;next.material.addEventListener('dispose',()=>impactDisposal++);sync([]);sync([]);scene.clear();
  assert(geometryDisposal===0&&impactDisposal===1&&!actor.node.parent&&!next.node.parent,'omission disposes private material once, retains shared geometry');
+ }
  console.log('[ninjaScene] PASS: procedural blade/spin, source scaling, independent HIT, hidden phases, pause and disposal');
 }

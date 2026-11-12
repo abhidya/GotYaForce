@@ -2569,6 +2569,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       (runtime.grounded ? variantIndex===0 : variantIndex===4 && runtime.command.subtype===4);
     const admittedNinja=isSourceNinjaX(runtime.borgId)&&runtime.command?.exact===true&&runtime.command.type===2&&actionIndex===2&&
       (runtime.grounded?variantIndex===0:variantIndex===4&&runtime.command.subtype===4);
+    if(runtime.borgId==='pl0003'&&!admittedNinja)return false;
     const admittedSwitching=isSourceSwitchingX(runtime.borgId)&&runtime.command?.exact===true&&runtime.command.type===2&&actionIndex===2&&
       (runtime.grounded?variantIndex===0:variantIndex===4&&runtime.command.subtype===4);
     if(isSourceSwitchingX(runtime.borgId)&&!admittedSwitching)return false;

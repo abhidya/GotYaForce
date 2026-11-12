@@ -283,6 +283,9 @@ export interface BorgRuntime {
   sourceSupportHeight6d0?: number;
   sourceSwitchingResistance59c?: number;
   switchingForcedMove?: import("./switchingProjectile.js").SwitchingForcedMove;
+  /** Scoped Double Ninja source input, independent of the still-legacy charged payload. */
+  doubleNinjaXInput?: {held:boolean;pressEdge:boolean;releasedReady:boolean;warmup:number;charge:number;pending:boolean};
+  sourceDoubleNinjaInputBlock58e?: number;
   ninjaXInput?: {held:boolean;pressEdge:boolean;pending:boolean};
   /** Scoped pl0005 input686f0. Charge uses source768 rate, independently of animationdt. */
   teleportXInput?: {held:boolean;pressEdge:boolean;releasedReady:boolean;warmup:number;charge:number;pending:boolean};

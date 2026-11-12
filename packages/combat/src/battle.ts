@@ -1,3 +1,4 @@
+import {stepDoubleNinjaXInput} from './doubleNinjaXInput.js';
 import {spawnSwitchingSource,stepSwitchingForcedMove} from './switchingProjectile.js';
 import {isSourceSwitchingX,stepSwitchingXInput} from './switchingX.js';
 import {isSourceTeleportX,stepTeleportXInput} from './teleportX.js';
@@ -1302,7 +1303,8 @@ class BattleImpl implements Battle {
       if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
       if(isSourceSwitchingX(b.borgId))stepSwitchingXInput(b,input.special);
-      if(isSourceNinjaX(b.borgId))stepNinjaXInput(b,input.special);
+      if(isSourceNinjaX(b.borgId)&&b.borgId!=='pl0003')stepNinjaXInput(b,input.special);
+      if(b.borgId==='pl0003')stepDoubleNinjaXInput(b,input.special,b.state==="special"&&b.command?.type===5);
       if(isSourceTeleportX(b.borgId))stepTeleportXInput(b,input.special,b.state==="special"&&b.command?.type===5);
       if (b.borgId === "pl0106") {
         const sample = stepTimeBomberInput(b,input.special);

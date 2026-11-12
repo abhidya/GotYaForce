@@ -1,4 +1,4 @@
-/** Scoped Normal Ninja/Sasuke X: ff2bc/ff30c/ff418/ff4d4 and715f8.
+/** Scoped Normal/Sasuke/Double Ninja ordinary X: ff2bc/ff30c/ff418/ff4d4 and715f8.
  * Authored part0 state triggers the throw, not a collision. Original animated
  * attachment/support geometry and shared aim helper rounding remain host seams. */
 import type {BorgRuntime} from './types.js';
@@ -11,8 +11,11 @@ import {romAirKnockoutReturn,romGroundIdleReturn} from './families/shared-idle-r
 import {createNinjaXStream,tickNinjaXStream,type NinjaXStream} from './ninjaXStream.js';
 
 type Actor=RomActor&RomHelperScratch&{grounded?:boolean;stateMode?:number};
-export const isSourceNinjaX=(id:string):boolean=>id==='pl0000'||id==='pl000a';
+export const isSourceNinjaX=(id:string):boolean=>id==='pl0000'||id==='pl000a'||id==='pl0003';
 export interface NinjaXState {
+  /** Source7c8/7b0 fixture seam only. Live ordinary entry starts unarmed;
+   * clone lifecycle/rendering and the charged producer are NOT integrated. */
+  doubleClone: {arm7c8:number;offset7b0:Vec3}|null;
   targetUid:string|null;targetPoint:Vec3|null;noTargetLatch541:number;
   stream:NinjaXStream|null;streamMask:number;callbackCount:number;fireCount:number;
   resourceDenied:boolean;flags6e8:number;flags6e9:number;stateMode71d:number;
@@ -28,7 +31,7 @@ export function stepNinjaXInput(b:BorgRuntime,held:boolean){
 const states=new WeakMap<RomActor,NinjaXState>();
 export function getNinjaXState(a:RomActor):NinjaXState|undefined{return states.get(a);}
 export function prepareNinjaX(a:RomActor,targetUid:string|null,targetPoint:Vec3|null):NinjaXState{
-  const s:NinjaXState={targetUid,targetPoint:targetPoint?{...targetPoint}:null,noTargetLatch541:0,
+  const s:NinjaXState={doubleClone:a.borgNumber===3?{arm7c8:0,offset7b0:{x:0,y:0,z:0}}:null,targetUid,targetPoint:targetPoint?{...targetPoint}:null,noTargetLatch541:0,
     stream:null,streamMask:0,callbackCount:0,fireCount:0,resourceDenied:false,flags6e8:0,flags6e9:0,
     stateMode71d:0,supportHeight6d0:null,lastGroundProbe:0,exitKind:null};
   states.set(a,s);return s;
@@ -49,7 +52,9 @@ export function releaseNinjaX(a:Actor,s:NinjaXState,ctx:StreamContext):void{
     a.lockYaw=toS16(a.heading-0x8000);a.hSpeed=10;a.hDecel=0;a.yVel=15;a.gravityCoeff=-1;
   }
   if(!allocateWeapon(a,ctx,2,1,true)){s.resourceDenied=true;return;}
-  s.fireCount++;ctx.onFamilyProjectile?.(a,0x8007db5c,a.borgNumber===0xa?3:0);
+  s.fireCount++;
+  ctx.onFamilyProjectile?.(a,0x8007db5c,a.borgNumber===3?1:a.borgNumber===0xa?3:0);
+  if(a.borgNumber===3&&(s.doubleClone?.arm7c8??0)!==0)ctx.onFamilyProjectile?.(a,0x8007db5c,2);
 }
 export function stepNinjaX(a:Actor,ctx:StreamContext):void{
   const s=states.get(a);if(!s)return;

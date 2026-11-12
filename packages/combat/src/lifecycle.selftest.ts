@@ -1,3 +1,6 @@
+import {runDoubleNinjaXBattleSelfTest} from './doubleNinjaXBattle.selftest.js';
+import {runDoubleNinjaXEngineSelfTest} from './doubleNinjaXEngine.selftest.js';
+import {runDoubleNinjaXInputSelfTest} from './doubleNinjaXInput.selftest.js';
 import { runNinjaProjectileSelfTest } from "./ninjaProjectile.selftest.js";
 import { runNinjaXStreamSelfTest } from "./ninjaXStream.selftest.js";
 import { runNinjaXSelfTest } from "./ninjaX.selftest.js";
@@ -282,6 +285,9 @@ export function runSelfTest(): void {
   runNinjaXSelfTest();
   runNinjaShurikenFlightSelfTest();
   runNinjaProjectileSelfTest();
+  runDoubleNinjaXEngineSelfTest();
+  runDoubleNinjaXInputSelfTest();
+  runDoubleNinjaXBattleSelfTest();
   runNinjaXBattleSelfTest();
   runTeleportXBattleSelfTest();
   runSwitchingXStreamSelfTest();

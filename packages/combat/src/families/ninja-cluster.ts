@@ -628,7 +628,9 @@ export function configureNormalNinjaFamily(
 // (big-shuriken toss). Borg 0x003 → shuriken types 1 (+2 when +0x7c8 armed).
 // ============================================================================
 
-/** DOUBLE NINJA X-special on-hit: backflip (same scalars) + borg-0x003 shuriken.
+/** Legacy unadmitted DOUBLE NINJA X fallback, not source parity.
+ * Production ordinary X uses ninjaX.ts; the old body omits its conditional
+ * recoil/ammo gate. DOUBLE NINJA X-special on-hit: backflip (same scalars) + borg-0x003 shuriken.
  *  borg 0x003 → type 1, plus type 2 when the X-charge armed +0x7c8 (decode §2). */
 function doubleNinjaXOnHit(actor: RomActor, ctx: StreamContext): void {
   // Backflip — identical scalars to ninja.ts ninjaXOnHit (the shared X config).
@@ -757,7 +759,7 @@ function createDoubleNinjaRootAction(ctx: StreamContext): (actor: RomActor) => v
     switch (actor.actionIndex) {
       case 0: normalBCombo(actor, ctx); return;
       case 1: contextualB(actor); return;
-      case 2: xSpecial(base); return;
+      case 2: if(getNinjaXState(base))stepNinjaX(base,ctx);else xSpecial(base); return;
       case 3: doubleXChargeDash(actor, ctx); return; // X-charge dash (live for pl0003)
       case 4: normalBigShurikenToss(actor, ctx); return; // B-charge big-shuriken toss
       default: return;
