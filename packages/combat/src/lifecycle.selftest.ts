@@ -1,3 +1,4 @@
+import {runDoubleCloneContactSelfTest} from './doubleCloneContact.selftest.js';
 import {runDoubleCloneReactionObservationSelfTest} from './doubleCloneReactionObservation.selftest.js';
 import {runDoubleCloneReactionObservationBattleSelfTest} from './doubleCloneReactionObservationBattle.selftest.js';
 import {runDoubleCloneReactionFrameSelfTest} from './doubleCloneReactionFrame.selftest.js';
@@ -294,6 +295,7 @@ export function runSelfTest(): void {
   runDoubleCloneLifecycleSelfTest();
   runDoubleCloneReactionSelfTest();
   runDoubleCloneReactionFrameSelfTest();
+  runDoubleCloneContactSelfTest();
   runDoubleCloneReactionObservationBattleSelfTest();
   runDoubleCloneReactionObservationSelfTest();
   runDoubleNinjaXEngineSelfTest();
