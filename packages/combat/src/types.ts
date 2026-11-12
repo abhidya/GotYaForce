@@ -709,6 +709,19 @@ export interface DiverAuraChild {
   pulsePhaseDegrees: number;
   visualScale: Vec3;
   baseScale: number;
+  particleCountdown: number;
+  particleRng: number;
+  particles: DiverActiveParticle[];
+}
+
+export interface DiverActiveParticle {
+  index: number;
+  scale: number;
+  offset: Vec3;
+  rise: number;
+  yaw: number;
+  yawStep: number;
+  opacity: number;
 }
 
 /** Detached, non-colliding natural-expiry effect. */

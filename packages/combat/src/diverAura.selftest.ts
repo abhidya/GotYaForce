@@ -1,4 +1,4 @@
-import { createDiverAuraTail, stepDiverAuras, stepDiverAuraTails, spawnOrRefreshDiverAura, diverAuraPulseScale } from "./diverAura.js";
+import { stepDiverActiveParticles, createDiverAuraTail, stepDiverAuras, stepDiverAuraTails, spawnOrRefreshDiverAura, diverAuraPulseScale } from "./diverAura.js";
 import { initRng8, getRng8, resetPrng, stepPrng } from "./prng.js";
 import { applyContactAuraStatus, stepAmmoRefill, useWeaponCell } from "./combat.js";
 import { diverAmmoBaseRate, refreshDiverAmmoRate, stepDiverXRefill } from "./diverAmmo.js";
@@ -60,6 +60,49 @@ export function runDiverAuraSelfTest(): void {
     for (let i = 0; i < 100 && !f.state.diverAuras?.length; i++) f.step();
     const child = f.state.diverAuras?.[0];
     assert(child, `${id} actual X did not spawn an aura child`);
+    assert(child.particles.length === 1 && child.particleCountdown === 30, "first active tick births one mesh79 particle");
+    const activeCopy = structuredClone(child);
+    activeCopy.particles = []; activeCopy.particleCountdown = 0; activeCopy.particleRng = 123;
+    initRng8(); resetPrng(17, 39); const expectedGlobal = stepPrng(); resetPrng(17, 39);
+    const globalBefore = JSON.stringify(getRng8());
+    let expectedVisual = 123;
+    for (let i = 0; i < 6; i++) { expectedVisual ^= expectedVisual << 13; expectedVisual ^= expectedVisual >>> 17; expectedVisual ^= expectedVisual << 5; }
+    stepDiverActiveParticles(activeCopy);
+    assert(activeCopy.particleRng === expectedVisual && JSON.stringify(getRng8()) === globalBefore && stepPrng() === expectedGlobal,
+      "successful active birth consumes six local bytes and no gameplay RNG");
+    const born = structuredClone(activeCopy.particles[0]!);
+    // Seed123 bytes [1,239,125,229,97,111], independently calculated fixture.
+    assert(Math.abs(born.scale - 1.003921568627451) < 1e-12 && Math.abs(born.rise - 4.76078431372549) < 1e-12 &&
+      Math.abs(born.offset.x - 417.4030313875329) < 1e-9 && Math.abs(born.offset.y + 355.5534916598175) < 1e-9 &&
+      Math.abs(born.offset.z - 379.9677819357362) < 1e-9 && born.yaw === -9728 && born.yawStep === -1024 && born.opacity === .25,
+      "seeded birth scale/clamp/rise/yaw matches decoded formulas");
+    const stateAfterBirth = activeCopy.particleRng;
+    for (let i = 0; i < 29; i++) stepDiverActiveParticles(activeCopy);
+    assert(activeCopy.particleRng === stateAfterBirth && activeCopy.particleCountdown === 1, "29 subsequent ticks do not birth");
+    stepDiverActiveParticles(activeCopy);
+    assert(activeCopy.particleRng !== stateAfterBirth && Number(activeCopy.particleCountdown) === 30, "30th subsequent tick births");
+    const full = structuredClone(child);
+    full.particles = Array.from({ length: 32 }, (_, index) => ({ ...structuredClone(born), index, offset: { x: 0, y: 0, z: 0 } }));
+    full.particleCountdown = 0; const fullRng = full.particleRng;
+    stepDiverActiveParticles(full);
+    assert(full.particles.length === 32 && full.particleRng === fullRng, "full pool rejects birth without RNG draws");
+    full.particles.splice(7, 1); full.particleCountdown = 0;
+    stepDiverActiveParticles(full);
+    assert(full.particles.some((p) => p.index === 7) && full.particles.length === 32, "first free slot reused");
+    const boundary = structuredClone(child);
+    boundary.particleCountdown = 10;
+    boundary.particles = [{ ...born, index: 0, scale: 1, rise: 0, yaw: 32760, yawStep: 1024, offset: { x: 670, y: 0, z: 0 } }];
+    boundary.baseScale = 1; stepDiverActiveParticles(boundary);
+    assert(boundary.particles.length === 0, "active particle removed at inclusive boundary");
+    boundary.particles = [{ ...born, index: 0, scale: 1, rise: 0, yaw: 32760, yawStep: 1024, offset: { x: 670, y: 0, z: 0 } }];
+    boundary.baseScale = 2; stepDiverActiveParticles(boundary);
+    assert(boundary.particles.length === 1 && boundary.particles[0]!.yaw === -31752, "current owner scale and signed yaw wrap");
+    boundary.baseScale = .5; stepDiverActiveParticles(boundary);
+    assert(Number(boundary.particles.length) === 0, "shrinking owner immediately changes active boundary");
+    const refresh = structuredClone(child); const preserved = JSON.stringify([refresh.particles, refresh.particleCountdown, refresh.particleRng]);
+    spawnOrRefreshDiverAura([refresh], f.owner, 0x801213bc, child.subtype);
+    assert(JSON.stringify([refresh.particles, refresh.particleCountdown, refresh.particleRng]) === preserved, "refresh does not reset active particles/cadence/RNG");
+
     assert(f.state.projectiles.length === 0, `${id} X still emitted an ordinary projectile`);
     assert(Number(f.target.slowAuraLevel) === level, `${id} did not use real kind-9 damage record`);
     assert(f.target.hp === hp && f.target.comboAccum === combo, `${id} contact changed HP/combo`);

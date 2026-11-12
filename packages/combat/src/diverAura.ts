@@ -46,6 +46,7 @@ export function spawnOrRefreshDiverAura(
     hitRadius: Math.max(...hit.halfExtent, hit.radius),
     bankTexId: row.getInt16(0), visualVariant: row.getFloat32(28),
     baseScale: owner.modelSizeScale ?? 1,
+    particleCountdown: 0, particleRng: 0, particles: [],
     pulsePhaseDegrees: 0,
     visualScale: { x: initialScale, y: initialScale, z: initialScale },
   });
@@ -72,6 +73,7 @@ export function stepDiverAuras(children: DiverAuraChild[], all: readonly BorgRun
     if (child.pulsePhaseDegrees >= 360) child.pulsePhaseDegrees -= 360;
     const baseScale = owner.modelSizeScale ?? 1;
     child.visualScale = diverAuraPulseScale(child.pulsePhaseDegrees, baseScale);
+    stepDiverActiveParticles(child);
     const hit = attackHitRecordsForKind(child.ownerFormId, row.getInt16(4))[0]!;
     const record = familyDamageRecordForBorg(child.ownerFormId, hit.damageRecordIndex)!;
     child.hitRadius = Math.max(...hit.halfExtent, hit.radius) * baseScale;
@@ -104,7 +106,7 @@ export function diverAuraPulseScale(phaseDegrees: number, ownerBaseScale: number
 
 /** Source zz_0121db0_ birth / FUN_80121918 init / FUN_80121990 update. Mathematical translation,
  * not PPC rounding parity. Isolated visual RNG intentionally does not reproduce
- * the source global RNG stream (active mesh-79 particles remain unimplemented). */
+ * the source global RNG stream. Active particles use their own persistent visual stream. */
 export function createDiverAuraTail(child: DiverAuraChild): DiverAuraTail {
   let rng = 2166136261;
   for (const char of child.uid) rng = Math.imul(rng ^ char.charCodeAt(0), 16777619);
@@ -135,5 +137,45 @@ export function stepDiverAuraTails(tails: DiverAuraTail[]): DiverAuraTail[] {
       return p.opacity > 0;
     });
     return tail.particles.length > 0;
+  });
+}
+
+
+/** Mesh-79 particles: FUN_80121694 / zz_0121db0_ / zz_0122208_.
+ * Mathematical source translation, not PPC or source-global RNG parity. */
+export function stepDiverActiveParticles(child: DiverAuraChild): void {
+  child.particleCountdown--;
+  if (child.particleCountdown <= 0) {
+    child.particleCountdown = 30;
+    const index = Array.from({ length: 32 }, (_, i) => i).find((i) => !child.particles.some((p) => p.index === i));
+    if (index !== undefined) {
+      if (!child.particleRng) {
+        child.particleRng = 2166136261;
+        for (const char of child.uid) child.particleRng = Math.imul(child.particleRng ^ char.charCodeAt(0), 16777619);
+        if (!child.particleRng) child.particleRng = 1;
+      }
+      const byte = () => {
+        let state = child.particleRng;
+        state ^= state << 13; state ^= state >>> 17; state ^= state << 5;
+        child.particleRng = state; return state >>> 24;
+      };
+      const r = Array.from({ length: 6 }, byte);
+      const scale = 1 + r[0]! / 255;
+      const radius = 760 * child.baseScale - 90 * scale;
+      const offset = { x: radius * (r[1]! / 127.5 - 1), y: radius * (r[2]! / 510 - 1), z: radius * (r[3]! / 127.5 - 1) };
+      const magnitude = Math.hypot(offset.x, offset.y, offset.z);
+      if (magnitude > radius && magnitude > 0) {
+        const factor = radius / magnitude;
+        offset.x *= factor; offset.y *= factor; offset.z *= factor;
+      }
+      child.particles.push({ index, scale, offset, rise: 4 + r[4]! / 127.5,
+        yaw: (r[5]! << 25) >> 16, yawStep: r[5]! & 0x80 ? 0x400 : -0x400, opacity: .25 });
+    }
+  }
+  // Source births before updating, including the newly allocated particle.
+  child.particles = child.particles.filter((p) => {
+    p.offset.y += p.rise;
+    p.yaw = ((p.yaw + p.yawStep) << 16) >> 16;
+    return Math.hypot(p.offset.x, p.offset.y, p.offset.z) < 760 * child.baseScale - 90 * p.scale;
   });
 }
