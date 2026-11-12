@@ -1,3 +1,4 @@
+import {runActorDispatchOrderSelfTest} from './rom/dispatch-order.selftest.js';
 import {runDoubleCloneContactSelfTest} from './doubleCloneContact.selftest.js';
 import {runDoubleCloneReactionObservationSelfTest} from './doubleCloneReactionObservation.selftest.js';
 import {runDoubleCloneReactionObservationBattleSelfTest} from './doubleCloneReactionObservationBattle.selftest.js';
@@ -288,6 +289,7 @@ function assertNonRomAirborneDeathKeepsGravity(stats: readonly BorgStats[]): voi
 }
 
 export function runSelfTest(): void {
+  runActorDispatchOrderSelfTest();
   runNinjaXStreamSelfTest();
   runNinjaXSelfTest();
   runNinjaShurikenFlightSelfTest();
