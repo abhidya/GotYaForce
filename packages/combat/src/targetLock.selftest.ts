@@ -36,9 +36,11 @@ export function runSelfTest(): void {
   const bridge = self.romDriver;
   assert(bridge instanceof RomDriverBridge, "fixture has actual ROM bridge");
   const lockPosition = () => (bridge.actor as typeof bridge.actor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
+  const olderOwnPosition = { ...bridge.actor.targetCache5e8 };
   bridge.syncIn(self, state.borgs);
   assert(lockPosition()?.z === ally.pos.z, "ROM lock coordinates follow ally");
-  assert(bridge.actor.targetCache5e8.z === ally.pos.z, "ROM target cache follows ally");
+  assert(bridge.actor.targetCache5e8.x === olderOwnPosition.x && bridge.actor.targetCache5e8.y === olderOwnPosition.y
+    && bridge.actor.targetCache5e8.z === olderOwnPosition.z, "ROM own-position history is independent of ally lock sync");
   assert(bridge.actor.visibilityTarget === bridge.actor.visibilityRoster[1], "ROM visibility follows ally");
 
   // Invoke the actual Ninja fire callback installed by attachToBattle, reaching the

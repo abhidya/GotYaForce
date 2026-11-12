@@ -1,5 +1,6 @@
 import { runPoweredChargeSelfTest } from "./poweredCharge.selftest.js";
 import { runGatlingBattleSelfTest } from "./gatlingBattle.selftest.js";
+import { runSourcePositionHistorySelfTest } from "./sourcePositionHistory.selftest.js";
 import { runKnightWindupSelfTest } from "./knightWindup.selftest.js";
 import { runPrimaryAmmoSelfTest } from "./primaryAmmo.selftest.js";
 import { runHitDrainSelfTest } from "./hitDrain.selftest.js";
@@ -215,6 +216,7 @@ export function runSelfTest(): void {
   runDiverAuraSelfTest();
   runPoweredChargeSelfTest();
   runGatlingBattleSelfTest();
+  runSourcePositionHistorySelfTest();
   runKnightWindupSelfTest();
   runPrimaryAmmoSelfTest();
   runTargetLockSelfTest();

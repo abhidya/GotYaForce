@@ -1548,6 +1548,7 @@ export class RomDriverBridge implements RomFamilyDriver {
   private romOwnedSpecial = false;
   private runtime: BorgRuntime | null = null;
   private visibilityBindings: Array<{ runtime: BorgRuntime; state: RomVisibilityTarget }> = [];
+  private positionHistoryFrame: number | null = null;
 
   private constructor(
     actor: RomActor,
@@ -1879,6 +1880,11 @@ export class RomDriverBridge implements RomFamilyDriver {
         turnStep1: movement.turnStep1,
       };
     }
+    // Source spawn setup seeds both own-position samples from +0x20, after the
+    // spawn/floor placement (chunk_0007.c:699-704). Do not seed from a lock target.
+    Object.assign(actor.pos, runtime.pos);
+    Object.assign(actor.savedGroundPos, runtime.pos);
+    Object.assign(actor.targetCache5e8, runtime.pos);
     return bridge;
   }
 
@@ -1971,6 +1977,18 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (host.onStopStream) dest.onStopStream = host.onStopStream;
   }
 
+  /** zz_005685c_ (chunk_0007.c:201-206): shift own-position history exactly once
+   * before this simulation frame's movement/action work, even while the driver
+   * is inactive or the actor is airborne/hit/dead. The older +0x5e8 sample is used
+   * by family movement carry; +0x2c is the current frame's pre-movement position.
+   * Battle owns this clock. syncIn/admission/interrupt must not advance it. */
+  beginFrame(runtime: BorgRuntime, frame: number): void {
+    if (this.positionHistoryFrame === frame) return;
+    this.positionHistoryFrame = frame;
+    Object.assign(this.actor.targetCache5e8, this.actor.savedGroundPos);
+    Object.assign(this.actor.savedGroundPos, runtime.pos);
+  }
+
   /** Copy BorgRuntime → RomActor (before the ROM step). During an active special,
    *  velocity is NOT synced — the ROM handler owns it (syncIn would overwrite the
    *  phase machine's impulses with stale BorgRuntime.vel from before the special). */
@@ -2018,11 +2036,6 @@ export class RomDriverBridge implements RomFamilyDriver {
     a.tierScale = 1;
     a.maxFall = -9999;
     (a as RomActor & { grounded?: boolean }).grounded = runtime.grounded;
-    if (runtime.grounded) {
-      a.savedGroundPos.x = runtime.pos.x;
-      a.savedGroundPos.y = runtime.pos.y;
-      a.savedGroundPos.z = runtime.pos.z;
-    }
     (a as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = null;
     (a as RomActor & { targetDistance760?: number }).targetDistance760 = 0;
     if (activeTarget) {
@@ -2035,9 +2048,6 @@ export class RomDriverBridge implements RomFamilyDriver {
         target.pos.y - runtime.pos.y,
         target.pos.z - runtime.pos.z,
       );
-      a.targetCache5e8.x = target.pos.x;
-      a.targetCache5e8.y = target.pos.y;
-      a.targetCache5e8.z = target.pos.z;
       // zz_006d0dc_ -> FUN_800669d0 consumes the live target bearing as BAM16.
       // Height participates in pitch seeking, while yaw is atan2(horizontal x,z).
       const targetYaw = radToBam(Math.atan2(target.pos.x - runtime.pos.x, target.pos.z - runtime.pos.z));
@@ -2154,8 +2164,8 @@ export class RomDriverBridge implements RomFamilyDriver {
       dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex, variantIndex });
       stepRomActor(this.actor, this.tables, this.ctx);
       this.syncOut(runtime);
-      // The shared-X blink-away reposition (phase 0's pos += (pos−target)×0.95) can
-      // teleport past the arena walls near stage edges — the ROM's own step runs the
+      // The shared-X movement carry (phase 0's pos += (pos−olderOwnPos)×0.95) can
+      // cross the arena walls near stage edges — the ROM's own step runs the
       // ground/wall collide (zz_00677b0_) right after; the port applies the host's
       // bounds clamp + off-mesh revert here (same policy tick() documents).
       if (this.bounds) {
