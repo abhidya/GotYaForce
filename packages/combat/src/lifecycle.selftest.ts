@@ -1,3 +1,4 @@
+import {runDoubleCloneLifecycleSelfTest} from './doubleCloneLifecycle.selftest.js';
 import {runDoubleNinjaXBattleSelfTest} from './doubleNinjaXBattle.selftest.js';
 import {runDoubleNinjaXEngineSelfTest} from './doubleNinjaXEngine.selftest.js';
 import {runDoubleNinjaXInputSelfTest} from './doubleNinjaXInput.selftest.js';
@@ -285,6 +286,7 @@ export function runSelfTest(): void {
   runNinjaXSelfTest();
   runNinjaShurikenFlightSelfTest();
   runNinjaProjectileSelfTest();
+  runDoubleCloneLifecycleSelfTest();
   runDoubleNinjaXEngineSelfTest();
   runDoubleNinjaXInputSelfTest();
   runDoubleNinjaXBattleSelfTest();
