@@ -1,3 +1,7 @@
+import {spawnGredRangedSource} from './gredRangedProjectile.js';
+import { spawnGBlackChargeSource } from './gblackChargeProjectile.js';
+import { spawnGBlackGroundWaveSource } from './gblackGroundWaveAdapter.js';
+import { spawnTimeBomberSource, stepTimeBomberInput } from "./timeBomberProjectile.js";
 import { isNurseX, stepNurseInput } from "./nurseInput.js";
 import { isArrowNinja, spawnArrowSource, stepArrowInput, stepArrowMashInput, applyPendingArrowCorrection } from "./arrowProjectile.js";
 import { spawnBeamSource, stepBeamInput } from "./beamProjectile.js";
@@ -5,7 +9,7 @@ import { refreshSourceAttackTargets } from "./sourceAttackTarget.js";
 import { spawnRevolverSource, stepRevolverInput, isRevolver, type RevolverPresentationSink } from "./revolverProjectileRuntime.js";
 import type { RevolverLaunchFlash } from "./types.js";
 import { spawnGatlingSource, stepGatlingInput } from "./gatlingProjectile.js";
-import type { PoweredLaunchFlash } from "./types.js";
+import type { MineReceiverMeleeAttack, PoweredLaunchFlash } from "./types.js";
 import type { PoweredPresentationSink } from "./poweredProjectileRuntime.js";
 import { spawnPoweredSource } from "./poweredProjectileRuntime.js";
 import { stepPoweredCharge } from "./poweredCharge.js";
@@ -55,6 +59,7 @@ import {
   slotTelemetryFor,
   stepActionState,
   stepAmmoRefill,
+  grantAmmo,
   stepAttacks,
   stepContactDamage,
   stepCooldowns,
@@ -421,14 +426,15 @@ class BattleImpl implements Battle {
           return { velY: floor.velY, grounded: floor.grounded };
         },
       },
+      returnResource: (owner,cell) => { const p=this.profiles.get(owner.uid);if(p)grantAmmo(owner,cell,p); },
       allocateResource: (owner, type, count, consume) => {
         const profile = this.profiles.get(owner.uid);
         return profile ? useWeaponCell(owner, profile, type, count, consume) : false;
       },
       spawnProjectile: (owner, spawnerAddr, kind, actor) =>
         this.addRomProjectile(owner, spawnerAddr, kind, actor),
-      resolveHit: (attacker, victim, damageRecordIndex, knockbackMult) =>
-        this.resolveRomHit(attacker, victim, damageRecordIndex, knockbackMult),
+      resolveHit: (attacker, victim, damageRecordIndex, knockbackMult, onContactAccepted) =>
+        this.resolveRomHit(attacker, victim, damageRecordIndex, knockbackMult, onContactAccepted),
       // Bridge → Battle.onRomCue: every ported family's ctx.onPlayCue fire flows here
       // via bridge.ts attachToBattle's hostCtx.onPlayCue. Forward to the host-settable
       // public field; apps/game/main.ts enterBattle wires it to the audio manager.
@@ -709,7 +715,9 @@ class BattleImpl implements Battle {
       actors: state.borgs.map(snapshotActor),
       diverAuras: structuredClone(state.diverAuras ?? []),
       diverAuraTails: structuredClone(state.diverAuraTails ?? []),
-      projectiles: state.projectiles.map(snapshotProjectile),
+      // Groundwave emitters are invisible; pending/released pulse objects have no model.
+      // Active pulses use the generic procedural flame, not source visual parity.
+      projectiles: state.projectiles.filter(p=>(!p.gblackGroundWaveSource||(p.gblackGroundWaveSource.kind==='child'&&p.gblackGroundWaveSource.phase==='active'))).filter(p=>p.timeBomberSource?.kind!=='mine'||p.timeBomberSource.phase==='active').map(snapshotProjectile),
       projectileDespawns: this.projectileDespawns.map((despawn) => structuredClone(despawn)),
       activeUidByPlayer: { ...state.activeUidByPlayer },
       energy: { ...state.energy },
@@ -758,6 +766,7 @@ class BattleImpl implements Battle {
     victim: BorgRuntime,
     damageRecordIndex: number,
     knockbackMult: number,
+    onContactAccepted?: () => void,
   ): number {
     const victimProfile = this.profiles.get(victim.uid);
     if (!victimProfile) return 0;
@@ -767,7 +776,7 @@ class BattleImpl implements Battle {
     const attackerProfile = this.profiles.get(attacker.uid);
     const dir = { x: victim.pos.x - attacker.pos.x, y: 0, z: victim.pos.z - attacker.pos.z };
     return applyHit(victim, victimProfile, 0, knockbackMult, dir, attacker.pos, false, record,
-      attackerProfile ? { attacker, attackerProfile, damageScale: 1, attackerSideRank: this.sideRankForTeam(attacker.team), defenderSideRank: this.sideRankForTeam(victim.team) } : undefined,
+      attackerProfile ? { attacker, attackerProfile, onContactAccepted, damageScale: 1, attackerSideRank: this.sideRankForTeam(attacker.team), defenderSideRank: this.sideRankForTeam(victim.team) } : undefined,
       { burstMeters: this.state.burstMeterByPlayer, telemetry: this.state.telemetry, energyByTeam: this.state.energy, energyMaxByTeam: this.state.energyMax, cpuHalvingEnabled: this.isChallengeMode });
   }
 
@@ -790,12 +799,20 @@ class BattleImpl implements Battle {
     *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void {
     if (actor) {
+      const ranged=spawnGredRangedSource(b,actor,spawnerAddr,kind,this.state.borgs);
+      if(ranged!==null){this.state.projectiles.push(...ranged);return;}
+      const charge=spawnGBlackChargeSource(b,actor,spawnerAddr,kind);
+      if(charge!==null){this.state.projectiles.push(...charge);return;}
+      const wave=spawnGBlackGroundWaveSource(b,actor,spawnerAddr,kind);
+      if(wave!==null){this.state.projectiles.push(...wave);return;}
       const beam = spawnBeamSource(b,actor,spawnerAddr,kind);
       if (beam !== null) { this.state.projectiles.push(...beam); return; }
       const arrow = spawnArrowSource(b, actor, spawnerAddr, kind, this.state.borgs);
       if (arrow !== null) { this.state.projectiles.push(...arrow); return; }
       const revolver = spawnRevolverSource(b, actor, spawnerAddr, kind);
       if (revolver !== null) { this.state.projectiles.push(...revolver); return; }
+      const timeBomber = spawnTimeBomberSource(b, actor, spawnerAddr, kind, this.state.borgs);
+      if (timeBomber !== null) { this.state.projectiles.push(...timeBomber); return; }
       const gatling = spawnGatlingSource(b, actor, spawnerAddr, kind, this.state.borgs);
       if (gatling !== null) { this.state.projectiles.push(...gatling); return; }
       const powered = spawnPoweredSource(b, actor, spawnerAddr, kind, this.state.borgs, this.onPoweredLaunch);
@@ -1177,12 +1194,17 @@ class BattleImpl implements Battle {
     stepPrng();
 
     // 2) Lock-on resolution + facing context, then movement, then attacks.
+    const mineReceiverMelee: MineReceiverMeleeAttack[] = [];
     for (const b of all) {
       if (!b.alive) continue;
       const prof = profiles.get(b.uid);
       if (!prof) continue;
       const input = resolved.get(b.uid) ?? emptyInput();
 
+      if(b.borgId==='pl0106'){
+        const sample=b.timeBomberBInput??={held:false,pressEdge:false};
+        sample.pressEdge=input.attack&&!sample.held;sample.held=input.attack;
+      }
       // Tick down timers first (cooldowns, invincibility, post-hit gauge windows) so this
       // frame's gating is correct. stepGaugeWindows self-freezes while in hit/down (the
       // ROM's "in hit reaction" gate, chunk_0006.c:7982-8011).
@@ -1265,10 +1287,20 @@ class BattleImpl implements Battle {
       // Source charge bookkeeping also runs while another action owns this frame.
       stepArrowMashInput(b,input);
       if (isNurseX(b.borgId)) stepNurseInput(b, input.special);
-      if (b.borgId === "pl0104") stepBeamInput(b,input);
+      if (b.borgId === "pl0104" || b.borgId === "pl0615" || b.borgId === "pl0629") stepBeamInput(b,input);
       if (isArrowNinja(b.borgId)) stepArrowInput(b,input.special);
       if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
+      if (b.borgId === "pl0106") {
+        const sample = stepTimeBomberInput(b,input.special);
+        sample.neutral = Math.max(Math.abs(input.moveX),Math.abs(input.moveZ)) < 0x34 / 127;
+        // A bounded adapter for source walk/run control10. Sampling before
+        // movement excludes ambiguous first-frame starts and coasting entry.
+        // Host roots have uniform scalar scale and no source6b8 yaw correction.
+        sample.walking = !sample.neutral && b.grounded && b.state === "move" &&
+          !input.dash && !input.jump && !input.hyper && (b.cooldowns["dashActive"] ?? 0) <= 0 &&
+          b.romDriver instanceof RomDriverBridge && b.romDriver.actor.bodyPitch === 0;
+      }
       if (b.borgId === "pl0101") {
         stepPoweredCharge(b, input.special, b.state === "special" && b.command?.type === 5);
       }
@@ -1276,7 +1308,13 @@ class BattleImpl implements Battle {
       // ROM-family driver (1:1 ported state machine) — when active, owns the borg's
       // motion + attacks for this frame; skip the generic stepMovement/stepAttacks.
       // See packages/combat/src/bridge.ts. Borgs without a ported family are unaffected.
-      if (b.romDriver?.tick(b, SIM.DT, this.state.borgs, input)) {
+      b.romDriver?.runHostLocomotion?.(b,()=>{
+        stepMovement(b,prof,input,ctx);
+        clearJumpLatch(b,input.jump);
+      });
+      if (b.romDriver?.tick(b, SIM.DT, this.state.borgs, input,
+        (attack) => mineReceiverMelee.push(attack))) {
+        b.romDriver.postAction?.(b,this.state.borgs,input);
         // Drain any projectiles the ROM stream's fireChild op spawned this tick.
         const romProjs = b.romDriver.drainProjectiles();
         if (romProjs.length > 0) this.state.projectiles.push(...romProjs);
@@ -1340,6 +1378,9 @@ class BattleImpl implements Battle {
       // Passive contact damage (ATK-006 scaffold): immediate no-op while
       // CONTACT_DAMAGE.ENABLED stays false (the default) — see combat.ts stepContactDamage
       // for the evidence gap and the per-borg-data enable path.
+      b.romDriver?.postAction?.(b,this.state.borgs,input);
+      const postProjectiles=b.romDriver?.drainProjectiles()??[];
+      if(postProjectiles.length)this.state.projectiles.push(...postProjectiles);
       stepContactDamage(b, all);
 
       // Advance hit/down/death/spawn timers.
@@ -1371,6 +1412,7 @@ class BattleImpl implements Battle {
         onRevolverLaunch: this.onRevolverLaunch,
         onPoweredLaunch: this.onPoweredLaunch,
         onSourceCue: (cue) => this.onRomCue?.(cue),
+        mineReceiverMelee,
       },
       {
         sideRankForTeam: (team) => this.sideRankForTeam(team),
@@ -1394,7 +1436,7 @@ class BattleImpl implements Battle {
         vel: structuredClone(projectile.vel),
         team: projectile.team,
         reason: projectile.despawnReason,
-        ...(projectile.gatlingSource?.kind === "primary" && projectile.despawnReason === "hit-terrain"
+        ...((projectile.gatlingSource?.kind === "primary" || (projectile.timeBomberSource?.kind === "primary" || projectile.timeBomberSource?.kind === "mine")) && projectile.despawnReason === "hit-terrain"
           ? {suppressTerrainImpactFx:true} : {}),
         ...(projectile.lastImpactEffectId !== undefined
           ? { impactEffectId: projectile.lastImpactEffectId }

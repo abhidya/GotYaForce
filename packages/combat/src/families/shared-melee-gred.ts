@@ -302,12 +302,22 @@ export function createSharedMeleeGRed(
   };
 }
 
-/** G RED (pl0615) B-close config — seedSlot 0, 30-frame active window, 100-unit
- *  proximity. The exact ROM config struct lives in the variant function's r4 load
- *  (address unlocated in the current decode); these are the documented defaults from
- *  shared-engine.ts DEFAULT_CONFIGS.groundMelee until the per-family dig completes. */
+/** Legacy B-close placeholder retained only for unported borg/variant paths:
+ *  seed0, timer30 and proximity100 came from shared-engine.ts defaults. The
+ *  separately proven pl0615 action1/variant0 config below replaces it only there. */
 export const GRED_MELEE_CONFIG: SharedMeleeGRedConfig = {
   seedSlot: 0,
   timerFrames: 30,
   proximityRange: 100,
+};
+
+/** pl0615 action1/variant0 only: FUN_8018de34 loads r4=0x80365634 and calls
+ *  0x80177dd8. Original config +0/+4/+8/+c = 0/150/20/f32(.95);
+ *  +0x10/+0x14 callbacks are both null. Do not apply to other G RED-family
+ *  variants: their dispatch/config/engine joins remain outside this bounded port. */
+export const GRED_ACTION1_VARIANT0_CONFIG: SharedMeleeGRedConfig = {
+  seedSlot: 0,
+  timerFrames: 20,
+  proximityRange: 150,
+  decel: Math.fround(.95),
 };

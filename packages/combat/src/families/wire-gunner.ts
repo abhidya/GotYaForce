@@ -31,6 +31,7 @@
 // Float/stream constants (FLOAT_80439e90 stream rate read from boot.dol this session):
 //   FLOAT_80439e90 = -1.0  (zz_004beb8_ playback rate — default-speed stream arm)
 
+import { isTimeBomberGroundAction, timeBomberGroundAction, isTimeBomberPartAction, timeBomberAirAction, timeBomberAirFallback } from "./time-bomber.js";
 import type { RomActor } from "../rom/actor.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
@@ -166,6 +167,9 @@ export function createWireGunnerRootAction(
     null,                                       // 4: — TODO identify
   ];
   return (actor: RomActor) => {
+    if (actor.borgNumber===0x106 && actor.actionIndex===0 && actor.variantIndex===4) { timeBomberAirFallback(actor,ctx); return; }
+    if (isTimeBomberPartAction(actor)) { timeBomberAirAction(actor, ctx); return; }
+    if (isTimeBomberGroundAction(actor)) { timeBomberGroundAction(actor, ctx); return; }
     const fn = actionTable[actor.actionIndex];
     if (fn) fn(actor);
   };

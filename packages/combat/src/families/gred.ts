@@ -1,3 +1,7 @@
+import {getGRedAirShotState,stepGRedAirShot} from '../gredAirShot.js';
+import {getGRedShotState,stepGRedShot} from '../gredShot.js';
+import {getGBlackChargeState,stepGBlackCharge} from '../gblackCharge.js';
+import {getGRedChargeState,stepGRedCharge} from '../gredCharge.js';
 // G RED family (ctor 0x8018ccfc) — the REFERENCE port of a ROM-faithful borg family.
 // Covers pl0615 (G RED), pl0629 (NEO G RED), pl062a (G BLACK). Source:
 // `research/decomp/ghidra-export/chunk_0046.c:5058` (root dispatcher zz_018d24c_) and
@@ -14,26 +18,29 @@ import {
 } from "../rom/dispatch.js";
 import {
   integratePhysics,
-  vecSubtract,
   vecScale,
   vecAdd,
 } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
-import { createSharedMeleeGRed, GRED_MELEE_CONFIG } from "./shared-melee-gred.js";
+import { createSharedMeleeGRed, GRED_ACTION1_VARIANT0_CONFIG, GRED_MELEE_CONFIG } from "./shared-melee-gred.js";
 import { createSharedCharge, GRED_CHARGE_CONFIG } from "./shared-charge.js";
 import { createGRedDash } from "./gred-dash.js";
+import { getNeoGredMeleeState, stepNeoGredMelee } from "../neoGredMelee.js";
+import { getGRedCrashState, stepGRedCrash } from "../gredCrash.js";
+import {getGRedAirMeleeState,stepGRedAirMelee} from '../gredAirMelee.js';
 
-// Motion constants — every value read from boot.dol this session.
+// Original numeric constants rechecked in-place. These motion corrections do
+// not claim full X stream/aim/ground/timeout parity with the source.
 const G_RED_CRASH = {
   LAUNCH_Y: 4.0,         // FLOAT_8043b158 — phase-0 vertical impulse (the "fly up")
   BASE_XZ: 0.0,          // FLOAT_8043b110 — base horizontal velocity during launch
-  RELPOS_SCALE: 0.95,    // FLOAT_8043b124 — reposition scale (push 5% from target)
+  RELPOS_SCALE: Math.fround(.95), // FLOAT_8043b124 — retained own-motion fraction
   GRAVITY: 1.0,          // FLOAT_8043b130 — per-frame gravity during the move
   HIT_DASH_XZ: 60.0,     // FLOAT_8043b148 — phase-1→2 hit-transition horizontal dash
   HIT_DASH_Y: 10.0,      // FLOAT_8043b15c — phase-1→2 hit-transition vertical velocity
   LAND_TIMER: 120.0,     // FLOAT_8043b160 — phase-2 landing timer seed
-  ANGLE_DECAY: 0.9,      // FLOAT_8043b100 — phase-3 steering-angle decay
-  ANGLE_BASE: 176.0,     // DOUBLE_8043b108 — phase-3 steering-angle base offset
+  ANGLE_DECAY: Math.fround(.9), // FLOAT_8043b100 — phase-3 signed-angle decay
+  BAM_RADIANS: 0.0000958738019107841, // FLOAT_80437078 — source45204/45238
   STREAM_RATE: -1.0,     // FLOAT_8043b120 — action-stream playback rate
 } as const;
 
@@ -43,13 +50,6 @@ const PHASE_LAUNCH = 0;
 // the phase index is implicit in fbPhaseSlots[0] after the increment).
 const PHASE_DESCEND = 2;
 const PHASE_LAND = 3;
-
-/** The lock-target position the family handler reads at actor+0x5e8. The bridge adapter
- *  copies BorgRuntime's currently-locked enemy position into this field each frame. */
-function lockTargetPos(actor: RomActor): { x: number; y: number; z: number } | null {
-  const t = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
-  return t ?? null;
-}
 
 // ============================================================================
 // Phase 0 — FUN_8018e888 @ chunk_0047.c:779. The launch.
@@ -83,14 +83,13 @@ function gredXPhase0(actor: RomActor, ctx: StreamContext): void {
     actor.activeYaw = actor.lockYaw;
   }
 
-  // Reposition: motion = (pos - lockTarget); motion *= 0.95; pos += motion.
-  // (chunk_0047.c:836-839). Pushes G RED to 95% of the vector from target → the
-  // "leaps away then dashes in" windup spacing.
-  const target = lockTargetPos(actor);
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(G_RED_CRASH.RELPOS_SCALE, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
+  // Source+5e8 is the actor's OWN saved position, not the locked enemy.
+  // Bridge.beginFrame binds it from the previous savedGroundPos. Carry inertia
+  // unconditionally, including a missing target; stationary actors do not teleport.
+  for (const axis of ['x','y','z'] as const) {
+    const delta = Math.fround(actor.pos[axis] - actor.targetCache5e8[axis]);
+    actor.motion[axis] = Math.fround(delta * G_RED_CRASH.RELPOS_SCALE);
+    actor.pos[axis] = Math.fround(actor.pos[axis] + actor.motion[axis]);
   }
 
   // Start the action stream — group 4 (charge/air-special axis), slot = streamSlot.
@@ -144,17 +143,17 @@ function gredXPhase1(actor: RomActor, ctx: StreamContext): void {
 // ============================================================================
 function gredXPhase2(actor: RomActor, ctx: StreamContext): void {
   tickStream(actor, 0xf, ctx);
-  // Vertical accumulator: motion.y += motion.y × dt; clamp to motion.z.
-  // (chunk_0047.c:902-906 — the +0x38 = +0x3c × +0x1dc8 + +0x38, clamp +0x40.)
-  actor.motion.y = actor.motion.y * actor.dt + actor.motion.y;
-  if (actor.motion.z < actor.motion.y) actor.motion.y = actor.motion.z;
+  // Source+38 is motion.x, +3c is its increment and +40 its cap. The
+  // original fmadds rounds once after multiply+add; do not double motion.y.
+  actor.motion.x = Math.fround(actor.motion.y * actor.dt + actor.motion.x);
+  if (actor.motion.z < actor.motion.x) actor.motion.x = actor.motion.z;
 
-  // XZ velocity from sin/cos of steerYaw (chunk_0047.c:907-911).
-  // +0x44 (hSpeed) = motion.y × sin(steerYaw); +0x48 (yVel) = motion.y × -cos(steerYaw).
-  // NOTE: the source writes +0x44/+0x48 here, which the next integratePhysics consumes.
-  const yaw = actor.steerYaw;
-  actor.hSpeed = actor.motion.y * Math.sin(yaw);
-  actor.yVel = actor.motion.y * -Math.cos(yaw);
+  // 45238=COS and45204=SIN consume signed BAM16, not radians. Match the
+  // original f32 argument/result boundaries; JS libm remains a numeric adapter.
+  const pitch = (actor.steerYaw << 16) >> 16;
+  const angle = Math.fround(pitch * G_RED_CRASH.BAM_RADIANS);
+  actor.hSpeed = Math.fround(actor.motion.x * Math.fround(Math.cos(angle)));
+  actor.yVel = Math.fround(-actor.motion.x * Math.fround(Math.sin(angle)));
 
   integratePhysics(G_RED_CRASH.GRAVITY, actor, actor.activeYaw);
 
@@ -172,9 +171,10 @@ function gredXPhase2(actor: RomActor, ctx: StreamContext): void {
 // ============================================================================
 function gredXPhase3(actor: RomActor, ctx: StreamContext): void {
   tickStream(actor, 0xf, ctx);
-  // Steer yaw tick: steerYaw = (steerYaw - 176.0) × 0.9
-  // (chunk_0047.c:937-940 — the (s16 - DOUBLE_8043b108) × FLOAT_8043b100 write.)
-  actor.steerYaw = (actor.steerYaw - G_RED_CRASH.ANGLE_BASE) * G_RED_CRASH.ANGLE_DECAY;
+  // DOUBLE8043b108 is the s16-to-double conversion bias, NOT a176 offset.
+  // Source fmuls -> fctiwz -> sth: f32 damping, truncate toward0, signed16 store.
+  const signedPitch = (actor.steerYaw << 16) >> 16;
+  actor.steerYaw = (Math.trunc(Math.fround(signedPitch * G_RED_CRASH.ANGLE_DECAY)) << 16) >> 16;
   integratePhysics(G_RED_CRASH.GRAVITY, actor, actor.activeYaw);
 
   // Ground check (chunk_0047.c:942-966). zz_00677b0_ returns 0 when grounded.
@@ -221,15 +221,36 @@ export interface GRedFamilyCtx extends StreamContext {}
 
 export function createGRedRootAction(ctx: GRedFamilyCtx): (actor: RomActor) => void {
   const dash = createGRedDash(ctx);
+  const neutralGRedMelee = createSharedMeleeGRed(GRED_ACTION1_VARIANT0_CONFIG, ctx);
+  const legacyCharge=createSharedCharge(GRED_CHARGE_CONFIG,ctx);
+  const legacyMelee = createSharedMeleeGRed(GRED_MELEE_CONFIG, ctx);
   // The full ROM table has 5 entries indexed by +0x580; entry 2 is the X/air-B chain
   // (FUN_8018e7fc → variant table → phase table). Here we route actionIndex 2 directly
   // to the phase handler; the variant-dispatch and air-counter clear (FUN_8018e7fc /
   // FUN_8018e838) are folded in.
   const actionTable: Array<((actor: RomActor) => void) | null> = [
-    dash,          // 0: dash attack (zz_018d288_, all five variants)
-    createSharedMeleeGRed(GRED_MELEE_CONFIG, ctx), // 1: B melee (zz_0177dd8_ shared engine)
-    (actor) => gredXHandler(actor, ctx), // 2: X / air-B (G Crash)
-    createSharedCharge(GRED_CHARGE_CONFIG, ctx), // 3: B charge (zz_0179814_ shared engine)
+    (actor)=>{if(getGRedAirShotState(actor)&&(actor.variantIndex===3||actor.variantIndex===4))stepGRedAirShot(actor,ctx);else if(getGRedShotState(actor)&&actor.variantIndex===0)stepGRedShot(actor,ctx);else dash(actor);}, // 0: admitted normal ground/air shots; other routes remain legacy.
+    (actor) => {
+      if((actor.borgNumber===0x615||actor.borgNumber===0x62a||actor.borgNumber===0x629) && actor.variantIndex===4 && getGRedAirMeleeState(actor)){
+        stepGRedAirMelee(actor,ctx);return;
+      }
+      if (getNeoGredMeleeState(actor) &&
+          (((actor.borgNumber === 0x615 || actor.borgNumber === 0x62a) && actor.variantIndex === 0) ||
+           (actor.borgNumber === 0x629 && (actor.variantIndex === 0 || actor.variantIndex === 6)))) {
+        stepNeoGredMelee(actor,ctx); return;
+      }
+      // Unadmitted direct callers retain the prior bounded pl0615 v0 config;
+      // other variants retain their legacy placeholder. Actual fresh neutral B
+      // admission above owns the source clocks, contact and retap chain.
+      (actor.borgNumber === 0x615 && actor.variantIndex === 0 ? neutralGRedMelee : legacyMelee)(actor);
+    }, // 1: B melee
+    (actor) => {
+      if((actor.borgNumber===0x615 || actor.borgNumber===0x629 || actor.borgNumber===0x62a) &&
+          (actor.variantIndex===0 || actor.variantIndex===4) && getGRedCrashState(actor))
+        stepGRedCrash(actor,ctx);
+      else gredXHandler(actor,ctx);
+    }, // 2: admitted family neutral ground/air X; other routes retain legacy behavior.
+    (actor)=>{if(getGBlackChargeState(actor))stepGBlackCharge(actor,ctx);else if(getGRedChargeState(actor))stepGRedCharge(actor,ctx);else legacyCharge(actor);}, // 3: scoped RED/NEO charge; legacy neighbors unchanged.
     null,          // 4: (FUN_8018ee84) — TODO identify
   ];
   return (actor: RomActor) => {

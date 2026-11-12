@@ -44,9 +44,9 @@ this config block → ported ONCE as `families/shared-x-special.ts`, parameteriz
 ### Phase transcriptions (constants all DOL-read)
 
 - **P0 `zz_00ff30c_`**: +0x540++; no target → +0x5ac = +0x72; face (mask 0xc1); zero
-  +0x44/+0x48/+0x4c/+0x50 (FLOAT_804392b4=0) + turn rates; **reposition
-  motion=(pos−target)×0.95 (FLOAT_804392d0), pos+=motion** (the blink-away, same shape as
-  G Crash); ground snap zz_00677b0_; +0x6ea = cfg slot (air fork on +0x5e0&0x40), then
+  +0x44/+0x48/+0x4c/+0x50 (FLOAT_804392b4=0) + turn rates; **own-history carry
+  motion=f32(f32(pos−own5e8)×f32(0.95)), pos=f32(pos+motion)**
+  (FLOAT_804392d0; corrected against ff30c on2026-11-12, not target-dependent blinking); ground snap zz_00677b0_; +0x6ea = cfg slot (air fork on +0x5e0&0x40), then
   +0x6ea++; start stream rate −1.0 (FLOAT_804392b8) mask 0xf **group 4**; +0x80c=0.
 - **P1 `zz_00ff418_`**: tick 0xf; face 0xc1; reposition ×0.95 continue; on contact byte
   **+0x1cef > 0**: +0x540++ and invoke cfg callback; |motion|>3.0 (FLOAT_804392c8) →

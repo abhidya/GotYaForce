@@ -9,6 +9,7 @@
 import type { RomActor, Vec3 } from "../rom/actor.js";
 import {
   allocateWeapon,
+  groundSnapRevert,
   stepTargetRoll,
   stepTargetYaw,
   toS16,
@@ -25,6 +26,7 @@ export const GRED_DASH = {
   REPEAT_G_RED: 12.0,         // FLOAT_8043b134; actor+0x558
   REPEAT_NEO_G_RED: 8.0,      // FLOAT_8043b138
   REPEAT_G_BLACK: 16.0,       // FLOAT_8043b13c
+  ENTRY_CARRY: Math.fround(.95), // FLOAT_8043b124, verified18d350 phase0 only
   MOTION_DECAY: 0.95,         // FLOAT_8043b124
   AFTERIMAGE_THRESHOLD: 3.0, // FLOAT_8043b128 (zz_00b22f4_, renderer-side)
   STREAM_RATE: -1.0,          // FLOAT_8043b120
@@ -134,15 +136,20 @@ function dashV0Phase0(actor: RomActor): void {
   actor.yVel = 0;
   actor.hDecel = 0;
   actor.hSpeed = 0;
-  const target = s.lockTarget;
-  if (target) {
-    actor.motion.x = (actor.pos.x - target.x) * GRED_DASH.MOTION_DECAY;
-    actor.motion.y = (actor.pos.y - target.y) * GRED_DASH.MOTION_DECAY;
-    actor.motion.z = (actor.pos.z - target.z) * GRED_DASH.MOTION_DECAY;
-    actor.pos.x += actor.motion.x;
-    actor.pos.y += actor.motion.y;
-    actor.pos.z += actor.motion.z;
+  actor.poseAccum80 = 0;
+  actor.poseAccum7e = 0;
+  actor.poseAccum7c = 0;
+  // 18d350 retains the actor's own prior motion, unconditionally. +5e8 is
+  // the previous own-position sample, never a target coordinate. Keep the
+  // original subtract/scale/add f32 boundaries without changing other phases.
+  for (const axis of ['x', 'y', 'z'] as const) {
+    const delta = Math.fround(actor.pos[axis] - actor.targetCache5e8[axis]);
+    actor.motion[axis] = Math.fround(delta * GRED_DASH.ENTRY_CARRY);
+    actor.pos[axis] = Math.fround(actor.pos[axis] + actor.motion[axis]);
   }
+  // Existing host floor adapter for679d0, after carry and before80c reset.
+  groundSnapRevert(actor);
+  actor.accumulator80c = 0;
 }
 
 function dashV0Phase1(actor: RomActor, ctx: StreamContext): void {

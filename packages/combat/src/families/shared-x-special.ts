@@ -1,4 +1,4 @@
-// Shared-engine X-special machine — 1:1 port of `zz_00ff2bc_` @0x800ff2bc and its
+// Shared-engine X-special machine — bounded port of `zz_00ff2bc_` @0x800ff2bc and its
 // 3-phase table `PTR_zz_00ff30c__8031f000` = [0x800ff30c, 0x800ff418, 0x800ff4d4].
 //
 // Unlike G RED (whose X-special is a bespoke family chain, families/gred.ts), many
@@ -16,13 +16,14 @@
 
 import type { RomActor } from "../rom/actor.js";
 import { dispatchUpperBodyCue } from "../rom/dispatch.js";
-import { integratePhysics, vecSubtract, vecScale, vecAdd } from "../rom/physics.js";
+import { integratePhysics, vecScale, vecAdd } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Motion constants — every value read from boot.dol (nn-family decode §A4-§A6). */
 export const SHARED_X = {
-  REPOSITION_SCALE: 0.95, // FLOAT_804392d0 — same 5%-pull shape as G RED's FLOAT_8043b124
+  ENTRY_CARRY: Math.fround(.95), // FLOAT_804392d0; phase0 stored f32 operations only
+  REPOSITION_SCALE: 0.95, // Later-phase legacy arithmetic retained in this bounded fix
   STREAM_RATE: -1.0,      // FLOAT_804392b8 — playback rate (record-rate substitution applies)
   GRAVITY: 1.0,           // FLOAT_804392d4 — phase-2 integrator gravity param
   COOLDOWN: 4.0,          // FLOAT_804392d8 — +0x694 attack cooldown seeded at exit
@@ -47,7 +48,7 @@ export interface SharedXConfig {
 
 const DEFAULT_WHIFF_FRAMES = 60;
 
-/** The lock-target position the phase handlers read at actor+0x5e8 (bridge-synced). */
+/** Live target is used only for the existing aim adapter, never own +5e8 carry. */
 function lockTargetPos(actor: RomActor): { x: number; y: number; z: number } | null {
   const t = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
   return t ?? null;
@@ -62,7 +63,7 @@ function isAirborne(actor: RomActor): boolean {
 }
 
 // ============================================================================
-// Phase 0 — zz_00ff30c_ @0x800ff30c. Setup + blink-reposition + stream start.
+// Phase 0 — zz_00ff30c_ @0x800ff30c. Setup + own-history carry + stream start.
 // ============================================================================
 function sharedXPhase0(actor: RomActor, cfg: SharedXConfig, ctx: StreamContext): void {
   actor.fbPhaseSlots[0] = 1; // +0x540++ (enter phase 1)
@@ -83,12 +84,28 @@ function sharedXPhase0(actor: RomActor, cfg: SharedXConfig, ctx: StreamContext):
   actor.hDecel = 0;
   actor.gravityCoeff = 0;
 
-  // Reposition: motion = pos − lockTargetPos; motion ×= 0.95; pos += motion — the
-  // signature "blink away to double distance" windup (identical shape to G Crash).
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(SHARED_X.REPOSITION_SCALE, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
+  actor.poseAccum80 = 0;
+  actor.poseAccum7e = 0;
+  actor.poseAccum7c = 0;
+
+  // Original ff30c unconditionally carries the actor's own previous position
+  // delta, not target distance. Preserve the stored subtract/scale/add f32
+  // boundaries without changing the later phases' inherited arithmetic.
+  for (const axis of ['x', 'y', 'z'] as const) {
+    const delta = Math.fround(actor.pos[axis] - actor.targetCache5e8[axis]);
+    actor.motion[axis] = Math.fround(delta * SHARED_X.ENTRY_CARRY);
+    actor.pos[axis] = Math.fround(actor.pos[axis] + actor.motion[axis]);
+  }
+  // Source677b0 runs before stream selection/start. This is the existing host
+  // terrain adapter, not a new port of original stage collision or support.
+  const floor = actor.physicsRuntime;
+  if (floor) {
+    const result = floor.probeMotion
+      ? floor.probeMotion(actor.savedGroundPos, actor.pos, actor.yVel)
+      : floor.clampToGround(actor.pos, actor.yVel);
+    if ('y' in result && typeof result.y === 'number') actor.pos.y = result.y;
+    actor.yVel = result.velY;
+    (actor as RomActor & { grounded?: boolean }).grounded = result.grounded;
   }
 
   // Stream slot select: cfg ground/air slot into +0x6ea, which then auto-increments
@@ -97,7 +114,8 @@ function sharedXPhase0(actor: RomActor, cfg: SharedXConfig, ctx: StreamContext):
   actor.streamSlot = slot + 1;
   // zz_004beb8_(rate −1.0, actor, partMask 0xf, group 4, slot, −1, −1)
   startStream(actor, 0xf, 4, slot, SHARED_X.STREAM_RATE);
-  actor.handlerTimer = 0;
+  actor.accumulator80c = 0;
+  actor.handlerTimer = 0; // Existing whiff fallback bookkeeping, not source80c.
   void ctx;
 }
 

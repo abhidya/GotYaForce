@@ -149,6 +149,10 @@ export interface RomActor {
    *  @romfield modelScale +0xb4 f32
    *  @romfield sizeScale +0x7fc f32 */
   modelScale: number;
+  /** Explicit source+c0 HIT scale. Undefined binds to host modelScale as an approximation. */
+  collisionScale?: number;
+  /** Source1db supporting-actor contact, not terrain grounded status. Flat-floor host default0. */
+  supportContact1db: number;
   sizeScale: number;
   /** Monotonic host/presentation edge emitted when zz_00b2190_(actor, 1) succeeds.
    *  @romfield afterimageSerial port_side */
@@ -353,6 +357,8 @@ export interface RomActor {
   /** +0x1cef: part-0 contact flag (op 0x02 sets this; G Crash phase 1 polls >0 for hit).
    *  @romfield contactP0 +0x1cef s8 */
   contactP0: number;
+  /** Stream-authored +0x709 byte. Collision/status consumers remain unbound. */
+  contactFlags: number;
   /** +0x1cee: wall/stream-contact flag used by family handlers to end moves.
    *  @romfield wallContact +0x1cee s8 */
   wallContact: number;
@@ -552,7 +558,7 @@ export function createRomActor(): RomActor {
     bodyPitch: 0, aimRateScale: 1, actionSpeedRows: [0, 0, 0],
     savedGroundPos: { x: 0, y: 0, z: 0 }, housekeeping73f: 0, accumulator80c: 0,
     poseAccum7c: 0, poseAccum7e: 0, poseAccum80: 0,
-    afterimageSamplePos: { x: 0, y: 0, z: 0 }, modelScale: 1, sizeScale: 1,
+    afterimageSamplePos: { x: 0, y: 0, z: 0 }, modelScale: 1, sizeScale: 1, supportContact1db: 0,
     afterimageSerial: 0,
     weaponPartMask: 0x0f,
     weaponAnimationActiveMask: 0,
@@ -580,7 +586,7 @@ export function createRomActor(): RomActor {
     parts: [makeBlankPart(), makeBlankPart(), makeBlankPart(), makeBlankPart()],
     maxRise: 0, maxFall: 0, maxHSpeed: 0, stepHeight: 0,
     timescale: 1, tierScale: 1, dt: 1,
-    contactP0: 0, wallContact: 0, childMask144: 0,
+    contactP0: 0, contactFlags: 0, wallContact: 0, childMask144: 0,
     attachmentFlags14c: [0, 0, 0, 0], contactP1: 0,
     dashStrength1d0f: 0, faceGate1d10: 0, streamHold1b03: 0, streamCounter6eb: 0,
     statusWord5b4: 0, inputEdge5d4: 0, inputHeld5d8: 0,

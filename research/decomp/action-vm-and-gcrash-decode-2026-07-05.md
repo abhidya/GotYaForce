@@ -1,5 +1,7 @@
 # Action-script VM + G Crash state machine decode (2026-07-05)
 
+> Historical analysis: G Crash motion, timing, targeting and recovery interpretations below are superseded by `gred-crash-motion-2026-11-12.md`, `gred-crash-source-clock-2026-11-12.md` and `gred-family-crash-2026-11-12.md`. In particular,176 is not a gameplay offset and authored part-state is not hit confirmation.
+
 Question: the port generic-archetypes X-specials (projectile/aoe/melee). To port the real
 source mechanics we needed (a) the 10 undecoded action-script stream opcodes and (b) the
 per-family state handler that drives G RED's X-special "G Crash" motion. Both decoded this
@@ -26,7 +28,7 @@ part-gating), then `addi r0, r6, <size>; stw r0, 0(r5)` (advance stream by recor
 | 0x05 | 4 | bit 3 | b1 → +0x1d4f (part-3 state+0x1b), b2 → +0x1d50. Per-part flag setter. |
 | 0x06 | 2 (post-lhau) | any of bits 0..3 | Reads a u16 (`lhau r8, 2(r7)`) — the halfword is the per-part TARGET value. For each part bit set in partMask, writes 1 to +0x1cf2 (part 0) / +0x1d12 (part 1) / +0x1d32 (part 2) / +0x1d52 (part 3). These are the per-part "go" flags consumed by the part-anim blenders. |
 | 0x07 | 4 | bit 0 | b2 → conditional sthx (halfword store); on no-target path reads `*(*(actor+0x4b0) + 0xbe)` and `+0xbf` (the family descriptor's two "default hand" bytes) and stores them to +0x1d74/+0x1d75; then copies +0x1d74→+0x1d8c and +0x1d75→+0x1d8d. **Hand/weapon-swap op**: switches which weapon model is attached per part for the duration of the move. |
-| 0x0b | 4 | bit 1 | b2 is a bitmask over actor+0x709. If b1 == 0: `+0x709 \|= b2` (set bits). Else: `+0x709 &= ~b2` (clear bits). +0x709 is a generic per-actor flag byte (movement / FX-gating). |
+| 0x0b | 4 | bit 1 | b2 is a bitmask over actor+0x709. If b1 != 0: `+0x709 \|= b2` (set bits). Else: `+0x709 &= ~b2` (clear bits). **Corrected 2026-11-12 against original PPC8004c75c: OR at8004c784, ANDC at8004c798. The generic VM still needs a separately tested correction; admitted source G Crash tracks this correctly.** +0x709 is a generic per-actor flag byte (movement / FX-gating). |
 | 0x0c | 4 | bit 0 | b2 is a bitmask over actor+0x57a AND +0x57b. If b1 == 0: `+0x57b \|= b2`. Else: clear b2 from BOTH +0x57a and +0x57b. +0x57a/+0x57b are flag bytes consumed by the state dispatcher (`chunk_0009.c:4097/4100` writes them for state transitions). |
 
 **Conclusion A:** NONE of these 8 opcodes directly writes velocity (no stores to +0x44/+0x48/+0x4c

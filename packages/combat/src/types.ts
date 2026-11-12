@@ -139,13 +139,32 @@ export interface SourceTargetLockState {
   activeTargetUid: string | null;
 }
 
+/** Frame-local active melee registration for the bounded Time Bomber mine receiver.
+ * The record/window are authored; root reach, facing and vertical band are host geometry. */
+export interface MineReceiverMeleeAttack {
+  uid: string;
+  ownerUid: string;
+  team: number;
+  pos: Vec3;
+  forward: Vec3;
+  reach: number;
+  yTolerance: number;
+  damage: number;
+  damageRecord: import("./gauges.js").DamageRecord;
+}
+
 /** Narrow behavior exposed by the ROM-family sidecar to combat orchestration. */
 export interface RomFamilyDriver {
   /** Advance source own-position history once, before any movement in this frame. */
   beginFrame(runtime: BorgRuntime, frame: number): void;
-  tick(runtime: BorgRuntime, dt: number, all: readonly BorgRuntime[], input?: PlayerInput | null): boolean;
+  /** Compose independently owned lower-body locomotion before the action tick. */
+  runHostLocomotion?(runtime: BorgRuntime, update: () => void): void;
+  tick(runtime: BorgRuntime, dt: number, all: readonly BorgRuntime[], input?: PlayerInput | null,
+    onMineReceiverMelee?: (attack: MineReceiverMeleeAttack) => void): boolean;
   tryStartXSpecial(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
   tryStartBAttack(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
+  /** Source +4c0 callback, after both ROM and host action paths. */
+  postAction?(runtime: BorgRuntime, all: readonly BorgRuntime[], input: PlayerInput): void;
   drainProjectiles(): Projectile[];
   /** Relinquish action ownership without overwriting the host-owned lifecycle state. */
   interrupt(): void;
@@ -157,6 +176,8 @@ export interface BorgRuntime {
   /** Global pre-movement actor center snapshot, used only by actor aim adapters. */
   sourceFramePose?: { frame: number; pos: Vec3; scale: number };
   arrowInput?: { held:boolean; pressEdge:boolean; pending:boolean };
+  /** Scoped normal-shot6b8 capture suppression; no generic writer inferred. */
+  sourceGredRangedCaptureBlocked6b8?: boolean;
   arrowAttack?: { pos:Vec3; targetUid:string|null; trackingEnabled:boolean };
   /** Explicit source seams while animated attachment and status fields are not mapped. */
   sourceArrowAttachment?: Vec3;
@@ -172,6 +193,10 @@ export interface BorgRuntime {
   beamInput?: { held: boolean; pressEdge: boolean; pending: boolean; buttons: number; edges: number };
   beamAim?: { targetUid:string|null; pos:Vec3 };
   beamOwner?: import("./beamProjectile.js").BeamOwnerState;
+  gblackChargeOwner?: import("./gblackChargeProjectile.js").GBlackChargeOwner;
+  timeBomberBInput?: { held:boolean; pressEdge:boolean };
+  timeBomberInput?: { held:boolean; pressEdge:boolean; pending:boolean; neutral?:boolean; walking?:boolean };
+  timeBomberSavedAim?: { pos:Vec3; targetUid:string|null; homing:boolean };
   gatlingInput?: { held:boolean; pressEdge:boolean; pending:boolean };
   /** Captured source attack identity; pos refreshes at the global frame barrier. */
   gatlingSavedAim?: { pos: Vec3; targetUid: string | null };
@@ -323,6 +348,12 @@ export interface BorgRuntime {
    *  instead of the generic "melee"/"melee_alt"/"charge_shot" slot. Optional so external fakes
    *  self-heal to undefined. */
   meleeAnimStream?: { group: number; slot: number } | null;
+  /** Simulation-owned animation playhead for admitted G RED-family neutral melee, airborne B, and G Crash actions.
+   *  `serial` is a globally unique animation-start epoch (including recovery); `frame`
+   *  is the current source animation frame, including held frames. Applies only to the
+   *  exact resolved meleeAnimStream, never a slot-label fallback. Cleared on source exit,
+   *  interruption, or morph; other actions retain ordinary presentation playback. */
+  sourceAnimSample?: { serial: number; frame: number } | null;
   /** The CURRENT melee swing's (or charged release's) PATH-B authored sound events (DERIVED —
    *  the per-anim sound-event table at ROM actor+0x4e8 joined through the anim-descriptor
    *  banks; actionStreamData.ts AuthoredSoundEvent, research/decomp/
@@ -596,9 +627,13 @@ export type ProjectileDespawnReason =
 
 /** A homing/straight projectile in flight. */
 export interface Projectile {
+  gredRangedSource?: import("./gredRangedProjectile.js").GredRangedSource;
+  gblackChargeSource?: import("./gblackChargeProjectile.js").GBlackChargeSource;
+  gblackGroundWaveSource?: import("./gblackGroundWaveAdapter.js").GBlackGroundWaveSource;
   arrowSource?: import("./arrowProjectile.js").ArrowSourceState;
   revolverSource?: import("./revolverProjectileRuntime.js").RevolverSourceState;
   beamSource?: import("./beamProjectile.js").BeamSourceState;
+  timeBomberSource?: import("./timeBomberProjectile.js").TimeBomberSourceState;
   gatlingSource?: import("./gatlingProjectile.js").GatlingSourceState;
   gatlingSkipAdvance?: boolean;
   gatlingInitialPosition?: Vec3;
@@ -609,6 +644,8 @@ export interface Projectile {
   poweredInitialPosition?: Vec3;
   /** Authored hit.bin flags; existing host collision geometry does not interpret these. */
   sourceHitCollisionFlags?: number;
+  /** Source child+1c !=ff for same-owner collision; absent means unrepresented. */
+  sourceSelfContactEnabled?: boolean;
   uid: string;
   ownerUid: string;
   team: number;
