@@ -178,3 +178,13 @@ Use actual Battle stepping plus verified source traces where available, not only
 - Boundary cases cover rejected/duplicate contacts, signed gauge wrap, zero/near-zero offsets, bank absence and pause/resume. Unsupported diagnostics occur before external effects or partial owner transfer. Existing host-mode Battle/lifecycle regressions remain unchanged; live behavior stays disabled until source-mode tests, matching traces and whole-step boundary handling pass.
 
 No implementation or CI claim is implied by this plan. The stream-bank and owner-lifetime fixes implemented on the draft branch remain separate, bounded prerequisites. File/line anchors above describe this baseline; function names identify the durable source references.
+
+## Implemented prerequisite: signed reaction rotation
+
+`rom/helpers.ts` now ports66ec0/66f1c as `seedReactionTurn`/`stepReactionTurn` on existing actor fields72/7e/5aa/1dc8. Original DOL instruction inspection confirms signed32 `divw` with signed16 numerator, low16 storage and zero-divisor preservation.66f1c uses `fsubs`/`fmuls`/`fctiwz`: multiply the signed16 rate by source float1dc8 with float32 rounding, truncate toward zero, then test the signed16 step and stored signed16 remainder. A rounded-zero step takes the nonpositive branch. A zero rate clears5aa without changing yaw. Adding the short-converted step rather than the full conversion result is equivalent for low16 yaw/remainder stores.
+
+Original function byte SHA-256 evidence (bounded inspection; no binary bytes included):
+- `80066ec0..80066ed7`: `f18a8b1390efd1596223654e9ccacfc7a8ccdfe04035ada3af8f9491e25f9c15`
+- `80066f1c..80066fef`: `810d9d92c47f065f87635b21d1e83d5e6c9d4189c795bdee46265535999fe38d`
+
+The implementation rejects nonfinite/out-of-signed32 float-to-integer conversions before mutation rather than inventing PPC exceptional conversion results. Deterministic helper tests cover signed division, zero steps, wrap and float32 rounding. The captured recovery had7e=0 at inspected checkpoints and did not capture1dc8: it does **not** dynamically validate nonzero rotation. These helpers are not yet wired into a source-owned reaction handler or live mode.
