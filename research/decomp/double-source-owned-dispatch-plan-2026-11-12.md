@@ -39,6 +39,54 @@ stopped through its isolated process ledger and its listener was confirmed close
 These observations corroborate the baseline dispatch envelope only; they do not
 validate the callee implementations, reaction semantics or a source-owned mode.
 
+## Controlled action and natural reaction captures (2026-11-12)
+
+Two further isolated runs used the same verified original DOL and documented
+pl0003 roster reload, then controller input only. The action run verified 104
+injected pad frames, 105 P1 ticks and 22 complete scheduler samples (six idle,
+16 active), all with matching return stack pointers. X produced FB/UB
+(1,1) → (61,0) → (61,1) → (1,1). Active destinations were prehook 8006f7c0,
+UB0 8005f238, FB61 80065dfc and posthook 8006f88c. On the first active tick,
+control5e0 changed 0 → 3 during status/input and 3 → 0x43 during FB execution;
+it later returned to zero. Clone7c8 stayed zero; no 71750/71858/71938 entry
+was observed. This demonstrates real input and an action return, not charged
+clone activation or browser equivalence.
+
+The reaction-focused run verified 116 pad frames and captured 13 matched
+reaction entry/return pairs on another Double actor: four calls with selector
+6fe=1 targeting 8005c810, followed by nine with selector6 targeting 8005cc00.
+Eleven complete scheduler samples (three reaction1, eight reaction6) passed
+return-stack guards. At pad104 the actor had FB0/UB62, reaction1, phases540/544=0,
+control5e0=0x01000003 and timer6b4=30. Initial caller LR was 8005c48c;
+subsequent calls used the state62 wrapper with LR80065e34. Observed destinations
+were UB62 → 80065e24, FB0 → 8005f238 and posthook → 8006f88c; the actor's4c4
+binding was 8006f8d4. The first animation start recorded stream15, group argument
+0xffffff80 and variant0.
+
+At pad107 a new initialization call from LR8005c48c replaced reaction1 with
+reaction6 and reset phases/timer. The next animation used group argument
+0xffffff81 and variant5. Light-stream completion was not observed. This is not
+a closed single-contact light-reaction fixture: flat-terrain, nonlethal and
+unpaired isolation were not established. Clone state/vector remained zero at
+observed posthooks, so these calls do not prove clone-reset behavior. In
+particular, do not feed the observed entry control word into the bounded
+ordinary classifier as though its excluded 0x01000000 bit were absent.
+
+No deterministic replay was implemented from these traces. Replaying recorded
+callee outputs would test a scheduler envelope, not the missing reaction,
+terrain, stream and movement implementations. The next executable slice still
+requires those actual predicates and the complete reachable continuation;
+this interrupted light reaction cannot justify substituting a single-hit path.
+
+Local trace SHA-256 values:
+
+- Action: `e8e08766748431412f6a63bc557ae53ef4402311387712891c932ebf17d469e7`.
+- Reaction: `e829db5809dfb4715a6ffbc05965443744d452e5c29047475917241a687b9425`.
+
+Raw traces and numeric capture files remain on the rig. Both task-owned emulator
+processes were stopped through isolated ledgers and the listener was confirmed
+closed. No original assets, raw trace data or save states are included here.
+
 ## Audited ordering and ownership
 
 Source evidence is the local Ghidra export; line numbers identify the current corpus.
