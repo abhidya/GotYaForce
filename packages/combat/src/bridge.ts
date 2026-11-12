@@ -1,3 +1,5 @@
+import { createBeamStreamClock, tickBeamStream, type BeamStreamClock } from "./beamStream.js";
+import { spawnBeamSource, captureBeamAim } from "./beamProjectile.js";
 import { captureRevolverAttack, spawnRevolverSource, isRevolver } from "./revolverProjectileRuntime.js";
 import { actorAimTarget } from "./sourceAttackTarget.js";
 import { captureGatlingAim, spawnGatlingSource } from "./gatlingProjectile.js";
@@ -1510,6 +1512,8 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  drain after each tick alongside the stream's pendingProjectiles. */
   private spawnFamilyProjectile(actor: RomActor, spawnerAddr: number, type: number): void {
     if (this.runtime) {
+      const beam = spawnBeamSource(this.runtime, actor, spawnerAddr, type);
+      if (beam !== null) { this.familyProjectiles.push(...beam); this.specialHadEffect = true; return; }
       const revolver = spawnRevolverSource(this.runtime, actor, spawnerAddr, type);
       if (revolver !== null) { this.familyProjectiles.push(...revolver); this.specialHadEffect = true; return; }
       const gatling = spawnGatlingSource(this.runtime, actor, spawnerAddr, type,
@@ -1552,6 +1556,7 @@ export class RomDriverBridge implements RomFamilyDriver {
   private romOwnedSpecial = false;
   private runtime: BorgRuntime | null = null;
   private visibilityBindings: Array<{ runtime: BorgRuntime; state: RomVisibilityTarget }> = [];
+  private beamStreamClock: BeamStreamClock | null = null;
   private positionHistoryFrame: number | null = null;
 
   private constructor(
@@ -1566,11 +1571,31 @@ export class RomDriverBridge implements RomFamilyDriver {
       onStartStream?: (group: number, slot: number, mask: number) => boolean;
     }).onStartStream = (group, slot, mask) => this.onStartStream(group, slot, mask);
     (actor as RomActor & { onTickStreamPart?: (index: number) => boolean }).onTickStreamPart =
-      (index) => this.tickKnightStreamPart(index);
+      (index) => this.tickBeamStreamPart(index) || this.tickKnightStreamPart(index);
   }
 
   private onStartStream(group: number, slot: number, mask: number): boolean {
     if (!this.runtime) return false;
+    if (this.runtime.borgId === "pl0104" && this.actor.actionIndex === 2 && group === 4 && slot >= 0 && slot <= 2) {
+      this.beamStreamClock = createBeamStreamClock(slot);
+      this.streamSchedules = [];
+      this.actor.wallContact = 0;
+      this.actor.contactP0 = slot === 1 ? 1 : 0;
+      this.actor.contactP1 = 0;
+      if (slot !== 1) this.actor.defaultGroup = 1;
+      const flags = this.actor as RomActor & {
+        beamFlags6e8?: number; beamFlags6e9?: number; beamContactFlags709?: number;
+      };
+      flags.beamFlags6e8 = 0;
+      flags.beamFlags6e9 = slot === 1 ? 2 : 0;
+      // startStream clears709 first; slot0 then executes op0b010100 (OR1).
+      flags.beamContactFlags709 = slot === 0 ? 1 : 0;
+      // Original 8004c488 op3: replace posture bits4..11 with operand&ff0.
+      // Slot0 explicitly sets airborne40; release/recovery slots clear it.
+      this.actor.controlWord = (this.actor.controlWord & ~0xff0) | (slot === 0 ? 0x40 : 0);
+      this.ctx.onPlayAnim?.(this.actor, 4, slot, false);
+      return true;
+    }
     const events = streamEventsForSlot(
       this.runtime.borgId,
       this.actor.actionIndex,
@@ -1619,6 +1644,25 @@ export class RomDriverBridge implements RomFamilyDriver {
     });
     this.specialMaxFrames = Math.max(this.specialMaxFrames, this.streamFrame + maxFrame + 5);
     if (poweredSourceAction) this.dispatchEventList(events, 0);
+    return true;
+  }
+
+  private tickBeamStreamPart(index: number): boolean {
+    if (!this.beamStreamClock || this.runtime?.borgId !== "pl0104" || this.actor.actionIndex !== 2)
+      return false;
+    if (index !== 0) return true;
+    const event = tickBeamStream(this.beamStreamClock, this.actor.dt);
+    if (event.contact !== undefined) {
+      this.actor.contactP0 = event.contact;
+      if (event.contact === 0) {
+        (this.actor as RomActor & { beamFlags6e9?: number }).beamFlags6e9 = 2;
+      }
+    }
+    if (event.animation !== undefined) this.ctx.onPlayAnim?.(this.actor, 4, event.animation, false);
+    if (event.completed) {
+      for (const part of this.actor.parts) part.streamPtr = -1;
+      this.beamStreamClock = null;
+    }
     return true;
   }
 
@@ -1963,8 +2007,13 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (host.onFaceComplete) dest.onFaceComplete = host.onFaceComplete;
     if (host.onAllocateResource) dest.onAllocateResource = (actor, type, count, mode) => {
       const accepted = host.onAllocateResource!(actor, type, count, mode);
-      if (!accepted && type === 2 && (mode ?? 0) !== 0 &&
-          (isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) || runtime.borgId === "pl0101" || runtime.borgId === "pl0102" || isRevolver(runtime.borgId))) this.sourceXResourceDenied = true;
+      if (!accepted && type === 2 &&
+          ((mode ?? 0) !== 0 || runtime.borgId === "pl0104") &&
+          (isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) ||
+           runtime.borgId === "pl0101" || runtime.borgId === "pl0102" ||
+           runtime.borgId === "pl0104" || isRevolver(runtime.borgId))) {
+        this.sourceXResourceDenied = true;
+      }
       return accepted;
     };
     if (host.onExitFb) dest.onExitFb = host.onExitFb;
@@ -2047,6 +2096,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     // Generic aimOrigin518 above retains its existing shooter-root meaning.
     const captured = this.specialActive && a.actionIndex === 2
       ? (isRevolver(runtime.borgId) ? runtime.revolverAttack
+        : runtime.borgId === "pl0104" ? runtime.beamAim
         : runtime.borgId === "pl0102" ? runtime.gatlingSavedAim
         : runtime.borgId === "pl0101" ? runtime.poweredNormalAim : undefined)
       : undefined;
@@ -2056,7 +2106,8 @@ export class RomDriverBridge implements RomFamilyDriver {
       (isRevolver(runtime.borgId) || runtime.borgId === "pl0102" || runtime.borgId === "pl0101");
     // All other families retain their existing current-root aiming behavior.
     const sourceTarget = captured || sourceAdmission ? actorAimTarget(candidate) : candidate;
-    const targetPos = sourceTarget ? captured?.pos ?? sourceTarget.pos : null;
+    const targetPos = runtime.borgId === "pl0104" && captured
+      ? captured.pos : sourceTarget ? captured?.pos ?? sourceTarget.pos : null;
     if (captured && !sourceTarget) captured.targetUid = null;
     if (targetPos) {
       const target = { pos: targetPos };
@@ -2094,6 +2145,9 @@ export class RomDriverBridge implements RomFamilyDriver {
     scratch.statusWord5bc = held ? 0x200 : 0;
     scratch.bRetapInput = input?.attack ?? fallbackHeld;
     scratch.streamTickEnabled = true;
+    if (this.runtime?.borgId === "pl0104") {
+      (this.actor as RomActor & { inputEdges5bc?: number }).inputEdges5bc = this.runtime.beamInput?.edges ?? 0;
+    }
     this.actor.inputEdge5d4 = input?.attack || input?.special ? 0x41 : 0;
     this.actor.inputHeld5d8 = held ? 0x10 : 0;
     this.actor.statusWord5b4 = held ? 0x200 : 0;
@@ -2103,6 +2157,11 @@ export class RomDriverBridge implements RomFamilyDriver {
   /** Copy RomActor → BorgRuntime (after the ROM step). */
   syncOut(runtime: BorgRuntime): void {
     const a = this.actor;
+    if (runtime.borgId === "pl0104") {
+      const beam = a as RomActor & { gmBeamState6f7?: number };
+      runtime.beamOwner = { dt: a.dt, state: beam.gmBeamState6f7 ?? 0, pos: { ...a.pos },
+        yaw: bamToRad(a.heading), pitch: bamToRad(a.bodyPitch), scale: a.modelScale * a.sizeScale };
+    }
     runtime.pos.x = a.pos.x;
     runtime.pos.y = a.pos.y;
     runtime.pos.z = a.pos.z;
@@ -2160,7 +2219,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.streamEvents = null;
     this.streamSchedules = [];
     // Determine the special's duration from the decoded stream (default 30 frames).
-    this.specialMaxFrames = 30;
+    this.specialMaxFrames = runtime.borgId === "pl0104" && actionIndex === 2 ? 240 : 30;
     // Fire frame-0 events immediately (armHit + playAnim).
     this.dispatchEvent(0);
     this.streamFrame = 1;
@@ -2174,6 +2233,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.romOwnedSpecial = true;
     this.specialActive = true;
     this.actor.controlWord = (this.actor.controlWord & ~0x3) | 0x1;
+    if (runtime.borgId === "pl0104") delete runtime.beamAim;
     if (isRevolver(runtime.borgId)) {
       this.actor.controlWord = runtime.grounded ? this.actor.controlWord & ~0x40 : this.actor.controlWord | 0x40;
       // Discard the previous action's pointer before admission sync selects the
@@ -2188,11 +2248,14 @@ export class RomDriverBridge implements RomFamilyDriver {
       const preX = runtime.pos.x;
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
+      if (runtime.borgId === "pl0104" && actionIndex === 2) captureBeamAim(runtime, this.actor, all);
       if (runtime.borgId === "pl0102" && actionIndex === 2) captureGatlingAim(runtime,this.actor,all);
       if (runtime.borgId === "pl0101" && actionIndex === 2) capturePoweredNormalAim(runtime,this.actor,all);
       if (isRevolver(runtime.borgId) && actionIndex === 2) captureRevolverAttack(runtime,this.actor,all);
       // Decoded ground802d4668=[44,3,2,0], air802d46a8=[45,3,2,4].
-      const cueId = isRevolver(runtime.borgId) && variantIndex === 4 ? 45 : 44;
+      const airCue = (isRevolver(runtime.borgId) && variantIndex === 4) ||
+        (runtime.borgId === "pl0104" && (variantIndex === 3 || variantIndex === 4));
+      const cueId = airCue ? 45 : 44;
       dispatchCommandRecord(this.actor, { cueId, stateMode: 3, actionIndex, variantIndex });
       stepRomActor(this.actor, this.tables, this.ctx);
       this.syncOut(runtime);
@@ -2634,6 +2697,11 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  Deliberately leaves runtime state/animation untouched for the host lifecycle to own. */
   interrupt(): void {
     const wasActive = this.specialActive || this.romOwnedSpecial;
+    this.beamStreamClock = null;
+    if (this.runtime?.borgId === "pl0104") {
+      (this.actor as RomActor & { gmBeamState6f7?: number }).gmBeamState6f7 = 0;
+      if (this.runtime.beamOwner) this.runtime.beamOwner.state = 0;
+    }
     this.specialActive = false;
     this.romOwnedSpecial = false;
     this.armedHits = [];

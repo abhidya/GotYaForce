@@ -556,7 +556,7 @@ function beamPhase1(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
     // zz_00f036c_(actor, 0xc3) — TODO(host): effect hook @0x800f036c (unsurfaced).
     // zz_006dbe0_(actor, 2, 1, 1) — consume gate; fire zz_00e19a8_(1, +0x6f7).
     if (allocateWeapon(actor, ctx, 2, 1, true)) {
-      ctx.onFamilyProjectile?.(actor, BEAM_FIRE_SPAWNER, s.gmBeamState6f7 ?? 0);
+      ctx.onFamilyProjectile?.(actor, BEAM_FIRE_SPAWNER, 1);
       actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1;
       s.gmBeamState6f7 = 2;
       const slot = (actor.streamSlot ?? 0) + 1;
@@ -576,10 +576,11 @@ function beamPhase1(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
 function beamPhase2(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
   const s = scratchOf(actor);
   s.gmBeamState6f7 = 2;
-  // zz_006de44_(actor, 0xf0f00) — charge drain; clamps uVar3 to +0x54e and subtracts.
-  // TODO(host): zz_006de44_ @0x8006de44 (the held-button charge meter) is unsurfaced;
-  // modeled as a 1-unit drain per tick (the no-input default).
-  const drain = 1;
+  // zz_006de44_ counts rising input bits, not held frames. The source
+  // refunds at most the remaining sixty-unit extension budget.
+  let bits = ((actor as GunmanActor & { inputEdges5bc?: number }).inputEdges5bc ?? 0) & 0xf0f00;
+  let drain = 0;
+  while (bits !== 0) { bits &= bits - 1; drain++; }
   const charge = s.gmBeamCharge54e ?? 0;
   const drained = Math.max(0, charge - drain);
   s.gmBeamCharge54e = drained;
@@ -590,9 +591,23 @@ function beamPhase2(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
   tickStream(actor, 0xf, ctx);
   if (actor.contactP0 > 0) {
     stepTargetYaw(actor, 0xc1, 0);
-    // zz_006e39c_(actor, 0xc1, 1, 0x4000, +0x524) — TODO(host): dual-axis aim pitch
-    // converge @0x8006e39c (unsurfaced); stepPartTargetPitch is the nearest port.
-    stepPartTargetPitch(actor, 0xc1);
+    // zz_006e39c_(actor,c1,1,4000,+524): unlike +518 helpers it keeps
+    // seeking the stored point after target loss and uses actor dt, not +768.
+    const target = (actor as GunmanActor & { lockTarget?: Vec3 | null }).lockTarget;
+    if (target) {
+      const anchor = actor.partAimAnchors[1] ?? {
+        x: actor.pos.x, y: actor.pos.y + 109.79737567901611 * actor.modelScale * actor.sizeScale,
+        z: actor.pos.z,
+      };
+      const pitch = Math.trunc(Math.fround(Math.fround(Math.atan2(target.y - anchor.y,
+        Math.hypot(target.x - anchor.x, target.z - anchor.z))) * 10430.3779296875));
+      const signed = (value: number) => (value << 16) >> 16;
+      const desired = Math.max(-0x4000, Math.min(0x4000, signed(-actor.bodyPitch - pitch)));
+      const difference = signed(desired - actor.steerYaw);
+      const step = signed(Math.trunc((actor.descriptor?.turnStep1 ?? 0) * actor.dt));
+      actor.steerYaw = Math.abs(difference) <= step ? desired :
+        signed(actor.steerYaw + Math.sign(difference) * step);
+    }
   }
   // Timer exhausted → advance + re-arm.
   if ((s.gmBeamTimer560 ?? 0) <= BEAM_F.ZERO) {

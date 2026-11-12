@@ -248,6 +248,8 @@ interface ProjectileActor {
   bankLayerOpacity?: number[];
   /** Global explosion models only; the primary's model10 belongs to a different bank. */
   gatlingModelId?: 22 | 23;
+  /** Source sustained emitter, never the generic velocity-stretched bolt. */
+  sustainedBeam?: boolean;
   /** Independent world-space ring, never a child of the expanding body scale. */
   gatlingRing?: BankVisual;
 }
@@ -1518,8 +1520,10 @@ export class BattleScene {
       let actor = this.projectileActors.get(projectile.uid);
       const gatling = projectile.gatlingSource;
       const gatlingModelId = gatling?.kind === "explosion" ? (gatling.phase === "tail" ? 23 : 22) : undefined;
-      if (actor && actor.gatlingModelId !== gatlingModelId) {
-        // The source keeps the explosion UID while replacing model22 with tail model23.
+      if (actor && (actor.gatlingModelId !== gatlingModelId
+        || Boolean(actor.sustainedBeam) !== Boolean(projectile.beamSource))) {
+        // Reconcile a changed source visual without retaining the wrong mesh for this UID.
+        // Gatling keeps the explosion UID while replacing model22 with tail model23.
         this.disposeProjectileActor(actor);
         this.projectileActors.delete(projectile.uid);
         actor = undefined;
@@ -1529,7 +1533,7 @@ export class BattleScene {
         this.projectileActors.set(projectile.uid, actor);
       }
       actor.node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
-      const fade = gatling?.kind === "explosion" ? gatling.alpha
+      const fade = projectile.beamSource ? 1 : gatling?.kind === "explosion" ? gatling.alpha
         : projectile.poweredSource?.alpha ?? Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
       if (actor.bankMaterials) {
         // Bank-mesh flight visual: fade multiplies each layer's OWN rest opacity (the
@@ -1537,7 +1541,9 @@ export class BattleScene {
         for (let i = 0; i < actor.bankMaterials.length; i++) {
           actor.bankMaterials[i]!.opacity = (actor.bankLayerOpacity?.[i] ?? 1) * fade;
         }
-        if (gatling?.kind === "explosion") {
+        if (projectile.beamSource) {
+          this.syncSustainedBeam(actor, projectile);
+        } else if (gatling?.kind === "explosion") {
           actor.node.scale.setScalar(gatling.scale);
           // FUN_8008658c reads +70, not the independently randomized +72.
           actor.node.rotation.set(0, gatling.yaw, 0);
@@ -1701,7 +1707,46 @@ export class BattleScene {
     for (const material of ring.materials) material.dispose();
   }
 
+  /** Row1 resolves global model84. No generic bolt or unrelated bank substitutes for
+   * a missing export. The static cache is queried once per source lifetime. */
+  private sustainedBeamLayers(): BankFxLayer[] | null {
+    return bankFxTemplate(84);
+  }
+
+  private buildSustainedBeamActor(projectile: BattleProjectileObservation): ProjectileActor | null {
+    if (!projectile.beamSource) return null;
+    // FUN_800e1b64 passes inherited owner+88 directly to zz_000726c_, not the
+    // generic projectile team selector (which uses frames1/3).
+    const visual = buildBankVisual(this.sustainedBeamLayers() ?? [], projectile.team);
+    visual.node.name = `sustained-beam:${projectile.uid}:model84`;
+    this.root.add(visual.node);
+    return { node: visual.node, material: new THREE.MeshBasicMaterial(), beam: false,
+      bankMaterials: visual.materials, bankLayerOpacity: visual.layerOpacity, sustainedBeam: true };
+  }
+
+  private syncSustainedBeam(actor: ProjectileActor, projectile: BattleProjectileObservation): void {
+    const source = projectile.beamSource!;
+    // FUN_800e2298 rebuilds the attachment basis: collision auto-aim is deliberately
+    // NOT used for drawing. All transforms/ages arrive from the fixed-step simulation.
+    const { right, up, forward } = source.drawBasis;
+    actor.node.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(
+      new THREE.Vector3(right.x, right.y, right.z),
+      new THREE.Vector3(up.x, up.y, up.z),
+      new THREE.Vector3(forward.x, forward.y, forward.z),
+    ));
+    actor.node.position.set(source.origin.x, source.origin.y, source.origin.z);
+    // DAT_80433bc0=[1,1.2], verified float32. This is a transverse alternation,
+    // NOT a sign flip. Tail age does not replace the frozen active age parity.
+    const transverse = (source.age & 1) === 0 ? 1 : Math.fround(1.2);
+    const scale = Math.max(0, source.scale) * source.ownerScale;
+    // Although tail211c preserves actor+60, draw2298 explicitly scales its matrix
+    // uniformly by +148. Keep that final draw transform, without an invented alpha fade.
+    actor.node.scale.set(scale * transverse, scale * transverse, scale);
+  }
+
   private spawnProjectile(projectile: BattleProjectileObservation): ProjectileActor {
+    const sustainedBeam = this.buildSustainedBeamActor(projectile);
+    if (sustainedBeam) return sustainedBeam;
     const gatlingActor = this.buildGatlingExplosionActor(projectile);
     if (gatlingActor) return gatlingActor;
     // Guard clause: a resolved efct00 bank visual replaces the sprite/beam stand-in wholesale.

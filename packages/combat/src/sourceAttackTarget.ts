@@ -21,6 +21,16 @@ export function refreshSourceAttackTargets(all: readonly BorgRuntime[], frame: n
             frame, pos: { ...target.pos }, scale: tierSizeScale(target),
         };
     for (const owner of all) {
+        // zz_005685c_: captured +cc controls +524 refresh; retain last point
+        // after target loss or visibility rejection. Never acquire the new lock.
+        const beam = owner.beamAim;
+        if (beam) {
+            const target = beam.targetUid ? byUid.get(beam.targetUid) : undefined;
+            if (!livingAttackTarget(target)) beam.targetUid = null;
+            else if ((target.targetEligibility83 ?? 0) !== 0 ||
+                (((target.targetVisibilityMask5e6 ?? 0) & (1 << all.indexOf(owner))) !== 0))
+                beam.pos = { ...(target.sourceFramePose?.pos ?? target.pos) };
+        }
         for (const aim of [owner.gatlingSavedAim, owner.poweredNormalAim, owner.revolverAttack]) {
             if (!aim)
                 continue;

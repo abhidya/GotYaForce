@@ -159,6 +159,9 @@ export interface BorgRuntime {
   revolverInput?: { held: boolean; pressEdge: boolean; pending: boolean };
   /** Captured source attack identity/range; pos refreshes at the global frame barrier. */
   revolverAttack?: { pos: Vec3; targetUid: string | null; trackingEnabled: boolean };
+  beamInput?: { held: boolean; pressEdge: boolean; pending: boolean; buttons: number; edges: number };
+  beamAim?: { targetUid:string|null; pos:Vec3 };
+  beamOwner?: import("./beamProjectile.js").BeamOwnerState;
   gatlingInput?: { held:boolean; pressEdge:boolean; pending:boolean };
   /** Captured source attack identity; pos refreshes at the global frame barrier. */
   gatlingSavedAim?: { pos: Vec3; targetUid: string | null };
@@ -584,6 +587,7 @@ export type ProjectileDespawnReason =
 /** A homing/straight projectile in flight. */
 export interface Projectile {
   revolverSource?: import("./revolverProjectileRuntime.js").RevolverSourceState;
+  beamSource?: import("./beamProjectile.js").BeamSourceState;
   gatlingSource?: import("./gatlingProjectile.js").GatlingSourceState;
   gatlingSkipAdvance?: boolean;
   gatlingInitialPosition?: Vec3;
