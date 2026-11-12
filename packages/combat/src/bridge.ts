@@ -1,3 +1,4 @@
+import { spawnPoweredSource } from "./poweredProjectileRuntime.js";
 import { createKnightWindupClock, tickKnightWindupClock, type KnightWindupClock } from "./rom/knight-windup-clock.js";
 import { isDiverAmmoFamily } from "./diverAmmo.js";
 // Bridge between the existing @gf/combat `BorgRuntime` (the canonical game state —
@@ -1362,7 +1363,7 @@ export interface RomBattleRuntime {
     isSupported(x: number, z: number): boolean;
   };
   allocateResource(owner: BorgRuntime, type: number, count: number, consume: boolean): boolean;
-  spawnProjectile(owner: BorgRuntime, spawnerAddr: number, kind: number): void;
+  spawnProjectile(owner: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void;
   resolveHit(attacker: BorgRuntime, victim: BorgRuntime, damageRecordIndex: number, knockbackMult: number): void;
   /** Optional observer for zz_01cb750_'s form-change event. */
   postMorphEvent?(owner: BorgRuntime, borgNumber: number, slot: number): void;
@@ -1505,8 +1506,15 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  zz_006a668_ / etc. The bridge stores it in familyProjectiles for battle.ts to
    *  drain after each tick alongside the stream's pendingProjectiles. */
   private spawnFamilyProjectile(actor: RomActor, spawnerAddr: number, type: number): void {
-    void actor;
-    void spawnerAddr;
+    if (this.runtime) {
+      const powered = spawnPoweredSource(this.runtime, actor, spawnerAddr, type,
+        this.visibilityBindings.map(binding => binding.runtime));
+      if (powered !== null) {
+        this.familyProjectiles.push(...powered);
+        this.specialHadEffect = true;
+        return;
+      }
+    }
     const p: Projectile = {
       // Monotonic, not a length: the array is cleared on every drain and on
       // interrupt(), so a length-based id repeats across specials and two live
@@ -1589,16 +1597,19 @@ export class RomDriverBridge implements RomFamilyDriver {
       this.dispatchEventList(events.slice(0, events.findIndex((event) => event.op === "wait")), 0);
       return true;
     }
+    const poweredCharged = this.runtime.borgId === "pl0101" && this.actor.actionIndex === 3 && group === 4;
+    const startFrame = poweredCharged ? this.streamFrame - 1 : this.streamFrame;
     const maxFrame = events.reduce((max, event) =>
       Math.max(max, typeof event.frame === "number" ? event.frame : 0), 0);
     this.streamSchedules.push({
-      startFrame: this.streamFrame,
-      endFrame: this.streamFrame + maxFrame + 1,
+      startFrame,
+      endFrame: startFrame + maxFrame + 1,
       mask,
       events,
       completed: false,
     });
     this.specialMaxFrames = Math.max(this.specialMaxFrames, this.streamFrame + maxFrame + 5);
+    if (poweredCharged) this.dispatchEventList(events, 0);
     return true;
   }
 
@@ -1790,8 +1801,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     const hostCtx: RomHostContext = {
       onAllocateResource: (_actor, type, count, mode) =>
         battleRuntime.allocateResource(runtime, type, count, (mode ?? 0) !== 0),
-      onFamilyProjectile: (_actor, addr, kind) =>
-        battleRuntime.spawnProjectile(runtime, addr, kind),
+      onFamilyProjectile: (actor, addr, kind) =>
+        battleRuntime.spawnProjectile(runtime, addr, kind, actor),
       onSpawnChild: (_actor, childId) => {
         battleRuntime.spawnProjectile(runtime, 0, childId);
         return true;
@@ -2275,6 +2286,9 @@ export class RomDriverBridge implements RomFamilyDriver {
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
       this.syncActionInput(input, true);
+      const poweredCharged = runtime.borgId === "pl0101" && this.actor.actionIndex === 3;
+      // This source handler ticks its stream before testing +0x1cf0 in the same frame.
+      if (poweredCharged) this.dispatchEvent(this.streamFrame);
       // State 61 and the command fields remain live after the entry dispatch. Re-dispatching
       // cue 44 here would reset +0x540..+0x543 every frame, trapping every multi-phase ROM
       // machine in phase 0 and preventing an authored +0x1cee completion from being consumed.
@@ -2296,7 +2310,7 @@ export class RomDriverBridge implements RomFamilyDriver {
         }
       }
       // Stream events (anim + hitbox + fireChild) for this frame.
-      this.dispatchEvent(this.streamFrame);
+      if (!poweredCharged) this.dispatchEvent(this.streamFrame);
       this.streamFrame++;
       this.resolveHits(runtime, all);
       // Payload tracking for the X impotence latch: ROM-driven motion counts as a real
@@ -2520,7 +2534,13 @@ export class RomDriverBridge implements RomFamilyDriver {
           if (!part) break;
           part.stateByte = ev.state ?? 0;
           (part as typeof part & { c?: number }).c = ev.aux ?? 0;
-          if (partIndex === 0) this.actor.contactP0 = part.stateByte;
+          if (partIndex === 0) {
+            this.actor.contactP0 = part.stateByte;
+            // pl0101 action3 consumes the adjacent part-0 aux byte (+0x1cf0),
+            // not part1.state. Authored g4s0/s1 sets it at frame16.
+            if (this.runtime?.borgId === "pl0101" && this.actor.actionIndex === 3)
+              this.actor.contactP1 = ((ev.aux ?? 0) << 24) >> 24;
+          }
           break;
         }
       }

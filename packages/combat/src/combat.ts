@@ -1,3 +1,5 @@
+import { advancePoweredSource, poweredCanCollide, shrinkPoweredOnContact } from "./poweredProjectileRuntime.js";
+import { stepPoweredCharge, commitPoweredCharge } from "./poweredCharge.js";
 import { hasSourcePrimaryAmmo } from "./primaryAmmo.js";
 import { isDiverAmmoFamily, stepDiverXRefill, stepSourceAmmoRefill } from "./diverAmmo.js";
 // Combat: lock-on, melee (B), ranged shot (B for ranged borgs), special (X), projectiles
@@ -2474,6 +2476,10 @@ export function stepAttacks(
   damageContext: DamageRuntimeContext = {},
 ): AttackResult {
   const out: Projectile[] = [];
+  const powered = b.borgId === "pl0101"
+    ? (b.poweredCharge?.pending ? b.poweredCharge : stepPoweredCharge(b, specialHeld))
+    : null;
+  if (powered) powered.pending = false;
   if (isBusy(b) || !isTargetable(b)) return { projectiles: out };
   const actionProfile = actionProfileForProfile(p);
   const meleeDef = actionProfile.melee;
@@ -2532,6 +2538,7 @@ export function stepAttacks(
   const chargeRelease =
     releasedAttack && (b.cooldowns["chargeFrames"] ?? 0) > 0 && shotDef?.chargeable === true;
   const xChargeRelease =
+    powered ? powered.releasedReady :
     releasedSpecial && (b.cooldowns["xChargeFrames"] ?? 0) > 0 && xChargeMoveForBorgId(b.borgId) !== null;
   // Resolve this frame's command through the ROM tester priority (RANGED > CHARGED >
   // SECONDARY > MELEE) and attach the borg's exact +0x4ec command record where decoded.
@@ -2568,7 +2575,20 @@ export function stepAttacks(
   // outranks the X/secondary type 2 (FUN_800699d8 order) — the charge release below wins the
   // frame and the X press is not consumed.
   const commandPreemptsX = b.command?.type === AttackCommandType.Charged3;
-  if (canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  if (powered && canStartAction && !commandPreemptsX && (b.cooldowns["special"] ?? 0) <= 0) {
+    if (powered.releasedReady && b.command?.type === AttackCommandType.Ranged5 && b.command.actionIndex === 3 && b.command.exact) {
+      // Exact type-5/action-3 path has no ammo check or consumption.
+      if (b.romDriver?.tryStartXSpecial(b, all)) {
+        commitPoweredCharge(b);
+        return { projectiles: out };
+      }
+    } else if (!powered.releasedReady && powered.releaseEdge && xCanFire) {
+      // Compatibility: short X still fires on release, not source press semantics.
+      startSpecialAttack(b, p, actionProfile, 0, out, all, profiles, damageContext, xMoveForBorgId(b.borgId));
+      return { projectiles: out };
+    }
+  }
+  if (!powered && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
@@ -3570,13 +3590,23 @@ export function stepProjectiles(
   // victim applyHit already damaged this frame (stepAttacks Loop 1 ran first) are SKIPPED
   // in the sync — applyHit's source-primary computeBaseDamage stands. See
   // stepSourceCollision's header for the full contract.
-  stepSourceCollision(all, profiles, damageContext, projectiles);
+  // Source primary proximity/lifetime/flight precedes collision. New split children do
+  // not fly on their constructor frame. Other projectile families keep their old order.
+  const poweredPrevious = new Map<Projectile, Vec3>();
+  projectiles = projectiles.flatMap(pr => {
+    if (!pr.poweredSource) return [pr];
+    poweredPrevious.set(pr, { ...(pr.poweredInitialPosition ?? pr.pos) });
+    delete pr.poweredInitialPosition;
+    return advancePoweredSource(pr, byUid);
+  });
+  stepSourceCollision(all, profiles, damageContext, projectiles.filter(poweredCanCollide));
 
   const survivors: Projectile[] = [];
   for (const pr of projectiles) {
     pr.hitConfirmedThisFrame = false;
-    pr.life -= 1;
-    if (pr.life <= 0) {
+    if (pr.poweredSource && !poweredCanCollide(pr)) { survivors.push(pr); continue; }
+    if (!pr.poweredSource) pr.life -= 1;
+    if (!pr.poweredSource && pr.life <= 0) {
       pr.despawnReason = "expired"; // life seed: FUN_8006f11c, 600 frames (chunk_0009.c:3907)
       continue;
     }
@@ -3588,7 +3618,7 @@ export function stepProjectiles(
     // MISSING uid only occurs for synthetic callers (selfchecks/fixtures passing empty maps)
     // and is treated as "no liveness info" so those fixtures keep working.
     const owner = byUid.get(pr.ownerUid);
-    if (owner && !owner.alive) {
+    if (owner && !owner.alive && !pr.poweredSource) {
       pr.despawnReason = "owner-dead";
       continue;
     }
@@ -3612,12 +3642,13 @@ export function stepProjectiles(
     // (behavior-notes.md section (bc)).
     if (pr.drop) pr.vel.y -= pr.drop;
 
-    const prevPos = pr.pos;
-    pr.pos = add(pr.pos, pr.vel as Vec3);
+    const prevPos = pr.poweredSource ? poweredPrevious.get(pr) ?? pr.pos : pr.pos;
+    if (!pr.poweredSource) pr.pos = add(pr.pos, pr.vel as Vec3);
     if (ctx) {
       const impact = projectileImpactReason(pr, prevPos, ctx);
       if (impact) {
-        pr.despawnReason = impact;
+        if (shrinkPoweredOnContact(pr)) survivors.push(pr);
+        else pr.despawnReason = impact;
         continue;
       }
     }
@@ -3721,6 +3752,7 @@ export function stepProjectiles(
     // Persisting projectiles are never removed by a hit (only life expiry / out-of-bounds
     // above can drop them); the counter above already governs re-hit pacing.
     if (persistent || !consumed) survivors.push(pr);
+    else if (shrinkPoweredOnContact(pr)) { delete pr.despawnReason; survivors.push(pr); }
   }
   // Frame boundary: clear the source-collision / applyHit defer-tracking sets so they
   // never go stale across frame boundaries. stepSourceCollision ran at the top of this

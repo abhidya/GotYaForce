@@ -1,3 +1,5 @@
+import { spawnPoweredSource } from "./poweredProjectileRuntime.js";
+import { stepPoweredCharge } from "./poweredCharge.js";
 import { hasSourcePrimaryAmmo } from "./primaryAmmo.js";
 import { isDiverAmmoFamily, refreshDiverAmmoRate } from "./diverAmmo.js";
 import { spawnOrRefreshDiverAura, stepDiverAuras, stepDiverAuraTails } from "./diverAura.js";
@@ -376,8 +378,8 @@ class BattleImpl implements Battle {
         const profile = this.profiles.get(owner.uid);
         return profile ? useWeaponCell(owner, profile, type, count, consume) : false;
       },
-      spawnProjectile: (owner, spawnerAddr, kind) =>
-        this.addRomProjectile(owner, spawnerAddr, kind),
+      spawnProjectile: (owner, spawnerAddr, kind, actor) =>
+        this.addRomProjectile(owner, spawnerAddr, kind, actor),
       resolveHit: (attacker, victim, damageRecordIndex, knockbackMult) =>
         this.resolveRomHit(attacker, victim, damageRecordIndex, knockbackMult),
       // Bridge → Battle.onRomCue: every ported family's ctx.onPlayCue fire flows here
@@ -737,7 +739,11 @@ class BattleImpl implements Battle {
     *  attribution — shotKindForBorgId null) fall back to the shared MUZZLE_OFFSET constant +
     *  the variant table (DAT_802f3dda) via findVariantByKind, and finally the SHOT.* tuned
     *  constants. */
-  private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number): void {
+  private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void {
+    if (actor) {
+      const powered = spawnPoweredSource(b, actor, spawnerAddr, kind, this.state.borgs);
+      if (powered !== null) { this.state.projectiles.push(...powered); return; }
+    }
     // Dedicated owner-following child identity must survive before the B-shot resolver.
     if (spawnOrRefreshDiverAura(this.state.diverAuras ??= [], b, spawnerAddr, kind)) return;
 
@@ -1181,6 +1187,11 @@ class BattleImpl implements Battle {
       // same frame.
       if (b.romDriver && (b.state === "hit" || b.state === "down")) {
         b.romDriver.interrupt();
+      }
+
+      // Source charge bookkeeping also runs while another action owns this frame.
+      if (b.borgId === "pl0101") {
+        stepPoweredCharge(b, input.special, b.state === "special" && b.command?.type === 5);
       }
 
       // ROM-family driver (1:1 ported state machine) — when active, owns the borg's
