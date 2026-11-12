@@ -1,3 +1,4 @@
+import { isArrowNinja, stepArrowInput, advanceArrowSource, createArrowTether, applyArrowTetherCorrections } from "./arrowProjectile.js";
 import { advanceBeamSource, beamPulseOverlaps, stepBeamInput } from "./beamProjectile.js";
 import { advanceRevolverSource, stepRevolverInput, isRevolver, type RevolverPresentationSink } from "./revolverProjectileRuntime.js";
 import { advanceGatlingSource, createGatlingExplosion, stepGatlingInput } from "./gatlingProjectile.js";
@@ -2487,6 +2488,8 @@ export function stepAttacks(
       special: specialHeld, attack: attackHeld, jump: false, hyper: false,
     })) : null;
   if (beam) beam.pending = false;
+  const arrow = isArrowNinja(b.borgId) ? (b.arrowInput?.pending ? b.arrowInput : stepArrowInput(b,specialHeld)) : null;
+  if (arrow) arrow.pending=false;
   const revolver = isRevolver(b.borgId)
     ? (b.revolverInput?.pending ? b.revolverInput : stepRevolverInput(b,specialHeld)) : null;
   if (revolver) revolver.pending=false;
@@ -2512,7 +2515,7 @@ export function stepAttacks(
   // expiry and made an X-hold charge impossible.
   const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
   b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
-  const pressedSpecialEdge = beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld && !prevSpecialHeld;
+  const pressedSpecialEdge = arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
@@ -2562,7 +2565,7 @@ export function stepAttacks(
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld: powered ? powered.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
 
@@ -2606,11 +2609,11 @@ export function stepAttacks(
       if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
     }
   }
-  if ((beam?.pressEdge || revolver?.pressEdge) && canStartAction && !commandPreemptsX && xCanFire &&
+  if ((arrow?.pressEdge || beam?.pressEdge || revolver?.pressEdge) && canStartAction && !commandPreemptsX && xCanFire &&
       (b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact && b.command.type === AttackCommandType.Melee2 && b.command.actionIndex === 2) {
     if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
   }
-  if (!powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  if (!arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
@@ -3616,6 +3619,7 @@ export function stepProjectiles(
   // not fly on their constructor frame. Other projectile families keep their old order.
   const poweredPrevious = new Map<Projectile, Vec3>();
   projectiles = projectiles.flatMap(pr => {
+    if (pr.arrowSource) { poweredPrevious.set(pr, {...pr.pos}); return advanceArrowSource(pr,byUid); }
     if (pr.beamSource) return advanceBeamSource(pr,byUid);
     if (pr.revolverSource) {
       poweredPrevious.set(pr, { ...pr.pos });
@@ -3632,11 +3636,13 @@ export function stepProjectiles(
     return advancePoweredSource(pr, byUid, ctx?.onPoweredLaunch);
   });
   stepSourceCollision(all, profiles, damageContext, projectiles.filter(pr =>
-    !pr.beamSource && poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail")));
+    !pr.arrowSource && !pr.beamSource && poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail")));
 
+  applyArrowTetherCorrections(projectiles,byUid);
   const survivors: Projectile[] = [];
   for (const pr of projectiles) {
     pr.hitConfirmedThisFrame = false;
+    if (pr.arrowSource?.kind === "tether") { survivors.push(pr); continue; }
     if (pr.beamSource) {
       const child = pr.beamSource;
       const owner = byUid.get(pr.ownerUid);
@@ -3695,8 +3701,8 @@ export function stepProjectiles(
       survivors.push(pr);continue;
     }
     if (pr.poweredSource && !poweredCanCollide(pr)) { survivors.push(pr); continue; }
-    if (!pr.poweredSource && !pr.gatlingSource && !pr.revolverSource) pr.life -= 1;
-    if (!pr.poweredSource && !pr.gatlingSource && !pr.revolverSource && pr.life <= 0) {
+    if (!pr.arrowSource && !pr.poweredSource && !pr.gatlingSource && !pr.revolverSource) pr.life -= 1;
+    if (!pr.arrowSource && !pr.poweredSource && !pr.gatlingSource && !pr.revolverSource && pr.life <= 0) {
       pr.despawnReason = "expired"; // life seed: FUN_8006f11c, 600 frames (chunk_0009.c:3907)
       continue;
     }
@@ -3708,7 +3714,7 @@ export function stepProjectiles(
     // MISSING uid only occurs for synthetic callers (selfchecks/fixtures passing empty maps)
     // and is treated as "no liveness info" so those fixtures keep working.
     const owner = byUid.get(pr.ownerUid);
-    if (owner && !owner.alive && !pr.poweredSource && !pr.gatlingSource && !pr.revolverSource) {
+    if (owner && !owner.alive && !pr.arrowSource && !pr.poweredSource && !pr.gatlingSource && !pr.revolverSource) {
       pr.despawnReason = "owner-dead";
       continue;
     }
@@ -3732,8 +3738,8 @@ export function stepProjectiles(
     // (behavior-notes.md section (bc)).
     if (pr.drop) pr.vel.y -= pr.drop;
 
-    const prevPos = pr.poweredSource || pr.gatlingSource || pr.revolverSource ? poweredPrevious.get(pr) ?? pr.pos : pr.pos;
-    if (!pr.poweredSource && !pr.gatlingSource && !pr.revolverSource) pr.pos = add(pr.pos, pr.vel as Vec3);
+    const prevPos = pr.arrowSource || pr.poweredSource || pr.gatlingSource || pr.revolverSource ? poweredPrevious.get(pr) ?? pr.pos : pr.pos;
+    if (!pr.arrowSource && !pr.poweredSource && !pr.gatlingSource && !pr.revolverSource) pr.pos = add(pr.pos, pr.vel as Vec3);
     if (ctx) {
       const impact = projectileImpactReason(pr, prevPos, ctx);
       if (impact) {
@@ -3839,6 +3845,7 @@ export function stepProjectiles(
             pr.rehitCounter = record.rehitIntervalFrames;
             break;
           }
+          if (pr.arrowSource?.kind === "arrow") { const tether=createArrowTether(pr,o,byUid.get(pr.ownerUid)); if(tether) survivors.push(tether); }
           consumed = true;
           pr.despawnReason = "hit-target";
           break;

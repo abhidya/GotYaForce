@@ -1,3 +1,4 @@
+import { isArrowNinja, spawnArrowSource, stepArrowInput, stepArrowMashInput, applyPendingArrowCorrection } from "./arrowProjectile.js";
 import { spawnBeamSource, stepBeamInput } from "./beamProjectile.js";
 import { refreshSourceAttackTargets } from "./sourceAttackTarget.js";
 import { spawnRevolverSource, stepRevolverInput, isRevolver, type RevolverPresentationSink } from "./revolverProjectileRuntime.js";
@@ -790,6 +791,8 @@ class BattleImpl implements Battle {
     if (actor) {
       const beam = spawnBeamSource(b,actor,spawnerAddr,kind);
       if (beam !== null) { this.state.projectiles.push(...beam); return; }
+      const arrow = spawnArrowSource(b, actor, spawnerAddr, kind, this.state.borgs);
+      if (arrow !== null) { this.state.projectiles.push(...arrow); return; }
       const revolver = spawnRevolverSource(b, actor, spawnerAddr, kind);
       if (revolver !== null) { this.state.projectiles.push(...revolver); return; }
       const gatling = spawnGatlingSource(b, actor, spawnerAddr, kind, this.state.borgs);
@@ -1259,7 +1262,9 @@ class BattleImpl implements Battle {
       }
 
       // Source charge bookkeeping also runs while another action owns this frame.
+      stepArrowMashInput(b,input);
       if (b.borgId === "pl0104") stepBeamInput(b,input);
+      if (isArrowNinja(b.borgId)) stepArrowInput(b,input.special);
       if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
       if (b.borgId === "pl0101") {
@@ -1273,6 +1278,7 @@ class BattleImpl implements Battle {
         // Drain any projectiles the ROM stream's fireChild op spawned this tick.
         const romProjs = b.romDriver.drainProjectiles();
         if (romProjs.length > 0) this.state.projectiles.push(...romProjs);
+        applyPendingArrowCorrection(b,this.groundYFor(b.pos.x,b.pos.z,b.pos.y));
         continue;
       }
 
@@ -1337,6 +1343,7 @@ class BattleImpl implements Battle {
       // Advance hit/down/death/spawn timers.
       b.stateTime += 1;
       const r = stepActionState(b);
+      applyPendingArrowCorrection(b,this.groundYFor(b.pos.x,b.pos.z,b.pos.y));
       if (r.died) {
         this.spawnPlanned.add(this.forceIndexOfUid(b.uid));
       }

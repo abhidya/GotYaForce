@@ -1,3 +1,4 @@
+import { runArrowBattleSelfTest } from "./arrowBattle.selftest.js";
 import { runBeamBattleSelfTest } from "./beamBattle.selftest.js";
 import { runRevolverBattleSelfTest } from "./revolverBattle.selftest.js";
 import { runPoweredChargeSelfTest } from "./poweredCharge.selftest.js";
@@ -218,6 +219,7 @@ export function runSelfTest(): void {
   runDiverAuraSelfTest();
   runPoweredChargeSelfTest();
   runGatlingBattleSelfTest();
+  runArrowBattleSelfTest();
   runRevolverBattleSelfTest();
   runBeamBattleSelfTest();
   runSourcePositionHistorySelfTest();

@@ -156,6 +156,16 @@ export interface BorgRuntime {
   poweredCharge?: import("./poweredCharge.js").PoweredChargeState;
   /** Global pre-movement actor center snapshot, used only by actor aim adapters. */
   sourceFramePose?: { frame: number; pos: Vec3; scale: number };
+  arrowInput?: { held:boolean; pressEdge:boolean; pending:boolean };
+  arrowAttack?: { pos:Vec3; targetUid:string|null; trackingEnabled:boolean };
+  /** Explicit source seams while animated attachment and status fields are not mapped. */
+  sourceArrowAttachment?: Vec3;
+  sourceArrowTrackingEnabled?: boolean;
+  sourceArrowMass204?: number;
+  sourceArrowMash749?: number;
+  sourceArrowInputButtons?: number;
+  sourceArrowPendingCorrection?: Vec3;
+  sourceArrowTetherBlocked?: boolean;
   revolverInput?: { held: boolean; pressEdge: boolean; pending: boolean };
   /** Captured source attack identity/range; pos refreshes at the global frame barrier. */
   revolverAttack?: { pos: Vec3; targetUid: string | null; trackingEnabled: boolean };
@@ -586,6 +596,7 @@ export type ProjectileDespawnReason =
 
 /** A homing/straight projectile in flight. */
 export interface Projectile {
+  arrowSource?: import("./arrowProjectile.js").ArrowSourceState;
   revolverSource?: import("./revolverProjectileRuntime.js").RevolverSourceState;
   beamSource?: import("./beamProjectile.js").BeamSourceState;
   gatlingSource?: import("./gatlingProjectile.js").GatlingSourceState;

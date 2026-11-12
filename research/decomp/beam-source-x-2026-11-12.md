@@ -138,10 +138,13 @@ pitch is computed for actor aiming but not fabricated into the static bind matri
 - Target roots and the existing host body sphere replace original articulated
   target collision centers. Capsule overlap uses JS vector arithmetic; it is not
   PPC floating-point or complete source pair-dispatch parity.
-- The shared damage/reaction adapter remains in use. It does not model original
-  victim+1da bit2 same-frame HP eligibility (chunk0003:7946). Overlapping distinct
-  pulse IDs can therefore cause multiple host HP applications where the original
-  reaction gate may admit fewer. No arbitrary beam cooldown hides that gap.
+- The shared damage/reaction adapter remains in use. It does not model the
+  original defensive collision-descriptor gate at victim+1da mask0x02
+  (chunk0003:7799-7827,7946-7953). This is not a generic first-hit-per-frame
+  latch: ordinary damage does not set it. Distinct overlapping pulses must not
+  be suppressed merely because another pulse hit in the same frame. Defensive
+  descriptor/status interactions remain unverified; no arbitrary beam cooldown
+  hides that gap. See `collision-hit-gate-audit-2026-11-12.md`.
 - Destroyed owners normally remain in the battle roster for attribution. A truly
   missing owner uses the existing orphan-attacker damage path with record HP3,
   not full original attacker state. Independent pulses are not silently dropped.

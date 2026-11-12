@@ -250,6 +250,8 @@ interface ProjectileActor {
   gatlingModelId?: 22 | 23;
   /** Source sustained emitter, never the generic velocity-stretched bolt. */
   sustainedBeam?: boolean;
+  /** Arrow hit tether uses global37; flying arrow model12 is owner-local/unavailable. */
+  arrowTether?: boolean;
   /** Independent world-space ring, never a child of the expanding body scale. */
   gatlingRing?: BankVisual;
 }
@@ -1521,7 +1523,8 @@ export class BattleScene {
       const gatling = projectile.gatlingSource;
       const gatlingModelId = gatling?.kind === "explosion" ? (gatling.phase === "tail" ? 23 : 22) : undefined;
       if (actor && (actor.gatlingModelId !== gatlingModelId
-        || Boolean(actor.sustainedBeam) !== Boolean(projectile.beamSource))) {
+        || Boolean(actor.sustainedBeam) !== Boolean(projectile.beamSource)
+        || Boolean(actor.arrowTether) !== (projectile.arrowSource?.kind === "tether"))) {
         // Reconcile a changed source visual without retaining the wrong mesh for this UID.
         // Gatling keeps the explosion UID while replacing model22 with tail model23.
         this.disposeProjectileActor(actor);
@@ -1533,7 +1536,7 @@ export class BattleScene {
         this.projectileActors.set(projectile.uid, actor);
       }
       actor.node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
-      const fade = projectile.beamSource ? 1 : gatling?.kind === "explosion" ? gatling.alpha
+      const fade = projectile.beamSource || projectile.arrowSource ? 1 : gatling?.kind === "explosion" ? gatling.alpha
         : projectile.poweredSource?.alpha ?? Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
       if (actor.bankMaterials) {
         // Bank-mesh flight visual: fade multiplies each layer's OWN rest opacity (the
@@ -1541,7 +1544,9 @@ export class BattleScene {
         for (let i = 0; i < actor.bankMaterials.length; i++) {
           actor.bankMaterials[i]!.opacity = (actor.bankLayerOpacity?.[i] ?? 1) * fade;
         }
-        if (projectile.beamSource) {
+        if (projectile.arrowSource?.kind === "tether") {
+          this.syncArrowTether(actor, projectile);
+        } else if (projectile.beamSource) {
           this.syncSustainedBeam(actor, projectile);
         } else if (gatling?.kind === "explosion") {
           actor.node.scale.setScalar(gatling.scale);
@@ -1656,7 +1661,8 @@ export class BattleScene {
     // FUN_80084790 resolves 0x400b as owner-local model11, not global efct11.
     // That owner-bank mesh is not exported; retain the explicitly generic shell even if
     // a caller accidentally supplies a contradictory global-bank flightVisual.
-    if (projectile.revolverSource) return null;
+    // Arrow 0x400c also resolves in the owner bank, never global efct12.
+    if (projectile.revolverSource || projectile.arrowSource) return null;
     // flightVisual (sim-resolved, combat shotFlightVisualForBorgId) is preferred; the TUNED
     // renderer-side table covers the ROM-family beams whose guarded attribution lands on a
     // different table shape (resolveTunedFlightVisual). Both absent => keep the energy/sprite.
@@ -1744,7 +1750,43 @@ export class BattleScene {
     actor.node.scale.set(scale * transverse, scale * transverse, scale);
   }
 
+  private arrowTetherLayers(): BankFxLayer[] | null {
+    return bankFxTemplate(37);
+  }
+
+  private buildArrowTetherActor(projectile: BattleProjectileObservation): ProjectileActor | null {
+    if (projectile.arrowSource?.kind !== "tether") return null;
+    // 800a2fa4: global model0x25, direct inherited owner-team material selector.
+    // A missing export remains empty rather than inventing a bolt or a substitute bank.
+    const visual = buildBankVisual(this.arrowTetherLayers() ?? [], projectile.team);
+    visual.node.name = `arrow-tether:${projectile.uid}:model37`;
+    this.root.add(visual.node);
+    return { node: visual.node, material: new THREE.MeshBasicMaterial(), beam: false,
+      bankMaterials: visual.materials, bankLayerOpacity: visual.layerOpacity, arrowTether: true };
+  }
+
+  private syncArrowTether(actor: ProjectileActor, projectile: BattleProjectileObservation): void {
+    const source = projectile.arrowSource;
+    if (source?.kind !== "tether") return;
+    actor.node.position.set(source.anchor.x, source.anchor.y, source.anchor.z);
+    // 800a32c8 transports the previous matrix-up in the fixed-step simulation.
+    // Consume that complete basis, never recompute it from camera or render cadence.
+    const { right, up, forward } = source.drawBasis;
+    actor.node.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(
+      new THREE.Vector3(right.x, right.y, right.z),
+      new THREE.Vector3(up.x, up.y, up.z),
+      new THREE.Vector3(forward.x, forward.y, forward.z),
+    ));
+    const distance = Math.hypot(source.endpoint.x - source.anchor.x,
+      source.endpoint.y - source.anchor.y, source.endpoint.z - source.anchor.z);
+    actor.node.visible = distance > 0.0010000000474974513;
+    actor.node.scale.set(projectile.romScale?.[0] ?? 1, projectile.romScale?.[1] ?? 1,
+      actor.node.visible ? distance / 140 : 0.009999999776482582);
+  }
+
   private spawnProjectile(projectile: BattleProjectileObservation): ProjectileActor {
+    const arrowTether = this.buildArrowTetherActor(projectile);
+    if (arrowTether) return arrowTether;
     const sustainedBeam = this.buildSustainedBeamActor(projectile);
     if (sustainedBeam) return sustainedBeam;
     const gatlingActor = this.buildGatlingExplosionActor(projectile);

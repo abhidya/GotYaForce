@@ -275,12 +275,10 @@ function arrowNinjaAction2(ctx: StreamContext): (actor: RomActor) => void {
         actor.yVel = 0;
         actor.hDecel = 0;
         actor.hSpeed = 0;
-        // REPOSITION: motion = pos - lockTarget; motion x= 0.95; pos += motion.
-        if (actor.lockTarget) {
-          vecSubtract(actor.pos, actor.lockTarget, actor.motion);
-          vecScale(ARROW_NINJA_ACTION2.REPOSITION, actor.motion, actor.motion);
-          vecAdd(actor.pos, actor.motion, actor.pos);
-        }
+        // Source uses older OWN position +5e8, independent of the target.
+        vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+        vecScale(ARROW_NINJA_ACTION2.REPOSITION, actor.motion, actor.motion);
+        vecAdd(actor.pos, actor.motion, actor.pos);
         // zz_00679d0_ ground snap (registered ground clamp stands in).
         // +0x6ea = 0; airborne (+0x5e0 & 0x40) → 1; then +0x6ea++ AFTER the stream
         // slot is read (slot = pre-increment value). Group 4.
@@ -403,14 +401,14 @@ export function runArrowNinjaAction2SelfTests(assert: AssertFn): void {
   assert(a.rootAction !== null, "configureArrowNinjaFamily wires rootAction");
   a.rootAction?.(a);
 
-  // ph0: +0x540=1, reposition applied (0.95 toward target), stream started.
+  // ph0: +0x540=1, stationary own-history displacement, stream started.
   assert(a.fbPhaseSlots[0] === 1, "action-2 ph0 advances to phase 1");
-  assert(Math.abs(a.pos.x + 95) < 0.001, "action-2 ph0 repositions 0.95 toward target");
+  assert(Math.abs(a.pos.x) < 0.001, "action-2 ph0 uses own history, not distant lock target");
 
   // ph1 (dash): no contact → stays; motion glides further.
   a.rootAction?.(a);
   assert(a.fbPhaseSlots[0] === 1, "action-2 ph1 holds without contact");
-  assert(Math.abs(a.pos.x + 185.25) < 0.001, "action-2 ph1 continues the glide");
+  assert(Math.abs(a.pos.x) < 0.001, "action-2 ph1 preserves zero own-history glide");
 
   // ph1 contact → advance to ph2 + spawn (grounded: no air knockback arm).
   a.contactP0 = 1;

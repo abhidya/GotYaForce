@@ -31,7 +31,7 @@ export function refreshSourceAttackTargets(all: readonly BorgRuntime[], frame: n
                 (((target.targetVisibilityMask5e6 ?? 0) & (1 << all.indexOf(owner))) !== 0))
                 beam.pos = { ...(target.sourceFramePose?.pos ?? target.pos) };
         }
-        for (const aim of [owner.gatlingSavedAim, owner.poweredNormalAim, owner.revolverAttack]) {
+        for (const aim of [owner.arrowAttack, owner.gatlingSavedAim, owner.poweredNormalAim, owner.revolverAttack]) {
             if (!aim)
                 continue;
             const target = aim.targetUid ? actorAimTarget(byUid.get(aim.targetUid)) : null;
