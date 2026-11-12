@@ -1,3 +1,4 @@
+import { spawnGatlingSource, stepGatlingInput } from "./gatlingProjectile.js";
 import type { PoweredLaunchFlash } from "./types.js";
 import type { PoweredPresentationSink } from "./poweredProjectileRuntime.js";
 import { spawnPoweredSource } from "./poweredProjectileRuntime.js";
@@ -759,6 +760,8 @@ class BattleImpl implements Battle {
     *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void {
     if (actor) {
+      const gatling = spawnGatlingSource(b, actor, spawnerAddr, kind, this.state.borgs);
+      if (gatling !== null) { this.state.projectiles.push(...gatling); return; }
       const powered = spawnPoweredSource(b, actor, spawnerAddr, kind, this.state.borgs, this.onPoweredLaunch);
       if (powered !== null) { this.state.projectiles.push(...powered); return; }
     }
@@ -1210,6 +1213,7 @@ class BattleImpl implements Battle {
       }
 
       // Source charge bookkeeping also runs while another action owns this frame.
+      if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
       if (b.borgId === "pl0101") {
         stepPoweredCharge(b, input.special, b.state === "special" && b.command?.type === 5);
       }
@@ -1308,6 +1312,7 @@ class BattleImpl implements Battle {
         bounds: this.bounds,
         collision: this.collision,
         onPoweredLaunch: this.onPoweredLaunch,
+        onSourceCue: (cue) => this.onRomCue?.(cue),
       },
       {
         sideRankForTeam: (team) => this.sideRankForTeam(team),
@@ -1331,6 +1336,8 @@ class BattleImpl implements Battle {
         vel: structuredClone(projectile.vel),
         team: projectile.team,
         reason: projectile.despawnReason,
+        ...(projectile.gatlingSource?.kind === "primary" && projectile.despawnReason === "hit-terrain"
+          ? {suppressTerrainImpactFx:true} : {}),
         ...(projectile.lastImpactEffectId !== undefined
           ? { impactEffectId: projectile.lastImpactEffectId }
           : {}),

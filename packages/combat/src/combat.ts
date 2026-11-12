@@ -1,3 +1,4 @@
+import { advanceGatlingSource, createGatlingExplosion, stepGatlingInput } from "./gatlingProjectile.js";
 import { type PoweredPresentationSink, advancePoweredSource, poweredCanCollide, shrinkPoweredOnContact } from "./poweredProjectileRuntime.js";
 import { stepPoweredCharge, commitPoweredCharge } from "./poweredCharge.js";
 import { hasSourcePrimaryAmmo } from "./primaryAmmo.js";
@@ -150,6 +151,7 @@ type ReactionAnimLengthRow = { ground?: number; launch?: number };
 const REACTION_ANIM_LENGTHS = (reactionAnimLengthsData as { borgs: Record<string, ReactionAnimLengthRow> }).borgs;
 
 export interface ProjectileContext {
+  onSourceCue?: (cue:number) => void;
   onPoweredLaunch?: PoweredPresentationSink;
   bounds: RectStageBounds;
   collision: StageCollision | null;
@@ -2477,6 +2479,9 @@ export function stepAttacks(
   damageContext: DamageRuntimeContext = {},
 ): AttackResult {
   const out: Projectile[] = [];
+  const gatling = b.borgId === "pl0102"
+    ? (b.gatlingInput?.pending ? b.gatlingInput : stepGatlingInput(b,specialHeld)) : null;
+  if (gatling) gatling.pending=false;
   const powered = b.borgId === "pl0101"
     ? (b.poweredCharge?.pending ? b.poweredCharge : stepPoweredCharge(b, specialHeld))
     : null;
@@ -2496,7 +2501,7 @@ export function stepAttacks(
   // expiry and made an X-hold charge impossible.
   const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
   b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
-  const pressedSpecialEdge = specialHeld && !prevSpecialHeld;
+  const pressedSpecialEdge = gatling ? gatling.pressEdge : specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
@@ -2546,7 +2551,7 @@ export function stepAttacks(
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld: powered ? powered.pressEdge : specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: powered ? powered.pressEdge : gatling ? gatling.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
 
@@ -3596,19 +3601,52 @@ export function stepProjectiles(
   // not fly on their constructor frame. Other projectile families keep their old order.
   const poweredPrevious = new Map<Projectile, Vec3>();
   projectiles = projectiles.flatMap(pr => {
+    if (pr.gatlingSource) {
+      poweredPrevious.set(pr, { ...(pr.gatlingInitialPosition ?? pr.pos) });
+      delete pr.gatlingInitialPosition;
+      return advanceGatlingSource(pr, byUid);
+    }
     if (!pr.poweredSource) return [pr];
     poweredPrevious.set(pr, { ...(pr.poweredInitialPosition ?? pr.pos) });
     delete pr.poweredInitialPosition;
     return advancePoweredSource(pr, byUid, ctx?.onPoweredLaunch);
   });
-  stepSourceCollision(all, profiles, damageContext, projectiles.filter(poweredCanCollide));
+  stepSourceCollision(all, profiles, damageContext, projectiles.filter(pr =>
+    poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail")));
 
   const survivors: Projectile[] = [];
   for (const pr of projectiles) {
     pr.hitConfirmedThisFrame = false;
+    if (pr.gatlingSource?.kind === "explosion") {
+      const child = pr.gatlingSource;
+      if (child.phase !== "tail") {
+        // Global comhit107: one attack ID, rehit interval0. Multiple victims may
+        // connect in the same frame, but each victim only once per explosion.
+        // Host spherical max-extent + body-radius approximation, not source shape parity.
+        for (const target of all) {
+          if (target.uid === pr.ownerUid || child.hitUids.includes(target.uid) ||
+              !isTargetable(target) || isInvincible(target)) continue;
+          if (Math.hypot(target.pos.x-pr.pos.x,target.pos.y-pr.pos.y,target.pos.z-pr.pos.z) >
+              pr.hitRadius + SHOT.TARGET_BODY_RADIUS) continue;
+          const profile = profiles.get(target.uid), owner = byUid.get(pr.ownerUid);
+          const ownerProfile = owner ? profiles.get(owner.uid) : undefined;
+          if (!profile) continue;
+          const record = pr.damageRecord!;
+          if (owner && burstAllyPassthroughBlocks(owner,target,record)) continue;
+          child.hitUids.push(target.uid);
+          applyHit(target,profile,pr.damage,pr.knockback,
+            {x:target.pos.x-pr.pos.x,y:target.pos.y-pr.pos.y,z:target.pos.z-pr.pos.z},pr.pos,false,record,
+            owner && ownerProfile ? {attacker:owner,attackerProfile:ownerProfile,damageScale:1,aimedTargetUid:pr.aimedTargetUid??null,
+              attackerSideRank:damageContext.sideRankForTeam?.(owner.team),
+              defenderSideRank:damageContext.sideRankForTeam?.(target.team)} : undefined,damageContext);
+          pr.hitConfirmedThisFrame=true;pr.lastImpactEffectId=record.impactEffectId;
+        }
+      }
+      survivors.push(pr);continue;
+    }
     if (pr.poweredSource && !poweredCanCollide(pr)) { survivors.push(pr); continue; }
-    if (!pr.poweredSource) pr.life -= 1;
-    if (!pr.poweredSource && pr.life <= 0) {
+    if (!pr.poweredSource && !pr.gatlingSource) pr.life -= 1;
+    if (!pr.poweredSource && !pr.gatlingSource && pr.life <= 0) {
       pr.despawnReason = "expired"; // life seed: FUN_8006f11c, 600 frames (chunk_0009.c:3907)
       continue;
     }
@@ -3620,7 +3658,7 @@ export function stepProjectiles(
     // MISSING uid only occurs for synthetic callers (selfchecks/fixtures passing empty maps)
     // and is treated as "no liveness info" so those fixtures keep working.
     const owner = byUid.get(pr.ownerUid);
-    if (owner && !owner.alive && !pr.poweredSource) {
+    if (owner && !owner.alive && !pr.poweredSource && !pr.gatlingSource) {
       pr.despawnReason = "owner-dead";
       continue;
     }
@@ -3644,11 +3682,16 @@ export function stepProjectiles(
     // (behavior-notes.md section (bc)).
     if (pr.drop) pr.vel.y -= pr.drop;
 
-    const prevPos = pr.poweredSource ? poweredPrevious.get(pr) ?? pr.pos : pr.pos;
-    if (!pr.poweredSource) pr.pos = add(pr.pos, pr.vel as Vec3);
+    const prevPos = pr.poweredSource || pr.gatlingSource ? poweredPrevious.get(pr) ?? pr.pos : pr.pos;
+    if (!pr.poweredSource && !pr.gatlingSource) pr.pos = add(pr.pos, pr.vel as Vec3);
     if (ctx) {
       const impact = projectileImpactReason(pr, prevPos, ctx);
       if (impact) {
+        if (pr.gatlingSource?.kind === "primary" && impact === "hit-terrain") {
+          survivors.push(createGatlingExplosion(pr,ctx.onSourceCue));
+          // Dedicated source explosion replaces terrain puff, but preserve impact reason.
+          pr.despawnReason=impact;continue;
+        }
         if (shrinkPoweredOnContact(pr)) survivors.push(pr);
         else pr.despawnReason = impact;
         continue;
@@ -3661,15 +3704,16 @@ export function stepProjectiles(
     //   - Default (`pr.consumeOnHit !== false`, including absent): FIRST valid hit consumes the
     //     projectile — unchanged from the pre-ATK-008 behavior, bit-for-bit.
     //   - Persist (`pr.consumeOnHit === false`): the projectile survives hits; re-hits are paced
-    //     by a SINGLE per-object counter (`pr.rehitCounter`), mirroring the ROM's one counter per
-    //     object at object+0x4e (NOT a per-target map) reloaded from the damage record's s8+0x16
-    //     `rehitIntervalFrames` (chunk_0013.c:1175-1182). The counter gates the NEXT damage
+    //     by a SINGLE host counter (`pr.rehitCounter`), seeded from the damage record's
+    //     s8+0x16 `rehitIntervalFrames`. This legacy policy is NOT the source attack-ID
+    //     renewal in chunk_0013.c:1175-1182. The host counter gates the NEXT damage
     //     application: if it's > 0 this frame, it only ticks down and no hit is applied (even if
     //     overlapping a valid target); once it reaches 0 the object is hit-ready, applies at most
     //     ONE hit this frame (first valid target found), then reloads — so it can't double-fire
     //     against multiple overlapping targets on the same frame. Interval 0 reloads to 0, so a
     //     hit-ready object stays hit-ready next frame too (unlimited rehit while overlapping,
-    //     matching the ROM's interval-0 semantics).
+    //     legacy host approximation; source attack IDs instead suppress repeat victims.
+    //     Gatling explosion bypasses this legacy policy).
     const persistent = pr.consumeOnHit === false;
     let consumed = false;
     if (persistent && (pr.rehitCounter ?? 0) > 0) {
@@ -3739,8 +3783,8 @@ export function stepProjectiles(
           pr.lastImpactEffectId = record.impactEffectId;
           if (persistent) {
             // Reload the single per-object counter immediately so this same frame's loop can't
-            // apply a second hit (the ROM shape: counter gates the next application, then
-            // reloads on use). Interval 0 reloads to 0, so the object is still hit-ready next
+            // apply a second hit (legacy host policy, not source attack-ID renewal).
+            // Interval 0 reloads to 0, so the object is still hit-ready next
             // frame (unlimited rehit while overlapping).
             pr.rehitCounter = record.rehitIntervalFrames;
             break;
@@ -3754,6 +3798,7 @@ export function stepProjectiles(
     // Persisting projectiles are never removed by a hit (only life expiry / out-of-bounds
     // above can drop them); the counter above already governs re-hit pacing.
     if (persistent || !consumed) survivors.push(pr);
+    else if (pr.gatlingSource?.kind === "primary") { survivors.push(createGatlingExplosion(pr,ctx?.onSourceCue)); }
     else if (shrinkPoweredOnContact(pr)) { delete pr.despawnReason; survivors.push(pr); }
   }
   // Frame boundary: clear the source-collision / applyHit defer-tracking sets so they

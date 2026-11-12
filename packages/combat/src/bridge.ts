@@ -1,3 +1,4 @@
+import { captureGatlingAim, spawnGatlingSource } from "./gatlingProjectile.js";
 import { capturePoweredNormalAim, spawnPoweredSource } from "./poweredProjectileRuntime.js";
 import { createKnightWindupClock, tickKnightWindupClock, type KnightWindupClock } from "./rom/knight-windup-clock.js";
 import { isDiverAmmoFamily } from "./diverAmmo.js";
@@ -1507,6 +1508,9 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  drain after each tick alongside the stream's pendingProjectiles. */
   private spawnFamilyProjectile(actor: RomActor, spawnerAddr: number, type: number): void {
     if (this.runtime) {
+      const gatling = spawnGatlingSource(this.runtime, actor, spawnerAddr, type,
+        this.visibilityBindings.map(binding => binding.runtime));
+      if (gatling !== null) { this.familyProjectiles.push(...gatling); this.specialHadEffect = true; return; }
       const powered = spawnPoweredSource(this.runtime, actor, spawnerAddr, type,
         this.visibilityBindings.map(binding => binding.runtime));
       if (powered !== null) {
@@ -1950,7 +1954,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (host.onAllocateResource) dest.onAllocateResource = (actor, type, count, mode) => {
       const accepted = host.onAllocateResource!(actor, type, count, mode);
       if (!accepted && type === 2 && (mode ?? 0) !== 0 &&
-          (isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) || runtime.borgId === "pl0101")) this.sourceXResourceDenied = true;
+          (isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) || runtime.borgId === "pl0101" || runtime.borgId === "pl0102")) this.sourceXResourceDenied = true;
       return accepted;
     };
     if (host.onExitFb) dest.onExitFb = host.onExitFb;
@@ -2145,6 +2149,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       const preX = runtime.pos.x;
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
+      if (runtime.borgId === "pl0102" && actionIndex === 2) captureGatlingAim(runtime,this.actor,all);
       if (runtime.borgId === "pl0101" && actionIndex === 2) capturePoweredNormalAim(runtime,this.actor,all);
       dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex, variantIndex });
       stepRomActor(this.actor, this.tables, this.ctx);
