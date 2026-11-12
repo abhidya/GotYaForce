@@ -6,7 +6,8 @@ This lane implements only the detached natural-expiry tail for Jelly, Tar and Ja
 Diver X. Active aura mesh 78, its pulse, bone attachment and collision remain separate.
 Death, missing owner and morph still remove the active aura immediately without a tail.
 The source owner-stop +0x82 visibility behavior is not sufficiently established to
-extend that path. Active selector-79 particles remain unimplemented.
+extend that path. Active selector-79 particles are now covered by the separate
+[active-particle lane](diver-active-particles-2026-11-11.md).
 
 Evidence is the read-only rig audit of `chunk_0033.c`, especially lines 762–813 and
 894–921, and original PPC checked against DOL SHA-256
@@ -45,7 +46,7 @@ vector at `0x2adcb4`.
 These formulas are source-backed, but JS arithmetic and normalization are not a
 claim of exact PPC rounding. The local UID-seeded xorshift generator consumes
 exactly 192 bytes for 32 births. It intentionally approximates the source global
-RNG sequence, whose omitted active particles would also consume bytes. Neither
+RNG sequence, rather than sharing the active-particle visual RNG stream. Neither
 browser gameplay PRNG is touched. Rendering consumes no random values.
 
 ## Browser lifecycle and rendering boundary

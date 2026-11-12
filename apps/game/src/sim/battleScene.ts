@@ -208,6 +208,8 @@ interface DiverTailActor {
 }
 
 interface DiverAuraActor {
+  particleRoot: THREE.Group;
+  particles: Map<number, THREE.Group>;
   ownerUid: string;
   ownerFormId: string;
   fallbackPosition: THREE.Vector3;
@@ -1365,7 +1367,10 @@ export class BattleScene {
           node.add(new THREE.Mesh(layer.geometry, material));
           materials.push(material);
         }
-        actor = { node, materials, ownerUid: child.ownerUid, ownerFormId: child.ownerFormId,
+        const particleRoot = new THREE.Group();
+        particleRoot.name = `diver-active-particles:${child.uid}`;
+        this.root.add(particleRoot);
+        actor = { node, materials, particleRoot, particles: new Map(), ownerUid: child.ownerUid, ownerFormId: child.ownerFormId,
           fallbackPosition: new THREE.Vector3() };
         this.root.add(node);
         this.diverAuraActors.set(child.uid, actor);
@@ -1374,6 +1379,38 @@ export class BattleScene {
       actor.ownerFormId = child.ownerFormId;
       actor.fallbackPosition.set(child.pos.x, child.pos.y, child.pos.z);
       actor.node.scale.set(child.visualScale.x, child.visualScale.y, child.visualScale.z);
+      const liveParticles = new Set(child.particles.map((p) => p.index));
+      for (const p of child.particles) {
+        let particle = actor.particles.get(p.index);
+        if (!particle) {
+          const layers = bankFxTemplate(79);
+          if (!layers) continue;
+          particle = new THREE.Group();
+          particle.name = `diver-active-particle:${p.index}`;
+          for (const layer of layers) {
+            const color = new THREE.Color();
+            sampleBankAnim(layer, child.visualVariant, color);
+            const material = new THREE.MeshBasicMaterial({ color, opacity: p.opacity,
+              vertexColors: layer.vertexColors, transparent: true,
+              blending: layer.additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+              depthWrite: false, side: THREE.DoubleSide });
+            particle.add(new THREE.Mesh(layer.geometry, material));
+          }
+          actor.particleRoot.add(particle);
+          actor.particles.set(p.index, particle);
+        }
+        particle.position.set(p.offset.x, p.offset.y, p.offset.z);
+        particle.scale.setScalar(p.scale);
+        particle.rotation.set(0, p.yaw * Math.PI / 32768, 0);
+        for (const mesh of particle.children as THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>[])
+          mesh.material.opacity = p.opacity;
+      }
+      for (const [index, particle] of actor.particles) {
+        if (liveParticles.has(index)) continue;
+        actor.particleRoot.remove(particle);
+        for (const mesh of particle.children as THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>[]) mesh.material.dispose();
+        actor.particles.delete(index);
+      }
     }
     for (const [uid, actor] of this.diverAuraActors) {
       if (live.has(uid)) continue;
@@ -1389,16 +1426,21 @@ export class BattleScene {
       aura.node.position.copy(aura.fallbackPosition);
       const owner = this.actors.get(aura.ownerUid);
       const anchor = owner?.borgId === aura.ownerFormId ? owner.diverAuraAnchor : null;
+      aura.particleRoot.position.copy(aura.node.position);
       if (!anchor) continue; // pending/missing model, form change, or retired owner
       anchor.updateWorldMatrix(true, false);
       aura.node.position.setFromMatrixPosition(anchor.matrixWorld);
       this.root.worldToLocal(aura.node.position);
+      aura.particleRoot.position.copy(aura.node.position);
       // Do not inherit bone rotation/scale or apply model normalization twice.
     }
   }
 
   private disposeDiverAura(actor: DiverAuraActor): void {
-    this.root.remove(actor.node);
+    this.root.remove(actor.node, actor.particleRoot);
+    for (const particle of actor.particles.values())
+      for (const mesh of particle.children as THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>[]) mesh.material.dispose();
+    actor.particles.clear();
     // Geometry belongs to the shared bank template; only materials are per child.
     for (const material of actor.materials) material.dispose();
   }

@@ -33,7 +33,7 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   THREE.TextureLoader.prototype.load = load;
   const internals = scene as unknown as {
     diverTailActors: Map<string, { node: THREE.Group; particles: Map<number, THREE.Group>; materials: THREE.MeshBasicMaterial[] }>;
-    diverAuraActors: Map<string, { node: THREE.Group; materials: THREE.MeshBasicMaterial[] }>;
+    diverAuraActors: Map<string, { node: THREE.Group; materials: THREE.MeshBasicMaterial[]; particleRoot: THREE.Group; particles: Map<number, THREE.Group> }>;
     projectileActors: Map<string, { node: THREE.Object3D; beam: boolean }>;
     ringTexture: THREE.Texture | null;
     spawnSpecialBurst: (pos: { x: number; y: number; z: number }, radius: number) => void;
@@ -55,7 +55,7 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   const child: DiverAuraChild = {
     uid: "aura", ownerUid: "owner", ownerFormId: "pl0a04", team: 0,
     subtype: 0, pos: { x: 10, y: 20, z: 30 }, remainingFrames: 1140,
-    hitRadius: 100, bankTexId: 78, baseScale: 1, visualVariant: 0, pulsePhaseDegrees: 0, visualScale: { x: .01, y: .01, z: .01 },
+    hitRadius: 100, bankTexId: 78, baseScale: 1, visualVariant: 0, particleCountdown: 0, particleRng: 0, particles: [], pulsePhaseDegrees: 0, visualScale: { x: .01, y: .01, z: .01 },
   };
   const sync = (children: DiverAuraChild[], projectiles: BattleProjectileObservation[] = []) =>
     scene.sync([], projectiles, null, false, [], children);
@@ -139,9 +139,33 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
     scene.sync(snapshot.actors, snapshot.projectiles, null, false, snapshot.projectileDespawns, snapshot.diverAuras, snapshot.diverAuraTails);
     const actual = snapshot.diverAuras[0]!;
     const actualNode = internals.diverAuraActors.get(actual.uid)!.node;
+    const activeActor = internals.diverAuraActors.get(actual.uid)!;
+    assert(actual.particles.length === 1 && activeActor.particles.size === 1, `${id} actual X emits active mesh79`);
+    const activeParticle = activeActor.particles.values().next().value!;
+    const activeMesh = activeParticle.children[0] as THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
+    assert(activeMesh.geometry.index!.count / 3 === 75 && activeMesh.material.vertexColors && activeMesh.material.blending === THREE.AdditiveBlending,
+      "active mesh79 topology/vertex colors/additive blending");
+    assert(near(activeMesh.material.opacity, .25) && activeMesh.material.color.equals(new THREE.Color(1, 1, 1)), "active alpha replaces bank alpha, white authored color");
+    assert(activeActor.particleRoot.parent === root && activeActor.particleRoot.scale.equals(new THREE.Vector3(1, 1, 1)), "active particles do not inherit pulse scale");
+    const firstActiveState = actual.particles[0]!;
+    assert(activeParticle.scale.equals(new THREE.Vector3().setScalar(firstActiveState.scale)) && near(activeParticle.rotation.y, firstActiveState.yaw * Math.PI / 32768),
+      "active particle applies observed uniform scale and signed yaw");
+    const frozenActive = JSON.stringify(actual.particles);
+    const activePosition = activeParticle.position.clone(); const activeYaw = activeParticle.rotation.y;
+    scene.update(3); syncBattle(battle);
+    assert(activeParticle.position.equals(activePosition) && activeParticle.rotation.y === activeYaw && JSON.stringify(battle.observe().diverAuras[0]!.particles) === frozenActive,
+      "render-only time cannot move/spin/birth active particles");
+    assert(activeActor.particleRoot.position.equals(actualNode.position), "active particle translation follows aura anchor");
+
     assert(actualNode.position.equals(new THREE.Vector3(actual.pos.x, actual.pos.y, actual.pos.z)),
       `${id} Battle child reaches scene`);
     const owner = battleStateForSelfcheck(battle).borgs[0]!;
+    let individualActiveDisposals = 0;
+    activeMesh.material.addEventListener("dispose", () => individualActiveDisposals++);
+    const withoutActive = { ...actual, particles: [] };
+    scene.sync(snapshot.actors, snapshot.projectiles, null, false, [], [withoutActive]);
+    assert(!activeParticle.parent && individualActiveDisposals === 1, "individual active removal disposes its material");
+    syncBattle(battle);
     assert(actual.pulsePhaseDegrees === 3 && actualNode.scale.x > 1 && actualNode.scale.y < 1,
       `${id} first active pulse reaches scene from actual X`);
     const initialScale = actualNode.scale.clone();
@@ -186,10 +210,20 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
     const lastBaseScale = state.diverAuras![0]!.baseScale;
     state.diverAuras![0]!.remainingFrames = 1;
     const frozenAnchor = actualNode.position.clone();
+    let activeDisposals = 0, sharedActiveDisposals = 0;
+    for (const particle of activeActor.particles.values())
+      for (const mesh of particle.children as THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>[]) {
+        mesh.material.addEventListener("dispose", () => activeDisposals++);
+      }
+    activeMesh.geometry.addEventListener("dispose", () => sharedActiveDisposals++);
+    const activeCount = activeActor.particles.size;
     tick(); const expiry = syncBattle(battle);
     assert(expiry.diverAuras.length === 0 && expiry.diverAuraTails.length === 1,
       `${id} natural expiry emits exactly one detached tail`);
     const tail = internals.diverTailActors.get(actual.uid)!;
+    assert(!activeActor.particleRoot.parent && activeActor.particles.size === 0 && activeDisposals === activeCount && sharedActiveDisposals === 0,
+      "expiry resets active mesh79 pool, disposes owned materials only");
+    assert(JSON.stringify(actual.particles) === frozenActive, "active particle snapshots remain immutable");
     assert(!actualNode.parent && tail.particles.size === 32, `${id} main mesh gone, 32 teardown particles`);
     const firstParticle = tail.particles.get(0)!;
     const particleMesh = firstParticle.children[0] as THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
@@ -309,7 +343,7 @@ async function checkDiverBoneAttachment(): Promise<void> {
     pos: { x: 10, y: 20, z: 30 }, rotY: Math.PI / 2, modelSizeScale: 1.5 };
   const child: DiverAuraChild = { uid: "bone-aura", ownerUid: owner.uid, ownerFormId: "pl0805", team: 0,
     subtype: 0, pos: { ...owner.pos }, remainingFrames: 1140, hitRadius: 100,
-    bankTexId: 78, baseScale: 1, visualVariant: 0, pulsePhaseDegrees: 0, visualScale: { x: .75, y: .75, z: .75 } };
+    bankTexId: 78, baseScale: 1, visualVariant: 0, particleCountdown: 0, particleRng: 0, particles: [], pulsePhaseDegrees: 0, visualScale: { x: .75, y: .75, z: .75 } };
   const sync = (id = "pl0805") => scene.sync([{ ...owner, combatFormId: id }], [], null, false, [], [child]);
   const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
   const makeRig = () => {
