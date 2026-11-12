@@ -758,15 +758,15 @@ class BattleImpl implements Battle {
     victim: BorgRuntime,
     damageRecordIndex: number,
     knockbackMult: number,
-  ): void {
+  ): number {
     const victimProfile = this.profiles.get(victim.uid);
-    if (!victimProfile) return;
+    if (!victimProfile) return 0;
     const record =
       familyDamageRecordForBorg(attacker.borgId, damageRecordIndex) ??
       damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
     const attackerProfile = this.profiles.get(attacker.uid);
     const dir = { x: victim.pos.x - attacker.pos.x, y: 0, z: victim.pos.z - attacker.pos.z };
-    applyHit(victim, victimProfile, 0, knockbackMult, dir, attacker.pos, false, record,
+    return applyHit(victim, victimProfile, 0, knockbackMult, dir, attacker.pos, false, record,
       attackerProfile ? { attacker, attackerProfile, damageScale: 1, attackerSideRank: this.sideRankForTeam(attacker.team), defenderSideRank: this.sideRankForTeam(victim.team) } : undefined,
       { burstMeters: this.state.burstMeterByPlayer, telemetry: this.state.telemetry, energyByTeam: this.state.energy, energyMaxByTeam: this.state.energyMax, cpuHalvingEnabled: this.isChallengeMode });
   }

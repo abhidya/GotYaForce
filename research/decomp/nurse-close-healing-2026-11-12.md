@@ -1,5 +1,8 @@
 # Nurse close allied X healing
 
+Historical scope of PR #46. See nurse-airborne-healing-2026-11-12.md and
+nurse-far-homing-2026-11-12.md for later extensions and recovery corrections.
+
 Scope: ground, close-range allied X for Angel Nurse (`pl0900`), Angel Rescue
 (`pl0908`), and Nao (`pl090d`). This is a bounded browser implementation, not a
 claim that the complete Nurse move set or collision system matches the original.
