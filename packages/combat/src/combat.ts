@@ -1,3 +1,4 @@
+import {isSourceTeleportX,stepTeleportXInput} from './teleportX.js';
 import {advanceNinjaSource} from './ninjaProjectile.js';
 import {isSourceNinjaX,stepNinjaXInput} from './ninjaX.js';
 import {advanceGredRangedSource} from './gredRangedProjectile.js';
@@ -204,7 +205,7 @@ export function isInvincible(b: BorgRuntime): boolean {
   // The +0x558 3-phase deploy lock (DEPLOY, behavior-notes.md (af)) keeps a spawning borg
   // protected for the full SPAWN_DURATION — DERIVED, replaces the old flat TUNED 45f invincTimer
   // (battle.ts now inits invincTimer=0 at spawn; the spawn STATE is the protection).
-  return b.invincTimer > 0 || b.state === "spawn";
+  return b.invincTimer > 0 || b.state === "spawn" || b.sourceDefenseDisabled === true;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -1489,7 +1490,7 @@ function runSourceCollisionPasses(
   // self-pair broadPhase exclusion (hooks below) skips active-vs-same-borg pairs.
   const borgList: SourceCollisionObject[] = [];
   for (const b of all) {
-    if (!isTargetable(b)) continue;
+    if (!isTargetable(b) || b.sourceDefenseDisabled) continue;
     const owner = ownerActorFor(b);
     borgList.push(borgToCollisionObject(b, owner, damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE), 0));
   }
@@ -2520,6 +2521,8 @@ export function stepAttacks(
   damageContext: DamageRuntimeContext = {},
 ): AttackResult {
   const out: Projectile[] = [];
+  const teleport=isSourceTeleportX(b.borgId)?(b.teleportXInput?.pending?b.teleportXInput:stepTeleportXInput(b,specialHeld)):null;
+  if(teleport)teleport.pending=false;
   const ninja=isSourceNinjaX(b.borgId)?(b.ninjaXInput?.pending?b.ninjaXInput:stepNinjaXInput(b,specialHeld)):null;
   if(ninja)ninja.pending=false;
   const nurse = isNurseX(b.borgId) ? consumeNurseInput(b, specialHeld) : null;
@@ -2558,7 +2561,7 @@ export function stepAttacks(
   // expiry and made an X-hold charge impossible.
   const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
   b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
-  const pressedSpecialEdge = ninja?ninja.pressEdge:nurse ? nurse.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld && !prevSpecialHeld;
+  const pressedSpecialEdge = teleport?teleport.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
@@ -2601,14 +2604,14 @@ export function stepAttacks(
   const chargeRelease =
     releasedAttack && (b.cooldowns["chargeFrames"] ?? 0) > 0 && shotDef?.chargeable === true;
   const xChargeRelease =
-    powered ? powered.releasedReady :
+    teleport ? teleport.releasedReady : powered ? powered.releasedReady :
     releasedSpecial && (b.cooldowns["xChargeFrames"] ?? 0) > 0 && xChargeMoveForBorgId(b.borgId) !== null;
   // Resolve this frame's command through the ROM tester priority (RANGED > CHARGED >
   // SECONDARY > MELEE) and attach the borg's exact +0x4ec command record where decoded.
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld: ninja?ninja.pressEdge:nurse ? nurse.pressEdge : powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: teleport?teleport.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
   // Refine only the proven established walk/run lane. Other families and
@@ -2649,6 +2652,19 @@ export function stepAttacks(
       b.romDriver?.tryStartXSpecial(b, all);
     return { projectiles: out };
   }
+  if(teleport&&canStartAction&&!commandPreemptsX){
+    if(xCanFire&&(b.cooldowns["special"]??0)<=0){
+      if(teleport.releasedReady&&b.command?.exact&&b.command.type===5&&b.command.actionIndex===3){
+        // Deliberately retained legacy charged action3 payload, NOT source teleport restoration.
+        teleport.warmup=teleport.charge=0;
+        startSpecialAttack(b,p,actionProfile,2,out,all,profiles,damageContext,xMoveForBorgId(b.borgId));
+        return {projectiles:out};
+      }
+      if(teleport.pressEdge&&b.command?.exact&&b.command.type===2&&b.command.actionIndex===2){
+        b.romDriver?.tryStartXSpecial(b,all);return {projectiles:out};
+      }
+    }
+  }
   if(ninja&&pressedSpecialEdge&&canStartAction&&!commandPreemptsX){
     if(xCanFire&&(b.cooldowns["special"]??0)<=0&&b.command?.exact&&b.command.type===2&&b.command.actionIndex===2)
       b.romDriver?.tryStartXSpecial(b,all);
@@ -2682,7 +2698,7 @@ export function stepAttacks(
       (b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact && b.command.type === AttackCommandType.Melee2 && b.command.actionIndex === 2) {
     if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
   }
-  if (!ninja && !isNurseX(b.borgId) && !arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  if (!teleport && !ninja && !isNurseX(b.borgId) && !arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
@@ -3101,9 +3117,16 @@ function startSpecialAttack(
   // fractionally each frame via stepWeaponCellRefill and don't use `timer`.
   const xCell = ensureWeaponCells(b, p)[1];
   if (xCell && xCell.max > 0) {
-    xCell.cur = Math.max(0, xCell.cur - 1);
-    if (xCell.cur <= 0 && xCell.refillType !== 1) {
-      xCell.timer = xCell.refillParam > 0 ? xCell.refillParam : AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES;
+    if(isSourceTeleportX(b.borgId)){
+      // Retained generic charged payload still spends one X unit. Its newly
+      // shared cell2/HUD identity needs source debt bookkeeping, or next refill
+      // would undo a bare cur--. This does not restore the charged actor engine.
+      useWeaponCell(b,p,2,1,true);
+    }else{
+      xCell.cur = Math.max(0, xCell.cur - 1);
+      if (xCell.cur <= 0 && xCell.refillType !== 1) {
+        xCell.timer = xCell.refillParam > 0 ? xCell.refillParam : AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES;
+      }
     }
   }
   b.cooldowns["special"] = specialDef.cooldown;

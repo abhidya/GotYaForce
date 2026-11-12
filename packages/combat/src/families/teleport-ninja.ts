@@ -1,4 +1,9 @@
-// TELEPORT NINJA family (ctor 0x801456d4) — ROM-faithful port.
+import {getTeleportXState,stepTeleportX} from '../teleportX.js';
+// TELEPORT NINJA family (ctor0x801456d4) — legacy transcription.
+// Fresh pl0005 ordinary X v0/v4 is now admitted through teleportX.ts and its
+// independently tested146d90 engine. The old unadmitted action2 transcription
+// below has known destination/same-call errors and is NOT a parity reference.
+// Other actions, Switching and contextual variants retain their previous scope.
 // @audit-ported pl0005 action=0 variants=0,1,2,3,4
 // @audit-ported pl0009 action=0 variants=0,1,2,3,4
 // @audit-ported pl0005 action=1 variants=0,1,2,3
@@ -984,6 +989,8 @@ export function createTeleportNinjaRootAction(
         tnStrikeHandler(actor, ctx, sharedLunge);
         return;
       case 2:
+        if(getTeleportXState(actor)){stepTeleportX(actor,ctx);return;}
+        // Legacy unadmitted variants and Switching retain their existing path.
         tnXSpecialHandler(actor, ctx);
         return;
       case 3:
@@ -1401,7 +1408,7 @@ export function runTeleportNinjaSelfTests(assert: AssertFn): void {
   // ACTION 2 — X-special (borg-switched).
   // ============================================================================
 
-  // --- pl0005 X ph0: setup — +0x540++, +0x558=4.0, +0x54a latch, ammo gate. ---
+  // --- Unadmitted legacy pl0005 direct-root fixture, not the new live X contract. ---
   {
     const spawned: Array<[number, number]> = [];
     const a = createRomActor() as TnActor;
