@@ -90,18 +90,16 @@ export function runRomCollisionSelfTest(): void {
   assert(JSON.stringify(noGeometry.borg.pos) === JSON.stringify(noGeometryOld.borg.pos),
     "no collision geometry retains existing floor/off-mesh behavior");
 
-  for (const id of ["pl0009"]) {
-    const warp = setup(geometry(10), id);
-    let probes = 0;
-    warp.driver.actor.physicsRuntime!.probeMotion = () => { probes++; throw new Error("warp entered dash probe"); };
-    // Enter the registered X bridge directly: these families' input charge gates
-    // differ from Acceleration Ninja. Do not mistake an unstarted move for isolation.
-    assert(warp.driver.tryStartXSpecial(warp.borg, warp.actors), `${id} X bridge starts`);
-    assert(warp.driver.actor.fbPhaseSlots[0] !== 0, `${id} X family phase actually ran`);
-    warp.driver.tick(warp.borg, 1, warp.actors);
-
-    assert(probes === 0, `${id} unadmitted legacy switching path retains its existing clamp`);
-  }
+  // Switching ordinary X now owns source677b0 on entry and windup. Keep the
+  // probe boundary observable through actual input instead of asserting that
+  // the formerly unadmitted legacy path never probes.
+  const switching=setup(geometry(),"pl0009");
+  let switchingProbes=0;
+  const switchingProbe=switching.driver.actor.physicsRuntime!.probeMotion!;
+  switching.driver.actor.physicsRuntime!.probeMotion=(...args)=>{switchingProbes++;return switchingProbe(...args);};
+  switching.press();switching.tick();
+  assert(switching.borg.command?.exact&&switching.driver.actor.actionIndex===2&&switchingProbes===2,
+    "actual pl0009 ordinary X probes once per source dispatch");
   // The newly admitted pl0005 route follows original677b0 after both setup
   // carry and interpolated travel. Observe the existing host motion probe, not
   // a claim that its swept stage geometry is console-equivalent.

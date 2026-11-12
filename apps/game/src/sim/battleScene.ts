@@ -263,6 +263,8 @@ interface ProjectileActor {
   /** Procedural source c3be0 trail, independent of the tip collision sphere. */
   gredRanged?: boolean;
   ninja?: "primary" | "impact";
+  /** Stationary Switching field: global150 warning, then global151/152. */
+  switchingField?: { subphase: 0 | 1; inner: BankVisual; outer?: BankVisual };
   /** Independent world-space ring, never a child of the expanding body scale. */
   gatlingRing?: BankVisual;
 }
@@ -1605,6 +1607,7 @@ export class BattleScene {
         || Boolean(actor.sustainedBeam) !== Boolean(projectile.beamSource)
         || Boolean(actor.arrowTether) !== (projectile.arrowSource?.kind === "tether")
         || actor.ninja !== projectile.ninjaSource?.kind
+        || actor.switchingField?.subphase !== projectile.switchingSource?.field.subphase
         || actor.gblackCharge !== projectile.gblackChargeSource?.kind
         || Boolean(actor.gredRanged) !== Boolean(projectile.gredRangedSource))) {
         // Reconcile a changed source visual without retaining the wrong mesh for this UID.
@@ -1616,6 +1619,12 @@ export class BattleScene {
       if (!actor) {
         actor = this.spawnProjectile(projectile);
         this.projectileActors.set(projectile.uid, actor);
+      }
+      if (projectile.switchingSource) {
+        // This child is a delayed stationary field, not a moving energy bolt.
+        // Only simulation samples may change its visibility, pose or material.
+        this.syncSwitchingField(actor, projectile);
+        continue;
       }
       actor.node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
       const fade = projectile.beamSource || projectile.arrowSource ? 1 : gatling?.kind === "explosion" ? gatling.alpha
@@ -1701,7 +1710,7 @@ export class BattleScene {
         // (zz_00840b8_, chunk_0012.c:3216) vanish without a hit-puff.
         const despawn = despawnsByUid.get(uid);
         const reason = despawn?.reason;
-        if (despawn && (reason === "hit-target" || reason === "hit-terrain")) {
+        if (!actor.switchingField && despawn && (reason === "hit-target" || reason === "hit-terrain")) {
           // Use the lifecycle fact's final pos: for hit-terrain it was moved to the geometry impact
           // point (zz_0083244_/zz_0083714_ via zz_006f268_, chunk_0009.c:3956).
           actor.node.position.set(despawn.pos.x, despawn.pos.y, despawn.pos.z);
@@ -1932,6 +1941,53 @@ export class BattleScene {
     actor.node.rotation.set(0,flight.yaw+flight.spinAngleS16*Math.PI*2/65536,0);
   }
 
+  private switchingFieldLayers(modelId: 150 | 151 | 152): BankFxLayer[] | null {
+    return bankFxTemplate(modelId);
+  }
+
+  private buildSwitchingFieldActor(projectile: BattleProjectileObservation): ProjectileActor | null {
+    const field = projectile.switchingSource?.field;
+    if (!field) return null;
+    // 801e2b4c/801e2cdc use global DAT_803bb374 models0x96/0x97/0x98,
+    // already in the checked-in bank. 8000726c samples inherited +88 directly,
+    // not the generic projectile's frames1/3 selector. This is the existing
+    // static mesh/material adapter, not a GX or original animation equivalence.
+    const modelId = field.subphase === 0 ? 150 : 151;
+    const inner = buildBankVisual(this.switchingFieldLayers(modelId) ?? [], projectile.team);
+    inner.node.name = `switching-field:${projectile.uid}:model${modelId}`;
+    const node = new THREE.Group();
+    node.name = `switching-field:${projectile.uid}`;
+    node.add(inner.node);
+    const switchingField: NonNullable<ProjectileActor["switchingField"]> = { subphase: field.subphase, inner };
+    if (field.subphase === 1) {
+      const outer = buildBankVisual(this.switchingFieldLayers(152) ?? [], projectile.team);
+      outer.node.name = `switching-field:${projectile.uid}:model152`;
+      node.add(outer.node);
+      switchingField.outer = outer;
+    }
+    this.root.add(node);
+    return { node, material: new THREE.MeshBasicMaterial(), beam: false, switchingField };
+  }
+
+  private syncSwitchingField(actor: ProjectileActor, projectile: BattleProjectileObservation): void {
+    const field = projectile.switchingSource!.field;
+    const visual = actor.switchingField!;
+    actor.node.visible = field.visible;
+    actor.node.position.set(field.pos.x, field.pos.y, field.pos.z);
+    // 80047aa4 flags0x14 apply yaw+scale. Animated pitch drives the warning
+    // pulse only, not tilt. INIT resets +58/+5c/+60 to1, so neither owner model
+    // scale nor HIT's radius270/vertical9150 scales the source geometry here.
+    actor.node.rotation.set(0, field.yaw * BAM16_TO_RADIANS, 0);
+    actor.node.scale.set(field.visualScale.x, field.visualScale.y, field.visualScale.z);
+    visual.inner.node.scale.setScalar(field.subphase === 0 ? 1 : field.innerScale);
+    if (visual.outer) {
+      // 801e2fb4 builds an outerScale scratch matrix but passes base+114 to
+      // the outer draw. Preserve that observed no-op; do not invent expansion.
+      visual.outer.node.scale.setScalar(1);
+      for (const material of visual.outer.materials) material.opacity = field.outerAlpha;
+    }
+  }
+
   private buildGBlackChargeActor(projectile: BattleProjectileObservation): ProjectileActor | null {
     const source=projectile.gblackChargeSource;if(!source)return null;
     const color=projectile.team===0?PROJECTILE_COLORS.energy.ally:PROJECTILE_COLORS.energy.enemy;
@@ -1975,6 +2031,8 @@ export class BattleScene {
   }
 
   private spawnProjectile(projectile: BattleProjectileObservation): ProjectileActor {
+    const switching = this.buildSwitchingFieldActor(projectile);
+    if (switching) return switching;
     const ninja=this.buildNinjaActor(projectile);
     if(ninja)return ninja;
     const ranged=this.buildGredRangedActor(projectile);
@@ -2033,6 +2091,10 @@ export class BattleScene {
 
   private disposeProjectileActor(actor: ProjectileActor): void {
     this.root.remove(actor.node);
+    if (actor.switchingField) {
+      for (const material of actor.switchingField.inner.materials) material.dispose();
+      for (const material of actor.switchingField.outer?.materials ?? []) material.dispose();
+    }
     if (actor.gatlingRing) this.disposeGatlingRing(actor.gatlingRing);
     if (actor.bankMaterials) {
       // Bank-mesh projectile: geometries are the shared module-level bankFxTemplate cache
