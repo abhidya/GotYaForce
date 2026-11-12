@@ -1,3 +1,5 @@
+import {spawnSwitchingSource,stepSwitchingForcedMove} from './switchingProjectile.js';
+import {isSourceSwitchingX,stepSwitchingXInput} from './switchingX.js';
 import {isSourceTeleportX,stepTeleportXInput} from './teleportX.js';
 import {spawnNinjaSource} from './ninjaProjectile.js';
 import {isSourceNinjaX,stepNinjaXInput} from './ninjaX.js';
@@ -802,6 +804,8 @@ class BattleImpl implements Battle {
     *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void {
     if (actor) {
+      const switching=spawnSwitchingSource(b,actor,spawnerAddr,kind);
+      if(switching!==null){this.state.projectiles.push(...switching);return;}
       const ninja=spawnNinjaSource(b,actor,spawnerAddr,kind,this.state.borgs);
       if(ninja!==null){this.state.projectiles.push(...ninja);return;}
       const ranged=spawnGredRangedSource(b,actor,spawnerAddr,kind,this.state.borgs);
@@ -1262,6 +1266,7 @@ class BattleImpl implements Battle {
       // death, force accounting, deployment, and result settlement. interrupt() is idempotent,
       // so an already-entered death also cancels ownership before the bridge can restore idle.
       if (b.hp <= 0 || b.state === "death") {
+        stepSwitchingForcedMove(b,this.bounds);
         b.romDriver?.interrupt();
         if (b.state !== "death") enterDeath(b);
         // Preserve the normal death-state physics path: horizontal control remains frozen by
@@ -1285,7 +1290,7 @@ class BattleImpl implements Battle {
       // reaction entirely. interrupt() clears specialActive, and tick() opens with
       // `if (!this.specialActive) return false`, so the generic path resumes this
       // same frame.
-      if (b.romDriver && (b.state === "hit" || b.state === "down")) {
+      if (b.romDriver && !b.switchingForcedMove && (b.state === "hit" || b.state === "down")) {
         b.romDriver.interrupt();
       }
 
@@ -1296,6 +1301,7 @@ class BattleImpl implements Battle {
       if (isArrowNinja(b.borgId)) stepArrowInput(b,input.special);
       if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
+      if(isSourceSwitchingX(b.borgId))stepSwitchingXInput(b,input.special);
       if(isSourceNinjaX(b.borgId))stepNinjaXInput(b,input.special);
       if(isSourceTeleportX(b.borgId))stepTeleportXInput(b,input.special,b.state==="special"&&b.command?.type===5);
       if (b.borgId === "pl0106") {
@@ -1311,6 +1317,8 @@ class BattleImpl implements Battle {
       if (b.borgId === "pl0101") {
         stepPoweredCharge(b, input.special, b.state === "special" && b.command?.type === 5);
       }
+
+      if(stepSwitchingForcedMove(b,this.bounds)){continue;}
 
       // ROM-family driver (1:1 ported state machine) — when active, owns the borg's
       // motion + attacks for this frame; skip the generic stepMovement/stepAttacks.

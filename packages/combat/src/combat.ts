@@ -1,3 +1,5 @@
+import {isSourceSwitchingX,stepSwitchingXInput} from './switchingX.js';
+import {advanceSwitchingSource,createSwitchingSwapPass,stageSwitchingSwap,commitSwitchingSwapPass} from './switchingProjectile.js';
 import {isSourceTeleportX,stepTeleportXInput} from './teleportX.js';
 import {advanceNinjaSource} from './ninjaProjectile.js';
 import {isSourceNinjaX,stepNinjaXInput} from './ninjaX.js';
@@ -1598,6 +1600,8 @@ export function stepSourceCollision(
  * (chunk_0003.c:6255-6263). On a confirmed stagger the existing reaction path runs (hitstun
  * -> "hit", big/lethal blows -> "down" -> wake). Returns dmg dealt.
  */
+let switchingIncomingReactions: Set<string> | null = null;
+
 export function applyHit(
   victim: BorgRuntime,
   // UNUSED since the flat mitigate() defence model was removed: it was the only reader
@@ -1864,7 +1868,7 @@ export function applyHit(
     : groundHorizontalSpeed(strength, scaleRatio);
   const knockback = baseSpeed * KNOCKBACK.PORT_SCALE * knockbackMult;
 
-  if (useLaunchTable) {
+  if (!switchingIncomingReactions?.has(victim.uid) && useLaunchTable) {
     // Pitch split (FUN_8005ed38): h = s*cos(-pitch), v = s*sin(-pitch), where "pitch" is the
     // ROM's STORED pitch field (+0x282) — which the doc says is "itself stored negated" versus
     // the conceptual/UI-facing angle. knockbackPitchTrimRadians() returns the trim in the
@@ -1890,7 +1894,7 @@ export function applyHit(
     }
     victim.reactionDecelFramesRemaining = undefined; // launch uses the fixed LAUNCH_DECEL/frame, not a frames-to-stop denominator
     victim.reactionKind = "launch";
-  } else {
+  } else if (!switchingIncomingReactions?.has(victim.uid)) {
     victim.vel.x = dir.x * knockback;
     victim.vel.z = dir.z * knockback;
     // Standard ground knockback vertical is DERIVED ZERO (FLOAT_80437444 = 0.0) — falls under
@@ -1972,7 +1976,7 @@ export function applyHit(
     victim.downGauge < 1 ||
     balanceBroke ||
     (record.reactionFlags & REACTION_FORCE_STAGGER_MASK) !== 0;
-  if (!staggered) return dmg;
+  if (!staggered || switchingIncomingReactions?.has(victim.uid)) return dmg;
 
   // Stagger entry: reset the down gauge to base (zz_003d3e8_, chunk_0004.c:6866-6876 —
   // +50%/level, x1 at the port's default level).
@@ -2521,6 +2525,8 @@ export function stepAttacks(
   damageContext: DamageRuntimeContext = {},
 ): AttackResult {
   const out: Projectile[] = [];
+  const switching=isSourceSwitchingX(b.borgId)?(b.switchingXInput?.pending?b.switchingXInput:stepSwitchingXInput(b,specialHeld)):null;
+  if(switching)switching.pending=false;
   const teleport=isSourceTeleportX(b.borgId)?(b.teleportXInput?.pending?b.teleportXInput:stepTeleportXInput(b,specialHeld)):null;
   if(teleport)teleport.pending=false;
   const ninja=isSourceNinjaX(b.borgId)?(b.ninjaXInput?.pending?b.ninjaXInput:stepNinjaXInput(b,specialHeld)):null;
@@ -2561,7 +2567,7 @@ export function stepAttacks(
   // expiry and made an X-hold charge impossible.
   const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
   b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
-  const pressedSpecialEdge = teleport?teleport.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld && !prevSpecialHeld;
+  const pressedSpecialEdge = switching?switching.pressEdge:teleport?teleport.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
@@ -2611,7 +2617,7 @@ export function stepAttacks(
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld: teleport?teleport.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: switching?switching.pressEdge:teleport?teleport.pressEdge:ninja?ninja.pressEdge:nurse ? nurse.pressEdge : powered ? powered.pressEdge : arrow ? arrow.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : timeBomber ? timeBomber.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
   // Refine only the proven established walk/run lane. Other families and
@@ -2665,7 +2671,7 @@ export function stepAttacks(
       }
     }
   }
-  if(ninja&&pressedSpecialEdge&&canStartAction&&!commandPreemptsX){
+  if((ninja||switching)&&pressedSpecialEdge&&canStartAction&&!commandPreemptsX){
     if(xCanFire&&(b.cooldowns["special"]??0)<=0&&b.command?.exact&&b.command.type===2&&b.command.actionIndex===2)
       b.romDriver?.tryStartXSpecial(b,all);
     return {projectiles:out};
@@ -2698,7 +2704,7 @@ export function stepAttacks(
       (b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact && b.command.type === AttackCommandType.Melee2 && b.command.actionIndex === 2) {
     if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
   }
-  if (!teleport && !ninja && !isNurseX(b.borgId) && !arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  if (!switching && !teleport && !ninja && !isNurseX(b.borgId) && !arrow && !powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
@@ -3729,6 +3735,7 @@ export function stepProjectiles(
   // not fly on their constructor frame. Other projectile families keep their old order.
   const poweredPrevious = new Map<Projectile, Vec3>();
   projectiles = projectiles.flatMap(pr => {
+    if(pr.switchingSource)return advanceSwitchingSource(pr,byUid,ctx?.bounds,ctx?.onSourceCue);
     if(pr.ninjaSource)return advanceNinjaSource(pr,byUid,{
       ...(ctx?.onSourceCue?{onCue:ctx.onSourceCue}:{}),
       terrainImpact:(start,end)=>{
@@ -3839,7 +3846,7 @@ export function stepProjectiles(
     return advancePoweredSource(pr, byUid, ctx?.onPoweredLaunch);
   });
   stepSourceCollision(all, profiles, damageContext, projectiles.filter(pr =>
-    !pr.ninjaSource && !pr.gredRangedSource && !pr.gblackChargeSource && !pr.gblackGroundWaveSource && !pr.arrowSource && !pr.beamSource && (pr.timeBomberSource?.kind!=="mine" || isLiveTimeBomberMine(pr)) && poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail") && !(pr.timeBomberSource?.kind === "explosion" && pr.timeBomberSource.phase === "tail")));
+    !pr.switchingSource && !pr.ninjaSource && !pr.gredRangedSource && !pr.gblackChargeSource && !pr.gblackGroundWaveSource && !pr.arrowSource && !pr.beamSource && (pr.timeBomberSource?.kind!=="mine" || isLiveTimeBomberMine(pr)) && poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail") && !(pr.timeBomberSource?.kind === "explosion" && pr.timeBomberSource.phase === "tail")));
 
   // Actor attacks were staged earlier; mine movement/lifecycle MUST finish first.
   // A newly damaged mine remains registered through this collision pass and retires
@@ -3857,8 +3864,30 @@ export function stepProjectiles(
 
   applyArrowTetherCorrections(projectiles,byUid);
   const survivors: Projectile[] = [];
+  const switchingSwaps=createSwitchingSwapPass(all);
+  switchingIncomingReactions=switchingSwaps.incoming;
   for (const pr of projectiles) {
     pr.hitConfirmedThisFrame = false;
+    if(pr.switchingSource){
+      const child=pr.switchingSource,field=child.field;
+      if(field.hitActive&&(field.flags272&1)===0){
+        const owner=byUid.get(pr.ownerUid),ownerProfile=profiles.get(pr.ownerUid),record=pr.damageRecord!;
+        const segment={start:pr.pos,end:{...pr.pos,y:Math.fround(pr.pos.y+9150*field.collisionScale)}};
+        for(const target of all){
+          if(target.uid===pr.ownerUid||!isTargetable(target)||isInvincible(target)||
+            ((record.flagsA&0x80)!==0&&target.team===pr.team)||(owner&&burstAllyPassthroughBlocks(owner,target,record)))continue;
+          if(!beamPulseOverlaps(segment,target.pos,pr.hitRadius+SHOT.TARGET_BODY_RADIUS))continue;
+          const profile=profiles.get(target.uid);if(!profile)continue;
+          applyHit(target,profile,pr.damage,pr.knockback,pr.vel,pr.pos,false,record,
+            owner&&ownerProfile?{attacker:owner,attackerProfile:ownerProfile,damageScale:1,aimedTargetUid:pr.aimedTargetUid??null,
+              attackerSideRank:damageContext.sideRankForTeam?.(owner.team),defenderSideRank:damageContext.sideRankForTeam?.(target.team),
+              onContactAccepted:()=>{child.contactPending=true;pr.hitConfirmedThisFrame=true;pr.lastImpactEffectId=record.impactEffectId;
+                stageSwitchingSwap(switchingSwaps,owner,target);},
+            }:undefined,damageContext);
+        }
+      }
+      survivors.push(pr);continue;
+    }
     if(pr.ninjaSource){
       const child=pr.ninjaSource;
       const flight=child.kind==='primary'?child.flight:null;
@@ -4247,6 +4276,8 @@ export function stepProjectiles(
   // Both are fresh-built again next frame.
   __sourceCollisionDeferHandled = new Set();
   __applyHitAlreadyDamaged = new Set();
+  switchingIncomingReactions=null;
+  commitSwitchingSwapPass(switchingSwaps,all,ctx?.onSourceCue);
   return survivors;
 }
 

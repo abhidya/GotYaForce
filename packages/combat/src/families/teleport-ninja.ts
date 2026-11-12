@@ -1,3 +1,4 @@
+import {getSwitchingXState,stepSwitchingX} from '../switchingX.js';
 import {getTeleportXState,stepTeleportX} from '../teleportX.js';
 // TELEPORT NINJA family (ctor0x801456d4) — legacy transcription.
 // Fresh pl0005 ordinary X v0/v4 is now admitted through teleportX.ts and its
@@ -989,6 +990,7 @@ export function createTeleportNinjaRootAction(
         tnStrikeHandler(actor, ctx, sharedLunge);
         return;
       case 2:
+        if(getSwitchingXState(actor)){stepSwitchingX(actor,ctx);return;}
         if(getTeleportXState(actor)){stepTeleportX(actor,ctx);return;}
         // Legacy unadmitted variants and Switching retain their existing path.
         tnXSpecialHandler(actor, ctx);

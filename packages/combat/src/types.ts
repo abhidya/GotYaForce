@@ -277,6 +277,12 @@ export interface BorgRuntime {
    */
   weaponCells?: WeaponCell[];
   /** Fresh X edge sampled even while the admitted Ninja source action owns motion. */
+  switchingXInput?: {held:boolean;pressEdge:boolean;pending:boolean};
+  /** Source c8 capture persists across the child INIT; not a live lock selection. */
+  switchingCapturedTargetUid?: string|null;
+  sourceSupportHeight6d0?: number;
+  sourceSwitchingResistance59c?: number;
+  switchingForcedMove?: import("./switchingProjectile.js").SwitchingForcedMove;
   ninjaXInput?: {held:boolean;pressEdge:boolean;pending:boolean};
   /** Scoped pl0005 input686f0. Charge uses source768 rate, independently of animationdt. */
   teleportXInput?: {held:boolean;pressEdge:boolean;releasedReady:boolean;warmup:number;charge:number;pending:boolean};
@@ -639,6 +645,7 @@ export type ProjectileDespawnReason =
 
 /** A homing/straight projectile in flight. */
 export interface Projectile {
+  switchingSource?: import("./switchingProjectile.js").SwitchingSource;
   ninjaSource?: import("./ninjaProjectile.js").NinjaSource;
   gredRangedSource?: import("./gredRangedProjectile.js").GredRangedSource;
   gblackChargeSource?: import("./gblackChargeProjectile.js").GBlackChargeSource;

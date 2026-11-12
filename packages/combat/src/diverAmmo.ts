@@ -11,7 +11,7 @@ export function isDiverAmmoFamily(id: string): boolean {
 
 /** Proven X stat segment maps to source cell 2; browser cell 1 is its HUD alias. */
 export function hasSourceXAmmo(id: string): boolean {
-  return id === "pl0005" || id === "pl0000" || id === "pl000a" || isNurseX(id) || isDiverAmmoFamily(id) || id === "pl0002" || id === "pl000b" || id === "pl0101" || id === "pl0102" || id === "pl0106" || id === "pl0104" || id === "pl0100" || id === "pl0108";
+  return id === "pl0009" || id === "pl0005" || id === "pl0000" || id === "pl000a" || isNurseX(id) || isDiverAmmoFamily(id) || id === "pl0002" || id === "pl000b" || id === "pl0101" || id === "pl0102" || id === "pl0106" || id === "pl0104" || id === "pl0100" || id === "pl0108";
 }
 
 export interface DiverRefillContext {
