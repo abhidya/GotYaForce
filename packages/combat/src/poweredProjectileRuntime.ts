@@ -7,7 +7,8 @@ import { attackHitRecordsForKind } from "./attackHitData.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { stepRng8 } from "./prng.js";
 import { beginPoweredSecondaryShrink, createPoweredPrimary, stepPoweredPrimary, createPoweredSecondaries, stepPoweredSecondary, poweredPrimaryMuzzle, createPoweredNormalPort, poweredNormalMuzzle,
-  type PoweredPrimaryState, type PoweredSecondaryState } from "./poweredProjectile.js";
+  type PoweredLaunchSeed, type PoweredPrimaryState, type PoweredSecondaryState } from "./poweredProjectile.js";
+export type PoweredPresentationSink = (owner: Pick<BorgRuntime,'uid'|'team'>, event: PoweredLaunchSeed) => void;
 let serial = 0;
 export type PoweredSourceState = PoweredPrimaryState | PoweredSecondaryState;
 function targetData(b: BorgRuntime | undefined | null) {
@@ -50,7 +51,7 @@ export function capturePoweredNormalAim(owner:BorgRuntime,actor:RomActor,all:rea
   }};
 }
 export function spawnPoweredSource(owner: BorgRuntime, actor: RomActor, addr: number, row: number,
-  all: readonly BorgRuntime[]): Projectile[] | null {
+  all: readonly BorgRuntime[], onLaunch?: PoweredPresentationSink): Projectile[] | null {
   if (owner.borgId !== "pl0101") return null;
   if (actor.actionIndex === 2 && addr === 0x8016d584 && row >= 0 && row <= 3) {
     // Four port callbacks each emit four children. Rows are NOT HIT kinds.
@@ -60,24 +61,24 @@ export function spawnPoweredSource(owner: BorgRuntime, actor: RomActor, addr: nu
     const ownerScale = actor.modelScale * actor.sizeScale;
     const port = row as 0|1|2|3;
     const pos = poweredNormalMuzzle(port,actor.pos,yaw,ownerScale);
-    return createPoweredNormalPort(port,pos,yaw,aim.pos,ownerScale,stepRng8)
+    return createPoweredNormalPort(port,pos,yaw,aim.pos,ownerScale,stepRng8,event=>onLaunch?.(owner,event))
       .map(state => wrap(owner,state,aim.targetUid));
   }
   if (actor.actionIndex !== 3) return null;
-  if (addr === 0x800f036c && row === 6) return []; // source presentation effect, never damage
+  if (addr === 0x800f036c && row === 6) return []; // legacy sound callback, never damage
   if (addr !== 0x8007db5c || ![6,7,8,9].includes(row)) return null;
   const target = targetData(activeSourceTarget(owner, all));
   const yaw = actor.heading * Math.PI * 2 / 65536;
   const ownerScale = actor.modelScale * actor.sizeScale;
   const pos = poweredPrimaryMuzzle(row as 6|7|8|9, actor.pos, yaw, ownerScale);
-  const state = createPoweredPrimary(row as 6|7|8|9, pos, yaw, target, ownerScale);
-  if (state.split) return createPoweredSecondaries(state, stepRng8).map(s => wrap(owner,s,target?.uid ?? null));
+  const state = createPoweredPrimary(row as 6|7|8|9, pos, yaw, target, ownerScale,target?.pos??null,event=>onLaunch?.(owner,event));
+  if (state.split) return createPoweredSecondaries(state, stepRng8,event=>onLaunch?.(owner,event)).map(s => wrap(owner,s,target?.uid ?? null));
   if (!state.alive) return [];
   const projectile = wrap(owner,state,target?.uid ?? null);
   projectile.poweredInitialPosition = { ...pos };
   return [projectile];
 }
-export function advancePoweredSource(pr: Projectile, byUid: Map<string,BorgRuntime>): Projectile[] {
+export function advancePoweredSource(pr: Projectile, byUid: Map<string,BorgRuntime>, onLaunch?: PoweredPresentationSink): Projectile[] {
   let state = pr.poweredSource!;
   const owner = byUid.get(pr.ownerUid);
   if (owner && !owner.alive) {
@@ -91,7 +92,7 @@ export function advancePoweredSource(pr: Projectile, byUid: Map<string,BorgRunti
     const next = stepPoweredPrimary(state,targetData(state.targetUid ? byUid.get(state.targetUid) : null));
     if (next.split) {
       pr.despawnReason = "expired";
-      return createPoweredSecondaries(next.state,stepRng8).map(s => wrap({uid:pr.ownerUid,team:pr.team},s,pr.aimedTargetUid ?? null,false));
+      return createPoweredSecondaries(next.state,stepRng8,event=>onLaunch?.({uid:pr.ownerUid,team:pr.team},event)).map(s => wrap({uid:pr.ownerUid,team:pr.team},s,pr.aimedTargetUid ?? null,false));
     }
     if (!next.alive) { pr.despawnReason = "expired"; return []; }
     pr.poweredSource = next.state;

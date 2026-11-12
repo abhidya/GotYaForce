@@ -298,6 +298,7 @@ export function battleSceneState(battle: Battle, focus: BattleActorObservation |
   projectiles: readonly BattleProjectileObservation[];
   diverAuras: ReturnType<Battle["observe"]>["diverAuras"];
   diverAuraTails: ReturnType<Battle["observe"]>["diverAuraTails"];
+  poweredLaunchFlashes: ReturnType<Battle["observe"]>["poweredLaunchFlashes"];
   projectileDespawns: readonly ProjectileDespawnObservation[];
   focusUid: string | null;
 } {
@@ -307,6 +308,7 @@ export function battleSceneState(battle: Battle, focus: BattleActorObservation |
     projectiles: observation.projectiles,
     diverAuras: observation.diverAuras,
     diverAuraTails: observation.diverAuraTails,
+    poweredLaunchFlashes: observation.poweredLaunchFlashes,
     projectileDespawns: observation.projectileDespawns,
     focusUid: focus?.uid ?? null,
   };

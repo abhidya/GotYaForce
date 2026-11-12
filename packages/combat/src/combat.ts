@@ -1,4 +1,4 @@
-import { advancePoweredSource, poweredCanCollide, shrinkPoweredOnContact } from "./poweredProjectileRuntime.js";
+import { type PoweredPresentationSink, advancePoweredSource, poweredCanCollide, shrinkPoweredOnContact } from "./poweredProjectileRuntime.js";
 import { stepPoweredCharge, commitPoweredCharge } from "./poweredCharge.js";
 import { hasSourcePrimaryAmmo } from "./primaryAmmo.js";
 import { hasSourceXAmmo, stepSourceAmmoRefill } from "./diverAmmo.js";
@@ -150,6 +150,7 @@ type ReactionAnimLengthRow = { ground?: number; launch?: number };
 const REACTION_ANIM_LENGTHS = (reactionAnimLengthsData as { borgs: Record<string, ReactionAnimLengthRow> }).borgs;
 
 export interface ProjectileContext {
+  onPoweredLaunch?: PoweredPresentationSink;
   bounds: RectStageBounds;
   collision: StageCollision | null;
 }
@@ -3598,7 +3599,7 @@ export function stepProjectiles(
     if (!pr.poweredSource) return [pr];
     poweredPrevious.set(pr, { ...(pr.poweredInitialPosition ?? pr.pos) });
     delete pr.poweredInitialPosition;
-    return advancePoweredSource(pr, byUid);
+    return advancePoweredSource(pr, byUid, ctx?.onPoweredLaunch);
   });
   stepSourceCollision(all, profiles, damageContext, projectiles.filter(poweredCanCollide));
 

@@ -53,6 +53,9 @@ function runPoweredNormalSelfTest():void {
   assert(Number(allocations.length)===1&&allocations[0]!.slot===2&&allocations[0]!.count===1&&allocations[0]!.accepted,'one source weapon2 cell allocation at gate');
   assert(cell.cur===full-1,'source weapon2 spends exactly one browser weapon1 cell');
   const children=state.projectiles.filter(p=>p.ownerUid===owner.uid);
+  assert(owner.state==='special','normal launch remains special, not generic shooting slot');
+  const flashes=battle.observe().poweredLaunchFlashes;
+  assert(flashes.length===4&&flashes.every(f=>f.cause==='normal'&&f.ageFrames===0&&f.effectId===0),'four normal launch flashes, not sixteen');
   assert(children.length===16&&children.every(p=>p.poweredSource?.kind==='secondary'),'normal emits only sixteen source secondaries, no generic fallback');
   for(const port of [0,1,2,3])assert(children.filter(p=>p.poweredSource?.kind==='secondary'&&p.poweredSource.port===port).length===4,`four normal children on port ${port}`);
   const firstPort=children.filter(p=>p.poweredSource?.kind==='secondary'&&p.poweredSource.port===0);
@@ -118,6 +121,7 @@ function runPoweredNormalSelfTest():void {
   if(mode==='depleted')owner.weaponCells![1]!.cur=0;
   if(mode==='interrupted'){owner.state='hit';owner.stateTime=0;owner.cooldowns['hitstun']=20;}
   for(let i=0;i<90;i++)battle.step(1/60,inputs);
+  assert(battle.observe().poweredLaunchFlashes.length===0,`${mode}: no launch presentation`);
   assert(events.length===0&&state.projectiles.filter(p=>p.ownerUid===owner.uid).length===0,`${mode}: no normal volley or generic fallback`);
   if(mode==='depleted')assert(allocations.length===1&&!allocations[0]!.accepted,'depletion after admission fails exactly one source allocation');
   else assert(allocations.length===0,`${mode}: no allocation before admitted fire gate`);
@@ -127,6 +131,7 @@ function runPoweredNormalSelfTest():void {
 }
 export function runPoweredChargeSelfTest():void {
  runFlightTests();
+ runPoweredPresentationSelfTest();
  runPoweredNormalSelfTest();
  for(const boosted of [false,true]){
  const b={burstActive:boosted,burstPaired:boosted} as BorgRuntime;
@@ -142,6 +147,7 @@ export function runPoweredChargeSelfTest():void {
  for(const ammo of [0,1]){
  const {battle,inputs,state,owner,driver}=setup();
  const events:{addr:number,row:number}[]=[];let allocations=0;
+ const chargedCues:number[]=[];battle.onRomCue=c=>chargedCues.push(c);
  const spawn=driver.ctx.onFamilyProjectile!;
  driver.ctx.onFamilyProjectile=(a,addr,row)=>{events.push({addr,row});spawn(a,addr,row);};
  const alloc=driver.ctx.onAllocateResource!;
@@ -153,15 +159,19 @@ export function runPoweredChargeSelfTest():void {
  assert(events.every(e=>e.addr!==0x8007db5c),'holding never emits charged primaries');
  battle.step(1/60,inputs);assert(owner.poweredCharge!.ready,'actual frame190 ready');
  owner.weaponCells![1]!.cur=ammo;
- events.length=0;allocations=0;
+ events.length=0;allocations=0;chargedCues.length=0;
  inputs.p1.special=false;battle.step(1/60,inputs);
  assert(owner.command?.type===5&&owner.command.actionIndex===3&&owner.command.recordAddress==='0x8034ead0','exact source command');
  assert(driver.actor.actionIndex===3,'bridge action3');
  assert(Number(owner.poweredCharge!.charge)===0,'live commit reset');
  for(let i=0;i<90&&Number(events.length)===0;i++)battle.step(1/60,inputs);
- assert(events.map(e=>e.row).join(',')==='8,9,6,7,6',`four source rows/effect: ${JSON.stringify(events)}`);
+ assert(events.map(e=>e.row).join(',')==='8,9,6,7',`four source rows (sound is separate): ${JSON.stringify(events)}`);
+ assert(chargedCues.filter(c=>c===6).length===1,'charged fire plays source cue6 once');
  assert(allocations===0,'no charged ammo allocation');
  const primaries=state.projectiles.filter(p=>p.poweredSource?.kind==='primary');
+ assert(owner.state==='special','charged launch remains special, not generic shooting slot');
+ const primaryFlashes=battle.observe().poweredLaunchFlashes;
+ assert(primaryFlashes.length===4&&primaryFlashes.every(f=>f.cause==='primary'),'charged launches four independent flashes');
  assert(primaries.length===4,`four primary projectiles, got ${primaries.length}`);
  assert(primaries.every(p=>p.romShotKind===15&&p.flightVisual?.bankTexId===125&&p.romScale?.[0]===.4),'exact source visuals/HIT');
  assert(primaries.every(p=>p.pos.y>0),'static bind attachments above floor');
@@ -207,7 +217,7 @@ export function runPoweredChargeSelfTest():void {
  assert(Number(events.length)===0&&driver.actor.contactP1===0,'repeat resets part0 aux gate');
  for(let i=0;i<15;i++) { battle.step(1/60,inputs); assert(Number(events.length)===0,'repeat may not fire before authored frame16'); }
  for(let i=0;i<30&&Number(events.length)===0;i++)battle.step(1/60,inputs);
- assert(Number(events.length)===5,'repeat release starts fresh four-shot source volley');
+ assert(Number(events.length)===4,'repeat release starts fresh four-shot source volley');
  }
  {
  const {battle,inputs,owner,driver}=setup();let shots=0;
@@ -244,4 +254,44 @@ export function runPoweredChargeSelfTest():void {
  assert(result.length===0&&shots[0]!.despawnReason==='hit-terrain'&&shots[0]!.pos.z===60,'constructor segment hits wall between muzzle and endpoint');
  }
  console.log('Powered normal/charged-X integration: passed');
+}
+
+/** Real simulation observation lifetime, separate from projectile/render lifetime. */
+function runPoweredPresentationSelfTest():void {
+ const {battle,inputs,state}=setup();
+ const cues:number[]=[];battle.onRomCue=cue=>cues.push(cue);
+ inputs.p1.special=true;
+ for(let i=0;i<17;i++)battle.step(1/60,inputs);
+ const first=battle.observe();
+ assert(first.poweredLaunchFlashes.length===4,'normal admitted fire yields four live events');
+ assert(cues.filter(c=>c===6).length===4,'normal sound6 once per port');
+ assert(new Set(first.poweredLaunchFlashes.map(f=>f.spin)).size>1,'visual RNG varies across first volley without gameplay RNG draws');
+ for(const f of first.poweredLaunchFlashes){
+  for(const axis of Object.values(f.basis))assert(Math.abs(Math.hypot(axis.x,axis.y,axis.z)-1)<1e-8,'unit launch basis never inherits actor scale');
+ }
+ for(let i=0;i<20;i++)assert(battle.observe()===first,'render-only and pause observation cannot age or replay events');
+ state.projectiles.length=0;
+ for(let age=1;age<4;age++){
+  const observed=battle.step(1/60,inputs);
+  assert(observed.poweredLaunchFlashes.length===4&&observed.poweredLaunchFlashes.every(f=>f.ageFrames===age),'flash persists independently after children disappear');
+  assert(first.poweredLaunchFlashes.every(f=>f.ageFrames===0),'previous observation remains immutable over steps');
+ }
+ assert(battle.step(1/60,inputs).poweredLaunchFlashes.length===0,'flash retires on source frame4');
+ assert(cues.filter(c=>c===6).length===4,'aging does not replay cue');
+ // Source charged split event survives its primary and does not depend on owner action.
+ const test=setup();test.driver.actor.actionIndex=3;
+ const initial:import('./poweredProjectile.js').PoweredLaunchSeed[]=[];
+ const primary=spawnPoweredSource(test.owner,test.driver.actor,0x8007db5c,8,test.state.borgs,(_o,e)=>initial.push(e))![0]!;
+ assert(initial.length===1&&initial[0]!.cause==='primary','primary FX once before flight');
+ assert(initial[0]!.pos.z===primary.poweredInitialPosition!.z&&initial[0]!.pos.z!==primary.pos.z,'primary flash at muzzle, not advanced endpoint');
+ const src=primary.poweredSource!;assert(src.kind==='primary','primary fixture');
+ primary.poweredSkipAdvance=false;src.targetUid=test.state.borgs[1]!.uid;
+ src.pos={x:0,y:100,z:0};primary.pos={...src.pos};test.state.borgs[1]!.pos={x:0,y:100,z:250};
+ test.state.projectiles=[primary];const splitCues:number[]=[];test.battle.onRomCue=c=>splitCues.push(c);
+ const splitObs=test.battle.step(1/60,test.inputs);
+ assert(splitObs.poweredLaunchFlashes.length===1&&splitObs.poweredLaunchFlashes[0]!.cause==='split','one flash per four-child split');
+ assert(splitCues.filter(c=>c===255).length===1,'split source sound is255, not6');
+ assert(!splitObs.projectiles.some(p=>p.uid===primary.uid),'split primary removed while flash survives');
+ const unrelated=spawnPoweredSource(test.state.borgs[1]!,test.driver.actor,0x8016d584,0,[],()=>{throw new Error('unrelated flash');});
+ assert(unrelated===null,'unrelated borg presentation unchanged');
 }
