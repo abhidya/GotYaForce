@@ -8,9 +8,9 @@ Do not add an unconditional `stepRomActor` call to the existing bridge. The next
 
 This is larger than porting reaction selectors 1–8. Their reachable continuations include 10 (landing), 12 (terrain fall) and 19 (recovery input); those handlers have their own reachable transitions. Audit and implement the reachable closure before enabling the mode. A first-entry control-bit classifier is not that closure.
 
-First prerequisite: verify the numeric lifecycle18/19 dispatch mappings and record one deterministic ordinary Double scenario through the actor sweep and collision phase, including the exact eligibility gates. This establishes which source handlers must replace host ownership before implementing the offline slice.
+Static lifecycle18/19 mappings are now verified (see eligibility below). First remaining prerequisite: record one deterministic ordinary Double scenario through the actor sweep and collision phase, including the exact eligibility gates. This establishes which source handlers must replace host ownership before implementing the offline slice.
 
-The existing repository cannot yet support this milestone honestly. Missing eligibility mappings, shared handlers/streams and source physics/contact bindings below are requirements, not optional adapters. Implementing another detached lifecycle interface would not close them.
+The existing repository cannot yet support this milestone honestly. Missing runtime eligibility bindings, shared handlers/streams and source physics/contact bindings below are requirements, not optional adapters. Implementing another detached lifecycle interface would not close them.
 
 ## Audited ordering and ownership
 
@@ -30,7 +30,7 @@ Therefore the source-owned path must replace, rather than layer on, the actor's 
 
 ## Required state and implementations before enabling
 
-1. **Eligibility:** verify numeric lifecycle18/19/1a table mappings and normal/death/spawn transitions; bind global66 and per-actor3e5/globalD2 inhibition. Establish which outer snapshots/cleanup still run while gated. Do not infer these from UI pause, host freeze or `alive`.
+1. **Eligibility:** static mapping verified:54070 indexes802d3264 by18 (`541ac,5475c,54d54,5514c`); outer1's5475c indexes802d3274 by19 (`547dc,54c78,54cbc,54cf0`). Writer chain541ac→547dc→54c78 establishes18=1 with19=0→1→2;58244 also explicitly writes1/2.5475c may redirect19=1/2→3;5bbc0 enters18=2,54d54 exits to18=3, and5514c can reset18=0. Original pointer reads independently confirm the separate tables; there are no index bounds checks. Runtime trace/replay remains pending. Bind global66 and per-actor3e5/globalD2 inhibition and verify1a-dependent normal/death/spawn behavior, including outer cleanup while gated. Do not infer these from UI pause, host freeze or `alive`.
 2. **Persistent source state:** authoritative control5e0, FB/UB selectors and phase blocks, source input latches and58e, transform history, reaction6fd/6fe, strength702, status1da/599, gauges and timers6b4/6b6/720, invulnerability272 and contact730. Reset/redeployment needs explicit initialization, not reuse of a host hit state.
 3. **Shared dispatch:** implement selected ordinary states and the complete reachable reaction closure. Current UB2–31 include approximate stream/physics factories;62 and63 are unported. State-table callability is not proof of coverage.
 4. **Reaction dependencies:**5c15c/5c080 cleanup and4c4 callback, descriptor joint resets,5c694 timeout/recovery tail, shared animation completion bytes, knockback direction/strength tables,5ee0c/5ef08 terrain query and landing predicates. See `chunk_0007.c:3895–3998,4159–4596,5529–5839`.
