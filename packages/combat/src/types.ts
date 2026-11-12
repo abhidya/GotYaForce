@@ -153,6 +153,8 @@ export interface BorgRuntime {
   /** Source slot-2 charge, isolated from tuned X-charge tiers. */
   poweredCharge?: import("./poweredCharge.js").PoweredChargeState;
   /** Action-2 admission snapshot of source +0x518, with root/static-bind host transforms. */
+  gatlingInput?: { held:boolean; pressEdge:boolean; pending:boolean };
+  gatlingSavedAim?: { pos: Vec3; targetUid: string | null };
   poweredNormalAim?: { pos: Vec3; targetUid: string | null };
   uid: string;
   borgId: string;
@@ -574,6 +576,9 @@ export type ProjectileDespawnReason =
 
 /** A homing/straight projectile in flight. */
 export interface Projectile {
+  gatlingSource?: import("./gatlingProjectile.js").GatlingSourceState;
+  gatlingSkipAdvance?: boolean;
+  gatlingInitialPosition?: Vec3;
   poweredSource?: import("./poweredProjectileRuntime.js").PoweredSourceState;
   /** Constructor ran on this frame; do not fly the new child a second time. */
   poweredSkipAdvance?: boolean;
@@ -898,6 +903,8 @@ export type BattleProjectileObservation = DeepReadonly<Projectile>;
 
 /** Final immutable facts for a projectile removed during this fixed step. */
 export interface ProjectileDespawnObservation {
+  /** Source detonation supplies its own terrain effect, not the generic puff. */
+  readonly suppressTerrainImpactFx?: boolean;
   readonly uid: string;
   readonly pos: DeepReadonly<Vec3>;
   readonly vel: DeepReadonly<Vec3>;

@@ -10,7 +10,7 @@ export function isDiverAmmoFamily(id: string): boolean {
 
 /** Proven X stat segment maps to source cell 2; browser cell 1 is its HUD alias. */
 export function hasSourceXAmmo(id: string): boolean {
-  return isDiverAmmoFamily(id) || id === "pl0101";
+  return isDiverAmmoFamily(id) || id === "pl0101" || id === "pl0102";
 }
 
 export interface DiverRefillContext {

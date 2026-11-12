@@ -218,6 +218,12 @@ interface DiverAuraActor {
   materials: THREE.MeshBasicMaterial[];
 }
 
+interface BankVisual {
+  node: THREE.Group;
+  materials: THREE.MeshBasicMaterial[];
+  layerOpacity: number[];
+}
+
 interface ProjectileActor {
   /** Scene node: a camera-facing Sprite for billboard kinds, the crossed-plane beam rig
    *  (long axis oriented along velocity each frame) for "energy" bolts, or (when the sim
@@ -233,6 +239,10 @@ interface ProjectileActor {
    *  on top of the layer's own matAnim-sampled rest opacity, same convention as BankFxActor. */
   bankMaterials?: THREE.MeshBasicMaterial[];
   bankLayerOpacity?: number[];
+  /** Global explosion models only; the primary's model10 belongs to a different bank. */
+  gatlingModelId?: 22 | 23;
+  /** Independent world-space ring, never a child of the expanding body scale. */
+  gatlingRing?: BankVisual;
 }
 
 interface ImpactActor {
@@ -457,6 +467,27 @@ function bankFxTemplate(texId: number): BankFxLayer[] | null {
     bankFxTemplates.set(texId, tpl);
   }
   return tpl;
+}
+
+/** Geometry stays in the static bank cache; every instance owns only its materials. */
+function buildBankVisual(layers: readonly BankFxLayer[], matAnimFrame?: number): BankVisual {
+  const node = new THREE.Group();
+  const materials: THREE.MeshBasicMaterial[] = [];
+  const layerOpacity: number[] = [];
+  for (const layer of layers) {
+    const color = layer.color.clone();
+    const opacity = matAnimFrame === undefined
+      ? layer.baseOpacity : sampleBankAnim(layer, matAnimFrame, color).opacity;
+    const material = new THREE.MeshBasicMaterial({
+      color, vertexColors: layer.vertexColors, transparent: true, opacity,
+      blending: layer.additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+      depthWrite: false, side: THREE.DoubleSide,
+    });
+    node.add(new THREE.Mesh(layer.geometry, material));
+    materials.push(material);
+    layerOpacity.push(opacity);
+  }
+  return { node, materials, layerOpacity };
 }
 
 /** Live bank-mesh FX instance (mesh analogue of ImpactActor's sprite fields). */
@@ -1463,19 +1494,45 @@ export class BattleScene {
     for (const projectile of projectiles) {
       live.add(projectile.uid);
       let actor = this.projectileActors.get(projectile.uid);
+      const gatling = projectile.gatlingSource;
+      const gatlingModelId = gatling?.kind === "explosion" ? (gatling.phase === "tail" ? 23 : 22) : undefined;
+      if (actor && actor.gatlingModelId !== gatlingModelId) {
+        // The source keeps the explosion UID while replacing model22 with tail model23.
+        this.disposeProjectileActor(actor);
+        this.projectileActors.delete(projectile.uid);
+        actor = undefined;
+      }
       if (!actor) {
         actor = this.spawnProjectile(projectile);
         this.projectileActors.set(projectile.uid, actor);
       }
       actor.node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
-      const fade = projectile.poweredSource?.alpha ?? Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
+      const fade = gatling?.kind === "explosion" ? gatling.alpha
+        : projectile.poweredSource?.alpha ?? Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
       if (actor.bankMaterials) {
         // Bank-mesh flight visual: fade multiplies each layer's OWN rest opacity (the
         // matAnim-sampled/authored value), same convention as BankFxActor's tween.
         for (let i = 0; i < actor.bankMaterials.length; i++) {
           actor.bankMaterials[i]!.opacity = (actor.bankLayerOpacity?.[i] ?? 1) * fade;
         }
-        if (projectile.poweredSource) {
+        if (gatling?.kind === "explosion") {
+          actor.node.scale.setScalar(gatling.scale);
+          // FUN_8008658c reads +70, not the independently randomized +72.
+          actor.node.rotation.set(0, gatling.yaw, 0);
+          if (actor.gatlingRing) {
+            const ring = actor.gatlingRing;
+            if (gatling.ringAge >= 10 || gatling.phase === "tail") {
+              this.disposeGatlingRing(ring);
+              delete actor.gatlingRing;
+            } else {
+              ring.node.position.copy(actor.node.position);
+              ring.node.scale.set(gatling.ringScale.x, gatling.ringScale.y, gatling.ringScale.z);
+              for (let i = 0; i < ring.materials.length; i++) {
+                ring.materials[i]!.opacity = ring.layerOpacity[i]! * gatling.ringAlpha;
+              }
+            }
+          }
+        } else if (projectile.poweredSource) {
           actor.node.scale.setScalar(projectile.poweredSource.scale);
           if (projectile.poweredSource.kind === "primary") actor.node.rotation.y = projectile.poweredSource.yaw + projectile.poweredSource.spin;
           else {
@@ -1527,9 +1584,9 @@ export class BattleScene {
               despawn.team,
               Math.atan2(despawn.vel.x, despawn.vel.z),
             );
-          } else {
-            // Terrain impact: a different ROM path (terrain hit, not the damage-record effect
-            // spawner) — keep the generic efct00 puff.
+          } else if (!despawn.suppressTerrainImpactFx) {
+            // Gatling detonation replaces this generic terrain-puff branch with its source
+            // explosion. Target contact effects still follow the damage record above.
             this.spawnImpact(actor.node.position);
           }
         }
@@ -1550,7 +1607,7 @@ export class BattleScene {
           despawn.team,
           Math.atan2(despawn.vel.x, despawn.vel.z),
         );
-      } else if (despawn.reason === "hit-terrain") {
+      } else if (despawn.reason === "hit-terrain" && !despawn.suppressTerrainImpactFx) {
         this.spawnImpact(pos);
       }
     }
@@ -1575,31 +1632,8 @@ export class BattleScene {
     if (!visual) return null;
     const layers = bankFxTemplate(visual.bankTexId);
     if (!layers) return null;
-    const node = new THREE.Group();
-    const bankMaterials: THREE.MeshBasicMaterial[] = [];
-    const bankLayerOpacity: number[] = [];
-    const animColor = new THREE.Color();
     const matAnimFrame = visual.teamTint ? (projectile.team === 1 ? 3 : 1) : undefined;
-    for (const layer of layers) {
-      let color = layer.color;
-      let restOpacity = layer.baseOpacity;
-      if (matAnimFrame !== undefined && layer.anim) {
-        restOpacity = sampleBankAnim(layer, matAnimFrame, animColor).opacity;
-        color = animColor.clone();
-      }
-      const material = new THREE.MeshBasicMaterial({
-        color,
-        vertexColors: layer.vertexColors,
-        transparent: true,
-        opacity: restOpacity,
-        blending: layer.additive ? THREE.AdditiveBlending : THREE.NormalBlending,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      });
-      node.add(new THREE.Mesh(layer.geometry, material));
-      bankMaterials.push(material);
-      bankLayerOpacity.push(restOpacity);
-    }
+    const { node, materials: bankMaterials, layerOpacity: bankLayerOpacity } = buildBankVisual(layers, matAnimFrame);
     node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
     node.rotation.y = Math.atan2(projectile.vel.x, projectile.vel.z);
     this.root.add(node);
@@ -1608,7 +1642,42 @@ export class BattleScene {
     return { node, material: new THREE.MeshBasicMaterial(), beam: false, bankMaterials, bankLayerOpacity };
   }
 
+  /** These IDs explicitly use global DAT_803bb374, unlike Gatling's owner-local model10.
+   * Missing static assets leave an empty node, never a different bank or invented bolt. */
+  private gatlingLayers(modelId: 18 | 22 | 23): BankFxLayer[] | null {
+    return bankFxTemplate(modelId);
+  }
+
+  private buildGatlingExplosionActor(projectile: BattleProjectileObservation): ProjectileActor | null {
+    const source = projectile.gatlingSource;
+    if (source?.kind !== "explosion") return null;
+    const modelId = source.phase === "tail" ? 23 : 22;
+    // The explosion row's fixed matAnim selector is 0, independent of team. The ring and
+    // tail do not attach matAnim. Templates resolve synchronously, with no async lifetime.
+    const body = buildBankVisual(this.gatlingLayers(modelId) ?? [], modelId === 22 ? 0 : undefined);
+    body.node.name = `gatling-explosion:${projectile.uid}:model${modelId}`;
+    this.root.add(body.node);
+    const actor: ProjectileActor = {
+      node: body.node, material: new THREE.MeshBasicMaterial(), beam: false,
+      bankMaterials: body.materials, bankLayerOpacity: body.layerOpacity, gatlingModelId: modelId,
+    };
+    if (source.phase !== "tail" && source.ringAge >= 0 && source.ringAge < 10) {
+      const ring = buildBankVisual(this.gatlingLayers(18) ?? []);
+      ring.node.name = `gatling-explosion-ring:${projectile.uid}`;
+      this.root.add(ring.node);
+      actor.gatlingRing = ring;
+    }
+    return actor;
+  }
+
+  private disposeGatlingRing(ring: BankVisual): void {
+    this.root.remove(ring.node);
+    for (const material of ring.materials) material.dispose();
+  }
+
   private spawnProjectile(projectile: BattleProjectileObservation): ProjectileActor {
+    const gatlingActor = this.buildGatlingExplosionActor(projectile);
+    if (gatlingActor) return gatlingActor;
     // Guard clause: a resolved efct00 bank visual replaces the sprite/beam stand-in wholesale.
     const bankActor = this.buildBankProjectileActor(projectile);
     if (bankActor) return bankActor;
@@ -1655,6 +1724,7 @@ export class BattleScene {
 
   private disposeProjectileActor(actor: ProjectileActor): void {
     this.root.remove(actor.node);
+    if (actor.gatlingRing) this.disposeGatlingRing(actor.gatlingRing);
     if (actor.bankMaterials) {
       // Bank-mesh projectile: geometries are the shared module-level bankFxTemplate cache
       // (never disposed here, same convention as BankFxActor); only per-instance materials

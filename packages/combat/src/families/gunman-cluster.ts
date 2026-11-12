@@ -442,10 +442,13 @@ function gatlingPhase1(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
   // +0x1cef contact gate.
   if (actor.contactP0 > 0) {
     actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1;
-    actor.lockYaw = (actor.heading - 0x8000) & 0xffff;
-    actor.hSpeed = GATLING_F.HSPEED_SEED;
-    actor.hDecel = GATLING_F.ZERO;
-    actor.yVel = GATLING_F.YVEL_SEED;
+    // All recoil writes belong inside the +0x1d0f branch, not only gravity.
+    if (actor.dashStrength1d0f !== 0) {
+      actor.lockYaw = (actor.heading - 0x8000) & 0xffff;
+      actor.hSpeed = GATLING_F.HSPEED_SEED;
+      actor.hDecel = GATLING_F.ZERO;
+      actor.yVel = GATLING_F.YVEL_SEED;
+    }
     // +0x1d0f (dashStrength) != 0 → gravity = -1.0 (FLOAT_80439f68 repurposed as the
     // descriptor gravity slot read; the ROM reads *(desc+0x6c) here only in the
     // +0x1d0f branch via FLOAT_80439f68 = -1.0 as the gravity arg).
@@ -997,6 +1000,7 @@ export function runGunmanClusterSelfTests(assert: AssertFn): void {
     a.fbPhaseSlots[0] = 1;
     a.contactP0 = 1; // +0x1cef > 0
     a.heading = 0;
+    a.dashStrength1d0f = 1;
     root(a);
     assert(shots.length === 1 && shots[0]!.addr === GATLING_SHOT_SPAWNER && shots[0]!.type === 4,
       `gatling ph1 contact spawns zz_007db5c_(4) (got ${JSON.stringify(shots)})`);

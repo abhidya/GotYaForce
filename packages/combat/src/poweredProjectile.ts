@@ -14,7 +14,7 @@ export interface PoweredLaunchSeed {
 }
 export type PoweredLaunchSink = (event: PoweredLaunchSeed) => void;
 export interface PoweredTarget { uid: string; pos: PoweredVec3; scale: number }
-export type PoweredPrimaryRow = 6 | 7 | 8 | 9;
+export type PoweredPrimaryRow = 4 | 6 | 7 | 8 | 9;
 export type PoweredNormalPort = 0 | 1 | 2 | 3;
 export type PoweredSecondaryPort = PoweredNormalPort | 4 | 5 | 6 | 7;
 export const POWERED_PRIMARY_ROWS = [8, 9, 6, 7] as const;
@@ -43,10 +43,12 @@ const clamp = (n:number,lo:number,hi:number):number => Math.min(hi,Math.max(lo,n
 const wrap = (a:number):number => ((a+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
 
 export function createPoweredPrimary(row:PoweredPrimaryRow,pos:PoweredVec3,yaw:number,target:PoweredTarget|null,ownerScale=1,launchAim:PoweredVec3|null=target?.pos??null,onLaunch?:PoweredLaunchSink):PoweredPrimaryState {
+  // Shared 8007db5c row4 differs only through decoded table fields.
+  const speed=row===4?40:60, gravity=row===4?Math.fround(.3):.15;
   let heading=yaw,pitch=0;
   if(target){
     const d=sub(launchAim??target.pos,pos), horizontal=Math.max(Math.hypot(d.x,d.z),.0001);
-    const q=.15*horizontal*horizontal/(2*60*60);
+    const q=gravity*horizontal*horizontal/(2*speed*speed);
     // Algebraically rationalized low ballistic root avoids subtractive cancellation.
     const discriminant=horizontal*horizontal-4*q*(q+d.y);
     const root=Math.sqrt(Math.max(discriminant,0));
@@ -54,9 +56,9 @@ export function createPoweredPrimary(row:PoweredPrimaryRow,pos:PoweredVec3,yaw:n
     pitch=Math.min(Math.atan(tangent),.8);
     heading=Math.atan2(d.x,d.z);
   }
-  const state:PoweredPrimaryState={kind:'primary',row,pos:copy(pos),vel:{x:60*Math.sin(heading)*Math.cos(pitch),y:60*Math.sin(pitch),z:60*Math.cos(heading)*Math.cos(pitch)},life:600,scale:.4*ownerScale,ownerScale,alpha:1,spin:0,yaw,gravity:.15,gravityTimer:1,targetUid:target?.uid??null,targetCenter:target?copy(target.pos):null,alive:true,split:false};
+  const state:PoweredPrimaryState={kind:'primary',row,pos:copy(pos),vel:{x:speed*Math.sin(heading)*Math.cos(pitch),y:speed*Math.sin(pitch),z:speed*Math.cos(heading)*Math.cos(pitch)},life:600,scale:(row===4?2:.4)*ownerScale,ownerScale,alpha:1,spin:0,yaw,gravity,gravityTimer:row===4?4:1,targetUid:target?.uid??null,targetCenter:target?copy(target.pos):null,alive:true,split:false};
   // 8007dd84 emits launch FX before the constructor's first flight update.
-  onLaunch?.({cause:'primary',pos:copy(pos),basis:poweredLaunchBasis(state.vel,{x:state.vel.z,y:0,z:-state.vel.x})});
+  if(row!==4) onLaunch?.({cause:'primary',pos:copy(pos),basis:poweredLaunchBasis(state.vel,{x:state.vel.z,y:0,z:-state.vel.x})});
   return stepPoweredPrimary(state,target).state;
 }
 
@@ -69,22 +71,23 @@ export function stepPoweredPrimary(input:PoweredPrimaryState,target:PoweredTarge
   const validTarget=state.targetUid!==null&&target?.uid===state.targetUid?target:null;
   if(!validTarget){state.targetUid=null;state.targetCenter=null;}
   else if(--state.gravityTimer<=0){
-    state.gravityTimer=1;state.targetCenter=copy(validTarget.pos);
+    state.gravityTimer=state.row===4?4:1;state.targetCenter=copy(validTarget.pos);
     const d=sub(validTarget.pos,state.pos);
-    if(length(d)<300*validTarget.scale){state.alive=false;state.split=true;return {state,alive:false,split:true};}
+    if(state.row!==4&&length(d)<300*validTarget.scale){state.alive=false;state.split=true;return {state,alive:false,split:true};}
     const t=Math.hypot(d.x,d.z)/Math.hypot(state.vel.x,state.vel.z);
     const desired=2*(t*state.vel.y-d.y)/(t*t);
     if(Number.isFinite(desired))state.gravity+=clamp(clamp(desired,0,7.5)-state.gravity,-.15,.15);
   }
   state.pos=add(state.pos,{x:state.vel.x,y:state.vel.y-state.gravity*.5,z:state.vel.z});
   const vy=state.vel.y-state.gravity;
-  state.vel=mul(normalized({...state.vel,y:vy},{x:0,y:0,z:1}),60);
+  state.vel=mul(normalized({...state.vel,y:vy},{x:0,y:0,z:1}),state.row===4?40:60);
   state.vel.y=vy;
   return {state,alive:true,split:false};
 }
 
 /** Four children per primary, not an explosion. Exactly five injected source-byte draws. */
 export function createPoweredSecondaries(primary:PoweredPrimaryState,randomByte:()=>number,onLaunch?:PoweredLaunchSink):PoweredSecondaryState[]{
+  if(primary.row===4)return []; // row4 signed split selector is -1
   const port=POWERED_PRIMARY_PORTS[primary.row];
   const visualYaw=primary.yaw+primary.spin;
   return createPoweredPort(port,primary.pos,
@@ -150,7 +153,7 @@ export function stepPoweredSecondary(input:PoweredSecondaryState):{state:Powered
 }
 
 /** Static bind translation only: animated attachment matrices remain an integration gap. */
-export function poweredPrimaryMuzzle(row:PoweredPrimaryRow,ownerPos:PoweredVec3,yaw:number,ownerScale=1):PoweredVec3 {
+export function poweredPrimaryMuzzle(row:Exclude<PoweredPrimaryRow,4>,ownerPos:PoweredVec3,yaw:number,ownerScale=1):PoweredVec3 {
   const right=row===7||row===9;
   const local={x:(right?67.59280443191528:-67.59277391433716)+(right?118:-118),y:(right?136.1260986328125:136.12603759765625)+(row>=8?-22:36),z:(right?-.00001393718:-.00000385384)+30};
   return add(ownerPos,{x:(local.x*Math.cos(yaw)+local.z*Math.sin(yaw))*ownerScale,y:local.y*ownerScale,z:(-local.x*Math.sin(yaw)+local.z*Math.cos(yaw))*ownerScale});

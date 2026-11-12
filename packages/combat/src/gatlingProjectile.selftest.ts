@@ -1,0 +1,38 @@
+import { createPoweredPrimary,stepPoweredPrimary,createPoweredSecondaries } from './poweredProjectile.js';
+import { createGatlingExplosion,stepGatlingExplosion,gatlingMuzzle,GATLING_EXPLOSION_DAMAGE } from './gatlingProjectile.js';
+import type {Projectile} from './types.js';
+export function runSelfTest():void{
+ const ok=(v:unknown,m:string)=>{if(!v)throw new Error(`[gatlingProjectile] ${m}`);};
+ const near=(a:number,b:number,m:string)=>ok(Math.abs(a-b)<1e-6,`${m}: ${a} != ${b}`);
+ const origin={x:0,y:0,z:0};
+ const flight=createPoweredPrimary(4,origin,0,null);
+ near(flight.pos.z,40,'constructor advances once');near(flight.pos.y,-Math.fround(.3)/2,'initial ballistic drop');
+ ok(flight.life===599&&flight.row===4&&flight.scale===2,'row4 source seed');
+ ok(createPoweredSecondaries(flight,()=>0).length===0,'row4 cannot split');
+ const target={uid:'t',pos:{x:0,y:0,z:2000},scale:1};
+ let f=createPoweredPrimary(4,origin,0,target);
+ const initial=f.gravity;
+ f=stepPoweredPrimary(f,{...target,pos:{x:0,y:-1000,z:2000}}).state;
+ f=stepPoweredPrimary(f,{...target,pos:{x:0,y:-1000,z:2000}}).state;
+ near(f.gravity,initial,'no correction before period4');
+ f=stepPoweredPrimary(f,{...target,pos:{x:0,y:-1000,z:2000}}).state;
+ ok(f.gravity>initial,'period4 gravity corrects');
+ const close=stepPoweredPrimary({...flight,targetUid:'t'}, {...target,pos:{x:0,y:0,z:10}});
+ ok(close.alive&&!close.split,'row4 proximity never splits');
+ const m=gatlingMuzzle(origin,0,2);near(m.x,265.18560886383057,'joint11+row offset scales');
+ near(m.y,272.252197265625,'joint11 Y scales');
+ let cue=-1;
+ const explosion=createGatlingExplosion({ownerUid:'owner',team:0,pos:origin,gatlingSource:{kind:'primary',flight}} as Projectile,c=>cue=c);
+ const s=explosion.gatlingSource!;if(s.kind!=='explosion')throw Error('state');
+ ok(cue===12&&explosion.romShotKind===107&&explosion.damageRecord===GATLING_EXPLOSION_DAMAGE,'global explosion identity');
+ near(s.scale,.01,'init scale');
+ for(let n=0;n<12;n++)stepGatlingExplosion(s);
+ ok(s.phase==='expand','twelve expansion updates');
+ stepGatlingExplosion(s);ok(String(s.phase)==='hold','thirteenth reaches target');near(s.scale,1.25,'scale clamps');
+ for(let n=0;n<3;n++)stepGatlingExplosion(s);
+ ok(String(s.phase)==='hold','three hold updates retain collision');
+ stepGatlingExplosion(s);ok(String(s.phase)==='tail','fourth hold disables collision');near(s.scale,1.25,'tail starts at explosion scale');
+ for(let n=0;n<30;n++)ok(stepGatlingExplosion(s),'tail survives through frame30');
+ near(s.scale,1.5625,'tail final scale');near(s.alpha,0,'tail final alpha');
+ ok(!stepGatlingExplosion(s),'tail expires beyond frame30');
+}
