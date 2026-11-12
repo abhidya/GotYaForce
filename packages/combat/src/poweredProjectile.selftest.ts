@@ -1,0 +1,64 @@
+import { createPoweredPrimary, stepPoweredPrimary, createPoweredSecondaries, stepPoweredSecondary, beginPoweredSecondaryShrink, poweredPrimaryMuzzle, POWERED_PRIMARY_ROWS } from './poweredProjectile.js';
+const check=(condition:boolean,message:string):void=>{if(!condition)throw new Error(message);};
+const near=(a:number,b:number,message:string):void=>check(Math.abs(a-b)<1e-8,`${message}: ${a} != ${b}`);
+export function runSelfTest():void {
+  const origin={x:0,y:0,z:0};
+  const noTarget=createPoweredPrimary(8,origin,0,null);
+  check(noTarget.life===599,'init invokes flight update');
+  near(noTarget.pos.z,60,'immediate forward travel');near(noTarget.pos.y,-.075,'half gravity integration');near(noTarget.vel.y,-.15,'gravity subtract');
+  near(noTarget.gravity,.15,'no target retains gravity');near(noTarget.spin,Math.PI*0x1800/32768,'visual spin first tick');
+  const life=stepPoweredPrimary({...noTarget,life:1},null);
+  check(!life.alive&&!life.split,'life expires without split');near(life.state.pos.z,noTarget.pos.z,'expiry before movement');
+  const target={uid:'target',pos:{x:0,y:0,z:300},scale:1};
+  const boundary=stepPoweredPrimary({...noTarget,pos:origin,targetUid:'target'},target);
+  check(boundary.alive&&!boundary.split,'strict proximity boundary survives');
+  const inside=stepPoweredPrimary({...noTarget,pos:origin,targetUid:'target'},{...target,pos:{x:0,y:0,z:299.999}});
+  check(inside.split&&!inside.alive,'inside boundary splits before motion');near(inside.state.pos.z,0,'split before movement');
+  const scaled=stepPoweredPrimary({...noTarget,pos:origin,targetUid:'target'},{...target,pos:{x:0,y:0,z:599},scale:2});
+  check(scaled.split,'proximity uses target scale');
+  const other=stepPoweredPrimary({...noTarget,pos:origin,targetUid:'target'},{...target,uid:'other',pos:origin});
+  check(other.alive&&other.state.targetUid===null,'unrelated target cannot split or retarget');
+  const low={...target,pos:{x:1000,y:-10000,z:1000}};
+  const down=stepPoweredPrimary({...noTarget,pos:origin,targetUid:'target'},low);
+  near(down.state.gravity,.3,'gravity positive slew capped .15');near(down.state.vel.x,0,'live sideways target cannot yaw steer');
+  const high=stepPoweredPrimary({...noTarget,pos:origin,targetUid:'target'}, {...low,pos:{x:1000,y:10000,z:1000}});
+  near(high.state.gravity,0,'gravity lower clamp');
+  const capped=stepPoweredPrimary({...noTarget,pos:origin,gravity:7.5,targetUid:'target'},low);
+  near(capped.state.gravity,7.5,'gravity upper clamp');
+  const degenerate=stepPoweredPrimary({...noTarget,pos:origin,targetUid:'target'}, {...target,pos:{x:0,y:1000,z:0}});
+  check(Object.values(degenerate.state.vel).every(Number.isFinite),'vertical-target finite safeguard');
+  const saved=createPoweredPrimary(6,origin,0,{...target,pos:{x:0,y:1000,z:1000}},1,{x:1000,y:0,z:0});
+  check(saved.vel.x>0&&Math.abs(saved.vel.z)<1e-8,'saved launch aim separate from live target');
+  const impossible=createPoweredPrimary(8,origin,0,{...target,pos:{x:0,y:100000,z:1000}});
+  near(impossible.pos.y,60*Math.sin(.8), 'impossible arc retains source discriminant clamp and pitch cap');
+  const ownerScaled=createPoweredPrimary(8,origin,0,null,2);
+  near(ownerScaled.pos.z,noTarget.pos.z,'owner scale does not change flight speed');near(ownerScaled.scale,.8,'owner scale affects visual scale');
+  for(const row of POWERED_PRIMARY_ROWS){
+    let calls=0; const draws=[0,0,1,6,7];
+    const primary={...inside.state,row};
+    const children=createPoweredSecondaries(primary,()=>draws[calls++]!);
+    check(calls===5&&children.length===4,'exact RNG consumption and child count');
+    check(children.every(c=>c.port===({8:6,9:7,6:4,7:5} as const)[row]),'row secondary port');
+    children.forEach((child,i)=>{
+      near(child.speed,[22.5,25,37.5,40][i]!,'decoded random speed');near(child.acceleration,-child.speed/40,'matching speed decrement factor');
+      near(Math.hypot(child.direction.x,child.direction.y,child.direction.z),1,'basis direction normalized');
+      near(child.direction.x*child.reference.x+child.direction.y*child.reference.y+child.direction.z*child.reference.z,0,'basis orthogonal');
+      near(child.pos.z,primary.pos.z,'no immediate secondary flight tick');check(child.life===40,'secondary source lifetime');
+      const step=stepPoweredSecondary(child).state;
+      near(Math.hypot(step.pos.x-child.pos.x,step.pos.y-child.pos.y,step.pos.z-child.pos.z),child.speed,'move before deceleration');
+      near(step.speed,child.speed+child.acceleration,'deceleration');near(step.direction.z,child.direction.z,'secondary no gravity or homing');
+      const exhausted=stepPoweredSecondary({...child,life:1});
+      check(exhausted.alive&&exhausted.state.phase==='shrink','expiry enters shrink rather than release');near(exhausted.state.pos.z,child.pos.z,'secondary expiry before motion');
+      const shrinking=stepPoweredSecondary(beginPoweredSecondaryShrink(child)).state;
+      near(shrinking.scale,.8,'source multiplicative shrink');
+      check(!stepPoweredSecondary({...shrinking,scale:.001}).alive,'shrink releases below threshold');
+      const floor=stepPoweredSecondary({...child,speed:.05,acceleration:-1}).state;near(floor.speed,.05,'secondary speed floor');
+    });
+    const sum=children.reduce((acc,c)=>({x:acc.x+c.direction.x,y:acc.y+c.direction.y,z:acc.z+c.direction.z}),{x:0,y:0,z:0});
+    near(sum.x,0,'four-child cone symmetry X');near(sum.y,0,'four-child cone symmetry Y');
+    const theta=Math.PI*({4:2,5:1,6:4,7:4}[children[0]!.port])/16;
+    near(sum.z,4*Math.cos(theta),'decoded cone angle');
+  }
+  const muzzle=poweredPrimaryMuzzle(8,origin,0);near(muzzle.x,-185.59277391433716,'bone7 plus source row X');near(muzzle.y,114.12603759765625,'row8 lower muzzle');
+  console.log('Powered projectile source math: passed');
+}

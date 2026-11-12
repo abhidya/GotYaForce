@@ -691,15 +691,13 @@ function poweredPhase1(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
           ctx.onFamilyProjectile?.(actor, POWERED_PORT_SPAWNER, port);
         }
       }
-    } else {
-      // Action 3: zz_007db5c_({8,9,6,7}) + zz_00f036c_(6). Single ammo gate covers the volley.
-      if (allocateWeapon(actor, ctx, 2, 1, true)) {
-        for (const type of [8, 9, 6, 7]) {
-          ctx.onFamilyProjectile?.(actor, GATLING_SHOT_SPAWNER, type);
-        }
-        // zz_00f036c_(actor, 6) — effect spawn.
-        ctx.onFamilyProjectile?.(actor, POWERED_EFFECT_SPAWNER, 6);
+    } else if (actor.actionIndex === 3) {
+      // FUN_80166fa8: action 3 bypasses the action-2 resource call entirely.
+      // These are spawner TABLE ROWS, not HIT kinds. The fifth callback is visual only.
+      for (const type of [8, 9, 6, 7]) {
+        ctx.onFamilyProjectile?.(actor, GATLING_SHOT_SPAWNER, type);
       }
+      ctx.onFamilyProjectile?.(actor, POWERED_EFFECT_SPAWNER, 6);
     }
   }
   if (Math.hypot(actor.motion.x, actor.motion.y, actor.motion.z) > POWERED_F.AFTERIMAGE_THRESHOLD) {
@@ -1096,12 +1094,12 @@ export function runGunmanClusterSelfTests(assert: AssertFn): void {
     assert(a.fbPhaseSlots[0] === 2, "powered ph1 contact → advance to ph2");
   }
 
-  // --- action 3 ph1 contact → zz_007db5c_({8,9,6,7}) + effect. ---
+  // --- action 3 bypasses ammo even when action-2 allocation would deny. ---
   {
     const shots: ShotEvent[] = [];
     const a = createRomActorScratch();
     configurePoweredGunmanFamily(a, makeCtx({
-      onAllocateResource: () => true,
+      onAllocateResource: () => { throw new Error("action 3 must never allocate ammo"); },
       onFamilyProjectile: (addr, type) => shots.push({ addr, type }),
     }));
     const root = a.rootAction!;

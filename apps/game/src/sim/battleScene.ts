@@ -1459,14 +1459,25 @@ export class BattleScene {
         this.projectileActors.set(projectile.uid, actor);
       }
       actor.node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
-      const fade = Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
+      const fade = projectile.poweredSource?.alpha ?? Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
       if (actor.bankMaterials) {
         // Bank-mesh flight visual: fade multiplies each layer's OWN rest opacity (the
         // matAnim-sampled/authored value), same convention as BankFxActor's tween.
         for (let i = 0; i < actor.bankMaterials.length; i++) {
           actor.bankMaterials[i]!.opacity = (actor.bankLayerOpacity?.[i] ?? 1) * fade;
         }
-        actor.node.rotation.y = Math.atan2(projectile.vel.x, projectile.vel.z);
+        if (projectile.poweredSource) {
+          actor.node.scale.setScalar(projectile.poweredSource.scale);
+          if (projectile.poweredSource.kind === "primary") actor.node.rotation.y = projectile.poweredSource.yaw + projectile.poweredSource.spin;
+          else {
+            const source = projectile.poweredSource;
+            const forward = new THREE.Vector3(source.direction.x, source.direction.y, source.direction.z).normalize();
+            const up = new THREE.Vector3(source.reference.x, source.reference.y, source.reference.z).normalize();
+            const right = new THREE.Vector3().crossVectors(up, forward).normalize();
+            actor.node.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right, up, forward));
+            actor.node.rotateZ(source.spin);
+          }
+        } else actor.node.rotation.y = Math.atan2(projectile.vel.x, projectile.vel.z);
       } else {
         actor.material.opacity = fade;
       }

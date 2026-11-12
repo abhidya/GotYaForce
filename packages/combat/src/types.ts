@@ -149,6 +149,8 @@ export interface RomFamilyDriver {
 }
 
 export interface BorgRuntime {
+  /** Source slot-2 charge, isolated from tuned X-charge tiers. */
+  poweredCharge?: import("./poweredCharge.js").PoweredChargeState;
   uid: string;
   borgId: string;
   /** Current descriptor/model form after an in-place ROM morph. `borgId` remains the
@@ -569,6 +571,13 @@ export type ProjectileDespawnReason =
 
 /** A homing/straight projectile in flight. */
 export interface Projectile {
+  poweredSource?: import("./poweredProjectileRuntime.js").PoweredSourceState;
+  /** Constructor ran on this frame; do not fly the new child a second time. */
+  poweredSkipAdvance?: boolean;
+  /** Muzzle before immediate constructor flight; consumed by the first host sweep. */
+  poweredInitialPosition?: Vec3;
+  /** Authored hit.bin flags; existing host collision geometry does not interpret these. */
+  sourceHitCollisionFlags?: number;
   uid: string;
   ownerUid: string;
   team: number;
