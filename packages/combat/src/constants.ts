@@ -793,10 +793,10 @@ export const HEAL = {
   /** Legacy cadence constant; passive bleed is unsupported by the cited status timer. */
   VAMPIRE_BLEED_INTERVAL_FRAMES: 30,
   /**
-   * Legacy guide-driven Nurse behavior remains disabled. The source-backed close
+   * Legacy guide-driven Nurse behavior remains disabled. The source-backed
    * allied ground/air X route now lives in nurseX.ts and the flagsA&2 contact resolver, using
    * family damage records (200/400 allied HP, quartered across teams), not this
-   * flag or the historical guide amounts below. Far-target routes remain unsupported.
+   * flag or the historical guide amounts below. Enemy/invalid-target fallback remains unsupported.
    */
   NURSE_ENABLED: false,
   /**

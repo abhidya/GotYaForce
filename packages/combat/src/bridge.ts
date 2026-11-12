@@ -1,4 +1,4 @@
-import { getNurseXState, isNurseX, prepareNurseX, clearNurseX, canStartNurseX } from "./nurseX.js";
+import { getNurseXState, isNurseX, prepareNurseX, clearNurseX, canStartNurseX, isCloseNurseX } from "./nurseX.js";
 import { isArrowNinja, captureArrowAttack, spawnArrowSource } from "./arrowProjectile.js";
 import { createBeamStreamClock, tickBeamStream, type BeamStreamClock } from "./beamStream.js";
 import { createArrowStreamClock, tickArrowStream, type ArrowStreamClock } from "./arrowStream.js";
@@ -1359,7 +1359,7 @@ export type RomHitResolver = (
   victim: BorgRuntime,
   damageRecordIndex: number,
   knockbackMult: number,
-) => void;
+) => number | void;
 
 /** Host-provided ground clamp — called after the ROM physics step to snap the borg
  *  to the stage floor. Without this the ROM integrator (no collision awareness) lets
@@ -2244,6 +2244,10 @@ export class RomDriverBridge implements RomFamilyDriver {
     runtime.vel.x = vel.x;
     runtime.vel.y = vel.y;
     runtime.vel.z = vel.z;
+    const nurse = this.specialActive ? getNurseXState(a) : undefined;
+    if (nurse && !nurse.close && (a.fbPhaseSlots[0] ?? 0) >= 2 && (a.fbPhaseSlots[0] ?? 0) < 7) {
+      Object.assign(runtime.vel, a.motion);
+    }
     const previousSerial = runtime.romAfterimage?.serial ?? 0;
     if (a.afterimageSerial !== previousSerial) {
       const baseScale = a.modelScale * a.sizeScale;
@@ -2279,7 +2283,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (isNurseX(runtime.borgId)) {
       const target = activeSourceTarget(runtime, all);
       if (!canStartNurseX(runtime, target)) return false;
-      prepareNurseX(this.actor, target!.uid);
+      prepareNurseX(this.actor, target!.uid, isCloseNurseX(runtime, target!));
     }
     // Impotence latch (see the field's doc): this borg's ROM X already proved to be a
     // no-payload pantomime — hand the press to the generic startSpecialAttack path.
@@ -2506,6 +2510,12 @@ export class RomDriverBridge implements RomFamilyDriver {
           runtime.vel.y = Math.max(0, runtime.vel.y);
         }
       }
+      // The host floor owns the far action's grounded presentation; +1d9 is a
+      // contact byte, never a floor flag. Preserve close and other families here.
+      const nurseMotion = getNurseXState(this.actor);
+      if (nurseMotion && !nurseMotion.close && this.groundClamp) {
+        runtime.grounded = this.groundClamp(runtime.pos, runtime.vel.y).grounded;
+      }
       // Stream events (anim + hitbox + fireChild) for this frame.
       if (!poweredSourceAction) this.dispatchEvent(this.streamFrame);
       this.streamFrame++;
@@ -2518,6 +2528,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       // (controlWord &= ~0x3). Detect that OR the max-frame safety timeout.
       const phaseDone = (this.actor.controlWord & 0x3) === 0 && this.streamFrame > 2;
       if (phaseDone || (!this.hasPendingKnightWindup() && this.streamFrame >= this.specialMaxFrames)) {
+        clearNurseX(this.actor);
         this.specialActive = false;
         this.romOwnedSpecial = false;
         this.armedHits = [];
@@ -2785,7 +2796,8 @@ export class RomDriverBridge implements RomFamilyDriver {
           hit.struck.add(target.uid);
           // Route through the host's full applyHit path for damage-formula fidelity.
           if (this.hitResolver) {
-            this.hitResolver(runtime, target, hit.damageRecordIndex, 1.0);
+            const resolved = this.hitResolver(runtime, target, hit.damageRecordIndex, 1.0);
+            if (nurse && typeof resolved === "number" && resolved < 0) nurse.pendingContact |= 0x10;
           } else if (!nurseHealing) {
             // Healing requires the full resolver (immunity, signed HP, gauges and
             // reactions). Never turn it into the legacy damaging fallback.
