@@ -16,6 +16,7 @@ import type {
   Battle,
   BattleProjectileObservation,
   ProjectileDespawnObservation,
+  PoweredLaunchFlashObservation,
   ProjectileVisualKind,
 } from "@gf/combat";
 import { MUZZLE_OFFSET, SHOT } from "@gf/combat";
@@ -716,6 +717,10 @@ export class BattleScene {
   private projectileActors = new Map<string, ProjectileActor>();
   private impactActors: ImpactActor[] = [];
   private bankFxActors: BankFxActor[] = [];
+  /** Simulation-owned id-0 flashes, deliberately outside the render-dt FX clock. */
+  private poweredFlashActors = new Map<string, {
+    node: THREE.Group; materials: THREE.MeshBasicMaterial[]; layerOpacity: number[];
+  }>();
   private pending = new Set<string>();
   private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
   private impactPuffFrames: THREE.Texture[];
@@ -799,6 +804,7 @@ export class BattleScene {
     projectileDespawns: readonly ProjectileDespawnObservation[] = [],
     diverAuras: readonly DiverAuraObservation[] = [],
     diverAuraTails: readonly DiverTailObservation[] = [],
+    poweredLaunchFlashes: readonly PoweredLaunchFlashObservation[] = [],
   ): void {
     const live = new Set<string>();
     for (const b of borgs) {
@@ -869,6 +875,7 @@ export class BattleScene {
     // Capture the last rendered aura anchor before removing its mesh-78 actor.
     this.syncDiverAuraTails(diverAuraTails);
     this.syncDiverAuras(diverAuras);
+    this.syncPoweredLaunchFlashes(poweredLaunchFlashes);
   }
 
   /** Advance all per-actor animation mixers. */
@@ -903,6 +910,8 @@ export class BattleScene {
     for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
     for (const actor of this.impactActors) this.disposeImpactActor(actor);
     for (const actor of this.bankFxActors) this.disposeBankFxActor(actor);
+    for (const actor of this.poweredFlashActors.values()) this.disposePoweredFlash(actor);
+    this.poweredFlashActors.clear();
     this.actors.clear();
     this.projectileActors.clear();
     this.impactActors = [];
@@ -2058,6 +2067,72 @@ export class BattleScene {
       endScale: radius * 2,
       opacity: 0.9, // TUNED-visual
     });
+  }
+
+  /** The committed id-0 mesh is optional; no invented sprite/audio replaces a missing bank.
+   * Templates are static imported JSON, not asynchronously loaded. Missing entries keep
+   * an empty node for this four-frame lifetime; a new launch resolves the template again. */
+  private poweredFlashLayers(): BankFxLayer[] | null {
+    return bankFxTemplate(35);
+  }
+
+  /** Source Powered launches supply their exact world position and unit basis. Reconcile
+   * the simulation's live list, not slot transitions or render delta time. In particular,
+   * stale expired records cannot restart a flash and pause/repeated sync never ages it. */
+  private syncPoweredLaunchFlashes(flashes: readonly PoweredLaunchFlashObservation[]): void {
+    const live = new Set<string>();
+    for (const flash of flashes) {
+      if (flash.ageFrames < 0 || flash.ageFrames >= flash.lifeFrames) continue;
+      live.add(flash.uid);
+      let actor = this.poweredFlashActors.get(flash.uid);
+      if (!actor) {
+        const node = new THREE.Group();
+        node.name = `powered-launch-flash:${flash.uid}`;
+        const materials: THREE.MeshBasicMaterial[] = [];
+        const layerOpacity: number[] = [];
+        for (const layer of this.poweredFlashLayers() ?? []) {
+          const color = layer.color.clone();
+          const opacity = layer.anim ? sampleBankAnim(layer, flash.team, color).opacity : layer.baseOpacity;
+          const material = new THREE.MeshBasicMaterial({
+            color, vertexColors: layer.vertexColors, transparent: true, opacity,
+            blending: layer.additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+            depthWrite: false, side: THREE.DoubleSide,
+          });
+          node.add(new THREE.Mesh(layer.geometry, material));
+          materials.push(material);
+          layerOpacity.push(opacity);
+        }
+        actor = { node, materials, layerOpacity };
+        this.poweredFlashActors.set(flash.uid, actor);
+        this.root.add(node);
+      }
+      const { right, up, forward } = flash.basis;
+      const basis = new THREE.Matrix4().makeBasis(
+        new THREE.Vector3(right.x, right.y, right.z),
+        new THREE.Vector3(up.x, up.y, up.z),
+        new THREE.Vector3(forward.x, forward.y, forward.z),
+      );
+      actor.node.quaternion.setFromRotationMatrix(basis);
+      actor.node.rotateZ(flash.spin);
+      actor.node.position.set(flash.pos.x, flash.pos.y, flash.pos.z);
+      evalRomKeys(MUZZLE_FLASH_SCALE_KEYS, flash.ageFrames, BANK_KEY_SCRATCH);
+      actor.node.scale.set(BANK_KEY_SCRATCH[0]!, BANK_KEY_SCRATCH[1]!, BANK_KEY_SCRATCH[2]!);
+      evalRomKeys(MUZZLE_FLASH_ALPHA_KEYS, flash.ageFrames, BANK_KEY_SCRATCH);
+      for (let i = 0; i < actor.materials.length; i++) {
+        actor.materials[i]!.opacity = actor.layerOpacity[i]! * BANK_KEY_SCRATCH[0]!;
+      }
+    }
+    for (const [uid, actor] of this.poweredFlashActors) {
+      if (live.has(uid)) continue;
+      this.disposePoweredFlash(actor);
+      this.poweredFlashActors.delete(uid);
+    }
+  }
+
+  private disposePoweredFlash(actor: { node: THREE.Group; materials: THREE.MeshBasicMaterial[] }): void {
+    this.root.remove(actor.node);
+    for (const material of actor.materials) material.dispose();
+    // Mesh geometry belongs to the shared bank cache, not this launch.
   }
 
   /**

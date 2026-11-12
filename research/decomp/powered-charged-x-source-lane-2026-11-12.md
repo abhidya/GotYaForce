@@ -22,8 +22,8 @@ Original pl0101data.bin +0x18c = float 180 (0x43340000). X weapon row
   Other active actions do not stop charge bookkeeping.
 - zz_0069c50_ → zz_0069dd0_ → zz_0069fe0_ → zz_006a104_ (chunk_0009) type 5 has no ammo consumption.
   FUN_80166fa8, chunk_0042:3825–3840, gates action 2 only with
-  zz_006dbe0_(2, 1, 1). Action 3 emits rows 8, 9, 6, 7 and effect 6 at 0x800f036c
-  unconditionally. Effect 6 creates no damaging fifth projectile.
+  zz_006dbe0_(2, 1, 1). Action 3 emits rows 8, 9, 6, 7 and sound cue 6 at 0x800f036c
+  unconditionally. The sound dispatcher creates no fifth projectile.
 - Bank 0x8034ebe0 g4s0/s1 sets part 0 aux 1 at authored frame 16. DOL opcode 02
   writes this signed byte to +0x1cf0 (not part 1.state). The narrow bridge maps
   that byte and dispatches the stream before the same-frame handler gate.
@@ -52,8 +52,8 @@ Original pl0101data.bin +0x18c = float 180 (0x43340000). X weapon row
 Historical boundary at the charged-X commit: short-X was release-based
 compatibility. This is superseded by the normal-X follow-up linked above.
 The source charged route uses no tuned 45/90 tier or damage multiplier. There is
-no X-charge HUD/ready indicator in the current game; none is added. Presentation
-of the non-damaging 0x800f036c effect 6 and source charge glow remain unimplemented.
+no X-charge HUD/ready indicator in the current game; none is added. Source charge glow remains unimplemented. Firing flashes and sound routing are
+covered by powered-launch-presentation-2026-11-12.md (cue assets remain absent).
 
 Only neutral one-frame timestep is supported. Full source status time scaling,
 global input disable, disabled-command masks and every command admission gate

@@ -1,3 +1,4 @@
+import type { PoweredLaunchSeed } from "./poweredProjectile.js";
 // Public types for the deterministic battle API. Mirrors the contract in the task brief.
 // Control scheme (CONFIRMED from the game's controls screen + lock-relative movement trace):
 //   A=jump, B=attack(melee/contextual), X=special, R=switch lock-on target,
@@ -911,7 +912,18 @@ export interface ProjectileDespawnObservation {
  * only for this cached boundary observation. Removed-projectile lifecycle facts are supplied
  * separately by `projectileDespawns`.
  */
+export interface PoweredLaunchFlash extends PoweredLaunchSeed {
+  uid: string;
+  ownerUid: string;
+  team: number;
+  effectId: 0;
+  spin: number;
+  ageFrames: number;
+  lifeFrames: 4;
+}
+export type PoweredLaunchFlashObservation = DeepReadonly<PoweredLaunchFlash>;
 export interface BattleObservation {
+  readonly poweredLaunchFlashes: readonly PoweredLaunchFlashObservation[];
   readonly diverAuras: readonly DeepReadonly<DiverAuraChild>[];
   readonly diverAuraTails: readonly DeepReadonly<DiverAuraTail>[];
   readonly actors: readonly BattleActorObservation[];

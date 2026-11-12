@@ -80,8 +80,8 @@ export const BEAM_FIRE_SPAWNER = 0x800e19a8;
 /** FUN_8016d584 @0x8016d584 — POWERED action-2 4-port aimed spawn (chunk_0042.c). Fired
  *  once per hardpoint (0..3) when the aim-roll converges. */
 export const POWERED_PORT_SPAWNER = 0x8016d584;
-/** zz_00f036c_ @0x800f036c — POWERED action-3 effect spawn (type 6). */
-export const POWERED_EFFECT_SPAWNER = 0x800f036c;
+/** zz_00f036c_ is the shared SOUND dispatcher, not a projectile or effect. */
+export const POWERED_SOUND_DISPATCHER = 0x800f036c;
 /** zz_0082824_ @0x80082824 — SHOT_HELPER (record-table projectile spawn, shared). */
 export const GUNMAN_SHOT_HELPER = 0x80082824;
 /** zz_00c3be0_ @0x800c3be0 — effect spawner (shared). */
@@ -693,11 +693,11 @@ function poweredPhase1(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
       }
     } else if (actor.actionIndex === 3) {
       // FUN_80166fa8: action 3 bypasses the action-2 resource call entirely.
-      // These are spawner TABLE ROWS, not HIT kinds. The fifth callback is visual only.
+      // These are spawner TABLE ROWS, not HIT kinds. The separate cue is sound only.
       for (const type of [8, 9, 6, 7]) {
         ctx.onFamilyProjectile?.(actor, GATLING_SHOT_SPAWNER, type);
       }
-      ctx.onFamilyProjectile?.(actor, POWERED_EFFECT_SPAWNER, 6);
+      ctx.onPlayCue?.(actor, 6);
     }
   }
   if (Math.hypot(actor.motion.x, actor.motion.y, actor.motion.z) > POWERED_F.AFTERIMAGE_THRESHOLD) {
@@ -860,8 +860,10 @@ interface ShotEvent { addr: number; type: number; }
 function makeCtx(opts: {
   onAllocateResource?: (slot: number, count: number, mode: number) => boolean;
   onFamilyProjectile?: (addr: number, type: number) => void;
+  onPlayCue?: (cue: number) => void;
 } = {}): GunmanFamilyCtx {
   const ctx: GunmanFamilyCtx = {};
+  if(opts.onPlayCue) ctx.onPlayCue=(_actor,cue)=>opts.onPlayCue!(cue);
   if (opts.onAllocateResource) {
     const sink = opts.onAllocateResource;
     ctx.onAllocateResource = (_a, slot, count, mode) => sink(slot, count, mode ?? 0);
@@ -1097,8 +1099,10 @@ export function runGunmanClusterSelfTests(assert: AssertFn): void {
   // --- action 3 bypasses ammo even when action-2 allocation would deny. ---
   {
     const shots: ShotEvent[] = [];
+    const cues: number[] = [];
     const a = createRomActorScratch();
     configurePoweredGunmanFamily(a, makeCtx({
+      onPlayCue: cue=>cues.push(cue),
       onAllocateResource: () => { throw new Error("action 3 must never allocate ammo"); },
       onFamilyProjectile: (addr, type) => shots.push({ addr, type }),
     }));
@@ -1107,10 +1111,11 @@ export function runGunmanClusterSelfTests(assert: AssertFn): void {
     a.fbPhaseSlots[0] = 1; a.contactP1 = 1; a.heading = 0;
     root(a);
     const volleys = shots.filter((s) => s.addr === GATLING_SHOT_SPAWNER).map((s) => s.type).sort();
-    const fx = shots.filter((s) => s.addr === POWERED_EFFECT_SPAWNER);
+    const fx = shots.filter((s) => s.addr === POWERED_SOUND_DISPATCHER);
     assert(JSON.stringify(volleys) === JSON.stringify([6, 7, 8, 9]),
       `powered action-3 ph1 spawns zz_007db5c_({8,9,6,7}) (got ${JSON.stringify(volleys)})`);
-    assert(fx.length === 1 && fx[0]!.type === 6, "powered action-3 ph1 spawns zz_00f036c_(6) effect");
+    assert(fx.length === 0, "powered action-3 sound never enters projectile route");
+    assert(cues.length===1&&cues[0]===6,"powered action-3 plays cue6 once");
   }
 
   // --- ph1 ammo-gate denies. ---

@@ -7,6 +7,12 @@
  * deterministic orthogonal basis: explicit numerical safeguards, not decoded behavior.
  */
 export interface PoweredVec3 { x: number; y: number; z: number }
+export interface PoweredLaunchSeed {
+  cause: 'normal' | 'primary' | 'split';
+  pos: PoweredVec3;
+  basis: { right: PoweredVec3; up: PoweredVec3; forward: PoweredVec3 };
+}
+export type PoweredLaunchSink = (event: PoweredLaunchSeed) => void;
 export interface PoweredTarget { uid: string; pos: PoweredVec3; scale: number }
 export type PoweredPrimaryRow = 6 | 7 | 8 | 9;
 export type PoweredNormalPort = 0 | 1 | 2 | 3;
@@ -36,7 +42,7 @@ const normalized = (v: PoweredVec3, fallback: PoweredVec3): PoweredVec3 => lengt
 const clamp = (n:number,lo:number,hi:number):number => Math.min(hi,Math.max(lo,n));
 const wrap = (a:number):number => ((a+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
 
-export function createPoweredPrimary(row:PoweredPrimaryRow,pos:PoweredVec3,yaw:number,target:PoweredTarget|null,ownerScale=1,launchAim:PoweredVec3|null=target?.pos??null):PoweredPrimaryState {
+export function createPoweredPrimary(row:PoweredPrimaryRow,pos:PoweredVec3,yaw:number,target:PoweredTarget|null,ownerScale=1,launchAim:PoweredVec3|null=target?.pos??null,onLaunch?:PoweredLaunchSink):PoweredPrimaryState {
   let heading=yaw,pitch=0;
   if(target){
     const d=sub(launchAim??target.pos,pos), horizontal=Math.max(Math.hypot(d.x,d.z),.0001);
@@ -49,6 +55,8 @@ export function createPoweredPrimary(row:PoweredPrimaryRow,pos:PoweredVec3,yaw:n
     heading=Math.atan2(d.x,d.z);
   }
   const state:PoweredPrimaryState={kind:'primary',row,pos:copy(pos),vel:{x:60*Math.sin(heading)*Math.cos(pitch),y:60*Math.sin(pitch),z:60*Math.cos(heading)*Math.cos(pitch)},life:600,scale:.4*ownerScale,ownerScale,alpha:1,spin:0,yaw,gravity:.15,gravityTimer:1,targetUid:target?.uid??null,targetCenter:target?copy(target.pos):null,alive:true,split:false};
+  // 8007dd84 emits launch FX before the constructor's first flight update.
+  onLaunch?.({cause:'primary',pos:copy(pos),basis:poweredLaunchBasis(state.vel,{x:state.vel.z,y:0,z:-state.vel.x})});
   return stepPoweredPrimary(state,target).state;
 }
 
@@ -76,28 +84,33 @@ export function stepPoweredPrimary(input:PoweredPrimaryState,target:PoweredTarge
 }
 
 /** Four children per primary, not an explosion. Exactly five injected source-byte draws. */
-export function createPoweredSecondaries(primary:PoweredPrimaryState,randomByte:()=>number):PoweredSecondaryState[]{
+export function createPoweredSecondaries(primary:PoweredPrimaryState,randomByte:()=>number,onLaunch?:PoweredLaunchSink):PoweredSecondaryState[]{
   const port=POWERED_PRIMARY_PORTS[primary.row];
   const visualYaw=primary.yaw+primary.spin;
   return createPoweredPort(port,primary.pos,
     primary.targetCenter?sub(primary.targetCenter,primary.pos):primary.vel,
-    {x:Math.sin(visualYaw),y:0,z:Math.cos(visualYaw)},primary.ownerScale,randomByte);
+    {x:Math.sin(visualYaw),y:0,z:Math.cos(visualYaw)},primary.ownerScale,randomByte,onLaunch,'split');
 }
 
 /** FUN_8016d584 rows 0..3: actor-local Z reference, saved world aim, four children. */
 export function createPoweredNormalPort(port:PoweredNormalPort,pos:PoweredVec3,yaw:number,
-  aim:PoweredVec3,ownerScale:number,randomByte:()=>number):PoweredSecondaryState[]{
-  return createPoweredPort(port,pos,sub(aim,pos),{x:Math.sin(yaw),y:0,z:Math.cos(yaw)},ownerScale,randomByte);
+  aim:PoweredVec3,ownerScale:number,randomByte:()=>number,onLaunch?:PoweredLaunchSink):PoweredSecondaryState[]{
+  return createPoweredPort(port,pos,sub(aim,pos),{x:Math.sin(yaw),y:0,z:Math.cos(yaw)},ownerScale,randomByte,onLaunch,'normal');
 }
 
-/** All eight table rows share the same constructor and flight/shrink state machine. */
-function createPoweredPort(port:PoweredSecondaryPort,pos:PoweredVec3,aimDelta:PoweredVec3,
-  axis:PoweredVec3,ownerScale:number,randomByte:()=>number):PoweredSecondaryState[]{
+/** Mode-5 launch basis; deterministic degenerate fallback matches existing host math. */
+export function poweredLaunchBasis(aimDelta:PoweredVec3,axis:PoweredVec3):PoweredLaunchSeed['basis'] {
   const z=normalized(aimDelta,{x:0,y:0,z:1});
   let x=cross(axis,z);
   if(length(x)**2<=1e-10)x=cross(Math.abs(z.y)<.9?{x:0,y:1,z:0}:{x:1,y:0,z:0},z);
   x=normalized(x,{x:1,y:0,z:0});
-  const y=normalized(cross(z,x),{x:0,y:1,z:0});
+  return {right:x,up:normalized(cross(z,x),{x:0,y:1,z:0}),forward:z};
+}
+
+/** All eight table rows share the same constructor and flight/shrink state machine. */
+function createPoweredPort(port:PoweredSecondaryPort,pos:PoweredVec3,aimDelta:PoweredVec3,
+  axis:PoweredVec3,ownerScale:number,randomByte:()=>number,onLaunch?:PoweredLaunchSink,cause:'normal'|'split'='normal'):PoweredSecondaryState[]{
+  const {right:x,up:y,forward:z}=poweredLaunchBasis(aimDelta,axis);
   const theta=Math.PI*([2,1,4,4,2,1,4,4][port]!)/16;
   let azimuth=(Math.PI/2)*(((randomByte()&15)+1)/16);
   const result:PoweredSecondaryState[]=[];
@@ -110,6 +123,9 @@ function createPoweredPort(port:PoweredSecondaryPort,pos:PoweredVec3,aimDelta:Po
     result.push({kind:'secondary',port,pos:copy(pos),vel:mul(direction,speed),direction,reference,speed,acceleration:-factor,life:40,scale:ownerScale,alpha:1,spin:0,phase:'flight'});
     azimuth+=Math.PI/2;if(azimuth>Math.PI)azimuth-=Math.PI*2;
   }
+  // 8016d584 copies this UNSPLAYED base into all children, then flashes before
+  // 8016d9ac applies each child's Rz/Rx spread. Not the fourth child's direction.
+  onLaunch?.({cause,pos:copy(pos),basis:{right:copy(x),up:copy(y),forward:copy(z)}});
   return result;
 }
 

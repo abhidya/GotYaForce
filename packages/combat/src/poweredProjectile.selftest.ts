@@ -59,6 +59,15 @@ export function runSelfTest():void {
     const theta=Math.PI*({0:2,1:1,2:4,3:4,4:2,5:1,6:4,7:4}[children[0]!.port])/16;
     near(sum.z,4*Math.cos(theta),'decoded cone angle');
   }
+  {
+    const launches:import('./poweredProjectile.js').PoweredLaunchSeed[]=[];
+    const target={x:300,y:500,z:1000};
+    const a=createPoweredNormalPort(0,origin,0,target,1,()=>0,e=>launches.push(e));
+    const b=createPoweredNormalPort(0,origin,0,target,3,()=>255,e=>launches.push(e));
+    check(JSON.stringify(launches[0])===JSON.stringify(launches[1]),'flash basis unaffected by random splay and actor scale');
+    check(JSON.stringify(a[3]!.direction)!==JSON.stringify(b[3]!.direction),'fixture actually changes spread');
+    check(launches.length===2,'one event per port independent of four children');
+  }
   for(const port of [0,1,2,3] as const){
     let calls=0;const draws=[0,0,1,6,7];
     const children=createPoweredNormalPort(port,origin,0,{x:0,y:0,z:1000},1,()=>draws[calls++]!);

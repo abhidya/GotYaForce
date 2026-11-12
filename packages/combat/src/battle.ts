@@ -1,3 +1,5 @@
+import type { PoweredLaunchFlash } from "./types.js";
+import type { PoweredPresentationSink } from "./poweredProjectileRuntime.js";
 import { spawnPoweredSource } from "./poweredProjectileRuntime.js";
 import { stepPoweredCharge } from "./poweredCharge.js";
 import { hasSourcePrimaryAmmo } from "./primaryAmmo.js";
@@ -235,6 +237,21 @@ interface ForceRuntime {
 class BattleImpl implements Battle {
   private state: BattleState;
   private observationCache: BattleObservation | null = null;
+  private poweredLaunchFlashes: PoweredLaunchFlash[] = [];
+  private poweredFlashSerial = 0;
+  private poweredVisualRng = 0x706f7765;
+  private readonly onPoweredLaunch: PoweredPresentationSink = (owner,event) => {
+    const serial = ++this.poweredFlashSerial;
+    // Separate visual-only deterministic byte: source uses global RNG at FX init.
+    // Exact global object scheduling/RNG interleaving is not reproduced by this host.
+    let random = this.poweredVisualRng;
+    random ^= random << 13; random ^= random >>> 17; random ^= random << 5;
+    this.poweredVisualRng = random >>> 0;
+    const byte = this.poweredVisualRng >>> 24;
+    this.poweredLaunchFlashes.push({...structuredClone(event),uid:`powered-flash-${serial}`,
+      ownerUid:owner.uid,team:owner.team,effectId:0,spin:byte*Math.PI/128,ageFrames:0,lifeFrames:4});
+    if(event.cause !== 'primary') this.onRomCue?.(event.cause === 'normal' ? 6 : 255);
+  };
   private projectileDespawns: ProjectileDespawnObservation[] = [];
 
   private profiles = new Map<string, BorgProfile>();
@@ -657,6 +674,7 @@ class BattleImpl implements Battle {
     if (this.observationCache) return this.observationCache;
     const state = this.state;
     this.observationCache = {
+      poweredLaunchFlashes: structuredClone(this.poweredLaunchFlashes),
       actors: state.borgs.map(snapshotActor),
       diverAuras: structuredClone(state.diverAuras ?? []),
       diverAuraTails: structuredClone(state.diverAuraTails ?? []),
@@ -741,7 +759,7 @@ class BattleImpl implements Battle {
     *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void {
     if (actor) {
-      const powered = spawnPoweredSource(b, actor, spawnerAddr, kind, this.state.borgs);
+      const powered = spawnPoweredSource(b, actor, spawnerAddr, kind, this.state.borgs, this.onPoweredLaunch);
       if (powered !== null) { this.state.projectiles.push(...powered); return; }
     }
     // Dedicated owner-following child identity must survive before the B-shot resolver.
@@ -1044,6 +1062,8 @@ class BattleImpl implements Battle {
     if (this.state.result !== "ongoing") return this.observe();
     this.observationCache = null;
     this.projectileDespawns = [];
+    this.poweredLaunchFlashes = this.poweredLaunchFlashes
+      .map(flash=>({...flash,ageFrames:flash.ageFrames+1})).filter(flash=>flash.ageFrames<flash.lifeFrames);
 
     // 0) Power Burst charged-flag sweep (ROM +0x103, Q4): the flag flips ONE frame AFTER the
     // clamped meter reaches METER_MAX. Deterministic check-BEFORE-fill ordering: this runs
@@ -1287,6 +1307,7 @@ class BattleImpl implements Battle {
       {
         bounds: this.bounds,
         collision: this.collision,
+        onPoweredLaunch: this.onPoweredLaunch,
       },
       {
         sideRankForTeam: (team) => this.sideRankForTeam(team),
