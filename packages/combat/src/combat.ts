@@ -1,3 +1,4 @@
+import { advanceBeamSource, beamPulseOverlaps, stepBeamInput } from "./beamProjectile.js";
 import { advanceRevolverSource, stepRevolverInput, isRevolver, type RevolverPresentationSink } from "./revolverProjectileRuntime.js";
 import { advanceGatlingSource, createGatlingExplosion, stepGatlingInput } from "./gatlingProjectile.js";
 import { type PoweredPresentationSink, advancePoweredSource, poweredCanCollide, shrinkPoweredOnContact } from "./poweredProjectileRuntime.js";
@@ -2481,6 +2482,11 @@ export function stepAttacks(
   damageContext: DamageRuntimeContext = {},
 ): AttackResult {
   const out: Projectile[] = [];
+  const beam = b.borgId === "pl0104"
+    ? (b.beamInput?.pending ? b.beamInput : stepBeamInput(b, {
+      special: specialHeld, attack: attackHeld, jump: false, hyper: false,
+    })) : null;
+  if (beam) beam.pending = false;
   const revolver = isRevolver(b.borgId)
     ? (b.revolverInput?.pending ? b.revolverInput : stepRevolverInput(b,specialHeld)) : null;
   if (revolver) revolver.pending=false;
@@ -2506,7 +2512,7 @@ export function stepAttacks(
   // expiry and made an X-hold charge impossible.
   const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
   b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
-  const pressedSpecialEdge = revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld && !prevSpecialHeld;
+  const pressedSpecialEdge = beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
@@ -2556,7 +2562,7 @@ export function stepAttacks(
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld: powered ? powered.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: powered ? powered.pressEdge : beam ? beam.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
 
@@ -2600,11 +2606,11 @@ export function stepAttacks(
       if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
     }
   }
-  if (revolver && revolver.pressEdge && canStartAction && !commandPreemptsX && xCanFire &&
+  if ((beam?.pressEdge || revolver?.pressEdge) && canStartAction && !commandPreemptsX && xCanFire &&
       (b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact && b.command.type === AttackCommandType.Melee2 && b.command.actionIndex === 2) {
     if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
   }
-  if (!powered && !revolver && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  if (!powered && !revolver && !beam && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
@@ -3610,6 +3616,7 @@ export function stepProjectiles(
   // not fly on their constructor frame. Other projectile families keep their old order.
   const poweredPrevious = new Map<Projectile, Vec3>();
   projectiles = projectiles.flatMap(pr => {
+    if (pr.beamSource) return advanceBeamSource(pr,byUid);
     if (pr.revolverSource) {
       poweredPrevious.set(pr, { ...pr.pos });
       return advanceRevolverSource(pr, byUid, ctx?.onRevolverLaunch);
@@ -3625,11 +3632,41 @@ export function stepProjectiles(
     return advancePoweredSource(pr, byUid, ctx?.onPoweredLaunch);
   });
   stepSourceCollision(all, profiles, damageContext, projectiles.filter(pr =>
-    poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail")));
+    !pr.beamSource && poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail")));
 
   const survivors: Projectile[] = [];
   for (const pr of projectiles) {
     pr.hitConfirmedThisFrame = false;
+    if (pr.beamSource) {
+      const child = pr.beamSource;
+      const owner = byUid.get(pr.ownerUid);
+      const ownerProfile = owner ? profiles.get(owner.uid) : undefined;
+      for (const pulse of child.pulses) {
+        for (const target of all) {
+          if (target.uid === pr.ownerUid || pulse.hitUids.includes(target.uid) ||
+              !isTargetable(target) || isInvincible(target)) continue;
+          const record = pr.damageRecord!;
+          const profile = profiles.get(target.uid);
+          if (!profile || (owner && (
+            ((record.flagsA & 0x80) !== 0 && owner.team === target.team) ||
+            burstAllyPassthroughBlocks(owner, target, record)
+          ))) continue;
+          if (!beamPulseOverlaps(pulse, target.pos, pulse.radius + SHOT.TARGET_BODY_RADIUS)) continue;
+          pulse.hitUids.push(target.uid);
+          applyHit(target, profile, record.hpDamage, 1, child.direction, pulse.start, false, record,
+            owner && ownerProfile ? {
+              attacker: owner, attackerProfile: ownerProfile, damageScale: 1,
+              aimedTargetUid: pr.aimedTargetUid ?? null,
+              attackerSideRank: damageContext.sideRankForTeam?.(owner.team),
+              defenderSideRank: damageContext.sideRankForTeam?.(target.team),
+            } : undefined, damageContext);
+          pr.hitConfirmedThisFrame = true;
+          pr.lastImpactEffectId = record.impactEffectId;
+        }
+      }
+      survivors.push(pr);
+      continue;
+    }
     if (pr.gatlingSource?.kind === "explosion") {
       const child = pr.gatlingSource;
       if (child.phase !== "tail") {

@@ -1,3 +1,4 @@
+import { spawnBeamSource, stepBeamInput } from "./beamProjectile.js";
 import { refreshSourceAttackTargets } from "./sourceAttackTarget.js";
 import { spawnRevolverSource, stepRevolverInput, isRevolver, type RevolverPresentationSink } from "./revolverProjectileRuntime.js";
 import type { RevolverLaunchFlash } from "./types.js";
@@ -787,6 +788,8 @@ class BattleImpl implements Battle {
     *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void {
     if (actor) {
+      const beam = spawnBeamSource(b,actor,spawnerAddr,kind);
+      if (beam !== null) { this.state.projectiles.push(...beam); return; }
       const revolver = spawnRevolverSource(b, actor, spawnerAddr, kind);
       if (revolver !== null) { this.state.projectiles.push(...revolver); return; }
       const gatling = spawnGatlingSource(b, actor, spawnerAddr, kind, this.state.borgs);
@@ -1256,6 +1259,7 @@ class BattleImpl implements Battle {
       }
 
       // Source charge bookkeeping also runs while another action owns this frame.
+      if (b.borgId === "pl0104") stepBeamInput(b,input);
       if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
       if (b.borgId === "pl0101") {
