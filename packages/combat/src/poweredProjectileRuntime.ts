@@ -6,7 +6,7 @@ import { tierSizeScale } from "./timescale.js";
 import { attackHitRecordsForKind } from "./attackHitData.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { stepRng8 } from "./prng.js";
-import { beginPoweredSecondaryShrink, createPoweredPrimary, stepPoweredPrimary, createPoweredSecondaries, stepPoweredSecondary, poweredPrimaryMuzzle,
+import { beginPoweredSecondaryShrink, createPoweredPrimary, stepPoweredPrimary, createPoweredSecondaries, stepPoweredSecondary, poweredPrimaryMuzzle, createPoweredNormalPort, poweredNormalMuzzle,
   type PoweredPrimaryState, type PoweredSecondaryState } from "./poweredProjectile.js";
 let serial = 0;
 export type PoweredSourceState = PoweredPrimaryState | PoweredSecondaryState;
@@ -36,9 +36,34 @@ function wrap(owner: Pick<BorgRuntime,"uid"|"team">, state: PoweredSourceState, 
     poweredSource: state, poweredSkipAdvance: skipAdvance,
   };
 }
+/** zz_006a104_ -> zz_006bda8_: save aim on admission, before the authored windup.
+ * Target center is the host root approximation; no-target Y uses static joint3.
+ * The source no-target X/Z are absolute world coordinates, not owner-relative.
+ */
+export function capturePoweredNormalAim(owner:BorgRuntime,actor:RomActor,all:readonly BorgRuntime[]):void {
+  const target=targetData(activeSourceTarget(owner,all));
+  const yaw=actor.heading*Math.PI*2/65536;
+  owner.poweredNormalAim={targetUid:target?.uid??null,pos:target?{...target.pos}:{
+    x:20000*Math.sin(yaw),
+    y:actor.pos.y+actor.modelScale*actor.sizeScale*124.89293384552002,
+    z:20000*Math.cos(yaw),
+  }};
+}
 export function spawnPoweredSource(owner: BorgRuntime, actor: RomActor, addr: number, row: number,
   all: readonly BorgRuntime[]): Projectile[] | null {
-  if (owner.borgId !== "pl0101" || actor.actionIndex !== 3) return null;
+  if (owner.borgId !== "pl0101") return null;
+  if (actor.actionIndex === 2 && addr === 0x8016d584 && row >= 0 && row <= 3) {
+    // Four port callbacks each emit four children. Rows are NOT HIT kinds.
+    const aim = owner.poweredNormalAim;
+    if (!aim) return []; // no invented aim or generic damaging fallback
+    const yaw = actor.heading * Math.PI * 2 / 65536;
+    const ownerScale = actor.modelScale * actor.sizeScale;
+    const port = row as 0|1|2|3;
+    const pos = poweredNormalMuzzle(port,actor.pos,yaw,ownerScale);
+    return createPoweredNormalPort(port,pos,yaw,aim.pos,ownerScale,stepRng8)
+      .map(state => wrap(owner,state,aim.targetUid));
+  }
+  if (actor.actionIndex !== 3) return null;
   if (addr === 0x800f036c && row === 6) return []; // source presentation effect, never damage
   if (addr !== 0x8007db5c || ![6,7,8,9].includes(row)) return null;
   const target = targetData(activeSourceTarget(owner, all));

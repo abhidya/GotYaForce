@@ -1,7 +1,7 @@
 import { advancePoweredSource, poweredCanCollide, shrinkPoweredOnContact } from "./poweredProjectileRuntime.js";
 import { stepPoweredCharge, commitPoweredCharge } from "./poweredCharge.js";
 import { hasSourcePrimaryAmmo } from "./primaryAmmo.js";
-import { isDiverAmmoFamily, stepDiverXRefill, stepSourceAmmoRefill } from "./diverAmmo.js";
+import { hasSourceXAmmo, stepSourceAmmoRefill } from "./diverAmmo.js";
 // Combat: lock-on, melee (B), ranged shot (B for ranged borgs), special (X), projectiles
 // with homing, damage = f(attack/shot, defense), hitstun -> "hit", knockdown -> "down" ->
 // wake with invincTimer=60 (the decomp countdown, ported exactly), cooldowns + ammo/reload.
@@ -228,10 +228,10 @@ export function stepCooldowns(b: BorgRuntime): void {
 // ROM shape: 3 weapon cells (struct+0x774/+0x77c/+0x784, stride 8; aux max/refillType/
 // refillParam at struct+0x78c stride 8). Weapon 0 drives the B shot path and mirrors
 // BorgRuntime.ammo for compat. Weapon 1 is now bound to the X/special ammo path per the
-// official B/X counter split. Diver source cell 2 aliases browser X cell 1;
+// official B/X counter split. Diver and Powered source cell 2 alias browser X cell 1;
 // other families retain their existing mapping.
 //
-// Source-backed primary modes 0/1 and Diver X use diverAmmo.ts's source timer lane.
+// Source-backed primary modes 0/1 and Diver/Powered X use diverAmmo.ts's source timer lane.
 // Other slots and unsupported/no-row profiles retain the legacy browser refill policy:
 //   - max === 0 -> infinite: the fire gate is skipped entirely (chunk_0002.c:7158-7165), cur
 //     is never decremented below 0.
@@ -249,7 +249,7 @@ export function stepCooldowns(b: BorgRuntime): void {
  *  weapon-1 slot (DERIVED where available via weaponOneCellSourceForBorgId — behavior-notes.md
  *  section (am) cross-check; see that function's doc for the row-layout citation). Weapon 1
  *  drives X/special ammo gating/decrement/refill in stepAttacks/startSpecialAttack.
- *  For Divers, browser index 1 aliases source cell 2, as recovered from the
+ *  For Divers and Powered Gunman, browser index 1 aliases source cell 2, as recovered from the
  *  FUN_800562b8 slot-selection arithmetic; other families retain their existing mapping. */
 function initWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
   const shotDef = actionProfileForProfile(p).shot;
@@ -270,13 +270,13 @@ function initWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
         max: weapon1Source.max,
         refillType: weapon1Source.refillType,
         refillParam: weapon1Source.refillParam,
-        timer: weapon1Source.refillType === 1 ? 0 : weapon1Source.refillParam,
+        timer: hasSourceXAmmo(p.id) || weapon1Source.refillType === 1 ? 0 : weapon1Source.refillParam,
       }
     : { cur: 0, max: 0, refillType: 0, refillParam: 0, timer: 0 };
   const weapon2: WeaponCell = { cur: 0, max: 0, refillType: 0, refillParam: 0, timer: 0 };
   // FUN_800562b8 maps the second stat segment to ROM cell 2. Keep the
   // browser X/HUD index 1 as an alias, not a second independently charged pool.
-  return [weapon0, weapon1, isDiverAmmoFamily(p.id) ? weapon1 : weapon2];
+  return [weapon0, weapon1, hasSourceXAmmo(p.id) ? weapon1 : weapon2];
 }
 
 /** Ensure `b.weaponCells` exists (lazy self-heal for constructors/fakes that only set `ammo`
@@ -292,7 +292,7 @@ function ensureWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
   }
   // Re-establish the alias after a caller/deserializer copied the array by value.
   // Browser X is canonical; never reset its outstanding timer or charge.
-  if (isDiverAmmoFamily(p.id) && b.weaponCells[1]) b.weaponCells[2] = b.weaponCells[1];
+  if (hasSourceXAmmo(p.id) && b.weaponCells[1]) b.weaponCells[2] = b.weaponCells[1];
   syncAmmoAlias(b, b.weaponCells[0]);
   return b.weaponCells;
 }
@@ -315,9 +315,9 @@ export function stepAmmoRefill(b: BorgRuntime, p: BorgProfile): void {
   const cells = ensureWeaponCells(b, p);
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i]!;
-    if (isDiverAmmoFamily(p.id) && i === 2) continue; // aliases X, never tick twice
+    if (hasSourceXAmmo(p.id) && i === 2) continue; // aliases X, never tick twice
     if (i === 0 && hasSourcePrimaryAmmo(p.id, p.level)) stepSourceAmmoRefill(cell, b, 0);
-    else if (isDiverAmmoFamily(p.id) && i === 1) stepDiverXRefill(cell, b);
+    else if (hasSourceXAmmo(p.id) && i === 1) stepSourceAmmoRefill(cell, b, 2);
     else stepWeaponCellRefill(cell);
   }
   const weapon0 = cells[0];
@@ -385,7 +385,7 @@ export function useWeaponCell(
   cell.cur -= count;
   if (cell.refillType === 1) {
     cell.timer = (weaponIdx === 0 && hasSourcePrimaryAmmo(p.id, p.level)) ||
-      (isDiverAmmoFamily(p.id) && (weaponIdx === 1 || weaponIdx === 2))
+      (hasSourceXAmmo(p.id) && (weaponIdx === 1 || weaponIdx === 2))
       ? Math.fround(cell.timer + cell.refillParam) : cell.timer + cell.refillParam;
   } else if (cell.refillType <= 0) {
     if (cell.cur === 0) cell.timer = cell.refillParam;
@@ -2545,7 +2545,7 @@ export function stepAttacks(
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: powered ? powered.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
 
@@ -2582,10 +2582,11 @@ export function stepAttacks(
         commitPoweredCharge(b);
         return { projectiles: out };
       }
-    } else if (!powered.releasedReady && powered.releaseEdge && xCanFire) {
-      // Compatibility: short X still fires on release, not source press semantics.
-      startSpecialAttack(b, p, actionProfile, 0, out, all, profiles, damageContext, xMoveForBorgId(b.borgId));
-      return { projectiles: out };
+    } else if (powered.pressEdge && xCanFire && b.command?.type === AttackCommandType.Melee2
+      && b.command.actionIndex === 2 && b.command.exact) {
+      // DAT_802d3910 flags=0 reads the press-edge word. Charge still uses raw held X.
+      // Admission only checks the shared source cell; the authored frame-16 gate spends it.
+      if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
     }
   }
   if (!powered && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {

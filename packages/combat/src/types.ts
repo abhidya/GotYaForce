@@ -151,6 +151,8 @@ export interface RomFamilyDriver {
 export interface BorgRuntime {
   /** Source slot-2 charge, isolated from tuned X-charge tiers. */
   poweredCharge?: import("./poweredCharge.js").PoweredChargeState;
+  /** Action-2 admission snapshot of source +0x518, with root/static-bind host transforms. */
+  poweredNormalAim?: { pos: Vec3; targetUid: string | null };
   uid: string;
   borgId: string;
   /** Current descriptor/model form after an in-place ROM morph. `borgId` remains the

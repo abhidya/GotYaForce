@@ -1,4 +1,5 @@
-import { spawnPoweredSource } from "./poweredProjectileRuntime.js";
+import { spawnPoweredSource, capturePoweredNormalAim } from "./poweredProjectileRuntime.js";
+import { stepDiverXRefill, refreshDiverAmmoRate } from "./diverAmmo.js";
 import { stepProjectiles } from "./combat.js";
 import { stepPoweredCharge, commitPoweredCharge } from './poweredCharge.js';
 import { runSelfTest as runFlightTests } from './poweredProjectile.selftest.js';
@@ -18,8 +19,115 @@ function setup(){
  owner.pos={x:0,y:0,z:0};state.borgs[1]!.pos={x:0,y:0,z:6000};
  return {battle,inputs,state,owner,driver};
 }
+/** Real Battle input path: admission and the authored resource gate are separate. */
+function runPoweredNormalSelfTest():void {
+ const instrument=()=>{
+  const test=setup();
+  const events:{addr:number,row:number}[]=[];
+  const allocations:{slot:number,count:number,mode:number|undefined,accepted:boolean}[]=[];
+  const spawn=test.driver.ctx.onFamilyProjectile!;
+  test.driver.ctx.onFamilyProjectile=(a,addr,row)=>{events.push({addr,row});spawn(a,addr,row);};
+  const allocate=test.driver.ctx.onAllocateResource!;
+  test.driver.ctx.onAllocateResource=(a,slot,count,mode)=>{
+   const accepted=allocate(a,slot,count,mode);allocations.push({slot,count,mode,accepted});return accepted;
+  };
+  return {...test,events,allocations};
+ };
+ {
+  const {battle,inputs,state,owner,driver,events,allocations}=instrument();
+  const cell=owner.weaponCells![1]!;const full=cell.cur;
+  assert(full>0,'normal-X fixture starts with ammo');
+  inputs.p1.special=true;battle.step(1/60,inputs);
+  assert(owner.command?.type===2&&owner.command.actionIndex===2&&owner.command.recordAddress==='0x8034ea20','normal press selects exact type2/action2');
+  assert(driver.actor.actionIndex===2,'normal press enters ROM action2');
+  const savedAim=owner.poweredNormalAim;
+  assert(savedAim?.targetUid===state.borgs[1]!.uid&&savedAim.pos.z===6000,'normal admission snapshots selected target root');
+  state.borgs[1]!.pos={x:6000,y:0,z:0};
+  assert(cell.cur===full&&allocations.length===0&&events.length===0,'normal press admits without spend or spawn');
+  for(let i=0;i<15;i++){
+   battle.step(1/60,inputs);
+   assert(Number(events.length)===0&&Number(allocations.length)===0&&cell.cur===full,'no normal allocation/spawn before authored frame16');
+  }
+  battle.step(1/60,inputs);
+  assert(events.map(e=>`${e.addr.toString(16)}:${e.row}`).join(',')==='8016d584:0,8016d584:1,8016d584:2,8016d584:3','normal frame16 dispatches all four source ports');
+  assert(Number(allocations.length)===1&&allocations[0]!.slot===2&&allocations[0]!.count===1&&allocations[0]!.accepted,'one source weapon2 cell allocation at gate');
+  assert(cell.cur===full-1,'source weapon2 spends exactly one browser weapon1 cell');
+  const children=state.projectiles.filter(p=>p.ownerUid===owner.uid);
+  assert(children.length===16&&children.every(p=>p.poweredSource?.kind==='secondary'),'normal emits only sixteen source secondaries, no generic fallback');
+  for(const port of [0,1,2,3])assert(children.filter(p=>p.poweredSource?.kind==='secondary'&&p.poweredSource.port===port).length===4,`four normal children on port ${port}`);
+  const firstPort=children.filter(p=>p.poweredSource?.kind==='secondary'&&p.poweredSource.port===0);
+  const origin=firstPort[0]!.pos;const aimLength=Math.hypot(savedAim.pos.x-origin.x,savedAim.pos.y-origin.y,savedAim.pos.z-origin.z);
+  const coneSum=firstPort.reduce((sum,p)=>{const child=p.poweredSource!;assert(child.kind==='secondary','normal secondary state');return {x:sum.x+child.direction.x,y:sum.y+child.direction.y,z:sum.z+child.direction.z};},{x:0,y:0,z:0});
+  const coneLength=Math.hypot(coneSum.x,coneSum.y,coneSum.z);
+  assert(Math.abs(coneSum.x/coneLength-(savedAim.pos.x-origin.x)/aimLength)<1e-8&&Math.abs(coneSum.z/coneLength-(savedAim.pos.z-origin.z)/aimLength)<1e-8,'normal fire uses entry snapshot, not target moved during windup');
+  assert(children.every(p=>p.life===40&&p.romShotKind===0&&p.flightVisual?.bankTexId===26&&p.hitRadius===20),'normal source life/HIT/visuals and no constructor movement');
+  battle.step(1/60,inputs);
+  assert(children.every(p=>p.life===39),'normal child advances once on subsequent frame');
+  for(let i=0;i<80;i++)battle.step(1/60,inputs);
+  assert(Number(events.length)===4&&Number(allocations.length)===1,'held normal never repeats after action ends');
+  inputs.p1.special=false;battle.step(1/60,inputs);
+  for(let i=0;i<45;i++)battle.step(1/60,inputs);
+  assert(cell.cur===full,'source refill completes before normal repress');
+  assert(Number(events.length)===4&&Number(allocations.length)===1,'short release never duplicates normal volley');
+  inputs.p1.special=true;battle.step(1/60,inputs);
+  assert(driver.actor.actionIndex===2,'fresh repress starts another normal action');
+  for(let i=0;i<16;i++)battle.step(1/60,inputs);
+  assert(Number(events.length)===8&&Number(allocations.length)===2,'fresh repress fires exactly one fresh normal volley');
+ }
+ {
+  const {battle,inputs,owner}=setup();const cell=owner.weaponCells![1]!;
+  assert(owner.weaponCells![2]===cell&&cell.timer===0&&cell.cur===cell.max&&cell.refillParam===120,`Powered full source cell2 aliases browser cell1 with zero initial debt and period120: ${JSON.stringify(cell)}, alias=${owner.weaponCells![2]===cell}`);
+  cell.cur=cell.max-1;cell.timer=120;
+  for(let i=0;i<119;i++)battle.step(1/60,inputs);
+  assert(Number(cell.timer)===1&&cell.cur===cell.max-1,'baseline refill retains integer ammo for119 frames');
+  battle.step(1/60,inputs);assert(Number(cell.timer)===0&&cell.cur===cell.max,'baseline source refill completes on frame120');
+  cell.cur=cell.max-1;cell.timer=120;owner.sourceAmmoRefillPauseMask=4;
+  battle.step(1/60,inputs);assert(Number(cell.timer)===120,'source slot2 mask bit4 pauses X refill');
+  owner.sourceAmmoRefillPauseMask=2;
+  battle.step(1/60,inputs);assert(Number(cell.timer)===119,'browser slot1 mask bit2 does not pause source X');
+  owner.sourceAmmoRefillPauseMask=0;owner.sourceAmmoRefillRate=1;owner.burstPaired=true;
+  cell.timer=120;stepDiverXRefill(cell,owner);
+  assert(Number(cell.timer)===110,'paired first refill uses cached baseline times source multiplier10');
+  refreshDiverAmmoRate(owner);stepDiverXRefill(cell,owner);
+  assert(Number(cell.timer)===95,'paired subsequent refill uses refreshed base1.5 times source multiplier10');
+ }
+ {
+  const {owner,driver}=setup();
+  driver.actor.pos={x:500,y:70,z:-900};driver.actor.heading=16384;
+  driver.actor.modelScale=2;driver.actor.sizeScale=1;
+  capturePoweredNormalAim(owner,driver.actor,[]);
+  const aim=owner.poweredNormalAim!;
+  assert(aim.targetUid===null&&Math.abs(aim.pos.x-20000)<1e-8&&Math.abs(aim.pos.z)<1e-8,'targetless aim uses absolute source yaw endpoint, without adding owner X/Z');
+  assert(Math.abs(aim.pos.y-(70+2*124.89293384552002))<1e-8,'targetless aim uses decoded joint3 height and actor scale');
+ }
+ {
+  const {battle,inputs,events,allocations}=instrument();
+  inputs.p1.special=true;battle.step(1/60,inputs);
+  inputs.p1.special=false;
+  for(let i=0;i<15;i++){battle.step(1/60,inputs);assert(events.length===0,'short tap still waits for authored frame16');}
+  battle.step(1/60,inputs);
+  assert(Number(events.length)===4&&allocations.length===1,'short tap completes exactly one source normal volley');
+  for(let i=0;i<90;i++)battle.step(1/60,inputs);
+  assert(Number(events.length)===4&&allocations.length===1,'short tap release cannot trigger a second volley');
+ }
+ for(const mode of ['empty','depleted','interrupted','busy'] as const){
+  const {battle,inputs,state,owner,events,allocations}=instrument();
+  if(mode==='empty')owner.weaponCells![1]!.cur=0;
+  if(mode==='busy'){owner.state='hit';owner.stateTime=0;owner.cooldowns['hitstun']=20;}
+  inputs.p1.special=true;battle.step(1/60,inputs);
+  if(mode==='depleted')owner.weaponCells![1]!.cur=0;
+  if(mode==='interrupted'){owner.state='hit';owner.stateTime=0;owner.cooldowns['hitstun']=20;}
+  for(let i=0;i<90;i++)battle.step(1/60,inputs);
+  assert(events.length===0&&state.projectiles.filter(p=>p.ownerUid===owner.uid).length===0,`${mode}: no normal volley or generic fallback`);
+  if(mode==='depleted')assert(allocations.length===1&&!allocations[0]!.accepted,'depletion after admission fails exactly one source allocation');
+  else assert(allocations.length===0,`${mode}: no allocation before admitted fire gate`);
+  inputs.p1.special=false;battle.step(1/60,inputs);
+  assert(events.length===0,`${mode}: release does not buffer or duplicate normal action`);
+ }
+}
 export function runPoweredChargeSelfTest():void {
  runFlightTests();
+ runPoweredNormalSelfTest();
  for(const boosted of [false,true]){
  const b={burstActive:boosted,burstPaired:boosted} as BorgRuntime;
  const readyFrame=boosted?28:190;
@@ -41,9 +149,11 @@ export function runPoweredChargeSelfTest():void {
  owner.weaponCells![1]!.cur=ammo;
  inputs.p1.special=true;
  for(let i=0;i<189;i++)battle.step(1/60,inputs);
- assert(Number(owner.poweredCharge!.charge)===179&&Number(events.length)===0,'actual below threshold/no held fire');
+ assert(Number(owner.poweredCharge!.charge)===179,'actual raw hold below threshold despite normal-X action');
+ assert(events.every(e=>e.addr!==0x8007db5c),'holding never emits charged primaries');
  battle.step(1/60,inputs);assert(owner.poweredCharge!.ready,'actual frame190 ready');
  owner.weaponCells![1]!.cur=ammo;
+ events.length=0;allocations=0;
  inputs.p1.special=false;battle.step(1/60,inputs);
  assert(owner.command?.type===5&&owner.command.actionIndex===3&&owner.command.recordAddress==='0x8034ead0','exact source command');
  assert(driver.actor.actionIndex===3,'bridge action3');
@@ -87,10 +197,12 @@ export function runPoweredChargeSelfTest():void {
  assert(stepProjectiles([primaries[1]!],[],new Map(),byUid).length===0,'dead owner primary cannot split or move');
  owner.alive=true;
  // Interrupt/repeat resets choreography and requires a fresh complete hold.
+ state.projectiles.length=0;state.borgs[1]!.pos={x:0,y:0,z:6000};
  driver.interrupt();owner.state='idle';owner.anim='idle';owner.cooldowns['special']=0;
  events.length=0;inputs.p1.special=true;
  for(let i=0;i<190;i++)battle.step(1/60,inputs);
- assert(Number(events.length)===0,'repeat hold never auto-fires');
+ assert(events.every(e=>e.addr!==0x8007db5c),'repeat hold never auto-fires charged primaries');
+ events.length=0;
  inputs.p1.special=false;battle.step(1/60,inputs);
  assert(Number(events.length)===0&&driver.actor.contactP1===0,'repeat resets part0 aux gate');
  for(let i=0;i<15;i++) { battle.step(1/60,inputs); assert(Number(events.length)===0,'repeat may not fire before authored frame16'); }
@@ -101,13 +213,15 @@ export function runPoweredChargeSelfTest():void {
  const {battle,inputs,owner,driver}=setup();let shots=0;
  const spawn=driver.ctx.onFamilyProjectile!;driver.ctx.onFamilyProjectile=(a,addr,row)=>{shots++;spawn(a,addr,row);};
  inputs.p1.special=true;for(let i=0;i<90;i++)battle.step(1/60,inputs);
+ const heldShots=shots;
  inputs.p1.special=false;battle.step(1/60,inputs);
- assert(owner.command?.type!==5&&shots===0,'old90-frame threshold cannot activate source action3');
+ assert(owner.command?.type!==5&&shots===heldShots,'old90-frame threshold cannot activate source action3 or duplicate normal-X');
  assert(Number(owner.poweredCharge!.charge)===78,'underready residual preserved');
  }
  {
  const {battle,inputs,state,owner,driver}=setup();let shots=0;
  const spawn=driver.ctx.onFamilyProjectile!;driver.ctx.onFamilyProjectile=(a,addr,row)=>{shots++;spawn(a,addr,row);};
+ owner.weaponCells![1]!.cur=0;
  inputs.p1.special=true;for(let i=0;i<190;i++)battle.step(1/60,inputs);
  inputs.p1.special=false;battle.step(1/60,inputs);
  const target=state.borgs[1]!;target.pos={x:owner.pos.x+20,y:owner.pos.y,z:owner.pos.z};const hp=target.hp;
@@ -129,5 +243,5 @@ export function runPoweredChargeSelfTest():void {
  normal:{x:0,y:0,z:1},planeD:60,bounds2d:{minX:-1000,maxX:1000,minZ:60,maxZ:60}}]}});
  assert(result.length===0&&shots[0]!.despawnReason==='hit-terrain'&&shots[0]!.pos.z===60,'constructor segment hits wall between muzzle and endpoint');
  }
- console.log('Powered charged-X integration: passed');
+ console.log('Powered normal/charged-X integration: passed');
 }

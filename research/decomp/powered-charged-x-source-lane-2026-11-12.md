@@ -1,5 +1,8 @@
 # Powered Gunman charged-X source lane
 
+Normal-X follow-up: `powered-normal-x-source-lane-2026-11-12.md` supersedes
+the short-X compatibility boundary below with source press-edge action2.
+
 Scope: pl0101 exact type 5 / action 3, record 0x8034ead0 [44, 3, 3, 0], spawner
 0x8007db5c rows **8, 9, 6, 7**. Normal B, short-X compatibility and other families
 retain their existing routes. No raw assets were copied/uploaded or replaced.
@@ -46,7 +49,8 @@ Original pl0101data.bin +0x18c = float 180 (0x43340000). X weapon row
 
 ## Honest implementation boundaries
 
-Short-X remains release-based compatibility, not source press-while-charging.
+Historical boundary at the charged-X commit: short-X was release-based
+compatibility. This is superseded by the normal-X follow-up linked above.
 The source charged route uses no tuned 45/90 tier or damage multiplier. There is
 no X-charge HUD/ready indicator in the current game; none is added. Presentation
 of the non-damaging 0x800f036c effect 6 and source charge glow remain unimplemented.

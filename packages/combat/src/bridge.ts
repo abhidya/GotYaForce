@@ -1,4 +1,4 @@
-import { spawnPoweredSource } from "./poweredProjectileRuntime.js";
+import { capturePoweredNormalAim, spawnPoweredSource } from "./poweredProjectileRuntime.js";
 import { createKnightWindupClock, tickKnightWindupClock, type KnightWindupClock } from "./rom/knight-windup-clock.js";
 import { isDiverAmmoFamily } from "./diverAmmo.js";
 // Bridge between the existing @gf/combat `BorgRuntime` (the canonical game state —
@@ -1429,8 +1429,8 @@ export class RomDriverBridge implements RomFamilyDriver {
   private specialKind: "x" | "b" | null = null;
   /** True once the active ROM special armed a resolvable hit or fired a child projectile. */
   private specialHadEffect = false;
-  /** A source Diver resource denial is a valid no-payload outcome, not an unported X. */
-  private diverResourceDenied = false;
+  /** A source Diver/Powered resource denial is a valid no-payload outcome, not an unported X. */
+  private sourceXResourceDenied = false;
   /** Accumulated |Δpos| the ROM machine drove this special (movement X moves count as effect). */
   private specialMotionAccum = 0;
   /** Position at special start, for the NET displacement test in the impotence latch. */
@@ -1597,8 +1597,8 @@ export class RomDriverBridge implements RomFamilyDriver {
       this.dispatchEventList(events.slice(0, events.findIndex((event) => event.op === "wait")), 0);
       return true;
     }
-    const poweredCharged = this.runtime.borgId === "pl0101" && this.actor.actionIndex === 3 && group === 4;
-    const startFrame = poweredCharged ? this.streamFrame - 1 : this.streamFrame;
+    const poweredSourceAction = this.runtime.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3) && group === 4;
+    const startFrame = poweredSourceAction ? this.streamFrame - 1 : this.streamFrame;
     const maxFrame = events.reduce((max, event) =>
       Math.max(max, typeof event.frame === "number" ? event.frame : 0), 0);
     this.streamSchedules.push({
@@ -1609,7 +1609,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       completed: false,
     });
     this.specialMaxFrames = Math.max(this.specialMaxFrames, this.streamFrame + maxFrame + 5);
-    if (poweredCharged) this.dispatchEventList(events, 0);
+    if (poweredSourceAction) this.dispatchEventList(events, 0);
     return true;
   }
 
@@ -1950,7 +1950,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (host.onAllocateResource) dest.onAllocateResource = (actor, type, count, mode) => {
       const accepted = host.onAllocateResource!(actor, type, count, mode);
       if (!accepted && type === 2 && (mode ?? 0) !== 0 &&
-          isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId)) this.diverResourceDenied = true;
+          (isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) || runtime.borgId === "pl0101")) this.sourceXResourceDenied = true;
       return accepted;
     };
     if (host.onExitFb) dest.onExitFb = host.onExitFb;
@@ -2116,7 +2116,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.armedHits = [];
     this.specialKind = "x";
     this.specialHadEffect = false;
-    this.diverResourceDenied = false;
+    this.sourceXResourceDenied = false;
     this.specialMotionAccum = 0;
     this.specialStartPos = { x: runtime.pos.x, y: runtime.pos.y, z: runtime.pos.z };
     this.streamFrame = 0;
@@ -2145,6 +2145,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       const preX = runtime.pos.x;
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
+      if (runtime.borgId === "pl0101" && actionIndex === 2) capturePoweredNormalAim(runtime,this.actor,all);
       dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex, variantIndex });
       stepRomActor(this.actor, this.tables, this.ctx);
       this.syncOut(runtime);
@@ -2201,7 +2202,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.armedHits = [];
     this.specialKind = "b";
     this.specialHadEffect = false;
-    this.diverResourceDenied = false;
+    this.sourceXResourceDenied = false;
     this.specialMotionAccum = 0;
     this.streamFrame = 0;
     // Load pre-decoded stream events for the group-4 charge choreography (anim + fireChild).
@@ -2286,9 +2287,9 @@ export class RomDriverBridge implements RomFamilyDriver {
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
       this.syncActionInput(input, true);
-      const poweredCharged = runtime.borgId === "pl0101" && this.actor.actionIndex === 3;
+      const poweredSourceAction = runtime.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3);
       // This source handler ticks its stream before testing +0x1cf0 in the same frame.
-      if (poweredCharged) this.dispatchEvent(this.streamFrame);
+      if (poweredSourceAction) this.dispatchEvent(this.streamFrame);
       // State 61 and the command fields remain live after the entry dispatch. Re-dispatching
       // cue 44 here would reset +0x540..+0x543 every frame, trapping every multi-phase ROM
       // machine in phase 0 and preventing an authored +0x1cee completion from being consumed.
@@ -2310,7 +2311,7 @@ export class RomDriverBridge implements RomFamilyDriver {
         }
       }
       // Stream events (anim + hitbox + fireChild) for this frame.
-      if (!poweredCharged) this.dispatchEvent(this.streamFrame);
+      if (!poweredSourceAction) this.dispatchEvent(this.streamFrame);
       this.streamFrame++;
       this.resolveHits(runtime, all);
       // Payload tracking for the X impotence latch: ROM-driven motion counts as a real
@@ -2341,7 +2342,7 @@ export class RomDriverBridge implements RomFamilyDriver {
         // of silently doing nothing again. PLACEHOLDER policy until every family's hit
         // kinds are decoded.
         if (this.specialKind === "x" && !this.specialHadEffect &&
-            !this.diverResourceDenied) {
+            !this.sourceXResourceDenied) {
           const net =
             Math.abs(runtime.pos.x - this.specialStartPos.x) +
             Math.abs(runtime.pos.y - this.specialStartPos.y) +
@@ -2536,9 +2537,9 @@ export class RomDriverBridge implements RomFamilyDriver {
           (part as typeof part & { c?: number }).c = ev.aux ?? 0;
           if (partIndex === 0) {
             this.actor.contactP0 = part.stateByte;
-            // pl0101 action3 consumes the adjacent part-0 aux byte (+0x1cf0),
+            // pl0101 actions2/3 consume the adjacent part-0 aux byte (+0x1cf0),
             // not part1.state. Authored g4s0/s1 sets it at frame16.
-            if (this.runtime?.borgId === "pl0101" && this.actor.actionIndex === 3)
+            if (this.runtime?.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3))
               this.actor.contactP1 = ((ev.aux ?? 0) << 24) >> 24;
           }
           break;

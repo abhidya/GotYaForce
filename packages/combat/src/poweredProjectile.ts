@@ -1,4 +1,4 @@
-/** Powered Gunman charged action 3. Source: 8007db5c family,
+/** Powered Gunman normal action 2 and charged action 3. Source: 8007db5c family,
  * table 802d6d68 (chunk_0011:4289–4609); secondary 8016d584/8016d9ac/
  * 8016db34/8016dcc0, table 80350660 (chunk_0043:4633–4980).
  * Pure source-unit, one-frame math. Caller supplies target center and source attachment
@@ -9,7 +9,8 @@
 export interface PoweredVec3 { x: number; y: number; z: number }
 export interface PoweredTarget { uid: string; pos: PoweredVec3; scale: number }
 export type PoweredPrimaryRow = 6 | 7 | 8 | 9;
-export type PoweredSecondaryPort = 4 | 5 | 6 | 7;
+export type PoweredNormalPort = 0 | 1 | 2 | 3;
+export type PoweredSecondaryPort = PoweredNormalPort | 4 | 5 | 6 | 7;
 export const POWERED_PRIMARY_ROWS = [8, 9, 6, 7] as const;
 export const POWERED_PRIMARY_PORTS = { 6: 4, 7: 5, 8: 6, 9: 7 } as const;
 export interface PoweredPrimaryState {
@@ -77,13 +78,27 @@ export function stepPoweredPrimary(input:PoweredPrimaryState,target:PoweredTarge
 /** Four children per primary, not an explosion. Exactly five injected source-byte draws. */
 export function createPoweredSecondaries(primary:PoweredPrimaryState,randomByte:()=>number):PoweredSecondaryState[]{
   const port=POWERED_PRIMARY_PORTS[primary.row];
-  const z=normalized(primary.targetCenter?sub(primary.targetCenter,primary.pos):primary.vel,{x:0,y:0,z:1});
   const visualYaw=primary.yaw+primary.spin;
-  let x=cross({x:Math.sin(visualYaw),y:0,z:Math.cos(visualYaw)},z);
+  return createPoweredPort(port,primary.pos,
+    primary.targetCenter?sub(primary.targetCenter,primary.pos):primary.vel,
+    {x:Math.sin(visualYaw),y:0,z:Math.cos(visualYaw)},primary.ownerScale,randomByte);
+}
+
+/** FUN_8016d584 rows 0..3: actor-local Z reference, saved world aim, four children. */
+export function createPoweredNormalPort(port:PoweredNormalPort,pos:PoweredVec3,yaw:number,
+  aim:PoweredVec3,ownerScale:number,randomByte:()=>number):PoweredSecondaryState[]{
+  return createPoweredPort(port,pos,sub(aim,pos),{x:Math.sin(yaw),y:0,z:Math.cos(yaw)},ownerScale,randomByte);
+}
+
+/** All eight table rows share the same constructor and flight/shrink state machine. */
+function createPoweredPort(port:PoweredSecondaryPort,pos:PoweredVec3,aimDelta:PoweredVec3,
+  axis:PoweredVec3,ownerScale:number,randomByte:()=>number):PoweredSecondaryState[]{
+  const z=normalized(aimDelta,{x:0,y:0,z:1});
+  let x=cross(axis,z);
   if(length(x)**2<=1e-10)x=cross(Math.abs(z.y)<.9?{x:0,y:1,z:0}:{x:1,y:0,z:0},z);
   x=normalized(x,{x:1,y:0,z:0});
   const y=normalized(cross(z,x),{x:0,y:1,z:0});
-  const theta=Math.PI*({4:2,5:1,6:4,7:4}[port])/16;
+  const theta=Math.PI*([2,1,4,4,2,1,4,4][port]!)/16;
   let azimuth=(Math.PI/2)*(((randomByte()&15)+1)/16);
   const result:PoweredSecondaryState[]=[];
   for(let i=0;i<4;i++){
@@ -92,7 +107,7 @@ export function createPoweredSecondaries(primary:PoweredPrimaryState,randomByte:
     const direction=add(mul(radial,-Math.sin(theta)),mul(z,Math.cos(theta)));
     const reference=add(mul(radial,Math.cos(theta)),mul(z,Math.sin(theta)));
     const factor=((randomByte()&7)+9)/16,speed=40*factor;
-    result.push({kind:'secondary',port,pos:copy(primary.pos),vel:mul(direction,speed),direction,reference,speed,acceleration:-factor,life:40,scale:primary.ownerScale,alpha:1,spin:0,phase:'flight'});
+    result.push({kind:'secondary',port,pos:copy(pos),vel:mul(direction,speed),direction,reference,speed,acceleration:-factor,life:40,scale:ownerScale,alpha:1,spin:0,phase:'flight'});
     azimuth+=Math.PI/2;if(azimuth>Math.PI)azimuth-=Math.PI*2;
   }
   return result;
@@ -123,4 +138,12 @@ export function poweredPrimaryMuzzle(row:PoweredPrimaryRow,ownerPos:PoweredVec3,
   const right=row===7||row===9;
   const local={x:(right?67.59280443191528:-67.59277391433716)+(right?118:-118),y:(right?136.1260986328125:136.12603759765625)+(row>=8?-22:36),z:(right?-.00001393718:-.00000385384)+30};
   return add(ownerPos,{x:(local.x*Math.cos(yaw)+local.z*Math.sin(yaw))*ownerScale,y:local.y*ownerScale,z:(-local.x*Math.sin(yaw)+local.z*Math.cos(yaw))*ownerScale});
+}
+
+/** Rows0..3 use the same static joints as the primaries but upper y offset is16, not36. */
+export function poweredNormalMuzzle(port:PoweredNormalPort,ownerPos:PoweredVec3,yaw:number,ownerScale=1):PoweredVec3 {
+  const row=([6,7,8,9] as const)[port];
+  const muzzle=poweredPrimaryMuzzle(row,ownerPos,yaw,ownerScale);
+  if(port<2)muzzle.y-=20*ownerScale;
+  return muzzle;
 }
