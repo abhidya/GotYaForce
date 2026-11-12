@@ -12,6 +12,33 @@ Static lifecycle18/19 mappings are now verified (see eligibility below). First r
 
 The existing repository cannot yet support this milestone honestly. Missing runtime eligibility bindings, shared handlers/streams and source physics/contact bindings below are requirements, not optional adapters. Implementing another detached lifecycle interface would not close them.
 
+## Original baseline capture (2026-11-12)
+
+A dedicated isolated Dolphin run loaded the existing 2v2 save, used the documented
+roster reload to select Double Ninja in four slots, observed constructor 8006f60c,
+and settled 180 frames. Four live pl0003 actors were verified in battle phase 4.
+The bounded observer recorded 100 events over 6.2263 seconds: three complete scheduler
+invocations and one partial, with no capture errors. Although input injection was
+armed, zero injected pad frames occurred before the event cap. This is an idle
+baseline, not action/reaction coverage or a deterministic replay.
+
+All four observed lifecycle paths were 54070 →5475c →54cbc →56900 →55568,
+with 18=1 and 19=2. Each complete scheduler invocation observed 55dcc →5568c →59068,
+then prehook 6f7c0, UB 5f2a4, FB 5f23c, posthook 6f88c, 55ee4, 5b880 and return.
+Marker 578 was 2/1/0/2 at pre/UB/FB/post. Across 97 field snapshots, FB 5da=1,
+UB 5db=1, control 5e0=0 and cue-table 4f0=802d3ff8; entry/return stacks matched
+for the three complete invocations. No selector transition, saved-FB divergence,
+65e24/5c694 reaction call or clone activation was observed.
+
+The original DOL SHA-256 was
+`21454a8880c6254616662710d6ec626e43d853999da2cdfad700030960a94836`.
+The local trace SHA-256 was
+`11e5f3b6579825bf684af9ed43aa3c7d5366d131b0bdb23e85906843858b1886`.
+Raw captures remain local and are not included here. The dedicated emulator was
+stopped through its isolated process ledger and its listener was confirmed closed.
+These observations corroborate the baseline dispatch envelope only; they do not
+validate the callee implementations, reaction semantics or a source-owned mode.
+
 ## Audited ordering and ownership
 
 Source evidence is the local Ghidra export; line numbers identify the current corpus.
