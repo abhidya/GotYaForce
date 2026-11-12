@@ -938,7 +938,7 @@ export class BattleScene {
       actor.lastSeenSlot = slot;
       if (actor.ready) this.playSlot(actor, slot, b.meleeAnimStream, b.sourceAnimSample);
       // Dim/hide once dead so the death pose reads (sim culls dead borgs next frame).
-      if (!b.alive) actor.group.visible = true;
+      actor.group.visible = !b.alive || b.sourceHidden !== true;
     }
     // Despawn actors whose borg is gone.
     for (const [uid, actor] of this.actors) {

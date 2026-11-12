@@ -1,3 +1,4 @@
+import {isSourceTeleportX,stepTeleportXInput} from './teleportX.js';
 import {spawnNinjaSource} from './ninjaProjectile.js';
 import {isSourceNinjaX,stepNinjaXInput} from './ninjaX.js';
 import {spawnGredRangedSource} from './gredRangedProjectile.js';
@@ -1296,6 +1297,7 @@ class BattleImpl implements Battle {
       if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
       if(isSourceNinjaX(b.borgId))stepNinjaXInput(b,input.special);
+      if(isSourceTeleportX(b.borgId))stepTeleportXInput(b,input.special,b.state==="special"&&b.command?.type===5);
       if (b.borgId === "pl0106") {
         const sample = stepTimeBomberInput(b,input.special);
         sample.neutral = Math.max(Math.abs(input.moveX),Math.abs(input.moveZ)) < 0x34 / 127;

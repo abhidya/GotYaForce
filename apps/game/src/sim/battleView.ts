@@ -8,6 +8,7 @@ export interface BattleActorView {
   team: number;
   ownerPlayer: BattleActorObservation["ownerPlayer"];
   alive: boolean;
+  sourceHidden?: BattleActorObservation["sourceHidden"];
   state: BattleActorObservation["state"];
   anim: BattleActorObservation["anim"];
   pos: Vec3;
@@ -58,6 +59,7 @@ export function battleActorView(borg: BattleActorObservation): BattleActorView {
     team: borg.team,
     ownerPlayer: borg.ownerPlayer,
     alive: borg.alive,
+    sourceHidden: borg.sourceHidden,
     state: borg.state,
     anim: borg.anim,
     pos: borg.pos,

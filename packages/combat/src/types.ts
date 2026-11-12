@@ -278,6 +278,16 @@ export interface BorgRuntime {
   weaponCells?: WeaponCell[];
   /** Fresh X edge sampled even while the admitted Ninja source action owns motion. */
   ninjaXInput?: {held:boolean;pressEdge:boolean;pending:boolean};
+  /** Scoped pl0005 input686f0. Charge uses source768 rate, independently of animationdt. */
+  teleportXInput?: {held:boolean;pressEdge:boolean;releasedReady:boolean;warmup:number;charge:number;pending:boolean};
+  /** Explicit source58e input-disable seam; bit20 blocks Teleport type5 banking. */
+  sourceTeleportInputBlock58e?: number;
+  /** Source family144 timer. Its unported melee producer is not inferred from generic damage. */
+  sourceTeleportRecentMeleeTimer144?: number;
+  /** Exact admitted actor272bit2 removes its defensive collision shape, without consuming contacts. */
+  sourceDefenseDisabled?: boolean;
+  /** Exact admitted actor82==0 render suppression; unrelated lifecycle owns death rendering. */
+  sourceHidden?: boolean;
   /** ROM +0x597 refill inhibit bits; Diver X reads bit 2. No generic busy-state guess. */
   sourceAmmoRefillPauseMask?: number;
   /** Cached ROM +0x768: refill precedes this frame's rate rebuild. */

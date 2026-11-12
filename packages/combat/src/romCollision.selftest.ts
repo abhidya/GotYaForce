@@ -90,7 +90,7 @@ export function runRomCollisionSelfTest(): void {
   assert(JSON.stringify(noGeometry.borg.pos) === JSON.stringify(noGeometryOld.borg.pos),
     "no collision geometry retains existing floor/off-mesh behavior");
 
-  for (const id of ["pl0005", "pl0009"]) {
+  for (const id of ["pl0009"]) {
     const warp = setup(geometry(10), id);
     let probes = 0;
     warp.driver.actor.physicsRuntime!.probeMotion = () => { probes++; throw new Error("warp entered dash probe"); };
@@ -100,8 +100,17 @@ export function runRomCollisionSelfTest(): void {
     assert(warp.driver.actor.fbPhaseSlots[0] !== 0, `${id} X family phase actually ran`);
     warp.driver.tick(warp.borg, 1, warp.actors);
 
-    assert(probes === 0, `${id} teleport never uses physical-dash sweep`);
+    assert(probes === 0, `${id} unadmitted legacy switching path retains its existing clamp`);
   }
+  // The newly admitted pl0005 route follows original677b0 after both setup
+  // carry and interpolated travel. Observe the existing host motion probe, not
+  // a claim that its swept stage geometry is console-equivalent.
+  const teleport = setup(geometry(), "pl0005");
+  let teleportProbes=0;
+  const teleportProbe=teleport.driver.actor.physicsRuntime!.probeMotion!;
+  teleport.driver.actor.physicsRuntime!.probeMotion=(...args)=>{teleportProbes++;return teleportProbe(...args);};
+  teleport.press();teleport.tick();
+  assert(teleport.driver.actor.actionIndex===2&&teleportProbes===2,"actual pl0005 X setup probes once per source dispatch");
   const recovery = setup(geometry());
   recovery.press();
   recovery.driver.actor.fbPhaseSlots[0] = 2;
