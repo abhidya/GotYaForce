@@ -70,17 +70,38 @@ export function runDoubleCloneReactionFrameSelfTest():void {
   assert(zero.reaction?.type === 'preserve' && zero.reaction.enteredReaction,'zero gauge enters1to4');
 
   const offset = Object.freeze([3,4,5] as const);
-  const owner = Object.freeze({arm7c8:1,offset7b0:offset,lastPostDispatchFrameId:null});
-  const cleared = post(owner,done);
+  const owner = Object.freeze({arm7c8:1,offset7b0:offset,lastPostDispatchId:null});
+  const dispatch = Object.freeze({dispatchId:100,liveControl5e0:0x02000000});
+  const cleared = post(owner,dispatch);
   assert(cleared.arm7c8 === 0 && cleared.offset7b0 === offset && owner.arm7c8 === 1,'posthook only clears arm');
-  assert(post(owner,positive).arm7c8 === 1 && post(owner,zero).arm7c8 === 1,'no-bit posthook preserves arm');
-  const existing = finish(begin(null,1,{...seed,control5e0:0x02000000}),1,tail);
-  assert(post(owner,existing).arm7c8 === 0,'no admission still consumes existing reset bit');
+  assert(dispatch.liveControl5e0 === 0x02000000,'posthook does not clear control bit');
+  // A collision reset prediction can be invalidated by the next action handler.
+  assert(done.reaction?.type === 'reset' &&
+    post(owner,{dispatchId:100,liveControl5e0:0}).arm7c8 === 1,
+    'stale collision reset cannot override a cleared live bit');
+  assert(positive.reaction?.type === 'preserve' &&
+    post(owner,dispatch).arm7c8 === 0,
+    'intervening action can set the live bit after a preserve prediction');
   const unsupported = finish(one,1,{...tail,immediateDispatchPermitted:false,alive:false});
-  assert(post(owner,unsupported).arm7c8 === 1,'unsupported never invents reset');
-  throws(()=>post(post(owner,unsupported),unsupported),'unsupported consumes transport ID, no retry');
-  throws(()=>post(cleared,done),'posthook cannot replay');
-  throws(()=>post(owner,one),'posthook requires finalized frame');
+  assert(unsupported.reaction?.type === 'unsupported' && post(owner,dispatch).arm7c8 === 0,
+    'a proved actual hook reads live control independently of an unsupported classifier');
+  for (const liveControl5e0 of [0,1,0x40,0x01000000,0x80000000,0xfdffffff]) {
+    const kept = post(owner,{dispatchId:100,liveControl5e0});
+    assert(kept.arm7c8 === 1 && kept.offset7b0 === offset && kept.lastPostDispatchId === 100,
+      'unrelated control bits preserve arm and consume dispatch identity');
+    throws(()=>post(kept,{dispatchId:100,liveControl5e0:0x02000000}),
+      'no-bit dispatch cannot replay with changed input');
+  }
+  for (const liveControl5e0 of [0x02000000,0x02000040,0xffffffff]) {
+    assert(post(owner,{dispatchId:100,liveControl5e0}).arm7c8 === 0,'live reset bit clears arm');
+  }
+  assert(post(cleared,{dispatchId:101,liveControl5e0:0}).arm7c8 === 0,'next dispatch does not rearm');
+  throws(()=>post(cleared,dispatch),'same dispatch cannot replay');
+  throws(()=>post(cleared,{dispatchId:99,liveControl5e0:0}),'old dispatch cannot replay');
+  throws(()=>post(owner,{dispatchId:NaN,liveControl5e0:0}),'invalid dispatch ID');
+  for (const liveControl5e0 of [-1,0x100000000,NaN,0.5]) {
+    throws(()=>post(owner,{dispatchId:100,liveControl5e0}),'invalid live source control');
+  }
   throws(()=>add(original,contact('bad',{heavyEarlyReturn:true})),'heavy cannot also write gauges');
   throws(()=>add(original,contact('early',{flagsB:0x400})),'special early return cannot write gauges');
   throws(()=>begin(null,NaN,seed),'invalid frame ID');

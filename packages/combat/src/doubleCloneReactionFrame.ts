@@ -111,21 +111,30 @@ export function finalizeDoubleCloneReactionFrame(frame:DoubleCloneReactionFrame,
 export interface DoubleClonePostDispatchOwner {
   readonly arm7c8:number;
   readonly offset7b0:readonly [number,number,number];
-  readonly lastPostDispatchFrameId:number | null;
+  readonly lastPostDispatchId:number | null;
+}
+export interface DoubleClonePostDispatchInput {
+  /** Caller transport sequence for actual owner dispatches, NOT collision frames.
+   * Strictly increases within this owner lifecycle, including no-bit dispatches. */
+  readonly dispatchId:number;
+  /** Actual source control word sampled AFTER this actor's action dispatch,
+   * immediately at its6f88c hook. Never substitute a collision classifier bit. */
+  readonly liveControl5e0:number;
 }
 /** Source6f88c, independently checked from original instructions (omitted C).
- * Invoke at the real owner post-dispatch boundary, NOT merely on contact.
- * Consumes a proved bit even on no-admission. Does not clear the bit itself,
- * normalize displacement, or pretend unsupported dispatch has occurred.
- * Unsupported consumes transport bookkeeping only: there is no same-frame
- * retry on this owner. Resolve unknown source inputs before invoking this hook. */
+ * The actor scheduler runs +4bc -> action -> +4c0 BEFORE collision processing.
+ * Collision5c290/5c694 does not invoke +4c0. The next real post-hook therefore
+ * reads live control after the intervening action handler, which can change the
+ * collision-classified bit. This hook is deliberately independent of frames.
+ * Clears arm iff live02000000; does not change control or normalize offset.
+ * Caller must retain returned bookkeeping; this is not a global replay ledger. */
 export function postDispatchDoubleCloneReaction(owner:DoubleClonePostDispatchOwner,
-  frame:DoubleCloneReactionFrame):DoubleClonePostDispatchOwner {
-  requireValid(frame.complete && frame.reaction !== null,'frame is not finalized');
-  requireValid(integer(owner.arm7c8,0,255) && (owner.lastPostDispatchFrameId === null ||
-    (validId(owner.lastPostDispatchFrameId) && frame.frameId > owner.lastPostDispatchFrameId)),
-  'invalid owner or replayed post-dispatch frame');
-  if (frame.reaction!.type === 'unsupported') return {...owner,lastPostDispatchFrameId:frame.frameId};
-  return {...owner,arm7c8:frame.reaction!.resetBitAfterDispatch ? 0 : owner.arm7c8,
-    lastPostDispatchFrameId:frame.frameId};
+  dispatch:DoubleClonePostDispatchInput):DoubleClonePostDispatchOwner {
+  requireValid(validId(dispatch.dispatchId) && integer(dispatch.liveControl5e0,0,0xffffffff),
+    'invalid dispatch identity or live control word');
+  requireValid(integer(owner.arm7c8,0,255) && (owner.lastPostDispatchId === null ||
+    (validId(owner.lastPostDispatchId) && dispatch.dispatchId > owner.lastPostDispatchId)),
+    'invalid owner or replayed post-dispatch identity');
+  return {...owner,arm7c8:(dispatch.liveControl5e0 & 0x02000000) !== 0 ? 0 : owner.arm7c8,
+    lastPostDispatchId:dispatch.dispatchId};
 }
