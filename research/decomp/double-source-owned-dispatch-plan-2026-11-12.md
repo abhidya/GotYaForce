@@ -8,7 +8,7 @@ Do not add an unconditional `stepRomActor` call to the existing bridge. The next
 
 This is larger than porting reaction selectors 1–8. Their reachable continuations include 10 (landing), 12 (terrain fall) and 19 (recovery input); those handlers have their own reachable transitions. Audit and implement the reachable closure before enabling the mode. A first-entry control-bit classifier is not that closure.
 
-Static lifecycle18/19 mappings are now verified (see eligibility below). First remaining prerequisite: record one deterministic ordinary Double scenario through the actor sweep and collision phase, including the exact eligibility gates. This establishes which source handlers must replace host ownership before implementing the offline slice.
+Static lifecycle18/19 mappings are verified (see eligibility below). The recovery capture below now establishes one observed two-hit trajectory through ordinary control restoration. It does not yet provide a complete deterministic replay fixture: missing interpreter, physics and initial-state inputs must be captured and the reachable handlers implemented before equivalence can be tested.
 
 The existing repository cannot yet support this milestone honestly. Missing runtime eligibility bindings, shared handlers/streams and source physics/contact bindings below are requirements, not optional adapters. Implementing another detached lifecycle interface would not close them.
 
@@ -86,6 +86,49 @@ Local trace SHA-256 values:
 Raw traces and numeric capture files remain on the rig. Both task-owned emulator
 processes were stopped through isolated ledgers and the listener was confirmed
 closed. No original assets, raw trace data or save states are included here.
+
+## Completed nonlethal recovery capture (2026-11-12)
+
+A further isolated run captured the complete observed two-hit trajectory, with
+256 verified controller readbacks, 152 frame-state snapshots and no capture
+errors. Initial target HP was150. At frame104, damage9 left HP141 and entered
+reaction1; at107, damage14 left HP127 and entered reaction6. HP stayed127 for
+the remainder of the run. Reaction6 changed to10 at frame174, then11 at212,
+and called8006a474 at240. At241 the actor had ordinary FB/UB(1,1) and control0.
+Fresh P2 X input at242–243 produced FB61/UB0 and control0x43. Reaction selector6fe
+still held11 afterward: that byte alone is not a valid reacting predicate.
+
+Completion flags1cee/1d0e became1 at frames206,212 and240. The observed stream
+sequence was group0x80/variant0 interrupted by0x81/5, followed by0x82/3,
+0x82/1 and0x82/5. All67 captured original terrain-query argument/result pairs
+returned height0 and normal(0,1,0). The ground helper returned0 on66 calls,
+then1 at174 when timer6b4 was0. Position moved from(1200,0,1000) to approximately
+(1555.459,0,1212.368) at recovery. Eleven paired posthook samples passed
+return-stack guards. Two4c4 entries were observed, but clone7c8 remained0;
+armed clone cleanup/reset is still untested. Input5bc bit0x100 was never set.
+
+This closes the observed trajectory, not an implementation replay. It remains
+a two-hit knockdown/recovery rather than an isolated light reaction. Do not
+combine detailed boundaries from capture03 and the later recovery run into a
+purported single deterministic fixture. The raw label `motion20_87_raw` in this
+capture begins at actor+0x18, not+0x20; parsed position fields were checked.
+
+The concrete offline milestone is now reaction1 →6 →10 →11 →ordinary control
+and fresh X admission, with a flat-plane terrain provider and exclusive source
+ownership. Port5c290/5c694 admission/cleanup and5c810/5cc00/5d258/5d494, their
+movement/rotation dependencies and family hooks. Supply verified shared80/81/82
+programs, completion semantics, constants/tables and initial/transition state.
+Missing capture inputs still include complete animation-interpreter inputs,
+physics parameters/timestep reads and other terrain callbacks. Compute landing
+from motion, not from the recorded66-false/one-true results. Match the recorded
+transition frames and intermediate fields before claiming equivalence. Existing
+contact reducers and scheduler callbacks alone cannot execute this milestone.
+
+Local trace SHA-256:
+`199842d40138387d0d82945e64cc81956d772489ce041da83e0d7b44104de18e`.
+The raw capture remains on the rig. The isolated emulator was stopped through
+its ledger; its process was absent and listener closed. Earlier captures were
+preserved. This checkpoint changes documentation only, not live clone behavior.
 
 ## Audited ordering and ownership
 
