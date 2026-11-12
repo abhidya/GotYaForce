@@ -1,3 +1,5 @@
+import { captureRevolverAttack, spawnRevolverSource, isRevolver } from "./revolverProjectileRuntime.js";
+import { actorAimTarget } from "./sourceAttackTarget.js";
 import { captureGatlingAim, spawnGatlingSource } from "./gatlingProjectile.js";
 import { capturePoweredNormalAim, spawnPoweredSource } from "./poweredProjectileRuntime.js";
 import { createKnightWindupClock, tickKnightWindupClock, type KnightWindupClock } from "./rom/knight-windup-clock.js";
@@ -1508,6 +1510,8 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  drain after each tick alongside the stream's pendingProjectiles. */
   private spawnFamilyProjectile(actor: RomActor, spawnerAddr: number, type: number): void {
     if (this.runtime) {
+      const revolver = spawnRevolverSource(this.runtime, actor, spawnerAddr, type);
+      if (revolver !== null) { this.familyProjectiles.push(...revolver); this.specialHadEffect = true; return; }
       const gatling = spawnGatlingSource(this.runtime, actor, spawnerAddr, type,
         this.visibilityBindings.map(binding => binding.runtime));
       if (gatling !== null) { this.familyProjectiles.push(...gatling); this.specialHadEffect = true; return; }
@@ -1602,7 +1606,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       this.dispatchEventList(events.slice(0, events.findIndex((event) => event.op === "wait")), 0);
       return true;
     }
-    const poweredSourceAction = this.runtime.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3) && group === 4;
+    const poweredSourceAction = group === 4 && ((this.runtime.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3)) || (isRevolver(this.runtime.borgId) && this.actor.actionIndex === 2));
     const startFrame = poweredSourceAction ? this.streamFrame - 1 : this.streamFrame;
     const maxFrame = events.reduce((max, event) =>
       Math.max(max, typeof event.frame === "number" ? event.frame : 0), 0);
@@ -1960,7 +1964,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (host.onAllocateResource) dest.onAllocateResource = (actor, type, count, mode) => {
       const accepted = host.onAllocateResource!(actor, type, count, mode);
       if (!accepted && type === 2 && (mode ?? 0) !== 0 &&
-          (isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) || runtime.borgId === "pl0101" || runtime.borgId === "pl0102")) this.sourceXResourceDenied = true;
+          (isDiverAmmoFamily(runtime.combatFormId ?? runtime.borgId) || runtime.borgId === "pl0101" || runtime.borgId === "pl0102" || isRevolver(runtime.borgId))) this.sourceXResourceDenied = true;
       return accepted;
     };
     if (host.onExitFb) dest.onExitFb = host.onExitFb;
@@ -2038,8 +2042,24 @@ export class RomDriverBridge implements RomFamilyDriver {
     (a as RomActor & { grounded?: boolean }).grounded = runtime.grounded;
     (a as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = null;
     (a as RomActor & { targetDistance760?: number }).targetDistance760 = 0;
-    if (activeTarget) {
-      const target = activeTarget;
+    // Source +c8/+cc freezes attack identity, not target position. Only these
+    // verified source actions consume the global pre-movement +518 refresh.
+    // Generic aimOrigin518 above retains its existing shooter-root meaning.
+    const captured = this.specialActive && a.actionIndex === 2
+      ? (isRevolver(runtime.borgId) ? runtime.revolverAttack
+        : runtime.borgId === "pl0102" ? runtime.gatlingSavedAim
+        : runtime.borgId === "pl0101" ? runtime.poweredNormalAim : undefined)
+      : undefined;
+    const candidate = captured ? all.find(target => target.uid === captured.targetUid) : activeTarget;
+    const sourceAdmission = this.specialActive && this.specialKind === "x" &&
+      (runtime.command?.actionIndex ?? 2) === 2 &&
+      (isRevolver(runtime.borgId) || runtime.borgId === "pl0102" || runtime.borgId === "pl0101");
+    // All other families retain their existing current-root aiming behavior.
+    const sourceTarget = captured || sourceAdmission ? actorAimTarget(candidate) : candidate;
+    const targetPos = sourceTarget ? captured?.pos ?? sourceTarget.pos : null;
+    if (captured && !sourceTarget) captured.targetUid = null;
+    if (targetPos) {
+      const target = { pos: targetPos };
       (a as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = {
         x: target.pos.x, y: target.pos.y, z: target.pos.z,
       };
@@ -2048,11 +2068,13 @@ export class RomDriverBridge implements RomFamilyDriver {
         target.pos.y - runtime.pos.y,
         target.pos.z - runtime.pos.z,
       );
-      // zz_006d0dc_ -> FUN_800669d0 consumes the live target bearing as BAM16.
+      // zz_006d0dc_ -> FUN_800669d0 consumes the captured target bearing as BAM16.
       // Height participates in pitch seeking, while yaw is atan2(horizontal x,z).
       const targetYaw = radToBam(Math.atan2(target.pos.x - runtime.pos.x, target.pos.z - runtime.pos.z));
-      a.lockYaw = targetYaw;
-      a.activeYaw = targetYaw;
+      // Source recover owns +5ae (the backward recoil bearing). A global
+      // +518 refresh must not overwrite it after phase1 releases the shots.
+      const sourceRecover = captured && (a.fbPhaseSlots[0] ?? 0) >= 2;
+      if (!sourceRecover) { a.lockYaw = targetYaw; a.activeYaw = targetYaw; }
     }
   }
 
@@ -2152,6 +2174,13 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.romOwnedSpecial = true;
     this.specialActive = true;
     this.actor.controlWord = (this.actor.controlWord & ~0x3) | 0x1;
+    if (isRevolver(runtime.borgId)) {
+      this.actor.controlWord = runtime.grounded ? this.actor.controlWord & ~0x40 : this.actor.controlWord | 0x40;
+      // Discard the previous action's pointer before admission sync selects the
+      // currently active target. Subsequent syncs use this new captured identity.
+      delete runtime.revolverAttack;
+    } else if (runtime.borgId === "pl0102") delete runtime.gatlingSavedAim;
+    else if (runtime.borgId === "pl0101" && actionIndex === 2) delete runtime.poweredNormalAim;
     this.syncActionInput(null, true);
     // For G RED family (custom handler): also run the ROM physics for the launch arc.
     // The custom handler sets velocities that stepMovement will integrate.
@@ -2161,7 +2190,10 @@ export class RomDriverBridge implements RomFamilyDriver {
       this.syncIn(runtime, all);
       if (runtime.borgId === "pl0102" && actionIndex === 2) captureGatlingAim(runtime,this.actor,all);
       if (runtime.borgId === "pl0101" && actionIndex === 2) capturePoweredNormalAim(runtime,this.actor,all);
-      dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex, variantIndex });
+      if (isRevolver(runtime.borgId) && actionIndex === 2) captureRevolverAttack(runtime,this.actor,all);
+      // Decoded ground802d4668=[44,3,2,0], air802d46a8=[45,3,2,4].
+      const cueId = isRevolver(runtime.borgId) && variantIndex === 4 ? 45 : 44;
+      dispatchCommandRecord(this.actor, { cueId, stateMode: 3, actionIndex, variantIndex });
       stepRomActor(this.actor, this.tables, this.ctx);
       this.syncOut(runtime);
       // The shared-X movement carry (phase 0's pos += (pos−olderOwnPos)×0.95) can
@@ -2302,7 +2334,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
       this.syncActionInput(input, true);
-      const poweredSourceAction = runtime.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3);
+      const poweredSourceAction = (runtime.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3)) || (isRevolver(runtime.borgId) && this.actor.actionIndex === 2);
       // This source handler ticks its stream before testing +0x1cf0 in the same frame.
       if (poweredSourceAction) this.dispatchEvent(this.streamFrame);
       // State 61 and the command fields remain live after the entry dispatch. Re-dispatching
@@ -2552,9 +2584,9 @@ export class RomDriverBridge implements RomFamilyDriver {
           (part as typeof part & { c?: number }).c = ev.aux ?? 0;
           if (partIndex === 0) {
             this.actor.contactP0 = part.stateByte;
-            // pl0101 actions2/3 consume the adjacent part-0 aux byte (+0x1cf0),
-            // not part1.state. Authored g4s0/s1 sets it at frame16.
-            if (this.runtime?.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3))
+            // Verified Gunman actions consume part-0 aux (+0x1cf0), not part1.state.
+            // Powered sets it at16; Revolver/Billy at14.
+            if ((this.runtime?.borgId === "pl0101" && (this.actor.actionIndex === 2 || this.actor.actionIndex === 3)) || (this.runtime && isRevolver(this.runtime.borgId) && this.actor.actionIndex === 2))
               this.actor.contactP1 = ((ev.aux ?? 0) << 24) >> 24;
           }
           break;

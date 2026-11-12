@@ -54,10 +54,15 @@ the browser uses max-extent radius 20 and bank 26/team tint, alpha 1.
 
 ## Saved aim and honest boundaries
 
-`zz_006a104_` calls `zz_006bda8_` at admission, which snapshots target center
-into +0x518. The host snapshots the selected target root and does not chase a
-moving target during windup. Static muzzle and reference transforms are
-computed at the fire gate, separately from this saved aim.
+`zz_006a104_` calls `zz_006bda8_` at admission, capturing the target identity.
+The Revolver follow-up audit corrected the earlier frozen-position assumption:
+global `zz_006ae60_` refreshes +0x518 from the captured target center before
+actor movement. `sourceAttackTarget.ts` now provides an actor-order-independent
+pre-movement root snapshot to Powered normal, Gatling and Revolver windup.
+An R-switch changes the live lock but not the captured identity; target loss
+invalidates without replacement. Static muzzle/reference transforms are still
+computed at the fire gate. Flight tracking uses current target roots separately.
+See `revolver-source-x-audit-2026-11-12.md` for source and bounded host semantics.
 
 Without a target, source X/Z are **absolute world coordinates**
 `20000*sin(yaw), 20000*cos(yaw)`, without adding actor position.

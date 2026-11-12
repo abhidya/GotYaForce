@@ -29,6 +29,7 @@
     "selfcheck:hud": "node scripts/selfcheck-hud.mjs",
     "selfcheck:xammo": "node scripts/run-xammo-tests.mjs",
     "selfcheck:challenge-flow": "node scripts/run-challenge-flow-tests.mjs",
+    "selfcheck:revolver-launch-flashes": "node scripts/run-battle-scene-revolver-flash-selfcheck.mjs",
     "selfcheck:gatling-projectiles": "node scripts/run-battle-scene-gatling-selfcheck.mjs",
     "selfcheck:powered-launch-flashes": "node scripts/run-battle-scene-powered-flash-selfcheck.mjs",
     "test:render-disposal": "node --test packages/render/src/disposeObject3D.test.mjs",
@@ -70,7 +71,7 @@
     "atlas:preview": "pnpm --filter gotcha-force-atlas preview",
     "test:repo-policy": "node --test scripts/repository-policy.test.mjs",
     "test:oracle": "node research/decomp/oracle-harness/tests/run-oracle-tests.mjs",
-    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm selfcheck:browser-poc-gate && pnpm selfcheck:hud && pnpm selfcheck:menu-flow && pnpm selfcheck:force-builder && pnpm selfcheck:game-session && pnpm selfcheck:battle-pause-edge && pnpm selfcheck:battle-input-focus && pnpm selfcheck:title-frontend && pnpm selfcheck:camera && pnpm selfcheck:challenge-flow && pnpm test:render-disposal && pnpm selfcheck:powered-launch-flashes && pnpm selfcheck:gatling-projectiles && pnpm selfcheck:rom && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
+    "verify:contributor": "pnpm test:repo-policy && pnpm typecheck && pnpm selfcheck:browser-poc-gate && pnpm selfcheck:hud && pnpm selfcheck:menu-flow && pnpm selfcheck:force-builder && pnpm selfcheck:game-session && pnpm selfcheck:battle-pause-edge && pnpm selfcheck:battle-input-focus && pnpm selfcheck:title-frontend && pnpm selfcheck:camera && pnpm selfcheck:challenge-flow && pnpm test:render-disposal && pnpm selfcheck:powered-launch-flashes && pnpm selfcheck:gatling-projectiles && pnpm selfcheck:revolver-launch-flashes && pnpm selfcheck:rom && pnpm --filter @gf/combat test:lifecycle && pnpm test:oghidra-port && pnpm --filter game build",
     "verify:docs": "pnpm atlas:build"
   },
   "devDependencies": {

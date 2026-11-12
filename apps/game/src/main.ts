@@ -1194,6 +1194,7 @@ async function enterBattle(): Promise<void> {
         initialScene.diverAuras,
         initialScene.diverAuraTails,
         initialScene.poweredLaunchFlashes,
+        initialScene.revolverLaunchFlashes,
       );
       const focus = localFocusBorg();
       const focusPos = focus ? battleScene.positionOf(focus.uid) : null;
@@ -1477,6 +1478,7 @@ function syncBattlePresentation(live: BattleSession): void {
     sceneState.diverAuras,
     sceneState.diverAuraTails,
     sceneState.poweredLaunchFlashes,
+    sceneState.revolverLaunchFlashes,
   );
   updateHud();
 }

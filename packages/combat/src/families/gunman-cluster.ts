@@ -36,7 +36,7 @@
 //   POWERED  sdata2 @0x8043a9d8..0x8043aa08
 
 import { createRomActor, type RomActor, type Vec3 } from "../rom/actor.js";
-import { dispatchFullBodyCue } from "../rom/dispatch.js";
+import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
 import {
   allocateWeapon,
   groundSnapRevert,
@@ -283,7 +283,7 @@ function revolverPhase0(actor: GunmanActor, _ctx: GunmanFamilyCtx): void {
     // zz_006e1ac_(actor, 0xc1, 1) — part-pitch converge.
     stepPartTargetPitch(actor, 0xc1);
   }
-  // Blink toward cached target (×FLOAT_804377a0).
+  // Carry from own older-position sample (×FLOAT_804377a0).
   applyBlink(actor, REVOLVER_F.BLINK_DRAG);
   groundSnapRevert(actor);
   // Air-with-ground-snap clears the airborne bit (zz_00736bc_:1112-1114).
@@ -311,7 +311,7 @@ function revolverPhase1(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
   vecAdd(actor.pos, actor.motion, actor.pos);
   groundSnapRevert(actor);
 
-  // +0x1cf0 contact gate (part-1 contact > 0).
+  // +0x1cf0 contact gate (part-0 aux byte > 0).
   if (actor.contactP1 > 0) {
     actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1;
     // +0x5ae = +0x72 - 0x8000 (lockYaw = heading − 180°).
@@ -351,32 +351,30 @@ function revolverPhase1(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
 
 function revolverPhase2(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
   const s = scratchOf(actor);
-  // +0x18da steerYaw decay: val = (val - DOUBLE_base) × FLOAT_804377bc.
-  s.gmSteerYaw18da = Math.trunc((s.gmSteerYaw18da ?? 0) * REVOLVER_F.STEER_DECAY);
-  // tick stream + physics (gravity FLOAT_8043779c, yaw lockYaw).
+  // Canonical +0x18da is the same field the air aiming helper writes.
+  actor.steerYaw = Math.trunc(actor.steerYaw * REVOLVER_F.STEER_DECAY);
+  s.gmSteerYaw18da = actor.steerYaw;
   tickStream(actor, 0xf, ctx);
   integratePhysics(REVOLVER_F.GRAVITY, actor, actor.lockYaw);
-  const grounded = groundSnapRevert(actor);
-  // Grounded + contactP0 ≥ 0 → velocity drag (zz_006ed8c_ ×FLOAT_804377c0); else fallthrough.
+  // Direct zz_00677b0_ probe, not the saved-position revert wrapper00679d0.
+  const floor = actor.physicsRuntime;
+  const result = floor && (floor.isSupported?.(actor.pos.x, actor.pos.z) ?? true)
+    ? floor.clampToGround(actor.pos, actor.yVel) : null;
+  const grounded = result?.grounded ?? (!floor && (actor as RomActor & {grounded?: boolean}).grounded === true);
+  if (result) { actor.pos.y=result.y; actor.yVel=result.velY; }
+  (actor as RomActor & {grounded?: boolean}).grounded=grounded;
   if (grounded && actor.contactP0 >= 0) {
-    // fallthrough to contact check
-  } else if (actor.contactP0 < 0) {
-    // zz_006ed8c_((double)FLOAT_804377c0, actor) — velocity drag.
-    actor.hSpeed *= REVOLVER_F.VELOCITY_DRAG;
+    const drag = actor.dt === 1 ? REVOLVER_F.VELOCITY_DRAG : 1-(1-REVOLVER_F.VELOCITY_DRAG)*actor.dt;
+    actor.hSpeed *= drag; actor.yVel *= drag;
   }
-  // Exit on wallContact OR (grounded && contactP0 ≥ 0).
-  if (actor.wallContact !== 0 || (grounded && actor.contactP0 >= 0)) {
-    s.gmAimYaw1900 = 0;
-    s.gmAimYaw1918 = 0;
+  // FUN80073a3c: supported negative contact exits; nonnegative waits unless wall.
+  if (actor.wallContact !== 0 || (grounded && actor.contactP0 < 0)) {
+    s.gmAimYaw1900 = 0; s.gmAimYaw1918 = 0;
+    actor.housekeeping73f=0; actor.controlWord &= ~BITS.ACTION_MODE;
     s.gmHousekeeping6e8 = 0;
-    if (!grounded) {
-      romAirKnockoutReturn(actor);
-    } else if ((actor.controlWord & BITS.AIRBORNE) === 0) {
-      romGroundIdleReturn(actor);
-    } else {
-      // zz_006a750_(actor, 7) — upper-body cue 7.
-    }
-    // +0x694 = FLOAT_8043779c + dt (state-timer seed).
+    if (!grounded) romAirKnockoutReturn(actor);
+    else if ((actor.controlWord & BITS.AIRBORNE) === 0) romGroundIdleReturn(actor);
+    else dispatchUpperBodyCue(actor, 7);
     actor.stateTimer = REVOLVER_F.GRAVITY + actor.dt;
   }
   // Afterimage when hSpeed > FLOAT_804377b8.
@@ -392,7 +390,8 @@ const REVOLVER_PHASE_TABLE = [revolverPhase0, revolverPhase1, revolverPhase2];
 function revolverXHandler(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
   const s = scratchOf(actor);
   if ((actor.controlWord & BITS.AIRBORNE) === 0) {
-    s.gmSteerYaw18da = (s.gmSteerYaw18da ?? 0) >> 1;
+    actor.steerYaw >>= 1;
+    s.gmSteerYaw18da = actor.steerYaw;
   }
   const phase = actor.fbPhaseSlots[0] ?? 0;
   const fn = REVOLVER_PHASE_TABLE[phase];

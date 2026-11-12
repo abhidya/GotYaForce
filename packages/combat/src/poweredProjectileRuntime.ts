@@ -1,3 +1,4 @@
+import { actorAimTarget } from "./sourceAttackTarget.js";
 /** Narrow source-spawner adapter; never resolves through the owner's generic B shot. */
 import type { BorgRuntime, Projectile } from "./types.js";
 import type { RomActor } from "./rom/actor.js";
@@ -37,12 +38,12 @@ function wrap(owner: Pick<BorgRuntime,"uid"|"team">, state: PoweredSourceState, 
     poweredSource: state, poweredSkipAdvance: skipAdvance,
   };
 }
-/** zz_006a104_ -> zz_006bda8_: save aim on admission, before the authored windup.
+/** zz_006a104_ -> zz_006bda8_: capture target identity before windup; +518 refreshes before movement.
  * Target center is the host root approximation; no-target Y uses static joint3.
  * The source no-target X/Z are absolute world coordinates, not owner-relative.
  */
 export function capturePoweredNormalAim(owner:BorgRuntime,actor:RomActor,all:readonly BorgRuntime[]):void {
-  const target=targetData(activeSourceTarget(owner,all));
+  const target=actorAimTarget(activeSourceTarget(owner,all));
   const yaw=actor.heading*Math.PI*2/65536;
   owner.poweredNormalAim={targetUid:target?.uid??null,pos:target?{...target.pos}:{
     x:20000*Math.sin(yaw),

@@ -1,3 +1,4 @@
+import { advanceRevolverSource, stepRevolverInput, isRevolver, type RevolverPresentationSink } from "./revolverProjectileRuntime.js";
 import { advanceGatlingSource, createGatlingExplosion, stepGatlingInput } from "./gatlingProjectile.js";
 import { type PoweredPresentationSink, advancePoweredSource, poweredCanCollide, shrinkPoweredOnContact } from "./poweredProjectileRuntime.js";
 import { stepPoweredCharge, commitPoweredCharge } from "./poweredCharge.js";
@@ -151,6 +152,7 @@ type ReactionAnimLengthRow = { ground?: number; launch?: number };
 const REACTION_ANIM_LENGTHS = (reactionAnimLengthsData as { borgs: Record<string, ReactionAnimLengthRow> }).borgs;
 
 export interface ProjectileContext {
+  onRevolverLaunch?: RevolverPresentationSink;
   onSourceCue?: (cue:number) => void;
   onPoweredLaunch?: PoweredPresentationSink;
   bounds: RectStageBounds;
@@ -2479,6 +2481,9 @@ export function stepAttacks(
   damageContext: DamageRuntimeContext = {},
 ): AttackResult {
   const out: Projectile[] = [];
+  const revolver = isRevolver(b.borgId)
+    ? (b.revolverInput?.pending ? b.revolverInput : stepRevolverInput(b,specialHeld)) : null;
+  if (revolver) revolver.pending=false;
   const gatling = b.borgId === "pl0102"
     ? (b.gatlingInput?.pending ? b.gatlingInput : stepGatlingInput(b,specialHeld)) : null;
   if (gatling) gatling.pending=false;
@@ -2501,7 +2506,7 @@ export function stepAttacks(
   // expiry and made an X-hold charge impossible.
   const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
   b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
-  const pressedSpecialEdge = gatling ? gatling.pressEdge : specialHeld && !prevSpecialHeld;
+  const pressedSpecialEdge = revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld && !prevSpecialHeld;
   const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false): count
@@ -2551,7 +2556,7 @@ export function stepAttacks(
   // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
   b.command = resolveLiveCommand(
     b.borgId,
-    { attackHeld, specialHeld: powered ? powered.pressEdge : gatling ? gatling.pressEdge : specialHeld, chargeRelease, xChargeRelease },
+    { attackHeld, specialHeld: powered ? powered.pressEdge : revolver ? revolver.pressEdge : gatling ? gatling.pressEdge : specialHeld, chargeRelease, xChargeRelease },
     { meleeEngaged, airborne: !b.grounded },
   );
 
@@ -2595,7 +2600,11 @@ export function stepAttacks(
       if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
     }
   }
-  if (!powered && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  if (revolver && revolver.pressEdge && canStartAction && !commandPreemptsX && xCanFire &&
+      (b.cooldowns["special"] ?? 0) <= 0 && b.command?.exact && b.command.type === AttackCommandType.Melee2 && b.command.actionIndex === 2) {
+    if (b.romDriver?.tryStartXSpecial(b, all)) return { projectiles: out };
+  }
+  if (!powered && !revolver && canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
@@ -3601,6 +3610,10 @@ export function stepProjectiles(
   // not fly on their constructor frame. Other projectile families keep their old order.
   const poweredPrevious = new Map<Projectile, Vec3>();
   projectiles = projectiles.flatMap(pr => {
+    if (pr.revolverSource) {
+      poweredPrevious.set(pr, { ...pr.pos });
+      return advanceRevolverSource(pr, byUid, ctx?.onRevolverLaunch);
+    }
     if (pr.gatlingSource) {
       poweredPrevious.set(pr, { ...(pr.gatlingInitialPosition ?? pr.pos) });
       delete pr.gatlingInitialPosition;
@@ -3645,8 +3658,8 @@ export function stepProjectiles(
       survivors.push(pr);continue;
     }
     if (pr.poweredSource && !poweredCanCollide(pr)) { survivors.push(pr); continue; }
-    if (!pr.poweredSource && !pr.gatlingSource) pr.life -= 1;
-    if (!pr.poweredSource && !pr.gatlingSource && pr.life <= 0) {
+    if (!pr.poweredSource && !pr.gatlingSource && !pr.revolverSource) pr.life -= 1;
+    if (!pr.poweredSource && !pr.gatlingSource && !pr.revolverSource && pr.life <= 0) {
       pr.despawnReason = "expired"; // life seed: FUN_8006f11c, 600 frames (chunk_0009.c:3907)
       continue;
     }
@@ -3658,7 +3671,7 @@ export function stepProjectiles(
     // MISSING uid only occurs for synthetic callers (selfchecks/fixtures passing empty maps)
     // and is treated as "no liveness info" so those fixtures keep working.
     const owner = byUid.get(pr.ownerUid);
-    if (owner && !owner.alive && !pr.poweredSource && !pr.gatlingSource) {
+    if (owner && !owner.alive && !pr.poweredSource && !pr.gatlingSource && !pr.revolverSource) {
       pr.despawnReason = "owner-dead";
       continue;
     }
@@ -3682,8 +3695,8 @@ export function stepProjectiles(
     // (behavior-notes.md section (bc)).
     if (pr.drop) pr.vel.y -= pr.drop;
 
-    const prevPos = pr.poweredSource || pr.gatlingSource ? poweredPrevious.get(pr) ?? pr.pos : pr.pos;
-    if (!pr.poweredSource && !pr.gatlingSource) pr.pos = add(pr.pos, pr.vel as Vec3);
+    const prevPos = pr.poweredSource || pr.gatlingSource || pr.revolverSource ? poweredPrevious.get(pr) ?? pr.pos : pr.pos;
+    if (!pr.poweredSource && !pr.gatlingSource && !pr.revolverSource) pr.pos = add(pr.pos, pr.vel as Vec3);
     if (ctx) {
       const impact = projectileImpactReason(pr, prevPos, ctx);
       if (impact) {

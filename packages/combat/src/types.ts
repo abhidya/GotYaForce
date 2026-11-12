@@ -154,8 +154,13 @@ export interface RomFamilyDriver {
 export interface BorgRuntime {
   /** Source slot-2 charge, isolated from tuned X-charge tiers. */
   poweredCharge?: import("./poweredCharge.js").PoweredChargeState;
-  /** Action-2 admission snapshot of source +0x518, with root/static-bind host transforms. */
+  /** Global pre-movement actor center snapshot, used only by actor aim adapters. */
+  sourceFramePose?: { frame: number; pos: Vec3; scale: number };
+  revolverInput?: { held: boolean; pressEdge: boolean; pending: boolean };
+  /** Captured source attack identity/range; pos refreshes at the global frame barrier. */
+  revolverAttack?: { pos: Vec3; targetUid: string | null; trackingEnabled: boolean };
   gatlingInput?: { held:boolean; pressEdge:boolean; pending:boolean };
+  /** Captured source attack identity; pos refreshes at the global frame barrier. */
   gatlingSavedAim?: { pos: Vec3; targetUid: string | null };
   poweredNormalAim?: { pos: Vec3; targetUid: string | null };
   uid: string;
@@ -578,6 +583,7 @@ export type ProjectileDespawnReason =
 
 /** A homing/straight projectile in flight. */
 export interface Projectile {
+  revolverSource?: import("./revolverProjectileRuntime.js").RevolverSourceState;
   gatlingSource?: import("./gatlingProjectile.js").GatlingSourceState;
   gatlingSkipAdvance?: boolean;
   gatlingInitialPosition?: Vec3;
@@ -931,7 +937,20 @@ export interface PoweredLaunchFlash extends PoweredLaunchSeed {
   lifeFrames: 4;
 }
 export type PoweredLaunchFlashObservation = DeepReadonly<PoweredLaunchFlash>;
+/** Effect5 captures a fixed launch transform; simulation alone advances each layer. */
+export interface RevolverLaunchFlash {
+  uid: string;
+  ownerUid: string;
+  team: number;
+  effectId: 5;
+  pos: Vec3;
+  basis: { right: Vec3; up: Vec3; forward: Vec3 };
+  baseScale: number;
+  layers: Array<{ modelId: 92 | 35; spin: number; ageFrames: number; lifeFrames: 2 | 7 }>;
+}
+export type RevolverLaunchFlashObservation = DeepReadonly<RevolverLaunchFlash>;
 export interface BattleObservation {
+  readonly revolverLaunchFlashes: readonly RevolverLaunchFlashObservation[];
   readonly poweredLaunchFlashes: readonly PoweredLaunchFlashObservation[];
   readonly diverAuras: readonly DeepReadonly<DiverAuraChild>[];
   readonly diverAuraTails: readonly DeepReadonly<DiverAuraTail>[];

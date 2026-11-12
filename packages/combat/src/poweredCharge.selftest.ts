@@ -41,7 +41,7 @@ function runPoweredNormalSelfTest():void {
   assert(owner.command?.type===2&&owner.command.actionIndex===2&&owner.command.recordAddress==='0x8034ea20','normal press selects exact type2/action2');
   assert(driver.actor.actionIndex===2,'normal press enters ROM action2');
   const savedAim=owner.poweredNormalAim;
-  assert(savedAim?.targetUid===state.borgs[1]!.uid&&savedAim.pos.z===6000,'normal admission snapshots selected target root');
+  assert(savedAim?.targetUid===state.borgs[1]!.uid&&savedAim.pos.z===6000,'normal admission captures selected target identity and current root');
   state.borgs[1]!.pos={x:6000,y:0,z:0};
   assert(cell.cur===full&&allocations.length===0&&events.length===0,'normal press admits without spend or spawn');
   for(let i=0;i<15;i++){
@@ -59,10 +59,12 @@ function runPoweredNormalSelfTest():void {
   assert(children.length===16&&children.every(p=>p.poweredSource?.kind==='secondary'),'normal emits only sixteen source secondaries, no generic fallback');
   for(const port of [0,1,2,3])assert(children.filter(p=>p.poweredSource?.kind==='secondary'&&p.poweredSource.port===port).length===4,`four normal children on port ${port}`);
   const firstPort=children.filter(p=>p.poweredSource?.kind==='secondary'&&p.poweredSource.port===0);
-  const origin=firstPort[0]!.pos;const aimLength=Math.hypot(savedAim.pos.x-origin.x,savedAim.pos.y-origin.y,savedAim.pos.z-origin.z);
+  const liveAim=owner.poweredNormalAim!;
+  assert(liveAim.targetUid===state.borgs[1]!.uid&&liveAim.pos.x===6000&&liveAim.pos.z===0,'normal windup refreshes position from the same captured target');
+  const origin=firstPort[0]!.pos;const aimLength=Math.hypot(liveAim.pos.x-origin.x,liveAim.pos.y-origin.y,liveAim.pos.z-origin.z);
   const coneSum=firstPort.reduce((sum,p)=>{const child=p.poweredSource!;assert(child.kind==='secondary','normal secondary state');return {x:sum.x+child.direction.x,y:sum.y+child.direction.y,z:sum.z+child.direction.z};},{x:0,y:0,z:0});
   const coneLength=Math.hypot(coneSum.x,coneSum.y,coneSum.z);
-  assert(Math.abs(coneSum.x/coneLength-(savedAim.pos.x-origin.x)/aimLength)<1e-8&&Math.abs(coneSum.z/coneLength-(savedAim.pos.z-origin.z)/aimLength)<1e-8,'normal fire uses entry snapshot, not target moved during windup');
+  assert(Math.abs(coneSum.x/coneLength-(liveAim.pos.x-origin.x)/aimLength)<1e-8&&Math.abs(coneSum.z/coneLength-(liveAim.pos.z-origin.z)/aimLength)<1e-8,'normal fire follows the captured target current frame pose, not its frozen admission position');
   assert(children.every(p=>p.life===40&&p.romShotKind===0&&p.flightVisual?.bankTexId===26&&p.hitRadius===20),'normal source life/HIT/visuals and no constructor movement');
   battle.step(1/60,inputs);
   assert(children.every(p=>p.life===39),'normal child advances once on subsequent frame');
