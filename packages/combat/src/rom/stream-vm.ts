@@ -197,7 +197,12 @@ export function tickStream(actor: RomActor, mask: number, ctx: StreamContext = {
     const part = actor.parts[i]!;
     if (part.streamPtr < 0) continue;
     const before = part.streamPtr;
-    tickPart(actor, part, ctx);
+    // Decoded hosts can own a verified stream's local animation clock. Keep this
+    // inside the family's tickStream call, before its completion-byte consumer.
+    const hostHandled = (actor as RomActor & {
+      onTickStreamPart?: (partIndex: number) => boolean;
+    }).onTickStreamPart?.(i) === true;
+    if (!hostHandled) tickPart(actor, part, ctx);
     if (before >= 0 && part.streamPtr < 0) {
       part.active = 0;
       if (i === 0) actor.wallContact = 1;

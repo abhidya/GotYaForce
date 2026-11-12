@@ -1,3 +1,4 @@
+import { createKnightWindupClock, tickKnightWindupClock, type KnightWindupClock } from "./rom/knight-windup-clock.js";
 import { isDiverAmmoFamily } from "./diverAmmo.js";
 // Bridge between the existing @gf/combat `BorgRuntime` (the canonical game state —
 // HP, lock-on, ammo, gauges, status, projectiles, results telemetry) and the ROM
@@ -1456,6 +1457,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     mask: number;
     events: StreamEvent[];
     completed: boolean;
+    knightClocks?: Map<number, KnightWindupClock>;
   }> = [];
   /** Max frames the special runs before auto-completing (from the decoded stream length). */
   private specialMaxFrames = 30;
@@ -1546,6 +1548,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     (actor as RomActor & {
       onStartStream?: (group: number, slot: number, mask: number) => boolean;
     }).onStartStream = (group, slot, mask) => this.onStartStream(group, slot, mask);
+    (actor as RomActor & { onTickStreamPart?: (index: number) => boolean }).onTickStreamPart =
+      (index) => this.tickKnightStreamPart(index);
   }
 
   private onStartStream(group: number, slot: number, mask: number): boolean {
@@ -1557,7 +1561,34 @@ export class RomDriverBridge implements RomFamilyDriver {
       group,
       slot,
     );
+    const effective = mask & this.actor.weaponPartMask;
+    const knightWindup = (this.runtime.borgId === "pl0208" || this.runtime.borgId === "pl020e")
+      && this.actor.actionIndex === 2 && this.actor.variantIndex === 0 && group === 4 && slot === 2
+      && ACTION_STREAM_DATA.borgs[this.runtime.borgId]?.actions?.["2"]?.variants?.["0"]?.bank === "0x80300420";
+    // A replacement (even within the same bridge frame, or lacking decoded data)
+    // must revoke old ownership. Restrict this change to the verified wait path.
+    for (const schedule of this.streamSchedules) {
+      if (schedule.knightClocks || knightWindup) {
+        schedule.mask &= ~effective;
+        for (const index of schedule.knightClocks?.keys() ?? []) {
+          if ((effective & (1 << index)) !== 0) schedule.knightClocks!.delete(index);
+        }
+        if (schedule.knightClocks?.size === 0) schedule.completed = true;
+      }
+    }
     if (!events) return false;
+    if (knightWindup && effective !== 0) {
+      const clocks = new Map<number, KnightWindupClock>();
+      for (let i = 0; i < this.actor.parts.length; i++) {
+        if ((effective & (1 << i)) !== 0) clocks.set(i, createKnightWindupClock(1));
+      }
+      this.streamSchedules.push({ startFrame: this.streamFrame, endFrame: Infinity,
+        mask: effective, events: [], completed: false, knightClocks: clocks });
+      if ((effective & 1) !== 0) this.actor.wallContact = 0;
+      // Immediate source setup only. The terminal wait owns all subsequent ticks.
+      this.dispatchEventList(events.slice(0, events.findIndex((event) => event.op === "wait")), 0);
+      return true;
+    }
     const maxFrame = events.reduce((max, event) =>
       Math.max(max, typeof event.frame === "number" ? event.frame : 0), 0);
     this.streamSchedules.push({
@@ -1569,6 +1600,26 @@ export class RomDriverBridge implements RomFamilyDriver {
     });
     this.specialMaxFrames = Math.max(this.specialMaxFrames, this.streamFrame + maxFrame + 5);
     return true;
+  }
+
+  private tickKnightStreamPart(index: number): boolean {
+    const schedule = this.streamSchedules.find((candidate) =>
+      candidate.knightClocks && (candidate.mask & (1 << index)) !== 0 && !candidate.completed);
+    const clock = schedule?.knightClocks?.get(index);
+    if (!schedule || !clock) return false;
+    // Existing bridge animation-rate approximation: neutral 1. Source +1dc8's
+    // tier/action/status/freeze factors are NOT wired here (see findings doc).
+    if (tickKnightWindupClock(clock, 1)) {
+      this.actor.parts[index]!.streamPtr = -1;
+      schedule.knightClocks!.delete(index);
+      if (schedule.knightClocks!.size === 0) schedule.completed = true;
+    }
+    return true;
+  }
+
+  private hasPendingKnightWindup(): boolean {
+    return this.streamSchedules.some((schedule) => schedule.knightClocks
+      && !schedule.completed && schedule.mask !== 0);
   }
 
   /** Build a comprehensive RomHostContext with default implementations. The bridge
@@ -2255,7 +2306,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       // Completion: the phase machine's phase-3 exit clears +0x5e0's action bits
       // (controlWord &= ~0x3). Detect that OR the max-frame safety timeout.
       const phaseDone = (this.actor.controlWord & 0x3) === 0 && this.streamFrame > 2;
-      if (phaseDone || this.streamFrame >= this.specialMaxFrames) {
+      if (phaseDone || (!this.hasPendingKnightWindup() && this.streamFrame >= this.specialMaxFrames)) {
         this.specialActive = false;
         this.romOwnedSpecial = false;
         this.armedHits = [];
@@ -2420,6 +2471,7 @@ export class RomDriverBridge implements RomFamilyDriver {
   private dispatchEvent(frame: number): void {
     if (this.streamEvents) this.dispatchEventList(this.streamEvents, frame);
     for (const schedule of this.streamSchedules) {
+      if (schedule.knightClocks || schedule.mask === 0) continue;
       const localFrame = frame - schedule.startFrame;
       if (localFrame >= 0) this.dispatchEventList(schedule.events, localFrame);
       if (!schedule.completed && frame >= schedule.endFrame) {
