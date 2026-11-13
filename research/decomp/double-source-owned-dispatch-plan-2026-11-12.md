@@ -201,7 +201,7 @@ Original4c050 stores the next-command pointer at part+04; the port's `frameClock
 
 Source1cfc production remains missing.4cd24's unmet, non-bit8 wait path copies target(+08) to previous(+0c), calls49e58, conditionally adds signed animation duration to accumulator(+10), then stores float32(accumulator+animation frame) to+08. Masked/completed paths and bit8 countdown have different behavior.4c050 performs similar postprocessing only when its decoded commands contain no opcode01; opcode01/4c298 has its own animation-change bookkeeping.
 
-The next migration must implement the relevant49e58 animation mode(s),48648/opcode01 setup, source wait bit predicates and current/next command pointers together. For part1 this needs actual animation frame1b20, duration1b38, segment flag1b41, actor1d9a/1dc8 and dispatch-mode state. The existing recovery capture contains target/accumulator outputs but not these inputs or animation-handler entry/return. Neither target subtraction nor the synthetic frameClock can supply them. This correction does not enable source1cfc production, reaction timing or live ownership.
+The next migration must implement the relevant49e58 animation mode(s),48648/opcode01 setup, source wait bit predicates and current/next command pointers together. For part1 this needs actual animation frame1b20, duration1b38, segment flag1b41, actor1d9a/1dc8 and dispatch-mode state. The earlier recovery capture contains target/accumulator outputs but not these inputs or animation-handler entry/return. Capture05 below supplies actor/part inputs, but not the backing AObj/JObj state that produces them. Neither target subtraction nor the synthetic frameClock can supply missing inputs. This correction does not enable source1cfc production, reaction timing or live ownership.
 
 ## Source pointer and completion representation correction
 
@@ -221,3 +221,116 @@ cursors and both host active values against source completion 0 and 1, preservin
 all source bytes and the write log. A future source-owned interpreter needs real
 pointer provenance and a separate source completion latch, not these host values.
 No runtime behavior, source target production, or live clone activation changes.
+
+## Animation-input capture05
+
+A new isolated original-game run recorded **269 matched entry/return pairs** and
+**236 verified controller readbacks**, with zero capture errors and all return-stack
+guards passing. It reached reaction11 but the 240-second bound ended at frame236,
+before ordinary recovery. This is independent bounded evidence, not an extension
+of capture04's fixture or a new ordinary-return/fresh-X verification.
+
+The pairs comprise 124 calls to 49e58, their 122 mode0/49f10 and two mode2/4a0e0
+dispatches, and seven calls each to 48648, 4c298 and 4c050. No call remained open.
+Descriptor gates 1d88/1d8c were non-null throughout, and 1db3/1d9a stayed zero.
+Dispatch marker578 took values1 and2, but neither early-return gate was exercised.
+Mode1 setup appeared at frame235; its handler was not reached before cutoff.
+
+Representative directly observed part1 values (hexadecimal values are float32
+bits unless marked as a signed duration):
+
+- Frame105: timestep `3cf5c28f` (0.029999999329447746), animation frame
+  `00000000` → `3cf5c28f`, duration60, accumulator0 and status/segment/completion0.
+- Frame127: timestep2, animation38 →40 (`42180000` → `42200000`), signed
+  duration39 (`0027`), status1b42 changed0 →1. Stream completion1d0e remained0
+  at this handler return; animation status and stream completion are distinct.
+- Frame148: timestep1.5, animation28.5 →0 (`41e40000` → `00000000`), signed
+  duration30 (`001e`), segment1b41 changed0 →1. Accumulator remained39
+  (`421c0000`) at handler return; the subsequent same-frame snapshot directly
+  read accumulator/target69 (`428a0000`).
+- Frame168 repeated the rollover, with accumulator69 →99 in the subsequent
+  snapshot. Frame169 directly read frame1.5, accumulator99 (`42c60000`) and
+  target100.5 (`42c90000`). None of these inputs was inferred by subtraction.
+- Frame205: animation43.5 →45, duration44, status0 →1; stream completion was1
+  in frame206's snapshot. Frame208: animation0 →1, duration1, status0 →1;
+  elapsed1b1c subsequently reached4 while animation1b20 stayed1. Stream
+  completion became1 at frame212.
+- Mode2 at214: timestep2, transition limit5, clock1 →3, blend `3f4ccccd`
+  (0.800000011920929) → `3ecccccc` (0.3999999761581421), animation0 →2.
+  At215, transition clock3 →5 and mode2 →0, but animation stayed2 while elapsed
+  increased2 →4. An unconditional animation-frame-plus-timestep implementation
+  would fail this observation.
+
+### Dependency boundary exposed by the capture
+
+The next implementation cannot stop at 49f10's initial clock increments.
+49e58 snapshots clocks and dispatches through 802d0d84. Mode0/49f10 and
+mode2/4a0e0 call 4a830 →4aae0 →4acdc →4adc8/4b76c. Joint ranges and mappings
+come from actor1d90–1d93, descriptor4b0 and the1db4 tables. Source4adc8 obtains
+segment1b41 from AObj flag `0x04000000`; source4b76c copies AObj+04 back into
+animation1b20. Duration comes from AObj+0c. Request243b90 and interpreter243bd0
+own request suppression, rate, rewind/end, looping and stopped state. Setup48648
+also requires descriptor lookup4d1f4, metadata4d244, table802d0d70 and transition
+initialization.
+
+A bounded source AObj clock/request/end/loop implementation and verified
+mode0/mode2 handling are the next prerequisites for actual stream-wait and
+accumulator production. Captured handler outputs must not stand in for these
+implementations. This capture lacks backing AObj/JObj headers, FObj callback
+inputs and complete geometry effects. Negative duration, nonzero rewind,
+multi-loop steps, bit8 countdown and early-return gates remain unverified.
+No source-owned Battle mode or live clone behavior is enabled by this evidence.
+
+Local evidence SHA-256 values (raw captures remain on the rig):
+
+- Raw capture05: `8f485b7900c32ad35951122346852eacd8dabf6cfa87e5a691fc52b079aba893`.
+- Derived numeric summary: `c951e560814dde97794348c51eeefb79ba0f3e6f200824339b4d971929ea780a`.
+- Capture script: `9047071ddce77a5e573cfa856e4bac5feb3a369698e722908fc605c6f2b81513`.
+
+The task-owned Dolphin was stopped through the existing isolated process ledger;
+its process was absent, ledger cleared and listener closed. Existing emulator
+profiles and the supervisor were unchanged. No original bytes or raw captures
+were uploaded or committed.
+
+### Original AObj clock and callback audit
+
+Bounded read-only DOL inspection verifies request80243b90 (size0x40) and
+interpreter80243bd0 (size0x1b8), with the same original DOL hash recorded above.
+AObj fields are flags+00, frame+04, rewind+08, end+0c, rate+10 and FObj list+14.
+Constant8043d1f8 is positive zero (`00000000`). Request stores float32(frame),
+clears STOPPED `0x40000000`, sets REQUEST `0x08000000`, then forwards the original
+double request argument to FObjReqAnimAll, not the rounded stored frame.
+
+The interpreter returns immediately for null/stopped objects. A request suppresses
+one advance and is cleared; otherwise advance uses `fadds`. When LOOP `0x20000000`
+and end≤frame, the finite rewind<end branch stops FObjs, reloads state, computes
+`f32(rewind + fmod(f32(frame - rewind), f32(end - rewind)))`, stores the result,
+and requests FObjs at that stored frame. Both differences use `fsubs`; the final
+addition uses double `fadd` followed by `frsp`. Do not separately round the fmod
+result. The other rewind/end branch sets frame=end without stop/request calls.
+Both loop branches set WRAPPED `0x04000000` and interpret with delta0; the
+non-wrapping path clears WRAPPED. Non-loop completion sets STOPPED without
+clamping the frame. Final stopped/running counters depend on the final flags.
+
+FObj calls cannot generally be replaced by a precomputed list of events. The
+wrap path executes StopAll before reloading rewind/frame/end, and reloads the
+FObj list before ReqAll. The interpreter reloads flags/end/frame after InterpretAll,
+and reloads flags after the completion StopAll. StopAll8024895c itself can invoke
+FObjInterpretAnim80249ac4 for node state6, including indirect user callbacks.
+Flag `0x10000000` suppresses only the ordinary InterpretAll callback; wrap-stop
+and end-stop retain the original callback. ReqAll's audited body has no callback,
+but noninterference still requires valid, nonaliased objects.
+
+A pure scalar helper is defensible only for a null FObj list or an explicit
+non-mutating/nonaliasing effects contract. General callbacks require synchronous
+effects and subsequent live-state reads. Nonfinite values, intermediate float32
+overflow, unsupported aliasing and unverified FP-environment behavior need explicit
+exclusion. In particular, the DOL takes the rewind/end clamp branch on an unordered
+comparison, unlike the decompiler's apparent inverse comparison. Capture05 lacks
+AObj headers and does not dynamically verify any new helper under these contracts.
+
+Source anchors: `chunk_0070.c:2569–2670` and
+`chunk_0071.c:215–273,869–1225`. Original function SHA-256 values:
+
+- Request80243b90: `8a7a3a50f9ea7d80a891bc65745cde96d50b329c296dc359899b6754763b9b29`.
+- Interpreter80243bd0: `dd5555ed929b4f8b047ff6d91a36f2c304089c4a7d51d1e265adb959931298e8`.
