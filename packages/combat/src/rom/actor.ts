@@ -414,8 +414,10 @@ export interface RomActor {
 /** Per-part stream-state block (actor+0x1cd4 + partIndex*0x20, the structure
  *  `zz_004cd24_` walks at chunk_0006.c:2014). Member offsets are block-relative. */
 export interface RomPartState {
-  /** +0x00: stream pointer (offset into the resolved bank; -1 = no stream).
-   *  @romfield streamPtr +0x00 s32 */
+  /** Host stream cursor: offset into the retained bank, -1 when inactive, or a
+   * decoded-host sentinel. Source part+0x00 holds an absolute current-wait pointer
+   * (null when reset). There is no verified address/sentinel conversion here.
+   * @romfield streamPtr port_side */
   streamPtr: number;
   /** Synthetic VM frame clock (accumulates +dt; gates legacy wait ops).
    * Source part+0x04 is a next-command pointer written by4c050, not a float.
@@ -430,8 +432,10 @@ export interface RomPartState {
   /** +0x10: anim-time accumulator.
    *  @romfield animTime +0x10 f32 */
   animTime: number;
-  /** +0x1a: stream-active flag.
-   *  @romfield active +0x1a u8 */
+  /** Host stream-active flag (1 during execution, 0 after completion/reset).
+   * Source part+0x1a is a completion latch: 0 at start/reset, 1 on a terminal wait.
+   * Neither direct copying nor inversion preserves both completion and reset.
+   * @romfield active port_side */
   active: number;
   /** +0x1b: state byte (op 0x02 writes here per part).
    *  @romfield stateByte +0x1b s8 */

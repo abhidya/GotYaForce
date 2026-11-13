@@ -202,3 +202,22 @@ Original4c050 stores the next-command pointer at part+04; the port's `frameClock
 Source1cfc production remains missing.4cd24's unmet, non-bit8 wait path copies target(+08) to previous(+0c), calls49e58, conditionally adds signed animation duration to accumulator(+10), then stores float32(accumulator+animation frame) to+08. Masked/completed paths and bit8 countdown have different behavior.4c050 performs similar postprocessing only when its decoded commands contain no opcode01; opcode01/4c298 has its own animation-change bookkeeping.
 
 The next migration must implement the relevant49e58 animation mode(s),48648/opcode01 setup, source wait bit predicates and current/next command pointers together. For part1 this needs actual animation frame1b20, duration1b38, segment flag1b41, actor1d9a/1dc8 and dispatch-mode state. The existing recovery capture contains target/accumulator outputs but not these inputs or animation-handler entry/return. Neither target subtraction nor the synthetic frameClock can supply them. This correction does not enable source1cfc production, reaction timing or live ownership.
+
+## Source pointer and completion representation correction
+
+The remaining scalar annotations for `RomPartState.streamPtr` and `active` also
+claimed an invalid direct conversion. Source 4c020 clears the current/next pointers
+and completion byte to zero. Source 4c050 executes commands up to a wait, stores
+the absolute current-wait pointer at part+00 and next-command pointer at part+04,
+and clears part+1a. Source 4cd24 sets part+1a when a terminal wait completes.
+The host cursor instead contains a retained-bank offset, -1 when inactive, or
+`Number.MAX_SAFE_INTEGER` for a decoded-only host schedule. Its active flag is 1
+during execution and 0 after both reset and completion. Neither raw pointer
+encoding nor a direct/inverted flag copy preserves these source states.
+
+Both fields are now `port_side`; the generated oracle map refuses their scalar
+export before any write. Regression cases cover inactive/zero/nonzero/sentinel
+cursors and both host active values against source completion 0 and 1, preserving
+all source bytes and the write log. A future source-owned interpreter needs real
+pointer provenance and a separate source completion latch, not these host values.
+No runtime behavior, source target production, or live clone activation changes.
