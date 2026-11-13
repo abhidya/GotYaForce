@@ -366,3 +366,61 @@ receiver bindings, geometry effects, shared reaction setup and source stream-wai
 production remain to be supplied and independently verified. Capture05 does not
 provide AObj headers and does not dynamically validate this new module. No live
 clone or source-owned Battle mode is enabled.
+
+## Implemented prerequisite: FObj header and list effects
+
+`rom/fobj-list.ts` supplies actual bounded request/reset writes and ordered list
+walkers for request802488b8, stop8024895c and interpret-all8024a198. Its effect
+adapter connects those operations to the offline AObj controller. Request resets
+cursor+04 from base+08, stores `f32(s16(+18) + originalDoubleRequest)` at+1c,
+clears+11/+12/+16/+1a, writes positive zero to+20/+24/+28/+2c, clears flag0x40
+and sets the low flag nibble to1. Other modeled fields are preserved. In
+particular, rounding the request before adding a negative offset loses observable
+low bits and is incorrect.
+
+Stop invokes the required per-node interpreter only when byte+12 equals6. It
+then reloads and clears the flag low nibble, including for nodes not interpreted.
+Interpret-all invokes the interpreter for every node. Both walkers load the next
+link after the callback and any stop flag write, so callbacks can redirect or
+terminate traversal. They do not snapshot a list or precompute effects.
+
+The per-node decoder/interpolator is still a mandatory synchronous dependency,
+not implemented by these walkers. Callers must supply that implementation or
+throw for unsupported operations. No default no-op is provided. The existing
+decoded-key HSDRaw-style sampler is not substituted for the source runtime state
+machine. Tests use explicitly labeled interpreter fixtures; they demonstrate
+AObj/list ordering and header changes, not original joint callback behavior.
+
+The bounded runtime owns sealed, nonaliased header records and opaque node/data
+identities, not RAM addresses or pointer arithmetic. Scalar widths are checked;
+clocks are finite float32 and request/delta arguments are finite doubles. Unknown
+nodes, read-only or malformed fields, nonfinite results, cycles/revisits, a
+declared traversal budget, asynchronous effects and same-runtime reentry abort
+explicitly. These restrictions exclude unsupported scenarios rather than model
+retail failure behavior. Earlier writes and callbacks are not rolled back.
+Null lists are genuine no-ops. Allocation/free, unmodeled header fields and
+exceptional PPC floating-point environments remain outside this contract.
+
+Regression coverage includes signed offsets, original-double cancellation,
+signed zero/subnormals, preserved fields, live callback rewiring, selective stop
+dispatch, callback suppression through the AObj adapter, wrap/end ordering and
+failure boundaries. This checkpoint enables no live animation, source-owned
+Battle mode or charged clone, and does not yet replay captured FObj behavior.
+
+### Original FObj instruction audit
+
+The same original DOL confirms positive-zero constant8043d298 and signed-int
+conversion bias8043d2a0. Request802488fc uses `fsubs` for the signed-short
+conversion;80248900 uses `fadds` with the unchanged double request in f1, then
+stores+1c at80248904. Its reset stores occur in the order listed above, with
+next reloaded at80248948. Stop calls the interpreter at802489b0, reloads flags
+at802489bc, stores the masked flags at802489c4 and reloads next at802489c8.
+Interpret-all calls at8024a1d8 and reloads next at8024a1dc. Neither walker
+protects the current node's lifetime across a callback; this bounded model
+does not admit allocation/free or replacement of the current storage.
+
+Function SHA-256 values:
+
+- Request802488b8, size0xa4: `b5f850795387a7fabffdbbfd933a642b698c0c058cc5f24a373814ad790feeab`.
+- Stop8024895c, size0x98: `ebb6701d9c9dfc34323fb798f9477ae8f949d06f315593cc458f4ed2322d8002`.
+- Interpret-all8024a198, size0x70: `bcf7c4c9b6022403f2418af170535e1b0e4ac28f37b73cea489370398cb7344d`.
