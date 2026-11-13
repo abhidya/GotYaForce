@@ -140,6 +140,48 @@ assert.equal(textureDisposed, 0);
 assert.equal(boneTextureDisposed, 1);
 assert.ok([...resourceCounts.values()].every((count) => count === 1));
 assert.throws(() => mirror.sync(offset), /disposed/);
+
+// Cached creation-pose bounds must not cull an animated clone in the frustum.
+// The source bounds deliberately remain stale: sync must neither depend on nor
+// update them. Bounding boxes are optional, but refresh them when already present.
+const boundsOwner = new THREE.Group();
+const boundsSkin = new THREE.SkinnedMesh(geometry, material);
+const boundsBone = new THREE.Bone();
+boundsSkin.add(boundsBone);
+boundsOwner.add(boundsSkin);
+boundsOwner.updateMatrixWorld(true);
+boundsSkin.bind(new THREE.Skeleton([boundsBone]));
+boundsSkin.computeBoundingSphere();
+boundsSkin.computeBoundingBox();
+const originalSphere = boundsSkin.boundingSphere.clone();
+const originalBox = boundsSkin.boundingBox.clone();
+const boundsMirror = createDoubleCloneMirror(boundsOwner);
+const boundsClone = boundsMirror.root.children[0].children[0];
+const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 20);
+camera.position.set(100, 0, 10);
+camera.lookAt(100, 0, 0);
+camera.updateMatrixWorld(true);
+const frustum = new THREE.Frustum().setFromProjectionMatrix(
+  new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse),
+);
+const zeroOffset = new THREE.Vector3();
+for (const displacement of [100, 0, 100]) {
+  boundsBone.position.x = displacement;
+  boundsSkin.morphTargetInfluences[0] = displacement === 100 ? 0.5 : 0;
+  boundsOwner.updateMatrixWorld(true);
+  boundsMirror.sync(zeroOffset);
+  assert.equal(frustum.intersectsObject(boundsClone), displacement === 100);
+  const vertex = new THREE.Vector3();
+  for (let index = 0; index < geometry.attributes.position.count; index++) {
+    boundsClone.getVertexPosition(index, vertex);
+    assert.ok(boundsClone.boundingBox.containsPoint(vertex));
+    assert.ok(boundsClone.boundingSphere.distanceToPoint(vertex) < 1e-9);
+  }
+  assert.ok(boundsSkin.boundingSphere.equals(originalSphere));
+  assert.ok(boundsSkin.boundingBox.equals(originalBox));
+}
+boundsMirror.dispose();
+
 skin.bindMode = "detached";
 assert.throws(() => createDoubleCloneMirror(owner), /attached skeleton/);
 skin.bindMode = "attached";

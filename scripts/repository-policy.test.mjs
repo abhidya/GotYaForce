@@ -69,3 +69,12 @@ test('Pages deploy watches shared game code and build inputs', () => {
     assert.ok(paths.includes(input), `Pages push filter excludes game build input: ${input}`)
   }
 })
+
+test('Contributor gate runs the Double clone mirror selfcheck', () => {
+  const { scripts } = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'))
+  assert.equal(scripts['selfcheck:double-clone-mirror'],
+    'node scripts/run-double-clone-mirror-selfcheck.mjs')
+  const checks = scripts['verify:contributor'].split(/\s*&&\s*/)
+  assert.ok(checks.includes('pnpm selfcheck:double-clone-mirror'),
+    'clone pose and resource-isolation tests must run in the contributor gate')
+})

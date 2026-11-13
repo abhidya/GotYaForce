@@ -133,6 +133,14 @@ export function createDoubleCloneMirror(source: THREE.Object3D): DoubleCloneMirr
     }
     root.updateMatrixWorld(true);
     skeletons.forEach((skeleton) => skeleton.update());
+    // SkinnedMesh bounds are cached, not invalidated by changed bone matrices or
+    // morph weights. A creation-pose sphere can cull the current mirrored pose.
+    // Compute from the private pose, without relying on fresh owner bounds.
+    for (const { clone: copy } of pairs) {
+      if (!(copy instanceof THREE.SkinnedMesh)) continue;
+      copy.computeBoundingSphere();
+      if (copy.boundingBox !== null) copy.computeBoundingBox();
+    }
   }
   return { root, sync, dispose };
 }
