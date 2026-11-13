@@ -417,8 +417,10 @@ export interface RomPartState {
   /** +0x00: stream pointer (offset into the resolved bank; -1 = no stream).
    *  @romfield streamPtr +0x00 s32 */
   streamPtr: number;
-  /** +0x04: frame clock (accumulates +dt; gates wait ops).
-   *  @romfield frameClock +0x04 f32 */
+  /** Synthetic VM frame clock (accumulates +dt; gates legacy wait ops).
+   * Source part+0x04 is a next-command pointer written by4c050, not a float.
+   * This clock cannot be hydrated from or exported to original actor storage.
+   * @romfield frameClock port_side */
   frameClock: number;
   /** +0x08/+0x0c: prev/cur integration targets.
    *  @romfield prevTarget +0x08 f32
