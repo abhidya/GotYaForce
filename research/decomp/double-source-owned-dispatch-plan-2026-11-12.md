@@ -334,3 +334,35 @@ Source anchors: `chunk_0070.c:2569–2670` and
 
 - Request80243b90: `8a7a3a50f9ea7d80a891bc65745cde96d50b329c296dc359899b6754763b9b29`.
 - Interpreter80243bd0: `dd5555ed929b4f8b047ff6d91a36f2c304089c4a7d51d1e265adb959931298e8`.
+
+## Implemented prerequisite: offline AObj scalar control
+
+`rom/aobj-clock.ts` now implements the audited request and interpreter scalar
+control, using explicit source-width state and counters. FObj operations are
+mandatory synchronous effects, not optional no-ops or precomputed events.
+Effects execute between source state operations; subsequent fields and list
+identities are read live. This preserves callback-sensitive wrap/completion
+ordering and ordinary-only callback suppression. Request forwards the original
+double argument while storing float32, and non-loop overshoot remains unclamped.
+
+The admitted domain uses factory-created, nonaliased records with finite float32
+clocks and uint32 flags/counters; FObj lists and callbacks use opaque identities,
+not raw RAM pointers. Nonfinite values, float32 overflow, malformed/read-only
+state, asynchronous effects and same-object reentry fail explicitly. An error
+does not roll back earlier state writes or executed effects. In particular,
+rejecting an asynchronous effect cannot cancel work it has already started.
+These are offline scenario failures, not live-match fallback behavior.
+
+Lifecycle tests cover precision and request suppression, stopped/null handling,
+wrap/clamp/overshoot, signed zero, negative/zero rates, source rounding, callback
+mutations, reloaded list identities, counters and rejection boundaries. Concrete
+negative controls distinguish a rounded request argument, unrounded pre-fmod
+subtraction and stale/precomputed callback state. No distinguishing witness is
+claimed for rounding an already-representable fmod remainder.
+
+This is scalar/effect-boundary implementation coverage, not an FObj implementation,
+original trace replay or live integration. Source FObj/JObj backing data, callback
+receiver bindings, geometry effects, shared reaction setup and source stream-wait
+production remain to be supplied and independently verified. Capture05 does not
+provide AObj headers and does not dynamically validate this new module. No live
+clone or source-owned Battle mode is enabled.

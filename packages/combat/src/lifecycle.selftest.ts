@@ -1,3 +1,4 @@
+import {runAObjClockSelfTest} from './rom/aobj-clock.selftest.js';
 import {runActorDispatchOrderSelfTest} from './rom/dispatch-order.selftest.js';
 import {runDoubleCloneContactSelfTest} from './doubleCloneContact.selftest.js';
 import {runDoubleCloneReactionObservationSelfTest} from './doubleCloneReactionObservation.selftest.js';
@@ -289,6 +290,7 @@ function assertNonRomAirborneDeathKeepsGravity(stats: readonly BorgStats[]): voi
 }
 
 export function runSelfTest(): void {
+  runAObjClockSelfTest();
   runActorDispatchOrderSelfTest();
   runNinjaXStreamSelfTest();
   runNinjaXSelfTest();
