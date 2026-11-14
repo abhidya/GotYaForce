@@ -2,6 +2,7 @@ import {createSourceActorJointMappingRuntime, type SourceActorJointMappingHeader
 import {createSourceJObjAnimationRuntime} from './jobj-animation.js';
 import {createSourceJointAnimationFeedbackRuntime} from './joint-animation-feedback.js';
 import {markIncompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
+import {markIncompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {createSourceActorInputPrefixRuntime} from './actor-input-prefix.js';
 import {createSourceActorTickPrefixRuntime, isSourceActorTickPrefixClaimedActor,
   type SourceActorTickRawDistances, type SourceActorTickPrefixBinding} from './actor-tick-prefix.js';
@@ -292,6 +293,18 @@ export function runActorTickPrefixSelfTests(): void {
     x.hooks.mapping = () => ({...header});
     rejects(() => x.run(1), 'incomplete mode1 operation');
     check(!Object.hasOwn(x.actual, 'targetDistance760'), 'clean copy cannot bypass retained poison');
+  }
+  {
+    const x = fixture(); markIncompleteSourceActorDoubleLifecycle(x.actual);
+    rejects(() => x.run(0), 'incomplete source Double lifecycle');
+    check(!Object.hasOwn(x.actual, 'targetDistance760') && !Object.hasOwn(x.actual, 'horizontalDistance764'),
+      'standalone tick refuses Double action poison before either host raw store without a frame');
+    equal(x.actual.controlWord, 0x80100041, 'Double poison preserves support flags');
+    equal(x.borg.paramTier.timerFrames, 3, 'Double poison preserves gauge');
+    rejects(() => x.run(0), 'epoch already consumed');
+    x.actual.actionIndex = 0; x.actual.fbState = 0; x.actual.controlWord = 0;
+    rejects(() => x.run(1), 'incomplete source Double lifecycle');
+    check(!Object.hasOwn(x.actual, 'targetDistance760'), 'changing source action and gates cannot erase Double poison');
   }
   console.log('[actor-tick-prefix-test] explicit raw-input epochs, real gauge prefix, support clears and honest refusals passed');
 }

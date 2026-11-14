@@ -1,6 +1,7 @@
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {createRomActor} from './actor.js';
-import {createSourceActorTerrainQueryRuntime, isSourceActorTerrainQueryRuntime, type SourceActorTerrainGlobals} from './actor-terrain-query.js';
+import {createSourceActorTerrainNormalOutput, createSourceActorTerrainQueryRuntime, isSourceActorTerrainQueryRuntime,
+  type SourceActorTerrainGlobals, type SourceActorTerrainNormalOutput} from './actor-terrain-query.js';
 import {createSourceActorTransformHistoryRuntime} from './actor-transform-history.js';
 import {createSourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {createSourceActorJointMappingRuntime} from './actor-joint-mapping.js';
@@ -126,7 +127,7 @@ export function runActorTerrainQuerySelfTests(): void {
     f.point.y = 5;
     check(f.actual.pos.y === 0 && f.actual.savedGroundPos.y === 0 && f.actual.stepHeight === 0 && f.prior.previousStepHeight6d4 === 0,
       'query never writes actual current/history fields');
-    check(Object.keys(f.runtime).join(',') === 'getActualActor,getHistoryBinding,getTerrainGlobals,bindActor,query8003d6e4,queryNormal8003de80', 'no persistent result/normal/height surface');
+    check(Object.keys(f.runtime).join(',') === 'getActualActor,getHistoryBinding,getTerrainGlobals,bindActor,query8003d6e4,queryNormal8003de80,queryHeightNormal8003e0a8', 'no persistent result/normal/height surface');
     check(f.runtime.getTerrainGlobals() === f.terrain, 'read-only accessor returns the same actual global owner');
     check(isSourceActorTerrainQueryRuntime(f.runtime) && Object.isFrozen(f.runtime), 'genuine terrain identity is frozen');
     for (const fake of [null, undefined, {}, {...f.runtime}, Object.create(f.runtime)])
@@ -379,6 +380,7 @@ export function runActorTerrainQuerySelfTests(): void {
     rejects(f.query, 'source word changed');
   }
   runActorTerrainNormalQuerySelfTests();
+  runActorTerrainHeightNormalQuerySelfTests();
 }
 
 export function runActorTerrainNormalQuerySelfTests(): void {
@@ -608,5 +610,264 @@ export function runActorTerrainNormalQuerySelfTests(): void {
     rejects(f.normal, 'caught same-runtime reentry'); check(caught, 'nested normal query refused');
     outputIs(f.output, 0, 'caught reentry leaves only prior source stores');
     delete f.hooks.history; f.normal(); outputIs(f.output, 3, 'normal query guard recovers on next independent call');
+  }
+}
+
+export function runActorTerrainHeightNormalQuerySelfTests(): void {
+  const marked = (height: number, bits: number, x = 0, z = 0): TriangleInput => {
+    const value = triangle(height, x, z); value.normal = vec(bits & 1 ? -0 : 0, 1, bits & 2 ? -0 : 0); return value;
+  };
+  const outputIs = (output: SourceActorTerrainNormalOutput, bits: number, why: string): void => {
+    check(Object.is(output.x, bits & 1 ? -0 : 0) && output.y === 1 && Object.is(output.z, bits & 2 ? -0 : 0), why);
+  };
+  const withFloors = (triangles: TriangleInput[], upper = 100, lower = -100) => {
+    const f = fixture([], {floor: layer(0x1c, triangles), upper, lower}), output = createSourceActorTerrainNormalOutput();
+    Object.assign(output, vec(71, 72, 73));
+    return {...f, output, heightNormal: (clearance = 0) => f.runtime.queryHeightNormal8003e0a8(f.id, f.point, clearance, output)};
+  };
+  {
+    const scratch = createSourceActorTerrainNormalOutput();
+    check(Number.isNaN(scratch.x) && Number.isNaN(scratch.y) && Number.isNaN(scratch.z),
+      'new output is uninitialized scratch, not a default successful normal');
+    check(scratch !== createSourceActorTerrainNormalOutput(), 'each caller receives a distinct fresh output owner');
+  }
+  {
+    const f = withFloors([marked(4, 1), marked(2, 2), marked(8, 3)]);
+    check(f.heightNormal() === 4, 'height-normal returns eligible best height');
+    outputIs(f.output, 1, 'height-normal retains eligible best normal, not last triangle');
+    check(f.heightNormal(-10) === 2, 'height-normal returns minimum fallback');
+    outputIs(f.output, 2, 'minimum fallback copies its own normal unlike normal-only query');
+    check(f.heightNormal(100) === 8, 'height-normal selects maximum on initial clearance equality');
+    outputIs(f.output, 3, 'maximum fallback copies its own normal');
+    const other = createSourceActorTerrainNormalOutput(); f.point.y = 3;
+    check(f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, other) === 2, 'new caller-local output accepted');
+    outputIs(other, 2, 'new caller owns its selected normal'); outputIs(f.output, 3, 'earlier output is not overwritten or retained');
+    check(f.actual.pos.y === 0 && f.actual.savedGroundPos.y === 0 && f.actual.stepHeight === 0 && f.prior.previousStepHeight6d4 === 0,
+      'height-normal only writes the explicit caller output');
+  }
+  for (const clearance of [0, -10, 100]) {
+    const f = withFloors([marked(4, 1), marked(4, 2)]);
+    check(f.heightNormal(clearance) === 4, 'all height-normal accumulation modes preserve equal heights');
+    outputIs(f.output, 2, 'eligible/minimum/maximum ties replace with later normal');
+  }
+  for (const test of [
+    {triangles: [] as TriangleInput[], clearance: 0, height: -100, bits: 0},
+    {triangles: [], clearance: 100, height: -100, bits: 0},
+    {triangles: [marked(-200, 3)], clearance: 0, height: -200, bits: 3},
+    {triangles: [marked(-200, 3)], clearance: 100, height: -100, bits: 0},
+    {triangles: [marked(100, 3)], clearance: 0, height: -100, bits: 3},
+    {triangles: [marked(120, 3)], clearance: 0, height: -100, bits: 0},
+    {triangles: [marked(-100, 3)], clearance: 0, height: -100, bits: 3},
+  ]) {
+    const f = withFloors(test.triangles);
+    check(f.heightNormal(test.clearance) === test.height, 'sentinel and unfiltered fallback heights match source');
+    outputIs(f.output, test.bits, 'fallback normal copied even if selected height equals a source sentinel');
+  }
+  {
+    const f = withFloors([marked(2, 1), marked(5, 2), marked(100, 3), marked(120, 3)]);
+    check(f.heightNormal() === 2, 'eligible height limit excludes equality'); outputIs(f.output, 1, 'equality does not replace best normal');
+    f.point.y = 200;
+    check(f.heightNormal() === 5, 'eligible ceiling excludes equal and higher floors'); outputIs(f.output, 2, 'ceiling filtering retains lower normal');
+    check(f.heightNormal(100) === 120, 'maximum is independent of query and ceiling limits'); outputIs(f.output, 3, 'maximum normal passes no eligibility filter');
+  }
+  {
+    const f = withFloors([marked(2, 1), marked(7, 2), marked(15, 3)]);
+    f.actual.pos.y = 1; f.actual.savedGroundPos.y = 6;
+    check(f.heightNormal() === 7, 'positive previous-current top increases local clearance'); outputIs(f.output, 2, 'adjusted best normal follows height');
+    f.actual.savedGroundPos.y = -1;
+    check(f.heightNormal() === 2, 'negative displacement leaves clearance unchanged'); outputIs(f.output, 1, 'negative delta does not alter output selection');
+    f.actual.savedGroundPos.y = 1; f.prior.previousStepHeight6d4 = 10;
+    check(f.heightNormal() === 7, 'actual history step is consumed');
+    f.actual.stepHeight = 10; check(f.heightNormal() === 2, 'actual current step subtracts from previous top');
+  }
+  {
+    const f = withFloors([marked(2, 1), marked(8, 2), marked(15, 3)], 10);
+    f.actual.savedGroundPos.y = 20;
+    check(f.heightNormal() === 8, 'maximum flag uses entry clearance, not adjusted local limit');
+    outputIs(f.output, 2, 'large positive delta does not turn eligible best into maximum');
+  }
+  {
+    const f = withFloors([marked(4, 1), marked(5, 2)]);
+    f.actual.savedGroundPos.y = 2 ** 24; f.prior.previousStepHeight6d4 = 1; f.actual.pos.y = 2 ** 24;
+    check(f.heightNormal() === 4, 'previous top rounds before subtraction');
+    f.actual.savedGroundPos.y = 2 ** 24 + 2; f.prior.previousStepHeight6d4 = 0; f.actual.stepHeight = 1; f.point.y = 4;
+    check(f.heightNormal() === 5, 'current top rounds before subtraction'); outputIs(f.output, 2, 'rounding affects normal selection');
+  }
+  {
+    const f = withFloors([marked(-1, 1), marked(0, 2)], 2 ** 25);
+    f.actual.savedGroundPos.y = 1; f.point.y = -(2 ** 24);
+    check(f.heightNormal(2 ** 24) === -1, 'clearance adjustment rounds before caller-Y sum'); outputIs(f.output, 1, 'rounded limit excludes zero');
+  }
+  for (const height of [2 ** -149, -(2 ** -149), -0]) {
+    const f = withFloors([marked(height, 0)]);
+    check(Object.is(f.heightNormal(), height), 'separate plane operations retain subnormal and signed-zero result');
+    if (Object.is(height, -0)) {
+      f.point.x = 0; f.point.z = 0;
+      check(Object.is(f.heightNormal(), 0), 'plane zero comes from real multiply/add/divide rather than vertex Y shortcut');
+    }
+  }
+  {
+    const f = withFloors([marked(2, 1), marked(7, 2)]); let histories = 0;
+    f.hooks.history = () => {
+      outputIs(f.output, 0, 'default source stores precede both history reads');
+      if (++histories === 2) f.prior.previousStepHeight6d4 = 10;
+    };
+    check(f.heightNormal() === 7 && histories === 2, 'post-ceiling history step is freshly read'); outputIs(f.output, 2, 'fresh history affects selected normal');
+  }
+  {
+    const f = fixture([], {floor: layer(0x1c, [marked(2, 1), marked(7, 2)], [[0], [], [1], []])});
+    const output = createSourceActorTerrainNormalOutput(); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) {f.point.x = 600; f.point.y = 8;}};
+    check(f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, output) === 7,
+      'cell and limit reload caller point while edges retain original local X/Z'); outputIs(output, 2, 'second cell normal is selected');
+  }
+  {
+    const f = withFloors([marked(4, 3)]); Object.assign(f.actual.pos, f.point);
+    check(f.runtime.queryHeightNormal8003e0a8(f.id, f.actual.pos, 0, f.output) === 4,
+      'actual actor.pos is an admitted point owner, as passed by 677b0'); outputIs(f.output, 3, 'actual point query writes separate local output');
+  }
+  for (const axis of ['x', 'z'] as const) for (const bound of [-7500, 7500, -8000, 8000]) {
+    const f = withFloors([marked(2, 3)]); f.point[axis] = bound;
+    f.point.y = NaN; if (axis === 'x') f.point.z = NaN;
+    f.actual.pos.y = NaN; f.actual.stepHeight = NaN; f.actual.savedGroundPos.y = NaN;
+    f.prior.previousStepHeight6d4 = NaN; f.terrain.upper34 = NaN; f.terrain.lower68 = NaN;
+    check(f.heightNormal(NaN) === -5000 && !f.events.includes('history'),
+      'outside height-normal returns authenticated -5000 before caller Y/clearance/terrain/history');
+    outputIs(f.output, 0, 'outside return still performs genuine default stores');
+  }
+  for (const support of [1, 127, 128, 255]) {
+    const f = withFloors([]); f.actual.supportContact1db = support; f.point.x = NaN;
+    rejects(f.heightNormal, 'nonzero supporting contact height-normal transform');
+    check(f.output.x === 71 && f.output.y === 72 && f.output.z === 73, 'support refusal precedes zero-support output stores');
+  }
+  for (const key of ['ceiling24', 'ceiling20'] as const) {
+    const f = fixture([], {[key]: layer(key === 'ceiling24' ? 0x24 : 0x20, [triangle(1)])}), output = createSourceActorTerrainNormalOutput();
+    f.actual.pos.y = NaN;
+    Object.defineProperty(f.terrain, 'floor1c', {get() {throw Error('unreached floor getter');}});
+    if (key === 'ceiling24') Object.defineProperty(f.terrain, 'ceiling20', {get() {throw Error('unreached ceiling getter');}});
+    rejects(() => f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, output), `nonempty ${key}`);
+    outputIs(output, 0, 'ceiling refusal retains default and skips later floor/current-position loads');
+  }
+  {
+    const f = withFloors([]); f.terrain.upper34 = NaN; f.actual.stepHeight = NaN;
+    rejects(() => f.heightNormal(NaN), 'upper34'); outputIs(f.output, 0, 'initial global upper read precedes clearance comparison');
+    f.terrain.upper34 = 100; rejects(() => f.heightNormal(NaN), 'saved clearance');
+    check(!f.events.includes('history'), 'height-normal validates original clearance before ceiling arguments, unlike 3de80');
+  }
+  {
+    const skipped = marked(88, 0, 700, 700); skipped.normal.x = NaN; skipped.vertices[0].y = NaN;
+    const f = withFloors([skipped, marked(2, 3)]);
+    check(f.heightNormal() === 2, 'edge-rejected malformed triangle is not a normal/height fallback candidate'); outputIs(f.output, 3, 'scan continues to real eligible pointer');
+  }
+  {
+    const bad = marked(3, 0); bad.normal.x = 1;
+    const f = withFloors([marked(2, 3), bad]); rejects(f.heightNormal, 'nonflat source normal X');
+    outputIs(f.output, 3, 'later unsupported normal retains earlier completed candidate stores');
+  }
+  for (const [axis, value] of [['x', 1], ['z', 1], ['y', 0], ['y', -1], ['x', NaN]] as const) {
+    const bad = marked(200, 0); bad.normal[axis] = value;
+    const f = withFloors([bad]); rejects(f.heightNormal, Number.isNaN(value) ? 'finite exact source' : 'nonflat source normal');
+    outputIs(f.output, 0, 'unsupported normal refuses before height-based eligibility filtering');
+  }
+  {
+    const f = withFloors([marked(2, 3)]);
+    f.floor.view.setUint32(f.floor.recordBase + 0x10, 0xffffffff, false);
+    f.floor.view.setUint32(f.floor.recordBase + 0x0c, 0xffffffff, false);
+    rejects(f.heightNormal, `source word changed at 0x${(f.floor.recordBase + 0x0c).toString(16)}`);
+    outputIs(f.output, 0, 'height-normal loads v1Z before v2X, unlike normal-only query');
+  }
+  {
+    const bad = marked(2, 0); bad.normal.x = 1;
+    const f = withFloors([bad]); f.floor.view.setUint32(f.floor.recordBase + 0x2c, 0xffffffff, false);
+    rejects(f.heightNormal, `source word changed at 0x${(f.floor.recordBase + 0x2c).toString(16)}`);
+    outputIs(f.output, 0, 'normal X/Z/Y captures precede first unsupported X arithmetic');
+  }
+  for (const axis of ['x', 'y', 'z'] as const) {
+    const f = withFloors([]); Object.defineProperty(f.output, axis, {writable: false}); f.point.x = NaN;
+    rejects(f.heightNormal, `normal output ${axis}: non-writable`);
+    check(Object.is(f.output.x, axis === 'x' ? 71 : 0) && f.output.y === (axis === 'z' ? 1 : 72) && f.output.z === 73,
+      'initial height-normal stores retain exact X/Y/Z refusal prefix before bounds');
+  }
+  for (const clearance of [0, -10, 100]) {
+    const f = withFloors([marked(clearance === 100 ? 120 : 4, 3)]); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) Object.defineProperty(f.output, 'y', {writable: false});};
+    rejects(() => f.heightNormal(clearance), 'normal output y: non-writable');
+    check(Object.is(f.output.x, -0) && f.output.y === 1 && Object.is(f.output.z, 0),
+      'candidate/minimum/maximum output X survives a Y refusal, with Z left at default');
+  }
+  {
+    const f = withFloors([]); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) Object.defineProperty(f.output, 'x', {writable: false});};
+    rejects(f.heightNormal, 'normal output x: non-writable');
+    outputIs(f.output, 0, 'empty minimum fallback performs real stores instead of returning default success');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); let getterCalled = false;
+    Object.defineProperty(f.output, 'y', {get() {getterCalled = true; return 72;}});
+    rejects(f.heightNormal, 'normal output y: own data property');
+    check(!getterCalled && Object.is(f.output.x, 0) && f.output.z === 73, 'output accessor refuses without invoking it after X prefix');
+  }
+  {
+    const f = withFloors([marked(2, 3)]);
+    for (const output of [vec(1), {...f.output}, Object.create(f.output), f.floor.grid.triangles[0]!.normal])
+      rejects(() => f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, output as SourceActorTerrainNormalOutput), 'fresh branded');
+    for (const output of [f.point, f.actual.pos, f.actual.savedGroundPos])
+      rejects(() => f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, output as SourceActorTerrainNormalOutput), 'aliased caller-local');
+    rejects(() => f.runtime.queryHeightNormal8003e0a8(f.id, f.output, 0, f.output), 'aliased caller-local');
+    check(f.point.x === 100 && f.actual.pos.y === 0 && Object.is(f.floor.grid.triangles[0]!.normal.x, -0),
+      'unbranded/known aliases refuse before corrupting source or caller input');
+  }
+  for (const key of ['motion', 'targetCache5e8', 'pos', 'savedGroundPos'] as const) {
+    const f = withFloors([]); f.actual[key] = f.output; f.point.x = 7500;
+    rejects(f.heightNormal, 'aliased caller-local height-normal output adopted');
+    check(f.output.x === 71 && f.output.y === 72 && f.output.z === 73,
+      'branded output adopted as actual vector is rejected before even outside default stores');
+  }
+  for (const where of ['history', 'terrain'] as const) {
+    const f = withFloors([]); f.point.x = 7500;
+    // The canonical history record is sealed, but its scalar storage remains
+    // writable. An object adopted into that slot is an alias, not a scalar read.
+    if (where === 'history') Object.defineProperty(f.prior, 'previousStepHeight6d4', {value: f.output});
+    else Object.defineProperty(f.terrain, 'adoptedOutput', {value: f.output});
+    rejects(f.heightNormal, 'aliased caller-local height-normal output adopted');
+    check(f.output.x === 71 && f.output.y === 72 && f.output.z === 73, 'output adopted by known history/global owner is rejected before stores');
+  }
+  for (const key of ['pos', 'savedGroundPos'] as const) {
+    const f = withFloors([]); f.actual[key] = vec(NaN); f.point.x = 7500;
+    rejects(f.heightNormal, `${key} owner changed`);
+    check(f.output.x === 71 && f.output.y === 72 && f.output.z === 73,
+      'replacement vector identity is reconciled before outside stores without inspecting its numeric fields');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); let getterCalled = false;
+    for (const owner of [f.actual, f.terrain]) Object.defineProperty(owner, 'unreadOwner', {
+      get() {getterCalled = true; throw Error('metadata scan invoked getter');},
+    });
+    check(f.heightNormal() === 2 && !getterCalled, 'output ownership admission reads descriptors without invoking unrelated owner accessors');
+    outputIs(f.output, 3, 'metadata-only ownership check leaves source arithmetic intact');
+  }
+  for (const clearance of [0, -10, 100]) {
+    const f = withFloors([marked(clearance === 100 ? 120 : 4, 3)]); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) f.actual.motion = f.output;};
+    rejects(() => f.heightNormal(clearance), 'aliased caller-local height-normal output adopted');
+    outputIs(f.output, 0, 'adoption after default is rejected before subsequent candidate/minimum/maximum normal stores');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); f.floor.view.setUint32(f.floor.source.cells[0]!.list.sentinelOffset, 0, false);
+    rejects(f.heightNormal, 'source word changed'); outputIs(f.output, 3, 'sentinel refusal retains completed candidate stores');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); f.hooks.replaceActual = true;
+    rejects(f.heightNormal, 'actual RomActor owner changed'); check(f.output.x === 71, 'actual owner refusal precedes output default');
+    f.hooks.replaceActual = false; f.hooks.replaceHistory = true;
+    rejects(f.heightNormal, 'transform history owner changed'); outputIs(f.output, 0, 'history replacement keeps prior default stores');
+    rejects(() => f.runtime.queryHeightNormal8003e0a8(Symbol(), f.point, 0, f.output), 'unknown/non-owned');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); let caught = false;
+    f.hooks.history = () => {try {f.heightNormal();} catch {caught = true;}};
+    rejects(f.heightNormal, 'caught same-runtime reentry'); check(caught, 'nested height-normal query refused');
+    outputIs(f.output, 0, 'caught reentry leaves prior default, never reports success');
+    delete f.hooks.history; check(f.heightNormal() === 2, 'height-normal guard recovers for independent call'); outputIs(f.output, 3, 'independent result succeeds');
   }
 }

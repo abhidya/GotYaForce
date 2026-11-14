@@ -2,7 +2,7 @@
  "generated_by": "research/decomp/oracle-harness/gen_actor_field_map.py",
  "map_schema": 1,
  "source": "packages/combat/src/rom/actor.ts",
- "source_sha256": "d7e312b2ebf4184117718c57ba43d80a86407456ced9ac3b14115b2f9c547f64",
+ "source_sha256": "25f6d3b792829d70c45e708d6f646bffac59f50ccb92a2b0fe54a1ad03a33037",
  "interfaces": {
   "RomActor": {
    "fields": [
@@ -33,6 +33,12 @@
      "kind": "vec3",
      "width": 12,
      "tsField": "aimOrigin518"
+    },
+    {
+     "offset": 7676,
+     "kind": "s16",
+     "width": 2,
+     "tsField": "aimRoll1dfc"
     },
     {
      "kind": "struct",

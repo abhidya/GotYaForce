@@ -1,5 +1,7 @@
 import {runActorAnimationTransitionSelfTests} from './rom/actor-animation-transition.selftest.js';
 import {runActorFrameLifecycleSelfTests} from './rom/actor-frame-lifecycle.selftest.js';
+import {runActorDoublePrehookSelfTests} from './rom/actor-double-prehook.selftest.js';
+import {runActorDoubleActionSelfTests} from './rom/actor-double-action.selftest.js';
 import {runSourceInputAtanSelfTests} from './rom/source-input-atan.selftest.js';
 import {runSourceFloat64SelfTests} from './rom/source-float64.selftest.js';
 import {runSourceInputAngleSelfTests} from './rom/source-input-angle.selftest.js';
@@ -412,6 +414,8 @@ export function runSelfTest(): void {
   runActorAnimationSetupSelfTests();
   runActorAnimationTransitionSelfTests();
   runActorFrameLifecycleSelfTests();
+  runActorDoublePrehookSelfTests();
+  runActorDoubleActionSelfTests();
   runActorMovementFollowupSelfTests();
   runActorAttributeRefreshSelfTests();
   runAnimationArchiveHydrationSelfTest();

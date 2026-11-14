@@ -1,6 +1,10 @@
 /** Bounded actual80055568 prefix, never a completed actor frame.
  * Fixed source schedule: marker578=2; genuine55dcc; genuine5568c; genuine59068;
- * snapshot actual position20/24/28; refuse at the still-unimplemented actual4bc.
+ * snapshot actual position20/24/28; optionally run genuine Double4bc, capture
+ * upper5db then full5da, store marker1/dispatch upper, marker0/dispatch full,
+ * then marker2 before the actual4c0 boundary.
+ * Missing family owners retain the historical4bc refusal. An admitted Double
+ * action still stops at its next unsupported callee, never skips to a suffix.
  * No hook/state/posthook/flag/sound call is skipped and no extra465fc is added.
  *
  * Explicit decoded raw distances are HOST ingress before the first55568 write,
@@ -9,7 +13,7 @@
  * on failed ingress. A previously incomplete frame refuses before a new epoch.
  * Once source execution begins, the frame is permanently
  * incomplete; another frame or direct tick ingress cannot bypass that prefix.
- * This is offline only: no production routing, full55568, clone or playback claim.
+ * This is offline only: no production routing, full55568, complete attack or clone claim.
  */
 import type {RomActor} from './actor.js';
 import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
@@ -17,6 +21,9 @@ import {isSourceActorStatusTimersRuntime, type SourceActorStatusTimersRuntime} f
 import {isSourceActorAnimationDispatchRuntime, type SourceActorAnimationDispatchRuntime} from './actor-animation-dispatch.js';
 import {isSourceActorMovementFollowupRuntime} from './actor-movement-followup.js';
 import {requireCompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
+import {isSourceActorDoublePrehookRuntime, requireCompleteSourceActorDoubleLifecycle, markIncompleteSourceActorDoubleLifecycle,
+  type SourceActorDoublePrehookRuntime} from './actor-double-prehook.js';
+import {isSourceActorDoubleActionRuntime, type SourceActorDoubleActionRuntime} from './actor-double-action.js';
 import {claimSourceActorTickFrame, isSourceActorTickPrefixRuntime, hasIncompleteSourceActorFrame,
   type SourceActorTickPrefixRuntime, type SourceActorFrameRawDistances,
   type SourceActorTickFrameCapability, type SourceActorTickFrameOwners} from './actor-tick-prefix.js';
@@ -28,6 +35,8 @@ export interface SourceActorFrameLifecycleSources {
   status: SourceActorStatusTimersRuntime;
   tick: SourceActorTickPrefixRuntime;
   dispatch: SourceActorAnimationDispatchRuntime;
+  prehook?: SourceActorDoublePrehookRuntime;
+  action?: SourceActorDoubleActionRuntime;
 }
 export interface SourceActorFrameLifecycleRuntime {
   bindActor(identity: symbol): void;
@@ -77,6 +86,11 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
   if (!isSourceActorStatusTimersRuntime(status)) fail('5568c requires genuine source status runtime');
   if (!isSourceActorTickPrefixRuntime(tick)) fail('59068 requires genuine source tick runtime');
   if (!isSourceActorAnimationDispatchRuntime(dispatch)) fail('marker578 requires genuine source animation dispatch');
+  const optional = (key: string): unknown => Object.getOwnPropertyDescriptor(sources, key) === undefined ? undefined : own(sources, key);
+  const prehook = optional('prehook'), action = optional('action');
+  if (prehook !== undefined && !isSourceActorDoublePrehookRuntime(prehook)) fail('4bc requires genuine source Double prehook');
+  if (action !== undefined && (!isSourceActorDoubleActionRuntime(action) || prehook === undefined || action.getPrehookRuntime() !== prehook))
+    fail('state dispatch requires genuine matched source Double action');
   const movement = attributes.getMovementRuntime();
   if (!isSourceActorMovementFollowupRuntime(movement)) fail('55dcc child4d08c requires genuine source movement runtime');
   let busy = false, poisoned = false;
@@ -92,11 +106,23 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
     actual: RomActor; borg: object; world: object; mapping: object; attribute: object;
     status: object; start: object; movement: object; dispatch: object; pos: object;
     capability: SourceActorTickFrameCapability;
+    familyOwners: readonly object[];
   }
   const actors = new Map<symbol, Entry>(), owned = new WeakSet<object>();
   const entry = (id: symbol): Entry => {const value = actors.get(id); if (!value) fail('unknown/non-owned frame actor'); return value;};
   const same = (value: unknown, expected: object, where: string): void => {check(); if (value !== expected) fail(`${where}: canonical source owner changed or differs`);};
-  const owners = (id: symbol, e: Omit<Entry, 'capability'>): void => {
+  const familyOwners = (id: symbol): object[] => {
+    const records: object[] = [];
+    for (const runtime of [prehook, action]) {
+      if (runtime === undefined) continue;
+      const values = invoke(() => runtime.getSourceOwners(id));
+      if (!Array.isArray(values)) fail('Double source owner array required');
+      for (const value of values) records.push(record(value, 'Double source owner'));
+    }
+    return [...new Set(records)];
+  };
+  const owners = (id: symbol, e: Omit<Entry, 'capability' | 'familyOwners'> & {familyOwners?: readonly object[]}): void => {
+    requireCompleteSourceActorDoubleLifecycle(e.actual); check();
     requireCompleteSourceActorAnimationTransition(e.mapping); check();
     for (const key of ['rootAction', 'preState', 'postState'])
       if (read(e.actual, key) !== null) fail(`legacy callable ${key} conflicts with exclusive source frame ownership`);
@@ -119,6 +145,34 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
     same(invoke(() => status.getMovementBinding(id)), e.movement, 'status movement');
     same(invoke(() => dispatch.getActorBinding(id)), e.dispatch, 'marker578 binding');
     same(read(e.actual, 'pos'), e.pos, 'position20');
+    if (prehook !== undefined) {
+      if (invoke(() => prehook.assertActorComplete(id)) !== undefined) fail('Double completion assertion returned unexpectedly');
+      for (const [key, expected] of [
+        ['getActualActor', e.actual], ['getMappingActor', e.mapping], ['getWorldBinding', e.world],
+        ['getAttributeBinding', e.attribute], ['getStartBinding', e.start], ['getStatusBinding', e.status],
+      ] as const) same(invoke(() => prehook[key](id)), expected, `Double prehook ${key}`);
+    }
+    if (action !== undefined) {
+      same(invoke(() => action.getActualActor(id)), e.actual, 'Double action actual');
+      same(invoke(() => action.getMappingActor(id)), e.mapping, 'Double action mapping');
+      same(invoke(() => action.getAttributeBinding(id)), e.attribute, 'Double action attributes');
+      same(invoke(() => action.getDispatchBinding(id)), e.dispatch, 'Double action dispatch marker');
+      same(invoke(() => action.getPrehookBinding(id)), invoke(() => prehook!.getActorBinding(id)), 'Double action prehook');
+      const ground = invoke(() => action.getGroundRuntime());
+      if (ground !== undefined) {
+        same(invoke(() => ground.getActualActor(id)), e.actual, 'Double ground actual');
+        same(invoke(() => ground.getActualBorg(id)), e.borg, 'Double ground Borg');
+        same(invoke(() => ground.getWorldBinding(id)), e.world, 'Double ground world');
+        same(invoke(() => ground.getStatusBinding(id)), e.status, 'Double ground status');
+      }
+    }
+    if (e.familyOwners !== undefined) {
+      const current = familyOwners(id);
+      // The action runtime can discover another existing parameter descriptor
+      // lazily. All retained owners must remain, but that registry may grow.
+      if (e.familyOwners.some(value => !current.includes(value)))
+        fail('Double canonical source owners changed');
+    }
   };
   const runtime: SourceActorFrameLifecycleRuntime = {
     bindActor(id: symbol): void {guard(() => {
@@ -135,37 +189,70 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
         dispatch: record(invoke(() => dispatch.getActorBinding(id)), 'dispatch'),
         pos: record(read(actual, 'pos'), 'position20')};
       owners(id, initial);
-      const records = Object.values(initial);
-      if (new Set(records).size !== records.length || records.some(value => owned.has(value))) fail('source frame storage owner alias');
+      const baseRecords = Object.values(initial), family = Object.freeze(familyOwners(id));
+      // Shared decoded dispatch tables/parameter records are not per-actor
+      // storage claims. Their genuine owners enforce their own alias rules.
+      if (new Set(baseRecords).size !== baseRecords.length || baseRecords.some(value => owned.has(value))) fail('source frame storage owner alias');
       // No parallel numeric4b4/4bc/4c0 cells or callable family owners are admitted.
       // Null legacy placeholders are not interpreted as source no-op pointers.
-      pendingClaims.set(runtime, {id, owners: initial});
+      const ground = action?.getGroundRuntime();
+      const join: SourceActorTickFrameOwners = ground === undefined ? initial : {...initial, ground: {
+        gauge: invoke(() => ground.getGaugeBinding(id)), terrain: invoke(() => ground.getTerrainGlobals()),
+        history: invoke(() => ground.getHistoryBinding(id))}};
+      pendingClaims.set(runtime, {id, owners: join});
       let capability: SourceActorTickFrameCapability;
-      try {capability = invoke(() => claimSourceActorTickFrame(runtime, tick, id, initial));}
+      try {capability = invoke(() => claimSourceActorTickFrame(runtime, tick, id, join));}
       finally {pendingClaims.delete(runtime);}
-      actors.set(id, {...initial, capability}); records.forEach(value => owned.add(value));
+      actors.set(id, {...initial, capability, familyOwners: family}); baseRecords.forEach(value => owned.add(value));
     });},
     getActualActor(id: symbol) {return entry(id).actual;},
     getDispatchBinding(id: symbol) {return entry(id).dispatch;},
     ingestRawDistancesAndRun(id: symbol, epoch: number, raw: SourceActorFrameRawDistances): void {guard(() => {
       const e = entry(id);
       invoke(() => e.capability.beginHostIngress(epoch)); owners(id, e);
-      if (Object.values(e).includes(raw)) fail('raw input must not alias a source frame owner');
+      if (Object.values(e).includes(raw) || familyOwners(id).includes(raw)) fail('raw input must not alias a source frame owner');
       // The tag describes a host boundary; it is not evidence of original producer provenance.
       invoke(() => e.capability.ingestRawDistances(raw));
       invoke(() => e.capability.beginSourceFrame());
-      read(e.dispatch, 'marker578', true); (e.dispatch as {marker578: number}).marker578 = 2; check();
-      if (invoke(() => attributes.refreshActor(id)) !== undefined) fail('genuine55dcc returned unexpectedly');
-      owners(id, e);
-      if (invoke(() => status.updateActor(id)) !== undefined) fail('genuine5568c returned unexpectedly');
-      owners(id, e);
-      if (invoke(() => e.capability.runActor()) !== undefined) fail('genuine59068 returned unexpectedly');
-      owners(id, e);
-      // Source lwz snapshots preserve values without arithmetic. These locals are
-      // deliberately not actor/history storage and do not refresh savedGroundPos.
-      const x = f32(read(e.pos, 'x'), 'position20'), y = f32(read(e.pos, 'y'), 'position24'), z = f32(read(e.pos, 'z'), 'position28');
-      void x; void y; void z;
-      fail('80055568 reached unsupported actual4bc family prehook after position20/24/28 snapshot');
+      try {
+        read(e.dispatch, 'marker578', true); (e.dispatch as {marker578: number}).marker578 = 2; check();
+        if (invoke(() => attributes.refreshActor(id)) !== undefined) fail('genuine55dcc returned unexpectedly');
+        owners(id, e);
+        if (invoke(() => status.updateActor(id)) !== undefined) fail('genuine5568c returned unexpectedly');
+        owners(id, e);
+        if (invoke(() => e.capability.runActor()) !== undefined) fail('genuine59068 returned unexpectedly');
+        owners(id, e);
+        // Source lwz snapshots preserve values without arithmetic. These locals are
+        // deliberately not actor/history storage and do not refresh savedGroundPos.
+        const x = f32(read(e.pos, 'x'), 'position20'), y = f32(read(e.pos, 'y'), 'position24'), z = f32(read(e.pos, 'z'), 'position28');
+        void x; void y; void z;
+        if (prehook === undefined) fail('80055568 reached unsupported actual4bc family prehook after position20/24/28 snapshot');
+        if (invoke(() => prehook.runActor(id)) !== undefined) fail('genuine4bc returned unexpectedly');
+        owners(id, e);
+        // Both signed selectors are captured before marker1. In particular the
+        // full selector is not reloaded after upper-body dispatch returns.
+        const saved = action === undefined ? undefined : invoke(() => action.captureStateSelectors(id));
+        if (action === undefined) {
+          for (const key of ['ubState', 'fbState'] as const) {
+            const value = read(e.actual, key);
+            if (typeof value !== 'number' || !Number.isInteger(value) || value < -128 || value > 127)
+              fail(`${key}: canonical signed source byte required`);
+          }
+        }
+        read(e.dispatch, 'marker578', true); (e.dispatch as {marker578: number}).marker578 = 1; check();
+        if (action === undefined || saved === undefined) fail('80055568 reached unsupported saved upper state dispatch after actual4bc and marker1');
+        if (invoke(() => action.dispatchUpper(id, saved)) !== undefined) fail('genuine upper state returned unexpectedly');
+        read(e.dispatch, 'marker578', true); (e.dispatch as {marker578: number}).marker578 = 0; check();
+        if (invoke(() => action.dispatchFull(id, saved)) !== undefined) fail('genuine full state returned unexpectedly');
+        read(e.dispatch, 'marker578', true); (e.dispatch as {marker578: number}).marker578 = 2; check();
+        fail('80055568 reached unsupported actual4c0 posthook after saved upper/full dispatch');
+      } catch (error) {
+        // A completed inner action cannot make an unfinished outer frame
+        // replayable through its public prehook/action/ground entry points.
+        // Host ingress errors remain outside this source-effect latch.
+        markIncompleteSourceActorDoubleLifecycle(e.actual);
+        throw error;
+      }
     });},
   };
   genuineRuntimes.add(runtime); return Object.freeze(runtime);

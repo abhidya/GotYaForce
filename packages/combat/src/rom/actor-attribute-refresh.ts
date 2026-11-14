@@ -49,6 +49,8 @@ export interface SourceActorAttributeDescriptorBinding {
 export interface SourceActorAttributeParameterDescriptor {
   /** Signed-short extension of this SAME 4ac owner, consumed by 8005568c. */
   field04: number; field08: number;
+  /** Signed yaw rate on this SAME4ac owner, consumed by800669d0 maskC1. */
+  fieldAe: number;
   field74: number; field78: number; field7c: number;
   /** Unsigned table selector on this SAME 4ac owner, consumed by8006826c. */
   byteA3: number;
@@ -71,6 +73,8 @@ export interface SourceActorAttributeRefreshRuntime {
   getDescriptorBinding(identity: symbol): Partial<SourceActorAttributeDescriptorBinding>;
   createParameterDescriptor(initial: Readonly<Partial<SourceActorAttributeParameterDescriptor>>): symbol;
   getParameterDescriptor(identity: symbol): Partial<SourceActorAttributeParameterDescriptor>;
+  /** Metadata-only retained registry owners; no actor4ac or descriptor scalar reads. */
+  getKnownParameterDescriptors(): readonly object[];
   refreshActor(identity: symbol): void;
 }
 const ROW_SOURCES = ['field850', 'field854', 'field858', 'field85c', 'field860', 'field864',
@@ -200,7 +204,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
     getDescriptorBinding(id: symbol) {return descriptorEntry(id).binding;},
     createParameterDescriptor(initial: Readonly<Partial<SourceActorAttributeParameterDescriptor>>): symbol {return guard(() => {
       const binding = copy<SourceActorAttributeParameterDescriptor>(initial, ['field74', 'field78', 'field7c', 'field184', 'field188', 'field18c']);
-      for (const key of ['field04', 'field08'] as const) {
+      for (const key of ['field04', 'field08', 'fieldAe'] as const) {
         if (Object.getOwnPropertyDescriptor(initial, key) !== undefined) {
           const value = read(initial, key);
           if (typeof value !== 'number' || !Number.isInteger(value) || value < -32768 || value > 32767)
@@ -214,6 +218,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
       const id = Symbol('owned actor parameter4ac'); parameters.set(id, binding); return id;
     });},
     getParameterDescriptor(id: symbol) {return parameterEntry(id);},
+    getKnownParameterDescriptors() {return Object.freeze([...parameters.values()]);},
     refreshActor(id: symbol): void {guard(() => {
       const actor = actorEntry(id), actual = actor.actual, binding = actor.binding;
       if (worldActor(id) !== actual) fail('world owner changed its actual record');

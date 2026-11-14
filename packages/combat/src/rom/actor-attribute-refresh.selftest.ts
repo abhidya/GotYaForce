@@ -158,6 +158,26 @@ export function runActorAttributeRefreshSelfTests(): void {
   {
     const x = fixture();
     check(!Object.hasOwn(x.runtime.getParameterDescriptor(x.parameter), 'byteA3'), 'no default tier selector');
+    check(!Object.hasOwn(x.runtime.getParameterDescriptor(x.parameter), 'fieldAe'), 'no default yaw rate');
+    const known = x.runtime.getKnownParameterDescriptors();
+    check(Object.isFrozen(known) && known.includes(x.runtime.getParameterDescriptor(x.parameter)), 'known parameter metadata retains actual sealed owner');
+    const originalPointer = x.runtime.getActorBinding(x.id).parameter4ac;
+    x.runtime.getActorBinding(x.id).parameter4ac = Symbol('unreached foreign pointer');
+    equal(x.runtime.getKnownParameterDescriptors()[0], known[0], 'known metadata never dereferences actor4ac');
+    x.runtime.getActorBinding(x.id).parameter4ac = originalPointer!;
+    for (const value of [-32768, -1, 0, 1, 32767]) {
+      const initial = {fieldAe: value}, id = x.runtime.createParameterDescriptor(initial);
+      const descriptor = x.runtime.getParameterDescriptor(id);
+      equal(descriptor.fieldAe, value, 'same4ac registry retains signed+ae');
+      initial.fieldAe = 99; equal(descriptor.fieldAe, value, 'yaw rate copied once');
+      equal(Object.keys(descriptor).join(','), 'fieldAe', 'yaw rate invents no other fields');
+      check(Object.isSealed(descriptor), 'yaw-rate descriptor sealed');
+    }
+    for (const value of [-32769, 32768, 0.5, NaN, Infinity])
+      rejects(() => x.runtime.createParameterDescriptor({fieldAe: value}), 'fieldAe: signed-short');
+    let rateAccessor = false;
+    rejects(() => x.runtime.createParameterDescriptor({get fieldAe() {rateAccessor = true; return 0;}}), 'fieldAe: own data');
+    check(!rateAccessor, 'yaw rate accessor never invoked');
     for (const selector of [0, 1, 127, 128, 255]) {
       const initial = {byteA3: selector}, id = x.runtime.createParameterDescriptor(initial);
       const descriptor = x.runtime.getParameterDescriptor(id);

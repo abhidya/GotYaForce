@@ -1,4 +1,4 @@
-/** Bounded source 8003d6e4, 8003de80, 8003f320, 8003fa68 and 8003fb00.
+/** Bounded source 8003d6e4, 8003de80, 8003e0a8, 8003f320, 8003fa68 and 8003fb00.
  * Uses actual actor/history records and strict, byte-backed source cell lists.
  * No physics floor callback, inferred StageCollision geometry, default layer,
  * cached height/normal, persistent query result, or implicit refresh exists.
@@ -7,6 +7,8 @@
  * ProgramDB snapshots; chunk_0004.c:6993–7047,8246–8261,8288–8296,8502–8526.
  * read_archived_terrain_orientation_evidence.py fixes the distinct 8003de80
  * instruction order and normal stores (chunk_0004.c:7262–7343).
+ * read_archived_ground_query_evidence.py authenticates 8003e0a8/844 and its
+ * outside sentinel in both snapshots (chunk_0004.c:7349–7482).
  * Host bounds: finite exact f32 inputs/intermediates, RN=00, NI=0; synchronous
  * stable non-proxy own-data owners; source pointer arithmetic must address an
  * explicitly owned cell. Nonzero support refuses before its matrix/copy branch;
@@ -15,8 +17,10 @@
  * flat normals (+/-0,1,+/-0). Other normals refuse only when reached.
  * Source loads and arithmetic remain ordered, including local clearance
  * adjustment, current/history reloads, and all three height-query accumulators.
- * The normal query writes only its explicit caller-local output, with no
- * minimum/maximum fallback. Caller-local records must not alias source storage.
+ * The normal-only query has no minimum/maximum fallback. The distinct
+ * height-plus-normal query retains all three normals and copies the selected
+ * fallback in source order. Its branded caller-local output is never retained.
+ * Caller-local records must not be adopted into or alias source storage.
  * This is not general terrain, live FPSCR/RAM or original-game replay parity.
  */
 import {sourceTerrainGrid, type hitBin} from '@gf/formats';
@@ -25,6 +29,19 @@ import type {SourceActorTransformHistoryRuntime, SourceActorTransformHistoryBind
 import type {RomActor} from './actor.js';
 import type {SourceJointVector} from './joint-animation-feedback.js';
 import {addSourceFloat32} from './source-float.js';
+
+declare const terrainNormalOutputBrand: unique symbol;
+/** Fresh caller-owned storage, not an actor field or a retained query result. */
+export interface SourceActorTerrainNormalOutput extends SourceJointVector {
+  readonly [terrainNormalOutputBrand]: true;
+}
+const normalOutputs = new WeakSet<object>();
+/** Uninitialized scratch: a query must perform its actual source stores before
+ * any component is meaningful. The caller must keep this out of source owners. */
+export function createSourceActorTerrainNormalOutput(): SourceActorTerrainNormalOutput {
+  const output = {x: NaN, y: NaN, z: NaN} as SourceActorTerrainNormalOutput;
+  normalOutputs.add(output); return output;
+}
 
 export interface SourceActorTerrainGlobals {
   readonly floor1c: sourceTerrainGrid.SourceTerrainGrid;
@@ -55,6 +72,10 @@ export interface SourceActorTerrainQueryRuntime {
    * outside X/Z bounds, not no eligible floor. No result is retained here. */
   queryNormal8003de80(identity: symbol, callerLocalPoint: Readonly<SourceJointVector>, savedClearance: number,
     callerLocalNormalOutput: SourceJointVector): 0 | 1;
+  /** Distinct source height-plus-normal query, including min/max fallbacks.
+   * The point may be actual actor.pos. Only the fresh caller output is written. */
+  queryHeightNormal8003e0a8(identity: symbol, point: Readonly<SourceJointVector>, savedClearance: number,
+    callerLocalNormalOutput: SourceActorTerrainNormalOutput): number;
 }
 const runtimes = new WeakSet<object>();
 export function isSourceActorTerrainQueryRuntime(value: unknown): value is SourceActorTerrainQueryRuntime {
@@ -336,6 +357,112 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
         }
       }
       return 1;
+    });},
+    queryHeightNormal8003e0a8(id: symbol, point: Readonly<SourceJointVector>, savedClearance: number,
+      callerLocalNormalOutput: SourceActorTerrainNormalOutput): number {return guard(() => {
+      const actor = entry(id);
+      const actualOwner = actual(actor, id);
+      const support = integer(read(actualOwner, 'supportContact1db'), 0, 255, 'supportContact1db');
+      if (support !== 0) fail('nonzero supporting contact height-normal transform branch unsupported');
+      const output = record(callerLocalNormalOutput, 'caller-local height-normal output');
+      if (output === point || assigned.has(output) || output === terrain || output === sources)
+        fail('aliased caller-local height-normal output unsupported');
+      if (!normalOutputs.has(output)) fail('height-normal output must be fresh branded caller-local storage');
+      // A fresh allocation must not subsequently become an actor/history/global
+      // field. Inspect owner metadata only, without invoking accessors, validating
+      // source scalars, traversing layers, or requesting an early history reload.
+      const admitOutput = (): void => {
+        const knownOwners: object[] = [terrain, sources];
+        for (const known of actors.values()) knownOwners.push(known.actual, known.position, known.savedPosition, known.history);
+        for (const owner of knownOwners) {
+          const descriptors = Object.getOwnPropertyDescriptors(owner); check();
+          for (const descriptor of Object.values(descriptors)) {
+            if ('value' in descriptor && descriptor.value === output)
+              fail('aliased caller-local height-normal output adopted by source owner');
+          }
+        }
+        // Replaced vectors are also invalid on an outside-bounds query. Check
+        // identities, never X/Y/Z values, and recheck before subsequent writes.
+        if (read(actualOwner, 'pos') !== actor.position) fail('pos owner changed its actual record');
+        if (read(actualOwner, 'savedGroundPos') !== actor.savedPosition) fail('savedGroundPos owner changed its actual record');
+      };
+      admitOutput();
+      // 8003e130/134/138 precede the bounds call, including its outside return.
+      writeNormal(output, 'x', 0); writeNormal(output, 'y', 1); writeNormal(output, 'z', 0);
+      // FLOAT_8043702c = c59c4000, independently authenticated in both snapshots.
+      if (!inBounds(point)) return -5000;
+      const initialUpper = f(terrain, 'upper34');
+      let clearance = float(savedClearance, 'saved clearance');
+      const selectMaximum = clearance >= initialUpper;
+      const x = f(point, 'x'), y = f(point, 'y'), step = f(actual(actor, id), 'stepHeight');
+      const stackY = addSourceFloat32(y, step), z = f(point, 'z');
+      const savedY = f(actorVector(actor, id, 'savedGroundPos'), 'y');
+      const previousStep = f(history(actor, id), 'previousStepHeight6d4');
+      const ceiling = ceilingQuery({x, y: stackY, z}, addSourceFloat32(savedY, previousStep));
+      const oldY = f(actorVector(actor, id, 'savedGroundPos'), 'y');
+      const oldStep = f(history(actor, id), 'previousStepHeight6d4');
+      const currentY = f(actorVector(actor, id, 'pos'), 'y'), currentStep = f(actual(actor, id), 'stepHeight');
+      const previousTop = addSourceFloat32(oldY, oldStep), currentTop = addSourceFloat32(currentY, currentStep);
+      const displacement = sub32(previousTop, currentTop);
+      if (displacement > 0) clearance = addSourceFloat32(clearance, displacement);
+      const reloadedY = f(point, 'y'), limit = addSourceFloat32(clearance, reloadedY);
+      const selected = cell('floor1c', 0x1c, point);
+      let best = f(terrain, 'lower68'), maximum = best;
+      let minimum = f(terrain, 'upper34');
+      // Source stack locals +14/+08, initialized independently of the output.
+      const minimumNormal = {x: 0, y: 1, z: 0}, maximumNormal = {x: 0, y: 1, z: 0};
+      for (let cursor = 0; ; cursor++) {
+        const item = listEntry(selected, cursor);
+        if (item === -1) break;
+        const load = (offset: sourceTerrainGrid.SourceTerrainTriangleFloatOffset): number => triangleFloat(selected.view, item, offset);
+        // 3e214..258 has the height-query load order, not 3de80's v2X-first order.
+        const dx1 = sub32(load(0x04), x), dz1 = sub32(load(0x0c), z);
+        const vx2 = load(0x10), vz2 = load(0x18), dx2 = sub32(vx2, x);
+        const vx3 = load(0x1c), dz2 = sub32(vz2, z), vz3 = load(0x24), dx3 = sub32(vx3, x);
+        const edge1a = mul32(dz1, dx2), edge1b = mul32(dx1, dz2), dz3 = sub32(vz3, z);
+        if (edge1a < edge1b) continue;
+        if (mul32(dz2, dx3) < mul32(dx2, dz3)) continue;
+        if (mul32(dz3, dx1) < mul32(dx3, dz1)) continue;
+        // Preserve all three word captures before the first normal arithmetic.
+        const nx = load(0x28), nz = load(0x30), ny = load(0x2c);
+        if (nx !== 0) fail('nonflat source normal X unsupported');
+        const xProduct = mul32(nx, dx1);
+        if (nz !== 0) fail('nonflat source normal Z unsupported');
+        const zProduct = mul32(nz, dz1), vertexY = load(0x08);
+        const xz = addSourceFloat32(xProduct, zProduct);
+        if (ny !== 1) fail('nonflat source normal Y unsupported');
+        // 3e2a4..2c0 uses separate fmuls/fadds, never a host fused operation.
+        const yProduct = mul32(ny, vertexY), height = div32(addSourceFloat32(xz, yProduct), ny);
+        if (limit > height && ceiling > height && best <= height) {
+          admitOutput();
+          writeNormal(output, 'x', nx); best = height;
+          writeNormal(output, 'y', ny); writeNormal(output, 'z', nz);
+        }
+        if (minimum >= height) {
+          minimum = height; minimumNormal.x = nx; minimumNormal.y = ny; minimumNormal.z = nz;
+        }
+        if (maximum <= height) {
+          maximum = height; maximumNormal.x = nx; maximumNormal.y = ny; maximumNormal.z = nz;
+        }
+      }
+      if (selectMaximum) {
+        admitOutput();
+        const normalX = maximumNormal.x, normalY = maximumNormal.y;
+        writeNormal(output, 'x', normalX);
+        const normalZ = maximumNormal.z;
+        writeNormal(output, 'y', normalY); writeNormal(output, 'z', normalZ);
+        return maximum;
+      }
+      const lower = f(terrain, 'lower68');
+      if (best !== lower) return best;
+      // Copy the minimum normal even if its height still equals the sentinel.
+      admitOutput();
+      const normalX = minimumNormal.x, normalY = minimumNormal.y;
+      writeNormal(output, 'x', normalX);
+      const normalZ = minimumNormal.z;
+      writeNormal(output, 'y', normalY); writeNormal(output, 'z', normalZ);
+      const finalUpper = f(terrain, 'upper34');
+      return minimum === finalUpper ? f(terrain, 'lower68') : minimum;
     });},
   };
   runtimes.add(runtime); return Object.freeze(runtime);

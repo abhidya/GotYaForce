@@ -4736,7 +4736,7 @@ must be joined at these exact boundaries rather than inserted as extra refreshes
 Existing C and derived family evidence identify the next selection route to
 reauthenticate: upper0 cell802d37a8 ->5f238 return; full61 cell802d379c ->65dfc
 ->actual4b4; Double constructor root cell802d3b14 ->6facc; action2 cell802d3b70
-->71598; variant0 cell802d3c48 ->715d4; hidden config80433868 ->ff2bc; phase0
+->71598; variant0 cell802d3c48 ->715d4; hidden config address80433868 supplied to directff2bc; phase0
 cell8031f000 ->ff30c. These later pointer cells/callees are not covered by the
 current fixed reader. See [family decode](nn-family-decode-2026-07-06.md) and
 [ninja source X](ninja-source-x-2026-11-12.md) for the existing derived evidence.
@@ -4832,3 +4832,130 @@ full byte after upper returns. Phase0 still needs6d144,669d0,66a30 and the disti
 mirrored mapping, later authored opcodes, posthooks, projectile/clone allocation
 and the render scheduler remain separate reached boundaries. This slice does
 not claim a playable clone or completed action2 lifecycle.
+
+
+## Actual Double prehook and action2 phase0 prefix, 2026-11-14
+
+The next slice follows the actual55568 call graph beyond the prior4bc stop.
+The [Double evidence](double-action-envelope-evidence-2026-11-14.md) authenticates
+14 fixed complete spans, all298 instructions/operands, seven pointer cells,
+five constants and two hidden-config halfwords in both archived snapshots.
+This is static provenance plus bounded offline composition, not original
+execution, matching-decompilation MATCH, a completed attack or browser playability.
+
+### Canonical prehook and dispatch
+
+Explicit decoded4bc selects actual8006f7c0. The existing actual borgNumber3e8,
+control5e0, aimRoll1dfc, stream582, charge58e and status272 owners remain live.
+Only absent6ee and family4b4/4bc/4c0 cells get explicit partial binding storage.
+The existing persistent Double7c8/7b0 registry can now accept an explicit owner
+without copying, defaults or replacement. Its older ordinary-X initializer is
+unchanged. The optional1dfc declaration is promoted on RomActor without a
+constructor default, and the generated field map is refreshed.
+
+The prehook stores582 from signed3e8==3, conditionally clears1dfc then6ee,
+freshly reloads5e0 for272, clears58e bit20, reloads3e8 and only then reads7c8.
+An explicitly unarmed Double returns through the genuine leaf path. Nonzero7c8
+sets58e bit20 and refuses at actual4538c, before consuming vector/scale operands.
+This is not clone arming, charged normalization, posthook6f88c or a constructor.
+
+The frame's genuine optional prehook and action owners retain its original
+55dcc/5568c/59068 and position-snapshot prefix. After the prehook it captures
+upper5db then full5da, writes marker578=1, dispatches saved upper then saved full.
+An upper return cannot cause a full-selector reload. The original frame with
+no prehook still stops at4bc. A prehook-only frame retains both selector loads
+and marker1 before refusing at unsupported upper dispatch.
+
+The authenticated ordinary-X route is upper0→5f238 return, full61→65dfc,
+actual4b4→6facc, signed580 action2→71598, signed581 variant0→715d4,
+directff2bc and signed540 phase0→ff30c. The address80433868 is hidden r4
+configuration, not a function-pointer cell. Tables are explicit decoded records,
+not invented full-table hydration; missing/negative/other targets refuse at the
+reached source load or call. Actual540/580/581 and the existing cue byte541 are
+sole owners. Legacy fbPhaseSlots remains excluded by the established cue-runtime
+contract; canonical bytes544..547 stay on that same cue binding.
+
+### Real phase0 stores before ground probing
+
+Phase0 increments540, conditionally copies heading72 to activeYaw5ac for nullCC,
+then always calls real6d144. The null-target path writes5aa and continues through
+669d0/66a30. It uses signed fieldAe on the existing4ac parameter record and the
+actual mapping1dc8 clock, not the old model4b0 turnStep1 approximation. Signed
+conversion/truncation and source lockYaw/heading writes retain their ordering.
+NonnullCC refuses at6660c after the already-reached phase writes.
+
+After the real yaw helper, phase0 clears50/48/4c/44, then80/7e/7c. Actual paired
+subtract computes own20 minus own5e8 into38, scale multiplies38 by the exact
+float0.949999988079071, and paired add updates own20. XY stores precede later
+Z loads for subtract/add; scale captures XYZ before its first store. A readonly
+Y cannot partially commit its paired X store. Explicit GQR0 float/scale0,
+finite binary32 RN00/NI0 and signed32 conversion bounds are host preconditions,
+not observed machine state or a numerical parity claim.
+
+Execution then refuses at genuine800677b0, whose distinct3e0a8 height/normal
+query is not replaced by existing3d6e4 or host clampToGround. Config slots6ea,
+maskF/group4 stream start and80c remain untouched. Consequently the earlier
+mode1 implementation is not yet claimed as sustained ordinary-X action playback.
+
+Completed writes survive errors. Shared permanent Double failure state prevents
+prehook/action replay and omitted-frame standalone tick/ready bypasses after
+selectors or gates change. Raw ingress consumes epochs before failures and
+rejects known canonical owner aliases without prematurely dereferencing4ac.
+The frame keeps its exclusive source claim and remains incomplete at the next
+unsupported callee. Shared decoded tables/descriptors do not become per-actor
+storage claims. There is no production bridge change or browser activation.
+
+Next useful closure is actual677b0 and its terrain probe, followed by genuine
+stream start using the captured signed config slot/rate−1, reached authored
+commands and then the55568 posthook/remaining suffix. Later shared-X phases,
+projectile/resource callbacks, clone allocation, nonnull target facing and
+charged normalization remain separate required work.
+
+## Ground query and action2 stream continuation (2026-11-14)
+
+The local source-owned action2 phase0 now optionally continues through genuine
+`800677b0`. Its zero-7c9 branch invokes the distinct `8003e0a8` height-plus-normal
+query on the actual position and shared terrain/history owners. Supported floor
+queries use explicit byte-backed cells, empty ceilings, and flat normals. The
+query preserves eligible, minimum, and maximum candidates and their normal tie
+behavior; outside bounds returns the authenticated -5000 sentinel. It is not
+`3d6e4`, `3de80`, or the browser's host ground clamp.
+
+The real no-contact branch returns only after the query and fresh current-Y plus
+step-height comparison. Contact still refuses before displacement subtraction,
+normalization/dot, slope-angle, landing/callback, or steep-slope effects. The
+canonical gauge byte7c9 skip is separately covered and is not counted as ground
+playback. Branded caller-local output cannot be adopted into known source
+storage. Existing source globals and history are not shadowed.
+
+After the genuine return, phase0 stores fixed configuration0 to actual6ea,
+reloads control5e0 and optionally replaces6ea with fixed configuration1, captures
+the signed byte, increments6ea, and calls the same real stream runtime with
+mask15/group4/captured slot/start frame-1/default transition+mode. Actual80c is
+cleared only after that call returns. The frame join reconciles downstream
+query/gauge/history owners with its earlier tick owners before host ingress.
+
+Synthetic decoded composition now demonstrates a nonnull copied group4 stream,
+real opcode01, nonempty DAT/AObj/FObj setup, finite-linear mode1 pose blending,
+six explicitly invoked stream updates through mode0, and a seventh advancing
+frame1. Both fixed configuration slots and partial failures are exercised. This
+is executable offline composition, not retail Double stream provenance or a
+complete sustained attack. Full55568 still refuses at actual4c0 after successful
+upper/full dispatch; its posthook, housekeeping, conditional position restore,
+and remaining suffix are not skipped. Production routing, clone creation,
+contact/landing, and browser playability remain unproven.
+
+Static source evidence and exact limits:
+[ground query evidence](ground-query-evidence-2026-11-14.md). The two new complete
+spans represent347 instructions and all operands; five constants and exact prior
+fixed witnesses are authenticated against both archived ProgramDB snapshots.
+This is not original executable execution or a matching-decompilation MATCH.
+
+This checkpoint also corrects an earlier frame-order omission: authenticated
+55568 requires marker578 sequence2→1→0→2, including0 before full dispatch and2
+before the fresh4c0 call. The prior adapter had left marker1 at both boundaries.
+The saved full selector still comes from before upper dispatch. A source-phase
+failure now latches the shared Double lifecycle even when the inner action
+returned successfully, preventing direct prehook/action/ground replay of an
+unfinished enclosing frame. Host-input admission failures remain recoverable.
+The incomplete-frame latch is not cleared and no tail operation is bypassed.

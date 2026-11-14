@@ -78,6 +78,10 @@ export interface RomActor {
   /** +0x518: host-resolved actor aim origin consumed by zz_006e514_.
    *  @romfield aimOrigin518 +0x518 vec3 */
   aimOrigin518: Vec3;
+  /** Optional explicit +0x1dfc signed16 aim accumulator. Shared with the
+   * existing helper scratch owner; source admission supplies no default.
+   * @romfield aimRoll1dfc +0x1dfc s16 */
+  aimRoll1dfc?: number;
   /** +0x8e0/+0x8f0/+0x900 plus part*0x30: renderer-authored world aim anchors.
    *  Three 0x10-spaced float rows per part block; the TS field keeps one Vec3 anchor
    *  per part, so the codec refuses this record until the row semantics are pinned.

@@ -54,6 +54,7 @@ import {isSourceActorCue0LifecycleRuntime, hasIncompleteSourceActorCue0Lifecycle
   type SourceActorCue0LifecycleRuntime} from './actor-cue0-lifecycle.js';
 import type {RomActor} from './actor.js';
 import {requireCompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
+import {requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {isPendingSourceActorFrameClaim, type SourceActorFrameLifecycleRuntime} from './actor-frame-lifecycle.js';
 import {isSourceActorCommandAdmissionRuntime, hasIncompleteSourceActorCommandAdmission,
   type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
@@ -125,6 +126,8 @@ export interface SourceActorTickPrefixRuntime {
 export interface SourceActorTickFrameOwners {
   readonly actual: RomActor; readonly borg: object; readonly world: object;
   readonly status: object; readonly mapping: object;
+  /** Optional downstream677b0 owners, reconciled before a frame can claim ingress. */
+  readonly ground?: {readonly gauge: object; readonly terrain: object; readonly history: object};
 }
 export interface SourceActorTickFrameCapability {
   beginHostIngress(epoch: number): void;
@@ -794,6 +797,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
   };
   const frameOwned = new WeakSet<object>();
   const assertSourceComplete = (id: symbol, actor: Entry): void => {
+    requireCompleteSourceActorDoubleLifecycle(actor.actual); check();
     const mapping = canonicalMappings.get(id);
     if (mapping) {requireCompleteSourceActorAnimationTransition(mapping); check();}
     if (mapping && frameMapping!(id) !== mapping) fail('canonical source mapping owner changed');
@@ -1051,6 +1055,15 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     if ((actor.normal && actor.normal.mapping !== expected.mapping) ||
         (actor.rates && actor.rates.mapping !== expected.mapping) ||
         (actor.ceiling && actor.ceiling.mapping !== expected.mapping)) fail('frame canonical lifecycle mapping differs');
+    if (expected.ground !== undefined) {
+      const ground = expected.ground;
+      if (ground.gauge !== actor.gauge) fail('frame ground canonical gauge differs');
+      if ((actor.ceiling && ground.terrain !== actor.ceiling.terrain) ||
+          (actor.normal?.cue0Terrain && ground.terrain !== actor.normal.cue0Terrain) ||
+          (actor.stage && stageTerrain!(id) !== ground.terrain)) fail('frame ground canonical terrain differs');
+      if (actor.normal?.cue0 && cue0Value(actor.normal.cue0, 'getHistoryBinding', id) !== ground.history)
+        fail('frame ground canonical history differs');
+    }
     let prepared: SourceActorFrameRawDistances | undefined, begun = false, attempted = false, hostPending = false;
     const ready = (): void => {
       if (begun || incompleteFrames.has(actor.actual)) fail('actual actor has an incomplete source frame; continuation is unsupported');

@@ -4,6 +4,10 @@ import {createSourceActorAnimationTransitionRuntime} from './actor-animation-tra
 import {createSourceActorFrameLifecycleRuntime, hasIncompleteSourceActorFrame} from './actor-frame-lifecycle.js';
 import type {BorgRuntime, WeaponCell} from '../types.js';
 import {NeoGredMeleeState} from '../neoGredMelee.js';
+import {bindDoubleNinjaOwnerState, getDoubleNinjaOwnerState} from '../ninjaX.js';
+import {createSourceActorDoublePrehookRuntime, hasIncompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
+import {createSourceActorDoubleActionRuntime, type SourceActorDoubleActionTables} from './actor-double-action.js';
+import {createSourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
 import {createSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleBinding} from './actor-control-lifecycle.js';
 import {createSourceActorReadyTransitionsRuntime, type SourceActorReadyTransitionsBinding} from './actor-ready-transitions.js';
@@ -1147,6 +1151,7 @@ function terrainHydratedControlFixture(floorHeight = 0, corrections = false, pri
     query = createSourceActorTerrainQueryRuntime({world: owner.world, history, terrain}); query.bindActor(owner.actor);
     return Object.freeze({getTerrainGlobals: query.getTerrainGlobals, getActualActor: query.getActualActor,
       getHistoryBinding: query.getHistoryBinding, bindActor: query.bindActor, queryNormal8003de80: query.queryNormal8003de80,
+      queryHeightNormal8003e0a8: query.queryHeightNormal8003e0a8,
       query8003d6e4(id: symbol, point: Readonly<{x: number; y: number; z: number}>, clearance: number) {
         const height = query.query8003d6e4(id, point, clearance);
         queryCalls.push({point, clearance, height}); queryHooks.after?.(point, height); return height;
@@ -2827,6 +2832,9 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runCue44LifecycleHydratedCompositionTests();
   runMode1HydratedCompositionTests();
   runFrameLifecycleHydratedCompositionTests();
+  runDoubleFrameHydratedCompositionTests();
+  runDoubleGroundStreamHydratedCompositionTests();
+  runDoubleFrameMarkerCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -11525,4 +11533,613 @@ export function runFrameLifecycleHydratedCompositionTests(): void {
       'genuine failed transition poisons standalone59068 before raw stores even without a frame claim or through ready/mode/readiness bypass');
   }
   console.log('[actor-frame-lifecycle-composition] PASS: genuine marker/55dcc/5568c/59068 prefix with explicit pre55568 host ingress, actual position snapshot and honest4bc stop; exclusive claim and permanent incomplete frame prevent retry/direct-tick bypass; offline only, no full frame or playback claim');
+}
+
+/** Explicit Double opt-in over the SAME genuine DAT/status/input/animation graph.
+ * These sparse decoded code words are authenticated source rows, not caller
+ * callbacks. Remaining scalar/vector inputs are synthetic, never retail hydration. */
+function doubleFrameHydratedCompositionFixture(bind = true, withGround: boolean | 'separate-terrain' = false) {
+  const x = frameLifecycleHydratedCompositionFixture(false), a = x.sourceActor;
+  a.borgNumber = 3; a.aimRoll1dfc = 127;
+  a.gravityCoeff = 17; a.yVel = 19; a.hDecel = 23;
+  a.poseAccum7c = 101; a.poseAccum7e = 102; a.poseAccum80 = 103;
+  Object.assign(a.motion, {x: 41, y: 42, z: 43});
+  Object.assign(a.targetCache5e8, {x: -1, y: -2, z: -3});
+  x.start.defaultSelector582 = 7; x.statusState.short272 = 13; x.host.invincTimer = 0;
+  x.chargeState.byte58e = 0x20;
+  const doubleOwner = {arm7c8: 0, offset7b0: {x: 71, y: 72, z: 73}};
+  bindDoubleNinjaOwnerState(a, doubleOwner);
+  const prehookSources = {status: x.status, charge: x.charge, streams: x.control};
+  const prehook = createSourceActorDoublePrehookRuntime(prehookSources);
+  prehook.bindActor(x.actor, {pointer4b4: 0x8006facc, pointer4bc: 0x8006f7c0, pointer4c0: 0x8006f88c, byte6ee: 109});
+  // Extend the existing actual4ac owner through its genuine descriptor factory.
+  // No sidecar rate, replacement attribute owner or guessed default is admitted.
+  const parameterId = x.attributes.createParameterDescriptor({...x.parameter, fieldAe: 512});
+  x.attributeState.parameter4ac = parameterId; x.parameter = x.attributes.getParameterDescriptor(parameterId);
+  const actionTables = {upper37a8: [] as number[], full36a8: [] as number[], actions3b68: [] as number[],
+    variants3c48: [] as number[], phases1f000: [] as number[]};
+  actionTables.upper37a8[0] = 0x8005f238; actionTables.full36a8[61] = 0x80065dfc;
+  actionTables.actions3b68[2] = 0x80071598; actionTables.variants3c48[0] = 0x800715d4;
+  actionTables.phases1f000[0] = 0x800ff30c;
+  const groundTerrain = withGround === 'separate-terrain' ? createSourceActorTerrainQueryRuntime(
+    {world: x.world, history: x.history, terrain: {...x.terrain}}) : x.query;
+  if (withGround === 'separate-terrain') groundTerrain.bindActor(x.actor);
+  const groundSources = {gauges: x.gauges, terrain: groundTerrain};
+  const ground = withGround ? createSourceActorGroundProbeRuntime(groundSources) : undefined;
+  ground?.bindActor(x.actor);
+  const actionSources = {prehook, attributes: x.attributes, cues: x.cues, tables: actionTables, processor: {gqr0: 0},
+    ...(ground === undefined ? {} : {ground})};
+  const action = createSourceActorDoubleActionRuntime(actionSources); action.bindActor(x.actor);
+  const frameSources = {...x.frameSources, prehook, action}, frame = createSourceActorFrameLifecycleRuntime(frameSources);
+  if (bind) frame.bindActor(x.actor);
+  return Object.assign(x, {doubleOwner, prehookSources, prehook, prehookState: prehook.getActorBinding(x.actor),
+    actionTables, actionSources, action, groundSources, ground, frameSources, frame,
+    runFrame: (epoch = 1, targetDistance760 = 64, horizontalDistance764 = 20) =>
+      frame.ingestRawDistancesAndRun(x.actor, epoch, {boundary: 'externally-decoded-pre55568-raw', targetDistance760, horizontalDistance764})});
+}
+type DoubleFrameFixture = ReturnType<typeof doubleFrameHydratedCompositionFixture>;
+function retainDoubleFrameUnreached(x: DoubleFrameFixture): () => void {
+  const attached = x.joints.getBinding(x.joint).aobj7c!, callbacks = x.receiverTracks.length;
+  const retained = retainCompositionRecords([x.part, x.clocks, x.stream, x.waitControl,
+    x.historyState, x.historyState.rotation76!, x.historyState.preRotation1d6a!, x.historyState.aimOrigin524!,
+    x.sourceActor.savedGroundPos, x.rootMatrix, x.worldMatrix, x.doubleOwner, x.doubleOwner.offset7b0,
+    x.joints.getJoint(x.joint), x.joints.getBinding(x.joint), x.feedback.getAObj(attached),
+    x.pose.translation, x.pose.quaternion]);
+  return () => {
+    retained();
+    check(x.joints.getBinding(x.joint).aobj7c === attached && x.receiverTracks.length === callbacks,
+      'Double partial source frame retains actual animation/stream/clone/history owners until their source calls are reached');
+  };
+}
+function checkStandaloneDoublePermanentRefusal(x: DoubleFrameFixture): void {
+  check(!hasIncompleteSourceActorFrame(x.sourceActor) && hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+    'standalone partial Double action poisons its actual actor without manufacturing a frame claim');
+  for (const [index, bypass] of ['cue9', 'ready', 'control-mask', 'movement3'].entries()) {
+    x.sourceActor.ubCue = bypass === 'cue9' ? 9 : 0;
+    x.sourceActor.controlWord = bypass === 'control-mask' ? 0x41 : 0;
+    x.movementState.byte661 = bypass === 'movement3' ? 3 : 0;
+    x.actorControlState.byte490 = bypass === 'ready' ? 2 : 0; x.actorControlState.short49a = 1;
+    const retained = retainCommandAdmissionRecords(x), double = retainCompositionRecords([x.prehookState, x.doubleOwner, x.doubleOwner.offset7b0]);
+    rejects(() => x.runRawPrefix(index + 2, 128, 40), 'incomplete source Double');
+    rejects(() => x.runRawPrefix(index + 2, 256, 80), 'epoch'); retained(); double();
+  }
+  for (const run of [() => x.prehook.runActor(x.actor), () => x.action.captureStateSelectors(x.actor),
+    () => x.frame.bindActor(x.actor)]) rejects(run, 'incomplete source Double');
+}
+export function runDoubleFrameHydratedCompositionTests(): void {
+  {
+    const x = doubleFrameHydratedCompositionFixture(), a = x.sourceActor, retained = retainDoubleFrameUnreached(x);
+    let hostGroundCalls = 0;
+    a.physicsRuntime = {clampToGround() {hostGroundCalls++; throw Error('host ground approximation must not run');}};
+    rejects(() => x.runFrame(), '677b0'); retained();
+    check(x.prehook.getActualActor(x.actor) === a && x.action.getActualActor(x.actor) === a &&
+      x.prehook.getStartBinding(x.actor) === x.start && x.prehook.getStatusBinding(x.actor) === x.statusState &&
+      x.prehook.getChargeBinding(x.actor) === x.chargeState && x.action.getCueBinding(x.actor) === x.cueState &&
+      x.action.getAttributeBinding(x.actor) === x.attributeState && x.action.getMappingActor(x.actor) === x.sourceClock &&
+      x.action.getDispatchBinding(x.actor) === x.gates && x.action.getPrehookBinding(x.actor) === x.prehookState &&
+      getDoubleNinjaOwnerState(a) === x.doubleOwner && x.prehook.getCloneOwner(x.actor) === x.doubleOwner,
+      'actual Double joins retain one canonical actor/stream/status/charge/cue/parameter/mapping/dispatch and persistent clone owner');
+    check(a.fbState === 61 && a.ubState === 0 && a.actionIndex === 2 && a.variantIndex === 0 && a.fbPhase === 1 &&
+      x.gates.marker578 === 0 && x.start.defaultSelector582 === 1 && x.statusState.short272 === 9 &&
+      x.chargeState.byte58e === 0 && a.aimRoll1dfc === 127 && x.prehookState.byte6ee === 109 &&
+      [a.gravityCoeff, a.yVel, a.hDecel, a.hSpeed, a.poseAccum80, a.poseAccum7e, a.poseAccum7c].every(v => Object.is(v, 0)) &&
+      a.visibilityTarget === null && a.activeYaw === a.heading && a.lockYaw === a.heading && a.turnErrorYaw === 0 &&
+      hostGroundCalls === 0 && hasIncompleteSourceActorFrame(a) && hasIncompleteSourceActorDoubleLifecycle(a),
+      'real55568/prehook/saved upper0/full61/root/action2/variant0/phase0 performs canonical mutations and stops at exact ground boundary');
+    const expectedMotion = [102, 2, 303].map(v => Math.fround(v * Math.fround(0.95)));
+    check([a.motion.x, a.motion.y, a.motion.z].every((v, i) => Object.is(v, expectedMotion[i])) &&
+      [a.pos.x, a.pos.y, a.pos.z].every((v, i) => Object.is(v, Math.fround([101, 0, 300][i]! + expectedMotion[i]!))) &&
+      a.targetCache5e8.x === -1 && a.targetCache5e8.y === -2 && a.targetCache5e8.z === -3,
+      'actual subtract/scale/add carries distinct source position and prior-own-position through exact f32 motion before ground');
+    const stopped = retainCommandAdmissionRecords(x);
+    rejects(() => x.runFrame(2), 'incomplete source frame'); stopped();
+    rejects(() => x.runRawPrefix(2, 128, 40), 'exclusively owned'); stopped();
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(false), retained = retainDoubleFrameUnreached(x);
+    const frame = createSourceActorFrameLifecycleRuntime({attributes: x.attributes, status: x.status,
+      tick: x.prefix, dispatch: x.dispatch, prehook: x.prehook});
+    frame.bindActor(x.actor);
+    rejects(() => frame.ingestRawDistancesAndRun(x.actor, 1,
+      {boundary: 'externally-decoded-pre55568-raw', targetDistance760: 64, horizontalDistance764: 20}), 'upper'); retained();
+    check(x.gates.marker578 === 1 && x.start.defaultSelector582 === 1 && x.chargeState.byte58e === 0 &&
+      x.sourceActor.fbPhase === 0 && x.sourceActor.gravityCoeff === 17,
+      'prehook-only frame executes real4bc and578=1 before honest absent state-dispatch refusal, without inventing an action');
+  }
+  for (const key of ['prehook', 'action'] as const) {
+    const x = doubleFrameHydratedCompositionFixture(false);
+    rejects(() => createSourceActorFrameLifecycleRuntime({...x.frameSources, [key]: {...x.frameSources[key]}}), 'genuine');
+    check(!hasIncompleteSourceActorFrame(x.sourceActor), 'spread Double source cannot manufacture genuine frame ownership');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(false), y = doubleFrameHydratedCompositionFixture(false);
+    rejects(() => createSourceActorFrameLifecycleRuntime({...x.frameSources, prehook: y.prehook, action: y.action})
+      .bindActor(x.actor), 'unknown/non-owned');
+    check(!hasIncompleteSourceActorFrame(x.sourceActor) && !hasIncompleteSourceActorFrame(y.sourceActor) &&
+      x.sourceActor !== y.sourceActor && x.doubleOwner !== y.doubleOwner && x.actionTables !== y.actionTables,
+      'independent genuine graphs cannot impersonate each other through matching scalar values');
+    x.frame.bindActor(x.actor); y.frame.bindActor(y.actor);
+    rejects(() => x.runFrame(), '677b0'); rejects(() => y.runFrame(), '677b0');
+    check(x.sourceActor.fbPhase === 1 && y.sourceActor.fbPhase === 1,
+      'a partial Double lifecycle remains actor-local and does not poison an independent genuine graph');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(), original = Object.getOwnPropertyDescriptor;
+    const events: string[] = [], retained = retainDoubleFrameUnreached(x); let changed = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      for (const name of Object.keys(x.actionTables) as (keyof SourceActorDoubleActionTables)[]) {
+        if (owner === x.actionTables[name] && /^(0|2|61)$/.test(String(key))) {
+          events.push(`${name}:${String(key)}:${x.gates.marker578}`);
+          if (name === 'upper37a8') {changed = true; x.sourceActor.ubState = 17; x.sourceActor.fbState = 17;}
+          if (name === 'phases1f000') for (const slot of ['byte544', 'byte545', 'byte546', 'byte547'])
+            Object.defineProperty(x.cueState, slot, {writable: false});
+        }
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), '677b0');} finally {Object.getOwnPropertyDescriptor = original;}
+    retained();
+    check(changed && events.join() === 'upper37a8:0:1,full36a8:61:0,actions3b68:2:0,variants3c48:0:0,phases1f000:0:0' &&
+      x.sourceActor.ubState === 17 && x.sourceActor.fbState === 17 && x.sourceActor.fbPhase === 1,
+      'source dispatch reads upper under marker1 then full/root/action under marker0, using saved0/61 without reloading live5da after upper');
+    check(['byte544', 'byte545', 'byte546', 'byte547'].every(key => Reflect.get(x.cueState, key) === 0),
+      'phase0 increments only actual540 and leaves canonical cue544..547 readonly after their genuine earlier cue stores');
+  }
+  for (const field of ['defaultSelector582', 'short272', 'byte58e'] as const) {
+    const x = doubleFrameHydratedCompositionFixture(), retained = retainDoubleFrameUnreached(x);
+    const owner = field === 'defaultSelector582' ? x.start : field === 'short272' ? x.statusState : x.chargeState;
+    Object.defineProperty(owner, field, {writable: false});
+    rejects(() => x.runFrame(), `${field}: non-writable`); retained();
+    check(x.sourceActor.fbState === 61 && x.sourceActor.ubState === 0 && x.sourceActor.actionIndex === 2 &&
+      x.gates.marker578 === 2 && x.start.defaultSelector582 === (field === 'defaultSelector582' ? 7 : 1) &&
+      x.statusState.short272 === (field === 'byte58e' ? 9 : 13) && x.chargeState.byte58e === 0x20 && x.sourceActor.fbPhase === 0,
+      `readonly prehook ${field} preserves completed real59068 and only earlier4bc stores before selector capture/action`);
+    rejects(() => x.runFrame(2), 'incomplete source frame');
+  }
+  for (const field of ['gravityCoeff', 'poseAccum7e'] as const) {
+    const x = doubleFrameHydratedCompositionFixture(), a = x.sourceActor, retained = retainDoubleFrameUnreached(x);
+    Object.defineProperty(a, field, {writable: false});
+    rejects(() => x.runFrame(), `${field}: non-writable`); retained();
+    check(x.gates.marker578 === 0 && a.fbPhase === 1 && a.turnErrorYaw === 0 && a.activeYaw === a.heading &&
+      a.gravityCoeff === (field === 'gravityCoeff' ? 17 : 0) && a.poseAccum80 === (field === 'gravityCoeff' ? 103 : 0) &&
+      a.poseAccum7e === 102 && a.poseAccum7c === 101 && a.motion.x === 41,
+      `readonly phase0 ${field} retains increment/null-target source yaw and ordered earlier zero stores before vectors or ground`);
+    rejects(() => x.runFrame(2), 'incomplete source frame');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(), old = x.parameter;
+    const missing = x.attributes.createParameterDescriptor({field04: old.field04!, field08: old.field08!,
+      field74: old.field74!, field78: old.field78!, field7c: old.field7c!});
+    x.attributeState.parameter4ac = missing;
+    const retained = retainDoubleFrameUnreached(x);
+    rejects(() => x.runFrame(), 'fieldAe'); retained();
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.turnErrorYaw === 0 && x.sourceActor.gravityCoeff === 17 &&
+      !Object.hasOwn(x.attributes.getParameterDescriptor(missing), 'fieldAe'),
+      'live4ac replacement without explicit+ae refuses after real null-target delta store and before zero/vector/ground work');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(), original = Object.getOwnPropertyDescriptor;
+    let armed = true, caught = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (armed && owner === x.start && key === 'defaultSelector582' && x.sourceActor.controlWord === 3 && x.gates.marker578 === 2) {
+        armed = false; try {x.runFrame(2);} catch {caught = true;}
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), 'caught same-runtime reentry');} finally {Object.getOwnPropertyDescriptor = original;}
+    check(caught && x.gates.marker578 === 2 && x.sourceActor.fbState === 61 && x.sourceActor.fbPhase === 0 &&
+      hasIncompleteSourceActorFrame(x.sourceActor),
+      'caught frame reentry inside genuine prehook cannot continue to selector/marker1/action even when inner error was caught');
+    const retained = retainCommandAdmissionRecords(x); rejects(() => x.runFrame(3), 'incomplete source frame'); retained();
+  }
+  for (const failAt of ['prehook', 'action'] as const) {
+    const x = doubleFrameHydratedCompositionFixture(false);
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.sourceActor.fbPhase === 0,
+      'standalone genuine59068 supplies ordinaryX state without claiming or running a frame');
+    if (failAt === 'prehook') {
+      x.doubleOwner.arm7c8 = 1; rejects(() => x.prehook.runActor(x.actor), '4538c');
+      check(x.chargeState.byte58e === 0x20 && x.start.defaultSelector582 === 1 && x.sourceActor.fbPhase === 0,
+        'armed persistent clone retains real prehook prefix at normalization and never manufactures a clone or action');
+    } else {
+      x.prehook.runActor(x.actor);
+      const saved = x.action.captureStateSelectors(x.actor); x.action.dispatchUpper(x.actor, saved);
+      rejects(() => x.action.dispatchFull(x.actor, saved), '677b0');
+      check(x.sourceActor.fbPhase === 1, 'standalone actual action makes the same reached phase0 mutation before ground refusal');
+    }
+    checkStandaloneDoublePermanentRefusal(x);
+  }
+  for (const alias of ['prehook', 'clone', 'tables', 'table', 'processor', 'motion', 'history', 'parameter'] as const) {
+    const x = doubleFrameHydratedCompositionFixture();
+    const raw = alias === 'prehook' ? x.prehookState : alias === 'clone' ? x.doubleOwner : alias === 'tables' ? x.actionTables :
+      alias === 'table' ? x.actionTables.full36a8 : alias === 'processor' ? x.actionSources.processor :
+      alias === 'motion' ? x.sourceActor.motion : alias === 'history' ? x.sourceActor.targetCache5e8 : x.parameter;
+    const retained = retainCommandAdmissionRecords(x), family = retainCompositionRecords([x.prehookState, x.doubleOwner, x.doubleOwner.offset7b0]);
+    rejects(() => x.frame.ingestRawDistancesAndRun(x.actor, 0, raw as never), 'alias'); retained(); family();
+    rejects(() => x.runFrame(0), 'epoch'); retained(); family();
+    check(!hasIncompleteSourceActorFrame(x.sourceActor) && !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor) &&
+      x.sourceActor.targetDistance760 === -760 && x.sourceActor.horizontalDistance764 === -764,
+      `raw ${alias} identity cannot alias a retained Double source owner; consumed host epoch precedes all source effects`);
+    rejects(() => x.runFrame(1), '677b0');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(), original = Object.getOwnPropertyDescriptor;
+    let armed = true;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (armed && owner === x.sourceActor && key === 'fbState' && x.start.defaultSelector582 === 1 && x.gates.marker578 === 2) {
+        armed = false; Object.defineProperty(x.gates, 'marker578', {writable: false});
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), 'marker578: non-writable');} finally {Object.getOwnPropertyDescriptor = original;}
+    check(!armed && x.gates.marker578 === 2 && x.start.defaultSelector582 === 1 && x.chargeState.byte58e === 0 &&
+      x.statusState.short272 === 9 && x.sourceActor.fbPhase === 0 && x.sourceActor.gravityCoeff === 17,
+      'readonly second578 store retains complete prehook and selector-read prefix but never dispatches upper/full action');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(), originalPosition = x.sourceActor.pos;
+    x.sourceActor.pos = {...originalPosition};
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.runFrame(0), 'position20: canonical source owner changed'); retained();
+    rejects(() => x.runFrame(0), 'epoch'); retained();
+    check(!hasIncompleteSourceActorFrame(x.sourceActor) && x.sourceActor.targetDistance760 === -760,
+      'replaced actual position owner is refused before new raw stores rather than accepted by matching values');
+    x.sourceActor.pos = originalPosition; rejects(() => x.runFrame(1), '677b0');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(), retained = retainDoubleFrameUnreached(x);
+    x.actionTables.upper37a8 = [...x.actionTables.upper37a8];
+    rejects(() => x.runFrame(), 'upper37a8: canonical owner changed'); retained();
+    check(x.gates.marker578 === 2 && x.start.defaultSelector582 === 1 && x.chargeState.byte58e === 0 && x.sourceActor.fbPhase === 0,
+      'replaced table owner cannot impersonate retained decoded source rows after real prehook, even with identical code words');
+  }
+  for (const key of ['pointer4bc', 'pointer4b4'] as const) {
+    const x = doubleFrameHydratedCompositionFixture(), retained = retainDoubleFrameUnreached(x);
+    x.prehookState[key] = 0;
+    rejects(() => x.runFrame(), `actual${key.slice(7)}`); retained();
+    check(x.gates.marker578 === (key === 'pointer4bc' ? 2 : 0) &&
+      x.start.defaultSelector582 === (key === 'pointer4bc' ? 7 : 1) && x.sourceActor.fbPhase === 0,
+      `live canonical ${key} selects the actual source call boundary, without interpreting null as a no-op`);
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(), retained = retainDoubleFrameUnreached(x);
+    Object.defineProperty(x.sourceActor.motion, 'y', {writable: false});
+    rejects(() => x.runFrame(), 'y: non-writable'); retained();
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.gravityCoeff === 0 && x.sourceActor.poseAccum7c === 0 &&
+      x.sourceActor.motion.x === 41 && x.sourceActor.motion.y === 42 && x.sourceActor.motion.z === 43 &&
+      x.sourceActor.pos.x === 101 && x.sourceActor.pos.y === 0 && x.sourceActor.pos.z === 300,
+      'first paired subtract store refuses readonly motionY atomically after real yaw/zeros, without scaling, carry or ground');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture();
+    x.parameter.fieldAe = -1;
+    rejects(() => x.runFrame(), '677b0');
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.activeYaw === 0 && x.sourceActor.heading === 65535 &&
+      x.sourceActor.lockYaw === 65535 && x.sourceActor.turnErrorYaw === 1 && x.parameter.fieldAe === -1,
+      'actual signed parameter4ac+ae is multiplied/truncated/wrapped by669d0/66a30 even for null-target zero delta, not clamped as host speed');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture();
+    Object.defineProperty(x.parameter, 'fieldAe', {writable: false});
+    Object.defineProperty(x.actionSources.processor, 'gqr0', {writable: false});
+    for (const key of ['x', 'y', 'z']) Object.defineProperty(x.sourceActor.targetCache5e8, key, {writable: false});
+    const retained = retainCompositionRecords([x.parameter, x.actionSources.processor, x.sourceActor.targetCache5e8]);
+    rejects(() => x.runFrame(), '677b0'); retained();
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.pos.x === Math.fround(101 + Math.fround(102 * Math.fround(0.95))),
+      'reached readonly parameter/profile/prior-own-position inputs remain valid operands through real yaw and vector carry');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(), retained = retainDoubleFrameUnreached(x);
+    x.actionSources.processor.gqr0 = 1;
+    rejects(() => x.runFrame(), 'GQR0'); retained();
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.poseAccum7c === 0 && x.sourceActor.motion.x === 41 &&
+      x.sourceActor.pos.x === 101 && x.sourceActor.pos.y === 0,
+      'unsupported reached vector processor profile retains full phase/yaw/zero prefix and refuses before inventing quantized loads');
+  }
+  console.log('[actor-double-frame-composition] PASS: genuine55568/59068/Double4bc and saved upper0/full61/root/action2/variant0/phase0 on retained DAT/stream/pose owners; exact ordered partial mutations to677b0, no animation/ground/clone substitution, canonical identities and permanent frame/standalone guards; explicit synthetic offline inputs only');
+}
+
+/** Source group4/slot0 or1 resolves copied nonnull stream bytes. The command
+ * explicitly selects animation group2/action1 because the genuine prehook has
+ * already changed default582 to1. Only active part1 is supplied; requested maskF
+ * is still interpreted by the real start owner, not narrowed by an adapter.
+ * This is synthetic decoded input, not a retail Double animation schedule. */
+function doubleGroundStreamHydratedCompositionFixture(bind = true,
+  commands = Uint8Array.from([1, 2, 1, 1, 6, 0, 0, 0, 0, 3, 0, 7])) {
+  const x = installHydratedTransition(doubleFrameHydratedCompositionFixture(bind, true));
+  if (x.ground === undefined) throw Error('ground composition requires its genuine optional owner');
+  // Keep the source-carried point in the actual nonempty cell0. No terrain
+  // callback, floor sentinel, rewritten query or cached result is supplied.
+  x.sourceActor.targetCache5e8.z = 300;
+  x.sourceActor.streamSlot = 219; x.sourceActor.accumulator80c = 901;
+  x.control.getActorBinding(x.actor).blockedMask1d9a = 0;
+  const bytes = new Uint8Array(64 + commands.length), view = new DataView(bytes.buffer);
+  view.setInt16(16, 24); // family8 + group4*2 -> group32
+  view.setInt16(32, 32); view.setInt16(34, 32); // slots0/1 -> command64
+  bytes.set(commands, 64);
+  const streamBase = x.control.createStream(bytes);
+  x.start.familyBank1d80 = x.control.cursorAt(streamBase, 8);
+  // New real archive has duration7. Old attached duration3 and frame2 remain
+  // untouched until opcode01 performs the full canonical old-part copy.
+  const animationBytes = hydrationDatFixture(); new DataView(animationBytes.buffer).setFloat32(0x44, 7);
+  const nextArchive = x.hydration.hydrateAnimationArchive(animationBytes, [0, 1]);
+  x.archiveBanks.getPointerTable(x.selected)[0] = nextArchive.setupDescriptor;
+  return Object.assign(x, {ground: x.ground, streamBytes: bytes, streamBase, animationBytes, nextArchive,
+    prepareStandalone: (air = false) => {
+      x.runRawPrefix(1, 64, 20);
+      if (air) x.sourceActor.controlWord |= 0x40;
+      x.prehook.runActor(x.actor);
+      const saved = x.action.captureStateSelectors(x.actor); x.action.dispatchUpper(x.actor, saved);
+      return saved;
+    }});
+}
+type DoubleGroundStreamFixture = ReturnType<typeof doubleGroundStreamHydratedCompositionFixture>;
+function retainDoubleGroundSuffix(x: DoubleGroundStreamFixture): () => void {
+  return retainCompositionRecords([x.historyState, x.historyState.rotation76!, x.historyState.preRotation1d6a!,
+    x.historyState.aimOrigin524!, x.sourceActor.savedGroundPos, x.sourceActor.targetCache5e8,
+    x.rootMatrix, x.worldMatrix, x.doubleOwner, x.doubleOwner.offset7b0]);
+}
+function checkDoubleGroundStreamSetup(x: DoubleGroundStreamFixture, oldAttached: symbol | null, oldPoseX: number,
+  oldFrame: number, oldDuration: number, slot: number): void {
+  const attached = x.joints.getBinding(x.joint).aobj7c!, aobj = x.feedback.getAObj(attached);
+  const joint = x.joints.getJoint(x.joint), weight = x.blendState.field20;
+  check(attached !== null && attached !== oldAttached && aobj.frame === 0 && x.part.mode2f === 1 &&
+    x.part.frame0c === 0 && x.part.duration24 === 7 && x.blendState.field18 === 7 && x.blendState.field1c === 1 &&
+    x.blendState.group28 === 2 && x.blendState.action29 === 1 && x.blendState.status38 === 0 &&
+    x.oldPart.frame0c === oldFrame && x.oldPart.duration24 === oldDuration && x.oldPose.translation.x === oldPoseX,
+    'actual action2 opcode01 replaces a nonempty hydrated AObj/FObj graph and copies the real prior part/pose into mode1');
+  check(x.oldPose !== x.pose && x.oldPose.translation !== x.pose.translation &&
+    x.pose.translation.x === addSourceFloat32(Math.fround(joint.translation38 * Math.fround(1 - weight)), Math.fround(oldPoseX * weight)) &&
+    x.pose.translation.x !== joint.translation38 && x.pose.quaternion.w === 1,
+    'action-selected finite-linear mode1 blends the new captured pose with a distinct retained old pose');
+  check(x.sourceActor.fbPhase === 1 && x.sourceActor.streamSlot === slot + 1 && x.sourceActor.accumulator80c === 0 &&
+    x.start.defaultSelector582 === 1 && x.start.marker709 === 0 && x.waitControl.group18 === 4 &&
+    x.waitControl.action19 === slot && x.waitControl.status1d === 1 && x.waitControl.finished1a === 0 &&
+    x.waitControl.wait14 === 7 && x.waitControl.current00 === x.control.cursorAt(x.streamBase, 72) &&
+    x.waitControl.next04 === x.control.cursorAt(x.streamBase, 76) && x.stream.accumulator10 === 0 && x.stream.target08 === 0,
+    'fixed signed config selection increments6ea before real family group4 stream start and writes80c only after terminal wait installation');
+}
+/** Independent55568 schedule regression: each body sees the source marker,
+ * including the unconditional stores between successful handler returns. */
+export function runDoubleFrameMarkerCompositionTests(): void {
+  {
+    const x = doubleGroundStreamHydratedCompositionFixture(), original = Object.getOwnPropertyDescriptor;
+    const events: string[] = [], terminal = x.control.cursorAt(x.streamBase, 72);
+    const oldAttached = x.joints.getBinding(x.joint).aobj7c, oldX = x.pose.translation.x;
+    const oldFrame = x.part.frame0c, oldDuration = x.part.duration24; let observedReturn = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (owner === x.actionTables.upper37a8 && key === '0') {
+        events.push(`upper:${x.gates.marker578}`);
+        // Distinguish marker0 from1 at actual48648: only marker1 would suppress
+        // part1 setup with this live source gate. No setup adapter is replaced.
+        x.gates.marker1db3 = 1;
+      }
+      if (owner === x.actionTables.full36a8 && key === '61') events.push(`full:${x.gates.marker578}`);
+      if (!observedReturn && owner === x.sourceActor && key === 'accumulator80c' && x.waitControl.current00 === terminal) {
+        observedReturn = true; events.push(`stream-return:${x.gates.marker578}:${x.sourceActor.accumulator80c}`);
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), 'actual4c0');} finally {Object.getOwnPropertyDescriptor = original;}
+    events.push(`posthook-boundary:${x.gates.marker578}`);
+    check(events.join() === 'upper:1,full:0,stream-return:0:901,posthook-boundary:2' && x.gates.marker1db3 === 1,
+      'actual55568 source schedule is upper1, full/stream0, posthook2, with no missing or delayed inter-handler store');
+    checkDoubleGroundStreamSetup(x, oldAttached, oldX, oldFrame, oldDuration, 0);
+    check(hasIncompleteSourceActorFrame(x.sourceActor) && hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+      'correct full marker0 admits genuine mode1 even when marker1db3 would suppress an incorrectly retained upper marker1');
+  }
+  for (const boundary of ['between', 'after'] as const) for (const fault of ['readonly', 'reentry'] as const) {
+    const x = doubleGroundStreamHydratedCompositionFixture(), original = Object.getOwnPropertyDescriptor;
+    const oldAttached = x.joints.getBinding(x.joint).aobj7c, oldX = x.pose.translation.x;
+    const oldFrame = x.part.frame0c, oldDuration = x.part.duration24;
+    let upperReturned = false, injected = false, caught = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (owner === x.actionTables.upper37a8 && key === '0') upperReturned = true;
+      const reached = boundary === 'between' ? upperReturned && x.sourceActor.fbPhase === 0 : x.sourceActor.accumulator80c === 0;
+      if (!injected && reached && owner === x.gates && key === 'marker578') {
+        injected = true;
+        if (fault === 'readonly') Object.defineProperty(x.gates, 'marker578', {writable: false});
+        else try {x.runFrame(2);} catch {caught = true;}
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), fault === 'readonly' ? 'marker578: non-writable' : 'caught same-runtime reentry');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(injected && (fault !== 'reentry' || caught) && x.gates.marker578 === (boundary === 'between' ? 1 : 0) &&
+      x.sourceActor.fbPhase === (boundary === 'between' ? 0 : 1) && hasIncompleteSourceActorFrame(x.sourceActor) &&
+      hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+      `${fault} at the ${boundary === 'between' ? 'upper-to-full0' : 'full-to-posthook2'} store retains the previous marker and completed body without invoking the next body`);
+    if (boundary === 'between') check(x.sourceActor.gravityCoeff === 17 && x.sourceActor.streamSlot === 219 &&
+      x.sourceActor.accumulator80c === 901 && x.joints.getBinding(x.joint).aobj7c === oldAttached && x.part.mode2f === 0,
+      'failed inter-handler578=0 occurs after real upper return but before phase/vector/ground/stream/setup work');
+    else checkDoubleGroundStreamSetup(x, oldAttached, oldX, oldFrame, oldDuration, 0);
+    const retained = retainCommandAdmissionRecords(x), animation = retainCompositionRecords([x.part, x.oldPart,
+      x.pose.translation, x.pose.quaternion, x.oldPose.translation, x.oldPose.quaternion]);
+    rejects(() => x.runFrame(3), 'incomplete source frame'); retained(); animation();
+    rejects(() => x.runRawPrefix(3, 128, 40), 'exclusively owned'); retained(); animation();
+    for (const run of [() => x.prehook.runActor(x.actor), () => x.action.captureStateSelectors(x.actor),
+      () => x.ground.runActor(x.actor)]) {
+      rejects(run, 'incomplete source Double'); retained(); animation();
+    }
+  }
+  console.log('[actor-double-frame-markers] PASS: independent55568 upper1/full0/posthook2 schedule, actual marker0 mode1 admission with1db3=1, readonly/reentry at both inter-handler stores and retained-prefix no-replay guards; offline only,4c0 remains unsupported');
+}
+export function runDoubleGroundStreamHydratedCompositionTests(): void {
+  {
+    const x = doubleGroundStreamHydratedCompositionFixture(), a = x.sourceActor;
+    const oldAttached = x.joints.getBinding(x.joint).aobj7c, oldX = x.pose.translation.x;
+    const oldFrame = x.part.frame0c, oldDuration = x.part.duration24, retained = retainDoubleGroundSuffix(x);
+    const original = Object.getOwnPropertyDescriptor, layers: string[] = []; let hostGroundCalls = 0;
+    a.physicsRuntime = {clampToGround() {hostGroundCalls++; throw Error('host floor must not run');}};
+    x.streamBytes.fill(0xfe); x.animationBytes.fill(0); // Both consumers must use their genuine copied input owners.
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (owner === x.terrain && a.fbPhase === 1 && ['ceiling24', 'ceiling20', 'floor1c'].includes(String(key))) layers.push(String(key));
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), 'actual4c0');} finally {Object.getOwnPropertyDescriptor = original;}
+    retained(); checkDoubleGroundStreamSetup(x, oldAttached, oldX, oldFrame, oldDuration, 0);
+    check(layers.indexOf('ceiling24') >= 0 && layers.indexOf('ceiling24') < layers.indexOf('ceiling20') &&
+      layers.indexOf('ceiling20') < layers.indexOf('floor1c') && x.gaugeState.byte7c9 === 0 &&
+      Object.is(a.pos.x, Math.fround(101 + Math.fround(102 * Math.fround(0.95)))) &&
+      Object.is(a.pos.y, Math.fround(2 * Math.fround(0.95))) && a.pos.z === 300 && a.pos.y + a.stepHeight > 0 &&
+      x.landCalls() === 0 && hostGroundCalls === 0 && x.gates.marker578 === 2,
+      'genuine677b0 queries ordered actual ceiling/floor owners at the carried point and returns no-contact before source4c0 refusal');
+    check(x.ground.getActualActor(x.actor) === a && x.ground.getGaugeBinding(x.actor) === x.gaugeState &&
+      x.ground.getWorldBinding(x.actor) === x.header && x.ground.getStatusBinding(x.actor) === x.statusState &&
+      x.ground.getActualBorg(x.actor) === x.host && x.ground.getHistoryBinding(x.actor) === x.historyState &&
+      x.ground.getTerrainGlobals() === x.terrain && x.prehook.getStreamsRuntime() === x.control &&
+      hasIncompleteSourceActorFrame(a) && hasIncompleteSourceActorDoubleLifecycle(a),
+      'ground/action retain canonical gauge/history/terrain/start owners; unsupported posthook permanently poisons the enclosing frame and shared Double lifecycle');
+    const stopped = retainCommandAdmissionRecords(x), poses = retainCompositionRecords([x.part, x.oldPart,
+      x.pose.translation, x.pose.quaternion, x.oldPose.translation, x.oldPose.quaternion]);
+    rejects(() => x.runFrame(2), 'incomplete source frame'); stopped(); poses();
+    rejects(() => x.runRawPrefix(2, 128, 40), 'exclusively owned'); stopped(); poses();
+    for (const run of [() => x.prehook.runActor(x.actor), () => x.action.captureStateSelectors(x.actor),
+      () => x.ground.runActor(x.actor)]) {
+      rejects(run, 'incomplete source Double'); stopped(); poses();
+    }
+  }
+  for (const air of [false, true]) {
+    const x = doubleGroundStreamHydratedCompositionFixture(false), saved = x.prepareStandalone(air);
+    const oldAttached = x.joints.getBinding(x.joint).aobj7c, oldX = x.pose.translation.x;
+    const oldFrame = x.part.frame0c, oldDuration = x.part.duration24, retained = retainDoubleGroundSuffix(x);
+    check(x.action.dispatchFull(x.actor, saved) === undefined, 'standalone real phase0 returns after nonnull stream setup');
+    retained(); checkDoubleGroundStreamSetup(x, oldAttached, oldX, oldFrame, oldDuration, air ? 1 : 0);
+    check(!hasIncompleteSourceActorFrame(x.sourceActor) && !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+      'complete standalone phase0 creates neither a frame claim nor a false incomplete action');
+    const stopped = retainCommandAdmissionRecords(x);
+    rejects(() => x.action.dispatchFull(x.actor, saved), 'saved selector'); stopped();
+    const callbacks = x.receiverTracks.length;
+    for (let update = 1; update <= 6; update++) {
+      x.control.update(x.actor, 2);
+      check(x.part.frame0c === 0 && x.part.mode2f === (update === 6 ? 0 : 1) && x.clocks.elapsed08 === update &&
+        x.oldPose.translation.x === oldX && x.sourceActor.fbPhase === 1 && x.sourceActor.streamSlot === (air ? 2 : 1),
+        `explicit wait update${update} consumes action-selected mode1 without replaying ground/action or inventing another frame`);
+    }
+    x.control.update(x.actor, 2);
+    check(x.part.frame0c === 1 && x.feedback.getAObj(x.joints.getBinding(x.joint).aobj7c!).frame === 1 &&
+      x.pose.translation.x === x.joints.getJoint(x.joint).translation38 && x.receiverTracks.length > callbacks &&
+      x.waitControl.wait14 === 7 && x.sourceActor.accumulator80c === 0 && x.landCalls() === 0,
+      'only explicit seventh wait update reaches real mode0 finite-linear frame1 after the action-selected transition');
+    retained();
+  }
+  {
+    const x = doubleGroundStreamHydratedCompositionFixture(false), saved = x.prepareStandalone();
+    const original = Object.getOwnPropertyDescriptor, slots: number[] = []; let changed = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (!changed && owner === x.terrain && key === 'floor1c' && x.sourceActor.fbPhase === 1) {
+        changed = true; x.sourceActor.controlWord |= 0x40;
+      }
+      if (owner === x.sourceActor && key === 'streamSlot') slots.push(x.sourceActor.streamSlot);
+      return original(owner, key);
+    }) as typeof original;
+    try {x.action.dispatchFull(x.actor, saved);} finally {Object.getOwnPropertyDescriptor = original;}
+    check(changed && slots.includes(0) && slots.includes(1) && x.sourceActor.streamSlot === 2 &&
+      x.waitControl.action19 === 1 && x.waitControl.group18 === 4 && x.sourceActor.accumulator80c === 0,
+      'source config first stores ground0 then reloads post-query control40, stores air1, captures1 and increments2 before stream start');
+  }
+  for (const fault of ['opcode', 'terminal', 'slot', 'accumulator'] as const) {
+    const commands = fault === 'opcode' ? Uint8Array.from([0xfe, 0, 0, 0]) :
+      fault === 'terminal' ? Uint8Array.from([1, 2, 1, 1, 6, 0, 0, 0, 0, 3]) : undefined;
+    const x = doubleGroundStreamHydratedCompositionFixture(false, commands), saved = x.prepareStandalone(true);
+    const attached = x.joints.getBinding(x.joint).aobj7c, oldX = x.pose.translation.x, retained = retainDoubleGroundSuffix(x);
+    const marker709 = x.start.marker709;
+    if (fault === 'slot') Object.defineProperty(x.sourceActor, 'streamSlot', {writable: false});
+    if (fault === 'accumulator') Object.defineProperty(x.sourceActor, 'accumulator80c', {writable: false});
+    rejects(() => x.action.dispatchFull(x.actor, saved), fault === 'opcode' ? 'opcode' :
+      fault === 'terminal' ? 'bound' : fault === 'slot' ? 'streamSlot' : 'accumulator80c'); retained();
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.accumulator80c === 901 &&
+      x.sourceActor.streamSlot === (fault === 'slot' ? 219 : 2) && x.sourceActor.pos.y > 0,
+      `${fault} retains ground-complete phase0 and only reached signed config/increment stores, never the post-return80c store`);
+    if (fault === 'slot') check(x.start.marker709 === marker709 && x.joints.getBinding(x.joint).aobj7c === attached,
+      'readonly6ea refuses before any stream-start effect');
+    else check(x.start.marker709 === 0 && x.waitControl.group18 === 4 && x.waitControl.action19 === 1,
+      'captured air slot1 reaches actual stream reset after incrementing canonical6ea to2');
+    if (fault === 'terminal' || fault === 'accumulator') check(x.joints.getBinding(x.joint).aobj7c !== attached &&
+      x.part.mode2f === 1 && x.part.frame0c === 0 && x.oldPose.translation.x === oldX &&
+      x.waitControl.status1d === 1 && x.waitControl.current00 === x.control.cursorAt(x.streamBase, 72),
+      'late stream/80c refusal preserves genuine mode1 allocation/copy/blend and already-installed terminal cursor');
+    else check(x.joints.getBinding(x.joint).aobj7c === attached, 'early slot/opcode refusal cannot fabricate an animation attachment');
+    checkStandaloneDoublePermanentRefusal(x);
+  }
+  for (const owner of ['gauge', 'history', 'terrain'] as const) {
+    const x = doubleGroundStreamHydratedCompositionFixture(), raw = owner === 'gauge' ? x.gaugeState : owner === 'history' ? x.historyState : x.terrain;
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.frame.ingestRawDistancesAndRun(x.actor, 0, raw as never), 'alias'); retained();
+    rejects(() => x.runFrame(0), 'epoch'); retained();
+    check(!hasIncompleteSourceActorFrame(x.sourceActor) && x.sourceActor.accumulator80c === 901,
+      `raw ${owner} alias consumes epoch before source writes and cannot impersonate an external ingress record`);
+    rejects(() => x.runFrame(1), 'actual4c0');
+  }
+  for (const key of ['gauges', 'terrain'] as const) {
+    const x = doubleGroundStreamHydratedCompositionFixture(false);
+    rejects(() => createSourceActorGroundProbeRuntime({...x.groundSources, [key]: {...x.groundSources[key]}}), 'genuine');
+    check(!hasIncompleteSourceActorDoubleLifecycle(x.sourceActor), 'spread source metadata cannot manufacture a genuine ground runtime');
+  }
+  {
+    const x = doubleGroundStreamHydratedCompositionFixture(false), y = doubleGroundStreamHydratedCompositionFixture(false);
+    rejects(() => createSourceActorGroundProbeRuntime({gauges: x.gauges, terrain: y.query}).bindActor(x.actor), 'unknown/non-owned');
+    rejects(() => createSourceActorDoubleActionRuntime({...x.actionSources, ground: {...x.ground}}), 'genuine');
+    check(!hasIncompleteSourceActorDoubleLifecycle(x.sourceActor) && !hasIncompleteSourceActorDoubleLifecycle(y.sourceActor),
+      'matching scalar values from another graph or a spread ground cannot supply canonical actor ownership');
+  }
+  {
+    const x = doubleFrameHydratedCompositionFixture(false, 'separate-terrain'), retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.frame.bindActor(x.actor), 'terrain'); retained();
+    check(x.ground!.getTerrainGlobals() !== x.terrain && !hasIncompleteSourceActorFrame(x.sourceActor) &&
+      !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+      'same actual actor and identical grid values cannot join a distinct terrain-global owner into the existing stage/cue/ceiling frame');
+  }
+  for (const fault of ['hover', 'support', 'contact', 'floor'] as const) {
+    const x = doubleGroundStreamHydratedCompositionFixture(false), saved = x.prepareStandalone();
+    if (fault === 'hover') delete (x.sourceActor as Partial<typeof x.sourceActor>).hoverOffset668;
+    else if (fault === 'support') x.sourceActor.supportContact1db = 1;
+    else if (fault === 'contact') x.sourceActor.targetCache5e8.y = 2;
+    else Object.defineProperty(x.terrain, 'floor1c', {value: {...x.terrain.floor1c}});
+    const retained = retainDoubleFrameUnreached(x), slot = x.sourceActor.streamSlot, marker = x.start.marker709;
+    rejects(() => x.action.dispatchFull(x.actor, saved), fault === 'hover' ? 'hoverOffset668' :
+      fault === 'support' ? 'nonzero supporting contact' : fault === 'contact' ? '8020ba78' : 'source terrain');
+    retained();
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.streamSlot === slot && x.sourceActor.accumulator80c === 901 &&
+      x.start.marker709 === marker && x.landCalls() === 0,
+      `${fault} ground refusal preserves exact phase/yaw/vector prefix but never starts config, stream, pose or post-ground80c work`);
+    checkStandaloneDoublePermanentRefusal(x);
+  }
+  {
+    const x = doubleGroundStreamHydratedCompositionFixture(false), a = x.sourceActor;
+    x.gaugeState.byte7c9 = 1; a.hoverOffset668 = NaN; a.stepHeight = NaN; a.pos.y = NaN; a.supportContact1db = 255;
+    const retained = retainCommandAdmissionRecords(x);
+    check(x.ground.runActor(x.actor) === 0, 'canonical gauge7c9 nonzero returns before terrain/hover/contact operands'); retained();
+    check(x.sourceActor.streamSlot === 219 && x.sourceActor.accumulator80c === 901 && x.landCalls() === 0,
+      'ground skip alone does not claim action playback, stream setup or landing');
+  }
+  {
+    const x = doubleGroundStreamHydratedCompositionFixture(false), retained = retainCommandAdmissionRecords(x);
+    Object.defineProperty(x.gaugeState, 'byte7c9', {writable: false});
+    check(x.ground.runActor(x.actor) === 0, 'readonly canonical gauge0 supports genuine query-backed no-contact return'); retained();
+    x.sourceActor.pos.y = 0;
+    const contact = retainCommandAdmissionRecords(x);
+    rejects(() => x.ground.runActor(x.actor), '8020ba78'); contact();
+    check(x.landCalls() === 0 && x.sourceActor.accumulator80c === 901, 'actual ground contact stays an honest unsupported displacement/slope boundary');
+  }
+  for (const field of ['hoverOffset668', 'stepHeight'] as const) {
+    const x = doubleGroundStreamHydratedCompositionFixture(false);
+    delete (x.sourceActor as Partial<typeof x.sourceActor>)[field];
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.ground.runActor(x.actor), field); retained();
+  }
+  {
+    const x = doubleGroundStreamHydratedCompositionFixture(false), original = Object.getOwnPropertyDescriptor;
+    let armed = true, caught = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (armed && owner === x.gaugeState && key === 'byte7c9') {
+        armed = false; try {x.ground.runActor(x.actor);} catch {caught = true;}
+      }
+      return original(owner, key);
+    }) as typeof original;
+    const retained = retainCommandAdmissionRecords(x);
+    try {rejects(() => x.ground.runActor(x.actor), 'caught same-runtime reentry');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    retained(); check(caught && x.landCalls() === 0, 'caught ground reentry cannot continue to terrain, config, stream or landing');
+  }
+  console.log('[actor-double-ground-stream-composition] PASS: genuine55568/action2/677b0 distinct3e0a8 no-contact and copied nonnull group4 stream through actual opcode01/DAT/AObj/FObj mode1; fixed0/1 slots, ordered failures/80c after return, canonical owners/epochs and standalone explicit blend-to-frame1; frame still stops at4c0, synthetic offline only, no clone/full-frame/retail-playability claim');
 }
