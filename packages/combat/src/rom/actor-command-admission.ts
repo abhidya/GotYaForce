@@ -17,6 +17,7 @@
  * Reads and destination checks stay lazy; failures retain their prefix and
  * permanently mark an effectful incomplete call. No tick or input hydration.
  */
+import {readSourceShortTrig} from './source-short-trig.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
 import type {SourceActorStatusTimersRuntime} from './actor-status-timers.js';
@@ -69,6 +70,8 @@ export interface SourceActorCommandAdmissionRuntime {
   getStreamBinding(identity: symbol): object;
   getGlobal(): SourceActorInputChargeGlobal;
   getData(): SourceActorInputChargeData;
+  /** Already captured immutable explicit host GQR5 configuration, not a live register read. */
+  getShortTrigProfile(): unknown;
   getActorBinding(identity: symbol): Partial<SourceActorCommandAdmissionBinding>;
   /** Only new absent-field binding; not copies of canonical source owners. */
   getSourceOwners(identity: symbol): readonly object[];
@@ -268,15 +271,8 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
     if (e.aim !== undefined) stable(value, e.aim, 'aimOrigin518');
     retain(e, value, 'aim'); e.aim = value; return value;
   };
-  const trig = (heading: number, cosine: boolean): number => {
-    // 45204/45238 sth -> psq_l W=1,I=5 -> fmuls -> mandatory double sin/cos, then frsp.
-    if (gqr5 !== 0x00070007) fail('GQR5: explicit signed16/scale0 profile0x00070007 required');
-    const factor = constant('float80437078', 0.0000958738019107841 /* authenticated f32 bits0x38c90fdb */);
-    const angle = Math.fround(factor * heading);
-    if (angle !== 0) fail(`${cosine ? '80045238' : '80045204'} reached unsupported nonzero source trig`);
-    // Authenticated direct kernels: positive-zero sin returns+0; cos returns1.
-    return cosine ? 1 : 0;
-  };
+  const trig = (heading: number, cosine: boolean): number =>
+    readSourceShortTrig(heading,cosine,data,gqr5,check);
   const descriptorMetadata = (e: Entry, selected: symbol): object => {
     if (typeof selected !== 'symbol') fail('descriptor4b0: explicit owned descriptor identity required');
     const meta = record(descriptor(selected), 'descriptor+10 metadata');
@@ -464,7 +460,7 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
     getChargeBinding(id) {return entry(id).charge;}, getActionRuntime() {return action;}, getActionBinding(id) {return entry(id).action;},
     getCueRuntime() {return cues;}, getCueBinding(id) {return entry(id).cue;}, getDispatchBinding(id) {return entry(id).dispatch;},
     getStartBinding(id) {return entry(id).start;}, getStreamBinding(id) {return entry(id).stream;},
-    getGlobal() {return global;}, getData() {return data;}, getActorBinding(id) {return entry(id).binding;},
+    getGlobal() {return global;}, getData() {return data;}, getShortTrigProfile() {return gqr5;}, getActorBinding(id) {return entry(id).binding;},
     getSourceOwners(id) {return entry(id).extras;}, getKnownStorageOwners() {return Object.freeze([...storage.keys()]);},
     getKnownStorageEntries() {return Object.freeze([...storage].map(([owner, kind]) => Object.freeze({owner, kind})));},
     assertActorComplete(id) {assertComplete(entry(id).actual);},

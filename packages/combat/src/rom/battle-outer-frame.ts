@@ -27,6 +27,7 @@ import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRu
 import {markIncompleteSourceActorDoubleLifecycle, requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {addSourceFloat32} from './source-float.js';
 import {readSourceSquareDistance} from './source-square-distance.js';
+import {readSourceShortTrig} from './source-short-trig.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
@@ -563,12 +564,14 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       const binding=command(id,actor,false);
       const basicGuard=(): void=>{
         check();requireCompleteSourceActorDoubleLifecycle(actor);allocator.assertActorComplete(id);check();
+        admission().assertActorComplete(id);check();
         if(root.getSpawnRuntime()!==spawns || spawns.getWorldRuntime()!==world ||
           world.getActualActor(id)!==actor || admission().getActorBinding(id)!==binding)
           fail('6ae60 primary canonical actor/command/world changed');
       };
       const load=(owner: object,key: string): unknown=>{const value=read(owner,key);basicGuard();return value;};
       let data: object|undefined;
+      let nullDirection=false;
       let operandsGuard=basicGuard;
       const distanceKeys=['targetDistance758','horizontalDistance75c'] as const;
       const shadowKeys=['field758','field75c','field75C','float758','float75c','float75C',
@@ -609,6 +612,14 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
             fail(`${key}: competing primary distance storage alias`);
           for(const key of ['float80437658','float80437678']) if(owner!==data && fields[key]!==undefined)
             fail(`${key}: competing primary shared data storage`);
+          if(nullDirection) {
+            if(owner!==data && fields.float80437078!==undefined)
+              fail('float80437078: competing null-direction shared data storage');
+            if(!actualActors.includes(owner) && fields.heading!==undefined)
+              fail('heading: competing null-direction source storage');
+            for(const key of ['field72','short72','yaw72','byte72','byte73']) if(fields[key]!==undefined)
+              fail(`${key}: competing null-direction source alias`);
+          }
         }
         operandsGuard();
       };
@@ -652,12 +663,68 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(targetPointer===null) {
         const missing=constant('float80437678',20000,'8006b180');
         store('horizontalDistance75c',missing);store('targetDistance758',missing);
-        noShadows(actor,['field72','short72','yaw72','114','115','byte72','byte73']);
-        const headingWord=load(actor,'heading');distanceGuard();
-        const raw=unsigned(headingWord,65535,'heading');
-        const heading=raw<<16>>16; //b18c lha; actual heading retains raw BAM16 bits.
-        void heading;
-        fail('8006b190 reached mandatory80045204 primary null-target heading helper');
+        nullDirection=true;distanceGuard();
+        const heading=(): number=>{
+          noShadows(actor,['field72','short72','yaw72','114','115','byte72','byte73']);
+          const word=load(actor,'heading');distanceGuard();
+          return unsigned(word,65535,'heading')<<16>>16;
+        };
+        const trig=(angle: number,cosine: boolean): number=>{
+          const profile=call(()=>admission().getShortTrigProfile());distanceGuard();
+          return readSourceShortTrig(angle,cosine,data!,profile,distanceGuard);
+        };
+        const horizontal=(): number=>{
+          const value=read(actor,'horizontalDistance75c');distanceGuard();
+          return sourceFloat(value,'horizontalDistance75c');
+        };
+        let selected: object|undefined;
+        const selectedGuard=(): void=>{
+          basicGuard();
+          if(selected!==undefined) {
+            if(call(()=>dispatch.getSelectedPositionOwner(id))!==selected)
+              fail('6ae60 selected position canonical owner changed');
+            const owners=[sources,globals,data!,...retained.values(),...massActors.values()];
+            if(owners.includes(selected)) fail('6ae60 selected position aliases outer source storage');
+            for(const owner of owners) {
+              const fields=Object.getOwnPropertyDescriptors(owner);basicGuard();
+              for(const [key,p] of Object.entries(fields)) if('value' in p && p.value===selected && !(owner===actor && key==='lockTarget'))
+                fail('6ae60 selected position aliases outer canonical reference');
+            }
+          }
+          basicGuard();
+        };
+        const storeSelected=(axis: 'x'|'y'|'z',value: number): void=>{
+          const borrowed=call(()=>dispatch.getSelectedPositionOwner(id));
+          if(selected!==undefined && borrowed!==selected) fail('6ae60 selected position canonical owner changed');
+          selected=borrowed;operandsGuard=selectedGuard;distanceGuard();
+          const field=Object.getOwnPropertyDescriptor(selected,axis);distanceGuard();
+          if(!field || !('value' in field)) fail(`selected ${axis}: own data property required`);
+          if(!field.writable) fail(`selected ${axis}: non-writable field`);
+          const current=Object.getOwnPropertyDescriptors(selected)[axis];distanceGuard();
+          if(!current || !('value' in current)) fail(`selected ${axis}: own data property changed before store`);
+          if(!current.writable) fail(`selected ${axis}: non-writable field before store`);
+          const live=primaryStoreDescriptor(selected,axis);
+          if(!live || !('value' in live)) fail(`selected ${axis}: live own data property required before store`);
+          if(!live.writable) fail(`selected ${axis}: live non-writable field before store`);
+          (selected as Record<string,unknown>)[axis]=value;distanceGuard();
+        };
+        //45204/45238 share the real captured GQR5/data owner with command
+        //admission. Only their authenticated zero-angle domain can return.
+        const sine=trig(heading(),false);
+        const x=sourceFloat(Math.fround(horizontal()*sine),'primary selected X product');distanceGuard();
+        storeSelected('x',x);
+        const mapping=call(()=>admission().getMappingActor(id)),descriptor=read(mapping,'descriptor4b0');distanceGuard();
+        if(typeof descriptor!=='symbol') fail('primary descriptor4b0: owned source identity required');
+        const metadata=call(()=>admission().getDescriptorMetadata(id,descriptor));distanceGuard();
+        const rawJoint=read(metadata,'byte10');distanceGuard();
+        const joint=unsigned(rawJoint,255,'descriptor byte10')<<24>>24;
+        const row=call(()=>world.getWorldMatrix(id,joint));distanceGuard();
+        const height=read(row,'7');distanceGuard();
+        storeSelected('y',sourceFloat(height,'primary selected world row7'));
+        const cosine=trig(heading(),true);
+        const z=sourceFloat(Math.fround(horizontal()*cosine),'primary selected Z product');distanceGuard();
+        storeSelected('z',z);
+        fail('8006b1d0 reached mandatory secondary target cc load');
       }
       record(targetPointer,'6ae60 primary pointer508');
       //af98 captures504 before forming both vector addresses. Pointer-domain

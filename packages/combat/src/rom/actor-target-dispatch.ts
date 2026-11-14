@@ -33,6 +33,8 @@ export interface SourceActorTargetDispatchRuntime {
   getSchedulerRuntime(): SourceObjectSchedulerRuntime;
   /** Direct sources and reached table/globals/lists; no recursive graph inventory. */
   getRetainedStorageOwners(): readonly object[];
+  /** Reuse the exact selected-position claim after genuine dispatch; no XYZ loads. */
+  getSelectedPositionOwner(identity: symbol): object;
   dispatchActor(identity: symbol): void;
 }
 const positionAliases=['field50c','field50C','field510','field514','position50c','targetPosition50c',
@@ -157,6 +159,31 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
       write(list('scratchCandidates2208'),String(captured),object);
     }
   };
+  const position=(id: symbol,actual: object,binding: object,site: string): object=>{
+    const field=Object.getOwnPropertyDescriptor(actual,'lockTarget');check();
+    if(!field || !('value' in field)) fail(`${site} lockTarget: own data property required`);
+    const selected=record(field.value,`${site} selected position lockTarget`);
+    if(Array.isArray(selected)) fail('lockTarget: ordinary own-data record required');
+    const old=positions.get(id);if(old!==undefined && old!==selected) fail('lockTarget canonical owner changed');
+    const direct=[sources,scheduler,root,spawns,allocator,admission,action,actual,binding,tableOwner,globalsOwner,projectionOwner,
+      ...lists.values(),...bindings.values(),...candidateStages.values(),...call(()=>spawns.getRetainedStorageOwners()),
+      ...call(()=>world.getRetainedMatrixOwners()),...call(()=>admission.getKnownStorageOwners()),
+      ...call(()=>spawns.getPrehookRuntime().getStatusRuntime().getRetainedStorageOwners()),
+      ...call(()=>action.getRetainedStorageOwners())];
+    if(direct.includes(selected) || [...positions].some(([other,value])=>other!==id&&value===selected))
+      fail('lockTarget aliases canonical source storage');
+    // Root/scheduler inventories include this declared vector itself. Inspect
+    // references instead, allowing only THIS actor's lockTarget declaration.
+    for(const owner of forbidden()) if(owner!==selected) {
+      const fields=Object.getOwnPropertyDescriptors(owner);check();
+      for(const [key,p] of Object.entries(fields)) if('value' in p && p.value===selected && !(owner===actual && key==='lockTarget'))
+        fail(`lockTarget aliases canonical ${key} storage`);
+    }
+    if(!claimSourceHelperStorage(selected,runtime)) fail('lockTarget storage already claimed');
+    noShadows(selected,['lockTarget','active0','team','byte502','pointer504','pointer508','descriptor4b0','lifecycle18',
+      'half80436242','count804361a0',...positionAliases]);
+    positions.set(id,selected);return selected;
+  };
   const project = (id: symbol, actual: object, globals: object, binding: object): void => {
     // This optional host ingress preserves the former unsupported operation.
     // Its value is not touched until the source reaches its first stack store.
@@ -267,36 +294,12 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
     }
     // Integer lwz/stw copies, not three float loads or a copied target actor.
     // Decode each captured word only at its destination's reached store.
-    const position=(site: string): object=>{
-      const field=Object.getOwnPropertyDescriptor(actual,'lockTarget');check();
-      if(!field || !('value' in field)) fail(`${site} lockTarget: own data property required`);
-      const selected=record(field.value,`${site} selected position lockTarget`);
-      if(Array.isArray(selected)) fail('lockTarget: ordinary own-data record required');
-      const old=positions.get(id);if(old!==undefined && old!==selected) fail('lockTarget canonical owner changed');
-      const direct=[sources,scheduler,root,spawns,allocator,admission,action,actual,binding,tableOwner,globalsOwner,projectionOwner,
-        ...lists.values(),...bindings.values(),...candidateStages.values(),...call(()=>spawns.getRetainedStorageOwners()),
-        ...call(()=>world.getRetainedMatrixOwners()),...call(()=>admission.getKnownStorageOwners()),
-        ...call(()=>spawns.getPrehookRuntime().getStatusRuntime().getRetainedStorageOwners()),
-        ...call(()=>action.getRetainedStorageOwners())];
-      if(direct.includes(selected) || [...positions].some(([other,value])=>other!==id&&value===selected))
-        fail('lockTarget aliases canonical source storage');
-      // Root/scheduler inventories include this declared vector itself. Inspect
-      // references instead, allowing only THIS actor's lockTarget declaration.
-      for(const owner of forbidden()) if(owner!==selected) {
-        const fields=Object.getOwnPropertyDescriptors(owner);check();
-        for(const [key,p] of Object.entries(fields)) if('value' in p && p.value===selected && !(owner===actual && key==='lockTarget'))
-          fail(`lockTarget aliases canonical ${key} storage`);
-      }
-      if(!claimSourceHelperStorage(selected,runtime)) fail('lockTarget storage already claimed');
-      noShadows(selected,['lockTarget','active0','team','byte502','pointer504','pointer508','descriptor4b0','lifecycle18',
-        'half80436242','count804361a0',...positionAliases]);
-      positions.set(id,selected);return selected;
-    };
+
     const storeWord=(axis: 'x'|'y'|'z',word: number): void=>{
       floatWords.setUint32(0,word,false);
       const site={x:'8006ba34',y:'8006ba38',z:'8006ba40'}[axis];
       const value=float(floatWords.getFloat32(0,false),`${site} target ${axis} raw word`);
-      write(position(site),axis,value);
+      write(position(id,actual,binding,site),axis,value);
     };
     write(actual,'byte502',1);
     write(binding,'pointer504',call(()=>allocator.getObject(winner)));
@@ -309,6 +312,36 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
   const runtime: SourceActorTargetDispatchRuntime={
     getSchedulerRuntime() {return scheduler;},
     getRetainedStorageOwners() {return Object.freeze([sources,...(tableOwner?[tableOwner]:[]),...(globalsOwner?[globalsOwner]:[]),...lists.values(),...(projectionOwner?[projectionOwner]:[]),...positions.values()]);},
+    getSelectedPositionOwner(id) {
+      if(busy) {poisoned=true;fail('same-runtime reentry unsupported');}
+      busy=true;poisoned=false;let actual: object|undefined;
+      try {
+        actual=record(allocator.getActualActor(id),'actual actor');activeId=id;check();
+        requireCompleteSourceActorDoubleLifecycle(actual);
+        const binding=bindings.get(id);
+        if(binding===undefined) fail('selected position requires prior genuine dispatch binding');
+        if(read(sources,'scheduler')!==scheduler || scheduler.getRootRuntime()!==root ||
+          root.getSpawnRuntime()!==spawns || scheduler.getAllocatorRuntime()!==allocator ||
+          spawns.getAdmissionRuntime()!==admission || admission.getActionRuntime()!==action ||
+          call(()=>admission.getActualActor(id))!==actual || call(()=>action.getActualActor(id))!==actual ||
+          call(()=>world.getActualActor(id))!==actual || call(()=>admission.getActorBinding(id))!==binding)
+          fail('canonical selected-position actor/dispatch graph changed');
+        call(()=>admission.assertActorComplete(id));
+        const owners=[actual,binding,call(()=>admission.getWorldBinding(id)),call(()=>admission.getStatusBinding(id)),
+          call(()=>admission.getMappingActor(id)),call(()=>admission.getAttributeBinding(id)),
+          call(()=>admission.getChargeBinding(id)),call(()=>admission.getActionBinding(id)),
+          call(()=>admission.getCueBinding(id)),call(()=>admission.getDispatchBinding(id)),
+          call(()=>admission.getStartBinding(id)),call(()=>admission.getStreamBinding(id)),
+          call(()=>admission.getGlobal()),call(()=>admission.getData())];
+        for(const owner of owners) {
+          noShadows(owner,positionAliases);
+          if(owner!==actual) noShadows(owner,['lockTarget']);
+        }
+        const selected=position(id,actual,binding,'6ae60 selected-position borrow');
+        check();requireCompleteSourceActorDoubleLifecycle(actual);return selected;
+      } catch(error) {if(actual) markIncompleteSourceActorDoubleLifecycle(actual);throw error;}
+      finally {activeId=undefined;busy=false;}
+    },
     dispatchActor(id) {
       if(busy) {poisoned=true;fail('same-runtime reentry unsupported');}
       busy=true;poisoned=false;let actual: object|undefined;

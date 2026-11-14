@@ -30,6 +30,8 @@ function setup(make:Make) {
   const x=createActorTargetCandidatesTestFixture(make),stack:Vector={x:91,y:92,z:93},vector:Vector={x:71,y:72,z:73};
   x.sources.projectionStack=stack;Reflect.set(x.rootSources,'processor',x.actionSources.processor);x.scalarDescriptor.byte10=1;
   const processor=x.actionSources.processor,pos=x.sourceActor.pos,data=x.commandAdmission.getData();
+  // This suite intentionally stops at the next missing source constant.
+  Reflect.deleteProperty(data,'float80437078');
   const matrix=x.matrices.getMatrix(x.world.getStorage(x.actor).matrices8d4[1]!);
   matrix[3]=0;matrix[7]=0;matrix[11]=0;
   equal(x.hits.registerHit(x.child,1),1,'genuine HIT registration completes');
@@ -156,7 +158,7 @@ function branchOrderTests(make:Make):void {
   }
   {
     const x=setup(make),events:string[]=[],forbiddenNames:string[]=[];let forbidden=0;
-    run(x,'8006b190',(owner,key)=>{
+    run(x,'float80437078',(owner,key)=>{
       if(owner===x.data&&(key===zero||key===sentinel)) events.push(String(key));
       if(owner===x.sourceActor&&[distance,horizontal,'heading'].includes(String(key))) events.push(String(key));
       if(owner===x.admissionState&&key==='pointer504'||owner===x.sourceActor&&key==='pos'||
@@ -197,7 +199,7 @@ function captureAndFreshTests(make:Make):void {
   for(const phase of ['before','after'] as const) {
     const x=setup(make);let n=0;
     const mutation:Visit=(owner,key)=>{if(owner===x.sourceActor&&key===horizontal&&++n===1) Reflect.set(x.data,sentinel,123);};
-    run(x,'8006b190',phase==='before'?mutation:()=>{},phase==='after'?mutation:undefined,true);
+    run(x,'float80437078',phase==='before'?mutation:()=>{},phase==='after'?mutation:undefined,true);
     equal(n,1,'first null store admission reached');distances(x,20000,20000);retained(x);closed(x);
   }
   {
@@ -253,7 +255,7 @@ function destinationFaultTests(make:Make):void {
   }
   for(const nullable of [false,true]) {
     const x=setup(make);Object.assign(x.sourceActor,{targetDistance758:NaN,horizontalDistance75c:Symbol('unread prior distance')});
-    run(x,nullable?'8006b190':'8006b098',()=>{},undefined,nullable);
+    run(x,nullable?'float80437078':'8006b098',()=>{},undefined,nullable);
     distances(x,nullable?20000:0,nullable?20000:0);retained(x);closed(x);
   }
   for(const kind of ['missing','accessor','readonly'] as const) {
@@ -342,7 +344,7 @@ function horizontalFaultTests(make:Make):void {
 function headingTests(make:Make):void {
   for(const value of [0,1,32767,32768,65535]) {
     const x=setup(make);let reads=0;
-    run(x,'8006b190',(owner,key)=>{if(owner===x.sourceActor&&key==='heading') {reads++;x.sourceActor.heading=value;}},undefined,true);
+    run(x,'float80437078',(owner,key)=>{if(owner===x.sourceActor&&key==='heading') {reads++;x.sourceActor.heading=value;}},undefined,true);
     equal(reads,1,'heading loaded once at b18c');distances(x,20000,20000);retained(x);closed(x);
   }
   for(const kind of ['missing','inherited','accessor','nan','fraction','signed-negative','too-negative','too-positive'] as const) {
