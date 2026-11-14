@@ -60,6 +60,8 @@ export interface SourceActorProjectileSpawnRuntime {
   getSpawnRow1(): Readonly<SourceActorProjectileSpawnRow>;
   getAdmissionBinding(identity: symbol): ReturnType<SourceActorCommandAdmissionRuntime['getActorBinding']>;
   getSourceOwners(identity: symbol): readonly object[];
+  /** Already-bound identity inventory, no source field loads or pointer following. */
+  getRetainedStorageOwners(): readonly object[];
   assertActorComplete(identity: symbol): void;
   /** Identity registered only after every source spawn store completes. */
   getSpawnOwnerIdentity(projectile: symbol): symbol;
@@ -233,6 +235,11 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
     getMatchGlobals() {if (admission.getGlobal() !== matchGlobals) fail('shared match globals changed');return matchGlobals;}, getSpawnRow1() {return row;},
     getAdmissionBinding(id) {entry(id);return admission.getActorBinding(id);},
     getSourceOwners(id) {return Object.freeze([...new Set([...ownRecords(entry(id)),row,row.local04,...allocator.getSourceOwners(id)])]);},
+    getRetainedStorageOwners() {
+      const records: object[]=[row,row.local04,...allocator.getRetainedStorageOwners()];
+      for(const [id,e] of actors) records.push(...ownRecords(e),...prehook.getSourceOwners(id));
+      return Object.freeze([...new Set(records)]);
+    },
     assertActorComplete(id) {const e = entry(id); requireCompleteSourceActorDoubleLifecycle(e.actual); allocator.assertActorComplete(id);},
     getSpawnOwnerIdentity(projectile) {
       const id = completedSpawns.get(projectile);

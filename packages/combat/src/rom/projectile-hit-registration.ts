@@ -21,6 +21,8 @@ export interface SourceProjectileHitRuntime {
   getActorBinding(identity: symbol): Partial<SourceProjectileHitOwnerBinding>;
   getActualActor(identity: symbol): RomActor;
   getSpawnRuntime(): SourceActorProjectileSpawnRuntime;
+  /** Already-bound HIT owner identities only; no future actor/pointer lookup. */
+  getRetainedStorageOwners(): readonly object[];
   registerHit(projectile: symbol, kind: number): 0 | 1;
 }
 const runtimes = new WeakSet<object>(), claimedBindings = new WeakSet<object>(), claimedActors = new WeakSet<object>();
@@ -100,6 +102,7 @@ export function createSourceProjectileHitRuntime(spawns: SourceActorProjectileSp
       owners(id,e);actors.set(id,e);claimedBindings.add(binding);claimedActors.add(e.actual);
     });},
     getActorBinding(id) {return entry(id).binding;}, getActualActor(id) {return entry(id).actual;}, getSpawnRuntime() {return spawns;},
+    getRetainedStorageOwners() {return Object.freeze([...new Set([...actors.values()].flatMap(e=>[e.actual,e.binding]))]);},
     registerHit(child,kind) {return guard(() => {
       const origin = call(() => spawns.getSpawnOwnerIdentity(child)),e = entry(origin);
       if (isSourceActorDoubleFrameClaimed(e.actual)) fail('frame-owned actor requires its unimplemented later source object scheduler');

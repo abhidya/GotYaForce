@@ -1,3 +1,4 @@
+import {runBattleOuterFrameSelfTests} from './battle-outer-frame.selftest.js';
 import {runObjectSchedulerSelfTests} from './source-object-scheduler.selftest.js';
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {addSourceFloat32} from './source-float.js';
@@ -2867,6 +2868,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runProjectileTargetHydratedCompositionTests();
   runProjectileRetirementHydratedCompositionTests();
   runProjectileCleanupHydratedCompositionTests();
+  runBattleOuterFrameHydratedCompositionTests();
   runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
@@ -13253,4 +13255,19 @@ export function runProjectileRootHydratedCompositionTests(): void {
       'failed actor frame cannot schedule even its genuinely completed first spawn');
   }
   console.log('[projectile-root-composition] PASS: separate genuine completed-spawn root callback, actual signed owner guard and8aff0, explicit matching identity input reaches source state0/89100 draw registration then precise8ac80 HIT boundary; old mismatch and failed frame remain refused, no scheduler/flight/retail/browser claim');
+}
+
+/** Same genuine allocation/spawn/root graph; every prelude field is explicit
+ * synthetic ingress on the original shared global/row owners, never defaults. */
+export function createBattleOuterFrameTestFixture() {
+  const x=createObjectSchedulerTestFixture();
+  const teamRows103=Array.from({length:4},(_,i)=>({byte0:i,byte1:91,byte2:92,byte3:93,
+    byte4:94,byte5:95,byte6:96,byte7:97,byte8:98,byte9:99,byte10:0,threshold30:3000,meter:0,charged:true}));
+  const matchGlobals=Object.assign(x.matchGlobals,{byte15d4:0,byte66:0,halfD6:0x1234,
+    activeMask:0,slotTeam:[0,1,0,1,2,3],teamRows103});
+  const systemGlobals={controllerMask:0};
+  return Object.assign(x,{matchGlobals,systemGlobals,teamRows103});
+}
+export function runBattleOuterFrameHydratedCompositionTests(): void {
+  runBattleOuterFrameSelfTests(createBattleOuterFrameTestFixture);
 }

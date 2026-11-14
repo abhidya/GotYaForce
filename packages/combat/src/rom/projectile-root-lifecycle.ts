@@ -58,6 +58,8 @@ export interface SourceProjectileRootRuntime {
   getDrawList(): SourceProjectileDrawList;
   getSpawnRuntime(): SourceActorProjectileSpawnRuntime;
   getSourceOwners(projectile: symbol): readonly object[];
+  /** Host alias inventory of already retained graph records, not source reads. */
+  getRetainedStorageOwners(): readonly object[];
   dispatchStoredRoot(projectile: symbol): void;
 }
 interface SchedulerJoin {prepare(scheduler: SourceObjectSchedulerRuntime, child: symbol): symbol;
@@ -368,6 +370,19 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     });},
     getObject(id) {return entry(id).bytes;}, getDrawList() {return draw;}, getSpawnRuntime() {return spawns;},
     getSourceOwners(id) {const e = entry(id); return Object.freeze([e.bytes, e.actual, e.stage, e.world, e.status, draw]);},
+    getRetainedStorageOwners() {
+      const records: object[]=[sources,draw,...spawns.getRetainedStorageOwners()];
+      for(const e of children.values()) records.push(e.bytes,e.actual,e.stage,e.world,e.status);
+      if(hits!==undefined) records.push(...hits.getRetainedStorageOwners());
+      // Immediate record identities also exclude actor vectors and retained
+      // descriptor matrices. Accessors are not called and scalar values ignored.
+      const nested: object[]=[];
+      for(const owner of records) if(owner!==sources) {
+        for(const p of Object.values(Object.getOwnPropertyDescriptors(owner)))
+          if('value' in p && p.value!==null && typeof p.value==='object') nested.push(p.value);
+      }
+      return Object.freeze([...new Set([...records,...nested])]);
+    },
     dispatchStoredRoot(id) {dispatch(id);},
   };
   schedulerJoins.set(runtime,{
