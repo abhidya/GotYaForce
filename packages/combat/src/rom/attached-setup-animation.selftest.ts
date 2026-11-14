@@ -1,3 +1,4 @@
+import {runActorThirdPassTarget83SelfTests} from './actor-third-pass-target83.selftest.js';
 import {runActorThirdPassSelfTests} from './actor-third-pass.selftest.js';
 import {runActorSecondaryNullSelfTests} from './actor-secondary-null.selftest.js';
 import {runActorNullDirectionSelfTests} from './actor-null-direction.selftest.js';
@@ -2901,6 +2902,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runActorNullDirectionHydratedCompositionTests();
   runActorSecondaryNullHydratedCompositionTests();
   runActorThirdPassHydratedCompositionTests();
+  runActorThirdPassTarget83HydratedCompositionTests();
   runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
@@ -13430,4 +13432,8 @@ export function runActorSecondaryNullHydratedCompositionTests(): void {
 
 export function runActorThirdPassHydratedCompositionTests(): void {
   runActorThirdPassSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+export function runActorThirdPassTarget83HydratedCompositionTests(): void {
+  runActorThirdPassTarget83SelfTests(createBattleTargetPreparationTestFixture);
 }

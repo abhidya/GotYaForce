@@ -57,6 +57,9 @@ function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<
  return Object.assign(x,{physicalIdentities,physicalActors:actuals,physicalBindings:bindings,boundCount:count});
 }
 type Fixture=ReturnType<typeof fixture>;
+/** Same genuine six-actor composition for later source continuation tests. */
+export function createActorThirdPassTestFixture(make:Make) {return fixture(make);}
+
 
 function trace(x:Fixture,expected=next,before:Visit=()=>{},after?:Visit) {
  const native=Object.getOwnPropertyDescriptor,events:string[]=[];

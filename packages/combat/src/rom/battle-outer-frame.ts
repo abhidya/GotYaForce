@@ -9,7 +9,8 @@
  * mandatory6b7f4. Its optional genuine target-dispatch owner continues inactive
  * clearing and entry0 bounded returns; skipped lifecycle rows and dispatch
  * returns execute the primary508/504 live SquareDistance path and ordered zero/null
- * distance stores through the next mandatory direction helper or estimator. Skipped lifecycle rows retain canonical508/target83 bounds.
+ * distance stores through the next mandatory direction helper or estimator. Skipped lifecycle rows retain canonical508 bounds; active nonnull targets may
+ * use the SAME allocation-owned83 byte, stopping before the actor7d3 association guard.
  * Its bounded return still cannot skip mandatory27764.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
@@ -949,7 +950,45 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       const pointer=read(binding,'pointer508');
       if(pointer!==null) record(pointer,'6ae60 pointer508');
       if(s8(active)===0 || pointer===null) continue;
-      fail('8006b374 reached unsupported source target83 ownership after nonnull508');
+      //8006b374 reads the captured target, not a reloaded actor508. This
+      // bounded domain accepts a genuine actor bound to this SAME allocator
+      // and world; its canonical83 is already allocation-owned, not a new
+      // eligibility83 field copied onto the actual actor or an ad hoc target.
+      const target83=(()=>{
+        try {
+          const targetId=call(()=>allocator.getPointerIdentity(record(pointer,'6b374 captured target')));
+          const targetActor=actual(targetId);
+          const owner=record(call(()=>allocator.getActorBinding(targetId)),'6b374 canonical allocation83');
+          const guard=(): void=>{
+            check();requireCompleteSourceActorDoubleLifecycle(actor);
+            call(()=>admission().assertActorComplete(id));
+            if(command(id,actor,false)!==binding)fail('6b374 captured caller admission changed');
+            noShadows(actor,['pointer508','field508','byte508','byte509','byte50a','byte50b','byte50A','byte50B','1288','1289','1290','1291']);
+            noShadows(binding,['field508','byte508','byte509','byte50a','byte50b','byte50A','byte50B','1288','1289','1290','1291']);
+            requireCompleteSourceActorDoubleLifecycle(targetActor);
+            call(()=>allocator.assertActorComplete(targetId));
+            if(targetActor!==pointer || call(()=>allocator.getActualActor(targetId))!==targetActor ||
+              call(()=>world.getActualActor(targetId))!==targetActor ||
+              call(()=>allocator.getPointerTarget(targetId))!==targetActor ||
+              call(()=>allocator.getActorBinding(targetId))!==owner)
+              fail('6b374 canonical target/allocator/world owner differs');
+            if(owner===targetActor || [...retained.values()].includes(owner) || [...massActors.values()].includes(owner))
+              fail('6b374 allocation83 storage alias');
+            const worldOwner=call(()=>world.getActorBinding(targetId));
+            const records=[targetActor,worldOwner,...call(()=>allocator.getSourceOwners(targetId))];
+            for(const candidate of new Set(records)) {
+              if(candidate!==owner)noShadows(candidate,['byte83']);
+              noShadows(candidate,['eligibility83','groupEligibility83','field83']);
+              // An unrelated allocated byte buffer legitimately has offset131.
+              // Numeric actor aliases apply only to these actor-role records.
+              if(candidate===targetActor || candidate===worldOwner || candidate===owner)noShadows(candidate,['131']);
+            }
+          };
+          guard();const captured=byte(owner,'byte83');guard();return captured;
+        } catch(error) {fail(`8006b374 target83 ownership/load refused: ${String(error)}`);}
+      })();
+      if(s8(target83)!==0) continue;
+      fail('8006b380 reached unsupported source actor7d3 association guard');
     }
     //Genuine void return only if every reached canonical508 owner completed.
   };
