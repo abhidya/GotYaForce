@@ -28,6 +28,8 @@
 // A field WITHOUT a tag extracts as kind "unmapped" — visible and codec-refused, never
 // guessed (plan §3.3 mechanism 3).
 
+import type {SourceActorSoundEventTable} from './actor-sound-table.js';
+
 export interface Vec3 { x: number; y: number; z: number; }
 
 /** Battle-local physics behavior used by ROM family integration. */
@@ -336,7 +338,7 @@ export interface RomActor {
   sharedAnimDescBank: Uint8Array | null;
   /** +0x4e8: family sound-event table (per-anim whoosh/voice index list).
    *  @romfield soundEventTable +0x4e8 ptr */
-  soundEventTable: Uint8Array | null;
+  soundEventTable: SourceActorSoundEventTable | null;
   /** +0x582: default stream group (group==0 → this; cue-script-stream-decode §3).
    *  @romfield defaultGroup +0x582 u8 */
   defaultGroup: number;

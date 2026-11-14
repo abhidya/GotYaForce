@@ -12,6 +12,7 @@ import {createSourceStreamWaitTargetRuntime} from './stream-wait-target.js';
 import {createSourceAnimationSetupMetadataRuntime} from './animation-setup-metadata.js';
 import {createRomActor} from './actor.js';
 import {bindDoubleNinjaOwnerState} from '../ninjaX.js';
+import {createSourceActorSoundTable,readSourceActorSoundTableByte} from './actor-sound-table.js';
 function check(ok:boolean,why:string):void {if (!ok) throw Error(`[actor-frame-suffix-test] ${why}`);}
 function equal(actual:unknown,expected:unknown,why:string):void {check(Object.is(actual,expected),`${why}: got ${String(actual)}, expected ${String(expected)}`);}
 function rejects(run:()=>unknown,fragment:string):void {
@@ -71,6 +72,16 @@ function fixture(options:{defer?:boolean;metadata?:boolean;metadataParts?:number
   return {id,actual,clone,attribute,world,mapping,status,prehook,gauges,dispatch,metadata,parts,sources,runtime,initial,bind,
     binding:()=>runtime.getActorBinding(id),gauge:()=>gauges.getActorBinding(id),statusBinding:()=>status.getActorBinding(id),
     post:()=>runtime.runPosthook(id),house:()=>runtime.runHousekeeping(id),sound:()=>runtime.runSoundEvents(id)};
+}
+// Synthetic bounded payloads exercise the authenticated instructions, not retail
+// hydration or audio execution. The fourth byte is kind; byte2 only picks clocks.
+function event(frame:number,window=0,kind=0,soundId=0,marker=255):Uint8Array {
+  return Uint8Array.from([frame>>>8,frame&255,window,kind,soundId>>>8,soundId&255,marker,0]);
+}
+function soundFixture(table:Uint8Array=event(7)) {
+  const x=fixture({metadata:true}),part=x.parts[0]![0]!;
+  x.actual.soundEventTable=table; x.metadata.getPartBinding(part).auxiliary37=0;
+  return {...x,table,part,clock:x.dispatch.getPartBinding(part),feedback:x.dispatch.getActualFeedback().getPart(part)};
 }
 export function runActorFrameSuffixSelfTests():void {
   {
@@ -199,49 +210,283 @@ export function runActorFrameSuffixSelfTests():void {
     const y=fixture(); y.actual.soundEventTable=new Uint8Array(0); rejects(y.sound,'auxiliary37 metadata owner');
   }
   {
-    const x=fixture({metadata:true}); x.actual.soundEventTable=new Uint8Array(8);
-    x.metadata.getPartBinding(x.parts[0]![0]!).auxiliary37=0;
-    rejects(x.sound,'actual8005b98c sound event at byte0 (current=7, previous=6)');
-    check(hasIncompleteSourceActorDoubleLifecycle(x.actual),'reached event refuses permanently');
-    const y=fixture({metadata:true}); y.actual.soundEventTable=new Uint8Array(8);
-    y.metadata.getPartBinding(y.parts[0]![0]!).auxiliary37=254; rejects(y.sound,'negative sound event index -2');
-    const z=fixture({metadata:true}); z.actual.soundEventTable=new Uint8Array(2);
-    z.metadata.getPartBinding(z.parts[0]![0]!).auxiliary37=0; rejects(z.sound,'2: own data property');
+    const x=soundFixture(event(7,0,0,0xabcd));
+    rejects(x.sound,'actual800f036c sound event at byte0 (current=7, previous=6, kind=0, soundId=43981)');
+    check(hasIncompleteSourceActorDoubleLifecycle(x.actual),'reached audio refuses permanently');
+    x.actual.soundEventTable=null; rejects(x.sound,'incomplete'); rejects(x.house,'incomplete'); rejects(x.post,'incomplete');
+    const y=soundFixture(); y.metadata.getPartBinding(y.part).auxiliary37=254;
+    rejects(y.sound,'negative sound event index -2');
+    const z=soundFixture(new Uint8Array(2)); rejects(z.sound,'2: own data property');
+  }
+  // All u16 event frames convert exactly. Positive gates are (previous,current]
+  // crossings with strict previous<frame, not a signed16 or current-only test.
+  for (const frame of [1,7,32768,65535]) for (const now of [frame-1,frame,frame+1])
+    for (const previous of [frame-1,frame,frame+1]) {
+      const x=soundFixture(event(frame,0,0,0x1234)); x.clock.elapsed08=now; x.clock.previous10=previous;
+      if(now>=frame&&previous<frame) rejects(x.sound,'soundId=4660)');
+      else {x.sound();check(!hasIncompleteSourceActorDoubleLifecycle(x.actual),'noncrossing helper and chain genuinely return');}
+    }
+  for (const now of [-Math.fround(3e38),-(2**-149),-0,0,2**-149,1]) for (const previous of [-1,0,1]) {
+    const x=soundFixture(event(0)); x.clock.elapsed08=now; x.clock.previous10=previous;
+    if(now<=0) rejects(x.sound,'actual800f036c'); else x.sound();
+  }
+  for (const kind of [4,127,128,255]) {
+    const x=soundFixture(event(7,0,kind)); x.actual.modelScale=NaN; x.table[4]=255; x.table[5]=255;
+    const bytes:string[]=[]; watch(x.sound,(owner,key)=>{if(owner===x.table&&/^\d+$/.test(String(key))) bytes.push(String(key));});
+    equal(bytes.join(','),'2,0,1,3,6','unsigned kind>=4 returns without id/padding reads');
+    x.runtime.assertActorComplete(x.id);
   }
   {
-    const x=fixture({metadata:true}),part=x.parts[0]![0]!;
-    x.actual.soundEventTable=new Uint8Array(8); x.metadata.getPartBinding(part).auxiliary37=0;
-    const fresh=Uint8Array.from([0,0,1,0,0,0,255,0]);
-    x.dispatch.getActualFeedback().getPart(part).frame0c=5;
-    x.dispatch.getActualFeedback().getPart(part).duration24=NaN;
-    watch(()=>rejects(x.sound,'current=5, previous=4'),(owner,key)=>{
-      if(owner===x.metadata.getPartBinding(part)&&key==='auxiliary37') x.actual.soundEventTable=fresh;
-    });
-    const y=fixture({metadata:true}),other=y.parts[0]![0]!;
-    y.actual.soundEventTable=new Uint8Array(8); y.metadata.getPartBinding(other).auxiliary37=0;
-    y.dispatch.getActualFeedback().getPart(other).frame0c=NaN;
-    y.dispatch.getPartBinding(other).previous14=NaN;
+    const x=soundFixture(event(8,0,1)); x.actual.modelScale=NaN;
+    const bytes:string[]=[]; watch(x.sound,(owner,key)=>{if(owner===x.table&&/^\d+$/.test(String(key))) bytes.push(String(key));});
+    equal(bytes.join(','),'2,0,1,6','nonfiring event skips kind/id/scale then reads marker');
+    const y=soundFixture(event(7,0,0)); y.actual.modelScale=NaN; y.feedback.frame0c=NaN; y.clock.previous14=NaN;
     rejects(y.sound,'current=7, previous=6');
-    const z=fixture({metadata:true}),last=z.parts[0]![0]!;
-    z.actual.soundEventTable=new Uint8Array(8); z.metadata.getPartBinding(last).auxiliary37=0;
-    watch(()=>rejects(z.sound,'fresh actual4e8'),(owner,key)=>{
-      if(owner===z.metadata.getPartBinding(last)&&key==='auxiliary37') z.actual.soundEventTable=null;
-    });
   }
-  for (const [now,previous,duration,expected] of [[5,4,99,5],[4,4,99,4],[1,4,10,11],[1,4,-2,-1]] as const) {
-    const x=fixture({metadata:true}),part=x.parts[0]![0]!; x.actual.soundEventTable=Uint8Array.from([0,0,1,0,0,0,255,0]);
-    x.metadata.getPartBinding(part).auxiliary37=0;
-    const state=x.dispatch.getActualFeedback().getPart(part); state.frame0c=now; state.duration24=duration;
-    x.dispatch.getPartBinding(part).previous14=previous;
-    rejects(x.sound,`actual8005b98c sound event at byte0 (current=${expected}, previous=${previous})`);
+  // Byte2 selects elapsed vs frame clocks independently of byte3 dispatch kind.
+  for (const window of [1,2,128,255]) {
+    const x=soundFixture(event(5,window,0,2)); x.feedback.frame0c=5; x.clock.previous14=4;
+    x.feedback.duration24=NaN; x.clock.elapsed08=NaN; x.clock.previous10=NaN;
+    rejects(x.sound,'current=5, previous=4, kind=0, soundId=2');
+    const y=soundFixture(event(6,window,1)); y.feedback.frame0c=5; y.clock.previous14=4;
+    y.feedback.duration24=NaN; y.actual.modelScale=NaN; y.sound();
+  }
+  for (const [now,previous,duration,frame,expected] of [
+    [5,4,NaN,5,5],[1,4,10,11,11],[1,4,-2,0,-1],[-1,0,32767,32766,32766],
+    [1,4,-32768,0,-32767],[Math.fround(1.0000001192092896),2,10,11,11],
+  ] as const) {
+    const x=soundFixture(event(frame,1)); x.feedback.frame0c=now; x.feedback.duration24=duration; x.clock.previous14=previous;
+    rejects(x.sound,`actual800f036c sound event at byte0 (current=${expected}, previous=${previous}`);
   }
   {
-    const x=fixture({metadata:true}); x.actual.soundEventTable=new Uint8Array(8);
-    x.metadata.getPartBinding(x.parts[0]![3]!).auxiliary37=0;
-    rejects(x.sound,'actual8005b98c');
-    const y=fixture({metadata:true}); y.actual.soundEventTable=new Uint8Array(8);
-    y.metadata.getPartBinding(y.parts[0]![1]!).auxiliary37=256;
-    rejects(y.sound,'auxiliary37');
+    const x=soundFixture(event(5,1,1)); x.feedback.frame0c=4; x.clock.previous14=4;
+    x.feedback.duration24=NaN; x.actual.modelScale=NaN; x.sound();
+    const y=soundFixture(event(12,1,1)); y.feedback.frame0c=1; y.clock.previous14=4;
+    y.feedback.duration24=10; y.actual.modelScale=NaN; y.sound();
   }
-  console.log('[actor-frame-suffix-test] source posthook, signed housekeeping, explicit no-event sound returns and retained refusal boundaries passed');
+  for (const [scale,id,expected] of [
+    [Math.fround(0.6999999),1,0],[0.699999988079071,1,1],[Math.fround(0.7000001),1,1],
+    [Math.fround(1.9999999),65535,65535],[2,65535,65535],[Math.fround(2.0000002),65535,65536],
+    [-0,0,4294967295],[-1,65535,65534],[Math.fround(3e38),0,1],
+  ] as const) {
+    const x=soundFixture(event(7,0,1,id)); x.actual.modelScale=scale;
+    const order:string[]=[];
+    watch(()=>rejects(x.sound,`kind=1, soundId=${expected})`),(owner,key)=>{
+      if(owner===x.table&&/^\d+$/.test(String(key))) order.push(String(key));
+      if(owner===x.actual&&key==='modelScale') order.push('modelScale');
+    });
+    equal(order.join(','),'2,0,1,3,modelScale,4,5','one scale load precedes id and audio refusal precedes marker');
+  }
+  for (const kind of [2,3]) {
+    const x=soundFixture(event(7,0,kind,65535)); x.actual.modelScale=NaN;
+    const order:string[]=[];
+    watch(()=>rejects(x.sound,`actual800f061c sound event at byte0 (current=7, previous=6, kind=${kind}, soundId=65535, scalar=0.20000000298023224)`),
+      (owner,key)=>{if(owner===x.table&&/^\d+$/.test(String(key))) order.push(String(key));});
+    equal(order.join(','),'2,0,1,3,4,5','2/3 id precedes scalar/audio boundary, no marker');
+  }
+  for (const value of [NaN,Infinity,-Infinity,0.7]) {
+    const x=soundFixture(event(7,0,1)); x.actual.modelScale=value;
+    const order:string[]=[]; watch(()=>rejects(x.sound,'modelScale: finite exact source float32'),
+      (owner,key)=>{if(owner===x.table&&/^\d+$/.test(String(key))) order.push(String(key));});
+    equal(order.join(','),'2,0,1,3','invalid reached scale fails before id and marker');
+  }
+  {
+    const x=soundFixture(event(7,0,1)); delete (x.actual as unknown as Record<string,unknown>).modelScale;
+    rejects(x.sound,'modelScale: own data property');
+    const y=soundFixture(event(7,0,1)); let called=false;
+    Object.defineProperty(y.actual,'modelScale',{get(){called=true;return 1;}});
+    rejects(y.sound,'modelScale: own data property'); check(!called,'source accessor rejected without invoking getter');
+    const z=soundFixture(event(8,0,1)); delete (z.actual as unknown as Record<string,unknown>).modelScale;
+    z.sound(); check(!hasIncompleteSourceActorDoubleLifecycle(z.actual),'unread missing scale does not fail');
+  }
+  // Truncated arrays fail only at reached bytes. Byte7 is never required and
+  // an audio boundary must precede even a missing marker after its call.
+  for (const [length,frame,kind,fragment] of [
+    [0,7,0,'2: own data property'],[2,7,0,'2: own data property'],[3,7,0,'3: own data property'],
+    [3,8,0,'6: own data property'],[4,7,0,'4: own data property'],[5,7,0,'5: own data property'],
+    [6,7,0,'actual800f036c'],[6,7,4,'6: own data property'],[6,8,0,'6: own data property'],
+  ] as const) {
+    const x=soundFixture(event(frame,0,kind).slice(0,length)); rejects(x.sound,fragment);
+    check(hasIncompleteSourceActorDoubleLifecycle(x.actual),'truncation/boundary latches shared lifecycle');
+  }
+  for (const [frame,kind] of [[8,0],[7,4],[7,255]] as const) {
+    const x=soundFixture(event(frame,0,kind).slice(0,7)); x.sound();
+    check(!hasIncompleteSourceActorDoubleLifecycle(x.actual),'terminal seven-byte decoded view never reads padding');
+  }
+  {
+    const x=soundFixture(event(7,0,1).slice(0,4)); x.actual.modelScale=NaN;
+    rejects(x.sound,'modelScale: finite exact source float32');
+    const y=soundFixture(event(7,0,1).slice(0,4)); y.actual.modelScale=1;
+    rejects(y.sound,'4: own data property');
+  }
+  for (const marker of [0,1,127,128,254]) {
+    const first=event(8,0,1,65535,marker),last=event(7,0,255);
+    const x=soundFixture(Uint8Array.from([...first,...last]).slice(0,15)); x.actual.modelScale=NaN;
+    const bytes:string[]=[]; watch(x.sound,(owner,key)=>{if(owner===x.table&&/^\d+$/.test(String(key))) bytes.push(String(key));});
+    equal(bytes.join(','),'2,0,1,6,10,8,9,11,14','non-ff chain marker advances by8, never indexes marker');
+    const y=soundFixture(first); rejects(y.sound,'10: own data property');
+  }
+  {
+    const x=soundFixture(Uint8Array.from([...event(8,0,1,0,0),...event(12)]));
+    x.feedback.frame0c=0; x.clock.previous14=0;
+    const order:string[]=[];
+    watch(()=>rejects(x.sound,'byte8 (current=12, previous=11'),(owner,key)=>{
+      if(owner===x.table&&/^\d+$/.test(String(key))) {
+        order.push(String(key));
+        if(key==='6') {x.table[10]=255;x.feedback.frame0c=12;x.clock.previous14=11;x.clock.elapsed08=NaN;}
+      }
+    });
+    equal(order.join(','),'2,0,1,6,10,8,9,11,12,13','fresh per-record byte2/clocks and no marker after firing second event');
+    const y=soundFixture(Uint8Array.from([...event(8,0,0,0,0),...event(9)]));
+    watch(()=>rejects(y.sound,'byte8 (current=9, previous=8'),(owner,key)=>{
+      if(owner===y.table&&key==='6') {y.clock.elapsed08=9;y.clock.previous10=8;}
+    });
+  }
+  {
+    const x=soundFixture(Uint8Array.from([...event(7,0,255,0,0),...event(7,0,255)]));
+    x.metadata.getPartBinding(x.parts[0]![1]!).auxiliary37=0;
+    const fresh=event(7,0,255),order:string[]=[];
+    watch(x.sound,(owner,key)=>{
+      if((owner===x.table||owner===fresh)&&/^\d+$/.test(String(key))) {
+        order.push(`${owner===x.table?'old':'fresh'}:${String(key)}`);
+        if(owner===x.table&&key==='3') x.actual.soundEventTable=fresh;
+      }
+    });
+    equal(order.join(','),'old:2,old:0,old:1,old:3,old:6,old:10,old:8,old:9,old:11,old:14,fresh:2,fresh:0,fresh:1,fresh:3,fresh:6',
+      'old pointer retained for helper/marker/continuation and reloaded only on next active row');
+    const y=soundFixture(event(7,0,255));
+    watch(y.sound,(owner,key)=>{if(owner===y.table&&key==='3') y.actual.soundEventTable=null;});
+    check(!hasIncompleteSourceActorDoubleLifecycle(y.actual),'terminal marker still uses old table after pointer becomes null');
+  }
+  {
+    const x=soundFixture(); const fresh=event(5,1);
+    x.feedback.frame0c=5; x.feedback.duration24=NaN;
+    watch(()=>rejects(x.sound,'current=5, previous=4'),(owner,key)=>{
+      if(owner===x.metadata.getPartBinding(x.part)&&key==='auxiliary37') x.actual.soundEventTable=fresh;
+    });
+    const y=soundFixture();
+    watch(()=>rejects(y.sound,'fresh actual4e8'),(owner,key)=>{
+      if(owner===y.metadata.getPartBinding(y.part)&&key==='auxiliary37') y.actual.soundEventTable=null;
+    });
+  }
+  {
+    const table=Uint8Array.from([0,1,2,3].flatMap(i=>[...event(7,0,255,i)])),x=soundFixture(table);
+    const rowIds=x.parts[0]!,rows=rowIds.map(part=>x.metadata.getPartBinding(part));
+    rows.forEach((row,i)=>{row.auxiliary37=i;});
+    const order:string[]=[];
+    watch(x.sound,(owner,key)=>{
+      const row=rows.indexOf(owner as typeof rows[number]);if(row!==-1&&key==='auxiliary37') order.push(`row${row}`);
+      if(owner===table&&key==='6') rows[1]!.auxiliary37=2;
+      if(owner===table&&/^\d+$/.test(String(key))) order.push(String(key));
+    });
+    equal(order.join(','),'row0,2,0,1,3,6,row1,18,16,17,19,22,row2,18,16,17,19,22,row3,26,24,25,27,30',
+      'four rows visited in order with fresh selector and selected record, not cached row values');
+    const y=fixture({metadata:true}); y.actual.soundEventTable=event(7);
+    y.metadata.getPartBinding(y.parts[0]![3]!).auxiliary37=0; rejects(y.sound,'actual800f036c');
+    const z=fixture({metadata:true}); z.actual.soundEventTable=event(7);
+    z.metadata.getPartBinding(z.parts[0]![1]!).auxiliary37=256; rejects(z.sound,'auxiliary37');
+  }
+  {
+    const x=soundFixture(event(7)); x.metadata.getPartBinding(x.part).auxiliary37=127;
+    rejects(x.sound,'1018: own data property');
+    const y=soundFixture(Uint8Array.from([...new Uint8Array(8),...event(7,0,255)]));
+    y.metadata.getPartBinding(y.part).auxiliary37=1; y.sound();
+    const z=soundFixture(); (z.actual as unknown as Record<string,unknown>).soundEventTable={};
+    rejects(z.sound,'actual4e8 requires explicit decoded');
+  }
+  // Disjoint decoded windows keep their true offsets and refuse only reached
+  // gaps. Missing id bytes are fine on a returning predicate/kind path.
+  for (const [frame,kind] of [[8,1],[7,4],[7,255]] as const) {
+    const x=soundFixture(),payload=event(frame,0,kind),offset=127*8;
+    x.actual.soundEventTable=createSourceActorSoundTable([
+      {offset,bytes:payload.slice(0,4)},{offset:offset+6,bytes:payload.slice(6,7)},
+    ]);
+    x.metadata.getPartBinding(x.part).auxiliary37=127; x.actual.modelScale=NaN;
+    x.sound(); x.runtime.assertActorComplete(x.id);
+    check(x.runtime.getSourceOwners(x.id).includes(x.actual.soundEventTable),'opaque source table remains canonical excluded owner');
+  }
+  {
+    const x=soundFixture(),payload=event(7,0,255);
+    x.actual.soundEventTable=createSourceActorSoundTable([{offset:0,bytes:payload.slice(0,4)}]);
+    rejects(x.sound,'uncovered'); check(hasIncompleteSourceActorDoubleLifecycle(x.actual),'reached uncovered marker latches lifecycle');
+    const y=soundFixture(),firing=event(7);
+    y.actual.soundEventTable=createSourceActorSoundTable([{offset:0,bytes:firing.slice(0,6)}]);
+    rejects(y.sound,'actual800f036c');
+    const z=soundFixture();
+    z.actual.soundEventTable=createSourceActorSoundTable([{offset:2,bytes:Uint8Array.of(0)}]);
+    z.clock.elapsed08=NaN; rejects(z.sound,'elapsed08');
+  }
+  {
+    const x=soundFixture(),payload=event(8,0,0,0,0);
+    x.actual.soundEventTable=createSourceActorSoundTable([
+      {offset:0,bytes:payload.slice(0,3)},{offset:6,bytes:payload.slice(6,7)},
+      {offset:8,bytes:event(7,0,255).slice(0,4)},{offset:14,bytes:Uint8Array.of(255)},
+    ]);
+    x.sound(); check(!hasIncompleteSourceActorDoubleLifecycle(x.actual),'chain spans disjoint covered reads without invented padding/id');
+    const y=soundFixture();
+    y.actual.soundEventTable=createSourceActorSoundTable([{offset:0,bytes:payload.slice(0,7)}]);
+    rejects(y.sound,'uncovered');
+    const z=soundFixture();let called=false;
+    (z.actual as unknown as Record<string,unknown>).soundEventTable={readByte(){called=true;return 255;}};
+    rejects(z.sound,'actual4e8 requires explicit decoded'); check(!called,'arbitrary table callback cannot inject success');
+  }
+  for (const [windows,fragment] of [
+    [[{offset:2,bytes:Uint8Array.of(0)}],'byte0: uncovered'],
+    [[{offset:0,bytes:Uint8Array.of(0)},{offset:2,bytes:Uint8Array.of(0)}],'byte1: uncovered'],
+    [[{offset:0,bytes:Uint8Array.of(0,7,0)}],'byte3: uncovered'],
+  ] as const) {
+    const x=soundFixture();x.actual.soundEventTable=createSourceActorSoundTable(windows);rejects(x.sound,fragment);
+  }
+  {
+    const x=fixture({metadata:true});
+    (x.actual as unknown as Record<string,unknown>).soundEventTable=Object.create(Uint8Array.prototype);
+    rejects(x.sound,'actual4e8 requires explicit decoded');
+    const y=soundFixture(event(8));let child=false;
+    watch(()=>rejects(y.sound,'[actor-sound-table] caught same-runtime reentry'),(owner,key)=>{
+      if(!child&&owner===y.table&&key==='0') {child=true;try{readSourceActorSoundTableByte(y.table,0);}catch{/* child read stays poisoned */}}
+    });
+    check(hasIncompleteSourceActorDoubleLifecycle(y.actual),'caught child read reentry permanently latches actor');
+    y.actual.soundEventTable=null;rejects(y.sound,'incomplete');
+  }
+  for (const window of [0,1]) {
+    const x=soundFixture(event(7,window,255)),order:string[]=[];
+    if(window!==0) {x.feedback.frame0c=3;x.clock.previous14=4;x.feedback.duration24=4;}
+    watch(x.sound,(owner,key)=>{
+      if(owner===x.table&&/^\d+$/.test(String(key))) order.push(String(key));
+      if(owner===x.clock&&(key==='elapsed08'||key==='previous10'||key==='previous14')) order.push(String(key));
+      if(owner===x.feedback&&(key==='frame0c'||key==='duration24')) order.push(String(key));
+    });
+    equal(order.join(','),window===0?'2,elapsed08,previous10,0,1,3,6':'2,frame0c,previous14,duration24,0,1,3,6',
+      'clock/duration source reads precede helper frame load and terminating marker');
+  }
+  // Missing/invalid reached clocks retain the exact source read prefix. Zero
+  // event time does not inspect previous in the callee, but caller still loads it.
+  for (const [window,key] of [[0,'elapsed08'],[0,'previous10'],[1,'frame0c'],[1,'previous14']] as const) {
+    for (const invalid of [NaN,Infinity,0.1]) {
+      const x=soundFixture(event(0,window)),owner=key==='frame0c'?x.feedback:x.clock;
+      (owner as unknown as Record<string,unknown>)[key]=invalid; rejects(x.sound,`${key}: finite exact source float32`);
+    }
+    const y=soundFixture(event(0,window)),owner=key==='frame0c'?y.feedback:y.clock;
+    // Explicit undefined is missing decoded data, not a default source zero.
+    (owner as unknown as Record<string,unknown>)[key]=undefined; rejects(y.sound,`${key}: finite exact source float32`);
+  }
+  for (const duration of [NaN,32768,-32769,0.5]) {
+    const x=soundFixture(event(7,1)); x.feedback.frame0c=1; x.clock.previous14=4; x.feedback.duration24=duration;
+    rejects(x.sound,'duration24: integer out of bounds');
+  }
+  {
+    const x=soundFixture(event(7,0,1)),order:string[]=[];let triggered=false;
+    watch(()=>rejects(x.sound,'caught same-runtime reentry'),(owner,key)=>{
+      if(owner===x.table&&/^\d+$/.test(String(key))) order.push(String(key));
+      if(!triggered&&owner===x.actual&&key==='modelScale') {triggered=true;try{x.sound();}catch{/* outer must fail before id */}}
+    });
+    equal(order.join(','),'2,0,1,3','caught helper reentry cannot reach id/audio/marker');
+    check(hasIncompleteSourceActorDoubleLifecycle(x.actual),'helper reentry permanently latches');
+    const y=soundFixture(event(8)); let late=false;
+    watch(()=>rejects(y.sound,'caught same-runtime reentry'),(owner,key)=>{
+      if(!late&&owner===y.table&&key==='6') {late=true;try{y.house();}catch{/* outer must fail at marker */}}
+    });
+    check(hasIncompleteSourceActorDoubleLifecycle(y.actual),'returning-chain reentry permanently latches');
+  }
+  console.log('[actor-frame-suffix-test] source posthook, housekeeping, exact sound predicates/operands and returning event-chain traversal passed; audio remains refused');
 }

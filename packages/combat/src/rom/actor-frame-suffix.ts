@@ -1,11 +1,13 @@
-/** Bounded actual8006f88c,80055ee4 and8005b880, offline only.
+/** Bounded actual8006f88c,80055ee4,8005b880 and8005b98c, offline only.
  * Authenticated instruction/cell/scalar evidence:
- * research/decomp/frame-suffix-evidence-2026-11-14.md.
+ * research/decomp/frame-suffix-evidence-2026-11-14.md and
+ * research/decomp/sound-event-helper-evidence-2026-11-14.md.
  * Existing actual fields and genuine prehook/attribute/status/gauge/animation
  * owners remain live. Only missing8cc/1eb/276 are copied/sealed, with no defaults.
- * Posthook's Sasuke6e9 path and sound event callee5b98c remain explicit boundaries.
- * Null4e8 and four explicit signed auxiliary37==-1 values genuinely return;
- * neither is manufactured. Constructor802d3b48 is NONNULL802d3ca0, so an explicit
+ * Posthook's Sasuke6e9 path and reached sound calleesf036c/f061c remain boundaries.
+ * Null4e8, four explicit signed auxiliary37==-1 values, and terminated
+ * nonfiring/ignored-kind event chains genuinely return;
+ * none is manufactured. Constructor802d3b48 is NONNULL802d3ca0, so an explicit
  * null fixture is not retail sound hydration. No frame completion/release occurs
  * here. Source failures permanently latch the shared Double lifecycle.
  * Stable synchronous non-proxy own-data owners, finite exact binary32 RN00/NI0,
@@ -22,6 +24,7 @@ import {isSourceJointAnimationFeedbackRuntime} from './joint-animation-feedback.
 import {isSourceAnimationSetupMetadataRuntime, type SourceAnimationSetupMetadataRuntime} from './animation-setup-metadata.js';
 import {requireCompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
 import {addSourceFloat32} from './source-float.js';
+import {isSourceActorSoundTable,readSourceActorSoundTableByte,type SourceActorSoundEventTable} from './actor-sound-table.js';
 
 export interface SourceActorFrameSuffixBinding {byte8cc: number; byte1eb: number; byte276: number}
 export interface SourceActorFrameSuffixSources {
@@ -219,6 +222,35 @@ export function createSourceActorFrameSuffixRuntime(sources: SourceActorFrameSuf
     requireSourceActorDoubleInvocation(e.actual,operation,runtime);
     try {reconcile(id,e); body(e); check();} catch (error) {markIncompleteSourceActorDoubleLifecycle(e.actual); throw error;}
   });
+  // Bounded archived5b98c predicates and dispatch, with both audio calls refused.
+  // Arithmetic assumes the stated finite binary32 RN00/NI0 bounds.
+  // The eager80437418 f64 bias (2^52),804373e4 f32 +0 and repeated fsubs
+  // convert the single lhz frame exactly: every u16 is representable as f32.
+  // These authenticated fixed scalars are code evidence, not injected owners.
+  const soundByte = (table: SourceActorSoundEventTable, offset: number): number =>
+    invoke(() => readSourceActorSoundTableByte(table,offset));
+  const soundEvent = (actual: RomActor, table: SourceActorSoundEventTable, offset: number, now: number, previous: number): void => {
+    const halfword = (at: number): number => soundByte(table,at) * 256 + soundByte(table,at + 1);
+    const frame = halfword(offset);
+    if (frame === 0 ? now > 0 : now < frame || previous >= frame) return;
+    const kind = soundByte(table,offset + 3); // lbz: even0xff is unsigned255.
+    if (kind >= 4) return;
+    let soundId: number;
+    if (kind === 1) {
+      // One actualb4 load, before the id. Lower8043740c=3f333333;
+      // upper80437410=40000000 is reached only after the lower comparison.
+      const scale = f(actual,'modelScale');
+      if (scale < 0.699999988079071) soundId = (halfword(offset + 4) - 1) >>> 0;
+      else if (scale > 2) soundId = (halfword(offset + 4) + 1) >>> 0;
+      else soundId = halfword(offset + 4);
+    } else soundId = halfword(offset + 4);
+    // addi uses the whole32-bit register, never a second u16 truncation.
+    // For2/3 the id load precedes scalar80437404=3e4ccccd. No audio callback
+    // substitutes for either genuine unresolved source callee.
+    const operands = `sound event at byte${offset} (current=${now}, previous=${previous}, kind=${kind}, soundId=${soundId}`;
+    if (kind < 2) fail(`8005b98c reached unsupported actual800f036c ${operands}); no audio effect executed`);
+    fail(`8005b98c reached unsupported actual800f061c ${operands}, scalar=0.20000000298023224); no audio effect executed`);
+  };
   const runtime: SourceActorFrameSuffixRuntime = {
     bindActor(id,initial) {guard(() => {
       if (typeof id !== 'symbol' || actors.has(id)) fail('new symbol actor identity required');
@@ -282,7 +314,7 @@ export function createSourceActorFrameSuffixRuntime(sources: SourceActorFrameSuf
     runSoundEvents(id) {source(id,'sound',e => {
       const table = read(e.actual,'soundEventTable');
       if (table === null) return;
-      if (!(table instanceof Uint8Array)) fail('actual4e8 requires explicit decoded Uint8Array or null');
+      if (!(ArrayBuffer.isView(table) && table instanceof Uint8Array) && !isSourceActorSoundTable(table)) fail('actual4e8 requires explicit decoded sound table or null');
       if (metadata === undefined) fail('8005b8b4 requires actual signed auxiliary37 metadata owner');
       for (let index = 0; index < 4; index++) {
         const part = e.parts[index]!;
@@ -292,25 +324,34 @@ export function createSourceActorFrameSuffixRuntime(sources: SourceActorFrameSuf
         const selector = signed(metadataOwner,'auxiliary37');
         if (selector === -1) continue;
         const current = read(e.actual,'soundEventTable');
-        if (!(current instanceof Uint8Array)) fail('fresh actual4e8 requires explicit decoded nonnull sound table');
+        if (!(ArrayBuffer.isView(current) && current instanceof Uint8Array) && !isSourceActorSoundTable(current)) fail('fresh actual4e8 requires explicit decoded nonnull sound table');
         if (selector < 0) fail(`8005b8cc unsupported negative sound event index ${selector}`);
-        const offset = selector * 8;
-        const mode = byte(current,String(offset + 2));
-        const dispatchPart = record(invoke(() => dispatch.getPartBinding(part.id)),'sound dispatch');
-        if (part.dispatch === undefined) {
-          if (baseOwners(e).includes(dispatchPart) || assigned.has(dispatchPart)) fail('sound dispatch storage owner alias');
-          part.dispatch = dispatchPart; assigned.add(dispatchPart);
-        } else same(dispatchPart,part.dispatch,'sound dispatch');
-        let now: number, previous: number;
-        if (mode === 0) {now = f(dispatchPart,'elapsed08'); previous = f(dispatchPart,'previous10');}
-        else {
-          now = f(part.feedback,'frame0c'); previous = f(dispatchPart,'previous14');
-          if (now < previous) {
-            const duration = integer(read(part.feedback,'duration24'),-32768,32767,'duration24');
-            now = addSourceFloat32(now,duration);
+        let offset = selector * 8;
+        for (;;) {
+          // Keep this row's captured4e8 pointer through every helper return.
+          // Both byte2 and the selected clock pair are loaded again per record.
+          const mode = soundByte(current,offset + 2);
+          const dispatchPart = record(invoke(() => dispatch.getPartBinding(part.id)),'sound dispatch');
+          if (part.dispatch === undefined) {
+            if (baseOwners(e).includes(dispatchPart) || assigned.has(dispatchPart)) fail('sound dispatch storage owner alias');
+            part.dispatch = dispatchPart; assigned.add(dispatchPart);
+          } else same(dispatchPart,part.dispatch,'sound dispatch');
+          let now: number, previous: number;
+          if (mode === 0) {now = f(dispatchPart,'elapsed08'); previous = f(dispatchPart,'previous10');}
+          else {
+            now = f(part.feedback,'frame0c'); previous = f(dispatchPart,'previous14');
+            if (now < previous) {
+              const duration = integer(read(part.feedback,'duration24'),-32768,32767,'duration24');
+              now = addSourceFloat32(now,duration);
+            }
           }
+          soundEvent(e.actual,current,offset,now,previous);
+          // 5b948 lbz+6,5b94c addi pointer+8,5b950 extsb: the marker is
+          // consumed only after a genuine callee return; it is not an index.
+          const marker = soundByte(current,offset + 6);
+          offset += 8;
+          if ((marker << 24 >> 24) === -1) break;
         }
-        fail(`8005b880 reached unsupported actual8005b98c sound event at byte${offset} (current=${now}, previous=${previous}); no audio effect executed`);
       }
     });},
   };

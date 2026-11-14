@@ -3,6 +3,7 @@ import {addSourceFloat32} from './source-float.js';
 import {createSourceActorAnimationTransitionRuntime} from './actor-animation-transition.js';
 import {createSourceActorFrameLifecycleRuntime, hasIncompleteSourceActorFrame} from './actor-frame-lifecycle.js';
 import {createSourceActorFrameSuffixRuntime} from './actor-frame-suffix.js';
+import {createSourceActorSoundTable} from './actor-sound-table.js';
 import type {BorgRuntime, WeaponCell} from '../types.js';
 import {NeoGredMeleeState} from '../neoGredMelee.js';
 import {bindDoubleNinjaOwnerState, getDoubleNinjaOwnerState} from '../ninjaX.js';
@@ -359,7 +360,7 @@ function readyControlFixture(partNumber: 0 | 1 = 0, modelDat?: Uint8Array, poseC
     finishPartOneSetup(actor: symbol) {check(this === readyAdapter, 'part1 adapter receiver'); ready.finishPartOneSetup(actor);},
   };
   x.dispatch.bindSetupRuntime(genuineCompositionConstruction ? ready : readyAdapter);
-  return Object.assign(x, {control, targets, metadata, archiveBanks, ready, readyAdapter, readyHooks, commands, bank, selected, fallbackWrapper,
+  return Object.assign(x, {control, targets, descriptors, metadata, archiveBanks, ready, readyAdapter, readyHooks, commands, bank, selected, fallbackWrapper,
     initialAObj, mask, stream: targets.getStreamPart(x.actor, partNumber), waitControl: control.getPartBinding(x.actor, partNumber),
     begin: () => control.startStream(x.actor, mask, 0, 1)});
 }
@@ -2837,6 +2838,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runDoubleGroundStreamHydratedCompositionTests();
   runDoubleFrameMarkerCompositionTests();
   runCompletedDoubleFrameHydratedCompositionTests();
+  runNonnullDoubleSoundHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -12417,4 +12419,125 @@ export function runCompletedDoubleFrameHydratedCompositionTests(): void {
     checkCompletedDoubleFramePermanentRefusal(x);
   }
   console.log('[actor-completed-double-frame-composition] PASS: explicit genuine55568 suffix completes real Double phase0/nonnull copied stream/DAT/AObj/FObj/mode1 once; private completion preserves marker2, phase1, canonical owners and exclusive monotonic ingress; next genuine phase1 refuses permanently; explicit null sound fixture is not constructor hydration (actual cell802d3b48 is nonnull802d3ca0), no full attack/clone/production/playability claim');
+}
+
+/** Numeric witnesses: sound-hydration-evidence-2026-11-14.md. These are
+ * selected, authenticated decoded inputs, not a whole DOL or a retail actor.
+ * True logical offsets survive hydration; unknown bytes remain uncovered. */
+function nonnullDoubleSoundHydratedCompositionFixture(slot: 0 | 1 = 0, bind = true) {
+  // The caller schedule remains an explicit synthetic opcode01 + terminal wait.
+  // Its animation group/action and BOTH active channels now use the real source
+  // metadata. The actual retail stream's intervening opcode02 is still separate.
+  const x = doubleGroundStreamHydratedCompositionFixture(false,
+    Uint8Array.from([1, 4, slot, 1, 6, 0, 0, 0, 0, 3, 0, 7]));
+  const parts = x.mapping.getLayout(x.actor).parts;
+  x.control.getActorBinding(x.actor).activeMask579 = 3; // 8033af7a, not an inferred single part.
+  x.normalLifecycleState.short6bc = 10;
+  x.actionTables.phases1f000[1] = 0x800ff418;
+  if (slot === 1) x.sourceActor.controlWord |= 0x40;
+  const descriptorBytes = Uint8Array.from([
+    255,0,0,0, 4,0,1,0,22,255,255,0, 4,0,1,0,23,0,5,1,
+    255,0,0,0, 4,1,1,0,25,255,255,0, 4,1,1,0,255,3,5,0,
+  ]);
+  const descriptorWindows = [
+    {offset:8, bytes:Uint8Array.from([1,36])},
+    {offset:0x124, bytes:Uint8Array.from([4,188,4,208])},
+    {offset:0x5e0, bytes:descriptorBytes},
+  ];
+  const descriptorBase = x.descriptors.createByteWindows(descriptorWindows);
+  x.gates.family1d88 = descriptorBase;
+  // Existing nonnull shared readiness remains, but group4 never reads it.
+  x.metadata.bindDescriptorDefaults(x.sourceClock.descriptor4b0!, {bytebe:0,bytebf:1});
+  const archiveSlots = x.archiveBanks.createPointerTable([x.nextArchive.setupDescriptor,x.nextArchive.setupDescriptor]);
+  const archiveBank = x.archiveBanks.createPointerTable([null,null,null,null,archiveSlots]);
+  x.ready.getActorBinding(x.actor).familyBank1d78 = archiveBank;
+  // Real initializer4bb14 supplies zero rows, bank/part identities and aux37ff.
+  // We admit those values at an explicit initialized-state boundary; this does
+  // NOT execute the initializer's unrelated globals, matrices or actor setup.
+  for (const bank of [0,1]) for (const channel of [0,2,3]) {
+    const id = parts[bank]![channel]!;
+    Object.assign(x.feedback.getPart(id), {frame0c:0,duration24:0,segment2d:0,complete2e:0,mode2f:0,mirror30:0});
+    Object.assign(x.mapping.getPartBinding(id), {descriptor00:null,scaleIndex32:0,jointBank33:bank,poseBuffer35:0});
+    x.setup.bindPart(id,{rewind26:0,loop2c:0});
+    x.archiveFront.bindPart(id,{descriptor04:null});
+    x.dispatch.bindPart(id,{elapsed08:0,previous10:0,previous14:0,linked36:0});
+    x.metadata.bindPart(id,{selector2a:0,selector2b:0,auxiliary37:255});
+    x.ready.bindPart(id,{group28:0,action29:0,bank31:0,status38:0,field18:0,field1c:0,field20:0});
+    x.transition.bindPartRaw(id,{byte34:channel,byte39:0,byte3a:0,byte3b:0,byte3c:0,byte3d:0,byte3e:0,byte3f:0});
+  }
+  // Part1 retains the existing genuine old animation. Its supplied prior sound
+  // selector is the initializer's no-event state, overwritten by real4d244.
+  x.metadata.getPartBinding(parts[0]![1]!).auxiliary37 = 255;
+  const soundBytes = Uint8Array.from([
+    0,22,1,0,0,9,255,0, 0,35,1,1,0,103,0,0,
+    0,46,1,1,0,103,255,0, 0,20,1,0,0,9,255,0,
+  ]);
+  const soundTable = createSourceActorSoundTable([{offset:22*8,bytes:soundBytes}]);
+  x.sourceActor.soundEventTable = soundTable;
+  const suffixSources = {prehook:x.prehook,gauges:x.gauges,dispatch:x.dispatch,metadata:x.metadata};
+  const suffix = createSourceActorFrameSuffixRuntime(suffixSources);
+  suffix.bindActor(x.actor,{byte8cc:1,byte1eb:91,byte276:92});
+  const frameSources = {...x.frameSources,suffix}, frame = createSourceActorFrameLifecycleRuntime(frameSources);
+  if (bind) frame.bindActor(x.actor);
+  return Object.assign(x,{suffixSources,suffix,suffixState:suffix.getActorBinding(x.actor),frameSources,frame,
+    descriptorBytes,descriptorWindows,descriptorBase,soundBytes,soundTable,parts,slot,
+    runFrame:(epoch=1)=>frame.ingestRawDistancesAndRun(x.actor,epoch,
+      {boundary:'externally-decoded-pre55568-raw',targetDistance760:64,horizontalDistance764:20})});
+}
+export function runNonnullDoubleSoundHydratedCompositionTests():void {
+  for (const slot of [0,1] as const) {
+    const x=nonnullDoubleSoundHydratedCompositionFixture(slot), old=x.joints.getBinding(x.joint).aobj7c;
+    x.descriptorBytes.fill(0xfe);x.descriptorWindows[0]!.bytes.fill(0);x.soundBytes.fill(0);
+    check(x.runFrame()===undefined,'nonnull source sound and real metadata permit bounded first frame return');
+    const metadata=x.parts[0]!.map(id=>x.metadata.getPartBinding(id));
+    check(metadata.map(p=>p.auxiliary37).join() === (slot===0?'22,23,255,255':'25,255,255,255'),
+      'actual 4d244 selects distinct ground/air sound chains for both active rows and leaves inactive initializer ff unchanged');
+    check(metadata[0]!.selector2a===4 && metadata[0]!.selector2b===slot && metadata[1]!.selector2a===4 && metadata[1]!.selector2b===slot,
+      'both parts resolve true group4 metadata through copied sparse source offsets');
+    check(x.sourceActor.soundEventTable===x.soundTable && x.control.getActorBinding(x.actor).activeMask579===3 &&
+      x.sourceActor.fbPhase===1 && x.gates.marker578===2 && !hasIncompleteSourceActorFrame(x.sourceActor) &&
+      !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor) && x.joints.getBinding(x.joint).aobj7c!==old,
+      'nonnull sound completion retains canonical pointer, true mask3 and real phase0/stream/DAT/mode1 effects');
+    for (const channel of [0,1]) {
+      const part=x.feedback.getPart(x.parts[0]![channel]!);
+      check(part.frame0c===0 && part.mode2f===1 && x.dispatch.getPartBinding(x.parts[0]![channel]!).elapsed08===0 &&
+        x.control.getPartBinding(x.actor,channel).status1d===1 && x.control.getPartBinding(x.actor,channel).wait14===7,
+        'both real setup clocks remain at zero; authored positive sound thresholds do not fire');
+    }
+    check(x.metadata.getActorBinding(x.actor).byte1d74===0 && x.metadata.getActorBinding(x.actor).byte1d75===1,
+      'part0 reaches authenticated Double descriptor fallback bytes instead of fabricated hand selectors');
+    rejects(()=>x.soundTable.readByte(0),'uncovered');
+    rejects(()=>x.descriptors.readByte(x.descriptorBase,0),'uncovered');
+    rejects(()=>x.runFrame(1),'epoch');
+    rejects(()=>x.runFrame(2),slot===0?'unsupported target0x800ff418':'80069210');
+    check(x.sourceActor.fbPhase===1,'next genuine frame never resets phase0 to evade phase1 or earlier air-control boundary');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=nonnullDoubleSoundHydratedCompositionFixture(0,false);
+    // Remove the second ground part1 record without substituting zeros. The
+    // first part and first chain record really return before the reached gap.
+    x.sourceActor.soundEventTable=createSourceActorSoundTable([{offset:176,bytes:Uint8Array.from([
+      0,22,1,0,0,9,255,0,0,35,1,1,0,103,0,0])}]);
+    x.frame.bindActor(x.actor);
+    rejects(()=>x.runFrame(),'uncovered');
+    check(x.sourceActor.fbPhase===1 && x.sourceActor.accumulator80c===0 && x.gates.marker578===2 &&
+      x.metadata.getPartBinding(x.parts[0]![1]!).auxiliary37===23,
+      'missing later sound record retains actual action, both metadata writes and posthook prefix');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=nonnullDoubleSoundHydratedCompositionFixture(), original=Object.getOwnPropertyDescriptor;let changed=false;
+    Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+      if (!changed && owner===x.sourceActor && key==='soundEventTable' && x.sourceActor.accumulator80c===0) {
+        changed=true; x.feedback.getPart(x.parts[0]![0]!).frame0c=22;
+      }
+      return original(owner,key);
+    }) as typeof original;
+    try {rejects(()=>x.runFrame(),'800f036c');} finally {Object.getOwnPropertyDescriptor=original;}
+    check(changed && x.metadata.getPartBinding(x.parts[0]![0]!).auxiliary37===22,
+      'a reached authored event still refuses actual audio instead of discarding it to claim completion');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  console.log('[actor-nonnull-sound-composition] PASS: true mask3, copied bounded source metadata windows, real4d244 on parts0/1, initializer-backed inactive ff, nonnull actual4e8 records and genuine5b98c no-audio chain returns; mode1/DAT first frame completes, gaps/firing audio/next phase1 refuse honestly; synthetic stream schedule/model/terrain remain, no retail full-frame or browser-playability claim');
 }

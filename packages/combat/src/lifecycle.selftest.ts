@@ -1,3 +1,4 @@
+import {runActorSoundTableSelfTests} from './rom/actor-sound-table.selftest.js';
 import {runActorFrameSuffixSelfTests} from './rom/actor-frame-suffix.selftest.js';
 import {runActorAnimationTransitionSelfTests} from './rom/actor-animation-transition.selftest.js';
 import {runActorFrameLifecycleSelfTests} from './rom/actor-frame-lifecycle.selftest.js';
@@ -418,6 +419,7 @@ export function runSelfTest(): void {
   runActorDoublePrehookSelfTests();
   runActorDoubleActionSelfTests();
   runActorFrameSuffixSelfTests();
+  runActorSoundTableSelfTests();
   runActorMovementFollowupSelfTests();
   runActorAttributeRefreshSelfTests();
   runAnimationArchiveHydrationSelfTest();

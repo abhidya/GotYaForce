@@ -4999,3 +4999,65 @@ New static evidence: [frame suffix](frame-suffix-evidence-2026-11-14.md), contai
 three complete spans128 instructions, two fixed constructor cells and one scalar,
 checked against both archived snapshots. Posthook extent is not claimed from a
 missing map row. Original executable execution and MATCH remain unclaimed.
+
+## Nonnull ordinary-X sound records and bounded event return (2026-11-14)
+
+This continuation follows local `2a430d1d`. It implements the authenticated
+`8005b98c` predicate and returns through the actual `8005b880` chain loop when
+no audio call is reached. Both the model-scale-dependent unsigned sound-ID
+arithmetic and real `800f036c` / `800f061c` call boundaries remain explicit.
+Firing sounds are not discarded to obtain a completed frame. The caller reads
+its current record's continuation byte only after a real helper return, retains
+the selected row pointer across records, and reloads each record's window flag
+and source clock pair.
+
+The new bounded byte-window owners retain canonical sound-pointer and descriptor
+cursor identities. They privately copy only supplied bytes at their true logical
+offsets. Uncovered regions have no invented zero values and refuse only when
+read. Existing complete decoded `Uint8Array` sound tables and descriptor-bank
+`createBytes` consumers remain supported.
+
+The two archived snapshots agree on the following separately bounded witnesses:
+
+- Double descriptor `8033af78 + 2` supplies active mask **3**, parts 0 and 1.
+- Initializer `8004bb14` zeroes the two banks of four part records, sets their bank
+  and part identities, and sets every auxiliary sound selector to `ff`.
+- Ground/air metadata records `802bdd60` / `802bdd74` are 20 bytes each. Actual
+  group/slot displacement cells resolve those exact records. Their part 0
+  fallback bytes reach Double descriptor defaults **0 and 1**.
+- Ground part 0 selects sound index 22: frame 22, window 1, mode 0, sound 9.
+  Ground part 1 selects indexes 23–24: frames 35 and 46, window 1, mode 1,
+  sound 103. Only the latter terminates the two-record chain.
+- Air part 0 selects index 25: frame 20, window 1, mode 0, sound 9. Air part 1
+  explicitly selects `ff`. Inactive parts 2 and 3 retain their initializer `ff`.
+  The older broad generator's inferred part-2 sound is not used: its scan passed
+  beyond the actual 20-byte metadata record.
+
+The sound inspection window was fixed in advance at `802d3ca0..802d3dc8`, bounded
+by the independently named next object. This is not a claim that all 37 candidate
+records belong to the sound table. Only four reached records and their complete
+termination chains are emitted and hydrated. No dynamic archive pointer
+following or raw whole-window output is used. See
+[sound helper evidence](sound-event-helper-evidence-2026-11-14.md) and
+[sound hydration evidence](sound-hydration-evidence-2026-11-14.md).
+
+The new composition executes real descriptor lookup and `4d244` metadata setup
+for both active parts, then real action/stream/DAT/mode1/posthook/housekeeping and
+nonnull sound traversal on the existing canonical graph. At its source-produced
+zero setup clocks, the positive authored events do not fire, so the first bounded
+frame returns. Missing later records retain earlier source effects and fail;
+a reached frame-22 event refuses the actual audio boundary. The next ground
+frame reaches the unsupported phase-1 target without resetting phase 0. The
+next air frame encounters the earlier unsupported `80069210` control path.
+
+**Claim ceiling:** this is still an offline composition. The part-0 mapped joint
+range is empty in the synthetic model, while part 1 performs real nonempty
+DAT/AObj/FObj playback. The initialized part values are explicit authenticated
+state-boundary inputs, not execution of the full initializer. The stream schedule
+is still a supplied opcode01 plus terminal wait, not the complete authored
+ordinary-X stream: its intervening opcode02 producer is the next dependency.
+Terrain, model and host ingress remain supplied. No retail full-frame, audio,
+sustained attack, charged clone, production-selection or browser-playability
+claim follows from this checkpoint. Authenticate and implement the authored
+stream prefix/opcode02, then continue real phase 1 and its callback/magnitude
+boundaries; never reset the action or force null sound to bypass them.
