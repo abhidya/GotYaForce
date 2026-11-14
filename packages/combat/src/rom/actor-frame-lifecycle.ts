@@ -17,6 +17,7 @@
  * playability. Null4e8 fixtures are explicit synthetic inputs, not source defaults.
  */
 import type {RomActor} from './actor.js';
+import {bindSourceActorCue0Frame} from './actor-cue0-lifecycle.js';
 import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import {isSourceActorStatusTimersRuntime, type SourceActorStatusTimersRuntime} from './actor-status-timers.js';
 import {isSourceActorAnimationDispatchRuntime, type SourceActorAnimationDispatchRuntime} from './actor-animation-dispatch.js';
@@ -98,6 +99,7 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
   if (suffix !== undefined && (!isSourceActorFrameSuffixRuntime(suffix) || prehook === undefined ||
       suffix.getPrehookRuntime() !== prehook || suffix.getDispatchRuntime() !== dispatch))
     fail('suffix requires genuine matched prehook/animation runtime');
+  const normal = tick.getNormalLifecycleRuntime(), cue0 = normal?.getCue0Runtime();
   const movement = attributes.getMovementRuntime();
   if (!isSourceActorMovementFollowupRuntime(movement)) fail('55dcc child4d08c requires genuine source movement runtime');
   let busy = false, poisoned = false;
@@ -130,6 +132,11 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
   };
   const owners = (id: symbol, e: Omit<Entry, 'capability' | 'access' | 'familyOwners'> & {familyOwners?: readonly object[]}): void => {
     requireCompleteSourceActorDoubleLifecycle(e.actual); check();
+    if (tick.getNormalLifecycleRuntime() !== normal || normal?.getCue0Runtime() !== cue0)
+      fail('canonical normal/cue0 runtime changed');
+    const normalGround = cue0?.getGroundRuntime(id);
+    if (normalGround !== undefined && normalGround !== action?.getGroundRuntime())
+      fail('normal/action frame requires the same genuine ground runtime');
     requireCompleteSourceActorAnimationTransition(e.mapping); check();
     for (const key of ['rootAction', 'preState', 'postState'])
       if (read(e.actual, key) !== null) fail(`legacy callable ${key} conflicts with exclusive source frame ownership`);
@@ -215,9 +222,9 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
       // No parallel numeric4b4/4bc/4c0 cells or callable family owners are admitted.
       // Null legacy placeholders are not interpreted as source no-op pointers.
       const ground = action?.getGroundRuntime();
-      const join: SourceActorTickFrameOwners = {...initial,
+      const join: SourceActorTickFrameOwners = {...initial, normalRuntime: tick,
         ...(ground === undefined ? {} : {ground: {
-          gauge: invoke(() => ground.getGaugeBinding(id)), terrain: invoke(() => ground.getTerrainGlobals()),
+          runtime: ground, gauge: invoke(() => ground.getGaugeBinding(id)), terrain: invoke(() => ground.getTerrainGlobals()),
           history: invoke(() => ground.getHistoryBinding(id))}}),
         ...(suffix === undefined ? {} : {suffixGauge: invoke(() => suffix.getGaugeBinding(id))})};
       pendingClaims.set(runtime, {id, owners: join});
@@ -226,6 +233,7 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
         capability = invoke(() => claimSourceActorTickFrame(runtime, tick, id, join));
         access = invoke(() => claimSourceActorDoubleFrame(runtime, id, join));
         if (action !== undefined) invoke(() => bindSourceActorDoubleActionFrame(runtime, action, id, join, access));
+        if (cue0 !== undefined) invoke(() => bindSourceActorCue0Frame(runtime, cue0, id, join, access, tick));
       } finally {pendingClaims.delete(runtime);}
       actors.set(id, {...initial, capability, access, familyOwners: family}); baseRecords.forEach(value => owned.add(value));
     });},
@@ -244,7 +252,7 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
         owners(id, e);
         if (invoke(() => status.updateActor(id)) !== undefined) fail('genuine5568c returned unexpectedly');
         owners(id, e);
-        if (invoke(() => e.capability.runActor()) !== undefined) fail('genuine59068 returned unexpectedly');
+        if (invoke(() => e.access.invoke('normal', tick, () => e.capability.runActor())) !== undefined) fail('genuine59068 returned unexpectedly');
         owners(id, e);
         // Source lwz snapshots preserve values without arithmetic. These locals are
         // deliberately not actor/history storage and do not refresh savedGroundPos.

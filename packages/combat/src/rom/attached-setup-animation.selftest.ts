@@ -2840,6 +2840,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runCompletedDoubleFrameHydratedCompositionTests();
   runNonnullDoubleSoundHydratedCompositionTests();
   runAuthoredDoubleGroundPrefixCompositionTests();
+  runControl40DoubleGroundContinuationTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -3390,7 +3391,7 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
     if (supplied.team !== undefined) sourceActor.team = supplied.team;
     if (supplied.burstArmFrames !== undefined) Object.assign(host, {burstArmFrames: supplied.burstArmFrames});
     const runtime = createSourceActorCue0TailRuntime({world: x.world, movement: x.movement, status: x.status,
-      charge: chargeOwners.charge, cues});
+      charge: chargeOwners.charge, cues, attributes: x.attributes});
     runtime.bindActor(x.actor, supplied.initial);
     return runtime;
   })();
@@ -11009,10 +11010,10 @@ export function runCue44LifecycleHydratedCompositionTests(): void {
   {
     const x = cue44AdmittedControlFixture(), a = x.sourceActor;
     a.controlWord |= 0x40; a.team = 1; a.inputEdge5d4 = 0x200;
-    rejects(() => x.cue0.dispatchCue44(x.actor), '80069210');
+    rejects(() => x.cue0.dispatchCue44(x.actor), '800677b0 without genuine ground binding');
     check(x.cueState.byte588 === 1 && x.cue0Tail!.getActualBorg(x.actor).burstArmFrames === 6 && x.testerState.byte595 === 0 &&
       x.normalLifecycleState.short6bc === 1 && a.ubCue === 44,
-      'air44 follows genuine699d8 then69814 arm store and honestly refuses69210 without running the ground tail');
+      'air44 follows genuine699d8,69814 arm store and ordered integer gates, then refuses its missing genuine691d8 ground owner');
     checkCue44PermanentRefusal(x);
   }
   // Successful first store matters even when it was already1. A readonly first
@@ -11120,7 +11121,7 @@ export function runCue44LifecycleHydratedCompositionTests(): void {
       'caught same-runtime reentry after real588 store preserves incomplete cue44 and cannot silently continue');
     checkCue44PermanentRefusal(x);
   }
-  console.log('[actor-cue44-lifecycle-composition] PASS: real raw-input ordinary-X admission then next ground44 control epochs on canonical clock/status/cue owners; genuine terrain/tester/tail short circuits and upper5/mask prefix,588 first/equal/readonly ordering, air69210 and active5c080 boundaries, aliases/reentry/permanent poison and consumed epochs; synthetic decoded offline graph only, no action2 stream playback/full attack/retail replay/production claim');
+  console.log('[actor-cue44-lifecycle-composition] PASS: real raw-input ordinary-X admission then next ground44 control epochs on canonical clock/status/cue owners; genuine terrain/tester/tail short circuits and upper5/mask prefix,588 first/equal/readonly ordering, missing air691d8 ground and active5c080 boundaries, aliases/reentry/permanent poison and consumed epochs; synthetic decoded offline graph only, no action2 stream playback/full attack/retail replay/production claim');
 }
 
 /** Bind the complete second inline part, never a copied stand-in record. The
@@ -12510,7 +12511,7 @@ export function runNonnullDoubleSoundHydratedCompositionTests():void {
     rejects(()=>x.soundTable.readByte(0),'uncovered');
     rejects(()=>x.descriptors.readByte(x.descriptorBase,0),'uncovered');
     rejects(()=>x.runFrame(1),'epoch');
-    rejects(()=>x.runFrame(2),slot===0?'unsupported target0x800ff418':'80069210');
+    rejects(()=>x.runFrame(2),slot===0?'unsupported target0x800ff418':'800677b0 without genuine ground binding');
     check(x.sourceActor.fbPhase===1,'next genuine frame never resets phase0 to evade phase1 or earlier air-control boundary');
     checkCompletedDoubleFramePermanentRefusal(x);
   }
@@ -12591,7 +12592,7 @@ export function runAuthoredDoubleGroundPrefixCompositionTests():void {
       if(owner===x.actionTables.phases1f000 && key==='1')phaseReads++;
       return original(owner,key);
     }) as typeof original;
-    try {rejects(()=>x.runFrame(2),'80069210');} finally {Object.getOwnPropertyDescriptor=original;}
+    try {rejects(()=>x.runFrame(2),'800677b0 without genuine ground binding');} finally {Object.getOwnPropertyDescriptor=original;}
     check(phaseReads===0 && x.sourceActor.controlWord===0x43 && x.sourceActor.fbPhase===1 && x.gates.marker578===2,
       'genuine next frame takes authored40 normal cue44 path before phase1, without clearing control or replaying phase0');
     checkCompletedDoubleFramePermanentRefusal(x);
@@ -12643,5 +12644,104 @@ export function runAuthoredDoubleGroundPrefixCompositionTests():void {
       'another genuine movement runtime sharing mapping/waits cannot substitute a different actual actor into the real action');
     checkCompletedDoubleFramePermanentRefusal(x);
   }
-  console.log('[actor-authored-ground-prefix] PASS: authenticated28-byte ground commands01/02/03/wait on canonical stream/actual actor owners, retained real mode1/nonnull sound first frame, ordered partial writes and genuine next69210 boundary; actual air08 refuses; explicit synthetic bank headers/model/terrain, no phase1/audio/clone/browser completion claim');
+  console.log('[actor-authored-ground-prefix] PASS: authenticated28-byte ground commands01/02/03/wait on canonical stream/actual actor owners, retained real mode1/nonnull sound first frame, ordered partial writes and missing normal-ground boundary; actual air08 refuses; explicit synthetic bank headers/model/terrain, no phase1/audio/clone/browser completion claim');
+}
+
+/** Same actual ground runtime in both normal-control and later full action. No
+ * mode2 skip, cached first-frame query or source flag override is supplied. */
+function control40DoubleGroundContinuationFixture(bind = true) {
+  const x=authoredDoubleGroundPrefixCompositionFixture(false);
+  x.cue0.bindGroundRuntime(x.actor,x.ground);
+  if(bind)x.frame.bindActor(x.actor);
+  return Object.assign(x,{tailState:x.cue0Tail!.getActorBinding(x.actor)});
+}
+
+export function runControl40DoubleGroundContinuationTests():void {
+  {
+    const x=control40DoubleGroundContinuationFixture(), a=x.sourceActor;
+    const position=a.pos, history={...a.targetCache5e8};
+    check(x.cue0.getGroundRuntime(x.actor)===x.ground && x.action.getGroundRuntime()===x.ground &&
+      x.ground.getTerrainRuntime()===x.cue0.getTerrainRuntime() && x.header.mode4a0===0,
+      'normal and full action share one genuine ground runtime and actual terrain, without a mode2 skip');
+    const direct=[()=>x.ground.runActor(x.actor),()=>x.cue0.test800691d8(x.actor),()=>x.cue0.dispatchCue44(x.actor),
+      ()=>x.cue0Tail!.test80069210(x.actor),()=>x.cue0Tail!.test800693fc(x.actor),()=>x.cue0Tail!.test8006965c(x.actor),
+      ()=>x.cue0Tail!.test800695c4(x.actor),()=>x.cue0Tail!.test8006952c(x.actor)];
+    const before=retainCompositionRecords([a,position,x.cueState,x.tailState,x.statusState,x.normalLifecycleState]);
+    for(const run of direct){rejects(run,'exclusively owned');before();}
+    x.runFrame(1);
+    const expectedX=Math.fround(101+Math.fround(102*Math.fround(.95))), expectedY=Math.fround(2*Math.fround(.95));
+    check(a.pos===position && a.pos.x===expectedX && a.pos.y===expectedY && a.pos.z===300 && a.controlWord===0x43 &&
+      x.normalLifecycleState.short6bc===9 && a.fbPhase===1 && x.gates.marker578===2,
+      'authored40 keeps the real phase0 carried position and completed first-frame normal countdown');
+    const after=retainCompositionRecords([a,position,x.cueState,x.tailState,x.statusState,x.normalLifecycleState]);
+    for(const run of direct){rejects(run,'exclusively owned');after();}
+    let phaseReads=0, groundOperands=0;const original=Object.getOwnPropertyDescriptor;
+    Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+      if(owner===x.actionTables.phases1f000 && key==='1')phaseReads++;
+      if(owner===a && key==='hoverOffset668')groundOperands++;
+      return original(owner,key);
+    }) as typeof original;
+    try {rejects(()=>x.runFrame(2),'unsupported target0x800ff418');} finally {Object.getOwnPropertyDescriptor=original;}
+    check(phaseReads===1 && groundOperands>0 && a.pos===position && a.pos.x===expectedX && a.pos.y===expectedY && a.pos.z===300 &&
+      a.controlWord===0x43 && a.fbPhase===1 && x.gates.marker578===0 && x.normalLifecycleState.short6bc===8 &&
+      Object.keys(history).every(k=>Object.is(a.targetCache5e8[k as keyof typeof history],history[k as keyof typeof history])),
+      'next genuine frame completes the real control40/ground/normal/rate/ceiling prefix and reaches phase1 exactly once, without source-state reset');
+    check(x.control.getPartBinding(x.actor,0).wait14===2 && x.control.getPartBinding(x.actor,1).wait14===2 &&
+      x.part.frame0c===0 && a.accumulator80c===0 && a.soundEventTable===x.soundTable,
+      'unimplemented phase1 has not fabricated stream update, animation advancement, audio or a second completed frame');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=control40DoubleGroundContinuationFixture();x.runFrame(1);
+    // First access is the real55dcc overwrite; fault only the subsequent ground
+    // load, not a value that the earlier source producer legitimately replaces.
+    const original=Object.getOwnPropertyDescriptor;let accesses=0;
+    Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+      if(owner===x.sourceActor && key==='hoverOffset668' && ++accesses===2)x.sourceActor.hoverOffset668=NaN;
+      return original(owner,key);
+    }) as typeof original;
+    try{rejects(()=>x.runFrame(2),'hoverOffset668');}finally{Object.getOwnPropertyDescriptor=original;}
+    check(accesses===2 && x.gates.marker578===2 && x.sourceActor.fbPhase===1 && x.normalLifecycleState.short6bc===9 && x.cueState.byte588===1,
+      'genuine normal-stage ground reads actual clearance before normal countdown or later phase dispatch; it is not a cached/no-op return');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=control40DoubleGroundContinuationFixture();x.runFrame(1);
+    // Inject contact at the ground load, after earlier source producers.
+    const original=Object.getOwnPropertyDescriptor;let accesses=0;
+    Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+      if(owner===x.sourceActor && key==='hoverOffset668' && ++accesses===2){
+        x.sourceActor.pos.y=0;x.sourceActor.stepHeight=0;
+      }
+      return original(owner,key);
+    }) as typeof original;
+    try{rejects(()=>x.runFrame(2),'8020ba78');}finally{Object.getOwnPropertyDescriptor=original;}
+    check(x.gates.marker578===2 && x.normalLifecycleState.short6bc===9 && x.sourceActor.fbPhase===1 && x.landCalls()===0,
+      'actual normal-stage contact reaches the existing displacement boundary and never fabricates landing or phase1');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=control40DoubleGroundContinuationFixture();x.runFrame(1);
+    const original=Object.getOwnPropertyDescriptor;let accesses=0,caught=false;
+    Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+      if(owner===x.sourceActor && key==='hoverOffset668' && ++accesses===2){
+        try{x.ground.runActor(x.actor);}catch{caught=true;}
+      }
+      return original(owner,key);
+    }) as typeof original;
+    try{rejects(()=>x.runFrame(2),'caught same-runtime reentry');}finally{Object.getOwnPropertyDescriptor=original;}
+    check(caught && x.gates.marker578===2 && x.normalLifecycleState.short6bc===9 && x.sourceActor.fbPhase===1,
+      'caught genuine nested-ground reentry poisons normal/frame continuation before any later action stage');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=authoredDoubleGroundPrefixCompositionFixture(false);
+    const duplicate=createSourceActorGroundProbeRuntime(x.groundSources);duplicate.bindActor(x.actor);
+    x.cue0.bindGroundRuntime(x.actor,duplicate);
+    const retained=retainCompositionRecords([x.sourceActor,x.sourceActor.pos,x.cueState,x.statusState,x.normalLifecycleState]);
+    rejects(()=>x.frame.bindActor(x.actor),'same genuine ground');retained();
+    check(x.cue0.getGroundRuntime(x.actor)===duplicate && x.action.getGroundRuntime()===x.ground,
+      'a second genuine ground runtime with identical scalar owners cannot replace the action ground at frame composition or produce source effects');
+  }
+  console.log('[actor-control40-ground-continuation] PASS: authenticated five integer helpers plus691d8 through SAME genuine677b0 in private normal59068 scope, authored43/carried-position first frame then actual second-frame phase1 boundary; exact owners, standalone/reentry/contact/missing-input failures preserved; phase1 execution/audio/clone/production/browser playability remain unimplemented');
 }

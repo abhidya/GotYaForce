@@ -63,12 +63,12 @@ export function requireCompleteSourceActorDoubleLifecycle(actual: object): void 
 /** Private frame scope: ownership persists after successful frames. Public
  * executable adapters cannot run outside the exact genuine stage/runtime.
  * A token is obtainable only during the frame module's private bind join. */
-export type SourceActorDoubleOperation = 'prehook' | 'capture' | 'upper' | 'full' | 'ground' |
+export type SourceActorDoubleOperation = 'normal' | 'prehook' | 'capture' | 'upper' | 'full' | 'ground' |
   'posthook' | 'housekeeping' | 'sound' | 'stream';
 export interface SourceActorDoubleFrameAccess {
   invoke<T>(operation: SourceActorDoubleOperation, runtime: object, run: () => T): T;
 }
-const frameOwners = new WeakMap<object, {active?: {operation: SourceActorDoubleOperation; runtime: object}}>();
+const frameOwners = new WeakMap<object, {normalRuntime?: object; active?: {operation: SourceActorDoubleOperation; runtime: object}}>();
 const frameAccessOwners = new WeakMap<object, object>();
 export function isSourceActorDoubleFrameAccess(access: unknown, actual: object): access is SourceActorDoubleFrameAccess {
   return access !== null && typeof access === 'object' && frameAccessOwners.get(access) === actual;
@@ -79,14 +79,17 @@ export function claimSourceActorDoubleFrame(frame: SourceActorFrameLifecycleRunt
   const actual = owners.actual;
   requireCompleteSourceActorDoubleLifecycle(actual);
   if (frameOwners.has(actual)) fail('actual actor already has exclusive Double frame ownership');
-  const state: {active?: {operation: SourceActorDoubleOperation; runtime: object}} = {};
+  const state: {normalRuntime?: object; active?: {operation: SourceActorDoubleOperation; runtime: object}} =
+    {...(owners.normalRuntime === undefined ? {} : {normalRuntime: owners.normalRuntime})};
   const access: SourceActorDoubleFrameAccess = Object.freeze({
     invoke<T>(operation: SourceActorDoubleOperation, runtime: object, run: () => T): T {
       requireCompleteSourceActorDoubleLifecycle(actual);
       const prior = state.active;
-      // Only the genuine action body's ground and stream callees may nest.
-      // Their exact runtime remains part of this private invocation capability.
-      if (prior !== undefined && !(prior.operation === 'full' && (operation === 'ground' || operation === 'stream')))
+      // Only genuine full action -> ground/stream or59068 -> ground may nest.
+      // Callers still validate their exact parent stage/runtime before invoking
+      // this private capability; it never permits public standalone ground.
+      if (prior !== undefined && !((prior.operation === 'full' && (operation === 'ground' || operation === 'stream')) ||
+          (prior.operation === 'normal' && operation === 'ground')))
         fail('nested source frame operation is unsupported');
       state.active = {operation, runtime};
       try {const result = run(); requireCompleteSourceActorDoubleLifecycle(actual); return result;}
@@ -94,6 +97,15 @@ export function claimSourceActorDoubleFrame(frame: SourceActorFrameLifecycleRunt
     },
   });
   frameOwners.set(actual, state); frameAccessOwners.set(access, actual); return access;
+}
+/** Exact privately claimed59068 scope for its genuine public child helpers.
+ * Ground retains its stricter separate runtime-matching invocation guard. */
+export function requireSourceActorNormalInvocation(actual: object): void {
+  requireCompleteSourceActorDoubleLifecycle(actual);
+  const owner = frameOwners.get(actual);
+  if (owner !== undefined && (owner.normalRuntime === undefined || owner.active?.operation !== 'normal' ||
+      owner.active.runtime !== owner.normalRuntime))
+    fail('actor is exclusively owned by source frame; public standalone normal replay is unsupported');
 }
 export function requireSourceActorDoubleInvocation(actual: object, operation: SourceActorDoubleOperation, runtime: object): void {
   requireCompleteSourceActorDoubleLifecycle(actual);

@@ -22,10 +22,17 @@
  * Host-only incomplete-call poison prevents edited flags/cues bypassing them.
  * Cue44 writes canonical588 before its ground/air split. Its ground helpers
  * include genuine690a0 between696f4 and69038; active690a0 retains actual upper5
- * and control mask stores then refuses5c080. Air refuses69210 after real699d8
- * and69814. No unsupported helper or post-call control2000 store is invented.
+ * and control mask stores then refuses5c080. Air runs the authenticated integer
+ * chain and691d8 through the same optional genuine677b0 owner. Its private
+ * frame join admits that nested ground call only during genuine59068.
+ * No unsupported helper or post-call control2000 store is invented.
  */
 import type {RomActor} from './actor.js';
+import {isPendingSourceActorFrameClaim, type SourceActorFrameLifecycleRuntime} from './actor-frame-lifecycle.js';
+import {isSourceActorTickPrefixRuntime, type SourceActorTickPrefixRuntime, type SourceActorTickFrameOwners} from './actor-tick-prefix.js';
+import {isSourceActorDoubleFrameAccess, requireCompleteSourceActorDoubleLifecycle, requireSourceActorDoubleInvocation,
+  type SourceActorDoubleFrameAccess} from './actor-double-prehook.js';
+import {isSourceActorGroundProbeRuntime, type SourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import {isSourceActorCommandAdmissionRuntime, hasIncompleteSourceActorCommandAdmission,
   type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorCue0TailRuntime, hasIncompleteSourceActorCue0Tail,
@@ -59,6 +66,9 @@ export interface SourceActorCue0LifecycleSources {
 }
 export interface SourceActorCue0LifecycleRuntime {
   bindActor(identity: symbol, initial: Readonly<Partial<SourceActorCue0LifecycleBinding>>): void;
+  /** One-time genuine join after ground construction, before exclusive frame binding. */
+  bindGroundRuntime(identity: symbol, ground: SourceActorGroundProbeRuntime): void;
+  getGroundRuntime(identity: symbol): SourceActorGroundProbeRuntime | undefined;
   getActualActor(identity: symbol): RomActor;
   getWorldBinding(identity: symbol): SourceActorWorldMatrixBinding;
   getMappingActor(identity: symbol): object;
@@ -81,9 +91,24 @@ export interface SourceActorCue0LifecycleRuntime {
   dispatchCue0(identity: symbol): void;
   dispatchCue44(identity: symbol): void;
   test800690a0(identity: symbol): 0 | 1;
+  test800691d8(identity: symbol): 0;
 }
 const runtimes = new WeakSet<object>(), claimedActors = new WeakSet<object>();
 const incomplete = new WeakSet<object>();
+const frameBinders = new WeakMap<object, (id: symbol, owners: SourceActorTickFrameOwners,
+  access: SourceActorDoubleFrameAccess, tick: SourceActorTickPrefixRuntime) => void>();
+/** Private synchronous frame join. Neither public child exports nor copied
+ * runtime/token records can manufacture authority for normal-stage ground. */
+export function bindSourceActorCue0Frame(frame: SourceActorFrameLifecycleRuntime,
+  runtime: SourceActorCue0LifecycleRuntime, id: symbol, owners: SourceActorTickFrameOwners,
+  access: SourceActorDoubleFrameAccess, tick: SourceActorTickPrefixRuntime): void {
+  if (!isPendingSourceActorFrameClaim(frame, id, owners) || !isSourceActorCue0LifecycleRuntime(runtime) ||
+      !isSourceActorTickPrefixRuntime(tick) || tick.getNormalLifecycleRuntime()?.getCue0Runtime() !== runtime ||
+      runtime.getActualActor(id) !== owners.actual || !isSourceActorDoubleFrameAccess(access, owners.actual))
+    fail('cue0 frame join requires private genuine frame binding');
+  const bind = frameBinders.get(runtime); if (!bind) fail('genuine cue0 frame binder missing');
+  bind(id, owners, access, tick);
+}
 export function isSourceActorCue0LifecycleRuntime(value: unknown): value is SourceActorCue0LifecycleRuntime {
   return value !== null && typeof value === 'object' && runtimes.has(value);
 }
@@ -196,6 +221,11 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
   const tailTeams = tail === undefined ? undefined : capture('tail', 'getKnownTeamStorageOwners');
   const runTail = tail === undefined ? undefined : capture('tail', 'updateActor');
   const tail69814 = tail === undefined ? undefined : capture('tail', 'test80069814');
+  const tail69210 = tail === undefined ? undefined : capture('tail', 'test80069210');
+  const tail693fc = tail === undefined ? undefined : capture('tail', 'test800693fc');
+  const tail6965c = tail === undefined ? undefined : capture('tail', 'test8006965c');
+  const tail695c4 = tail === undefined ? undefined : capture('tail', 'test800695c4');
+  const tail6952c = tail === undefined ? undefined : capture('tail', 'test8006952c');
   const tail696f4 = tail === undefined ? undefined : capture('tail', 'test800696f4');
   const tail69038 = tail === undefined ? undefined : capture('tail', 'test80069038');
   const tail69354 = tail === undefined ? undefined : capture('tail', 'test80069354');
@@ -233,6 +263,9 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     historyVectors: ReadonlyArray<readonly [string, object]>;
     testerOwners?: readonly object[]; testerStatus?: object;
     commandStart?: object; commandStream?: object; commandBinding?: object;
+    groundOwners?: readonly object[];
+    ground?: {runtime: SourceActorGroundProbeRuntime; gauge: object};
+    frame?: {access: SourceActorDoubleFrameAccess; tick: SourceActorTickPrefixRuntime};
     tailOwners?: readonly object[]; tailBinding?: object; tailStatus?: object; tailBorg?: object; tailCharge?: object;
   }
   const owners = (e: Entry): object[] => [e.actual, e.position, e.savedPosition, e.world, e.mapping,
@@ -313,7 +346,7 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
       'word5d4', 'flags5d4', 'field5d4', 'inputFlags5d4', 'word5b4', 'flags5b4', 'field5b4',
       ...(commandGlobals === undefined ? [] : ['field504', 'field508', 'fieldc8', 'pointerC8', 'pointerCC', 'pointercc', 'fieldD0', 'byte709', 'byte1d9a'])];
     const known = new Map(commandEntries().map(({owner, kind}) => [owner, kind]));
-    for (const owner of [...owners(e), terrain, ...(global === undefined ? [] : [global, data!]), ...teamOwners(),
+    for (const owner of [...owners(e), ...(e.ground === undefined ? [] : e.groundOwners!), terrain, ...(global === undefined ? [] : [global, data!]), ...teamOwners(),
       ...(commandGlobals === undefined ? [] : [commandGlobals, commandConstants!]), ...known.keys()]) {
       for (const [key, expected] of canonical) {
         if (owner !== expected && !(key === 'controlWord' && known.get(owner) === 'visibility-target') &&
@@ -328,6 +361,23 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
         check();
       }
     }
+  };
+  const groundOwners = (id: symbol, e: Entry): void => {
+    if (e.ground === undefined) return;
+    const ground = e.ground.runtime;
+    stable(ground.getActualActor(id), e.actual, 'ground actual');
+    stable(ground.getActualBorg(id), e.tailBorg!, 'ground/tail Borg');
+    stable(ground.getWorldBinding(id), e.world, 'ground world');
+    stable(ground.getStatusBinding(id), e.tailStatus!, 'ground/tail status');
+    stable(ground.getGaugeBinding(id), e.ground.gauge, 'ground gauge');
+    stable(ground.getTerrainRuntime(), terrainRuntime, 'ground terrain runtime');
+    stable(ground.getTerrainGlobals(), terrain, 'ground terrain globals');
+    stable(ground.getHistoryBinding(id), e.history, 'ground history');
+    stable(ground.getPositionBinding(id), e.position, 'ground position');
+    const current = ground.getSourceOwners(id);
+    if (current.length !== e.groundOwners!.length || current.some((owner, i) => owner !== e.groundOwners![i]))
+      fail('ground canonical source owners changed');
+    check();
   };
   const admit = (id: symbol, e: Entry): void => {
     stable(worldActor(id), e.actual, 'world actor'); stable(worldBinding(id), e.world, 'world binding');
@@ -384,13 +434,14 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
         fail('tail source owners must retain only the new tail binding');
       assertTeamOwners(e);
     }
-    noShadows(e);
+    groundOwners(id, e); noShadows(e);
   };
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
   const entry = (id: symbol): Entry => {
     const e = actors.get(id); if (!e) fail('unknown/non-owned cue0-lifecycle actor'); return e;
   };
   const assertComplete = (actual: object): void => {
+    requireCompleteSourceActorDoubleLifecycle(actual); check();
     if (hasIncompleteSourceActorCommandAdmission(actual))
       fail('actual actor has known incomplete command admission; source continuation is unsupported');
     if (hasIncompleteSourceActorCue0Tail(actual))
@@ -483,6 +534,25 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     write(e, e.actual, 'controlWord', word(e.actual, 'controlWord') & 0x00ff0000); //69100/69108/6910c.
     fail('80069110 reached unsupported source call8005c080 after genuine upper5 and controlWord mask store');
   };
+  const requireNormalInvocation = (e: Entry): void => {
+    requireSourceActorDoubleInvocation(e.actual, 'normal', e.frame?.tick ?? runtime); check();
+  };
+  const test691d8 = (id: symbol, e: Entry): 0 => {
+    // Authenticated lbz/cmpwi uses unsigned4a0, with no sign-extension.
+    if (byte(e.world, 'mode4a0') === 2) return 0;
+    incomplete.add(e.actual);
+    if (e.ground === undefined) fail('800691f8 reached unsupported source call800677b0 without genuine ground binding');
+    groundOwners(id, e);
+    // The caller remains incomplete until the actual ground call returns. A
+    // contact/query/reentry failure may never be bypassed by later mode edits.
+    const ground = e.ground.runtime;
+    if (e.frame === undefined) ground.runActor(id);
+    else {
+      requireNormalInvocation(e);
+      e.frame.access.invoke('ground', ground, () => ground.runActor(id));
+    }
+    check(); groundOwners(id, e); return 0; //691fc ignores only a completed result.
+  };
   const dispatch44 = (id: symbol, e: Entry): void => {
     // Source stb588 precedes even the actual5e0 load, including equal-value
     // stores. The existing cue reset binding is the only byte588 owner.
@@ -500,7 +570,18 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     if (!airborne && updateTerrain(id, e) !== 0) return;
     if (child(runTesters, `${airborne ? '80059cf8' : '80059db4'} reached unsupported source call800699d8`) !== 0) return;
     if (child(tail69814, `${airborne ? '80059d08' : '80059dc4'} reached unsupported source call80069814 after genuine800699d8 returned0`) !== 0) return;
-    if (airborne) fail('80059d18 reached unsupported source call80069210 after genuine800699d8 and80069814 returned0');
+    if (airborne) {
+      if (child(tail69210, '80059d18 reached unsupported source call80069210') !== 0) return;
+      if (child(tail693fc, '80059d28 reached unsupported source call800693fc') !== 0) return;
+      if (child(tail696f4, '80059d38 reached unsupported source call800696f4') !== 0) return;
+      if (child(tail6965c, '80059d48 reached unsupported source call8006965c') !== 0) return;
+      if (child(tail695c4, '80059d58 reached unsupported source call800695c4') !== 0) return;
+      if (child(tail6952c, '80059d68 reached unsupported source call8006952c') !== 0) return;
+      if (test691d8(id, e) !== 0) return;
+      if (signedByte(e.movement, 'byte661') === 6)
+        child(tail68f9c, '80059d94 reached unsupported source call80068f9c');
+      return;
+    }
     if (child(tail696f4, '80059dd4 reached unsupported source call800696f4') !== 0) return;
     if (test690a0(id, e) !== 0) return;
     if (child(tail69038, '80059df4 reached unsupported source call80069038') !== 0) return;
@@ -552,6 +633,16 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
         ...(e.commandStart === undefined ? [] : [e.commandStart, e.commandStream!])]); check();
       actors.set(id, e); records.forEach(owner => assigned.add(owner)); claimedActors.add(actual);
     });},
+    bindGroundRuntime(id, ground) {guard(() => {
+      const e = entry(id); assertComplete(e.actual); requireNormalInvocation(e); admit(id, e);
+      if (e.ground !== undefined || e.frame !== undefined) fail('cue0 ground binding is one-time and must precede frame binding');
+      if (!isSourceActorGroundProbeRuntime(ground)) fail('ground requires genuine source runtime');
+      if (e.tailBorg === undefined || e.tailStatus === undefined) fail('ground join requires genuine tail Borg/status owners');
+      const joined = {...e, ground: {runtime: ground, gauge: record(ground.getGaugeBinding(id), 'ground gauge')},
+        groundOwners: Object.freeze(ownerList(ground.getSourceOwners(id), 'ground owners'))};
+      admit(id, joined); e.ground = joined.ground; e.groundOwners = joined.groundOwners;
+    });},
+    getGroundRuntime(id) {return entry(id).ground?.runtime;},
     getActualActor(id) {return entry(id).actual;},
     getWorldBinding(id) {return entry(id).world;},
     getMappingActor(id) {return entry(id).mapping;},
@@ -569,21 +660,33 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     getSourceOwners(id) {return entry(id).extras;},
     assertActorComplete(id) {assertComplete(entry(id).actual);},
     updateTerrain(id) {return guard(() => {
-      const e = entry(id); assertComplete(e.actual); admit(id, e);
+      const e = entry(id); assertComplete(e.actual); requireNormalInvocation(e); admit(id, e);
       const result = updateTerrain(id, e); check(); incomplete.delete(e.actual); return result;
     });},
     dispatchCue0(id) {guard(() => {
-      const e = entry(id); assertComplete(e.actual); admit(id, e);
+      const e = entry(id); assertComplete(e.actual); requireNormalInvocation(e); admit(id, e);
       dispatch(id, e); check(); incomplete.delete(e.actual);
     });},
     dispatchCue44(id) {guard(() => {
-      const e = entry(id); assertComplete(e.actual); admit(id, e);
+      const e = entry(id); assertComplete(e.actual); requireNormalInvocation(e); admit(id, e);
       dispatch44(id, e); check(); incomplete.delete(e.actual);
     });},
+    test800691d8(id) {return guard(() => {
+      const e = entry(id); assertComplete(e.actual); requireNormalInvocation(e); admit(id, e);
+      const result = test691d8(id, e); check(); incomplete.delete(e.actual); return result;
+    });},
     test800690a0(id) {return guard(() => {
-      const e = entry(id); assertComplete(e.actual); admit(id, e);
+      const e = entry(id); assertComplete(e.actual); requireNormalInvocation(e); admit(id, e);
       const result = test690a0(id, e); check(); incomplete.delete(e.actual); return result;
     });},
   };
+  frameBinders.set(runtime, (id, owners, access, tick) => guard(() => {
+    const e = entry(id); assertComplete(e.actual); admit(id, e);
+    if (e.frame !== undefined) fail('cue0 already has a frame binding');
+    if (e.ground !== undefined && (owners.ground?.runtime !== e.ground.runtime ||
+        owners.ground.gauge !== e.ground.gauge || owners.ground.terrain !== terrain || owners.ground.history !== e.history))
+      fail('normal/action frame requires the same genuine ground runtime and owners');
+    e.frame = {access, tick};
+  }));
   runtimes.add(runtime); return Object.freeze(runtime);
 }

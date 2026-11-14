@@ -1,6 +1,8 @@
 import {createSourceActorFrameLifecycleRuntime, isSourceActorFrameLifecycleRuntime,
   hasIncompleteSourceActorFrame, type SourceActorFrameRawDistances} from './actor-frame-lifecycle.js';
 import {createSourceActorTickPrefixRuntime, claimSourceActorTickFrame} from './actor-tick-prefix.js';
+import {claimSourceActorDoubleFrame, isSourceActorDoubleFrameAccess, requireSourceActorNormalInvocation,
+  requireSourceActorDoubleInvocation} from './actor-double-prehook.js';
 import {createSourceActorAttributeRefreshRuntime, isSourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import {createSourceActorStatusTimersRuntime, isSourceActorStatusTimersRuntime} from './actor-status-timers.js';
 import {createSourceActorMovementFollowupRuntime, isSourceActorMovementFollowupRuntime} from './actor-movement-followup.js';
@@ -86,6 +88,9 @@ export function runActorFrameLifecycleSelfTests(): void {
       [x.status, isSourceActorStatusTimersRuntime], [x.movement, isSourceActorMovementFollowupRuntime]] as const) {
       check(predicate(value), 'genuine child brand'); check(!predicate({...value}), 'copied child has no brand');
     }
+    equal(x.tick.getNormalLifecycleRuntime(), undefined, 'absent genuine normal child stays absent');
+    rejects(() => requireSourceActorNormalInvocation(x.actual), 'public standalone normal replay');
+    rejects(() => requireSourceActorDoubleInvocation(x.actual, 'ground', x.tick), 'public standalone source replay');
     equal(x.frame.getActualActor(x.id), x.actual, 'same actual actor');
     equal(x.frame.getDispatchBinding(x.id), x.marker(), 'same578 owner');
     rejects(() => x.run(), 'field4c: own data property');
@@ -94,6 +99,8 @@ export function runActorFrameLifecycleSelfTests(): void {
     equal(x.actual.horizontalDistance764, 8, 'second raw host store retained');
     equal(x.actual.hoverOffset668, 99, 'no later55dcc write manufactured');
     equal(x.tick.getActorBinding(x.id).byte598, 17, '59068 not reached');
+    rejects(() => requireSourceActorNormalInvocation(x.actual), 'known incomplete source Double lifecycle');
+    rejects(() => requireSourceActorDoubleInvocation(x.actual, 'ground', x.tick), 'known incomplete source Double lifecycle');
     check(hasIncompleteSourceActorFrame(x.actual), 'begun incomplete frame is tracked');
     rejects(() => x.run(1, raw(99, 98)), 'incomplete source frame');
     equal(x.actual.targetDistance760, 12, 'retry refused before raw overwrite');
@@ -123,8 +130,15 @@ export function runActorFrameLifecycleSelfTests(): void {
     const x = fixture(false);
     const owners = {actual: x.actual, borg: x.borg, world: x.world.getActorBinding(x.id),
       status: x.status.getActorBinding(x.id), mapping: x.mapping.getActor(x.id)};
+    // Unclaimed standalone children remain usable; exporting a claim helper
+    // or knowing all records never grants the frame's pending transaction.
+    requireSourceActorNormalInvocation(x.actual);
+    check(!isSourceActorDoubleFrameAccess({invoke() {}}, x.actual), 'forged normal access has no private brand');
+    rejects(() => claimSourceActorDoubleFrame(x.frame, x.id, {...owners, normalRuntime: x.tick}), 'active genuine frame binding');
     rejects(() => claimSourceActorTickFrame(x.frame, x.tick, x.id, owners), 'active genuine frame binding');
     x.frame.bindActor(x.id);
+    rejects(() => claimSourceActorDoubleFrame(x.frame, x.id, {...owners, normalRuntime: x.tick}), 'active genuine frame binding');
+    rejects(() => requireSourceActorNormalInvocation(x.actual), 'public standalone normal replay');
     rejects(() => claimSourceActorTickFrame(x.frame, x.tick, x.id, owners), 'active genuine frame binding');
     rejects(() => x.tick.ingestRawDistancesAndRun(x.id, 0, {boundary: 'externally-decoded-pre59068-raw', targetDistance760: 1, horizontalDistance764: 1}), 'exclusively owned');
   }

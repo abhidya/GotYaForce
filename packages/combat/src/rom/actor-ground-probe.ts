@@ -28,6 +28,8 @@ export interface SourceActorGroundProbeRuntime {
   getStatusBinding(identity: symbol): object;
   getHistoryBinding(identity: symbol): object;
   getTerrainGlobals(): object;
+  getTerrainRuntime(): SourceActorTerrainQueryRuntime;
+  getPositionBinding(identity: symbol): object;
   getSourceOwners(identity: symbol): readonly object[];
   /** A genuine zero is not a completed landing. Unsupported contact refuses. */
   runActor(identity: symbol): 0 | 1;
@@ -121,6 +123,7 @@ export function createSourceActorGroundProbeRuntime(sources: SourceActorGroundPr
     getGaugeBinding(id) {return entry(id).gauge;}, getWorldBinding(id) {return entry(id).world;},
     getStatusBinding(id) {return entry(id).status;}, getHistoryBinding(id) {return entry(id).history;},
     getTerrainGlobals() {return globals;},
+    getTerrainRuntime() {return terrain;}, getPositionBinding(id) {return entry(id).position;},
     getSourceOwners(id) {return Object.freeze([...Object.values(entry(id)), globals]);},
     runActor(id) {return guard(() => {
       const e = entry(id); requireSourceActorDoubleInvocation(e.actual, 'ground', runtime); owners(id, e);

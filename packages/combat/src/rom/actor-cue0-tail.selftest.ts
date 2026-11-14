@@ -1,6 +1,7 @@
 import {createRomActor} from './actor.js';
 import {createSourceActorInputChargeRuntime, type SourceActorInputChargeSources, type SourceActorInputChargeGlobal, type SourceActorInputChargeData} from './actor-input-charge.js';
 import {createSourceActorCueResetRuntime, type SourceActorCueResetBinding} from './actor-cue-reset.js';
+import {createSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshBinding} from './actor-attribute-refresh.js';
 import {createSourceActorCue0TailRuntime, isSourceActorCue0TailRuntime, hasIncompleteSourceActorCue0Tail,
   type SourceActorCue0TailBinding, type SourceActorCue0TailSources} from './actor-cue0-tail.js';
 function check(ok: boolean, why: string): void {if (!ok) throw Error(`[actor-cue0-tail-test] ${why}`);}
@@ -21,6 +22,7 @@ function watchProperties(run: () => void, observe: (owner: object, key: Property
   try {run();} finally {Object.getOwnPropertyDescriptor = original;}
 }
 function fixture(options: {defer?: boolean; global?: SourceActorInputChargeGlobal; data?: SourceActorInputChargeData;
+  attributes?: boolean;
   proxy?: ProxyHandler<ReturnType<typeof createRomActor>>} = {}) {
   const states = new Map<symbol, ReturnType<typeof makeState>>();
   const hooks: Partial<Record<'worldActor' | 'world' | 'mapping' | 'movementActor' | 'movement' | 'statusActor' |
@@ -33,8 +35,9 @@ function fixture(options: {defer?: boolean; global?: SourceActorInputChargeGloba
     actual.cueTable = new Int8Array(128).fill(-1); actual.ubCue = 201; actual.ubState = -12;
     actual.prevUbState = -21; Object.assign(actual, {onLand754: () => {throw Error('must never invoke onLand754');}});
     const id = Symbol('cue0-tail actor'), world = {mode4a0: 0, mode4a1: 0}, movement = {byte661: 0};
-    const status = {short736: 0, byte593: 73}, borg = {burstArmFrames: 4};
-    const mapping = {}, attribute = {}, dispatch = {family1d88: Symbol(), shared1d8c: Symbol(), marker578: 1, marker1db3: 1};
+    const status = {short736: 0, byte593: 73, byte747: 0}, borg = {burstArmFrames: 4};
+    const mapping = {}, attribute: Partial<SourceActorAttributeRefreshBinding> = {};
+    const dispatch = {family1d88: Symbol(), shared1d8c: Symbol(), marker578: 1, marker1db3: 1};
     const initial: Partial<SourceActorCue0TailBinding> = {byte57c: 9, byte58f: 10, byte7cd: 0};
     const cueInitial: Partial<SourceActorCueResetBinding> = {byte541: 11, byte542: 12, byte543: 13, byte544: 14,
       byte545: 15, byte546: 16, byte547: 17, byte588: 18, byte7ce: 19, byte7cf: 20};
@@ -58,6 +61,12 @@ function fixture(options: {defer?: boolean; global?: SourceActorInputChargeGloba
     getMovementBinding(id: symbol) {return (hooks.statusMovement?.() ?? get(id).movement) as object;},
     getAttributeBinding(id: symbol) {return (hooks.attribute?.() ?? get(id).attribute) as object;},
   };
+  const attributes = options.attributes ? createSourceActorAttributeRefreshRuntime({world: worldSource,
+    mapping: {getActor(id) {return get(id).mapping as ReturnType<SourceActorInputChargeSources['mapping']['getActor']>;},
+      getDescriptor() {throw Error('integer helpers never load descriptor4b0');}},
+    movement: {getActualActor(id) {return movementSource.getActualActor(id);},
+      getActorBinding(id) {return movementSource.getActorBinding(id);},
+      updateActor() {throw Error('integer helpers never refresh movement');}}}) : undefined;
   const row = {charged: false}, global = options.global ?? {teamRows103: [row]};
   const chargeSources: SourceActorInputChargeSources = {world: worldSource, status: statusSource,
     mapping: {getActor(id) {return get(id).mapping as ReturnType<SourceActorInputChargeSources['mapping']['getActor']>;},
@@ -70,21 +79,31 @@ function fixture(options: {defer?: boolean; global?: SourceActorInputChargeGloba
     getSourceActor(id) {return get(id).mapping as ReturnType<SourceActorInputChargeSources['mapping']['getActor']>;},
     getActorBinding(id) {return (hooks.dispatch?.() ?? get(id).dispatch) as ReturnType<typeof makeState>['dispatch'];},
   }});
-  const sources: SourceActorCue0TailSources = {world: worldSource, movement: movementSource, status: statusSource, charge, cues};
+  const sources: SourceActorCue0TailSources = {world: worldSource, movement: movementSource, status: statusSource, charge, cues,
+    ...(attributes ? {attributes} : {})};
   const runtime = createSourceActorCue0TailRuntime(sources);
   const add = (defer = false, proxy?: ProxyHandler<ReturnType<typeof createRomActor>>) => {
-    const x = makeState(proxy); states.set(x.id, x); charge.bindActor(x.id, {byte58e: 42, byte654: 43, byte655: 44});
+    const x = makeState(proxy); states.set(x.id, x);
+    if (attributes) {
+      attributes.bindActor(x.id, {parameter4ac: attributes.createParameterDescriptor({byte9f: 1})});
+      x.attribute = attributes.getActorBinding(x.id);
+    }
+    charge.bindActor(x.id, {byte58e: 42, byte654: 43, byte655: 44});
     cues.bindActor(x.id, x.cueInitial);
     const bind = () => runtime.bindActor(x.id, x.initial); if (!defer) bind();
     return {...x, bind, binding: () => runtime.getActorBinding(x.id), cueBinding: () => cues.getActorBinding(x.id),
       run: () => runtime.updateActor(x.id), burst: () => runtime.test80069814(x.id), gate: () => runtime.test800694c0(x.id),
       move: () => runtime.test800696f4(x.id), clear: () => runtime.test80069038(x.id),
-      held: () => runtime.test80069354(x.id), statusCue: () => runtime.test80068f9c(x.id)};
+      held: () => runtime.test80069354(x.id), statusCue: () => runtime.test80068f9c(x.id),
+      jump: () => runtime.test80069210(x.id), airHeld: () => runtime.test800693fc(x.id),
+      movementHeld: () => runtime.test8006965c(x.id), movementStatus: () => runtime.test800695c4(x.id),
+      movementFlag: () => runtime.test8006952c(x.id)};
   };
   return {...add(options.defer, options.proxy), add, runtime, sources, worldSource, movementSource, statusSource,
-    charge, cues, global, row, hooks};
+    charge, cues, attributes, global, row, hooks};
 }
 export function runActorCue0TailSelfTests(): void {
+  runControl40IntegerHelperSelfTests();
   {
     const x = fixture();
     check(isSourceActorCue0TailRuntime(x.runtime) && !isSourceActorCue0TailRuntime({...x.runtime}), 'genuine brand');
@@ -384,5 +403,235 @@ export function runActorCue0TailSelfTests(): void {
   }
   for (const key of ['byte57c', 'byte58f', 'byte7cd'] as const) for (const bad of [-1, 256, 1.5, NaN, Infinity, '1']) {
     const x = fixture({defer: true}); (x.initial as Record<string, unknown>)[key] = bad; rejects(x.bind, `${key}: integer`);
+  }
+}
+
+/** Instruction-authenticated helper schedules, synthetic explicit scalar/table
+ * values, genuine694c0 and genuine6a750 throughout. No fake helper returns. */
+function runControl40IntegerHelperSelfTests(): void {
+  const activeJump = (attributes = false) => {
+    const x = fixture({attributes}); x.actual.controlWord = 0; x.actual.inputEdge5d4 = 2;
+    x.binding().byte7cd = attributes ? 0 : 2; x.actual.cueTable![17] = -7; return x;
+  };
+  const activeHeld = (movement: boolean) => {
+    const x = fixture(); x.movement.byte661 = movement ? 2 : 0; x.actual.controlWord = 0;
+    x.actual.inputHeld5d8 = 0xabf5; x.actual.cueTable![(movement ? 22 : 15) * 2 + 1] = -7;
+    return {...x, selected: movement ? 22 : 15, invoke: movement ? x.movementHeld : x.airHeld};
+  };
+  {
+    const x = fixture(); absent(x.actual, 'inputEdge5d4'); absent(x.status, 'byte747');
+    absent(x.status, 'short736'); equal(x.jump(), 0, '69210 control2 skips all later fields and absent resolver');
+    x.actual.controlWord = 0; rejects(x.jump, 'inputEdge5d4');
+    x.actual.inputEdge5d4 = 0; equal(x.jump(), 0, '69210 edge2 skips588 and beyond');
+    x.actual.inputEdge5d4 = 2; x.cueBinding().byte588 = 0; equal(x.jump(), 0, '69210 signed588zero skips7cd');
+    x.cueBinding().byte588 = 1; rejects(x.jump, 'parameter4ac');
+    x.attribute.parameter4ac = Symbol('missing resolver'); rejects(x.jump, 'byte747');
+    x.status.byte747 = 0; rejects(x.jump, 'active4ac+9f requires genuine attribute');
+    check(!hasIncompleteSourceActorCue0Tail(x.actual), 'unresolved9f read has no effects');
+    const y = fixture({defer: true}); delete y.initial.byte7cd; y.bind();
+    y.actual.controlWord = 0; y.actual.inputEdge5d4 = 2; y.cueBinding().byte588 = 0;
+    equal(y.jump(), 0, '588zero does not demand7cd'); y.cueBinding().byte588 = 255; rejects(y.jump, 'byte7cd: own data');
+  }
+  for (let bit = 0; bit < 32; bit++) {
+    const mask = (2 ** bit) >>> 0;
+    const x = activeJump(); x.actual.controlWord = mask;
+    equal(x.jump(), bit === 1 ? 0 : 1, '69210 control mask2');
+    const y = activeJump(); y.actual.inputEdge5d4 = mask;
+    equal(y.jump(), bit === 1 ? 1 : 0, '69210 edge mask2');
+    for (const movement of [false, true]) {
+      const z = activeHeld(movement); z.actual.controlWord = mask;
+      equal(z.invoke(), bit === (movement ? 1 : 0) ? 0 : 1, 'held helper exact control mask');
+    }
+    for (const flag of [false, true]) {
+      const z = fixture(); z.actual.controlWord = 0; z.movement.byte661 = 2; z.actual.statusWord5b4 = mask;
+      const selected = flag ? 18 : 19; z.actual.cueTable![selected * 2 + 1] = 3;
+      equal((flag ? z.movementFlag : z.movementStatus)(), flag ? (bit === 8 ? 1 : 0) : (bit >= 16 && bit <= 19 ? 1 : 0),
+        '6952c/695c4 distinct status masks');
+      const c = fixture(); c.actual.controlWord = mask; c.movement.byte661 = 2; c.actual.statusWord5b4 = 0xf0100;
+      c.actual.cueTable![selected * 2 + 1] = 3;
+      equal((flag ? c.movementFlag : c.movementStatus)(), bit === 1 ? 0 : 1, 'status helper exact control2 mask');
+    }
+  }
+  for (let raw = 0; raw < 256; raw++) {
+    const x = activeJump(raw === 0); x.binding().byte7cd = raw;
+    if (raw === 1) x.status.short736 = 1; else absent(x.status, 'short736');
+    equal(x.jump(), 1, 'all raw7cd branches use exact zero/one semantics');
+    equal(x.actual.ubCue, 8, '69210 genuine upper8'); equal(x.actual.ubState, -7, '69210 real selected state');
+    const y = activeJump(); y.cueBinding().byte588 = raw;
+    equal(y.jump(), raw === 0 ? 0 : 1, 'all raw588 sign extensions retain nonzero');
+    const a = activeHeld(false); a.movement.byte661 = raw;
+    equal(a.invoke(), raw === 2 || raw === 5 ? 0 : 1, '693fc all raw661 excludes signed2/5 only');
+    const b = activeHeld(true); b.movement.byte661 = raw;
+    equal(b.invoke(), raw === 2 ? 1 : 0, '6965c all raw unsigned661');
+    const c = fixture(); c.actual.controlWord = 0; c.movement.byte661 = raw; c.actual.statusWord5b4 = 0xf0100;
+    c.actual.cueTable![39] = 1; c.actual.cueTable![37] = 2;
+    equal(c.movementStatus(), raw === 2 ? 1 : 0, '695c4 all unsigned661');
+    equal(c.movementFlag(), raw === 2 ? 1 : 0, '6952c all unsigned661');
+  }
+  for (const raw747 of [0, 1, 126, 127, 128, 129, 254, 255]) for (const limit of [0, 1, 126, 127, 128, 254, 255]) {
+    const x = activeJump(true); x.status.byte747 = raw747;
+    x.attributes!.getParameterDescriptor(x.attribute.parameter4ac!).byte9f = limit;
+    equal(x.jump(), (raw747 << 24 >> 24) < limit ? 1 : 0, 'signed747 strictly less than unsigned9f');
+  }
+  for (const short736 of [-32768, -1, 0, 1, 32767]) {
+    const x = activeJump(); x.binding().byte7cd = 1; x.status.short736 = short736;
+    equal(x.jump(), short736 > 0 ? 1 : 0, '69210 signed736>0 only for retained7cd==1');
+    const y = activeHeld(false); y.binding().byte7cd = 255; y.status.short736 = short736;
+    equal(y.invoke(), short736 > 0 ? 1 : 0, '693fc reuses real694c0 signed736');
+  }
+  {
+    const x = activeJump(true), first = x.attribute.parameter4ac!;
+    const second = x.attributes!.createParameterDescriptor({byte9f: 0});
+    const parameter = x.attributes!.getParameterDescriptor(first), order: string[] = [];
+    x.actual.cueTable![17] = -1;
+    watchProperties(() => equal(x.jump(), 0, '69210 sentinel after retained pointer threshold passes'), (owner, key) => {
+      if (owner === x.actual && ['controlWord', 'inputEdge5d4'].includes(String(key)) ||
+        owner === x.cueBinding() && key === 'byte588' || owner === x.binding() && key === 'byte7cd' ||
+        owner === x.attribute && key === 'parameter4ac' || owner === x.status && key === 'byte747' ||
+        owner === parameter && key === 'byte9f') order.push(String(key));
+      if (owner === x.status && key === 'byte747') x.attribute.parameter4ac = second;
+    });
+    equal(order.join(','), 'controlWord,inputEdge5d4,byte588,byte7cd,parameter4ac,byte747,byte9f', '69210 authenticated source read order');
+    equal(x.attribute.parameter4ac, second, '747 mutation was applied');
+    // A captured limit0 would reject, but the captured first descriptor1 reaches actual cueTable.
+    let calls = 0; x.attribute.parameter4ac = first;
+    watchProperties(() => rejects(x.jump, 'cueTable: own data'), (owner, key) => {
+      if (owner === x.status && key === 'byte747') {x.attribute.parameter4ac = second; absent(x.actual, 'cueTable');}
+      if (owner === parameter && key === 'byte9f') calls++;
+    });
+    equal(calls, 1, 'captured descriptor read once');
+  }
+  {
+    const x = activeJump(); x.binding().byte7cd = 1; x.status.short736 = 1; let reads = 0;
+    watchProperties(() => equal(x.jump(), 1, '7cd retained across736 mutation'), (owner, key) => {
+      if (owner === x.binding() && key === 'byte7cd') reads++;
+      if (owner === x.status && key === 'short736') x.binding().byte7cd = 0;
+    }); equal(reads, 1, '69210 reads7cd once');
+    const y = activeHeld(false); const order: string[] = []; y.binding().byte7cd = 1; y.status.short736 = 1;
+    y.actual.controlWord = 1;
+    watchProperties(() => equal(y.invoke(), 0, '693fc late control1 refusal'), (owner, key) => {
+      if (owner === y.movement && key === 'byte661' || owner === y.binding() && key === 'byte7cd' ||
+        owner === y.status && key === 'short736' || owner === y.actual && key === 'controlWord') order.push(String(key));
+    }); equal(order.join(','), 'byte661,byte7cd,short736,controlWord', '693fc real694c0 before control1');
+    const z = activeHeld(false); let movementReads = 0;
+    watchProperties(() => equal(z.invoke(), 1, '693fc retains661 before694c0'), (owner, key) => {
+      if (owner === z.movement && key === 'byte661') movementReads++;
+      if (owner === z.binding() && key === 'byte7cd') z.movement.byte661 = 5;
+    }); equal(movementReads, 1, '693fc retained661 read once');
+    const a = activeHeld(false); a.binding().byte7cd = 1; a.status.short736 = 0;
+    absent(a.actual, 'controlWord'); absent(a.actual, 'inputHeld5d8'); equal(a.invoke(), 0, 'failed694c0 skips later reads');
+    const b = activeHeld(false); b.binding().byte7cd = 1; absent(b.status, 'short736'); b.actual.controlWord = 1;
+    rejects(b.invoke, 'short736');
+  }
+  for (const method of ['airHeld', 'movementHeld', 'movementStatus', 'movementFlag'] as const) {
+    const x = fixture(); x.movement.byte661 = method === 'airHeld' ? 2 : 0;
+    absent(x.actual, 'controlWord'); absent(x.actual, 'inputHeld5d8'); absent(x.actual, 'statusWord5b4');
+    absent(x.status, 'short736'); x.binding().byte7cd = 1;
+    equal(x[method](), 0, '661 rejects lazily before all helper-specific operands');
+    const y = fixture(); y.movement.byte661 = method === 'airHeld' ? 0 : 2; y.actual.controlWord = 3;
+    absent(y.actual, 'inputHeld5d8'); absent(y.actual, 'statusWord5b4'); equal(y[method](), 0, 'control gate skips later source fields');
+    const z = fixture(); z.movement.byte661 = method === 'airHeld' ? 0 : 2; z.actual.controlWord = 0;
+    absent(z.actual, 'cueTable'); equal(z[method](), 0, 'held/status zero skips realcue access');
+    const a = fixture(); a.movement.byte661 = method === 'airHeld' ? 0 : 2; a.actual.controlWord = 0;
+    a.actual.inputHeld5d8 = 0x10; a.actual.statusWord5b4 = 0xf0100;
+    const order: string[] = [];
+    watchProperties(() => equal(a[method](), 0, 'ordered real sentinel'), (owner, key) => {
+      if (owner === a.movement && key === 'byte661' || owner === a.binding() && key === 'byte7cd' ||
+        owner === a.actual && ['controlWord', 'inputHeld5d8', 'statusWord5b4', 'cueTable'].includes(String(key))) order.push(String(key));
+    });
+    equal(order.join(','), method === 'airHeld' ? 'byte661,byte7cd,controlWord,inputHeld5d8,cueTable' :
+      method === 'movementHeld' ? 'byte661,controlWord,inputHeld5d8,cueTable' : 'byte661,controlWord,statusWord5b4,cueTable',
+      'complete source gate order before genuine sentinel');
+  }
+  for (const movement of [false, true]) {
+    for (let bit = 0; bit < 16; bit++) {
+      const x = activeHeld(movement); x.actual.inputHeld5d8 = 2 ** bit;
+      equal(x.invoke(), bit >= 4 && bit <= 7 ? 1 : 0, 'held gate masks only bits4..7');
+    }
+    const x = activeHeld(movement), order: string[] = []; let reads = 0;
+    watchProperties(() => equal(x.invoke(), 1, 'native nonzero cue consumes freshheld'), (owner, key) => {
+      if (owner === x.actual && key === 'inputHeld5d8') {
+        order.push('held'); reads++; if (reads === 2) x.actual.inputHeld5d8 = 0xabc0;
+        if (reads === 3) x.actual.inputHeld5d8 = 0xdef7;
+      }
+      if (owner === x.binding() && key === 'byte58f') order.push('58f store');
+      if (owner === x.actual && key === 'ubCue') order.push('cue');
+    });
+    equal(reads, 4, 'three separate held loads and final store check');
+    equal(x.binding().byte58f, 12, '58f comes from postcue second read');
+    equal(x.actual.inputHeld5d8, 0xde07, 'held clear comes from third read after58f');
+    check(order.indexOf('cue') > order.indexOf('held') && order.indexOf('58f store') > order.lastIndexOf('cue'), 'realcue before58f store');
+    equal(order.slice(-4).join(','), 'held,58f store,held,held', 'postcue exact ordered reads and stores');
+    const y = activeHeld(movement); y.actual.cueTable![y.selected * 2 + 1] = -1; let sentinelReads = 0;
+    watchProperties(() => equal(y.invoke(), 0, 'genuine sentinel0'), (owner, key) => {
+      if (owner === y.actual && key === 'inputHeld5d8') sentinelReads++;
+    }); equal(sentinelReads, 1, 'sentinel skips all postcue loads and stores');
+    equal(y.binding().byte58f, 10, 'sentinel retains58f'); equal(y.actual.inputHeld5d8, 0xabf5, 'sentinel retainsheld');
+    for (const destination of ['byte58f', 'inputHeld5d8'] as const) {
+      const z = activeHeld(movement); readonly(destination === 'byte58f' ? z.binding() : z.actual, destination);
+      rejects(z.invoke, `${destination}: non-writable`); equal(z.actual.ubCue, z.selected, 'late failure retains actualcue');
+      equal(z.binding().byte58f, destination === 'byte58f' ? 10 : 15, 'earlier58f prefix retained');
+      equal(z.actual.inputHeld5d8, 0xabf5, 'failed store does not clearheld');
+      check(hasIncompleteSourceActorCue0Tail(z.actual), 'effectful prefix blocks replay');
+      rejects(z.invoke, 'known incomplete'); rejects(z.jump, 'known incomplete');
+    }
+  }
+  for (const method of ['jump', 'airHeld', 'movementHeld', 'movementStatus', 'movementFlag'] as const) {
+    const selected = {jump: 8, airHeld: 15, movementHeld: 22, movementStatus: 19, movementFlag: 18}[method];
+    for (const success of [false, true]) {
+      const x = activeJump(); x.movement.byte661 = method === 'airHeld' ? 0 : 2;
+      x.status.short736 = 1; x.actual.inputHeld5d8 = 0x20; x.actual.statusWord5b4 = 0xf0100;
+      x.actual.cueTable![selected * 2 + 1] = success ? -128 : -1;
+      equal(x[method](), success ? 1 : 0, 'all helpers return realcue sentinel/success');
+      equal(x.actual.ubCue, success ? selected : 201, 'exact genuineupper cue requested');
+      equal(x.actual.ubState, success ? -128 : -12, 'actual source-selected state applied');
+      check(!hasIncompleteSourceActorCue0Tail(x.actual), 'completed native outcome not incomplete');
+    }
+    const x = activeJump(); x.movement.byte661 = method === 'airHeld' ? 0 : 2;
+    x.status.short736 = 1; x.actual.inputHeld5d8 = 0x20; x.actual.statusWord5b4 = 0xf0100; x.actual.cueTable![selected * 2 + 1] = 2;
+    readonly(x.cueBinding(), 'byte546'); rejects(x[method], 'byte546: non-writable');
+    equal(x.actual.ubCue, selected, 'real partialcue prefix preserved'); equal(x.cueBinding().byte547, 0, 'phase547 before failed546');
+    check(hasIncompleteSourceActorCue0Tail(x.actual), 'partial realcue permanently poisons tail'); rejects(x[method], 'known incomplete');
+  }
+  {
+    const x = activeJump(true); x.attribute.parameter4ac = x.attributes!.createParameterDescriptor({});
+    Object.assign(x.actual, {descriptor: {handlerData9f: 255}}); rejects(x.jump, 'byte9f: own data');
+    for (const invalid of [null, undefined, 1, {}, Promise.resolve(Symbol())]) {
+      const y = activeJump(true); (y.attribute as Record<string, unknown>).parameter4ac = invalid;
+      absent(y.status, 'byte747'); rejects(y.jump, 'byte747: own data');
+      y.status.byte747 = 0; rejects(y.jump, 'non-null decoded symbol');
+    }
+    const y = activeJump(true); y.attribute.parameter4ac = Symbol('foreign'); rejects(y.jump, 'explicitly owned parameter descriptor');
+    const z = fixture(); rejects(() => createSourceActorCue0TailRuntime({...z.sources, attributes: {} as never}), 'genuine source runtime');
+    const a = fixture({attributes: true}); rejects(() => createSourceActorCue0TailRuntime({...a.sources, attributes: {...a.attributes!}}), 'genuine source runtime');
+    const b = fixture({attributes: true, defer: true}); b.hooks.attribute = () => ({}); rejects(b.bind, 'owner changed');
+    const c = activeJump(true), other = fixture({attributes: true}); c.sources.attributes = other.attributes!;
+    equal(c.jump(), 1, 'captured genuine attribute runtime cannot be replaced through sources');
+    const d = fixture({attributes: true}), parameter = d.attributes!.getParameterDescriptor(d.attribute.parameter4ac!);
+    d.global.teamRows103 = [parameter as unknown as {charged: boolean}];
+    rejects(d.burst, 'row aliases another source owner');
+    const e = fixture({attributes: true}); e.actual.cueTable = e.attributes!.getParameterDescriptor(e.attribute.parameter4ac!) as unknown as Int8Array;
+    rejects(e.jump, 'parameter descriptor aliases another source owner');
+  }
+  for (const key of ['byte588', 'byte747', 'parameter4ac', 'byte9f', 'field4ac', 'field747', 'field588']) {
+    const x = fixture({defer: true}); (x.world as unknown as Record<string, unknown>)[key] = 0; rejects(x.bind, 'competing');
+    const y = fixture({attributes: true}); (y.actual as unknown as Record<string, unknown>)[key] = 0; rejects(y.jump, 'competing');
+  }
+  for (const key of ['byte588', 'byte747', 'byte9f'] as const) for (const bad of [-1, 256, 1.5, NaN, Infinity, '1']) {
+    const x = activeJump(true), parameter = x.attributes!.getParameterDescriptor(x.attribute.parameter4ac!);
+    const owner = key === 'byte588' ? x.cueBinding() : key === 'byte747' ? x.status : parameter;
+    (owner as Record<string, unknown>)[key] = bad; rejects(x.jump, `${key}: integer`);
+  }
+  for (const movement of [false, true]) {
+    let active = false, reenter: (() => unknown) | undefined;
+    const x = fixture({proxy: {set(target, key, value, receiver) {
+      const result = Reflect.set(target, key, value, receiver);
+      if (active && key === 'inputHeld5d8') {try {reenter!();} catch { /* caught adversary */ }} return result;
+    }}});
+    x.movement.byte661 = movement ? 2 : 0; x.actual.controlWord = 0; x.actual.inputHeld5d8 = 0x70;
+    x.actual.cueTable![(movement ? 22 : 15) * 2 + 1] = 2;
+    reenter = movement ? x.movementHeld : x.airHeld; active = true;
+    rejects(reenter, 'caught same-runtime reentry'); equal(x.actual.inputHeld5d8, 0, 'held store precedes caught reentry');
+    equal(x.binding().byte58f, 7, '58f prefix retained on reentry'); check(hasIncompleteSourceActorCue0Tail(x.actual), 'reentry blocks retry');
   }
 }

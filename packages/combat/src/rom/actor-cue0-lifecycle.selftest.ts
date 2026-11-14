@@ -1,7 +1,7 @@
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {createRomActor} from './actor.js';
 import {createSourceActorCue0LifecycleRuntime, isSourceActorCue0LifecycleRuntime,
-  hasIncompleteSourceActorCue0Lifecycle, type SourceActorCue0LifecycleBinding,
+  hasIncompleteSourceActorCue0Lifecycle, bindSourceActorCue0Frame, type SourceActorCue0LifecycleBinding,
   type SourceActorCue0LifecycleSources} from './actor-cue0-lifecycle.js';
 import {createSourceActorTerrainQueryRuntime, type SourceActorTerrainGlobals} from './actor-terrain-query.js';
 import {createSourceActorCueResetRuntime, type SourceActorCueResetBinding} from './actor-cue-reset.js';
@@ -96,7 +96,8 @@ function fixture(options: {defer?: boolean; height?: number; initial?: Partial<S
     world, movement, attribute, history, dispatch, terrain, cues, sources, initial, runtime, bind, hooks, calls,
     binding: () => runtime.getActorBinding(id), cueBinding: () => cues.getActorBinding(id),
     ground: () => runtime.updateTerrain(id), cue0: () => runtime.dispatchCue0(id),
-    cue44: () => runtime.dispatchCue44(id), test690a0: () => runtime.test800690a0(id)};
+    cue44: () => runtime.dispatchCue44(id), test690a0: () => runtime.test800690a0(id),
+    test691d8: () => runtime.test800691d8(id)};
 }
 function poisoned(x: ReturnType<typeof fixture>): void {
   check(hasIncompleteSourceActorCue0Lifecycle(x.actual), 'actual identity retains incomplete lifecycle');
@@ -108,6 +109,38 @@ function poisoned(x: ReturnType<typeof fixture>): void {
   check(!hasIncompleteSourceActorCue0Lifecycle({...x.actual}), 'incomplete marker is actual identity only');
 }
 export function runActorCue0LifecycleSelfTests(): void {
+  {
+    //691d8 has one unsigned-byte gate. It must not demand any query operand
+    // on mode2 and cannot fabricate a completed677b0 when the join is absent.
+    const skip = fixture(); skip.worldState.mode4a0 = 2;
+    skip.actual.hoverOffset668 = NaN; skip.actual.pos.y = NaN; skip.actual.stepHeight = NaN;
+    skip.historyState.previousStepHeight6d4 = NaN;
+    const reads: string[] = [];
+    watchProperties(() => equal(skip.test691d8(), 0, 'unsigned mode2 returns native0 without ground'), (owner, key) => {
+      if (owner === skip.worldState && key === 'mode4a0' || owner === skip.actual && key === 'hoverOffset668' ||
+          owner === skip.actual.pos && key === 'y' || owner === skip.historyState && key === 'previousStepHeight6d4')
+        reads.push(String(key));
+    });
+    equal(reads.join(','), 'mode4a0', '691d8 skip has no query operand load');
+    check(!hasIncompleteSourceActorCue0Lifecycle(skip.actual), 'completed mode2 skip clears no source failure');
+    for (const mode of [0, 1, 3, 127, 128, 255]) {
+      const x = fixture(); x.worldState.mode4a0 = mode;
+      rejects(x.test691d8, '800691f8 reached unsupported source call800677b0');
+      check(hasIncompleteSourceActorCue0Lifecycle(x.actual), 'missing actual ground leaves caller permanently incomplete');
+      x.worldState.mode4a0 = 2;
+      rejects(x.test691d8, 'known incomplete cue0 lifecycle');
+    }
+    for (const mode of [-1, 256, NaN, 1.5]) {
+      const x = fixture(); x.worldState.mode4a0 = mode;
+      rejects(x.test691d8, 'mode4a0: integer out of bounds');
+    }
+    const fake = fixture();
+    rejects(() => fake.runtime.bindGroundRuntime(fake.id, {} as never), 'ground requires genuine source runtime');
+    equal(fake.runtime.getGroundRuntime(fake.id), undefined, 'forged ground never establishes a join');
+    rejects(() => bindSourceActorCue0Frame({} as never, fake.runtime, fake.id, {} as never,
+      {} as never, {} as never), 'private genuine frame binding');
+  }
+
   {
     const x = fixture();
     check(isSourceActorCue0LifecycleRuntime(x.runtime), 'genuine brand');

@@ -116,6 +116,8 @@ export interface SourceActorTickPrefixRuntime {
     initial: Readonly<Partial<SourceActorTickPrefixBinding>>): void;
   getActualActor(identity: symbol): RomActor;
   getActualBorg(identity: symbol): SourceActorGaugeBorgOwner;
+  /** Retained genuine normal child, for the private frame join only. */
+  getNormalLifecycleRuntime(): SourceActorNormalLifecycleRuntime | undefined;
   getActorBinding(identity: symbol): Partial<SourceActorTickPrefixBinding>;
   /** A fully admitted ready or normal branch returns source void; other reached gaps refuse.
    * This does not execute the enclosing actor frame or produce raw target inputs. */
@@ -127,8 +129,9 @@ export interface SourceActorTickFrameOwners {
   readonly actual: RomActor; readonly borg: object; readonly world: object;
   readonly status: object; readonly mapping: object;
   /** Optional downstream677b0 owners, reconciled before a frame can claim ingress. */
+  readonly normalRuntime?: object;
   readonly suffixGauge?: object;
-  readonly ground?: {readonly gauge: object; readonly terrain: object; readonly history: object};
+  readonly ground?: {readonly runtime: object; readonly gauge: object; readonly terrain: object; readonly history: object};
 }
 export interface SourceActorTickFrameCapability {
   beginHostIngress(epoch: number): void;
@@ -263,7 +266,8 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
   const controlReady = control === undefined ? undefined : capture('actorControl', 'getReadyRuntime');
   const updateControl = control === undefined ? undefined : capture('actorControl', 'updateActor');
   const normal = Object.getOwnPropertyDescriptor(sources, 'normalLifecycle');
-  if (normal !== undefined && !isSourceActorNormalLifecycleRuntime(read(sources, 'normalLifecycle')))
+  const normalRuntime = normal === undefined ? undefined : read(sources, 'normalLifecycle');
+  if (normal !== undefined && !isSourceActorNormalLifecycleRuntime(normalRuntime))
     fail('normal lifecycle requires the genuine source runtime, not callback effects');
   const normalActor = normal === undefined ? undefined : capture('normalLifecycle', 'getActualActor');
   const normalWorld = normal === undefined ? undefined : capture('normalLifecycle', 'getWorldBinding');
@@ -1041,6 +1045,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     });},
     getActualActor(id: symbol) {return entry(id).actual;},
     getActualBorg(id: symbol) {return entry(id).borg;},
+    getNormalLifecycleRuntime() {return normalRuntime as SourceActorNormalLifecycleRuntime | undefined;},
     getActorBinding(id: symbol) {return entry(id).binding;},
     ingestRawDistancesAndRun(id: symbol, epoch: number, raw: SourceActorTickRawDistances): void {return guard(() => {
       const actor = entry(id);

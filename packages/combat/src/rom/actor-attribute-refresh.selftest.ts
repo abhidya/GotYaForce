@@ -135,6 +135,28 @@ function referenceProduct(a: number, b: number): number {
 }
 export function runActorAttributeRefreshSelfTests(): void {
   {
+    const x = fixture(), missing = x.runtime.createParameterDescriptor({});
+    check(!Object.hasOwn(x.runtime.getParameterDescriptor(missing), 'byte9f'), 'missing4ac+9f has no default');
+    for (let value = 0; value < 256; value++) {
+      const initial = {byte9f: value}, id = x.runtime.createParameterDescriptor(initial);
+      const parameter = x.runtime.getParameterDescriptor(id);
+      equal(parameter.byte9f, value, 'all explicit unsigned9f values');
+      check(parameter !== initial && Object.isSealed(parameter), '9f uses copied sealed existing parameter owner');
+      equal(x.runtime.getParameterDescriptor(id), parameter, 'same4ac identity resolves same9f owner');
+      check(x.runtime.getKnownParameterDescriptors().includes(parameter), '9f owner in same genuine parameter registry');
+      initial.byte9f = 0; equal(parameter.byte9f, value, 'caller mutation does not hydrate9f');
+    }
+    for (const value of [-1, 256, 1.5, NaN, Infinity, '1', null, undefined]) {
+      rejects(() => x.runtime.createParameterDescriptor({byte9f: value as number}), 'byte9f: unsigned integer');
+    }
+    let invoked = false;
+    const accessor = Object.defineProperty({}, 'byte9f', {get() {invoked = true; return 1;}});
+    rejects(() => x.runtime.createParameterDescriptor(accessor), 'byte9f: own data');
+    check(!invoked, 'parameter9f accessor never executes');
+    const inherited = x.runtime.createParameterDescriptor(Object.create({byte9f: 1}) as {byte9f: number});
+    check(!Object.hasOwn(x.runtime.getParameterDescriptor(inherited), 'byte9f'), 'inherited9f is not explicit hydration');
+  }
+  {
     const x = fixture();
     equal(x.runtime.getDescriptorBinding(x.descriptor).byte10, undefined, 'historical descriptors do not gain a joint10 default');
     for (let raw = 0; raw < 256; raw++) {

@@ -54,6 +54,8 @@ export interface SourceActorAttributeParameterDescriptor {
   field74: number; field78: number; field7c: number;
   /** Unsigned table selector on this SAME 4ac owner, consumed by8006826c. */
   byteA3: number;
+  /** Explicit unsigned limit on this SAME4ac owner, consumed by80069210. */
+  byte9f?: number;
   /** Charge thresholds on this SAME 4ac owner, consumed by800686f0. */
   field184: number; field188: number; field18c: number;
 }
@@ -212,8 +214,10 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
           binding[key] = value === 0 ? 0 : value;
         }
       }
-      if (Object.getOwnPropertyDescriptor(initial, 'byteA3') !== undefined)
-        binding.byteA3 = integer(read(initial, 'byteA3'), 255, 'byteA3');
+      for (const key of ['byteA3', 'byte9f'] as const) {
+        const p = Object.getOwnPropertyDescriptor(initial, key); check();
+        if (p !== undefined) binding[key] = integer(read(initial, key), 255, key);
+      }
       Object.seal(binding);
       const id = Symbol('owned actor parameter4ac'); parameters.set(id, binding); return id;
     });},
