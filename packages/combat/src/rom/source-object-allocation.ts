@@ -1,6 +1,7 @@
-/** Bounded source88aa0(actor,3,8,0,1), not retail heap hydration.
+/** Bounded source88aa0(actor,3,8,0,1)/(actor,4,48,0,0), not retail heap hydration.
  * Evidence: research/decomp/object-allocator-evidence-2026-11-14.md and
- * research/decomp/projectile-spawn-evidence-2026-11-14.md.
+ * research/decomp/projectile-spawn-evidence-2026-11-14.md and
+ * research/decomp/projectile-hit-evidence-2026-11-14.md.
  * No original-runtime execution or oracle parity is claimed.
  * Object and descriptor records retain caller-supplied canonical BE byte storage.
  * Opaque symbols receive local u32 encodings solely to represent pointers in that
@@ -8,6 +9,8 @@
  * defaults, copied allocation record, model creation, or injected callback runs.
  * Synthetic offline fixtures must explicitly supply every reached byte/table cell.
  * The authenticated pool3 type3 size is0x2e4; group8..14 classifications are16.
+ * Pool4 type4 size is0x1c0; group48..54 classifications are26. Its requested
+ * descriptor count is zero; signed negative descriptor availability still fails.
  * Descriptor0 has actual nonnull initializer80006f60 (three zero word stores),
  * not an optional injected success function. Its source record stride is0x2c.
  *
@@ -36,6 +39,10 @@ export interface SourceDescriptorPool {
   initCallback14?: number;
 }
 export interface SourceObjectAllocationActorBinding {byte83: number}
+/** Symbolic address only: this neither dereferences nor copies source bytes. */
+export interface SourceObjectInteriorAddress {readonly base: symbol; readonly byteOffset: number}
+/** Frozen alias metadata retains the original target, not a replacement record. */
+export interface SourceObjectInteriorTarget {readonly base: object; readonly byteOffset: number}
 export interface SourceObjectAllocationSources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor'>;
   objectPools: Readonly<Record<number, SourceObjectPool>>;
@@ -57,11 +64,16 @@ export interface SourceObjectAllocationRuntime {
   assertActorComplete(identity: symbol): void;
   claimActor(identity: symbol, caller: symbol): void;
   allocateProjectile(identity: symbol, caller: symbol): symbol | null;
+  allocateProjectileHit(identity: symbol, caller: symbol): symbol | null;
   markActorIncomplete(identity: symbol, caller: symbol): void;
   getObject(identity: symbol): SourceAllocationBytes;
   getDescriptor(identity: symbol): SourceAllocationBytes;
   getPointerTarget(identity: symbol): object;
   getPointerIdentity(actual: object): symbol;
+  /** Intern an owned base+offset alias. Scalar access still requires actual memory. */
+  getInteriorPointer(base: symbol, byteOffset: number): symbol;
+  /** Null for an owned base identity; unknown/foreign identities are rejected. */
+  getInteriorAddress(pointer: symbol): Readonly<SourceObjectInteriorAddress> | null;
   readU8(identity: symbol, offset: number): number;
   readS8(identity: symbol, offset: number): number;
   readU16(identity: symbol, offset: number): number;
@@ -142,6 +154,7 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     retain(read(table(name), String(index)), `${name}[${index}]`);
   type Memory = {kind: 'object' | 'descriptor'; bytes: SourceAllocationBytes};
   const memories = new Map<symbol, Memory>(), targets = new Map<symbol, object>(), targetIds = new WeakMap<object, symbol>();
+  const interiorIds = new Map<symbol, Map<number, symbol>>(), interiorAddresses = new Map<symbol, Readonly<SourceObjectInteriorAddress>>();
   const handles = new Map<symbol, number>(), identities = new Map<number, symbol>();
   let nextHandle = 1;
   const identify = (id: symbol, target: object): void => {
@@ -153,6 +166,23 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
       if (nextHandle > 0xffffffff) fail('opaque pointer handle capacity exhausted');
       targets.set(id, target); targetIds.set(target, id); handles.set(id, nextHandle); identities.set(nextHandle++, id);
     }
+  };
+  const target = (id: symbol): object => {
+    const value = targets.get(id); if (value === undefined) fail('unknown/non-owned pointer identity'); return value;
+  };
+  const interiorPointer = (base: symbol, byteOffset: number): symbol => {
+    target(base); integer(byteOffset, 0xffff, 'interior byte offset');
+    if (byteOffset === 0) return base;
+    const prior = interiorAddresses.get(base);
+    if (prior !== undefined) {base = prior.base; byteOffset += prior.byteOffset;}
+    integer(byteOffset, 0xffff, 'interior byte offset');
+    const original = target(base), byOffset = interiorIds.get(base) ?? new Map<number, symbol>();
+    const existing = byOffset.get(byteOffset); if (existing !== undefined) return existing;
+    const id = Symbol('source interior pointer');
+    const view: Readonly<SourceObjectInteriorTarget> = Object.freeze({base: original, byteOffset});
+    identify(id, view);
+    interiorAddresses.set(id, Object.freeze({base, byteOffset}));
+    byOffset.set(byteOffset, id); interiorIds.set(base, byOffset); return id;
   };
   const registerMemory = (id: symbol, initial: SourceAllocationBytes, kind: Memory['kind']): void => {
     if (typeof id !== 'symbol' || targets.has(id)) fail('new symbol memory identity required');
@@ -237,8 +267,8 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     //06d4c retains the actual returned descriptor and clears +0xc.
     store(id, 0x0c, 4, 0); return id;
   };
-  const popObject = (): symbol | null => {
-    const p = pool('objectPools', 3), id = pointerField(p, 'head');
+  const popObject = (poolIndex: 3 | 4): symbol | null => {
+    const p = pool('objectPools', poolIndex), id = pointerField(p, 'head');
     if (id === null) return null;
     write(p, 'count', (raw(p, 'count', 0xffff) - 1) & 0xffff);
     memory(id, 'object');
@@ -246,10 +276,39 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     if (next === null) write(p, 'tail', null);
     const type = load(id, 2, 1), signedType = type << 24 >> 24;
     const size = raw(table('typeSizes'), String(signedType), 0xffff);
-    if (signedType !== 3 || size !== 0x2e4) fail('only authenticated object pool3 type3 size0x2e4 is bounded');
+    const expectedSize = poolIndex === 3 ? 0x2e4 : 0x1c0;
+    if (signedType !== poolIndex || size !== expectedSize)
+      fail(`only authenticated object pool${poolIndex} type${poolIndex} size0x${expectedSize.toString(16)} is bounded`);
     // Real canonical bytes, not a replacement record or selective field reset.
     for (let offset = 0; offset < size; offset++) store(id, offset, 1, 0);
-    store(id, 2, 1, type); store(id, 3, 1, 3); return id;
+    store(id, 2, 1, type); store(id, 3, 1, poolIndex); return id;
+  };
+  const allocate = (id: symbol, caller: symbol, poolIndex: 3 | 4): symbol | null => {
+    const a = authorize(id, caller);
+    requireSourceActorDoubleInvocation(a.actual, 'allocation', runtime);
+    if (actualActor(id) !== a.actual) fail('world actor owner changed its actual record'); noShadow(a.actual);
+    allocating = true; dirty = false;
+    const requestedDescriptors = poolIndex === 3 ? 1 : 0, requestedGroup = poolIndex === 3 ? 8 : 48;
+    if (countDescriptor(pool('descriptorPools', 0)) < requestedDescriptors) return null;
+    const allocated = popObject(poolIndex); if (allocated === null) return null;
+    store(allocated, 1, 1, requestedGroup); store(allocated, 0x85, 1, 255);
+    let group = requestedGroup;
+    if (raw(a.binding, 'byte83', 255) === 0) group += (raw(a.actual, 'slot', 255) << 24 >> 24) + 1;
+    store(allocated, 1, 1, group & 255);
+    const eligibility = raw(table('groupEligibility'), String(group), 255), expectedEligibility = poolIndex === 3 ? 16 : 26;
+    if (group < requestedGroup || group > requestedGroup + 6 || eligibility !== expectedEligibility)
+      fail(`only authenticated group${requestedGroup}..${requestedGroup + 6} classification${expectedEligibility} is bounded`);
+    store(allocated, 0x83, 1, eligibility);
+    const g = pool('groups', group), previous = pointerField(g, 'head');
+    write(g, 'head', allocated); putPointer(allocated, 4, null);
+    if (previous === null) {write(g, 'tail', allocated); putPointer(allocated, 8, null);}
+    else {putPointer(allocated, 8, previous); memory(previous, 'object'); putPointer(previous, 4, allocated);}
+    if ((load(allocated, 2, 1) << 24 >> 24) !== 4) {
+      for (let index = 0; index < 8; index++)
+        putPointer(allocated, 0xe0 + index * 4, index < requestedDescriptors ? allocateDescriptor() : null);
+      store(allocated, 0x99, 1, requestedDescriptors);
+    }
+    return allocated;
   };
   const floatBits = new DataView(new ArrayBuffer(4));
   const runtime: SourceObjectAllocationRuntime = {
@@ -287,34 +346,14 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
       if (typeof caller !== 'symbol' || a.caller !== caller) fail('exclusive actor caller capability required');
       a.incomplete = true; incomplete = true;
     });},
-    allocateProjectile(id, caller) {return guard(() => {
-      const a = authorize(id, caller);
-      requireSourceActorDoubleInvocation(a.actual, 'allocation', runtime);
-      if (actualActor(id) !== a.actual) fail('world actor owner changed its actual record'); noShadow(a.actual);
-      allocating = true; dirty = false;
-      if (countDescriptor(pool('descriptorPools', 0)) < 1) return null;
-      const allocated = popObject(); if (allocated === null) return null;
-      store(allocated, 1, 1, 8); store(allocated, 0x85, 1, 255);
-      let group = 8;
-      if (raw(a.binding, 'byte83', 255) === 0) group += (raw(a.actual, 'slot', 255) << 24 >> 24) + 1;
-      store(allocated, 1, 1, group & 255);
-      const eligibility = raw(table('groupEligibility'), String(group), 255);
-      if (group < 8 || group > 14 || eligibility !== 16) fail('only authenticated group8..14 classification16 is bounded');
-      store(allocated, 0x83, 1, eligibility);
-      const g = pool('groups', group), previous = pointerField(g, 'head');
-      write(g, 'head', allocated); putPointer(allocated, 4, null);
-      if (previous === null) {write(g, 'tail', allocated); putPointer(allocated, 8, null);}
-      else {putPointer(allocated, 8, previous); memory(previous, 'object'); putPointer(previous, 4, allocated);}
-      if ((load(allocated, 2, 1) << 24 >> 24) !== 4) {
-        for (let index = 0; index < 8; index++) putPointer(allocated, 0xe0 + index * 4, index === 0 ? allocateDescriptor() : null);
-        store(allocated, 0x99, 1, 1);
-      }
-      return allocated;
-    }, true);},
+    allocateProjectile(id, caller) {return guard(() => allocate(id, caller, 3), true);},
+    allocateProjectileHit(id, caller) {return guard(() => allocate(id, caller, 4), true);},
     getObject(id) {return memory(id, 'object');},
     getDescriptor(id) {return memory(id, 'descriptor');},
-    getPointerTarget(id) {const value = targets.get(id); if (!value) fail('unknown/non-owned pointer identity'); return value;},
+    getPointerTarget(id) {return target(id);},
     getPointerIdentity(actual) {const id = targetIds.get(actual); if (id === undefined) fail('actual pointer owner has not been registered'); return id;},
+    getInteriorPointer(base, byteOffset) {return guard(() => interiorPointer(base, byteOffset), true);},
+    getInteriorAddress(id) {return guard(() => {target(id); return interiorAddresses.get(id) ?? null;});},
     readU8(id, offset) {return guard(() => load(id, offset, 1));},
     readS8(id, offset) {return guard(() => load(id, offset, 1) << 24 >> 24);},
     readU16(id, offset) {return guard(() => load(id, offset, 2));},

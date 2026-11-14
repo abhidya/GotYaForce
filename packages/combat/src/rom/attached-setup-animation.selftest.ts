@@ -15,6 +15,9 @@ import {runActorProjectileSpawnSelfTests} from './actor-projectile-spawn.selftes
 import {runSourceObjectAllocationSelfTests} from './source-object-allocation.selftest.js';
 import {createSourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
 import {runProjectileRootLifecycleSelfTests} from './projectile-root-lifecycle.selftest.js';
+import {createSourceProjectileHitRuntime} from './projectile-hit-registration.js';
+import {createDoubleProjectileHitExportSlice} from './projectile-hit-export-slice.js';
+import {runProjectileHitRegistrationSelfTests} from './projectile-hit-registration.selftest.js';
 import {createSourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
 import {createSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleBinding} from './actor-control-lifecycle.js';
@@ -2854,6 +2857,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runProjectileSpawnHydratedCompositionTests();
   runProjectileFrameGroundContinuationTests();
   runProjectileRootHydratedCompositionTests();
+  runProjectileHitHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -11596,20 +11600,28 @@ function doubleFrameHydratedCompositionFixture(bind = true, withGround: boolean 
     const objectPool = {head: child as symbol | null, tail: nextChild as symbol | null, count: 2};
     const descriptorPool = {freeHead: descriptor as symbol | null, activeHead: null as symbol | null, count: 2, initCallback14: 0x80006f60};
     const groups: Record<number, SourceObjectGroup> = Object.fromEntries(Array.from({length: 7}, (_, i) => [i + 8, {head: null, tail: null}]));
-    const allocator = createSourceObjectAllocationRuntime({world: x.world, objectPools: {3: objectPool}, descriptorPools: {0: descriptorPool},
-      groups, typeSizes: {3: 0x2e4}, groupEligibility: {8: 16, 9: 16, 10: 16, 11: 16, 12: 16, 13: 16, 14: 16}});
+    const hitIds = Array.from({length:4},(_,i)=>Symbol(`source HIT ${i}`)), hitBytes = hitIds.map(()=>bytes(0x1c0));
+    const hitPool = {head:hitIds[0] as symbol|null,tail:hitIds[3] as symbol|null,count:4};
+    for(let i=48;i<=54;i++) groups[i]={head:null,tail:null};
+    const allocator = createSourceObjectAllocationRuntime({world: x.world, objectPools: {3: objectPool,4:hitPool}, descriptorPools: {0: descriptorPool},
+      groups, typeSizes: {3: 0x2e4,4:0x1c0}, groupEligibility: {8: 16, 9: 16, 10: 16, 11: 16, 12: 16, 13: 16, 14: 16,
+        48:26,49:26,50:26,51:26,52:26,53:26,54:26}});
     for (const [id, raw] of [[child, objectBytes], [nextChild, nextObjectBytes]] as const) allocator.registerObject(id, raw);
     for (const [id, raw] of [[descriptor, descriptorBytes], [nextDescriptor, nextDescriptorBytes]] as const) allocator.registerDescriptor(id, raw);
     allocator.writeU8(child, 2, 3); allocator.writeU8(nextChild, 2, 3);
     allocator.writePointer(child, 4, nextChild); allocator.writePointer(nextChild, 4, null);
     allocator.writePointer(descriptor, 0, nextDescriptor); allocator.writePointer(nextDescriptor, 0, null);
+    hitIds.forEach((id,i)=>allocator.registerObject(id,hitBytes[i]!));
+    hitIds.forEach((id,i)=>{allocator.writeU8(id,2,4);
+      allocator.writePointer(id,4,hitIds[i+1]??null);});
     allocator.bindActor(x.actor, {byte83: 0});
     const row1 = {family2e: 3, joint02: 11, local04: {x: 55, y: 0, z: 0}, offset2c: 0};
     const projectileSources = {prehook, world: x.world, admission: x.commandAdmission, gauges: x.gauges, setup: x.ready, allocator, row1};
     const projectiles = createSourceActorProjectileSpawnRuntime(projectileSources);
     const projectileInitial = {pointer90: a as object | null};
     return {projectiles, allocator, objectPool, descriptorPool, groups, child, nextChild, descriptor, nextDescriptor,
-      objectBytes, nextObjectBytes, descriptorBytes, nextDescriptorBytes, row1, projectileSources, projectileInitial};
+      objectBytes, nextObjectBytes, descriptorBytes, nextDescriptorBytes, row1, projectileSources, projectileInitial,
+      hitIds,hitBytes,hitPool};
   })() : undefined;
   const actionSources = {prehook, attributes: x.attributes, cues: x.cues, tables: actionTables, processor: {gqr0: 0},
     ...(ground === undefined ? {} : {ground}), ...(projectileFixture === undefined ? {} : {projectiles: projectileFixture.projectiles})};
@@ -13084,6 +13096,48 @@ export function createProjectileRootTestFixture(matchingMirror = true) {
   const rootSources = {spawns: x.projectiles, stage: x.stageBounds, drawList0: drawList, initialState0: 0x8007dd84, row1Hit03: 1};
   const root = createSourceProjectileRootRuntime(rootSources); root.bindProjectile(x.child);
   return Object.assign(x, {root, rootSources, drawList});
+}
+/** Explicit source integer projection plus synthetic current type4 free lists.
+ * Only eight selected HIT bytes are reconstructed from lossless export fields;
+ * no rounded floats, full raw asset, constructor or matrix is manufactured. */
+export function createProjectileHitTestFixture() {
+  const x=createProjectileSpawnTestFixture();x.sourceActor.borgMirror94=3;
+  check(x.projectiles.spawn(x.actor,1)===x.child,'real spawn supplies HIT child');
+  const hitBinding=createDoubleProjectileHitExportSlice(),hitTableIdentity=Symbol('explicit pl0003 integer slice'),
+    damageIdentity=Symbol('actual retained derived family table');
+  x.allocator.registerExternal(hitTableIdentity,hitBinding.pointer3fc);
+  x.allocator.registerExternal(damageIdentity,hitBinding.pointer27c);
+  const hits=createSourceProjectileHitRuntime(x.projectiles);hits.bindActor(x.actor,hitBinding);
+  const drawList={head:null as symbol|null,tail:null as symbol|null};
+  const rootSources={spawns:x.projectiles,stage:x.stageBounds,drawList0:drawList,initialState0:0x8007dd84,row1Hit03:1,hits};
+  const root=createSourceProjectileRootRuntime(rootSources);root.bindProjectile(x.child);
+  return Object.assign(x,{hits,hitBinding,hitTableIdentity,damageIdentity,root,rootSources,drawList});
+}
+export function runProjectileHitHydratedCompositionTests(): void {
+  runProjectileHitRegistrationSelfTests(createProjectileHitTestFixture);
+  const x=createProjectileHitTestFixture(),a=x.allocator,first=x.hitIds[0]!;
+  const priorDescriptors=x.descriptorPool.count,position=[0x20,0x24,0x28].map(o=>a.readU32(x.child,o));
+  rejects(()=>x.root.dispatchStoredRoot(x.child),'positive HIT continuation');
+  check(x.hitPool.count===3 && x.groups[49]!.head===first && x.descriptorPool.count===priorDescriptors,
+    'real initial root allocates HIT from canonical type4 pool without descriptor consumption');
+  check(a.readU32(first,0xc)===0x8008a65c && a.readPointer(first,0x20)===x.child &&
+    a.readPointer(first,0x24)===x.actor && a.readPointer(first,0x2c)===x.damageIdentity &&
+    a.readU8(first,0x11)===1 && a.readS16(first,0x48)===0 && a.readS16(first,0x4a)===-1 &&
+    a.readU8(x.child,0x86)===1 && a.readU8(x.child,0x1d8)===0,
+    'lossless selected export fields drive actual nonempty HIT registration writes');
+  check(a.getInteriorAddress(a.readPointer(first,0x28)!)?.base===x.hitTableIdentity &&
+    a.getInteriorAddress(a.readPointer(first,0x28)!)?.byteOffset===0xaf0 &&
+    a.getInteriorAddress(a.readPointer(first,0x60)!)?.base===x.child &&
+    a.getInteriorAddress(a.readPointer(first,0x60)!)?.byteOffset===0x114 &&
+    position.every((v,i)=>a.readU32(x.child,[0x20,0x24,0x28][i]!)===v),
+    'canonical interior addresses retain actual table and child; later matrix refresh remains unreached');
+  rejects(()=>x.hits.registerHit(x.child,1),'incomplete');
+  const y=createProjectileHitTestFixture();y.hitPool.head=null;
+  y.root.dispatchStoredRoot(y.child);
+  check(y.allocator.readU8(y.child,0x18)===2 && y.groups[49]!.head===null && y.hitPool.count===4,
+    'real allocation failure reaches zero-HIT state2 epilogue without inventing collision data');
+  y.projectiles.assertActorComplete(y.actor);
+  console.log('[projectile-hit-composition] PASS: same spawned child reaches real type4 HIT allocation/list/alias/activation writes from eight lossless exported integer bytes, positive suffix remains explicit matrix boundary; genuine zero return retires initial state, no full asset/scheduler/flight/collision/browser claim');
 }
 export function runProjectileRootHydratedCompositionTests(): void {
   runProjectileRootLifecycleSelfTests(createProjectileRootTestFixture);

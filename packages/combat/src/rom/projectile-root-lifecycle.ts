@@ -17,6 +17,7 @@ import {isSourceActorStageBoundsRuntime, type SourceActorStageBoundsRuntime} fro
 import {isSourceActorDoubleFrameClaimed} from './actor-double-prehook.js';
 import type {RomActor} from './actor.js';
 import type {SourceAllocationBytes} from './source-object-allocation.js';
+import {isSourceProjectileHitRuntime, type SourceProjectileHitRuntime} from './projectile-hit-registration.js';
 
 export interface SourceProjectileDrawList {head?: symbol | null; tail?: symbol | null}
 export interface SourceProjectileRootSources {
@@ -27,6 +28,8 @@ export interface SourceProjectileRootSources {
   /** Explicit decoded802d6f98[0] and selected802d6da3, copied and validated. */
   initialState0: number;
   row1Hit03: number;
+  /** Optional genuine continuation, never a caller-supplied success callback. */
+  hits?: SourceProjectileHitRuntime;
 }
 export interface SourceProjectileRootRuntime {
   bindProjectile(projectile: symbol): void;
@@ -63,6 +66,11 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
   const state0 = unsigned(own(sources, 'initialState0'), 0xffffffff, 'state0'), hit = unsigned(own(sources, 'row1Hit03'), 255, 'row1Hit03');
   if (state0 !== 0x8007dd84 || hit !== 1) fail('initial-state or row1 HIT cell differs from authenticated evidence');
   const allocator = spawns.getAllocatorRuntime(), prehook = spawns.getPrehookRuntime();
+  const hitProperty = Object.getOwnPropertyDescriptor(sources,'hits');
+  if (hitProperty && !('value' in hitProperty)) fail('hits: own data runtime required');
+  const hits = hitProperty?.value as unknown;
+  if (hits !== undefined && (!isSourceProjectileHitRuntime(hits) || hits.getSpawnRuntime() !== spawns))
+    fail('genuine HIT runtime with same completed-spawn owner required');
   const draw = list as SourceProjectileDrawList;
   let busy = false, poisoned = false;
   const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
@@ -134,7 +142,12 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     put16(e.id, 0x72, heading);
     if (variant !== 1) fail(`8007ddfc reached unauthenticated row${variant} HIT byte`);
     if ((hit << 24 >> 24) !== 1) fail('authenticated signed row1 HIT byte changed');
-    fail('8007de04 reached unsupported actual8008ac80 HIT registration(child,1); owner27c/3fc and type4 allocation are not hydrated');
+    if (hits === undefined)
+      fail('8007de04 reached unsupported actual8008ac80 HIT registration(child,1); owner27c/3fc and type4 allocation are not hydrated');
+    same(call(() => hits.getActualActor(e.origin)),e.actual,'HIT actual');
+    const result = call(() => hits.registerHit(e.id,1));
+    if (result === 0) {put8(e.id,0x18,2);return;} //7de10/14 then actual epilogue
+    fail('8007de1c reached positive HIT continuation before actual8020b7a8 position refresh; remaining projectile initialization is unsupported');
   };
   const runtime: SourceProjectileRootRuntime = {
     bindProjectile(id) {guard(() => {

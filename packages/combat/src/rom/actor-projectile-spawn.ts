@@ -54,6 +54,8 @@ export interface SourceActorProjectileSpawnRuntime {
   assertActorComplete(identity: symbol): void;
   /** Identity registered only after every source spawn store completes. */
   getSpawnOwnerIdentity(projectile: symbol): symbol;
+  /** Actual88aa0(owner,4,48,0,0) for a completed child's reached8ac80 call. */
+  allocateProjectileHit(projectile: symbol): symbol | null;
   /** Host return exposes allocation identity for inspection; source returns void. */
   spawn(identity: symbol, variant: number): symbol | null;
 }
@@ -222,6 +224,16 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
       if (id === undefined) fail('projectile has no completed genuine spawn');
       return id;
     },
+    allocateProjectileHit(projectile) {return guard(() => {
+      const id = completedSpawns.get(projectile);
+      if (id === undefined) fail('HIT allocation requires completed genuine spawn');
+      const e = entry(id);
+      try {owners(id,e); return call(() => allocator.allocateProjectileHit(id,e.caller));}
+      catch (error) {
+        markIncompleteSourceActorDoubleLifecycle(e.actual);
+        allocator.markActorIncomplete(id,e.caller); throw error;
+      }
+    });},
     spawn(id, variant) {return guard(() => {
       const e = entry(id); requireSourceActorDoubleInvocation(e.actual,'projectile',runtime);
       try {
