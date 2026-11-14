@@ -4959,3 +4959,43 @@ failure now latches the shared Double lifecycle even when the inner action
 returned successfully, preventing direct prehook/action/ground replay of an
 unfinished enclosing frame. Host-input admission failures remain recoverable.
 The incomplete-frame latch is not cleared and no tail operation is bypassed.
+
+## Bounded complete actor-frame suffix (2026-11-14)
+
+An explicit genuine suffix now executes actual4c0→6f88c,55ee4, the conditional
+original-position restoration, and5b880 in that order. The posthook clears the
+persistent7c8 arm only behind its source control bit; the separate Sasuke
+signed-borg10/6e9 path remains a reached refusal. Housekeeping reuses canonical
+attribute87,actual sizeScale7fc/modelScaleb4,gauge7c9/status272; only previously
+missing8cc/1eb/276 are explicitly supplied without defaults. The threshold is
+source-authenticated2.0, with signed8cc and fresh control loads preserved.
+
+The frame restores the position captured before its prehook, in individual
+X/Y/Z word-store order, only when a fresh control40 check is clear and canonical
+tick.byte598 is nonzero. No transform-history snapshot or action-end position
+is substituted. Actual5b880 supports an explicit null sound table and the four
+explicit signed auxiliary37=-1 skips. Reached sound rows execute their genuine
+operand loads and refuse before5b98c; no audio event is silently discarded.
+
+Only genuine final sound-scan return and final owner checks release the private
+per-frame incomplete state. Exclusive frame ownership, consumed input epochs,
+and every child failure latch persist. A private frame capability authorizes
+only the exact stage/runtime, including the nested full-action ground call;
+public prehook/action/ground/suffix calls cannot replay a claimed actor between
+frames or during another stage. Host-ingress errors remain recoverable with a
+later epoch. Source-phase errors remain permanently incomplete.
+
+Synthetic decoded composition demonstrates a completed first Double action2
+frame with its nonnull copied stream and real DAT/AObj/FObj/mode1 state retained.
+A subsequent genuine epoch reaches the unsupported phase1 target800ff418 without
+resetting actual540. This proves bounded frame completion and next-frame
+admission, not sustained action playback. The completion fixture explicitly uses
+null4e8. Authenticated constructor802d3b48 instead points to nonnull802d3ca0;
+retail sound-table payload and event handling remain unimplemented. No retail
+hydration, complete attack, clone allocation, production selection or browser
+playability claim follows.
+
+New static evidence: [frame suffix](frame-suffix-evidence-2026-11-14.md), containing
+three complete spans128 instructions, two fixed constructor cells and one scalar,
+checked against both archived snapshots. Posthook extent is not claimed from a
+missing map row. Original executable execution and MATCH remain unclaimed.

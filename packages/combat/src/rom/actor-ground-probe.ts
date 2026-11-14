@@ -13,7 +13,7 @@ import {addSourceFloat32} from './source-float.js';
 import {isSourceActorGaugeScaleRuntime, type SourceActorGaugeScaleRuntime} from './actor-gauge-scale.js';
 import {createSourceActorTerrainNormalOutput, isSourceActorTerrainQueryRuntime,
   type SourceActorTerrainQueryRuntime} from './actor-terrain-query.js';
-import {requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
+import {requireCompleteSourceActorDoubleLifecycle, requireSourceActorDoubleInvocation} from './actor-double-prehook.js';
 
 export interface SourceActorGroundProbeSources {
   gauges: SourceActorGaugeScaleRuntime;
@@ -123,7 +123,7 @@ export function createSourceActorGroundProbeRuntime(sources: SourceActorGroundPr
     getTerrainGlobals() {return globals;},
     getSourceOwners(id) {return Object.freeze([...Object.values(entry(id)), globals]);},
     runActor(id) {return guard(() => {
-      const e = entry(id); owners(id, e);
+      const e = entry(id); requireSourceActorDoubleInvocation(e.actual, 'ground', runtime); owners(id, e);
       if (byte(e.gauge, 'byte7c9') !== 0) return 0;
       const clearance = f(e.actual, 'hoverOffset668');
       const normal = createSourceActorTerrainNormalOutput();

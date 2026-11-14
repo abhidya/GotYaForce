@@ -16,6 +16,8 @@
  * Refusals after source effects permanently poison this actor's Double
  * lifecycle, including action dispatch. No production routing is added.
  */
+import {isPendingSourceActorFrameClaim, type SourceActorFrameLifecycleRuntime} from './actor-frame-lifecycle.js';
+import type {SourceActorTickFrameOwners} from './actor-tick-prefix.js';
 import type {RomActor} from './actor.js';
 import {getDoubleNinjaOwnerState, type DoubleNinjaOwnerState} from '../ninjaX.js';
 import {isSourceActorStatusTimersRuntime, type SourceActorStatusTimersRuntime} from './actor-status-timers.js';
@@ -57,6 +59,46 @@ export function markIncompleteSourceActorDoubleLifecycle(actual: object): void {
 export function hasIncompleteSourceActorDoubleLifecycle(actual: object): boolean {return incomplete.has(actual);}
 export function requireCompleteSourceActorDoubleLifecycle(actual: object): void {
   if (incomplete.has(actual)) fail('known incomplete source Double lifecycle');
+}
+/** Private frame scope: ownership persists after successful frames. Public
+ * executable adapters cannot run outside the exact genuine stage/runtime.
+ * A token is obtainable only during the frame module's private bind join. */
+export type SourceActorDoubleOperation = 'prehook' | 'capture' | 'upper' | 'full' | 'ground' |
+  'posthook' | 'housekeeping' | 'sound';
+export interface SourceActorDoubleFrameAccess {
+  invoke<T>(operation: SourceActorDoubleOperation, runtime: object, run: () => T): T;
+}
+const frameOwners = new WeakMap<object, {active?: {operation: SourceActorDoubleOperation; runtime: object}}>();
+const frameAccessOwners = new WeakMap<object, object>();
+export function isSourceActorDoubleFrameAccess(access: unknown, actual: object): access is SourceActorDoubleFrameAccess {
+  return access !== null && typeof access === 'object' && frameAccessOwners.get(access) === actual;
+}
+export function claimSourceActorDoubleFrame(frame: SourceActorFrameLifecycleRuntime, id: symbol,
+  owners: SourceActorTickFrameOwners): SourceActorDoubleFrameAccess {
+  if (!isPendingSourceActorFrameClaim(frame, id, owners)) fail('Double frame claim requires active genuine frame binding');
+  const actual = owners.actual;
+  requireCompleteSourceActorDoubleLifecycle(actual);
+  if (frameOwners.has(actual)) fail('actual actor already has exclusive Double frame ownership');
+  const state: {active?: {operation: SourceActorDoubleOperation; runtime: object}} = {};
+  const access: SourceActorDoubleFrameAccess = Object.freeze({
+    invoke<T>(operation: SourceActorDoubleOperation, runtime: object, run: () => T): T {
+      requireCompleteSourceActorDoubleLifecycle(actual);
+      const prior = state.active;
+      // Only the genuine action body's nested ground helper is a nested stage.
+      if (prior !== undefined && !(prior.operation === 'full' && operation === 'ground'))
+        fail('nested source frame operation is unsupported');
+      state.active = {operation, runtime};
+      try {const result = run(); requireCompleteSourceActorDoubleLifecycle(actual); return result;}
+      finally {if (prior === undefined) delete state.active; else state.active = prior;}
+    },
+  });
+  frameOwners.set(actual, state); frameAccessOwners.set(access, actual); return access;
+}
+export function requireSourceActorDoubleInvocation(actual: object, operation: SourceActorDoubleOperation, runtime: object): void {
+  requireCompleteSourceActorDoubleLifecycle(actual);
+  const owner = frameOwners.get(actual);
+  if (owner !== undefined && (owner.active?.operation !== operation || owner.active.runtime !== runtime))
+    fail('actor is exclusively owned by source frame; public standalone source replay is unsupported');
 }
 function fail(reason: string): never {
   throw Error(`[actor-double-prehook] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -185,7 +227,7 @@ export function createSourceActorDoublePrehookRuntime(sources: SourceActorDouble
     },
     assertActorComplete(id) {guard(() => {const e = entry(id); requireCompleteSourceActorDoubleLifecycle(e.actual); reconcile(id, e);});},
     runActor(id) {guard(() => {
-      const e = entry(id); requireCompleteSourceActorDoubleLifecycle(e.actual); reconcile(id, e);
+      const e = entry(id); requireSourceActorDoubleInvocation(e.actual, 'prehook', runtime); reconcile(id, e);
       let effect = false;
       const write = (owner: object, key: string, value: number): void => {
         own(owner, key, true); check(); effect = true; (owner as Record<string, unknown>)[key] = value; check();

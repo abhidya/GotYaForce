@@ -2,6 +2,7 @@ import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {addSourceFloat32} from './source-float.js';
 import {createSourceActorAnimationTransitionRuntime} from './actor-animation-transition.js';
 import {createSourceActorFrameLifecycleRuntime, hasIncompleteSourceActorFrame} from './actor-frame-lifecycle.js';
+import {createSourceActorFrameSuffixRuntime} from './actor-frame-suffix.js';
 import type {BorgRuntime, WeaponCell} from '../types.js';
 import {NeoGredMeleeState} from '../neoGredMelee.js';
 import {bindDoubleNinjaOwnerState, getDoubleNinjaOwnerState} from '../ninjaX.js';
@@ -2835,6 +2836,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runDoubleFrameHydratedCompositionTests();
   runDoubleGroundStreamHydratedCompositionTests();
   runDoubleFrameMarkerCompositionTests();
+  runCompletedDoubleFrameHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -11961,7 +11963,7 @@ export function runDoubleFrameMarkerCompositionTests(): void {
       rejects(run, 'incomplete source Double'); retained(); animation();
     }
   }
-  console.log('[actor-double-frame-markers] PASS: independent55568 upper1/full0/posthook2 schedule, actual marker0 mode1 admission with1db3=1, readonly/reentry at both inter-handler stores and retained-prefix no-replay guards; offline only,4c0 remains unsupported');
+  console.log('[actor-double-frame-markers] PASS: independent55568 upper1/full0/posthook2 schedule, actual marker0 mode1 admission with1db3=1, readonly/reentry at both inter-handler stores and retained-prefix no-replay guards; offline only, historical no-suffix graph retains4c0 refusal');
 }
 export function runDoubleGroundStreamHydratedCompositionTests(): void {
   {
@@ -12141,5 +12143,278 @@ export function runDoubleGroundStreamHydratedCompositionTests(): void {
     finally {Object.getOwnPropertyDescriptor = original;}
     retained(); check(caught && x.landCalls() === 0, 'caught ground reentry cannot continue to terrain, config, stream or landing');
   }
-  console.log('[actor-double-ground-stream-composition] PASS: genuine55568/action2/677b0 distinct3e0a8 no-contact and copied nonnull group4 stream through actual opcode01/DAT/AObj/FObj mode1; fixed0/1 slots, ordered failures/80c after return, canonical owners/epochs and standalone explicit blend-to-frame1; frame still stops at4c0, synthetic offline only, no clone/full-frame/retail-playability claim');
+  console.log('[actor-double-ground-stream-composition] PASS: genuine55568/action2/677b0 distinct3e0a8 no-contact and copied nonnull group4 stream through actual opcode01/DAT/AObj/FObj mode1; fixed0/1 slots, ordered failures/80c after return, canonical owners/epochs and standalone explicit blend-to-frame1; historical no-suffix frame still stops at4c0, synthetic offline only, no clone/full-frame/retail-playability claim');
+}
+
+/** Explicit suffix admission on the existing real Double/ground/stream graph.
+ * Null soundEventTable is deliberate synthetic input, NOT constructor hydration:
+ * the authenticated Double constructor cell802d3b48 points to NONNULL802d3ca0.
+ * The copied stream/DAT/pose owners are unchanged and no actual540 reset is made.
+ * Historical compositions above retain their original missing-suffix refusal. */
+function completedDoubleFrameHydratedCompositionFixture(bind = true,
+  initial: Partial<{byte8cc: number; byte1eb: number; byte276: number}> = {byte8cc: 1, byte1eb: 91, byte276: 92}) {
+  const x = doubleGroundStreamHydratedCompositionFixture(false);
+  x.sourceActor.soundEventTable = null;
+  // This graph hydrates one active part, not all four sound metadata records.
+  // A nonnull table must therefore refuse rather than invent missing indexes.
+  const suffixSources = {prehook: x.prehook, gauges: x.gauges, dispatch: x.dispatch};
+  const suffix = createSourceActorFrameSuffixRuntime(suffixSources); suffix.bindActor(x.actor, initial);
+  const frameSources = {...x.frameSources, suffix}, frame = createSourceActorFrameLifecycleRuntime(frameSources);
+  if (bind) frame.bindActor(x.actor);
+  return Object.assign(x, {suffixSources, suffix, suffixState: suffix.getActorBinding(x.actor), frameSources, frame,
+    runFrame: (epoch = 1, targetDistance760 = 64, horizontalDistance764 = 20) =>
+      frame.ingestRawDistancesAndRun(x.actor, epoch, {boundary: 'externally-decoded-pre55568-raw', targetDistance760, horizontalDistance764})});
+}
+type CompletedDoubleFrameFixture = ReturnType<typeof completedDoubleFrameHydratedCompositionFixture>;
+function retainCompletedDoubleFrame(x: CompletedDoubleFrameFixture): () => void {
+  const source = retainCommandAdmissionRecords(x), suffix = retainCompositionRecords([x.suffixState,
+    x.prehookState, x.doubleOwner, x.doubleOwner.offset7b0, x.part, x.oldPart, x.clocks,
+    x.pose.translation, x.pose.quaternion, x.oldPose.translation, x.oldPose.quaternion]);
+  return () => {source(); suffix();};
+}
+function checkCompletedDoubleFramePermanentRefusal(x: CompletedDoubleFrameFixture): void {
+  check(hasIncompleteSourceActorFrame(x.sourceActor) && hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+    'partial suffix permanently retains both enclosing frame and shared Double failure latches');
+  const retained = retainCompletedDoubleFrame(x);
+  rejects(() => x.runFrame(20), 'incomplete source frame'); retained();
+  rejects(() => x.runRawPrefix(20, 128, 40), 'exclusively owned'); retained();
+  for (const run of [() => x.prehook.runActor(x.actor), () => x.action.captureStateSelectors(x.actor),
+    () => x.ground.runActor(x.actor), () => x.suffix.runPosthook(x.actor),
+    () => x.suffix.runHousekeeping(x.actor), () => x.suffix.runSoundEvents(x.actor)]) {
+    rejects(run, 'incomplete source Double'); retained();
+  }
+}
+export function runCompletedDoubleFrameHydratedCompositionTests(): void {
+  {
+    const x = completedDoubleFrameHydratedCompositionFixture(), a = x.sourceActor;
+    const oldAttached = x.joints.getBinding(x.joint).aobj7c, oldX = x.pose.translation.x;
+    const oldFrame = x.part.frame0c, oldDuration = x.part.duration24, history = retainDoubleGroundSuffix(x);
+    x.streamBytes.fill(0xfe); x.animationBytes.fill(0);
+    check(x.runFrame() === undefined, 'genuine bounded55568 returns only after real posthook, housekeeping and explicit null sound return');
+    checkDoubleGroundStreamSetup(x, oldAttached, oldX, oldFrame, oldDuration, 0); history();
+    check(x.suffix.getActualActor(x.actor) === a && x.suffix.getMappingActor(x.actor) === x.sourceClock &&
+      x.suffix.getAttributeBinding(x.actor) === x.attributeState && x.suffix.getStatusBinding(x.actor) === x.statusState &&
+      x.suffix.getGaugeBinding(x.actor) === x.gaugeState && x.suffix.getDispatchBinding(x.actor) === x.gates &&
+      x.suffix.getPrehookBinding(x.actor) === x.prehookState && x.suffix.getWorldBinding(x.actor) === x.header,
+      'completed suffix retains existing canonical actual, status, mapping, gauge, attribute, prehook and dispatch owners');
+    check(x.suffixState.byte8cc === 1 && x.suffixState.byte1eb === 0 && x.suffixState.byte276 === 0 &&
+      x.attributeState.byte87 === 0 && x.gates.marker578 === 2 && x.prefixState.byte598 === 0 &&
+      !hasIncompleteSourceActorFrame(a) && !hasIncompleteSourceActorDoubleLifecycle(a) &&
+      isSourceActorTickPrefixClaimedActor(a) && a.fbPhase === 1 && a.soundEventTable === null,
+      'completion clears only transient frame incompleteness; marker2, phase1, source effects and permanent exclusive tick claim remain');
+    const retained = retainCompletedDoubleFrame(x);
+    rejects(() => x.runFrame(1), 'epoch'); retained();
+    rejects(() => x.runRawPrefix(2, 128, 40), 'exclusively owned'); retained();
+    for (const run of [() => x.prehook.runActor(x.actor), () => x.action.captureStateSelectors(x.actor),
+      () => x.ground.runActor(x.actor), () => x.suffix.runPosthook(x.actor),
+      () => x.suffix.runHousekeeping(x.actor), () => x.suffix.runSoundEvents(x.actor)]) {
+      rejects(run, 'exclusively owned by source frame'); retained();
+    }
+    rejects(() => createSourceActorFrameLifecycleRuntime(x.frameSources).bindActor(x.actor), 'already has a source frame owner'); retained();
+  }
+  {
+    const x = completedDoubleFrameHydratedCompositionFixture();
+    // Avoid an unrelated normal-countdown expiry on the next genuine frame.
+    // Phase1 is selected by the first frame, not injected or reset by the test.
+    x.normalLifecycleState.short6bc = 10; x.actionTables.phases1f000[1] = 0x800ff418;
+    x.runFrame();
+    const attached = x.joints.getBinding(x.joint).aobj7c, oldPose = {...x.oldPose.translation};
+    rejects(() => x.runFrame(2, 128, NaN), 'horizontalDistance764');
+    const retained = retainCompletedDoubleFrame(x);
+    rejects(() => x.runFrame(2, 128, 40), 'epoch'); retained();
+    check(x.sourceActor.targetDistance760 === 128 && x.sourceActor.fbPhase === 1 && x.gates.marker578 === 2 &&
+      !hasIncompleteSourceActorFrame(x.sourceActor) && !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+      'bad host ingress after a completed frame retains its first raw store and consumed epoch without starting source or undoing completion');
+    rejects(() => x.runFrame(3, 128, 40), 'unsupported target0x800ff418');
+    check(x.sourceActor.fbPhase === 1 && x.joints.getBinding(x.joint).aobj7c === attached &&
+      x.oldPose.translation.x === oldPose.x && x.oldPose.translation.y === oldPose.y && x.oldPose.translation.z === oldPose.z &&
+      x.gates.marker578 === 0,
+      'completed first frame admits next real epoch but source phase1 refuses before replaying phase0 or replacing its actual attachment');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  for (const key of ['suffix'] as const) {
+    const x = completedDoubleFrameHydratedCompositionFixture(false);
+    rejects(() => createSourceActorFrameLifecycleRuntime({...x.frameSources, [key]: {...x.frameSources[key]}}), 'genuine');
+    check(!hasIncompleteSourceActorFrame(x.sourceActor), 'spread suffix cannot manufacture genuine frame completion authority');
+  }
+  {
+    const x = completedDoubleFrameHydratedCompositionFixture(), retained = retainCompletedDoubleFrame(x);
+    rejects(() => x.frame.ingestRawDistancesAndRun(x.actor, 0, x.suffixState as never), 'alias'); retained();
+    rejects(() => x.runFrame(0), 'epoch'); retained();
+    check(!hasIncompleteSourceActorFrame(x.sourceActor) && !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+      'suffix-binding raw alias consumes host epoch without starting source or poisoning the recoverable actor');
+    x.runFrame(1);
+    check(!hasIncompleteSourceActorFrame(x.sourceActor), 'new genuine epoch completes after repaired pre-source host ingress');
+  }
+  for (const missing of ['byte8cc', 'byte1eb', 'byte276'] as const) {
+    const initial: Partial<{byte8cc: number; byte1eb: number; byte276: number}> = {byte8cc: 1, byte1eb: 91, byte276: 92};
+    delete initial[missing];
+    const x = completedDoubleFrameHydratedCompositionFixture(true, initial);
+    check(!Object.hasOwn(x.suffixState, missing), `${missing} remains absent rather than receiving an invented default`);
+    rejects(() => x.runFrame(), missing);
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.accumulator80c === 0 && x.part.mode2f === 1 &&
+      x.suffixState.byte1eb === (missing === 'byte276' ? 0 : initial.byte1eb) && x.gates.marker578 === 2,
+      `${missing} lazy refusal retains real action/nonnull stream/mode1 and exactly the reached housekeeping prefix`);
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  for (const field of ['byte1eb', 'byte276'] as const) {
+    const x = completedDoubleFrameHydratedCompositionFixture();
+    Object.defineProperty(x.suffixState, field, {writable: false});
+    rejects(() => x.runFrame(), `${field}: non-writable`);
+    check(x.attributeState.byte87 === 0 && x.suffixState.byte1eb === (field === 'byte1eb' ? 91 : 0) &&
+      x.suffixState.byte276 === 92 && x.sourceActor.accumulator80c === 0 && x.gates.marker578 === 2,
+      `${field} destination failure preserves the ordered55ee4 prefix and never treats an inner completed stream as completed frame`);
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x = completedDoubleFrameHydratedCompositionFixture();
+    Object.defineProperty(x.sourceActor, 'byte8cc', {value: 1, configurable: true});
+    const retained = retainCompletedDoubleFrame(x);
+    rejects(() => x.runFrame(0), 'byte8cc'); retained();
+    check(!hasIncompleteSourceActorFrame(x.sourceActor), 'canonical suffix field shadow is rejected before source execution');
+    delete (x.sourceActor as unknown as Record<string, unknown>).byte8cc;
+    x.runFrame(1);
+    check(!hasIncompleteSourceActorFrame(x.sourceActor), 'pre-source suffix shadow is repairable without clearing a failure latch');
+  }
+  for (const mode of [0, 1, 127, 128, 255]) {
+    const x = completedDoubleFrameHydratedCompositionFixture(true, {byte8cc: mode, byte1eb: 91, byte276: 92});
+    x.runFrame();
+    check(x.suffixState.byte8cc === mode && x.suffixState.byte1eb === (mode === 0 || mode === 1 ? 0 : 1) &&
+      !Object.hasOwn(x.sourceActor, 'byte8cc') && !Object.hasOwn(x.attributeState, 'byte1eb'),
+      `raw8cc=${mode} reaches its signed source branch on the explicit owner without manufacturing aliases or unsigned-only branches`);
+  }
+  for (const gate of ['restore', 'air', 'zero', 'air-unread598'] as const) {
+    const x = completedDoubleFrameHydratedCompositionFixture(), a = x.sourceActor, original = Object.getOwnPropertyDescriptor;
+    a.pos.z = 301; a.targetCache5e8.z = 299;
+    let captured: number[] | undefined, carried: number[] | undefined, injected = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (owner === x.actionTables.upper37a8 && key === '0') captured = [a.pos.x, a.pos.y, a.pos.z];
+      if (!injected && owner === x.suffixState && key === 'byte276' && x.suffixState.byte1eb === 0) {
+        injected = true; carried = [a.pos.x, a.pos.y, a.pos.z];
+        // Explicit adversarial operands supplied AFTER the earlier housekeeping
+        // control loads, not evidence of an unimplemented source598 producer.
+        a.controlWord = gate.startsWith('air') ? a.controlWord | 0x40 : a.controlWord & ~0x40;
+        x.prefixState.byte598 = gate === 'zero' ? 0 : gate === 'air-unread598' ? NaN : 1;
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {x.runFrame();} finally {Object.getOwnPropertyDescriptor = original;}
+    const expected = gate === 'restore' ? captured : carried;
+    check(injected && captured !== undefined && carried !== undefined && expected !== undefined &&
+      captured.every((value, i) => !Object.is(value, carried![i])) &&
+      [a.pos.x, a.pos.y, a.pos.z].every((value, i) => Object.is(value, expected[i])) && x.attributeState.byte87 === 0 &&
+      x.gates.marker578 === 2 && !hasIncompleteSourceActorFrame(a),
+      `${gate} uses fresh post-housekeeping control40, lazily reads598, and restores only the original pre-action frame XYZ snapshot`);
+    if (gate === 'restore') check(a.pos.x !== a.savedGroundPos.x && a.pos.y !== a.savedGroundPos.y && a.pos.z !== a.savedGroundPos.z &&
+      a.pos.x !== a.targetCache5e8.x && a.pos.y !== a.targetCache5e8.y && a.pos.z !== a.targetCache5e8.z,
+      'captured frame words are neither transform history, saved ground position nor a post-action recapture');
+  }
+  for (const field of ['x', 'y', 'z'] as const) {
+    const x = completedDoubleFrameHydratedCompositionFixture(), a = x.sourceActor, original = Object.getOwnPropertyDescriptor;
+    a.pos.z = 301; a.targetCache5e8.z = 299;
+    let captured: number[] | undefined, carried: number[] | undefined, injected = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (owner === x.actionTables.upper37a8 && key === '0') captured = [a.pos.x, a.pos.y, a.pos.z];
+      if (!injected && owner === x.suffixState && key === 'byte276' && x.suffixState.byte1eb === 0) {
+        injected = true; carried = [a.pos.x, a.pos.y, a.pos.z];
+        a.controlWord &= ~0x40; x.prefixState.byte598 = 1;
+        Object.defineProperty(a.pos, field, {writable: false});
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), `${field}: non-writable`);} finally {Object.getOwnPropertyDescriptor = original;}
+    const failed = ['x', 'y', 'z'].indexOf(field);
+    check(injected && captured !== undefined && carried !== undefined &&
+      [a.pos.x, a.pos.y, a.pos.z].every((value, i) => Object.is(value, i < failed ? captured![i] : carried![i])) &&
+      x.suffixState.byte1eb === 0 && x.suffixState.byte276 === 0 && x.gates.marker578 === 2 && a.fbPhase === 1,
+      `readonly restore ${field} retains preceding independent source XYZ word stores and all completed action/housekeeping effects`);
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x = completedDoubleFrameHydratedCompositionFixture(), a = x.sourceActor, original = Object.getOwnPropertyDescriptor;
+    let captured: number[] | undefined, changed = false, restore = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (!changed && owner === x.prehookState && key === 'pointer4bc' && a.fbState === 61) {
+        changed = true; captured = [a.pos.x, a.pos.y, a.pos.z];
+        // The source snapshot must already exist before the first prehook load.
+        // Changing supplied words here distinguishes a delayed snapshot.
+        Object.assign(a.pos, {x: 151, y: 10, z: 351});
+      }
+      if (!restore && owner === x.suffixState && key === 'byte276' && x.suffixState.byte1eb === 0) {
+        restore = true; a.controlWord &= ~0x40; x.prefixState.byte598 = 1;
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {x.runFrame();} finally {Object.getOwnPropertyDescriptor = original;}
+    check(changed && restore && captured !== undefined &&
+      [a.pos.x, a.pos.y, a.pos.z].every((value, i) => Object.is(value, captured![i])) &&
+      !hasIncompleteSourceActorFrame(a),
+      'actual55568 captures XYZ before actual4bc, not after a changed prehook operand or after upper/full dispatch');
+  }
+  for (const operation of ['prehook', 'capture', 'ground'] as const) {
+    const x = completedDoubleFrameHydratedCompositionFixture(), original = Object.getOwnPropertyDescriptor;
+    let injected = false, denied = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (!injected && owner === x.suffixState && key === 'byte276' && x.suffixState.byte1eb === 0) {
+        injected = true;
+        const retained = retainCompletedDoubleFrame(x);
+        const run = operation === 'prehook' ? () => x.prehook.runActor(x.actor) : operation === 'capture' ?
+          () => x.action.captureStateSelectors(x.actor) : () => x.ground.runActor(x.actor);
+        rejects(run, 'exclusively owned by source frame'); denied = true; retained();
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {x.runFrame();} finally {Object.getOwnPropertyDescriptor = original;}
+    check(injected && denied && !hasIncompleteSourceActorFrame(x.sourceActor) &&
+      !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor) && x.gates.marker578 === 2 && x.sourceActor.fbPhase === 1,
+      `caught cross-stage ${operation} replay is denied before effects while the genuine enclosing suffix can still finish`);
+  }
+  {
+    const x = completedDoubleFrameHydratedCompositionFixture(), a = x.sourceActor, original = Object.getOwnPropertyDescriptor;
+    a.pos.z = 301; a.targetCache5e8.z = 299;
+    let armed = false, caught = false, capturedX: number | undefined, carriedY: number | undefined;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (owner === x.actionTables.upper37a8 && key === '0') capturedX = a.pos.x;
+      if (!armed && owner === x.suffixState && key === 'byte276' && x.suffixState.byte1eb === 0) {
+        armed = true; a.controlWord &= ~0x40; x.prefixState.byte598 = 1; carriedY = a.pos.y;
+      }
+      if (armed && !caught && owner === a.pos && key === 'y') {
+        try {x.runFrame(2);} catch {caught = true;}
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), 'caught same-runtime reentry');} finally {Object.getOwnPropertyDescriptor = original;}
+    check(caught && a.pos.x === capturedX && a.pos.y === carriedY && x.gates.marker578 === 2 && x.suffixState.byte276 === 0,
+      'caught same-frame reentry at restoreY preserves completed restoreX and housekeeping but cannot authorize final completion');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x = completedDoubleFrameHydratedCompositionFixture(), a = x.sourceActor, original = Object.getOwnPropertyDescriptor;
+    const position = a.pos; let changed = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (!changed && owner === a && key === 'soundEventTable' && x.suffixState.byte276 === 0) {
+        changed = true; a.pos = {...position};
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), 'position20: canonical source owner changed');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(changed && a.pos !== position && a.fbPhase === 1 && a.accumulator80c === 0 &&
+      x.suffixState.byte1eb === 0 && x.suffixState.byte276 === 0 && x.gates.marker578 === 2,
+      'late null-sound boundary cannot complete a frame whose original position owner was replaced before final owner reconciliation');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x = completedDoubleFrameHydratedCompositionFixture();
+    // Nonnull source data is never silently converted to null or all-minus-one
+    // metadata to pass the final callee. This graph has only one hydrated part.
+    x.sourceActor.soundEventTable = new Uint8Array(8);
+    rejects(() => x.runFrame(), 'requires actual signed auxiliary37 metadata owner');
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.accumulator80c === 0 && x.part.mode2f === 1 &&
+      x.suffixState.byte1eb === 0 && x.suffixState.byte276 === 0 && x.gates.marker578 === 2 &&
+      x.sourceActor.soundEventTable instanceof Uint8Array,
+      'nonnull sound refusal follows genuine completed posthook/housekeeping and retains actual stream/pose effects without manufacturing return');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  console.log('[actor-completed-double-frame-composition] PASS: explicit genuine55568 suffix completes real Double phase0/nonnull copied stream/DAT/AObj/FObj/mode1 once; private completion preserves marker2, phase1, canonical owners and exclusive monotonic ingress; next genuine phase1 refuses permanently; explicit null sound fixture is not constructor hydration (actual cell802d3b48 is nonnull802d3ca0), no full attack/clone/production/playability claim');
 }

@@ -1,3 +1,4 @@
+import {runActorFrameSuffixSelfTests} from './rom/actor-frame-suffix.selftest.js';
 import {runActorAnimationTransitionSelfTests} from './rom/actor-animation-transition.selftest.js';
 import {runActorFrameLifecycleSelfTests} from './rom/actor-frame-lifecycle.selftest.js';
 import {runActorDoublePrehookSelfTests} from './rom/actor-double-prehook.selftest.js';
@@ -416,6 +417,7 @@ export function runSelfTest(): void {
   runActorFrameLifecycleSelfTests();
   runActorDoublePrehookSelfTests();
   runActorDoubleActionSelfTests();
+  runActorFrameSuffixSelfTests();
   runActorMovementFollowupSelfTests();
   runActorAttributeRefreshSelfTests();
   runAnimationArchiveHydrationSelfTest();

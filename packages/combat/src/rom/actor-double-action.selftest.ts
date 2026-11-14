@@ -3,8 +3,8 @@ import {createSourceActorGaugeScaleRuntime} from './actor-gauge-scale.js';
 import {createSourceActorTerrainQueryRuntime, type SourceActorTerrainGlobals} from './actor-terrain-query.js';
 import type {SourceActorTransformHistoryBinding} from './actor-transform-history.js';
 import {createSourceActorDoubleActionRuntime, isSourceActorDoubleActionRuntime,
-  type SourceActorDoubleActionTables, type SourceActorDoubleStateSelectors} from './actor-double-action.js';
-import {createSourceActorDoublePrehookRuntime, hasIncompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
+  bindSourceActorDoubleActionFrame, type SourceActorDoubleActionTables, type SourceActorDoubleStateSelectors} from './actor-double-action.js';
+import {createSourceActorDoublePrehookRuntime, hasIncompleteSourceActorDoubleLifecycle, claimSourceActorDoubleFrame, isSourceActorDoubleFrameAccess} from './actor-double-prehook.js';
 import {createSourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import {createSourceActorStatusTimersRuntime} from './actor-status-timers.js';
 import {createSourceActorInputChargeRuntime} from './actor-input-charge.js';
@@ -104,6 +104,17 @@ function fixture(bind = true, profile = true, withGround = false) {
     action, sources, processor, hooks, capture, run, ground, gauges, terrain, streams, parameterState: attributes.getParameterDescriptor(parameter)};
 }
 export function runActorDoubleActionSelfTests(): void {
+  {
+    const x = fixture();
+    const frame = {} as Parameters<typeof claimSourceActorDoubleFrame>[0];
+    const owners = {actual: x.actual} as Parameters<typeof claimSourceActorDoubleFrame>[2];
+    const access = {invoke: <T>(_operation: unknown, _runtime: object, run: () => T): T => run()};
+    check(!isSourceActorDoubleFrameAccess(access, x.actual), 'structural frame token cannot grant access');
+    rejects(() => claimSourceActorDoubleFrame(frame, x.id, owners), 'active genuine frame binding');
+    rejects(() => bindSourceActorDoubleActionFrame(frame, x.action, x.id, owners, access), 'private genuine frame binding');
+    rejects(x.run, 'actual800677b0');
+  }
+
   {
     const x = fixture(); check(isSourceActorDoubleActionRuntime(x.action), 'genuine action brand');
     check(!isSourceActorDoubleActionRuntime({...x.action}), 'copied methods cannot forge action brand');

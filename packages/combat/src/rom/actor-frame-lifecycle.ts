@@ -1,19 +1,20 @@
-/** Bounded actual80055568 prefix, never a completed actor frame.
- * Fixed source schedule: marker578=2; genuine55dcc; genuine5568c; genuine59068;
- * snapshot actual position20/24/28; optionally run genuine Double4bc, capture
- * upper5db then full5da, store marker1/dispatch upper, marker0/dispatch full,
- * then marker2 before the actual4c0 boundary.
- * Missing family owners retain the historical4bc refusal. An admitted Double
- * action still stops at its next unsupported callee, never skips to a suffix.
- * No hook/state/posthook/flag/sound call is skipped and no extra465fc is added.
+/** Bounded actual80055568 composition, offline only.
+ * Source prefix: marker2,55dcc,5568c,59068,original position snapshot,4bc,
+ * saved upper/full selectors,marker1/upper,marker0/full,marker2/posthook.
+ * Optional genuine suffix then executes55ee4,conditional original-position
+ * restoration and5b880. A completed final call and final owner checks alone
+ * release per-frame incomplete state through the private tick capability.
+ * Any reached gap preserves effects and all failure latches. No family hook,
+ * sound event, unsupported phase or child error is skipped to reach completion.
  *
- * Explicit decoded raw distances are HOST ingress before the first55568 write,
- * not a source producer or a mutation inserted after55dcc. The source59068
- * operation only consumes those canonical actual fields. Epochs remain consumed
- * on failed ingress. A previously incomplete frame refuses before a new epoch.
- * Once source execution begins, the frame is permanently
- * incomplete; another frame or direct tick ingress cannot bypass that prefix.
- * This is offline only: no production routing, full55568, complete attack or clone claim.
+ * Explicit decoded raw distances are host ingress before the first55568 write,
+ * not a source producer. Epochs remain consumed on failed ingress. Exclusive
+ * frame ownership persists across successful frames; public standalone source
+ * adapters require the exact private stage/runtime, including nested ground.
+ * Actual actor,clock,phase,position and history owners are never reset to replay
+ * phase0. Next real phase or branch may still refuse. This is not retail sound
+ * hydration, sustained action/clone playback, production selection or browser
+ * playability. Null4e8 fixtures are explicit synthetic inputs, not source defaults.
  */
 import type {RomActor} from './actor.js';
 import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
@@ -22,8 +23,9 @@ import {isSourceActorAnimationDispatchRuntime, type SourceActorAnimationDispatch
 import {isSourceActorMovementFollowupRuntime} from './actor-movement-followup.js';
 import {requireCompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
 import {isSourceActorDoublePrehookRuntime, requireCompleteSourceActorDoubleLifecycle, markIncompleteSourceActorDoubleLifecycle,
-  type SourceActorDoublePrehookRuntime} from './actor-double-prehook.js';
-import {isSourceActorDoubleActionRuntime, type SourceActorDoubleActionRuntime} from './actor-double-action.js';
+  claimSourceActorDoubleFrame, type SourceActorDoubleFrameAccess, type SourceActorDoublePrehookRuntime} from './actor-double-prehook.js';
+import {isSourceActorDoubleActionRuntime, bindSourceActorDoubleActionFrame, type SourceActorDoubleActionRuntime} from './actor-double-action.js';
+import {isSourceActorFrameSuffixRuntime, type SourceActorFrameSuffixRuntime} from './actor-frame-suffix.js';
 import {claimSourceActorTickFrame, isSourceActorTickPrefixRuntime, hasIncompleteSourceActorFrame,
   type SourceActorTickPrefixRuntime, type SourceActorFrameRawDistances,
   type SourceActorTickFrameCapability, type SourceActorTickFrameOwners} from './actor-tick-prefix.js';
@@ -37,13 +39,15 @@ export interface SourceActorFrameLifecycleSources {
   dispatch: SourceActorAnimationDispatchRuntime;
   prehook?: SourceActorDoublePrehookRuntime;
   action?: SourceActorDoubleActionRuntime;
+  /** Genuine posthook/housekeeping/sound suffix; absent preserves4c0 refusal. */
+  suffix?: SourceActorFrameSuffixRuntime;
 }
 export interface SourceActorFrameLifecycleRuntime {
   bindActor(identity: symbol): void;
   getActualActor(identity: symbol): RomActor;
   /** No source-frame field copies are created. This is the existing578 owner. */
   getDispatchBinding(identity: symbol): object;
-  /** Always refuses at the first unsupported source call, retaining all effects. */
+  /** Returns only after the genuine final suffix; reached gaps retain effects and refuse. */
   ingestRawDistancesAndRun(identity: symbol, epoch: number, raw: SourceActorFrameRawDistances): void;
 }
 const genuineRuntimes = new WeakSet<object>();
@@ -87,10 +91,13 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
   if (!isSourceActorTickPrefixRuntime(tick)) fail('59068 requires genuine source tick runtime');
   if (!isSourceActorAnimationDispatchRuntime(dispatch)) fail('marker578 requires genuine source animation dispatch');
   const optional = (key: string): unknown => Object.getOwnPropertyDescriptor(sources, key) === undefined ? undefined : own(sources, key);
-  const prehook = optional('prehook'), action = optional('action');
+  const prehook = optional('prehook'), action = optional('action'), suffix = optional('suffix');
   if (prehook !== undefined && !isSourceActorDoublePrehookRuntime(prehook)) fail('4bc requires genuine source Double prehook');
   if (action !== undefined && (!isSourceActorDoubleActionRuntime(action) || prehook === undefined || action.getPrehookRuntime() !== prehook))
     fail('state dispatch requires genuine matched source Double action');
+  if (suffix !== undefined && (!isSourceActorFrameSuffixRuntime(suffix) || prehook === undefined ||
+      suffix.getPrehookRuntime() !== prehook || suffix.getDispatchRuntime() !== dispatch))
+    fail('suffix requires genuine matched prehook/animation runtime');
   const movement = attributes.getMovementRuntime();
   if (!isSourceActorMovementFollowupRuntime(movement)) fail('55dcc child4d08c requires genuine source movement runtime');
   let busy = false, poisoned = false;
@@ -104,8 +111,8 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
   const invoke = <T>(run: () => T): T => {const result = run(); check(); return result;};
   interface Entry {
     actual: RomActor; borg: object; world: object; mapping: object; attribute: object;
-    status: object; start: object; movement: object; dispatch: object; pos: object;
-    capability: SourceActorTickFrameCapability;
+    status: object; start: object; movement: object; dispatch: object; pos: object; tickBinding: object;
+    capability: SourceActorTickFrameCapability; access: SourceActorDoubleFrameAccess;
     familyOwners: readonly object[];
   }
   const actors = new Map<symbol, Entry>(), owned = new WeakSet<object>();
@@ -113,7 +120,7 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
   const same = (value: unknown, expected: object, where: string): void => {check(); if (value !== expected) fail(`${where}: canonical source owner changed or differs`);};
   const familyOwners = (id: symbol): object[] => {
     const records: object[] = [];
-    for (const runtime of [prehook, action]) {
+    for (const runtime of [prehook, action, suffix]) {
       if (runtime === undefined) continue;
       const values = invoke(() => runtime.getSourceOwners(id));
       if (!Array.isArray(values)) fail('Double source owner array required');
@@ -121,7 +128,7 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
     }
     return [...new Set(records)];
   };
-  const owners = (id: symbol, e: Omit<Entry, 'capability' | 'familyOwners'> & {familyOwners?: readonly object[]}): void => {
+  const owners = (id: symbol, e: Omit<Entry, 'capability' | 'access' | 'familyOwners'> & {familyOwners?: readonly object[]}): void => {
     requireCompleteSourceActorDoubleLifecycle(e.actual); check();
     requireCompleteSourceActorAnimationTransition(e.mapping); check();
     for (const key of ['rootAction', 'preState', 'postState'])
@@ -145,6 +152,7 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
     same(invoke(() => status.getMovementBinding(id)), e.movement, 'status movement');
     same(invoke(() => dispatch.getActorBinding(id)), e.dispatch, 'marker578 binding');
     same(read(e.actual, 'pos'), e.pos, 'position20');
+    same(invoke(() => tick.getActorBinding(id)), e.tickBinding, 'tick binding598');
     if (prehook !== undefined) {
       if (invoke(() => prehook.assertActorComplete(id)) !== undefined) fail('Double completion assertion returned unexpectedly');
       for (const [key, expected] of [
@@ -165,6 +173,17 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
         same(invoke(() => ground.getWorldBinding(id)), e.world, 'Double ground world');
         same(invoke(() => ground.getStatusBinding(id)), e.status, 'Double ground status');
       }
+    }
+    if (suffix !== undefined) {
+      for (const [key, expected] of [
+        ['getActualActor', e.actual], ['getMappingActor', e.mapping], ['getWorldBinding', e.world],
+        ['getAttributeBinding', e.attribute], ['getStatusBinding', e.status], ['getDispatchBinding', e.dispatch],
+      ] as const) same(invoke(() => suffix[key](id)), expected, `suffix ${key}`);
+      same(invoke(() => suffix.getGaugeRuntime().getActualBorg(id)), e.borg, 'suffix actual Borg');
+      same(invoke(() => suffix.getPrehookBinding(id)), invoke(() => prehook!.getActorBinding(id)), 'suffix prehook');
+      const ground = action?.getGroundRuntime();
+      if (ground !== undefined) same(invoke(() => suffix.getGaugeBinding(id)), invoke(() => ground.getGaugeBinding(id)), 'suffix/ground gauge');
+      if (invoke(() => suffix.assertActorComplete(id)) !== undefined) fail('suffix completion assertion returned unexpectedly');
     }
     if (e.familyOwners !== undefined) {
       const current = familyOwners(id);
@@ -187,7 +206,7 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
         start: record(invoke(() => status.getStartBinding(id)), 'stream start'),
         movement: record(invoke(() => attributes.getMovementBinding(id)), 'movement'),
         dispatch: record(invoke(() => dispatch.getActorBinding(id)), 'dispatch'),
-        pos: record(read(actual, 'pos'), 'position20')};
+        pos: record(read(actual, 'pos'), 'position20'), tickBinding: record(invoke(() => tick.getActorBinding(id)), 'tick binding598')};
       owners(id, initial);
       const baseRecords = Object.values(initial), family = Object.freeze(familyOwners(id));
       // Shared decoded dispatch tables/parameter records are not per-actor
@@ -196,14 +215,19 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
       // No parallel numeric4b4/4bc/4c0 cells or callable family owners are admitted.
       // Null legacy placeholders are not interpreted as source no-op pointers.
       const ground = action?.getGroundRuntime();
-      const join: SourceActorTickFrameOwners = ground === undefined ? initial : {...initial, ground: {
-        gauge: invoke(() => ground.getGaugeBinding(id)), terrain: invoke(() => ground.getTerrainGlobals()),
-        history: invoke(() => ground.getHistoryBinding(id))}};
+      const join: SourceActorTickFrameOwners = {...initial,
+        ...(ground === undefined ? {} : {ground: {
+          gauge: invoke(() => ground.getGaugeBinding(id)), terrain: invoke(() => ground.getTerrainGlobals()),
+          history: invoke(() => ground.getHistoryBinding(id))}}),
+        ...(suffix === undefined ? {} : {suffixGauge: invoke(() => suffix.getGaugeBinding(id))})};
       pendingClaims.set(runtime, {id, owners: join});
-      let capability: SourceActorTickFrameCapability;
-      try {capability = invoke(() => claimSourceActorTickFrame(runtime, tick, id, join));}
-      finally {pendingClaims.delete(runtime);}
-      actors.set(id, {...initial, capability, familyOwners: family}); baseRecords.forEach(value => owned.add(value));
+      let capability: SourceActorTickFrameCapability, access: SourceActorDoubleFrameAccess;
+      try {
+        capability = invoke(() => claimSourceActorTickFrame(runtime, tick, id, join));
+        access = invoke(() => claimSourceActorDoubleFrame(runtime, id, join));
+        if (action !== undefined) invoke(() => bindSourceActorDoubleActionFrame(runtime, action, id, join, access));
+      } finally {pendingClaims.delete(runtime);}
+      actors.set(id, {...initial, capability, access, familyOwners: family}); baseRecords.forEach(value => owned.add(value));
     });},
     getActualActor(id: symbol) {return entry(id).actual;},
     getDispatchBinding(id: symbol) {return entry(id).dispatch;},
@@ -227,11 +251,11 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
         const x = f32(read(e.pos, 'x'), 'position20'), y = f32(read(e.pos, 'y'), 'position24'), z = f32(read(e.pos, 'z'), 'position28');
         void x; void y; void z;
         if (prehook === undefined) fail('80055568 reached unsupported actual4bc family prehook after position20/24/28 snapshot');
-        if (invoke(() => prehook.runActor(id)) !== undefined) fail('genuine4bc returned unexpectedly');
+        if (invoke(() => e.access.invoke('prehook', prehook, () => prehook.runActor(id))) !== undefined) fail('genuine4bc returned unexpectedly');
         owners(id, e);
         // Both signed selectors are captured before marker1. In particular the
         // full selector is not reloaded after upper-body dispatch returns.
-        const saved = action === undefined ? undefined : invoke(() => action.captureStateSelectors(id));
+        const saved = action === undefined ? undefined : invoke(() => e.access.invoke('capture', action, () => action.captureStateSelectors(id)));
         if (action === undefined) {
           for (const key of ['ubState', 'fbState'] as const) {
             const value = read(e.actual, key);
@@ -241,11 +265,30 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
         }
         read(e.dispatch, 'marker578', true); (e.dispatch as {marker578: number}).marker578 = 1; check();
         if (action === undefined || saved === undefined) fail('80055568 reached unsupported saved upper state dispatch after actual4bc and marker1');
-        if (invoke(() => action.dispatchUpper(id, saved)) !== undefined) fail('genuine upper state returned unexpectedly');
+        if (invoke(() => e.access.invoke('upper', action, () => action.dispatchUpper(id, saved))) !== undefined) fail('genuine upper state returned unexpectedly');
         read(e.dispatch, 'marker578', true); (e.dispatch as {marker578: number}).marker578 = 0; check();
-        if (invoke(() => action.dispatchFull(id, saved)) !== undefined) fail('genuine full state returned unexpectedly');
+        if (invoke(() => e.access.invoke('full', action, () => action.dispatchFull(id, saved))) !== undefined) fail('genuine full state returned unexpectedly');
         read(e.dispatch, 'marker578', true); (e.dispatch as {marker578: number}).marker578 = 2; check();
-        fail('80055568 reached unsupported actual4c0 posthook after saved upper/full dispatch');
+        if (suffix === undefined) fail('80055568 reached unsupported actual4c0 posthook after saved upper/full dispatch');
+        if (invoke(() => e.access.invoke('posthook', suffix, () => suffix.runPosthook(id))) !== undefined)
+          fail('genuine4c0 returned unexpectedly');
+        if (invoke(() => e.access.invoke('housekeeping', suffix, () => suffix.runHousekeeping(id))) !== undefined)
+          fail('genuine55ee4 returned unexpectedly');
+        const control = read(e.actual, 'controlWord');
+        if (typeof control !== 'number' || !Number.isInteger(control) || control < 0 || control > 0xffffffff)
+          fail('controlWord: source uint32 required');
+        if ((control & 0x40) === 0) {
+          const flag = read(e.tickBinding, 'byte598');
+          if (typeof flag !== 'number' || !Number.isInteger(flag) || flag < 0 || flag > 255)
+            fail('byte598: canonical source byte required');
+          if (flag !== 0) for (const [key, value] of [['x', x], ['y', y], ['z', z]] as const) {
+            read(e.pos, key, true); (e.pos as Record<string, unknown>)[key] = value; check();
+          }
+        }
+        if (invoke(() => e.access.invoke('sound', suffix, () => suffix.runSoundEvents(id))) !== undefined)
+          fail('genuine5b880 returned unexpectedly');
+        owners(id, e);
+        invoke(() => e.capability.completeSourceFrame());
       } catch (error) {
         // A completed inner action cannot make an unfinished outer frame
         // replayable through its public prehook/action/ground entry points.

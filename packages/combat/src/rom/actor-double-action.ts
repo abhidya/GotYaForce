@@ -23,11 +23,14 @@
  * operations retain prior stores and permanently latch the shared incomplete
  * Double lifecycle, so changed selectors cannot replay a partial handler.
  */
+import {isPendingSourceActorFrameClaim, type SourceActorFrameLifecycleRuntime} from './actor-frame-lifecycle.js';
+import type {SourceActorTickFrameOwners} from './actor-tick-prefix.js';
 import {isSourceActorGroundProbeRuntime, type SourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import type {RomActor} from './actor.js';
 import {addSourceFloat32} from './source-float.js';
 import {isSourceActorDoublePrehookRuntime, markIncompleteSourceActorDoubleLifecycle,
-  requireCompleteSourceActorDoubleLifecycle, type SourceActorDoublePrehookRuntime} from './actor-double-prehook.js';
+  requireCompleteSourceActorDoubleLifecycle, requireSourceActorDoubleInvocation, isSourceActorDoubleFrameAccess,
+  type SourceActorDoubleFrameAccess, type SourceActorDoublePrehookRuntime} from './actor-double-prehook.js';
 import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import {isSourceActorCueResetRuntime, type SourceActorCueResetRuntime} from './actor-cue-reset.js';
 
@@ -72,6 +75,16 @@ export interface SourceActorDoubleActionRuntime {
 const runtimes = new WeakSet<object>(), claimed = new WeakSet<object>();
 export function isSourceActorDoubleActionRuntime(value: unknown): value is SourceActorDoubleActionRuntime {
   return value !== null && typeof value === 'object' && runtimes.has(value);
+}
+const frameBinders = new WeakMap<object, (id: symbol, access: SourceActorDoubleFrameAccess) => void>();
+/** Internal join only; the access token is never returned by the action runtime. */
+export function bindSourceActorDoubleActionFrame(frame: SourceActorFrameLifecycleRuntime,
+  runtime: SourceActorDoubleActionRuntime, id: symbol, owners: SourceActorTickFrameOwners,
+  access: SourceActorDoubleFrameAccess): void {
+  if (!isPendingSourceActorFrameClaim(frame, id, owners) || !isSourceActorDoubleActionRuntime(runtime) ||
+      runtime.getActualActor(id) !== owners.actual || !isSourceActorDoubleFrameAccess(access, owners.actual))
+    fail('action frame join requires private genuine frame binding');
+  const bind = frameBinders.get(runtime); if (!bind) fail('genuine action frame binder missing'); bind(id, access);
 }
 function fail(reason: string): never {
   throw Error(`[actor-double-action] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -143,6 +156,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
   const snapshots = new WeakMap<object, {id: symbol; stage: 'upper' | 'full' | 'done'}>();
   const pending = new Map<symbol, SourceActorDoubleStateSelectors>();
+  const frameAccesses = new Map<symbol, SourceActorDoubleFrameAccess>();
   const entry = (id: symbol): Entry => {const e = actors.get(id); if (!e) fail('unknown/non-owned Double action actor'); return e;};
   const noShadows = (e: Entry, extras: readonly object[] = []): void => {
     const canonical = new Map<string, object>([
@@ -266,7 +280,8 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     for (const key of ['gravityCoeff','yVel','hDecel','hSpeed','poseAccum80','poseAccum7e','poseAccum7c']) write(a, key, 0);
     carry(e);
     if (ground === undefined) fail('800ff30c reached unsupported actual800677b0 ground height/normal probe before config slots and stream start');
-    call(() => ground.runActor(id)); // source ignores the genuine0/1 result
+    const access = frameAccesses.get(id);
+    call(() => access === undefined ? ground.runActor(id) : access.invoke('ground', ground, () => ground.runActor(id))); // source ignores0/1
     // Signed configuration halfwords80433868/6a are fixed authenticated0/1.
     // The first6ea store precedes the fresh5e0 load even on the air branch.
     write(a, 'streamSlot', 0);
@@ -288,7 +303,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     phaseZero(id, e);
   };
   const dispatch = (id: symbol, saved: SourceActorDoubleStateSelectors, upper: boolean): void => guard(() => {
-    const e = entry(id); owners(id, e);
+    const e = entry(id); requireSourceActorDoubleInvocation(e.actual, upper ? 'upper' : 'full', runtime); owners(id, e);
     const snapshot = snapshots.get(saved);
     if (!snapshot || snapshot.id !== id || pending.get(id) !== saved || snapshot.stage !== (upper ? 'upper' : 'full'))
       fail('saved selector capability missing, consumed or out of order');
@@ -327,12 +342,14 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
         ...[0,1,2,3].map(index => streams.getPartBinding(id, index))])])]);},
     assertActorComplete(id) {requireCompleteSourceActorDoubleLifecycle(entry(id).actual);},
     captureStateSelectors(id) {return guard(() => {
-      const e = entry(id); owners(id, e);
+      const e = entry(id); requireSourceActorDoubleInvocation(e.actual, 'capture', runtime); owners(id, e);
       if (pending.has(id)) fail('previous saved selectors have not completed');
       const upper = state(e.actual, 'ubState'), full = state(e.actual, 'fbState');
       const saved = Object.freeze({upper, full}); snapshots.set(saved, {id, stage: 'upper'}); pending.set(id, saved); return saved;
     });},
     dispatchUpper(id, saved) {dispatch(id, saved, true);}, dispatchFull(id, saved) {dispatch(id, saved, false);},
   };
-  runtimes.add(runtime); return Object.freeze(runtime);
+  runtimes.add(runtime);
+  frameBinders.set(runtime, (id, access) => {entry(id); if (frameAccesses.has(id)) fail('action already has a frame binding'); frameAccesses.set(id, access);});
+  return Object.freeze(runtime);
 }

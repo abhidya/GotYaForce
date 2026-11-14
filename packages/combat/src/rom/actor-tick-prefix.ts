@@ -127,6 +127,7 @@ export interface SourceActorTickFrameOwners {
   readonly actual: RomActor; readonly borg: object; readonly world: object;
   readonly status: object; readonly mapping: object;
   /** Optional downstream677b0 owners, reconciled before a frame can claim ingress. */
+  readonly suffixGauge?: object;
   readonly ground?: {readonly gauge: object; readonly terrain: object; readonly history: object};
 }
 export interface SourceActorTickFrameCapability {
@@ -134,6 +135,8 @@ export interface SourceActorTickFrameCapability {
   ingestRawDistances(raw: SourceActorFrameRawDistances): void;
   beginSourceFrame(): void;
   runActor(): void;
+  /** Private caller certifies genuine5b880 return, never a finally/failure cleanup. */
+  completeSourceFrame(): void;
 }
 const frameClaims = new WeakMap<object, (id: symbol, expected: SourceActorTickFrameOwners) => SourceActorTickFrameCapability>();
 const incompleteFrames = new WeakSet<object>();
@@ -1055,6 +1058,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     if ((actor.normal && actor.normal.mapping !== expected.mapping) ||
         (actor.rates && actor.rates.mapping !== expected.mapping) ||
         (actor.ceiling && actor.ceiling.mapping !== expected.mapping)) fail('frame canonical lifecycle mapping differs');
+    if (expected.suffixGauge !== undefined && expected.suffixGauge !== actor.gauge) fail('frame suffix canonical gauge differs');
     if (expected.ground !== undefined) {
       const ground = expected.ground;
       if (ground.gauge !== actor.gauge) fail('frame ground canonical gauge differs');
@@ -1091,6 +1095,17 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
         if (frameMapping!(id) !== expected.mapping) fail('frame mapping owner changed');
         assertSourceComplete(id, actor); owners(id, actor); noLegacyDistances(actor.actual);
         runSource(id, prepared);
+      });},
+      completeSourceFrame(): void {guard(() => {
+        if (!begun || !prepared || !attempted || hostPending || !incompleteFrames.has(actor.actual))
+          fail('source frame completion requires its executed private frame');
+        assertSourceComplete(id, actor); owners(id, actor);
+        if (frameMapping!(id) !== expected.mapping) fail('frame mapping owner changed');
+        check();
+        // This private capability is invoked only after genuine5b880 returns.
+        // Child failure latches, exclusive ownership and consumed epochs stay.
+        incompleteFrames.delete(actor.actual); begun = false; prepared = undefined;
+        attempted = false; hostPending = false;
       });},
     });
     check(); frameOwned.add(actor.actual); return capability;
