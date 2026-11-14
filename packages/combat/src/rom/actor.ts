@@ -270,6 +270,15 @@ export interface RomActor {
    *  @romfield controlWord +0x5e0 u32 */
   controlWord: number;
 
+  /** Actual raw byte written by source stream opcode02 (8004c44c). Missing until
+   *  an explicit initialized-state input or reached store; no allocation default.
+   *  @romfield byte6e8 +0x6e8 u8 */
+  byte6e8?: number;
+  /** Actual raw byte written by source stream opcode02 (8004c454). No stream or
+   *  lifecycle mirror is permitted; future source consumers use this same actor.
+   *  @romfield byte6e9 +0x6e9 u8 */
+  byte6e9?: number;
+
   // ===== Command dispatch (cue-script-stream-decode, zz_006a104_) =====
   /** +0x580: actionIndex (the family action-table row; 0=dash, 1=B-melee, 2=air-B/X,
    *  3=B-charge, 4=…). Set by zz_006a104_ from the command-record byte 2.

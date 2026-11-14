@@ -161,7 +161,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
   const noShadows = (e: Entry, extras: readonly object[] = []): void => {
     const canonical = new Map<string, object>([
       ...['fbPhase','actionIndex','variantIndex','ubState','fbState','visibilityTarget','activeYaw','turnErrorYaw','heading','lockYaw',
-        'hSpeed','yVel','hDecel','gravityCoeff','poseAccum80','poseAccum7e','poseAccum7c','pos','motion','targetCache5e8','streamSlot','accumulator80c'].map(key => [key,e.actual] as [string, object]),
+        'hSpeed','yVel','hDecel','gravityCoeff','poseAccum80','poseAccum7e','poseAccum7c','pos','motion','targetCache5e8','streamSlot','accumulator80c','byte6e8','byte6e9'].map(key => [key,e.actual] as [string, object]),
       ['byte541', e.cue], ['pointer4b4', e.prehook], ['pointer4bc', e.prehook], ['pointer4c0', e.prehook],
       ['parameter4ac', e.attribute], ['timestep1dc8', e.mapping], ['marker578', e.dispatch],
     ]);
@@ -197,6 +197,10 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     stable(call(() => cues.getDispatchBinding(id)), e.dispatch, 'dispatch binding');
     stable(call(() => prehook.getStreamsRuntime()), streams, 'stream runtime');
     stable(call(() => streams.getStartActorBinding(id)), call(() => prehook.getStartBinding(id)), 'source stream start');
+    if (call(() => streams.hasActualActorBinding(id))) {
+      stable(call(() => streams.getActualActor(id)), e.actual, 'source stream actual');
+      stable(call(() => streams.getMappingActor(id)), e.mapping, 'source stream mapping');
+    }
     if (ground !== undefined) {
       stable(call(() => ground.getActualActor(id)), e.actual, 'ground actual');
       stable(call(() => ground.getWorldBinding(id)), call(() => prehook.getWorldBinding(id)), 'ground world');
@@ -288,7 +292,8 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     if ((word(a, 'controlWord') & 0x40) !== 0) write(a, 'streamSlot', 1);
     const slot = signedByte(a, 'streamSlot');
     write(a, 'streamSlot', (slot + 1) & 255);
-    if (call(() => streams.startStream(id, 15, 4, slot, -1, 0xffffffff, 0xffffffff)) !== undefined)
+    const start = () => streams.startStream(id, 15, 4, slot, -1, 0xffffffff, 0xffffffff);
+    if (call(() => access === undefined ? start() : access.invoke('stream', streams, start)) !== undefined)
       fail('actual8004beb8 returned unexpectedly');
     write(a, 'accumulator80c', 0);
   };

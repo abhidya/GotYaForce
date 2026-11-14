@@ -64,7 +64,7 @@ export function requireCompleteSourceActorDoubleLifecycle(actual: object): void 
  * executable adapters cannot run outside the exact genuine stage/runtime.
  * A token is obtainable only during the frame module's private bind join. */
 export type SourceActorDoubleOperation = 'prehook' | 'capture' | 'upper' | 'full' | 'ground' |
-  'posthook' | 'housekeeping' | 'sound';
+  'posthook' | 'housekeeping' | 'sound' | 'stream';
 export interface SourceActorDoubleFrameAccess {
   invoke<T>(operation: SourceActorDoubleOperation, runtime: object, run: () => T): T;
 }
@@ -84,8 +84,9 @@ export function claimSourceActorDoubleFrame(frame: SourceActorFrameLifecycleRunt
     invoke<T>(operation: SourceActorDoubleOperation, runtime: object, run: () => T): T {
       requireCompleteSourceActorDoubleLifecycle(actual);
       const prior = state.active;
-      // Only the genuine action body's nested ground helper is a nested stage.
-      if (prior !== undefined && !(prior.operation === 'full' && operation === 'ground'))
+      // Only the genuine action body's ground and stream callees may nest.
+      // Their exact runtime remains part of this private invocation capability.
+      if (prior !== undefined && !(prior.operation === 'full' && (operation === 'ground' || operation === 'stream')))
         fail('nested source frame operation is unsupported');
       state.active = {operation, runtime};
       try {const result = run(); requireCompleteSourceActorDoubleLifecycle(actual); return result;}

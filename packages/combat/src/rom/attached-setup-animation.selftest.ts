@@ -2486,7 +2486,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
     'truncated wait preserves actual playback and current/next stores, with later control fields unchanged');
   }
   {
-    const x = parsedControlFixture(Uint8Array.from([0, 8, 0, 2, 2, 0, 0, 0])); x.run();
+    const x = parsedControlFixture(Uint8Array.from([0, 8, 0, 2, 255, 0, 0, 0])); x.run();
     x.control.parseWaitRecord(x.actor, 2, x.base);
     rejects(() => x.control.update(x.actor, 2), 'unsupported zz_004c050_ opcode');
     check(x.waitControl.current00 === x.base && x.waitControl.wait14 === 0 && x.waitControl.finished1a === 0 &&
@@ -2839,6 +2839,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runDoubleFrameMarkerCompositionTests();
   runCompletedDoubleFrameHydratedCompositionTests();
   runNonnullDoubleSoundHydratedCompositionTests();
+  runAuthoredDoubleGroundPrefixCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -11848,7 +11849,7 @@ export function runDoubleFrameHydratedCompositionTests(): void {
  * is still interpreted by the real start owner, not narrowed by an adapter.
  * This is synthetic decoded input, not a retail Double animation schedule. */
 function doubleGroundStreamHydratedCompositionFixture(bind = true,
-  commands = Uint8Array.from([1, 2, 1, 1, 6, 0, 0, 0, 0, 3, 0, 7])) {
+  commands: Uint8Array = Uint8Array.from([1, 2, 1, 1, 6, 0, 0, 0, 0, 3, 0, 7])) {
   const x = installHydratedTransition(doubleFrameHydratedCompositionFixture(bind, true));
   if (x.ground === undefined) throw Error('ground composition requires its genuine optional owner');
   // Keep the source-carried point in the actual nonempty cell0. No terrain
@@ -12424,12 +12425,12 @@ export function runCompletedDoubleFrameHydratedCompositionTests(): void {
 /** Numeric witnesses: sound-hydration-evidence-2026-11-14.md. These are
  * selected, authenticated decoded inputs, not a whole DOL or a retail actor.
  * True logical offsets survive hydration; unknown bytes remain uncovered. */
-function nonnullDoubleSoundHydratedCompositionFixture(slot: 0 | 1 = 0, bind = true) {
-  // The caller schedule remains an explicit synthetic opcode01 + terminal wait.
-  // Its animation group/action and BOTH active channels now use the real source
-  // metadata. The actual retail stream's intervening opcode02 is still separate.
+function nonnullDoubleSoundHydratedCompositionFixture(slot: 0 | 1 = 0, bind = true, commandOverride?: Uint8Array) {
+  // Default caller schedule remains explicit synthetic opcode01 + terminal wait.
+  // The separate authored-prefix composition supplies authenticated command bytes;
+  // both retain the same real metadata and explicit synthetic bank scaffolding.
   const x = doubleGroundStreamHydratedCompositionFixture(false,
-    Uint8Array.from([1, 4, slot, 1, 6, 0, 0, 0, 0, 3, 0, 7]));
+    commandOverride ?? Uint8Array.from([1, 4, slot, 1, 6, 0, 0, 0, 0, 3, 0, 7]));
   const parts = x.mapping.getLayout(x.actor).parts;
   x.control.getActorBinding(x.actor).activeMask579 = 3; // 8033af7a, not an inferred single part.
   x.normalLifecycleState.short6bc = 10;
@@ -12540,4 +12541,107 @@ export function runNonnullDoubleSoundHydratedCompositionTests():void {
     checkCompletedDoubleFramePermanentRefusal(x);
   }
   console.log('[actor-nonnull-sound-composition] PASS: true mask3, copied bounded source metadata windows, real4d244 on parts0/1, initializer-backed inactive ff, nonnull actual4e8 records and genuine5b98c no-audio chain returns; mode1/DAT first frame completes, gaps/firing audio/next phase1 refuse honestly; synthetic stream schedule/model/terrain remain, no retail full-frame or browser-playability claim');
+}
+
+/** Actual command bytes, independently bounded at the first wait. Selector
+ * headers remain the prior explicit synthetic scaffolding, as do DAT/model and
+ * terrain inputs. No bytes after the first wait are supplied or zero-filled. */
+function authoredDoubleGroundPrefixCompositionFixture(bind = true, commandOverride?: Uint8Array, slot: 0 | 1 = 0) {
+  const commands = commandOverride ?? Uint8Array.from([
+    1,4,0,1,6,0,0,0, 2,255,0,0,0,0,0,0, 3,0,1,0,0,0,0,64, 0,2,0,2,
+  ]);
+  const x = nonnullDoubleSoundHydratedCompositionFixture(slot,false,commands);
+  x.control.bindActualActor(x.actor,x.movement);
+  if (bind) x.frame.bindActor(x.actor);
+  return Object.assign(x,{authoredCommands:commands});
+}
+export function runAuthoredDoubleGroundPrefixCompositionTests():void {
+  {
+    const x=authoredDoubleGroundPrefixCompositionFixture(), old=x.joints.getBinding(x.joint).aobj7c;
+    const state0=x.control.getPartBinding(x.actor,0),state1=x.control.getPartBinding(x.actor,1);
+    check(state0.state1b===undefined && state0.auxiliary1c===undefined && state1.state1b===undefined &&
+      state1.auxiliary1c===undefined && !Object.hasOwn(x.sourceActor,'byte6e8') && !Object.hasOwn(x.sourceActor,'byte6e9'),
+      'new source storage is uninitialized before the actual command stores, not default retail zero state');
+    const before=retainCompositionRecords([x.sourceActor,state0,state1,x.start]);
+    for (const run of [()=>x.control.parseWaitRecord(x.actor,3,x.streamBase),
+      ()=>x.control.startStream(x.actor,3,4,0),()=>x.control.update(x.actor,3)]) {
+      rejects(run,'exclusively owned');before();
+    }
+    x.authoredCommands.fill(254);x.streamBytes.fill(253);
+    check(x.runFrame()===undefined,'actual ground opcode01/02/03/wait prefix completes the first bounded frame');
+    check(state0.state1b===0 && state0.auxiliary1c===0 && state1.state1b===0 && state1.auxiliary1c===1 &&
+      x.sourceActor.byte6e8===0 && x.sourceActor.byte6e9===0 && x.start.defaultSelector582===1,
+      'real command handlers establish both canonical state pairs and actual6e8/6e9 while ff preserves genuine prehook582');
+    check(x.sourceActor.controlWord===0x43 && x.sourceActor.fbPhase===1 && x.gates.marker578===2 &&
+      x.sourceActor.accumulator80c===0 && x.sourceActor.soundEventTable===x.soundTable &&
+      x.joints.getBinding(x.joint).aobj7c!==old && x.control.getActualActor(x.actor)===x.sourceActor,
+      'actual authored40 survives the real posthook/sound suffix on the same actor, nonempty animation and retained sound graph');
+    for (const state of [state0,state1]) check(state.wait14===2 && state.finished1a===0 && state.status1d===1 &&
+      x.control.cursorOffset(x.streamBase,state.current00!)===88 && x.control.cursorOffset(x.streamBase,state.next04!)===92,
+      'each eight-byte handler advances to real wait at command+24, with uncovered continuation at+28');
+    check(!hasIncompleteSourceActorFrame(x.sourceActor) && !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+      'only completed source suffix releases first-frame incompleteness');
+    const after=retainCompositionRecords([x.sourceActor,state0,state1,x.start]);
+    for (const run of [()=>x.control.parseWaitRecord(x.actor,3,x.streamBase),
+      ()=>x.control.startStream(x.actor,3,4,0),()=>x.control.update(x.actor,3)]) {
+      rejects(run,'exclusively owned');after();
+    }
+    let phaseReads=0;const original=Object.getOwnPropertyDescriptor;
+    Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+      if(owner===x.actionTables.phases1f000 && key==='1')phaseReads++;
+      return original(owner,key);
+    }) as typeof original;
+    try {rejects(()=>x.runFrame(2),'80069210');} finally {Object.getOwnPropertyDescriptor=original;}
+    check(phaseReads===0 && x.sourceActor.controlWord===0x43 && x.sourceActor.fbPhase===1 && x.gates.marker578===2,
+      'genuine next frame takes authored40 normal cue44 path before phase1, without clearing control or replaying phase0');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=authoredDoubleGroundPrefixCompositionFixture();
+    Object.defineProperty(x.sourceActor,'byte6e9',{value:91,writable:false,configurable:true});
+    rejects(()=>x.runFrame(),'byte6e9');
+    check(x.control.getPartBinding(x.actor,0).state1b===0 && x.control.getPartBinding(x.actor,0).auxiliary1c===0 &&
+      x.sourceActor.byte6e8===0 && x.sourceActor.byte6e9===91 && x.control.getPartBinding(x.actor,1).state1b===undefined &&
+      x.start.defaultSelector582===1 && x.sourceActor.accumulator80c===901,
+      'readonly final opcode02 destination retains earlier three stores and setup, before selector, opcode03 or action suffix');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=authoredDoubleGroundPrefixCompositionFixture(true,Uint8Array.from([
+      1,4,0,1,6,0,0,0,2,255,0,0,0,0,0,0,3,0,1,0,0,0,0,64,
+    ]));
+    rejects(()=>x.runFrame(),'out of bounds');
+    check(x.sourceActor.controlWord===0x43 && x.control.getPartBinding(x.actor,1).auxiliary1c===1 &&
+      x.sourceActor.accumulator80c===901 && x.control.getPartBinding(x.actor,1).current00===null,
+      'missing actual terminal wait is a reached gap after commands, never fabricated from zero padding');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=authoredDoubleGroundPrefixCompositionFixture(true,Uint8Array.from([
+      1,4,1,1,6,0,0,0,2,255,0,0,0,0,0,0,3,0,1,0,0,0,0,64,8,0,0,1,0,2,0,1,
+    ]),1);
+    rejects(()=>x.runFrame(),'unsupported zz_004c050_ opcode');
+    check(x.control.getPartBinding(x.actor,0).state1b===0 && x.control.getPartBinding(x.actor,1).auxiliary1c===1 &&
+      x.sourceActor.byte6e8===0 && x.sourceActor.byte6e9===0 && (x.sourceActor.controlWord&0x40)!==0 &&
+      x.sourceActor.accumulator80c===901 && x.control.getPartBinding(x.actor,1).current00===null,
+      'actual air prefix executes02/03 then refuses genuine08; its later wait is not skipped to invent completion');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=nonnullDoubleSoundHydratedCompositionFixture(0,false,Uint8Array.from([
+      1,4,0,1,6,0,0,0,2,255,0,0,0,0,0,0,3,0,1,0,0,0,0,64,0,2,0,2,
+    ]));
+    const other=createRomActor();
+    const movement=createSourceActorMovementFollowupRuntime({mapping:x.mapping,waits:x.control,setup:x.ready});
+    movement.bindActor(x.actor,other,{byte661:0,field66c:0,field670:0});
+    x.control.bindActualActor(x.actor,movement);
+    x.frame.bindActor(x.actor);
+    const retained=retainCompositionRecords([other,x.control.getPartBinding(x.actor,0),x.control.getPartBinding(x.actor,1)]);
+    rejects(()=>x.runFrame(),'source stream actual');retained();
+    check(x.sourceActor.fbPhase===0 && x.sourceActor.accumulator80c===901 && !Object.hasOwn(other,'byte6e8') &&
+      !Object.hasOwn(x.sourceActor,'byte6e8'),
+      'another genuine movement runtime sharing mapping/waits cannot substitute a different actual actor into the real action');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  console.log('[actor-authored-ground-prefix] PASS: authenticated28-byte ground commands01/02/03/wait on canonical stream/actual actor owners, retained real mode1/nonnull sound first frame, ordered partial writes and genuine next69210 boundary; actual air08 refuses; explicit synthetic bank headers/model/terrain, no phase1/audio/clone/browser completion claim');
 }

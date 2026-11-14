@@ -5061,3 +5061,49 @@ sustained attack, charged clone, production-selection or browser-playability
 claim follows from this checkpoint. Authenticate and implement the authored
 stream prefix/opcode02, then continue real phase 1 and its callback/magnitude
 boundaries; never reset the action or force null sound to bypass them.
+
+
+## 2026-11-14: authored ground opcode02/03 prefix
+
+The bounded source stream path now executes the authenticated 28-byte ordinary
+ground prefix through the real opcode01 setup, opcode02 part0 state, opcode03
+part1 state, and the actual mode2/wait2 stop record. See
+`part-state-command-evidence-2026-11-14.md` and the fixed reader/tests for both
+archived snapshots. Both state commands consume eight bytes, including when
+unselected. The zero payload inside opcode02 is not an early terminal wait.
+
+The canonical stream part owner retains raw unsigned `state1b` and `auxiliary1c`
+slots with no initialized value until an explicit input or proved source store.
+Opcode02 writes the same actual actor's optional `byte6e8` and `byte6e9`; no
+constructor zero defaults or legacy contact-state mirrors are introduced.
+The signed ff selector leaves the genuine582 owner unread and unchanged; fe
+XORs its current byte with1. Neither handler writes584. Opcode03 retains its
+two separate actual5e0 stores, fresh second operand/control reads, and earlier
+part-state effects when a later destination refuses.
+
+A one-time genuine movement join reconciles actual actor, mapping and wait
+owners. The real Double action invokes streams only inside the existing private
+frame capability's nested stream stage. Public parse/start/update cannot replay
+a claimed actor between frames or after a partial failure. Another genuine
+movement runtime with matching mapping/wait records but a different actual actor
+is rejected by action owner reconciliation. Historical unjoined fixtures retain
+their explicitly narrower behavior; they do not prove the new canonical join.
+
+The new offline composition preserves both active source metadata rows, real
+nonnull sound records, nonempty part1 DAT/AObj/FObj mode1 playback and the actual
+ground wait. Its first55568 frame completes with control43, phase1 and marker2.
+The next fresh epoch reaches the genuine earlier cue44 air-control path and
+refuses at80059d18 -> 80069210 **before any phase1 table selection**. The test
+never clears40, forces a phase, nulls sound, or skips the normal-control stage.
+The actual air32-byte prefix executes02/03 then refuses at its unimplemented
+opcode08 before the later wait. Truncated ground input refuses after reached
+state/control stores instead of fabricating zero-filled continuation.
+
+Scope remains bounded host execution: family-bank selector headers are explicit
+synthetic scaffolding, DAT/model/terrain and initial actor inputs are supplied,
+and full allocation/retail-bank hydration is not established. No original
+executable run, audio effect, completed phase1, sustained attack, charged clone,
+production activation or browser-playability claim follows from this checkpoint.
+The coherent next lifecycle dependency is the authenticated control40 chain,
+sharing the existing ground runtime during normal59068, before later phase1
+stream/motion/callback/magnitude work.
