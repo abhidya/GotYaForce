@@ -52,6 +52,8 @@ export interface SourceActorProjectileSpawnRuntime {
   getAllocatorRuntime(): SourceObjectAllocationRuntime;
   getSourceOwners(identity: symbol): readonly object[];
   assertActorComplete(identity: symbol): void;
+  /** Identity registered only after every source spawn store completes. */
+  getSpawnOwnerIdentity(projectile: symbol): symbol;
   /** Host return exposes allocation identity for inspection; source returns void. */
   spawn(identity: symbol, variant: number): symbol | null;
 }
@@ -137,6 +139,7 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
   interface Entry {actual: RomActor; mapping: object; world: object; status: object; admission: object; gauge: object;
     setupPart0: object; setupActor: object; aim: object; binding: Partial<SourceActorProjectileSpawnBinding>; caller: symbol}
   const actors = new Map<symbol, Entry>(), frameAccesses = new Map<symbol, SourceActorDoubleFrameAccess>();
+  const completedSpawns = new Map<symbol, symbol>();
   const entry = (id: symbol): Entry => {const e = actors.get(id); if (!e) fail('unknown/non-owned projectile actor'); return e;};
   const partZero = (id: symbol): object => {
     const layout = call(() => mapping.getLayout(id)), parts = read(layout, 'parts'), bank = read(parts, '0'), part = read(bank, '0');
@@ -214,6 +217,11 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
     getPrehookRuntime() {return prehook;}, getCueRuntime() {return cues;}, getAllocatorRuntime() {return allocator;},
     getSourceOwners(id) {return Object.freeze([...new Set([...ownRecords(entry(id)),row,row.local04,...allocator.getSourceOwners(id)])]);},
     assertActorComplete(id) {const e = entry(id); requireCompleteSourceActorDoubleLifecycle(e.actual); allocator.assertActorComplete(id);},
+    getSpawnOwnerIdentity(projectile) {
+      const id = completedSpawns.get(projectile);
+      if (id === undefined) fail('projectile has no completed genuine spawn');
+      return id;
+    },
     spawn(id, variant) {return guard(() => {
       const e = entry(id); requireSourceActorDoubleInvocation(e.actual,'projectile',runtime);
       try {
@@ -256,6 +264,7 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
         const aimX = f(e.aim,'x'), aimY = f(e.aim,'y');
         sf(0x144,aimX); sf(0x148,aimY); sf(0x14c,f(e.aim,'z'));
         u8(0x150,byte(e.setupPart0,'group28')); u8(0x151,byte(e.setupPart0,'action29'));
+        completedSpawns.set(child, id);
         return child;
       } catch (error) {
         markIncompleteSourceActorDoubleLifecycle(e.actual);

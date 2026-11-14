@@ -72,6 +72,9 @@ export interface SourceActorDoubleFrameAccess {
 }
 const frameOwners = new WeakMap<object, {normalRuntime?: object; active?: {operation: SourceActorDoubleOperation; runtime: object}}>();
 const frameAccessOwners = new WeakMap<object, object>();
+/** Read-only ownership test for a separately scheduled projectile callback.
+ * It grants no capability to run or replay any actor frame stage. */
+export function isSourceActorDoubleFrameClaimed(actual: object): boolean {return frameOwners.has(actual);}
 export function isSourceActorDoubleFrameAccess(access: unknown, actual: object): access is SourceActorDoubleFrameAccess {
   return access !== null && typeof access === 'object' && frameAccessOwners.get(access) === actual;
 }

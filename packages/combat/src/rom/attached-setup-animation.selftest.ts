@@ -13,6 +13,8 @@ import {createSourceObjectAllocationRuntime, type SourceAllocationBytes, type So
 import {createSourceActorProjectileSpawnRuntime} from './actor-projectile-spawn.js';
 import {runActorProjectileSpawnSelfTests} from './actor-projectile-spawn.selftest.js';
 import {runSourceObjectAllocationSelfTests} from './source-object-allocation.selftest.js';
+import {createSourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
+import {runProjectileRootLifecycleSelfTests} from './projectile-root-lifecycle.selftest.js';
 import {createSourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
 import {createSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleBinding} from './actor-control-lifecycle.js';
@@ -2851,6 +2853,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runSourceObjectAllocationSelfTests();
   runProjectileSpawnHydratedCompositionTests();
   runProjectileFrameGroundContinuationTests();
+  runProjectileRootHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -13066,4 +13069,61 @@ export function runProjectileFrameGroundContinuationTests(): void {
     rejects(() => x.allocator.writeU8(x.nextChild, 0, 1), 'incomplete');
   }
   console.log('[actor-projectile-frame-continuation] PASS: genuine frame715f8/6dbe0/7db5c/88aa0/06d4c with actual two-pool allocation, same-byte metadata and joint11 transform; ordered ammo/physics, true exhaustion, unread second-arm boundary, atomic failures and permanent closure; explicit synthetic release/pools/joint11, no flight/retail hydration/browser claim');
+}
+
+/** Separate later callback witness after a COMPLETE standalone source spawn.
+ * The constructor's3e8→94 identity copy has not been hydrated in the old graph;
+ * matchingMirror explicitly supplies that positive input, never changes old
+ * fixtures or hides the ordinary mismatched-child invalidation path. */
+export function createProjectileRootTestFixture(matchingMirror = true) {
+  const x = createProjectileSpawnTestFixture();
+  if (matchingMirror) x.sourceActor.borgMirror94 = 3;
+  const child = x.projectiles.spawn(x.actor, 1);
+  check(child === x.child, 'actual successful spawn supplies root object');
+  const drawList = {head: null as symbol | null, tail: null as symbol | null};
+  const rootSources = {spawns: x.projectiles, stage: x.stageBounds, drawList0: drawList, initialState0: 0x8007dd84, row1Hit03: 1};
+  const root = createSourceProjectileRootRuntime(rootSources); root.bindProjectile(x.child);
+  return Object.assign(x, {root, rootSources, drawList});
+}
+export function runProjectileRootHydratedCompositionTests(): void {
+  runProjectileRootLifecycleSelfTests(createProjectileRootTestFixture);
+  {
+    const x = createProjectileRootTestFixture(false);
+    check(x.sourceActor.borgNumber === 3 && x.allocator.readU16(x.child, 0x94) === 0,
+      'ordinary earlier synthetic fixture still lacks constructor identity-mirror hydration');
+    rejects(() => x.root.dispatchStoredRoot(x.child), 'state2 dispatch');
+    check(x.allocator.readU8(x.child, 0x18) === 2 && x.allocator.readU8(x.child, 0x1d8) === 1 &&
+      x.allocator.readU8(x.child, 0x82) === 0 && x.allocator.readU32(x.child, 0x100) === 0 && x.drawList.head === null,
+      'actual mismatch executes ordered retirement guard rather than manufacturing initialization');
+  }
+  {
+    const x = createProjectileRootTestFixture(); x.sourceActor.heading = 0x8123;
+    const oldPosition = [0x20, 0x24, 0x28].map(offset => x.allocator.readU32(x.child, offset));
+    rejects(() => x.root.dispatchStoredRoot(x.child), 'actual8008ac80 HIT registration');
+    check(x.root.getObject(x.child) === x.objectBytes && x.allocator.readU8(x.child, 0x18) === 1 &&
+      x.allocator.readU32(x.child, 0x100) === 0x80047aa4 && x.allocator.readU8(x.child, 0x85) === 0 &&
+      x.allocator.readU8(x.child, 0x84) === 20 && x.allocator.readU16(x.child, 0x72) === 0x8123,
+      'real initial handler changes source state, stores future draw callback, registers draw0, sets category and copies actual yaw');
+    check(x.drawList.head === x.child && x.drawList.tail === x.child &&
+      x.allocator.readPointer(x.child, 0x104) === null && x.allocator.readPointer(x.child, 0x108) === null &&
+      x.groups[9]!.head === x.child && x.groups[9]!.tail === x.child &&
+      oldPosition.every((bits, i) => x.allocator.readU32(x.child, [0x20, 0x24, 0x28][i]!) === bits),
+      'draw0 is distinct from existing allocation group9; unsupported HIT does not refresh transform or fake later initialization');
+    rejects(() => x.root.dispatchStoredRoot(x.child), 'incomplete');
+    rejects(() => x.projectiles.spawn(x.actor, 1), 'incomplete');
+    rejects(() => x.allocator.writeU8(x.nextChild, 0, 1), 'incomplete');
+  }
+  {
+    // A newly allocated child cannot be treated as if the actual source main
+    // loop continued after its parent frame's unsupported magnitude helper.
+    const x = createProjectileSpawnTestFixture(true); x.sourceActor.borgMirror94 = 3; x.runFrame(1);
+    x.control.getPartBinding(x.actor, 0).state1b = 1;
+    rejects(() => x.runFrame(2), '8020bb38 frsqrte');
+    const root = createSourceProjectileRootRuntime({spawns: x.projectiles, stage: x.stageBounds,
+      drawList0: {head: null, tail: null}, initialState0: 0x8007dd84, row1Hit03: 1});
+    rejects(() => root.bindProjectile(x.child), 'incomplete');
+    check(x.allocator.readU8(x.child, 0x18) === 0 && x.allocator.readU32(x.child, 0x100) === 0,
+      'failed actor frame cannot schedule even its genuinely completed first spawn');
+  }
+  console.log('[projectile-root-composition] PASS: separate genuine completed-spawn root callback, actual signed owner guard and8aff0, explicit matching identity input reaches source state0/89100 draw registration then precise8ac80 HIT boundary; old mismatch and failed frame remain refused, no scheduler/flight/retail/browser claim');
 }
