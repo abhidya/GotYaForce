@@ -122,8 +122,9 @@ export function runActorNormalLifecycleSelfTests(): void {
     for (let raw = 0; raw < 256; raw++) {
       const x = fixture(true); Object.keys(x.initial).forEach(key => absent(x.initial, key)); x.bind();
       x.actual.ubCue = raw;
-      if (raw === 9) equal(x.cue(), undefined, 'only proven cue9 returns without4c8/59f5c reads');
+      if (raw === 9) equal(x.cue(), undefined, 'proven cue9 returns without4c8/59f5c reads');
       else if (raw === 0) rejects(x.cue, 'actual cue target8005913c');
+      else if (raw === 44) rejects(x.cue, 'actual cue target80059cd0');
       else {
         const signed = raw < 128 ? raw : raw - 256;
         const cell = 0x802d3300 + signed * 4;

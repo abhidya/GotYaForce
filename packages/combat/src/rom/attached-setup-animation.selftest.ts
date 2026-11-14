@@ -2812,6 +2812,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runInputTestersHydratedCompositionTests();
   runCue0TailHydratedCompositionTests();
   runCommandAdmissionHydratedCompositionTests();
+  runCue44LifecycleHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -10518,6 +10519,8 @@ function commandAdmissionHydratedControlFixture(supplied = commandAdmissionHydra
   const visibility = Array.from({length: 6}, (_, i) => ({eligibility83: i, controlWord: 0x80000000,
     visibilityMask5e6: 0x44 | i << 4})); a.visibilityRoster = visibility;
   const cueTable = new Int8Array(96); cueTable.fill(-1); cueTable[0] = 0; cueTable[1] = 0;
+  // Deliberately synthetic signed states, NOT Double's actual cue44 row(61,0).
+  // Distinct61/62 make the independent full/upper source stores observable.
   cueTable[18] = -8; cueTable[19] = -7; cueTable[88] = 61; cueTable[89] = 62; a.cueTable = cueTable;
   x.cells[2].max = 0; x.cells[2].refillType = 7; // max0 must bypass this malformed/unimplemented refill branch.
   x.start.marker709 = 0x35; x.control.getActorBinding(x.actor).blockedMask1d9a = 0x83;
@@ -10531,7 +10534,9 @@ function retainCommandAdmissionRecords(x: CommandAdmissionFixture): () => void {
     x.admissionState, x.testerState, x.chargeState, x.cueState, x.gates, x.statusState, x.sourceClock,
     x.commandTable, x.commandRows, x.commandRow, x.visibility, ...x.visibility,
     x.start, x.control.getActorBinding(x.actor), ...x.cells, ...x.ammoSlots, x.admissionGlobal, x.admissionData,
-    x.normalLifecycleState, x.actorControlState, x.readyState, x.actionRequest!.getActorBinding(x.actor), x.tier];
+    x.normalLifecycleState, x.actorControlState, x.readyState, x.actionRequest!.getActorBinding(x.actor), x.tier,
+    x.inputState, x.machineState, x.movementState, x.attributeState, x.historyState, x.rateState, x.rateBorg, x.cue0State, x.terrain,
+    ...(x.cue0Tail === undefined ? [] : [x.cue0Tail.getActorBinding(x.actor), ...x.cue0Tail.getKnownTeamStorageOwners()])];
   const saved = owners.map(owner => ({owner, keys: Reflect.ownKeys(owner)}))
     .map(row => ({...row, values: row.keys.map(key => Reflect.get(row.owner, key))}));
   return () => check(saved.every(({owner, keys, values}) => keys.length === Reflect.ownKeys(owner).length &&
@@ -10571,7 +10576,7 @@ function checkCommandNativeOne(x: CommandAdmissionFixture): void {
     x.cueState.byte7cf === 202 && x.cueState.byte7ce === 0 && x.cueState.byte588 === 0 &&
     ['byte541', 'byte542', 'byte543', 'byte544', 'byte545', 'byte546', 'byte547']
       .every(key => Reflect.get(x.cueState, key) === 0) && x.gates.marker1db3 === 0,
-    'genuine full then upper44 cues retain old states/cues and complete actual phase/landing/dispatch resets');
+    'genuine full then upper44 helpers consume deliberately synthetic61/62 states and complete actual phase/landing/dispatch resets');
   check(x.cells[2].max === 0 && x.cells[2].cur === 3 && x.cells[2].refillType === 7 && x.cells[2].timer === 0.5 &&
     x.ammoSlots[2].mirror776 === 13 && x.testerState.byte595 === 0 && x.admissionGlobal === x.globals,
     'actual source ammo.max0 bypasses consume/refillType, non-normal-match signed byte45>=5 exits genuine voice and595 remains tester-only');
@@ -10601,7 +10606,8 @@ export function runCommandAdmissionHydratedCompositionTests(): void {
     r.assertActorComplete(x.actor); x.inputTesters.assertActorComplete(x.actor);
   }
   {
-    const x = commandAdmissionHydratedControlFixture(), a = x.sourceActor; x.header.mode4a1 = 1; a.statusWord5bc = 0x400;
+    const x = commandAdmissionHydratedControlFixture(commandAdmissionHydration(), true), a = x.sourceActor;
+    x.header.mode4a1 = 1; a.statusWord5bc = 0x400;
     check(x.runRawPrefix(1, 64, 20) === undefined, 'real ordinary-X native1 completes genuine cue0 and normal caller suffix');
     checkCommandNativeOne(x); checkChargeConsumedEpoch(x);
     check(x.normalLifecycleState.short6bc === 1 && x.actionRequest!.getActorBinding(x.actor).byte73c === 4 &&
@@ -10611,8 +10617,14 @@ export function runCommandAdmissionHydratedCompositionTests(): void {
     x.updateStatus();
     check(a.stateTimer === 8 && x.statusState.field690 === 7 && x.cells[2].timer === 7 && x.normalLifecycleState.short6bc === 1,
       'explicit later genuine status keeps694 while admitted mode3 is active, decrements other status/ammo at the new clock and never replays command/cues');
-    rejects(() => x.runRawPrefix(2, 64, 20), 'source table802d3300');
-    check(a.ubCue === 44 && a.fbCue === 44, 'later active cue44 remains honest unsupported lifecycle boundary rather than implicit full attack support');
+    a.statusWord5bc = 0;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(2, 66, 22) === undefined && a.ubCue === 44 && a.fbCue === 44 &&
+      a.ubState === 62 && a.fbState === 61 && x.cueState.byte588 === 1 && x.normalLifecycleState.short6bc === 0 &&
+      a.inputEdge5d4 === 0 && x.tier.timerFrames === 6 && x.sourceClock.timestep1dc8 === 1,
+      'next genuine ground44 control epoch stores588 then traverses actual helpers and normal suffix without replaying X admission or action2 playback');
+    retained();
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch');
   }
   // A live raw sentinel may finish without any snapshot/cue/ammo/voice owner.
   // This exercises real69ea4/null direction and actual6a104 first-byte return.
@@ -10851,4 +10863,235 @@ export function runCommandAdmissionHydratedCompositionTests(): void {
     }
   }
   console.log('[actor-command-admission-composition] PASS: genuine ordinary X edge69b98/69dd0/69ea4/null508 direction/raw4ec [44,3,2,0]/6a104 on retained source graph; exact zero-yaw snapshot and descriptor-selected matrix Y, shared flags/stream/six visibility records/full+upper cues/ammo.max0 and signed non-normal-match voice return, lazy sentinel/cooldown, retained partial writes and permanent incomplete re-entry guards; synthetic offline only, no active-match voice/general trig/target arithmetic/full attack/production activation');
+}
+
+/** Reach cue44 through the real raw-input, command-admission and normal route.
+ * Only subsequent source inputs are changed by individual tests. The command
+ * fixture's61/62 row remains explicitly synthetic; cue44 control is not the
+ * separate action2 stream dispatcher80055568 or its playback state machine. */
+function cue44AdmittedControlFixture(withTail = true) {
+  const x = commandAdmissionHydratedControlFixture(commandAdmissionHydration(), withTail);
+  x.header.mode4a1 = 1; x.sourceActor.statusWord5bc = 0x400;
+  check(x.runRawPrefix(1, 64, 20) === undefined && x.sourceActor.ubCue === 44 && x.sourceActor.fbCue === 44 &&
+    x.sourceActor.actionIndex === 2 && x.normalLifecycleState.short6bc === 1 && x.sourceClock.timestep1dc8 === 1,
+    'real input epoch admits ordinary X on the same source actor and reaches cue44 before its next control dispatch');
+  x.sourceActor.statusWord5bc = 0;
+  return x;
+}
+function checkCue44PermanentRefusal(x: CommandAdmissionFixture): void {
+  for (const [index, bypass] of ['cue9', 'ready', 'control-mask', 'movement3'].entries()) {
+    if (Object.getOwnPropertyDescriptor(x.sourceActor, 'ubCue')!.writable) x.sourceActor.ubCue = bypass === 'cue9' ? 9 : 44;
+    if (Object.getOwnPropertyDescriptor(x.sourceActor, 'controlWord')!.writable)
+      x.sourceActor.controlWord = bypass === 'control-mask' ? 0x43 : 3;
+    x.movementState.byte661 = bypass === 'movement3' ? 3 : 0;
+    x.actorControlState.byte490 = bypass === 'ready' ? 2 : 0; x.actorControlState.short49a = 1;
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.runRawPrefix(index + 20, 128, 40), 'known incomplete');
+    rejects(() => x.runRawPrefix(index + 20, 256, 80), 'epoch'); retained();
+  }
+  for (const run of [() => x.cue0.dispatchCue44(x.actor), () => x.cue0.test800690a0(x.actor),
+    () => x.cue0.dispatchCue0(x.actor), () => x.cue0.updateTerrain(x.actor),
+    () => x.normalLifecycle.updateActor(x.actor), () => x.normalLifecycle.dispatchCue(x.actor),
+    () => x.normalLifecycle.updateCueState(x.actor), () => x.normalLifecycle.updateCountdown(x.actor)])
+    rejects(run, 'known incomplete');
+}
+export function runCue44LifecycleHydratedCompositionTests(): void {
+  {
+    // Fixed-span authenticated source witnesses: Double's producer802d3b50
+    // names table802d3ff8; row44 at802d4050 is3d00 in both archived snapshots.
+    // This opt-in row is distinct from the historical synthetic61/62 fixture.
+    const x = commandAdmissionHydratedControlFixture(commandAdmissionHydration(), true), a = x.sourceActor;
+    x.cueTable[89] = 0; x.header.mode4a1 = 1; a.statusWord5bc = 0x400;
+    const attached = x.joints.getBinding(x.joint).aobj7c, callbacks = x.receiverTracks.length, matrix = [...x.worldMatrix];
+    check(x.runRawPrefix(1, 64, 20) === undefined && a.fbCue === 44 && a.ubCue === 44 &&
+      a.fbState === 61 && a.ubState === 0 && a.prevFbState === -13 && a.prevUbState === -12 &&
+      x.cueState.byte588 === 0 && x.cueState.byte7ce === 0 && x.gates.marker1db3 === 0,
+      'explicit authenticated Double cue44 row61/0 performs both real resets: upper0 is a state transition, not sentinel-1');
+    check(x.joints.getBinding(x.joint).aobj7c === attached && x.receiverTracks.length === callbacks &&
+      x.worldMatrix.every((value, index) => Object.is(value, matrix[index])),
+      'source-row admission does not replace or advance the attached animation or rebuild its matrix');
+    const retained = retainCeilingLifecycleCadence(x); a.statusWord5bc = 0;
+    check(x.runRawPrefix(2, 66, 22) === undefined && a.fbState === 61 && a.ubState === 0 &&
+      a.fbCue === 44 && a.ubCue === 44 && x.cueState.byte588 === 1 && x.normalLifecycleState.short6bc === 0,
+      'source-row61/0 admission reaches the same next cue44 control epoch without claiming55568 selects or plays FB61');
+    retained();
+  }
+  {
+    const x = cue0LifecycleHydratedControlFixture(3, {}); x.sourceActor.ubCue = 44;
+    x.sourceActor.controlWord = 0; x.header.mode4a0 = 2;
+    rejects(() => x.cue0.dispatchCue44(x.actor), '800699d8');
+    check(x.cueState.byte588 === 1 && x.sourceActor.ubCue === 44 && x.sourceActor.fbCue === 202 &&
+      !Object.hasOwn(x.cue0State, 'byte732') && x.cue0.getInputTestersRuntime() === undefined,
+      'cue44 does not borrow cue0 movement3-to1b special case or hydrate absent testers/732 at the genuine mode2 terrain gate');
+    rejects(() => x.cue0.dispatchCue44(x.actor), 'known incomplete');
+  }
+  {
+    const old = rotationDampingHydratedControlFixture(); old.stageState.lifecycle18 = 0; old.sourceActor.ubCue = 44;
+    check(old.normalLifecycle.getCue0Runtime() === undefined, 'historical graph has no implicit shared cue handler');
+    rejects(() => old.runRawPrefix(1, 64, 20), 'target80059cd0');
+    check(old.cueState.byte588 === 18 && old.normalLifecycleState.short6bc === 2,
+      'authenticated cue44 target preserves the old absent-owner boundary before588 or normal callback stores');
+  }
+  {
+    const x = cue44AdmittedControlFixture(), a = x.sourceActor, tail = x.cue0Tail!;
+    check(x.normalLifecycle.getCue0Runtime() === x.cue0 && x.cue0.getCueBinding(x.actor) === x.cueState &&
+      tail.getCueBinding(x.actor) === x.cueState && x.commandAdmission.getCueBinding(x.actor) === x.cueState &&
+      x.cue0.getActualActor(x.actor) === a && x.cue0.getMappingActor(x.actor) === x.sourceClock &&
+      x.inputTesters.getStatusBinding(x.actor) === x.statusState && tail.getStatusBinding(x.actor) === x.statusState &&
+      x.cue0.getTailRuntime() === tail && x.cue0.getInputTestersRuntime() === x.inputTesters,
+      'cue44 reuses genuine normal/cue/tester/tail/command identity and canonical raw clock/status/reset owners');
+    const retained = retainCeilingLifecycleCadence(x), before709 = x.start.marker709;
+    a.stateTimer = 9;
+    check(x.runRawPrefix(2, 66, 22) === undefined && x.cueState.byte588 === 1 && a.ubCue === 44 && a.fbCue === 44 &&
+      a.ubState === 62 && a.fbState === 61 && a.actionIndex === 2 && a.stateTimer === 9 &&
+      x.normalLifecycleState.short6bc === 0 && x.sourceClock.timestep1dc8 === 1 && x.start.marker709 === before709,
+      'second raw epoch completes real cue44 control without replaying command admission, a clock step or action2 stream setup');
+    retained(); rejects(() => x.runRawPrefix(2, 128, 40), 'epoch');
+    check(x.runRawPrefix(3, 68, 24) === undefined && x.cueState.byte588 === 1 && x.tier.timerFrames === 5 &&
+      x.normalLifecycleState.short6bc === 0 && a.stateTimer === 9,
+      'completed cue44 clears its marker and a fresh raw epoch may perform the required equal588=1 store again');
+  }
+  {
+    const x = cue44AdmittedControlFixture(), a = x.sourceActor;
+    a.controlWord = 0; x.cue0State.byte732 = NaN;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), 'byte732'); retained();
+    check(x.cueState.byte588 === 1 && a.pos.y === 0 && x.normalLifecycleState.short6bc === 1 && x.tier.timerFrames === 6,
+      'cue44 initial588 and real terrain ground snap precede reached732 failure and retain the exact source prefix');
+    checkCue44PermanentRefusal(x);
+  }
+  {
+    const x = cue44AdmittedControlFixture(false), a = x.sourceActor;
+    a.controlWord = 0x40; x.header.mode4a0 = 2; x.statusState.byte593 = 1;
+    x.movementState.byte661 = NaN; x.cue0State.byte732 = NaN; x.attributeState.field674 = NaN;
+    a.hoverOffset668 = NaN; a.stepHeight = NaN;
+    x.cue0.dispatchCue44(x.actor);
+    check(x.cueState.byte588 === 1 && x.testerState.byte595 === 0 && x.normalLifecycleState.short6bc === 1 &&
+      x.cue0.getTailRuntime() === undefined && a.ubCue === 44 && Number.isNaN(x.movementState.byte661),
+      'air tester native1 returns before absent tail and all unused movement/terrain fields without synthesizing a callee');
+    x.cue0.assertActorComplete(x.actor);
+  }
+  for (const air of [false, true]) {
+    const x = cue44AdmittedControlFixture(false), a = x.sourceActor;
+    if (air) a.controlWord |= 0x40;
+    rejects(() => x.cue0.dispatchCue44(x.actor), '80069814');
+    check(x.cueState.byte588 === 1 && x.testerState.byte595 === 0 && x.normalLifecycleState.short6bc === 1,
+      'ground/air native tester0 retains588 before the actually reached missing69814 owner');
+    checkCue44PermanentRefusal(x);
+  }
+  {
+    const x = cue44AdmittedControlFixture(), a = x.sourceActor;
+    a.controlWord |= 0x40; a.team = 1; a.inputEdge5d4 = 0x200;
+    rejects(() => x.cue0.dispatchCue44(x.actor), '80069210');
+    check(x.cueState.byte588 === 1 && x.cue0Tail!.getActualBorg(x.actor).burstArmFrames === 6 && x.testerState.byte595 === 0 &&
+      x.normalLifecycleState.short6bc === 1 && a.ubCue === 44,
+      'air44 follows genuine699d8 then69814 arm store and honestly refuses69210 without running the ground tail');
+    checkCue44PermanentRefusal(x);
+  }
+  // Successful first store matters even when it was already1. A readonly first
+  // store has no completed cue44 effects and remains directly retryable.
+  for (const old588 of [0, 1, 255, NaN]) {
+    const x = cue44AdmittedControlFixture(); x.cueState.byte588 = old588; x.sourceActor.controlWord = NaN;
+    rejects(() => x.cue0.dispatchCue44(x.actor), 'controlWord');
+    check(x.cueState.byte588 === 1 && x.testerState.byte595 === 0 && x.normalLifecycleState.short6bc === 1,
+      'cue44 writes exact588=1 before reading flags without reading or validating the overwritten byte');
+    checkCue44PermanentRefusal(x);
+  }
+  for (const old588 of [0, 1]) {
+    const x = cue44AdmittedControlFixture(); x.cueState.byte588 = old588;
+    Object.defineProperty(x.cueState, 'byte588', {writable: false});
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.cue0.dispatchCue44(x.actor), 'byte588: non-writable'); retained();
+    x.cue0.assertActorComplete(x.actor);
+    rejects(() => x.cue0.dispatchCue44(x.actor), 'byte588: non-writable'); retained();
+  }
+  //690a0 is a new source helper between696f4 and69038. Native0 gates stay
+  // lazy; upper5 sentinel is real native0, not a replacement return callback.
+  for (const gate of ['flag', 'edge', 'status', 'sentinel'] as const) {
+    const x = cue44AdmittedControlFixture(), a = x.sourceActor;
+    a.stateFlagA = gate === 'flag' ? 0 : 0x40; a.inputEdge5d4 = gate === 'edge' ? 0 : 1;
+    a.statusWord5b4 = gate === 'status' ? 0 : 0x100;
+    if (gate === 'flag') {a.inputEdge5d4 = NaN; a.statusWord5b4 = NaN;}
+    if (gate === 'edge') a.statusWord5b4 = NaN;
+    a.controlWord = NaN;
+    check(x.cue0.test800690a0(x.actor) === 0 && a.ubCue === 44 && x.cueState.byte588 === 0 && Number.isNaN(a.controlWord),
+      `${gate} real690a0 native0 bypasses downstream control/helper reads and leaves admitted cue state untouched`);
+    x.cue0.assertActorComplete(x.actor);
+  }
+  for (const failure of ['upper-first', 'upper-state', 'upper-last', 'mask', 'call'] as const) {
+    const x = cue44AdmittedControlFixture(), a = x.sourceActor;
+    a.stateFlagA = 0x40; a.inputEdge5d4 = 1; a.statusWord5b4 = 0x100; a.controlWord = 0xff12347f;
+    x.cueTable[11] = -25; x.cueState.byte588 = 1; x.cueState.byte7ce = 19; x.gates.marker1db3 = 1;
+    if (failure !== 'call') Object.defineProperty(failure === 'upper-first' ? x.cueState : failure === 'upper-last' ? x.gates : a,
+      failure === 'upper-first' ? 'byte7ce' : failure === 'upper-state' ? 'ubState' : failure === 'upper-last' ? 'marker1db3' : 'controlWord',
+      {writable: false});
+    rejects(() => x.cue0.test800690a0(x.actor), failure === 'call' ? '8005c080' : 'non-writable');
+    check(a.ubCue === (failure === 'upper-first' ? 44 : 5) &&
+      a.ubState === (failure === 'upper-first' || failure === 'upper-state' ? 62 : -25) &&
+      x.cueState.byte588 === (failure === 'upper-first' || failure === 'upper-state' ? 1 : 0) &&
+      a.controlWord === (failure === 'call' ? 0x120000 : 0xff12347f) && x.normalLifecycleState.short6bc === 1,
+      `${failure} preserves exact genuine upper5 reset prefix and mask00ff0000 before unsupported5c080; no later OR2000`);
+    checkCue44PermanentRefusal(x);
+  }
+  {
+    const x = cue44AdmittedControlFixture(), a = x.sourceActor;
+    a.stateFlagA = 0x40; a.statusWord5bc = 0x100; a.statusWord5b4 = 0x100; x.cueTable[11] = -25;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), '8005c080'); retained();
+    check((a.inputEdge5d4 & 1) !== 0 && a.ubCue === 5 && a.fbCue === 44 && a.ubState === -25 &&
+      a.controlWord === 0 && x.cueState.byte588 === 0 && x.normalLifecycleState.short6bc === 1 && x.tier.timerFrames === 6,
+      'genuine next input-machine edge1 reaches690a0 in normal cue44 and preserves real upper5/mask prefix at its helper boundary');
+    checkCue44PermanentRefusal(x);
+  }
+  for (const first of ['696f4', '69038', '69354', '68f9c'] as const) {
+    const x = cue44AdmittedControlFixture(), a = x.sourceActor, tail = x.cue0Tail!.getActorBinding(x.actor);
+    a.controlWord = 0; a.stateFlagA = first === '69038' ? 0x40 : 0;
+    a.inputEdge5d4 = first === '696f4' ? 0x80 : first === '69038' ? 1 : 0;
+    a.statusWord5b4 = 0xf0100; a.inputHeld5d8 = first === '69354' ? 0xa0 : 0;
+    x.chargeDescriptor[0x2e] = 255; // Genuine earlier X wrapper must natively decline.
+    x.movementState.byte661 = first === '696f4' ? 2 : 0;
+    const cue = first === '696f4' ? 32 : first === '69038' ? 4 : first === '69354' ? 12 : 1;
+    const state = cue === 1 ? -11 : -cue; x.cueTable[cue * 2 + 1] = state;
+    if (first === '696f4') a.stateFlagA = NaN; // Earliest nonzero must skip690a0 entirely.
+    x.cue0.dispatchCue44(x.actor);
+    check(a.ubCue === cue && a.ubState === state && a.fbCue === 44 && x.cueState.byte588 === 0 &&
+      tail.byte57c === (first === '69038' ? 0 : 73) && tail.byte58f === (first === '69354' ? 10 : 91) &&
+      a.inputHeld5d8 === 0 && x.normalLifecycleState.short6bc === 1,
+      `${first} genuine nonzero/sentinel priority preserves exact tail stores and prevents later eligible cue effects`);
+    x.cue0.assertActorComplete(x.actor); x.cue0Tail!.assertActorComplete(x.actor);
+  }
+  for (const key of ['byte588', 'field588', 'flags588', 'command588', 'stateFlagA', 'inputEdge5d4', 'statusWord5b4'] as const) {
+    const x = cue44AdmittedControlFixture();
+    Object.defineProperty(x.admissionGlobal, key, {value: 0, writable: true, configurable: true});
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), key); retained();
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch');
+    check(x.cueState.byte588 === 0 && x.tier.timerFrames === 7, 'canonical/shadow rejection precedes next raw ingress and588 store');
+  }
+  {
+    const x = cue44AdmittedControlFixture();
+    for (const [index, owner] of [x.cueState, x.cue0State, x.cue0Tail!.getActorBinding(x.actor), x.statusState, x.sourceClock].entries()) {
+      const retained = retainCommandAdmissionRecords(x);
+      rejects(() => x.prefix.ingestRawDistancesAndRun(x.actor, index + 2, owner as never), 'raw input must not alias');
+      rejects(() => x.runRawPrefix(index + 2, 128, 40), 'epoch'); retained();
+    }
+    check(x.cueState.byte588 === 0 && x.tier.timerFrames === 7, 'same cue/status/clock owners cannot impersonate raw epoch inputs');
+  }
+  {
+    const x = cue44AdmittedControlFixture(), original = Object.getOwnPropertyDescriptor;
+    let caught = false, armed = true;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (armed && owner === x.sourceActor && key === 'controlWord' && x.cueState.byte588 === 1) {
+        armed = false;
+        try {x.cue0.dispatchCue44(x.actor);} catch {caught = true;}
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.cue0.dispatchCue44(x.actor), 'caught same-runtime reentry');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(caught && x.cueState.byte588 === 1 && x.normalLifecycleState.short6bc === 1,
+      'caught same-runtime reentry after real588 store preserves incomplete cue44 and cannot silently continue');
+    checkCue44PermanentRefusal(x);
+  }
+  console.log('[actor-cue44-lifecycle-composition] PASS: real raw-input ordinary-X admission then next ground44 control epochs on canonical clock/status/cue owners; genuine terrain/tester/tail short circuits and upper5/mask prefix,588 first/equal/readonly ordering, air69210 and active5c080 boundaries, aliases/reentry/permanent poison and consumed epochs; synthetic decoded offline graph only, no action2 stream playback/full attack/retail replay/production claim');
 }

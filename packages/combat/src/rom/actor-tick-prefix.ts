@@ -576,6 +576,33 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     if (!n.cue0Owners.includes(tail.binding)) fail('cue0 must retain the new tail binding');
     assertTeamOwners(id, actor);
   };
+  // Cue44 writes the SAME source588 cell already owned by cue resets. Keep
+  // this admission check independent of command admission and of the selected
+  // ready/control branch, including before explicit raw input is ingested.
+  const assertCueControlOwners = (id: symbol, actor: Entry, raw?: object): void => {
+    const n = actor.normal; if (!n?.cue0 || !n.cue) return;
+    const extra = [n.cue0Terrain, actor.ceiling?.globals, actor.ceiling?.terrain,
+      n.tail?.global, n.tail?.data, n.command?.global, n.command?.data, raw]
+      .filter((value): value is object => value !== undefined);
+    const records = [...actorRecords(actor), ...extra,
+      ...(n.tail ? teamOwners(n.tail, id) : []),
+      ...(n.command ? commandEntries(n.command, id).map(({owner}) => owner) : []),
+      ...(n.testers ? testerDescriptors(n.testers, id) : []),
+      ...(n.rotation ? rotationRecords(n.rotation, 'getKnownDescriptorRecords', id) : [])];
+    const canonical = new Map<string, object>([['byte588', n.cue], ['stateFlagA', actor.actual],
+      ['inputEdge5d4', actor.actual], ['statusWord5b4', actor.actual]]);
+    for (const owner of records) {
+      for (const [key, expected] of canonical) {
+        const p = Object.getOwnPropertyDescriptor(owner, key); check();
+        if (owner !== expected && p !== undefined) fail(`${key}: competing cue-control storage on another owner`);
+      }
+      for (const key of ['field588', 'flags588', 'command588', 'byte57a', 'field57a', 'flags57a',
+        'field5d4', 'word5d4', 'flags5d4', 'inputFlags5d4', 'field5b4', 'word5b4', 'flags5b4']) {
+        const alias = Object.getOwnPropertyDescriptor(owner, key); check();
+        if (alias !== undefined) fail(`${key}: competing cue-control storage alias`);
+      }
+    }
+  };
   const normalOwners = (id: symbol, actor: Entry): void => {
     if (!actor.normal) return;
     const n = actor.normal;
@@ -625,7 +652,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       if (rotationRecords(n.rotation, 'getKnownDescriptorRecords', id).some(owner => assigned.has(owner)))
         fail('rotation descriptor aliases a bound actor source owner');
     }
-    tailOwners(id, actor); assertCommandOwners(id, actor);
+    tailOwners(id, actor); assertCommandOwners(id, actor); assertCueControlOwners(id, actor);
     const stageCue = stageCues?.(id);
     if (stageCue !== undefined && n.cues !== undefined && stageCue !== n.cues)
       fail('normal/stage must share the same genuine cue runtime');
@@ -900,7 +927,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       if (hasIncompleteSourceActorNormalCountdown(actor.actual)) fail('actual actor has a known incomplete6bc expiry; source continuation is unsupported');
       if (assertNormalComplete && assertNormalComplete(id) !== undefined) fail('normal completion assertion returned unexpectedly');
       owners(id, actor); noLegacyDistances(actor.actual); record(raw, 'explicit decoded raw distances');
-      assertCommandOwners(id, actor, raw);
+      assertCommandOwners(id, actor, raw); assertCueControlOwners(id, actor, raw);
       if ((actor.normal?.tail && (nestedTailStorage(actor).includes(raw) || teamOwners(actor.normal.tail, id).includes(raw) || actor.normal.tail.descriptors().includes(raw) ||
           raw === actor.normal.tail.global || raw === actor.normal.tail.data || raw === actor.normal.tail.chargeBinding)) || assigned.has(raw) || (actor.normal?.testers && testerDescriptors(actor.normal.testers, id).includes(raw)) || (actor.normal?.rotation && rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id).includes(raw)) || tierOwners(id, actor).includes(raw) || raw === actor.normal?.cue0Terrain || raw === actor.ceiling?.globals || raw === actor.ceiling?.terrain ||
           raw === read(actor.world, 'scale58') || raw === read(actor.borg, 'paramTier'))

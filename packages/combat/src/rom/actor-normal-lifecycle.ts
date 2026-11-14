@@ -4,7 +4,10 @@
  * cue cells802d3300/802d3324 resolve to8005913c/80059138. Cue9 is an independent
  * return-only body. Optional genuine cue0 continues movement3's two real cue
  * resets or the ordered terrain helper, genuine699d8 testers and optional
- * genuine remaining cue0 tail.
+ * genuine remaining cue0 tail. Authenticated cue44 cell802d33b0 resolves to
+ * 80059cd0; that same genuine runtime performs canonical588 and its ordered
+ * ground control chain, including bounded690a0. The fixed witness is
+ * actor-x-playback-evidence-2026-11-14.md. This is not55568 action-state playback.
  * Unsupported remaining callees retain their exact reached boundaries.
  * Cue0 and normal share status attributes, cue records and mapping identity.
  * Its additional history/position owners are retained, with no copied state.
@@ -188,6 +191,7 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
   const cue0Owners = cue0 === undefined ? undefined : capture('cue0', 'getSourceOwners');
   const cue0Terrain = cue0 === undefined ? undefined : capture('cue0', 'getTerrainGlobals');
   const dispatchCue0 = cue0 === undefined ? undefined : capture('cue0', 'dispatchCue0');
+  const dispatchCue44 = cue0 === undefined ? undefined : capture('cue0', 'dispatchCue44');
   const cue0Testers = cue0 === undefined ? undefined : capture('cue0', 'getInputTestersRuntime');
   const testers = cue0Testers?.();
   if (testers !== undefined && !isSourceActorInputTestersRuntime(testers))
@@ -326,8 +330,10 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     const canonical = new Map<string, object>([
       ['controlWord', e.actual], ['ubCue', e.actual], ['fbCue', e.actual],
       ['stateFlagA', e.actual], ['stateFlagB', e.actual], ['byte661', e.movement],
+      ['inputEdge5d4', e.actual], ['statusWord5b4', e.actual],
       ['callback4c8', e.binding], ['callback4dc', e.binding], ['short6bc', e.binding], ['byte1d9', e.binding],
     ]);
+    if (e.cue !== undefined) canonical.set('byte588', e.cue);
     if (commandGlobals !== undefined) {
       for (const key of ['pointer504', 'pointer508', 'pointerc8', 'byteD0']) canonical.set(key, e.commandBinding!);
       canonical.set('marker709', e.commandStart!); canonical.set('blockedMask1d9a', e.commandStream!);
@@ -337,6 +343,7 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     const aliases = ['byte5e4', 'byte5e5', 'word5e0', 'flags5e0', 'field5e0', 'field4c8', 'pointer4c8',
       'field4dc', 'pointer4dc', 'field6bc', 'timer6bc', 'countdown6bc', 'metadata1d9', 'flags1d9',
       'field1d9', 'hitReact', 'flyingBounce1d9', 'aerialXDamaged',
+      'field588', 'flags588', 'command588', 'field5d4', 'word5d4', 'flags5d4', 'inputFlags5d4', 'field5b4', 'word5b4', 'flags5b4',
       'flags57a', 'flags57b', 'byte57a', 'byte57b', 'field57a', 'field57b', 'field661', 'move661',
       ...(commandGlobals === undefined ? [] : ['field504', 'field508', 'fieldc8', 'pointerC8', 'pointerCC', 'pointercc', 'fieldD0', 'byte709', 'byte1d9a'])];
     const known = new Map(commandEntries().map(({owner, kind}) => [owner, kind]));
@@ -453,6 +460,14 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
         fail('800590e8 reached unsupported actual cue target8005913c from authenticated table802d3300 entry802d3300');
       assertComplete(e.actual);
       if (dispatchCue0(id) !== undefined) fail('genuine cue0 returned asynchronously or unexpectedly');
+      assertTeamOwners(e); assertCommandOwners(e); noShadows(e);
+      return;
+    }
+    if (cue === 44) {
+      if (!dispatchCue44)
+        fail('800590e8 reached unsupported actual cue target80059cd0 from authenticated table802d3300 entry802d33b0');
+      assertComplete(e.actual);
+      if (dispatchCue44(id) !== undefined) fail('genuine cue44 returned asynchronously or unexpectedly');
       assertTeamOwners(e); assertCommandOwners(e); noShadows(e);
       return;
     }

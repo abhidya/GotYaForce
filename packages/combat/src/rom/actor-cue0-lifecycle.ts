@@ -1,6 +1,7 @@
-/** Bounded source8005913c and its first genuine helper80068df8.
- * Evidence: actor-cue0-lifecycle-evidence-2026-11-14.md and authenticated archived
- * instruction reader. Movement3 performs actual6a750(1b), then6a6fc(1b),
+/** Bounded source8005913c, cue44 source80059cd0 and helper80068df8.
+ * Evidence: actor-cue0-lifecycle-evidence-2026-11-14.md,
+ * actor-x-playback-evidence-2026-11-14.md and authenticated archived readers.
+ * Movement3 performs actual6a750(1b), then6a6fc(1b),
  * ignoring both native0/1 results. Other movement reaches genuine68df8 and
  * optionally continues genuine699d8 input testers. Native1 returns; native0
  * reaches either the optional genuine69814/696f4/69038/69354/68f9c tail or
@@ -19,6 +20,10 @@
  * not original-game parity. Methods/receivers and distinct vectors are retained,
  * actor claims permanent, and reached failures preserve previous writes.
  * Host-only incomplete-call poison prevents edited flags/cues bypassing them.
+ * Cue44 writes canonical588 before its ground/air split. Its ground helpers
+ * include genuine690a0 between696f4 and69038; active690a0 retains actual upper5
+ * and control mask stores then refuses5c080. Air refuses69210 after real699d8
+ * and69814. No unsupported helper or post-call control2000 store is invented.
  */
 import type {RomActor} from './actor.js';
 import {isSourceActorCommandAdmissionRuntime, hasIncompleteSourceActorCommandAdmission,
@@ -74,6 +79,8 @@ export interface SourceActorCue0LifecycleRuntime {
   assertActorComplete(identity: symbol): void;
   updateTerrain(identity: symbol): 0 | 1;
   dispatchCue0(identity: symbol): void;
+  dispatchCue44(identity: symbol): void;
+  test800690a0(identity: symbol): 0 | 1;
 }
 const runtimes = new WeakSet<object>(), claimedActors = new WeakSet<object>();
 const incomplete = new WeakSet<object>();
@@ -188,6 +195,11 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
   const tailOwners = tail === undefined ? undefined : capture('tail', 'getSourceOwners');
   const tailTeams = tail === undefined ? undefined : capture('tail', 'getKnownTeamStorageOwners');
   const runTail = tail === undefined ? undefined : capture('tail', 'updateActor');
+  const tail69814 = tail === undefined ? undefined : capture('tail', 'test80069814');
+  const tail696f4 = tail === undefined ? undefined : capture('tail', 'test800696f4');
+  const tail69038 = tail === undefined ? undefined : capture('tail', 'test80069038');
+  const tail69354 = tail === undefined ? undefined : capture('tail', 'test80069354');
+  const tail68f9c = tail === undefined ? undefined : capture('tail', 'test80068f9c');
   const charge = tailCharge?.();
   if (tail !== undefined && !isSourceActorInputChargeRuntime(charge)) fail('tail charge requires genuine source runtime');
   const captureCharge = (key: 'getGlobal' | 'getData' | 'getAttributeBinding' | 'getKnownDescriptorRecords') => {
@@ -209,6 +221,7 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     if (value !== expected) fail(`${where}: owner changed its actual record or returned asynchronously`);
   };
   const byte = (owner: unknown, key: string): number => integer(read(owner, key), 0, 255, key);
+  const word = (owner: unknown, key: string): number => integer(read(owner, key), 0, 0xffffffff, key);
   const signedByte = (owner: unknown, key: string): number => byte(owner, key) << 24 >> 24;
   const f = (owner: unknown, key: string): number => float(read(owner, key), key);
   interface Entry {
@@ -284,6 +297,7 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
       ['lockYaw', e.actual], ['slopeMode698', e.actual], ['byte661', e.movement],
       ['mode4a0', e.world], ['field674', e.attribute], ['byte732', e.binding],
       ['previousStepHeight6d4', e.history], ['ubCue', e.actual], ['fbCue', e.actual],
+      ['byte588', e.cue], ['stateFlagA', e.actual], ['inputEdge5d4', e.actual], ['statusWord5b4', e.actual],
     ]);
     if (commandGlobals !== undefined) {
       for (const key of ['pointer504', 'pointer508', 'pointerc8', 'byteD0']) canonical.set(key, e.commandBinding!);
@@ -295,7 +309,8 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
       'field661', 'move661', 'field668', 'hover668', 'field674Alias', 'stepThreshold674',
       'field732', 'flags732', 'ledge732', 'field5f8', 'scale5f8', 'field44', 'speed44',
       'field5ae', 'yaw5ae', 'field698', 'field20', 'field24', 'field28', 'field2c', 'field30', 'field34',
-      'positionY24', 'savedY30',
+      'positionY24', 'savedY30', 'field588', 'flags588', 'command588', 'byte57a', 'field57a', 'flags57a',
+      'word5d4', 'flags5d4', 'field5d4', 'inputFlags5d4', 'word5b4', 'flags5b4', 'field5b4',
       ...(commandGlobals === undefined ? [] : ['field504', 'field508', 'fieldc8', 'pointerC8', 'pointerCC', 'pointercc', 'fieldD0', 'byte709', 'byte1d9a'])];
     const known = new Map(commandEntries().map(({owner, kind}) => [owner, kind]));
     for (const owner of [...owners(e), terrain, ...(global === undefined ? [] : [global, data!]), ...teamOwners(),
@@ -454,6 +469,44 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     if (runTail(id) !== undefined) fail('genuine cue0 tail returned asynchronously or unexpectedly');
     assertTeamOwners(e);
   };
+  const test690a0 = (id: symbol, e: Entry): 0 | 1 => {
+    if ((byte(e.actual, 'stateFlagA') & 0x40) === 0) return 0; //690b4/690b8.
+    if ((word(e.actual, 'inputEdge5d4') & 1) === 0) return 0; //690c8/690cc.
+    if ((word(e.actual, 'statusWord5b4') & 0x100) === 0) return 0; //690dc/690e0.
+    // The genuine cue reset may store a prefix before failing. Use this
+    // lifecycle's existing actor marker, including for the public direct call.
+    incomplete.add(e.actual);
+    const result = upperCue(id, 5); //690f4.
+    if (result !== 0 && result !== 1) fail('genuine upper-body cue returned asynchronously or unexpectedly');
+    assertCommandOwners(e); assertTeamOwners(e); noShadows(e);
+    if (result === 0) return 0;
+    write(e, e.actual, 'controlWord', word(e.actual, 'controlWord') & 0x00ff0000); //69100/69108/6910c.
+    fail('80069110 reached unsupported source call8005c080 after genuine upper5 and controlWord mask store');
+  };
+  const dispatch44 = (id: symbol, e: Entry): void => {
+    // Source stb588 precedes even the actual5e0 load, including equal-value
+    // stores. The existing cue reset binding is the only byte588 owner.
+    write(e, e.cue, 'byte588', 1); //59ce8.
+    const airborne = (word(e.actual, 'controlWord') & 0x40) !== 0; //59cec/59cf0.
+    const child = (method: ((...args: unknown[]) => unknown) | undefined, boundary: string): 0 | 1 => {
+      if (!method) fail(boundary);
+      const result = method(id);
+      if (result !== 0 && result !== 1) fail('genuine cue44 helper returned asynchronously or unexpectedly');
+      // Newly reached command/team storage remains canonical before the next
+      // helper, including when a real short-circuit return completes this call.
+      assertCommandOwners(e); assertTeamOwners(e); noShadows(e);
+      return result;
+    };
+    if (!airborne && updateTerrain(id, e) !== 0) return;
+    if (child(runTesters, `${airborne ? '80059cf8' : '80059db4'} reached unsupported source call800699d8`) !== 0) return;
+    if (child(tail69814, `${airborne ? '80059d08' : '80059dc4'} reached unsupported source call80069814 after genuine800699d8 returned0`) !== 0) return;
+    if (airborne) fail('80059d18 reached unsupported source call80069210 after genuine800699d8 and80069814 returned0');
+    if (child(tail696f4, '80059dd4 reached unsupported source call800696f4') !== 0) return;
+    if (test690a0(id, e) !== 0) return;
+    if (child(tail69038, '80059df4 reached unsupported source call80069038') !== 0) return;
+    if (child(tail69354, '80059e04 reached unsupported source call80069354') !== 0) return;
+    child(tail68f9c, '80059e14 reached unsupported source call80068f9c');
+  };
   const runtime: SourceActorCue0LifecycleRuntime = {
     bindActor(id, initial) {guard(() => {
       if (typeof id !== 'symbol' || actors.has(id)) fail('new symbol actor identity required');
@@ -522,6 +575,14 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     dispatchCue0(id) {guard(() => {
       const e = entry(id); assertComplete(e.actual); admit(id, e);
       dispatch(id, e); check(); incomplete.delete(e.actual);
+    });},
+    dispatchCue44(id) {guard(() => {
+      const e = entry(id); assertComplete(e.actual); admit(id, e);
+      dispatch44(id, e); check(); incomplete.delete(e.actual);
+    });},
+    test800690a0(id) {return guard(() => {
+      const e = entry(id); assertComplete(e.actual); admit(id, e);
+      const result = test690a0(id, e); check(); incomplete.delete(e.actual); return result;
     });},
   };
   runtimes.add(runtime); return Object.freeze(runtime);

@@ -4681,3 +4681,74 @@ source family playback, sustained attack effects, production activation or
 browser acceptance. See [command-admission evidence](actor-command-admission-evidence-2026-11-14.md)
 for421 primary plus54 bounded support instructions and explicit libm/voice
 coverage omissions.
+
+## Ordinary X cue44 control continuation, 2026-11-14
+
+Fixed archived cell802d33b0 selects80059cd0 for signed upper cue44. The complete
+352-byte handler and160-byte690a0 helper are independently selected from their
+named C markers, with all128 instructions represented and terminal returns
+checked in both snapshots. Neither extent is claimed to come from the retail
+symbol map. The fixed witness is
+[actor-x-playback-evidence-2026-11-14.md](actor-x-playback-evidence-2026-11-14.md).
+
+This handler continues control decisions; it is not the action-state playback
+inside55568. The existing genuine cue0 runtime now exposes dispatchCue44 on its
+same actual, terrain, movement, attribute, cue, tester and tail owners. No new
+actor binding or second588 cell is introduced. It stores the existing cue-reset
+binding's byte588=1 before reading controlWord bit40. The ground branch calls
+68df8,699d8,69814,696f4,690a0,69038,69354 and68f9c in source order, retaining each
+real short-circuit return. It cannot substitute the whole cue0 tail, whose call
+sequence omits690a0. The air branch performs699d8/69814 and then refuses at its
+first unsupported69210 call.
+
+Real690a0 returns0 on its ordered stateFlagA bit40, inputEdge5d4 bit1 and
+statusWord5b4 bit100 gates. When all pass, it invokes genuine upper cue5. A
+sentinel return0 leaves later control storage untouched. Successful cue5 is
+followed by a fresh controlWord load, mask00ff0000 and store; the next actual
+5c080 remains unsupported. No later OR2000 or native1 is manufactured. Required
+equal-value writes and completed effect prefixes are retained. Shared lifecycle
+incomplete state protects later direct lifecycle methods, normal dispatch,
+ready/control bypasses and explicit raw-distance ingress.
+
+Normal dispatch now selects the authenticated cue44 target and reuses the same
+canonical graph. Byte588 and familiar raw aliases are checked across composed
+owners before raw ingress, including paths that would otherwise bypass cue44.
+The attached witness can run real X admission then subsequent ground-control
+epochs without repeating the command or pretending to advance animation.
+
+Actual Double cue44 hydration is now separately grounded: the already selected
+constructor8006f60c copies producer cell802d3b50 to actor4f0. That fixed pointer
+cell is newly authenticated as802d3ff8, and only the fixed two-byte cue44 row at
+802d4050 is selected, yielding full-body61 and upper0. The old test fixture's
+[61,62] is deliberately synthetic; it is not the Double row. Upper0 performs a
+real cue transition/reset and is not the signed-1 sentinel. No full cue table,
+live actor constructor, or runtime pointer-driven archive read is supplied.
+
+### Next actual playback boundary
+
+Source55568 still needs its outer schedule: marker578=2;55dcc;5568c;59068;
+position snapshot; actual4bc; saved signed full-body5da; marker578=1 and live
+upper-state dispatch; marker578=0 and saved full-state dispatch; marker578=2;
+actual4c0;55ee4; conditional position restore;5b880. Marker578 is the existing
+animation-dispatch binding, not a new outer flag. Source-owned graph operations
+must be joined at these exact boundaries rather than inserted as extra refreshes.
+
+Existing C and derived family evidence identify the next selection route to
+reauthenticate: upper0 cell802d37a8 ->5f238 return; full61 cell802d379c ->65dfc
+->actual4b4; Double constructor root cell802d3b14 ->6facc; action2 cell802d3b70
+->71598; variant0 cell802d3c48 ->715d4; hidden config80433868 ->ff2bc; phase0
+cell8031f000 ->ff30c. These later pointer cells/callees are not covered by the
+current fixed reader. See [family decode](nn-family-decode-2026-07-06.md) and
+[ninja source X](ninja-source-x-2026-11-12.md) for the existing derived evidence.
+
+Before this playback, Double4bc=6f7c0 must write the canonical stream-start582,
+charge58e and status272 owners and honor its persistent clone arm7c8. Phase0
+requires genuine6d144 ->669d0 ->66a30 even with no target, then677b0's distinct
+3e0a8 height/normal query. The current3d6e4 terrain helper cannot replace it.
+The real ordinary group4 programs start with opcode01 mode1/blend6; the current
+source animation setup accepts mode0 only. Replacing that request with mode0 or
+using the legacy Ninja private stream schedule would not establish playback.
+Source mode1 setup487ec, mode1 playback4a00c and reached authored opcodes remain
+work. Later resource debit, projectile/clone allocation, source posthook and
+render scheduling are also unfinished. This checkpoint makes no full55568,
+sustained attack/clone behavior, production selection or browser-playability claim.

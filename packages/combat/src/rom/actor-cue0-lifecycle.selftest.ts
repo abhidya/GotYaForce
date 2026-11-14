@@ -18,6 +18,13 @@ function rejects(run: () => unknown, fragment: string): void {
 }
 const vec = (x: number, y = x, z = x) => ({x, y, z});
 const readonly = (owner: object, key: string): void => {Object.defineProperty(owner, key, {writable: false});};
+function watchProperties(run: () => void, observe: (owner: object, key: PropertyKey) => void): void {
+  const original = Object.getOwnPropertyDescriptor;
+  Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+    observe(owner, key); return original(owner, key);
+  }) as typeof original;
+  try {run();} finally {Object.getOwnPropertyDescriptor = original;}
+}
 /** Explicit synthetic STIH records, using the genuine strict terrain view.
  * No geometry callback or synthetic query/cue implementation participates. */
 function layer(offset: sourceTerrainGrid.SourceTerrainLayerOffset, height?: number) {
@@ -36,7 +43,8 @@ function layer(offset: sourceTerrainGrid.SourceTerrainLayerOffset, height?: numb
   }
   return sourceTerrainGrid.createSourceTerrainGrid(bytes, hitBin.parseStageHitGrid(bytes), offset);
 }
-function fixture(options: {defer?: boolean; height?: number; initial?: Partial<SourceActorCue0LifecycleBinding>} = {}) {
+function fixture(options: {defer?: boolean; height?: number; initial?: Partial<SourceActorCue0LifecycleBinding>;
+  cueInitial?: Partial<SourceActorCueResetBinding>} = {}) {
   const id = Symbol('cue0 actor'), actual = Object.assign(createRomActor(), {hoverOffset668: 1, slopeMode698: 6, onLand754: null});
   delete (actual as Partial<typeof actual>).fbPhaseSlots; delete (actual as Partial<typeof actual>).shotByte1db3;
   Object.assign(actual.pos, vec(100, 5, 100)); Object.assign(actual.savedGroundPos, vec(100, 0, 100));
@@ -80,19 +88,22 @@ function fixture(options: {defer?: boolean; height?: number; initial?: Partial<S
     byte541: 1, byte542: 2, byte543: 3, byte544: 4, byte545: 5, byte546: 6, byte547: 7,
     byte588: 8, byte7ce: 9, byte7cf: 10,
   };
-  cues.bindActor(id, cueInitial);
+  cues.bindActor(id, options.cueInitial ?? cueInitial);
   const sources: SourceActorCue0LifecycleSources = {world, movement, attribute, terrain, cues};
   const runtime = createSourceActorCue0LifecycleRuntime(sources), initial = options.initial ?? {byte732: 0};
   const bind = () => runtime.bindActor(id, initial); if (!options.defer) bind();
   return {id, actual, worldState, movementState, attributeState, mapping, historyState, dispatchState, globals,
     world, movement, attribute, history, dispatch, terrain, cues, sources, initial, runtime, bind, hooks, calls,
     binding: () => runtime.getActorBinding(id), cueBinding: () => cues.getActorBinding(id),
-    ground: () => runtime.updateTerrain(id), cue0: () => runtime.dispatchCue0(id)};
+    ground: () => runtime.updateTerrain(id), cue0: () => runtime.dispatchCue0(id),
+    cue44: () => runtime.dispatchCue44(id), test690a0: () => runtime.test800690a0(id)};
 }
 function poisoned(x: ReturnType<typeof fixture>): void {
   check(hasIncompleteSourceActorCue0Lifecycle(x.actual), 'actual identity retains incomplete lifecycle');
   x.actual.controlWord = 0x40; x.worldState.mode4a0 = 2; x.movementState.byte661 = 3; x.actual.ubCue = 9;
   rejects(x.ground, 'known incomplete cue0 lifecycle'); rejects(x.cue0, 'known incomplete cue0 lifecycle');
+  x.actual.stateFlagA = 0; x.actual.inputEdge5d4 = 0; x.actual.statusWord5b4 = 0;
+  rejects(x.cue44, 'known incomplete cue0 lifecycle'); rejects(x.test690a0, 'known incomplete cue0 lifecycle');
   rejects(() => x.runtime.assertActorComplete(x.id), 'known incomplete cue0 lifecycle');
   check(!hasIncompleteSourceActorCue0Lifecycle({...x.actual}), 'incomplete marker is actual identity only');
 }
@@ -295,6 +306,136 @@ export function runActorCue0LifecycleSelfTests(): void {
     equal(partial.actual.ubCue, 27, 'upper stores retained before caught full-callee reentry'); poisoned(partial);
   }
   {
+    // Cue44 has its own genuine initial store and never takes cue0's movement3
+    // fast path. Empty children retain their exact reached call boundaries.
+    const x = fixture(); x.movementState.byte661 = 3;
+    const order: string[] = [];
+    watchProperties(() => rejects(x.cue44, 'unsupported source call800699d8'), (owner, key) => {
+      if (owner === x.cueBinding() && key === 'byte588' || owner === x.actual && key === 'controlWord')
+        order.push(String(key));
+    });
+    equal(order.join(','), 'byte588,controlWord,controlWord', '588 store before branch and genuine68df8 control reload');
+    equal(x.cueBinding().byte588, 1, 'same canonical cue588 receives initial1');
+    equal(x.actual.pos.y, 2, 'ground44 invokes actual terrain before699d8');
+    equal(x.actual.ubCue, 0, 'movement3 does not dispatch upper1b in cue44');
+    equal(x.actual.fbCue, 9, 'movement3 does not dispatch full1b in cue44'); poisoned(x);
+    const air = fixture({initial: {}}); air.actual.controlWord = 0x40;
+    air.worldState.mode4a0 = NaN; air.actual.pos.y = NaN; air.attributeState.field674 = NaN;
+    air.movementState.byte661 = NaN;
+    rejects(air.cue44, 'unsupported source call800699d8');
+    equal(air.cueBinding().byte588, 1, 'air44 writes588 before real699d8 boundary');
+    check(Number.isNaN(air.actual.pos.y), 'air44 never invents a ground call'); poisoned(air);
+    const same = fixture({initial: {}}); same.cueBinding().byte588 = 1; same.worldState.mode4a0 = 2;
+    rejects(same.cue44, 'unsupported source call800699d8');
+    equal(same.actual.pos.y, 5, 'mode2 ground helper genuinely skips terrain'); poisoned(same);
+    const invalid = fixture(); invalid.actual.controlWord = NaN;
+    rejects(invalid.cue44, 'controlWord: integer'); equal(invalid.cueBinding().byte588, 1, '588 precedes failing control read'); poisoned(invalid);
+    const oldInvalid = fixture(); oldInvalid.cueBinding().byte588 = NaN; oldInvalid.actual.controlWord = NaN;
+    rejects(oldInvalid.cue44, 'controlWord: integer'); equal(oldInvalid.cueBinding().byte588, 1, 'stb does not load overwritten588'); poisoned(oldInvalid);
+    const missing = fixture({cueInitial: {}}); missing.actual.controlWord = NaN;
+    rejects(missing.cue44, 'byte588: own data');
+    check(!hasIncompleteSourceActorCue0Lifecycle(missing.actual), 'first absent588 store has no effect marker');
+    const ro = fixture(); readonly(ro.cueBinding(), 'byte588'); ro.actual.controlWord = NaN;
+    rejects(ro.cue44, 'byte588: non-writable'); equal(ro.cueBinding().byte588, 8, 'failed first store preserves588');
+    check(!hasIncompleteSourceActorCue0Lifecycle(ro.actual), 'failed first store remains retryable');
+    ro.actual.stateFlagA = 0; equal(ro.test690a0(), 0, 'no-effect failed44 does not poison genuine early690a0');
+    const equalReadonly = fixture(); equalReadonly.cueBinding().byte588 = 1; readonly(equalReadonly.cueBinding(), 'byte588');
+    rejects(equalReadonly.cue44, 'byte588: non-writable');
+    check(!hasIncompleteSourceActorCue0Lifecycle(equalReadonly.actual), 'equal588 still attempts its real store');
+  }
+  {
+    // This helper does not read later flags, cue data or control when an actual
+    // early gate fails. No absent scalar is hydrated and no fallback runs.
+    for (const flag of [0, 0x38, 0x80, 0xbf]) {
+      const x = fixture(); x.actual.stateFlagA = flag;
+      x.actual.inputEdge5d4 = NaN; x.actual.statusWord5b4 = NaN; x.actual.controlWord = NaN;
+      x.actual.cueTable = null;
+      equal(x.test690a0(), 0, '690a0 absent state40 returns genuine0 lazily');
+      equal(x.cueBinding().byte588, 8, 'direct early helper never stores588');
+      check(!hasIncompleteSourceActorCue0Lifecycle(x.actual), 'early helper completes without poison');
+    }
+    const edge = fixture(); edge.actual.stateFlagA = 0x40; edge.actual.inputEdge5d4 = 0xfffffffe;
+    edge.actual.statusWord5b4 = NaN; edge.actual.controlWord = NaN;
+    equal(edge.test690a0(), 0, 'edge bit1 absent skips later status/control');
+    const status = fixture(); status.actual.stateFlagA = 0x40; status.actual.inputEdge5d4 = 1;
+    status.actual.statusWord5b4 = 0xfffffeff; status.actual.controlWord = NaN;
+    equal(status.test690a0(), 0, 'status100 absent skips cue/control');
+    const sentinel = fixture(); sentinel.actual.stateFlagA = 0x40; sentinel.actual.inputEdge5d4 = 1;
+    sentinel.actual.statusWord5b4 = 0x100; sentinel.actual.controlWord = NaN;
+    const order: string[] = [];
+    watchProperties(() => equal(sentinel.test690a0(), 0, 'genuine upper5 sentinel0'), (owner, key) => {
+      if (owner === sentinel.actual && ['stateFlagA', 'inputEdge5d4', 'statusWord5b4', 'cueTable', 'controlWord'].includes(String(key)))
+        order.push(String(key));
+    });
+    equal(order.join(','), 'stateFlagA,inputEdge5d4,statusWord5b4,cueTable', '690a0 gates and upper cue precede any5e0 load');
+    equal(sentinel.actual.ubCue, 0, 'sentinel never changes upper cue'); equal(sentinel.cueBinding().byte588, 8, 'sentinel never clears588');
+    check(!hasIncompleteSourceActorCue0Lifecycle(sentinel.actual), 'completed sentinel clears conservative helper poison');
+    equal(sentinel.test690a0(), 0, 'completed sentinel may repeat');
+    for (const [key, bads] of [
+      ['stateFlagA', [-1, 256, .5, NaN, Infinity]],
+      ['inputEdge5d4', [-1, 0x100000000, .5, NaN, Infinity]],
+      ['statusWord5b4', [-1, 0x100000000, .5, NaN, Infinity]],
+    ] as const) for (const bad of bads) {
+      const x = fixture(); x.actual.stateFlagA = 0x40; x.actual.inputEdge5d4 = 1; x.actual.statusWord5b4 = 0x100;
+      x.actual[key] = bad; rejects(x.test690a0, `${key}: integer`);
+      check(!hasIncompleteSourceActorCue0Lifecycle(x.actual), 'pre-cue invalid gate has no effect marker');
+    }
+    const getter = fixture(); getter.actual.stateFlagA = 0x40;
+    Object.defineProperty(getter.actual, 'inputEdge5d4', {get() {throw Error('must not invoke gate getter');}, configurable: true});
+    rejects(getter.test690a0, 'inputEdge5d4: own data');
+    const missing = fixture(); delete missing.actual.stateFlagA;
+    rejects(missing.test690a0, 'stateFlagA: own data');
+  }
+  {
+    const active = () => {
+      const x = fixture(); x.actual.stateFlagA = 0x40; x.actual.inputEdge5d4 = 1; x.actual.statusWord5b4 = 0x100;
+      x.actual.cueTable![11] = -9; x.actual.controlWord = 0xfedcba98; return x;
+    };
+    const x = active(), order: string[] = [];
+    watchProperties(() => rejects(x.test690a0, 'unsupported source call8005c080'), (owner, key) => {
+      if (owner === x.actual && ['stateFlagA', 'inputEdge5d4', 'statusWord5b4', 'cueTable', 'controlWord'].includes(String(key)) ||
+          owner === x.cueBinding() && key === 'byte588') order.push(String(key));
+    });
+    equal(order.join(','), 'stateFlagA,inputEdge5d4,statusWord5b4,cueTable,byte588,controlWord,controlWord',
+      'real upper5 reset precedes control load then mask store');
+    equal(x.actual.ubCue, 5, 'actual upper cue5 selected'); equal(x.actual.ubState, -9, 'actual signed cue row used');
+    equal(x.actual.prevUbState, -2, 'real previous upper state'); equal(x.cueBinding().byte7ce, 0, 'real saved upper cue');
+    equal(x.cueBinding().byte588, 0, 'genuine upper5 clears canonical588');
+    equal(x.dispatchState.marker1db3, 0, 'genuine upper5 clears actual marker');
+    equal(x.actual.controlWord, 0x00dc0000, '690a0 masks actual control; later2000 OR is forbidden before5c080 returns');
+    equal(x.actual.fbCue, 9, 'helper never calls full-body cue'); poisoned(x);
+    for (const control of [0, 0x00a50000, 0xffffffff]) {
+      const y = active(); y.actual.controlWord = control;
+      rejects(y.test690a0, 'unsupported source call8005c080');
+      equal(y.actual.controlWord, control & 0x00ff0000, 'source mask includes equal-value control stores'); poisoned(y);
+    }
+    const bad = active(); bad.actual.controlWord = NaN;
+    rejects(bad.test690a0, 'controlWord: integer'); equal(bad.actual.ubCue, 5, 'upper5 effects precede malformed control'); poisoned(bad);
+    const ro = active(); readonly(ro.actual, 'controlWord');
+    rejects(ro.test690a0, 'controlWord: non-writable'); equal(ro.actual.ubCue, 5, 'upper5 effects precede readonly control');
+    equal(ro.actual.controlWord, 0xfedcba98, 'failed mask store keeps old control');
+    check(hasIncompleteSourceActorCue0Lifecycle(ro.actual), 'readonly mask failure retains lifecycle marker');
+    rejects(ro.test690a0, 'known incomplete cue0 lifecycle');
+    const equalReadonly = active(); equalReadonly.actual.controlWord = 0x00a50000; readonly(equalReadonly.actual, 'controlWord');
+    rejects(equalReadonly.test690a0, 'controlWord: non-writable');
+    equal(equalReadonly.actual.ubCue, 5, 'equal control mask still attempts its real store after upper5');
+    const partial = active(); readonly(partial.cueBinding(), 'byte546');
+    rejects(partial.test690a0, 'byte546: non-writable'); equal(partial.actual.ubCue, 5, 'partial upper5 prefix retained');
+    equal(partial.cueBinding().byte547, 0, 'earlier phase clear retained'); equal(partial.cueBinding().byte588, 8, 'later phase clear unreached');
+    equal(partial.actual.controlWord, 0xfedcba98, 'mask not reached after partial cue failure'); poisoned(partial);
+    const table = active(); table.actual.cueTable = new Int8Array(1);
+    rejects(table.test690a0, 'indexed byte outside'); poisoned(table);
+    const captured = active(); captured.sources.cues = {} as never; captured.sources.world = {} as never;
+    captured.world.getActualActor = () => {throw Error('replacement world method must not run');};
+    rejects(captured.test690a0, 'unsupported source call8005c080');
+    equal(captured.actual.ubCue, 5, 'retained genuine cue5 and captured world receiver survive source replacement'); poisoned(captured);
+    const reentry = active(); reentry.hooks.dispatch = () => {
+      try {reentry.test690a0();} catch { /* Deliberate caught same-runtime reentry. */ }
+      return reentry.dispatchState;
+    };
+    rejects(reentry.test690a0, 'caught same-runtime reentry'); poisoned(reentry);
+  }
+  {
     for (const key of ['controlWord', 'hoverOffset668', 'tierScale', 'hSpeed', 'slopeMode698', 'byte661', 'mode4a0', 'byte732', 'previousStepHeight6d4']) {
       const x = fixture(); (x.attributeState as Record<string, unknown>)[key] = 0;
       rejects(x.ground, `${key}: competing cue0-lifecycle storage`); equal(x.actual.pos.y, 5, 'shadow rejected before source store');
@@ -309,5 +450,17 @@ export function runActorCue0LifecycleSelfTests(): void {
     rejects(y.bind, 'source owner alias');
     const z = fixture({defer: true}); Object.defineProperty(z.initial, 'byte732', {get() {throw Error('must not call getter');}});
     rejects(z.bind, 'byte732: own data');
+  }
+  for (const method of ['cue44', 'test690a0'] as const) {
+    for (const key of ['byte588', 'stateFlagA', 'inputEdge5d4', 'statusWord5b4']) {
+      const x = fixture(); (x.attributeState as Record<string, unknown>)[key] = 0;
+      rejects(x[method], `${key}: competing cue0-lifecycle storage`);
+      equal(x.cueBinding().byte588, 8, 'dynamic canonical shadow rejected before588 store');
+    }
+    for (const key of ['field588', 'flags588', 'command588', 'byte57a', 'field57a', 'flags57a', 'word5d4', 'field5d4', 'flags5b4']) {
+      const x = fixture(); (x.actual as unknown as Record<string, unknown>)[key] = 0;
+      rejects(x[method], `${key}: competing cue0-lifecycle storage alias`);
+      equal(x.cueBinding().byte588, 8, 'dynamic raw alias rejected before588 store');
+    }
   }
 }
