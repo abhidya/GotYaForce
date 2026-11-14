@@ -8,7 +8,8 @@
  * clears. Optional shared10514 ingress supports6b450 early returns before
  * mandatory6b7f4. Its optional genuine target-dispatch owner continues inactive
  * clearing and entry0 bounded returns; skipped lifecycle rows and dispatch
- * returns retain canonical508/target83 bounds.
+ * returns execute the primary508/504 live SquareDistance path through its next
+ * constant boundary. Skipped lifecycle rows retain canonical508/target83 bounds.
  * Its bounded return still cannot skip mandatory27764.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
@@ -25,6 +26,7 @@ import {isSourceObjectSchedulerRuntime, claimSourceObjectSchedulerOuterFrame,
 import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import {markIncompleteSourceActorDoubleLifecycle, requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {addSourceFloat32} from './source-float.js';
+import {readSourceSquareDistance} from './source-square-distance.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
@@ -552,6 +554,71 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         fail('6ae60 command source storage alias');
       commandOwners.set(id,{binding,action});return needAction?action:binding;
     };
+    const primaryDistance=(id: symbol,actor: object,dispatch: SourceActorTargetDispatchRuntime): never=>{
+      const binding=command(id,actor,false);
+      const basicGuard=(): void=>{
+        check();requireCompleteSourceActorDoubleLifecycle(actor);allocator.assertActorComplete(id);check();
+        if(root.getSpawnRuntime()!==spawns || spawns.getWorldRuntime()!==world ||
+          world.getActualActor(id)!==actor || admission().getActorBinding(id)!==binding)
+          fail('6ae60 primary canonical actor/command/world changed');
+      };
+      const load=(owner: object,key: string): unknown=>{const value=read(owner,key);basicGuard();return value;};
+      for(const owner of [actor,binding]) noShadows(owner,['field504','field508',
+        ...Array.from({length:8},(_,index)=>0x504+index).flatMap(offset=>
+          [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])]);
+      noShadows(actor,['pointer504','pointer508']);
+      //af8c compares this captured pointer only. It does not dereference the
+      //target, infer eligibility, or recover the OBJECT from that target actor.
+      const targetPointer=load(binding,'pointer508');
+      if(targetPointer===null) fail('8006b180 reached unsupported80437678 primary null-target constant');
+      record(targetPointer,'6ae60 primary pointer508');
+      //af98 captures504 before forming both vector addresses. Pointer-domain
+      //admission for B is deferred until its first actual paired load.
+      const provider=load(binding,'pointer504');
+      noShadows(actor,['position20','field20','field24','field28',
+        ...Array.from({length:12},(_,index)=>0x20+index).flatMap(offset=>
+          [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])]);
+      const position=record(load(actor,'pos'),'6ae60 actual position20');
+      if(Array.isArray(position)) fail('6ae60 position20 requires ordinary source vector');
+      if(call(()=>world.getPositionOwner(id))!==position) fail('6ae60 actual position record changed');
+      const positionGuard=(): void=>{
+        basicGuard();
+        const field=Object.getOwnPropertyDescriptor(actor,'pos');check();
+        if(!field || !('value' in field) || field.value!==position || world.getPositionOwner(id)!==position)
+          fail('6ae60 actual position record changed');
+        const commandRuntime=admission(),actionRuntime=commandRuntime.getActionRuntime();
+        const structured=[sources,globals,root,scheduler,allocator,spawns,world,actor,binding,
+          commandRuntime.getGlobal(),commandRuntime.getData(),commandRuntime.getWorldBinding(id),
+          commandRuntime.getStatusBinding(id),commandRuntime.getMappingActor(id),commandRuntime.getAttributeBinding(id),
+          commandRuntime.getChargeBinding(id),commandRuntime.getActionBinding(id),commandRuntime.getCueBinding(id),
+          commandRuntime.getDispatchBinding(id),commandRuntime.getStartBinding(id),commandRuntime.getStreamBinding(id),
+          ...retained.values(),...massActors.values(),...world.getRetainedMatrixOwners(),
+          ...commandRuntime.getKnownStorageOwners(),...actionRuntime.getRetainedStorageOwners(),
+          ...status.getRetainedStorageOwners(),...allocator.getRetainedStorageOwners()];
+        //Only this actor's inline pos reference is admitted. The vector cannot
+        //also be canonical bytes, helper data, another actor or another vector.
+        const references=[...structured,root.getDrawList(),...dispatch.getRetainedStorageOwners(),
+          ...root.getRetainedStorageOwners(),...scheduler.getRetainedStorageOwners()];check();
+        for(const owner of references) {
+          if(owner===position) continue;
+          const fields=Object.getOwnPropertyDescriptors(owner);check();
+          for(const [key,p] of Object.entries(fields)) if('value' in p && p.value===position && !(owner===actor && key==='pos'))
+            fail('6ae60 position20 aliases canonical source reference');
+        }
+        if(structured.includes(position))
+          fail('6ae60 position20 aliases canonical source storage');
+        basicGuard();
+      };
+      positionGuard();
+      const processor=call(()=>root.getVectorProcessorProfile());
+      if(processor===undefined) fail('8006afac reached authenticated8020bc88 PSVECSquareDistance; explicit processor profile unavailable');
+      if(processor===position) fail('6ae60 position20 aliases processor storage');
+      readSourceSquareDistance({a:position,aName:'position20',b:provider,bRepresentation:'record',
+        allocator,root,processor,guard:positionGuard});
+      //Only now does the caller reach its first threshold load. Never replace
+      //frsqrte with host sqrt, or skip the remaining same-actor preparation.
+      fail('8006afb0 reached unsupported80437658 primary distance threshold load');
+    };
     //8006ae78 captures base once. Signed active!=0, six unrolled physical rows.
     const initial=physical();
     for(let index=0;index<6;index++) {
@@ -587,9 +654,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(!isSourceActorTargetDispatchRuntime(dispatch) || dispatch.getSchedulerRuntime()!==scheduler)
           fail('6b7f4 exact genuine target-dispatch/scheduler owner required');
         call(()=>dispatch.dispatchActor(id));
-        //8006af8c starts mandatory per-actor primary distance preparation.
-        //Do not skip it to the next physical actor or third-pass target83.
-        fail('8006af8c reached unsupported source primary-target distance preparation after8006b7f4');
+        primaryDistance(id,actor,dispatch);
       }
     }
     //8006b358 reload. The active BYTE LOAD precedes the unconditional508

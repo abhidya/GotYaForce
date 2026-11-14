@@ -117,6 +117,8 @@ export interface SourceActorWorldMatrixRuntime {
   /** Same retained mapping header, for identity-preserving composition. */
   getMappingActor(identity: symbol): object;
   getActorBinding(identity: symbol): SourceActorWorldMatrixBinding;
+  /** Canonical inline20 vector already retained at binding; no scalar reads. */
+  getPositionOwner(identity: symbol): object;
   /** Live owned record, with lazy element reads left to the caller. */
   getWorldMatrix(identity: symbol, index: number): readonly number[];
   getStorage(identity: symbol): SourceActorWorldMatrixStorage;
@@ -480,6 +482,7 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       for (const [matrixId, value] of matrices) {assignedMatrixIds.add(matrixId); assignedMatrixRecords.add(value);}
     });},
     getActorBinding(id: symbol): SourceActorWorldMatrixBinding {return entry(id).binding;},
+    getPositionOwner(id: symbol): object {return entry(id).position;},
     getWorldMatrix(id: symbol, index: number): readonly number[] {
       let result!: readonly number[];
       guard(() => {

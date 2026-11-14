@@ -14,7 +14,7 @@
  * capabilities. Stable synchronous non-proxy own-data records are host bounds.
  */
 import {claimSourceHelperStorage} from './source-storage-claims.js';
-import {addSourceFloat32, fusedMultiplyAddSourceFloat32} from './source-float.js';
+import {readSourceSquareDistance} from './source-square-distance.js';
 import {isSourceObjectSchedulerRuntime,type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import {markIncompleteSourceActorDoubleLifecycle,requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 export interface SourceActorTargetDispatchSources {
@@ -201,31 +201,11 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
       if(typeof value!=='number' || !Number.isFinite(value) || !Object.is(value,Math.fround(value)))
         fail(`${where}: finite exact source float32 required`);return value;
     };
-    const paired=(): void=>{
-      if(call(()=>root.getVectorProcessorProfile())!==profile) fail('processor profile owner changed');
-      if(uint(read(profile,'gqr0'),0xffffffff,'gqr0')!==0)
-        fail('GQR0 must explicitly select float load/store type0 scale0');
-    };
-    // Captured A address and original OBJECT pointer are never replaced by a
-    // projected snapshot, actor position, or a second byte/pointer domain.
+    // Captured A and OBJECT addresses stay live in the shared genuine SDK body.
     const a=projectionOwner!;
-    const squareDistance=(object: symbol|null): number=>{
-      paired();const ay=float(read(a,'y'),'stack.y'),az=float(read(a,'z'),'stack.z');
-      paired();
-      if(object===null) fail('8020bc8c null OBJECT at reached vector load');
-      call(()=>allocator.getObject(object));
-      const by=call(()=>allocator.readF32(object,0x68)),bz=call(()=>allocator.readF32(object,0x6c));
-      const oldY=addSourceFloat32(ay,-by),oldZ=addSourceFloat32(az,-bz);check();
-      paired();const ax=float(read(a,'x'),'stack.x'),ayAgain=float(read(a,'y'),'stack.y');
-      paired();const bx=call(()=>allocator.readF32(object,0x64)),byAgain=call(()=>allocator.readF32(object,0x68));
-      // Both XY loads precede the old YZ squares. Product of two binary32
-      // operands is exactly representable in binary64 before its one f32 round.
-      const yy=float(Math.fround(oldY*oldY),'square oldY'),zz=float(Math.fround(oldZ*oldZ),'square oldZ');
-      const dx=addSourceFloat32(ax,-bx),dy=addSourceFloat32(ayAgain,-byAgain);check();
-      const xy=fusedMultiplyAddSourceFloat32(dx,dx,yy);check();
-      fusedMultiplyAddSourceFloat32(dy,dy,zz);check(); // unused paired lane executes
-      const result=addSourceFloat32(xy,zz);check();return result;
-    };
+    const squareDistance=(object: symbol|null): number=>readSourceSquareDistance({
+      a,aName:'stack',b:object,bRepresentation:'identity',allocator,root,processor:profile,guard:check,
+    });
     let winner=first,best=squareDistance(first),savedCount=0;
     for(let index=1;index<((savedCount=uint(read(globals,'count804361a0'),0xffffffff,'count804361a0'))|0);index++) {
       if(index>=4096) fail('8006b984 nearest candidate index outside host bound4096');

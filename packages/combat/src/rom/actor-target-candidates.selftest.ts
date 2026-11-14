@@ -576,7 +576,7 @@ function outerTests(make: Make): void {
   for(const accepted of [false,true]) {
     const x=setup(make),stage=candidate(x,accepted?0:2),frame=outer(x);let selected=false,lifecycle=0,descriptor=0;
     let pointer508=0,physicalReloads=0,nextIdentity=0,nextActive=0;
-    observe(()=>rejects(()=>frame.runFrame(),accepted?'8006b924':'8006af8c'),(owner,key)=>{
+    observe(()=>rejects(()=>frame.runFrame(),accepted?'8006b924':'8006b180'),(owner,key)=>{
       if(owner===x.targetPreparation&&key==='targetDispatch') selected=true;
       if(selected&&owner===stage&&key==='lifecycle18') lifecycle++;
       if(selected&&owner===x.mapping.getActor(x.actor)&&key==='descriptor4b0') descriptor++;
@@ -587,7 +587,7 @@ function outerTests(make: Make): void {
     });
     equal(lifecycle,1,'real outer target dispatcher reaches candidate lifecycle exactly once');
     equal(descriptor,0,'surviving scan stops before caller descriptor4b0');
-    equal(pointer508,0,'accepted/rejected candidate branch never skips into primary or third-pass508 work');
+    equal(pointer508,accepted?0:1,'only a returned rejected scan reaches the primary508 load; no third-pass work');
     equal(physicalReloads,0,'candidate refusal or return never reloads the third-pass physical block');
     equal(nextIdentity,0,'candidate refusal or return never advances the second-pass identity');
     equal(nextActive,0,'candidate refusal or return never reads the next physical actor');
@@ -606,7 +606,7 @@ function outerTests(make: Make): void {
 
 export function runActorTargetCandidatesSelfTests(make: Make): void {
   branchTests(make);freshnessTests(make);faultTests(make);boundTests(make);ownerTests(make);interruptionTests(make);candidateClosureTests(make);outerTests(make);
-  console.log('[actor-target-candidates] PASS: genuine same-world candidate scan, all255 nonzero active bytes, signed team/lifecycle filters, live BE+20 pointers and duplicate retention, ordered count-before-pointer stores and stale tails, lazy faults and host bounds, owner/alias/reentry and independently failed candidate closure, actual outer rejected-candidate6af8c boundary and accepted exact6b924 stop, neither skipping to later actor/pass reads; explicit synthetic inputs only, no target selection, descriptor continuation or full-frame claim');
+  console.log('[actor-target-candidates] PASS: genuine same-world candidate scan, all255 nonzero active bytes, signed team/lifecycle filters, live BE+20 pointers and duplicate retention, ordered count-before-pointer stores and stale tails, lazy faults and host bounds, owner/alias/reentry and independently failed candidate closure, actual outer rejected-candidate primary null-constant boundary and accepted exact6b924 stop, neither skipping to later actor/pass reads; explicit synthetic inputs only, no target selection, descriptor continuation or full-frame claim');
 }
 
 /** Genuine reusable candidate graph for later source continuation tests. */

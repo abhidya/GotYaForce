@@ -456,7 +456,7 @@ function outerTests(make:Make):void {
         captured=true;for(let i=0x20;i<0x24;i++) x.bytes[i]=0;
       }
     });
-    observe(()=>rejects(()=>frame.runFrame(),'8006af8c'),(owner,key)=>{
+    observe(()=>rejects(()=>frame.runFrame(),nullable?'8006b180':'8006afb0'),(owner,key)=>{
       nullWinner(owner,key);
       if(owner===x.targetPreparation&&key==='targetDispatch') selected=true;
       if(!selected) return;
@@ -467,8 +467,8 @@ function outerTests(make:Make):void {
     },(owner,key)=>{if(owner===x.vector&&key==='z') finalStore=true;});
     stored(x,x.bytes,nullable?null:x.targetActor);
     check(finalStore,'genuine helper reaches its final coordinate-store admission');
-    equal(pointer508,1,'one helper508 destination admission, with no unsupported af8c source reload');
-    equal(afterFinal508,0,'completed selected-target copy never reads508 again');
+    equal(pointer508,2,'helper508 destination admission precedes one genuine primary af8c load');
+    equal(afterFinal508,1,'completed selected-target copy is followed by one captured primary508 load');
     equal(physicalReloads,0,'successful helper never skips mandatory continuation to third-pass reload');
     equal(nextIdentity,0,'successful helper never skips mandatory continuation to next second-pass identity');
     equal(nextActive,0,'successful helper never reads next second-pass actor');
@@ -482,5 +482,5 @@ function outerTests(make:Make):void {
 
 export function runActorTargetStorageSelfTests(make:Make):void {
   basicAndFlags(make);liveRedirect(make);finalReloads(make);orderAndFaults(make);redirectFaultsAndBounds(make);savedRedirectLimit(make);descriptorFaults(make);descriptorOwnerAliases(make);aliasesAndInterruptions(make);outerTests(make);
-  console.log('[actor-target-storage] PASS: genuine HIT interior descriptor reuse, live BE0200 sibling selection and saved signed count, original OBJECT/actual identity stores and raw XY-before-stores/Z-after-Y order, lazy failures and partial writes, aliases/reentry/independent closure, state1 refusal and real outer6af8c boundary before primary-target, next-actor or third-pass reads; explicit offline synthetic operands only, no completed-frame/console/full-game claim');
+  console.log('[actor-target-storage] PASS: genuine HIT interior descriptor reuse, live BE0200 sibling selection and saved signed count, original OBJECT/actual identity stores and raw XY-before-stores/Z-after-Y order, lazy failures and partial writes, aliases/reentry/independent closure, state1 refusal and real outer primary null-constant/SquareDistance-threshold boundaries before next-actor or third-pass reads; explicit offline synthetic operands only, no completed-frame/console/full-game claim');
 }

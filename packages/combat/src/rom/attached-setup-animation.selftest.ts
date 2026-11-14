@@ -1,3 +1,4 @@
+import {runActorPrimaryDistanceSelfTests} from './actor-primary-distance.selftest.js';
 import {runActorTargetStorageSelfTests} from './actor-target-storage.selftest.js';
 import {runActorTargetDistanceSelfTests} from './actor-target-distance.selftest.js';
 import {runActorTargetProjectionSelfTests} from './actor-target-projection.selftest.js';
@@ -2891,6 +2892,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runActorTargetProjectionHydratedCompositionTests();
   runActorTargetDistanceHydratedCompositionTests();
   runActorTargetStorageHydratedCompositionTests();
+  runActorPrimaryDistanceHydratedCompositionTests();
   runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
@@ -13399,4 +13401,9 @@ export function runActorTargetDistanceHydratedCompositionTests(): void {
 /** Canonical descriptor redirect and exact selected-target store prefix. */
 export function runActorTargetStorageHydratedCompositionTests(): void {
   runActorTargetStorageSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+/** Actual post-dispatch508/504 and live canonical position/OBJECT SquareDistance. */
+export function runActorPrimaryDistanceHydratedCompositionTests(): void {
+  runActorPrimaryDistanceSelfTests(createBattleTargetPreparationTestFixture);
 }

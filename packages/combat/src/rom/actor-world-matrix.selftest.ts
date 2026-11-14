@@ -396,7 +396,10 @@ export function runActorWorldMatrixSelfTests(): void {
     check(f.output(0)[3] === 0 && f.output(0)[7] === 0 && f.output(0)[11] === -30, 'identity destination store prefix remains actual owner behavior');
   }
   {
-    const f = fixture(); f.actual.pos = {x: 1, y: 2, z: 3};
+    const f = fixture(),original=f.actual.pos;
+    check(f.runtime.getPositionOwner(f.id)===original,'position query returns the already bound canonical owner');
+    f.actual.pos = {x: 1, y: 2, z: 3};
+    check(f.runtime.getPositionOwner(f.id)===original,'position ownership query never adopts a replacement');
     rejects(f.update, 'position record changed'); check(f.output(0)[7] === 0, 'replacement of fixed position record refuses after identity');
   }
   {

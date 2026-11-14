@@ -447,8 +447,7 @@ function faultTests(make: Make): void {
   }
 }
 
-/** The850 helper may return, but the mandatory same-actor af8c source
- * continuation is still unavailable. No later pass may absorb that return. */
+/** The850 return reaches exactly one primary508 load, never a later pass. */
 function continuationProbe(x: Joined) {
   let selected=false,pointer508=0,physicalReloads=0,nextIdentity=0,nextActive=0;
   return {
@@ -460,9 +459,9 @@ function continuationProbe(x: Joined) {
       if(owner===x.physicalIdentities&&key==='1') nextIdentity++;
       if(owner===x.slotTargets[1]&&key==='active0') nextActive++;
     },
-    assert(helper508Stores: number): void {
+    assert(helper508Stores: number,primaryReads=1): void {
       check(selected,'outer reached the genuine target dispatcher');
-      equal(pointer508,helper508Stores,'only helper508 stores occur, never the unsupported af8c or later pointer reload');
+      equal(pointer508,helper508Stores+primaryReads,'only helper stores and reached primary508 load occur');
       equal(physicalReloads,0,'returned helper never reaches the third-pass physical-block reload');
       equal(nextIdentity,0,'returned helper never advances to the next second-pass physical identity');
       equal(nextActive,0,'returned helper never reads the next second-pass actor active byte');
@@ -473,7 +472,7 @@ function continuationProbe(x: Joined) {
 function outerTests(make: Make): void {
   {
     const x=setup(make),{frame}=outer(x),probe=continuationProbe(x);let target=false,actionHousekeeping=0,dispatchHousekeeping=0;
-    noSchedulerWork(x,()=>observe(()=>rejects(()=>frame.runFrame(),'8006af8c'),(owner,key)=>{
+    noSchedulerWork(x,()=>observe(()=>rejects(()=>frame.runFrame(),'8006b180'),(owner,key)=>{
       probe.visit(owner,key);
       if(owner===x.targetPreparation && key==='targetDispatch') target=true;
       if(owner===x.sourceActor && key==='housekeeping73f') {if(target) dispatchHousekeeping++;else actionHousekeeping++;}
@@ -490,7 +489,7 @@ function outerTests(make: Make): void {
   {
     const x=setup(make),{frame}=outer(x),probe=continuationProbe(x);let selected=false,tableReads=0;
     x.sourceActor.byte502=211;x.admissionState.pointer508=x.visibility[0]!;x.admissionState.pointer504=x.visibility[1]!;
-    observe(()=>rejects(()=>frame.runFrame(),'8006af8c'),(owner,key)=>{
+    observe(()=>rejects(()=>frame.runFrame(),'8006b180'),(owner,key)=>{
       probe.visit(owner,key);
       if(!selected && owner===x.targetPreparation && key==='targetDispatch') {selected=true;x.sourceActor.active0=0;}
       if(owner===x.targetDispatchSources && key==='dispatch39a0') tableReads++;
@@ -504,8 +503,8 @@ function outerTests(make: Make): void {
   }
   for(const half of [0,1,65535]) {
     const x=setup(make),globals=candidates(x,half),{frame}=outer(x),probe=continuationProbe(x);
-    observe(()=>rejects(()=>frame.runFrame(),half===0?'8006af8c':'candidate list803c1d7c load'),probe.visit);
-    probe.assert(0);
+    observe(()=>rejects(()=>frame.runFrame(),half===0?'8006b180':'candidate list803c1d7c load'),probe.visit);
+    probe.assert(0,half===0?1:0);
     equal(globals.count804361a0,0,'outer preserves genuine candidate scratch reset before later refusal');closed(x,frame);
   }
   for(const fault of ['missing','copied','foreign'] as const) {
@@ -560,5 +559,5 @@ function outerTests(make: Make): void {
 
 export function runActorTargetDispatchSelfTests(make: Make): void {
   helperTests(make);candidateTests(make);lateOwnerTests(make);faultTests(make);outerTests(make);
-  console.log('[actor-target-dispatch] PASS: all256 active/state/housekeeping bytes, ordered canonical502/508/504 clears, authenticated signed-index0 dispatch, genuine73f and zero-candidate returns, ordered scratch reset/reload, lazy owner/scalar faults, data aliases and caught reentry, real outer exact6af8c return boundary before further pointer/actor/pass reads and permanent closure; bounded offline synthetic composition only, no source hydration, candidate-list load, scheduler execution or full-frame claim');
+  console.log('[actor-target-dispatch] PASS: all256 active/state/housekeeping bytes, ordered canonical502/508/504 clears, authenticated signed-index0 dispatch, genuine73f and zero-candidate returns, ordered scratch reset/reload, lazy owner/scalar faults, data aliases and caught reentry, real outer exact primary null-constant boundary after captured508 and before further actor/pass reads and permanent closure; bounded offline synthetic composition only, no source hydration, candidate-list load, scheduler execution or full-frame claim');
 }

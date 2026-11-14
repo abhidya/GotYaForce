@@ -17,7 +17,7 @@
  * Reads and destination checks stay lazy; failures retain their prefix and
  * permanently mark an effectful incomplete call. No tick or input hydration.
  */
-import type {RomActor, RomVisibilityTarget} from './actor.js';
+import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
 import type {SourceActorStatusTimersRuntime} from './actor-status-timers.js';
 import type {SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
@@ -32,7 +32,8 @@ import type {SourceActorAnimationDispatchBinding} from './actor-animation-dispat
 
 export interface SourceActorCommandAdmissionBinding {
   pointer504: object | null;
-  pointer508: RomVisibilityTarget | null;
+  /** Opaque captured source target, not the separate visibilityTarget/+cc view. */
+  pointer508: object | null;
   pointerc8: object | null;
   byteD0: number;
 }
