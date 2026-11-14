@@ -8,11 +8,13 @@
  * count. Positive lists use the same allocator object/actor pointers and stage
  * lifecycle owners. Rejected lists return; accepted candidates preserve ordered
  * scratch count/list stores. Explicit projection stack continues descriptor4b0
- * and three ordered translation stores to the actual SquareDistance call. All source
+ * and three ordered translation stores. An explicit existing root processor profile
+ * continues live SquareDistance and nearest selection through winner OBJECT+20. All source
  * data is explicit and live; there are no defaults, callbacks or scheduler
  * capabilities. Stable synchronous non-proxy own-data records are host bounds.
  */
 import {claimSourceHelperStorage} from './source-storage-claims.js';
+import {addSourceFloat32, fusedMultiplyAddSourceFloat32} from './source-float.js';
 import {isSourceObjectSchedulerRuntime,type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import {markIncompleteSourceActorDoubleLifecycle,requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 export interface SourceActorTargetDispatchSources {
@@ -61,10 +63,12 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
     admission=spawns.getAdmissionRuntime(),action=admission.getActionRuntime(),world=spawns.getWorldRuntime();
   let busy=false,poisoned=false,activeId: symbol|undefined,activeCandidate: object|undefined,tableOwner: object|undefined,globalsOwner: object|undefined,projectionOwner: object|undefined;
   const bindings=new Map<symbol,object>(),lists=new Map<string,object>(),candidateStages=new Map<symbol,object>();
+  const acceptedActors=new Set<object>();
   const check=(): void=>{
     if(poisoned) fail('caught same-runtime reentry');
     if(activeId!==undefined) allocator.assertActorComplete(activeId);
     if(activeCandidate!==undefined) requireCompleteSourceActorDoubleLifecycle(activeCandidate);
+    for(const accepted of acceptedActors) requireCompleteSourceActorDoubleLifecycle(accepted);
   };
   const read=(owner: unknown,key: string): unknown=>{const value=own(owner,key);check();return value;};
   const write=(owner: object,key: string,value: number|symbol|null): void=>{
@@ -138,6 +142,9 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
       noShadows(binding,['active0','team','team88','byte88','field88','136','byte18','state18','24']);
       candidateStages.set(pointer,binding);
       if((byte(binding,'lifecycle18')<<24>>24)>=2) continue;
+      // Metadata-only guards retain every accepted actor after scan moves on.
+      // Distance must not reread OBJECT+20 or repeat source candidate filters.
+      acceptedActors.add(candidate);check();
       const captured=uint(read(globals,'count804361a0'),0xffffffff,'count804361a0');
       write(globals,'count804361a0',(captured+1)>>>0);
       // Source increments the count BEFORE its indexed pointer store. A bad
@@ -146,7 +153,7 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
       write(list('scratchCandidates2208'),String(captured),object);
     }
   };
-  const project = (id: symbol, actual: object): never => {
+  const project = (id: symbol, actual: object, globals: object): never => {
     // This optional host ingress preserves the former unsupported operation.
     // Its value is not touched until the source reaches its first stack store.
     const supplied=Object.getOwnPropertyDescriptor(sources,'projectionStack');check();
@@ -182,7 +189,53 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
         fail(`projection matrix lane${lane}: finite exact source float32 required`);
       write(stack(),axis,value);
     }
-    fail('8006b968 reached authenticated8020bc88 PSVECSquareDistance; canonical vector-call integration unsupported');
+    // The existing root owns the explicit profile. Absence preserves the
+    // historical boundary AFTER all three projection stores, before vector reads.
+    const profile=call(()=>root.getVectorProcessorProfile());
+    if(profile===undefined) fail('8006b968 reached authenticated8020bc88 PSVECSquareDistance; explicit processor profile unavailable');
+    const float=(value: unknown,where: string): number=>{
+      if(typeof value!=='number' || !Number.isFinite(value) || !Object.is(value,Math.fround(value)))
+        fail(`${where}: finite exact source float32 required`);return value;
+    };
+    const paired=(): void=>{
+      if(call(()=>root.getVectorProcessorProfile())!==profile) fail('processor profile owner changed');
+      if(uint(read(profile,'gqr0'),0xffffffff,'gqr0')!==0)
+        fail('GQR0 must explicitly select float load/store type0 scale0');
+    };
+    // Captured A address and original OBJECT pointer are never replaced by a
+    // projected snapshot, actor position, or a second byte/pointer domain.
+    const a=projectionOwner!;
+    const squareDistance=(object: symbol|null): number=>{
+      paired();const ay=float(read(a,'y'),'stack.y'),az=float(read(a,'z'),'stack.z');
+      paired();
+      if(object===null) fail('8020bc8c null OBJECT at reached vector load');
+      call(()=>allocator.getObject(object));
+      const by=call(()=>allocator.readF32(object,0x68)),bz=call(()=>allocator.readF32(object,0x6c));
+      const oldY=addSourceFloat32(ay,-by),oldZ=addSourceFloat32(az,-bz);check();
+      paired();const ax=float(read(a,'x'),'stack.x'),ayAgain=float(read(a,'y'),'stack.y');
+      paired();const bx=call(()=>allocator.readF32(object,0x64)),byAgain=call(()=>allocator.readF32(object,0x68));
+      // Both XY loads precede the old YZ squares. Product of two binary32
+      // operands is exactly representable in binary64 before its one f32 round.
+      const yy=float(Math.fround(oldY*oldY),'square oldY'),zz=float(Math.fround(oldZ*oldZ),'square oldZ');
+      const dx=addSourceFloat32(ax,-bx),dy=addSourceFloat32(ayAgain,-byAgain);check();
+      const xy=fusedMultiplyAddSourceFloat32(dx,dx,yy);check();
+      fusedMultiplyAddSourceFloat32(dy,dy,zz);check(); // unused paired lane executes
+      const result=addSourceFloat32(xy,zz);check();return result;
+    };
+    let winner=first,best=squareDistance(first);
+    for(let index=1;index<(uint(read(globals,'count804361a0'),0xffffffff,'count804361a0')|0);index++) {
+      if(index>=4096) fail('8006b984 nearest candidate index outside host bound4096');
+      const next=read(list('scratchCandidates2208'),String(index));
+      if(next!==null && typeof next!=='symbol') fail('scratch nearest candidate: source pointer identity required');
+      const distance=squareDistance(next);
+      // Source branches only on GT; finite equality replaces the winner.
+      // NaN/unordered is outside the explicit finite arithmetic host domain.
+      if(!(distance>best)) {winner=next;best=distance;}
+    }
+    if(winner===null) fail('8006b9b8 null winner OBJECT at reached pointer load');
+    const actor=call(()=>allocator.readPointer(winner,0x20));
+    if(actor===null) fail('8006ba18 reached target commit after null winner actor; target stores unsupported');
+    fail('8006b9c4 reached selected winner OBJECT+28 sibling descriptor load; target selection suffix unsupported');
   };
   const runtime: SourceActorTargetDispatchRuntime={
     getSchedulerRuntime() {return scheduler;},
@@ -237,9 +290,9 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
         write(globals,'count804361a0',0);
         scan(actual,count,globals);
         if(uint(read(globals,'count804361a0'),0xffffffff,'count804361a0')===0) return;
-        project(id,actual);
+        project(id,actual,globals);
       } catch(error) {if(actual) markIncompleteSourceActorDoubleLifecycle(actual);throw error;}
-      finally {activeCandidate=undefined;activeId=undefined;busy=false;}
+      finally {acceptedActors.clear();activeCandidate=undefined;activeId=undefined;busy=false;}
     },
   };
   if(!claimSourceHelperStorage(sources,runtime)) fail('target-dispatch sources storage already claimed');

@@ -57,6 +57,8 @@ export interface SourceProjectileRootRuntime {
   bindProjectile(projectile: symbol): void;
   getObject(projectile: symbol): SourceAllocationBytes;
   getDrawList(): SourceProjectileDrawList;
+  /** Existing explicit paired-vector host profile; lazy identity-only access. */
+  getVectorProcessorProfile(): object | undefined;
   getSpawnRuntime(): SourceActorProjectileSpawnRuntime;
   /** Same retained source18 owner, not a replacement lifecycle adapter. */
   getStageRuntime(): SourceActorStageBoundsRuntime;
@@ -123,7 +125,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
   if (hits !== undefined && (!isSourceProjectileHitRuntime(hits) || hits.getSpawnRuntime() !== spawns))
     fail('genuine HIT runtime with same completed-spawn owner required');
   const draw = list as SourceProjectileDrawList;
-  let busy = false, poisoned = false;
+  let busy = false, poisoned = false, vectorProcessorOwner: object | undefined;
   const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
   const guard = (run: () => void): void => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
@@ -185,11 +187,40 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     if (old === null) {writeList('tail', id); putPtr(id, 0x104, null);}
     else {putPtr(id, 0x104, old); call(() => allocator.getObject(old)); putPtr(old, 0x108, id);}
   };
+  const vectorProcessor = (): object | undefined => {
+    const p=Object.getOwnPropertyDescriptor(sources,'processor');check();
+    if(p!==undefined && !('value' in p)) fail('processor: own data profile required; explicit GQR0 float processor profile unavailable');
+    const selected=p?.value as unknown;
+    if(selected===undefined) {
+      if(vectorProcessorOwner!==undefined) fail('processor profile owner changed');
+      return undefined;
+    }
+    if(selected===null || typeof selected!=='object' || Array.isArray(selected) ||
+      ArrayBuffer.isView(selected) || selected instanceof Promise) fail('processor: ordinary own-data profile required');
+    if(vectorProcessorOwner!==undefined && vectorProcessorOwner!==selected) fail('processor profile owner changed');
+    const owners: object[]=[sources,draw,...call(()=>spawns.getRetainedStorageOwners()),
+      ...call(()=>prehook.getStatusRuntime().getRetainedStorageOwners())];
+    for(const e of children.values()) owners.push(e.bytes,e.actual,e.stage,e.world,e.status);
+    if(hits!==undefined) owners.push(...call(()=>hits.getRetainedStorageOwners()));
+    const declared=Object.getOwnPropertyDescriptors(sources);check();
+    for(const key of ['targetStack','initializationStack']) {
+      const d=declared[key];
+      if(d && 'value' in d && d.value!==null && typeof d.value==='object') owners.push(d.value);
+    }
+    const nested: object[]=[];
+    for(const owner of owners) if(owner!==sources) {
+      const descriptors=Object.getOwnPropertyDescriptors(owner);check();
+      for(const d of Object.values(descriptors))
+        if('value' in d && d.value!==null && typeof d.value==='object') nested.push(d.value);
+    }
+    if([...owners,...nested].includes(selected)) fail('processor profile aliases canonical source storage');
+    if(!claimSourceHelperStorage(selected,runtime)) fail('processor profile storage already claimed');
+    vectorProcessorOwner=selected;return selected;
+  };
   const targetPrefix = (e: Entry, capturedTarget: object): never => {
-    const processorProperty=Object.getOwnPropertyDescriptor(sources,'processor');check();
-    if(!processorProperty || !('value' in processorProperty) || processorProperty.value===undefined)
+    const processor=vectorProcessor();
+    if(processor===undefined)
       fail('actual8020ba78 target displacement requires explicit GQR0 float processor profile');
-    const processor=processorProperty.value as unknown;
     if(unsigned(read(processor,'gqr0'),0xffffffff,'gqr0')!==0)
       fail('GQR0 must explicitly select float load/store type0 scale0');
     const supplied=Object.getOwnPropertyDescriptor(sources,'targetStack');check();
@@ -373,7 +404,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
         fail('draw list or projectile source owner alias');
       owners(e); children.set(id, e); claimedChildren.add(bytes);
     });},
-    getObject(id) {return entry(id).bytes;}, getDrawList() {return draw;}, getSpawnRuntime() {return spawns;}, getStageRuntime() {return stage;},
+    getObject(id) {return entry(id).bytes;}, getDrawList() {return draw;}, getVectorProcessorProfile() {return vectorProcessor();}, getSpawnRuntime() {return spawns;}, getStageRuntime() {return stage;},
     getSourceOwners(id) {const e = entry(id); return Object.freeze([e.bytes, e.actual, e.stage, e.world, e.status, draw]);},
     getRetainedStorageOwners() {
       const records: object[]=[sources,draw,...spawns.getRetainedStorageOwners(),

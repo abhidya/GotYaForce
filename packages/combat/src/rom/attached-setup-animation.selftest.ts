@@ -1,3 +1,4 @@
+import {runActorTargetDistanceSelfTests} from './actor-target-distance.selftest.js';
 import {runActorTargetProjectionSelfTests} from './actor-target-projection.selftest.js';
 import {runActorTargetCandidatesSelfTests} from './actor-target-candidates.selftest.js';
 import {runActorTargetDispatchSelfTests} from './actor-target-dispatch.selftest.js';
@@ -2887,6 +2888,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runActorTargetDispatchHydratedCompositionTests();
   runActorTargetCandidatesHydratedCompositionTests();
   runActorTargetProjectionHydratedCompositionTests();
+  runActorTargetDistanceHydratedCompositionTests();
   runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
@@ -13385,4 +13387,9 @@ export function runActorTargetCandidatesHydratedCompositionTests(): void {
 
 export function runActorTargetProjectionHydratedCompositionTests(): void {
   runActorTargetProjectionSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+/** Live genuine SquareDistance and nearest loop with explicit canonical profile. */
+export function runActorTargetDistanceHydratedCompositionTests(): void {
+  runActorTargetDistanceSelfTests(createBattleTargetPreparationTestFixture);
 }

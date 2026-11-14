@@ -337,7 +337,9 @@ function storageTests(make: Make): void {
     const owner=field==='displacement'?{}:x.rootSources;
     Object.defineProperty(owner,field,{get() {invoked++;throw Error('metadata-only accessor');},configurable:true});
     if(field==='displacement') Reflect.set(x.rootSources,'targetStack',owner);
-    boundary(x);prefix(x,3);equal(invoked,0,`unreached root ${field} accessor is never executed by ownership inventory`);
+    if(field==='processor') rejects(()=>x.targetDispatch.dispatchActor(x.actor),'processor: own data profile required');
+    else boundary(x);
+    prefix(x,3);equal(invoked,0,`root ${field} accessor is never executed by ownership inventory or reached profile admission`);
   }
   {
     const x=setup(make),y=setup(make);boundary(x);y.sources.projectionStack=x.stack;
