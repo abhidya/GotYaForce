@@ -55,6 +55,10 @@ export interface SourceActorInputChargeRuntime {
   getStatusBinding(identity: symbol): object;
   getMappingActor(identity: symbol): object;
   getAttributeBinding(identity: symbol): object;
+  /** Reached descriptor load through this SAME retained mapping registry. */
+  getMappingDescriptor(identity: symbol): number[];
+  /** Already reached raw8c owners only; never loads an actor pointer. */
+  getKnownDescriptorRecords(): readonly object[];
   getGlobal(): SourceActorInputChargeGlobal;
   getData(): SourceActorInputChargeData;
   getEffects(): SourceActorChargeEffectsRuntime | undefined;
@@ -249,6 +253,8 @@ export function createSourceActorInputChargeRuntime(sources: SourceActorInputCha
     getStatusBinding(id) {return entry(id).status;},
     getMappingActor(id) {return entry(id).mapping;},
     getAttributeBinding(id) {return entry(id).attribute;},
+    getMappingDescriptor(id) {return guard(() => sourceDescriptor(id, entry(id)) as number[]);},
+    getKnownDescriptorRecords() {return Object.freeze([...descriptors.values()]);},
     getGlobal() {return global;},
     getData() {return data;},
     getEffects() {return effects;},

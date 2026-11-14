@@ -22,6 +22,7 @@ import {createSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateStorag
 import {createSourceActorWorldMatrixRuntime, type SourceActorWorldMatrixCorrection} from './actor-world-matrix.js';
 import {createSourceActorRotationDampingRuntime} from './actor-rotation-damping.js';
 import {createSourceActorCue0LifecycleRuntime, type SourceActorCue0LifecycleBinding} from './actor-cue0-lifecycle.js';
+import {createSourceActorInputTestersRuntime, type SourceActorInputTestersBinding} from './actor-input-testers.js';
 import {createSourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
 import {createSourceJObjModelHydrationRuntime} from './jobj-model-hydration.js';
 import {createSourceDisplayAnimationAttachmentRuntime} from './display-animation-attachment.js';
@@ -2806,6 +2807,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runNormalLifecycleHydratedCompositionTests();
   runRotationDampingHydratedCompositionTests();
   runCue0LifecycleHydratedCompositionTests();
+  runInputTestersHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -3311,6 +3313,13 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
   const actionRequest = chargeHydration?.actionRequest === undefined ? undefined :
     createSourceActorActionRequestRuntime({world: x.world});
   if (actionRequest !== undefined) actionRequest.bindActor(x.actor, chargeHydration!.actionRequest!);
+  const inputTesters = chargeHydration?.inputTesters === undefined ? undefined : (() => {
+    if (chargeOwners === undefined) throw Error('explicit input testers require the same genuine charge owner');
+    const runtime = createSourceActorInputTestersRuntime({world: x.world, status: x.status, mapping: x.mapping,
+      charge: chargeOwners.charge, ...(actionRequest === undefined ? {} : {actionRequest})});
+    runtime.bindActor(x.actor, chargeHydration.inputTesters);
+    return runtime;
+  })();
   const rateInputs = chargeHydration?.actorRates;
   const actorRates = rateInputs === undefined ? undefined : (() => {
     // Explicit synthetic decoded inputs, not source RAM hydration or new rate
@@ -3334,7 +3343,8 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
     createSourceActorTerrainQueryRuntime({world: x.world, history: x.history, terrain: chargeHydration.cue0TerrainGlobals});
   if (cue0Terrain !== query) cue0Terrain.bindActor(x.actor);
   const cue0 = chargeHydration?.cue0 === undefined ? undefined :
-    createSourceActorCue0LifecycleRuntime({world: x.world, movement: x.movement, attribute: x.attributes, terrain: cue0Terrain, cues});
+    createSourceActorCue0LifecycleRuntime({world: x.world, movement: x.movement, attribute: x.attributes, terrain: cue0Terrain, cues,
+      ...(inputTesters === undefined ? {} : {inputTesters})});
   if (cue0 !== undefined) cue0.bindActor(x.actor, chargeHydration!.cue0!);
   const normalLifecycle = chargeHydration?.normalLifecycle === undefined ? undefined :
     createSourceActorNormalLifecycleRuntime({world: x.world, movement: x.movement, status: x.status, cues,
@@ -3353,7 +3363,7 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
     ...(readyTransitions === undefined ? {} : {readyTransitions}), ...(actionRequest === undefined ? {} : {actionRequest}),
     ...(actorRates === undefined ? {} : {actorRates}), ...(ceiling === undefined ? {} : {ceiling}),
     ...(normalLifecycle === undefined ? {} : {normalLifecycle}), ...(rotation === undefined ? {} : {rotation}),
-    ...(cue0 === undefined ? {} : {cue0}),
+    ...(cue0 === undefined ? {} : {cue0}), ...(inputTesters === undefined ? {} : {inputTesters}),
     runRawPrefix: (epoch: number, targetDistance760: number, horizontalDistance764: number) =>
       prefix.ingestRawDistancesAndRun(x.actor, epoch, {boundary: 'externally-decoded-pre59068-raw', targetDistance760, horizontalDistance764})});
 }
@@ -7032,6 +7042,8 @@ interface ChargeInputHydration {
   normalLifecycle?: Partial<SourceActorNormalLifecycleBinding>;
   /** Explicit cue0 byte only; terrain/history/attribute/cue owners stay shared. */
   cue0?: Partial<SourceActorCue0LifecycleBinding>;
+  /** Explicit absent595/748 only; actual585/status593/charge58e and raw8c stay shared. */
+  inputTesters?: Partial<SourceActorInputTestersBinding>;
   /** Explicit negative composition input; never a fallback for shared terrain. */
   cue0TerrainGlobals?: SourceActorTerrainGlobals;
   /** Supplied +b0 bytes share the existing raw8c descriptor; corrections are
@@ -8820,11 +8832,12 @@ export function runTierLifecycleHydratedCompositionTests(): void {
  * opt-in: the historical poststage move0 must retain its rotation refusal. */
 function normalLifecycleHydratedControlFixture(initial: Partial<SourceActorNormalLifecycleBinding>,
   move661 = 0, tierHydration?: TierLifecycleHydration, rotationHydration?: ChargeInputHydration['rotation'],
-  cue0Hydration?: Partial<SourceActorCue0LifecycleBinding>) {
+  cue0Hydration?: Partial<SourceActorCue0LifecycleBinding>, inputTestersHydration?: Partial<SourceActorInputTestersBinding>) {
   const supplied = chargeInputHydration();
   supplied.normalLifecycle = initial; supplied.actorRates = rateLifecycleHydration(); supplied.ceiling = {byteD9: 0};
   if (rotationHydration !== undefined) supplied.rotation = rotationHydration;
   if (cue0Hydration !== undefined) supplied.cue0 = cue0Hydration;
+  if (inputTestersHydration !== undefined) supplied.inputTesters = inputTestersHydration;
   if (tierHydration !== undefined) {supplied.tierHydration = tierHydration; supplied.actorRates.withMatrix = true;}
   const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(),
     {byte490: 0, short49a: 3, short49c: 3}, {byte7d2: 1, byte73c: 31}, supplied);
@@ -9417,10 +9430,11 @@ export function runRotationDampingHydratedCompositionTests(): void {
  * history and terrain owners below are the same objects used by the older
  * consumers; no source callee is replaced with a successful test callback. */
 function cue0LifecycleHydratedControlFixture(move661 = 3,
-  initial: Partial<SourceActorCue0LifecycleBinding> = {byte732: 0}, tierHydration?: TierLifecycleHydration) {
+  initial: Partial<SourceActorCue0LifecycleBinding> = {byte732: 0}, tierHydration?: TierLifecycleHydration,
+  inputTestersHydration?: Partial<SourceActorInputTestersBinding>) {
   const x = normalLifecycleHydratedControlFixture(
     {callback4c8: 0x8006f950, callback4dc: null, short6bc: 2, byte1d9: 0}, move661, tierHydration,
-    {jointsB0: [255, 255, 255, 255, 255, 255, 255, 255], corrections18d4: [{x: 0, y: 0, z: 0}, {y: 0, z: 0}]}, initial);
+    {jointsB0: [255, 255, 255, 255, 255, 255, 255, 255], corrections18d4: [{x: 0, y: 0, z: 0}, {y: 0, z: 0}]}, initial, inputTestersHydration);
   if (x.cue0 === undefined || x.rotation === undefined) throw Error('cue0 composition requires genuine cue0 and rotation owners');
   // Stage bounds must not replace the cue being tested with9. These are live,
   // explicit source gate inputs, not a different scheduling path.
@@ -9744,4 +9758,265 @@ export function runCue0LifecycleHydratedCompositionTests(): void {
       'completed cue0 clears its own marker even when a later independent4c8 dispatch fails; repaired normal9 may run in a fresh epoch');
   }
   console.log('[actor-cue0-lifecycle-composition] PASS: genuine movement3 upper/full1b and complete4c8/rotation/rates/ceiling, real ground snap/uphill rollback/active ledge ordered refusals, eager732/674 and strict thresholds, permanent incomplete guards and raw aliases/epochs, canonical terrain/attribute/cue contracts, actual tier expiry and explicit downstream consumers; synthetic offline only, no producer/RAM/full-frame/replay/browser-playability claim');
+}
+
+/** Explicit input testers extend the existing cue0 branch. Descriptor bytes,
+ * actual command585, status593 and charge58e remain owned by their existing
+ * genuine producers; only missing595/748 receive supplied partial storage. */
+function inputTestersHydratedControlFixture(initial: Partial<SourceActorInputTestersBinding> = {byte595: 77, byte748: 0},
+  tierHydration?: TierLifecycleHydration) {
+  const x = cue0LifecycleHydratedControlFixture(0, {byte732: 0}, tierHydration, initial);
+  if (x.inputTesters === undefined) throw Error('input tester composition requires explicit genuine owner');
+  x.sourceActor.inputEdge5d4 = 0; x.sourceActor.inputHeld5d8 = 0;
+  x.sourceActor.statusWord5b4 = 0; x.sourceActor.statusWord5bc = 0;
+  x.sourceActor.cmdButton = 93; x.sourceActor.variantIndex = 71;
+  x.header.mode4a0 = 0;
+  return Object.assign(x, {inputTesters: x.inputTesters, testerState: x.inputTesters.getActorBinding(x.actor)});
+}
+type InputTestersFixture = ReturnType<typeof inputTestersHydratedControlFixture>;
+function checkInputTestersPermanentRefusal(x: InputTestersFixture): void {
+  const a = x.sourceActor;
+  const records: object[] = [a, a.pos, a.savedGroundPos, x.testerState, x.cue0State, x.cueState, x.gates,
+    x.normalLifecycleState, x.inputState, x.machineState, x.chargeState, x.tier, x.rateBorg,
+    x.sourceClock, x.statusState, x.attributeState, x.historyState, x.movementState,
+    x.actorControlState, x.readyState, x.actionRequest!.getActorBinding(x.actor)];
+  for (const [index, bypass] of ['cue9', 'ready', 'control-mask', 'movement3'].entries()) {
+    a.ubCue = bypass === 'cue9' ? 9 : 0; a.controlWord = bypass === 'control-mask' ? 0x41 : 0x40;
+    x.movementState.byte661 = bypass === 'movement3' ? 3 : 0;
+    x.actorControlState.byte490 = bypass === 'ready' ? 2 : 0; x.actorControlState.short49a = 1;
+    const saved = records.map(owner => ({owner, keys: Reflect.ownKeys(owner)}))
+      .map(row => ({...row, values: row.keys.map(key => Reflect.get(row.owner, key))}));
+    rejects(() => x.runRawPrefix(index + 2, 128, 40), 'known incomplete input testers');
+    rejects(() => x.runRawPrefix(index + 2, 256, 80), 'epoch');
+    check(saved.every(({owner, keys, values}) => keys.length === Reflect.ownKeys(owner).length &&
+      keys.every((key, n) => Object.is(Reflect.get(owner, key), values[n]))),
+      'standalone incomplete tester blocks edited cue/ready/control/movement gates before raw ingress and all other tick effects');
+  }
+  for (const run of [() => x.normalLifecycle.updateActor(x.actor), () => x.normalLifecycle.dispatchCue(x.actor),
+    () => x.normalLifecycle.updateCueState(x.actor), () => x.normalLifecycle.updateCountdown(x.actor),
+    () => x.cue0.dispatchCue0(x.actor), () => x.cue0.updateTerrain(x.actor),
+    () => x.inputTesters.updateActor(x.actor), () => x.inputTesters.testDescriptor(x.actor)])
+    rejects(run, 'known incomplete input testers');
+}
+export function runInputTestersHydratedCompositionTests(): void {
+  {
+    const old = cue0LifecycleHydratedControlFixture(0);
+    check(old.cue0.getInputTestersRuntime() === undefined && !Object.hasOwn(old, 'inputTesters'),
+      'historical cue0 graph retains absent testers and595/748 without implicit source activation');
+    rejects(() => old.runRawPrefix(1, 64, 20), '800699d8');
+    checkCue0CommonUnreached(old);
+  }
+  {
+    const x = inputTestersHydratedControlFixture(), a = x.sourceActor, t = x.inputTesters;
+    check(x.cue0.getInputTestersRuntime() === t && t.getActualActor(x.actor) === a &&
+      t.getWorldBinding(x.actor) === x.header && t.getStatusBinding(x.actor) === x.statusState &&
+      t.getMappingActor(x.actor) === x.sourceClock && t.getAttributeBinding(x.actor) === x.attributeState &&
+      t.getChargeBinding(x.actor) === x.chargeState && t.getChargeRuntime() === x.charge &&
+      x.inputPrefix.getChargeRuntime() === x.charge && t.getActionRuntime() === x.actionRequest &&
+      t.getActionBinding(x.actor) === x.actionRequest!.getActorBinding(x.actor) &&
+      Object.isSealed(x.testerState) && Reflect.ownKeys(x.testerState).join() === 'byte595,byte748',
+      'cue0 testers retain the same actual/world/status/mapping/attribute/charge/action owners; only595/748 are newly supplied');
+    const before = [a.cmdButton, a.variantIndex, x.cueState.byte588, x.statusState.byte593];
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '80069814'); retained(); checkChargeConsumedEpoch(x); checkCue0CommonUnreached(x);
+    check(x.testerState.byte595 === 0 && [a.cmdButton, a.variantIndex, x.cueState.byte588, x.statusState.byte593]
+      .every((value, index) => value === before[index]) && a.ubCue === 0 && a.fbCue === 202,
+      'zero-input wrappers complete their595 resets and native0 reaches exact69814 without changing585/581/cue588/status593 or later lifecycle');
+    // The tester completed natively; only the outer cue0 remains incomplete.
+    t.assertActorComplete(x.actor); checkCue0PermanentRefusal(x);
+  }
+  {
+    const x = inputTestersHydratedControlFixture(), a = x.sourceActor;
+    a.controlWord = 0; a.hoverOffset668 = 0; a.stepHeight = 0; a.tierScale = 1; a.hSpeed = 4; a.slopeMode698 = 7;
+    x.attributeState.field674 = 10; x.historyState.previousStepHeight6d4 = 0;
+    Object.assign(a.pos, {x: 101, y: 2, z: 300}); Object.assign(a.savedGroundPos, {x: 100, y: 2, z: 300});
+    rejects(() => x.runRawPrefix(1, 64, 20), '80069814');
+    check(Object.is(a.pos.y, 0) && a.pos.x === 101 && a.pos.z === 300 && a.savedGroundPos.y === 2 &&
+      x.testerState.byte595 === 0 && x.testerState.byte748 === 0 && a.cmdButton === 93 &&
+      x.cueState.byte588 === 18 && x.landCalls() === 0,
+      'ordinary real terrain ground store precedes all six genuine tester wrappers and later69814 refusal without fake landing or cue reset');
+    checkCue0CommonUnreached(x); checkCue0PermanentRefusal(x);
+  }
+  {
+    const x = inputTestersHydratedControlFixture();
+    // Resolve the SAME descriptor through real69dd0, making it a known raw
+    // input alias without fabricating a descriptor-owner callback.
+    x.sourceActor.cmdButton = 3;
+    check(x.inputTesters.testDescriptor(x.actor) === 0 && x.inputTesters.getKnownDescriptorRecords().includes(x.chargeDescriptor),
+      'real descriptor sentinel returns native0 and records the existing charge/raw8c descriptor identity');
+    const owners = [x.testerState, x.chargeState, x.actionRequest!.getActorBinding(x.actor), x.chargeDescriptor];
+    for (const [index, owner] of owners.entries()) {
+      rejects(() => x.prefix.ingestRawDistancesAndRun(x.actor, index + 1, owner as never), 'raw input must not alias');
+      rejects(() => x.runRawPrefix(index + 1, 64, 20), 'epoch');
+    }
+    check(x.sourceActor.targetDistance760 === -760 && x.sourceActor.horizontalDistance764 === -764 &&
+      x.testerState.byte595 === 77 && x.tier.timerFrames === 8 && x.normalLifecycleState.short6bc === 2,
+      'all additional tester/charge/action and known descriptor raw aliases consume epochs before ingress or source stores');
+  }
+  {
+    const x = inputTestersHydratedControlFixture();
+    for (const fake of [{...x.inputTesters}, {updateActor() {return 1;}}, null, undefined])
+      rejects(() => createSourceActorCue0LifecycleRuntime({world: x.world, movement: x.movement,
+        attribute: x.attributes, terrain: x.query, cues: x.cues, inputTesters: fake as never}), 'genuine');
+    check(x.testerState.byte595 === 77 && x.sourceActor.targetDistance760 === -760,
+      'copied methods and fake successful native1 callbacks cannot replace the genuine tester source runtime');
+  }
+  for (const prime593 of [false, true]) {
+    const x = inputTestersHydratedControlFixture(), a = x.sourceActor;
+    x.header.mode4a0 = 2; x.header.mode4a1 = 1;
+    const before593 = x.statusState.byte593;
+    if (prime593) {
+      x.statusState.byte593 = 0; a.inputEdge5d4 = 0x1000;
+      check(x.inputTesters.updateActor(x.actor) === 1 && x.statusState.byte593 === 6 && x.testerState.byte595 === 0,
+        'real69cb0 stores593=6 then native1 in mode2 without a linked target or descriptor read');
+    }
+    a.pos.y = 1002; a.yVel = 7; a.steerYaw = 1;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'native tester1 completes cue0 and real normal4c8/rotation/countdown/action/rates/ceiling');
+    retained(); checkChargeConsumedEpoch(x);
+    check(a.ubCue === 0 && a.fbCue === 0 && a.cmdButton === 93 && a.variantIndex === 71 &&
+      x.cueState.byte588 === 18 && x.testerState.byte595 === 0 &&
+      x.statusState.byte593 === (prime593 ? 6 : before593) && a.steerYaw === 0 &&
+      x.normalLifecycleState.short6bc === 1 && x.actionRequest!.getActorBinding(x.actor).byte73c === 4 &&
+      x.sourceClock.timestep1dc8 === 1 && a.aimRateScale === 1 && a.timescale === 1 &&
+      x.rateBorg.slowHitTimer === 2 && x.rateBorg.hasteHitTimer === 3 && a.pos.y === 994 && Object.is(a.yVel, 0),
+      'mode2/control40 native1 preserves cue/descriptor command fields while real mode4a1 rate-one branch and ceiling execute');
+    a.stateTimer = 8; x.statusState.field690 = 8; x.cells[2].timer = 8;
+    x.updateStatus();
+    check(x.statusState.byte593 === (prime593 ? 5 : before593! - 1) && a.stateTimer === 7 &&
+      x.statusState.field690 === 7 && x.cells[2].timer === 7 && x.normalLifecycleState.short6bc === 1,
+      'later explicit genuine status/ammo consumes the same593 and new clock without redispatching input testers');
+    x.inputTesters.assertActorComplete(x.actor); x.cue0.assertActorComplete(x.actor);
+  }
+  for (const selector of [0, 1]) {
+    const x = inputTestersHydratedControlFixture({byte595: 77, byte748: 0}, tierLifecycleHydration(selector));
+    x.header.mode4a0 = 2; x.header.mode4a1 = 1;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.tiers !== undefined && x.tier.tier === 17 &&
+      x.tier.timerFrames === 0 && x.tier.deltaAccum === 0 && x.normalLifecycleState.short6bc === 1 &&
+      x.sourceClock.timestep1dc8 === 1 && x.inputTesters.getAttributeBinding(x.actor) === x.tiers!.getAttributeBinding(x.actor),
+      'genuine tier expiry and both selector rows coexist with tester/charge/action canonical owners and native cue0 completion');
+    retained();
+  }
+  {
+    const x = inputTestersHydratedControlFixture(), a = x.sourceActor;
+    x.header.mode4a0 = 2; x.statusState.byte593 = 1;
+    a.prevActionIndex = NaN; a.inputEdge5d4 = NaN; a.cmdButton = NaN;
+    x.chargeState.byte58e = NaN; x.testerState.byte748 = NaN; x.sourceClock.descriptor4b0 = null;
+    check(x.inputTesters.updateActor(x.actor) === 1 && x.testerState.byte595 === 0 &&
+      x.statusState.byte593 === 1 && Number.isNaN(a.cmdButton) && x.sourceClock.descriptor4b0 === null,
+      'mode2 positive593 short circuit leaves unused584/58e/edge585/748 and absent descriptor lazy after mandatory595 store');
+  }
+  for (const mode of [1, 2]) {
+    const x = inputTestersHydratedControlFixture(), a = x.sourceActor;
+    x.header.mode4a0 = mode; x.statusState.byte593 = 0; a.inputEdge5d4 = 0x1000;
+    if (mode === 2) Object.defineProperty(x.statusState, 'byte593', {writable: false});
+    rejects(() => x.inputTesters.updateActor(x.actor), mode === 1 ? '4a4' : 'byte593: non-writable');
+    check(x.testerState.byte595 === 0 && x.statusState.byte593 === (mode === 1 ? 6 : 0) && a.cmdButton === 93,
+      'mode branch retains mandatory595 and only completed593 store before linked4a4 or readonly593 failure');
+    checkCue0CommonUnreached(x); checkInputTestersPermanentRefusal(x);
+  }
+  {
+    const x = inputTestersHydratedControlFixture();
+    Object.defineProperty(x.testerState, 'byte595', {writable: false});
+    rejects(() => x.inputTesters.updateActor(x.actor), 'byte595: non-writable');
+    x.inputTesters.assertActorComplete(x.actor);
+    check(x.testerState.byte595 === 77 && x.sourceActor.cmdButton === 93 && x.statusState.byte593 === 2,
+      'standalone readonly first595 refuses before any source store and leaves no incomplete tester marker');
+    // The outer caller has entered a callee: its conservative marker survives.
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte595: non-writable');
+    checkCue0PermanentRefusal(x);
+  }
+  for (const missing of ['595', '748'] as const) {
+    const x = inputTestersHydratedControlFixture(missing === '595' ? {byte748: 0} : {byte595: 77});
+    if (missing === '748') x.sourceActor.inputEdge5d4 = 0x20;
+    rejects(() => x.inputTesters.updateActor(x.actor), `byte${missing}: own data`);
+    check(x.testerState.byte595 === (missing === '595' ? undefined : 0) && x.sourceActor.cmdButton === 93,
+      'explicit partial bindings fail only when the missing field is reached and retain earlier mandatory resets');
+    if (missing === '595') x.inputTesters.assertActorComplete(x.actor);
+    else checkInputTestersPermanentRefusal(x);
+  }
+  // Each preceding sentinel must return natively before the next selected
+  // wrapper can reach its real descriptor call. Later active entries prove
+  // strict priority rather than a collection of independent predicates.
+  const commandOrder = [5, 3, 2, 1, 0] as const;
+  for (const [order, command] of commandOrder.entries()) {
+    const x = inputTestersHydratedControlFixture(), a = x.sourceActor;
+    a.inputEdge5d4 = 0x14e0; x.actionRequest!.getActorBinding(x.actor).byte7d2 = 8;
+    for (const [index, selected] of commandOrder.entries()) x.chargeDescriptor[0x2c + selected] = index < order ? 255 : 0;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.inputTesters.updateActor(x.actor), '80069fe0'); retained();
+    check(a.cmdButton === command && a.variantIndex === 71 && x.testerState.byte595 === (order < 2 ? 1 : 0) &&
+      x.cueState.byte588 === 18 && x.statusState.byte593 === 2 && x.normalLifecycleState.short6bc === 2,
+      `ordered tester${command} retains exactly585 and charged595 prefix, never581 or cue588, before real69fe0`);
+    checkInputTestersPermanentRefusal(x);
+  }
+  for (const [type, control] of [[1, 0x40], [0, 0x41]] as const) {
+    const x = inputTestersHydratedControlFixture(), a = x.sourceActor;
+    a.inputEdge5d4 = 0x80; a.controlWord = control; a.stateFlagA = 4; x.chargeDescriptor[0x2e] = type;
+    rejects(() => x.inputTesters.updateActor(x.actor), type === 1 ? '80069ea4' : '8005c080');
+    check(a.cmdButton === 2 && x.testerState.byte595 === 0 && a.variantIndex === 71 && x.cueState.byte588 === 18,
+      'type1 and passed control-state mask stop at genuine call boundaries before unsupported595/cue/action stores');
+    checkInputTestersPermanentRefusal(x);
+  }
+  {
+    const x = inputTestersHydratedControlFixture(), a = x.sourceActor;
+    a.inputEdge5d4 = 0x14e0; x.actionRequest!.getActorBinding(x.actor).byte7d2 = 8;
+    for (const command of commandOrder) x.chargeDescriptor[0x2c + command] = 2;
+    check(x.inputTesters.updateActor(x.actor) === 0 && a.cmdButton === 0 && x.testerState.byte595 === 0 &&
+      a.variantIndex === 71 && x.cueState.byte588 === 18,
+      'real type-other native0 traverses all ordered wrappers and normalizes final zero without inventing a successful callee');
+    x.inputTesters.assertActorComplete(x.actor);
+  }
+  {
+    const x = inputTestersHydratedControlFixture(), a = x.sourceActor;
+    a.cmdButton = 3; x.chargeDescriptor[0x2f] = 2;
+    check(x.inputTesters.testDescriptor(x.actor) === 0 && x.charge.getMappingDescriptor(x.actor) === x.chargeDescriptor,
+      'descriptor+b8+585 uses same raw8c+2f as charge slot0 and native type-other returns zero');
+    x.charge.updateActor(x.actor);
+    check(x.chargeState.field648 === 19 && x.chargeState.field63c === 0,
+      'explicit later genuine charge consumes the same live slot byte and retains its own source stores');
+    x.chargeDescriptor[0x2f] = 0;
+    rejects(() => x.inputTesters.testDescriptor(x.actor), '80069fe0');
+    x.inputTesters.assertActorComplete(x.actor);
+    x.chargeDescriptor[0x2f] = 255; a.controlWord = NaN; a.stateFlagA = NaN;
+    check(x.inputTesters.testDescriptor(x.actor) === 0 && x.testerState.byte595 === 77,
+      'read-only descriptor boundary is retryable; live sentinel precedes malformed control/state gates without595 writes');
+    a.cmdButton = 255;
+    check(x.inputTesters.testDescriptor(x.actor) === 0,
+      'signed585=-1 addresses retained raw8c+2b, not variant581 or an invented six-slot clamp');
+  }
+  for (const mismatch of ['status', 'charge', 'action'] as const) {
+    // Build from the unclaimed gauge graph so failed admission is genuinely
+    // tested, rather than rejected merely because an earlier tick claimed it.
+    const x = gaugeScaleHydratedControlFixture(), charge = hydrateChargeInputOwners(x, chargeInputHydration());
+    delete (x.sourceActor as Partial<typeof x.sourceActor>).fbPhaseSlots;
+    delete (x.sourceActor as Partial<typeof x.sourceActor>).shotByte1db3;
+    const action = createSourceActorActionRequestRuntime({world: x.world}); action.bindActor(x.actor, {byte7d2: 1, byte73c: 31});
+    const testers = createSourceActorInputTestersRuntime({world: x.world, status: x.status, mapping: x.mapping,
+      charge: charge.charge, actionRequest: action}); testers.bindActor(x.actor, {byte595: 77, byte748: 0});
+    const terrain = inputTestersHydratedControlFixture().terrain;
+    const query = createSourceActorTerrainQueryRuntime({world: x.world, history: x.history, terrain}); query.bindActor(x.actor);
+    const cues = createSourceActorCueResetRuntime({world: x.world, dispatch: x.dispatch}); cues.bindActor(x.actor, {});
+    const cue0 = createSourceActorCue0LifecycleRuntime({world: x.world, movement: x.movement, attribute: x.attributes,
+      terrain: query, cues, inputTesters: testers}); cue0.bindActor(x.actor, {});
+    const otherStatus = {...x.statusState};
+    const normal = createSourceActorNormalLifecycleRuntime({world: x.world, movement: x.movement,
+      status: mismatch === 'status' ? {...x.status, getActorBinding() {return otherStatus;}} : x.status, cues, cue0});
+    if (mismatch === 'status') rejects(() => normal.bindActor(x.actor, {}), 'input tester/normal status');
+    else {
+      normal.bindActor(x.actor, {});
+      const input = createSourceActorInputPrefixRuntime({world: x.world, gauges: x.gauges,
+        ...(mismatch === 'charge' ? {} : {charge: charge.charge})}); input.bindActor(x.actor, {});
+      const prefix = createSourceActorTickPrefixRuntime({world: x.world, gauges: x.gauges, inputPrefix: input,
+        normalLifecycle: normal, ...(mismatch === 'action' ? {} : {actionRequest: action})});
+      rejects(() => prefix.bindActor(x.actor, x.host, {byte598: 7}),
+        mismatch === 'charge' ? 'same genuine charge runtime' : 'same genuine actionRequest runtime');
+      check(!isSourceActorTickPrefixClaimedActor(x.sourceActor), 'failed canonical tester admission must not claim the actual tick actor');
+    }
+    check(testers.getActorBinding(x.actor).byte595 === 77 && action.getActorBinding(x.actor).byte73c === 31 &&
+      charge.chargeState.field648 === 20,
+      'distinct status and absent canonical charge/action consumers are refused before source writes instead of duplicating existing owners');
+  }
+  console.log('[actor-input-testers-composition] PASS: genuine six ordered testers and descriptor gate on retained DAT/setup/status/charge/action/cue0 graph; mode2 native1 completes normal4c8/rotation/countdown/rate-one/ceiling and later status593, zero-input real terrain reaches exact69814, active sentinel/type/control call boundaries and retained585/595 prefixes, lazy partial fields, readonly first/later stores, canonical tier coexistence, raw aliases/known descriptor epochs and standalone/outer incomplete guards; synthetic offline only, no linked target/active command/producer/RAM/full-frame/replay/browser-playability claim');
 }

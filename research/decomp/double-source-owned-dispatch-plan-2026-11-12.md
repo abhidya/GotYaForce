@@ -4545,3 +4545,45 @@ not rolled back. Tests use explicitly supplied synthetic decoded actors and
 terrain bytes. This remains bounded source integration, not constructor/input
 hydration, a complete normal controller, production activation or browser
 playability. See [cue0 evidence](actor-cue0-lifecycle-evidence-2026-11-14.md).
+
+### Ordered source input testers, 2026-11-14
+
+Cue0 now optionally continues its terrain return through actual `800699d8` and
+its six ordered helpers: `69cb0`, `69c50`, `69bf0`, `69b98`, `69b10`, `69a88`.
+Each unconditional byte595 clear is a separate source store, even with no
+input. The first genuine nonzero result stops the chain. Mode2 in `69cb0`
+returns1 before linked-actor access, after the required595 clear and any
+reached signed593 countdown reset. This path can return through cue0 and the
+existing normal/countdown/action/rate/ceiling tail on explicitly supplied owners.
+A complete zero-input chain returns0 and reaches the next honest `69814`
+boundary; it does not silently complete all of cue0.
+
+The new binding holds only missing byte595 and byte748. Command585 is the
+existing actual `cmdButton`, not `variantIndex` at581. Status593, charge58e,
+action-request7d2, world4a0 and actual584/5d4/5e0/57a remain their existing live
+owners. Tick reconciles the same charge runtime used by the input prefix and
+the same action-request runtime used by its later common tail. Shared action
+and tier attribute owners are allowed only by exact canonical identity.
+
+Reached `69dd0` loads signed585 before4b0, reads descriptor+b8, preserves the
+sentinel−1 return before control flags, and preserves genuine other-type zero
+returns. It reloads585/pointer/type when the source does. Raw8c indices are
+bounded by actual supplied storage, not an invented six-action restriction.
+The descriptor is resolved through a narrow guarded getter on the genuine
+charge runtime's existing registry, so b8..bd and the overlapping charge slots
+cannot acquire a second owner. Known-descriptor metadata never eagerly reads
+an unselected pointer. PowerPC `slw` uses the low six count bits; counts32..63
+produce zero, unlike JavaScript's implicit modulo32 shift.
+
+The mode1 linked4a4 branch, `5c080`, `69ea4` and `69fe0` remain explicit
+boundaries. No linked3e6 owner is borrowed from unrelated damage snapshots.
+Failures retain all earlier source stores. A partial tester invocation blocks
+later continuation before raw ingress; a complete tester call does not clear
+the surrounding cue0 invocation's still-pending69814 boundary. The latter
+marker begins conservatively at the genuine call, like the existing cue reset
+calls. Successful direct helper calls clear only their own completed marker.
+
+Tests use synthetic decoded data and genuine runtime composition. This does
+not supply native input/descriptor hydration, a complete normal controller,
+production activation or browser playability. See [input-tester evidence](actor-input-testers-evidence-2026-11-14.md)
+for the full307-instruction schedule and archive authentication limits.

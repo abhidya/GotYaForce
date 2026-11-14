@@ -3,7 +3,8 @@
  * Fixed authenticated
  * cue cells802d3300/802d3324 resolve to8005913c/80059138. Cue9 is an independent
  * return-only body. Optional genuine cue0 continues movement3's two real cue
- * resets or the ordered terrain helper, retaining the next699d8 refusal.
+ * resets or the ordered terrain helper and optional genuine699d8 testers.
+ * Unsupported remaining callees retain their exact reached boundaries.
  * Cue0 and normal share status attributes, cue records and mapping identity.
  * Its additional history/position owners are retained, with no copied state.
  * Actual4c8 is separate explicit source
@@ -31,6 +32,8 @@
  * or counters. They are admission bounds, not additional source stores.
  */
 import type {RomActor} from './actor.js';
+import {isSourceActorInputTestersRuntime, hasIncompleteSourceActorInputTesters,
+  type SourceActorInputTestersRuntime} from './actor-input-testers.js';
 import {isSourceActorCue0LifecycleRuntime, hasIncompleteSourceActorCue0Lifecycle,
   type SourceActorCue0LifecycleRuntime} from './actor-cue0-lifecycle.js';
 import {isSourceActorRotationDampingRuntime, hasIncompleteSourceActorRotationDamping,
@@ -180,6 +183,17 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
   const cue0Owners = cue0 === undefined ? undefined : capture('cue0', 'getSourceOwners');
   const cue0Terrain = cue0 === undefined ? undefined : capture('cue0', 'getTerrainGlobals');
   const dispatchCue0 = cue0 === undefined ? undefined : capture('cue0', 'dispatchCue0');
+  const cue0Testers = cue0 === undefined ? undefined : capture('cue0', 'getInputTestersRuntime');
+  const testers = cue0Testers?.();
+  if (testers !== undefined && !isSourceActorInputTestersRuntime(testers))
+    fail('cue0 input testers require genuine source runtime');
+  const captureTester = (key: keyof SourceActorInputTestersRuntime) => {
+    if (testers === undefined) return undefined;
+    const method = read(testers, key);
+    if (typeof method !== 'function') fail(`input testers ${key}: own data-function required`);
+    return (...args: unknown[]): unknown => {const value = Reflect.apply(method, testers, args); check(); return value;};
+  };
+  const testerStatus = captureTester('getStatusBinding'), testerDescriptors = captureTester('getKnownDescriptorRecords');
   const ownerList = (value: unknown, where: string): object[] => {
     if (!Array.isArray(value)) fail(`${where}: actual owner array required`);
     return value.map(owner => record(owner, where));
@@ -263,6 +277,12 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
       if (current.length !== e.cue0Owners!.length || current.some((owner, i) => owner !== e.cue0Owners![i]))
         fail('cue0 source owners changed');
       if (owners(e).includes(e.cue0Terrain!)) fail('cue0 terrain aliases an actor source owner');
+      if (cue0Testers!() !== testers) fail('cue0 input tester runtime changed');
+      if (testerStatus) {
+        stable(testerStatus(id), e.status, 'input tester/normal status');
+        if (ownerList(testerDescriptors!(), 'known input tester descriptors').some(owner => owners(e).includes(owner)))
+          fail('input tester descriptor aliases a normal source owner');
+      }
     }
     noShadows(e);
   };
@@ -271,6 +291,8 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     const e = actors.get(id); if (!e) fail('unknown/non-owned normal-lifecycle actor'); return e;
   };
   const assertComplete = (actual: object): void => {
+    if (hasIncompleteSourceActorInputTesters(actual))
+      fail('actual actor has known incomplete input testers; source continuation is unsupported');
     if (hasIncompleteSourceActorCue0Lifecycle(actual))
       fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
     if (hasIncompleteSourceActorRotationDamping(actual))
@@ -281,6 +303,8 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
       fail('actual actor has a known incomplete6bc expiry; source continuation is unsupported');
   };
   const dispatch = (id: symbol, e: Entry): void => {
+    if (hasIncompleteSourceActorInputTesters(e.actual))
+      fail('actual actor has known incomplete input testers; source continuation is unsupported');
     if (hasIncompleteSourceActorCue0Lifecycle(e.actual))
       fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
     const cue = signedByte(e.actual, 'ubCue');
@@ -386,6 +410,8 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     assertActorComplete(id) {assertComplete(entry(id).actual);},
     dispatchCue(id) {guard(() => {
       const e = entry(id);
+      if (hasIncompleteSourceActorInputTesters(e.actual))
+        fail('actual actor has known incomplete input testers; source continuation is unsupported');
       if (hasIncompleteSourceActorCue0Lifecycle(e.actual))
         fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
       admit(id, e); dispatch(id, e);

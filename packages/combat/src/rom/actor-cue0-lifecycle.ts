@@ -2,7 +2,9 @@
  * Evidence: actor-cue0-lifecycle-evidence-2026-11-14.md and authenticated archived
  * instruction reader. Movement3 performs actual6a750(1b), then6a6fc(1b),
  * ignoring both native0/1 results. Other movement reaches genuine68df8 and
- * refuses the first subsequent unimplemented callee699d8. No no-op substitute,
+ * optionally continues genuine699d8 input testers. Native1 returns; native0
+ * reaches the explicit69814 boundary. Without that optional runtime the
+ * historical699d8 refusal remains. No no-op substitute,
  * arbitrary callback, host floor contract, hydration or live tick is supplied.
  *
  * Actual3d6e4 writes the returned ground height before732/674 reads. Uphill
@@ -19,6 +21,8 @@
  * Host-only incomplete-call poison prevents edited flags/cues bypassing them.
  */
 import type {RomActor} from './actor.js';
+import {isSourceActorInputTestersRuntime, hasIncompleteSourceActorInputTesters,
+  type SourceActorInputTestersRuntime} from './actor-input-testers.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
 import type {SourceActorMovementFollowupRuntime, SourceActorMovementFollowupBinding} from './actor-movement-followup.js';
 import type {SourceActorAttributeRefreshRuntime, SourceActorAttributeRefreshBinding} from './actor-attribute-refresh.js';
@@ -38,6 +42,8 @@ export interface SourceActorCue0LifecycleSources {
   attribute: Pick<SourceActorAttributeRefreshRuntime, 'getActualActor' | 'getActorBinding'>;
   terrain: SourceActorTerrainQueryRuntime;
   cues: SourceActorCueResetRuntime;
+  /** Genuine ordered699d8 helpers; absence preserves the historical boundary. */
+  inputTesters?: SourceActorInputTestersRuntime;
 }
 export interface SourceActorCue0LifecycleRuntime {
   bindActor(identity: symbol, initial: Readonly<Partial<SourceActorCue0LifecycleBinding>>): void;
@@ -51,6 +57,7 @@ export interface SourceActorCue0LifecycleRuntime {
   getTerrainGlobals(): SourceActorTerrainGlobals;
   getHistoryBinding(identity: symbol): SourceActorTransformHistoryBinding;
   getCueRuntime(): SourceActorCueResetRuntime;
+  getInputTestersRuntime(): SourceActorInputTestersRuntime | undefined;
   getCueBinding(identity: symbol): Partial<SourceActorCueResetBinding>;
   getDispatchBinding(identity: symbol): SourceActorAnimationDispatchBinding;
   /** Retained additional owners and vectors, no scalar copies or synthetic owner. */
@@ -120,6 +127,22 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
   const cueActor = capture('cues', 'getActualActor'), cueMapping = capture('cues', 'getMappingActor');
   const cueBinding = capture('cues', 'getActorBinding'), cueDispatch = capture('cues', 'getDispatchBinding');
   const upperCue = capture('cues', 'dispatchUpperBodyCue'), fullCue = capture('cues', 'dispatchFullBodyCue');
+  const testersOption = Object.getOwnPropertyDescriptor(sources, 'inputTesters');
+  const testers = testersOption === undefined ? undefined : read(sources, 'inputTesters');
+  if (testersOption !== undefined && !isSourceActorInputTestersRuntime(testers))
+    fail('inputTesters requires genuine source runtime');
+  const testerActor = testers === undefined ? undefined : capture('inputTesters', 'getActualActor');
+  const testerWorld = testers === undefined ? undefined : capture('inputTesters', 'getWorldBinding');
+  const testerMapping = testers === undefined ? undefined : capture('inputTesters', 'getMappingActor');
+  const testerAttribute = testers === undefined ? undefined : capture('inputTesters', 'getAttributeBinding');
+  const testerStatus = testers === undefined ? undefined : capture('inputTesters', 'getStatusBinding');
+  const testerOwners = testers === undefined ? undefined : capture('inputTesters', 'getSourceOwners');
+  const testerDescriptors = testers === undefined ? undefined : capture('inputTesters', 'getKnownDescriptorRecords');
+  const runTesters = testers === undefined ? undefined : capture('inputTesters', 'updateActor');
+  const ownerList = (value: unknown, where: string): object[] => {
+    if (!Array.isArray(value)) fail(`${where}: actual owner array required`);
+    return value.map(owner => record(owner, where));
+  };
   const terrain = record(terrainGlobals(), 'terrain globals8043625c') as SourceActorTerrainGlobals;
   const stable = (value: unknown, expected: object, where: string): void => {
     if (value !== expected) fail(`${where}: owner changed its actual record or returned asynchronously`);
@@ -134,9 +157,11 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     cue: Partial<SourceActorCueResetBinding>; dispatch: SourceActorAnimationDispatchBinding;
     binding: Partial<SourceActorCue0LifecycleBinding>; extras: readonly object[];
     historyVectors: ReadonlyArray<readonly [string, object]>;
+    testerOwners?: readonly object[]; testerStatus?: object;
   }
   const owners = (e: Entry): object[] => [e.actual, e.position, e.savedPosition, e.world, e.mapping,
-    e.movement, e.attribute, e.history, e.cue, e.dispatch, e.binding, ...e.historyVectors.map(([, owner]) => owner)];
+    e.movement, e.attribute, e.history, e.cue, e.dispatch, e.binding, ...e.historyVectors.map(([, owner]) => owner),
+    ...(e.testerOwners ?? []), ...(e.testerStatus === undefined ? [] : [e.testerStatus])];
   const noShadows = (e: Entry): void => {
     const canonical = new Map<string, object>([
       ['controlWord', e.actual], ['pos', e.actual], ['savedGroundPos', e.actual],
@@ -175,6 +200,17 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     stable(read(e.actual, 'pos'), e.position, 'actual position');
     stable(read(e.actual, 'savedGroundPos'), e.savedPosition, 'actual saved position');
     for (const [key, owner] of e.historyVectors) stable(read(e.history, key), owner, `history ${key}`);
+    if (testerActor) {
+      stable(testerActor(id), e.actual, 'input tester actor'); stable(testerWorld!(id), e.world, 'input tester world');
+      stable(testerMapping!(id), e.mapping, 'input tester mapping');
+      stable(testerAttribute!(id), e.attribute, 'input tester attribute');
+      stable(testerStatus!(id), e.testerStatus!, 'input tester status');
+      const current = ownerList(testerOwners!(id), 'input tester source owners');
+      if (current.length !== e.testerOwners!.length || current.some((owner, i) => owner !== e.testerOwners![i]))
+        fail('input tester source owners changed');
+      if (ownerList(testerDescriptors!(), 'known input tester descriptors').some(owner => owners(e).includes(owner) || owner === terrain))
+        fail('input tester descriptor aliases a cue0 source owner');
+    }
     noShadows(e);
   };
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
@@ -182,6 +218,8 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     const e = actors.get(id); if (!e) fail('unknown/non-owned cue0-lifecycle actor'); return e;
   };
   const assertComplete = (actual: object): void => {
+    if (hasIncompleteSourceActorInputTesters(actual))
+      fail('actual actor has known incomplete input testers; source continuation is unsupported');
     if (incomplete.has(actual)) fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
   };
   const write = (e: Entry, owner: object, key: string, value: number): void => {
@@ -242,7 +280,14 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
       return;
     }
     if (updateTerrain(id, e) !== 0) return;
-    fail('80059184 reached unsupported source call800699d8 after genuine80068df8 returned0');
+    if (!runTesters) fail('80059184 reached unsupported source call800699d8 after genuine80068df8 returned0');
+    // The nested helper may finish its own six-store sequence, but this caller
+    // still owes later source calls. Keep caller poison across native0 return.
+    incomplete.add(e.actual);
+    const result = runTesters(id);
+    if (result !== 0 && result !== 1) fail('genuine input testers returned asynchronously or unexpectedly');
+    if (result === 1) return;
+    fail('80059194 reached unsupported source call80069814 after genuine800699d8 returned0');
   };
   const runtime: SourceActorCue0LifecycleRuntime = {
     bindActor(id, initial) {guard(() => {
@@ -264,6 +309,10 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
           historyVectors.push([key, record(read(e.history, key), `history ${key}`)]);
       }
       e.historyVectors = Object.freeze(historyVectors);
+      if (testerOwners) {
+        e.testerOwners = ownerList(testerOwners(id), 'input tester source owners');
+        e.testerStatus = record(testerStatus!(id), 'input tester status');
+      }
       admit(id, e);
       const records = owners(e);
       if (new Set([...records, terrain]).size !== records.length + 1 || records.some(owner => assigned.has(owner)))
@@ -271,7 +320,7 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
       record(initial, 'initial cue0 binding'); noShadows({...e, binding: initial});
       if (Object.getOwnPropertyDescriptor(initial, 'byte732') !== undefined) binding.byte732 = byte(initial, 'byte732');
       Object.seal(binding); e.extras = Object.freeze([binding, e.attribute, e.history, e.position, e.savedPosition,
-        ...e.historyVectors.map(([, owner]) => owner)]); check();
+        ...e.historyVectors.map(([, owner]) => owner), ...(e.testerOwners ?? [])]); check();
       actors.set(id, e); records.forEach(owner => assigned.add(owner)); claimedActors.add(actual);
     });},
     getActualActor(id) {return entry(id).actual;},
@@ -284,6 +333,7 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     getTerrainGlobals() {return terrain;},
     getHistoryBinding(id) {return entry(id).history;},
     getCueRuntime() {return cueRuntime;},
+    getInputTestersRuntime() {return testers as SourceActorInputTestersRuntime | undefined;},
     getCueBinding(id) {return entry(id).cue;},
     getDispatchBinding(id) {return entry(id).dispatch;},
     getSourceOwners(id) {return entry(id).extras;},

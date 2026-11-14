@@ -53,6 +53,8 @@
 import {isSourceActorCue0LifecycleRuntime, hasIncompleteSourceActorCue0Lifecycle,
   type SourceActorCue0LifecycleRuntime} from './actor-cue0-lifecycle.js';
 import type {RomActor} from './actor.js';
+import {isSourceActorInputTestersRuntime, hasIncompleteSourceActorInputTesters,
+  type SourceActorInputTestersRuntime} from './actor-input-testers.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {isSourceActorGaugeScaleRuntime, type SourceActorGaugeBorgOwner,
   type SourceActorGaugeScaleRuntime} from './actor-gauge-scale.js';
@@ -232,6 +234,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
   const action = Object.getOwnPropertyDescriptor(sources, 'actionRequest');
   if (action !== undefined && !isSourceActorActionRequestRuntime(read(sources, 'actionRequest')))
     fail('action request requires the genuine source runtime, not callback effects');
+  const actionRuntime = action === undefined ? undefined : read(sources, 'actionRequest');
   const actionActor = action === undefined ? undefined : capture('actionRequest', 'getActualActor');
   const actionWorld = action === undefined ? undefined : capture('actionRequest', 'getWorldBinding');
   const actionBinding = action === undefined ? undefined : capture('actionRequest', 'getActorBinding');
@@ -277,7 +280,8 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     normal?: {binding: object; mapping: object; movement: object;
       cues: SourceActorCueResetRuntime | undefined; cue: object | undefined; dispatch: object | undefined;
       rotation: SourceActorRotationDampingRuntime | undefined; rotationOwners: readonly object[];
-      cue0: SourceActorCue0LifecycleRuntime | undefined; cue0Owners: readonly object[]; cue0Terrain?: object; cue0Attribute?: object};
+      cue0: SourceActorCue0LifecycleRuntime | undefined; cue0Owners: readonly object[]; cue0Terrain?: object; cue0Attribute?: object;
+      testers: SourceActorInputTestersRuntime | undefined; testerAction?: object};
     ceiling?: {mapping: object; matrix: object; terrain: object; globals: object;
       charge: SourceActorInputChargeRuntime; chargeGlobal: () => unknown};
     ready?: {runtime: SourceActorReadyTransitionsRuntime; binding: object};
@@ -338,6 +342,15 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     if (!Array.isArray(values)) fail('cue0 source owner array required');
     return values.map(value => record(value, 'cue0 source owner'));
   };
+  const testerValue = (runtime: SourceActorInputTestersRuntime, key: keyof SourceActorInputTestersRuntime, id: symbol): unknown => {
+    const fn = read(runtime, key); if (typeof fn !== 'function') fail(`input testers ${key}: own data-function required`);
+    const value = Reflect.apply(fn, runtime, [id]); check(); return value;
+  };
+  const testerDescriptors = (runtime: SourceActorInputTestersRuntime, id: symbol): object[] => {
+    const values = testerValue(runtime, 'getKnownDescriptorRecords', id);
+    if (!Array.isArray(values)) fail('input tester descriptor owner array required');
+    return values.map(value => record(value, 'input tester descriptor owner'));
+  };
   const normalOwners = (id: symbol, actor: Entry): void => {
     if (!actor.normal) return;
     const n = actor.normal;
@@ -360,6 +373,22 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
         fail('normal cue0 shared owners changed');
       if (stageTerrain && stageTerrain(id) !== n.cue0Terrain)
         fail('cue0/stage must share the same terrain-global owner');
+      if (cue0Value(n.cue0, 'getInputTestersRuntime', id) !== n.testers)
+        fail('cue0 input tester runtime changed after tick admission');
+      if (n.testers) {
+        if (testerValue(n.testers, 'getStatusBinding', id) !== actor.status)
+          fail('input tester/tick status owner mismatch');
+        if (testerValue(n.testers, 'getChargeRuntime', id) !== inputCharge?.(id))
+          fail('input testers and input prefix must share the same genuine charge runtime');
+        const action = testerValue(n.testers, 'getActionRuntime', id);
+        if (action !== undefined && action !== actionRuntime)
+          fail('input testers and tick must share the same genuine actionRequest runtime');
+        if (testerValue(n.testers, 'getActionBinding', id) !== n.testerAction ||
+            (n.testerAction !== undefined && n.testerAction !== actor.action))
+          fail('input tester/tick action owner mismatch');
+        if (testerDescriptors(n.testers, id).some(owner => assigned.has(owner)))
+          fail('input tester descriptor aliases a bound actor source owner');
+      }
     }
     if (normalRotation!(id) !== n.rotation) fail('normal rotation runtime changed after tick admission');
     if (n.rotation) {
@@ -410,7 +439,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       actor.rates?.mapping, actor.rates?.binding, actor.ceiling?.matrix, actor.ceiling?.terrain,
       actor.normal?.binding, actor.normal?.movement, actor.normal?.cue, actor.normal?.dispatch,
       actor.rates ? undefined : actor.normal?.mapping, ...(actor.normal?.rotationOwners ?? []),
-      ...(actor.normal?.cue0Owners ?? []).filter(owner => owner !== attribute)].filter(value => value !== undefined);
+      ...(actor.normal?.cue0Owners ?? []).filter(owner => owner !== attribute && owner !== actor.normal?.testerAction)].filter(value => value !== undefined);
     if (new Set([...known, globals, binding, attribute]).size !== known.length + 3)
       fail('tier source owner alias: distinct shared and actor-specific records required');
     return [globals, binding, attribute, rate];
@@ -560,10 +589,26 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
         const cue0Attribute = cue0 ? record(cue0Value(cue0, 'getAttributeBinding', id), 'cue0 attribute') : undefined;
         if (cue0Terrain && stageTerrain && stageTerrain(id) !== cue0Terrain)
           fail('cue0/stage must share the same terrain-global owner');
-        records.push(...cue0Owners);
+        const testersValue = cue0 ? cue0Value(cue0, 'getInputTestersRuntime', id) : undefined;
+        if (testersValue !== undefined && !isSourceActorInputTestersRuntime(testersValue))
+          fail('cue0 input testers must be genuine');
+        const testers = testersValue as SourceActorInputTestersRuntime | undefined;
+        let testerAction: object | undefined;
+        if (testers) {
+          if (testerValue(testers, 'getStatusBinding', id) !== status)
+            fail('input tester/tick status owner mismatch');
+          if (testerValue(testers, 'getChargeRuntime', id) !== inputCharge?.(id))
+            fail('input testers and input prefix must share the same genuine charge runtime');
+          const runtime = testerValue(testers, 'getActionRuntime', id);
+          const binding = testerValue(testers, 'getActionBinding', id);
+          if (runtime !== undefined && (runtime !== actionRuntime || binding !== actionOwner))
+            fail('input testers and tick must share the same genuine actionRequest runtime');
+          if (binding !== undefined) testerAction = record(binding, 'input tester action binding');
+        }
+        records.push(...cue0Owners.filter(owner => owner !== testerAction));
         if (cue0Terrain && records.includes(cue0Terrain)) fail('cue0 terrain aliases an actor source owner');
         normalOwnersAtBind = {mapping, movement, binding, cues, cue, dispatch, rotation, rotationOwners,
-          cue0, cue0Owners, ...(cue0Terrain === undefined ? {} : {cue0Terrain, cue0Attribute: cue0Attribute!})};
+          cue0, cue0Owners, testers, ...(testerAction === undefined ? {} : {testerAction}), ...(cue0Terrain === undefined ? {} : {cue0Terrain, cue0Attribute: cue0Attribute!})};
       }
       const readyRuntime = controlReady?.(id);
       let ready: Entry['ready'];
@@ -602,13 +647,14 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       actor.lastEpoch = next; // Once attempted, never retry or silently normalize twice.
       // A prior6bc expiry may already have stored zero before an unsupported4dc.
       // Never let a later ready branch silently skip that outstanding source call.
+      if (hasIncompleteSourceActorInputTesters(actor.actual)) fail('actual actor has known incomplete input testers; source continuation is unsupported');
       if (hasIncompleteSourceActorCue0Lifecycle(actor.actual)) fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
       if (hasIncompleteSourceActorRotationDamping(actor.actual)) fail('actual actor has a known incomplete rotation damping; source continuation is unsupported');
       if (hasIncompleteSourceActorNormalCueSync(actor.actual)) fail('actual actor has a known incomplete cue synchronization; source continuation is unsupported');
       if (hasIncompleteSourceActorNormalCountdown(actor.actual)) fail('actual actor has a known incomplete6bc expiry; source continuation is unsupported');
       if (assertNormalComplete && assertNormalComplete(id) !== undefined) fail('normal completion assertion returned unexpectedly');
       owners(id, actor); noLegacyDistances(actor.actual); record(raw, 'explicit decoded raw distances');
-      if (assigned.has(raw) || (actor.normal?.rotation && rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id).includes(raw)) || tierOwners(id, actor).includes(raw) || raw === actor.normal?.cue0Terrain || raw === actor.ceiling?.globals || raw === actor.ceiling?.terrain ||
+      if (assigned.has(raw) || (actor.normal?.testers && testerDescriptors(actor.normal.testers, id).includes(raw)) || (actor.normal?.rotation && rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id).includes(raw)) || tierOwners(id, actor).includes(raw) || raw === actor.normal?.cue0Terrain || raw === actor.ceiling?.globals || raw === actor.ceiling?.terrain ||
           raw === read(actor.world, 'scale58') || raw === read(actor.borg, 'paramTier'))
         fail('raw input must not alias a bound source owner');
       if (read(raw, 'boundary') !== 'externally-decoded-pre59068-raw') fail('explicit externally decoded pre59068 raw boundary required');

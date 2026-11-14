@@ -53,6 +53,30 @@ function fixture(defer = false) {
 }
 export function runActorInputChargeSelfTests(): void {
   {
+    const x = fixture(), selected = x.mapping.descriptor4b0;
+    (x.mapping as {descriptor4b0: symbol | null}).descriptor4b0 = null;
+    equal(x.runtime.getKnownDescriptorRecords().length, 0, 'known descriptor metadata does not read an unselected pointer');
+    x.mapping.descriptor4b0 = selected;
+    const beforeEdge = x.actual.inputEdge5d4, beforeReady = x.binding().byte655;
+    equal(x.runtime.getMappingDescriptor(x.id), x.descriptor, 'reached descriptor uses the retained registry');
+    const known = x.runtime.getKnownDescriptorRecords();
+    check(Object.isFrozen(known) && known.length === 1 && known[0] === x.descriptor, 'known descriptor list is frozen but retains original owner');
+    equal(x.actual.inputEdge5d4, beforeEdge, 'metadata bridge does not change input edges');
+    equal(x.binding().byte655, beforeReady, 'metadata bridge does not run charge stores');
+    x.descriptor[0x2c] = 7;
+    equal(x.runtime.getMappingDescriptor(x.id)[0x2c], 7, 'descriptor bridge reads the live shared slot');
+    x.sources.mapping.getDescriptor = () => {throw Error('replaced mapping method must not run');};
+    equal(x.runtime.getMappingDescriptor(x.id), x.descriptor, 'mapping method and receiver remain captured');
+    x.hooks.descriptor = () => [...x.descriptor];
+    rejects(() => x.runtime.getMappingDescriptor(x.id), 'owner changed');
+    equal(x.runtime.getKnownDescriptorRecords()[0], x.descriptor, 'failed replacement keeps prior registry owner');
+    rejects(() => x.runtime.getMappingDescriptor(Symbol('unknown')), 'unknown/non-owned');
+    const y = fixture();
+    y.hooks.descriptor = () => {try {y.runtime.getMappingDescriptor(y.id);} catch {} return y.descriptor;};
+    rejects(() => y.runtime.getMappingDescriptor(y.id), 'reentry');
+    equal(y.runtime.getKnownDescriptorRecords().length, 0, 'caught resolver reentry cannot publish a partial descriptor owner');
+  }
+  {
     const x = fixture(); check(isSourceActorInputChargeRuntime(x.runtime) && !isSourceActorInputChargeRuntime({...x.runtime}), 'genuine runtime brand');
     check(Object.isSealed(x.binding()) && x.binding() !== x.initial, 'explicit copied sealed state');
     check(x.runtime.getActualActor(x.id) === x.actual && x.runtime.getStatusBinding(x.id) === x.status &&
