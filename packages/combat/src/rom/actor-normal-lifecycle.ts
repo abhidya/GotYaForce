@@ -3,7 +3,8 @@
  * Fixed authenticated
  * cue cells802d3300/802d3324 resolve to8005913c/80059138. Cue9 is an independent
  * return-only body. Optional genuine cue0 continues movement3's two real cue
- * resets or the ordered terrain helper and optional genuine699d8 testers.
+ * resets or the ordered terrain helper, genuine699d8 testers and optional
+ * genuine remaining cue0 tail.
  * Unsupported remaining callees retain their exact reached boundaries.
  * Cue0 and normal share status attributes, cue records and mapping identity.
  * Its additional history/position owners are retained, with no copied state.
@@ -32,6 +33,8 @@
  * or counters. They are admission bounds, not additional source stores.
  */
 import type {RomActor} from './actor.js';
+import {isSourceActorCue0TailRuntime, hasIncompleteSourceActorCue0Tail,
+  type SourceActorCue0TailRuntime} from './actor-cue0-tail.js';
 import {isSourceActorInputTestersRuntime, hasIncompleteSourceActorInputTesters,
   type SourceActorInputTestersRuntime} from './actor-input-testers.js';
 import {isSourceActorCue0LifecycleRuntime, hasIncompleteSourceActorCue0Lifecycle,
@@ -194,6 +197,29 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     return (...args: unknown[]): unknown => {const value = Reflect.apply(method, testers, args); check(); return value;};
   };
   const testerStatus = captureTester('getStatusBinding'), testerDescriptors = captureTester('getKnownDescriptorRecords');
+  const cue0Tail = cue0 === undefined ? undefined : capture('cue0', 'getTailRuntime');
+  const tail = cue0Tail?.();
+  if (tail !== undefined && !isSourceActorCue0TailRuntime(tail)) fail('cue0 tail requires genuine source runtime');
+  const captureTail = (key: keyof SourceActorCue0TailRuntime) => {
+    if (tail === undefined) return undefined;
+    const method = read(tail, key);
+    if (typeof method !== 'function') fail(`cue0 tail ${key}: own data-function required`);
+    return (...args: unknown[]): unknown => {const value = Reflect.apply(method, tail, args); check(); return value;};
+  };
+  const tailStatus = captureTail('getStatusBinding'), tailBorg = captureTail('getActualBorg');
+  const tailCharge = captureTail('getChargeBinding'), tailGlobal = captureTail('getGlobal');
+  const tailTeams = captureTail('getKnownTeamStorageOwners');
+  const tailChargeRuntime = captureTail('getChargeRuntime');
+  const charge = tailChargeRuntime?.();
+  const captureCharge = (key: 'getData' | 'getKnownDescriptorRecords') => {
+    if (charge === undefined) return undefined;
+    const method = read(charge, key);
+    if (typeof method !== 'function') fail(`tail charge ${key}: own data-function required`);
+    return (): unknown => {const value = Reflect.apply(method, charge, []); check(); return value;};
+  };
+  const chargeData = captureCharge('getData'), chargeDescriptors = captureCharge('getKnownDescriptorRecords');
+  const data = chargeData === undefined ? undefined : record(chargeData(), 'tail charge data');
+  const global = tailGlobal === undefined ? undefined : record(tailGlobal(), 'tail match global');
   const ownerList = (value: unknown, where: string): object[] => {
     if (!Array.isArray(value)) fail(`${where}: actual owner array required`);
     return value.map(owner => record(owner, where));
@@ -217,9 +243,28 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     binding: Partial<SourceActorNormalLifecycleBinding>;
     rotationStorage?: object; rotationOwners?: readonly object[];
     cue0Owners?: readonly object[]; cue0Terrain?: object; cue0Attribute?: object;
+    tailBorg?: object; tailCharge?: object;
   }
   const owners = (e: Entry): object[] => [e.actual, e.world, e.mapping, e.movement, e.status, e.binding,
-    ...(e.cue === undefined ? [] : [e.cue]), ...(e.dispatch === undefined ? [] : [e.dispatch]), ...(e.rotationOwners ?? []), ...(e.cue0Owners ?? [])];
+    ...(e.cue === undefined ? [] : [e.cue]), ...(e.dispatch === undefined ? [] : [e.dispatch]), ...(e.rotationOwners ?? []), ...(e.cue0Owners ?? []),
+    ...(e.tailBorg === undefined ? [] : [e.tailBorg]),
+    // With testers this binding already occurs in cue0's retained extras.
+    ...(e.tailCharge === undefined || testers !== undefined ? [] : [e.tailCharge])];
+  const teamOwners = (): object[] => tailTeams === undefined ? [] : ownerList(tailTeams(), 'known tail team storage');
+  const assertTeamOwners = (e: Entry): void => {
+    if (global === undefined) return;
+    const records = owners(e), teams = teamOwners();
+    const descriptors = [
+      ...(rotationDescriptors === undefined ? [] : ownerList(rotationDescriptors(), 'known rotation descriptors')),
+      ...(chargeDescriptors === undefined ? [] : ownerList(chargeDescriptors(), 'known tail charge descriptors')),
+    ];
+    const forbidden = (owner: object): boolean => owner === e.cue0Terrain || records.includes(owner) ||
+      assigned.has(owner) || descriptors.includes(owner);
+    if (global === data || forbidden(global) || forbidden(data!) ||
+        descriptors.some(owner => owner === global || owner === data || records.includes(owner) || assigned.has(owner)) ||
+        teams.some(owner => owner === global || owner === data || forbidden(owner)))
+      fail('tail shared storage aliases a normal source owner or descriptor');
+  };
   const noShadows = (e: Entry): void => {
     const canonical = new Map<string, object>([
       ['controlWord', e.actual], ['ubCue', e.actual], ['fbCue', e.actual],
@@ -230,7 +275,7 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
       'field4dc', 'pointer4dc', 'field6bc', 'timer6bc', 'countdown6bc', 'metadata1d9', 'flags1d9',
       'field1d9', 'hitReact', 'flyingBounce1d9', 'aerialXDamaged',
       'flags57a', 'flags57b', 'byte57a', 'byte57b', 'field57a', 'field57b', 'field661', 'move661'];
-    for (const owner of owners(e)) {
+    for (const owner of [...owners(e), ...(global === undefined ? [] : [global, data!]), ...teamOwners()]) {
       for (const [key, expected] of canonical) {
         if (owner !== expected && Object.getOwnPropertyDescriptor(owner, key) !== undefined)
           fail(`${key}: competing normal-lifecycle storage on another owner`);
@@ -277,6 +322,14 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
       if (current.length !== e.cue0Owners!.length || current.some((owner, i) => owner !== e.cue0Owners![i]))
         fail('cue0 source owners changed');
       if (owners(e).includes(e.cue0Terrain!)) fail('cue0 terrain aliases an actor source owner');
+      if (cue0Tail!() !== tail) fail('cue0 tail runtime changed');
+      if (tailStatus) {
+        stable(tailStatus(id), e.status, 'tail/normal status');
+        stable(tailBorg!(id), e.tailBorg!, 'tail Borg'); stable(tailCharge!(id), e.tailCharge!, 'tail charge binding');
+        if (tailGlobal!() !== global || tailChargeRuntime!() !== charge || chargeData!() !== data)
+          fail('tail charge/global/data changed');
+        assertTeamOwners(e);
+      }
       if (cue0Testers!() !== testers) fail('cue0 input tester runtime changed');
       if (testerStatus) {
         stable(testerStatus(id), e.status, 'input tester/normal status');
@@ -291,6 +344,8 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     const e = actors.get(id); if (!e) fail('unknown/non-owned normal-lifecycle actor'); return e;
   };
   const assertComplete = (actual: object): void => {
+    if (hasIncompleteSourceActorCue0Tail(actual))
+      fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
     if (hasIncompleteSourceActorInputTesters(actual))
       fail('actual actor has known incomplete input testers; source continuation is unsupported');
     if (hasIncompleteSourceActorCue0Lifecycle(actual))
@@ -303,6 +358,8 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
       fail('actual actor has a known incomplete6bc expiry; source continuation is unsupported');
   };
   const dispatch = (id: symbol, e: Entry): void => {
+    if (hasIncompleteSourceActorCue0Tail(e.actual))
+      fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
     if (hasIncompleteSourceActorInputTesters(e.actual))
       fail('actual actor has known incomplete input testers; source continuation is unsupported');
     if (hasIncompleteSourceActorCue0Lifecycle(e.actual))
@@ -315,6 +372,7 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
         fail('800590e8 reached unsupported actual cue target8005913c from authenticated table802d3300 entry802d3300');
       assertComplete(e.actual);
       if (dispatchCue0(id) !== undefined) fail('genuine cue0 returned asynchronously or unexpectedly');
+      assertTeamOwners(e);
       return;
     }
     fail(`800590e0 reached unsupported source table802d3300 entry ${cell.toString(16)} before indirect call800590e8`);
@@ -385,6 +443,10 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
         e.cue0Terrain = record(cue0Terrain!(), 'cue0 terrain');
         e.cue0Attribute = record(cue0Attribute!(id), 'cue0 attribute');
       }
+      if (tailBorg) {
+        e.tailBorg = record(tailBorg(id), 'tail Borg');
+        e.tailCharge = record(tailCharge!(id), 'tail charge binding');
+      }
       admit(id, e); const records = owners(e);
       if (new Set(records).size !== records.length || records.some(owner => assigned.has(owner)))
         fail('source owner alias: distinct actual/world/mapping/movement/status/normal/cue/dispatch required');
@@ -410,6 +472,8 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     assertActorComplete(id) {assertComplete(entry(id).actual);},
     dispatchCue(id) {guard(() => {
       const e = entry(id);
+      if (hasIncompleteSourceActorCue0Tail(e.actual))
+        fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
       if (hasIncompleteSourceActorInputTesters(e.actual))
         fail('actual actor has known incomplete input testers; source continuation is unsupported');
       if (hasIncompleteSourceActorCue0Lifecycle(e.actual))

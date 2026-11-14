@@ -4587,3 +4587,44 @@ Tests use synthetic decoded data and genuine runtime composition. This does
 not supply native input/descriptor hydration, a complete normal controller,
 production activation or browser playability. See [input-tester evidence](actor-input-testers-evidence-2026-11-14.md)
 for the full307-instruction schedule and archive authentication limits.
+
+### Remaining cue0 tail, 2026-11-14
+
+The optional genuine tail continues after `699d8` returns0 through `69814`,
+`696f4`, `69038`, `69354` and `68f9c`. It implements the reached `694c0`
+predicate and uses the genuine upper-cue reset runtime for every active call.
+Intermediate nonzero returns short-circuit; the final helper's native0/1 is
+ignored by the source void epilogue. Missing optional tail preserves the
+historical69814 boundary. This closes that bounded cue0 call chain without
+pretending earlier terrain/input boundaries or subsequent cues are complete.
+
+The source global is the same retained `PTR_DAT_80433934` owner used by charge,
+matrix, ceiling and tier paths. `teamRows103` is an explicit source team-indexed
+array of references to existing `BurstMeterState.charged` cells, admitting their
+boolean0/1 subset. It does not infer a mapping from the browser's player-keyed
+meter map. Negative signed indices or absent rows outside explicitly supplied
+storage refuse rather than receiving default flags. Selected rows and the array
+retain identity; real team sharing is allowed, actor-owner aliasing is not.
+
+`69814` loads actual `team` at88 before the global pointer and reads the selected
+charged flag before inputEdge5d4. A charged edge200 writes the existing actual
+Borg's `burstArmFrames=6` at6fb and still returns0. It never creates a second
+byte6fb. `694c0` reads new byte7cd; zero returns1 without short736, otherwise a
+single read of the existing signed status.short736 tests positivity.
+
+Only missing byte57c, byte58f and byte7cd receive partial tail-binding storage.
+Existing actual control/status/input words, inputHeld5d8, movement.byte661,
+status.short736, Borg.burstArmFrames and real cue/dispatch records stay live.
+`69038` stores57c=0 before upper cue4, including sentinel-return0. `69354`
+selects upper cue37 or12; on native success it reloads held5d8, stores58f from
+bits4..7, reloads held5d8 again and clears those bits. `696f4` invokes694c0
+before its control/input gates and real cue32. `68f9c` selects real cue29 or1.
+
+Reached failures retain source prefixes and incomplete-call guards across
+standalone calls, later cue9/ready branches and raw ingress. A completed child
+call never clears an unfinished outer cue0 invocation. Shared-global and owner
+reconciliation uses metadata without eagerly loading unselected rows. Tests use
+explicit decoded inputs and genuine offline composition, not live player/team
+hydration, original execution, a complete frame, production activation or
+browser-playability evidence. See [tail evidence](actor-cue0-tail-evidence-2026-11-14.md)
+for the authenticated159-instruction schedule and its limits.

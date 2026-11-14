@@ -17,6 +17,7 @@
  * Reads and destination checks follow the reached instruction prefix. Earlier
  * writes remain on refusal, and caught mutation reentry poisons the outer call.
  */
+import type {BurstMeterState} from '../types.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import type {SourceActorStatusTimersRuntime} from './actor-status-timers.js';
@@ -31,7 +32,11 @@ export interface SourceActorInputChargeBinding {
   field648: number; field64c: number; field650: number;
   byte654: number; byte655: number;
 }
-export interface SourceActorInputChargeGlobal {byte1829?: number}
+export interface SourceActorInputChargeGlobal {
+  byte1829?: number;
+  /** Same matrix-global owner; explicit source team rows, never a copied flag. */
+  teamRows103?: readonly Pick<BurstMeterState, 'charged'>[];
+}
 export interface SourceActorInputChargeData {
   float80437628?: number; float8043762c?: number;
   float80437630?: number; float80437634?: number;

@@ -23,6 +23,7 @@ import {createSourceActorWorldMatrixRuntime, type SourceActorWorldMatrixCorrecti
 import {createSourceActorRotationDampingRuntime} from './actor-rotation-damping.js';
 import {createSourceActorCue0LifecycleRuntime, type SourceActorCue0LifecycleBinding} from './actor-cue0-lifecycle.js';
 import {createSourceActorInputTestersRuntime, type SourceActorInputTestersBinding} from './actor-input-testers.js';
+import {createSourceActorCue0TailRuntime, type SourceActorCue0TailBinding} from './actor-cue0-tail.js';
 import {createSourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
 import {createSourceJObjModelHydrationRuntime} from './jobj-model-hydration.js';
 import {createSourceDisplayAnimationAttachmentRuntime} from './display-animation-attachment.js';
@@ -2808,6 +2809,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runRotationDampingHydratedCompositionTests();
   runCue0LifecycleHydratedCompositionTests();
   runInputTestersHydratedCompositionTests();
+  runCue0TailHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -3342,9 +3344,20 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
   const cue0Terrain = chargeHydration?.cue0TerrainGlobals === undefined ? query :
     createSourceActorTerrainQueryRuntime({world: x.world, history: x.history, terrain: chargeHydration.cue0TerrainGlobals});
   if (cue0Terrain !== query) cue0Terrain.bindActor(x.actor);
+  const cue0Tail = chargeHydration?.cue0Tail === undefined ? undefined : (() => {
+    if (chargeOwners === undefined) throw Error('explicit cue0 tail requires the same genuine charge owner');
+    const supplied = chargeHydration.cue0Tail;
+    // Explicit synthetic source88/actual6fb hydration, never a player mapping or copied team flag.
+    if (supplied.team !== undefined) sourceActor.team = supplied.team;
+    if (supplied.burstArmFrames !== undefined) Object.assign(host, {burstArmFrames: supplied.burstArmFrames});
+    const runtime = createSourceActorCue0TailRuntime({world: x.world, movement: x.movement, status: x.status,
+      charge: chargeOwners.charge, cues});
+    runtime.bindActor(x.actor, supplied.initial);
+    return runtime;
+  })();
   const cue0 = chargeHydration?.cue0 === undefined ? undefined :
     createSourceActorCue0LifecycleRuntime({world: x.world, movement: x.movement, attribute: x.attributes, terrain: cue0Terrain, cues,
-      ...(inputTesters === undefined ? {} : {inputTesters})});
+      ...(inputTesters === undefined ? {} : {inputTesters}), ...(cue0Tail === undefined ? {} : {tail: cue0Tail})});
   if (cue0 !== undefined) cue0.bindActor(x.actor, chargeHydration!.cue0!);
   const normalLifecycle = chargeHydration?.normalLifecycle === undefined ? undefined :
     createSourceActorNormalLifecycleRuntime({world: x.world, movement: x.movement, status: x.status, cues,
@@ -3364,6 +3377,7 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
     ...(actorRates === undefined ? {} : {actorRates}), ...(ceiling === undefined ? {} : {ceiling}),
     ...(normalLifecycle === undefined ? {} : {normalLifecycle}), ...(rotation === undefined ? {} : {rotation}),
     ...(cue0 === undefined ? {} : {cue0}), ...(inputTesters === undefined ? {} : {inputTesters}),
+    ...(cue0Tail === undefined ? {} : {cue0Tail}),
     runRawPrefix: (epoch: number, targetDistance760: number, horizontalDistance764: number) =>
       prefix.ingestRawDistancesAndRun(x.actor, epoch, {boundary: 'externally-decoded-pre59068-raw', targetDistance760, horizontalDistance764})});
 }
@@ -7044,6 +7058,8 @@ interface ChargeInputHydration {
   cue0?: Partial<SourceActorCue0LifecycleBinding>;
   /** Explicit absent595/748 only; actual585/status593/charge58e and raw8c stay shared. */
   inputTesters?: Partial<SourceActorInputTestersBinding>;
+  /** Tail-only partial cells and explicit existing actor/Borg/global source inputs. */
+  cue0Tail?: Cue0TailHydration;
   /** Explicit negative composition input; never a fallback for shared terrain. */
   cue0TerrainGlobals?: SourceActorTerrainGlobals;
   /** Supplied +b0 bytes share the existing raw8c descriptor; corrections are
@@ -8832,12 +8848,17 @@ export function runTierLifecycleHydratedCompositionTests(): void {
  * opt-in: the historical poststage move0 must retain its rotation refusal. */
 function normalLifecycleHydratedControlFixture(initial: Partial<SourceActorNormalLifecycleBinding>,
   move661 = 0, tierHydration?: TierLifecycleHydration, rotationHydration?: ChargeInputHydration['rotation'],
-  cue0Hydration?: Partial<SourceActorCue0LifecycleBinding>, inputTestersHydration?: Partial<SourceActorInputTestersBinding>) {
+  cue0Hydration?: Partial<SourceActorCue0LifecycleBinding>, inputTestersHydration?: Partial<SourceActorInputTestersBinding>,
+  cue0TailHydration?: Cue0TailHydration) {
   const supplied = chargeInputHydration();
   supplied.normalLifecycle = initial; supplied.actorRates = rateLifecycleHydration(); supplied.ceiling = {byteD9: 0};
   if (rotationHydration !== undefined) supplied.rotation = rotationHydration;
   if (cue0Hydration !== undefined) supplied.cue0 = cue0Hydration;
   if (inputTestersHydration !== undefined) supplied.inputTesters = inputTestersHydration;
+  if (cue0TailHydration !== undefined) {
+    supplied.cue0Tail = cue0TailHydration;
+    if (cue0TailHydration.teamRows103 !== undefined) supplied.global.teamRows103 = cue0TailHydration.teamRows103;
+  }
   if (tierHydration !== undefined) {supplied.tierHydration = tierHydration; supplied.actorRates.withMatrix = true;}
   const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(),
     {byte490: 0, short49a: 3, short49c: 3}, {byte7d2: 1, byte73c: 31}, supplied);
@@ -9431,10 +9452,10 @@ export function runRotationDampingHydratedCompositionTests(): void {
  * consumers; no source callee is replaced with a successful test callback. */
 function cue0LifecycleHydratedControlFixture(move661 = 3,
   initial: Partial<SourceActorCue0LifecycleBinding> = {byte732: 0}, tierHydration?: TierLifecycleHydration,
-  inputTestersHydration?: Partial<SourceActorInputTestersBinding>) {
+  inputTestersHydration?: Partial<SourceActorInputTestersBinding>, cue0TailHydration?: Cue0TailHydration) {
   const x = normalLifecycleHydratedControlFixture(
     {callback4c8: 0x8006f950, callback4dc: null, short6bc: 2, byte1d9: 0}, move661, tierHydration,
-    {jointsB0: [255, 255, 255, 255, 255, 255, 255, 255], corrections18d4: [{x: 0, y: 0, z: 0}, {y: 0, z: 0}]}, initial, inputTestersHydration);
+    {jointsB0: [255, 255, 255, 255, 255, 255, 255, 255], corrections18d4: [{x: 0, y: 0, z: 0}, {y: 0, z: 0}]}, initial, inputTestersHydration, cue0TailHydration);
   if (x.cue0 === undefined || x.rotation === undefined) throw Error('cue0 composition requires genuine cue0 and rotation owners');
   // Stage bounds must not replace the cue being tested with9. These are live,
   // explicit source gate inputs, not a different scheduling path.
@@ -9764,8 +9785,8 @@ export function runCue0LifecycleHydratedCompositionTests(): void {
  * actual command585, status593 and charge58e remain owned by their existing
  * genuine producers; only missing595/748 receive supplied partial storage. */
 function inputTestersHydratedControlFixture(initial: Partial<SourceActorInputTestersBinding> = {byte595: 77, byte748: 0},
-  tierHydration?: TierLifecycleHydration) {
-  const x = cue0LifecycleHydratedControlFixture(0, {byte732: 0}, tierHydration, initial);
+  tierHydration?: TierLifecycleHydration, cue0TailHydration?: Cue0TailHydration) {
+  const x = cue0LifecycleHydratedControlFixture(0, {byte732: 0}, tierHydration, initial, cue0TailHydration);
   if (x.inputTesters === undefined) throw Error('input tester composition requires explicit genuine owner');
   x.sourceActor.inputEdge5d4 = 0; x.sourceActor.inputHeld5d8 = 0;
   x.sourceActor.statusWord5b4 = 0; x.sourceActor.statusWord5bc = 0;
@@ -10019,4 +10040,419 @@ export function runInputTestersHydratedCompositionTests(): void {
       'distinct status and absent canonical charge/action consumers are refused before source writes instead of duplicating existing owners');
   }
   console.log('[actor-input-testers-composition] PASS: genuine six ordered testers and descriptor gate on retained DAT/setup/status/charge/action/cue0 graph; mode2 native1 completes normal4c8/rotation/countdown/rate-one/ceiling and later status593, zero-input real terrain reaches exact69814, active sentinel/type/control call boundaries and retained585/595 prefixes, lazy partial fields, readonly first/later stores, canonical tier coexistence, raw aliases/known descriptor epochs and standalone/outer incomplete guards; synthetic offline only, no linked target/active command/producer/RAM/full-frame/replay/browser-playability claim');
+}
+
+/** Additional decoded inputs are opt-in only. The team array borrows the
+ * existing charged cells, and 6fb is the SAME status Borg.burstArmFrames.
+ * There is no inferred player/team mapping, byte103 copy or live hydration. */
+interface Cue0TailHydration {
+  initial: Partial<SourceActorCue0TailBinding>;
+  teamRows103?: NonNullable<SourceActorInputChargeGlobal['teamRows103']>;
+  team?: number;
+  burstArmFrames?: number;
+}
+function cue0TailHydration(initial: Partial<SourceActorCue0TailBinding> = {byte57c: 73, byte58f: 91, byte7cd: 0}): Cue0TailHydration {
+  return {initial, teamRows103: [{charged: false}, {charged: true}], team: 0, burstArmFrames: 19};
+}
+function cue0TailHydratedControlFixture(supplied = cue0TailHydration(), tierHydration?: TierLifecycleHydration) {
+  const x = inputTestersHydratedControlFixture(undefined, tierHydration, supplied);
+  if (x.cue0Tail === undefined) throw Error('cue0 tail composition requires explicit genuine owner');
+  const cueTable = new Int8Array(76).fill(-1);
+  // Real signed entries: success is produced by genuine6a750 stores, never a
+  // callback returning1. Other entries stay real sentinel-1/native0.
+  for (const [cue, state] of [[1, -11], [4, -14], [9, -7], [12, -22], [27, -17], [29, -29], [32, -32], [37, -37]])
+    cueTable[cue! * 2 + 1] = state!;
+  cueTable[18] = -8; cueTable[54] = -18;
+  x.sourceActor.cueTable = cueTable;
+  return Object.assign(x, {cue0Tail: x.cue0Tail, tailState: x.cue0Tail.getActorBinding(x.actor),
+    tailBorg: x.status.getActualBorg(x.actor), cueTable});
+}
+type Cue0TailFixture = ReturnType<typeof cue0TailHydratedControlFixture>;
+function retainCue0TailRecords(x: Cue0TailFixture): () => void {
+  const records: object[] = [x.sourceActor, x.sourceActor.pos, x.sourceActor.savedGroundPos,
+    x.tailState, x.tailBorg, x.chargeGlobal, x.cue0State, x.testerState, x.cueState, x.gates,
+    x.normalLifecycleState, x.inputState, x.machineState, x.chargeState, x.tier,
+    x.sourceClock, x.statusState, x.attributeState, x.historyState, x.movementState,
+    x.actorControlState, x.readyState, x.actionRequest!.getActorBinding(x.actor)];
+  const teamRows = x.chargeGlobal.teamRows103;
+  if (teamRows !== undefined) records.push(teamRows, ...teamRows);
+  const saved = records.map(owner => ({owner, keys: Reflect.ownKeys(owner)}))
+    .map(row => ({...row, values: row.keys.map(key => Reflect.get(row.owner, key))}));
+  return () => check(saved.every(({owner, keys, values}) => keys.length === Reflect.ownKeys(owner).length &&
+    keys.every((key, n) => Object.is(Reflect.get(owner, key), values[n]))),
+    'cue0-tail admission/incomplete guard preserves all retained source cells before ingestion or other tick work');
+}
+function checkCue0TailPermanentRefusal(x: Cue0TailFixture): void {
+  for (const [index, bypass] of ['cue9', 'ready', 'control-mask', 'movement3'].entries()) {
+    x.sourceActor.ubCue = bypass === 'cue9' ? 9 : 0;
+    x.sourceActor.controlWord = bypass === 'control-mask' ? 0x43 : 0x40;
+    x.movementState.byte661 = bypass === 'movement3' ? 3 : 0;
+    x.actorControlState.byte490 = bypass === 'ready' ? 2 : 0; x.actorControlState.short49a = 1;
+    const retained = retainCue0TailRecords(x);
+    rejects(() => x.runRawPrefix(index + 2, 128, 40), 'known incomplete cue0 tail'); retained();
+    rejects(() => x.runRawPrefix(index + 2, 256, 80), 'epoch'); retained();
+  }
+  for (const run of [() => x.normalLifecycle.updateActor(x.actor), () => x.normalLifecycle.dispatchCue(x.actor),
+    () => x.normalLifecycle.updateCueState(x.actor), () => x.normalLifecycle.updateCountdown(x.actor),
+    () => x.cue0.dispatchCue0(x.actor), () => x.cue0.updateTerrain(x.actor),
+    () => x.cue0Tail.updateActor(x.actor), () => x.cue0Tail.test80069814(x.actor),
+    () => x.cue0Tail.test800694c0(x.actor), () => x.cue0Tail.test800696f4(x.actor),
+    () => x.cue0Tail.test80069038(x.actor), () => x.cue0Tail.test80069354(x.actor),
+    () => x.cue0Tail.test80068f9c(x.actor)]) rejects(run, 'known incomplete cue0 tail');
+}
+export function runCue0TailHydratedCompositionTests(): void {
+  {
+    const old = inputTestersHydratedControlFixture();
+    check(old.cue0.getTailRuntime() === undefined && !Object.hasOwn(old, 'cue0Tail') &&
+      !Object.hasOwn(old.sourceActor, 'team88') && !Object.hasOwn(old.host, 'burstArmFrames') &&
+      !Object.hasOwn(old.chargeGlobal, 'teamRows103'),
+      'historical tester graph receives no tail, team/Borg/row inputs or new missing-byte defaults');
+    rejects(() => old.runRawPrefix(1, 64, 20), '80069814');
+    checkCue0CommonUnreached(old); checkCue0PermanentRefusal(old);
+  }
+  {
+    const supplied = cue0TailHydration(), x = cue0TailHydratedControlFixture(supplied), t = x.cue0Tail;
+    check(x.cue0.getTailRuntime() === t && t.getActualActor(x.actor) === x.sourceActor &&
+      t.getWorldBinding(x.actor) === x.header && t.getMovementBinding(x.actor) === x.movementState &&
+      t.getStatusBinding(x.actor) === x.statusState && t.getActualBorg(x.actor) === x.host &&
+      t.getMappingActor(x.actor) === x.sourceClock && t.getChargeRuntime() === x.charge &&
+      t.getChargeBinding(x.actor) === x.chargeState && t.getCueRuntime() === x.cues &&
+      t.getCueBinding(x.actor) === x.cueState && t.getDispatchBinding(x.actor) === x.gates &&
+      t.getGlobal() === x.chargeGlobal && x.chargeGlobal === x.globals && x.normal.getGlobals() === x.globals &&
+      x.ceiling.getMatchGlobals() === x.globals && x.chargeGlobal.teamRows103 === supplied.teamRows103 &&
+      t.getSourceOwners(x.actor).length === 1 && t.getSourceOwners(x.actor)[0] === x.tailState &&
+      Object.isSealed(x.tailState) && Reflect.ownKeys(x.tailState).join() === 'byte57c,byte58f,byte7cd',
+      'tail retains canonical world/movement/status/Borg/mapping/charge/cue/global identities and only owns three missing bytes');
+    x.sourceActor.pos.y = 1002; x.sourceActor.yVel = 7; x.sourceActor.steerYaw = 1;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'zero-input real normal cue0 now returns beyond former69814 boundary');
+    retained(); checkChargeConsumedEpoch(x);
+    check(x.sourceActor.ubCue === 0 && x.sourceActor.fbCue === 202 && x.sourceActor.inputEdge5d4 === 0 &&
+      x.sourceActor.inputHeld5d8 === 0 && x.tailBorg.burstArmFrames === 19 && x.tailState.byte57c === 73 &&
+      x.tailState.byte58f === 91 && x.testerState.byte595 === 0 && x.normalLifecycleState.short6bc === 1 &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === 4 && x.rateBorg.slowHitTimer === 1 &&
+      x.rateBorg.hasteHitTimer === 2 && x.sourceClock.timestep1dc8 === 1.875 &&
+      x.sourceActor.aimRateScale === 1.875 && x.sourceActor.steerYaw === 0 &&
+      x.sourceActor.pos.y === 994 && Object.is(x.sourceActor.yVel, 0),
+      'all five real native0 tail returns permit actual4c8/rotation/countdown/action/rate/ceiling suffix without animation or matrix synthesis');
+    check(t.getKnownTeamStorageOwners().includes(supplied.teamRows103!) &&
+      t.getKnownTeamStorageOwners().includes(supplied.teamRows103![0]!),
+      'already reached team array and actual selected charged row remain known owners, not copied byte103 state');
+    t.assertActorComplete(x.actor); x.cue0.assertActorComplete(x.actor);
+  }
+  for (const charged of [false, true]) {
+    const supplied = cue0TailHydration(), x = cue0TailHydratedControlFixture(supplied), row = supplied.teamRows103![0]!;
+    row.charged = charged; x.sourceActor.statusWord5bc = 0x800;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.sourceActor.inputEdge5d4 === 0x200 &&
+      x.tailBorg.burstArmFrames === (charged ? 6 : 19) && x.tailBorg === x.host &&
+      x.normalLifecycleState.short6bc === 1 && x.actionRequest!.getActorBinding(x.actor).byte73c === 4 &&
+      row.charged === charged && x.tailState.byte57c === 73 && x.tailState.byte58f === 91,
+      'real fourth input machine edge200 and same team charged cell arm actual Borg6fb then continue all later native0 helpers');
+    retained();
+  }
+  {
+    const x = cue0TailHydratedControlFixture(), a = x.sourceActor;
+    a.controlWord = 0; a.hoverOffset668 = 0; a.stepHeight = 0; a.tierScale = 1; a.hSpeed = 4; a.slopeMode698 = 7;
+    x.attributeState.field674 = 10; x.historyState.previousStepHeight6d4 = 0;
+    Object.assign(a.pos, {x: 101, y: 2, z: 300}); Object.assign(a.savedGroundPos, {x: 100, y: 2, z: 300});
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && Object.is(a.pos.y, 0) && a.savedGroundPos.y === 2 &&
+      x.testerState.byte595 === 0 && x.normalLifecycleState.short6bc === 1 && x.landCalls() === 0,
+      'real terrain snap followed by six genuine testers and the entire no-input tail completes the retained graph');
+    retained();
+  }
+  // 696f4 must call694c0 before control/input.7cd0 short-circuits736, whereas
+  // nonzero uses signed736>0, not its raw unsigned magnitude or nonzero truth.
+  for (const movement of [2, 5]) for (const short736 of [-32768, -1, 0, 1, 32767]) for (const sentinel of [false, true]) {
+    const x = cue0TailHydratedControlFixture(); x.movementState.byte661 = movement;
+    x.tailState.byte7cd = 255; x.statusState.short736 = short736;
+    x.sourceActor.controlWord = 0; x.sourceActor.inputEdge5d4 = 0x80;
+    if (sentinel) x.cueTable[65] = -1;
+    check(x.cue0Tail.test800696f4(x.actor) === (short736 > 0 && !sentinel ? 1 : 0) &&
+      x.sourceActor.ubCue === (short736 > 0 && !sentinel ? 32 : 0) && x.tailState.byte58f === 91,
+      `movement${movement}/signed736${short736}/sentinel${sentinel} reaches only the genuine upper32 source result`);
+  }
+  {
+    const x = cue0TailHydratedControlFixture(); x.movementState.byte661 = 2;
+    x.tailState.byte7cd = NaN; x.sourceActor.controlWord = NaN; x.sourceActor.inputEdge5d4 = NaN;
+    rejects(() => x.cue0Tail.test800696f4(x.actor), 'byte7cd'); x.cue0Tail.assertActorComplete(x.actor);
+    x.tailState.byte7cd = 0; x.statusState.short736 = NaN; x.sourceActor.controlWord = 3;
+    check(x.cue0Tail.test800696f4(x.actor) === 0, '7cd0 bypasses malformed736 before the control3 early return avoids malformed input');
+    x.tailState.byte7cd = 1; x.statusState.short736 = 0; x.sourceActor.controlWord = NaN;
+    check(x.cue0Tail.test800696f4(x.actor) === 0, 'real predicate0 precedes and bypasses malformed control and input');
+    x.statusState.short736 = 1;
+    rejects(() => x.cue0Tail.test800696f4(x.actor), 'controlWord'); x.cue0Tail.assertActorComplete(x.actor);
+  }
+  for (const sentinel of [false, true]) {
+    const x = cue0TailHydratedControlFixture(); x.sourceActor.inputEdge5d4 = 1; x.sourceActor.statusWord5b4 = 0x100;
+    if (sentinel) x.cueTable[9] = -1;
+    check(x.cue0Tail.test80069038(x.actor) === (sentinel ? 0 : 1) && x.tailState.byte57c === 0 &&
+      x.sourceActor.ubCue === (sentinel ? 0 : 4) && x.sourceActor.ubState === (sentinel ? -12 : -14) &&
+      x.cueState.byte588 === (sentinel ? 18 : 0) && x.gates.marker1db3 === (sentinel ? 1 : 0),
+      '69038 stores real57c before a genuine cue4 success or genuine sentinel0, without manufacturing a callee result');
+    x.cue0Tail.assertActorComplete(x.actor);
+  }
+  for (const movement of [0, 6, 255]) for (const sentinel of [false, true]) {
+    const x = cue0TailHydratedControlFixture(), cue = movement === 6 ? 37 : 12;
+    x.movementState.byte661 = movement; x.sourceActor.inputHeld5d8 = 0xabcd;
+    if (sentinel) x.cueTable[cue * 2 + 1] = -1;
+    check(x.cue0Tail.test80069354(x.actor) === (sentinel ? 0 : 1) &&
+      x.sourceActor.ubCue === (sentinel ? 0 : cue) && x.sourceActor.ubState === (sentinel ? -12 : movement === 6 ? -37 : -22) &&
+      x.tailState.byte58f === (sentinel ? 91 : 12) && x.sourceActor.inputHeld5d8 === (sentinel ? 0xabcd : 0xab0d),
+      '69354 genuine cue12/37 success precedes fresh held nibble->58f then fresh halfword clear; sentinel preserves both success destinations');
+  }
+  for (const movement of [0, 6, 255]) for (const sentinel of [false, true]) {
+    const x = cue0TailHydratedControlFixture(), cue = movement === 6 ? 29 : 1;
+    x.movementState.byte661 = movement; x.sourceActor.statusWord5b4 = 0xf0000;
+    if (sentinel) x.cueTable[cue * 2 + 1] = -1;
+    check(x.cue0Tail.updateActor(x.actor) === undefined && x.sourceActor.ubCue === (sentinel ? 0 : cue) &&
+      x.sourceActor.ubState === (sentinel ? -12 : movement === 6 ? -29 : -11) &&
+      x.tailState.byte57c === 73 && x.tailState.byte58f === 91,
+      'terminal68f9c genuine upper1/29 native0 and native1 both return from ordered tail without an extra helper or synthetic result');
+    x.cue0Tail.assertActorComplete(x.actor);
+  }
+  {
+    const x = cue0TailHydratedControlFixture(); x.sourceActor.inputEdge5d4 = 1;
+    x.sourceActor.statusWord5b4 = 0x100 | 0xf0000; x.sourceActor.inputHeld5d8 = 0xa0;
+    x.cueTable[9] = -1;
+    check(x.cue0Tail.updateActor(x.actor) === undefined && x.tailState.byte57c === 0 &&
+      x.sourceActor.ubCue === 12 && x.tailState.byte58f === 10 && x.sourceActor.inputHeld5d8 === 0,
+      'real cue4 sentinel continues to real cue12 success and returns before terminal cue1 despite its eligible status bits');
+  }
+  for (const first of ['696f4', '69038'] as const) {
+    const x = cue0TailHydratedControlFixture(); x.sourceActor.inputHeld5d8 = 0xf0;
+    x.sourceActor.statusWord5b4 = 0xf0100;
+    x.sourceActor.inputEdge5d4 = first === '696f4' ? 0x81 : 1;
+    x.movementState.byte661 = first === '696f4' ? 2 : 0;
+    check(x.cue0Tail.updateActor(x.actor) === undefined && x.sourceActor.ubCue === (first === '696f4' ? 32 : 4) &&
+      x.tailState.byte57c === (first === '696f4' ? 73 : 0) && x.tailState.byte58f === 91 && x.sourceActor.inputHeld5d8 === 0xf0,
+      'earlier real nonzero cue return stops subsequent helper effects without eagerly consuming held input');
+  }
+  // Partial source prefixes must persist. These are direct standalone tail
+  // failures, so the tail marker itself, not an outer cue0 marker, guards retries.
+  {
+    const x = cue0TailHydratedControlFixture(); x.sourceActor.team = 1; x.sourceActor.inputEdge5d4 = 0x200;
+    x.movementState.byte661 = NaN;
+    rejects(() => x.cue0Tail.updateActor(x.actor), 'byte661');
+    check(x.tailBorg.burstArmFrames === 6 && x.tailState.byte57c === 73 && x.tailState.byte58f === 91,
+      '69814 always-zero arm store is retained before the next696f4 movement read fails');
+    checkCue0TailPermanentRefusal(x);
+  }
+  for (const late of ['cue', '58f', 'held'] as const) {
+    const x = cue0TailHydratedControlFixture();
+    if (late === 'cue') {
+      x.sourceActor.inputEdge5d4 = 1; x.sourceActor.statusWord5b4 = 0x100;
+      Object.defineProperty(x.sourceActor, 'ubState', {writable: false});
+    } else {
+      x.sourceActor.inputHeld5d8 = 0xabcd;
+      Object.defineProperty(late === '58f' ? x.tailState : x.sourceActor,
+        late === '58f' ? 'byte58f' : 'inputHeld5d8', {writable: false});
+    }
+    rejects(() => x.cue0Tail.updateActor(x.actor), late === 'cue' ? 'ubState: non-writable' :
+      late === '58f' ? 'byte58f: non-writable' : 'inputHeld5d8: non-writable');
+    check(x.sourceActor.ubCue === (late === 'cue' ? 4 : 12) && x.sourceActor.prevUbState === -12 &&
+      x.tailState.byte57c === (late === 'cue' ? 0 : 73) && x.tailState.byte58f === (late === 'held' ? 12 : 91) &&
+      x.sourceActor.inputHeld5d8 === (late === 'cue' ? 0 : 0xabcd) &&
+      x.cueState.byte588 === (late === 'cue' ? 18 : 0) && x.gates.marker1db3 === (late === 'cue' ? 1 : 0),
+      `${late} readonly destination preserves precisely completed57c/realcue/58f stores and stops the next source write`);
+    checkCue0CommonUnreached(x); checkCue0TailPermanentRefusal(x);
+  }
+  {
+    const x = cue0TailHydratedControlFixture(); x.sourceActor.inputEdge5d4 = 1; x.sourceActor.statusWord5b4 = 0x100;
+    Object.defineProperty(x.tailState, 'byte57c', {writable: false});
+    rejects(() => x.cue0Tail.test80069038(x.actor), 'byte57c: non-writable');
+    x.cue0Tail.assertActorComplete(x.actor);
+    check(x.tailState.byte57c === 73 && x.sourceActor.ubCue === 0 && x.cueState.byte588 === 18,
+      'readonly first57c store fails before genuine cue4 and without a standalone incomplete-effect marker');
+  }
+  for (const initial of [{}, {byte7cd: 0}, {byte57c: 73, byte7cd: 0}] as Partial<SourceActorCue0TailBinding>[]) {
+    const x = cue0TailHydratedControlFixture(cue0TailHydration(initial));
+    check(x.cue0Tail.updateActor(x.actor) === undefined && Reflect.ownKeys(x.tailState).length === Reflect.ownKeys(initial).length,
+      'unreached missing tail fields remain absent on native-zero branches instead of receiving defaults');
+    x.sourceActor.inputHeld5d8 = 0xf0;
+    rejects(() => x.cue0Tail.test80069354(x.actor), 'byte58f: own data');
+    check(x.sourceActor.ubCue === 12 && x.sourceActor.inputHeld5d8 === 0xf0,
+      'missing58f is checked only after the genuine upper12 prefix, before held clear');
+    checkCue0TailPermanentRefusal(x);
+  }
+  for (const selector of [0, 1]) {
+    const x = cue0TailHydratedControlFixture(cue0TailHydration(), tierLifecycleHydration(selector));
+    x.sourceActor.pos.y = 1002; x.sourceActor.yVel = 7;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.tiers !== undefined && x.tier.tier === 17 &&
+      x.tier.timerFrames === 0 && x.tier.deltaAccum === 0 && x.normalLifecycleState.short6bc === 1 &&
+      x.cue0Tail.getGlobal() === x.globals && x.charge.getGlobal() === x.globals && x.normal.getGlobals() === x.globals &&
+      x.ceiling.getMatchGlobals() === x.globals && x.sourceActor.pos.y === 994,
+      'tier expiry selectors and ceiling consume the same retained matrix/charge/team global while the no-input cue0 tail completes');
+    retained();
+  }
+  // Team data is lazily read from the explicit shared array. A malformed or
+  // absent unreachable input never becomes a fixture-generated default.
+  {
+    const x = cue0TailHydratedControlFixture({initial: {}});
+    x.sourceActor.inputEdge5d4 = NaN;
+    rejects(() => x.cue0Tail.test80069814(x.actor), 'teamRows103');
+    x.cue0Tail.assertActorComplete(x.actor);
+    check(!Object.hasOwn(x.chargeGlobal, 'teamRows103') && !Object.hasOwn(x.host, 'burstArmFrames'),
+      'absent explicit team and Borg fields stay absent after the reached table load refuses');
+  }
+  for (const team of [128, 255, 2]) {
+    const x = cue0TailHydratedControlFixture(); x.sourceActor.team = team;
+    x.sourceActor.inputEdge5d4 = NaN;
+    rejects(() => x.cue0Tail.test80069814(x.actor), 'signed team');
+    check(x.tailBorg.burstArmFrames === 19, 'negative signed-byte or out-of-range team is refused without clamping or consuming edge input');
+    x.cue0Tail.assertActorComplete(x.actor);
+  }
+  {
+    const supplied = cue0TailHydration(), x = cue0TailHydratedControlFixture(supplied);
+    const rows = supplied.teamRows103!, row = rows[0]!;
+    x.sourceActor.inputEdge5d4 = NaN;
+    check(x.cue0Tail.test80069814(x.actor) === 0 && x.tailBorg.burstArmFrames === 19,
+      'uncharged actual team row returns before malformed edge input or6fb destination');
+    row.charged = true; x.sourceActor.inputEdge5d4 = 0;
+    check(x.cue0Tail.test80069814(x.actor) === 0 && x.tailBorg.burstArmFrames === 19,
+      'live charged mutation is read from the same original row, not copied at binding');
+    x.sourceActor.inputEdge5d4 = 0x200;
+    Object.defineProperty(x.tailBorg, 'burstArmFrames', {writable: false});
+    rejects(() => x.cue0Tail.test80069814(x.actor), 'burstArmFrames: non-writable');
+    x.cue0Tail.assertActorComplete(x.actor);
+    check(row.charged && x.tailBorg.burstArmFrames === 19 && x.sourceActor.ubCue === 0,
+      'readonly actual Borg6fb is checked at its first store with no fabricated team clear or cue writes');
+  }
+  for (const replacement of ['table', 'row'] as const) {
+    const supplied = cue0TailHydration(), x = cue0TailHydratedControlFixture(supplied);
+    x.cue0Tail.test80069814(x.actor);
+    if (replacement === 'table') x.chargeGlobal.teamRows103 = [...supplied.teamRows103!];
+    else (supplied.teamRows103 as {charged: boolean}[])[0] = {charged: false};
+    const retained = retainCue0TailRecords(x);
+    rejects(() => x.cue0Tail.test80069814(x.actor), replacement === 'table' ? 'table owner changed' : 'row owner changed');
+    retained(); x.cue0Tail.assertActorComplete(x.actor);
+  }
+  {
+    const x = cue0TailHydratedControlFixture();
+    x.cue0Tail.test80069814(x.actor); x.sourceActor.cmdButton = 3; x.inputTesters.testDescriptor(x.actor);
+    const owners: object[] = [x.sourceActor, x.host, x.tailState, x.statusState, x.movementState, x.chargeState,
+      x.cueState, x.gates, x.chargeGlobal, x.chargeData, x.chargeDescriptor,
+      x.chargeGlobal.teamRows103!, x.chargeGlobal.teamRows103![0]!];
+    for (const [index, owner] of owners.entries()) {
+      const retained = retainCue0TailRecords(x);
+      rejects(() => x.prefix.ingestRawDistancesAndRun(x.actor, index + 1, owner as never), 'raw input must not alias'); retained();
+      rejects(() => x.runRawPrefix(index + 1, 64, 20), 'epoch'); retained();
+    }
+    check(x.sourceActor.targetDistance760 === -760 && x.tier.timerFrames === 8 && x.testerState.byte595 === 77 &&
+      x.normalLifecycleState.short6bc === 2 && x.tailBorg.burstArmFrames === 19,
+      'raw aliases of canonical tail cells, known team rows/table, shared global/data and descriptor consume epochs before ingress or effects');
+  }
+  for (const ownerName of ['actual', 'borg', 'global', 'table', 'row', 'data'] as const) {
+    for (const key of ['byte6fb', 'field57c', 'flags58f', 'field7cd', 'byte103', 'team88']) {
+      const x = cue0TailHydratedControlFixture();
+      x.cue0Tail.test80069814(x.actor); // Make only actual reached team storage known.
+      const owner: object = ownerName === 'actual' ? x.sourceActor : ownerName === 'borg' ? x.tailBorg :
+        ownerName === 'global' ? x.chargeGlobal : ownerName === 'table' ? x.chargeGlobal.teamRows103! :
+          ownerName === 'row' ? x.chargeGlobal.teamRows103![0]! : x.chargeData;
+      Object.defineProperty(owner, key, {value: 0, writable: true, configurable: true});
+      const retained = retainCue0TailRecords(x);
+      rejects(() => x.cue0Tail.updateActor(x.actor), key); retained();
+      check(x.sourceActor.targetDistance760 === -760 && x.tier.timerFrames === 8 && x.testerState.byte595 === 77,
+        `${ownerName}/${key} shadow on retained owner is rejected before any tail effects`);
+      delete (owner as Record<string, unknown>)[key];
+      x.cue0Tail.assertActorComplete(x.actor);
+      check(x.cue0Tail.updateActor(x.actor) === undefined,
+        'pre-effect storage-shadow refusal remains repairable without replaying any source writes');
+    }
+  }
+  for (const ownerName of ['row', 'global', 'borg'] as const) for (const key of ['inputHeld5d8', 'byte57c', 'short736']) {
+    const x = cue0TailHydratedControlFixture(); x.cue0Tail.test80069814(x.actor);
+    const owner: object = ownerName === 'row' ? x.chargeGlobal.teamRows103![0]! : ownerName === 'global' ? x.chargeGlobal : x.tailBorg;
+    Object.defineProperty(owner, key, {value: 0, configurable: true});
+    const retained = retainCue0TailRecords(x);
+    rejects(() => x.cue0Tail.updateActor(x.actor), key); retained();
+    check(x.tailBorg.burstArmFrames === 19 && x.sourceActor.targetDistance760 === -760,
+      'canonical tail cells cannot be mirrored on known team/global/Borg owners before source execution');
+  }
+  {
+    const x = inputTestersHydratedControlFixture();
+    const sources = {world: x.world, movement: x.movement, status: x.status, charge: x.charge, cues: x.cues};
+    for (const key of ['charge', 'cues'] as const) for (const fake of [{...sources[key]}, null, undefined])
+      rejects(() => createSourceActorCue0TailRuntime({...sources, [key]: fake as never}), 'genuine');
+    for (const fake of [{updateActor() {}}, null, undefined])
+      rejects(() => createSourceActorCue0LifecycleRuntime({world: x.world, movement: x.movement,
+        attribute: x.attributes, terrain: x.query, cues: x.cues, inputTesters: x.inputTesters, tail: fake as never}), 'genuine');
+    const wrongStatus = createSourceActorCue0TailRuntime({...sources,
+      status: {...x.status, getActorBinding() {return {...x.statusState};}}});
+    rejects(() => wrongStatus.bindActor(x.actor, {}), 'status binding');
+    check(x.normalLifecycleState.short6bc === 2 && x.testerState.byte595 === 77,
+      'copied genuine methods and independent status objects cannot create successful cue-tail ownership');
+  }
+  {
+    const x = inputTestersHydratedControlFixture();
+    const world = {...x.world}, movement = {...x.movement}, status = {...x.status};
+    const actual = world.getActualActor;
+    world.getActualActor = function(id) {check(this === world, 'tail captures the original world receiver'); return actual(id);};
+    const t = createSourceActorCue0TailRuntime({world, movement, status, charge: x.charge, cues: x.cues});
+    // Only mutable owner lookup facades change. Genuine charge/cue callees are
+    // retained and never replaced with effect callbacks or fake native returns.
+    world.getActualActor = () => {throw Error('replacement world lookup');};
+    movement.getActorBinding = () => {throw Error('replacement movement lookup');};
+    status.getActualBorg = () => {throw Error('replacement Borg lookup');};
+    t.bindActor(x.actor, {byte57c: 73});
+    x.sourceActor.inputEdge5d4 = 1; x.sourceActor.statusWord5b4 = 0x100;
+    check(t.test80069038(x.actor) === 1 && t.getActualActor(x.actor) === x.sourceActor &&
+      t.getActualBorg(x.actor) === x.host && x.sourceActor.ubCue === 4 && t.getActorBinding(x.actor).byte57c === 0,
+      'captured lookup methods retain receivers and genuine cue4 still performs the actual source reset');
+  }
+  {
+    const x = inputTestersHydratedControlFixture(), other = inputTestersHydratedControlFixture();
+    let borg = x.status.getActualBorg(x.actor);
+    const t = createSourceActorCue0TailRuntime({world: x.world, movement: x.movement,
+      status: {...x.status, getActualBorg() {return borg;}}, charge: x.charge, cues: x.cues});
+    t.bindActor(x.actor, {}); borg = other.status.getActualBorg(other.actor);
+    rejects(() => t.test80069038(x.actor), 'status Borg');
+    check(t.getActualBorg(x.actor) === x.host && x.sourceActor.ubCue === 0,
+      'changed status Borg identity cannot redirect the actual6fb owner even on a non-burst helper');
+  }
+  for (const mismatch of ['status', 'Borg', 'charge'] as const) {
+    // Start with an actual unclaimed gauge graph, so rejection must reconcile
+    // the composed tail identities rather than merely hit an earlier claim.
+    const x = gaugeScaleHydratedControlFixture(), supplied = chargeInputHydration();
+    supplied.ceiling = {byteD9: 0}; supplied.global.teamRows103 = [{charged: false}];
+    const charge = hydrateChargeInputOwners(x, supplied);
+    delete (x.sourceActor as Partial<typeof x.sourceActor>).fbPhaseSlots;
+    delete (x.sourceActor as Partial<typeof x.sourceActor>).shotByte1db3;
+    const cues = createSourceActorCueResetRuntime({world: x.world, dispatch: x.dispatch}); cues.bindActor(x.actor, {});
+    const wrongBorg = {...x.host};
+    const tail = createSourceActorCue0TailRuntime({world: x.world, movement: x.movement,
+      status: mismatch === 'Borg' ? {...x.status, getActualBorg() {return wrongBorg;}} : x.status,
+      charge: charge.charge, cues}); tail.bindActor(x.actor, {});
+    const terrain = cue0TailHydratedControlFixture().terrain;
+    const query = createSourceActorTerrainQueryRuntime({world: x.world, history: x.history, terrain}); query.bindActor(x.actor);
+    const cue0 = createSourceActorCue0LifecycleRuntime({world: x.world, movement: x.movement, attribute: x.attributes,
+      terrain: query, cues, tail}); cue0.bindActor(x.actor, {});
+    const otherStatus = {...x.statusState};
+    const normal = createSourceActorNormalLifecycleRuntime({world: x.world, movement: x.movement,
+      status: mismatch === 'status' ? {...x.status, getActorBinding() {return otherStatus;}} : x.status, cues, cue0});
+    if (mismatch === 'status') rejects(() => normal.bindActor(x.actor, {}), 'tail/normal status');
+    else {
+      normal.bindActor(x.actor, {});
+      const input = createSourceActorInputPrefixRuntime({world: x.world, gauges: x.gauges,
+        ...(mismatch === 'charge' ? {} : {charge: charge.charge})}); input.bindActor(x.actor, {});
+      const prefix = createSourceActorTickPrefixRuntime({world: x.world, gauges: x.gauges,
+        inputPrefix: input, normalLifecycle: normal});
+      rejects(() => prefix.bindActor(x.actor, x.host, {byte598: 7}),
+        mismatch === 'Borg' ? 'getActualBorg' : 'same genuine charge runtime');
+    }
+    check(!isSourceActorTickPrefixClaimedActor(x.sourceActor) && charge.chargeState.field648 === 20 &&
+      x.tier.timerFrames === 8 && Reflect.ownKeys(tail.getActorBinding(x.actor)).length === 0,
+      'canonical tail/normal/tick status, Borg and charge mismatches reject before source effects or permanent tick admission');
+  }
+  for (const key of ['charge', 'cues'] as const) {
+    const x = inputTestersHydratedControlFixture(), other = inputTestersHydratedControlFixture();
+    const t = createSourceActorCue0TailRuntime({world: x.world, movement: x.movement, status: x.status,
+      charge: key === 'charge' ? other.charge : x.charge, cues: key === 'cues' ? other.cues : x.cues});
+    rejects(() => t.bindActor(x.actor, {}), 'unknown');
+    check(x.testerState.byte595 === 77 && other.testerState.byte595 === 77 && x.sourceActor.ubCue === 0 && other.sourceActor.ubCue === 0,
+      'a genuine runtime belonging to a different actor graph cannot substitute charge or cue ownership');
+  }
+  console.log('[actor-cue0-tail-composition] PASS: real69814/696f4/694c0/69038/69354/68f9c on retained DAT/setup/status/Borg/charge/cue graph; real signed cue successes and sentinels, zero-input normal completion, team charged/edge200 actual6fb, source-ordered57c/58f/held writes and readonly partial failures, optional hydration and permanent standalone guards, canonical shared tier/ceiling global; synthetic decoded offline graph only, no live team mapping/original-DOL/full-tick/replay/browser-playability claim');
 }

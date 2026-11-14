@@ -53,6 +53,8 @@
 import {isSourceActorCue0LifecycleRuntime, hasIncompleteSourceActorCue0Lifecycle,
   type SourceActorCue0LifecycleRuntime} from './actor-cue0-lifecycle.js';
 import type {RomActor} from './actor.js';
+import {isSourceActorCue0TailRuntime, hasIncompleteSourceActorCue0Tail,
+  type SourceActorCue0TailRuntime} from './actor-cue0-tail.js';
 import {isSourceActorInputTestersRuntime, hasIncompleteSourceActorInputTesters,
   type SourceActorInputTestersRuntime} from './actor-input-testers.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
@@ -273,6 +275,14 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       check();
     }
   };
+  type TailGetter = 'getActualActor' | 'getWorldBinding' | 'getMovementBinding' | 'getStatusBinding' |
+    'getActualBorg' | 'getMappingActor' | 'getChargeRuntime' | 'getChargeBinding' | 'getGlobal' |
+    'getCueRuntime' | 'getCueBinding' | 'getDispatchBinding' | 'getActorBinding' | 'getKnownTeamStorageOwners';
+  interface TailOwners {
+    runtime: SourceActorCue0TailRuntime; value: (key: TailGetter, id: symbol) => unknown;
+    charge: SourceActorInputChargeRuntime; chargeBinding: object; binding: object; global: object; data: object;
+    chargeGlobal: () => unknown; chargeData: () => unknown; descriptors: () => object[];
+  }
   interface Entry {
     actual: RomActor; borg: SourceActorGaugeBorgOwner; world: object; status: object;
     gauge: object; stage?: object; input?: object; control?: object; action?: object;
@@ -281,7 +291,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       cues: SourceActorCueResetRuntime | undefined; cue: object | undefined; dispatch: object | undefined;
       rotation: SourceActorRotationDampingRuntime | undefined; rotationOwners: readonly object[];
       cue0: SourceActorCue0LifecycleRuntime | undefined; cue0Owners: readonly object[]; cue0Terrain?: object; cue0Attribute?: object;
-      testers: SourceActorInputTestersRuntime | undefined; testerAction?: object};
+      testers: SourceActorInputTestersRuntime | undefined; testerAction?: object; tail?: TailOwners};
     ceiling?: {mapping: object; matrix: object; terrain: object; globals: object;
       charge: SourceActorInputChargeRuntime; chargeGlobal: () => unknown};
     ready?: {runtime: SourceActorReadyTransitionsRuntime; binding: object};
@@ -351,6 +361,102 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     if (!Array.isArray(values)) fail('input tester descriptor owner array required');
     return values.map(value => record(value, 'input tester descriptor owner'));
   };
+  const captureTail = (runtime: SourceActorCue0TailRuntime, id: symbol): TailOwners => {
+    const methods = new Map<TailGetter, (...args: unknown[]) => unknown>();
+    const keys: TailGetter[] = ['getActualActor', 'getWorldBinding', 'getMovementBinding', 'getStatusBinding',
+      'getActualBorg', 'getMappingActor', 'getChargeRuntime', 'getChargeBinding', 'getGlobal',
+      'getCueRuntime', 'getCueBinding', 'getDispatchBinding', 'getActorBinding', 'getKnownTeamStorageOwners'];
+    for (const key of keys) {
+      const fn = read(runtime, key); if (typeof fn !== 'function') fail(`cue0 tail ${key}: own data-function required`);
+      methods.set(key, (...args: unknown[]): unknown => {const value = Reflect.apply(fn, runtime, args); check(); return value;});
+    }
+    const value = (key: TailGetter, actorId: symbol): unknown => methods.get(key)!(actorId);
+    const charge = value('getChargeRuntime', id);
+    if (!isSourceActorInputChargeRuntime(charge)) fail('cue0 tail requires genuine charge runtime');
+    const captureCharge = (key: 'getGlobal' | 'getData' | 'getKnownDescriptorRecords') => {
+      const fn = read(charge, key); if (typeof fn !== 'function') fail(`tail charge ${key}: own data-function required`);
+      return (): unknown => {const result = Reflect.apply(fn, charge, []); check(); return result;};
+    };
+    const chargeGlobal = captureCharge('getGlobal'), chargeData = captureCharge('getData');
+    const getDescriptors = captureCharge('getKnownDescriptorRecords');
+    const descriptors = (): object[] => {
+      const values = getDescriptors(); if (!Array.isArray(values)) fail('tail charge descriptor owner array required');
+      return values.map(owner => record(owner, 'tail charge descriptor'));
+    };
+    return {runtime, value, charge, chargeBinding: record(value('getChargeBinding', id), 'tail charge binding'),
+      binding: record(value('getActorBinding', id), 'tail binding'), global: record(value('getGlobal', id), 'tail match global'),
+      data: record(chargeData(), 'tail charge data'), chargeGlobal, chargeData, descriptors};
+  };
+  const teamOwners = (tail: TailOwners, id: symbol): object[] => {
+    const values = tail.value('getKnownTeamStorageOwners', id);
+    if (!Array.isArray(values)) fail('tail team storage owner array required');
+    return values.map(owner => record(owner, 'tail team storage owner'));
+  };
+  // Shared tables/rows may belong to several actors. They are never actor-only
+  // extras or claims, but must not alias any retained composed actor storage.
+  const actorRecords = (actor: Entry): object[] => {
+    const n = actor.normal;
+    const optional = [actor.stage, actor.input, actor.control, actor.action, actor.ready?.binding,
+      actor.rates?.mapping, actor.rates?.binding, actor.ceiling?.matrix,
+      actor.rates || !actor.ceiling ? undefined : actor.ceiling.mapping,
+      n?.binding, n?.movement, n?.cue, n?.dispatch,
+      actor.rates || actor.ceiling ? undefined : n?.mapping,
+      n?.tail && !n.testers ? n.tail.chargeBinding : undefined];
+    return [actor.actual, actor.borg, actor.world, actor.status, actor.gauge, actor.binding,
+      ...optional.filter((owner): owner is object => owner !== undefined), ...(n?.rotationOwners ?? []),
+      ...(n?.cue0Owners ?? []).filter(owner => owner !== n?.testerAction)];
+  };
+  const nestedTailStorage = (actor: Entry): object[] => {
+    const tail = actor.normal?.tail; if (!tail) return [];
+    const result: object[] = [];
+    // Owner-reference metadata only: do not read a selected table element or
+    // invoke an accessor while admitting an otherwise unreached source path.
+    const fields: [object, string][] = [[actor.actual, 'cueTable'], [actor.world, 'scale58'],
+      [actor.borg, 'paramTier'], [tail.data, 'held3970'], [tail.data, 'release397c']];
+    for (const [owner, key] of fields) {
+      const p = Object.getOwnPropertyDescriptor(owner, key); check();
+      if (p && 'value' in p && p.value !== null && typeof p.value === 'object') result.push(p.value);
+    }
+    return result;
+  };
+  const assertTeamOwners = (id: symbol, actor: Entry, raw?: object): void => {
+    const tail = actor.normal?.tail; if (!tail) return;
+    const descriptors = [...tail.descriptors(), ...(actor.normal?.rotation ?
+      rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id) : [])];
+    const records = [...actorRecords(actor), ...nestedTailStorage(actor)], teams = teamOwners(tail, id);
+    const forbidden = (owner: object): boolean => assigned.has(owner) || records.includes(owner) || descriptors.includes(owner) ||
+      owner === actor.normal?.cue0Terrain || owner === actor.ceiling?.terrain;
+    if (forbidden(tail.global) || forbidden(tail.data) || tail.global === tail.data ||
+        teams.some(owner => owner === tail.global || owner === tail.data || forbidden(owner)))
+      fail('tail shared storage aliases a tick source owner or descriptor');
+    if (raw !== undefined && teams.includes(raw)) fail('raw input must not alias tail team storage');
+    for (const [otherId, other] of actors) {
+      if (teams.some(owner => nestedTailStorage(other).includes(owner) || owner === other.normal?.cue0Terrain || owner === other.ceiling?.terrain ||
+          (other.normal?.rotation && rotationRecords(other.normal.rotation, 'getKnownDescriptorRecords', otherId).includes(owner)) ||
+          (other.normal?.testers && testerDescriptors(other.normal.testers, otherId).includes(owner))))
+        fail('tail team storage aliases another actor terrain or descriptor');
+    }
+  };
+  const tailOwners = (id: symbol, actor: Entry): void => {
+    const n = actor.normal; if (!n?.cue0) return;
+    const tail = n.tail;
+    if (cue0Value(n.cue0, 'getTailRuntime', id) !== tail?.runtime) fail('cue0 tail runtime changed after tick admission');
+    if (!tail) return;
+    const expected: [TailGetter, object | undefined][] = [
+      ['getActualActor', actor.actual], ['getWorldBinding', actor.world], ['getStatusBinding', actor.status],
+      ['getActualBorg', actor.borg], ['getMappingActor', n.mapping], ['getMovementBinding', n.movement],
+      ['getCueRuntime', n.cues], ['getCueBinding', n.cue], ['getDispatchBinding', n.dispatch],
+      ['getActorBinding', tail.binding], ['getChargeBinding', tail.chargeBinding], ['getGlobal', tail.global],
+    ];
+    for (const [key, owner] of expected)
+      if (owner === undefined || tail.value(key, id) !== owner) fail(`tail ${key}: canonical tick source owner mismatch`);
+    if (tail.value('getChargeRuntime', id) !== tail.charge || inputCharge?.(id) !== tail.charge ||
+        tail.chargeGlobal() !== tail.global || tail.chargeData() !== tail.data)
+      fail('tail/input prefix must retain the same genuine charge runtime and global');
+    if (actor.ceiling && actor.ceiling.globals !== tail.global) fail('tail/ceiling match global owner mismatch');
+    if (!n.cue0Owners.includes(tail.binding)) fail('cue0 must retain the new tail binding');
+    assertTeamOwners(id, actor);
+  };
   const normalOwners = (id: symbol, actor: Entry): void => {
     if (!actor.normal) return;
     const n = actor.normal;
@@ -398,6 +504,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       if (rotationRecords(n.rotation, 'getKnownDescriptorRecords', id).some(owner => assigned.has(owner)))
         fail('rotation descriptor aliases a bound actor source owner');
     }
+    tailOwners(id, actor);
     const stageCue = stageCues?.(id);
     if (stageCue !== undefined && n.cues !== undefined && stageCue !== n.cues)
       fail('normal/stage must share the same genuine cue runtime');
@@ -422,6 +529,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     for (const [key, owner] of expected)
       if (tierValue(runtime, key, id) !== owner) fail(`tier ${key}: canonical source owner mismatch`);
     const globals = record(tierValue(runtime, 'getMatchGlobals', id), 'tier match globals');
+    if (actor.normal?.tail && actor.normal.tail.global !== globals) fail('tail/tier match global owner mismatch');
     const charge = inputCharge?.(id);
     if (charge !== undefined) {
       if (!isSourceActorInputChargeRuntime(charge)) fail('tier/input charge must be genuine');
@@ -442,6 +550,9 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       ...(actor.normal?.cue0Owners ?? []).filter(owner => owner !== attribute && owner !== actor.normal?.testerAction)].filter(value => value !== undefined);
     if (new Set([...known, globals, binding, attribute]).size !== known.length + 3)
       fail('tier source owner alias: distinct shared and actor-specific records required');
+    if (actor.normal?.tail && teamOwners(actor.normal.tail, id).some(owner =>
+        owner === globals || owner === binding || owner === attribute || owner === rate))
+      fail('tail team storage aliases a tier source owner');
     return [globals, binding, attribute, rate];
   };
   const owners = (id: symbol, actor: Entry): void => {
@@ -605,10 +716,14 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
             fail('input testers and tick must share the same genuine actionRequest runtime');
           if (binding !== undefined) testerAction = record(binding, 'input tester action binding');
         }
+        const tailValue = cue0 ? cue0Value(cue0, 'getTailRuntime', id) : undefined;
+        if (tailValue !== undefined && !isSourceActorCue0TailRuntime(tailValue)) fail('cue0 tail must be genuine');
+        const tail = tailValue === undefined ? undefined : captureTail(tailValue as SourceActorCue0TailRuntime, id);
+        if (tail && !testers) records.push(tail.chargeBinding);
         records.push(...cue0Owners.filter(owner => owner !== testerAction));
         if (cue0Terrain && records.includes(cue0Terrain)) fail('cue0 terrain aliases an actor source owner');
         normalOwnersAtBind = {mapping, movement, binding, cues, cue, dispatch, rotation, rotationOwners,
-          cue0, cue0Owners, testers, ...(testerAction === undefined ? {} : {testerAction}), ...(cue0Terrain === undefined ? {} : {cue0Terrain, cue0Attribute: cue0Attribute!})};
+          cue0, cue0Owners, testers, ...(tail === undefined ? {} : {tail}), ...(testerAction === undefined ? {} : {testerAction}), ...(cue0Terrain === undefined ? {} : {cue0Terrain, cue0Attribute: cue0Attribute!})};
       }
       const readyRuntime = controlReady?.(id);
       let ready: Entry['ready'];
@@ -647,6 +762,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       actor.lastEpoch = next; // Once attempted, never retry or silently normalize twice.
       // A prior6bc expiry may already have stored zero before an unsupported4dc.
       // Never let a later ready branch silently skip that outstanding source call.
+      if (hasIncompleteSourceActorCue0Tail(actor.actual)) fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
       if (hasIncompleteSourceActorInputTesters(actor.actual)) fail('actual actor has known incomplete input testers; source continuation is unsupported');
       if (hasIncompleteSourceActorCue0Lifecycle(actor.actual)) fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
       if (hasIncompleteSourceActorRotationDamping(actor.actual)) fail('actual actor has a known incomplete rotation damping; source continuation is unsupported');
@@ -654,7 +770,8 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       if (hasIncompleteSourceActorNormalCountdown(actor.actual)) fail('actual actor has a known incomplete6bc expiry; source continuation is unsupported');
       if (assertNormalComplete && assertNormalComplete(id) !== undefined) fail('normal completion assertion returned unexpectedly');
       owners(id, actor); noLegacyDistances(actor.actual); record(raw, 'explicit decoded raw distances');
-      if (assigned.has(raw) || (actor.normal?.testers && testerDescriptors(actor.normal.testers, id).includes(raw)) || (actor.normal?.rotation && rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id).includes(raw)) || tierOwners(id, actor).includes(raw) || raw === actor.normal?.cue0Terrain || raw === actor.ceiling?.globals || raw === actor.ceiling?.terrain ||
+      if ((actor.normal?.tail && (nestedTailStorage(actor).includes(raw) || teamOwners(actor.normal.tail, id).includes(raw) || actor.normal.tail.descriptors().includes(raw) ||
+          raw === actor.normal.tail.global || raw === actor.normal.tail.data || raw === actor.normal.tail.chargeBinding)) || assigned.has(raw) || (actor.normal?.testers && testerDescriptors(actor.normal.testers, id).includes(raw)) || (actor.normal?.rotation && rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id).includes(raw)) || tierOwners(id, actor).includes(raw) || raw === actor.normal?.cue0Terrain || raw === actor.ceiling?.globals || raw === actor.ceiling?.terrain ||
           raw === read(actor.world, 'scale58') || raw === read(actor.borg, 'paramTier'))
         fail('raw input must not alias a bound source owner');
       if (read(raw, 'boundary') !== 'externally-decoded-pre59068-raw') fail('explicit externally decoded pre59068 raw boundary required');
@@ -687,6 +804,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
           fail(`800590e0 reached unsupported source table802d3300 entry ${dispatchAddress.toString(16)} before indirect call800590e8`);
         }
         if (updateNormal(id) !== undefined) fail('genuine normal lifecycle returned asynchronously or unexpectedly');
+        assertTeamOwners(id, actor, raw);
       }
       // Both source branches meet here only after every reached call completes.
       if (!updateAction) fail('80059110 reached unsupported source call 8005a298');

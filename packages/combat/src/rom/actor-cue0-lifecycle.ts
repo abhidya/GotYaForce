@@ -3,8 +3,8 @@
  * instruction reader. Movement3 performs actual6a750(1b), then6a6fc(1b),
  * ignoring both native0/1 results. Other movement reaches genuine68df8 and
  * optionally continues genuine699d8 input testers. Native1 returns; native0
- * reaches the explicit69814 boundary. Without that optional runtime the
- * historical699d8 refusal remains. No no-op substitute,
+ * reaches either the optional genuine69814/696f4/69038/69354/68f9c tail or
+ * its historical69814 boundary. Without testers the699d8 refusal remains. No no-op substitute,
  * arbitrary callback, host floor contract, hydration or live tick is supplied.
  *
  * Actual3d6e4 writes the returned ground height before732/674 reads. Uphill
@@ -21,6 +21,9 @@
  * Host-only incomplete-call poison prevents edited flags/cues bypassing them.
  */
 import type {RomActor} from './actor.js';
+import {isSourceActorCue0TailRuntime, hasIncompleteSourceActorCue0Tail,
+  type SourceActorCue0TailRuntime} from './actor-cue0-tail.js';
+import {isSourceActorInputChargeRuntime} from './actor-input-charge.js';
 import {isSourceActorInputTestersRuntime, hasIncompleteSourceActorInputTesters,
   type SourceActorInputTestersRuntime} from './actor-input-testers.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
@@ -44,6 +47,8 @@ export interface SourceActorCue0LifecycleSources {
   cues: SourceActorCueResetRuntime;
   /** Genuine ordered699d8 helpers; absence preserves the historical boundary. */
   inputTesters?: SourceActorInputTestersRuntime;
+  /** Genuine remaining ordered cue0 helpers; absence retains the69814 boundary. */
+  tail?: SourceActorCue0TailRuntime;
 }
 export interface SourceActorCue0LifecycleRuntime {
   bindActor(identity: symbol, initial: Readonly<Partial<SourceActorCue0LifecycleBinding>>): void;
@@ -58,6 +63,7 @@ export interface SourceActorCue0LifecycleRuntime {
   getHistoryBinding(identity: symbol): SourceActorTransformHistoryBinding;
   getCueRuntime(): SourceActorCueResetRuntime;
   getInputTestersRuntime(): SourceActorInputTestersRuntime | undefined;
+  getTailRuntime(): SourceActorCue0TailRuntime | undefined;
   getCueBinding(identity: symbol): Partial<SourceActorCueResetBinding>;
   getDispatchBinding(identity: symbol): SourceActorAnimationDispatchBinding;
   /** Retained additional owners and vectors, no scalar copies or synthetic owner. */
@@ -139,6 +145,39 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
   const testerOwners = testers === undefined ? undefined : capture('inputTesters', 'getSourceOwners');
   const testerDescriptors = testers === undefined ? undefined : capture('inputTesters', 'getKnownDescriptorRecords');
   const runTesters = testers === undefined ? undefined : capture('inputTesters', 'updateActor');
+  const testerCharge = testers === undefined ? undefined : capture('inputTesters', 'getChargeRuntime');
+  const testerChargeBinding = testers === undefined ? undefined : capture('inputTesters', 'getChargeBinding');
+  const tailOption = Object.getOwnPropertyDescriptor(sources, 'tail');
+  const tail = tailOption === undefined ? undefined : read(sources, 'tail');
+  if (tailOption !== undefined && !isSourceActorCue0TailRuntime(tail)) fail('tail requires genuine source runtime');
+  const tailActor = tail === undefined ? undefined : capture('tail', 'getActualActor');
+  const tailWorld = tail === undefined ? undefined : capture('tail', 'getWorldBinding');
+  const tailMapping = tail === undefined ? undefined : capture('tail', 'getMappingActor');
+  const tailMovement = tail === undefined ? undefined : capture('tail', 'getMovementBinding');
+  const tailStatus = tail === undefined ? undefined : capture('tail', 'getStatusBinding');
+  const tailBorg = tail === undefined ? undefined : capture('tail', 'getActualBorg');
+  const tailCharge = tail === undefined ? undefined : capture('tail', 'getChargeRuntime');
+  const tailChargeBinding = tail === undefined ? undefined : capture('tail', 'getChargeBinding');
+  const tailGlobal = tail === undefined ? undefined : capture('tail', 'getGlobal');
+  const tailCues = tail === undefined ? undefined : capture('tail', 'getCueRuntime');
+  const tailCue = tail === undefined ? undefined : capture('tail', 'getCueBinding');
+  const tailDispatch = tail === undefined ? undefined : capture('tail', 'getDispatchBinding');
+  const tailBinding = tail === undefined ? undefined : capture('tail', 'getActorBinding');
+  const tailOwners = tail === undefined ? undefined : capture('tail', 'getSourceOwners');
+  const tailTeams = tail === undefined ? undefined : capture('tail', 'getKnownTeamStorageOwners');
+  const runTail = tail === undefined ? undefined : capture('tail', 'updateActor');
+  const charge = tailCharge?.();
+  if (tail !== undefined && !isSourceActorInputChargeRuntime(charge)) fail('tail charge requires genuine source runtime');
+  const captureCharge = (key: 'getGlobal' | 'getData' | 'getAttributeBinding' | 'getKnownDescriptorRecords') => {
+    if (charge === undefined) return undefined;
+    const method = read(charge, key);
+    if (typeof method !== 'function') fail(`tail charge ${key}: own data-function required`);
+    return (...args: unknown[]): unknown => {const result = Reflect.apply(method, charge, args); check(); return result;};
+  };
+  const chargeGlobal = captureCharge('getGlobal'), chargeDescriptors = captureCharge('getKnownDescriptorRecords');
+  const global = tailGlobal === undefined ? undefined : record(tailGlobal(), 'tail match globals');
+  const chargeData = captureCharge('getData'), chargeAttribute = captureCharge('getAttributeBinding');
+  const data = chargeData === undefined ? undefined : record(chargeData(), 'tail charge data');
   const ownerList = (value: unknown, where: string): object[] => {
     if (!Array.isArray(value)) fail(`${where}: actual owner array required`);
     return value.map(owner => record(owner, where));
@@ -158,10 +197,26 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     binding: Partial<SourceActorCue0LifecycleBinding>; extras: readonly object[];
     historyVectors: ReadonlyArray<readonly [string, object]>;
     testerOwners?: readonly object[]; testerStatus?: object;
+    tailOwners?: readonly object[]; tailBinding?: object; tailStatus?: object; tailBorg?: object; tailCharge?: object;
   }
   const owners = (e: Entry): object[] => [e.actual, e.position, e.savedPosition, e.world, e.mapping,
     e.movement, e.attribute, e.history, e.cue, e.dispatch, e.binding, ...e.historyVectors.map(([, owner]) => owner),
-    ...(e.testerOwners ?? []), ...(e.testerStatus === undefined ? [] : [e.testerStatus])];
+    ...(e.testerOwners ?? []), ...(e.testerStatus === undefined ? [] : [e.testerStatus]),
+    ...(e.tailOwners ?? []), ...(e.tailBorg === undefined ? [] : [e.tailBorg]),
+    // Only these recognized canonical records may occur in both children.
+    ...(e.tailStatus === undefined || e.testerStatus !== undefined ? [] : [e.tailStatus]),
+    ...(e.tailCharge === undefined || e.testerOwners !== undefined ? [] : [e.tailCharge])];
+  const teamOwners = (): object[] => tailTeams === undefined ? [] : ownerList(tailTeams(), 'known tail team storage');
+  const assertTeamOwners = (e: Entry): void => {
+    if (global === undefined) return;
+    const records = owners(e), descriptors = ownerList(chargeDescriptors!(), 'known charge descriptors');
+    const forbidden = (owner: object): boolean => owner === terrain || records.includes(owner) || assigned.has(owner);
+    if (global === data || forbidden(global) || forbidden(data!) ||
+        descriptors.some(owner => owner === global || owner === data || forbidden(owner)))
+      fail('tail global/data/descriptor aliases a cue0 source owner');
+    if (teamOwners().some(owner => owner === global || owner === data || forbidden(owner) || descriptors.includes(owner)))
+      fail('tail team storage aliases a cue0 source owner or charge descriptor');
+  };
   const noShadows = (e: Entry): void => {
     const canonical = new Map<string, object>([
       ['controlWord', e.actual], ['pos', e.actual], ['savedGroundPos', e.actual],
@@ -175,7 +230,7 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
       'field732', 'flags732', 'ledge732', 'field5f8', 'scale5f8', 'field44', 'speed44',
       'field5ae', 'yaw5ae', 'field698', 'field20', 'field24', 'field28', 'field2c', 'field30', 'field34',
       'positionY24', 'savedY30'];
-    for (const owner of [...owners(e), terrain]) {
+    for (const owner of [...owners(e), terrain, ...(global === undefined ? [] : [global, data!]), ...teamOwners()]) {
       for (const [key, expected] of canonical) {
         if (owner !== expected && Object.getOwnPropertyDescriptor(owner, key) !== undefined)
           fail(`${key}: competing cue0-lifecycle storage on another owner`);
@@ -211,6 +266,23 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
       if (ownerList(testerDescriptors!(), 'known input tester descriptors').some(owner => owners(e).includes(owner) || owner === terrain))
         fail('input tester descriptor aliases a cue0 source owner');
     }
+    if (tailActor) {
+      stable(tailActor(id), e.actual, 'tail actor'); stable(tailWorld!(id), e.world, 'tail world');
+      stable(tailMapping!(id), e.mapping, 'tail mapping'); stable(tailMovement!(id), e.movement, 'tail movement');
+      stable(tailStatus!(id), e.tailStatus!, 'tail status'); stable(tailBorg!(id), e.tailBorg!, 'tail Borg');
+      stable(tailBinding!(id), e.tailBinding!, 'tail binding'); stable(tailChargeBinding!(id), e.tailCharge!, 'tail charge binding');
+      stable(chargeAttribute!(id), e.attribute, 'tail charge/cue0 attribute');
+      if (tailCharge!() !== charge || chargeGlobal!() !== global || tailGlobal!() !== global || chargeData!() !== data)
+        fail('tail must retain the same genuine charge runtime and match global');
+      if (tailCues!() !== cueRuntime || tailCue!(id) !== e.cue || tailDispatch!(id) !== e.dispatch)
+        fail('tail/cue0 must share the same genuine cue runtime and records');
+      if (testerStatus && (e.tailStatus !== e.testerStatus || testerCharge!() !== charge || testerChargeBinding!(id) !== e.tailCharge))
+        fail('tail/input testers must share canonical status and charge owners');
+      const current = ownerList(tailOwners!(id), 'tail source owners');
+      if (current.length !== 1 || current[0] !== e.tailBinding || e.tailOwners!.length !== 1 || e.tailOwners![0] !== e.tailBinding)
+        fail('tail source owners must retain only the new tail binding');
+      assertTeamOwners(e);
+    }
     noShadows(e);
   };
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
@@ -218,6 +290,8 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     const e = actors.get(id); if (!e) fail('unknown/non-owned cue0-lifecycle actor'); return e;
   };
   const assertComplete = (actual: object): void => {
+    if (hasIncompleteSourceActorCue0Tail(actual))
+      fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
     if (hasIncompleteSourceActorInputTesters(actual))
       fail('actual actor has known incomplete input testers; source continuation is unsupported');
     if (incomplete.has(actual)) fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
@@ -287,7 +361,9 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     const result = runTesters(id);
     if (result !== 0 && result !== 1) fail('genuine input testers returned asynchronously or unexpectedly');
     if (result === 1) return;
-    fail('80059194 reached unsupported source call80069814 after genuine800699d8 returned0');
+    if (!runTail) fail('80059194 reached unsupported source call80069814 after genuine800699d8 returned0');
+    if (runTail(id) !== undefined) fail('genuine cue0 tail returned asynchronously or unexpectedly');
+    assertTeamOwners(e);
   };
   const runtime: SourceActorCue0LifecycleRuntime = {
     bindActor(id, initial) {guard(() => {
@@ -313,6 +389,12 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
         e.testerOwners = ownerList(testerOwners(id), 'input tester source owners');
         e.testerStatus = record(testerStatus!(id), 'input tester status');
       }
+      if (tailOwners) {
+        e.tailOwners = ownerList(tailOwners(id), 'tail source owners');
+        e.tailBinding = record(tailBinding!(id), 'tail binding');
+        e.tailStatus = record(tailStatus!(id), 'tail status'); e.tailBorg = record(tailBorg!(id), 'tail Borg');
+        e.tailCharge = record(tailChargeBinding!(id), 'tail charge binding');
+      }
       admit(id, e);
       const records = owners(e);
       if (new Set([...records, terrain]).size !== records.length + 1 || records.some(owner => assigned.has(owner)))
@@ -320,7 +402,7 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
       record(initial, 'initial cue0 binding'); noShadows({...e, binding: initial});
       if (Object.getOwnPropertyDescriptor(initial, 'byte732') !== undefined) binding.byte732 = byte(initial, 'byte732');
       Object.seal(binding); e.extras = Object.freeze([binding, e.attribute, e.history, e.position, e.savedPosition,
-        ...e.historyVectors.map(([, owner]) => owner), ...(e.testerOwners ?? [])]); check();
+        ...e.historyVectors.map(([, owner]) => owner), ...(e.testerOwners ?? []), ...(e.tailOwners ?? [])]); check();
       actors.set(id, e); records.forEach(owner => assigned.add(owner)); claimedActors.add(actual);
     });},
     getActualActor(id) {return entry(id).actual;},
@@ -334,6 +416,7 @@ export function createSourceActorCue0LifecycleRuntime(sources: SourceActorCue0Li
     getHistoryBinding(id) {return entry(id).history;},
     getCueRuntime() {return cueRuntime;},
     getInputTestersRuntime() {return testers as SourceActorInputTestersRuntime | undefined;},
+    getTailRuntime() {return tail as SourceActorCue0TailRuntime | undefined;},
     getCueBinding(id) {return entry(id).cue;},
     getDispatchBinding(id) {return entry(id).dispatch;},
     getSourceOwners(id) {return entry(id).extras;},

@@ -45,9 +45,9 @@ export interface SourceActorStatusTimersBinding {
 export type SourceActorStatusBorgOwner = Pick<BorgRuntime, 'hp' | 'hitDrainFrames' |
   'balanceGauge' | 'balanceGaugeMax' | 'balanceRefillDelay' | 'downResetDelay' |
   'comboWindow' | 'comboAccum' | 'comboRank' | 'invincTimer' | 'sourceAmmoRefillPauseMask'> &
-  /** Existing Borg cells, required lazily by reached ready/rate lifecycle paths. */
+  /** Existing Borg cells, required lazily by reached ready/rate/cue-tail paths. */
   Partial<Pick<BorgRuntime, 'maxHp' | 'colorVariant' | 'slowHitTimer' | 'hasteHitTimer' |
-    'slowAuraLevel' | 'hasteAuraLevel' | 'slowHitLevel' | 'hasteHitLevel'>>;
+    'slowAuraLevel' | 'hasteAuraLevel' | 'slowHitLevel' | 'hasteHitLevel' | 'burstArmFrames'>>;
 export interface SourceActorStatusAmmoSlot {
   readonly cell: WeaponCell;
   /** Explicit otherwise-missing source +776 (+8*slot), not a HUD alias. */

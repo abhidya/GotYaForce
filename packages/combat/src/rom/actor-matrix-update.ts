@@ -29,6 +29,7 @@
  * checked at each store. Caught reentry poisons the call. Prior work survives
  * refusal, including count clears, damping, matrix rebuilds and partial copies.
  */
+import type {BurstMeterState} from '../types.js';
 import {addSourceFloat32, fusedMultiplyAddSourceFloat32} from './source-float.js';
 import type {SourceActorTerrainQueryRuntime} from './actor-terrain-query.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorCorrectedTraversalState,
@@ -52,7 +53,12 @@ export interface SourceActorMatrixUpdateStorage {
 }
 /** The same retained PTR_DAT_80433934 record. Optional cells are established
  * only by an explicit source-input boundary, never by this constructor. */
-export interface SourceActorMatrixUpdateGlobals {maskD2: number; byteD9?: number; byte1829?: number; byte1f?: number}
+export interface SourceActorMatrixUpdateGlobals {
+  maskD2: number; byteD9?: number; byte1829?: number; byte1f?: number;
+  /** Explicit source team-indexed row references. No inferred player mapping;
+   * charged borrows the existing +103 owner in its boolean0/1 subset. */
+  teamRows103?: readonly Pick<BurstMeterState, 'charged'>[];
+}
 export interface SourceActorMatrixUpdateSources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor' | 'getActorBinding' |
     'getWorldMatrix' | 'bindCorrectedTraversalState' | 'prepareActor' | 'rebuildActor' | 'copyActorMatrices'>;
