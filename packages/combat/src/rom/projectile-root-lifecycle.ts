@@ -20,9 +20,12 @@ import type {RomActor} from './actor.js';
 import type {SourceAllocationBytes} from './source-object-allocation.js';
 import {isSourceProjectileHitRuntime, type SourceProjectileHitRuntime} from './projectile-hit-registration.js';
 import {sourceProjectileHeadingRadians, sourceProjectileInitialPitch} from './projectile-heading.js';
+import {addSourceFloat32} from './source-float.js';
+import type {SourceJointVector} from './joint-animation-feedback.js';
 
 export interface SourceProjectileDrawList {head?: symbol | null; tail?: symbol | null}
 export interface SourceProjectileInitializationStack {rotationX: symbol; rotationY: symbol}
+export interface SourceProjectileTargetStack {displacement: SourceJointVector}
 export interface SourceProjectileRootSources {
   spawns: SourceActorProjectileSpawnRuntime;
   stage: SourceActorStageBoundsRuntime;
@@ -35,6 +38,10 @@ export interface SourceProjectileRootSources {
   hits?: SourceProjectileHitRuntime;
   /** Explicit source temporary matrix storage, distinct from all actor matrices. */
   initializationStack?: SourceProjectileInitializationStack;
+  /** Explicit retained source stack28/2c/30, not a target/actor vector alias. */
+  targetStack?: SourceProjectileTargetStack;
+  /** Explicit host profile for the reached paired-vector helper, never defaulted. */
+  processor?: {gqr0: number};
 }
 export interface SourceProjectileRootRuntime {
   bindProjectile(projectile: symbol): void;
@@ -45,7 +52,7 @@ export interface SourceProjectileRootRuntime {
   dispatchStoredRoot(projectile: symbol): void;
 }
 const runtimes = new WeakSet<object>(), claimedChildren = new WeakSet<object>(), claimedDrawLists = new WeakSet<object>(),
-  claimedStackMatrices = new WeakSet<object>();
+  claimedStackMatrices = new WeakSet<object>(), claimedTargetStacks = new WeakSet<object>();
 export function isSourceProjectileRootRuntime(value: unknown): value is SourceProjectileRootRuntime {
   return value !== null && typeof value === 'object' && runtimes.has(value);
 }
@@ -138,6 +145,63 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     if (old === null) {writeList('tail', id); putPtr(id, 0x104, null);}
     else {putPtr(id, 0x104, old); call(() => allocator.getObject(old)); putPtr(old, 0x108, id);}
   };
+  const targetPrefix = (e: Entry, capturedTarget: object): never => {
+    const processorProperty=Object.getOwnPropertyDescriptor(sources,'processor');check();
+    if(!processorProperty || !('value' in processorProperty) || processorProperty.value===undefined)
+      fail('actual8020ba78 target displacement requires explicit GQR0 float processor profile');
+    const processor=processorProperty.value as unknown;
+    if(unsigned(read(processor,'gqr0'),0xffffffff,'gqr0')!==0)
+      fail('GQR0 must explicitly select float load/store type0 scale0');
+    const supplied=Object.getOwnPropertyDescriptor(sources,'targetStack');check();
+    if(!supplied || !('value' in supplied) || supplied.value===undefined)
+      fail('8007de9c reached actual8020ba78 target displacement; explicit target stack unavailable');
+    const record=(value:unknown,where:string):object=>{
+      if(value===null || typeof value!=='object' || Array.isArray(value) || ArrayBuffer.isView(value) || value instanceof Promise)
+        fail(`${where}: ordinary own-data record required`);
+      return value;
+    };
+    const stack=record(supplied.value,'target stack'), destination=record(read(stack,'displacement'),'target displacement');
+    // Host ownership admission only: inspect descriptors, never invoke accessors
+    // or dereference the target pointer. Existing actor vectors, HIT bindings,
+    // registered child/descriptor bytes and their immediate owners cannot stand
+    // in for the source stack. Matrix arrays are rejected by record admission.
+    const sourceOwners=[...call(()=>spawns.getSourceOwners(e.origin)),e.bytes,e.stage,e.world,e.status,draw,sources,processor,capturedTarget];
+    if(hits!==undefined) sourceOwners.push(call(()=>hits.getActorBinding(e.origin)));
+    const nested:object[]=[];
+    for(const owner of sourceOwners) {
+      if(owner===sources || owner===capturedTarget || owner===null || typeof owner!=='object') continue;
+      const descriptors=Object.getOwnPropertyDescriptors(owner);check();
+      for(const descriptor of Object.values(descriptors))
+        if('value' in descriptor && descriptor.value!==null && typeof descriptor.value==='object') nested.push(descriptor.value);
+    }
+    if(stack===destination || [...sourceOwners,...nested].includes(stack) || [...sourceOwners,...nested].includes(destination))
+      fail('target stack aliases source owner');
+    if(claimedTargetStacks.has(stack)||claimedTargetStacks.has(destination)) fail('target stack already claimed');
+    claimedTargetStacks.add(stack);claimedTargetStacks.add(destination);
+    const value=(number:unknown,where:string):number=>{
+      if(typeof number!=='number'||!Number.isFinite(number)||!Object.is(number,Math.fround(number))) fail(`${where}: finite source float32 required`);
+      return number;
+    };
+    const load=(offset:number):number=>call(()=>allocator.readF32(e.id,offset));
+    // Actual8020ba78: paired XY loads/subtract/store, THEN Z loads/subtract.
+    const ax=load(0x144),ay=load(0x148),bx=load(0x20),by=load(0x24);
+    const x=addSourceFloat32(ax,-bx),y=addSourceFloat32(ay,-by);
+    own(destination,'x',true);check();own(destination,'y',true);check();
+    (destination as SourceJointVector).x=x;check();(destination as SourceJointVector).y=y;check();
+    const az=load(0x14c),bz=load(0x28),z=addSourceFloat32(az,-bz);
+    // W1's second lanes are both +1 and execute the unused +0 subtraction.
+    addSourceFloat32(1,-1);
+    own(destination,'z',true);check();(destination as SourceJointVector).z=z;check();
+    //7dea0/7dea4 both loads precede either square. Never reload stackY here.
+    const dx=value(read(destination,'x'),'stack28'),dz=value(read(destination,'z'),'stack30');
+    const xx=value(Math.fround(dx*dx),'8007dea8 squareX');
+    const zz=value(Math.fround(dz*dz),'8007deb0 squareZ');
+    const squared=addSourceFloat32(xx,zz); //7deb4, not a fused/unrounded norm.
+    if(squared>0) fail('8007dec0 reached actual frsqrte after target horizontal-square prefix; estimator remains unsupported');
+    // Even nonzero displacement can round both squares to zero. Source next
+    // loads379c0 before7df10 replaces stack28; neither is invented here.
+    fail('8007df0c reached unauthenticated FLOAT_804379c0 after zero horizontal-square prefix');
+  };
   const initialize = (e: Entry): void => {
     const variant = u8(e.id, 0x11), pointer = ptr(e.id, 0x90);
     put8(e.id, 0x18, 1);
@@ -171,8 +235,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     const admission = call(() => spawns.getAdmissionBinding(e.origin)), target = read(admission,'pointerc8');
     if (target !== null && typeof target !== 'object') fail('ownerc8: explicit source pointer owner required');
     const yaw = sourceProjectileHeadingRadians(freshHeading);
-    if (target !== null)
-      fail('8007de9c reached positive HIT continuation at actual8020ba78 target displacement; ballistic flight prefix unsupported');
+    if (target !== null) targetPrefix(e,target);
     const pitch = sourceProjectileInitialPitch();
     if (!Number.isFinite(yaw) || !Object.is(pitch,-0)) fail('source flight scalar invariant differs');
     const suppliedStack = Object.getOwnPropertyDescriptor(sources,'initializationStack');check();
