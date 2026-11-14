@@ -3,7 +3,8 @@
  * existing teamRows103/charged/meter owners. First reached active-burst8b290,
  * normal53b30 or unconditional pausedbef4 remains a hard ordered boundary unless
  * explicit mass ingress supplies the bounded53b30 prefix. That path stops before
- * nonzero passenger1e4 or first55fc, never skips a scheduler predecessor.
+ * nonzero passenger1e4 or missing RNG/ordering ingress. The no-contact ordering
+ * suffix can return53b30 and then stops before mandatory6ae60.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
  *
@@ -19,6 +20,7 @@ import {isSourceObjectSchedulerRuntime, claimSourceObjectSchedulerOuterFrame,
 import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import {markIncompleteSourceActorDoubleLifecycle, requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {addSourceFloat32} from './source-float.js';
+import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceBattleOuterGlobalFields, SourceBattleSystemGlobals} from './battle-global-layout.js';
 
 /** Explicit metadata for source pointer arithmetic, not a copied actor table.
@@ -36,7 +38,15 @@ export interface SourceBattleMassPreparationSources {
   physicalBlock?: SourceBattlePhysicalActorBlock;
   /** SAME4ac registry used by the reached canonical status binding. */
   attributes?: SourceActorAttributeRefreshRuntime;
-  data?: {float80437250?: number; float80437254?: number};
+  data?: {float80437250?: number; float80437254?: number; float80437258?: number};
+  /** Actual global RNG bytes, not a seed/default or a host random callback. */
+  rngState?: {byte804360c6?: number; byte804360c7?: number};
+  /** Distinct DAT_803c4e6c six-word list and DAT_80436260 byte. The list is
+   * not cleared: role1 scans count+1 and can observe its stale logical tail. */
+  orderPointers?: Record<number,symbol|null>;
+  orderCount?: {count80436260?: number};
+  /** SAME genuine465fc binding owns4a4. Reached only by role1 parent scans. */
+  matrices?: SourceActorMatrixUpdateRuntime;
 }
 export interface SourceBattleOuterFrameSources {
   scheduler: SourceObjectSchedulerRuntime;
@@ -115,6 +125,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     }
     if(previous!==undefined && previous!==actual) fail(`${name}: canonical owner changed`);
     if(actual===sources || actual===globals || actual===root.getDrawList() ||
+      [...massActors.values()].includes(actual) ||
       call(()=>scheduler.getRetainedStorageOwners()).includes(actual) ||
       [...retained].some(([key,owner])=>key!==name && owner===actual)) fail(`${name}: source storage alias`);
     retained.set(name,actual);return actual;
@@ -193,7 +204,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       storeCharged(row,meter>=threshold);
     }
   };
-  const prepareMass=(): never=>{
+  const prepareMass=(): void=>{
     const supplied=Object.getOwnPropertyDescriptor(sources,'massPreparation');check();
     if(supplied===undefined) fail('80029458 reached mandatory80053b30 normal-stage predecessor');
     const mass=retain('massPreparation',read(sources,'massPreparation'));
@@ -263,7 +274,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         fail(`${key}: finite exact source float32 required`);
       return value;
     };
-    const constant=(key: 'float80437250'|'float80437254',expected: number): number=>{
+    const constant=(key: 'float80437250'|'float80437254'|'float80437258',expected: number): number=>{
       const value=f(massOwner('data'),key);
       if(!Object.is(value,expected)) fail(`${key}: differs from authenticated source bits`);return value;
     };
@@ -286,6 +297,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     if(read(block,'base')!==base) fail('53b30 physical base differs from captured table[0]');
     const ids=retain('mass physical identities',read(block,'identities'));
     if(!Array.isArray(ids) || !Object.isFrozen(ids) || read(ids,'length')!==6) fail('53b30 six frozen physical identities required');
+    // Sparse host representation preserves uninitialized source stack bytes.
+    // Only an active physical row reaches the source stb zero at stack+8+i.
+    const passengerCounts: (number|undefined)[]=Array(6);
     const physicalTargets=new Set<object>(),physicalIds=new Set<symbol>();
     for(let index=0;index<6;index++) {
       if(read(mass,'physicalBlock')!==block) fail('53b30 physical block owner changed');
@@ -295,8 +309,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(physicalTargets.has(actor)) fail('53b30 physical targets overlap');physicalTargets.add(actor);
       if(s8(byte(actor,'active0'))===0) continue;
       const zero=constant('float80437250',0);
-      // Source initializes local_18[index] here. It is not observable before
-      // the unsupported passenger/RNG suffix; no fabricated stack is exposed.
+      passengerCounts[index]=0; //80053be8: active physical index, not actor.slot.
       const owner=borg(id,actor);write(owner,'sourceArrowMass204',zero);
       const state=s8(life(id,actor));
       if(state===1 || state===2) {
@@ -338,7 +351,134 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(s8(byte(actor,'supportContact1db'))!==0)
         fail('80053b30 mass propagation reached unsupported actual pointer1e4 ownership');
     }
-    fail('80053d60 reached mandatory800055fc RNG predecessor');
+    const randomByte=(): number=>{
+      const supplied=Object.getOwnPropertyDescriptor(mass,'rngState');check();
+      if(supplied===undefined) fail('80053d60 reached mandatory800055fc RNG predecessor');
+      const state=massOwner('rngState');
+      noShadows(state,['c6','c7','bytec6','bytec7','198','199','seed','state']);
+      //13 authenticated instructions: old low is captured once. The high
+      // byte store precedes low; a failing low store retains updated high.
+      const high=byte(state,'byte804360c7'),low=byte(state,'byte804360c6');
+      const nextHigh=(((high*256+low)*3)>>8)&255,nextLow=(low+nextHigh)&255;
+      write(state,'byte804360c7',nextHigh);
+      write(state,'byte804360c6',nextLow);
+      return nextLow;
+    };
+    const countOwner=(): object=>{
+      const owner=massOwner('orderCount');noShadows(owner,['count','byte0','0']);return owner;
+    };
+    const orderCount=(): number=>byte(countOwner(),'count80436260');
+    const writeOrderCount=(value: number): void=>write(countOwner(),'count80436260',value&255);
+    const orderIndex=(index: number): void=>{
+      // Index6 aliases the adjacent actor table in retail memory. This
+      // bounded host list does not silently manufacture that alias.
+      if(index<0 || index>=6) fail('53b30 order pointer outside explicit6-word owner');
+    };
+    const orderPointer=(index: number): symbol|null=>{
+      orderIndex(index);const id=read(massOwner('orderPointers'),String(index));
+      if(id!==null && typeof id!=='symbol') fail('53b30 order pointer identity required');return id;
+    };
+    const writeOrderPointer=(index: number,id: symbol|null): void=>{
+      orderIndex(index);write(massOwner('orderPointers'),String(index),id);
+    };
+    const world=spawns.getWorldRuntime(),worlds=new Map<symbol,object>();
+    const worldOwner=(id: symbol,actor: object): object=>{
+      if(spawns.getWorldRuntime()!==world || call(()=>world.getActualActor(id))!==actor ||
+        call(()=>status.getActualActor(id))!==actor) fail('53b30 canonical world actual differs');
+      const owner=record(call(()=>world.getActorBinding(id)),'53b30 same world4a0');
+      if(call(()=>status.getWorldBinding(id))!==owner || (worlds.has(id)&&worlds.get(id)!==owner))
+        fail('53b30 canonical world binding differs');
+      if(owner===actor || [...retained.values()].includes(owner) || [...borgs.values()].includes(owner))
+        fail('53b30 world storage alias');
+      noShadows(actor,['mode4a0','field4a0','byte4a0','byte4A0','1184']);
+      noShadows(owner,['field4a0','byte4a0','byte4A0','1184']);worlds.set(id,owner);return owner;
+    };
+    const slot=(actor: object): number=>{
+      noShadows(actor,['slot3e4','byte3e4','byte3E4','field3e4','field3E4','996']);
+      return s8(byte(actor,'slot'));
+    };
+    const passengerCount=(index: number): number=>{
+      if(index<0 || index>=6 || passengerCounts[index]===undefined)
+        fail('53b30 reached uninitialized or out-of-domain local passenger count');
+      return s8(passengerCounts[index]!);
+    };
+    const parent=(id: symbol,actor: object,worldBinding: object): symbol|null=>{
+      const matrices=read(mass,'matrices');
+      if(!isSourceActorMatrixUpdateRuntime(matrices) || call(()=>matrices.getActualActor(id))!==actor ||
+        call(()=>matrices.getWorldBinding(id))!==worldBinding || call(()=>matrices.getGlobals())!==globals ||
+        call(()=>matrices.getMappingActor(id))!==call(()=>status.getMappingActor(id)))
+        fail('53b30 same genuine4a4 matrix owner required');
+      const owner=record(call(()=>matrices.getActorBinding(id)),'53b30 matrix4a4 binding');
+      if(call(()=>world.getCorrectedTraversalState(id))!==owner) fail('53b30 canonical corrected4a4 owner differs');
+      if(owner===actor || [...retained.values()].includes(owner) || [...borgs.values()].includes(owner) ||
+        [...worlds.values()].includes(owner)) fail('53b30 matrix storage alias');
+      noShadows(actor,['link4a4','pointer4a4','field4a4','byte4a4','byte4a5','byte4a6','byte4a7',
+        'byte4A4','byte4A5','byte4A6','byte4A7','1188','1189','1190','1191']);
+      noShadows(owner,['pointer4a4','field4a4','byte4a4','byte4a5','byte4a6','byte4a7',
+        'byte4A4','byte4A5','byte4A6','byte4A7','1188','1189','1190','1191']);
+      const value=read(owner,'link4a4');
+      if(value!==null && typeof value!=='symbol') fail('53b30 parent pointer identity required');return value;
+    };
+    const shift=(end: number,start: number): void=>{
+      // The source unrolls groups of8 then the remainder. A bounded6-word
+      // list can reach only the remainder; preserve each load/store pair.
+      for(let index=end;index>start;index--) writeOrderPointer(index,orderPointer(index-1));
+    };
+    let selected=(randomByte()>>>2)%6;
+    const direction=(randomByte()&8)!==0?1:-1;
+    writeOrderCount(0); //53d9c precedes authenticated1.0 load53da4.
+    const one=constant('float80437258',1);
+    for(let visit=0;visit<6;visit++) {
+      const id=slotPointer(selected),actor=actual(id);
+      if(id===null) fail('53b30 null ordering actor');
+      noShadows(actor,['float664','mass664','1636','1637','1638','1639','byte664','byte665','byte666','byte667']);
+      write(actor,'field664',one);
+      selected=selected+direction<0?5:(selected+direction)%6;
+      if(s8(byte(actor,'active0'))===0) continue;
+      if(byte(worldOwner(id,actor),'mode4a0')===1) continue;
+      const captured=s8(orderCount());
+      if(captured<0) continue;
+      for(let index=0;index<=captured;index++) {
+        if(index===captured) {
+          const raw=orderCount(),destination=s8(raw);
+          writeOrderCount(raw+1); //append stb BEFORE stwx.
+          writeOrderPointer(destination,id);break;
+        }
+        const existing=orderPointer(index); //pointer load, then candidate slot, then existing slot.
+        const candidateSlot=slot(actor),other=actual(existing),otherSlot=slot(other);
+        const candidateCount=passengerCount(candidateSlot),otherCount=passengerCount(otherSlot);
+        if(candidateCount<=otherCount) continue; //stable ties in random visit order.
+        shift(captured,index);
+        const fresh=orderCount();
+        writeOrderPointer(index,id);writeOrderCount(fresh+1);break; //insert stwx BEFORE stb.
+      }
+    }
+    //53f44 reloads table0 once, then returns to physical stride. This explicit
+    // metadata covers the original block only; a retargeted base is refused.
+    if(slotPointer(0)!==base) fail('53b30 final physical base differs from explicit block');
+    for(let index=0;index<6;index++) {
+      if(read(mass,'physicalBlock')!==block || read(block,'identities')!==ids)
+        fail('53b30 physical block owner changed');
+      const id=read(ids,String(index));
+      if(typeof id!=='symbol') fail('53b30 physical identity required');
+      const actor=actual(id);
+      if(s8(byte(actor,'active0'))===0) continue;
+      const header=worldOwner(id,actor);
+      if(byte(header,'mode4a0')!==1) continue;
+      const captured=s8(orderCount());
+      if(captured<0) continue;
+      for(let position=0;position<=captured;position++) {
+        //53f80 list pointer load precedes fresh4a4 every comparison. No
+        // dereference of either compared pointer and no null-parent default.
+        const existing=orderPointer(position),link=parent(id,actor,header);
+        if(existing!==link) continue;
+        shift(captured,position);
+        const fresh=orderCount();
+        writeOrderPointer(position,id);writeOrderCount(fresh+1);break;
+      }
+    }
+    //Genuine53b30 return for the fully reached bounded no-contact path.
+
   };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
@@ -351,7 +491,10 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           root.getSpawnRuntime()!==spawns || scheduler.getAllocatorRuntime()!==allocator) fail('canonical scheduler graph changed');
         noShadows(globals,['5588','102','214','215','byteD6','byteD7','byted6','byted7','half214']);
         applyPending();updateTeams();
-        if(s8(byte(match(),'byte66'))===0) prepareMass();
+        if(s8(byte(match(),'byte66'))===0) {
+          prepareMass();
+          fail('8002945c reached mandatory8006ae60 normal-stage predecessor');
+        }
         fail('80029464 reached mandatory8000bef4 outer-frame predecessor');
       } catch(error) {
         incomplete=true;closing=true;

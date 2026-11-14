@@ -64,6 +64,9 @@ export interface RomActor {
    * No constructor default; supplied only by a source hydration boundary.
    * @romfield active0 +0x0 u8 */
   active0?: number;
+  /** Explicit source53b30 ordering reset. No constructor default.
+   * @romfield field664 +0x664 f32 */
+  field664?: number;
   /** Port-side runtime dependency. Kept on the actor so concurrent battles cannot
    *  overwrite one another's floor behavior.
    *  @romfield physicsRuntime port_side */

@@ -1,3 +1,4 @@
+import {runBattleMassOrderingSelfTests} from './battle-mass-ordering.selftest.js';
 import {runBattleMassPreparationSelfTests} from './battle-mass-preparation.selftest.js';
 import {runBattleOuterFrameSelfTests} from './battle-outer-frame.selftest.js';
 import {runObjectSchedulerSelfTests} from './source-object-scheduler.selftest.js';
@@ -2871,6 +2872,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runProjectileCleanupHydratedCompositionTests();
   runBattleOuterFrameHydratedCompositionTests();
   runBattleMassPreparationHydratedCompositionTests();
+  runBattleMassOrderingHydratedCompositionTests();
   runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
@@ -13302,4 +13304,24 @@ export function createBattleMassPreparationTestFixture() {
 }
 export function runBattleMassPreparationHydratedCompositionTests(): void {
   runBattleMassPreparationSelfTests(createBattleMassPreparationTestFixture);
+}
+
+/** Optional ordering ingress added only for this bounded synthetic witness.
+ * The old preparation fixture still ends at its missing RNG owner. There is
+ * one genuine active actor, not six hydrated status/parameter actor graphs. */
+export function createBattleMassOrderingTestFixture() {
+  const x=createBattleMassPreparationTestFixture();
+  Object.assign(x.sourceActor,{field664:77,slot:0});
+  x.header.mode4a0=0;
+  const orderPointers: Record<number,symbol|null>={};
+  for(let i=0;i<6;i++) orderPointers[i]=null;
+  const massPreparation=Object.assign(x.massPreparation,{
+    rngState:{byte804360c6:0xc3,byte804360c7:1},orderPointers,
+    orderCount:{count80436260:77},matrices:x.normal,
+    data:{...x.massPreparation.data,float80437258:1},
+  });
+  return Object.assign(x,{massPreparation});
+}
+export function runBattleMassOrderingHydratedCompositionTests(): void {
+  runBattleMassOrderingSelfTests(createBattleMassOrderingTestFixture);
 }

@@ -117,6 +117,8 @@ export interface SourceActorWorldMatrixRuntime {
   /** Live owned record, with lazy element reads left to the caller. */
   getWorldMatrix(identity: symbol, index: number): readonly number[];
   getStorage(identity: symbol): SourceActorWorldMatrixStorage;
+  /** Already retained canonical correction owner, without scalar reads. */
+  getCorrectedTraversalState(identity: symbol): SourceActorCorrectedTraversalState | undefined;
   /** Once-only binding to the actual controller owner; no default scan state. */
   bindCorrectedTraversalState(identity: symbol, actualState: SourceActorCorrectedTraversalState): void;
   /** Once-only late binding, after real movement/terrain owners exist. */
@@ -482,6 +484,7 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       return result;
     },
     getStorage(id: symbol): SourceActorWorldMatrixStorage {return entry(id).storage;},
+    getCorrectedTraversalState(id: symbol): SourceActorCorrectedTraversalState | undefined {return entry(id).corrected;},
     getActualActor(id: symbol): RomActor {return entry(id).actual;},
     getMappingActor(id: symbol): object {return entry(id).mapping;},
     bindCorrectedTraversalState(id: symbol, actualState: SourceActorCorrectedTraversalState): void {guard(() => {
