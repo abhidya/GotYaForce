@@ -1,7 +1,8 @@
 /** Bounded stored8007dcec callback and initial8007dd84 prefix, not a scheduler.
  * See projectile-callback/initialization-evidence-2026-11-14.md. Only source
- * states0/2 and row1 are authenticated. Explicit state2 data admits its real
- * retirement handler; state3/freeing remains unsupported. A genuine8ac80 continuation
+ * states0/2/3 and row1 are authenticated. Explicit state2 data admits its real
+ * retirement handler; explicit state3 data admits canonical cleanup (see
+ * projectile-cleanup-integration-2026-11-14.md). A genuine8ac80 continuation
  * preserves actual zero return or refreshes the same child position, then
  * refuses at the reached flight helper. Missing HIT remains an explicit bound.
  *
@@ -37,6 +38,8 @@ export interface SourceProjectileRootSources {
   row1Hit03: number;
   /** Optional decoded802d6fa0, admitted only at actual signed state2 dispatch. */
   retirementState2?: number;
+  /** Optional decoded802d6fa4, admitted only at actual signed state3 dispatch. */
+  cleanupState3?: number;
   /** Optional genuine continuation, never a caller-supplied success callback. */
   hits?: SourceProjectileHitRuntime;
   /** Explicit source temporary matrix storage, distinct from all actor matrices. */
@@ -56,6 +59,15 @@ export interface SourceProjectileRootRuntime {
 }
 const runtimes = new WeakSet<object>(), claimedChildren = new WeakSet<object>(), claimedDrawLists = new WeakSet<object>(),
   claimedStackMatrices = new WeakSet<object>(), claimedTargetStacks = new WeakSet<object>();
+const cleanupScopes = new WeakMap<object, (spawns: SourceActorProjectileSpawnRuntime, child: symbol) =>
+  {drawList: SourceProjectileDrawList; lifetime: symbol}>();
+/** Internal genuine join: a branded idle root never authorizes cleanup. */
+export function requireSourceProjectileCleanupInvocation(root: SourceProjectileRootRuntime,
+  spawns: SourceActorProjectileSpawnRuntime, child: symbol): {drawList: SourceProjectileDrawList; lifetime: symbol} {
+  const scope = cleanupScopes.get(root);
+  if (!isSourceProjectileRootRuntime(root) || !scope) fail('private active state3 cleanup invocation required');
+  return scope(spawns,child);
+}
 export function isSourceProjectileRootRuntime(value: unknown): value is SourceProjectileRootRuntime {
   return value !== null && typeof value === 'object' && runtimes.has(value);
 }
@@ -99,13 +111,15 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
   const read = (owner: unknown, key: string): unknown => {const value = own(owner, key); check(); return value;};
   const writeList = (key: 'head' | 'tail', value: symbol | null): void => {own(draw, key, true); check(); draw[key] = value; check();};
   const same = (value: unknown, expected: unknown, where: string): void => {check(); if (value !== expected) fail(`${where}: source owner changed or differs`);};
-  interface Entry {id: symbol; origin: symbol; actual: RomActor; bytes: SourceAllocationBytes; stage: object; world: object; status: object; incomplete: boolean}
+  interface Entry {id: symbol; origin: symbol; actual: RomActor; bytes: SourceAllocationBytes; stage: object; world: object; status: object; incomplete: boolean; released: boolean; lifetime: symbol}
   const children = new Map<symbol, Entry>();
+  let cleanupEntry: Entry | undefined;
   const entry = (id: symbol): Entry => {const e = children.get(id); if (!e) fail('unknown/non-owned projectile'); return e;};
   const owners = (e: Entry): void => {
     if (e.incomplete) fail('known incomplete projectile root');
     call(() => spawns.assertActorComplete(e.origin));
     same(call(() => spawns.getSpawnOwnerIdentity(e.id)), e.origin, 'completed spawn');
+    same(call(() => spawns.getSpawnLifetime(e.id)), e.lifetime, 'completed spawn lifetime');
     same(call(() => spawns.getActualActor(e.origin)), e.actual, 'spawn actor');
     same(call(() => stage.getActualActor(e.origin)), e.actual, 'stage actor');
     same(call(() => allocator.getObject(e.id)), e.bytes, 'same child bytes');
@@ -266,12 +280,13 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
   };
   const runtime: SourceProjectileRootRuntime = {
     bindProjectile(id) {guard(() => {
-      if (typeof id !== 'symbol' || children.has(id)) fail('new projectile identity required');
+      if (typeof id !== 'symbol' || (children.has(id) && !children.get(id)!.released)) fail('new projectile identity required');
       const origin = call(() => spawns.getSpawnOwnerIdentity(id)), actual = call(() => spawns.getActualActor(origin));
       const bytes = call(() => allocator.getObject(id));
       if (claimedChildren.has(bytes)) fail('child already claimed by source root');
       const e: Entry = {id, origin, actual, bytes, stage: call(() => stage.getActorBinding(origin)),
-        world: call(() => stage.getWorldBinding(origin)), status: call(() => stage.getStatusBinding(origin)), incomplete: false};
+        world: call(() => stage.getWorldBinding(origin)), status: call(() => stage.getStatusBinding(origin)), incomplete: false,
+        released:false,lifetime:call(() => spawns.getSpawnLifetime(id))};
       const owned = call(() => spawns.getSourceOwners(origin));
       if (owned.includes(draw) || draw === bytes || new Set([actual, bytes, e.stage, e.world, e.status, draw]).size !== 6)
         fail('draw list or projectile source owner alias');
@@ -281,6 +296,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     getSourceOwners(id) {const e = entry(id); return Object.freeze([e.bytes, e.actual, e.stage, e.world, e.status, draw]);},
     dispatchStoredRoot(id) {guard(() => {
       const e = entry(id);
+      if (e.released) fail('released projectile requires a new completed spawn and explicit rebind');
       if (isSourceActorDoubleFrameClaimed(e.actual)) fail('frame-owned actor requires its unimplemented later source object scheduler');
       try {
         owners(e);
@@ -311,6 +327,19 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
           // complete invocation, not an inline state3/free-list continuation.
           put8(id,0x18,3); invalidation(id); put8(id,0x82,0); return;
         }
+        if (selected === 3) {
+          const supplied = Object.getOwnPropertyDescriptor(sources,'cleanupState3');check();
+          if (!supplied || ('value' in supplied && supplied.value === undefined))
+            fail('8007dd64 reached unauthenticated projectile state3 dispatch cell');
+          if (!('value' in supplied)) fail('cleanupState3: own data dispatch cell required');
+          if (unsigned(supplied.value,0xffffffff,'cleanupState3') !== 0x8007e678)
+            fail('cleanupState3: authenticated dispatch target differs');
+          cleanupEntry=e;
+          try {call(() => spawns.cleanupProjectile(id,runtime));} finally {cleanupEntry=undefined;}
+          // A NEW bind after a NEW completed spawn constructs another Entry.
+          // The old Entry stays released even if these exact bytes are reused.
+          e.released=true;claimedChildren.delete(e.bytes);return;
+        }
         if (selected !== 0) fail(`8007dd64 reached unauthenticated projectile state${selected} dispatch cell`);
         if (state0 !== 0x8007dd84) fail('initial source dispatch target changed');
         initialize(e);
@@ -319,5 +348,11 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
       }
     });},
   };
+  cleanupScopes.set(runtime,(producer,child) => {
+    const e=cleanupEntry;
+    if (!busy || poisoned || !e || e.id!==child || e.released || e.incomplete || producer!==spawns)
+      fail('private active state3 cleanup invocation required');
+    return {drawList:draw,lifetime:e.lifetime};
+  });
   runtimes.add(runtime); claimedDrawLists.add(draw); return Object.freeze(runtime);
 }

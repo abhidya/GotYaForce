@@ -21,6 +21,7 @@ import {runProjectileHitRegistrationSelfTests} from './projectile-hit-registrati
 import {runProjectileFlightPrefixSelfTests} from './projectile-flight-prefix.selftest.js';
 import {runProjectileTargetPrefixSelfTests} from './projectile-target-prefix.selftest.js';
 import {runProjectileRetirementSelfTests} from './projectile-retirement.selftest.js';
+import {runProjectileCleanupSelfTests} from './projectile-cleanup.selftest.js';
 import {createSourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
 import {createSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleBinding} from './actor-control-lifecycle.js';
@@ -2864,6 +2865,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runProjectileFlightHydratedCompositionTests();
   runProjectileTargetHydratedCompositionTests();
   runProjectileRetirementHydratedCompositionTests();
+  runProjectileCleanupHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -13106,8 +13108,11 @@ export function createProjectileRootTestFixture(matchingMirror = true) {
 /** Explicit source integer projection plus synthetic current type4 free lists.
  * Only eight selected HIT bytes are reconstructed from lossless export fields;
  * no rounded floats, full raw asset, constructor or matrix is manufactured. */
-export function createProjectileHitTestFixture(withFlightStack = false) {
+export function createProjectileHitTestFixture(withFlightStack = false, withDescriptorRow0 = false) {
   const x=createProjectileSpawnTestFixture();x.sourceActor.borgMirror94=3;
+  // Explicit synthetic current descriptor row markers, BEFORE allocation. The
+  // real allocator preserves byte8; old fixtures retain their original sentinel.
+  if(withDescriptorRow0) for(const id of [x.descriptor,x.nextDescriptor]) x.allocator.writeU8(id,8,0);
   check(x.projectiles.spawn(x.actor,1)===x.child,'real spawn supplies HIT child');
   const hitBinding=createDoubleProjectileHitExportSlice(),hitTableIdentity=Symbol('explicit pl0003 integer slice'),
     damageIdentity=Symbol('actual retained derived family table');
@@ -13144,6 +13149,17 @@ export function createProjectileRetirementTestFixture() {
 }
 export function runProjectileRetirementHydratedCompositionTests(): void {
   runProjectileRetirementSelfTests(createProjectileRetirementTestFixture);
+}
+/** Adds two authenticated dispatch cells and explicit current descriptor row0
+ * markers without changing HIT results or inserting cleanup/state shortcuts. */
+export function createProjectileCleanupTestFixture() {
+  const x=createProjectileHitTestFixture(false,true);
+  const descriptorPool=Object.assign(x.descriptorPool,{releaseCallback18:0x80006ed8});
+  const rootSources=Object.assign(x.rootSources,{retirementState2:0x8007e63c,cleanupState3:0x8007e678});
+  return Object.assign(x,{rootSources,descriptorPool});
+}
+export function runProjectileCleanupHydratedCompositionTests(): void {
+  runProjectileCleanupSelfTests(createProjectileCleanupTestFixture);
 }
 export function runProjectileTargetHydratedCompositionTests(): void {
   runProjectileTargetPrefixSelfTests(createProjectileTargetTestFixture);

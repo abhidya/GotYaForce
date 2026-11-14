@@ -2,7 +2,10 @@
  * Both bodies and all selected row bytes are authenticated by the fixed
  * read_archived_projectile_spawn_evidence.py reader. Row1 is copied/frozen;
  * missing rows are not defaults. This is static-source offline execution, not
- * retail heap hydration, projectile flight, callback execution or playability.
+ * retail heap hydration, projectile flight, scheduling or playability.
+ * A separate private root cleanup join revokes completed-spawn lifetimes only
+ * after the actual allocator release chain returns; spawning itself never
+ * executes the stored root callback.
  *
  * All reached source loads and stores retain instruction order. The newly
  * allocated byte record is the canonical allocation: exact8020b7a8 writes
@@ -28,6 +31,7 @@ import {isSourceActorCommandAdmissionRuntime, type SourceActorCommandAdmissionRu
 import {isSourceActorGaugeScaleRuntime, type SourceActorGaugeScaleRuntime} from './actor-gauge-scale.js';
 import {isSourceObjectAllocationRuntime, type SourceObjectAllocationRuntime} from './source-object-allocation.js';
 import type {SourceJointVector} from './joint-animation-feedback.js';
+import {requireSourceProjectileCleanupInvocation, type SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
 
 export interface SourceActorProjectileSpawnRow {
   family2e: number; joint02: number; local04: Readonly<SourceJointVector>; offset2c: number;
@@ -57,6 +61,9 @@ export interface SourceActorProjectileSpawnRuntime {
   assertActorComplete(identity: symbol): void;
   /** Identity registered only after every source spawn store completes. */
   getSpawnOwnerIdentity(projectile: symbol): symbol;
+  /** Host lifetime of this completed allocation, not a source object field. */
+  getSpawnLifetime(projectile: symbol): symbol;
+  cleanupProjectile(projectile: symbol, root: SourceProjectileRootRuntime): void;
   /** Actual88aa0(owner,4,48,0,0) for a completed child's reached8ac80 call. */
   allocateProjectileHit(projectile: symbol): symbol | null;
   /** Host return exposes allocation identity for inspection; source returns void. */
@@ -144,7 +151,7 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
   interface Entry {actual: RomActor; mapping: object; world: object; status: object; admission: object; gauge: object;
     setupPart0: object; setupActor: object; aim: object; binding: Partial<SourceActorProjectileSpawnBinding>; caller: symbol}
   const actors = new Map<symbol, Entry>(), frameAccesses = new Map<symbol, SourceActorDoubleFrameAccess>();
-  const completedSpawns = new Map<symbol, symbol>();
+  const completedSpawns = new Map<symbol, {owner: symbol; lifetime: symbol}>();
   const entry = (id: symbol): Entry => {const e = actors.get(id); if (!e) fail('unknown/non-owned projectile actor'); return e;};
   const partZero = (id: symbol): object => {
     const layout = call(() => mapping.getLayout(id)), parts = read(layout, 'parts'), bank = read(parts, '0'), part = read(bank, '0');
@@ -227,16 +234,38 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
     getSpawnOwnerIdentity(projectile) {
       const id = completedSpawns.get(projectile);
       if (id === undefined) fail('projectile has no completed genuine spawn');
-      return id;
+      return id.owner;
+    },
+    getSpawnLifetime(projectile) {
+      const completed = completedSpawns.get(projectile);
+      if (!completed) fail('projectile has no completed genuine spawn');
+      return completed.lifetime;
+    },
+    cleanupProjectile(projectile, root) {
+      const scope = requireSourceProjectileCleanupInvocation(root,runtime,projectile);
+      guard(() => {
+        const completed = completedSpawns.get(projectile);
+        if (!completed || completed.lifetime !== scope.lifetime) fail('cleanup requires same completed spawn lifetime');
+        const id = completed.owner, e = entry(id);
+        try {
+          owners(id,e);
+          call(() => allocator.releaseProjectile(id,e.caller,projectile,scope.drawList));
+          // Host lifetime revocation only AFTER every source cleanup effect.
+          completedSpawns.delete(projectile);
+        } catch (error) {
+          markIncompleteSourceActorDoubleLifecycle(e.actual);
+          allocator.markActorIncomplete(id,e.caller); throw error;
+        }
+      });
     },
     allocateProjectileHit(projectile) {return guard(() => {
       const id = completedSpawns.get(projectile);
       if (id === undefined) fail('HIT allocation requires completed genuine spawn');
-      const e = entry(id);
-      try {owners(id,e); return call(() => allocator.allocateProjectileHit(id,e.caller));}
+      const origin = id.owner, e = entry(origin);
+      try {owners(origin,e); return call(() => allocator.allocateProjectileHit(origin,e.caller));}
       catch (error) {
         markIncompleteSourceActorDoubleLifecycle(e.actual);
-        allocator.markActorIncomplete(id,e.caller); throw error;
+        allocator.markActorIncomplete(origin,e.caller); throw error;
       }
     });},
     spawn(id, variant) {return guard(() => {
@@ -281,7 +310,7 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
         const aimX = f(e.aim,'x'), aimY = f(e.aim,'y');
         sf(0x144,aimX); sf(0x148,aimY); sf(0x14c,f(e.aim,'z'));
         u8(0x150,byte(e.setupPart0,'group28')); u8(0x151,byte(e.setupPart0,'action29'));
-        completedSpawns.set(child, id);
+        completedSpawns.set(child, {owner:id,lifetime:Symbol('completed projectile allocation lifetime')});
         return child;
       } catch (error) {
         markIncompleteSourceActorDoubleLifecycle(e.actual);

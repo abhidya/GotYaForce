@@ -1,7 +1,8 @@
-/** Bounded source88aa0(actor,3,8,0,1)/(actor,4,48,0,0), not retail heap hydration.
+/** Bounded source88aa0 allocation and88e50 release, not retail heap hydration.
  * Evidence: research/decomp/object-allocator-evidence-2026-11-14.md and
  * research/decomp/projectile-spawn-evidence-2026-11-14.md and
- * research/decomp/projectile-hit-evidence-2026-11-14.md.
+ * research/decomp/projectile-hit-evidence-2026-11-14.md and
+ * research/decomp/projectile-cleanup-evidence-2026-11-14.md.
  * No original-runtime execution or oracle parity is claimed.
  * Object and descriptor records retain caller-supplied canonical BE byte storage.
  * Opaque symbols receive local u32 encodings solely to represent pointers in that
@@ -13,6 +14,10 @@
  * descriptor count is zero; signed negative descriptor availability still fails.
  * Descriptor0 has actual nonnull initializer80006f60 (three zero word stores),
  * not an optional injected success function. Its source record stride is0x2c.
+ * Release reaches actual nonnull06ed8; a nonzero descriptor+c remains an
+ * explicit JObjUnref boundary. Cleanup preserves source stale fields and uses
+ * the SAME pool/group/descriptor owners, with the root-owned draw list passed
+ * only through the private active source3 join. No scheduler is invented.
  *
  * Scalar stores preflight one source-width destination before committing. Memset
  * zeroes the real supplied type-sized backing; byte-wise admission failure order
@@ -37,6 +42,8 @@ export interface SourceDescriptorPool {
   count?: number;
   /** Explicit source code-pointer bits, not a host success callback. */
   initCallback14?: number;
+  /** Explicit descriptor0 release cell8036f65c, reached only by197ad8. */
+  releaseCallback18?: number;
 }
 export interface SourceObjectAllocationActorBinding {byte83: number}
 /** Symbolic address only: this neither dereferences nor copies source bytes. */
@@ -65,6 +72,8 @@ export interface SourceObjectAllocationRuntime {
   claimActor(identity: symbol, caller: symbol): void;
   allocateProjectile(identity: symbol, caller: symbol): symbol | null;
   allocateProjectileHit(identity: symbol, caller: symbol): symbol | null;
+  /** Actual88e50 helper chain, only through the spawn owner private capability. */
+  releaseProjectile(identity: symbol, caller: symbol, projectile: symbol, drawList0: SourceObjectGroup): void;
   markActorIncomplete(identity: symbol, caller: symbol): void;
   getObject(identity: symbol): SourceAllocationBytes;
   getDescriptor(identity: symbol): SourceAllocationBytes;
@@ -310,6 +319,77 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     }
     return allocated;
   };
+  const release = (id: symbol, caller: symbol, child: symbol, draw: SourceObjectGroup): void => {
+    const a = authorize(id,caller);
+    requireSourceActorDoubleInvocation(a.actual,'allocation',runtime);
+    if (actualActor(id) !== a.actual) fail('world actor owner changed its actual record'); noShadow(a.actual);
+    memory(child,'object');
+    if ([...owners.values(),a.actual,a.binding].includes(draw)) fail('cleanup draw list aliases allocation owner');
+    record(draw,'actual cleanup draw list');
+    allocating = true; dirty = false;
+    const signed = (object: symbol, offset: number): number => load(object,offset,1) << 24 >> 24;
+    const unlinkDraw = (): void => {
+      const group = signed(child,0x85); //89444/48: -1 is a genuine immediate return.
+      if (group === -1) return;
+      const previous = pointer(child,0x104), next = pointer(child,0x108);
+      if (group !== 0) fail('actual89444 reached unsupported draw-list family or group');
+      // Actual group0 has tail at r4, head at r5; it is NOT allocator group order.
+      if (previous === null && next === null) {write(draw,'tail',null);write(draw,'head',null);}
+      else if (previous === null) {write(draw,'tail',next);putPointer(next!,0x104,null);}
+      else if (next === null) {write(draw,'head',previous);putPointer(previous,0x108,null);}
+      else {putPointer(previous,0x108,next);putPointer(next,0x104,previous);}
+      store(child,0x100,4,0);store(child,0x85,1,255);
+    };
+    const releaseDescriptor = (descriptor: symbol): void => {
+      memory(descriptor,'descriptor');
+      // Actual06d80 never clears a null+c. Nonnull requires real JObjUnref.
+      if (pointer(descriptor,0x0c) !== null) fail('actual80006da0 reached unsupported8024fd74 JObjUnref');
+      const type = signed(descriptor,8);
+      if (type !== 0) fail(`actual197b10 reached unauthenticated descriptor row${type} release callback`);
+      const p = pool('descriptorPools',type), callback = raw(p,'releaseCallback18',0xffffffff);
+      if (callback !== 0x80006ed8) fail('descriptor0 release callback differs from authenticated80006ed8');
+      // Actual nonnull06ed8 callback reloads+c even after06d80 saw null.
+      if (pointer(descriptor,0x0c) !== null) fail('actual80006ef8 reached unsupported8024fd74 JObjUnref');
+      //06ed8 returns0.197ad8 ignores that value and reloads both active links.
+      const previous = pointer(descriptor,0), next = pointer(descriptor,4);
+      if (previous === null) write(p,'activeHead',next); else putPointer(previous,4,next);
+      if (next !== null) putPointer(next,0,previous);
+      const free = pointerField(p,'freeHead');
+      putPointer(descriptor,0,free);write(p,'freeHead',descriptor);store(descriptor,9,1,0);
+      //197bec and197bd8 each resolve the actual shared table; signed load then
+      // low16 store preserves wrap. The captured row index is not reread from8.
+      const count = countDescriptor(pool('descriptorPools',type));
+      write(pool('descriptorPools',type),'count',(count+1)&0xffff);
+    };
+    const group = signed(child,1);
+    if (group !== -1) {
+      const previous = pointer(child,4), next = pointer(child,8);
+      if (previous === null && next === null) {
+        write(pool('groups',group),'head',null);
+        write(pool('groups',signed(child,1)),'tail',null); //88eb0 fresh index
+      } else if (previous === null) {
+        write(pool('groups',group),'head',next);putPointer(next!,4,null);
+      } else if (next === null) {
+        write(pool('groups',group),'tail',previous);putPointer(previous,8,null);
+      } else {putPointer(previous,8,next);putPointer(next,4,previous);}
+      if (load(child,2,1) !== 4) {
+        unlinkDraw();
+        for (let index=0;index<signed(child,0x99);index++) {
+          const descriptor = pointer(child,0xe0+index*4);
+          if (descriptor !== null) releaseDescriptor(descriptor);
+        }
+      }
+    }
+    // Actual89814 uses tail/head/count globals separately and reloads byte3.
+    const firstPool = pool('objectPools',signed(child,3)), tail = pointerField(firstPool,'tail');
+    if (tail === null) {
+      write(firstPool,'tail',child);write(pool('objectPools',signed(child,3)),'head',child);
+    } else {
+      putPointer(tail,4,child);write(pool('objectPools',signed(child,3)),'tail',child);
+    }
+    const countPool = pool('objectPools',signed(child,3)), count = raw(countPool,'count',0xffff);
+    write(countPool,'count',(count+1)&0xffff);store(child,0,1,0);putPointer(child,4,null);
+  };
   const floatBits = new DataView(new ArrayBuffer(4));
   const runtime: SourceObjectAllocationRuntime = {
     registerObject(id, bytes) {guard(() => registerMemory(id, bytes, 'object'), true);},
@@ -348,6 +428,7 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     });},
     allocateProjectile(id, caller) {return guard(() => allocate(id, caller, 3), true);},
     allocateProjectileHit(id, caller) {return guard(() => allocate(id, caller, 4), true);},
+    releaseProjectile(id, caller, child, draw) {guard(() => release(id,caller,child,draw),true);},
     getObject(id) {return memory(id, 'object');},
     getDescriptor(id) {return memory(id, 'descriptor');},
     getPointerTarget(id) {return target(id);},
