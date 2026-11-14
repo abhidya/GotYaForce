@@ -1,9 +1,11 @@
 import {
   AOBJ_LOOP as LOOP, AOBJ_NO_CALLBACK as SILENT, AOBJ_REQUEST as REQUEST,
   AOBJ_STOPPED as STOPPED, AOBJ_WRAPPED as WRAPPED,
-  createSourceAObj, createSourceAObjCounters, interpretSourceAObj, requestSourceAObj,
+  createSourceAObj, createSourceAObjCounters, interpretSourceAObj, requestSourceAObj, setSourceAObjRate,
+  setSourceAObjFlags, clearSourceAObjFlags,
   type SourceAObj, type SourceAObjEffects,
 } from './aobj-clock.js';
+import {createSourceFObjScalarCallbackRuntime} from './fobj-callback.js';
 function check(ok: boolean, message: string): void { if (!ok) throw Error(`[aobj-clock] ${message}`); }
 function rejects(run: () => void, text: string): void {
   let diagnostic = '';
@@ -26,6 +28,68 @@ function fixture(initial: Partial<SourceAObj> = {}) {
   return {a, counts, events, effects, tick: () => interpretSourceAObj(a, callback, effects, counts)};
 }
 export function runAObjClockSelfTest(): void {
+  for (const [change, set] of [[setSourceAObjFlags, true], [clearSourceAObjFlags, false]] as const) {
+    const poison = new Proxy({}, {get() {throw Error('mask must not be coerced');}}) as number;
+    for (const mask of [NaN, Infinity, -1, 0x100000000, .5, poison]) {
+      check(change(null, mask) === undefined, 'null flags target bypasses mask validation');
+    }
+    for (const before of [0, 0xffffffff, 0x81234567, STOPPED | REQUEST | WRAPPED]) {
+      for (const mask of [0, 0xffffffff, LOOP, SILENT, LOOP | SILENT, STOPPED | REQUEST | WRAPPED | 3]) {
+        const f = fixture({flags: before}), snapshot = {...f.a};
+        const expected = (set ? before | (mask & 0x30000000) : before & ~(mask & 0x30000000)) >>> 0;
+        check(change(f.a, mask) === undefined && f.a.flags === expected, 'source flag helper masks changes to 0x30000000 and preserves uint32 bits');
+        check((['frame', 'rewind', 'end', 'rate', 'fobjs'] as const).every(key => Object.is(f.a[key], snapshot[key])) &&
+          f.events.length === 0 && f.counts.running === 0 && f.counts.stopped === 0,
+        'flag helper changes no clocks/list/effects/counters');
+      }
+    }
+    const f = fixture({flags: 0x81234567}), before = f.a.flags;
+    for (const mask of [NaN, Infinity, -1, 0x100000000, .5, poison]) {
+      rejects(() => change(f.a, mask), 'expected uint32'); check(f.a.flags === before, 'invalid masks fail before flags store');
+    }
+    for (const oldFlags of [NaN, Infinity, -1, 0x100000000, .5]) {
+      f.a.flags = oldFlags; rejects(() => change(f.a, 0), 'expected uint32');
+      check(Object.is(f.a.flags, oldFlags), 'old consumed flags must be uint32 even with zero mask');
+    }
+    const foreign = {...fixture().a}; rejects(() => change(foreign, LOOP), 'factory-created');
+    const proxy = new Proxy(f.a, {
+      get() {throw Error('foreign flags target must not be read');},
+      getOwnPropertyDescriptor() {throw Error('foreign flags target must not be inspected');},
+    });
+    rejects(() => change(proxy, LOOP), 'factory-created');
+    rejects(() => change(Object.create(f.a) as SourceAObj, LOOP), 'factory-created');
+    for (const freeze of [false, true]) {
+      const a = fixture().a;
+      if (freeze) Object.freeze(a); else Object.defineProperty(a, 'flags', {writable: false});
+      rejects(() => change(a, 0), 'non-writable flags'); check(a.flags === 0, 'readonly flags refused even for zero selected mask');
+    }
+    const narrow = fixture({flags: 0x81234567});
+    narrow.a.frame = NaN; narrow.a.rewind = Infinity; narrow.a.end = .1; narrow.a.rate = NaN;
+    narrow.a.fobjs = poison as unknown as symbol;
+    for (const key of ['frame', 'rewind', 'end', 'rate', 'fobjs']) Object.defineProperty(narrow.a, key, {writable: false});
+    change(narrow.a, 0xffffffff);
+    check(narrow.a.flags === (set ? 0xb1234567 : 0x81234567), 'flag-only helper ignores every unrelated invalid/frozen AObj field');
+    rejects(narrow.tick, 'non-writable'); rejects(() => requestSourceAObj(narrow.a, 0, narrow.effects), 'non-writable');
+  }
+  {
+    // Actual packed interpolation invokes both helpers while AObj interpretation
+    // is active, without weakening request/interpret same-AObj reentry guards.
+    const owner = Symbol('flag callback owner'), r = createSourceFObjScalarCallbackRuntime(owner);
+    const base = r.createData(Uint8Array.from([2, 3, 4, 2, 11]));
+    const node = r.createNode({next00: null, cursor04: base, base08: base, length0c: 5,
+      flags10: 1, byte11: 0, byte12: 0, track13: 7, format14: 0x80, format15: 0x80,
+      half16: 0, offset18: 0, half1a: 0, frame1c: 0, value20: 0, value24: 0, value28: 0, value2c: 0});
+    const a = createSourceAObj({flags: 0x80, frame: 0, rewind: 0, end: 9, rate: 1, fobjs: node});
+    const counts = createSourceAObjCounters(); let calls = 0;
+    const callback = r.createCallback((target, track, value) => {
+      check(target === owner && track === 7 && value === 7, 'actual flag callback interpolation'); calls++;
+      setSourceAObjFlags(a, 0xffffffff); check(a.flags === (LOOP | SILENT | 0x80), 'active callback sets selected bits only');
+      clearSourceAObjFlags(a, 0xffffffff); check(a.flags === 0x80, 'active callback clears selected bits only');
+    });
+    requestSourceAObj(a, 2, r.effects); interpretSourceAObj(a, callback, r.effects, counts);
+    check(calls === 1 && a.flags === 0x80 && a.frame === 2 && counts.running === 1 && counts.stopped === 0,
+      'source flag helpers remain available during real interpretation');
+  }
   {
     const f = fixture({flags: (STOPPED | WRAPPED | 0x80000001) >>> 0, rate: -0});
     const request = 1 + 2 ** -25;
@@ -208,6 +272,93 @@ export function runAObjClockSelfTest(): void {
     check(request.a.frame === 4 && request.a.flags === REQUEST, 'request failure does not roll back stored clock/flags');
     const m = fixture(); m.effects.interpretAll = () => { Object.freeze(m.a); };
     rejects(m.tick, 'non-writable');
+  }
+  {
+    const poison = new Proxy({}, {get() { throw Error('rate must not be inspected or coerced'); }});
+    for (const rate of [NaN, Infinity, -Infinity, Number.MAX_VALUE, 1 + 2 ** -25, poison as number]) {
+      check(setSourceAObjRate(null, rate) === undefined, 'null rate target bypasses all argument validation');
+    }
+    const f = fixture({flags: STOPPED | REQUEST | WRAPPED, frame: -0, rewind: -2, end: 9});
+    const before = {...f.a}, exact = 1 + 2 ** -23;
+    check(setSourceAObjRate(f.a, exact) === undefined && f.a.rate === exact,
+      'owned rate setter stores an already-finite source float32 and returns undefined');
+    check((['flags', 'frame', 'rewind', 'end', 'fobjs'] as const).every(key => Object.is(f.a[key], before[key])) &&
+      f.events.length === 0 && f.counts.running === 0 && f.counts.stopped === 0,
+      'rate setter performs only the rate store, without flags, clocks, effects or accounting');
+    const maximum = (2 - 2 ** -23) * 2 ** 127, minimum = 2 ** -149;
+    for (const rate of [0, -2, maximum, -maximum, minimum, -minimum, 2 ** -126, -(2 ** -126), -0]) {
+      setSourceAObjRate(f.a, rate);
+      check(Object.is(f.a.rate, rate), 'rate setter preserves exact float32 extremes, subnormals and signed zero');
+    }
+    for (const rate of [NaN, Infinity, -Infinity, poison as number]) {
+      rejects(() => setSourceAObjRate(f.a, rate), 'finite source float32');
+      check(Object.is(f.a.rate, -0), 'invalid double rate is rejected before any write or coercion');
+    }
+    for (const rate of [1 + 2 ** -25, .1, 2 ** -150, -(2 ** -150), Number.MIN_VALUE, -Number.MIN_VALUE,
+      2 ** 128, -(2 ** 128), Number.MAX_VALUE, -Number.MAX_VALUE]) {
+      rejects(() => setSourceAObjRate(f.a, rate), 'finite source float32');
+      check(Object.is(f.a.rate, -0), 'widened/underflow/overflow double rate is rejected rather than rounded');
+    }
+  }
+  {
+    const f = fixture();
+    const foreign = {...f.a};
+    rejects(() => setSourceAObjRate(foreign, 4), 'factory-created');
+    check(foreign.rate === 1 && f.a.rate === 1, 'lookalike rate target cannot mutate owned state');
+    const poison = new Proxy(f.a, {
+      get() { throw Error('foreign target must not be read'); },
+      getOwnPropertyDescriptor() { throw Error('foreign target must not be inspected'); },
+    });
+    rejects(() => setSourceAObjRate(poison, 4), 'factory-created');
+    rejects(() => setSourceAObjRate(Object.create(f.a) as SourceAObj, 4), 'factory-created');
+    for (const freezeAll of [false, true]) {
+      const frozen = fixture().a;
+      if (freezeAll) Object.freeze(frozen);
+      else Object.defineProperty(frozen, 'rate', {writable: false});
+      rejects(() => setSourceAObjRate(frozen, 4), 'non-writable rate');
+      check(frozen.rate === 1, 'non-writable owned rate is rejected without mutation');
+    }
+  }
+  {
+    const f = fixture();
+    f.a.flags = -1; f.a.frame = NaN; f.a.rewind = Infinity; f.a.end = .1;
+    f.a.fobjs = new Proxy({}, {get() { throw Error('unrelated FObj state must not be read'); }}) as unknown as symbol;
+    for (const key of ['flags', 'frame', 'rewind', 'end', 'fobjs']) {
+      Object.defineProperty(f.a, key, {writable: false});
+    }
+    const before = {...f.a};
+    for (const oldRate of [NaN, Infinity, -Infinity, .1]) {
+      f.a.rate = oldRate;
+      setSourceAObjRate(f.a, 3);
+      check(f.a.rate === 3 && (['flags', 'frame', 'rewind', 'end', 'fobjs'] as const)
+        .every(key => Object.is(f.a[key], before[key])),
+      'rate-only store overwrites invalid old rate and ignores unrelated invalid/frozen fields');
+    }
+    rejects(f.tick, 'non-writable');
+    rejects(() => requestSourceAObj(f.a, 0, f.effects), 'non-writable');
+    check(f.a.rate === 3 && !f.events.length, 'narrow setter does not weaken interpreter/request validation');
+  }
+  {
+    // Actual packed opcode6 stream and real FObj effects, not an injected interpreter.
+    const owner = Symbol('rate callback owner'), r = createSourceFObjScalarCallbackRuntime(owner);
+    const bytes = Uint8Array.from([0x16, 3, 3, 5]), base = r.createData(bytes);
+    const id = r.createNode({next00: null, cursor04: base, base08: base, length0c: bytes.length,
+      flags10: 1, byte11: 0, byte12: 0, track13: 7, format14: 0x80, format15: 0x80,
+      half16: 0, offset18: 0, half1a: 0, frame1c: 0, value20: 0, value24: 0, value28: 0, value2c: 0});
+    const a = createSourceAObj({flags: 0, frame: 0, rewind: 0, end: 0, rate: 1, fobjs: id});
+    const counts = createSourceAObjCounters(), values: number[] = [], oldRates: number[] = [];
+    const cb = r.createCallback((callbackOwner, track, value) => {
+      check(callbackOwner === owner && track === 7, 'real FObj callback preserves owner/track');
+      values.push(value); oldRates.push(a.rate);
+      setSourceAObjRate(a, value);
+    });
+    requestSourceAObj(a, 0, r.effects);
+    interpretSourceAObj(a, cb, r.effects, counts);
+    check(values.join() === '3,5' && oldRates.join() === '1,3' && a.rate === 5 && a.frame === 0,
+      'rate setter is allowed in ordinary and end-stop callbacks while the AObj is busy');
+    check(r.getNode(id).frame1c === 3 && (r.getNode(id).flags10 & 15) === 0 && a.flags === STOPPED &&
+      counts.stopped === 1 && counts.running === 0,
+      'same interpreter reloads rate3 for real stopAll, reaching the final key instead of using stale rate1');
   }
   console.log('[aobj-clock] PASS: offline request/clock control, ordered mutable effects, rounding, counters and rejection boundaries (not retail replay)');
 }

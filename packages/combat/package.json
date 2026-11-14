@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@gf/camera-math": "workspace:*",
+    "@gf/formats": "workspace:*",
     "@gf/physics": "workspace:*"
   },
   "devDependencies": {

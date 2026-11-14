@@ -1,10 +1,10 @@
-/** Offline scalar control for 80243b90 / 80243bd0, not an FObj implementation.
- * Source: chunk_0070.c:2569–2670; DOL arithmetic/order audit in
+/** Offline scalar control for 80243aec / 80243b08 / 80243b90 / 80243bd0 / 80243fc0.
+ * Source: chunk_0070.c:2512–2536,2569–2670,2814–2857; DOL arithmetic/order audit in
  * research/decomp/double-source-owned-dispatch-plan-2026-11-12.md.
  *
- * Only factory-created, nonaliased data records are admitted. Clocks must already
- * be finite float32 values (including signed zero); request arguments are finite
- * doubles. JS IEEE round-to-nearest arithmetic is assumed, not arbitrary PPC FP
+ * Only factory-created, nonaliased data records are admitted. Clocks and rate-setter
+ * arguments must already be finite float32 values (including signed zero); request
+ * arguments are finite doubles. JS IEEE round-to-nearest arithmetic is assumed, not arbitrary PPC FP
  * environments. Symbol identities stand for separately owned FObj lists/callbacks,
  * never RAM pointers or overlapping storage. Effects MUST perform the synchronous
  * FObj operation, including callbacks, or throw an unsupported-operation error.
@@ -13,7 +13,8 @@
  *
  * Effects may change live AObj fields. Validation happens after each boundary;
  * failure stops the offline scenario but DOES NOT roll back writes or effects
- * already executed. Async effects and reentry on the same AObj are unsupported.
+ * already executed. Async effects and request/interpret reentry on the same AObj
+ * are unsupported; rate and flag setters remain available during callbacks.
  * Capture05 has no AObj headers and does not dynamically validate this helper.
  */
 export const AOBJ_STOPPED = 0x40000000;
@@ -30,6 +31,8 @@ export interface SourceAObj {
   end: number;
   rate: number;
   fobjs: FObjListIdentity;
+  /** +0x18 reference; absent initial values become null on owned records. */
+  joint18?: symbol | null;
 }
 export interface SourceAObjCounters { running: number; stopped: number }
 export interface SourceAObjEffects {
@@ -74,16 +77,95 @@ function validateCounters(c: SourceAObjCounters, where: string): void {
 export function createSourceAObj(initial: SourceAObj): SourceAObj {
   // Copy each scalar into sealed data properties, never retain a backing object.
   const a = Object.seal({flags: initial.flags, frame: initial.frame, rewind: initial.rewind,
-    end: initial.end, rate: initial.rate, fobjs: initial.fobjs});
+    end: initial.end, rate: initial.rate, fobjs: initial.fobjs, joint18: initial.joint18 ?? null});
   states.add(a);
   validate(a, 'create');
   return a;
+}
+/** Ownership-only query for composed owners. Does not consume any header field. */
+export function isLiveSourceAObj(a: SourceAObj): boolean {return states.has(a);}
+/** 80243f8c: logical pool release only. No field erasure, physical pool reuse,
+ * allocation capacity, or OOM is modeled. Busy request/interpret records cannot
+ * be released. Retained references cease to be admitted by all clock operations.
+ */
+export function freeSourceAObj(a: SourceAObj | null): void {
+  if (a === null) return;
+  if (!states.has(a)) fail('free', 'expected factory-created nonaliased AObj');
+  if (busy.has(a)) fail('free', 'busy request/interpret lifetime is unsupported');
+  states.delete(a);
 }
 export function createSourceAObjCounters(running = 0, stopped = 0): SourceAObjCounters {
   const c = Object.seal({running, stopped});
   counters.add(c);
   validateCounters(c, 'create counters');
   return c;
+}
+/** zz_0243fc0 (80243fc0), chunk_0070.c:2814–2827: null no-op, then stfs at +0x10.
+ * Only already-finite source float32 inputs are admitted. Arbitrary double stfs
+ * storage conversion is not modeled as round-to-nearest float32 arithmetic.
+ * This store neither reads the old rate nor inspects other AObj/FObj fields.
+ * It is allowed during synchronous FObj callbacks, including a busy interpreter.
+ */
+export function setSourceAObjRate(a: SourceAObj | null, rate: number): void {
+  if (a === null) return;
+  if (!states.has(a)) fail('set rate', 'expected factory-created nonaliased AObj');
+  const property = Object.getOwnPropertyDescriptor(a, 'rate');
+  if (!property || !('value' in property) || !property.writable) {
+    fail('set rate', 'non-writable rate data property is unsupported');
+  }
+  float32(rate, 'set rate');
+  a.rate = rate;
+}
+/** 80243fd0, chunk_0070.c:2829–2841: null bypass then stfs at +0x08.
+ * Already-finite exact-f32 inputs only; no old field or unrelated state read.
+ * Like the rate setter, this remains available during synchronous callbacks.
+ */
+export function setSourceAObjRewindFrame(a: SourceAObj | null, frame: number): void {
+  if (a === null) return;
+  if (!states.has(a)) fail('set rewind', 'expected factory-created nonaliased AObj');
+  const property = Object.getOwnPropertyDescriptor(a, 'rewind');
+  if (!property || !('value' in property) || !property.writable) {
+    fail('set rewind', 'non-writable rewind data property is unsupported');
+  }
+  float32(frame, 'set rewind');
+  a.rewind = frame;
+}
+/** 80243fe0, chunk_0070.c:2845–2857: null bypass then stfs at +0x0c.
+ * Exact-f32 admission avoids guessing arbitrary-double storage conversion.
+ * Ownership and the written field alone are checked; old end is overwritten.
+ */
+export function setSourceAObjEndFrame(a: SourceAObj | null, frame: number): void {
+  if (a === null) return;
+  if (!states.has(a)) fail('set end', 'expected factory-created nonaliased AObj');
+  const property = Object.getOwnPropertyDescriptor(a, 'end');
+  if (!property || !('value' in property) || !property.writable) {
+    fail('set end', 'non-writable end data property is unsupported');
+  }
+  float32(frame, 'set end');
+  a.end = frame;
+}
+/** 80243aec/80243b08: null bypass, otherwise change only mask bits 0x30000000.
+ * Ownership and the consumed flags field are the only header checks. These
+ * source helpers remain available during synchronous request/interpret effects.
+ */
+function changeSourceAObjFlags(a: SourceAObj | null, mask: number, set: boolean): void {
+  if (a === null) return;
+  const where = set ? 'set flags' : 'clear flags';
+  if (!states.has(a)) fail(where, 'expected factory-created nonaliased AObj');
+  const property = Object.getOwnPropertyDescriptor(a, 'flags');
+  if (!property || !('value' in property) || !property.writable) {
+    fail(where, 'non-writable flags data property is unsupported');
+  }
+  uint32(property.value, `${where}.flags`);
+  uint32(mask, `${where}.mask`);
+  const selected = mask & 0x30000000;
+  a.flags = (set ? property.value | selected : property.value & ~selected) >>> 0;
+}
+export function setSourceAObjFlags(a: SourceAObj | null, mask: number): void {
+  changeSourceAObjFlags(a, mask, true);
+}
+export function clearSourceAObjFlags(a: SourceAObj | null, mask: number): void {
+  changeSourceAObjFlags(a, mask, false);
 }
 function validateEffects(e: SourceAObjEffects): void {
   if (!e || ['requestAll', 'stopAll', 'interpretAll'].some(key => typeof e[key as keyof SourceAObjEffects] !== 'function')) {

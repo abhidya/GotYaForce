@@ -153,6 +153,12 @@ export interface RomActor {
   collisionScale?: number;
   /** Source1db supporting-actor contact, not terrain grounded status. Flat-floor host default0. */
   supportContact1db: number;
+  /** Actual+760 full3D captured-target distance. Legacy bridge may pre-normalize
+   * this field; source tick-prefix requires explicit fresh raw input instead. */
+  targetDistance760?: number;
+  /** Actual+764 horizontalXZ captured-target distance for explicit source input.
+   * No default, copied speed scalar or curTargetDist compatibility alias. */
+  horizontalDistance764?: number;
   sizeScale: number;
   /** Monotonic host/presentation edge emitted when zz_00b2190_(actor, 1) succeeds.
    *  @romfield afterimageSerial port_side */
