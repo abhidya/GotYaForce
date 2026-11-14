@@ -1,11 +1,13 @@
 /** Bounded actual Double action2 dispatch, offline only.
- * Source:55568/65dfc/6facc/71598/715d4/ff2bc/ff30c and6d144/669d0/66a30.
+ * Source:55568/65dfc/6facc/71598/715d4/ff2bc/ff30c/ff418 and6d144/669d0/66a30.
  * Exact instruction operands and vectors are authenticated by the fixed
- * read_archived_double_action_evidence.py reader, not inferred from C order.
- * See research/decomp/double-action-envelope-evidence-2026-11-14.md.
+ * read_archived_double_action_evidence.py and read_archived_phase1_entry_evidence.py
+ * readers, not inferred from C order. See the Double action envelope evidence
+ * and terrain-orientation-evidence-2026-11-13.md under research/decomp/.
  * Explicit decoded tables select numeric source functions, never host callbacks
  * or legacy Ninja streams. Only authenticated UB return, FB root, action2,
- * variant0 and phase0 bodies are supported. Unknown targets refuse when reached.
+ * variant0 and bounded phase0/phase1 bodies are supported. Unknown targets
+ * refuse when reached.
  * The caller captures UB then FB before marker1, dispatches saved UB before saved
  * FB and owns the578 stores. No state reload, default table or mode0 substitution.
  *
@@ -18,6 +20,13 @@
  * then authenticated fixed config0/1, signed6ea capture/increment, the same
  * genuine4beb8 stream runtime, and80c only after its return. This can execute
  * real copied commands/setup/mode1 with explicit inputs, not retail schedules.
+ * Phase1 calls the same genuine4cd24(mask15), then yaw, existing-motion scale/add
+ * and677b0 before its signed part0.state1b load. Positive state increments540
+ * then refuses the actual nonnull715f8 callback. Nonpositive state reaches the
+ * explicit8020bb38 frsqrte boundary after the authenticated8020bb14 square
+ * prefix. Its genuine zero-square return is retained, never manufactured.
+ * Both stream-part states stay on their retained genuine owners, never legacy
+ * contact/dash fields. Source byte/float reads and writability remain lazy.
  * Float32 RN00/NI0, paired-single enablement and finite signed32 conversion are
  * host bounds, not observed processor configuration. Failed
  * operations retain prior stores and permanently latch the shared incomplete
@@ -27,7 +36,7 @@ import {isPendingSourceActorFrameClaim, type SourceActorFrameLifecycleRuntime} f
 import type {SourceActorTickFrameOwners} from './actor-tick-prefix.js';
 import {isSourceActorGroundProbeRuntime, type SourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import type {RomActor} from './actor.js';
-import {addSourceFloat32} from './source-float.js';
+import {addSourceFloat32, fusedMultiplyAddSourceFloat32} from './source-float.js';
 import {isSourceActorDoublePrehookRuntime, markIncompleteSourceActorDoubleLifecycle,
   requireCompleteSourceActorDoubleLifecycle, requireSourceActorDoubleInvocation, isSourceActorDoubleFrameAccess,
   type SourceActorDoubleFrameAccess, type SourceActorDoublePrehookRuntime} from './actor-double-prehook.js';
@@ -150,7 +159,8 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     if (value !== expected) fail(`${where}: canonical owner changed or differs`);
   };
   interface Entry {actual: RomActor; prehook: object; mapping: object; attribute: object; cue: object; dispatch: object;
-    pos: object; motion: object; history: object}
+    pos: object; motion: object; history: object;
+    start: object; wait: object; part0: object; part1: object; part2: object; part3: object}
   const shared = (): object[] => [tables, ...Object.values(arrays), ...(processor ? [processor] : [])];
   const parameters = new Set<object>();
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
@@ -161,21 +171,31 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
   const noShadows = (e: Entry, extras: readonly object[] = []): void => {
     const canonical = new Map<string, object>([
       ...['fbPhase','actionIndex','variantIndex','ubState','fbState','visibilityTarget','activeYaw','turnErrorYaw','heading','lockYaw',
-        'hSpeed','yVel','hDecel','gravityCoeff','poseAccum80','poseAccum7e','poseAccum7c','pos','motion','targetCache5e8','streamSlot','accumulator80c','byte6e8','byte6e9'].map(key => [key,e.actual] as [string, object]),
+        'hSpeed','yVel','hDecel','gravityCoeff','poseAccum80','poseAccum7e','poseAccum7c','pos','motion','targetCache5e8','streamSlot','accumulator80c','byte6e8','byte6e9','controlWord'].map(key => [key,e.actual] as [string, object]),
       ['byte541', e.cue], ['pointer4b4', e.prehook], ['pointer4bc', e.prehook], ['pointer4c0', e.prehook],
       ['parameter4ac', e.attribute], ['timestep1dc8', e.mapping], ['marker578', e.dispatch],
+      ...['familyBank1d80','sharedBank1d84','defaultSelector582','marker709'].map(key => [key,e.start] as [string, object]),
+      ...['activeMask579','blockedMask1d9a','marker71d'].map(key => [key,e.wait] as [string, object]),
     ]);
+    const parts = [e.part0, e.part1, e.part2, e.part3];
     const owners = [...Object.values(e), ...shared(), ...extras];
     for (const owner of owners) {
       for (const [key, expected] of canonical) {
         if (owner !== expected && Object.getOwnPropertyDescriptor(owner, key) !== undefined) fail(`${key}: competing source storage owner`);
         check();
       }
+      for (const key of ['state1b', 'auxiliary1c']) {
+        if (!parts.includes(owner) && Object.getOwnPropertyDescriptor(owner, key) !== undefined)
+          fail(`${key}: competing source stream-part storage owner`);
+        check();
+      }
       if (!parameters.has(owner) && Object.getOwnPropertyDescriptor(owner, 'fieldAe') !== undefined)
         fail('fieldAe: competing parameter4ac storage owner');
       check();
       for (const key of ['byte540','phase540','byte580','action580','byte581','variant581','byte5da','byte5db','pointerCC','pointercc',
-        'field4ac','pointer4ac','field1dc8','phaseSlots','fbPhaseSlots','lockTarget']) {
+        'field4ac','pointer4ac','field1dc8','phaseSlots','fbPhaseSlots','lockTarget',
+        'byte1cef','state1cef','field1cef','byte1cf0','auxiliary1cf0','field1cf0',
+        'byte1d0f','state1d0f','field1d0f','byte1d10','auxiliary1d10','field1d10']) {
         if (Object.getOwnPropertyDescriptor(owner, key) !== undefined) fail(`${key}: competing source storage alias`);
         check();
       }
@@ -196,7 +216,12 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     stable(call(() => cues.getActorBinding(id)), e.cue, 'cue binding');
     stable(call(() => cues.getDispatchBinding(id)), e.dispatch, 'dispatch binding');
     stable(call(() => prehook.getStreamsRuntime()), streams, 'stream runtime');
-    stable(call(() => streams.getStartActorBinding(id)), call(() => prehook.getStartBinding(id)), 'source stream start');
+    stable(call(() => streams.getStartActorBinding(id)), e.start, 'source stream start');
+    stable(call(() => prehook.getStartBinding(id)), e.start, 'prehook stream start');
+    stable(call(() => streams.getActorBinding(id)), e.wait, 'source stream wait');
+    stable(call(() => streams.getMappingActor(id)), e.mapping, 'source stream mapping');
+    for (const [index, part] of [e.part0, e.part1, e.part2, e.part3].entries())
+      stable(call(() => streams.getPartBinding(id, index)), part, `source stream part${index}`);
     if (call(() => streams.hasActualActorBinding(id))) {
       stable(call(() => streams.getActualActor(id)), e.actual, 'source stream actual');
       stable(call(() => streams.getMappingActor(id)), e.mapping, 'source stream mapping');
@@ -250,8 +275,8 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
       write(a, 'lockYaw', heading); write(a, 'heading', heading);
     }
   };
-  const vectorProfile = (): void => {
-    if (!processor) fail('reached8020ba78 requires explicit GQR0 float processor profile');
+  const vectorProfile = (site: string): void => {
+    if (!processor) fail(`reached${site} requires explicit GQR0 float processor profile`);
     if (word(processor, 'gqr0') !== 0) fail('GQR0 must explicitly select float load/store type0 scale0');
   };
   const pairStore = (destination: object, x: number, y: number): void => {
@@ -266,9 +291,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     const az = f(a, 'z'), bz = f(b, 'z');
     write(destination, 'z', addSourceFloat32(az, subtract ? -bz : bz));
   };
-  const carry = (e: Entry): void => {
-    vectorProfile();
-    pairArithmetic(e.pos, e.history, e.motion, true); // actual8020ba78
+  const scaleAndAdd = (e: Entry): void => {
     // actual8020ba9c captures XYZ before its XY store, unlike add/subtract.
     const x = f(e.motion, 'x'), y = f(e.motion, 'y'), z = f(e.motion, 'z');
     const scale = 0.949999988079071; // authenticated804392d0=3f733333
@@ -282,7 +305,9 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     if (target(a) === null) write(a, 'activeYaw', bam(a, 'heading'));
     nullTargetYaw(e);
     for (const key of ['gravityCoeff','yVel','hDecel','hSpeed','poseAccum80','poseAccum7e','poseAccum7c']) write(a, key, 0);
-    carry(e);
+    vectorProfile('8020ba78');
+    pairArithmetic(e.pos, e.history, e.motion, true); // actual8020ba78, phase0 only
+    scaleAndAdd(e);
     if (ground === undefined) fail('800ff30c reached unsupported actual800677b0 ground height/normal probe before config slots and stream start');
     const access = frameAccesses.get(id);
     call(() => access === undefined ? ground.runActor(id) : access.invoke('ground', ground, () => ground.runActor(id))); // source ignores0/1
@@ -297,6 +322,51 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
       fail('actual8004beb8 returned unexpectedly');
     write(a, 'accumulator80c', 0);
   };
+  const motionMagnitude = (motion: object): number => {
+    // Authenticated8020bb14/68: XY load and paired products precede Z load.
+    // W1 supplies1 in the second Z lane. All paired arithmetic executes even
+    // where its second lane is unused. RN00/NI0 and finite f32 remain bounds.
+    vectorProfile('8020bb14');
+    const x = f(motion, 'x'), y = f(motion, 'y');
+    const xx = float(Math.fround(x * x), '8020bb1c squareX');
+    const yy = float(Math.fround(y * y), '8020bb1c squareY');
+    const z = f(motion, 'z');
+    const zero = addSourceFloat32(0.5, -0.5); // authenticated8043ca90, bb24
+    const zx = fusedMultiplyAddSourceFloat32(z, z, xx);
+    fusedMultiplyAddSourceFloat32(1, 1, yy); // second ps_madd lane, bb28
+    const square = addSourceFloat32(zx, yy); // ps_sum0, bb2c
+    if (square === zero) return square; // source bb30/34 -> bb54 bare return
+    fail('800ff418 reached unsupported actual8020bb14 motion magnitude at8020bb38 frsqrte numerical boundary before threshold804392c8 and conditional800b22f4');
+  };
+  const phaseOne = (id: symbol, e: Entry): void => {
+    const a = e.actual, access = frameAccesses.get(id);
+    // Host identity admission is lazy at this reached source call. It also
+    // enables the stream runtime's private stage and permanent failure guards.
+    if (!call(() => streams.hasActualActorBinding(id)))
+      fail('800ff418 reached actual8004cd24 without genuine stream actual-actor join');
+    stable(call(() => streams.getActualActor(id)), a, 'phase1 stream actual');
+    stable(call(() => streams.getMappingActor(id)), e.mapping, 'phase1 stream mapping');
+    const update = () => streams.update(id, 15);
+    call(() => access === undefined ? update() : access.invoke('stream', streams, update)); // source ignores0/1
+    owners(id, e); // identity-only admission after executable stream continuation
+    nullTargetYaw(e); // actual8006d144(actor,c1); no phase0 active-yaw initialization
+    vectorProfile('8020ba9c');
+    scaleAndAdd(e); // existing motion38, never pos-history subtraction
+    if (ground === undefined) fail('800ff418 reached unsupported actual800677b0 ground height/normal probe before signed part0 state');
+    call(() => access === undefined ? ground.runActor(id) : access.invoke('ground', ground, () => ground.runActor(id)));
+    if (signedByte(e.part0, 'state1b') > 0) {
+      write(a, 'fbPhase', (byte(a, 'fbPhase') + 1) & 255);
+      // Actual715d4 retains fixed config80433868. Its authenticated+4 word is
+      // nonnull800715f8, not an injectable callback or a nullable fixture knob.
+      fail('800ff418 reached unsupported actual800715f8 callback from fixed8043386c after phase increment');
+    }
+    // ff4a4 always reads current motion after the optional callback returns.
+    // No positive state bypasses its earlier nonnull callback. The restricted
+    // matrix-axis estimator is not a general-motion implementation.
+    const magnitude = motionMagnitude(e.motion);
+    if (magnitude > 3) // authenticated804392c8=40400000, after magnitude returns
+      fail('800ff418 reached unsupported actual800b22f4 afterimage effect');
+  };
   const fullRoot = (id: symbol, e: Entry): void => {
     expectTarget(word(e.prehook, 'pointer4b4'), 0x8006facc, '80065dfc actual4b4');
     expectTarget(selected('actions3b68', signedByte(e.actual, 'actionIndex')), 0x80071598, '8006facc action');
@@ -304,8 +374,10 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     // Actual715d4 supplies fixed r4 ADDRESS80433868 to the directff2bc call.
     // It is not a function-pointer cell. Config pointee is not read before677b0.
     if (byte(e.cue, 'byte541') !== 0) write(e.actual, 'visibilityTarget', null);
-    expectTarget(selected('phases1f000', signedByte(e.actual, 'fbPhase')), 0x800ff30c, '800ff2bc phase');
-    phaseZero(id, e);
+    const phase = selected('phases1f000', signedByte(e.actual, 'fbPhase'));
+    if (phase === 0x800ff30c) phaseZero(id, e);
+    else if (phase === 0x800ff418) phaseOne(id, e);
+    else fail(`800ff2bc phase: unsupported target0x${phase.toString(16)}`);
   };
   const dispatch = (id: symbol, saved: SourceActorDoubleStateSelectors, upper: boolean): void => guard(() => {
     const e = entry(id); requireSourceActorDoubleInvocation(e.actual, upper ? 'upper' : 'full', runtime); owners(id, e);
@@ -331,7 +403,13 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
         mapping: record(call(() => attributes.getMappingActor(id)), 'mapping'), attribute: record(call(() => attributes.getActorBinding(id)), 'attribute'),
         cue: record(call(() => cues.getActorBinding(id)), 'cue'), dispatch: record(call(() => cues.getDispatchBinding(id)), 'dispatch'),
         pos: record(read(actual, 'pos'), 'position20'), motion: record(read(actual, 'motion'), 'motion38'),
-        history: record(read(actual, 'targetCache5e8'), 'own history5e8')};
+        history: record(read(actual, 'targetCache5e8'), 'own history5e8'),
+        start: record(call(() => streams.getStartActorBinding(id)), 'stream start'),
+        wait: record(call(() => streams.getActorBinding(id)), 'stream wait'),
+        part0: record(call(() => streams.getPartBinding(id, 0)), 'stream part0'),
+        part1: record(call(() => streams.getPartBinding(id, 1)), 'stream part1'),
+        part2: record(call(() => streams.getPartBinding(id, 2)), 'stream part2'),
+        part3: record(call(() => streams.getPartBinding(id, 3)), 'stream part3')};
       const values = Object.values(e);
       if (new Set([...values, ...shared()]).size !== values.length + shared().length || values.some(value => assigned.has(value)))
         fail('Double action source owner alias');
@@ -342,9 +420,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     getAttributeBinding(id) {return entry(id).attribute;}, getCueBinding(id) {return entry(id).cue;},
     getDispatchBinding(id) {return entry(id).dispatch;}, getTables() {return tables;},
     getSourceOwners(id) {return Object.freeze([...new Set([...Object.values(entry(id)), ...shared(), ...attributes.getKnownParameterDescriptors(),
-      ...(ground === undefined ? [] : ground.getSourceOwners(id)),
-      ...(ground === undefined ? [] : [streams.getStartActorBinding(id), streams.getActorBinding(id),
-        ...[0,1,2,3].map(index => streams.getPartBinding(id, index))])])]);},
+      ...(ground === undefined ? [] : ground.getSourceOwners(id))])]);},
     assertActorComplete(id) {requireCompleteSourceActorDoubleLifecycle(entry(id).actual);},
     captureStateSelectors(id) {return guard(() => {
       const e = entry(id); requireSourceActorDoubleInvocation(e.actual, 'capture', runtime); owners(id, e);

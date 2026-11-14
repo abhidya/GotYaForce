@@ -101,7 +101,29 @@ function fixture(bind = true, profile = true, withGround = false) {
   const capture = () => action.captureStateSelectors(id);
   const run = () => {const saved = capture(); action.dispatchUpper(id, saved); action.dispatchFull(id, saved);};
   return {id, actual, raw, mapping, attributes, parameter, prehook, cues, animation, tables, upper, full, actions, variants, phases,
-    action, sources, processor, hooks, capture, run, ground, gauges, terrain, streams, parameterState: attributes.getParameterDescriptor(parameter)};
+    action, sources, processor, hooks, capture, run, ground, gauges, terrain, streams, movement, setupState, parameterState: attributes.getParameterDescriptor(parameter)};
+}
+/** Explicit offline action-level phase1 entry, not a demonstrated second55568
+ * frame. Ordinary nonzero motion is retained, no input/control/pose bypasses. */
+function phaseOneFixture(withGround = true, profile = true) {
+  const x = fixture(true, profile, withGround);
+  x.streams.bindActualActor(x.id, x.movement);
+  x.actual.fbPhase = 1; x.phases[1] = 0x800ff418;
+  x.streams.getPartBinding(x.id, 0).state1b = 0;
+  return x;
+}
+function countdown(x: ReturnType<typeof phaseOneFixture>, wait = 2): void {
+  x.streams.getActorBinding(x.id).activeMask579 = 15;
+  const command = x.streams.createCommand({flags01: 9});
+  for (let index = 0; index < 4; index++)
+    Object.assign(x.streams.getPartBinding(x.id, index), {current00: command, wait14: wait, event1e: 7});
+}
+function observeDescriptors(run: () => void, observe: (owner: object, key: PropertyKey) => void): void {
+  const original = Object.getOwnPropertyDescriptor;
+  Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+    observe(owner, key); return original(owner, key);
+  }) as typeof Object.getOwnPropertyDescriptor;
+  try {run();} finally {Object.getOwnPropertyDescriptor = original;}
 }
 export function runActorDoubleActionSelfTests(): void {
   {
@@ -319,5 +341,211 @@ export function runActorDoubleActionSelfTests(): void {
     rejects(() => x.ground.runActor(x.id), 'competing source storage alias');
     rejects(() => createSourceActorDoubleActionRuntime({...x.sources, ground: {...x.ground}}), 'genuine source ground');
   }
-  console.log('[double-action-test] genuine dispatch, saved selectors, canonical owners, signed yaw, vector order and permanent partial refusal passed');
+  {
+    const x = phaseOneFixture(); countdown(x);
+    let yawStores = 0;
+    x.hooks.store = key => {
+      if (key !== 'turnErrorYaw') return;
+      yawStores++;
+      for (let index = 0; index < 4; index++) {
+        equal(x.streams.getPartBinding(x.id, index).wait14, 1, 'actual4cd24 mask15 countdown precedes yaw');
+        equal(x.streams.getPartBinding(x.id, index).event1e, 0, 'real stream event clear precedes yaw');
+      }
+    };
+    rejects(x.run, 'actual8020bb14 motion magnitude at8020bb38');
+    equal(yawStores, 2, 'actual6d144 and66a30 both store yaw error');
+    equal(x.actual.activeYaw, 1, 'phase1 never copies heading into active yaw');
+    equal(x.actual.heading, 0xa34, 'phase1 real negative yaw step');
+    equal(x.actual.fbPhase, 1, 'nonpositive part0 state does not increment phase');
+    for (const [axis, position, motion] of [['x',3,91],['y',5,92],['z',7,93]] as const) {
+      equal(x.actual.motion[axis], Math.fround(motion * Math.fround(.95)), `existing motion ${axis} decays without subtraction`);
+      equal(x.actual.pos[axis], Math.fround(position + x.actual.motion[axis]), `phase1 position ${axis} carries`);
+    }
+    for (const [key,value] of [['hSpeed',7],['yVel',8],['hDecel',9],['gravityCoeff',10],['poseAccum80',5],['poseAccum7e',6],['poseAccum7c',7],['accumulator80c',73]] as const)
+      equal(x.actual[key], value, `phase1 preserves ${key}`);
+    equal(x.animation.getActorBinding(x.id).marker578, 2, 'isolated action does not manufacture frame markers');
+    check(hasIncompleteSourceActorDoubleLifecycle(x.actual), 'reached positive-square numerical boundary permanently poisons actual');
+    x.actual.fbPhase = 0; x.actual.fbState = 0; x.streams.getPartBinding(x.id, 0).state1b = 1;
+    for (const run of [x.capture, () => x.prehook.runActor(x.id), () => x.ground.runActor(x.id), () => x.streams.update(x.id, 15)])
+      rejects(run, 'incomplete');
+  }
+  for (const wait of [1, 2]) {
+    const x = phaseOneFixture(); countdown(x, wait);
+    rejects(x.run, 'at8020bb38 frsqrte');
+    for (let index = 0; index < 4; index++) {
+      equal(x.streams.getPartBinding(x.id, index).finished1a, wait === 1 ? 1 : 0, 'source stream0/1 return ignored');
+      equal(x.streams.getPartBinding(x.id, index).wait14, wait - 1, 'real countdown retained through numerical refusal');
+    }
+  }
+  for (const state of [0, 1, 127, 128, 255]) {
+    const x = phaseOneFixture(), part = x.streams.getPartBinding(x.id, 0);
+    part.state1b = state;
+    x.streams.getPartBinding(x.id, 1).state1b = 127;
+    x.actual.contactP0 = state > 0 && state < 128 ? 0 : 127;
+    x.actual.contactP1 = 127; x.actual.dashStrength1d0f = -128; x.actual.faceGate1d10 = 127;
+    const positive = state > 0 && state < 128;
+    rejects(x.run, positive ? 'actual800715f8 callback from fixed8043386c after phase increment' : 'at8020bb38 frsqrte');
+    equal(x.actual.fbPhase, positive ? 2 : 1, 'signed canonical part0 state alone controls phase increment');
+    equal(part.state1b, state, 'state remains raw u8, never sign-normalized in storage');
+    equal(x.streams.getPartBinding(x.id, 1).state1b, 127, 'part1 state is retained independently');
+    equal(x.actual.motion.x, Math.fround(91 * Math.fround(.95)), 'callback refusal retains scale');
+    equal(x.actual.pos.x, Math.fround(3 + x.actual.motion.x), 'callback refusal retains add');
+  }
+  {
+    const x = fixture(true, true, true); x.actual.fbPhase = 1; x.phases[1] = 0x800ff418;
+    rejects(x.run, 'actual8004cd24 without genuine stream actual-actor join');
+    equal(x.streams.getPartBinding(x.id, 0).finished1a, 0, 'missing actual join precedes stream effects');
+    equal(x.actual.turnErrorYaw, 2, 'missing actual join precedes yaw');
+    equal(x.actual.motion.x, 91, 'missing actual join precedes vector effects');
+    const y = phaseOneFixture(); y.phases[1] = 0x12345678;
+    rejects(y.run, '800ff2bc phase: unsupported target0x12345678');
+    equal(y.streams.getPartBinding(y.id, 0).finished1a, 0, 'selector1 alone does not authorize phase1');
+  }
+  {
+    const x = phaseOneFixture(false);
+    x.streams.getPartBinding(x.id, 0).state1b = undefined;
+    rejects(x.run, 'actual800677b0');
+    equal(x.actual.motion.x, Math.fround(91 * Math.fround(.95)), 'missing ground preserves stream/yaw/scale/add');
+    equal(x.actual.fbPhase, 1, 'ground refuses before missing state load');
+    const y = phaseOneFixture(); y.streams.getPartBinding(y.id, 0).state1b = undefined;
+    let sawGround = false;
+    observeDescriptors(() => rejects(y.run, 'state1b: integer out of bounds'), (owner,key) => {
+      if (owner === y.gauges.getActorBinding(y.id) && key === 'byte7c9' && y.actual.pos.x !== 3) sawGround = true;
+      if (owner === y.streams.getPartBinding(y.id, 0) && key === 'state1b' && y.actual.pos.x !== 3)
+        check(sawGround, 'source signed state read follows actual ground call');
+    });
+    equal(y.actual.fbPhase, 1, 'uninitialized state cannot use legacy contactP0 zero');
+    equal(y.actual.pos.x, Math.fround(3 + y.actual.motion.x), 'missing state after add');
+  }
+  {
+    const x = phaseOneFixture(); countdown(x);
+    Object.defineProperty(x.streams.getPartBinding(x.id, 1), 'wait14', {writable:false});
+    rejects(x.run, 'wait14: non-writable');
+    equal(x.streams.getPartBinding(x.id, 0).wait14, 1, 'earlier stream countdown retained');
+    equal(x.streams.getPartBinding(x.id, 1).event1e, 0, 'failed countdown retains current event clear');
+    equal(x.streams.getPartBinding(x.id, 2).event1e, 7, 'later parts not run after stream failure');
+    equal(x.actual.turnErrorYaw, 2, 'stream failure precedes first yaw store');
+    equal(x.actual.motion.x, 91, 'stream failure precedes scale');
+    rejects(() => x.streams.update(x.id, 15), 'incomplete');
+  }
+  {
+    const x = phaseOneFixture(); x.actual.visibilityTarget = {} as NonNullable<typeof x.actual.visibilityTarget>;
+    rejects(x.run, 'actual8006660c');
+    equal(x.streams.getPartBinding(x.id, 3).finished1a, 1, 'nonnull target refusal follows all real null-stream resets');
+    equal(x.actual.fbPhase, 1, 'phase1 no early phase increment on target failure');
+    equal(x.actual.motion.x, 91, 'target refusal before scale');
+    const y = phaseOneFixture(true, false); rejects(y.run, 'reached8020ba9c requires explicit GQR0');
+    equal(y.actual.heading, 0xa34, 'missing phase1 profile follows real yaw');
+    equal(y.actual.motion.x, 91, 'missing phase1 profile before scale store');
+  }
+  {
+    const x = phaseOneFixture(); x.actual.motion.z = NaN;
+    rejects(x.run, 'z: finite exact source float32');
+    equal(x.actual.motion.x, 91, 'scale captures XYZ before any XY store');
+    equal(x.actual.pos.x, 3, 'bad scaleZ before position add');
+    const y = phaseOneFixture(); Object.defineProperty(y.actual.motion, 'y', {writable:false});
+    rejects(y.run, 'y: non-writable'); equal(y.actual.motion.x, 91, 'paired scale store checks both XY destinations');
+    const z = phaseOneFixture(); Object.defineProperty(z.actual.pos, 'z', {writable:false});
+    rejects(z.run, 'z: non-writable');
+    equal(z.actual.motion.z, Math.fround(93 * Math.fround(.95)), 'all scale stores precede position add');
+    equal(z.actual.pos.x, Math.fround(3 + z.actual.motion.x), 'position XY store retained when positionZ readonly');
+    equal(z.actual.pos.z, 7, 'readonly positionZ retains old value');
+  }
+  {
+    const x = phaseOneFixture(); x.streams.getPartBinding(x.id, 0).state1b = 1;
+    Object.defineProperty(x.raw, 'fbPhase', {writable:false});
+    rejects(x.run, 'fbPhase: non-writable');
+    equal(x.actual.pos.x, Math.fround(3 + x.actual.motion.x), 'readonly540 tested after add/ground/state');
+    equal(x.actual.fbPhase, 1, 'readonly540 does not suppress callback by substituting null');
+    const y = phaseOneFixture(); y.streams.getPartBinding(y.id, 0).state1b = 1;
+    // Source dispatch captures the selector; an explicit observation mutation
+    // after the later ground call proves the increment reloads current540.
+    // This does not bypass a source boundary or manufacture a successful frame.
+    let changed = false;
+    observeDescriptors(() => rejects(y.run, 'actual800715f8'), (owner,key) => {
+      if (!changed && owner === y.streams.getPartBinding(y.id, 0) && key === 'state1b' && y.actual.pos.x !== 3) {
+        changed = true; y.actual.fbPhase = 255;
+      }
+    });
+    check(changed, 'late source state load observed'); equal(y.actual.fbPhase, 0, 'actual540 increment wraps unsigned byte');
+  }
+  {
+    const x = phaseOneFixture(); countdown(x);
+    let reentered = false;
+    observeDescriptors(() => rejects(x.run, 'reentry'), (owner,key) => {
+      if (!reentered && owner === x.streams.getPartBinding(x.id, 0) && key === 'wait14') {
+        reentered = true;
+        try {x.capture();} catch { /* swallowed child error cannot unpoison outer action */ }
+      }
+    });
+    check(reentered, 'actual stream wait triggered reentry');
+    equal(x.streams.getPartBinding(x.id, 0).wait14, 1, 'real stream writes before outer reentry check are retained');
+    equal(x.actual.turnErrorYaw, 2, 'caught stream reentry prevents yaw');
+    rejects(x.capture, 'incomplete'); rejects(() => x.streams.update(x.id,15), 'incomplete');
+  }
+  for (const state of [1, 128]) {
+    const x = phaseOneFixture(), part = x.streams.getPartBinding(x.id, 0);
+    // Explicit copied test commands, not an original bank/retail schedule.
+    const next = x.streams.createStream(new Uint8Array([2,255,state,4,6,7,0,0, 0,9,0,2]));
+    Object.assign(part, {current00:x.streams.createCommand({flags01:8}), next04:next, wait14:1});
+    x.streams.getActorBinding(x.id).activeMask579 = 1;
+    rejects(x.run, state === 1 ? 'actual800715f8' : 'at8020bb38 frsqrte');
+    equal(part.state1b,state,'actual4cd24 continuation writes canonical02 state before phase1 reads it');
+    equal(part.auxiliary1c,4,'real02 auxiliary store retained');
+    equal(x.actual.byte6e8,6,'real02 actual6e8 store retained'); equal(x.actual.byte6e9,7,'real02 actual6e9 store retained');
+    equal(part.wait14,2,'real parser installs following wait before yaw/motion');
+    equal(x.streams.cursorOffset(next,part.current00!),8,'actual parsed wait cursor retained');
+    equal(x.actual.fbPhase,state === 1 ? 2 : 1,'phase tests freshly authored signed state rather than pre-update snapshot');
+  }
+  {
+    const x = phaseOneFixture(), reads: string[] = []; let stateRead = false;
+    Object.defineProperty(x.streams.getPartBinding(x.id,0),'state1b',{writable:false});
+    observeDescriptors(() => rejects(x.run,'at8020bb38 frsqrte'), (owner,key) => {
+      if (owner === x.streams.getPartBinding(x.id,0) && key === 'state1b' && x.actual.pos.x !== 3) stateRead = true;
+      if (owner === x.actual.motion && stateRead) reads.push(String(key));
+    });
+    equal(reads.filter(key=>['x','y','z'].includes(key)).join(','),'x,y,z','actual8020bb14 reads current XYZ after ground/signed state');
+    const y = phaseOneFixture(), early: string[] = []; let earlyState = false;
+    y.actual.motion.x = Math.fround(1e30);
+    observeDescriptors(() => rejects(y.run,'8020bb1c squareX'), (owner,key) => {
+      if (owner === y.streams.getPartBinding(y.id,0) && key === 'state1b' && y.actual.pos.x !== 3) earlyState = true;
+      if (owner === y.actual.motion && earlyState) early.push(String(key));
+    });
+    equal(early.filter(key=>['x','y','z'].includes(key)).join(','),'x,y','paired XY product fault precedes numerical Z load');
+    equal(y.actual.pos.x,Math.fround(3+y.actual.motion.x),'numerical finite-domain refusal retains prior source add');
+    const z = phaseOneFixture(); z.streams.getPartBinding(z.id,0).state1b = 1;
+    const unreached: string[] = []; let callbackState = false;
+    observeDescriptors(() => rejects(z.run,'actual800715f8'), (owner,key) => {
+      if (owner === z.streams.getPartBinding(z.id,0) && key === 'state1b' && z.actual.pos.x !== 3) callbackState = true;
+      if (owner === z.actual.motion && callbackState) unreached.push(String(key));
+    });
+    equal(unreached.filter(key=>['x','y','z'].includes(key)).join(','),'','nonnull callback boundary precedes every magnitude operand load');
+  }
+  for (const alias of ['byte1cef','state1cef','byte1cf0','byte1d0f','state1d0f','byte1d10']) {
+    const x = phaseOneFixture(); (x.actual as unknown as Record<string, unknown>)[alias] = 0;
+    rejects(x.capture, 'competing source storage alias');
+  }
+  {
+    const x = fixture(false); (x.actual as unknown as Record<string, unknown>).state1b = 0;
+    rejects(() => x.action.bindActor(x.id), 'competing source stream-part storage owner');
+    delete (x.actual as unknown as Record<string, unknown>).state1b; x.action.bindActor(x.id);
+    for (let index = 0; index < 4; index++) check(x.action.getSourceOwners(x.id).includes(x.streams.getPartBinding(x.id,index)), 'all genuine parts retained even without ground');
+    const y = fixture(false), other = createSourceActorMovementFollowupRuntime({mapping:y.mapping, waits:y.streams, setup:{getActorBinding:()=>y.setupState}});
+    other.bindActor(y.id, createRomActor(), {byte661:0,field66c:0,field670:0}); y.streams.bindActualActor(y.id,other);
+    rejects(() => y.action.bindActor(y.id), 'source stream actual: canonical owner changed');
+  }
+  {
+    const x = phaseOneFixture(); countdown(x);
+    const original = x.actual.motion; let changed = false;
+    observeDescriptors(() => rejects(x.run, 'motion38: canonical owner changed'), (owner,key) => {
+      if (!changed && owner === x.streams.getPartBinding(x.id,0) && key === 'wait14') {
+        changed = true; x.actual.motion = {...original};
+      }
+    });
+    equal(original.x,91,'post-stream owner admission prevents stale-motion stores');
+    equal(x.actual.turnErrorYaw,2,'post-stream wrong owner refuses before yaw');
+    equal(x.streams.getPartBinding(x.id,0).wait14,1,'wrong-owner refusal retains real stream prefix');
+    check(hasIncompleteSourceActorDoubleLifecycle(x.actual),'late wrong owner permanently poisons actual');
+  }
+  console.log('[double-action-test] genuine phase0/phase1 dispatch, actual mask15 stream waits, canonical raw states, signed yaw, vector order, callback/numerical boundaries and permanent partial refusal passed');
 }

@@ -2841,6 +2841,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runNonnullDoubleSoundHydratedCompositionTests();
   runAuthoredDoubleGroundPrefixCompositionTests();
   runControl40DoubleGroundContinuationTests();
+  runPhase1DoubleGroundContinuationTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -12229,7 +12230,7 @@ export function runCompletedDoubleFrameHydratedCompositionTests(): void {
     check(x.sourceActor.targetDistance760 === 128 && x.sourceActor.fbPhase === 1 && x.gates.marker578 === 2 &&
       !hasIncompleteSourceActorFrame(x.sourceActor) && !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
       'bad host ingress after a completed frame retains its first raw store and consumed epoch without starting source or undoing completion');
-    rejects(() => x.runFrame(3, 128, 40), 'unsupported target0x800ff418');
+    rejects(() => x.runFrame(3, 128, 40), 'without genuine stream actual-actor join');
     check(x.sourceActor.fbPhase === 1 && x.joints.getBinding(x.joint).aobj7c === attached &&
       x.oldPose.translation.x === oldPose.x && x.oldPose.translation.y === oldPose.y && x.oldPose.translation.z === oldPose.z &&
       x.gates.marker578 === 0,
@@ -12511,7 +12512,7 @@ export function runNonnullDoubleSoundHydratedCompositionTests():void {
     rejects(()=>x.soundTable.readByte(0),'uncovered');
     rejects(()=>x.descriptors.readByte(x.descriptorBase,0),'uncovered');
     rejects(()=>x.runFrame(1),'epoch');
-    rejects(()=>x.runFrame(2),slot===0?'unsupported target0x800ff418':'800677b0 without genuine ground binding');
+    rejects(()=>x.runFrame(2),slot===0?'without genuine stream actual-actor join':'800677b0 without genuine ground binding');
     check(x.sourceActor.fbPhase===1,'next genuine frame never resets phase0 to evade phase1 or earlier air-control boundary');
     checkCompletedDoubleFramePermanentRefusal(x);
   }
@@ -12681,14 +12682,15 @@ export function runControl40DoubleGroundContinuationTests():void {
       if(owner===a && key==='hoverOffset668')groundOperands++;
       return original(owner,key);
     }) as typeof original;
-    try {rejects(()=>x.runFrame(2),'unsupported target0x800ff418');} finally {Object.getOwnPropertyDescriptor=original;}
-    check(phaseReads===1 && groundOperands>0 && a.pos===position && a.pos.x===expectedX && a.pos.y===expectedY && a.pos.z===300 &&
+    try {rejects(()=>x.runFrame(2),'8020bb38 frsqrte');} finally {Object.getOwnPropertyDescriptor=original;}
+    const nextX=Math.fround(Math.fround(102*Math.fround(.95))*Math.fround(.95)), nextY=Math.fround(expectedY*Math.fround(.95));
+    check(phaseReads===1 && groundOperands>=3 && a.pos===position && a.pos.x===addSourceFloat32(expectedX,nextX) && a.pos.y===addSourceFloat32(expectedY,nextY) && a.pos.z===300 &&
       a.controlWord===0x43 && a.fbPhase===1 && x.gates.marker578===0 && x.normalLifecycleState.short6bc===8 &&
       Object.keys(history).every(k=>Object.is(a.targetCache5e8[k as keyof typeof history],history[k as keyof typeof history])),
-      'next genuine frame completes the real control40/ground/normal/rate/ceiling prefix and reaches phase1 exactly once, without source-state reset');
+      'next genuine frame completes control40 and real phase1 stream/motion/ground prefix exactly once, without source-state reset');
     check(x.control.getPartBinding(x.actor,0).wait14===2 && x.control.getPartBinding(x.actor,1).wait14===2 &&
-      x.part.frame0c===0 && a.accumulator80c===0 && a.soundEventTable===x.soundTable,
-      'unimplemented phase1 has not fabricated stream update, animation advancement, audio or a second completed frame');
+      x.part.frame0c===0 && x.clocks.elapsed08===1 && x.blendState.field1c===2 && a.accumulator80c===0 && a.soundEventTable===x.soundTable,
+      'actual phase1 stream updates real mode1 blend clocks while wait/frame0 remain valid; numerical refusal never fabricates audio or a completed second frame');
     checkCompletedDoubleFramePermanentRefusal(x);
   }
   {
@@ -12743,5 +12745,92 @@ export function runControl40DoubleGroundContinuationTests():void {
     check(x.cue0.getGroundRuntime(x.actor)===duplicate && x.action.getGroundRuntime()===x.ground,
       'a second genuine ground runtime with identical scalar owners cannot replace the action ground at frame composition or produce source effects');
   }
-  console.log('[actor-control40-ground-continuation] PASS: authenticated five integer helpers plus691d8 through SAME genuine677b0 in private normal59068 scope, authored43/carried-position first frame then actual second-frame phase1 boundary; exact owners, standalone/reentry/contact/missing-input failures preserved; phase1 execution/audio/clone/production/browser playability remain unimplemented');
+  console.log('[actor-control40-ground-continuation] PASS: authenticated five integer helpers plus691d8 through SAME genuine677b0 in private normal59068 scope, authored43/carried-position first frame then actual second-frame phase1 stream/motion/ground prefix to numerical boundary; exact owners, standalone/reentry/contact/missing-input failures preserved; complete phase1/audio/clone/production/browser playability remain unimplemented');
+}
+
+
+/** Same authored command/normal/Double graph, now selected through actual phase1.
+ * No stream result, yaw, motion, ground result or callback is substituted. */
+function phase1DoubleGroundContinuationFixture() {return control40DoubleGroundContinuationFixture();}
+export function runPhase1DoubleGroundContinuationTests():void {
+  {
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);
+    const a=x.sourceActor, position=a.pos, motion=a.motion, history={...a.targetCache5e8};
+    const priorPosition={...position},priorMotion={...motion},oldAttached=x.joints.getBinding(x.joint).aobj7c;
+    const parts=[0,1].map(i=>x.mapping.getLayout(x.actor).parts[0]![i]!);
+    check(parts.every(id=>x.dispatch.getPartBinding(id).elapsed08===0 && x.ready.getPartBinding(id).field1c===1),
+      'first actual authored stream setup has genuine initial mode1 clocks');
+    rejects(()=>x.runFrame(2),'8020bb38 frsqrte');
+    for(const key of ['x','y','z'] as const){
+      const next=Math.fround(priorMotion[key]*Math.fround(.95));
+      check(motion[key]===next && position[key]===addSourceFloat32(priorPosition[key],next) &&
+        a.targetCache5e8[key]===history[key], 'phase1 decays existing motion then adds it, without phase0 history subtraction');
+    }
+    check(a.pos===position && a.motion===motion && x.joints.getBinding(x.joint).aobj7c===oldAttached &&
+      parts.every(id=>x.dispatch.getPartBinding(id).elapsed08===1 && x.ready.getPartBinding(id).field1c===2 &&
+        x.ready.getPartBinding(id).field20===Math.fround(1-Math.fround(2/7))) &&
+      x.control.getPartBinding(x.actor,0).state1b===0 && x.control.getPartBinding(x.actor,1).auxiliary1c===1 &&
+      x.normalLifecycleState.short6bc===8 && x.gates.marker578===0 && a.fbPhase===1 && a.controlWord===0x43,
+      'both real stream parts advance their actual blend clocks before yaw/movement/ground and positive norm refusal');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  for(const index of [0,1]){
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);
+    const a=x.sourceActor,position={...a.pos},motion={...a.motion},part=x.control.getPartBinding(x.actor,index);
+    Object.defineProperty(part,'event1e',{writable:false});
+    rejects(()=>x.runFrame(2),'event1e: non-writable');
+    const elapsed=[0,1].map(i=>x.dispatch.getPartBinding(x.mapping.getLayout(x.actor).parts[0]![i]!).elapsed08);
+    check(elapsed[0]===(index===0?0:1) && elapsed[1]===0 &&
+      ['x','y','z'].every(k=>Reflect.get(a.pos,k)===Reflect.get(position,k) && Reflect.get(a.motion,k)===Reflect.get(motion,k)) &&
+      x.normalLifecycleState.short6bc===8 && x.gates.marker578===0 && a.fbPhase===1,
+      'real4cd24 precedes yaw/vector work and preserves only completed earlier-part stream work on failure');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);const a=x.sourceActor, prior={...a.motion},position={...a.pos};
+    Object.defineProperty(a.motion,'y',{writable:false});
+    rejects(()=>x.runFrame(2),'y: non-writable');
+    check(x.clocks.elapsed08===1 && x.blendState.field1c===2 &&
+      ['x','y','z'].every(k=>Reflect.get(a.motion,k)===Reflect.get(prior,k) && Reflect.get(a.pos,k)===Reflect.get(position,k)),
+      'phase1 retains real stream advancement but a failed paired XY scale store never commits partial motion or position');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);const a=x.sourceActor,prior={...a.pos};
+    const original=Object.getOwnPropertyDescriptor;let clearance=0,stateReads=0,injected=false;
+    Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+      if(owner===a && key==='hoverOffset668'){
+        clearance++;
+        if(!injected && a.pos.x>prior.x && a.pos.y>prior.y){injected=true;a.hoverOffset668=NaN;}
+      }
+      if(owner===x.control.getPartBinding(x.actor,0) && key==='state1b')stateReads++;
+      return original(owner,key);
+    }) as typeof original;
+    try{rejects(()=>x.runFrame(2),'hoverOffset668');}finally{Object.getOwnPropertyDescriptor=original;}
+    check(injected && clearance>=3 && stateReads===0 && a.pos.x>prior.x && a.pos.y>prior.y && x.clocks.elapsed08===1 &&
+      x.normalLifecycleState.short6bc===8 && a.fbPhase===1,
+      'second real ground call is after phase1 movement and before signed part0 state or magnitude, not reused normal-stage result');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  for(const state of [1,127,128,255]){
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);const a=x.sourceActor,prior={...a.pos};
+    // Explicit synthetic boundary variant. This is not an authored event or a
+    // manufactured completion; its real nonnull callback must still refuse.
+    x.control.getPartBinding(x.actor,0).state1b=state;
+    a.contactP0=state<128?0:1;a.contactP1=77;
+    rejects(()=>x.runFrame(2),state<128?'actual800715f8 callback':'8020bb38 frsqrte');
+    check(a.fbPhase===(state<128?2:1) && a.pos.x>prior.x && a.pos.y>prior.y && x.clocks.elapsed08===1 &&
+      x.normalLifecycleState.short6bc===8 && x.gates.marker578===0,
+      'fresh raw canonical part0 state is signed only at source load; positive increments phase before fixednonnull callback, ignoring legacy contact fields');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);const a=x.sourceActor,prior={...a.pos};
+    x.control.getPartBinding(x.actor,0).state1b=undefined;a.contactP0=1;
+    rejects(()=>x.runFrame(2),'state1b');
+    check(a.fbPhase===1 && a.pos.x>prior.x && x.clocks.elapsed08===1 && x.normalLifecycleState.short6bc===8,
+      'missing canonical state stays missing after real stream/motion/ground; no legacy state or constructor default supplies it');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  console.log('[actor-phase1-ground-continuation] PASS: actual second55568 frame runs genuine4cd24 two-part mode1 blend advancement, yaw, existing-motion decay/add, SAME677b0 and signed canonical state; positive state preserves540 before715f8 refusal, ordinary motion reaches exact8020bb38; source-order/partial-effects/private guards retained, no full phase1/audio/clone/browser completion claim');
 }
