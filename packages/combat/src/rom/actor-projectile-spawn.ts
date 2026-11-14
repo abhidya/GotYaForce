@@ -50,6 +50,9 @@ export interface SourceActorProjectileSpawnRuntime {
   getPrehookRuntime(): SourceActorDoublePrehookRuntime;
   getCueRuntime(): ReturnType<SourceActorCommandAdmissionRuntime['getCueRuntime']>;
   getAllocatorRuntime(): SourceObjectAllocationRuntime;
+  getWorldRuntime(): SourceActorWorldMatrixRuntime;
+  getSpawnRow1(): Readonly<SourceActorProjectileSpawnRow>;
+  getAdmissionBinding(identity: symbol): ReturnType<SourceActorCommandAdmissionRuntime['getActorBinding']>;
   getSourceOwners(identity: symbol): readonly object[];
   assertActorComplete(identity: symbol): void;
   /** Identity registered only after every source spawn store completes. */
@@ -217,6 +220,8 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
     });},
     getActualActor(id) {return entry(id).actual;}, getActorBinding(id) {return entry(id).binding;},
     getPrehookRuntime() {return prehook;}, getCueRuntime() {return cues;}, getAllocatorRuntime() {return allocator;},
+    getWorldRuntime() {return world;}, getSpawnRow1() {return row;},
+    getAdmissionBinding(id) {entry(id);return admission.getActorBinding(id);},
     getSourceOwners(id) {return Object.freeze([...new Set([...ownRecords(entry(id)),row,row.local04,...allocator.getSourceOwners(id)])]);},
     assertActorComplete(id) {const e = entry(id); requireCompleteSourceActorDoubleLifecycle(e.actual); allocator.assertActorComplete(id);},
     getSpawnOwnerIdentity(projectile) {

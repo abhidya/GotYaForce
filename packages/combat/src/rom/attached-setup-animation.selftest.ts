@@ -18,6 +18,7 @@ import {runProjectileRootLifecycleSelfTests} from './projectile-root-lifecycle.s
 import {createSourceProjectileHitRuntime} from './projectile-hit-registration.js';
 import {createDoubleProjectileHitExportSlice} from './projectile-hit-export-slice.js';
 import {runProjectileHitRegistrationSelfTests} from './projectile-hit-registration.selftest.js';
+import {runProjectileFlightPrefixSelfTests} from './projectile-flight-prefix.selftest.js';
 import {createSourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
 import {createSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleBinding} from './actor-control-lifecycle.js';
@@ -2858,6 +2859,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runProjectileFrameGroundContinuationTests();
   runProjectileRootHydratedCompositionTests();
   runProjectileHitHydratedCompositionTests();
+  runProjectileFlightHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -13100,7 +13102,7 @@ export function createProjectileRootTestFixture(matchingMirror = true) {
 /** Explicit source integer projection plus synthetic current type4 free lists.
  * Only eight selected HIT bytes are reconstructed from lossless export fields;
  * no rounded floats, full raw asset, constructor or matrix is manufactured. */
-export function createProjectileHitTestFixture() {
+export function createProjectileHitTestFixture(withFlightStack = false) {
   const x=createProjectileSpawnTestFixture();x.sourceActor.borgMirror94=3;
   check(x.projectiles.spawn(x.actor,1)===x.child,'real spawn supplies HIT child');
   const hitBinding=createDoubleProjectileHitExportSlice(),hitTableIdentity=Symbol('explicit pl0003 integer slice'),
@@ -13109,9 +13111,21 @@ export function createProjectileHitTestFixture() {
   x.allocator.registerExternal(damageIdentity,hitBinding.pointer27c);
   const hits=createSourceProjectileHitRuntime(x.projectiles);hits.bindActor(x.actor,hitBinding);
   const drawList={head:null as symbol|null,tail:null as symbol|null};
-  const rootSources={spawns:x.projectiles,stage:x.stageBounds,drawList0:drawList,initialState0:0x8007dd84,row1Hit03:1,hits};
+  const initializationStack=withFlightStack?{rotationX:x.matrices.createMatrix(Array(12).fill(37)),rotationY:x.matrices.createMatrix(Array(12).fill(-19))}:undefined;
+  const rootSources={spawns:x.projectiles,stage:x.stageBounds,drawList0:drawList,initialState0:0x8007dd84,row1Hit03:1,hits,...(initializationStack?{initializationStack}:{})};
   const root=createSourceProjectileRootRuntime(rootSources);root.bindProjectile(x.child);
-  return Object.assign(x,{hits,hitBinding,hitTableIdentity,damageIdentity,root,rootSources,drawList});
+  return Object.assign(x,{hits,hitBinding,hitTableIdentity,damageIdentity,root,rootSources,drawList,initializationStack});
+}
+/** Reuses the same genuine graph and supplies explicit source stack matrices.
+ * Sentinel lanes are not source operands: actual RotTrig overwrites every lane.
+ * Neither the owner's heading nor its live target pointer is changed here. */
+export function createProjectileFlightTestFixture() {
+  const x=createProjectileHitTestFixture(true);
+  if(!x.initializationStack) throw Error('explicit flight stack missing from fixture');
+  return Object.assign(x,{initializationStack:x.initializationStack});
+}
+export function runProjectileFlightHydratedCompositionTests(): void {
+  runProjectileFlightPrefixSelfTests(createProjectileFlightTestFixture);
 }
 export function runProjectileHitHydratedCompositionTests(): void {
   runProjectileHitRegistrationSelfTests(createProjectileHitTestFixture);
@@ -13130,14 +13144,14 @@ export function runProjectileHitHydratedCompositionTests(): void {
     a.getInteriorAddress(a.readPointer(first,0x60)!)?.base===x.child &&
     a.getInteriorAddress(a.readPointer(first,0x60)!)?.byteOffset===0x114 &&
     position.every((v,i)=>a.readU32(x.child,[0x20,0x24,0x28][i]!)===v),
-    'canonical interior addresses retain actual table and child; later matrix refresh remains unreached');
+    'canonical interior addresses retain actual table and child; unchanged source matrix yields the same refreshed position');
   rejects(()=>x.hits.registerHit(x.child,1),'incomplete');
   const y=createProjectileHitTestFixture();y.hitPool.head=null;
   y.root.dispatchStoredRoot(y.child);
   check(y.allocator.readU8(y.child,0x18)===2 && y.groups[49]!.head===null && y.hitPool.count===4,
     'real allocation failure reaches zero-HIT state2 epilogue without inventing collision data');
   y.projectiles.assertActorComplete(y.actor);
-  console.log('[projectile-hit-composition] PASS: same spawned child reaches real type4 HIT allocation/list/alias/activation writes from eight lossless exported integer bytes, positive suffix remains explicit matrix boundary; genuine zero return retires initial state, no full asset/scheduler/flight/collision/browser claim');
+  console.log('[projectile-hit-composition] PASS: same spawned child reaches real type4 HIT allocation/list/alias/activation writes from eight lossless exported integer bytes, positive suffix reaches the explicit rotation bound; genuine zero return retires initial state, no full asset/scheduler/flight/collision/browser claim');
 }
 export function runProjectileRootHydratedCompositionTests(): void {
   runProjectileRootLifecycleSelfTests(createProjectileRootTestFixture);

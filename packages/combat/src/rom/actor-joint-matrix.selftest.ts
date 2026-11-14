@@ -58,8 +58,153 @@ function positivePrimaryExpected(bend: number): {current: number[]; next: number
       next: [cc, -s, 0, s, ss, c, 0, c, 0, 0, q, 0]};
   }
 }
+function runActorJointStandaloneMatrixSelfTests(): void {
+  const one = 0x3f800000, minusZero = 0x80000000;
+  // Independently written raw words, not production rotation helper output.
+  // sin(+0)=+0, sin(-0)=-0, cos(±0)=+1; ps_neg changes only sine's sign.
+  const rotations = [
+    {axis: 'x', angle: 0, words: [one, 0, 0, 0, 0, one, minusZero, 0, 0, 0, one, 0]},
+    {axis: 'x', angle: -0, words: [one, 0, 0, 0, 0, one, 0, 0, 0, minusZero, one, 0]},
+    {axis: 'y', angle: 0, words: [one, 0, 0, 0, 0, one, 0, 0, minusZero, 0, one, 0]},
+    {axis: 'y', angle: -0, words: [one, 0, minusZero, 0, 0, one, 0, 0, 0, 0, one, 0]},
+    {axis: 'z', angle: 0, words: [one, minusZero, 0, 0, 0, one, 0, 0, 0, 0, one, 0]},
+    {axis: 'z', angle: -0, words: [one, 0, 0, 0, minusZero, one, 0, 0, 0, 0, one, 0]},
+  ] as const;
+  const storeOrder = {
+    x: [0, 1, 2, 3, 4, 7, 8, 11, 9, 10, 5, 6],
+    y: [6, 7, 0, 1, 10, 11, 4, 5, 2, 3, 8, 9],
+    z: [2, 3, 6, 7, 8, 9, 4, 5, 0, 1, 10, 11],
+  } as const;
+  for (const {axis, angle, words} of rotations) {
+    const f = fixture();
+    // RotRad never reads the old destination values, including poisoned ones.
+    f.output.fill(NaN);
+    f.runtime.rotateRadiansZero(axis, f.destination, angle);
+    check(f.output.every((v, i) => bits(v) === words[i]), `${axis} radians raw zero signs ${bits(angle).toString(16)}`);
+    f.runtime.rotateRadiansZero(axis, f.destination, -angle);
+    f.runtime.rotateRadiansZero(axis, f.destination, angle);
+    check(f.output.every((v, i) => bits(v) === words[i]), `${axis} explicit repeated radians call reloads sign`);
+    // Each single lane fault checks the exact instruction store ordering,
+    // including a successful first lane before a failed second paired lane.
+    for (let stop = 0; stop < 12; stop++) {
+      const failed = fixture(), order = storeOrder[axis];
+      Object.defineProperty(failed.output, String(order[stop]), {writable: false});
+      rejects(() => failed.runtime.rotateRadiansZero(axis, failed.destination, angle), 'non-writable');
+      const prefix = new Set<number>(order.slice(0, stop));
+      check(failed.output.every((v, i) => bits(v) === (prefix.has(i) ? words[i] : bits(19))),
+        `${axis} signed-zero radians retains source store prefix through lane${stop}`);
+      failed.runtime.rotateRadiansZero(axis, failed.parent, angle);
+      check(failed.runtime.getMatrix(failed.parent).every((v, i) => bits(v) === words[i]),
+        `${axis} radians recovers after destination fault`);
+    }
+  }
+  {
+    const f = fixture();
+    for (const angle of [1, -1, fromBits(1), fromBits(0x80000001), fromBits(0x7f7fffff)]) {
+      rejects(() => f.runtime.rotateRadiansZero('x', f.destination, angle), '8020b260 sinf: nonzero radians');
+      check(f.output.every(v => v === 19), 'nonzero radians stop at sinf before any RotTrig store');
+    }
+    for (const angle of [NaN, Infinity, -Infinity, Number.MIN_VALUE, 1 + 2 ** -30, '0', null, undefined, new Number(0)]) {
+      rejects(() => f.runtime.rotateRadiansZero('x', f.destination, angle as number), 'expected finite source float32');
+      check(f.output.every(v => v === 19), 'invalid scalar cannot be rounded/coerced into zero-radian domain');
+    }
+    rejects(() => f.runtime.rotateRadiansZero('q' as 'x', f.destination, 0), 'rotation axis');
+    const foreign = fixture();
+    rejects(() => f.runtime.rotateRadiansZero('y', foreign.destination, -0), 'unknown/non-owned matrix');
+    // The real sinf call precedes RotTrig and destination access. Do not move
+    // the nonzero boundary after any write or invent a destination snapshot.
+    rejects(() => f.runtime.rotateRadiansZero('y', foreign.destination, 1), '8020b260 sinf: nonzero radians');
+    Object.defineProperty(f.output, '0', {writable: false});
+    rejects(() => f.runtime.rotateRadiansZero('x', f.destination, 1), '8020b260 sinf: nonzero radians');
+    check(f.output.every(v => v === 19) && foreign.output.every(v => v === 19), 'all failed radians calls preserve destinations');
+  }
+  {
+    const f = fixture(), x = f.parent, y = f.runtime.createMatrix(Array(12).fill(29));
+    f.runtime.rotateRadiansZero('x', x, -0); f.runtime.rotateRadiansZero('y', y, 0);
+    const beforeY = f.runtime.getMatrix(y).map(bits);
+    check(bits(f.runtime.getMatrix(x)[9]!) === minusZero && beforeY[8] === minusZero,
+      'explicit scratch X/Y retain separate source signed-zero results');
+    f.runtime.concat(y, x, x);
+    check(f.runtime.getMatrix(x).every((v, i) => bits(v) === bits(identity[i]!)),
+      'projectile Y/X/X alias executes actual arithmetic and removes both negative-zero lanes');
+    check(f.runtime.getMatrix(y).every((v, i) => bits(v) === beforeY[i]), 'Y/X/X does not alter left scratch matrix');
+  }
+  const leftValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  const rightValues = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
+  const product = [110, 116, 122, 132, 314, 332, 350, 376, 518, 548, 578, 620];
+  for (const alias of ['none', 'left', 'right', 'both'] as const) {
+    const f = fixture(), left = f.runtime.createMatrix(leftValues);
+    const right = alias === 'both' ? left : f.runtime.createMatrix(rightValues);
+    const destination = alias === 'none' ? f.destination : alias === 'right' ? right : left;
+    f.runtime.concat(left, right, destination);
+    const expected = alias === 'both' ? [38, 44, 50, 60, 98, 116, 134, 160, 158, 188, 218, 260] : product;
+    check(f.runtime.getMatrix(destination).every((v, i) => bits(v) === bits(expected[i]!)),
+      `standalone Concat supports complete ${alias} alias without premature stores`);
+    if (destination !== left) check(f.runtime.getMatrix(left).every((v, i) => v === leftValues[i]), 'Concat preserves non-output left');
+    if (destination !== right) check(f.runtime.getMatrix(right).every((v, i) => v === rightValues[i]), 'Concat preserves non-output right');
+  }
+  {
+    const f = fixture(), left = f.runtime.createMatrix([-1, 1 - 2 ** -23, 0, 0, ...identity.slice(4)]);
+    const right = f.runtime.createMatrix([1, 0, 0, 0, 1 + 2 ** -23, 1, 0, 0, 0, 0, 1, 0]);
+    f.runtime.concat(left, right, f.destination);
+    check(bits(f.output[0]!) === 0xa8800000, 'standalone Concat preserves fused -2^-46 cancellation');
+    const signed = f.runtime.createMatrix([-0, -0, -0, 0, -0, -0, -0, 0, -0, -0, -0, 0]);
+    f.runtime.concat(signed, f.parent, f.destination);
+    check(f.output.every((v, i) => bits(v) === (i % 4 < 2 ? minusZero : 0)),
+      'standalone Concat executes column2 positive-zero translation FMA, never copies identity input');
+  }
+  const concatOrder = [0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 10, 11];
+  for (let stop = 0; stop < 12; stop++) {
+    const f = fixture(), left = f.runtime.createMatrix(leftValues), right = f.runtime.createMatrix(rightValues);
+    Object.defineProperty(f.output, String(concatOrder[stop]), {writable: false});
+    rejects(() => f.runtime.concat(left, right, f.destination), 'non-writable');
+    const prefix = new Set(concatOrder.slice(0, stop));
+    check(f.output.every((v, i) => bits(v) === bits(prefix.has(i) ? product[i]! : 19)),
+      `standalone Concat retains paired-store prefix through lane${stop}`);
+    f.runtime.concat(left, right, left);
+    check(f.runtime.getMatrix(left).every((v, i) => v === product[i]), 'standalone Concat recovers after failed store');
+  }
+  for (const side of ['left', 'right'] as const) {
+    const f = fixture(), left = f.runtime.createMatrix(leftValues), right = f.runtime.createMatrix(rightValues);
+    f.runtime.getMatrix(side === 'left' ? left : right)[11] = NaN;
+    rejects(() => f.runtime.concat(left, right, f.destination), 'expected finite source float32');
+    check(f.output.every(v => v === 19), `standalone Concat reads complete ${side} before first destination store`);
+  }
+  {
+    const f = fixture(), largest = fromBits(0x7f7fffff);
+    const left = f.runtime.createMatrix([1, 0, 0, 0, largest, 0, 0, 0, 0, 0, 1, 0]);
+    const right = f.runtime.createMatrix([2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0]);
+    rejects(() => f.runtime.concat(left, right, f.destination), 'concat product');
+    check(f.output[0] === 2 && bits(f.output[1]!) === 0 && f.output.slice(2).every(v => v === 19),
+      'standalone Concat retains first pair before second-pair finite-intermediate overflow refusal');
+  }
+  for (const slot of ['left', 'right', 'destination'] as const) {
+    const f = fixture(), other = fixture();
+    rejects(() => f.runtime.concat(slot === 'left' ? other.parent : f.parent,
+      slot === 'right' ? other.parent : f.parent, slot === 'destination' ? other.destination : f.destination),
+    'unknown/non-owned matrix');
+    check(f.output.every(v => v === 19) && other.output.every(v => v === 19), `standalone Concat requires same owner for ${slot}`);
+  }
+  for (const operation of ['rotation', 'concat'] as const) {
+    const f = fixture();
+    f.hooks.get = () => {
+      try {
+        if (operation === 'rotation') f.runtime.rotateRadiansZero('x', f.destination, -0);
+        else f.runtime.concat(f.parent, f.parent, f.destination);
+      } catch { /* a swallowed nested call must still poison composeJoint */ }
+    };
+    rejects(f.compose, 'reentry was caught');
+    check(f.output.every(v => v === 19), `${operation} nested call cannot mutate before outer poison refusal`);
+    delete f.hooks.get;
+    f.runtime.rotateRadiansZero('y', f.destination, -0);
+    check(bits(f.output[2]!) === minusZero, `${operation} shares runtime reentry recovery`);
+    f.runtime.concat(f.parent, f.parent, f.destination);
+    check(f.output.every((v, i) => bits(v) === bits(identity[i]!)), `${operation} leaves Concat usable after reentry refusal`);
+  }
+}
 export function runActorJointMatrixSelfTests(): void {
   runActorJointMatrixBytesSelfTests();
+  runActorJointStandaloneMatrixSelfTests();
   {
     // Binary64 witnesses are necessary: final frsp happens to hide the first
     // sine's stage2 split-multiply error. Exercise the production internal

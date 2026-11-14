@@ -109,6 +109,8 @@ export interface SourceActorWorldMatrixRuntime {
   getActualActor(identity: symbol): RomActor;
   /** Retained source matrix runtime, not a replacement transform adapter. */
   getMatricesRuntime(): SourceActorJointMatrixRuntime;
+  /** Read-only ownership query; source temporary matrices must not alias these. */
+  ownsActorMatrix(identity: symbol): boolean;
   /** Same retained mapping header, for identity-preserving composition. */
   getMappingActor(identity: symbol): object;
   getActorBinding(identity: symbol): SourceActorWorldMatrixBinding;
@@ -411,6 +413,7 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
   }
   const runtime: SourceActorWorldMatrixRuntime = Object.freeze({
     getMatricesRuntime() {return matricesRuntime;},
+    ownsActorMatrix(id: symbol) {return assignedMatrixIds.has(id);},
     bindActor(id: symbol, actual: RomActor, initial: Readonly<SourceActorWorldMatrixBinding>, storage: SourceActorWorldMatrixStorage): void {guard(() => {
       symbol(id, 'actor'); record(actual, 'actual RomActor');
       if (actors.has(id)) fail('world-matrix actor already bound');

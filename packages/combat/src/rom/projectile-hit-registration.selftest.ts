@@ -17,7 +17,7 @@ export interface SourceProjectileHitTestFixture extends SourceProjectileRootTest
   hitIds: symbol[]; hitBytes: SourceAllocationBytes[]; hitPool: SourceObjectPool;
   descriptorPool: SourceDescriptorPool; descriptorBytes: SourceAllocationBytes; nextDescriptorBytes: SourceAllocationBytes;
 }
-const NEXT = 'positive HIT continuation before actual8020b7a8 position refresh';
+const NEXT = 'positive HIT continuation at actual8020b238';
 function check(ok: boolean, why: string): void {if (!ok) throw Error(`[projectile-hit-test] ${why}`);}
 function equal(actual: unknown, expected: unknown, why: string): void {
   check(Object.is(actual,expected),`${why}: got ${String(actual)}, expected ${String(expected)}`);
@@ -153,7 +153,7 @@ export function runProjectileHitRegistrationSelfTests(make: () => SourceProjecti
     equal(a.readU32(x.child,0x100),0x80047aa4,'prior genuine draw callback stored');
     equal(x.drawList.head,x.child,'prior genuine89100 draw registration'); equal(x.drawList.tail,x.child,'actual draw tail');
     equal(a.readU8(x.child,0x84),20,'prior category store'); equal(a.readU16(x.child,0x72),0x8123,'prior owner yaw copy');
-    check(before.every((v,i) => a.readU32(x.child,[0x20,0x24,0x28][i]!)===v),'positive boundary precedes8020b7a8 position refresh');
+    check(before.every((v,i) => a.readU32(x.child,[0x20,0x24,0x28][i]!)===v),'fresh position refresh is equal when the actual source matrix has not changed');
     closed(x);
   }
   for (const mode of ['parent-null','negative-remap','empty-pool','negative-descriptors'] as const) {

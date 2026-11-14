@@ -1,7 +1,8 @@
 /** Bounded stored8007dcec callback and initial8007dd84 prefix, not a scheduler.
  * See projectile-callback/initialization-evidence-2026-11-14.md. Only source
- * state0 and row1 are authenticated. The actual8ac80 HIT registration remains
- * an explicit boundary after genuine89100(0,1), not an assumed empty asset.
+ * state0 and row1 are authenticated. An optional genuine8ac80 continuation
+ * preserves actual zero return or refreshes the same child position, then
+ * refuses at the reached flight helper. Missing HIT remains an explicit bound.
  *
  * A separate explicit dispatch consumes a successfully spawned object's SAME
  * bytes. It never runs inline inside7db5c, invents an actor constructor, resumes
@@ -18,8 +19,10 @@ import {isSourceActorDoubleFrameClaimed} from './actor-double-prehook.js';
 import type {RomActor} from './actor.js';
 import type {SourceAllocationBytes} from './source-object-allocation.js';
 import {isSourceProjectileHitRuntime, type SourceProjectileHitRuntime} from './projectile-hit-registration.js';
+import {sourceProjectileHeadingRadians, sourceProjectileInitialPitch} from './projectile-heading.js';
 
 export interface SourceProjectileDrawList {head?: symbol | null; tail?: symbol | null}
+export interface SourceProjectileInitializationStack {rotationX: symbol; rotationY: symbol}
 export interface SourceProjectileRootSources {
   spawns: SourceActorProjectileSpawnRuntime;
   stage: SourceActorStageBoundsRuntime;
@@ -30,6 +33,8 @@ export interface SourceProjectileRootSources {
   row1Hit03: number;
   /** Optional genuine continuation, never a caller-supplied success callback. */
   hits?: SourceProjectileHitRuntime;
+  /** Explicit source temporary matrix storage, distinct from all actor matrices. */
+  initializationStack?: SourceProjectileInitializationStack;
 }
 export interface SourceProjectileRootRuntime {
   bindProjectile(projectile: symbol): void;
@@ -39,7 +44,8 @@ export interface SourceProjectileRootRuntime {
   getSourceOwners(projectile: symbol): readonly object[];
   dispatchStoredRoot(projectile: symbol): void;
 }
-const runtimes = new WeakSet<object>(), claimedChildren = new WeakSet<object>(), claimedDrawLists = new WeakSet<object>();
+const runtimes = new WeakSet<object>(), claimedChildren = new WeakSet<object>(), claimedDrawLists = new WeakSet<object>(),
+  claimedStackMatrices = new WeakSet<object>();
 export function isSourceProjectileRootRuntime(value: unknown): value is SourceProjectileRootRuntime {
   return value !== null && typeof value === 'object' && runtimes.has(value);
 }
@@ -80,7 +86,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     try {run(); check();} finally {busy = false;}
   };
   const call = <T>(run: () => T): T => {const value = run(); check(); return value;};
-  const read = (owner: object, key: string): unknown => {const value = own(owner, key); check(); return value;};
+  const read = (owner: unknown, key: string): unknown => {const value = own(owner, key); check(); return value;};
   const writeList = (key: 'head' | 'tail', value: symbol | null): void => {own(draw, key, true); check(); draw[key] = value; check();};
   const same = (value: unknown, expected: unknown, where: string): void => {check(); if (value !== expected) fail(`${where}: source owner changed or differs`);};
   interface Entry {id: symbol; origin: symbol; actual: RomActor; bytes: SourceAllocationBytes; stage: object; world: object; status: object; incomplete: boolean}
@@ -147,7 +153,50 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     same(call(() => hits.getActualActor(e.origin)),e.actual,'HIT actual');
     const result = call(() => hits.registerHit(e.id,1));
     if (result === 0) {put8(e.id,0x18,2);return;} //7de10/14 then actual epilogue
-    fail('8007de1c reached positive HIT continuation before actual8020b7a8 position refresh; remaining projectile initialization is unsupported');
+    // Saved initializer90, NOT a fresh child90/8c read after HIT registration.
+    const world = call(() => spawns.getWorldRuntime()), matrices = call(() => world.getMatricesRuntime());
+    same(call(() => world.getActualActor(e.origin)),actual,'saved initializer world owner');
+    same(call(() => world.getActorBinding(e.origin)),e.world,'same initializer world binding');
+    const row = call(() => spawns.getSpawnRow1());
+    const joint = unsigned(read(row,'joint02'),255,'row1 joint02') << 24 >> 24;
+    const matrix = call(() => world.getWorldMatrix(e.origin,joint));
+    const storage = call(() => world.getStorage(e.origin)), matrixId = read(read(storage,'matrices8d4'),String(joint));
+    if (typeof matrixId !== 'symbol') fail('saved owner joint11 source matrix identity required');
+    same(call(() => matrices.getMatrix(matrixId)),matrix,'same actual saved-owner matrix');
+    call(() => matrices.transformPointBytes(matrixId,row.local04,e.bytes,0x20));
+    if ((unsigned(read(row,'offset2c'),255,'row1 offset2c') << 24 >> 24) !== 0)
+      fail('8007de54 reached unsupported actual8020ba54 nonzero row1 offset');
+    // Fresh owner72 and canonical ownerc8 are both read before literal loads.
+    const freshHeading = unsigned(read(actual,'heading'),65535,'fresh heading72');
+    const admission = call(() => spawns.getAdmissionBinding(e.origin)), target = read(admission,'pointerc8');
+    if (target !== null && typeof target !== 'object') fail('ownerc8: explicit source pointer owner required');
+    const yaw = sourceProjectileHeadingRadians(freshHeading);
+    if (target !== null)
+      fail('8007de9c reached positive HIT continuation at actual8020ba78 target displacement; ballistic flight prefix unsupported');
+    const pitch = sourceProjectileInitialPitch();
+    if (!Number.isFinite(yaw) || !Object.is(pitch,-0)) fail('source flight scalar invariant differs');
+    const suppliedStack = Object.getOwnPropertyDescriptor(sources,'initializationStack');check();
+    if (!suppliedStack || !('value' in suppliedStack))
+      fail('8007e030 reached positive HIT continuation at actual8020b238 RotRad(X,-0); explicit initialization stack unavailable');
+    const stack = suppliedStack.value as unknown;
+    if ([e.actual,e.bytes,e.stage,e.world,e.status,draw].includes(stack as object)) fail('initialization stack aliases source owner');
+    const xId=read(stack as object,'rotationX'), yId=read(stack as object,'rotationY');
+    if (typeof xId!=='symbol' || typeof yId!=='symbol' || xId===yId) fail('distinct owned initialization stack matrices required');
+    // Host ownership admission, not emulated matrix-data loads. No source actor
+    // slot can be overwritten to stand in for the two source stack matrices.
+    if(call(()=>world.ownsActorMatrix(xId))||call(()=>world.ownsActorMatrix(yId))) fail('initialization stack aliases actor matrix storage');
+    const xMatrix=call(()=>matrices.getMatrix(xId)),yMatrix=call(()=>matrices.getMatrix(yId));
+    if(claimedStackMatrices.has(xMatrix)||claimedStackMatrices.has(yMatrix)) fail('initialization stack already claimed');
+    claimedStackMatrices.add(xMatrix);claimedStackMatrices.add(yMatrix);
+    call(()=>matrices.rotateRadiansZero('x',xId,pitch));
+    call(()=>matrices.rotateRadiansZero('y',yId,yaw));
+    call(()=>matrices.concat(yId,xId,xId));
+    for(const [lane,offset] of [[2,0x38],[6,0x3c],[10,0x40]] as const) {
+      const value=read(xMatrix,String(lane));
+      if(typeof value!=='number'||!Number.isFinite(value)||!Object.is(value,Math.fround(value))) fail('source direction lane requires finite float32');
+      call(()=>allocator.writeF32(e.id,offset,value));
+    }
+    fail('8007e074 reached actual8020bab8 Normalize after source flight-direction stores; reciprocal-square-root estimate remains unsupported');
   };
   const runtime: SourceProjectileRootRuntime = {
     bindProjectile(id) {guard(() => {
