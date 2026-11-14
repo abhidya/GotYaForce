@@ -117,9 +117,6 @@ const INTRO_ACTOR_ANCHORS = [
 ] as const;
 
 const FIXED_FRAME_SECONDS = SOURCE_FRAME_SECONDS;
-/** Cap on the catch-up a single fallback tick may swallow, so returning from a long
- *  background gap fast-forwards a bounded number of VM frames instead of one spike. */
-const FALLBACK_MAX_CATCHUP_SECONDS = 0.1;
 
 // ROM script animId -> baked g0-file clip — DERIVED 2026-07-06 (family-ctor-anim-bank
 // decode): the VM fires actorPlayAnim(slot, groupSel=5, animId); groupSel 5 indexes the
@@ -439,37 +436,43 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
   let sceneDisposed = false;
   let sceneFrame = 0;
 
-  // The 3D desk scene is decoration; the VM is what advances the intro and sets
-  // endRequested, which enter() gates on. Every await in the loader below is
-  // unguarded, so a single 404 lands in its catch, the render loop never starts,
-  // the VM never ticks, and every keypress, click and gamepad button is swallowed
-  // for the rest of the session -- while data-gf-runtime already reads boot-ready.
-  // Tick the VM on its own in that case so the title is always dismissible.
-  let fallbackFrame = 0;
-  const startVmOnlyFallback = (): void => {
-    let last = performance.now();
-    let accumulator = 0;
-    const step = (now = performance.now()): void => {
-      if (destroyed) return;
-      accumulator += Math.min(FALLBACK_MAX_CATCHUP_SECONDS, Math.max(0, (now - last) / 1000));
-      last = now;
-      while (accumulator >= FIXED_FRAME_SECONDS) {
-        vm.tick();
-        accumulator -= FIXED_FRAME_SECONDS;
-      }
-      root.dataset["gfIntroEnd"] = String(vm.state.endRequested);
-      root.dataset["gfIntroDone"] = String(vm.state.endRequested === 1);
-      fallbackFrame = requestAnimationFrame(step);
-    };
-    fallbackFrame = requestAnimationFrame(step);
-    teardown.push(() => cancelAnimationFrame(fallbackFrame));
+  // A failed decorative scene cannot satisfy the VM's archive/camera waits.
+  // Do not pretend those source resources loaded or tick a permanently stalled VM.
+  // Make the host's explicit recovery visible and allow the player into the menu.
+  let sceneUnavailable = false;
+  let releaseRenderer = (): void => {};
+  const showSceneFailure = (): void => {
+    if (destroyed) return;
+    sceneUnavailable = true;
+    root.dataset["gfIntroFallback"] = "scene-unavailable";
+    tintLayer.style.opacity = "0";
+    overlayLayer.style.opacity = "0";
+    (prompt as HTMLElement).hidden = false;
+    (prompt as HTMLElement).style.opacity = "1";
+    const notice = el("div", {
+      class: "gf-title-intro-error",
+      text: "Title scene unavailable. Press Enter, Start, or click to continue.",
+      attrs: { role: "status" },
+    });
+    notice.style.cssText =
+      "position:absolute;inset:45% 5% auto;text-align:center;z-index:10;" +
+      "padding:16px;color:#fff;background:rgba(0,0,0,.85);font:16px/1.5 system-ui;";
+    root.appendChild(notice);
   };
 
   void (async () => {
     try {
       const canvas = sceneHost.querySelector<HTMLCanvasElement>(".gf-ui-scene-canvas");
-      if (!canvas) return;
+      if (!canvas) throw new Error("Title scene canvas is missing");
       const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      let rendererReleased = false;
+      releaseRenderer = (): void => {
+        if (rendererReleased) return;
+        rendererReleased = true;
+        renderer.dispose();
+        renderer.forceContextLoss();
+      };
+      teardown.push(releaseRenderer);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.setClearColor(0x000000, 0);
 
@@ -486,6 +489,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
         throw new Error(`Failed to load exact TDC camera tracks: ${cameraAnimationsResponse.status}`);
       }
       const cameraAnimations = (await cameraAnimationsResponse.json()) as TdcCameraAnimation[];
+      if (sceneDisposed) return;
 
       applyTdcFrame = (index, frame): void => {
         const state = index < 0 ? TL00_BASE_SCENE_STATE : TDC_SCENE_STATES[index];
@@ -565,6 +569,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
           loader.loadGlbScene(publicUrl(`/ui/scenes/tl00/model_${String(i).padStart(2, "0")}.glb`)).catch(() => null),
         ),
       );
+      if (sceneDisposed) return;
       let mountedTl00 = 0;
       for (const model of tl00Models) {
         if (!model) continue;
@@ -582,6 +587,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
           ),
         ),
       );
+      if (sceneDisposed) return;
       props = propModels.map((model, index) => {
         const source = propController.frames[index]!;
         prepareImportedModel(model, {
@@ -733,17 +739,17 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
         sceneDisposed = true;
         cancelAnimationFrame(sceneFrame);
         for (const actor of actors) actor.mixer.stopAllAction();
-        renderer.dispose();
       });
     } catch (err) {
       sceneHost.dataset["gfModelStatus"] = "failed";
       console.warn("[title] source tl00 3D desk scene unavailable:", err);
-      startVmOnlyFallback();
+      releaseRenderer();
+      showSceneFailure();
     }
   })();
 
   function enter(): void {
-    if (destroyed || vm.state.endRequested === 0) return;
+    if (destroyed || (!sceneUnavailable && vm.state.endRequested === 0)) return;
     opts.onEnter();
   }
 
@@ -771,6 +777,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     },
     destroy: () => {
       destroyed = true;
+      sceneDisposed = true;
       window.removeEventListener("keydown", onKey);
       root.removeEventListener("click", onClick);
       for (const fn of teardown) fn();
