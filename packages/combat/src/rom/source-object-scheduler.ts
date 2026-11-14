@@ -8,6 +8,7 @@
  * No callback injection, copied lists, fabricated active slot, default mask,
  * estimator, source actor constructor, or browser activation is supplied.
  */
+import {claimSourceHelperStorage} from './source-storage-claims.js';
 import {isPendingSourceBattleOuterFrameClaim, requireSourceBattleOuterFrameFailure,
   type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
 import {isSourceProjectileRootRuntime, prepareSourceProjectileScheduledRoot,
@@ -152,6 +153,7 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
     if(actual===sources || actual===globals || actual===root.getDrawList() ||
       call(()=>root.getRetainedStorageOwners()).includes(actual)) fail('actor slots alias another source owner');
     if(slotsOwner!==undefined && slotsOwner!==actual) fail('actor-slot table owner changed');
+    if(!claimSourceHelperStorage(actual,runtime)) fail('actor slots source storage already claimed');
     slotsOwner=actual;return actual as Readonly<Record<number,symbol|null>>;
   };
   const slots = (bits: number): void => {
@@ -225,5 +227,6 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
       finally {active=undefined;busy=false;}
     },
   });
+  if(!claimSourceHelperStorage(sources,runtime)) fail('scheduler sources storage already claimed');
   runtimes.add(runtime);claims.set(root,runtime);return Object.freeze(runtime);
 }

@@ -1,3 +1,4 @@
+import {runActorTargetDispatchSelfTests} from './actor-target-dispatch.selftest.js';
 import {runBattleTargetPreparationSelfTests} from './battle-target-preparation.selftest.js';
 import {runActorSlotStatusSelfTests} from './actor-slot-status.selftest.js';
 import {runBattleMassOrderingSelfTests} from './battle-mass-ordering.selftest.js';
@@ -2881,6 +2882,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleMassOrderingHydratedCompositionTests();
   runBattleTargetPreparationHydratedCompositionTests();
   runActorSlotStatusHydratedCompositionTests();
+  runActorTargetDispatchHydratedCompositionTests();
   runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
@@ -13367,4 +13369,8 @@ export function runBattleTargetPreparationHydratedCompositionTests(): void {
 }
 export function runActorSlotStatusHydratedCompositionTests(): void {
   runActorSlotStatusSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+export function runActorTargetDispatchHydratedCompositionTests(): void {
+  runActorTargetDispatchSelfTests(createBattleTargetPreparationTestFixture);
 }

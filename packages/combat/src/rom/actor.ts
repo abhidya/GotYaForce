@@ -64,6 +64,9 @@ export interface RomActor {
    * No constructor default; supplied only by a source hydration boundary.
    * @romfield active0 +0x0 u8 */
   active0?: number;
+  /** Explicit6b7f4 target-dispatch state. No constructor default.
+   * @romfield byte502 +0x502 u8 */
+  byte502?: number;
   /** Explicit source53b30 ordering reset. No constructor default.
    * @romfield field664 +0x664 f32 */
   field664?: number;

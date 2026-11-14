@@ -8,6 +8,7 @@
  * are metadata admission, not source scalar reads. No successful callback,
  * copied target list, cached pointer target or implicit dispatch word is used.
  */
+import {claimSourceHelperStorage} from './source-storage-claims.js';
 import {isSourceObjectSchedulerRuntime,type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 export interface SourceActorPlayerSlotRecord {state18?: number}
 export interface SourceActorSlotStatusSources {
@@ -20,10 +21,11 @@ export interface SourceActorSlotStatusRuntime {
   getSchedulerRuntime(): SourceObjectSchedulerRuntime;
   /** Direct helper owners only. Never recurse through scheduler inventory. */
   getRetainedStorageOwners(): readonly object[];
+  /** Metadata-only explicit reference inventory, including unreached rows. */
+  getDeclaredStorageOwners(): readonly object[];
   readSlot(slot: number): number;
 }
-const runtimes=new WeakSet<object>(),claims=new WeakMap<object,SourceActorSlotStatusRuntime>(),
-  storageClaims=new WeakMap<object,SourceActorSlotStatusRuntime>();
+const runtimes=new WeakSet<object>(),claims=new WeakMap<object,SourceActorSlotStatusRuntime>();
 export function isSourceActorSlotStatusRuntime(value: unknown): value is SourceActorSlotStatusRuntime {
   return value!==null && typeof value==='object' && runtimes.has(value);
 }
@@ -65,12 +67,27 @@ export function createSourceActorSlotStatusRuntime(sources: SourceActorSlotStatu
     if(old && old!==selected) fail(`${name}: canonical owner changed`);
     if(selected===tableOwner || forbidden().includes(selected) ||
       [...retained].some(([key,owner])=>key!==name && owner===selected)) fail(`${name}: source storage alias`);
-    const claim=storageClaims.get(selected);if(claim && claim!==runtime) fail(`${name}: storage already claimed`);
-    retained.set(name,selected);storageClaims.set(selected,runtime);return selected;
+    if(!claimSourceHelperStorage(selected,runtime)) fail(`${name}: storage already claimed`);
+    retained.set(name,selected);return selected;
   };
   const runtime: SourceActorSlotStatusRuntime={
     getSchedulerRuntime() {return scheduler;},
     getRetainedStorageOwners() {return Object.freeze([sources,...retained.values()]);},
+    getDeclaredStorageOwners() {
+      // References only. Missing/accessor fields are left to their reached
+      // source load; this inventory never invokes a getter or reads a scalar.
+      const values: object[]=[sources];
+      const reference=(owner: object,key: string): object|undefined=>{
+        const p=Object.getOwnPropertyDescriptor(owner,key);check();
+        if(p && 'value' in p && p.value!==null && typeof p.value==='object') {
+          values.push(p.value);return p.value;
+        }
+        return undefined;
+      };
+      const rows=reference(sources,'slotRecords');
+      if(rows) for(let index=0;index<13;index++) reference(rows,String(index));
+      reference(sources,'dispatch3938');return Object.freeze(values);
+    },
     readSlot(slot) {
       if(busy) {poisoned=true;fail('same-runtime reentry unsupported');}
       busy=true;poisoned=false;
@@ -108,5 +125,6 @@ export function createSourceActorSlotStatusRuntime(sources: SourceActorSlotStatu
       } finally {busy=false;}
     },
   };
+  if(!claimSourceHelperStorage(sources,runtime)) fail('slot-status sources storage already claimed');
   runtimes.add(runtime);claims.set(scheduler,runtime);return Object.freeze(runtime);
 }

@@ -487,7 +487,7 @@ function targetTests(make: Make): void {
   }
   for(const location of ['state','actor','housekeeping','request'] as const) {
     const x=setup(make),{frame}=outer(x);let entered=false,target=false;
-    observe(()=>rejects(()=>frame.runFrame(),'caught same-runtime reentry'),(owner,key)=>{
+    observe(()=>rejects(()=>frame.runFrame(),'known incomplete source Double lifecycle'),(owner,key)=>{
       if(owner===x.slotRecords[0] && key==='state18') target=true;
       const reached=location==='state'?owner===x.slotRecords[0]&&key==='state18':
         location==='actor'?owner===x.sourceActor&&key==='byte43d':

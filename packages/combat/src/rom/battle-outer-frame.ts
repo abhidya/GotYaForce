@@ -6,7 +6,9 @@
  * nonzero passenger1e4 or missing RNG/ordering ingress. The no-contact ordering
  * suffix can return53b30. Optional target ingress executes the ordered6ae60
  * clears. Optional shared10514 ingress supports6b450 early returns before
- * mandatory6b7f4; skipped lifecycle rows retain canonical508/target83 bounds.
+ * mandatory6b7f4. Its optional genuine target-dispatch owner continues inactive
+ * clearing and entry0 bounded returns; skipped lifecycle rows and dispatch
+ * returns retain canonical508/target83 bounds.
  * Its bounded return still cannot skip mandatory27764.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
@@ -25,6 +27,7 @@ import {markIncompleteSourceActorDoubleLifecycle, requireCompleteSourceActorDoub
 import {addSourceFloat32} from './source-float.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
+import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
 import type {SourceActorSlotStatusRuntime} from './actor-slot-status.js';
 import type {SourceBattleOuterGlobalFields, SourceBattleSystemGlobals} from './battle-global-layout.js';
 
@@ -59,6 +62,8 @@ export interface SourceBattleTargetPreparationSources {
   admission?: SourceActorCommandAdmissionRuntime;
   /** SAME optional10514 owner retained by the canonical action runtime. */
   slotStatus?: SourceActorSlotStatusRuntime;
+  /** Genuine6b7f4 on this exact scheduler/admission graph. */
+  targetDispatch?: SourceActorTargetDispatchRuntime;
 }
 export interface SourceBattleOuterFrameSources {
   scheduler: SourceObjectSchedulerRuntime;
@@ -576,7 +581,12 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(helper!==canonical || canonical===undefined || canonical.getSchedulerRuntime()!==scheduler)
           fail('6b450 exact shared slot-status/scheduler owner required');
         call(()=>action.prepareTarget(id));
-        fail('8006af88 reached mandatory8006b7f4 target-dispatch predecessor');
+        const dispatchPresent=Object.getOwnPropertyDescriptor(target,'targetDispatch');check();
+        if(dispatchPresent===undefined) fail('8006af88 reached mandatory8006b7f4 target-dispatch predecessor');
+        const dispatch=read(target,'targetDispatch');
+        if(!isSourceActorTargetDispatchRuntime(dispatch) || dispatch.getSchedulerRuntime()!==scheduler)
+          fail('6b7f4 exact genuine target-dispatch/scheduler owner required');
+        call(()=>dispatch.dispatchActor(id));
       }
     }
     //8006b358 reload. The active BYTE LOAD precedes the unconditional508
@@ -597,10 +607,16 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     }
     //Genuine void return only if every reached canonical508 owner completed.
   };
+  const close=(): void=>{
+    if(incomplete) return;
+    incomplete=true;closing=true;
+    for(const actor of massActors.values()) markIncompleteSourceActorDoubleLifecycle(actor);
+    try {closeSourceObjectSchedulerOuterFrame(scheduler,runtime);} finally {closing=false;}
+  };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
     runFrame(): never {
-      if(busy) {poisoned=true;fail('same-runtime reentry unsupported');}
+      if(busy) {poisoned=true;close();fail('same-runtime reentry unsupported');}
       if(incomplete) fail('permanently incomplete outer frame');
       busy=true;poisoned=false;
       try {
@@ -615,10 +631,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         }
         fail('80029464 reached mandatory8000bef4 outer-frame predecessor');
       } catch(error) {
-        incomplete=true;closing=true;
-        for(const actor of massActors.values()) markIncompleteSourceActorDoubleLifecycle(actor);
-        try {closeSourceObjectSchedulerOuterFrame(scheduler,runtime);} finally {closing=false;}
-        throw error;
+        close();throw error;
       } finally {busy=false;}
     },
   };
