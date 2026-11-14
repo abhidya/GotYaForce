@@ -18,6 +18,8 @@
  * permanently mark an effectful incomplete call. No tick or input hydration.
  */
 import {readSourceShortTrig} from './source-short-trig.js';
+import {claimSourceHelperStorage} from './source-storage-claims.js';
+import {requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
 import type {SourceActorStatusTimersRuntime} from './actor-status-timers.js';
@@ -72,6 +74,8 @@ export interface SourceActorCommandAdmissionRuntime {
   getData(): SourceActorInputChargeData;
   /** Already captured immutable explicit host GQR5 configuration, not a live register read. */
   getShortTrigProfile(): unknown;
+  /** Same retained aim owner/claim, without XYZ or captured-target loads. */
+  getAimPositionOwner(identity: symbol): object;
   getActorBinding(identity: symbol): Partial<SourceActorCommandAdmissionBinding>;
   /** Only new absent-field binding; not copies of canonical source owners. */
   getSourceOwners(identity: symbol): readonly object[];
@@ -268,8 +272,11 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
   };
   const aim = (e: Entry): object => {
     const value = record(read(e.actual, 'aimOrigin518'), 'actual aimOrigin518 vector');
+    if(Array.isArray(value) || ArrayBuffer.isView(value)) fail('aimOrigin518: ordinary source vector required');
     if (e.aim !== undefined) stable(value, e.aim, 'aimOrigin518');
-    retain(e, value, 'aim'); e.aim = value; return value;
+    retain(e, value, 'aim');
+    if(!claimSourceHelperStorage(value,runtime)) fail('aimOrigin518: source storage already claimed');
+    e.aim = value; return value;
   };
   const trig = (heading: number, cosine: boolean): number =>
     readSourceShortTrig(heading,cosine,data,gqr5,check);
@@ -461,6 +468,13 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
     getCueRuntime() {return cues;}, getCueBinding(id) {return entry(id).cue;}, getDispatchBinding(id) {return entry(id).dispatch;},
     getStartBinding(id) {return entry(id).start;}, getStreamBinding(id) {return entry(id).stream;},
     getGlobal() {return global;}, getData() {return data;}, getShortTrigProfile() {return gqr5;}, getActorBinding(id) {return entry(id).binding;},
+    getAimPositionOwner(id) {
+      const e=entry(id);
+      try {return guard(()=>{
+        assertComplete(e.actual);requireCompleteSourceActorDoubleLifecycle(e.actual);admit(id,e);
+        const owner=aim(e);assertComplete(e.actual);requireCompleteSourceActorDoubleLifecycle(e.actual);return owner;
+      });} catch(error) {incomplete.add(e.actual);throw error;}
+    },
     getSourceOwners(id) {return entry(id).extras;}, getKnownStorageOwners() {return Object.freeze([...storage.keys()]);},
     getKnownStorageEntries() {return Object.freeze([...storage].map(([owner, kind]) => Object.freeze({owner, kind})));},
     assertActorComplete(id) {assertComplete(entry(id).actual);},

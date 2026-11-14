@@ -560,7 +560,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         fail('6ae60 command source storage alias');
       commandOwners.set(id,{binding,action});return needAction?action:binding;
     };
-    const primaryDistance=(id: symbol,actor: object,dispatch: SourceActorTargetDispatchRuntime): never=>{
+    const primaryDistance=(id: symbol,actor: object,dispatch: SourceActorTargetDispatchRuntime): void=>{
       const binding=command(id,actor,false);
       const basicGuard=(): void=>{
         check();requireCompleteSourceActorDoubleLifecycle(actor);allocator.assertActorComplete(id);check();
@@ -571,9 +571,15 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       };
       const load=(owner: object,key: string): unknown=>{const value=read(owner,key);basicGuard();return value;};
       let data: object|undefined;
-      let nullDirection=false;
+      let nullDirection=false,secondaryReached=false,ccReached=false,aimReached=false;
       let operandsGuard=basicGuard;
-      const distanceKeys=['targetDistance758','horizontalDistance75c'] as const;
+      const distanceKeys=['targetDistance758','horizontalDistance75c','targetDistance760','horizontalDistance764'] as const;
+      const secondaryAliases=['field760','field764','float760','float764',
+        ...Array.from({length:8},(_,index)=>0x760+index).flatMap(offset=>
+          [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
+      const aimAliases=['field518','field51c','field51C','field520','position518','targetPosition518',
+        ...Array.from({length:12},(_,index)=>0x518+index).flatMap(offset=>
+          [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
       const shadowKeys=['field758','field75c','field75C','float758','float75c','float75C',
         ...Array.from({length:8},(_,index)=>0x758+index).flatMap(offset=>
           [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
@@ -606,12 +612,31 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           fail('6ae60 primary data aliases canonical source storage');
         for(const owner of owners) {
           const fields=Object.getOwnPropertyDescriptors(owner);basicGuard();
-          for(const key of distanceKeys) if(!actualActors.includes(owner) && fields[key]!==undefined)
+          for(const key of (secondaryReached?distanceKeys:distanceKeys.slice(0,2))) if(!actualActors.includes(owner) && fields[key]!==undefined)
             fail(`${key}: competing primary distance storage`);
           for(const key of shadowKeys) if(fields[key]!==undefined)
             fail(`${key}: competing primary distance storage alias`);
           for(const key of ['float80437658','float80437678']) if(owner!==data && fields[key]!==undefined)
             fail(`${key}: competing primary shared data storage`);
+          if(ccReached) {
+            if(!actualActors.includes(owner) && fields.visibilityTarget!==undefined)
+              fail('visibilityTarget: competing secondary source storage');
+            for(const key of ['pointerCC','pointercc','fieldcc','fieldCC','bytecc','bytecd','bytece','bytecf',
+              'byteCC','byteCD','byteCE','byteCF']) if(fields[key]!==undefined)
+              fail(`${key}: competing secondary pointer alias`);
+            // These offsets name actual+cc only on this actor. Unrelated raw
+            // byte windows may legitimately have numeric entries at204..207.
+            if(owner===actor) for(const key of ['204','205','206','207']) if(fields[key]!==undefined)
+              fail(`${key}: competing secondary pointer alias`);
+          }
+          if(secondaryReached) {
+            for(const key of secondaryAliases) if(fields[key]!==undefined)
+              fail(`${key}: competing secondary distance alias`);
+            if(!actualActors.includes(owner) && fields.aimOrigin518!==undefined)
+              fail('aimOrigin518: competing secondary aim storage');
+          }
+          if(aimReached) for(const key of aimAliases) if(fields[key]!==undefined)
+            fail(`${key}: competing secondary aim storage alias`);
           if(nullDirection) {
             if(owner!==data && fields.float80437078!==undefined)
               fail('float80437078: competing null-direction shared data storage');
@@ -686,7 +711,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
             const owners=[sources,globals,data!,...retained.values(),...massActors.values()];
             if(owners.includes(selected)) fail('6ae60 selected position aliases outer source storage');
             for(const owner of owners) {
-              const fields=Object.getOwnPropertyDescriptors(owner);basicGuard();
+              const fields: PropertyDescriptorMap=Object.getOwnPropertyDescriptors(owner);basicGuard();
               for(const [key,p] of Object.entries(fields)) if('value' in p && p.value===selected && !(owner===actor && key==='lockTarget'))
                 fail('6ae60 selected position aliases outer canonical reference');
             }
@@ -724,7 +749,84 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         const cosine=trig(heading(),true);
         const z=sourceFloat(Math.fround(horizontal()*cosine),'primary selected Z product');distanceGuard();
         storeSelected('z',z);
-        fail('8006b1d0 reached mandatory secondary target cc load');
+        // The source reloads actualcc only after the completed primary path.
+        // A nonnull value is compared, not dereferenced or substituted for c8.
+        ccReached=true;distanceGuard();
+        noShadows(actor,['204','205','206','207']);
+        const ccField=Object.getOwnPropertyDescriptor(actor,'visibilityTarget');distanceGuard();
+        if(!ccField || !('value' in ccField)) fail('8006b1d0 visibilityTarget: own data property required');
+        const secondary=ccField.value;
+        if(secondary!==null) {
+          record(secondary,'8006b1d0 visibilityTarget');
+          fail('8006b1dc reached mandatory captured secondary pointerc8 load');
+        }
+        secondaryReached=true;distanceGuard();
+        const secondaryMissing=constant('float80437678',20000,'8006b2ec');
+        store('horizontalDistance764',secondaryMissing);store('targetDistance760',secondaryMissing);
+        let aimed: object|undefined;
+        const aimGuard=(): void=>{
+          selectedGuard();
+          if(aimed!==undefined) {
+            const commandRuntime=admission();
+            for(const owner of [actor,binding,aimed,commandRuntime.getData(),commandRuntime.getWorldBinding(id),
+              commandRuntime.getStatusBinding(id),commandRuntime.getMappingActor(id),commandRuntime.getActionBinding(id)])
+              noShadows(owner,aimAliases);
+            if(call(()=>commandRuntime.getAimPositionOwner(id))!==aimed)
+              fail('6ae60 aimOrigin518 canonical owner changed');
+            const direct=[sources,globals,data!,...retained.values(),...massActors.values()];
+            if(direct.includes(aimed)) fail('6ae60 aimOrigin518 aliases outer source storage');
+            const references: object[]=[...direct,...root.getRetainedStorageOwners(),...scheduler.getRetainedStorageOwners(),
+              ...dispatch.getRetainedStorageOwners(),...allocator.getRetainedStorageOwners(),
+              ...world.getRetainedActorOwners(),...world.getRetainedMatrixOwners(),...commandRuntime.getKnownStorageOwners(),
+              ...commandRuntime.getActionRuntime().getRetainedStorageOwners(),...status.getRetainedStorageOwners()];
+            for(const owner of references) {
+              if(owner===aimed) continue;
+              const fields: PropertyDescriptorMap=Object.getOwnPropertyDescriptors(owner);basicGuard();
+              for(const [key,p] of Object.entries(fields)) if('value' in p && p.value===aimed && !(owner===actor && key==='aimOrigin518'))
+                fail('6ae60 aimOrigin518 aliases canonical reference');
+            }
+          }
+          selectedGuard();
+        };
+        const storeAim=(axis: 'x'|'y'|'z',value: number): void=>{
+          aimReached=true;distanceGuard();
+          const borrowed=call(()=>admission().getAimPositionOwner(id));
+          if(aimed!==undefined && aimed!==borrowed) fail('aimOrigin518 canonical owner changed');
+          aimed=borrowed;operandsGuard=aimGuard;distanceGuard();
+          for(const owner of [actor,binding,aimed,admission().getData(),admission().getWorldBinding(id),
+            admission().getStatusBinding(id),admission().getMappingActor(id),admission().getActionBinding(id)])
+            noShadows(owner,aimAliases);
+          const field=Object.getOwnPropertyDescriptor(aimed,axis);distanceGuard();
+          if(!field || !('value' in field)) fail(`aim ${axis}: own data property required`);
+          if(!field.writable) fail(`aim ${axis}: non-writable field`);
+          const current=Object.getOwnPropertyDescriptors(aimed)[axis];distanceGuard();
+          if(!current || !('value' in current)) fail(`aim ${axis}: own data property changed before store`);
+          if(!current.writable) fail(`aim ${axis}: non-writable field before store`);
+          const live=primaryStoreDescriptor(aimed,axis);
+          if(!live || !('value' in live)) fail(`aim ${axis}: live own data property required before store`);
+          if(!live.writable) fail(`aim ${axis}: live non-writable field before store`);
+          (aimed as Record<string,unknown>)[axis]=value;distanceGuard();
+        };
+        const secondaryHorizontal=(): number=>{
+          const value=read(actor,'horizontalDistance764');distanceGuard();return sourceFloat(value,'horizontalDistance764');
+        };
+        const secondarySine=trig(heading(),false);
+        const sx=sourceFloat(Math.fround(secondaryHorizontal()*secondarySine),'secondary X product');distanceGuard();
+        storeAim('x',sx);
+        const secondaryMapping=call(()=>admission().getMappingActor(id)),secondaryDescriptor=read(secondaryMapping,'descriptor4b0');distanceGuard();
+        if(typeof secondaryDescriptor!=='symbol') fail('secondary descriptor4b0: owned source identity required');
+        const secondaryMetadata=call(()=>admission().getDescriptorMetadata(id,secondaryDescriptor));distanceGuard();
+        const secondaryByte=read(secondaryMetadata,'byte10');distanceGuard();
+        const secondaryJoint=unsigned(secondaryByte,255,'secondary descriptor byte10')<<24>>24;
+        const secondaryRow=call(()=>world.getWorldMatrix(id,secondaryJoint));distanceGuard();
+        const secondaryHeight=read(secondaryRow,'7');distanceGuard();
+        storeAim('y',sourceFloat(secondaryHeight,'secondary world row7'));
+        const secondaryCosine=trig(heading(),true);
+        const sz=sourceFloat(Math.fround(secondaryHorizontal()*secondaryCosine),'secondary Z product');distanceGuard();
+        storeAim('z',sz);
+        //b33c..b348 advance the same second-pass loop; existing third-pass
+        //canonical508 admission remains mandatory even for inactive rows.
+        return;
       }
       record(targetPointer,'6ae60 primary pointer508');
       //af98 captures504 before forming both vector addresses. Pointer-domain

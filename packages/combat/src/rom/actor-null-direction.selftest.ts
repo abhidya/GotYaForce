@@ -77,7 +77,12 @@ function run(x:Fixture,fragment:string,before:Visit=()=>{},after?:Visit):string 
       changed=true;x.allocator.writePointer(x.id,0x20,null);
     }
     if(!helper&&owner===x.vector&&key==='z') helper=true;
-    else if(!primary&&(helper||!x.hasSelection&&dispatch)&&owner===x.admissionState&&key==='pointer508') primary=true;
+    else if(!primary&&(helper||!x.hasSelection&&dispatch)&&owner===x.admissionState&&key==='pointer508') {
+      primary=true;
+      // Keep this older primary-only suite bounded at the first missing cc
+      // source cell. The separate secondary suite hydrates that continuation.
+      equal(Reflect.deleteProperty(x.sourceActor,'visibilityTarget'),true,'remove unreached secondary source cell');
+    }
     if(primary) {
       if(owner===x.physicalIdentities&&key==='1'||owner===x.slotTargets[1]&&key==='active0'||
         owner===x.sourceActor&&key==='active0'||owner===x.massPreparation&&key==='physicalBlock'||owner===x.groups||
@@ -135,13 +140,13 @@ function orderAndOwnershipTests(make:Make):void {
       if(owner===x.matrixIds&&key==='1') events.push('matrix[1]');
       if(owner===x.matrix&&key==='7') events.push('matrix.7');
       if(owner===x.vector&&axes.includes(key as typeof axes[number])) events.push(`target.${String(key)}`);
-      if(owner===x.admissionState&&key==='pointer504'||owner===x.sourceActor&&key==='visibilityTarget'||
+      if(owner===x.admissionState&&key==='pointer504'||
         owner===x.pos&&axes.includes(key as typeof axes[number])||owner===x.bytes&&rawKey(key)||
         owner===x.processor&&['gqr0','gqr5'].includes(String(key))||owner===x.rootSources&&key==='processor') forbidden++;
     });
     equal(events.join(','),`float80437678,${horizontal},${distance},heading,${factor},${horizontal},target.x,descriptor4b0,byte10,matrix[1],matrix.7,target.y,heading,${factor},${horizontal},target.z`,
       'b180 ordered stores, b18c/b190/b194/b19c, descriptor/matrix/Y, fresh b1bc/b1c0/b1c4/b1cc source order');
-    equal(headings,2,'heading is freshly loaded for cosine');equal(forbidden,0,'no504, actual position, GQR0, live processor or secondary/+cc scalar loads');
+    equal(headings,2,'heading is freshly loaded for cosine');equal(forbidden,0,'no504, actual position, GQR0 or live processor loads before missing secondary source cell');
     equal(isSourceActorDoubleFrameClaimed(x.sourceActor),claimed,'no new frame authority');
     equal(claimSourceHelperStorage(x.vector,x.targetDispatch),true,'borrow keeps real selector storage claim');
     equal(claimSourceHelperStorage(x.vector,{}),false,'null direction cannot transfer selector claim to another owner');
