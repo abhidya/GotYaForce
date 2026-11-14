@@ -599,3 +599,8 @@ export function runActorTargetCandidatesSelfTests(make: Make): void {
   branchTests(make);freshnessTests(make);faultTests(make);boundTests(make);ownerTests(make);interruptionTests(make);candidateClosureTests(make);outerTests(make);
   console.log('[actor-target-candidates] PASS: genuine same-world candidate scan, all255 nonzero active bytes, signed team/lifecycle filters, live BE+20 pointers and duplicate retention, ordered count-before-pointer stores and stale tails, lazy faults and host bounds, owner/alias/reentry and independently failed candidate closure, actual outer rejected-candidate return and exact6b924 stop; explicit synthetic inputs only, no target selection, descriptor continuation or full-frame claim');
 }
+
+/** Genuine reusable candidate graph for later source continuation tests. */
+export function createActorTargetCandidatesTestFixture(make: Make,half=1,lifecycle=0) {
+  const x=setup(make,half);candidate(x,lifecycle);return x;
+}

@@ -441,6 +441,25 @@ class SyntheticTests(unittest.TestCase):
         self.assertEqual((rows[0x8006b914]['BO'],rows[0x8006b914]['BI'],rows[0x8006b914]['target']), (16,0,'8006b898'))
         self.assertEqual((rows[0x8006b910]['rD'],rows[0x8006b910]['rA'],rows[0x8006b910]['immediate']), (6,6,4))
 
+    def test_candidate_projection_capture_load_and_interleaved_store_order(self):
+        rows={int(r['address'],16):r for r in EXPECTED[0x8006b850]}
+        memory=[(r['address'],r['mnemonic'],r.get('rA'),r.get('displacement'))
+                for r in EXPECTED[0x8006b850] if 0x8006b924<=int(r['address'],16)<0x8006b968
+                and r['mnemonic'] in ('lwz','lbz','lfs','stfs')]
+        self.assertEqual(memory,[('8006b924','lwz',30,0x4b0),('8006b934','lbz',5,0x10),
+            ('8006b938','lwz',4,0),('8006b950','lfs',5,0x8e0),('8006b954','stfs',1,8),
+            ('8006b958','lfs',5,0x8f0),('8006b95c','stfs',1,12),
+            ('8006b960','lfs',5,0x900),('8006b964','stfs',1,16)])
+        self.assertEqual((rows[0x8006b93c]['mnemonic'],rows[0x8006b93c]['rS'],rows[0x8006b93c]['rA']),('extsb',0,0))
+        self.assertEqual((rows[0x8006b940]['mnemonic'],rows[0x8006b940]['rD'],rows[0x8006b940]['rA'],rows[0x8006b940]['immediate']),('mulli',0,0,0x30))
+        self.assertEqual((rows[0x8006b944]['rS'],rows[0x8006b944]['rA'],rows[0x8006b944]['rB']),(4,31,4))
+        self.assertEqual((rows[0x8006b948]['rD'],rows[0x8006b948]['rA'],rows[0x8006b948]['immediate']),(4,4,0x64))
+        self.assertEqual((rows[0x8006b94c]['rD'],rows[0x8006b94c]['rA'],rows[0x8006b94c]['rB']),(5,30,0))
+        self.assertEqual((rows[0x8006b968]['mnemonic'],rows[0x8006b968]['target']),('bl','8020bc88'))
+        # No source index bound, null-pointee branch or vector helper intervenes.
+        self.assertFalse(any(r['mnemonic'] in ('bc','b','bl') for r in EXPECTED[0x8006b850]
+            if 0x8006b924<=int(r['address'],16)<0x8006b968))
+
     def test_invalid_ranges_widths_mappings_and_decoder_bounds(self):
         for pc,width,_ in INVENTORY:
             for address,size in [(bad,width) for bad in (pc-4,pc+4,pc+1,float(pc),True,-1,1<<32,CELL_ADDRESS)]+[(pc,bad) for bad in (0,width-4,width+4,-width,True,float(width))]:

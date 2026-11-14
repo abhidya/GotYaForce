@@ -7,7 +7,8 @@
  * Zero73f reads explicit candidate count before clearing the shared scratch
  * count. Positive lists use the same allocator object/actor pointers and stage
  * lifecycle owners. Rejected lists return; accepted candidates preserve ordered
- * scratch count/list stores before the descriptor4b0 boundary. All source
+ * scratch count/list stores. Explicit projection stack continues descriptor4b0
+ * and three ordered translation stores to the actual SquareDistance call. All source
  * data is explicit and live; there are no defaults, callbacks or scheduler
  * capabilities. Stable synchronous non-proxy own-data records are host bounds.
  */
@@ -23,6 +24,8 @@ export interface SourceActorTargetDispatchSources {
   /** Actual803c1d7c list and803b2208 scratch list, not target snapshots. */
   candidateList1d7c?: Readonly<Record<number,symbol|null>>;
   scratchCandidates2208?: Record<number,symbol|null>;
+  /** Actual caller-local stack+8/+c/+10; absent preserves the prior924 boundary. */
+  projectionStack?: {x: number; y: number; z: number};
 }
 export interface SourceActorTargetDispatchRuntime {
   getSchedulerRuntime(): SourceObjectSchedulerRuntime;
@@ -55,8 +58,8 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
   if(!isSourceObjectSchedulerRuntime(scheduler)) fail('genuine scheduler required');
   if(claims.has(scheduler)) fail('scheduler already has a canonical target-dispatch owner');
   const root=scheduler.getRootRuntime(),spawns=root.getSpawnRuntime(),allocator=scheduler.getAllocatorRuntime(),stage=root.getStageRuntime(),
-    admission=spawns.getAdmissionRuntime(),action=admission.getActionRuntime();
-  let busy=false,poisoned=false,activeId: symbol|undefined,activeCandidate: object|undefined,tableOwner: object|undefined,globalsOwner: object|undefined;
+    admission=spawns.getAdmissionRuntime(),action=admission.getActionRuntime(),world=spawns.getWorldRuntime();
+  let busy=false,poisoned=false,activeId: symbol|undefined,activeCandidate: object|undefined,tableOwner: object|undefined,globalsOwner: object|undefined,projectionOwner: object|undefined;
   const bindings=new Map<symbol,object>(),lists=new Map<string,object>(),candidateStages=new Map<symbol,object>();
   const check=(): void=>{
     if(poisoned) fail('caught same-runtime reentry');
@@ -73,15 +76,15 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
     for(const key of keys) {const p=Object.getOwnPropertyDescriptor(owner,key);check();if(p!==undefined) fail(`${key}: competing source cell owner`);}
   };
   const forbidden=(): readonly object[]=>[sources,scheduler,root,spawns,allocator,admission,action,
-    ...call(()=>scheduler.getRetainedStorageOwners()),
+    ...call(()=>scheduler.getRetainedStorageOwners()),...call(()=>world.getRetainedMatrixOwners()),
     ...call(()=>spawns.getPrehookRuntime().getStatusRuntime().getRetainedStorageOwners()),
-    ...call(()=>action.getRetainedStorageOwners()),...bindings.values(),...candidateStages.values(),
+    ...call(()=>action.getRetainedStorageOwners()),...call(()=>admission.getKnownStorageOwners()),...bindings.values(),...candidateStages.values(),
     ...(call(()=>action.getSlotStatusRuntime())?.getRetainedStorageOwners()??[]),
     ...(call(()=>action.getSlotStatusRuntime())?.getDeclaredStorageOwners()??[])];
   const dispatchTable=(): object=>{
     const table=record(read(sources,'dispatch39a0'),'dispatch39a0');
     if(tableOwner && tableOwner!==table) fail('dispatch39a0: canonical owner changed');
-    if(table===globalsOwner || [...lists.values()].includes(table) || forbidden().includes(table)) fail('dispatch39a0: source storage alias');
+    if(table===globalsOwner || table===projectionOwner || [...lists.values()].includes(table) || forbidden().includes(table)) fail('dispatch39a0: source storage alias');
     if(!claimSourceHelperStorage(table,runtime)) fail('dispatch39a0: storage already claimed');
     noShadows(table,['active0','byte502','pointer504','pointer508','housekeeping73f']);
     tableOwner=table;return table;
@@ -89,7 +92,7 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
   const list=(name: 'candidateList1d7c'|'scratchCandidates2208'): object=>{
     const selected=record(read(sources,name),name),old=lists.get(name);
     if(old && old!==selected) fail(`${name}: canonical owner changed`);
-    if(selected===tableOwner || selected===globalsOwner || forbidden().includes(selected) ||
+    if(selected===tableOwner || selected===globalsOwner || selected===projectionOwner || forbidden().includes(selected) ||
       [...lists].some(([key,value])=>key!==name && value===selected)) fail(`${name}: source storage alias`);
     if(!claimSourceHelperStorage(selected,runtime)) fail(`${name}: storage already claimed`);
     noShadows(selected,['active0','team','byte502','pointer504','pointer508','housekeeping73f','lifecycle18',
@@ -143,9 +146,47 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
       write(list('scratchCandidates2208'),String(captured),object);
     }
   };
+  const project = (id: symbol, actual: object): never => {
+    // This optional host ingress preserves the former unsupported operation.
+    // Its value is not touched until the source reaches its first stack store.
+    const supplied=Object.getOwnPropertyDescriptor(sources,'projectionStack');check();
+    if(supplied===undefined) fail('8006b924 reached unsupported candidate-positive source path');
+    const mapping=call(()=>admission.getMappingActor(id));
+    if(spawns.getWorldRuntime()!==world || call(()=>world.getActualActor(id))!==actual ||
+      call(()=>world.getMappingActor(id))!==mapping) fail('projection canonical world/mapping changed');
+    const selected=read(mapping,'descriptor4b0');
+    if(typeof selected!=='symbol') fail('descriptor4b0: explicit owned descriptor identity required');
+    const metadata=call(()=>admission.getDescriptorMetadata(id,selected));
+    const raw=byte(metadata,'byte10');
+    //938 loads this word before sign extension, index admission or any matrix
+    //load. Adding64 is pointer arithmetic, not permission to dereference it.
+    const first=read(list('scratchCandidates2208'),'0');
+    if(first!==null && typeof first!=='symbol') fail('scratch first candidate: source pointer identity required');
+    const joint=raw<<24>>24;
+    const matrix=call(()=>world.getWorldMatrix(id,joint));
+    if(!Array.isArray(matrix) || read(matrix,'length')!==12) fail('projection requires canonical twelve-lane matrix');
+    const stack=(): object=>{
+      const selected=record(read(sources,'projectionStack'),'projection stack');
+      if(Array.isArray(selected)) fail('projection stack: ordinary own-data record required');
+      if(projectionOwner!==undefined && projectionOwner!==selected) fail('projection stack owner changed');
+      if(selected===tableOwner || selected===globalsOwner || [...lists.values()].includes(selected) ||
+        selected===metadata || selected===matrix || forbidden().includes(selected)) fail('projection stack source storage alias');
+      if(!claimSourceHelperStorage(selected,runtime)) fail('projection stack storage already claimed');
+      noShadows(selected,['active0','team','descriptor4b0','pointer4b0','byte10','byte502','pointer504','pointer508','lifecycle18',
+        'half80436242','count804361a0']);
+      projectionOwner=selected;return selected;
+    };
+    for(const [lane,axis] of [[3,'x'],[7,'y'],[11,'z']] as const) {
+      const value=read(matrix,String(lane));
+      if(typeof value!=='number' || !Number.isFinite(value) || !Object.is(value,Math.fround(value)))
+        fail(`projection matrix lane${lane}: finite exact source float32 required`);
+      write(stack(),axis,value);
+    }
+    fail('8006b968 reached authenticated8020bc88 PSVECSquareDistance; canonical vector-call integration unsupported');
+  };
   const runtime: SourceActorTargetDispatchRuntime={
     getSchedulerRuntime() {return scheduler;},
-    getRetainedStorageOwners() {return Object.freeze([sources,...(tableOwner?[tableOwner]:[]),...(globalsOwner?[globalsOwner]:[]),...lists.values()]);},
+    getRetainedStorageOwners() {return Object.freeze([sources,...(tableOwner?[tableOwner]:[]),...(globalsOwner?[globalsOwner]:[]),...lists.values(),...(projectionOwner?[projectionOwner]:[])]);},
     dispatchActor(id) {
       if(busy) {poisoned=true;fail('same-runtime reentry unsupported');}
       busy=true;poisoned=false;let actual: object|undefined;
@@ -188,7 +229,7 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
         if(byte(actual,'housekeeping73f')!==0) return;
         const globals=record(read(sources,'candidateGlobals'),'candidateGlobals');
         if(globalsOwner && globalsOwner!==globals) fail('candidateGlobals: canonical owner changed');
-        if(globals===tableOwner || [...lists.values()].includes(globals) || forbidden().includes(globals)) fail('candidateGlobals: source storage alias');
+        if(globals===tableOwner || globals===projectionOwner || [...lists.values()].includes(globals) || forbidden().includes(globals)) fail('candidateGlobals: source storage alias');
         if(!claimSourceHelperStorage(globals,runtime)) fail('candidateGlobals: storage already claimed');
         noShadows(globals,['active0','byte502','pointer504','pointer508','housekeeping73f','byte80436242','word80436242']);
         globalsOwner=globals;
@@ -196,7 +237,7 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
         write(globals,'count804361a0',0);
         scan(actual,count,globals);
         if(uint(read(globals,'count804361a0'),0xffffffff,'count804361a0')===0) return;
-        fail('8006b924 reached unsupported candidate-positive source path');
+        project(id,actual);
       } catch(error) {if(actual) markIncompleteSourceActorDoubleLifecycle(actual);throw error;}
       finally {activeCandidate=undefined;activeId=undefined;busy=false;}
     },

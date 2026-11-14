@@ -37,6 +37,7 @@
  * cross-actor aliases. Per-access validation and caught-reentry poison are
  * host admission bounds. Failures preserve completed writes, never roll back.
  */
+import {reserveSourcePointerStorage} from './source-storage-claims.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorJointMappingRuntime} from './actor-joint-mapping.js';
 import type {SourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
@@ -111,6 +112,8 @@ export interface SourceActorWorldMatrixRuntime {
   getMatricesRuntime(): SourceActorJointMatrixRuntime;
   /** Read-only ownership query; source temporary matrices must not alias these. */
   ownsActorMatrix(identity: symbol): boolean;
+  /** Actual bound matrix records only; no matrix values or source pointers read. */
+  getRetainedMatrixOwners(): readonly object[];
   /** Same retained mapping header, for identity-preserving composition. */
   getMappingActor(identity: symbol): object;
   getActorBinding(identity: symbol): SourceActorWorldMatrixBinding;
@@ -468,6 +471,8 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       const ownedStorage: SourceActorWorldMatrixStorage = Object.freeze({matrices8d4: Object.freeze(matrixIds), copy114, copy1aa4, scratch,
         topology1994: Object.freeze(rows), corrections18d4: Object.freeze(corrections), scales15d4: Object.freeze(scales)});
       const position = record(read(actual, 'pos'), 'actual position');
+      for(const value of matrices.values()) if(!reserveSourcePointerStorage(value))
+        fail('world matrix source storage already claimed');
       actors.set(id, {actual, position, mapping, layout, binding, storage: ownedStorage, matrices,
         poses: Object.freeze(poses), poseRecords: Object.freeze(poseRecords),
         correctionArrays: new Map(), correctionRecords: new Map()});
@@ -484,6 +489,7 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       return result;
     },
     getStorage(id: symbol): SourceActorWorldMatrixStorage {return entry(id).storage;},
+    getRetainedMatrixOwners() {return Object.freeze([...new Set([...actors.values()].flatMap(e=>[...e.matrices.values()]))]);},
     getCorrectedTraversalState(id: symbol): SourceActorCorrectedTraversalState | undefined {return entry(id).corrected;},
     getActualActor(id: symbol): RomActor {return entry(id).actual;},
     getMappingActor(id: symbol): object {return entry(id).mapping;},

@@ -1,3 +1,4 @@
+import {claimSourceHelperStorage} from './source-storage-claims.js';
 /** Bounded stored8007dcec callback and initial8007dd84 prefix, not a scheduler.
  * See projectile-callback/initialization-evidence-2026-11-14.md. Only source
  * states0/2/3 and row1 are authenticated. Explicit state2 data admits its real
@@ -60,7 +61,7 @@ export interface SourceProjectileRootRuntime {
   /** Same retained source18 owner, not a replacement lifecycle adapter. */
   getStageRuntime(): SourceActorStageBoundsRuntime;
   getSourceOwners(projectile: symbol): readonly object[];
-  /** Host alias inventory of already retained graph records, not source reads. */
+  /** Host alias inventory, including declared stack/profile identities; no source reads. */
   getRetainedStorageOwners(): readonly object[];
   dispatchStoredRoot(projectile: symbol): void;
 }
@@ -215,6 +216,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     }
     if(stack===destination || [...sourceOwners,...nested].includes(stack) || [...sourceOwners,...nested].includes(destination))
       fail('target stack aliases source owner');
+    if(!claimSourceHelperStorage(stack,runtime)||!claimSourceHelperStorage(destination,runtime)) fail('target stack already claimed by source storage');
     if(claimedTargetStacks.has(stack)||claimedTargetStacks.has(destination)) fail('target stack already claimed');
     claimedTargetStacks.add(stack);claimedTargetStacks.add(destination);
     const value=(number:unknown,where:string):number=>{
@@ -284,6 +286,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     if ([e.actual,e.bytes,e.stage,e.world,e.status,draw].includes(stack as object)) fail('initialization stack aliases source owner');
     const xId=read(stack as object,'rotationX'), yId=read(stack as object,'rotationY');
     if (typeof xId!=='symbol' || typeof yId!=='symbol' || xId===yId) fail('distinct owned initialization stack matrices required');
+    if(!claimSourceHelperStorage(stack as object,runtime)) fail('initialization stack source storage already claimed');
     // Host ownership admission, not emulated matrix-data loads. No source actor
     // slot can be overwritten to stand in for the two source stack matrices.
     if(call(()=>world.ownsActorMatrix(xId))||call(()=>world.ownsActorMatrix(yId))) fail('initialization stack aliases actor matrix storage');
@@ -375,6 +378,12 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     getRetainedStorageOwners() {
       const records: object[]=[sources,draw,...spawns.getRetainedStorageOwners(),
         ...prehook.getStatusRuntime().getRetainedStorageOwners()];
+      // Declared stack/profile identities are host alias metadata, not source
+      // loads. Do not call accessors or inspect unrelated source fields.
+      for(const key of ['targetStack','initializationStack','processor']) {
+        const p=Object.getOwnPropertyDescriptor(sources,key);
+        if(p && 'value' in p && p.value!==null && typeof p.value==='object') records.push(p.value);
+      }
       for(const e of children.values()) records.push(e.bytes,e.actual,e.stage,e.world,e.status);
       if(hits!==undefined) records.push(...hits.getRetainedStorageOwners());
       // Immediate record identities also exclude actor vectors and retained

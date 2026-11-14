@@ -55,6 +55,8 @@ export interface SourceActorCommandAdmissionRuntime {
   getStatusBinding(identity: symbol): object;
   getMappingActor(identity: symbol): object;
   getAttributeBinding(identity: symbol): object;
+  /** Same attributes-owned descriptor scalar record, retained without scalar loads. */
+  getDescriptorMetadata(identity: symbol, descriptor: symbol): object;
   getChargeRuntime(): SourceActorInputChargeRuntime;
   getChargeBinding(identity: symbol): Partial<SourceActorInputChargeBinding>;
   getActionRuntime(): SourceActorActionRequestRuntime;
@@ -274,6 +276,14 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
     // Authenticated direct kernels: positive-zero sin returns+0; cos returns1.
     return cosine ? 1 : 0;
   };
+  const descriptorMetadata = (e: Entry, selected: symbol): object => {
+    if (typeof selected !== 'symbol') fail('descriptor4b0: explicit owned descriptor identity required');
+    const meta = record(descriptor(selected), 'descriptor+10 metadata');
+    if (descriptorRows.has(selected)) stable(meta, descriptorRows.get(selected)!, 'descriptor metadata');
+    if (descriptorIds.has(meta) && descriptorIds.get(meta) !== selected) fail('descriptor metadata aliases another identity');
+    retain(e, meta, 'descriptor-metadata'); descriptorRows.set(selected, meta); descriptorIds.set(meta, selected);
+    return meta;
+  };
   const captureTarget = (id: symbol, e: Entry): void => {
     write(e, e.binding, 'pointerc8', pointer(read(e.binding, 'pointer504'), 'pointer504'));
     write(e, e.actual, 'visibilityTarget', pointer(read(e.binding, 'pointer508'), 'pointer508'));
@@ -290,10 +300,7 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
     write(e, aim(e), 'x', float(x, 'snapshot x'));
     const selected = read(e.mapping, 'descriptor4b0');
     if (typeof selected !== 'symbol') fail('descriptor4b0: explicit owned descriptor identity required');
-    const meta = record(descriptor(selected), 'descriptor+10 metadata');
-    if (descriptorRows.has(selected)) stable(meta, descriptorRows.get(selected)!, 'descriptor metadata');
-    if (descriptorIds.has(meta) && descriptorIds.get(meta) !== selected) fail('descriptor metadata aliases another identity');
-    retain(e, meta, 'descriptor-metadata'); descriptorRows.set(selected, meta); descriptorIds.set(meta, selected);
+    const meta = descriptorMetadata(e, selected);
     const joint = s8(byte(meta, 'byte10'));
     const row = record(matrix(id, joint), 'world matrix row');
     const known = matrixRows.get(id) ?? new Map<number, object>();
@@ -447,7 +454,12 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
     });},
     getActualActor(id) {return entry(id).actual;}, getWorldBinding(id) {return entry(id).world;},
     getStatusBinding(id) {return entry(id).status;}, getMappingActor(id) {return entry(id).mapping;},
-    getAttributeBinding(id) {return entry(id).attribute;}, getChargeRuntime() {return charge;},
+    getAttributeBinding(id) {return entry(id).attribute;},
+    getDescriptorMetadata(id, selected) {return guard(() => {
+      const e = entry(id); assertComplete(e.actual); admit(id, e);
+      return descriptorMetadata(e, selected);
+    });},
+    getChargeRuntime() {return charge;},
     getChargeBinding(id) {return entry(id).charge;}, getActionRuntime() {return action;}, getActionBinding(id) {return entry(id).action;},
     getCueRuntime() {return cues;}, getCueBinding(id) {return entry(id).cue;}, getDispatchBinding(id) {return entry(id).dispatch;},
     getStartBinding(id) {return entry(id).start;}, getStreamBinding(id) {return entry(id).stream;},
