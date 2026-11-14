@@ -2,7 +2,7 @@
  "generated_by": "research/decomp/oracle-harness/gen_actor_field_map.py",
  "map_schema": 1,
  "source": "packages/combat/src/rom/actor.ts",
- "source_sha256": "95a8622db7cbb59d7eab4b562230b2729bdea535cd920e41ae75786453106356",
+ "source_sha256": "b025042afc2c4ea02bfdd469465a825fae1cea53a8c0b8b72ce16b011d8559a2",
  "interfaces": {
   "RomActor": {
    "fields": [
@@ -187,6 +187,10 @@
      "kind": "unmapped"
     },
     {
+     "tsField": "noClamp6cb",
+     "kind": "unmapped"
+    },
+    {
      "tsField": "targetDistance760",
      "kind": "unmapped"
     },
@@ -203,6 +207,18 @@
     {
      "kind": "port_side",
      "tsField": "afterimageSerial"
+    },
+    {
+     "offset": 1402,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "stateFlagA"
+    },
+    {
+     "offset": 1403,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "stateFlagB"
     },
     {
      "offset": 1401,
@@ -641,6 +657,10 @@
      "tsField": "statusWord5b4"
     },
     {
+     "tsField": "statusWord5bc",
+     "kind": "unmapped"
+    },
+    {
      "offset": 1492,
      "kind": "u32",
      "width": 4,
@@ -648,8 +668,8 @@
     },
     {
      "offset": 1496,
-     "kind": "u32",
-     "width": 4,
+     "kind": "u16",
+     "width": 2,
      "tsField": "inputHeld5d8"
     },
     {

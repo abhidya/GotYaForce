@@ -135,6 +135,24 @@ function referenceProduct(a: number, b: number): number {
 }
 export function runActorAttributeRefreshSelfTests(): void {
   {
+    const x = fixture();
+    check(!Object.hasOwn(x.runtime.getParameterDescriptor(x.parameter), 'byteA3'), 'no default tier selector');
+    for (const selector of [0, 1, 127, 128, 255]) {
+      const initial = {byteA3: selector}, id = x.runtime.createParameterDescriptor(initial);
+      const descriptor = x.runtime.getParameterDescriptor(id);
+      equal(descriptor.byteA3, selector, 'same4ac registry retains unsigned+a3');
+      initial.byteA3 = 42; equal(descriptor.byteA3, selector, 'initial selector copied once');
+      check(Object.isSealed(descriptor), 'parameter descriptor remains sealed');
+      equal(Object.keys(descriptor).join(','), 'byteA3', 'selector extension invents no constructor limits or floats');
+      descriptor.byteA3 = 3; equal(x.runtime.getParameterDescriptor(id).byteA3, 3, 'selector stays live on same registry owner');
+    }
+    for (const selector of [-1, 256, 1.5, NaN, Infinity])
+      rejects(() => x.runtime.createParameterDescriptor({byteA3: selector}), 'byteA3: unsigned integer');
+    let invoked = false;
+    rejects(() => x.runtime.createParameterDescriptor({get byteA3() {invoked = true; return 0;}}), 'byteA3: own data');
+    check(!invoked, 'selector admission does not invoke accessor');
+  }
+  {
     const x = fixture(), rows = x.actual.actionSpeedRows, before = [...x.world.getWorldMatrix(x.id, 1)]; x.run();
     products(x); copied(x); equal(x.actual.maxHSpeed, 7, 'explicit parameter74'); equal(x.actual.maxRise, 8, 'explicit parameter78');
     equal(x.actual.maxFall, 9, 'explicit parameter7c'); equal(x.runtime.getActorBinding(x.id).byte87, 1, 'bit6 copied');

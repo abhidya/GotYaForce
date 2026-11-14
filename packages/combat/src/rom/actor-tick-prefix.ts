@@ -1,10 +1,32 @@
-/** Offline bounded actual80059068 prefix, not a complete actor tick.
+/** Offline bounded actual80059068, not a complete enclosing actor frame.
  * Archived entry: lfs760/B4,fdivs,stfs760 @5907c..59088; fresh
  * lfs764/B4,fdivs,stfs764 @5908c..59098; real5bab8 @5909c;67a70
- * @590a4; unreconstructed59e58 @590ac. 67a70 clears control5e0 bit00100000
+ * @590a4; optionally genuine bounded59e58 @590ac. 67a70 clears control5e0 bit00100000
  * then byte598, and only its zero-contact1db branch genuinely returns here.
  * Nonzero contact refuses at the existing unsupported1e4 owner, not a shadow
- * pointer. All paths eventually refuse; no callback stands in for a callee.
+ * pointer. Without stageBounds,59e58 remains the historical refusal. With the
+ * genuine stage runtime it either refuses a reached cue or returns to the
+ * next685c0 @590b4. Optional genuine inputPrefix advances its admitted
+ * angular/input/ten-machine/charge path. Absent inputPrefix retains historical
+ * 685c0 refusal; a genuine return reaches the next5a190 call @590bc. Optional
+ * genuine actorControl admits its returned-zero gates/countdowns, then reaches
+ * signed actual5e4 table dispatch @590e0/590e8. Without normalLifecycle this
+ * remains the historical refusal. An explicitly bound genuine ready transition may
+ * instead return1, skipping the two indirect calls and59f5c/5a144. That path
+ * reaches5a298 @59110; optional genuine actionRequest admits its bounded
+ * returns, then reaches5a378 @59118. Optional genuine actorRates performs
+ * rate/status/clock writes on the same owners, then reaches68030 @59120.
+ * Optional genuine ceiling supplies that final helper and its8b290 leaf, with
+ * shared stage and reconciled matrix/charge match globals; this admitted branch
+ * then genuinely returns void. Optional normalLifecycle supplies authenticated
+ * cue9, actual4c8 and bounded59f5c/5a144 before that same common tail. Missing
+ * normalLifecycle retains the historical table refusal. Incomplete6bc expiry
+ * refuses all later ticks before their first mutation, including ready bypasses.
+ * Optional normal rotation damping supplies the genuine active movement body
+ * on existing correction owners. Partial damping is likewise guarded, and
+ * its retained storage is excluded from raw input aliases.
+ * No source call is skipped and no callback stands in for a callee. Completion
+ * of this branch does not execute55568 or claim a full actor frame/playability.
  *
  * An explicit externally decoded/synthetic raw-input boundary writes the
  * actual actor.targetDistance760 (full3D) and horizontalDistance764 (XZ).
@@ -24,12 +46,30 @@
  * operands and RN00/NI0 are bounds, not observed hardware state. Exact rational
  * nearest-even division retains subnormals/signed zero; zero divisors and
  * rounded overflow refuse. Checks are lazy; all completed effects are retained.
- * No movement, matrix rebuild, clocks, legacy step or production activation.
+ * Optional cue0 performs real bounded position correction; its unfinished
+ * calls block all later branches before raw ingress. No general movement,
+ * matrix rebuild, animation advance, legacy step or production activation.
  */
+import {isSourceActorCue0LifecycleRuntime, hasIncompleteSourceActorCue0Lifecycle,
+  type SourceActorCue0LifecycleRuntime} from './actor-cue0-lifecycle.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {isSourceActorGaugeScaleRuntime, type SourceActorGaugeBorgOwner,
   type SourceActorGaugeScaleRuntime} from './actor-gauge-scale.js';
+import {isSourceActorStageBoundsRuntime, type SourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
+import {isSourceActorInputPrefixRuntime, type SourceActorInputPrefixRuntime} from './actor-input-prefix.js';
+import {isSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleRuntime} from './actor-control-lifecycle.js';
+import {isSourceActorReadyTransitionsRuntime, type SourceActorReadyTransitionsRuntime} from './actor-ready-transitions.js';
+import {isSourceActorActionRequestRuntime, type SourceActorActionRequestRuntime} from './actor-action-request.js';
+import {isSourceActorRateLifecycleRuntime, type SourceActorRateLifecycleRuntime} from './actor-rate-lifecycle.js';
+import {isSourceActorCeilingLifecycleRuntime, type SourceActorCeilingLifecycleRuntime} from './actor-ceiling-lifecycle.js';
+import {isSourceActorInputChargeRuntime, type SourceActorInputChargeRuntime} from './actor-input-charge.js';
+import {isSourceActorTierLifecycleRuntime, type SourceActorTierLifecycleRuntime} from './actor-tier-lifecycle.js';
+import {isSourceActorNormalLifecycleRuntime, hasIncompleteSourceActorNormalCountdown, hasIncompleteSourceActorNormalCueSync,
+  type SourceActorNormalLifecycleRuntime} from './actor-normal-lifecycle.js';
+import type {SourceActorCueResetRuntime} from './actor-cue-reset.js';
+import {isSourceActorRotationDampingRuntime, hasIncompleteSourceActorRotationDamping,
+  type SourceActorRotationDampingRuntime} from './actor-rotation-damping.js';
 
 export interface SourceActorTickPrefixBinding {byte598: number}
 export interface SourceActorTickRawDistances {
@@ -38,8 +78,23 @@ export interface SourceActorTickRawDistances {
   readonly horizontalDistance764: number;
 }
 export interface SourceActorTickPrefixSources {
-  world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor' | 'getActorBinding'>;
+  world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor' | 'getActorBinding'> &
+    Partial<Pick<SourceActorWorldMatrixRuntime, 'getMappingActor'>>;
   gauges: SourceActorGaugeScaleRuntime;
+  /** Optional genuine59e58. Without it the historical refusal is unchanged. */
+  stageBounds?: SourceActorStageBoundsRuntime;
+  /** Optional genuine685c0 prefix; absent retains historical refusal. */
+  inputPrefix?: SourceActorInputPrefixRuntime;
+  /** Optional genuine5a190 gates/countdowns; absent retains its historical refusal. */
+  actorControl?: SourceActorControlLifecycleRuntime;
+  /** Genuine control-zero cue/4c8/59f5c/5a144 continuation; missing retains table refusal. */
+  normalLifecycle?: SourceActorNormalLifecycleRuntime;
+  /** Common tail reached after either genuine control branch completes. */
+  actionRequest?: SourceActorActionRequestRuntime;
+  /** Optional genuine5a378 writing existing rate/status/mapping owners. */
+  actorRates?: SourceActorRateLifecycleRuntime;
+  /** Genuine final68030, with reconciled shared match and stage globals. */
+  ceiling?: SourceActorCeilingLifecycleRuntime;
 }
 export interface SourceActorTickPrefixRuntime {
   bindActor(identity: symbol, actualBorg: SourceActorGaugeBorgOwner,
@@ -47,8 +102,9 @@ export interface SourceActorTickPrefixRuntime {
   getActualActor(identity: symbol): RomActor;
   getActualBorg(identity: symbol): SourceActorGaugeBorgOwner;
   getActorBinding(identity: symbol): Partial<SourceActorTickPrefixBinding>;
-  /** Always refuses at the first unreconstructed reached source helper. */
-  ingestRawDistancesAndRun(identity: symbol, epoch: number, raw: SourceActorTickRawDistances): never;
+  /** A fully admitted ready or normal branch returns source void; other reached gaps refuse.
+   * This does not execute the enclosing actor frame or produce raw target inputs. */
+  ingestRawDistancesAndRun(identity: symbol, epoch: number, raw: SourceActorTickRawDistances): void;
 }
 const claimedActors = new WeakSet<object>();
 /** Genuine permanent claim, not a mutable property a bridge adapter can copy. */
@@ -130,6 +186,83 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
   const gaugeActor = capture('gauges', 'getActualActor'), gaugeBorg = capture('gauges', 'getActualBorg');
   const gaugeStatus = capture('gauges', 'getStatusBinding'), gaugeBinding = capture('gauges', 'getActorBinding');
   const updateGauge = capture('gauges', 'updateActor');
+  const gaugeTiers = capture('gauges', 'getTierLifecycleRuntime');
+  const stage = Object.getOwnPropertyDescriptor(sources, 'stageBounds');
+  if (stage !== undefined && !isSourceActorStageBoundsRuntime(read(sources, 'stageBounds')))
+    fail('stage bounds require the genuine source runtime, not callback effects');
+  const stageActor = stage === undefined ? undefined : capture('stageBounds', 'getActualActor');
+  const stageWorld = stage === undefined ? undefined : capture('stageBounds', 'getWorldBinding');
+  const stageStatus = stage === undefined ? undefined : capture('stageBounds', 'getStatusBinding');
+  const stageBinding = stage === undefined ? undefined : capture('stageBounds', 'getActorBinding');
+  const updateStage = stage === undefined ? undefined : capture('stageBounds', 'updateActor');
+  const input = Object.getOwnPropertyDescriptor(sources, 'inputPrefix');
+  if (input !== undefined && !isSourceActorInputPrefixRuntime(read(sources, 'inputPrefix')))
+    fail('input prefix requires the genuine source runtime, not callback effects');
+  const inputActor = input === undefined ? undefined : capture('inputPrefix', 'getActualActor');
+  const inputBorg = input === undefined ? undefined : capture('inputPrefix', 'getActualBorg');
+  const inputBinding = input === undefined ? undefined : capture('inputPrefix', 'getActorBinding');
+  const updateInput = input === undefined ? undefined : capture('inputPrefix', 'updateActor');
+  const control = Object.getOwnPropertyDescriptor(sources, 'actorControl');
+  if (control !== undefined && !isSourceActorControlLifecycleRuntime(read(sources, 'actorControl')))
+    fail('actor control requires the genuine source runtime, not callback effects');
+  const controlActor = control === undefined ? undefined : capture('actorControl', 'getActualActor');
+  const controlWorld = control === undefined ? undefined : capture('actorControl', 'getWorldBinding');
+  const controlStatus = control === undefined ? undefined : capture('actorControl', 'getStatusBinding');
+  const controlBinding = control === undefined ? undefined : capture('actorControl', 'getActorBinding');
+  const controlReady = control === undefined ? undefined : capture('actorControl', 'getReadyRuntime');
+  const updateControl = control === undefined ? undefined : capture('actorControl', 'updateActor');
+  const normal = Object.getOwnPropertyDescriptor(sources, 'normalLifecycle');
+  if (normal !== undefined && !isSourceActorNormalLifecycleRuntime(read(sources, 'normalLifecycle')))
+    fail('normal lifecycle requires the genuine source runtime, not callback effects');
+  const normalActor = normal === undefined ? undefined : capture('normalLifecycle', 'getActualActor');
+  const normalWorld = normal === undefined ? undefined : capture('normalLifecycle', 'getWorldBinding');
+  const normalStatus = normal === undefined ? undefined : capture('normalLifecycle', 'getStatusBinding');
+  const normalMapping = normal === undefined ? undefined : capture('normalLifecycle', 'getMappingActor');
+  const normalWorldMapping = normal === undefined ? undefined : capture('world', 'getMappingActor');
+  const normalMovement = normal === undefined ? undefined : capture('normalLifecycle', 'getMovementBinding');
+  const normalBinding = normal === undefined ? undefined : capture('normalLifecycle', 'getActorBinding');
+  const normalCues = normal === undefined ? undefined : capture('normalLifecycle', 'getCueRuntime');
+  const normalRotation = normal === undefined ? undefined : capture('normalLifecycle', 'getRotationRuntime');
+  const normalCue0 = normal === undefined ? undefined : capture('normalLifecycle', 'getCue0Runtime');
+  const normalCueBinding = normal === undefined ? undefined : capture('normalLifecycle', 'getCueBinding');
+  const normalDispatch = normal === undefined ? undefined : capture('normalLifecycle', 'getDispatchBinding');
+  const stageCues = normal === undefined || stage === undefined ? undefined : capture('stageBounds', 'getCueRuntime');
+  const updateNormal = normal === undefined ? undefined : capture('normalLifecycle', 'updateActor');
+  const assertNormalComplete = normal === undefined ? undefined : capture('normalLifecycle', 'assertActorComplete');
+  const action = Object.getOwnPropertyDescriptor(sources, 'actionRequest');
+  if (action !== undefined && !isSourceActorActionRequestRuntime(read(sources, 'actionRequest')))
+    fail('action request requires the genuine source runtime, not callback effects');
+  const actionActor = action === undefined ? undefined : capture('actionRequest', 'getActualActor');
+  const actionWorld = action === undefined ? undefined : capture('actionRequest', 'getWorldBinding');
+  const actionBinding = action === undefined ? undefined : capture('actionRequest', 'getActorBinding');
+  const updateAction = action === undefined ? undefined : capture('actionRequest', 'updateActor');
+  const rates = Object.getOwnPropertyDescriptor(sources, 'actorRates');
+  if (rates !== undefined && !isSourceActorRateLifecycleRuntime(read(sources, 'actorRates')))
+    fail('actor rates require the genuine source runtime, not callback effects');
+  const rateActor = rates === undefined ? undefined : capture('actorRates', 'getActualActor');
+  const rateBorg = rates === undefined ? undefined : capture('actorRates', 'getActualBorg');
+  const rateWorld = rates === undefined ? undefined : capture('actorRates', 'getWorldBinding');
+  const rateStatus = rates === undefined ? undefined : capture('actorRates', 'getStatusBinding');
+  const rateMapping = rates === undefined ? undefined : capture('actorRates', 'getMappingActor');
+  const rateBinding = rates === undefined ? undefined : capture('actorRates', 'getActorBinding');
+  const rateMatrix = rates === undefined ? undefined : capture('actorRates', 'getMatrixBinding');
+  const worldMapping = rates === undefined ? undefined : capture('world', 'getMappingActor');
+  const updateRates = rates === undefined ? undefined : capture('actorRates', 'updateActor');
+  const ceiling = Object.getOwnPropertyDescriptor(sources, 'ceiling');
+  if (ceiling !== undefined && !isSourceActorCeilingLifecycleRuntime(read(sources, 'ceiling')))
+    fail('ceiling requires the genuine source runtime, not callback effects');
+  if (ceiling !== undefined && (stage === undefined || input === undefined))
+    fail('ceiling completion requires the same genuine stage and input owners');
+  const ceilingActor = ceiling === undefined ? undefined : capture('ceiling', 'getActualActor');
+  const ceilingWorld = ceiling === undefined ? undefined : capture('ceiling', 'getWorldBinding');
+  const ceilingMapping = ceiling === undefined ? undefined : capture('ceiling', 'getMappingActor');
+  const ceilingMatrix = ceiling === undefined ? undefined : capture('ceiling', 'getMatrixBinding');
+  const ceilingTerrain = ceiling === undefined ? undefined : capture('ceiling', 'getTerrainGlobals');
+  const ceilingGlobals = ceiling === undefined ? undefined : capture('ceiling', 'getMatchGlobals');
+  const stageTerrain = stage === undefined ? undefined : capture('stageBounds', 'getTerrainGlobals');
+  const inputCharge = input === undefined ? undefined : capture('inputPrefix', 'getChargeRuntime');
+  const ceilingWorldMapping = ceiling === undefined ? undefined : capture('world', 'getMappingActor');
+  const updateCeiling = ceiling === undefined ? undefined : capture('ceiling', 'updateActor');
   const f = (value: unknown, key: string): number => float(read(value, key), key);
   const noLegacyDistances = (actual: object): void => {
     for (const key of ['speedScalar760', 'speedScalar764', 'kfmSpeedScalar760', 'kfmSpeedScalar764', 'curTargetDist']) {
@@ -139,17 +272,183 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
   };
   interface Entry {
     actual: RomActor; borg: SourceActorGaugeBorgOwner; world: object; status: object;
-    gauge: object; binding: Partial<SourceActorTickPrefixBinding>; lastEpoch: number;
+    gauge: object; stage?: object; input?: object; control?: object; action?: object;
+    rates?: {binding: object; mapping: object};
+    normal?: {binding: object; mapping: object; movement: object;
+      cues: SourceActorCueResetRuntime | undefined; cue: object | undefined; dispatch: object | undefined;
+      rotation: SourceActorRotationDampingRuntime | undefined; rotationOwners: readonly object[];
+      cue0: SourceActorCue0LifecycleRuntime | undefined; cue0Owners: readonly object[]; cue0Terrain?: object; cue0Attribute?: object};
+    ceiling?: {mapping: object; matrix: object; terrain: object; globals: object;
+      charge: SourceActorInputChargeRuntime; chargeGlobal: () => unknown};
+    ready?: {runtime: SourceActorReadyTransitionsRuntime; binding: object};
+    binding: Partial<SourceActorTickPrefixBinding>; lastEpoch: number;
   }
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
   const entry = (id: symbol): Entry => {const actor = actors.get(id); if (!actor) fail('unknown/non-owned tick-prefix actor'); return actor;};
   const stable = (get: (id: symbol) => unknown, id: symbol, expected: object, where: string): void => {
     if (get(id) !== expected) fail(`${where}: owner changed its actual record or returned asynchronously`);
   };
+  const readyValue = (runtime: SourceActorReadyTransitionsRuntime, key: string, id: symbol): unknown => {
+    const method = read(runtime, key);
+    if (typeof method !== 'function') fail(`ready ${key}: own data-function required`);
+    const value = Reflect.apply(method, runtime, [id]); check(); return value;
+  };
+  const readyOwners = (id: symbol, actor: Entry): void => {
+    const current = controlReady?.(id);
+    if (current !== actor.ready?.runtime) fail('control ready runtime changed after tick admission');
+    if (!actor.ready) return;
+    const runtime = actor.ready.runtime;
+    const expected: readonly [string, object | undefined][] = [
+      ['getActualActor', actor.actual], ['getWorldBinding', actor.world], ['getStatusBinding', actor.status],
+      ['getStageBinding', actor.stage], ['getControlBinding', actor.control], ['getActualBorg', actor.borg],
+      ['getActorBinding', actor.ready.binding],
+    ];
+    for (const [key, owner] of expected)
+      if (owner === undefined || readyValue(runtime, key, id) !== owner) fail(`ready ${key}: canonical source owner mismatch`);
+  };
+  const ceilingOwners = (id: symbol, actor: Entry): void => {
+    if (!actor.ceiling) return;
+    const c = actor.ceiling;
+    stable(ceilingActor!, id, actor.actual, 'ceiling actor');
+    stable(ceilingWorld!, id, actor.world, 'ceiling world');
+    stable(ceilingMapping!, id, c.mapping, 'ceiling mapping');
+    stable(ceilingWorldMapping!, id, c.mapping, 'ceiling/world mapping');
+    stable(ceilingMatrix!, id, c.matrix, 'ceiling matrix');
+    const rateMatrixOwner = rateMatrix?.(id);
+    if (rateMatrixOwner !== undefined && rateMatrixOwner !== c.matrix) fail('ceiling/rate canonical matrix4a4 owner mismatch');
+    stable(ceilingTerrain!, id, c.terrain, 'ceiling terrain');
+    stable(stageTerrain!, id, c.terrain, 'ceiling/stage terrain');
+    stable(ceilingGlobals!, id, c.globals, 'ceiling match globals');
+    if (inputCharge!(id) !== c.charge || c.chargeGlobal() !== c.globals)
+      fail('ceiling/input charge must retain the same PTR_DAT_80433934 match globals');
+    check();
+  };
+  const rotationRecords = (runtime: SourceActorRotationDampingRuntime, method: 'getStorageOwners' | 'getKnownDescriptorRecords', id: symbol): object[] => {
+    const fn = read(runtime, method); if (typeof fn !== 'function') fail(`rotation ${method}: own data-function required`);
+    const values = Reflect.apply(fn, runtime, [id]); check();
+    if (!Array.isArray(values)) fail(`rotation ${method}: actual owner array required`);
+    return values.map(value => record(value, `rotation ${method}`));
+  };
+  const cue0Value = (runtime: SourceActorCue0LifecycleRuntime, key: keyof SourceActorCue0LifecycleRuntime, id: symbol): unknown => {
+    const fn = read(runtime, key); if (typeof fn !== 'function') fail(`cue0 ${key}: own data-function required`);
+    const value = Reflect.apply(fn, runtime, [id]); check(); return value;
+  };
+  const cue0Records = (runtime: SourceActorCue0LifecycleRuntime, id: symbol): object[] => {
+    const values = cue0Value(runtime, 'getSourceOwners', id);
+    if (!Array.isArray(values)) fail('cue0 source owner array required');
+    return values.map(value => record(value, 'cue0 source owner'));
+  };
+  const normalOwners = (id: symbol, actor: Entry): void => {
+    if (!actor.normal) return;
+    const n = actor.normal;
+    stable(normalActor!, id, actor.actual, 'normal actor');
+    stable(normalWorld!, id, actor.world, 'normal world');
+    stable(normalStatus!, id, actor.status, 'normal status');
+    stable(normalMapping!, id, n.mapping, 'normal mapping');
+    stable(normalWorldMapping!, id, n.mapping, 'normal/world mapping');
+    stable(normalMovement!, id, n.movement, 'normal movement');
+    stable(normalBinding!, id, n.binding, 'normal binding');
+    if (normalCues!(id) !== n.cues || normalCueBinding!(id) !== n.cue || normalDispatch!(id) !== n.dispatch)
+      fail('normal cue owners changed after tick admission');
+    if (normalCue0!(id) !== n.cue0) fail('normal cue0 runtime changed after tick admission');
+    if (n.cue0) {
+      const current = cue0Records(n.cue0, id);
+      if (current.length !== n.cue0Owners.length || current.some((owner, i) => owner !== n.cue0Owners[i]))
+        fail('normal cue0 source owners changed');
+      if (cue0Value(n.cue0, 'getTerrainGlobals', id) !== n.cue0Terrain ||
+          cue0Value(n.cue0, 'getAttributeBinding', id) !== n.cue0Attribute)
+        fail('normal cue0 shared owners changed');
+      if (stageTerrain && stageTerrain(id) !== n.cue0Terrain)
+        fail('cue0/stage must share the same terrain-global owner');
+    }
+    if (normalRotation!(id) !== n.rotation) fail('normal rotation runtime changed after tick admission');
+    if (n.rotation) {
+      const current = rotationRecords(n.rotation, 'getStorageOwners', id);
+      if (current.length !== n.rotationOwners.length || current.some((owner, i) => owner !== n.rotationOwners[i]))
+        fail('normal rotation storage owners changed');
+      if (rotationRecords(n.rotation, 'getKnownDescriptorRecords', id).some(owner => assigned.has(owner)))
+        fail('rotation descriptor aliases a bound actor source owner');
+    }
+    const stageCue = stageCues?.(id);
+    if (stageCue !== undefined && n.cues !== undefined && stageCue !== n.cues)
+      fail('normal/stage must share the same genuine cue runtime');
+  };
+  // Gauge/tier construction is cyclic, so genuine late binding is checked on
+  // every invocation. It may add no duplicate rate, descriptor or match owner.
+  const tierValue = (runtime: SourceActorTierLifecycleRuntime, key: keyof SourceActorTierLifecycleRuntime, id: symbol): unknown => {
+    const fn = read(runtime, key); if (typeof fn !== 'function') fail(`tier ${key}: own data-function required`);
+    const result = Reflect.apply(fn, runtime, [id]); check(); return result;
+  };
+  const tierOwners = (id: symbol, actor: Entry): object[] => {
+    const runtime = gaugeTiers(id);
+    if (runtime === undefined) return [];
+    if (!isSourceActorTierLifecycleRuntime(runtime)) fail('gauge tier lifecycle must be genuine');
+    const expected: [keyof SourceActorTierLifecycleRuntime, object][] = [
+      ['getActualActor', actor.actual], ['getActualBorg', actor.borg], ['getWorldBinding', actor.world],
+      ['getStatusBinding', actor.status], ['getGaugeBinding', actor.gauge],
+      ['getTierOwner', record(read(actor.borg, 'paramTier'), 'actual paramTier')],
+    ];
+    if (actor.rates) expected.push(['getRateBinding', actor.rates.binding], ['getMappingActor', actor.rates.mapping]);
+    if (actor.ceiling) expected.push(['getMatrixBinding', actor.ceiling.matrix], ['getMatchGlobals', actor.ceiling.globals]);
+    for (const [key, owner] of expected)
+      if (tierValue(runtime, key, id) !== owner) fail(`tier ${key}: canonical source owner mismatch`);
+    const globals = record(tierValue(runtime, 'getMatchGlobals', id), 'tier match globals');
+    const charge = inputCharge?.(id);
+    if (charge !== undefined) {
+      if (!isSourceActorInputChargeRuntime(charge)) fail('tier/input charge must be genuine');
+      const fn = read(charge, 'getGlobal'); if (typeof fn !== 'function') fail('charge global requires own data-function');
+      if (Reflect.apply(fn, charge, []) !== globals) fail('tier/input charge must share the same PTR_DAT_80433934 match globals');
+      check();
+    }
+    const binding = record(tierValue(runtime, 'getActorBinding', id), 'tier binding');
+    const attribute = record(tierValue(runtime, 'getAttributeBinding', id), 'tier attribute binding');
+    const rate = record(tierValue(runtime, 'getRateBinding', id), 'tier rate binding');
+    if (actor.normal?.cue0 && actor.normal.cue0Attribute !== attribute)
+      fail('cue0/tier canonical attribute owner mismatch');
+    const known = [actor.actual, actor.borg, actor.world, actor.status, actor.gauge, actor.binding,
+      actor.stage, actor.input, actor.control, actor.action, actor.ready?.binding,
+      actor.rates?.mapping, actor.rates?.binding, actor.ceiling?.matrix, actor.ceiling?.terrain,
+      actor.normal?.binding, actor.normal?.movement, actor.normal?.cue, actor.normal?.dispatch,
+      actor.rates ? undefined : actor.normal?.mapping, ...(actor.normal?.rotationOwners ?? []),
+      ...(actor.normal?.cue0Owners ?? []).filter(owner => owner !== attribute)].filter(value => value !== undefined);
+    if (new Set([...known, globals, binding, attribute]).size !== known.length + 3)
+      fail('tier source owner alias: distinct shared and actor-specific records required');
+    return [globals, binding, attribute, rate];
+  };
   const owners = (id: symbol, actor: Entry): void => {
     stable(worldActor, id, actor.actual, 'world actor'); stable(gaugeActor, id, actor.actual, 'gauge actor');
     stable(gaugeBorg, id, actor.borg, 'gauge Borg'); stable(worldBinding, id, actor.world, 'world binding');
     stable(gaugeStatus, id, actor.status, 'status binding'); stable(gaugeBinding, id, actor.gauge, 'gauge binding');
+    if (stageActor) {
+      stable(stageActor, id, actor.actual, 'stage actor'); stable(stageWorld!, id, actor.world, 'stage world');
+      stable(stageStatus!, id, actor.status, 'stage status'); stable(stageBinding!, id, actor.stage!, 'stage binding');
+    }
+    if (inputActor) {
+      stable(inputActor, id, actor.actual, 'input actor'); stable(inputBorg!, id, actor.borg, 'input Borg');
+      stable(inputBinding!, id, actor.input!, 'input binding');
+    }
+    if (controlActor) {
+      stable(controlActor, id, actor.actual, 'control actor');
+      stable(controlWorld!, id, actor.world, 'control world');
+      stable(controlStatus!, id, actor.status, 'control status');
+      stable(controlBinding!, id, actor.control!, 'control binding');
+    }
+    readyOwners(id, actor);
+    if (actionActor) {
+      stable(actionActor, id, actor.actual, 'action request actor');
+      stable(actionWorld!, id, actor.world, 'action request world');
+      stable(actionBinding!, id, actor.action!, 'action request binding');
+    }
+    if (rateActor) {
+      stable(rateActor, id, actor.actual, 'actor rates actor');
+      stable(rateBorg!, id, actor.borg, 'actor rates Borg');
+      stable(rateWorld!, id, actor.world, 'actor rates world');
+      stable(rateStatus!, id, actor.status, 'actor rates status');
+      stable(rateMapping!, id, actor.rates!.mapping, 'actor rates mapping');
+      stable(worldMapping!, id, actor.rates!.mapping, 'actor rates/world mapping');
+      stable(rateBinding!, id, actor.rates!.binding, 'actor rates binding');
+    }
+    ceilingOwners(id, actor); normalOwners(id, actor); tierOwners(id, actor);
   };
   // Host boundary only: explicit raw input may establish absent canonical cells.
   // Existing cells must be own writable data. No zero/default/legacy fallback.
@@ -171,25 +470,146 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       const world = record(worldBinding(id), 'world binding'), status = record(gaugeStatus(id), 'status binding');
       const gauge = record(gaugeBinding(id), 'gauge binding');
       const records = [actual, borg, world, status, gauge];
+      let stageOwner: object | undefined;
+      if (stageActor) {
+        stable(stageActor, id, actual, 'stage actor'); stable(stageWorld!, id, world, 'stage world');
+        stable(stageStatus!, id, status, 'stage status');
+        stageOwner = record(stageBinding!(id), 'stage binding'); records.push(stageOwner);
+      }
+      let inputOwner: object | undefined;
+      if (inputActor) {
+        stable(inputActor, id, actual, 'input actor'); stable(inputBorg!, id, borg, 'input Borg');
+        inputOwner = record(inputBinding!(id), 'input binding'); records.push(inputOwner);
+      }
+      let controlOwner: object | undefined;
+      if (controlActor) {
+        stable(controlActor, id, actual, 'control actor'); stable(controlWorld!, id, world, 'control world');
+        stable(controlStatus!, id, status, 'control status');
+        controlOwner = record(controlBinding!(id), 'control binding'); records.push(controlOwner);
+      }
+      let actionOwner: object | undefined;
+      if (actionActor) {
+        stable(actionActor, id, actual, 'action request actor'); stable(actionWorld!, id, world, 'action request world');
+        actionOwner = record(actionBinding!(id), 'action request binding'); records.push(actionOwner);
+      }
+      let rateOwners: Entry['rates'];
+      if (rateActor) {
+        stable(rateActor, id, actual, 'actor rates actor'); stable(rateBorg!, id, borg, 'actor rates Borg');
+        stable(rateWorld!, id, world, 'actor rates world'); stable(rateStatus!, id, status, 'actor rates status');
+        const mapping = record(rateMapping!(id), 'actor rates mapping');
+        stable(worldMapping!, id, mapping, 'actor rates/world mapping');
+        rateOwners = {mapping, binding: record(rateBinding!(id), 'actor rates binding')};
+        records.push(rateOwners.mapping, rateOwners.binding);
+      }
+      let ceilingOwnersAtBind: Entry['ceiling'];
+      if (ceilingActor) {
+        stable(ceilingActor, id, actual, 'ceiling actor'); stable(ceilingWorld!, id, world, 'ceiling world');
+        const mapping = record(ceilingMapping!(id), 'ceiling mapping');
+        stable(ceilingWorldMapping!, id, mapping, 'ceiling/world mapping');
+        if (rateOwners && rateOwners.mapping !== mapping) fail('ceiling/rate canonical mapping mismatch');
+        const matrix = record(ceilingMatrix!(id), 'ceiling matrix');
+        const rateMatrixOwner = rateMatrix?.(id);
+        if (rateMatrixOwner !== undefined && rateMatrixOwner !== matrix) fail('ceiling/rate canonical matrix4a4 owner mismatch');
+        const terrain = record(ceilingTerrain!(id), 'ceiling terrain');
+        stable(stageTerrain!, id, terrain, 'ceiling/stage terrain');
+        const globals = record(ceilingGlobals!(id), 'ceiling match globals');
+        const charge = inputCharge!(id);
+        if (!isSourceActorInputChargeRuntime(charge)) fail('ceiling completion requires genuine input charge');
+        const getter = read(charge, 'getGlobal');
+        if (typeof getter !== 'function') fail('charge global requires own data-function');
+        const chargeGlobal = (): unknown => {const value = Reflect.apply(getter, charge, []); check(); return value;};
+        if (chargeGlobal() !== globals) fail('ceiling/input charge must share the same PTR_DAT_80433934 match globals');
+        if (!rateOwners) records.push(mapping);
+        records.push(matrix);
+        // Shared globals are allowed across actors, but never alias an actor's cells.
+        if (new Set([...records, terrain, globals]).size !== records.length + 2)
+          fail('ceiling source owner alias: distinct stage/match/actor records required');
+        ceilingOwnersAtBind = {mapping, matrix, terrain, globals, charge, chargeGlobal};
+      }
+      let normalOwnersAtBind: Entry['normal'];
+      if (normalActor) {
+        stable(normalActor, id, actual, 'normal actor'); stable(normalWorld!, id, world, 'normal world');
+        stable(normalStatus!, id, status, 'normal status');
+        const mapping = record(normalMapping!(id), 'normal mapping');
+        stable(normalWorldMapping!, id, mapping, 'normal/world mapping');
+        if ((rateOwners && rateOwners.mapping !== mapping) ||
+            (ceilingOwnersAtBind && ceilingOwnersAtBind.mapping !== mapping))
+          fail('normal/rate/ceiling canonical mapping mismatch');
+        const movement = record(normalMovement!(id), 'normal movement');
+        const binding = record(normalBinding!(id), 'normal binding');
+        const cues = normalCues!(id) as SourceActorCueResetRuntime | undefined;
+        const cueValue = normalCueBinding!(id), dispatchValue = normalDispatch!(id);
+        const cue = cueValue === undefined ? undefined : record(cueValue, 'normal cue binding');
+        const dispatch = dispatchValue === undefined ? undefined : record(dispatchValue, 'normal dispatch binding');
+        if (!rateOwners && !ceilingOwnersAtBind) records.push(mapping);
+        records.push(movement, binding);
+        if (cue) records.push(cue);
+        if (dispatch) records.push(dispatch);
+        const rotationValue = normalRotation!(id);
+        if (rotationValue !== undefined && !isSourceActorRotationDampingRuntime(rotationValue))
+          fail('normal rotation must be genuine');
+        const rotation = rotationValue as SourceActorRotationDampingRuntime | undefined;
+        const rotationOwners = rotation ? rotationRecords(rotation, 'getStorageOwners', id) : [];
+        records.push(...rotationOwners);
+        const cue0ValueAtBind = normalCue0!(id);
+        if (cue0ValueAtBind !== undefined && !isSourceActorCue0LifecycleRuntime(cue0ValueAtBind))
+          fail('normal cue0 must be genuine');
+        const cue0 = cue0ValueAtBind as SourceActorCue0LifecycleRuntime | undefined;
+        const cue0Owners = cue0 ? cue0Records(cue0, id) : [];
+        const cue0Terrain = cue0 ? record(cue0Value(cue0, 'getTerrainGlobals', id), 'cue0 terrain') : undefined;
+        const cue0Attribute = cue0 ? record(cue0Value(cue0, 'getAttributeBinding', id), 'cue0 attribute') : undefined;
+        if (cue0Terrain && stageTerrain && stageTerrain(id) !== cue0Terrain)
+          fail('cue0/stage must share the same terrain-global owner');
+        records.push(...cue0Owners);
+        if (cue0Terrain && records.includes(cue0Terrain)) fail('cue0 terrain aliases an actor source owner');
+        normalOwnersAtBind = {mapping, movement, binding, cues, cue, dispatch, rotation, rotationOwners,
+          cue0, cue0Owners, ...(cue0Terrain === undefined ? {} : {cue0Terrain, cue0Attribute: cue0Attribute!})};
+      }
+      const readyRuntime = controlReady?.(id);
+      let ready: Entry['ready'];
+      if (readyRuntime !== undefined) {
+        if (!isSourceActorReadyTransitionsRuntime(readyRuntime)) fail('control ready runtime must be genuine');
+        ready = {runtime: readyRuntime, binding: record(readyValue(readyRuntime, 'getActorBinding', id), 'ready binding')};
+        records.push(ready.binding);
+      }
       if (new Set(records).size !== records.length || records.some(value => assigned.has(value)))
         fail('source owner alias: distinct actual actor/Borg/world/status/gauge required');
+      if (ceilingOwnersAtBind && new Set([...records, ceilingOwnersAtBind.terrain, ceilingOwnersAtBind.globals]).size !== records.length + 2)
+        fail('ceiling source owner alias: stage/match globals must differ from every actor owner');
       noLegacyDistances(actual); record(initial, 'initial tick-prefix binding');
       const binding: Partial<SourceActorTickPrefixBinding> = {};
       if (Object.getOwnPropertyDescriptor(initial, 'byte598') !== undefined)
         binding.byte598 = integer(read(initial, 'byte598'), 0, 255, 'byte598');
-      check(); actors.set(id, {actual, borg, world, status, gauge, binding: Object.seal(binding), lastEpoch: -1});
+      const actor: Entry = {actual, borg, world, status, gauge,
+        ...(stageOwner === undefined ? {} : {stage: stageOwner}),
+        ...(inputOwner === undefined ? {} : {input: inputOwner}),
+        ...(controlOwner === undefined ? {} : {control: controlOwner}),
+        ...(actionOwner === undefined ? {} : {action: actionOwner}),
+        ...(rateOwners === undefined ? {} : {rates: rateOwners}),
+        ...(normalOwnersAtBind === undefined ? {} : {normal: normalOwnersAtBind}),
+        ...(ceilingOwnersAtBind === undefined ? {} : {ceiling: ceilingOwnersAtBind}),
+        ...(ready === undefined ? {} : {ready}), binding: Object.seal(binding), lastEpoch: -1};
+      readyOwners(id, actor); ceilingOwners(id, actor); normalOwners(id, actor); tierOwners(id, actor); check(); actors.set(id, actor);
       records.forEach(value => assigned.add(value)); assigned.add(binding); claimedActors.add(actual);
     });},
     getActualActor(id: symbol) {return entry(id).actual;},
     getActualBorg(id: symbol) {return entry(id).borg;},
     getActorBinding(id: symbol) {return entry(id).binding;},
-    ingestRawDistancesAndRun(id: symbol, epoch: number, raw: SourceActorTickRawDistances): never {return guard(() => {
+    ingestRawDistancesAndRun(id: symbol, epoch: number, raw: SourceActorTickRawDistances): void {return guard(() => {
       const actor = entry(id);
       const next = integer(epoch, 0, Number.MAX_SAFE_INTEGER, 'pre59068 raw-input epoch');
       if (next <= actor.lastEpoch) fail('pre59068 raw-input epoch already consumed or out of order');
       actor.lastEpoch = next; // Once attempted, never retry or silently normalize twice.
+      // A prior6bc expiry may already have stored zero before an unsupported4dc.
+      // Never let a later ready branch silently skip that outstanding source call.
+      if (hasIncompleteSourceActorCue0Lifecycle(actor.actual)) fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
+      if (hasIncompleteSourceActorRotationDamping(actor.actual)) fail('actual actor has a known incomplete rotation damping; source continuation is unsupported');
+      if (hasIncompleteSourceActorNormalCueSync(actor.actual)) fail('actual actor has a known incomplete cue synchronization; source continuation is unsupported');
+      if (hasIncompleteSourceActorNormalCountdown(actor.actual)) fail('actual actor has a known incomplete6bc expiry; source continuation is unsupported');
+      if (assertNormalComplete && assertNormalComplete(id) !== undefined) fail('normal completion assertion returned unexpectedly');
       owners(id, actor); noLegacyDistances(actor.actual); record(raw, 'explicit decoded raw distances');
-      if (assigned.has(raw) || raw === read(actor.world, 'scale58') || raw === read(actor.borg, 'paramTier'))
+      if (assigned.has(raw) || (actor.normal?.rotation && rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id).includes(raw)) || tierOwners(id, actor).includes(raw) || raw === actor.normal?.cue0Terrain || raw === actor.ceiling?.globals || raw === actor.ceiling?.terrain ||
+          raw === read(actor.world, 'scale58') || raw === read(actor.borg, 'paramTier'))
         fail('raw input must not alias a bound source owner');
       if (read(raw, 'boundary') !== 'externally-decoded-pre59068-raw') fail('explicit externally decoded pre59068 raw boundary required');
       ingest(actor.actual, 'targetDistance760', f(raw, 'targetDistance760'));
@@ -206,7 +626,32 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       write(actor.binding, 'byte598', 0);
       const contact = integer(read(actor.actual, 'supportContact1db'), 0, 255, 'supportContact1db') << 24 >> 24;
       if (contact !== 0) fail('80067a70 nonzero support reached unsupported actual pointer1e4 ownership');
-      fail('800590ac reached unsupported source call 80059e58');
+      if (!updateStage) fail('800590ac reached unsupported source call 80059e58');
+      if (updateStage(id) !== undefined) fail('genuine stage-boundary stage returned asynchronously or unexpectedly');
+      if (!updateInput) fail('800590b4 reached unsupported source call 800685c0');
+      if (updateInput(id) !== undefined) fail('genuine input prefix returned asynchronously or unexpectedly');
+      if (!updateControl) fail('800590bc reached unsupported source call 8005a190');
+      const controlResult = updateControl(id);
+      if (controlResult !== 0 && controlResult !== 1) fail('bounded genuine actor control returned unexpectedly or asynchronously');
+      if (controlResult === 0) {
+        if (!updateNormal) {
+          // Historical boundary: signed5e4 is read before the unresolved table.
+          const cue = integer(read(actor.actual, 'ubCue'), 0, 255, 'ubCue');
+          const dispatchAddress = (0x802d3300 + ((cue << 24 >> 24) << 2)) >>> 0;
+          fail(`800590e0 reached unsupported source table802d3300 entry ${dispatchAddress.toString(16)} before indirect call800590e8`);
+        }
+        if (updateNormal(id) !== undefined) fail('genuine normal lifecycle returned asynchronously or unexpectedly');
+      }
+      // Both source branches meet here only after every reached call completes.
+      if (!updateAction) fail('80059110 reached unsupported source call 8005a298');
+      if (updateAction(id) !== undefined) fail('genuine action request returned asynchronously or unexpectedly');
+      if (!updateRates) fail('80059118 reached unsupported source call 8005a378');
+      if (updateRates(id) !== undefined) fail('genuine actor rates returned asynchronously or unexpectedly');
+      if (!updateCeiling) fail('80059120 reached unsupported source call 80068030');
+      const ceilingResult = updateCeiling(id);
+      if (ceilingResult !== 0 && ceilingResult !== 1) fail('genuine ceiling tail returned asynchronously or unexpectedly');
+      // Source59068 ignores68030's native result and returns void at59134.
+      return;
     });},
   });
 }

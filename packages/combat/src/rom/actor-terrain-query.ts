@@ -21,7 +21,8 @@
  */
 import {sourceTerrainGrid, type hitBin} from '@gf/formats';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
-import type {SourceActorTransformHistoryRuntime} from './actor-transform-history.js';
+import type {SourceActorTransformHistoryRuntime, SourceActorTransformHistoryBinding} from './actor-transform-history.js';
+import type {RomActor} from './actor.js';
 import type {SourceJointVector} from './joint-animation-feedback.js';
 import {addSourceFloat32} from './source-float.js';
 
@@ -31,6 +32,9 @@ export interface SourceActorTerrainGlobals {
   readonly ceiling24: sourceTerrainGrid.SourceTerrainGrid;
   upper34: number;
   lower68: number;
+  /** Actual stage lifecycle bounds; deliberately distinct from grid extents.
+   * Absent until explicitly supplied, never inferred from terrain geometry. */
+  maxX38?: number; minX3c?: number; maxZ40?: number; minZ44?: number;
 }
 export interface SourceActorTerrainQuerySources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor'>;
@@ -40,12 +44,21 @@ export interface SourceActorTerrainQuerySources {
 }
 export interface SourceActorTerrainQueryRuntime {
   bindActor(identity: symbol): void;
+  /** Retained source owners, metadata only; no source scalar reads. */
+  getActualActor(identity: symbol): RomActor;
+  getHistoryBinding(identity: symbol): SourceActorTransformHistoryBinding;
+  /** Same retained DAT_8043625c owner, without copying or default fields. */
+  getTerrainGlobals(): SourceActorTerrainGlobals;
   /** Explicit caller-local point; clearance is a value, never an actor shadow. */
   query8003d6e4(identity: symbol, point: Readonly<SourceJointVector>, savedClearance: number): number;
   /** Direct source normal query. Writes caller output in source order; 0 means
    * outside X/Z bounds, not no eligible floor. No result is retained here. */
   queryNormal8003de80(identity: symbol, callerLocalPoint: Readonly<SourceJointVector>, savedClearance: number,
     callerLocalNormalOutput: SourceJointVector): 0 | 1;
+}
+const runtimes = new WeakSet<object>();
+export function isSourceActorTerrainQueryRuntime(value: unknown): value is SourceActorTerrainQueryRuntime {
+  return value !== null && typeof value === 'object' && runtimes.has(value);
 }
 function fail(reason: string): never {
   throw Error(`[actor-terrain-query] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -202,7 +215,13 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
     if (listEntry(second, 0) !== -1) fail('nonempty ceiling20 triangle body unsupported');
     return first.ceiling!;
   }
-  return Object.freeze({
+  const entry = (id: symbol): Entry => {
+    const value = actors.get(id); if (!value) fail('unknown/non-owned terrain-query actor'); return value;
+  };
+  const runtime: SourceActorTerrainQueryRuntime = {
+    getActualActor(id) {return entry(id).actual as RomActor;},
+    getHistoryBinding(id) {return entry(id).history as SourceActorTransformHistoryBinding;},
+    getTerrainGlobals() {return terrain as SourceActorTerrainGlobals;},
     bindActor(id: symbol): void {guard(() => {
       if (typeof id !== 'symbol') fail('actual actor symbol required');
       if (actors.has(id)) fail('terrain-query actor already bound');
@@ -318,5 +337,6 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
       }
       return 1;
     });},
-  });
+  };
+  runtimes.add(runtime); return Object.freeze(runtime);
 }

@@ -48,6 +48,10 @@ export interface SourceActorAttributeParameterDescriptor {
   /** Signed-short extension of this SAME 4ac owner, consumed by 8005568c. */
   field04: number; field08: number;
   field74: number; field78: number; field7c: number;
+  /** Unsigned table selector on this SAME 4ac owner, consumed by8006826c. */
+  byteA3: number;
+  /** Charge thresholds on this SAME 4ac owner, consumed by800686f0. */
+  field184: number; field188: number; field18c: number;
 }
 export interface SourceActorAttributeRefreshSources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor'>;
@@ -55,6 +59,7 @@ export interface SourceActorAttributeRefreshSources {
   movement: Pick<SourceActorMovementFollowupRuntime, 'getActualActor' | 'getActorBinding' | 'updateActor'>;
 }
 export interface SourceActorAttributeRefreshRuntime {
+  getActualActor(identity: symbol): RomActor;
   bindActor(identity: symbol, initial: Readonly<Partial<SourceActorAttributeRefreshBinding>>): void;
   getActorBinding(identity: symbol): Partial<SourceActorAttributeRefreshBinding>;
   bindDescriptor(identity: symbol, initial: Readonly<Partial<SourceActorAttributeDescriptorBinding>>): void;
@@ -165,6 +170,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
       check(); actors.set(id, {actual, mapping, movement: state, rows, binding: Object.seal(binding)});
       for (const value of records) assigned.add(value);
     });},
+    getActualActor(id: symbol) {return actorEntry(id).actual;},
     getActorBinding(id: symbol) {return actorEntry(id).binding;},
     bindDescriptor(id: symbol, initial: Readonly<Partial<SourceActorAttributeDescriptorBinding>>): void {guard(() => {
       if (typeof id !== 'symbol') fail('descriptor identity must be a symbol');
@@ -176,7 +182,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
     });},
     getDescriptorBinding(id: symbol) {return descriptorEntry(id).binding;},
     createParameterDescriptor(initial: Readonly<Partial<SourceActorAttributeParameterDescriptor>>): symbol {return guard(() => {
-      const binding = copy<SourceActorAttributeParameterDescriptor>(initial, ['field74', 'field78', 'field7c']);
+      const binding = copy<SourceActorAttributeParameterDescriptor>(initial, ['field74', 'field78', 'field7c', 'field184', 'field188', 'field18c']);
       for (const key of ['field04', 'field08'] as const) {
         if (Object.getOwnPropertyDescriptor(initial, key) !== undefined) {
           const value = read(initial, key);
@@ -185,6 +191,8 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
           binding[key] = value === 0 ? 0 : value;
         }
       }
+      if (Object.getOwnPropertyDescriptor(initial, 'byteA3') !== undefined)
+        binding.byteA3 = integer(read(initial, 'byteA3'), 255, 'byteA3');
       Object.seal(binding);
       const id = Symbol('owned actor parameter4ac'); parameters.set(id, binding); return id;
     });},

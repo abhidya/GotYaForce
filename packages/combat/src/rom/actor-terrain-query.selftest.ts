@@ -1,6 +1,6 @@
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {createRomActor} from './actor.js';
-import {createSourceActorTerrainQueryRuntime, type SourceActorTerrainGlobals} from './actor-terrain-query.js';
+import {createSourceActorTerrainQueryRuntime, isSourceActorTerrainQueryRuntime, type SourceActorTerrainGlobals} from './actor-terrain-query.js';
 import {createSourceActorTransformHistoryRuntime} from './actor-transform-history.js';
 import {createSourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {createSourceActorJointMappingRuntime} from './actor-joint-mapping.js';
@@ -126,7 +126,15 @@ export function runActorTerrainQuerySelfTests(): void {
     f.point.y = 5;
     check(f.actual.pos.y === 0 && f.actual.savedGroundPos.y === 0 && f.actual.stepHeight === 0 && f.prior.previousStepHeight6d4 === 0,
       'query never writes actual current/history fields');
-    check(Object.keys(f.runtime).join(',') === 'bindActor,query8003d6e4,queryNormal8003de80', 'no persistent result/normal/height surface');
+    check(Object.keys(f.runtime).join(',') === 'getActualActor,getHistoryBinding,getTerrainGlobals,bindActor,query8003d6e4,queryNormal8003de80', 'no persistent result/normal/height surface');
+    check(f.runtime.getTerrainGlobals() === f.terrain, 'read-only accessor returns the same actual global owner');
+    check(isSourceActorTerrainQueryRuntime(f.runtime) && Object.isFrozen(f.runtime), 'genuine terrain identity is frozen');
+    for (const fake of [null, undefined, {}, {...f.runtime}, Object.create(f.runtime)])
+      check(!isSourceActorTerrainQueryRuntime(fake), 'terrain brand cannot be copied or inherited');
+    check(f.runtime.getActualActor(f.id) === f.actual && f.runtime.getHistoryBinding(f.id) === f.prior,
+      'metadata accessors retain actual/history owners without a copied result surface');
+    rejects(() => f.runtime.getActualActor(Symbol()), 'unknown/non-owned');
+    rejects(() => f.runtime.getHistoryBinding(Symbol()), 'unknown/non-owned');
   }
   for (const heights of [[], [-200], [100]]) {
     const f = fixture(heights); check(f.query() === (heights[0] === -200 ? -200 : -100), 'source sentinel fallback and below-lower minimum');

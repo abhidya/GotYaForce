@@ -153,6 +153,9 @@ export interface RomActor {
   collisionScale?: number;
   /** Source1db supporting-actor contact, not terrain grounded status. Flat-floor host default0. */
   supportContact1db: number;
+  /** Actual+6cb stage-exit/no-clamp byte, shared with physicsExtras.
+   * Explicit source owner only; no lifecycle/default host hydration. */
+  noClamp6cb?: number;
   /** Actual+760 full3D captured-target distance. Legacy bridge may pre-normalize
    * this field; source tick-prefix requires explicit fresh raw input instead. */
   targetDistance760?: number;
@@ -163,6 +166,13 @@ export interface RomActor {
   /** Monotonic host/presentation edge emitted when zz_00b2190_(actor, 1) succeeds.
    *  @romfield afterimageSerial port_side */
   afterimageSerial: number;
+
+  /** Existing stream-vm +57a/+57b storage, promoted without host defaults.
+   * Source59f5c consumes these exact actual-actor bytes, not copied flags.
+   * @romfield stateFlagA +0x57a u8
+   * @romfield stateFlagB +0x57b u8 */
+  stateFlagA?: number;
+  stateFlagB?: number;
 
   // ===== Weapon/part animation host state (zz_0048d54_ @0x80048d54) =====
   /** +0x579 descriptor-owned part-enable mask. Part 1 is deliberately skipped by
@@ -393,9 +403,11 @@ export interface RomActor {
   /** +0x5b4: live action status word.
    *  @romfield statusWord5b4 +0x5b4 u32 */
   statusWord5b4: number;
-  /** +0x5d4/+0x5d8: raw edge and held input words.
+  /** +0x5bc: explicit raw press-edge word; existing family owner, no default. */
+  statusWord5bc?: number;
+  /** +0x5d4 word / +0x5d8 HALFWORD: input state. Adjacent5da/5db are states.
    *  @romfield inputEdge5d4 +0x5d4 u32
-   *  @romfield inputHeld5d8 +0x5d8 u32 */
+   *  @romfield inputHeld5d8 +0x5d8 u16 */
   inputEdge5d4: number;
   inputHeld5d8: number;
   /** +0x694: state-timer float (e.g. deploy lock, post-state cooldown; zz_005568c_ decays it).

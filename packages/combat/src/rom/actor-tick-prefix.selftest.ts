@@ -1,3 +1,4 @@
+import {createSourceActorInputPrefixRuntime} from './actor-input-prefix.js';
 import {createSourceActorTickPrefixRuntime, isSourceActorTickPrefixClaimedActor,
   type SourceActorTickRawDistances, type SourceActorTickPrefixBinding} from './actor-tick-prefix.js';
 import {createSourceActorGaugeScaleRuntime} from './actor-gauge-scale.js';
@@ -187,6 +188,10 @@ export function runActorTickPrefixSelfTests(): void {
     const z = fixture(true); rejects(() => z.runtime.bindActor(z.id, {...z.borg}, {byte598: 0}), 'gauge Borg');
     check(!isSourceActorTickPrefixClaimedActor(z.actual), 'wrong Borg fails before claim');
     rejects(() => createSourceActorTickPrefixRuntime({...z.sources, gauges: {...z.gauges}}), 'genuine source runtime');
+    rejects(() => createSourceActorTickPrefixRuntime({...z.sources, actorRates: {} as never}), 'actor rates require the genuine source runtime');
+    rejects(() => createSourceActorTickPrefixRuntime({...z.sources, actorRates: undefined as never}), 'actor rates require the genuine source runtime');
+    rejects(() => createSourceActorTickPrefixRuntime({...z.sources, ceiling: {} as never}), 'ceiling requires the genuine source runtime');
+    rejects(() => createSourceActorTickPrefixRuntime({...z.sources, ceiling: undefined as never}), 'ceiling requires the genuine source runtime');
     const w = fixture(true); w.hooks.world = () => w.state; rejects(w.bind, 'source owner alias');
     const v = fixture(true); v.hooks.worldActor = () => Promise.resolve(v.actual); rejects(v.bind, 'synchronous actual owned record');
   }
@@ -234,6 +239,26 @@ export function runActorTickPrefixSelfTests(): void {
     rejects(() => RomDriverBridge.prototype.syncIn.call(receiver, attemptedRoster[0]!, attemptedRoster), 'no fallback');
     equal(x.actual.targetDistance760, 6, 'bridge cannot overwrite or renormalize after partial source execution');
     equal(x.borg.paramTier.timerFrames, 2, 'bridge refusal does not duplicate gauge update');
+  }
+  {
+    const x = fixture(true);
+    const inputPrefix = createSourceActorInputPrefixRuntime({world: x.world, gauges: x.gauges});
+    inputPrefix.bindActor(x.id, {});
+    rejects(() => createSourceActorTickPrefixRuntime({...x.sources, inputPrefix: {...inputPrefix}}), 'genuine source runtime');
+    const joined = createSourceActorTickPrefixRuntime({...x.sources, inputPrefix});
+    joined.bindActor(x.id, x.borg, {byte598: 7});
+    // Genuine optional input does not bypass the preceding absent stage helper.
+    rejects(() => joined.ingestRawDistancesAndRun(x.id, 1, raw()), '80059e58');
+    equal(x.actual.inputEdge5d4, 0, 'historical input value unchanged before reached input');
+  }
+  {
+    const x = fixture(true), otherBorg = {...x.borg};
+    const inputPrefix = createSourceActorInputPrefixRuntime({world: x.world,
+      gauges: {getActualActor: () => x.actual, getActualBorg: () => otherBorg}});
+    inputPrefix.bindActor(x.id, {});
+    const joined = createSourceActorTickPrefixRuntime({...x.sources, inputPrefix});
+    rejects(() => joined.bindActor(x.id, x.borg, {}), 'input Borg');
+    check(!isSourceActorTickPrefixClaimedActor(x.actual), 'mismatched input owner never claims tick');
   }
   console.log('[actor-tick-prefix-test] explicit raw-input epochs, real gauge prefix, support clears and honest refusals passed');
 }

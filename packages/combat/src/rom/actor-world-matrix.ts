@@ -107,6 +107,8 @@ export interface SourceActorWorldMatrixRuntime {
   bindActor(identity: symbol, actual: RomActor, initial: Readonly<SourceActorWorldMatrixBinding>,
     storage: SourceActorWorldMatrixStorage): void;
   getActualActor(identity: symbol): RomActor;
+  /** Same retained mapping header, for identity-preserving composition. */
+  getMappingActor(identity: symbol): object;
   getActorBinding(identity: symbol): SourceActorWorldMatrixBinding;
   /** Live owned record, with lazy element reads left to the caller. */
   getWorldMatrix(identity: symbol, index: number): readonly number[];
@@ -470,6 +472,7 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
     },
     getStorage(id: symbol): SourceActorWorldMatrixStorage {return entry(id).storage;},
     getActualActor(id: symbol): RomActor {return entry(id).actual;},
+    getMappingActor(id: symbol): object {return entry(id).mapping;},
     bindCorrectedTraversalState(id: symbol, actualState: SourceActorCorrectedTraversalState): void {guard(() => {
       const actor = entry(id);
       if (actor.corrected !== undefined) fail('corrected traversal state already bound');

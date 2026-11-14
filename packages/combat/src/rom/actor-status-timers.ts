@@ -44,7 +44,10 @@ export interface SourceActorStatusTimersBinding {
 /** A borrow of the actual intended host runtime, never a copied snapshot. */
 export type SourceActorStatusBorgOwner = Pick<BorgRuntime, 'hp' | 'hitDrainFrames' |
   'balanceGauge' | 'balanceGaugeMax' | 'balanceRefillDelay' | 'downResetDelay' |
-  'comboWindow' | 'comboAccum' | 'comboRank' | 'invincTimer' | 'sourceAmmoRefillPauseMask'>;
+  'comboWindow' | 'comboAccum' | 'comboRank' | 'invincTimer' | 'sourceAmmoRefillPauseMask'> &
+  /** Existing Borg cells, required lazily by reached ready/rate lifecycle paths. */
+  Partial<Pick<BorgRuntime, 'maxHp' | 'colorVariant' | 'slowHitTimer' | 'hasteHitTimer' |
+    'slowAuraLevel' | 'hasteAuraLevel' | 'slowHitLevel' | 'hasteHitLevel'>>;
 export interface SourceActorStatusAmmoSlot {
   readonly cell: WeaponCell;
   /** Explicit otherwise-missing source +776 (+8*slot), not a HUD alias. */
@@ -63,6 +66,11 @@ export interface SourceActorStatusTimersRuntime {
     ammoSlots: readonly [SourceActorStatusAmmoSlot, SourceActorStatusAmmoSlot, SourceActorStatusAmmoSlot]): void;
   getActorBinding(identity: symbol): Partial<SourceActorStatusTimersBinding>;
   getActualActor(identity: symbol): RomActor;
+  /** Existing borrowed owners, exposed for source charge/lifecycle agreement. */
+  getWorldBinding(identity: symbol): object;
+  getMappingActor(identity: symbol): object;
+  getAttributeBinding(identity: symbol): object;
+  getMovementBinding(identity: symbol): object;
   getActualBorg(identity: symbol): SourceActorStatusBorgOwner;
   /** Explicit late connection to the genuine reset pair on these same owners. */
   bindGaugeResetSources(identity: symbol, gauges: SourceActorGaugeScaleRuntime): void;
@@ -217,6 +225,10 @@ export function createSourceActorStatusTimersRuntime(sources: SourceActorStatusT
     });},
     getActorBinding(id: symbol) {return entry(id).binding;},
     getActualActor(id: symbol) {return entry(id).actual;},
+    getWorldBinding(id: symbol) {return entry(id).world;},
+    getMappingActor(id: symbol) {return entry(id).mapping;},
+    getAttributeBinding(id: symbol) {return entry(id).attribute;},
+    getMovementBinding(id: symbol) {return entry(id).movement;},
     getActualBorg(id: symbol) {return entry(id).borg;},
     bindGaugeResetSources(id: symbol, gauges: SourceActorGaugeScaleRuntime): void {guard(() => {
       const actor = entry(id);

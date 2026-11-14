@@ -50,6 +50,8 @@ export interface SourceActorAnimationSetupRequest {
   readonly mode: number;
 }
 export interface SourceActorAnimationDispatchRuntime {
+  /** Same mapping header bound to this actor, never a snapshot. */
+  getSourceActor(actor: symbol): SourceActorJointMappingHeader;
   bindSetupRuntime(setup: Pick<SourceActorAnimationSetupRuntime, 'setupModeZero' | 'finishPartOneSetup'>): void;
   bindActor(actor: symbol, initial: SourceActorAnimationDispatchBinding): void;
   bindPart(part: symbol, initial: SourceActorAnimationDispatchPartBinding): void;
@@ -136,6 +138,7 @@ export function createSourceActorAnimationDispatchRuntime(mapping: SourceActorJo
       } finally {busy = false;}
     },
     getActorBinding(id: symbol) {return actorRecord(id).binding;},
+    getSourceActor(id: symbol) {return actorRecord(id).source;},
     getPartBinding(id: symbol) {return partRecord(id).binding;},
     setupPart(id: symbol, partNumber: number, blockedSource: {readonly blockedMask1d9a: number},
       request: SourceActorAnimationSetupRequest): void {

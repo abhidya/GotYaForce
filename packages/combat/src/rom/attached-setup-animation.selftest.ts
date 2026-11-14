@@ -1,13 +1,27 @@
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import type {BorgRuntime, WeaponCell} from '../types.js';
 import {NeoGredMeleeState} from '../neoGredMelee.js';
+import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
+import {createSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleBinding} from './actor-control-lifecycle.js';
+import {createSourceActorReadyTransitionsRuntime, type SourceActorReadyTransitionsBinding} from './actor-ready-transitions.js';
+import {createSourceActorActionRequestRuntime, type SourceActorActionRequestBinding} from './actor-action-request.js';
+import {createSourceActorRateLifecycleRuntime, type SourceActorRateLifecycleBinding} from './actor-rate-lifecycle.js';
+import {createSourceActorCeilingLifecycleRuntime} from './actor-ceiling-lifecycle.js';
+import {createSourceActorTierLifecycleRuntime, type SourceActorTierLifecycleBinding} from './actor-tier-lifecycle.js';
+import {createSourceActorNormalLifecycleRuntime, type SourceActorNormalLifecycleBinding,
+  sourceActorNormalReturn80059138, sourceActorNormalReturn8018cfe4, sourceActorNormalReturn8006f950} from './actor-normal-lifecycle.js';
+import {integratePosition} from './physicsExtras.js';
+import {createSourceActorChargeEffectsRuntime, type SourceActorChargeEffectsBinding, type SourceActorChargeEffectsData,
+  type SourceActorChargeSoundSources} from './actor-charge-effects.js';
 import {createSourceActorGaugeScaleRuntime} from './actor-gauge-scale.js';
 import {createSourceActorTickPrefixRuntime, isSourceActorTickPrefixClaimedActor} from './actor-tick-prefix.js';
 import {createSourceActorStatusTimersRuntime, type SourceActorStatusAmmoSlot} from './actor-status-timers.js';
 import {createSourceActorTerrainQueryRuntime, type SourceActorTerrainQueryRuntime, type SourceActorTerrainGlobals} from './actor-terrain-query.js';
 import {createSourceActorTransformHistoryRuntime, type SourceActorTransformHistoryRuntime} from './actor-transform-history.js';
 import {createSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateStorage} from './actor-matrix-update.js';
-import {createSourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
+import {createSourceActorWorldMatrixRuntime, type SourceActorWorldMatrixCorrection} from './actor-world-matrix.js';
+import {createSourceActorRotationDampingRuntime} from './actor-rotation-damping.js';
+import {createSourceActorCue0LifecycleRuntime, type SourceActorCue0LifecycleBinding} from './actor-cue0-lifecycle.js';
 import {createSourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
 import {createSourceJObjModelHydrationRuntime} from './jobj-model-hydration.js';
 import {createSourceDisplayAnimationAttachmentRuntime} from './display-animation-attachment.js';
@@ -419,7 +433,8 @@ function matrixHydratedControlFixture() {
 /** Actual first-pass 46698 caller with explicit actor topology and storage.
  * The imported JObj tree is deliberately different; it cannot select this graph.
  * Source setup still consumes retained matrices, never an automatic refresh. */
-function worldMatrixHydratedControlFixture(correctionDescriptor = false, primaryChain = false) {
+function worldMatrixHydratedControlFixture(correctionDescriptor = false, primaryChain = false,
+  rotationCorrections?: readonly SourceActorWorldMatrixCorrection[]) {
   const capacity = primaryChain ? 4 : 2;
   const x = modelHydratedControlFixture(modelDatFixture(), hydrationDatFixture(), capacity); x.begin();
   x.sourceActor.pos.x = 100; x.sourceActor.pos.y = 2; x.sourceActor.pos.z = 300;
@@ -432,7 +447,7 @@ function worldMatrixHydratedControlFixture(correctionDescriptor = false, primary
     scale58: {x: 2, y: 3, z: 4}, offset1dbc: {x: 3, y: 4, z: 5},
     adjusted1d54: {x: -1, y: -2, z: -3}, preRotation1d64: {x: 0, y: 0, z: 0},
   }, {matrices8d4, copy114, copy1aa4, scratch, topology1994: primaryChain ? [[1, 255, 255, 0], [2, 255, 0, 1], [3, 255, 0, 2], [255, 255, 0, 3]] : [[1, 255, 255, 0], [255, 255, 0, 1]],
-    corrections18d4: Array.from({length: capacity}, () => ({x: 0, y: 0, z: 0})),
+    corrections18d4: rotationCorrections ?? Array.from({length: capacity}, () => ({x: 0, y: 0, z: 0})),
     scales15d4: Array.from({length: capacity}, (_, i) => ({x: 1, y: !primaryChain && i === 1 ? 2 : 1, z: 1}))});
   const header = world.getActorBinding(x.actor), worldStorage = world.getStorage(x.actor);
   const rebuild = () => world.updateActor(x.actor); rebuild();
@@ -449,8 +464,9 @@ function worldMatrixHydratedControlFixture(correctionDescriptor = false, primary
  * The linked actor has genuine separate world storage but no normal controller,
  * metadata or movement binding. 47a2c copies matrices, not actor state. */
 function normalMatrixHydratedControlFixture(terrainFactory?: (owner: ReturnType<typeof worldMatrixHydratedControlFixture>) => SourceActorTerrainQueryRuntime,
-  correctionStorage?: SourceActorMatrixUpdateStorage, primaryChain = false) {
-  const x = worldMatrixHydratedControlFixture(correctionStorage !== undefined, primaryChain);
+  correctionStorage?: SourceActorMatrixUpdateStorage, primaryChain = false,
+  rotationCorrections?: readonly SourceActorWorldMatrixCorrection[]) {
+  const x = worldMatrixHydratedControlFixture(correctionStorage !== undefined, primaryChain, rotationCorrections);
   const capacity = primaryChain ? 4 : 2;
   const sourceActor = Object.assign(x.sourceActor, {flyer741: 0});
   const parts = Array.from({length: 2}, () => Array.from({length: 4}, () => x.mapping.createPart(
@@ -486,8 +502,8 @@ function normalMatrixHydratedControlFixture(terrainFactory?: (owner: ReturnType<
 }
 /** Explicit 5685c boundary over the same actual source actor/world records.
  * Only the four previously absent history records are introduced. */
-function historyHydratedControlFixture() {
-  const x = normalMatrixHydratedControlFixture();
+function historyHydratedControlFixture(rotationCorrections?: readonly SourceActorWorldMatrixCorrection[]) {
+  const x = normalMatrixHydratedControlFixture(undefined, undefined, false, rotationCorrections);
   Object.assign(x.sourceActor.savedGroundPos, {x: 10, y: 20, z: 30});
   Object.assign(x.sourceActor.targetCache5e8, {x: -1, y: -2, z: -3});
   Object.assign(x.sourceActor.aimOrigin518, {x: 501, y: 502, z: 503});
@@ -506,8 +522,9 @@ const attributeRowDestinations = ['field814', 'field818', 'field81c', 'field820'
   'field82c', 'field830', 'field834', 'field838', 'field83c', 'field840', 'field844', 'field848', 'field84c'] as const;
 /** The real DAT/setup/world/history/movement composition, with only the missing
  * 55dcc inputs supplied explicitly. This does not hydrate a production actor. */
-function attributeHydratedControlFixture(parameterShorts?: {field04: number; field08: number}) {
-  const x = historyHydratedControlFixture();
+function attributeHydratedControlFixture(parameterShorts?: {field04: number; field08: number},
+  rotationCorrections?: readonly SourceActorWorldMatrixCorrection[]) {
+  const x = historyHydratedControlFixture(rotationCorrections);
   const sourceActor = Object.assign(x.sourceActor, {hoverOffset668: -668});
   sourceActor.maxHSpeed = -678; sourceActor.maxRise = -679; sourceActor.maxFall = -680;
   const descriptorIdentity = x.mapping.getActor(x.actor).descriptor4b0!;
@@ -709,8 +726,8 @@ function runAttributeHydratedControlTests(): void {
 /** Explicit 55dcc -> 5568c prefix on the existing source graph. The borrowed
  * host-field record and three distinct WeaponCells are supplied synthetic
  * owners, not copied status snapshots or a claim of production Borg hydration. */
-function statusHydratedControlFixture() {
-  const x = attributeHydratedControlFixture({field04: 20, field08: 4});
+function statusHydratedControlFixture(rotationCorrections?: readonly SourceActorWorldMatrixCorrection[]) {
+  const x = attributeHydratedControlFixture({field04: 20, field08: 4}, rotationCorrections);
   const sourceActor = Object.assign(x.sourceActor, {slopeMode698: 0.5});
   sourceActor.stateTimer = 1.5; sourceActor.housekeeping73f = 7; sourceActor.aimRateScale = 0.5;
   sourceActor.dt = 13; sourceActor.contactFlags = 0x3f; sourceActor.fbState = 1;
@@ -898,8 +915,8 @@ function runStatusHydratedControlTests(): void {
 /** Extend the established synthetic DAT/setup/world/attribute/status graph.
  * The same borrowed host owns its paramTier; only absent gauge/scale fields are
  * added. Historical unbound-reset fixtures above deliberately remain unchanged. */
-function gaugeScaleHydratedControlFixture() {
-  const x = statusHydratedControlFixture();
+function gaugeScaleHydratedControlFixture(rotationCorrections?: readonly SourceActorWorldMatrixCorrection[]) {
+  const x = statusHydratedControlFixture(rotationCorrections);
   const host = Object.assign(x.host, {paramTier: {tier: 16, deltaAccum: 5, timerFrames: 8}});
   x.sourceActor.collisionScale = -19;
   const gauges = createSourceActorGaugeScaleRuntime({world: x.world, status: x.status});
@@ -1113,7 +1130,8 @@ function terrainHydratedControlFixture(floorHeight = 0, corrections = false, pri
     history.bindActor(owner.actor, {rotation76: {x: 0, y: 0, z: 0}, preRotation1d6a: {x: 0, y: 0, z: 0},
       previousStepHeight6d4: -99, aimOrigin524: {x: -1, y: -2, z: -3}});
     query = createSourceActorTerrainQueryRuntime({world: owner.world, history, terrain}); query.bindActor(owner.actor);
-    return Object.freeze({bindActor: query.bindActor, queryNormal8003de80: query.queryNormal8003de80,
+    return Object.freeze({getTerrainGlobals: query.getTerrainGlobals, getActualActor: query.getActualActor,
+      getHistoryBinding: query.getHistoryBinding, bindActor: query.bindActor, queryNormal8003de80: query.queryNormal8003de80,
       query8003d6e4(id: symbol, point: Readonly<{x: number; y: number; z: number}>, clearance: number) {
         const height = query.query8003d6e4(id, point, clearance);
         queryCalls.push({point, clearance, height}); queryHooks.after?.(point, height); return height;
@@ -2765,6 +2783,31 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runStatusHydratedControlTests();
   runGaugeScaleHydratedControlTests();
   runTickPrefixHydratedControlTests();
+  runStageBoundsHydratedControlTests();
+  runCueResetHydratedControlTests();
+  runInputPrefixHydratedControlTests();
+  runInputMachineHydratedControlTests();
+  runSecondInputMachineHydratedControlTests();
+  runThirdInputMachineHydratedControlTests();
+  runFourthInputMachineHydratedControlTests();
+  runFifthInputMachineHydratedControlTests();
+  runSixthInputMachineHydratedControlTests();
+  runSeventhInputMachineHydratedControlTests();
+  runEighthInputMachineHydratedControlTests();
+  runNinthInputMachineHydratedControlTests();
+  runTenthInputMachineHydratedControlTests();
+  runChargeInputHydratedControlTests();
+  runActorControlHydratedCompositionTests();
+  runChargeEffectsHydratedCompositionTests();
+  runReadyLifecycleHydratedCompositionTests();
+  runRateLifecycleHydratedCompositionTests();
+  runCeilingLifecycleHydratedCompositionTests();
+  runTierLifecycleHydratedCompositionTests();
+  runNormalLifecycleHydratedCompositionTests();
+  runRotationDampingHydratedCompositionTests();
+  runCue0LifecycleHydratedCompositionTests();
+  runAngularInputHydratedControlTests();
+  runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
 }
 
@@ -2785,12 +2828,13 @@ function tickPrefixHydratedControlFixture(withByte598 = true) {
 type TickPrefixFixture = ReturnType<typeof tickPrefixHydratedControlFixture>;
 /** Only the reached distance/scale/tier/control stores may change here. The
  * real graph's other records, identities and explicit-call cadence stay put. */
-function retainTickPrefixUnrelatedOwners(x: TickPrefixFixture): () => void {
+function retainTickPrefixUnrelatedOwners(x: TickPrefixFixture, stageTransition = false): () => void {
   const aobj = x.joints.getBinding(x.joint).aobj7c!;
   const rows: {record: object; omitted?: readonly string[]}[] = [
-    {record: x.sourceActor, omitted: ['targetDistance760', 'horizontalDistance764', 'modelScale', 'collisionScale', 'controlWord']},
+    {record: x.sourceActor, omitted: ['targetDistance760', 'horizontalDistance764', 'modelScale', 'collisionScale', 'controlWord', ...(stageTransition ? ['noClamp6cb'] : [])]},
     {record: x.host, omitted: ['downGauge']}, {record: x.tier, omitted: ['timerFrames']},
     {record: x.gaugeState, omitted: ['fieldC4']}, {record: x.prefixState, omitted: ['byte598']},
+    ...(stageTransition ? [{record: x.statusState, omitted: ['short272']}] : [{record: x.statusState}]),
     {record: x.scaleVector, omitted: ['x', 'y', 'z']},
     ...[x.header, x.header.offset1dbc, x.header.adjusted1d54, x.header.preRotation1d64,
       x.normalState, x.historyState, x.historyState.rotation76, x.historyState.preRotation1d6a,
@@ -2798,7 +2842,7 @@ function retainTickPrefixUnrelatedOwners(x: TickPrefixFixture): () => void {
       x.sourceActor.targetCache5e8, x.sourceActor.aimOrigin518, x.sourceActor.actionSpeedRows,
       ...x.sourceActor.parts, x.targetActor, x.targetHeader, x.targetHeader.scale58,
       x.targetPose, x.targetPose.translation, x.targetPose.quaternion, x.clocks, x.part,
-      x.stream, x.waitControl, x.control.getActorBinding(x.actor), x.start, x.statusState,
+      x.stream, x.waitControl, x.control.getActorBinding(x.actor), x.start,
       ...x.cells, ...x.ammoSlots, x.attributeState, x.parameter, x.scalarDescriptor,
       x.movementState, x.ready.getActorBinding(x.actor), x.sourceClock,
       x.joints.getBinding(x.joint), x.joints.getJoint(x.joint), x.feedback.getAObj(aobj),
@@ -2942,4 +2986,6762 @@ function runTickPrefixHydratedControlTests(): void {
       `${fault} retains exact67a70 store order; real nonzero supporting contact refuses missing1e4 owner rather than borrowing the separate collision adapter`);
   }
   console.log('[actor-tick-prefix-composition] PASS: explicit decoded3D760/XZ764 ingress and bounded real59068 prefix on the SAME DAT/setup/status/gauge/world/Borg owners; both divisions before real5bab8, actual750/scale/reset/copies, real67a70 control/598 clears and zero1db return, strict consumed epochs and retained6817c/C0/67a70 failure prefixes; explicit later55dcc/4d08c/wait/matrix/linked/history consumers; always refuses remaining59e58 or earlier unsupported effect, no full tick/raw producer/spawn/production activation');
+}
+
+/** Explicit bounded59e58 joins the existing DAT/setup/status/gauge graph.
+ * Stage limits live on the actual terrain-global owner, not its grid extents;
+ * these decoded synthetic fields do not claim source stage hydration. */
+function stageBoundsHydratedControlFixture() {
+  const x = gaugeScaleHydratedControlFixture();
+  const sourceActor = Object.assign(x.sourceActor, {targetDistance760: -760, horizontalDistance764: -764, noClamp6cb: 0});
+  sourceActor.controlWord = 0x100040; sourceActor.supportContact1db = 0;
+  const floor = sourceTerrainDatFixture(true), ceiling24 = sourceTerrainDatFixture(false), ceiling20 = sourceTerrainDatFixture(false);
+  const terrain: SourceActorTerrainGlobals = {
+    floor1c: sourceTerrainGrid.createSourceTerrainGrid(floor.bytes, floor.grid, 0x1c),
+    ceiling24: sourceTerrainGrid.createSourceTerrainGrid(ceiling24.bytes, ceiling24.grid, 0x24),
+    ceiling20: sourceTerrainGrid.createSourceTerrainGrid(ceiling20.bytes, ceiling20.grid, 0x20),
+    upper34: 1000, lower68: -1000, maxX38: 100, minX3c: -100, maxZ40: 300, minZ44: -300,
+  };
+  const query = createSourceActorTerrainQueryRuntime({world: x.world, history: x.history, terrain});
+  query.bindActor(x.actor);
+  const stageBounds = createSourceActorStageBoundsRuntime({world: x.world, status: x.status, terrain: query});
+  stageBounds.bindActor(x.actor, {lifecycle18: 1, short6cc: 17});
+  const prefix = createSourceActorTickPrefixRuntime({world: x.world, gauges: x.gauges, stageBounds});
+  prefix.bindActor(x.actor, x.host, {byte598: 7});
+  return Object.assign(x, {sourceActor, terrain, query, stageBounds, stageState: stageBounds.getActorBinding(x.actor),
+    prefix, prefixState: prefix.getActorBinding(x.actor),
+    runRawPrefix: (epoch: number, targetDistance760: number, horizontalDistance764: number) =>
+      prefix.ingestRawDistancesAndRun(x.actor, epoch, {boundary: 'externally-decoded-pre59068-raw', targetDistance760, horizontalDistance764})});
+}
+function runStageBoundsHydratedControlTests(): void {
+  {
+    const x = stageBoundsHydratedControlFixture(); x.host.downGaugeBase = 32;
+    const position = x.sourceActor.pos, stage = x.stageState, status = x.statusState, globals = x.terrain;
+    check(x.query.getTerrainGlobals() === globals && x.stageBounds.getTerrainGlobals() === globals &&
+      x.stageBounds.getActualActor(x.actor) === x.sourceActor &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === status &&
+      x.prefix.getActualActor(x.actor) === x.sourceActor && x.world.getActualActor(x.actor) === x.sourceActor &&
+      x.status.getActualActor(x.actor) === x.sourceActor && x.gauges.getActualActor(x.actor) === x.sourceActor,
+      '59e58 borrows identical actual actor/position/world/status/terrain owners from the real DAT/setup graph');
+    x.host.downResetDelay = 0.25; x.statusState.field7d8 = 0.25; x.snapshot(); x.refreshStatusPrefix();
+    let retained = retainTickPrefixUnrelatedOwners(x);
+    rejects(() => x.runRawPrefix(40, 64, 20), '685c0'); retained();
+    check(x.stageState === stage && x.stageState.short6cc === 0 && x.sourceActor.noClamp6cb === 0 &&
+      x.sourceActor.pos === position && x.query.getTerrainGlobals() === globals && x.statusState === status &&
+      x.sourceActor.targetDistance760 === 32 && x.sourceActor.horizontalDistance764 === 10 &&
+      x.tier.timerFrames === 7 && x.prefixState.byte598 === 0 && x.sourceActor.controlWord === 0x40,
+      'inclusive maxX100/maxZ300 resets actual6cc after real5bab8/zero-support67a70 and only then refuses685c0');
+    checkScaleStores(x, 2.049999952316284, 'stage check follows genuine scale writes without another scale call');
+    retained = retainTickPrefixUnrelatedOwners(x);
+    rejects(() => x.runRawPrefix(40, 640, 200), 'epoch'); retained();
+    check(x.stageState.short6cc === 0 && x.tier.timerFrames === 7 && x.sourceActor.targetDistance760 === 32,
+      'same685c0-refused epoch retains the reset and cannot repeat distance, tier, scale or stage effects');
+    // Match the historical explicit downstream schedule. No stage helper is a
+    // fabricated full tick and no normal/wait/movement callback is supplied.
+    x.host.downGauge = 99; x.sourceActor.controlWord = 0x100040; x.prefixState.byte598 = 9;
+    rejects(() => x.runRawPrefix(41, 66, 22), '685c0');
+    x.scalarDescriptor.field44 = 64; x.refreshAttributes();
+    checkAttributeStores(x, [6.1875, 132, 1.03125, 8.25, 10.3125], 'later55dcc consumes same actual stage-prefix model scale');
+    check(x.sourceActor.stepHeight === Math.fround(27 * Math.fround(0.7)) && x.movementCallCount() === 2 &&
+      x.worldMatrix[7] === 95 && x.tier.timerFrames === 6, 'stage return adds no implicit movement/matrix cadence');
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.pose.translation.y === 33 && x.statusState.field8c8 === 2 && x.movementCallCount() === 2 &&
+      x.worldMatrix[7] === 95 && x.tier.timerFrames === 6, 'real wait advances pose separately without repeating stage or gauges');
+    x.sourceActor.pos.y = 6; x.updateNormal();
+    check(x.worldMatrix[3] === 153.625 && x.worldMatrix[7] === 82.3125 && x.worldMatrix[11] === 399 &&
+      x.targetMatrices[1]!.every((value, i) => Object.is(value, x.worldMatrix[i])) &&
+      x.historyState.previousStepHeight6d4 === 9, 'explicit normal alone rebuilds and copies linked matrices after stage return');
+    x.refreshAttributes(); x.snapshot();
+    check(x.sourceActor.stepHeight === 7.21875 && x.movementCallCount() === 3 &&
+      x.historyState.previousStepHeight6d4 === 7.21875 && x.sourceActor.savedGroundPos.y === 6 &&
+      x.tier.timerFrames === 6 && x.stageState.short6cc === 0, 'explicit movement/history retains the historical downstream cadence');
+  }
+  {
+    const x = stageBoundsHydratedControlFixture(); x.sourceActor.pos.x = 101; x.stageState.short6cc = 28;
+    let retained = retainTickPrefixUnrelatedOwners(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '685c0'); retained();
+    check(x.stageState.short6cc === 29 && x.sourceActor.noClamp6cb === 0 && x.statusState.short272 === 9,
+      'stage maxX100, not grid extent1000, counts28 to29 and genuinely returns before685c0');
+    retained = retainTickPrefixUnrelatedOwners(x, true);
+    rejects(() => x.runRawPrefix(2, 66, 22), '6a750'); retained();
+    check(x.stageState.short6cc === 0 && x.sourceActor.noClamp6cb === 1 && x.statusState.short272 === 9 &&
+      x.tier.timerFrames === 6 && x.prefixState.byte598 === 0 && x.sourceActor.modelScale === 2.0625,
+      '29 to30 resets6cc and stores canonical6cb1 before unsupported6a750, retaining real scale/contact prefix');
+    retained = retainTickPrefixUnrelatedOwners(x);
+    rejects(() => x.runRawPrefix(2, 660, 220), 'epoch'); retained();
+    check(x.stageState.short6cc === 0 && x.sourceActor.noClamp6cb === 1 && x.tier.timerFrames === 6,
+      'transition refusal consumes epoch and preserves stage/scale effects without re-entering the callee');
+  }
+  for (const gate of ['mode', 'lifecycle', 'noClamp'] as const) {
+    const x = stageBoundsHydratedControlFixture(); x.sourceActor.pos.x = 101; x.stageState.short6cc = 29;
+    if (gate === 'mode') x.header.mode4a1 = 255;
+    if (gate === 'lifecycle') x.stageState.lifecycle18 = 255;
+    if (gate === 'noClamp') x.sourceActor.noClamp6cb = 255;
+    const retained = retainTickPrefixUnrelatedOwners(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '685c0'); retained();
+    check(x.stageState.short6cc === 29 && x.sourceActor.noClamp6cb === (gate === 'noClamp' ? 255 : 0) &&
+      x.sourceActor.targetDistance760 === 32 && x.tier.timerFrames === 7 && x.prefixState.byte598 === 0,
+      `${gate} gate genuinely returns after earlier prefix stores without incrementing/resetting the stage count`);
+  }
+  for (const flags of [0, 0x01000000, 0x04000000]) {
+    const x = stageBoundsHydratedControlFixture(); x.sourceActor.pos.z = -301; x.stageState.short6cc = -8;
+    x.sourceActor.controlWord = 0x02100040 | flags; x.statusState.short272 = -32760;
+    const retained = retainTickPrefixUnrelatedOwners(x, true);
+    rejects(() => x.runRawPrefix(1, 64, 20), '6a750'); retained();
+    check(x.stageState.short6cc === 0 && x.sourceActor.noClamp6cb === (flags === 0 ? 1 : 2) &&
+      x.statusState.short272 === (flags === 0 ? -32760 : -32693) &&
+      x.sourceActor.controlWord === (0x02000040 | flags) && x.prefixState.byte598 === 0 && x.tier.timerFrames === 7,
+      `control02000000 forces transition below30 with flags${flags.toString(16)}, preserving signed272 and real67a70 stores`);
+  }
+  {
+    const x = stageBoundsHydratedControlFixture(); x.sourceActor.pos.x = 101; x.stageState.short6cc = 29;
+    x.sourceActor.controlWord |= 0x01000000; Object.defineProperty(x.statusState, 'short272', {writable: false});
+    const retained = retainTickPrefixUnrelatedOwners(x, true);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'non-writable'); retained();
+    check(x.stageState.short6cc === 0 && x.sourceActor.noClamp6cb === 2 && x.statusState.short272 === 9 &&
+      x.tier.timerFrames === 7 && x.prefixState.byte598 === 0 && x.sourceActor.targetDistance760 === 32,
+      'readonly actual status272 refuses after6cc reset and canonical6cb2, retaining all earlier59068 effects');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch');
+    check(x.stageState.short6cc === 0 && x.sourceActor.noClamp6cb === 2 && x.tier.timerFrames === 7 &&
+      x.sourceActor.targetDistance760 === 32, 'same failed272 epoch cannot replay or roll back partial stage writes');
+  }
+  console.log('[actor-stage-bounds-composition] PASS: bounded59e58 uses identical actual DAT/setup/world/status/terrain owners; inclusive reset,28->29->transition, control/flag branches and signed272, retained partial failures and consumed epochs; real later wait/movement/matrix/history cadence unchanged; always refuses685c0 or earlier unsupported6a750, no full tick/spawn/production activation');
+}
+
+import {createSourceActorCueResetRuntime} from './actor-cue-reset.js';
+/** Explicit offline ownership migration of this synthetic actor only. Production
+ * actors and the earlier fixtures retain their historical legacy fields. */
+function cueResetHydratedControlFixture(upper = -7, full = -8) {
+  const x = stageBoundsHydratedControlFixture();
+  x.snapshot(); x.refreshStatusPrefix();
+  delete (x.sourceActor as Partial<typeof x.sourceActor>).fbPhaseSlots;
+  delete (x.sourceActor as Partial<typeof x.sourceActor>).shotByte1db3;
+  let landCalls = 0;
+  const sourceActor = Object.assign(x.sourceActor, {onLand754: (() => {landCalls++;}) as (() => void) | null});
+  sourceActor.cueTable = new Int8Array(32); sourceActor.cueTable[18] = full; sourceActor.cueTable[19] = upper;
+  sourceActor.ubCue = 201; sourceActor.fbCue = 202; sourceActor.ubState = -12; sourceActor.fbState = -13;
+  sourceActor.prevUbState = -21; sourceActor.prevFbState = -22; sourceActor.fbPhase = 23;
+  const gates = x.dispatch.getActorBinding(x.actor); gates.marker578 = 1; gates.marker1db3 = 1;
+  const cues = createSourceActorCueResetRuntime({world: x.world, dispatch: x.dispatch});
+  cues.bindActor(x.actor, {byte541: 11, byte542: 12, byte543: 13, byte544: 14, byte545: 15,
+    byte546: 16, byte547: 17, byte588: 18, byte7ce: 19, byte7cf: 20});
+  x.stageBounds.bindCueRuntime(cues);
+  sourceActor.pos.x = 101; x.stageState.short6cc = 29;
+  return Object.assign(x, {sourceActor, cues, cueState: cues.getActorBinding(x.actor), gates, landCalls: () => landCalls});
+}
+export function runCueResetHydratedControlTests(): void {
+  {
+    const x = cueResetHydratedControlFixture(), a = x.sourceActor, c = x.cueState;
+    const attached = x.joints.getBinding(x.joint).aobj7c, frame = x.part.frame0c;
+    const requests = x.requestCalls, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    const matrix = Array.from(x.worldMatrix), history = x.historyState.previousStepHeight6d4;
+    check(x.cues.getActualActor(x.actor) === a && x.cues.getDispatchBinding(x.actor) === x.gates &&
+      x.world.getMappingActor(x.actor) === x.mapping.getActor(x.actor) &&
+      x.dispatch.getSourceActor(x.actor) === x.mapping.getActor(x.actor) &&
+      !Object.hasOwn(a, 'fbPhaseSlots') && !Object.hasOwn(a, 'shotByte1db3') && !Object.hasOwn(a, 'animState'),
+      'cue resets borrow actual DAT/world/dispatch owners without rival arrays, marker or588 mirrors');
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+      {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c === attached && x.part.frame0c === frame &&
+      x.dispatch.updatePart(x.actor, 1) === 0 && x.receiverTracks.length === callbacks,
+      'the real marker1db3 gate initially suppresses both actual setup and playback');
+    rejects(() => x.runRawPrefix(1, 64, 20), '685c0');
+    check(a.ubCue === 9 && a.fbCue === 9 && a.ubState === -7 && a.fbState === -8 &&
+      a.prevUbState === -12 && a.prevFbState === -13 && c.byte7ce === 201 && c.byte7cf === 202 &&
+      [c.byte541, c.byte542, c.byte543, c.byte544, c.byte545, c.byte546, c.byte547, c.byte588, a.fbPhase].every(v => v === 0) &&
+      a.onLand754 === null && x.landCalls() === 0 && x.gates.marker1db3 === 0 && x.gates.marker578 === 1 &&
+      x.stageState.short6cc === 0 && a.noClamp6cb === 1 && x.tier.timerFrames === 7 &&
+      x.prefixState.byte598 === 0 && a.targetDistance760 === 32 && a.horizontalDistance764 === 10,
+      'real59068/59e58 performs ordered upper9/full9 reset on actual owners before unsupported685c0');
+    check(x.joints.getBinding(x.joint).aobj7c === attached && x.part.frame0c === frame &&
+      x.receiverTracks.length === callbacks && x.requestCalls === requests && x.movementCallCount() === moves &&
+      x.worldMatrix.every((v, i) => Object.is(v, matrix[i])) && x.historyState.previousStepHeight6d4 === history,
+      'cue reset adds no implicit animation, movement, matrix or history work');
+    rejects(() => x.runRawPrefix(1, 640, 200), 'epoch');
+    check(a.prevUbState === -12 && a.prevFbState === -13 && c.byte7ce === 201 && c.byte7cf === 202 &&
+      x.tier.timerFrames === 7, 'consumed epoch cannot replay either cue or earlier scale prefix');
+    const beforeWait = x.receiverTracks.length;
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > beforeWait && x.worldMatrix.every((v, i) => Object.is(v, matrix[i])) &&
+      x.historyState.previousStepHeight6d4 === history, 'real wait cadence remains an explicit downstream call');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((v, i) => Object.is(v, x.worldMatrix[i])) &&
+      !x.worldMatrix.every((v, i) => Object.is(v, matrix[i])) && x.historyState.previousStepHeight6d4 === history,
+      'explicit normal update alone rebuilds and copies linked matrices');
+    x.refreshAttributes(); x.snapshot();
+    check(x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6 &&
+      x.tier.timerFrames === 7 && x.landCalls() === 0,
+      'explicit attribute/movement/history finishes without repeating cue or prefix calls');
+    // The identical marker owner is read by real dispatch, not a copied flag.
+    // Repeated setup selects new metadata, so it follows the bounded normal call.
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+      {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.receiverTracks.length > callbacks &&
+      x.gates.marker578 === 1 && x.gates.marker1db3 === 0,
+      'explicit real setup now replaces the animation through the same cleared marker owner');
+    const afterSetup = x.receiverTracks.length, afterSetupFrame = x.part.frame0c;
+    x.dispatch.updatePart(x.actor, 1);
+    check(x.receiverTracks.length > afterSetup && x.part.frame0c > afterSetupFrame,
+      'explicit real playback observes the reset marker without changing marker578');
+    check(x.worldMatrix.every((v, i) => Object.is(v, settledMatrix[i])) &&
+      x.historyState.previousStepHeight6d4 === settledHistory,
+      'separate setup/playback never adds an implicit matrix/history suffix');
+  }
+  for (const sentinel of ['upper', 'full'] as const) {
+    const x = cueResetHydratedControlFixture(sentinel === 'upper' ? -1 : -7, sentinel === 'full' ? -1 : -8);
+    rejects(() => x.runRawPrefix(1, 64, 20), '685c0');
+    const a = x.sourceActor, c = x.cueState;
+    check(sentinel === 'upper' ?
+      a.ubCue === 201 && a.ubState === -12 && a.prevUbState === -21 && c.byte7ce === 19 &&
+      c.byte544 === 14 && c.byte545 === 15 && c.byte546 === 16 && c.byte547 === 17 && c.byte588 === 18 &&
+      a.onLand754 !== null && x.gates.marker1db3 === 1 &&
+      a.fbCue === 9 && a.fbState === -8 && a.prevFbState === -13 && c.byte7cf === 202 &&
+      c.byte541 === 0 && c.byte542 === 0 && c.byte543 === 0 && a.fbPhase === 0 :
+      a.ubCue === 9 && a.ubState === -7 && a.prevUbState === -12 && c.byte7ce === 201 &&
+      c.byte544 === 0 && c.byte545 === 0 && c.byte546 === 0 && c.byte547 === 0 && c.byte588 === 0 &&
+      a.onLand754 === null && x.gates.marker1db3 === 0 &&
+      a.fbCue === 202 && a.fbState === -13 && a.prevFbState === -22 && c.byte7cf === 20 &&
+      c.byte541 === 11 && c.byte542 === 12 && c.byte543 === 13 && a.fbPhase === 23,
+      `${sentinel} sentinel returns zero without writes while the other real stage cue still executes`);
+    check(x.landCalls() === 0 && x.stageState.short6cc === 0 && a.noClamp6cb === 1,
+      'sentinel never calls the landing callback or rolls back stage transition');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch');
+  }
+  for (const fault of ['missing754', 'readonly754', 'readonlyMarker'] as const) {
+    const x = cueResetHydratedControlFixture(), a = x.sourceActor, c = x.cueState;
+    if (fault === 'missing754') delete (a as Partial<typeof a>).onLand754;
+    else Object.defineProperty(fault === 'readonly754' ? a : x.gates,
+      fault === 'readonly754' ? 'onLand754' : 'marker1db3', {writable: false});
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'readonlyMarker' ? 'marker1db3' : 'onLand754');
+    check(a.ubCue === 9 && a.ubState === -7 && a.prevUbState === -12 && c.byte7ce === 201 &&
+      [c.byte544, c.byte545, c.byte546, c.byte547, c.byte588].every(v => v === 0) &&
+      (fault === 'readonlyMarker' ? a.onLand754 === null : fault === 'missing754' ? a.onLand754 === undefined : a.onLand754 !== null) &&
+      x.gates.marker1db3 === 1 && a.fbCue === 202 && a.fbState === -13 && a.prevFbState === -22 &&
+      c.byte7cf === 20 && c.byte541 === 11 && c.byte542 === 12 && c.byte543 === 13 && a.fbPhase === 23 &&
+      x.stageState.short6cc === 0 && a.noClamp6cb === 1 && x.tier.timerFrames === 7 && x.landCalls() === 0,
+      `${fault} preserves reached upper prefix and earlier stage/scale stores, but never enters full reset`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch');
+    check(a.prevUbState === -12 && c.byte7ce === 201 && x.tier.timerFrames === 7,
+      'failed reached cue consumes epoch without replay or rollback');
+  }
+  console.log('[actor-cue-reset-composition] PASS: actual stage upper/full cue resets, sentinel independence, real dispatch marker gate and explicit downstream cadence, retained late failures and consumed epochs; offline synthetic composition only');
+}
+
+import {createSourceActorInputPrefixRuntime, type SourceActorInputProcessorState} from './actor-input-prefix.js';
+import {createSourceActorInputMachineRuntime} from './actor-input-machine.js';
+import {createSourceActorInputChargeRuntime, type SourceActorInputChargeBinding, type SourceActorInputChargeData,
+  type SourceActorInputChargeGlobal} from './actor-input-charge.js';
+import {createSourceInputAngleRuntime, type SourceInputAngleRuntime} from './source-input-angle.js';
+import {createSourceInputAtanRuntime} from './source-input-atan.js';
+/** One genuine prefix owns this synthetic actor. Build from the unclaimed gauge
+ * graph, rather than replacing the already-claimed prefix in older fixtures.
+ * Supplied stick/status cells are an explicit decoded boundary, not PAD/CPU
+ * hydration, hardware replay or production input scheduling. */
+function inputPrefixHydratedControlFixture(withMachine = false, processor?: SourceActorInputProcessorState,
+  withSecond = false, angular?: SourceInputAngleRuntime, withThird = false, withFourth = false, withFifth = false, withSixth = false, withSeventh = false, withEighth = false, withNinth = false, withTenth = false, chargeHydration?: ChargeInputHydration) {
+  const x = gaugeScaleHydratedControlFixture(chargeHydration?.rotation?.corrections18d4);
+  const host = Object.assign(x.host, {sourceArrowMash749: 77});
+  const sourceActor = Object.assign(x.sourceActor, {targetDistance760: -760, horizontalDistance764: -764,
+    noClamp6cb: 0, statusWord5bc: 0x80050a01, onLand754: null as (() => void) | null});
+  sourceActor.controlWord = 0x100040; sourceActor.supportContact1db = 0;
+  sourceActor.statusWord5b4 = 0x60000; sourceActor.inputHeld5d8 = 0xabcd; sourceActor.inputEdge5d4 = 0x87654321;
+  const floor = sourceTerrainDatFixture(true), ceiling24 = sourceTerrainDatFixture(false), ceiling20 = sourceTerrainDatFixture(false);
+  const terrain: SourceActorTerrainGlobals = {
+    floor1c: sourceTerrainGrid.createSourceTerrainGrid(floor.bytes, floor.grid, 0x1c),
+    ceiling24: sourceTerrainGrid.createSourceTerrainGrid(ceiling24.bytes, ceiling24.grid, 0x24),
+    ceiling20: sourceTerrainGrid.createSourceTerrainGrid(ceiling20.bytes, ceiling20.grid, 0x20),
+    upper34: 1000, lower68: -1000, maxX38: 100, minX3c: -100, maxZ40: 300, minZ44: -300,
+  };
+  const query = createSourceActorTerrainQueryRuntime({world: x.world, history: x.history, terrain});
+  query.bindActor(x.actor);
+  const stageBounds = createSourceActorStageBoundsRuntime({world: x.world, status: x.status, terrain: query});
+  stageBounds.bindActor(x.actor, {lifecycle18: 1, short6cc: 29});
+  x.snapshot(); x.refreshStatusPrefix();
+  delete (sourceActor as Partial<typeof sourceActor>).fbPhaseSlots;
+  delete (sourceActor as Partial<typeof sourceActor>).shotByte1db3;
+  let landCalls = 0; sourceActor.onLand754 = () => {landCalls++;};
+  sourceActor.cueTable = new Int8Array(32); sourceActor.cueTable[18] = -8; sourceActor.cueTable[19] = -7;
+  sourceActor.ubCue = 201; sourceActor.fbCue = 202; sourceActor.ubState = -12; sourceActor.fbState = -13;
+  sourceActor.prevUbState = -21; sourceActor.prevFbState = -22; sourceActor.fbPhase = 23;
+  const gates = x.dispatch.getActorBinding(x.actor); gates.marker578 = 1; gates.marker1db3 = 1;
+  const cues = createSourceActorCueResetRuntime({world: x.world, dispatch: x.dispatch});
+  cues.bindActor(x.actor, {byte541: 11, byte542: 12, byte543: 13, byte544: 14, byte545: 15,
+    byte546: 16, byte547: 17, byte588: 18, byte7ce: 19, byte7cf: 20});
+  stageBounds.bindCueRuntime(cues); sourceActor.pos.x = 101;
+  const machineTables = {dispatch3988: [0x80068c14, 0x80068c84, 0x80068d04], descriptor38f8: [1, 0, 0, 1, 0x200, 0],
+    ...(withSecond ? {descriptor3904: [1, 0, 0, 1, 0x200, 0]} : {}),
+    ...(withThird ? {descriptor3910: [1, 0, 0, 1, 0x400, 0]} : {}),
+    ...(withFourth ? {descriptor391c: [1, 0, 0, 1, 0x800, 0]} : {}),
+    ...(withFifth ? {descriptor3928: [1, 0, 0, 16, 0x100, 0]} : {}),
+    ...(withSixth ? {descriptor3934: [1, 4, 0, 1, 0x100, 0]} : {}),
+    ...(withSeventh ? {descriptor3940: [1, 0, 0, 1, 0x20, 0]} : {}),
+    ...(withEighth ? {descriptor394c: [1, 0, 0, 1, 0x40, 0]} : {}),
+    ...(withNinth ? {descriptor3958: [1, 0, 0, 1, 0x10, 0]} : {}),
+    ...(withTenth ? {descriptor3964: [1, 0x10, 0, 1, 0xf, 0]} : {})};
+  const firstMachine = withMachine ? createSourceActorInputMachineRuntime({world: x.world, tables: machineTables}) : undefined;
+  firstMachine?.bindActor(x.actor, {byte614: 0, byte615: 77, byte616: 99, byte617: 0,
+    ...(withSecond ? {byte618: 0, byte619: 31, byte61a: 55, byte61b: 0} : {}),
+    ...(withThird ? {byte61c: 0, byte61d: 17, byte61e: 33, byte61f: 0} : {}),
+    ...(withFourth ? {byte624: 0, byte625: 13, byte626: 21, byte627: 0} : {}),
+    ...(withFifth ? {byte600: 0, byte601: 9, byte602: 17, byte603: 0} : {}),
+    ...(withSixth ? {byte604: 0, byte605: 5, byte606: 11, byte607: 0} : {}),
+    ...(withSeventh ? {byte608: 0, byte609: 3, byte60a: 7, byte60b: 0} : {}),
+    ...(withEighth ? {byte60c: 0, byte60d: 2, byte60e: 5, byte60f: 0} : {}),
+    ...(withNinth ? {byte610: 0, byte611: 1, byte612: 3, byte613: 0} : {}),
+    ...(withTenth ? {byte628: 0, byte629: 23, byte62a: 41, byte62b: 0} : {})});
+  const chargeOwners = chargeHydration === undefined ? undefined : hydrateChargeInputOwners(x, chargeHydration);
+  const inputPrefix = createSourceActorInputPrefixRuntime({world: x.world, gauges: x.gauges,
+    ...(chargeOwners === undefined ? {} : {charge: chargeOwners.charge}),
+    ...(firstMachine === undefined ? {} : {firstMachine}), ...(processor === undefined ? {} : {processor}),
+    ...(angular === undefined ? {} : {angular})});
+  inputPrefix.bindActor(x.actor, {ushort5b8: 0x123a, stickX5ca: 0, stickY5cb: 0,
+    byte5fc: 3, byte5fd: 1, byte5fe: 1, byte5ff: 9});
+  const actorControl = chargeHydration?.actorControl === undefined ? undefined :
+    createSourceActorControlLifecycleRuntime({world: x.world, status: x.status});
+  if (actorControl !== undefined) actorControl.bindActor(x.actor, chargeHydration!.actorControl!);
+  const readyInputs = chargeHydration?.ready;
+  const readyTransitions = readyInputs === undefined ? undefined : (() => {
+    if (actorControl === undefined) throw Error('explicit ready composition requires control owner');
+    Object.assign(host, readyInputs.borg);
+    const runtime = createSourceActorReadyTransitionsRuntime({world: x.world, status: x.status, stageBounds, control: actorControl});
+    runtime.bindActor(x.actor, readyInputs.initial); actorControl.bindReadyRuntime(runtime);
+    return runtime;
+  })();
+  const actionRequest = chargeHydration?.actionRequest === undefined ? undefined :
+    createSourceActorActionRequestRuntime({world: x.world});
+  if (actionRequest !== undefined) actionRequest.bindActor(x.actor, chargeHydration!.actionRequest!);
+  const rateInputs = chargeHydration?.actorRates;
+  const actorRates = rateInputs === undefined ? undefined : (() => {
+    // Explicit synthetic decoded inputs, not source RAM hydration or new rate
+    // producer claims. The source clock is the existing mapping record, not dt.
+    delete (sourceActor as Partial<typeof sourceActor>).dt;
+    Object.assign(host, rateInputs.borg);
+    const runtime = createSourceActorRateLifecycleRuntime({world: x.world, mapping: x.mapping, status: x.status,
+      ...(rateInputs.withMatrix ? {matrix: x.normal} : {})});
+    runtime.bindActor(x.actor, rateInputs.initial);
+    return runtime;
+  })();
+  const ceiling = chargeHydration?.ceiling === undefined ? undefined :
+    createSourceActorCeilingLifecycleRuntime({world: x.world, matrix: x.normal, stageBounds});
+  ceiling?.bindActor(x.actor);
+  const rotation = chargeHydration?.rotation === undefined ? undefined :
+    createSourceActorRotationDampingRuntime({world: x.world, mapping: x.mapping});
+  rotation?.bindActor(x.actor);
+  // An explicitly supplied alternate terrain owner is used only to exercise
+  // tick admission: equal fields cannot substitute for its retained global.
+  const cue0Terrain = chargeHydration?.cue0TerrainGlobals === undefined ? query :
+    createSourceActorTerrainQueryRuntime({world: x.world, history: x.history, terrain: chargeHydration.cue0TerrainGlobals});
+  if (cue0Terrain !== query) cue0Terrain.bindActor(x.actor);
+  const cue0 = chargeHydration?.cue0 === undefined ? undefined :
+    createSourceActorCue0LifecycleRuntime({world: x.world, movement: x.movement, attribute: x.attributes, terrain: cue0Terrain, cues});
+  if (cue0 !== undefined) cue0.bindActor(x.actor, chargeHydration!.cue0!);
+  const normalLifecycle = chargeHydration?.normalLifecycle === undefined ? undefined :
+    createSourceActorNormalLifecycleRuntime({world: x.world, movement: x.movement, status: x.status, cues,
+      ...(rotation === undefined ? {} : {rotation}), ...(cue0 === undefined ? {} : {cue0})});
+  if (normalLifecycle !== undefined) normalLifecycle.bindActor(x.actor, chargeHydration!.normalLifecycle!);
+  const prefix = createSourceActorTickPrefixRuntime({world: x.world, gauges: x.gauges, stageBounds, inputPrefix,
+    ...(actorControl === undefined ? {} : {actorControl}), ...(actionRequest === undefined ? {} : {actionRequest}),
+    ...(actorRates === undefined ? {} : {actorRates}), ...(ceiling === undefined ? {} : {ceiling}),
+    ...(normalLifecycle === undefined ? {} : {normalLifecycle})});
+  prefix.bindActor(x.actor, host, {byte598: 7});
+  return Object.assign(x, {sourceActor, host, terrain, query, stageBounds, stageState: stageBounds.getActorBinding(x.actor),
+    cues, cueState: cues.getActorBinding(x.actor), gates, landCalls: () => landCalls,
+    inputPrefix, inputState: inputPrefix.getActorBinding(x.actor), prefix, prefixState: prefix.getActorBinding(x.actor),
+    firstMachine, machineTables, processor, ...(chargeOwners === undefined ? {} : {chargeOwners}),
+    ...(actorControl === undefined ? {} : {actorControl}),
+    ...(readyTransitions === undefined ? {} : {readyTransitions}), ...(actionRequest === undefined ? {} : {actionRequest}),
+    ...(actorRates === undefined ? {} : {actorRates}), ...(ceiling === undefined ? {} : {ceiling}),
+    ...(normalLifecycle === undefined ? {} : {normalLifecycle}), ...(rotation === undefined ? {} : {rotation}),
+    ...(cue0 === undefined ? {} : {cue0}),
+    runRawPrefix: (epoch: number, targetDistance760: number, horizontalDistance764: number) =>
+      prefix.ingestRawDistancesAndRun(x.actor, epoch, {boundary: 'externally-decoded-pre59068-raw', targetDistance760, horizontalDistance764})});
+}
+type InputPrefixHydratedFixture = ReturnType<typeof inputPrefixHydratedControlFixture>;
+/** The additional input callee must not advance any real downstream owner or
+ * introduce an animation/movement/matrix/history call behind the caller. */
+function retainInputPrefixCadence(x: InputPrefixHydratedFixture): () => void {
+  const attached = x.joints.getBinding(x.joint).aobj7c!;
+  const rows: object[] = [x.header, x.header.offset1dbc, x.header.adjusted1d54, x.header.preRotation1d64,
+    x.normalState, x.historyState, x.historyState.rotation76, x.historyState.preRotation1d6a, x.historyState.aimOrigin524,
+    x.sourceActor.pos, x.sourceActor.savedGroundPos, x.sourceActor.targetCache5e8, x.sourceActor.aimOrigin518,
+    x.sourceActor.actionSpeedRows, ...x.sourceActor.parts, x.targetActor, x.targetHeader, x.targetHeader.scale58,
+    x.targetPose, x.targetPose.translation, x.targetPose.quaternion, x.clocks, x.part, x.stream, x.waitControl,
+    x.control.getActorBinding(x.actor), x.start, x.statusState, ...x.cells, ...x.ammoSlots, x.attributeState,
+    x.parameter, x.scalarDescriptor, x.movementState, x.ready.getActorBinding(x.actor), x.sourceClock,
+    x.joints.getBinding(x.joint), x.joints.getJoint(x.joint), x.feedback.getAObj(attached),
+    ...x.worldStorage.matrices8d4.map(id => x.matrices.getMatrix(id)),
+    ...[x.worldStorage.copy114, x.worldStorage.copy1aa4, x.worldStorage.scratch].map(id => x.matrices.getMatrix(id)),
+    ...x.targetMatrices, ...x.targetCopies];
+  for (const bank of x.mapping.getLayout(x.actor).poses) for (const id of bank) {
+    const pose = x.feedback.getPose(id); rows.push(pose, pose.translation, pose.quaternion);
+  }
+  let node = x.feedback.getAObj(attached).fobjs;
+  while (node !== null) {const row = x.fobjs.getNode(node); rows.push(row); node = row.next00;}
+  const saved = rows.map(record => ({record, keys: Reflect.ownKeys(record)}))
+    .map(row => ({...row, values: row.keys.map(key => Reflect.get(row.record, key))}));
+  const requests = x.requestCalls, ends = x.endCalls, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+  return () => check(saved.every(({record, keys, values}) => Reflect.ownKeys(record).length === keys.length &&
+    keys.every((key, i) => Object.is(Reflect.get(record, key), values[i]))) &&
+    x.requestCalls === requests && x.endCalls === ends && x.receiverTracks.length === callbacks && x.movementCallCount() === moves,
+    'actual input prefix retains all downstream DAT/setup/status/animation/matrix/linked/history owners and explicit-call cadence');
+}
+function checkInputPrefixEarlierStores(x: InputPrefixHydratedFixture): void {
+  const a = x.sourceActor, c = x.cueState;
+  check(a.targetDistance760 === 32 && a.horizontalDistance764 === 10 && x.tier.timerFrames === 7 &&
+    x.prefixState.byte598 === 0 && a.controlWord === 0x40 && x.stageState.short6cc === 0 && a.noClamp6cb === 1 &&
+    a.ubCue === 9 && a.fbCue === 9 && a.ubState === -7 && a.fbState === -8 && a.prevUbState === -12 && a.prevFbState === -13 &&
+    c.byte7ce === 201 && c.byte7cf === 202 &&
+    [c.byte541, c.byte542, c.byte543, c.byte544, c.byte545, c.byte546, c.byte547, c.byte588, a.fbPhase].every(v => v === 0) &&
+    a.onLand754 === null && x.landCalls() === 0 && x.gates.marker1db3 === 0 && x.gates.marker578 === 1,
+    'real distance/gauge/contact/stage/upper/full cue prefix remains visible before the reached input boundary');
+  checkScaleStores(x, 2.049999952316284, 'genuine input work occurs after the one real5bab8 scale call');
+}
+export function runInputPrefixHydratedControlTests(): void {
+  {
+    const x = inputPrefixHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    check(x.inputPrefix.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.prefix.getActualActor(x.actor) === a && x.prefix.getActualBorg(x.actor) === x.host &&
+      x.gauges.getActualActor(x.actor) === a && x.gauges.getActualBorg(x.actor) === x.host &&
+      x.status.getActualActor(x.actor) === a && x.world.getActualActor(x.actor) === a &&
+      x.cues.getActualActor(x.actor) === a && x.cues.getDispatchBinding(x.actor) === x.gates &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === x.statusState &&
+      isSourceActorTickPrefixClaimedActor(a) && !Object.hasOwn(a, 'sourceArrowMash749') && !Object.hasOwn(a, 'byte749'),
+      'input callee borrows the same actual DAT/status/gauge/stage/cue actor and Borg, without a rival749 or copied input owner');
+    let retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '80068b8c'); retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === 0x0200 && a.inputEdge5d4 === 0 && a.statusWord5b4 === 0x60000 && a.statusWord5bc === 0x80050a01 &&
+      i.byte5fc === 11 && i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 && x.host.sourceArrowMash749 === 4,
+      'actual68980 new-press mask and ordered timers produce held0200, genuine5bc popcount writes same Borg749, then685c0 clears edge before first68b8c');
+    retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 640, 200), 'epoch'); retained();
+    check(i.byte5ff === 19 && a.inputHeld5d8 === 0x0200 && x.host.sourceArrowMash749 === 4 &&
+      a.targetDistance760 === 32 && x.tier.timerFrames === 7 && a.prevUbState === -12 && a.prevFbState === -13,
+      '68b8c refusal consumes its epoch without replaying input timers, distance/gauge stages or real cues');
+
+    a.statusWord5b4 = 0; a.statusWord5bc = 0x00000f00; a.inputEdge5d4 = 0x12345678;
+    const oldScale = a.modelScale; retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), '80068b8c'); retained();
+    check(a.inputHeld5d8 === 0xa200 && a.inputEdge5d4 === 0 && i.byte5fc === 0 && i.byte5fd === 0 &&
+      i.byte5fe === 15 && i.byte5ff === 18 && i.ushort5b8 === 0x123a && x.host.sourceArrowMash749 === 4 &&
+      a.targetDistance760 === Math.fround(66 / oldScale) && a.horizontalDistance764 === Math.fround(22 / oldScale) &&
+      x.tier.timerFrames === 6 && a.modelScale === 2.0625 && a.prevUbState === -12 && a.prevFbState === -13,
+      'next explicit epoch uses live status/ushort inputs, writes low16 release nibble and decrements newfe once without replaying skipped stage cues');
+
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history &&
+      a.inputHeld5d8 === 0xa200 && i.byte5ff === 18 && x.tier.timerFrames === 6,
+      'separate real status/wait advances animation without hidden input, scale, movement, matrix or history calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal rebuilding copies actual linked matrices after the input refusal');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight &&
+      a.savedGroundPos.y === 6 && x.tier.timerFrames === 6 && i.byte5fe === 15 && x.landCalls() === 0,
+      'explicit movement/history consumes retained matrices without ticking input or repeating cue callbacks');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+      {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputHeld5d8 === 0xa200 && i.byte5ff === 18 && x.host.sourceArrowMash749 === 4,
+      'genuine later setup observes the same cleared cue marker and retains source input cells without an implicit suffix');
+  }
+  {
+    const x = inputPrefixHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    i.byte5fc = 0; a.statusWord5b4 = 0;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '80068b8c'); retained(); checkInputPrefixEarlierStores(x);
+    check(i.byte5fc === 0 && i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 8 &&
+      a.inputHeld5d8 === 0x0b00 && a.inputEdge5d4 === 0 && x.host.sourceArrowMash749 === 4,
+      'both genuine zero-stick below-radius8b73c calls return direction0 before actual timers,5bc popcount and edge clear');
+  }
+  for (const flags of [0, 1]) {
+    const x = inputPrefixHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    i.byte5fc = flags; i.stickX5ca = 52;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '8008b778'); retained(); checkInputPrefixEarlierStores(x);
+    check(i.byte5fc === flags && i.byte5fd === 1 && i.byte5fe === 1 && i.byte5ff === 9 &&
+      a.inputHeld5d8 === 0xabcd && a.inputEdge5d4 === 0x87654321 && x.host.sourceArrowMash749 === 77,
+      `reached ${flags === 0 ? 'first' : 'second'} angular branch refuses quantized load before input writes while preserving genuine earlier stage/cue effects`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch');
+    check(x.tier.timerFrames === 7 && i.byte5fd === 1 && a.inputEdge5d4 === 0x87654321,
+      'angular refusal consumes epoch and cannot replay the earlier real stages');
+  }
+  for (const fault of ['timer', 'mash', 'edge', 'missingStatus'] as const) {
+    const x = inputPrefixHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    if (fault === 'timer') Object.defineProperty(i, 'byte5fd', {writable: false});
+    else if (fault === 'mash') Object.defineProperty(x.host, 'sourceArrowMash749', {writable: false});
+    else if (fault === 'edge') Object.defineProperty(a, 'inputEdge5d4', {writable: false});
+    else delete (a as Partial<typeof a>).statusWord5bc;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'timer' ? 'byte5fd' : fault === 'mash' ? 'sourceArrowMash749' :
+      fault === 'edge' ? 'inputEdge5d4' : 'statusWord5bc'); retained(); checkInputPrefixEarlierStores(x);
+    check(i.byte5fc === 11 && a.inputHeld5d8 === (fault === 'timer' ? 0xa2cd : 0x0200) &&
+      i.byte5fd === (fault === 'timer' ? 1 : 0) && i.byte5fe === (fault === 'timer' ? 1 : 0) &&
+      i.byte5ff === (fault === 'timer' ? 20 : 19) && x.host.sourceArrowMash749 === (fault === 'edge' ? 4 : 77) &&
+      a.inputEdge5d4 === 0x87654321,
+      `${fault} preserves every reached68980 write and earlier stage/cues without a fabricated popcount, edge clear or descriptor call`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch');
+    check(x.tier.timerFrames === 7 && a.targetDistance760 === 32 && a.inputEdge5d4 === 0x87654321,
+      `${fault} consumes the failed epoch before any permitted retry could ingest or execute again`);
+  }
+  {
+    const x = inputPrefixHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    Object.defineProperty(x.gates, 'marker1db3', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'marker1db3'); retained();
+    check(a.ubCue === 9 && a.ubState === -7 && a.onLand754 === null && a.fbCue === 202 && a.fbState === -13 &&
+      x.stageState.short6cc === 0 && a.noClamp6cb === 1 && x.tier.timerFrames === 7 &&
+      i.byte5fc === 3 && i.byte5fd === 1 && i.byte5fe === 1 && i.byte5ff === 9 &&
+      a.inputHeld5d8 === 0xabcd && a.inputEdge5d4 === 0x87654321 && x.host.sourceArrowMash749 === 77,
+      'earlier actual upper-cue marker failure prevents full cue and every input effect, preserving the reached stage and upper prefix');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch');
+  }
+  console.log('[actor-input-prefix-composition] PASS: same actual DAT/status/gauge/stage/cue/input actor and Borg; bounded genuine68980/zero-direction8b73c/6de44 then edge clear before first68b8c; live second-epoch release, retained angular/timer/status/mash/edge and earlier cue failures, consumed epochs and explicit downstream animation/movement/matrix/history cadence; synthetic offline composition only, no hardware/PAD/full tick/production activation');
+}
+
+/** The opt-in first machine shares the already constructed DAT/setup graph.
+ * Its supplied table cells are the authenticated first descriptor/dispatch
+ * values; actor bytes and optional processor state remain explicit offline
+ * inputs. The distinct second descriptor and bytes are opt-in; no source
+ * CPU/PAD producer is supplied. */
+function inputMachineHydratedControlFixture(processor?: SourceActorInputProcessorState, withSecond = false, withThird = false,
+  withFourth = false, withFifth = false, withSixth = false, withSeventh = false, withEighth = false, withNinth = false, withTenth = false) {
+  const x = inputPrefixHydratedControlFixture(true, processor, withSecond, undefined, withThird, withFourth, withFifth, withSixth, withSeventh, withEighth, withNinth, withTenth), firstMachine = x.firstMachine;
+  if (!firstMachine) throw Error('input-machine fixture requires the genuine optional runtime');
+  return Object.assign(x, {firstMachine, machineState: firstMachine.getActorBinding(x.actor)});
+}
+type InputMachineHydratedFixture = ReturnType<typeof inputMachineHydratedControlFixture>;
+function checkMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte614, m.byte615, m.byte616, m.byte617].every((value, i) => value === expected[i]), message);
+}
+function checkInputMachinePrecedingStores(x: InputMachineHydratedFixture): void {
+  checkInputPrefixEarlierStores(x);
+  const a = x.sourceActor, i = x.inputState;
+  check(a.inputHeld5d8 === 0x0200 && a.statusWord5b4 === 0x60000 && a.statusWord5bc === 0x80050a01 &&
+    i.byte5fc === 11 && i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 && x.host.sourceArrowMash749 === 4,
+    'genuine first machine follows the same completed68980 timers, held writes and Borg749 popcount');
+}
+export function runInputMachineHydratedControlTests(): void {
+  {
+    const x = inputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a &&
+      x.status.getActualActor(x.actor) === a && x.world.getActualActor(x.actor) === a &&
+      x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      !x.firstMachine.hasSecondMachine() && !Object.hasOwn(x.machineTables, 'descriptor3904') &&
+      ['byte618', 'byte619', 'byte61a', 'byte61b'].every(key => !Object.hasOwn(x.machineState, key)) &&
+      isSourceActorTickPrefixClaimedActor(a) &&
+      ['byte614', 'byte615', 'byte616', 'byte617', 'inputFlags5d4', 'inputEdges5bc'].every(key => !Object.hasOwn(a, key)),
+      'first machine shares canonical actor status/input owners and explicit table identity, without copied or rival614..617 cells');
+    let retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '80068610 reached unsupported second source call 80068b8c (descriptor802d3904, actor+618, mask40)');
+    retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, [0, 126, 0, 0], 'real phase0 enters phase2, decrements127 to126, matches canonical5bc and consumes the one-byte tail');
+    check(a.inputEdge5d4 === 0x20, 'real first68b8c ORs mask20 after the earlier real685c0 edge clear, before unsupported second mask40');
+    retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 640, 200), 'epoch'); retained();
+    checkMachineBytes(x, [0, 126, 0, 0], 'second-machine refusal consumes the epoch before any first-machine replay');
+    check(a.inputEdge5d4 === 0x20 && i.byte5ff === 19 && x.tier.timerFrames === 7 &&
+      a.targetDistance760 === 32 && a.prevUbState === -12 && a.prevFbState === -13,
+      'consumed epoch retains input edge and all previous real distance/gauge/cue effects');
+
+    a.statusWord5b4 = 0; a.statusWord5bc = 0x00000f00; a.inputEdge5d4 = 0xdeadbeef;
+    const oldScale = a.modelScale; retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), 'descriptor802d3904'); retained();
+    checkMachineBytes(x, [0, 126, 0, 0], 'new epoch re-enters actual phase0 and completes the first descriptor exactly once');
+    check(a.inputHeld5d8 === 0xa200 && a.inputEdge5d4 === 0x20 && i.byte5fc === 0 && i.byte5fe === 15 &&
+      i.byte5ff === 18 && x.host.sourceArrowMash749 === 4 && x.tier.timerFrames === 6 &&
+      a.targetDistance760 === Math.fround(66 / oldScale) && a.horizontalDistance764 === Math.fround(22 / oldScale),
+      'live release nibble, new raw distances and real first-machine edge share one new explicit epoch');
+
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history &&
+      a.inputHeld5d8 === 0xa200 && a.inputEdge5d4 === 0x20 && i.byte5ff === 18 && x.tier.timerFrames === 6,
+      'explicit status/wait advances genuine attached animation without replaying the first machine or rebuilding matrices/history');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices after the real machine return');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight &&
+      a.savedGroundPos.y === 6 && x.tier.timerFrames === 6 && i.byte5fe === 15 && x.landCalls() === 0,
+      'separate attribute/movement/history work consumes retained matrices without replaying input, machine or cue effects');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+      {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputHeld5d8 === 0xa200 && a.inputEdge5d4 === 0x20 && i.byte5ff === 18 && x.host.sourceArrowMash749 === 4,
+      'later real setup replaces attachment while preserving canonical machine edge and explicit downstream cadence');
+    checkMachineBytes(x, [0, 126, 0, 0], 'all explicitly invoked downstream owners retain first-machine bytes');
+  }
+  {
+    const x = inputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0x80050801;
+    let retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'descriptor802d3904'); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [2, 126, 0, 0], 'no mask200 in actual5bc leaves the real first machine waiting in phase2');
+    check(a.inputHeld5d8 === 0x200 && a.inputEdge5d4 === 0 && x.host.sourceArrowMash749 === 3,
+      'held200 is not substituted for canonical status5bc in the first descriptor predicate');
+    retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), 'descriptor802d3904'); retained();
+    checkMachineBytes(x, [2, 125, 0, 0], 'new explicit no-hit epoch decrements the retained phase2 timer once');
+    a.statusWord5bc = 0x200;
+    retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(3, 68, 24), 'descriptor802d3904'); retained();
+    checkMachineBytes(x, [0, 124, 0, 0], 'live canonical5bc match finishes retained phase2 without reinitializing its timer');
+    check(a.inputEdge5d4 === 0x20 && x.host.sourceArrowMash749 === 1 && x.tier.timerFrames === 5,
+      'first machine and actual mash producer read the same changed5bc in the third explicit epoch');
+  }
+  {
+    const x = inputMachineHydratedControlFixture(), m = x.machineState;
+    // Phase1 is explicitly supplied, not claimed reachable from this mode1
+    // descriptor's phase0. Its handler still uses the same genuine tables.
+    m.byte614 = 1; m.byte615 = 2; m.byte616 = 0;
+    let retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'descriptor802d3904'); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, [1, 0, 1, 0], 'real68c84 matches canonical5bc, loads descriptor timer0 and advances index before comparing mode1 limit');
+    check(x.sourceActor.inputEdge5d4 === 0, 'supplied phase1 cannot fabricate a tail or edge merely because its input mask matched');
+    retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), 'descriptor802d3904'); retained();
+    checkMachineBytes(x, [0, 255, 1, 0], 'next real phase1 call stores wrapped255 then signed-negative expiry resets phase before reading a mask');
+    retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(3, 68, 24), 'descriptor802d3904'); retained();
+    checkMachineBytes(x, [0, 126, 0, 0], 'later phase0 returns through real68d04 using the unchanged authenticated descriptor');
+    check(x.sourceActor.inputEdge5d4 === 0x20 && x.tier.timerFrames === 5,
+      'only the third explicit epoch reaches the first-machine tail edge, with one genuine gauge call per epoch');
+  }
+  for (const fault of ['dispatch', 'index', 'phase', 'timer', 'flags', 'mask', 'tail'] as const) {
+    const x = inputMachineHydratedControlFixture(), m = x.machineState;
+    if (fault === 'dispatch') x.machineTables.dispatch3988[0] = 0x80000000;
+    else if (fault === 'flags') x.machineTables.descriptor38f8[1] = NaN;
+    else if (fault === 'mask') x.machineTables.descriptor38f8[4] = NaN;
+    else Object.defineProperty(m, fault === 'index' ? 'byte616' : fault === 'phase' ? 'byte614' :
+      fault === 'timer' ? 'byte615' : 'byte617', {writable: false});
+    const expected = fault === 'dispatch' || fault === 'index' ? [0, 77, 99, 0] :
+      fault === 'phase' ? [0, 77, 0, 0] : fault === 'timer' ? [2, 77, 0, 0] :
+      fault === 'tail' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'flags' || fault === 'mask' ? 'integer out of bounds' :
+      fault === 'index' ? 'byte616' : fault === 'phase' ? 'byte614' : fault === 'timer' ? 'byte615' : 'byte617';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, expected, `${fault} preserves exactly the reached first-machine store prefix`);
+    check(x.sourceActor.inputEdge5d4 === 0, `${fault} retains earlier edge clear without inventing first or second descriptor edge`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkMachineBytes(x, expected, `${fault} consumes its epoch before replaying any machine store`);
+    check(x.tier.timerFrames === 7 && x.inputState.byte5ff === 19 && x.sourceActor.targetDistance760 === 32,
+      `${fault} consumed epoch retains real earlier gauge/input/distance work`);
+  }
+  {
+    const x = inputMachineHydratedControlFixture(), m = x.machineState;
+    m.byte614 = 2; m.byte615 = 1; m.byte616 = 0; m.byte617 = 255;
+    Object.defineProperty(m, 'byte617', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte617'); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, [0, 0, 0, 255], 'expired phase2 resets phase before wrapper tail-decrement destination refusal');
+    check(x.sourceActor.inputEdge5d4 === 0, 'wrapper failure leaves the genuine earlier685c0 edge clear visible');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch');
+    checkMachineBytes(x, [0, 0, 0, 255], 'failed tail wrapper cannot replay its expired handler in the consumed epoch');
+  }
+  for (const fault of ['cue', 'timer', 'mash', 'edge'] as const) {
+    const x = inputMachineHydratedControlFixture(), a = x.sourceActor;
+    const target = fault === 'cue' ? x.gates : fault === 'timer' ? x.inputState : fault === 'mash' ? x.host : a;
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'timer' ? 'byte5fd' : fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    Object.defineProperty(target, key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), key); retained();
+    checkMachineBytes(x, [0, 77, 99, 0], `${fault} failure before the machine call cannot mutate614..617`);
+    check(a.inputEdge5d4 === 0x87654321 && x.tier.timerFrames === 7,
+      `${fault} failure preserves original edge before machine execution while retaining actual gauge work`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch');
+    checkMachineBytes(x, [0, 77, 99, 0], `${fault} consumed epoch cannot enter the first machine later`);
+  }
+  for (const flags of [0, 1]) for (const profile of ['absent', 'signed8', 'unsupported'] as const) {
+    const processor = profile === 'absent' ? undefined : {gqr4: profile === 'signed8' ? 0x00060006 : 0};
+    const x = inputMachineHydratedControlFixture(processor), a = x.sourceActor, i = x.inputState;
+    i.byte5fc = flags; i.stickX5ca = -128; i.stickY5cb = 127;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), profile === 'absent' ? '8008b778' : profile === 'signed8' ? '8008b780' : 'signed8 load type6');
+    retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [0, 77, 99, 0], `${profile} ${flags === 0 ? 'first' : 'second'} angular refusal cannot enter first68b8c`);
+    check(i.byte5fc === flags && i.byte5fd === 1 && i.byte5fe === 1 && i.byte5ff === 9 &&
+      a.inputHeld5d8 === 0xabcd && a.inputEdge5d4 === 0x87654321 && x.host.sourceArrowMash749 === 77,
+      `${profile} angular boundary leaves real input stores unreached after completed stage/cues`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check(x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${profile} angular refusal consumes epoch without replaying earlier actual stages`);
+  }
+  {
+    const processor = {gqr4: 0}, x = inputMachineHydratedControlFixture(processor);
+    const retained = retainInputPrefixCadence(x);
+    x.inputState.byte5fc = 0;
+    rejects(() => x.runRawPrefix(1, 64, 20), 'descriptor802d3904'); retained();
+    checkMachineBytes(x, [0, 126, 0, 0], 'zero-radius returns do not read an unused unsupported processor profile before real first machine');
+    processor.gqr4 = 0x00060006; x.inputState.byte5fc = 1; x.inputState.stickX5ca = 52;
+    rejects(() => x.runRawPrefix(2, 66, 22), '8008b780'); retained();
+    checkMachineBytes(x, [0, 126, 0, 0], 'retained processor mutation reaches later angular boundary without replaying the machine');
+    check(x.sourceActor.inputEdge5d4 === 0x20 && x.inputState.byte5ff === 19 && x.tier.timerFrames === 6,
+      'new epoch profile refusal retains previous machine edge and input timer while preceding actual gauge runs once');
+    processor.gqr4 = 0;
+    rejects(() => x.runRawPrefix(3, 68, 24), 'signed8 load type6'); retained();
+    checkMachineBytes(x, [0, 126, 0, 0], 'later processor mutation back to unsupported type is observed rather than cached');
+  }
+  console.log('[actor-input-machine-composition] PASS: genuine first68b8c/68c14/68c84/68d04 on the same actual DAT/setup/status/gauge/stage/cue/input owners, authenticated supplied tables, hit/no-hit and live phase2 plus explicitly supplied phase1 epochs, retained partial stores and consumed failures, explicit downstream cadence; supplied signed8/scale0 profile reaches8b780 without angle result; first-only fixtures still refuse second descriptor3904, fulltick, hardware and production activation remain unsupported');
+}
+
+/** Both authenticated descriptors share handlers and the canonical actor edge,
+ * but retain distinct descriptor records and distinct machine bytes. The same
+ * synthetic DAT/setup graph supplies every preceding and downstream owner. */
+function secondInputMachineHydratedControlFixture() {
+  const x = inputMachineHydratedControlFixture(undefined, true), secondDescriptor = x.machineTables.descriptor3904;
+  if (!secondDescriptor || !x.firstMachine.hasSecondMachine()) throw Error('second-machine fixture requires explicit descriptor3904');
+  return Object.assign(x, {secondDescriptor});
+}
+function checkSecondMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte618, m.byte619, m.byte61a, m.byte61b].every((value, i) => value === expected[i]), message);
+}
+export function runSecondInputMachineHydratedControlTests(): void {
+  const thirdCall = '80068628 reached unsupported third source call 80068b8c (descriptor802d3910, actor+61c, mask80)';
+  {
+    const x = secondInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a &&
+      x.status.getActualActor(x.actor) === a && x.world.getActualActor(x.actor) === a &&
+      x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      x.secondDescriptor !== x.machineTables.descriptor38f8 &&
+      [1, 0, 0, 1, 0x200, 0].every((value, n) => x.secondDescriptor[n] === value && x.machineTables.descriptor38f8[n] === value) &&
+      ['byte614', 'byte615', 'byte616', 'byte617', 'byte618', 'byte619', 'byte61a', 'byte61b', 'inputFlags5d4', 'inputEdges5bc']
+        .every(key => !Object.hasOwn(a, key)) && isSourceActorTickPrefixClaimedActor(a),
+      'both machines share actual DAT/status/gauge/stage/cue/input owners and canonical edge, with distinct authenticated descriptors and no rival actor cells');
+    checkMachineBytes(x, [0, 77, 99, 0], 'first machine starts with its own supplied bytes');
+    checkSecondMachineBytes(x, [0, 31, 55, 0], 'optional second machine starts with distinct supplied bytes');
+    let retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), thirdCall); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, [0, 126, 0, 0], 'first phase0/phase2 and wrapper complete before the second call');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'second phase0/phase2 and wrapper consume the distinct descriptor tail');
+    check(a.inputEdge5d4 === 0x60 && !Object.hasOwn(x.machineState, 'byte61c') && !Object.hasOwn(a, 'byte61c'),
+      'second wrapper ORs40 into the first wrapper20 on canonical5d4 before the exact unsupported third call, without third-machine cells');
+    rejects(() => x.runRawPrefix(1, 640, 200), 'epoch'); retained();
+    checkMachineBytes(x, [0, 126, 0, 0], 'third-call refusal consumes the epoch before first-machine replay');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'third-call refusal consumes the epoch before second-machine replay');
+    check(a.inputEdge5d4 === 0x60 && i.byte5ff === 19 && x.tier.timerFrames === 7 &&
+      a.targetDistance760 === 32 && a.prevUbState === -12 && a.prevFbState === -13,
+      'consumed epoch retains the combined edge and genuine earlier input/gauge/distance/cue work');
+
+    a.statusWord5b4 = 0; a.statusWord5bc = 0xf00; a.inputEdge5d4 = 0xdeadbeef;
+    const oldScale = a.modelScale; retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), thirdCall); retained();
+    checkMachineBytes(x, [0, 126, 0, 0], 'new epoch re-enters first phase0 exactly once');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'new epoch re-enters second phase0 exactly once');
+    check(a.inputHeld5d8 === 0xa200 && a.inputEdge5d4 === 0x60 && i.byte5fc === 0 && i.byte5fe === 15 &&
+      i.byte5ff === 18 && x.host.sourceArrowMash749 === 4 && x.tier.timerFrames === 6 &&
+      a.targetDistance760 === Math.fround(66 / oldScale) && a.horizontalDistance764 === Math.fround(22 / oldScale),
+      'new epoch clears the old edge then accumulates20/40 while live release input and raw distances retain actual owner identity');
+
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'explicit status/wait advances real attached animation without implicit movement/matrix/history after both machine calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices after both machines');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight &&
+      a.savedGroundPos.y === 6 && x.landCalls() === 0,
+      'explicit attribute/movement/history cadence remains separate after the third-call refusal');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+      {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputHeld5d8 === 0xa200 && a.inputEdge5d4 === 0x60 && i.byte5ff === 18 && i.byte5fe === 15 &&
+      x.tier.timerFrames === 6 && x.host.sourceArrowMash749 === 4,
+      'later genuine setup replaces animation without replaying either machine or earlier input/gauge work');
+    checkMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain first-machine bytes');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain second-machine bytes');
+  }
+  for (const expired of ['first', 'second'] as const) {
+    const x = secondInputMachineHydratedControlFixture(), m = x.machineState;
+    if (expired === 'first') {m.byte614 = 2; m.byte615 = 1; m.byte616 = 0;}
+    else {m.byte618 = 2; m.byte619 = 1; m.byte61a = 0;}
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), thirdCall); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, expired === 'first' ? [0, 0, 0, 0] : [0, 126, 0, 0],
+      `${expired} expiry does not let a genuine first return0/1 alter the caller's second-call schedule`);
+    checkSecondMachineBytes(x, expired === 'second' ? [0, 0, 0, 0] : [0, 126, 0, 0],
+      `${expired} expiry does not let a genuine second return0/1 skip the third-call boundary`);
+    check(x.sourceActor.inputEdge5d4 === (expired === 'first' ? 0x40 : 0x20),
+      `${expired} return0 produces no caller-side edge store while the other wrapper's mask survives`);
+  }
+  {
+    const x = secondInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0x80050801; m.byte618 = 2; m.byte619 = 7; m.byte61a = 0;
+    let retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), thirdCall); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [2, 126, 0, 0], 'first no-hit enters its own phase2 timer');
+    checkSecondMachineBytes(x, [2, 6, 0, 0], 'second no-hit decrements its independent supplied phase2 timer');
+    check(a.inputHeld5d8 === 0x200 && a.inputEdge5d4 === 0 && x.host.sourceArrowMash749 === 3,
+      'neither machine substitutes held200 for absent200 in canonical5bc, and both zero returns still reach third');
+    retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), thirdCall); retained();
+    checkMachineBytes(x, [2, 125, 0, 0], 'second explicit no-hit epoch decrements first timer only once');
+    checkSecondMachineBytes(x, [2, 5, 0, 0], 'second explicit no-hit epoch decrements distinct second timer only once');
+    a.statusWord5bc = 0x200; retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(3, 68, 24), thirdCall); retained();
+    checkMachineBytes(x, [0, 124, 0, 0], 'live canonical match finishes retained first phase2');
+    checkSecondMachineBytes(x, [0, 4, 0, 0], 'live canonical match finishes retained second phase2 without borrowing the first timer');
+    check(a.inputEdge5d4 === 0x60 && x.host.sourceArrowMash749 === 1 && x.tier.timerFrames === 5,
+      'both machines and genuine mash producer observe the same changed5bc in the third explicit epoch');
+  }
+  {
+    const x = secondInputMachineHydratedControlFixture(), m = x.machineState;
+    // Phase1 is supplied offline, not claimed reachable from this mode1 descriptor.
+    m.byte618 = 1; m.byte619 = 2; m.byte61a = 0;
+    const expected = [[1, 0, 1, 0], [0, 255, 1, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 62 + epoch * 2, 18 + epoch * 2), thirdCall); retained();
+      checkMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} first phase0 remains independent of supplied second phase1`);
+      checkSecondMachineBytes(x, expected[epoch - 1]!, `epoch${epoch} second phase1 match, signed expiry, then phase0 obey distinct bytes`);
+      check(x.sourceActor.inputEdge5d4 === (epoch === 3 ? 0x60 : 0x20),
+        `epoch${epoch} second wrapper uses its own tail while caller ignores both Boolean returns`);
+    }
+  }
+  for (const fault of ['dispatch', 'index', 'phase', 'timer', 'flags', 'mask', 'tail', 'descriptorOwner'] as const) {
+    const x = secondInputMachineHydratedControlFixture(), m = x.machineState;
+    if (fault === 'dispatch') {m.byte618 = 1; x.machineTables.dispatch3988[1] = 0x80000000;}
+    else if (fault === 'flags') x.secondDescriptor[1] = NaN;
+    else if (fault === 'mask') x.secondDescriptor[4] = NaN;
+    else if (fault === 'descriptorOwner') x.machineTables.descriptor3904 = [...x.secondDescriptor];
+    else Object.defineProperty(m, fault === 'index' ? 'byte61a' : fault === 'phase' ? 'byte618' :
+      fault === 'timer' ? 'byte619' : 'byte61b', {writable: false});
+    const expected = fault === 'dispatch' ? [1, 31, 55, 0] : fault === 'index' || fault === 'descriptorOwner' ? [0, 31, 55, 0] :
+      fault === 'phase' ? [0, 31, 0, 0] : fault === 'timer' ? [2, 31, 0, 0] :
+      fault === 'tail' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'flags' || fault === 'mask' ? 'integer out of bounds' :
+      fault === 'descriptorOwner' ? 'descriptor3904: owner changed' : fault === 'index' ? 'byte61a' :
+      fault === 'phase' ? 'byte618' : fault === 'timer' ? 'byte619' : 'byte61b';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, [0, 126, 0, 0], `${fault} in second machine retains completed first-machine stores`);
+    checkSecondMachineBytes(x, expected, `${fault} retains exactly the reached second-machine store prefix`);
+    check(x.sourceActor.inputEdge5d4 === 0x20, `${fault} retains first wrapper20 without fabricating second40 or third80`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkMachineBytes(x, [0, 126, 0, 0], `${fault} consumed epoch cannot replay first machine`);
+    checkSecondMachineBytes(x, expected, `${fault} consumed epoch cannot replay failed second machine`);
+    check(x.sourceActor.inputEdge5d4 === 0x20 && x.inputState.byte5ff === 19 && x.tier.timerFrames === 7 &&
+      x.sourceActor.targetDistance760 === 32, `${fault} consumed epoch retains earlier genuine input/gauge/distance work`);
+  }
+  {
+    const x = secondInputMachineHydratedControlFixture(), m = x.machineState;
+    m.byte618 = 2; m.byte619 = 1; m.byte61a = 0; m.byte61b = 255;
+    Object.defineProperty(m, 'byte61b', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte61b'); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, [0, 126, 0, 0], 'second wrapper failure preserves completed first handler/wrapper');
+    checkSecondMachineBytes(x, [0, 0, 0, 255], 'second expired phase2 resets phase before failing wrapper tail-decrement destination');
+    check(x.sourceActor.inputEdge5d4 === 0x20, 'failed second wrapper retains first mask20 and does not reach mask40');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSecondMachineBytes(x, [0, 0, 0, 255], 'failed second wrapper consumes epoch before any tail replay');
+  }
+  for (const fault of ['firstMask', 'cue', 'inputTimer', 'mash', 'edge'] as const) {
+    const x = secondInputMachineHydratedControlFixture(), a = x.sourceActor;
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'inputTimer' ? 'byte5fd' :
+      fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    if (fault === 'firstMask') x.machineTables.descriptor38f8[4] = NaN;
+    else Object.defineProperty(fault === 'cue' ? x.gates : fault === 'inputTimer' ? x.inputState : fault === 'mash' ? x.host : a,
+      key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'firstMask' ? 'descriptor38f8[4]' : key); retained();
+    checkMachineBytes(x, fault === 'firstMask' ? [2, 126, 0, 0] : [0, 77, 99, 0],
+      `${fault} preserves only the reached first-machine prefix`);
+    checkSecondMachineBytes(x, [0, 31, 55, 0], `${fault} earlier refusal never enters second handler or wrapper`);
+    check(a.inputEdge5d4 === (fault === 'firstMask' ? 0 : 0x87654321) && x.tier.timerFrames === 7,
+      `${fault} retains canonical edge at its actual reached point and earlier genuine gauge work`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSecondMachineBytes(x, [0, 31, 55, 0], `${fault} consumed epoch cannot enter second machine later`);
+  }
+  console.log('[actor-second-input-machine-composition] PASS: same actual DAT/setup/status/gauge/stage/cue/input graph, distinct authenticated3904 and618..61b, first then second20/40 on canonical5d4, ignored0/1 returns, live no-hit and supplied phase1 epochs, retained first/second partial stores and consumed failures, explicit downstream cadence; exact third68628/3910/61c/80 refusal, synthetic offline only, no hardware/fulltick/production activation');
+}
+
+/** Third3910 owns its own explicit bytes and input400, while the genuine
+ * earlier wrappers preserve20/40 on the same canonical edge. The fourth
+ * callsite remains a refusal, not a claim that the whole input chain runs. */
+function thirdInputMachineHydratedControlFixture() {
+  const x = inputMachineHydratedControlFixture(undefined, true, true), thirdDescriptor = x.machineTables.descriptor3910;
+  if (!thirdDescriptor || !x.firstMachine.hasThirdMachine()) throw Error('third-machine fixture requires explicit descriptor3910');
+  return Object.assign(x, {thirdDescriptor});
+}
+function checkThirdMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte61c, m.byte61d, m.byte61e, m.byte61f].every((value, i) => value === expected[i]), message);
+}
+export function runThirdInputMachineHydratedControlTests(): void {
+  const fourthCall = '80068640 reached unsupported fourth source call 80068b8c (descriptor802d391c, actor+624, mask200)';
+  {
+    const x = inputPrefixHydratedControlFixture(true, undefined, false, undefined, true), machine = x.firstMachine!;
+    const m = machine.getActorBinding(x.actor), retained = retainInputPrefixCadence(x);
+    check(!machine.hasSecondMachine() && machine.hasThirdMachine(), 'third ownership does not fabricate the absent second descriptor');
+    rejects(() => x.runRawPrefix(1, 64, 20), '80068610 reached unsupported second source call'); retained();
+    check(x.sourceActor.inputEdge5d4 === 0x20 && m.byte61c === 0 && m.byte61d === 17 && m.byte61e === 33 && m.byte61f === 0,
+      'third-only optional ownership preserves the historical second refusal without skipping forward');
+  }
+  for (const mask of [0, 0x200, 0x400, 0x600]) {
+    const x = thirdInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.statusWord5bc = mask;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a &&
+      x.status.getActualActor(x.actor) === a && x.world.getActualActor(x.actor) === a &&
+      x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === x.statusState &&
+      x.world.getMappingActor(x.actor) === x.mapping.getActor(x.actor) &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      x.firstMachine.hasSecondMachine() && x.firstMachine.hasThirdMachine() &&
+      x.thirdDescriptor !== x.machineTables.descriptor38f8 && x.thirdDescriptor !== x.machineTables.descriptor3904 &&
+      [1, 0, 0, 1, 0x400, 0].every((value, n) => x.thirdDescriptor[n] === value) &&
+      ['byte614', 'byte615', 'byte616', 'byte617', 'byte618', 'byte619', 'byte61a', 'byte61b',
+        'byte61c', 'byte61d', 'byte61e', 'byte61f', 'byte624', 'inputFlags5d4', 'inputEdges5bc']
+        .every(key => !Object.hasOwn(a, key)) && !Object.hasOwn(x.machineState, 'byte624') &&
+      isSourceActorTickPrefixClaimedActor(a),
+      'all three descriptors use the same actual DAT/setup/status/gauge/stage/cue/input owners and no rival actor or fourth-machine cells');
+    checkThirdMachineBytes(x, [0, 17, 33, 0], 'third machine begins with independent supplied state, timer, index and tail');
+    const retained = retainInputPrefixCadence(x), expectedEdge = ((mask & 0x200) ? 0x60 : 0) | ((mask & 0x400) ? 0x80 : 0);
+    rejects(() => x.runRawPrefix(1, 64, 20), fourthCall); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [(mask & 0x200) ? 0 : 2, 126, 0, 0], `${mask} canonical200 selects the first handler result`);
+    checkSecondMachineBytes(x, [(mask & 0x200) ? 0 : 2, 126, 0, 0], `${mask} canonical200 independently selects the second handler result`);
+    checkThirdMachineBytes(x, [(mask & 0x400) ? 0 : 2, 126, 0, 0], `${mask} canonical400 independently selects the third handler result`);
+    check(a.inputEdge5d4 === expectedEdge && a.inputHeld5d8 === 0x200 &&
+      i.byte5fc === 11 && i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 &&
+      x.host.sourceArrowMash749 === ((mask & 0x200) ? 1 : 0) + ((mask & 0x400) ? 1 : 0),
+      `${mask} ignores all real0/1 returns, clears old edge once, retains preceding20/40 and only ORs third80 on its own hit`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkThirdMachineBytes(x, [(mask & 0x400) ? 0 : 2, 126, 0, 0], `${mask} fourth-call refusal consumes its epoch before third replay`);
+    check(a.inputEdge5d4 === expectedEdge && i.byte5ff === 19 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${mask} failed fourth call retains all three results and earlier genuine input/gauge work`);
+  }
+  for (const expired of ['first', 'second', 'third'] as const) {
+    const x = thirdInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0x600;
+    if (expired === 'first') {m.byte614 = 2; m.byte615 = 1; m.byte616 = 0;}
+    else if (expired === 'second') {m.byte618 = 2; m.byte619 = 1; m.byte61a = 0;}
+    else {m.byte61c = 2; m.byte61d = 1; m.byte61e = 0;}
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fourthCall); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, expired === 'first' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry cannot reschedule the first call`);
+    checkSecondMachineBytes(x, expired === 'second' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry cannot reschedule the second call`);
+    checkThirdMachineBytes(x, expired === 'third' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry cannot skip the third or fourth call`);
+    check(a.inputEdge5d4 === (expired === 'first' ? 0xc0 : expired === 'second' ? 0xa0 : 0x60),
+      `${expired} real return0 adds no caller-side mask or intercall edge clear`);
+  }
+  {
+    const x = thirdInputMachineHydratedControlFixture(), m = x.machineState;
+    m.byte61c = 2; m.byte61d = 1; m.byte61e = 0; m.byte61f = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fourthCall); retained(); checkInputMachinePrecedingStores(x);
+    checkThirdMachineBytes(x, [0, 0, 0, 1], 'third wrapper consumes its supplied live tail even after the handler expires without400');
+    check(x.sourceActor.inputEdge5d4 === 0xe0, 'third tail alone selects80 and retains first20/second40 without an intercall clear');
+  }
+  {
+    const x = thirdInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0; m.byte618 = 2; m.byte619 = 7; m.byte61a = 0;
+    m.byte61c = 2; m.byte61d = 11; m.byte61e = 0;
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      if (epoch === 3) a.statusWord5bc = 0x600;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 62 + epoch * 2, 18 + epoch * 2), fourthCall); retained();
+      checkMachineBytes(x, [epoch === 3 ? 0 : 2, 127 - epoch, 0, 0], `epoch${epoch} first timer remains independent`);
+      checkSecondMachineBytes(x, [epoch === 3 ? 0 : 2, 7 - epoch, 0, 0], `epoch${epoch} second timer remains independent`);
+      checkThirdMachineBytes(x, [epoch === 3 ? 0 : 2, 11 - epoch, 0, 0], `epoch${epoch} third timer remains independent`);
+      check(a.inputEdge5d4 === (epoch === 3 ? 0xe0 : 0) && x.host.sourceArrowMash749 === (epoch === 3 ? 2 : 0) &&
+        x.tier.timerFrames === 8 - epoch,
+        `epoch${epoch} all three machines read live canonical5bc, never held200, and execute once with the real gauge`);
+    }
+  }
+  {
+    const x = thirdInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0x600;
+    // Explicit offline phase1 is not claimed reachable from the mode1 descriptor.
+    m.byte61c = 1; m.byte61d = 2; m.byte61e = 0;
+    const expected = [[1, 0, 1, 0], [0, 255, 1, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 62 + epoch * 2, 18 + epoch * 2), fourthCall); retained();
+      checkMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} first ignores supplied third phase1`);
+      checkSecondMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} second ignores supplied third phase1`);
+      checkThirdMachineBytes(x, expected[epoch - 1]!, `epoch${epoch} third phase1 matches400, wraps on signed expiry, then restarts phase0`);
+      check(x.sourceActor.inputEdge5d4 === (epoch === 3 ? 0xe0 : 0x60),
+        `epoch${epoch} earlier20/40 survive regardless of the third return`);
+    }
+  }
+  for (const fault of ['dispatch', 'index', 'phase', 'timer', 'flags', 'mask', 'tail', 'descriptorOwner'] as const) {
+    const x = thirdInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0x600;
+    if (fault === 'dispatch') {m.byte61c = 1; x.machineTables.dispatch3988[1] = 0x80000000;}
+    else if (fault === 'flags') x.thirdDescriptor[1] = NaN;
+    else if (fault === 'mask') x.thirdDescriptor[4] = NaN;
+    else if (fault === 'descriptorOwner') x.machineTables.descriptor3910 = [...x.thirdDescriptor];
+    else Object.defineProperty(m, fault === 'index' ? 'byte61e' : fault === 'phase' ? 'byte61c' :
+      fault === 'timer' ? 'byte61d' : 'byte61f', {writable: false});
+    const expected = fault === 'dispatch' ? [1, 17, 33, 0] : fault === 'index' || fault === 'descriptorOwner' ? [0, 17, 33, 0] :
+      fault === 'phase' ? [0, 17, 0, 0] : fault === 'timer' ? [2, 17, 0, 0] :
+      fault === 'tail' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'flags' || fault === 'mask' ? 'integer out of bounds' :
+      fault === 'descriptorOwner' ? 'descriptor3910: owner changed' : fault === 'index' ? 'byte61e' :
+      fault === 'phase' ? 'byte61c' : fault === 'timer' ? 'byte61d' : 'byte61f';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [0, 126, 0, 0], `${fault} third failure retains completed first stores`);
+    checkSecondMachineBytes(x, [0, 126, 0, 0], `${fault} third failure retains completed second stores`);
+    checkThirdMachineBytes(x, expected, `${fault} retains exactly the reached third store prefix`);
+    check(x.sourceActor.inputEdge5d4 === 0x60, `${fault} never clears earlier20/40 or fabricates third80`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkThirdMachineBytes(x, expected, `${fault} consumes epoch before the failed third call can replay`);
+    check(x.sourceActor.inputEdge5d4 === 0x60 && x.inputState.byte5ff === 19 && x.tier.timerFrames === 7,
+      `${fault} consumed epoch cannot replay earlier genuine machine/input/gauge work`);
+  }
+  {
+    const x = thirdInputMachineHydratedControlFixture(), m = x.machineState;
+    m.byte61c = 2; m.byte61d = 1; m.byte61e = 0; m.byte61f = 255;
+    Object.defineProperty(m, 'byte61f', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte61f'); retained(); checkInputMachinePrecedingStores(x);
+    checkThirdMachineBytes(x, [0, 0, 0, 255], 'third expired handler resets phase before wrapper tail destination fails');
+    check(x.sourceActor.inputEdge5d4 === 0x60, 'failed third tail decrement preserves earlier20/40 without adding80');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkThirdMachineBytes(x, [0, 0, 0, 255], 'failed third wrapper cannot replay its expired handler');
+  }
+  for (const fault of ['firstMask', 'secondMask', 'cue', 'inputTimer', 'mash', 'edge'] as const) {
+    const x = thirdInputMachineHydratedControlFixture(), a = x.sourceActor;
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'inputTimer' ? 'byte5fd' :
+      fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    if (fault === 'firstMask') x.machineTables.descriptor38f8[4] = NaN;
+    else if (fault === 'secondMask') x.machineTables.descriptor3904![4] = NaN;
+    else Object.defineProperty(fault === 'cue' ? x.gates : fault === 'inputTimer' ? x.inputState : fault === 'mash' ? x.host : a,
+      key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'firstMask' ? 'descriptor38f8[4]' :
+      fault === 'secondMask' ? 'descriptor3904[4]' : key); retained();
+    checkThirdMachineBytes(x, [0, 17, 33, 0], `${fault} failure never reaches third handler or wrapper`);
+    check(a.inputEdge5d4 === (fault === 'firstMask' ? 0 : fault === 'secondMask' ? 0x20 : 0x87654321) &&
+      x.tier.timerFrames === 7, `${fault} earlier failure preserves the canonical edge at its reached point`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkThirdMachineBytes(x, [0, 17, 33, 0], `${fault} consumed epoch cannot enter third later`);
+  }
+  {
+    const x = thirdInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0x600;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fourthCall); retained();
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit status/wait advances real attached animation after all three calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices after all three calls');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6,
+      'explicit attribute/movement/history cadence remains separate after fourth-call refusal');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+      {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputEdge5d4 === 0xe0 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 2 && x.tier.timerFrames === 7,
+      'later actual setup replaces animation without replaying three-machine/input/gauge effects or adding matrix/history work');
+    checkMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain first bytes');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain second bytes');
+    checkThirdMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain third bytes');
+  }
+  console.log('[actor-third-input-machine-composition] PASS: same actual DAT/setup/status/gauge/stage/cue/input graph, distinct3910 and61c..61f, all200/400 combinations, retained20/40 plus third80, ignored0/1 returns, independent timers and supplied phase1, retained late stores and consumed failures, explicit downstream cadence; exact fourth68640/391c/624/200 refusal, synthetic offline only, no hardware/fulltick/production activation');
+}
+
+/** Fourth391c's authenticated six halfwords are explicit offline inputs, not
+ * implicit hydration. Its input800 and output200 deliberately differ. Existing
+ * fixtures keep their earlier opt-ins/refusals; this one claims no fifth600
+ * storage, source PAD producer, complete input chain or Battle activation. */
+function fourthInputMachineHydratedControlFixture(withThird = true, processor?: SourceActorInputProcessorState) {
+  const x = inputMachineHydratedControlFixture(processor, true, withThird, true), fourthDescriptor = x.machineTables.descriptor391c;
+  if (!fourthDescriptor || !x.firstMachine.hasFourthMachine()) throw Error('fourth-machine fixture requires explicit descriptor391c');
+  return Object.assign(x, {fourthDescriptor});
+}
+function checkFourthMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte624, m.byte625, m.byte626, m.byte627].every((value, i) => value === expected[i]), message);
+}
+export function runFourthInputMachineHydratedControlTests(): void {
+  const fourthCall = '80068640 reached unsupported fourth source call 80068b8c (descriptor802d391c, actor+624, mask200)';
+  const fifthCall = '80068658 reached unsupported fifth source call 80068b8c (descriptor802d3928, actor+600, mask1)';
+  {
+    const x = thirdInputMachineHydratedControlFixture(), retained = retainInputPrefixCadence(x);
+    check(!x.firstMachine.hasFourthMachine() && !Object.hasOwn(x.machineTables, 'descriptor391c') &&
+      ['byte624', 'byte625', 'byte626', 'byte627'].every(key => !Object.hasOwn(x.machineState, key)),
+      'historical three-machine graph acquires no fourth descriptor, cells or implicit defaults');
+    rejects(() => x.runRawPrefix(1, 64, 20), fourthCall); retained(); checkInputMachinePrecedingStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0x60, 'missing fourth preserves exact former refusal after the actual third no-hit');
+  }
+  {
+    const x = fourthInputMachineHydratedControlFixture(false), retained = retainInputPrefixCadence(x);
+    check(x.firstMachine.hasSecondMachine() && !x.firstMachine.hasThirdMachine() && x.firstMachine.hasFourthMachine(),
+      'fourth ownership cannot fabricate the absent third descriptor');
+    rejects(() => x.runRawPrefix(1, 64, 20), '80068628 reached unsupported third source call'); retained();
+    check(x.sourceActor.inputEdge5d4 === 0x60, 'missing third stops after the genuine first and second calls');
+    checkFourthMachineBytes(x, [0, 13, 21, 0], 'missing third never skips forward into fourth handler or wrapper');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFourthMachineBytes(x, [0, 13, 21, 0], 'third refusal consumes the epoch before a later fourth attempt');
+  }
+  for (const mask of [0, 0x200, 0x400, 0x600, 0x800, 0xa00, 0xc00, 0xe00]) {
+    const x = fourthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.statusWord5bc = mask;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a &&
+      x.status.getActualActor(x.actor) === a && x.world.getActualActor(x.actor) === a &&
+      x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === x.statusState &&
+      x.world.getMappingActor(x.actor) === x.mapping.getActor(x.actor) &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      x.firstMachine.hasSecondMachine() && x.firstMachine.hasThirdMachine() && x.firstMachine.hasFourthMachine() &&
+      new Set([x.machineTables.dispatch3988, x.machineTables.descriptor38f8, x.machineTables.descriptor3904,
+        x.machineTables.descriptor3910, x.fourthDescriptor]).size === 5 &&
+      [1, 0, 0, 1, 0x800, 0].every((value, n) => x.fourthDescriptor[n] === value) &&
+      ['byte614', 'byte615', 'byte616', 'byte617', 'byte618', 'byte619', 'byte61a', 'byte61b',
+        'byte61c', 'byte61d', 'byte61e', 'byte61f', 'byte624', 'byte625', 'byte626', 'byte627',
+        'byte600', 'inputFlags5d4', 'inputEdges5bc'].every(key => !Object.hasOwn(a, key)) &&
+      !Object.hasOwn(x.machineState, 'byte600') && !Object.hasOwn(x.machineTables, 'descriptor3928') &&
+      isSourceActorTickPrefixClaimedActor(a),
+      'four distinct descriptors use one genuine DAT/setup/status/gauge/stage/cue/input graph, with no rival cells or fifth defaults');
+    checkFourthMachineBytes(x, [0, 13, 21, 0], 'fourth begins with independent explicit phase, timer, index and tail');
+    const retained = retainInputPrefixCadence(x);
+    const expectedEdge = ((mask & 0x200) ? 0x60 : 0) | ((mask & 0x400) ? 0x80 : 0) | ((mask & 0x800) ? 0x200 : 0);
+    rejects(() => x.runRawPrefix(1, 64, 20), fifthCall); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [(mask & 0x200) ? 0 : 2, 126, 0, 0], `${mask} first reads canonical200 independently`);
+    checkSecondMachineBytes(x, [(mask & 0x200) ? 0 : 2, 126, 0, 0], `${mask} second reads canonical200 independently`);
+    checkThirdMachineBytes(x, [(mask & 0x400) ? 0 : 2, 126, 0, 0], `${mask} third reads canonical400 independently`);
+    checkFourthMachineBytes(x, [(mask & 0x800) ? 0 : 2, 126, 0, 0], `${mask} fourth reads canonical800 independently`);
+    check(a.inputEdge5d4 === expectedEdge && a.inputHeld5d8 === 0x200 && i.byte5fc === 11 &&
+      i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 &&
+      x.host.sourceArrowMash749 === ((mask & 0x200) ? 1 : 0) + ((mask & 0x400) ? 1 : 0) + ((mask & 0x800) ? 1 : 0),
+      `${mask} caller ignores all real0/1 results, clears once and preserves20/40/80 before fourth's distinct output200`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFourthMachineBytes(x, [(mask & 0x800) ? 0 : 2, 126, 0, 0], `${mask} fifth refusal consumes the epoch before fourth replay`);
+    check(a.inputEdge5d4 === expectedEdge && i.byte5ff === 19 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${mask} failed fifth call cannot replay input/gauge work or roll back the completed four-machine prefix`);
+  }
+  for (const control of [0, 0x40]) for (const canonicalHit of [false, true]) {
+    const x = fourthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.controlWord = 0x100000 | control; a.statusWord5bc = canonicalHit ? 0x800 : 0x600;
+    a.statusWord5b4 = canonicalHit ? 0 : 0x60800; a.inputHeld5d8 = canonicalHit ? 0 : 0x8ff;
+    i.byte5fc = canonicalHit ? 3 : 11; i.byte5fd = 0; i.byte5fe = 0; i.byte5ff = canonicalHit ? 0 : 4;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fifthCall); retained();
+    check(a.controlWord === control && a.inputHeld5d8 === (canonicalHit ? 0 : 0x8ff) &&
+      a.statusWord5b4 === (canonicalHit ? 0 : 0x60800) && a.inputEdge5d4 === (canonicalHit ? 0x200 : 0xe0),
+      `control${control} flags0 reads only canonical5bc800, not5b4's800/direction bits or actual held5d8's800`);
+    checkFourthMachineBytes(x, [canonicalHit ? 0 : 2, 126, 0, 0], 'fourth descriptor adds no fabricated control/status gate');
+    check(x.tier.timerFrames === 7 && x.stageState.short6cc === 0 && x.gates.marker1db3 === 0,
+      'held/control negative controls retain real gauge, stage and cue work');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [sx, sy, mask] of [[19, 0, 0], [20, 0, 2], [51, 0, 2], [52, 0, 2], [0, 52, 8],
+    [-52, 0, 1], [0, -52, 4], [52, 52, 10], [-52, 52, 9], [-52, -52, 5], [52, -52, 6],
+    [1, 52, 8], [1, -52, 4], [70, -29, 2]] as const) {
+    const x = diagonalInputHydratedControlFixture(true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = sx; i.stickY5cb = sy; i.byte5fc = 0; a.statusWord5bc = 0xe00;
+    check(x.firstMachine.hasFourthMachine() && x.angular.getProcessor() === x.angularProcessor &&
+      x.angular.getAtanRuntime()?.getProcessor() === x.angularProcessor,
+      'explicit fourth composes with the same genuine angular and finite atan processor owner');
+    const retained = retainInputPrefixCadence(x), strong = sx * sx + sy * sy >= 2704;
+    const hostAtan = Math.atan, hostAtan2 = Math.atan2;
+    try {
+      Math.atan = () => {throw Error('host atan is not source fourth composition');};
+      Math.atan2 = () => {throw Error('host atan2 is not source fourth composition');};
+      rejects(() => x.runRawPrefix(1, 64, 20), fifthCall);
+    } finally {Math.atan = hostAtan; Math.atan2 = hostAtan2;}
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (mask === 0 ? 0x200 : strong ? 0x200 | mask | (mask << 4) : 0x2c0 | mask) &&
+      i.byte5fc === (mask === 0 ? 8 : strong ? 11 : 9) && i.byte5fd === (mask === 0 ? 0 : strong ? 19 : 1) &&
+      i.byte5ff === 19 && a.inputEdge5d4 === 0x2e0 && x.host.sourceArrowMash749 === 3,
+      `fourth signed-byte${sx}/${sy} retains actual radius gates, axis/quadrant/X1/negative-bin selection and all four edges`);
+    checkMachineBytes(x, [0, 126, 0, 0], `fourth signed-byte${sx}/${sy} completes first wrapper`);
+    checkSecondMachineBytes(x, [0, 126, 0, 0], `fourth signed-byte${sx}/${sy} completes second wrapper`);
+    checkThirdMachineBytes(x, [0, 126, 0, 0], `fourth signed-byte${sx}/${sy} completes third wrapper`);
+    checkFourthMachineBytes(x, [0, 126, 0, 0], `fourth signed-byte${sx}/${sy} reaches real fourth wrapper without host atan`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check(a.inputEdge5d4 === 0x2e0 && i.byte5ff === 19 && x.tier.timerFrames === 7,
+      `fourth signed-byte${sx}/${sy} fifth refusal consumes epoch before angular/input/gauge replay`);
+  }
+  for (const fault of ['coefficient', 'fourthMask'] as const) {
+    const x = diagonalInputHydratedControlFixture(true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = -52; i.stickY5cb = 52; i.byte5fc = 0; a.statusWord5bc = 0xe00;
+    if (fault === 'coefficient') x.atanData.coefficients802b51a8[0] = 0;
+    else x.machineTables.descriptor391c![4] = NaN;
+    const retained = retainInputPrefixCadence(x), late = fault === 'fourthMask';
+    rejects(() => x.runRawPrefix(1, 64, 20), late ? 'descriptor391c[4]' : 'coefficients802b51a8');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (late ? 0x299 : 0xabcd) && a.inputEdge5d4 === (late ? 0xe0 : 0x87654321) &&
+      i.byte5fc === (late ? 11 : 0) && i.byte5fd === (late ? 19 : 1) && i.byte5ff === (late ? 19 : 9) &&
+      x.host.sourceArrowMash749 === (late ? 3 : 77), `${fault} retains exactly the reached genuine angular and input store prefix`);
+    checkThirdMachineBytes(x, late ? [0, 126, 0, 0] : [0, 17, 33, 0], `${fault} retains only reached third stores`);
+    checkFourthMachineBytes(x, late ? [2, 126, 0, 0] : [0, 13, 21, 0], `${fault} cannot fabricate fourth output200`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFourthMachineBytes(x, late ? [2, 126, 0, 0] : [0, 13, 21, 0], `${fault} consumed epoch excludes angular or fourth replay`);
+  }
+  for (const expired of ['first', 'second', 'third', 'fourth'] as const) {
+    const x = fourthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xe00;
+    if (expired === 'first') {m.byte614 = 2; m.byte615 = 1; m.byte616 = 0;}
+    else if (expired === 'second') {m.byte618 = 2; m.byte619 = 1; m.byte61a = 0;}
+    else if (expired === 'third') {m.byte61c = 2; m.byte61d = 1; m.byte61e = 0;}
+    else {m.byte624 = 2; m.byte625 = 1; m.byte626 = 0;}
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fifthCall); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, expired === 'first' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry retains independent first state`);
+    checkSecondMachineBytes(x, expired === 'second' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry retains independent second state`);
+    checkThirdMachineBytes(x, expired === 'third' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry retains independent third state`);
+    checkFourthMachineBytes(x, expired === 'fourth' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry cannot skip the fourth or fifth call`);
+    check(a.inputEdge5d4 === (0x2e0 & ~(expired === 'first' ? 0x20 : expired === 'second' ? 0x40 : expired === 'third' ? 0x80 : 0x200)),
+      `${expired} genuine return0 adds no caller-side mask and never clears another machine's edge`);
+  }
+  {
+    const x = fourthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0x600; m.byte624 = 2; m.byte625 = 1; m.byte626 = 0; m.byte627 = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fifthCall); retained(); checkInputPrefixEarlierStores(x);
+    checkFourthMachineBytes(x, [0, 0, 0, 1], 'fourth wrapper consumes the live tail after handler expiry without canonical800');
+    check(x.sourceActor.inputEdge5d4 === 0x2e0, 'fourth live tail alone ORs200 while retaining all earlier20/40/80');
+  }
+  {
+    const x = fourthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0; m.byte618 = 2; m.byte619 = 7; m.byte61a = 0;
+    m.byte61c = 2; m.byte61d = 11; m.byte61e = 0; m.byte624 = 2; m.byte625 = 15; m.byte626 = 0;
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      if (epoch === 3) a.statusWord5bc = 0xe00;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 62 + epoch * 2, 18 + epoch * 2), fifthCall); retained();
+      checkMachineBytes(x, [epoch === 3 ? 0 : 2, 127 - epoch, 0, 0], `epoch${epoch} first timer remains independent`);
+      checkSecondMachineBytes(x, [epoch === 3 ? 0 : 2, 7 - epoch, 0, 0], `epoch${epoch} second timer remains independent`);
+      checkThirdMachineBytes(x, [epoch === 3 ? 0 : 2, 11 - epoch, 0, 0], `epoch${epoch} third timer remains independent`);
+      checkFourthMachineBytes(x, [epoch === 3 ? 0 : 2, 15 - epoch, 0, 0], `epoch${epoch} fourth timer remains independent`);
+      check(a.inputEdge5d4 === (epoch === 3 ? 0x2e0 : 0) && x.host.sourceArrowMash749 === (epoch === 3 ? 3 : 0) &&
+        x.tier.timerFrames === 8 - epoch, `epoch${epoch} genuine four-machine chain and gauge execute once on new live canonical5bc`);
+    }
+  }
+  {
+    const x = fourthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xe00;
+    // Explicit phase1 is synthetic state, not claimed reachable from mode1.
+    m.byte624 = 1; m.byte625 = 2; m.byte626 = 0;
+    const expected = [[1, 0, 1, 0], [0, 255, 1, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 62 + epoch * 2, 18 + epoch * 2), fifthCall); retained();
+      checkMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} first ignores supplied fourth phase1`);
+      checkSecondMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} second ignores supplied fourth phase1`);
+      checkThirdMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} third ignores supplied fourth phase1`);
+      checkFourthMachineBytes(x, expected[epoch - 1]!, `epoch${epoch} supplied fourth phase1 matches800, expires signed and restarts phase0`);
+      check(x.sourceActor.inputEdge5d4 === (epoch === 3 ? 0x2e0 : 0xe0),
+        `epoch${epoch} fourth0/1 never discards earlier20/40/80 or bypasses fifth refusal`);
+    }
+  }
+  for (const fault of ['dispatch', 'index', 'phase', 'timer', 'flags', 'mask', 'tail', 'descriptorOwner'] as const) {
+    const x = fourthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xe00;
+    if (fault === 'dispatch') {m.byte624 = 1; x.machineTables.dispatch3988[1] = 0x80000000;}
+    else if (fault === 'flags') x.fourthDescriptor[1] = NaN;
+    else if (fault === 'mask') x.fourthDescriptor[4] = NaN;
+    else if (fault === 'descriptorOwner') x.machineTables.descriptor391c = [...x.fourthDescriptor];
+    else Object.defineProperty(m, fault === 'index' ? 'byte626' : fault === 'phase' ? 'byte624' :
+      fault === 'timer' ? 'byte625' : 'byte627', {writable: false});
+    const expected = fault === 'dispatch' ? [1, 13, 21, 0] : fault === 'index' || fault === 'descriptorOwner' ? [0, 13, 21, 0] :
+      fault === 'phase' ? [0, 13, 0, 0] : fault === 'timer' ? [2, 13, 0, 0] :
+      fault === 'tail' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'flags' || fault === 'mask' ? 'integer out of bounds' :
+      fault === 'descriptorOwner' ? 'descriptor391c: owner changed' : fault === 'index' ? 'byte626' :
+      fault === 'phase' ? 'byte624' : fault === 'timer' ? 'byte625' : 'byte627';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [0, 126, 0, 0], `${fault} fourth failure retains completed first stores`);
+    checkSecondMachineBytes(x, [0, 126, 0, 0], `${fault} fourth failure retains completed second stores`);
+    checkThirdMachineBytes(x, [0, 126, 0, 0], `${fault} fourth failure retains completed third stores`);
+    checkFourthMachineBytes(x, expected, `${fault} preserves exactly the reached fourth partial stores`);
+    check(x.sourceActor.inputEdge5d4 === 0xe0, `${fault} cannot erase earlier20/40/80 or fabricate output200`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFourthMachineBytes(x, expected, `${fault} consumes epoch before failed fourth call replay`);
+    check(x.sourceActor.inputEdge5d4 === 0xe0 && x.inputState.byte5ff === 19 && x.tier.timerFrames === 7,
+      `${fault} consumed epoch also prevents earlier input/gauge effects from repeating`);
+  }
+  {
+    const x = fourthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xe00; m.byte624 = 2; m.byte625 = 1; m.byte626 = 0; m.byte627 = 255;
+    Object.defineProperty(m, 'byte627', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte627'); retained(); checkInputPrefixEarlierStores(x);
+    checkFourthMachineBytes(x, [0, 0, 0, 255], 'expired fourth resets phase before its wrapper tail destination fails');
+    check(x.sourceActor.inputEdge5d4 === 0xe0, 'readonly fourth tail preserves prior edges without adding200');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFourthMachineBytes(x, [0, 0, 0, 255], 'failed fourth tail cannot replay its expired handler');
+  }
+  for (const fault of ['firstMask', 'secondMask', 'thirdMask', 'cue', 'inputTimer', 'mash', 'edge'] as const) {
+    const x = fourthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xe00;
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'inputTimer' ? 'byte5fd' :
+      fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    if (fault === 'firstMask') x.machineTables.descriptor38f8[4] = NaN;
+    else if (fault === 'secondMask') x.machineTables.descriptor3904![4] = NaN;
+    else if (fault === 'thirdMask') x.machineTables.descriptor3910![4] = NaN;
+    else Object.defineProperty(fault === 'cue' ? x.gates : fault === 'inputTimer' ? x.inputState : fault === 'mash' ? x.host : a,
+      key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'firstMask' ? 'descriptor38f8[4]' :
+      fault === 'secondMask' ? 'descriptor3904[4]' : fault === 'thirdMask' ? 'descriptor3910[4]' : key); retained();
+    checkFourthMachineBytes(x, [0, 13, 21, 0], `${fault} earlier refusal never enters fourth handler or wrapper`);
+    const expectedEdge = fault === 'firstMask' ? 0 : fault === 'secondMask' ? 0x20 : fault === 'thirdMask' ? 0x60 : 0x87654321;
+    check(a.inputEdge5d4 === expectedEdge && x.tier.timerFrames === 7, `${fault} preserves canonical edge at exactly the reached point`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFourthMachineBytes(x, [0, 13, 21, 0], `${fault} consumed epoch never reaches fourth later`);
+  }
+  for (const alias of ['first', 'second', 'third', 'dispatch', 'tables', 'actor', 'borg', 'machine', 'input', 'processor'] as const) {
+    const processor: SourceActorInputProcessorState = {gqr4: 0x00070007};
+    const x = fourthInputMachineHydratedControlFixture(true, processor);
+    const owner = alias === 'first' ? x.machineTables.descriptor38f8 : alias === 'second' ? x.machineTables.descriptor3904 :
+      alias === 'third' ? x.machineTables.descriptor3910 : alias === 'dispatch' ? x.machineTables.dispatch3988 :
+      alias === 'tables' ? x.machineTables : alias === 'actor' ? x.sourceActor : alias === 'borg' ? x.host :
+      alias === 'machine' ? x.machineState : alias === 'input' ? x.inputState : processor;
+    Object.defineProperty(x.machineTables, 'descriptor391c', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [0, 77, 99, 0], `${alias} alias preflight refuses before first handler`);
+    checkSecondMachineBytes(x, [0, 31, 55, 0], `${alias} alias preflight refuses before second handler`);
+    checkThirdMachineBytes(x, [0, 17, 33, 0], `${alias} alias preflight refuses before third handler`);
+    checkFourthMachineBytes(x, [0, 13, 21, 0], `${alias} alias preflight refuses before fourth handler`);
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.sourceActor.inputHeld5d8 === 0xabcd &&
+      x.inputState.byte5ff === 9 && x.host.sourceArrowMash749 === 77,
+      `${alias} fourth descriptor cannot alias another retained owner even though earlier stage/cues/gauge already ran`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFourthMachineBytes(x, [0, 13, 21, 0], `${alias} alias failure still consumes its tick epoch`);
+  }
+  for (const key of ['byte624', 'byte625', 'byte626', 'byte627'] as const) {
+    const x = fourthInputMachineHydratedControlFixture();
+    Object.defineProperty(x.sourceActor, key, {value: 1, writable: true, configurable: true});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${key}: competing source owner`); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, [0, 77, 99, 0], `${key} rival is rejected at first genuine machine entry`);
+    checkFourthMachineBytes(x, [0, 13, 21, 0], `${key} rival cannot replace sealed fourth binding cells`);
+    check(x.sourceActor.inputEdge5d4 === 0, `${key} late rival retains actual input clear before first wrapper refusal`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  {
+    const x = fourthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xe00;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fifthCall); retained();
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit status/wait advances actual attached animation after four input calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices after fourth input returns');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6,
+      'attribute/movement/history cadence remains explicit after the fifth-call refusal');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+      {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputEdge5d4 === 0x2e0 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 3 && x.tier.timerFrames === 7,
+      'later actual setup replaces animation without replaying four-machine/input/gauge work or an implicit matrix/history suffix');
+    checkMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain first bytes');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain second bytes');
+    checkThirdMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain third bytes');
+    checkFourthMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain fourth bytes');
+  }
+  console.log('[actor-fourth-input-machine-composition] PASS: genuine DAT/setup/status/gauge/stage/cue/input graph, distinct391c and624..627, all200/400/800 combinations, retained20/40/80 plus fourth200, held/control/status negative controls, real angular/finite-atan paths without host atan, ignored0/1 and independent timers/phase1, optional ordering and historical defaults, partial writes/consumed epochs, cross-owner/rival-cell exclusion and unchanged explicit downstream cadence; exact fifth68658/3928/600/1 refusal, synthetic offline only/no hardware/fulltick/production activation');
+}
+
+/** Fifth3928 is an explicit decoded descriptor, not a fourth-machine relabel:
+ * input100 produces output1 and its authenticated duration16 survives sixteen
+ * wrapper calls. No sixth604 storage, PAD producer or full-tick scheduler. */
+function fifthInputMachineHydratedControlFixture(missing?: 'second' | 'third' | 'fourth', processor?: SourceActorInputProcessorState) {
+  const x = inputMachineHydratedControlFixture(processor, missing !== 'second', missing !== 'third', missing !== 'fourth', true);
+  const fifthDescriptor = x.machineTables.descriptor3928;
+  if (!fifthDescriptor || !x.firstMachine.hasFifthMachine()) throw Error('fifth-machine fixture requires explicit descriptor3928');
+  return Object.assign(x, {fifthDescriptor});
+}
+function checkFifthMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte600, m.byte601, m.byte602, m.byte603].every((value, i) => value === expected[i]), message);
+}
+export function runFifthInputMachineHydratedControlTests(): void {
+  const fifthCall = '80068658 reached unsupported fifth source call 80068b8c (descriptor802d3928, actor+600, mask1)';
+  const sixthCall = '80068670 reached unsupported sixth source call 80068b8c (descriptor802d3934, actor+604, mask2)';
+  {
+    const x = fourthInputMachineHydratedControlFixture(), retained = retainInputPrefixCadence(x);
+    check(!x.firstMachine.hasFifthMachine() && !Object.hasOwn(x.machineTables, 'descriptor3928') &&
+      ['byte600', 'byte601', 'byte602', 'byte603'].every(key => !Object.hasOwn(x.machineState, key)),
+      'historical four-machine graph acquires no fifth descriptor, cells or implicit defaults');
+    rejects(() => x.runRawPrefix(1, 64, 20), fifthCall); retained(); checkInputMachinePrecedingStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0x260, 'absent fifth retains the historical first/second/fourth edges and exact refusal');
+  }
+  for (const missing of ['second', 'third', 'fourth'] as const) {
+    const x = fifthInputMachineHydratedControlFixture(missing), retained = retainInputPrefixCadence(x);
+    x.sourceActor.statusWord5bc = 0xf00;
+    check(x.firstMachine.hasFifthMachine() &&
+      (missing === 'second' ? !x.firstMachine.hasSecondMachine() : missing === 'third' ? !x.firstMachine.hasThirdMachine() : !x.firstMachine.hasFourthMachine()),
+      `${missing} absence is not filled by explicit fifth ownership`);
+    rejects(() => x.runRawPrefix(1, 64, 20), missing === 'second' ? '80068610 reached unsupported second source call' :
+      missing === 'third' ? '80068628 reached unsupported third source call' : '80068640 reached unsupported fourth source call');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(x.sourceActor.inputEdge5d4 === (missing === 'second' ? 0x20 : missing === 'third' ? 0x60 : 0xe0),
+      `${missing} omission retains precisely the completed earlier wrappers`);
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${missing} refusal cannot skip forward to fifth handler or its duration16 tail`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${missing} failure consumes epoch before a fifth retry`);
+  }
+  for (let bits = 0; bits < 16; bits++) {
+    const mask = bits << 8, x = fifthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.statusWord5bc = mask;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a && x.status.getActualActor(x.actor) === a &&
+      x.world.getActualActor(x.actor) === a && x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === x.statusState &&
+      x.world.getMappingActor(x.actor) === x.mapping.getActor(x.actor) &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      x.firstMachine.hasSecondMachine() && x.firstMachine.hasThirdMachine() && x.firstMachine.hasFourthMachine() && x.firstMachine.hasFifthMachine() &&
+      new Set([x.machineTables.dispatch3988, x.machineTables.descriptor38f8, x.machineTables.descriptor3904,
+        x.machineTables.descriptor3910, x.machineTables.descriptor391c, x.fifthDescriptor]).size === 6 &&
+      [1, 0, 0, 16, 0x100, 0].every((value, n) => x.fifthDescriptor[n] === value) &&
+      ['byte614', 'byte615', 'byte616', 'byte617', 'byte618', 'byte619', 'byte61a', 'byte61b',
+        'byte61c', 'byte61d', 'byte61e', 'byte61f', 'byte624', 'byte625', 'byte626', 'byte627',
+        'byte600', 'byte601', 'byte602', 'byte603', 'inputFlags5d4', 'inputEdges5bc'].every(key => !Object.hasOwn(a, key)) &&
+      ['byte604', 'byte605', 'byte606', 'byte607'].every(key => !Object.hasOwn(x.machineState, key)) &&
+      !Object.hasOwn(x.machineTables, 'descriptor3934') && isSourceActorTickPrefixClaimedActor(a),
+      'five distinct descriptors share the actual DAT/setup/status/gauge/stage/cue/input graph, without rival cells or sixth defaults');
+    const expectedEdge = ((mask & 0x200) ? 0x60 : 0) | ((mask & 0x400) ? 0x80 : 0) |
+      ((mask & 0x800) ? 0x200 : 0) | ((mask & 0x100) ? 1 : 0);
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), sixthCall); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [(mask & 0x200) ? 0 : 2, 126, 0, 0], `${mask} first canonical200/output20 remains independent`);
+    checkSecondMachineBytes(x, [(mask & 0x200) ? 0 : 2, 126, 0, 0], `${mask} second canonical200/output40 remains independent`);
+    checkThirdMachineBytes(x, [(mask & 0x400) ? 0 : 2, 126, 0, 0], `${mask} third canonical400/output80 remains independent`);
+    checkFourthMachineBytes(x, [(mask & 0x800) ? 0 : 2, 126, 0, 0], `${mask} fourth canonical800/output200 remains independent`);
+    checkFifthMachineBytes(x, [(mask & 0x100) ? 0 : 2, 126, 0, (mask & 0x100) ? 15 : 0],
+      `${mask} fifth canonical100/output1 initializes and consumes the genuine duration16`);
+    check(a.inputEdge5d4 === expectedEdge && a.inputHeld5d8 === 0x200 && i.byte5fc === 11 &&
+      i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 &&
+      x.host.sourceArrowMash749 === [0x100, 0x200, 0x400, 0x800].filter(value => (mask & value) !== 0).length,
+      `${mask} caller ignores all five real0/1 returns, clears once and preserves every earlier edge before output1`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFifthMachineBytes(x, [(mask & 0x100) ? 0 : 2, 126, 0, (mask & 0x100) ? 15 : 0],
+      `${mask} sixth refusal consumes epoch without replaying or shortening fifth tail`);
+    check(a.inputEdge5d4 === expectedEdge && i.byte5ff === 19 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${mask} sixth refusal retains completed input, distance and gauge stores`);
+  }
+  for (const control of [0, 0x40]) for (const canonicalHit of [false, true]) {
+    const x = fifthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.controlWord = 0x100000 | control; a.statusWord5bc = canonicalHit ? 0x100 : 0xe00;
+    a.statusWord5b4 = canonicalHit ? 0 : 0x60100; a.inputHeld5d8 = canonicalHit ? 0 : 0x1ff;
+    i.byte5fc = canonicalHit ? 3 : 11; i.byte5fd = 0; i.byte5fe = 0; i.byte5ff = canonicalHit ? 0 : 4;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), sixthCall); retained();
+    check(a.controlWord === control && a.inputHeld5d8 === (canonicalHit ? 0 : 0x1ff) &&
+      a.statusWord5b4 === (canonicalHit ? 0 : 0x60100) && a.inputEdge5d4 === (canonicalHit ? 1 : 0x2e0),
+      `control${control} fifth flags0 selects only5bc100, never held5d8's100 or5b4's100/direction flags`);
+    checkFifthMachineBytes(x, [canonicalHit ? 0 : 2, 126, 0, canonicalHit ? 15 : 0],
+      'authenticated fifth flags0 neither imposes control40 gates nor substitutes another input owner');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [sx, sy, direction] of [[19, 0, 0], [20, 0, 2], [51, 0, 2], [52, 0, 2], [0, 52, 8],
+    [-52, 0, 1], [0, -52, 4], [52, 52, 10], [-52, 52, 9], [-52, -52, 5], [52, -52, 6],
+    [1, 52, 8], [1, -52, 4], [70, -29, 2]] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = sx; i.stickY5cb = sy; i.byte5fc = 0; a.statusWord5bc = 0xf00;
+    check(x.firstMachine.hasFifthMachine() && x.angular.getProcessor() === x.angularProcessor &&
+      x.angular.getAtanRuntime()?.getProcessor() === x.angularProcessor,
+      'explicit fifth composes with genuine angular/finite-atan owners, not callback-produced input');
+    const retained = retainInputPrefixCadence(x), strong = sx * sx + sy * sy >= 2704;
+    const hostAtan = Math.atan, hostAtan2 = Math.atan2;
+    try {
+      Math.atan = () => {throw Error('host atan is not source fifth composition');};
+      Math.atan2 = () => {throw Error('host atan2 is not source fifth composition');};
+      rejects(() => x.runRawPrefix(1, 64, 20), sixthCall);
+    } finally {Math.atan = hostAtan; Math.atan2 = hostAtan2;}
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (direction === 0 ? 0x200 : strong ? 0x200 | direction | (direction << 4) : 0x2c0 | direction) &&
+      i.byte5fc === (direction === 0 ? 8 : strong ? 11 : 9) && i.byte5fd === (direction === 0 ? 0 : strong ? 19 : 1) &&
+      i.byte5ff === 19 && a.inputEdge5d4 === 0x2e1 && x.host.sourceArrowMash749 === 4,
+      `fifth signed-byte${sx}/${sy} retains radius gates, axis/quadrant/X1/negative-bin selection and five edges`);
+    checkMachineBytes(x, [0, 126, 0, 0], 'genuine angular chain completes first wrapper');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'genuine angular chain completes second wrapper');
+    checkThirdMachineBytes(x, [0, 126, 0, 0], 'genuine angular chain completes third wrapper');
+    checkFourthMachineBytes(x, [0, 126, 0, 0], 'genuine angular chain completes fourth wrapper');
+    checkFifthMachineBytes(x, [0, 126, 0, 15], 'genuine angular chain consumes fifth duration16 exactly once');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFifthMachineBytes(x, [0, 126, 0, 15], 'sixth refusal cannot replay actual angular/input work or the fifth wrapper');
+  }
+  for (const fault of ['coefficient', 'fifthMask'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = -52; i.stickY5cb = 52; i.byte5fc = 0; a.statusWord5bc = 0xf00;
+    if (fault === 'coefficient') x.atanData.coefficients802b51a8[0] = 0;
+    else x.machineTables.descriptor3928![4] = NaN;
+    const retained = retainInputPrefixCadence(x), late = fault === 'fifthMask';
+    rejects(() => x.runRawPrefix(1, 64, 20), late ? 'descriptor3928[4]' : 'coefficients802b51a8');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (late ? 0x299 : 0xabcd) && a.inputEdge5d4 === (late ? 0x2e0 : 0x87654321) &&
+      i.byte5fc === (late ? 11 : 0) && i.byte5fd === (late ? 19 : 1) && i.byte5ff === (late ? 19 : 9) &&
+      x.host.sourceArrowMash749 === (late ? 4 : 77), `${fault} retains only the reached genuine angular/input store prefix`);
+    checkFourthMachineBytes(x, late ? [0, 126, 0, 0] : [0, 13, 21, 0], `${fault} retains reached fourth stores`);
+    checkFifthMachineBytes(x, late ? [2, 126, 0, 0] : [0, 9, 17, 0], `${fault} cannot fabricate fifth tail or output1`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const expired of ['first', 'second', 'third', 'fourth', 'fifth'] as const) {
+    const x = fifthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf00;
+    if (expired === 'first') {m.byte614 = 2; m.byte615 = 1; m.byte616 = 0;}
+    else if (expired === 'second') {m.byte618 = 2; m.byte619 = 1; m.byte61a = 0;}
+    else if (expired === 'third') {m.byte61c = 2; m.byte61d = 1; m.byte61e = 0;}
+    else if (expired === 'fourth') {m.byte624 = 2; m.byte625 = 1; m.byte626 = 0;}
+    else {m.byte600 = 2; m.byte601 = 1; m.byte602 = 0;}
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), sixthCall); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, expired === 'first' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry leaves first state independent`);
+    checkSecondMachineBytes(x, expired === 'second' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry leaves second state independent`);
+    checkThirdMachineBytes(x, expired === 'third' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry leaves third state independent`);
+    checkFourthMachineBytes(x, expired === 'fourth' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry leaves fourth state independent`);
+    checkFifthMachineBytes(x, expired === 'fifth' ? [0, 0, 0, 0] : [0, 126, 0, 15], `${expired} expiry cannot skip the fifth or sixth call`);
+    const absent = expired === 'first' ? 0x20 : expired === 'second' ? 0x40 : expired === 'third' ? 0x80 : expired === 'fourth' ? 0x200 : 1;
+    check(a.inputEdge5d4 === (0x2e1 & ~absent), `${expired} real return0 neither adds its mask nor erases other wrappers' results`);
+  }
+  {
+    const x = fifthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    // Explicit longer gauge input avoids its separate unsupported tier-expiry
+    // boundary while keeping genuine gauge work in every one of these epochs.
+    x.tier.timerFrames = 32;
+    for (let epoch = 1; epoch <= 17; epoch++) {
+      a.statusWord5bc = epoch === 1 ? 0xf00 : 0xe00;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), sixthCall); retained();
+      checkFifthMachineBytes(x, epoch === 1 ? [0, 126, 0, 15] : [2, 128 - epoch, 0, Math.max(16 - epoch, 0)],
+        `epoch${epoch} fifth duration16 tail consumes once while its no-hit phase2 timer runs independently`);
+      check(a.inputEdge5d4 === (epoch <= 16 ? 0x2e1 : 0x2e0) && x.host.sourceArrowMash749 === (epoch === 1 ? 4 : 3),
+        `epoch${epoch} fifth contributes output1 for exactly sixteen calls without another canonical100 hit`);
+      checkMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} tail lifetime does not reuse first machine state`);
+      checkSecondMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} tail lifetime does not reuse second machine state`);
+      checkThirdMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} tail lifetime does not reuse third machine state`);
+      checkFourthMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} tail lifetime does not reuse fourth machine state`);
+      rejects(() => x.runRawPrefix(epoch, 128, 40), 'epoch'); retained();
+      check(x.machineState.byte603 === Math.max(16 - epoch, 0) && x.tier.timerFrames === 32 - epoch,
+        'duplicate epoch never drains an extra fifth tail or real gauge frame');
+    }
+  }
+  {
+    const x = fifthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    for (let epoch = 1; epoch <= 4; epoch++) {
+      a.statusWord5bc = epoch === 2 ? 0 : 0x100;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), sixthCall); retained();
+      checkFifthMachineBytes(x, epoch === 2 ? [2, 126, 0, 14] : epoch === 3 ? [0, 125, 0, 15] : [0, 126, 0, 15],
+        `epoch${epoch} live100 retriggers duration16 rather than accumulating tail or reusing earlier state`);
+      check(a.inputEdge5d4 === 1 && x.host.sourceArrowMash749 === (epoch === 2 ? 0 : 1),
+        `epoch${epoch} retained fifth tail alone is sufficient for output1`);
+    }
+  }
+  {
+    const x = fifthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xe00; m.byte600 = 2; m.byte601 = 1; m.byte602 = 0; m.byte603 = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), sixthCall); retained(); checkInputPrefixEarlierStores(x);
+    checkFifthMachineBytes(x, [0, 0, 0, 1], 'fifth wrapper consumes live tail even after handler expiry and no canonical100');
+    check(x.sourceActor.inputEdge5d4 === 0x2e1, 'fifth wrapper tail alone preserves20/40/80/200 and ORs1');
+  }
+  {
+    const x = fifthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0; m.byte618 = 2; m.byte619 = 7; m.byte61a = 0;
+    m.byte61c = 2; m.byte61d = 11; m.byte61e = 0; m.byte624 = 2; m.byte625 = 15; m.byte626 = 0;
+    m.byte600 = 2; m.byte601 = 19; m.byte602 = 0;
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      if (epoch === 3) a.statusWord5bc = 0xf00;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), sixthCall); retained();
+      checkMachineBytes(x, [epoch === 3 ? 0 : 2, 127 - epoch, 0, 0], `epoch${epoch} independent first countdown`);
+      checkSecondMachineBytes(x, [epoch === 3 ? 0 : 2, 7 - epoch, 0, 0], `epoch${epoch} independent second countdown`);
+      checkThirdMachineBytes(x, [epoch === 3 ? 0 : 2, 11 - epoch, 0, 0], `epoch${epoch} independent third countdown`);
+      checkFourthMachineBytes(x, [epoch === 3 ? 0 : 2, 15 - epoch, 0, 0], `epoch${epoch} independent fourth countdown`);
+      checkFifthMachineBytes(x, [epoch === 3 ? 0 : 2, 19 - epoch, 0, epoch === 3 ? 15 : 0], `epoch${epoch} independent fifth countdown and duration16`);
+      check(a.inputEdge5d4 === (epoch === 3 ? 0x2e1 : 0) && x.tier.timerFrames === 8 - epoch,
+        `epoch${epoch} all five machines and real gauge execute once on the live canonical word`);
+    }
+  }
+  {
+    const x = fifthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf00;
+    // Phase1 is explicit synthetic supplied state, not claimed reachable from mode1.
+    m.byte600 = 1; m.byte601 = 2; m.byte602 = 0;
+    const expected = [[1, 0, 1, 0], [0, 255, 1, 0], [0, 126, 0, 15]];
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), sixthCall); retained();
+      checkFifthMachineBytes(x, expected[epoch - 1]!, `epoch${epoch} fifth supplied phase1 matches100, reloads0, expires signed then restarts duration16`);
+      check(x.sourceActor.inputEdge5d4 === (epoch === 3 ? 0x2e1 : 0x2e0),
+        `epoch${epoch} fifth0/1 never discards earlier results or bypasses sixth refusal`);
+    }
+  }
+  for (const fault of ['dispatch', 'index', 'phase', 'timer', 'flags', 'mask', 'duration', 'tail', 'descriptorOwner'] as const) {
+    const x = fifthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf00;
+    if (fault === 'dispatch') {m.byte600 = 1; x.machineTables.dispatch3988[1] = 0x80000000;}
+    else if (fault === 'flags') x.fifthDescriptor[1] = NaN;
+    else if (fault === 'mask') x.fifthDescriptor[4] = NaN;
+    else if (fault === 'duration') x.fifthDescriptor[3] = NaN;
+    else if (fault === 'descriptorOwner') x.machineTables.descriptor3928 = [...x.fifthDescriptor];
+    else Object.defineProperty(m, fault === 'index' ? 'byte602' : fault === 'phase' ? 'byte600' :
+      fault === 'timer' ? 'byte601' : 'byte603', {writable: false});
+    const expected = fault === 'dispatch' ? [1, 9, 17, 0] : fault === 'index' || fault === 'descriptorOwner' ? [0, 9, 17, 0] :
+      fault === 'phase' ? [0, 9, 0, 0] : fault === 'timer' ? [2, 9, 0, 0] :
+      fault === 'tail' || fault === 'duration' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'flags' || fault === 'mask' || fault === 'duration' ? 'integer out of bounds' :
+      fault === 'descriptorOwner' ? 'descriptor3928: owner changed' : fault === 'index' ? 'byte602' :
+      fault === 'phase' ? 'byte600' : fault === 'timer' ? 'byte601' : 'byte603';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [0, 126, 0, 0], `${fault} fifth failure retains completed first stores`);
+    checkSecondMachineBytes(x, [0, 126, 0, 0], `${fault} fifth failure retains completed second stores`);
+    checkThirdMachineBytes(x, [0, 126, 0, 0], `${fault} fifth failure retains completed third stores`);
+    checkFourthMachineBytes(x, [0, 126, 0, 0], `${fault} fifth failure retains completed fourth stores`);
+    checkFifthMachineBytes(x, expected, `${fault} preserves precisely reached fifth partial stores`);
+    check(x.sourceActor.inputEdge5d4 === 0x2e0, `${fault} never erases earlier20/40/80/200 or fabricates output1`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFifthMachineBytes(x, expected, `${fault} consumes epoch before fifth handler or wrapper replay`);
+    check(x.inputState.byte5ff === 19 && x.tier.timerFrames === 7, `${fault} prevents replay of completed input and gauge stores`);
+  }
+  {
+    const x = fifthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf00; m.byte600 = 2; m.byte601 = 1; m.byte602 = 0; m.byte603 = 255;
+    Object.defineProperty(m, 'byte603', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte603'); retained(); checkInputPrefixEarlierStores(x);
+    checkFifthMachineBytes(x, [0, 0, 0, 255], 'expired fifth resets phase before wrapper tail decrement fails');
+    check(x.sourceActor.inputEdge5d4 === 0x2e0, 'read-only tail failure occurs before fifth edge OR');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['firstMask', 'secondMask', 'thirdMask', 'fourthMask', 'cue', 'inputTimer', 'mash', 'edge'] as const) {
+    const x = fifthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf00;
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'inputTimer' ? 'byte5fd' : fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    if (fault === 'firstMask') x.machineTables.descriptor38f8[4] = NaN;
+    else if (fault === 'secondMask') x.machineTables.descriptor3904![4] = NaN;
+    else if (fault === 'thirdMask') x.machineTables.descriptor3910![4] = NaN;
+    else if (fault === 'fourthMask') x.machineTables.descriptor391c![4] = NaN;
+    else Object.defineProperty(fault === 'cue' ? x.gates : fault === 'inputTimer' ? x.inputState : fault === 'mash' ? x.host : a, key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'firstMask' ? 'descriptor38f8[4]' : fault === 'secondMask' ? 'descriptor3904[4]' :
+      fault === 'thirdMask' ? 'descriptor3910[4]' : fault === 'fourthMask' ? 'descriptor391c[4]' : key); retained();
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${fault} earlier failure cannot enter fifth handler or wrapper`);
+    const expectedEdge = fault === 'firstMask' ? 0 : fault === 'secondMask' ? 0x20 : fault === 'thirdMask' ? 0x60 : fault === 'fourthMask' ? 0xe0 : 0x87654321;
+    check(a.inputEdge5d4 === expectedEdge && x.tier.timerFrames === 7, `${fault} retains the canonical edge exactly at the reached point`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${fault} consumed epoch cannot reach fifth later`);
+  }
+  for (const alias of ['first', 'second', 'third', 'fourth', 'dispatch', 'tables', 'actor', 'borg', 'machine', 'input', 'processor'] as const) {
+    const processor: SourceActorInputProcessorState = {gqr4: 0x00070007};
+    const x = fifthInputMachineHydratedControlFixture(undefined, processor);
+    const owner = alias === 'first' ? x.machineTables.descriptor38f8 : alias === 'second' ? x.machineTables.descriptor3904 :
+      alias === 'third' ? x.machineTables.descriptor3910 : alias === 'fourth' ? x.machineTables.descriptor391c :
+      alias === 'dispatch' ? x.machineTables.dispatch3988 : alias === 'tables' ? x.machineTables : alias === 'actor' ? x.sourceActor :
+      alias === 'borg' ? x.host : alias === 'machine' ? x.machineState : alias === 'input' ? x.inputState : processor;
+    Object.defineProperty(x.machineTables, 'descriptor3928', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [0, 77, 99, 0], `${alias} alias preflight precedes first handler`);
+    checkSecondMachineBytes(x, [0, 31, 55, 0], `${alias} alias preflight precedes second handler`);
+    checkThirdMachineBytes(x, [0, 17, 33, 0], `${alias} alias preflight precedes third handler`);
+    checkFourthMachineBytes(x, [0, 13, 21, 0], `${alias} alias preflight precedes fourth handler`);
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${alias} alias cannot replace retained fifth owner`);
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.sourceActor.inputHeld5d8 === 0xabcd &&
+      x.inputState.byte5ff === 9 && x.host.sourceArrowMash749 === 77,
+      `${alias} fifth alias preflight retains earlier gauge/stage/cues but precedes genuine input stores`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const alias of ['angular', 'direction', 'atan', 'high', 'low', 'coefficients'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true);
+    const owner = alias === 'angular' ? x.angularData : alias === 'direction' ? x.angularData.direction80433928 :
+      alias === 'atan' ? x.atanData : alias === 'high' ? x.atanData.atanHi802b5168 :
+      alias === 'low' ? x.atanData.atanLo802b5188 : x.atanData.coefficients802b51a8;
+    Object.defineProperty(x.machineTables, 'descriptor3928', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${alias} source arithmetic owner cannot alias fifth descriptor`);
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.inputState.byte5ff === 9, `${alias} collision refuses before angular/input work`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const key of ['byte600', 'byte601', 'byte602', 'byte603'] as const) {
+    const x = fifthInputMachineHydratedControlFixture();
+    Object.defineProperty(x.sourceActor, key, {value: 1, writable: true, configurable: true});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${key}: competing source owner`); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, [0, 77, 99, 0], `${key} rival refuses at first genuine machine entry`);
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${key} rival never replaces sealed fifth binding cells`);
+    check(x.sourceActor.inputEdge5d4 === 0, `${key} late rival retains actual input clear before wrapper refusal`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  {
+    const x = fifthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf00;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), sixthCall); retained();
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit status/wait advances actual attached animation after five input calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices after fifth returns');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6,
+      'attribute/movement/history cadence stays explicit after sixth refusal');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputEdge5d4 === 0x2e1 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4 && x.tier.timerFrames === 7,
+      'later actual setup replaces animation without implicit five-machine/input/gauge/matrix/history work');
+    checkMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain first bytes');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain second bytes');
+    checkThirdMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain third bytes');
+    checkFourthMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain fourth bytes');
+    checkFifthMachineBytes(x, [0, 126, 0, 15], 'explicit downstream owners never drain fifth duration16 tail');
+  }
+  console.log('[actor-fifth-input-machine-composition] PASS: genuine DAT/setup/status/gauge/stage/cue/input graph, distinct3928 and600..603, all100/200/400/800 combinations, five independent states/edges, canonical5bc flags0 and duration16 tail lifetime/retrigger, actual angular/finite-atan paths without host atan, optional source ordering and historical defaults, partial stores/consumed epochs, cross-owner/rival-cell exclusion and explicit downstream cadence; exact sixth68670/3934/604/2 refusal, synthetic offline only/no hardware/fulltick/production activation');
+}
+
+/** Sixth3934 supplies the authenticated flags4/control40 gate and duration1,
+ * unlike the ungated fifth3928 duration16 despite their shared input100.
+ * These are explicit offline decoded inputs, not a PAD producer or full tick. */
+function sixthInputMachineHydratedControlFixture(missing?: 'second' | 'third' | 'fourth' | 'fifth',
+  processor?: SourceActorInputProcessorState) {
+  const x = inputMachineHydratedControlFixture(processor, missing !== 'second', missing !== 'third', missing !== 'fourth', missing !== 'fifth', true);
+  const sixthDescriptor = x.machineTables.descriptor3934;
+  if (!sixthDescriptor || !x.firstMachine.hasSixthMachine()) throw Error('sixth-machine fixture requires explicit descriptor3934');
+  return Object.assign(x, {sixthDescriptor});
+}
+function checkSixthMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte604, m.byte605, m.byte606, m.byte607].every((value, i) => value === expected[i]), message);
+}
+export function runSixthInputMachineHydratedControlTests(): void {
+  const sixthCall = '80068670 reached unsupported sixth source call 80068b8c (descriptor802d3934, actor+604, mask2)';
+  const seventhCall = '80068688 reached unsupported seventh source call 80068b8c (descriptor802d3940, actor+608, mask4)';
+  {
+    const x = fifthInputMachineHydratedControlFixture(), retained = retainInputPrefixCadence(x);
+    check(!x.firstMachine.hasSixthMachine() && !Object.hasOwn(x.machineTables, 'descriptor3934') &&
+      ['byte604', 'byte605', 'byte606', 'byte607'].every(key => !Object.hasOwn(x.machineState, key)),
+      'historical five-machine graph gains no sixth descriptor, cells or implicit defaults');
+    rejects(() => x.runRawPrefix(1, 64, 20), sixthCall); retained(); checkInputMachinePrecedingStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0x260, 'absent sixth preserves the historical five-call output and exact refusal');
+  }
+  {
+    const x = inputPrefixHydratedControlFixture(false, undefined, true, undefined, true, true, true, true);
+    x.sourceActor.statusWord5bc = 0xf00;
+    const retained = retainInputPrefixCadence(x);
+    check(x.firstMachine === undefined && Object.hasOwn(x.machineTables, 'descriptor3934'),
+      'unclaimed supplied sixth descriptor cannot invent the missing genuine first-machine runtime');
+    rejects(() => x.runRawPrefix(1, 64, 20), '800685f8 reached unsupported source call 80068b8c');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4,
+      'missing first retains genuine input clear and cannot skip ahead to any of six wrappers');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check(x.sourceActor.inputEdge5d4 === 0 && x.tier.timerFrames === 7, 'missing first consumes epoch before any wrapper retry');
+  }
+  for (const missing of ['second', 'third', 'fourth', 'fifth'] as const) {
+    const x = sixthInputMachineHydratedControlFixture(missing), retained = retainInputPrefixCadence(x);
+    x.sourceActor.statusWord5bc = 0xf00;
+    const absent = missing === 'second' ? !x.firstMachine.hasSecondMachine() : missing === 'third' ? !x.firstMachine.hasThirdMachine() :
+      missing === 'fourth' ? !x.firstMachine.hasFourthMachine() : !x.firstMachine.hasFifthMachine();
+    check(x.firstMachine.hasSixthMachine() && absent, `${missing} absence is not filled by sixth ownership`);
+    rejects(() => x.runRawPrefix(1, 64, 20), missing === 'second' ? '80068610 reached unsupported second source call' :
+      missing === 'third' ? '80068628 reached unsupported third source call' : missing === 'fourth' ?
+        '80068640 reached unsupported fourth source call' : '80068658 reached unsupported fifth source call');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(x.sourceActor.inputEdge5d4 === (missing === 'second' ? 0x20 : missing === 'third' ? 0x60 : missing === 'fourth' ? 0xe0 : 0x2e0),
+      `${missing} omission retains precisely the completed earlier wrappers`);
+    checkSixthMachineBytes(x, [0, 5, 11, 0], `${missing} refusal cannot skip forward to sixth handler or wrapper`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSixthMachineBytes(x, [0, 5, 11, 0], `${missing} omission consumes epoch before sixth retry`);
+  }
+  for (const control of [0, 0x40]) for (let bits = 0; bits < 16; bits++) {
+    const mask = bits << 8, x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.statusWord5bc = mask; a.controlWord = 0x100000 | control;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a && x.status.getActualActor(x.actor) === a &&
+      x.world.getActualActor(x.actor) === a && x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === x.statusState &&
+      x.world.getMappingActor(x.actor) === x.mapping.getActor(x.actor) &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      x.firstMachine.hasSecondMachine() && x.firstMachine.hasThirdMachine() && x.firstMachine.hasFourthMachine() &&
+      x.firstMachine.hasFifthMachine() && x.firstMachine.hasSixthMachine() &&
+      new Set([x.machineTables.dispatch3988, x.machineTables.descriptor38f8, x.machineTables.descriptor3904,
+        x.machineTables.descriptor3910, x.machineTables.descriptor391c, x.machineTables.descriptor3928, x.sixthDescriptor]).size === 7 &&
+      [1, 4, 0, 1, 0x100, 0].every((value, n) => x.sixthDescriptor[n] === value) &&
+      ['byte614', 'byte615', 'byte616', 'byte617', 'byte618', 'byte619', 'byte61a', 'byte61b',
+        'byte61c', 'byte61d', 'byte61e', 'byte61f', 'byte624', 'byte625', 'byte626', 'byte627',
+        'byte600', 'byte601', 'byte602', 'byte603', 'byte604', 'byte605', 'byte606', 'byte607',
+        'inputFlags5d4', 'inputEdges5bc'].every(key => !Object.hasOwn(a, key)) &&
+      ['byte608', 'byte609', 'byte60a', 'byte60b'].every(key => !Object.hasOwn(x.machineState, key)) &&
+      !Object.hasOwn(x.machineTables, 'descriptor3940') && isSourceActorTickPrefixClaimedActor(a),
+      'six distinct descriptors share the actual DAT/setup/status/gauge/stage/cue/input owners without rivals or seventh defaults');
+    const sixthHit = (mask & 0x100) !== 0 && control === 0x40;
+    const expectedEdge = ((mask & 0x200) ? 0x60 : 0) | ((mask & 0x400) ? 0x80 : 0) |
+      ((mask & 0x800) ? 0x200 : 0) | ((mask & 0x100) ? 1 : 0) | (sixthHit ? 2 : 0);
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), seventhCall); retained();
+    if (control === 0x40) checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [(mask & 0x200) ? 0 : 2, 126, 0, 0], `${mask}/${control} first output20 remains independent`);
+    checkSecondMachineBytes(x, [(mask & 0x200) ? 0 : 2, 126, 0, 0], `${mask}/${control} second output40 remains independent`);
+    checkThirdMachineBytes(x, [(mask & 0x400) ? 0 : 2, 126, 0, 0], `${mask}/${control} third output80 remains independent`);
+    checkFourthMachineBytes(x, [(mask & 0x800) ? 0 : 2, 126, 0, 0], `${mask}/${control} fourth output200 remains independent`);
+    checkFifthMachineBytes(x, [(mask & 0x100) ? 0 : 2, 126, 0, (mask & 0x100) ? 15 : 0],
+      `${mask}/${control} fifth flags0/output1 retains independent duration16`);
+    checkSixthMachineBytes(x, [sixthHit ? 0 : 2, 126, 0, 0],
+      `${mask}/${control} sixth flags4/output2 consumes its duration1 within the same wrapper`);
+    check(a.controlWord === control && a.inputEdge5d4 === expectedEdge && a.inputHeld5d8 === 0x200 && i.byte5fc === 11 &&
+      i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 &&
+      x.host.sourceArrowMash749 === [0x100, 0x200, 0x400, 0x800].filter(value => (mask & value) !== 0).length,
+      `${mask}/${control} caller clears once, ignores six real0/1 returns and retains each completed output`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSixthMachineBytes(x, [sixthHit ? 0 : 2, 126, 0, 0], `${mask}/${control} seventh refusal consumes epoch before sixth replay`);
+    check(a.inputEdge5d4 === expectedEdge && i.byte5ff === 19 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${mask}/${control} consumed epoch retains actual input, distance and gauge stores`);
+  }
+  for (const control of [0, 0x40]) for (const canonicalHit of [false, true]) for (const status of [0, 0x60000]) {
+    const x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.controlWord = 0x100000 | control; a.statusWord5bc = canonicalHit ? 0x100 : 0xe00;
+    a.statusWord5b4 = status | (canonicalHit ? 0 : 0x100); a.inputHeld5d8 = canonicalHit ? 0 : 0x1ff;
+    i.byte5fc = canonicalHit || status === 0 ? 3 : 11; i.byte5fd = 0; i.byte5fe = 0; i.byte5ff = canonicalHit ? 0 : 4;
+    const retained = retainInputPrefixCadence(x), hit = canonicalHit && control !== 0;
+    rejects(() => x.runRawPrefix(1, 64, 20), seventhCall); retained();
+    check(a.controlWord === control && a.inputHeld5d8 === (canonicalHit ? 0 : 0x1ff) &&
+      a.statusWord5b4 === (status | (canonicalHit ? 0 : 0x100)) && a.inputEdge5d4 === (canonicalHit ? hit ? 3 : 1 : 0x2e0),
+      `control${control}/status${status} sixth selects only canonical5bc100, never held5d8 or5b4 and no flags8 status gate`);
+    checkFifthMachineBytes(x, [canonicalHit ? 0 : 2, 126, 0, canonicalHit ? 15 : 0], 'sixth control gate never gates fifth flags0');
+    checkSixthMachineBytes(x, [hit ? 0 : 2, 126, 0, 0], 'authenticated sixth flags4 requires control40 only');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const lazy of ['mask', 'index'] as const) {
+    const x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.controlWord = 0x100000; a.statusWord5bc = 0xf00; m.byte604 = 2; m.byte605 = 7; m.byte606 = 0;
+    if (lazy === 'mask') x.sixthDescriptor[4] = NaN; else m.byte606 = 255;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), seventhCall); retained();
+    checkSixthMachineBytes(x, [2, 6, lazy === 'mask' ? 0 : 255, 0], `${lazy} is not read after sixth control40 gate returns`);
+    check(a.inputEdge5d4 === 0x2e1, 'sixth lazy gate preserves all five earlier outputs including fifth duration16');
+    a.controlWord = 0x40;
+    rejects(() => x.runRawPrefix(2, 64, 20), lazy === 'mask' ? 'descriptor3934[4]' : 'outside explicit12-byte descriptor'); retained();
+    checkSixthMachineBytes(x, [2, 5, lazy === 'mask' ? 0 : 255, 0], `${lazy} is reached only after opening40 and decrementing sixth timer`);
+    check(a.inputEdge5d4 === 0x2e1 && x.tier.timerFrames === 6, 'opened gate failure retains fifth and genuine second-epoch gauge work');
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch'); retained();
+  }
+  for (const [sx, sy, direction] of [[19, 0, 0], [20, 0, 2], [51, 0, 2], [52, 0, 2], [0, 52, 8],
+    [-52, 0, 1], [0, -52, 4], [52, 52, 10], [-52, 52, 9], [-52, -52, 5], [52, -52, 6],
+    [1, 52, 8], [1, -52, 4], [70, -29, 2]] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = sx; i.stickY5cb = sy; i.byte5fc = 0; a.statusWord5bc = 0xf00;
+    check(x.firstMachine.hasSixthMachine() && x.angular.getProcessor() === x.angularProcessor &&
+      x.angular.getAtanRuntime()?.getProcessor() === x.angularProcessor,
+      'sixth composes with genuine angular/finite-atan owners, not callback-produced input');
+    const retained = retainInputPrefixCadence(x), strong = sx * sx + sy * sy >= 2704;
+    const hostAtan = Math.atan, hostAtan2 = Math.atan2;
+    try {
+      Math.atan = () => {throw Error('host atan is not source sixth composition');};
+      Math.atan2 = () => {throw Error('host atan2 is not source sixth composition');};
+      rejects(() => x.runRawPrefix(1, 64, 20), seventhCall);
+    } finally {Math.atan = hostAtan; Math.atan2 = hostAtan2;}
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (direction === 0 ? 0x200 : strong ? 0x200 | direction | (direction << 4) : 0x2c0 | direction) &&
+      i.byte5fc === (direction === 0 ? 8 : strong ? 11 : 9) && i.byte5fd === (direction === 0 ? 0 : strong ? 19 : 1) &&
+      i.byte5ff === 19 && a.inputEdge5d4 === 0x2e3 && x.host.sourceArrowMash749 === 4,
+      `sixth signed-byte${sx}/${sy} retains radius gates, axis/quadrant/X1/negative-bin selection and six edges`);
+    checkMachineBytes(x, [0, 126, 0, 0], 'genuine angular chain completes first wrapper');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'genuine angular chain completes second wrapper');
+    checkThirdMachineBytes(x, [0, 126, 0, 0], 'genuine angular chain completes third wrapper');
+    checkFourthMachineBytes(x, [0, 126, 0, 0], 'genuine angular chain completes fourth wrapper');
+    checkFifthMachineBytes(x, [0, 126, 0, 15], 'genuine angular chain consumes one fifth duration16 call');
+    checkSixthMachineBytes(x, [0, 126, 0, 0], 'genuine angular chain consumes entire sixth duration1');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkFifthMachineBytes(x, [0, 126, 0, 15], 'seventh refusal cannot replay actual angular/input work or fifth tail');
+    checkSixthMachineBytes(x, [0, 126, 0, 0], 'seventh refusal cannot replay sixth output2');
+  }
+  for (const fault of ['coefficient', 'sixthMask'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = -52; i.stickY5cb = 52; i.byte5fc = 0; a.statusWord5bc = 0xf00;
+    if (fault === 'coefficient') x.atanData.coefficients802b51a8[0] = 0; else x.machineTables.descriptor3934![4] = NaN;
+    const retained = retainInputPrefixCadence(x), late = fault === 'sixthMask';
+    rejects(() => x.runRawPrefix(1, 64, 20), late ? 'descriptor3934[4]' : 'coefficients802b51a8');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (late ? 0x299 : 0xabcd) && a.inputEdge5d4 === (late ? 0x2e1 : 0x87654321) &&
+      i.byte5fc === (late ? 11 : 0) && i.byte5fd === (late ? 19 : 1) && i.byte5ff === (late ? 19 : 9) &&
+      x.host.sourceArrowMash749 === (late ? 4 : 77), `${fault} retains exactly the reached angular/input prefix`);
+    checkFifthMachineBytes(x, late ? [0, 126, 0, 15] : [0, 9, 17, 0], `${fault} retains reached fifth stores`);
+    checkSixthMachineBytes(x, late ? [2, 126, 0, 0] : [0, 5, 11, 0], `${fault} cannot fabricate sixth tail or output2`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const expired of ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'] as const) {
+    const x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf00;
+    if (expired === 'first') {m.byte614 = 2; m.byte615 = 1; m.byte616 = 0;}
+    else if (expired === 'second') {m.byte618 = 2; m.byte619 = 1; m.byte61a = 0;}
+    else if (expired === 'third') {m.byte61c = 2; m.byte61d = 1; m.byte61e = 0;}
+    else if (expired === 'fourth') {m.byte624 = 2; m.byte625 = 1; m.byte626 = 0;}
+    else if (expired === 'fifth') {m.byte600 = 2; m.byte601 = 1; m.byte602 = 0;}
+    else {m.byte604 = 2; m.byte605 = 1; m.byte606 = 0;}
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), seventhCall); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, expired === 'first' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} first state remains independent`);
+    checkSecondMachineBytes(x, expired === 'second' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} second state remains independent`);
+    checkThirdMachineBytes(x, expired === 'third' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} third state remains independent`);
+    checkFourthMachineBytes(x, expired === 'fourth' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} fourth state remains independent`);
+    checkFifthMachineBytes(x, expired === 'fifth' ? [0, 0, 0, 0] : [0, 126, 0, 15], `${expired} fifth duration16 remains independent`);
+    checkSixthMachineBytes(x, expired === 'sixth' ? [0, 0, 0, 0] : [0, 126, 0, 0], `${expired} expiry cannot skip sixth or seventh call`);
+    const absent = expired === 'first' ? 0x20 : expired === 'second' ? 0x40 : expired === 'third' ? 0x80 :
+      expired === 'fourth' ? 0x200 : expired === 'fifth' ? 1 : 2;
+    check(a.inputEdge5d4 === (0x2e3 & ~absent), `${expired} return0 neither adds its mask nor erases other wrappers' results`);
+  }
+  {
+    const x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    // Explicit in-domain input keeps genuine source gauge calls alive throughout
+    // the fifth tail, rather than bypassing its unrelated tier-expiry boundary.
+    x.tier.timerFrames = 64;
+    for (let epoch = 1; epoch <= 17; epoch++) {
+      a.statusWord5bc = epoch === 1 ? 0xf00 : 0xe00;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), seventhCall); retained();
+      checkFifthMachineBytes(x, epoch === 1 ? [0, 126, 0, 15] : [2, 128 - epoch, 0, Math.max(16 - epoch, 0)],
+        `epoch${epoch} fifth duration16 outlives sixth without another canonical100 hit`);
+      checkSixthMachineBytes(x, [epoch === 1 ? 0 : 2, epoch === 1 ? 126 : 128 - epoch, 0, 0],
+        `epoch${epoch} sixth duration1 ends immediately while its own phase2 timer runs independently`);
+      check(a.inputEdge5d4 === (epoch === 1 ? 0x2e3 : epoch <= 16 ? 0x2e1 : 0x2e0) &&
+        x.host.sourceArrowMash749 === (epoch === 1 ? 4 : 3), `epoch${epoch} fifth sixteen-call output differs from sixth one-call output`);
+      checkMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} duration test retains independent first state`);
+      checkSecondMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} duration test retains independent second state`);
+      checkThirdMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} duration test retains independent third state`);
+      checkFourthMachineBytes(x, [0, 126, 0, 0], `epoch${epoch} duration test retains independent fourth state`);
+      rejects(() => x.runRawPrefix(epoch, 128, 40), 'epoch'); retained();
+      check(x.machineState.byte603 === Math.max(16 - epoch, 0) && x.machineState.byte607 === 0 && x.tier.timerFrames === 64 - epoch,
+        `epoch${epoch} duplicate cannot drain either tail or extra genuine gauge frame`);
+    }
+  }
+  {
+    const x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    const expected = [[0, 126, 0, 0], [2, 126, 0, 0], [2, 125, 0, 0], [0, 124, 0, 0], [2, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 5; epoch++) {
+      a.statusWord5bc = epoch === 3 ? 0 : 0x100; a.controlWord = epoch === 2 || epoch === 5 ? 0 : 0x40;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), seventhCall); retained();
+      checkFifthMachineBytes(x, epoch === 3 ? [2, 126, 0, 14] : epoch === 4 ? [0, 125, 0, 15] : [0, 126, 0, 15],
+        `epoch${epoch} fifth retriggers or retains its tail regardless of sixth control gate`);
+      checkSixthMachineBytes(x, expected[epoch - 1]!, `epoch${epoch} live control40 and canonical100 alone determine sixth retrigger`);
+      check(a.inputEdge5d4 === (epoch === 1 || epoch === 4 ? 3 : 1) && x.tier.timerFrames === 8 - epoch,
+        `epoch${epoch} sixth never accumulates duration or borrows fifth tail`);
+    }
+  }
+  for (const expired of [false, true]) {
+    const x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.controlWord = 0x100000; a.statusWord5bc = 0xe00;
+    m.byte604 = 2; m.byte605 = expired ? 1 : 7; m.byte606 = 0; m.byte607 = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), seventhCall); retained();
+    checkSixthMachineBytes(x, [expired ? 0 : 2, expired ? 0 : 6, 0, 1],
+      `${expired} supplied live sixth tail survives control gate or timer expiry and is consumed exactly once`);
+    check(a.inputEdge5d4 === 0x2e2, 'sixth wrapper tail alone ORs2 after handler0, without canonical100 or fifth tail');
+  }
+  {
+    const x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0; m.byte618 = 2; m.byte619 = 7; m.byte61a = 0;
+    m.byte61c = 2; m.byte61d = 11; m.byte61e = 0; m.byte624 = 2; m.byte625 = 15; m.byte626 = 0;
+    m.byte600 = 2; m.byte601 = 19; m.byte602 = 0; m.byte604 = 2; m.byte605 = 23; m.byte606 = 0;
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      if (epoch === 3) a.statusWord5bc = 0xf00;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), seventhCall); retained();
+      checkMachineBytes(x, [epoch === 3 ? 0 : 2, 127 - epoch, 0, 0], `epoch${epoch} independent first countdown`);
+      checkSecondMachineBytes(x, [epoch === 3 ? 0 : 2, 7 - epoch, 0, 0], `epoch${epoch} independent second countdown`);
+      checkThirdMachineBytes(x, [epoch === 3 ? 0 : 2, 11 - epoch, 0, 0], `epoch${epoch} independent third countdown`);
+      checkFourthMachineBytes(x, [epoch === 3 ? 0 : 2, 15 - epoch, 0, 0], `epoch${epoch} independent fourth countdown`);
+      checkFifthMachineBytes(x, [epoch === 3 ? 0 : 2, 19 - epoch, 0, epoch === 3 ? 15 : 0], `epoch${epoch} independent fifth timer and tail`);
+      checkSixthMachineBytes(x, [epoch === 3 ? 0 : 2, 23 - epoch, 0, 0], `epoch${epoch} independent sixth timer and duration1`);
+      check(a.inputEdge5d4 === (epoch === 3 ? 0x2e3 : 0) && x.tier.timerFrames === 8 - epoch,
+        `epoch${epoch} all six machines and genuine gauge execute once on live canonical word`);
+    }
+  }
+  for (const control of [0, 0x40]) {
+    const x = sixthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf00; x.sourceActor.controlWord = 0x100000 | control;
+    // Supplied phase1 is synthetic state, not claimed reachable from mode1.
+    m.byte604 = 1; m.byte605 = 2; m.byte606 = 0;
+    const expected = [[1, 0, 1, 0], [0, 255, 1, 0], [control === 0 ? 2 : 0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), seventhCall); retained();
+      checkSixthMachineBytes(x, expected[epoch - 1]!, `epoch${epoch}/control${control} supplied sixth phase1 ignores40, reloads0 and expires before phase2 restores gate`);
+      checkFifthMachineBytes(x, [0, 126, 0, 15], `epoch${epoch} supplied sixth phase1 never substitutes fifth state`);
+      check(x.sourceActor.inputEdge5d4 === (epoch === 3 && control !== 0 ? 0x2e3 : 0x2e1), 'sixth0/1 never discards prior outputs or bypasses seventh refusal');
+    }
+  }
+  for (const fault of ['dispatch', 'index', 'phase', 'timer', 'flags', 'mask', 'duration', 'tail', 'descriptorOwner'] as const) {
+    const x = sixthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf00;
+    if (fault === 'dispatch') {m.byte604 = 1; x.machineTables.dispatch3988[1] = 0x80000000;}
+    else if (fault === 'flags') x.sixthDescriptor[1] = NaN;
+    else if (fault === 'mask') x.sixthDescriptor[4] = NaN;
+    else if (fault === 'duration') x.sixthDescriptor[3] = NaN;
+    else if (fault === 'descriptorOwner') x.machineTables.descriptor3934 = [...x.sixthDescriptor];
+    else Object.defineProperty(m, fault === 'index' ? 'byte606' : fault === 'phase' ? 'byte604' :
+      fault === 'timer' ? 'byte605' : 'byte607', {writable: false});
+    const expected = fault === 'dispatch' ? [1, 5, 11, 0] : fault === 'index' || fault === 'descriptorOwner' ? [0, 5, 11, 0] :
+      fault === 'phase' ? [0, 5, 0, 0] : fault === 'timer' ? [2, 5, 0, 0] :
+      fault === 'tail' || fault === 'duration' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'flags' || fault === 'mask' || fault === 'duration' ? 'integer out of bounds' :
+      fault === 'descriptorOwner' ? 'descriptor3934: owner changed' : fault === 'index' ? 'byte606' :
+      fault === 'phase' ? 'byte604' : fault === 'timer' ? 'byte605' : 'byte607';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [0, 126, 0, 0], `${fault} sixth failure retains completed first stores`);
+    checkSecondMachineBytes(x, [0, 126, 0, 0], `${fault} sixth failure retains completed second stores`);
+    checkThirdMachineBytes(x, [0, 126, 0, 0], `${fault} sixth failure retains completed third stores`);
+    checkFourthMachineBytes(x, [0, 126, 0, 0], `${fault} sixth failure retains completed fourth stores`);
+    checkFifthMachineBytes(x, [0, 126, 0, 15], `${fault} sixth failure retains completed fifth tail/output1`);
+    checkSixthMachineBytes(x, expected, `${fault} preserves precisely reached sixth partial stores`);
+    check(x.sourceActor.inputEdge5d4 === 0x2e1, `${fault} never erases earlier outputs or fabricates output2`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSixthMachineBytes(x, expected, `${fault} consumes epoch before sixth handler or wrapper replay`);
+    check(x.inputState.byte5ff === 19 && x.tier.timerFrames === 7 && x.machineState.byte603 === 15,
+      `${fault} cannot replay completed input, gauge or fifth tail decrement`);
+  }
+  {
+    const x = sixthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf00; m.byte604 = 2; m.byte605 = 1; m.byte606 = 0; m.byte607 = 255;
+    Object.defineProperty(m, 'byte607', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte607'); retained(); checkInputPrefixEarlierStores(x);
+    checkSixthMachineBytes(x, [0, 0, 0, 255], 'expired sixth resets phase before wrapper tail decrement fails');
+    check(x.sourceActor.inputEdge5d4 === 0x2e1 && x.machineState.byte603 === 15,
+      'read-only sixth tail failure precedes output2 without rolling back fifth tail');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['firstMask', 'secondMask', 'thirdMask', 'fourthMask', 'fifthMask', 'cue', 'inputTimer', 'mash', 'edge'] as const) {
+    const x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf00;
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'inputTimer' ? 'byte5fd' : fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    if (fault === 'firstMask') x.machineTables.descriptor38f8[4] = NaN;
+    else if (fault === 'secondMask') x.machineTables.descriptor3904![4] = NaN;
+    else if (fault === 'thirdMask') x.machineTables.descriptor3910![4] = NaN;
+    else if (fault === 'fourthMask') x.machineTables.descriptor391c![4] = NaN;
+    else if (fault === 'fifthMask') x.machineTables.descriptor3928![4] = NaN;
+    else Object.defineProperty(fault === 'cue' ? x.gates : fault === 'inputTimer' ? x.inputState : fault === 'mash' ? x.host : a, key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'firstMask' ? 'descriptor38f8[4]' : fault === 'secondMask' ? 'descriptor3904[4]' :
+      fault === 'thirdMask' ? 'descriptor3910[4]' : fault === 'fourthMask' ? 'descriptor391c[4]' : fault === 'fifthMask' ? 'descriptor3928[4]' : key);
+    retained();
+    checkSixthMachineBytes(x, [0, 5, 11, 0], `${fault} earlier failure cannot enter sixth handler or wrapper`);
+    const expectedEdge = fault === 'firstMask' ? 0 : fault === 'secondMask' ? 0x20 : fault === 'thirdMask' ? 0x60 :
+      fault === 'fourthMask' ? 0xe0 : fault === 'fifthMask' ? 0x2e0 : 0x87654321;
+    check(a.inputEdge5d4 === expectedEdge && x.tier.timerFrames === 7, `${fault} retains canonical edge exactly at reached source point`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSixthMachineBytes(x, [0, 5, 11, 0], `${fault} consumed epoch cannot reach sixth later`);
+  }
+  for (const alias of ['first', 'second', 'third', 'fourth', 'fifth', 'dispatch', 'tables', 'actor', 'borg', 'machine', 'input', 'processor'] as const) {
+    const processor: SourceActorInputProcessorState = {gqr4: 0x00070007};
+    const x = sixthInputMachineHydratedControlFixture(undefined, processor);
+    const owner = alias === 'first' ? x.machineTables.descriptor38f8 : alias === 'second' ? x.machineTables.descriptor3904 :
+      alias === 'third' ? x.machineTables.descriptor3910 : alias === 'fourth' ? x.machineTables.descriptor391c :
+      alias === 'fifth' ? x.machineTables.descriptor3928 : alias === 'dispatch' ? x.machineTables.dispatch3988 :
+      alias === 'tables' ? x.machineTables : alias === 'actor' ? x.sourceActor : alias === 'borg' ? x.host :
+      alias === 'machine' ? x.machineState : alias === 'input' ? x.inputState : processor;
+    Object.defineProperty(x.machineTables, 'descriptor3934', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checkMachineBytes(x, [0, 77, 99, 0], `${alias} alias preflight precedes first handler`);
+    checkSecondMachineBytes(x, [0, 31, 55, 0], `${alias} alias preflight precedes second handler`);
+    checkThirdMachineBytes(x, [0, 17, 33, 0], `${alias} alias preflight precedes third handler`);
+    checkFourthMachineBytes(x, [0, 13, 21, 0], `${alias} alias preflight precedes fourth handler`);
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${alias} alias preflight precedes fifth handler`);
+    checkSixthMachineBytes(x, [0, 5, 11, 0], `${alias} alias cannot replace retained sixth owner`);
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.sourceActor.inputHeld5d8 === 0xabcd &&
+      x.inputState.byte5ff === 9 && x.host.sourceArrowMash749 === 77,
+      `${alias} sixth alias retains preceding gauge/stage/cues but refuses before angular/input stores`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const alias of ['angular', 'direction', 'atan', 'high', 'low', 'coefficients'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true);
+    const owner = alias === 'angular' ? x.angularData : alias === 'direction' ? x.angularData.direction80433928 :
+      alias === 'atan' ? x.atanData : alias === 'high' ? x.atanData.atanHi802b5168 :
+      alias === 'low' ? x.atanData.atanLo802b5188 : x.atanData.coefficients802b51a8;
+    Object.defineProperty(x.machineTables, 'descriptor3934', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checkSixthMachineBytes(x, [0, 5, 11, 0], `${alias} source arithmetic owner cannot alias sixth descriptor`);
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${alias} alias refuses before fifth's independent tail begins`);
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.inputState.byte5ff === 9, `${alias} collision precedes angular/input work`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const key of ['byte604', 'byte605', 'byte606', 'byte607'] as const) {
+    const x = sixthInputMachineHydratedControlFixture();
+    Object.defineProperty(x.sourceActor, key, {value: 1, writable: true, configurable: true});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${key}: competing source owner`); retained(); checkInputMachinePrecedingStores(x);
+    checkMachineBytes(x, [0, 77, 99, 0], `${key} rival refuses at first genuine machine entry`);
+    checkFifthMachineBytes(x, [0, 9, 17, 0], `${key} rival never borrows fifth binding cells`);
+    checkSixthMachineBytes(x, [0, 5, 11, 0], `${key} rival never replaces sealed sixth binding cells`);
+    check(x.sourceActor.inputEdge5d4 === 0, `${key} late rival retains actual input clear before wrapper refusal`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  {
+    const x = sixthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf00;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), seventhCall); retained();
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit status/wait advances actual attached animation after six input calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices after sixth returns');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6,
+      'attribute/movement/history cadence stays explicit after seventh refusal');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputEdge5d4 === 0x2e3 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4 && x.tier.timerFrames === 7,
+      'later actual setup replaces animation without implicit six-machine/input/gauge/matrix/history work');
+    checkMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain first bytes');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain second bytes');
+    checkThirdMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain third bytes');
+    checkFourthMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners retain fourth bytes');
+    checkFifthMachineBytes(x, [0, 126, 0, 15], 'explicit downstream owners never drain fifth duration16 tail');
+    checkSixthMachineBytes(x, [0, 126, 0, 0], 'explicit downstream owners never replay sixth duration1 or output2');
+  }
+  console.log('[actor-sixth-input-machine-composition] PASS: genuine DAT/setup/status/gauge/stage/cue/input graph, distinct3934 and604..607, all16 input combinations with both control40 states, six independent states/outputs, canonical5bc100 and authenticated phase2 flags4 gate, duration1 versus retained fifth16 and control transitions, genuine angular/finite-atan paths without host atan, optional ordering and historical defaults, partial stores/consumed epochs, cross-owner/rival exclusion and explicit downstream cadence; exact seventh68688/3940/608/4 refusal, synthetic offline only/no hardware/fulltick/production activation');
+}
+
+/** Seventh3940's authenticated flags0 and canonical input20 differ from
+ * sixth3934's control40-gated input100. Output4 is not a direction inference.
+ * These explicit offline inputs extend only the genuine composed prefix;
+ * no PAD producer, eighth descriptor contents or production tick is supplied. */
+function seventhInputMachineHydratedControlFixture(missing?: 'second' | 'third' | 'fourth' | 'fifth' | 'sixth',
+  processor?: SourceActorInputProcessorState) {
+  const x = inputMachineHydratedControlFixture(processor, missing !== 'second', missing !== 'third', missing !== 'fourth',
+    missing !== 'fifth', missing !== 'sixth', true), seventhDescriptor = x.machineTables.descriptor3940;
+  if (!seventhDescriptor || !x.firstMachine.hasSeventhMachine()) throw Error('seventh-machine fixture requires explicit descriptor3940');
+  return Object.assign(x, {seventhDescriptor});
+}
+function checkSeventhMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte608, m.byte609, m.byte60a, m.byte60b].every((value, i) => value === expected[i]), message);
+}
+export function runSeventhInputMachineHydratedControlTests(): void {
+  const seventhCall = '80068688 reached unsupported seventh source call 80068b8c (descriptor802d3940, actor+608, mask4)';
+  const eighthCall = '800686a0 reached unsupported eighth source call 80068b8c (descriptor802d394c, actor+60c, mask8)';
+  const checks = [checkMachineBytes, checkSecondMachineBytes, checkThirdMachineBytes, checkFourthMachineBytes,
+    checkFifthMachineBytes, checkSixthMachineBytes, checkSeventhMachineBytes];
+  const initial = [[0, 77, 99, 0], [0, 31, 55, 0], [0, 17, 33, 0], [0, 13, 21, 0],
+    [0, 9, 17, 0], [0, 5, 11, 0], [0, 3, 7, 0]];
+  const complete = [[0, 126, 0, 0], [0, 126, 0, 0], [0, 126, 0, 0], [0, 126, 0, 0],
+    [0, 126, 0, 15], [0, 126, 0, 0], [0, 126, 0, 0]];
+  const cells = [['byte614', 'byte615', 'byte616', 'byte617'], ['byte618', 'byte619', 'byte61a', 'byte61b'],
+    ['byte61c', 'byte61d', 'byte61e', 'byte61f'], ['byte624', 'byte625', 'byte626', 'byte627'],
+    ['byte600', 'byte601', 'byte602', 'byte603'], ['byte604', 'byte605', 'byte606', 'byte607'],
+    ['byte608', 'byte609', 'byte60a', 'byte60b']] as const;
+  const outputs = [0x20, 0x40, 0x80, 0x200, 1, 2, 4];
+  {
+    const x = sixthInputMachineHydratedControlFixture(), retained = retainInputPrefixCadence(x);
+    check(!x.firstMachine.hasSeventhMachine() && !Object.hasOwn(x.machineTables, 'descriptor3940') &&
+      cells[6].every(key => !Object.hasOwn(x.machineState, key)),
+      'historical six-machine graph acquires no seventh descriptor, cells or implicit defaults');
+    rejects(() => x.runRawPrefix(1, 64, 20), seventhCall); retained(); checkInputMachinePrecedingStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0x260, 'missing seventh preserves exact former six-machine refusal and outputs');
+  }
+  {
+    const x = inputPrefixHydratedControlFixture(false, undefined, true, undefined, true, true, true, true, true);
+    x.sourceActor.statusWord5bc = 0xf20;
+    const retained = retainInputPrefixCadence(x);
+    check(x.firstMachine === undefined && Object.hasOwn(x.machineTables, 'descriptor3940'),
+      'supplied seventh table cannot invent the missing actual first-machine runtime');
+    rejects(() => x.runRawPrefix(1, 64, 20), '800685f8 reached unsupported source call 80068b8c');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4,
+      'missing runtime retains genuine input clear but cannot jump into any of seven wrappers');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [n, missing] of (['second', 'third', 'fourth', 'fifth', 'sixth'] as const).entries()) {
+    const x = seventhInputMachineHydratedControlFixture(missing), retained = retainInputPrefixCadence(x);
+    x.sourceActor.statusWord5bc = 0xf20;
+    const present = [x.firstMachine.hasSecondMachine(), x.firstMachine.hasThirdMachine(), x.firstMachine.hasFourthMachine(),
+      x.firstMachine.hasFifthMachine(), x.firstMachine.hasSixthMachine()];
+    check(x.firstMachine.hasSeventhMachine() && !present[n], `${missing} absence is not filled by seventh ownership`);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${['80068610', '80068628', '80068640', '80068658', '80068670'][n]} reached unsupported ${missing} source call`);
+    retained(); checkInputPrefixEarlierStores(x);
+    for (let p = 0; p <= n; p++) checks[p]!(x, complete[p]!, `${missing} retains completed predecessor${p + 1}`);
+    checkSeventhMachineBytes(x, initial[6]!, `${missing} refusal cannot skip into seventh handler or wrapper`);
+    check(x.sourceActor.inputEdge5d4 === [0x20, 0x60, 0xe0, 0x2e0, 0x2e1][n],
+      `${missing} omission retains only the completed earlier wrapper outputs`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSeventhMachineBytes(x, initial[6]!, `${missing} refusal consumes the epoch before seventh retry`);
+  }
+  for (const control of [0, 0x40]) for (let bits = 0; bits < 32; bits++) {
+    const mask = ((bits & 15) << 8) | ((bits & 16) ? 0x20 : 0);
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.statusWord5bc = mask; a.controlWord = 0x100000 | control;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a && x.status.getActualActor(x.actor) === a &&
+      x.world.getActualActor(x.actor) === a && x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === x.statusState &&
+      x.world.getMappingActor(x.actor) === x.mapping.getActor(x.actor) &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      x.firstMachine.hasSecondMachine() && x.firstMachine.hasThirdMachine() && x.firstMachine.hasFourthMachine() &&
+      x.firstMachine.hasFifthMachine() && x.firstMachine.hasSixthMachine() && x.firstMachine.hasSeventhMachine() &&
+      new Set([x.machineTables.dispatch3988, x.machineTables.descriptor38f8, x.machineTables.descriptor3904,
+        x.machineTables.descriptor3910, x.machineTables.descriptor391c, x.machineTables.descriptor3928,
+        x.machineTables.descriptor3934, x.seventhDescriptor]).size === 8 &&
+      [1, 0, 0, 1, 0x20, 0].every((value, n) => x.seventhDescriptor[n] === value) &&
+      [...cells.flat(), 'inputFlags5d4', 'inputEdges5bc'].every(key => !Object.hasOwn(a, key)) &&
+      ['byte60c', 'byte60d', 'byte60e', 'byte60f'].every(key => !Object.hasOwn(x.machineState, key)) &&
+      !Object.hasOwn(x.machineTables, 'descriptor394c') && isSourceActorTickPrefixClaimedActor(a),
+      'seven distinct descriptors share actual DAT/setup/status/gauge/stage/cue/input owners without rivals or eighth defaults');
+    check((a.inputEdge5d4 & 4) === 0, 'seventh own output4 begins clear, so a successful OR cannot be vacuous');
+    const hits = [(mask & 0x200) !== 0, (mask & 0x200) !== 0, (mask & 0x400) !== 0, (mask & 0x800) !== 0,
+      (mask & 0x100) !== 0, (mask & 0x100) !== 0 && control === 0x40, (mask & 0x20) !== 0];
+    const expectedEdge = hits.reduce((edge, hit, n) => edge | (hit ? outputs[n]! : 0), 0);
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), eighthCall); retained();
+    if (control === 0x40) checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, [hits[n] ? 0 : 2, 126, 0, n === 4 && hits[n] ? 15 : 0],
+      `${mask}/${control} machine${n + 1} retains its own phase/timer/index/tail and output`));
+    check(a.controlWord === control && a.inputEdge5d4 === expectedEdge && a.inputHeld5d8 === 0x200 &&
+      i.byte5fc === 11 && i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 &&
+      x.host.sourceArrowMash749 === [0x100, 0x200, 0x400, 0x800].filter(value => (mask & value) !== 0).length,
+      `${mask}/${control} caller clears once, ignores seven real0/1 returns and excludes seventh20 from the preceding mash mask`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSeventhMachineBytes(x, [hits[6] ? 0 : 2, 126, 0, 0], `${mask}/${control} eighth refusal consumes seventh epoch`);
+    check(a.inputEdge5d4 === expectedEdge && i.byte5ff === 19 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${mask}/${control} consumed epoch cannot replay earlier input/gauge or seven-machine effects`);
+  }
+  for (const control of [0, 0x40]) for (const canonicalHit of [false, true]) for (const status of [0, 0x60000]) {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.controlWord = 0x100000 | control; a.statusWord5bc = 0xf00 | (canonicalHit ? 0x20 : 0);
+    a.statusWord5b4 = status | (canonicalHit ? 0 : 0x20); a.inputHeld5d8 = canonicalHit ? 0 : 0x20;
+    i.byte5fc = canonicalHit || status === 0 ? 3 : 11; i.byte5fd = 0; i.byte5fe = 0; i.byte5ff = canonicalHit ? 0 : 4;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), eighthCall); retained();
+    check(a.controlWord === control && a.inputHeld5d8 === (canonicalHit ? 0 : 0x20) &&
+      a.statusWord5b4 === (status | (canonicalHit ? 0 : 0x20)) &&
+      a.inputEdge5d4 === (0x2e1 | (control ? 2 : 0) | (canonicalHit ? 4 : 0)),
+      `control${control}/status${status} seventh reads only canonical5bc20, never held-direction20 or5b420, with no flags4/8 gate`);
+    checkSixthMachineBytes(x, [control ? 0 : 2, 126, 0, 0], 'sixth retains its own authenticated control40 gate');
+    checkSeventhMachineBytes(x, [canonicalHit ? 0 : 2, 126, 0, 0], 'seventh flags0 is independent of sixth control gate and status5b4');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [sx, sy, direction] of [[19, 0, 0], [20, 0, 2], [51, 0, 2], [52, 0, 2], [0, 52, 8],
+    [-52, 0, 1], [0, -52, 4], [52, 52, 10], [-52, 52, 9], [-52, -52, 5], [52, -52, 6],
+    [1, 52, 8], [1, -52, 4], [70, -29, 2]] as const) for (const hit of [false, true]) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = sx; i.stickY5cb = sy; i.byte5fc = 0; a.statusWord5bc = hit ? 0xf20 : 0xf00;
+    check(x.firstMachine.hasSeventhMachine() && x.angular.getProcessor() === x.angularProcessor &&
+      x.angular.getAtanRuntime()?.getProcessor() === x.angularProcessor && (a.inputEdge5d4 & 4) === 0,
+      'seventh uses actual angular/finite-atan owners with its own output clear, not callback-generated directions');
+    const retained = retainInputPrefixCadence(x), strong = sx * sx + sy * sy >= 2704;
+    const hostAtan = Math.atan, hostAtan2 = Math.atan2;
+    try {
+      Math.atan = () => {throw Error('host atan is not source seventh composition');};
+      Math.atan2 = () => {throw Error('host atan2 is not source seventh composition');};
+      rejects(() => x.runRawPrefix(1, 64, 20), eighthCall);
+    } finally {Math.atan = hostAtan; Math.atan2 = hostAtan2;}
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (direction === 0 ? 0x200 : strong ? 0x200 | direction | (direction << 4) : 0x2c0 | direction) &&
+      i.byte5fc === (direction === 0 ? 8 : strong ? 11 : 9) && i.byte5fd === (direction === 0 ? 0 : strong ? 19 : 1) &&
+      i.byte5ff === 19 && a.inputEdge5d4 === (hit ? 0x2e7 : 0x2e3) && x.host.sourceArrowMash749 === 4,
+      `seventh signed-byte${sx}/${sy}/${hit} preserves radius/axis/quadrant/X1/bin paths without turning direction20 into canonical5bc20`);
+    checks.slice(0, 6).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'genuine angular chain retains independent predecessor state'));
+    checkSeventhMachineBytes(x, [hit ? 0 : 2, 126, 0, 0], 'seventh is selected by canonical20 regardless of genuine direction');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSeventhMachineBytes(x, [hit ? 0 : 2, 126, 0, 0], 'eighth refusal prevents angular or seventh replay');
+  }
+  for (const fault of ['coefficient', 'seventhMask'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = -52; i.stickY5cb = 52; i.byte5fc = 0; a.statusWord5bc = 0xf20;
+    if (fault === 'coefficient') x.atanData.coefficients802b51a8[0] = 0; else x.machineTables.descriptor3940![4] = NaN;
+    const retained = retainInputPrefixCadence(x), late = fault === 'seventhMask';
+    rejects(() => x.runRawPrefix(1, 64, 20), late ? 'descriptor3940[4]' : 'coefficients802b51a8');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (late ? 0x299 : 0xabcd) && a.inputEdge5d4 === (late ? 0x2e3 : 0x87654321) &&
+      i.byte5fc === (late ? 11 : 0) && i.byte5fd === (late ? 19 : 1) && i.byte5ff === (late ? 19 : 9) &&
+      x.host.sourceArrowMash749 === (late ? 4 : 77), `${fault} retains exactly the reached angular/input prefix`);
+    checks.slice(0, 6).forEach((assertBytes, n) => assertBytes(x, (late ? complete : initial)[n]!, `${fault} retains each reached predecessor`));
+    checkSeventhMachineBytes(x, late ? [2, 126, 0, 0] : initial[6]!, `${fault} cannot fabricate seventh tail or output4`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (let expired = 0; expired < 7; expired++) {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState, row = cells[expired]!;
+    a.statusWord5bc = 0xf20; m[row[0]] = 2; m[row[1]] = 1; m[row[2]] = 0;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), eighthCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, n === expired ? [0, 0, 0, 0] : complete[n]!,
+      `expired${expired + 1} preserves independent machine${n + 1} state and tail`));
+    check(a.inputEdge5d4 === (0x2e7 & ~outputs[expired]!), 'one expired return0 neither gates later calls nor erases earlier masks');
+  }
+  {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor;
+    // Explicit in-domain gauge lifetime keeps the real preceding calls alive.
+    x.tier.timerFrames = 64;
+    for (let epoch = 1; epoch <= 17; epoch++) {
+      a.statusWord5bc = epoch === 1 ? 0xf20 : 0xe00;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), eighthCall); retained();
+      checkFifthMachineBytes(x, epoch === 1 ? [0, 126, 0, 15] : [2, 128 - epoch, 0, Math.max(16 - epoch, 0)],
+        `epoch${epoch} fifth duration16 remains independent of seventh duration1`);
+      checkSixthMachineBytes(x, [epoch === 1 ? 0 : 2, epoch === 1 ? 126 : 128 - epoch, 0, 0], 'sixth duration1 does not borrow fifth tail');
+      checkSeventhMachineBytes(x, [epoch === 1 ? 0 : 2, epoch === 1 ? 126 : 128 - epoch, 0, 0], 'seventh duration1 ends in its successful wrapper');
+      check(a.inputEdge5d4 === (epoch === 1 ? 0x2e7 : epoch <= 16 ? 0x2e1 : 0x2e0) &&
+        x.host.sourceArrowMash749 === (epoch === 1 ? 4 : 3), `epoch${epoch} seventh adds no unrequested persistent output4`);
+      checks.slice(0, 4).forEach(assertBytes => assertBytes(x, [0, 126, 0, 0], 'first four wrappers retain their own one-call output'));
+      rejects(() => x.runRawPrefix(epoch, 128, 40), 'epoch'); retained();
+      check(x.machineState.byte603 === Math.max(16 - epoch, 0) && x.machineState.byte607 === 0 &&
+        x.machineState.byte60b === 0 && x.tier.timerFrames === 64 - epoch, 'duplicate cannot drain any tail or genuine gauge frame');
+    }
+  }
+  for (const expired of [false, true]) {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.controlWord = 0x100000; a.statusWord5bc = 0xe00;
+    m.byte608 = 2; m.byte609 = expired ? 1 : 7; m.byte60a = 0; m.byte60b = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), eighthCall); retained();
+    checkSeventhMachineBytes(x, [expired ? 0 : 2, expired ? 0 : 6, 0, 1], 'supplied seventh tail survives no-match or expiry and decrements once');
+    check(a.inputEdge5d4 === 0x2e4, 'seventh tail alone ORs4 without canonical20, control40, fifth tail or sixth output2');
+  }
+  {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0;
+    const timers = [127, 7, 11, 15, 19, 23, 27];
+    cells.slice(1).forEach((row, n) => {m[row[0]] = 2; m[row[1]] = timers[n + 1]!; m[row[2]] = 0;});
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      if (epoch === 3) a.statusWord5bc = 0xf20;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), eighthCall); retained();
+      checks.forEach((assertBytes, n) => assertBytes(x, [epoch === 3 ? 0 : 2, timers[n]! - epoch, 0, n === 4 && epoch === 3 ? 15 : 0],
+        `epoch${epoch} machine${n + 1} countdown remains independent`));
+      check(a.inputEdge5d4 === (epoch === 3 ? 0x2e7 : 0) && x.tier.timerFrames === 8 - epoch,
+        `epoch${epoch} live canonical word drives all seven machines once after real gauge work`);
+    }
+  }
+  {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor;
+    const expected = [[0, 126, 0, 0], [2, 126, 0, 0], [0, 125, 0, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 4; epoch++) {
+      a.statusWord5bc = epoch === 2 ? 0x100 : 0x120; a.controlWord = epoch % 2 === 0 ? 0x40 : 0;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), eighthCall); retained();
+      checkSeventhMachineBytes(x, expected[epoch - 1]!, 'seventh retriggers from live20 regardless of alternating control40');
+      checkFifthMachineBytes(x, [0, 126, 0, 15], 'seventh changes neither fifth live100 nor duration16');
+      check(a.inputEdge5d4 === [5, 3, 5, 7][epoch - 1], 'independent seventh20 and sixth100/control40 produce distinct outputs4 and2');
+    }
+  }
+  for (const control of [0, 0x40]) {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf20; a.controlWord = 0x100000 | control;
+    // Supplied phase1 is synthetic state, not claimed reachable from mode1.
+    m.byte608 = 1; m.byte609 = 2; m.byte60a = 0;
+    const expected = [[1, 0, 1, 0], [0, 255, 1, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), eighthCall); retained();
+      checkSeventhMachineBytes(x, expected[epoch - 1]!, `epoch${epoch}/control${control} supplied seventh phase1 matches20/reloads0, expires signed, then restarts phase0`);
+      check(a.inputEdge5d4 === (0x2e1 | (control ? 2 : 0) | (epoch === 3 ? 4 : 0)),
+        'seventh supplied phase1 and phase2 never borrow sixth control gate or discard preceding outputs');
+    }
+  }
+  for (const lazy of ['flags', 'mask', 'duration', 'index'] as const) {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf00; m.byte608 = 2; m.byte609 = lazy === 'duration' ? 7 : 1; m.byte60a = lazy === 'index' ? 255 : 0;
+    if (lazy !== 'index') x.seventhDescriptor[lazy === 'flags' ? 1 : lazy === 'mask' ? 4 : 3] = NaN;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), eighthCall); retained();
+    checkSeventhMachineBytes(x, lazy === 'duration' ? [2, 6, 0, 0] : [0, 0, lazy === 'index' ? 255 : 0, 0],
+      `${lazy} remains unread after expiry, or duration remains unread on genuine canonical20 miss`);
+    a.statusWord5bc = 0xf20;
+    if (lazy === 'index') {m.byte608 = 2; m.byte609 = 7;}
+    rejects(() => x.runRawPrefix(2, 64, 20), lazy === 'index' ? 'outside explicit12-byte descriptor' :
+      `descriptor3940[${lazy === 'flags' ? 1 : lazy === 'mask' ? 4 : 3}]`); retained();
+    checkSeventhMachineBytes(x, lazy === 'duration' ? [0, 5, 0, 0] : lazy === 'index' ? [2, 6, 255, 0] : [2, 126, 0, 0],
+      `${lazy} reached failure retains precisely phase/timer/index writes before validation`);
+    check(a.inputEdge5d4 === 0x2e3 && x.tier.timerFrames === 6, 'lazy failure retains all six earlier outputs and second-epoch gauge work');
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch'); retained();
+  }
+  for (const phase of [1, 2]) {
+    const x = seventhInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf20; m.byte608 = phase; m.byte609 = 7; m.byte60a = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'descriptor3940: indexed halfword outside explicit12-byte descriptor'); retained();
+    checkSeventhMachineBytes(x, [phase, 6, 2, 0], 'both indexed handlers retain timer decrement before explicit descriptor bound refusal');
+    check(x.sourceActor.inputEdge5d4 === 0x2e3, 'index2 cannot read eighth descriptor or fabricate output4');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['dispatch', 'index', 'phase', 'timer', 'flags', 'mask', 'duration', 'tail', 'descriptorOwner'] as const) {
+    const x = seventhInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf20;
+    if (fault === 'dispatch') {m.byte608 = 1; x.machineTables.dispatch3988[1] = 0x80000000;}
+    else if (fault === 'flags') x.seventhDescriptor[1] = NaN;
+    else if (fault === 'mask') x.seventhDescriptor[4] = NaN;
+    else if (fault === 'duration') x.seventhDescriptor[3] = NaN;
+    else if (fault === 'descriptorOwner') x.machineTables.descriptor3940 = [...x.seventhDescriptor];
+    else Object.defineProperty(m, fault === 'index' ? 'byte60a' : fault === 'phase' ? 'byte608' : fault === 'timer' ? 'byte609' : 'byte60b', {writable: false});
+    const expected = fault === 'dispatch' ? [1, 3, 7, 0] : fault === 'index' || fault === 'descriptorOwner' ? [0, 3, 7, 0] :
+      fault === 'phase' ? [0, 3, 0, 0] : fault === 'timer' ? [2, 3, 0, 0] :
+      fault === 'tail' || fault === 'duration' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'flags' || fault === 'mask' || fault === 'duration' ? 'integer out of bounds' :
+      fault === 'descriptorOwner' ? 'descriptor3940: owner changed' : fault === 'index' ? 'byte60a' :
+      fault === 'phase' ? 'byte608' : fault === 'timer' ? 'byte609' : 'byte60b';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 6).forEach((assertBytes, n) => assertBytes(x, complete[n]!, `${fault} retains completed machine${n + 1}`));
+    checkSeventhMachineBytes(x, expected, `${fault} preserves precisely reached seventh partial stores`);
+    check(x.sourceActor.inputEdge5d4 === 0x2e3, `${fault} never erases earlier outputs or fabricates output4`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSeventhMachineBytes(x, expected, `${fault} consumes epoch before seventh handler or wrapper replay`);
+    check(x.inputState.byte5ff === 19 && x.tier.timerFrames === 7 && x.machineState.byte603 === 15,
+      `${fault} cannot replay input/gauge work or drain preceding fifth tail`);
+  }
+  {
+    const x = seventhInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf20; m.byte608 = 2; m.byte609 = 1; m.byte60a = 0; m.byte60b = 255;
+    Object.defineProperty(m, 'byte60b', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte60b'); retained(); checkInputPrefixEarlierStores(x);
+    checkSeventhMachineBytes(x, [0, 0, 0, 255], 'expired seventh resets phase before tail decrement destination fails');
+    check(x.sourceActor.inputEdge5d4 === 0x2e3 && x.machineState.byte603 === 15,
+      'failed seventh wrapper tail preserves all preceding outputs without OR4');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['firstMask', 'secondMask', 'thirdMask', 'fourthMask', 'fifthMask', 'sixthMask', 'cue', 'inputTimer', 'mash', 'edge'] as const) {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf20;
+    const descriptorKeys = ['descriptor38f8', 'descriptor3904', 'descriptor3910', 'descriptor391c', 'descriptor3928', 'descriptor3934'] as const;
+    const n = ['firstMask', 'secondMask', 'thirdMask', 'fourthMask', 'fifthMask', 'sixthMask'].indexOf(fault);
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'inputTimer' ? 'byte5fd' : fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    if (n >= 0) x.machineTables[descriptorKeys[n]!]![4] = NaN;
+    else Object.defineProperty(fault === 'cue' ? x.gates : fault === 'inputTimer' ? x.inputState : fault === 'mash' ? x.host : a, key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), n >= 0 ? `${descriptorKeys[n]}[4]` : key); retained();
+    checkSeventhMachineBytes(x, initial[6]!, `${fault} earlier failure never enters seventh handler or wrapper`);
+    check(a.inputEdge5d4 === (n >= 0 ? [0, 0x20, 0x60, 0xe0, 0x2e0, 0x2e1][n] : 0x87654321) && x.tier.timerFrames === 7,
+      `${fault} preserves canonical edge exactly at reached source point`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkSeventhMachineBytes(x, initial[6]!, `${fault} consumed epoch cannot enter seventh later`);
+  }
+  for (const alias of ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'dispatch', 'tables', 'actor', 'borg', 'machine', 'input', 'processor'] as const) {
+    const processor: SourceActorInputProcessorState = {gqr4: 0x00070007};
+    const x = seventhInputMachineHydratedControlFixture(undefined, processor);
+    const owner = alias === 'first' ? x.machineTables.descriptor38f8 : alias === 'second' ? x.machineTables.descriptor3904 :
+      alias === 'third' ? x.machineTables.descriptor3910 : alias === 'fourth' ? x.machineTables.descriptor391c :
+      alias === 'fifth' ? x.machineTables.descriptor3928 : alias === 'sixth' ? x.machineTables.descriptor3934 :
+      alias === 'dispatch' ? x.machineTables.dispatch3988 : alias === 'tables' ? x.machineTables : alias === 'actor' ? x.sourceActor :
+      alias === 'borg' ? x.host : alias === 'machine' ? x.machineState : alias === 'input' ? x.inputState : processor;
+    Object.defineProperty(x.machineTables, 'descriptor3940', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${alias} preflight preserves initial machine${n + 1} cells`));
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.sourceActor.inputHeld5d8 === 0xabcd &&
+      x.inputState.byte5ff === 9 && x.host.sourceArrowMash749 === 77,
+      `${alias} seventh alias retains earlier gauge/stage/cues but refuses before angular/input stores`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const alias of ['angular', 'direction', 'atan', 'high', 'low', 'coefficients'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true);
+    const owner = alias === 'angular' ? x.angularData : alias === 'direction' ? x.angularData.direction80433928 :
+      alias === 'atan' ? x.atanData : alias === 'high' ? x.atanData.atanHi802b5168 :
+      alias === 'low' ? x.atanData.atanLo802b5188 : x.atanData.coefficients802b51a8;
+    Object.defineProperty(x.machineTables, 'descriptor3940', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${alias} arithmetic owner alias cannot replace any machine storage`));
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.inputState.byte5ff === 9, `${alias} collision precedes angular/input work`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const key of cells[6]) {
+    const x = seventhInputMachineHydratedControlFixture();
+    Object.defineProperty(x.sourceActor, key, {value: 1, writable: true, configurable: true});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${key}: competing source owner`); retained(); checkInputMachinePrecedingStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${key} rival refuses at first genuine machine entry`));
+    check(x.sourceActor.inputEdge5d4 === 0, `${key} late rival retains genuine input clear before wrapper refusal`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  {
+    const x = seventhInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf20;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), eighthCall); retained();
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit status/wait advances actual attached animation after seven input calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices after seventh returns');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6,
+      'attribute/movement/history cadence stays explicit after eighth refusal');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputEdge5d4 === 0x2e7 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4 && x.tier.timerFrames === 7,
+      'later actual setup replaces animation without implicit seven-machine/input/gauge/matrix/history work');
+    checks.forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'explicit downstream calls never replay machine or tail work'));
+  }
+  console.log('[actor-seventh-input-machine-composition] PASS: genuine DAT/setup/status/gauge/stage/cue/input graph, distinct3940 and608..60b, all32 input combinations under both control40 states, seven independent states/outputs, canonical5bc20 versus held-direction20 and5b4 with authenticated flags0, duration1 versus fifth16 and sixth control gate, genuine angular/finite-atan routes without host atan, historical defaults/source ordering, partial stores/lazy bounds/consumed epochs, cross-owner/rival exclusions and explicit downstream cadence; exact eighth686a0/394c/60c/8 refusal, synthetic offline only/no hardware/fulltick/production activation');
+}
+
+/** Eighth394c's authenticated flags0 and canonical input40 differ from
+ * seventh3940's input20 and sixth3934's control40-gated input100. Output8
+ * is neither a held-direction bit nor a control-word inference.
+ * These explicit offline inputs extend only the genuine composed prefix;
+ * no PAD producer, ninth descriptor contents or production tick is supplied. */
+function eighthInputMachineHydratedControlFixture(missing?: 'second' | 'third' | 'fourth' | 'fifth' | 'sixth' | 'seventh',
+  processor?: SourceActorInputProcessorState) {
+  const x = inputMachineHydratedControlFixture(processor, missing !== 'second', missing !== 'third', missing !== 'fourth',
+    missing !== 'fifth', missing !== 'sixth', missing !== 'seventh', true), eighthDescriptor = x.machineTables.descriptor394c;
+  if (!eighthDescriptor || !x.firstMachine.hasEighthMachine()) throw Error('eighth-machine fixture requires explicit descriptor394c');
+  return Object.assign(x, {eighthDescriptor});
+}
+function checkEighthMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte60c, m.byte60d, m.byte60e, m.byte60f].every((value, i) => value === expected[i]), message);
+}
+export function runEighthInputMachineHydratedControlTests(): void {
+  const eighthCall = '800686a0 reached unsupported eighth source call 80068b8c (descriptor802d394c, actor+60c, mask8)';
+  const ninthCall = '800686b8 reached unsupported ninth source call 80068b8c (descriptor802d3958, actor+610, mask10)';
+  const checks = [checkMachineBytes, checkSecondMachineBytes, checkThirdMachineBytes, checkFourthMachineBytes,
+    checkFifthMachineBytes, checkSixthMachineBytes, checkSeventhMachineBytes, checkEighthMachineBytes];
+  const initial = [[0, 77, 99, 0], [0, 31, 55, 0], [0, 17, 33, 0], [0, 13, 21, 0],
+    [0, 9, 17, 0], [0, 5, 11, 0], [0, 3, 7, 0], [0, 2, 5, 0]];
+  const complete = [[0, 126, 0, 0], [0, 126, 0, 0], [0, 126, 0, 0], [0, 126, 0, 0],
+    [0, 126, 0, 15], [0, 126, 0, 0], [0, 126, 0, 0], [0, 126, 0, 0]];
+  const cells = [['byte614', 'byte615', 'byte616', 'byte617'], ['byte618', 'byte619', 'byte61a', 'byte61b'],
+    ['byte61c', 'byte61d', 'byte61e', 'byte61f'], ['byte624', 'byte625', 'byte626', 'byte627'],
+    ['byte600', 'byte601', 'byte602', 'byte603'], ['byte604', 'byte605', 'byte606', 'byte607'],
+    ['byte608', 'byte609', 'byte60a', 'byte60b'], ['byte60c', 'byte60d', 'byte60e', 'byte60f']] as const;
+  const outputs = [0x20, 0x40, 0x80, 0x200, 1, 2, 4, 8];
+  {
+    const x = seventhInputMachineHydratedControlFixture(), retained = retainInputPrefixCadence(x);
+    check(!x.firstMachine.hasEighthMachine() && !Object.hasOwn(x.machineTables, 'descriptor394c') &&
+      cells[7].every(key => !Object.hasOwn(x.machineState, key)),
+      'historical seven-machine graph acquires no eighth descriptor, cells or implicit defaults');
+    rejects(() => x.runRawPrefix(1, 64, 20), eighthCall); retained(); checkInputMachinePrecedingStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0x260, 'missing eighth preserves exact former seven-machine refusal and outputs');
+  }
+  {
+    const x = inputPrefixHydratedControlFixture(false, undefined, true, undefined, true, true, true, true, true, true);
+    x.sourceActor.statusWord5bc = 0xf60;
+    const retained = retainInputPrefixCadence(x);
+    check(x.firstMachine === undefined && Object.hasOwn(x.machineTables, 'descriptor394c'),
+      'supplied eighth table cannot invent the missing actual first-machine runtime');
+    rejects(() => x.runRawPrefix(1, 64, 20), '800685f8 reached unsupported source call 80068b8c');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4,
+      'missing runtime retains genuine input clear but cannot jump into any of eight wrappers');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [n, missing] of (['second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'] as const).entries()) {
+    const x = eighthInputMachineHydratedControlFixture(missing), retained = retainInputPrefixCadence(x);
+    x.sourceActor.statusWord5bc = 0xf60;
+    const present = [x.firstMachine.hasSecondMachine(), x.firstMachine.hasThirdMachine(), x.firstMachine.hasFourthMachine(),
+      x.firstMachine.hasFifthMachine(), x.firstMachine.hasSixthMachine(), x.firstMachine.hasSeventhMachine()];
+    check(x.firstMachine.hasEighthMachine() && !present[n], `${missing} absence is not filled by eighth ownership`);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${['80068610', '80068628', '80068640', '80068658', '80068670', '80068688'][n]} reached unsupported ${missing} source call`);
+    retained(); checkInputPrefixEarlierStores(x);
+    for (let p = 0; p <= n; p++) checks[p]!(x, complete[p]!, `${missing} retains completed predecessor${p + 1}`);
+    checkEighthMachineBytes(x, initial[7]!, `${missing} refusal cannot skip into eighth handler or wrapper`);
+    check(x.sourceActor.inputEdge5d4 === [0x20, 0x60, 0xe0, 0x2e0, 0x2e1, 0x2e3][n],
+      `${missing} omission retains only the completed earlier wrapper outputs`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkEighthMachineBytes(x, initial[7]!, `${missing} refusal consumes the epoch before eighth retry`);
+  }
+  for (const control of [0, 0x40]) for (let bits = 0; bits < 64; bits++) {
+    const mask = ((bits & 15) << 8) | ((bits & 16) ? 0x20 : 0) | ((bits & 32) ? 0x40 : 0);
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.statusWord5bc = mask; a.controlWord = 0x100000 | control;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a && x.status.getActualActor(x.actor) === a &&
+      x.world.getActualActor(x.actor) === a && x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === x.statusState &&
+      x.world.getMappingActor(x.actor) === x.mapping.getActor(x.actor) &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      x.firstMachine.hasSecondMachine() && x.firstMachine.hasThirdMachine() && x.firstMachine.hasFourthMachine() &&
+      x.firstMachine.hasFifthMachine() && x.firstMachine.hasSixthMachine() && x.firstMachine.hasSeventhMachine() && x.firstMachine.hasEighthMachine() &&
+      new Set([x.machineTables.dispatch3988, x.machineTables.descriptor38f8, x.machineTables.descriptor3904,
+        x.machineTables.descriptor3910, x.machineTables.descriptor391c, x.machineTables.descriptor3928,
+        x.machineTables.descriptor3934, x.machineTables.descriptor3940, x.eighthDescriptor]).size === 9 &&
+      [1, 0, 0, 1, 0x40, 0].every((value, n) => x.eighthDescriptor[n] === value) &&
+      [...cells.flat(), 'inputFlags5d4', 'inputEdges5bc'].every(key => !Object.hasOwn(a, key)) &&
+      ['byte610', 'byte611', 'byte612', 'byte613'].every(key => !Object.hasOwn(x.machineState, key)) &&
+      !Object.hasOwn(x.machineTables, 'descriptor3958') && isSourceActorTickPrefixClaimedActor(a),
+      'eight distinct descriptors share actual DAT/setup/status/gauge/stage/cue/input owners without rivals or ninth defaults');
+    check((a.inputEdge5d4 & 8) === 0, 'eighth own output8 begins clear, so a successful OR cannot be vacuous');
+    const hits = [(mask & 0x200) !== 0, (mask & 0x200) !== 0, (mask & 0x400) !== 0, (mask & 0x800) !== 0,
+      (mask & 0x100) !== 0, (mask & 0x100) !== 0 && control === 0x40, (mask & 0x20) !== 0, (mask & 0x40) !== 0];
+    const expectedEdge = hits.reduce((edge, hit, n) => edge | (hit ? outputs[n]! : 0), 0);
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), ninthCall); retained();
+    if (control === 0x40) checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, [hits[n] ? 0 : 2, 126, 0, n === 4 && hits[n] ? 15 : 0],
+      `${mask}/${control} machine${n + 1} retains its own phase/timer/index/tail and output`));
+    check(a.controlWord === control && a.inputEdge5d4 === expectedEdge && a.inputHeld5d8 === 0x200 &&
+      i.byte5fc === 11 && i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 &&
+      x.host.sourceArrowMash749 === [0x100, 0x200, 0x400, 0x800].filter(value => (mask & value) !== 0).length,
+      `${mask}/${control} caller clears once, ignores eight real0/1 returns and excludes seventh20/eighth40 from the preceding mash mask`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkEighthMachineBytes(x, [hits[7] ? 0 : 2, 126, 0, 0], `${mask}/${control} ninth refusal consumes eighth epoch`);
+    check(a.inputEdge5d4 === expectedEdge && i.byte5ff === 19 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${mask}/${control} consumed epoch cannot replay earlier input/gauge or eight-machine effects`);
+  }
+  for (const control of [0, 0x40]) for (const canonicalHit of [false, true]) for (const status of [0, 0x60000]) {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.controlWord = 0x100000 | control; a.statusWord5bc = 0xf20 | (canonicalHit ? 0x40 : 0);
+    a.statusWord5b4 = status | (canonicalHit ? 0 : 0x40); a.inputHeld5d8 = canonicalHit ? 0 : 0x40;
+    i.byte5fc = canonicalHit || status === 0 ? 3 : 11; i.byte5fd = 0; i.byte5fe = 0; i.byte5ff = canonicalHit ? 0 : 4;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), ninthCall); retained();
+    check(a.controlWord === control && a.inputHeld5d8 === (canonicalHit ? 0 : 0x40) &&
+      a.statusWord5b4 === (status | (canonicalHit ? 0 : 0x40)) &&
+      a.inputEdge5d4 === (0x2e5 | (control ? 2 : 0) | (canonicalHit ? 8 : 0)),
+      `control${control}/status${status} eighth reads only canonical5bc40, never held-direction40 or5b440, with no flags4/8 gate`);
+    checkSixthMachineBytes(x, [control ? 0 : 2, 126, 0, 0], 'sixth retains its own authenticated control40 gate');
+    checkEighthMachineBytes(x, [canonicalHit ? 0 : 2, 126, 0, 0], 'eighth flags0 is independent of sixth control gate and status5b4');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [sx, sy, direction] of [[19, 0, 0], [20, 0, 2], [51, 0, 2], [52, 0, 2], [0, 52, 8],
+    [-52, 0, 1], [0, -52, 4], [52, 52, 10], [-52, 52, 9], [-52, -52, 5], [52, -52, 6],
+    [1, 52, 8], [1, -52, 4], [70, -29, 2]] as const) for (const hit of [false, true]) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = sx; i.stickY5cb = sy; i.byte5fc = 0; a.statusWord5bc = hit ? 0xf60 : 0xf20;
+    check(x.firstMachine.hasEighthMachine() && x.angular.getProcessor() === x.angularProcessor &&
+      x.angular.getAtanRuntime()?.getProcessor() === x.angularProcessor && (a.inputEdge5d4 & 8) === 0,
+      'eighth uses actual angular/finite-atan owners with its own output clear, not callback-generated directions');
+    const retained = retainInputPrefixCadence(x), strong = sx * sx + sy * sy >= 2704;
+    const hostAtan = Math.atan, hostAtan2 = Math.atan2;
+    try {
+      Math.atan = () => {throw Error('host atan is not source eighth composition');};
+      Math.atan2 = () => {throw Error('host atan2 is not source eighth composition');};
+      rejects(() => x.runRawPrefix(1, 64, 20), ninthCall);
+    } finally {Math.atan = hostAtan; Math.atan2 = hostAtan2;}
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (direction === 0 ? 0x200 : strong ? 0x200 | direction | (direction << 4) : 0x2c0 | direction) &&
+      i.byte5fc === (direction === 0 ? 8 : strong ? 11 : 9) && i.byte5fd === (direction === 0 ? 0 : strong ? 19 : 1) &&
+      i.byte5ff === 19 && a.inputEdge5d4 === (hit ? 0x2ef : 0x2e7) && x.host.sourceArrowMash749 === 4,
+      `eighth signed-byte${sx}/${sy}/${hit} preserves radius/axis/quadrant/X1/bin paths without turning direction40 into canonical5bc40`);
+    checks.slice(0, 7).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'genuine angular chain retains independent predecessor state'));
+    checkEighthMachineBytes(x, [hit ? 0 : 2, 126, 0, 0], 'eighth is selected by canonical40 regardless of genuine direction');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkEighthMachineBytes(x, [hit ? 0 : 2, 126, 0, 0], 'ninth refusal prevents angular or eighth replay');
+  }
+  for (const fault of ['coefficient', 'eighthMask'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = -52; i.stickY5cb = 52; i.byte5fc = 0; a.statusWord5bc = 0xf60;
+    if (fault === 'coefficient') x.atanData.coefficients802b51a8[0] = 0; else x.machineTables.descriptor394c![4] = NaN;
+    const retained = retainInputPrefixCadence(x), late = fault === 'eighthMask';
+    rejects(() => x.runRawPrefix(1, 64, 20), late ? 'descriptor394c[4]' : 'coefficients802b51a8');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (late ? 0x299 : 0xabcd) && a.inputEdge5d4 === (late ? 0x2e7 : 0x87654321) &&
+      i.byte5fc === (late ? 11 : 0) && i.byte5fd === (late ? 19 : 1) && i.byte5ff === (late ? 19 : 9) &&
+      x.host.sourceArrowMash749 === (late ? 4 : 77), `${fault} retains exactly the reached angular/input prefix`);
+    checks.slice(0, 7).forEach((assertBytes, n) => assertBytes(x, (late ? complete : initial)[n]!, `${fault} retains each reached predecessor`));
+    checkEighthMachineBytes(x, late ? [2, 126, 0, 0] : initial[7]!, `${fault} cannot fabricate eighth tail or output8`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (let expired = 0; expired < 8; expired++) {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState, row = cells[expired]!;
+    a.statusWord5bc = 0xf60; m[row[0]] = 2; m[row[1]] = 1; m[row[2]] = 0;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), ninthCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, n === expired ? [0, 0, 0, 0] : complete[n]!,
+      `expired${expired + 1} preserves independent machine${n + 1} state and tail`));
+    check(a.inputEdge5d4 === (0x2ef & ~outputs[expired]!), 'one expired return0 neither gates later calls nor erases earlier masks');
+  }
+  {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    // Explicit in-domain gauge lifetime keeps the real preceding calls alive.
+    x.tier.timerFrames = 64;
+    for (let epoch = 1; epoch <= 17; epoch++) {
+      a.statusWord5bc = epoch === 1 ? 0xf60 : 0xe00;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), ninthCall); retained();
+      checkFifthMachineBytes(x, epoch === 1 ? [0, 126, 0, 15] : [2, 128 - epoch, 0, Math.max(16 - epoch, 0)],
+        `epoch${epoch} fifth duration16 remains independent of eighth duration1`);
+      checkSixthMachineBytes(x, [epoch === 1 ? 0 : 2, epoch === 1 ? 126 : 128 - epoch, 0, 0], 'sixth duration1 does not borrow fifth tail');
+      checkSeventhMachineBytes(x, [epoch === 1 ? 0 : 2, epoch === 1 ? 126 : 128 - epoch, 0, 0], 'seventh duration1 retains its separate timer and no tail');
+      checkEighthMachineBytes(x, [epoch === 1 ? 0 : 2, epoch === 1 ? 126 : 128 - epoch, 0, 0], 'eighth duration1 ends in its successful wrapper');
+      check(a.inputEdge5d4 === (epoch === 1 ? 0x2ef : epoch <= 16 ? 0x2e1 : 0x2e0) &&
+        x.host.sourceArrowMash749 === (epoch === 1 ? 4 : 3), `epoch${epoch} eighth adds no unrequested persistent output8`);
+      checks.slice(0, 4).forEach(assertBytes => assertBytes(x, [0, 126, 0, 0], 'first four wrappers retain their own one-call output'));
+      rejects(() => x.runRawPrefix(epoch, 128, 40), 'epoch'); retained();
+      check(x.machineState.byte603 === Math.max(16 - epoch, 0) && x.machineState.byte607 === 0 &&
+        x.machineState.byte60b === 0 && x.machineState.byte60f === 0 && x.tier.timerFrames === 64 - epoch, 'duplicate cannot drain any tail or genuine gauge frame');
+    }
+  }
+  for (const expired of [false, true]) {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.controlWord = 0x100000; a.statusWord5bc = 0xe00;
+    m.byte60c = 2; m.byte60d = expired ? 1 : 7; m.byte60e = 0; m.byte60f = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), ninthCall); retained();
+    checkEighthMachineBytes(x, [expired ? 0 : 2, expired ? 0 : 6, 0, 1], 'supplied eighth tail survives no-match or expiry and decrements once');
+    check(a.inputEdge5d4 === 0x2e8, 'eighth tail alone ORs8 without canonical40, control40, fifth tail or sixth output2');
+  }
+  {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0;
+    const timers = [127, 7, 11, 15, 19, 23, 27, 31];
+    cells.slice(1).forEach((row, n) => {m[row[0]] = 2; m[row[1]] = timers[n + 1]!; m[row[2]] = 0;});
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      if (epoch === 3) a.statusWord5bc = 0xf60;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), ninthCall); retained();
+      checks.forEach((assertBytes, n) => assertBytes(x, [epoch === 3 ? 0 : 2, timers[n]! - epoch, 0, n === 4 && epoch === 3 ? 15 : 0],
+        `epoch${epoch} machine${n + 1} countdown remains independent`));
+      check(a.inputEdge5d4 === (epoch === 3 ? 0x2ef : 0) && x.tier.timerFrames === 8 - epoch,
+        `epoch${epoch} live canonical word drives all eight machines once after real gauge work`);
+    }
+  }
+  {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    const expected = [[0, 126, 0, 0], [2, 126, 0, 0], [0, 125, 0, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 4; epoch++) {
+      a.statusWord5bc = epoch === 2 ? 0x120 : 0x160; a.controlWord = epoch % 2 === 0 ? 0x40 : 0;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), ninthCall); retained();
+      checkEighthMachineBytes(x, expected[epoch - 1]!, 'eighth retriggers from live40 regardless of alternating control40');
+      checkFifthMachineBytes(x, [0, 126, 0, 15], 'eighth changes neither fifth live100 nor duration16');
+      check(a.inputEdge5d4 === [13, 7, 13, 15][epoch - 1], 'independent eighth40, seventh20 and sixth100/control40 produce distinct outputs8,4 and2');
+    }
+  }
+  for (const control of [0, 0x40]) {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf60; a.controlWord = 0x100000 | control;
+    // Supplied phase1 is synthetic state, not claimed reachable from mode1.
+    m.byte60c = 1; m.byte60d = 2; m.byte60e = 0;
+    const expected = [[1, 0, 1, 0], [0, 255, 1, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), ninthCall); retained();
+      checkEighthMachineBytes(x, expected[epoch - 1]!, `epoch${epoch}/control${control} supplied eighth phase1 matches40/reloads0, expires signed, then restarts phase0`);
+      check(a.inputEdge5d4 === (0x2e5 | (control ? 2 : 0) | (epoch === 3 ? 8 : 0)),
+        'eighth supplied phase1 and phase2 never borrow sixth control gate or discard preceding outputs');
+    }
+  }
+  for (const lazy of ['flags', 'mask', 'duration', 'index'] as const) {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf20; m.byte60c = 2; m.byte60d = lazy === 'duration' ? 7 : 1; m.byte60e = lazy === 'index' ? 255 : 0;
+    if (lazy !== 'index') x.eighthDescriptor[lazy === 'flags' ? 1 : lazy === 'mask' ? 4 : 3] = NaN;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), ninthCall); retained();
+    checkEighthMachineBytes(x, lazy === 'duration' ? [2, 6, 0, 0] : [0, 0, lazy === 'index' ? 255 : 0, 0],
+      `${lazy} remains unread after expiry, or duration remains unread on genuine canonical40 miss`);
+    a.statusWord5bc = 0xf60;
+    if (lazy === 'index') {m.byte60c = 2; m.byte60d = 7;}
+    rejects(() => x.runRawPrefix(2, 64, 20), lazy === 'index' ? 'outside explicit12-byte descriptor' :
+      `descriptor394c[${lazy === 'flags' ? 1 : lazy === 'mask' ? 4 : 3}]`); retained();
+    checkEighthMachineBytes(x, lazy === 'duration' ? [0, 5, 0, 0] : lazy === 'index' ? [2, 6, 255, 0] : [2, 126, 0, 0],
+      `${lazy} reached failure retains precisely phase/timer/index writes before validation`);
+    check(a.inputEdge5d4 === 0x2e7 && x.tier.timerFrames === 6, 'lazy failure retains all seven earlier outputs and second-epoch gauge work');
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch'); retained();
+  }
+  for (const phase of [1, 2]) for (const timer of [0, 1, 2, 127, 128, 129, 255]) {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf20; m.byte60c = phase; m.byte60d = timer; m.byte60e = 0; m.byte60f = 2;
+    const next = (timer - 1) & 255, active = next > 0 && next < 128;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), ninthCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 7).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'signed eighth timer preserves each predecessor'));
+    checkEighthMachineBytes(x, [active ? phase : 0, next, 0, 1],
+      `phase${phase}/timer${timer} preserves unsigned byte store followed by signed post-decrement expiry`);
+    check(a.inputEdge5d4 === 0x2ef, 'existing eighth tail still ORs8 after signed expiry or canonical40 miss');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkEighthMachineBytes(x, [active ? phase : 0, next, 0, 1], 'consumed signed-timer epoch cannot drain a retained tail');
+  }
+  for (const phase of [1, 2]) {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf20; m.byte60c = phase; m.byte60d = 7; m.byte60e = 1;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), ninthCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 7).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'index1 preserves all seven genuine predecessors'));
+    checkEighthMachineBytes(x, [phase === 1 ? 1 : 0, 6, 1, 0],
+      'authenticated index1 zero halfword never matches phase1 any-mask but matches phase2 all-mask');
+    check(a.inputEdge5d4 === (phase === 1 ? 0x2e7 : 0x2ef),
+      'index1 phase2 emits output8 without canonical40, while phase1 emits none');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const phase of [1, 2]) {
+    const x = eighthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf60; m.byte60c = phase; m.byte60d = 7; m.byte60e = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'descriptor394c: indexed halfword outside explicit12-byte descriptor'); retained();
+    checkEighthMachineBytes(x, [phase, 6, 2, 0], 'both indexed handlers retain timer decrement before explicit descriptor bound refusal');
+    check(x.sourceActor.inputEdge5d4 === 0x2e7, 'index2 cannot read ninth descriptor or fabricate output8');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['dispatch', 'index', 'phase', 'timer', 'flags', 'mask', 'duration', 'tail', 'descriptorOwner'] as const) {
+    const x = eighthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf60;
+    if (fault === 'dispatch') {m.byte60c = 1; x.machineTables.dispatch3988[1] = 0x80000000;}
+    else if (fault === 'flags') x.eighthDescriptor[1] = NaN;
+    else if (fault === 'mask') x.eighthDescriptor[4] = NaN;
+    else if (fault === 'duration') x.eighthDescriptor[3] = NaN;
+    else if (fault === 'descriptorOwner') x.machineTables.descriptor394c = [...x.eighthDescriptor];
+    else Object.defineProperty(m, fault === 'index' ? 'byte60e' : fault === 'phase' ? 'byte60c' : fault === 'timer' ? 'byte60d' : 'byte60f', {writable: false});
+    const expected = fault === 'dispatch' ? [1, 2, 5, 0] : fault === 'index' || fault === 'descriptorOwner' ? [0, 2, 5, 0] :
+      fault === 'phase' ? [0, 2, 0, 0] : fault === 'timer' ? [2, 2, 0, 0] :
+      fault === 'tail' || fault === 'duration' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'flags' || fault === 'mask' || fault === 'duration' ? 'integer out of bounds' :
+      fault === 'descriptorOwner' ? 'descriptor394c: owner changed' : fault === 'index' ? 'byte60e' :
+      fault === 'phase' ? 'byte60c' : fault === 'timer' ? 'byte60d' : 'byte60f';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 7).forEach((assertBytes, n) => assertBytes(x, complete[n]!, `${fault} retains completed machine${n + 1}`));
+    checkEighthMachineBytes(x, expected, `${fault} preserves precisely reached eighth partial stores`);
+    check(x.sourceActor.inputEdge5d4 === 0x2e7, `${fault} never erases earlier outputs or fabricates output8`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkEighthMachineBytes(x, expected, `${fault} consumes epoch before eighth handler or wrapper replay`);
+    check(x.inputState.byte5ff === 19 && x.tier.timerFrames === 7 && x.machineState.byte603 === 15,
+      `${fault} cannot replay input/gauge work or drain preceding fifth tail`);
+  }
+  {
+    const x = eighthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf60; m.byte60c = 2; m.byte60d = 1; m.byte60e = 0; m.byte60f = 255;
+    Object.defineProperty(m, 'byte60f', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte60f'); retained(); checkInputPrefixEarlierStores(x);
+    checkEighthMachineBytes(x, [0, 0, 0, 255], 'expired eighth resets phase before tail decrement destination fails');
+    check(x.sourceActor.inputEdge5d4 === 0x2e7 && x.machineState.byte603 === 15,
+      'failed eighth wrapper tail preserves all preceding outputs without OR8');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['firstMask', 'secondMask', 'thirdMask', 'fourthMask', 'fifthMask', 'sixthMask', 'seventhMask', 'cue', 'inputTimer', 'mash', 'edge'] as const) {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf60;
+    const descriptorKeys = ['descriptor38f8', 'descriptor3904', 'descriptor3910', 'descriptor391c', 'descriptor3928', 'descriptor3934', 'descriptor3940'] as const;
+    const n = ['firstMask', 'secondMask', 'thirdMask', 'fourthMask', 'fifthMask', 'sixthMask', 'seventhMask'].indexOf(fault);
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'inputTimer' ? 'byte5fd' : fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    if (n >= 0) x.machineTables[descriptorKeys[n]!]![4] = NaN;
+    else Object.defineProperty(fault === 'cue' ? x.gates : fault === 'inputTimer' ? x.inputState : fault === 'mash' ? x.host : a, key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), n >= 0 ? `${descriptorKeys[n]}[4]` : key); retained();
+    checkEighthMachineBytes(x, initial[7]!, `${fault} earlier failure never enters eighth handler or wrapper`);
+    check(a.inputEdge5d4 === (n >= 0 ? [0, 0x20, 0x60, 0xe0, 0x2e0, 0x2e1, 0x2e3][n] : 0x87654321) && x.tier.timerFrames === 7,
+      `${fault} preserves canonical edge exactly at reached source point`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkEighthMachineBytes(x, initial[7]!, `${fault} consumed epoch cannot enter eighth later`);
+  }
+  for (const alias of ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'dispatch', 'tables', 'actor', 'borg', 'machine', 'input', 'processor'] as const) {
+    const processor: SourceActorInputProcessorState = {gqr4: 0x00070007};
+    const x = eighthInputMachineHydratedControlFixture(undefined, processor);
+    const owner = alias === 'first' ? x.machineTables.descriptor38f8 : alias === 'second' ? x.machineTables.descriptor3904 :
+      alias === 'third' ? x.machineTables.descriptor3910 : alias === 'fourth' ? x.machineTables.descriptor391c :
+      alias === 'fifth' ? x.machineTables.descriptor3928 : alias === 'sixth' ? x.machineTables.descriptor3934 : alias === 'seventh' ? x.machineTables.descriptor3940 :
+      alias === 'dispatch' ? x.machineTables.dispatch3988 : alias === 'tables' ? x.machineTables : alias === 'actor' ? x.sourceActor :
+      alias === 'borg' ? x.host : alias === 'machine' ? x.machineState : alias === 'input' ? x.inputState : processor;
+    Object.defineProperty(x.machineTables, 'descriptor394c', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${alias} preflight preserves initial machine${n + 1} cells`));
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.sourceActor.inputHeld5d8 === 0xabcd &&
+      x.inputState.byte5ff === 9 && x.host.sourceArrowMash749 === 77,
+      `${alias} eighth alias retains earlier gauge/stage/cues but refuses before angular/input stores`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const alias of ['angular', 'direction', 'atan', 'high', 'low', 'coefficients'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true, true);
+    const owner = alias === 'angular' ? x.angularData : alias === 'direction' ? x.angularData.direction80433928 :
+      alias === 'atan' ? x.atanData : alias === 'high' ? x.atanData.atanHi802b5168 :
+      alias === 'low' ? x.atanData.atanLo802b5188 : x.atanData.coefficients802b51a8;
+    Object.defineProperty(x.machineTables, 'descriptor394c', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${alias} arithmetic owner alias cannot replace any machine storage`));
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.inputState.byte5ff === 9, `${alias} collision precedes angular/input work`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const key of cells[7]) {
+    const x = eighthInputMachineHydratedControlFixture();
+    Object.defineProperty(x.sourceActor, key, {value: 1, writable: true, configurable: true});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${key}: competing source owner`); retained(); checkInputMachinePrecedingStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${key} rival refuses at first genuine machine entry`));
+    check(x.sourceActor.inputEdge5d4 === 0, `${key} late rival retains genuine input clear before wrapper refusal`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  {
+    const x = eighthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf60;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), ninthCall); retained();
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit status/wait advances actual attached animation after eight input calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices after eighth returns');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6,
+      'attribute/movement/history cadence stays explicit after ninth refusal');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputEdge5d4 === 0x2ef && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4 && x.tier.timerFrames === 7,
+      'later actual setup replaces animation without implicit eight-machine/input/gauge/matrix/history work');
+    checks.forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'explicit downstream calls never replay machine or tail work'));
+  }
+  console.log('[actor-eighth-input-machine-composition] PASS: genuine DAT/setup/status/gauge/stage/cue/input graph, distinct394c and60c..60f, all64 input combinations under both control40 states, eight independent states/outputs, canonical5bc40 versus held-direction40 and5b4 with authenticated flags0, duration1 versus fifth16 and sixth control gate, genuine angular/finite-atan routes without host atan, historical defaults/source ordering, partial stores/lazy bounds/signed expiry/index1 semantics/consumed epochs, cross-owner/rival exclusions and explicit downstream cadence; exact ninth686b8/3958/610/10 refusal, synthetic offline only/no hardware/fulltick/production activation');
+}
+
+
+/** Ninth3958 has canonical input10 and wrapper output10, numerically equal
+ * but read from and written to distinct actual actor words. Its flags0,
+ * reload0 and duration1 are authenticated supplied cells, not live hydration.
+ * No tenth3964 descriptor, noncontiguous628 state, PAD producer or production
+ * tick is supplied by this bounded genuine graph. */
+function ninthInputMachineHydratedControlFixture(missing?: 'second' | 'third' | 'fourth' | 'fifth' | 'sixth' | 'seventh' | 'eighth',
+  processor?: SourceActorInputProcessorState) {
+  const x = inputMachineHydratedControlFixture(processor, missing !== 'second', missing !== 'third', missing !== 'fourth',
+    missing !== 'fifth', missing !== 'sixth', missing !== 'seventh', missing !== 'eighth', true), ninthDescriptor = x.machineTables.descriptor3958;
+  if (!ninthDescriptor || !x.firstMachine.hasNinthMachine()) throw Error('ninth-machine fixture requires explicit descriptor3958');
+  return Object.assign(x, {ninthDescriptor});
+}
+function checkNinthMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte610, m.byte611, m.byte612, m.byte613].every((value, i) => value === expected[i]), message);
+}
+export function runNinthInputMachineHydratedControlTests(): void {
+  const ninthCall = '800686b8 reached unsupported ninth source call 80068b8c (descriptor802d3958, actor+610, mask10)';
+  const tenthCall = '800686d0 reached unsupported tenth source call 80068b8c (descriptor802d3964, actor+628, mask2000)';
+  const checks = [checkMachineBytes, checkSecondMachineBytes, checkThirdMachineBytes, checkFourthMachineBytes,
+    checkFifthMachineBytes, checkSixthMachineBytes, checkSeventhMachineBytes, checkEighthMachineBytes, checkNinthMachineBytes];
+  const initial = [[0, 77, 99, 0], [0, 31, 55, 0], [0, 17, 33, 0], [0, 13, 21, 0],
+    [0, 9, 17, 0], [0, 5, 11, 0], [0, 3, 7, 0], [0, 2, 5, 0], [0, 1, 3, 0]];
+  const complete = [[0, 126, 0, 0], [0, 126, 0, 0], [0, 126, 0, 0], [0, 126, 0, 0],
+    [0, 126, 0, 15], [0, 126, 0, 0], [0, 126, 0, 0], [0, 126, 0, 0], [0, 126, 0, 0]];
+  const cells = [['byte614', 'byte615', 'byte616', 'byte617'], ['byte618', 'byte619', 'byte61a', 'byte61b'],
+    ['byte61c', 'byte61d', 'byte61e', 'byte61f'], ['byte624', 'byte625', 'byte626', 'byte627'],
+    ['byte600', 'byte601', 'byte602', 'byte603'], ['byte604', 'byte605', 'byte606', 'byte607'],
+    ['byte608', 'byte609', 'byte60a', 'byte60b'], ['byte60c', 'byte60d', 'byte60e', 'byte60f'],
+    ['byte610', 'byte611', 'byte612', 'byte613']] as const;
+  const outputs = [0x20, 0x40, 0x80, 0x200, 1, 2, 4, 8, 0x10];
+  {
+    const x = eighthInputMachineHydratedControlFixture(), retained = retainInputPrefixCadence(x);
+    check(!x.firstMachine.hasNinthMachine() && !Object.hasOwn(x.machineTables, 'descriptor3958') &&
+      cells[8].every(key => !Object.hasOwn(x.machineState, key)),
+      'historical eight-machine graph acquires no ninth descriptor, state or defaults');
+    rejects(() => x.runRawPrefix(1, 64, 20), ninthCall); retained(); checkInputMachinePrecedingStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0x260, 'missing ninth retains exact former eighth completion and ninth refusal');
+  }
+  {
+    const x = inputPrefixHydratedControlFixture(false, undefined, true, undefined, true, true, true, true, true, true, true);
+    x.sourceActor.statusWord5bc = 0xf70;
+    const retained = retainInputPrefixCadence(x);
+    check(x.firstMachine === undefined && Object.hasOwn(x.machineTables, 'descriptor3958'),
+      'supplied ninth table cannot fabricate the missing genuine first-machine runtime');
+    rejects(() => x.runRawPrefix(1, 64, 20), '800685f8 reached unsupported source call 80068b8c');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4,
+      'missing runtime retains genuine input clear and cannot jump into any of nine wrappers');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [n, missing] of (['second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth'] as const).entries()) {
+    const x = ninthInputMachineHydratedControlFixture(missing), retained = retainInputPrefixCadence(x);
+    x.sourceActor.statusWord5bc = 0xf70;
+    const present = [x.firstMachine.hasSecondMachine(), x.firstMachine.hasThirdMachine(), x.firstMachine.hasFourthMachine(),
+      x.firstMachine.hasFifthMachine(), x.firstMachine.hasSixthMachine(), x.firstMachine.hasSeventhMachine(), x.firstMachine.hasEighthMachine()];
+    check(x.firstMachine.hasNinthMachine() && !present[n], `${missing} absence is not filled by ninth ownership`);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${['80068610', '80068628', '80068640', '80068658', '80068670', '80068688', '800686a0'][n]} reached unsupported ${missing} source call`);
+    retained(); checkInputPrefixEarlierStores(x);
+    for (let p = 0; p <= n; p++) checks[p]!(x, complete[p]!, `${missing} preserves completed predecessor${p + 1}`);
+    checks.slice(n + 2).forEach((assertBytes, p) => assertBytes(x, initial[n + 2 + p]!, `${missing} cannot skip into a later supplied machine`));
+    check(x.sourceActor.inputEdge5d4 === [0x20, 0x60, 0xe0, 0x2e0, 0x2e1, 0x2e3, 0x2e7][n],
+      `${missing} preserves only preceding wrapper outputs despite ninth being supplied`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkNinthMachineBytes(x, initial[8]!, `${missing} refusal consumes epoch before ninth retry`);
+  }
+  for (const control of [0, 0x40]) for (let bits = 0; bits < 128; bits++) {
+    const mask = ((bits & 15) << 8) | ((bits & 16) ? 0x20 : 0) | ((bits & 32) ? 0x40 : 0) | ((bits & 64) ? 0x10 : 0);
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.statusWord5bc = mask; a.controlWord = 0x100000 | control;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a && x.status.getActualActor(x.actor) === a &&
+      x.world.getActualActor(x.actor) === a && x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === x.statusState &&
+      x.world.getMappingActor(x.actor) === x.mapping.getActor(x.actor) &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      x.firstMachine.hasSecondMachine() && x.firstMachine.hasThirdMachine() && x.firstMachine.hasFourthMachine() &&
+      x.firstMachine.hasFifthMachine() && x.firstMachine.hasSixthMachine() && x.firstMachine.hasSeventhMachine() &&
+      x.firstMachine.hasEighthMachine() && x.firstMachine.hasNinthMachine() &&
+      new Set([x.machineTables.dispatch3988, x.machineTables.descriptor38f8, x.machineTables.descriptor3904,
+        x.machineTables.descriptor3910, x.machineTables.descriptor391c, x.machineTables.descriptor3928,
+        x.machineTables.descriptor3934, x.machineTables.descriptor3940, x.machineTables.descriptor394c, x.ninthDescriptor]).size === 10 &&
+      [1, 0, 0, 1, 0x10, 0].every((value, n) => x.ninthDescriptor[n] === value) &&
+      [...cells.flat(), 'inputFlags5d4', 'inputEdges5bc'].every(key => !Object.hasOwn(a, key)) &&
+      ['byte628', 'byte629', 'byte62a', 'byte62b'].every(key => !Object.hasOwn(x.machineState, key)) &&
+      !Object.hasOwn(x.machineTables, 'descriptor3964') && isSourceActorTickPrefixClaimedActor(a),
+      'nine distinct descriptors share actual DAT/setup/status/gauge/stage/cue/input owners without rivals or tenth defaults');
+    check((a.inputEdge5d4 & 0x10) === 0, 'ninth own output10 starts clear, so its later OR cannot be vacuous');
+    const hits = [(mask & 0x200) !== 0, (mask & 0x200) !== 0, (mask & 0x400) !== 0, (mask & 0x800) !== 0,
+      (mask & 0x100) !== 0, (mask & 0x100) !== 0 && control === 0x40, (mask & 0x20) !== 0, (mask & 0x40) !== 0, (mask & 0x10) !== 0];
+    const expectedEdge = hits.reduce((edge, hit, n) => edge | (hit ? outputs[n]! : 0), 0);
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained();
+    if (control === 0x40) checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, [hits[n] ? 0 : 2, 126, 0, n === 4 && hits[n] ? 15 : 0],
+      `${mask}/${control} machine${n + 1} owns its phase, timer, index, tail and output`));
+    check(a.controlWord === control && a.inputEdge5d4 === expectedEdge && a.statusWord5bc === mask && a.inputHeld5d8 === 0x200 &&
+      i.byte5fc === 11 && i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 &&
+      x.host.sourceArrowMash749 === [0x100, 0x200, 0x400, 0x800].filter(value => (mask & value) !== 0).length,
+      `${mask}/${control} caller clears once, discards nine real0/1 returns and excludes canonical10/20/40 from preceding mash mask`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkNinthMachineBytes(x, [hits[8] ? 0 : 2, 126, 0, 0], `${mask}/${control} tenth refusal consumes ninth epoch`);
+    check(a.inputEdge5d4 === expectedEdge && i.byte5ff === 19 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${mask}/${control} consumed epoch cannot replay earlier input/gauge or nine-machine effects`);
+  }
+  for (const [descriptorMask, canonical, expected] of [[0x80, 0x80, 0x10], [0x30, 0x10, 0],
+    [0x30, 0x20, 4], [0x30, 0x30, 0x14]] as const) {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    // Explicit later mutations of the retained supplied descriptor prove that
+    // input-mask and flags fields are not the wrapper's fixed output mask.
+    x.ninthDescriptor[4] = descriptorMask; a.statusWord5bc = canonical;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained(); checkInputPrefixEarlierStores(x);
+    check(a.statusWord5bc === canonical && a.inputEdge5d4 === expected && x.host.sourceArrowMash749 === 0,
+      `${descriptorMask}/${canonical} live mask selects canonical input while wrapper output remains10 and flags0 requires every mask bit`);
+    checkNinthMachineBytes(x, [(expected & 0x10) ? 0 : 2, 126, 0, 0], 'live descriptor mask preserves independent ninth handler state');
+    checkSeventhMachineBytes(x, [(canonical & 0x20) ? 0 : 2, 126, 0, 0], 'canonical20 remains the separate seventh input and output4');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check(a.inputEdge5d4 === expected, 'consumed descriptor-mutation epoch cannot reread input or duplicate output');
+  }
+  for (const control of [0, 0x40]) for (const canonicalHit of [false, true]) for (const status of [0, 0x60000]) {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.controlWord = 0x100010 | control; a.statusWord5bc = 0xf60 | (canonicalHit ? 0x10 : 0);
+    a.statusWord5b4 = status | (canonicalHit ? 0 : 0x10); a.inputHeld5d8 = canonicalHit ? 0 : 0x10;
+    i.byte5fc = canonicalHit || status === 0 ? 3 : 11; i.byte5fd = 0; i.byte5fe = 0; i.byte5ff = canonicalHit ? 0 : 4;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained();
+    check(a.controlWord === (control | 0x10) && a.inputHeld5d8 === (canonicalHit ? 0 : 0x10) &&
+      a.statusWord5b4 === (status | (canonicalHit ? 0 : 0x10)) && a.statusWord5bc === (0xf60 | (canonicalHit ? 0x10 : 0)) &&
+      a.inputEdge5d4 === (0x2ed | (control ? 2 : 0) | (canonicalHit ? 0x10 : 0)),
+      `control${control}/status${status} ninth reads canonical5bc10, never held-direction10, control10 or5b410, without flags4/8 gates`);
+    checkSixthMachineBytes(x, [control ? 0 : 2, 126, 0, 0], 'sixth retains independent authenticated control40 gate');
+    checkNinthMachineBytes(x, [canonicalHit ? 0 : 2, 126, 0, 0], 'ninth flags0 keeps canonical input10 separate from output10');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [sx, sy, direction] of [[19, 0, 0], [20, 0, 2], [51, 0, 2], [52, 0, 2], [0, 52, 8],
+    [-52, 0, 1], [0, -52, 4], [52, 52, 10], [-52, 52, 9], [-52, -52, 5], [52, -52, 6],
+    [1, 52, 8], [1, -52, 4], [70, -29, 2]] as const) for (const hit of [false, true]) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = sx; i.stickY5cb = sy; i.byte5fc = 0; a.statusWord5bc = hit ? 0xf70 : 0xf60;
+    check(x.firstMachine.hasNinthMachine() && x.angular.getProcessor() === x.angularProcessor &&
+      x.angular.getAtanRuntime()?.getProcessor() === x.angularProcessor && (a.inputEdge5d4 & 0x10) === 0,
+      'ninth uses genuine angular/finite-atan owners with output10 clear, not callback-generated directions');
+    const retained = retainInputPrefixCadence(x), strong = sx * sx + sy * sy >= 2704;
+    const hostAtan = Math.atan, hostAtan2 = Math.atan2;
+    try {
+      Math.atan = () => {throw Error('host atan is not source ninth composition');};
+      Math.atan2 = () => {throw Error('host atan2 is not source ninth composition');};
+      rejects(() => x.runRawPrefix(1, 64, 20), tenthCall);
+    } finally {Math.atan = hostAtan; Math.atan2 = hostAtan2;}
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (direction === 0 ? 0x200 : strong ? 0x200 | direction | (direction << 4) : 0x2c0 | direction) &&
+      i.byte5fc === (direction === 0 ? 8 : strong ? 11 : 9) && i.byte5fd === (direction === 0 ? 0 : strong ? 19 : 1) &&
+      i.byte5ff === 19 && a.inputEdge5d4 === (hit ? 0x2ff : 0x2ef) && x.host.sourceArrowMash749 === 4,
+      `ninth signed-byte${sx}/${sy}/${hit} retains radius/axis/quadrant/X1/bin paths without making held-direction10 canonical input10`);
+    checks.slice(0, 8).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'genuine angular chain preserves each predecessor'));
+    checkNinthMachineBytes(x, [hit ? 0 : 2, 126, 0, 0], 'ninth reads canonical10 independently of genuine direction');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkNinthMachineBytes(x, [hit ? 0 : 2, 126, 0, 0], 'tenth refusal prevents angular or ninth replay');
+  }
+  for (const fault of ['coefficient', 'ninthMask'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = -52; i.stickY5cb = 52; i.byte5fc = 0; a.statusWord5bc = 0xf70;
+    if (fault === 'coefficient') x.atanData.coefficients802b51a8[0] = 0; else x.machineTables.descriptor3958![4] = NaN;
+    const retained = retainInputPrefixCadence(x), late = fault === 'ninthMask';
+    rejects(() => x.runRawPrefix(1, 64, 20), late ? 'descriptor3958[4]' : 'coefficients802b51a8');
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (late ? 0x299 : 0xabcd) && a.inputEdge5d4 === (late ? 0x2ef : 0x87654321) &&
+      i.byte5fc === (late ? 11 : 0) && i.byte5fd === (late ? 19 : 1) && i.byte5ff === (late ? 19 : 9) &&
+      x.host.sourceArrowMash749 === (late ? 4 : 77), `${fault} preserves exactly the reached angular/input prefix`);
+    checks.slice(0, 8).forEach((assertBytes, n) => assertBytes(x, (late ? complete : initial)[n]!, `${fault} preserves each reached predecessor`));
+    checkNinthMachineBytes(x, late ? [2, 126, 0, 0] : initial[8]!, `${fault} cannot fabricate ninth tail or output10`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (let expired = 0; expired < 9; expired++) {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState, row = cells[expired]!;
+    a.statusWord5bc = 0xf70; m[row[0]] = 2; m[row[1]] = 1; m[row[2]] = 0;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, n === expired ? [0, 0, 0, 0] : complete[n]!,
+      `expired${expired + 1} leaves independent machine${n + 1} state/tail intact`));
+    check(a.inputEdge5d4 === (0x2ff & ~outputs[expired]!), 'one real return0 cannot gate subsequent wrappers or erase preceding outputs');
+  }
+  {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    x.tier.timerFrames = 64; // Explicit in-domain gauge lifetime for seventeen genuine epochs.
+    for (let epoch = 1; epoch <= 17; epoch++) {
+      a.statusWord5bc = epoch === 1 ? 0xf70 : 0xe00;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), tenthCall); retained();
+      checkFifthMachineBytes(x, epoch === 1 ? [0, 126, 0, 15] : [2, 128 - epoch, 0, Math.max(16 - epoch, 0)],
+        `epoch${epoch} fifth duration16 remains independent of ninth duration1`);
+      checks.slice(5).forEach(assertBytes => assertBytes(x, [epoch === 1 ? 0 : 2, epoch === 1 ? 126 : 128 - epoch, 0, 0],
+        'sixth through ninth duration1 each consume only their own tail'));
+      check(a.inputEdge5d4 === (epoch === 1 ? 0x2ff : epoch <= 16 ? 0x2e1 : 0x2e0) &&
+        x.host.sourceArrowMash749 === (epoch === 1 ? 4 : 3), `epoch${epoch} ninth adds no persistent output10`);
+      checks.slice(0, 4).forEach(assertBytes => assertBytes(x, [0, 126, 0, 0], 'first four wrappers retain independent one-call outputs'));
+      rejects(() => x.runRawPrefix(epoch, 128, 40), 'epoch'); retained();
+      check(x.machineState.byte603 === Math.max(16 - epoch, 0) && cells.slice(5).every(row => x.machineState[row[3]] === 0) &&
+        x.tier.timerFrames === 64 - epoch, 'consumed epoch cannot drain any tail or genuine gauge frame');
+    }
+  }
+  for (const expired of [false, true]) {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.controlWord = 0x100000; a.statusWord5bc = 0xe00;
+    m.byte610 = 2; m.byte611 = expired ? 1 : 7; m.byte612 = 0; m.byte613 = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained();
+    checkNinthMachineBytes(x, [expired ? 0 : 2, expired ? 0 : 6, 0, 1], 'supplied ninth tail survives canonical10 miss or expiry and decrements once');
+    check(a.inputEdge5d4 === 0x2f0, 'ninth existing tail alone ORs10 without canonical10, control40 or any fifth-through-eighth tail');
+  }
+  {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0;
+    const timers = [127, 7, 11, 15, 19, 23, 27, 31, 35];
+    cells.slice(1).forEach((row, n) => {m[row[0]] = 2; m[row[1]] = timers[n + 1]!; m[row[2]] = 0;});
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      if (epoch === 3) a.statusWord5bc = 0xf70;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), tenthCall); retained();
+      checks.forEach((assertBytes, n) => assertBytes(x, [epoch === 3 ? 0 : 2, timers[n]! - epoch, 0, n === 4 && epoch === 3 ? 15 : 0],
+        `epoch${epoch} machine${n + 1} countdown remains independent`));
+      check(a.inputEdge5d4 === (epoch === 3 ? 0x2ff : 0) && x.tier.timerFrames === 8 - epoch,
+        `epoch${epoch} changed canonical word reaches each of nine machines once after real gauge work`);
+    }
+  }
+  {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    const expected = [[0, 126, 0, 0], [2, 126, 0, 0], [0, 125, 0, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 4; epoch++) {
+      a.statusWord5bc = epoch === 2 ? 0x160 : 0x170; a.controlWord = epoch % 2 === 0 ? 0x40 : 0;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), tenthCall); retained();
+      checkNinthMachineBytes(x, expected[epoch - 1]!, 'ninth retriggers from live canonical10 regardless of alternating control40');
+      checkFifthMachineBytes(x, [0, 126, 0, 15], 'ninth retrigger changes neither fifth100 input nor duration16');
+      check(a.inputEdge5d4 === [29, 15, 29, 31][epoch - 1], 'ninth10, eighth40, seventh20 and sixth100/control40 produce independent10/8/4/2 outputs');
+    }
+  }
+  for (const control of [0, 0x40]) {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf70; a.controlWord = 0x100000 | control;
+    m.byte610 = 1; m.byte611 = 2; m.byte612 = 0; // Supplied phase1, not claimed mode1 reachability.
+    const expected = [[1, 0, 1, 0], [0, 255, 1, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), tenthCall); retained();
+      checkNinthMachineBytes(x, expected[epoch - 1]!, `epoch${epoch}/control${control} ninth phase1 matches10/reloads0, expires signed, then restarts phase0`);
+      check(a.inputEdge5d4 === (0x2ed | (control ? 2 : 0) | (epoch === 3 ? 0x10 : 0)),
+        'ninth phase1/phase2 do not borrow sixth control gate or discard preceding outputs');
+    }
+  }
+  for (const lazy of ['flags', 'mask', 'duration', 'index'] as const) {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf60; m.byte610 = 2; m.byte611 = lazy === 'duration' ? 7 : 1; m.byte612 = lazy === 'index' ? 255 : 0;
+    if (lazy !== 'index') x.ninthDescriptor[lazy === 'flags' ? 1 : lazy === 'mask' ? 4 : 3] = NaN;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained();
+    checkNinthMachineBytes(x, lazy === 'duration' ? [2, 6, 0, 0] : [0, 0, lazy === 'index' ? 255 : 0, 0],
+      `${lazy} remains unread after expiry, or duration remains unread on genuine canonical10 miss`);
+    a.statusWord5bc = 0xf70;
+    if (lazy === 'index') {m.byte610 = 2; m.byte611 = 7;}
+    rejects(() => x.runRawPrefix(2, 64, 20), lazy === 'index' ? 'outside explicit12-byte descriptor' :
+      `descriptor3958[${lazy === 'flags' ? 1 : lazy === 'mask' ? 4 : 3}]`); retained();
+    checkNinthMachineBytes(x, lazy === 'duration' ? [0, 5, 0, 0] : lazy === 'index' ? [2, 6, 255, 0] : [2, 126, 0, 0],
+      `${lazy} reached failure retains exact preceding phase/timer/index writes`);
+    check(a.inputEdge5d4 === 0x2ef && x.tier.timerFrames === 6, 'lazy ninth failure retains all eight outputs and second-epoch gauge work');
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch'); retained();
+  }
+  for (const phase of [1, 2]) for (const timer of [0, 1, 2, 127, 128, 129, 255]) {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf60; m.byte610 = phase; m.byte611 = timer; m.byte612 = 0; m.byte613 = 2;
+    const next = (timer - 1) & 255, active = next > 0 && next < 128;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 8).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'signed ninth timer preserves each predecessor'));
+    checkNinthMachineBytes(x, [active ? phase : 0, next, 0, 1],
+      `phase${phase}/timer${timer} preserves unsigned byte store followed by signed post-decrement expiry`);
+    check(a.inputEdge5d4 === 0x2ff, 'existing ninth tail still ORs10 after signed expiry or canonical10 miss');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkNinthMachineBytes(x, [active ? phase : 0, next, 0, 1], 'consumed signed-timer epoch cannot drain retained ninth tail');
+  }
+  for (const phase of [1, 2]) {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf60; m.byte610 = phase; m.byte611 = 7; m.byte612 = 1;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 8).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'index1 preserves all eight genuine predecessors'));
+    checkNinthMachineBytes(x, [phase === 1 ? 1 : 0, 6, 1, 0],
+      'authenticated index1 zero halfword never matches phase1 any-mask but matches phase2 all-mask');
+    check(a.inputEdge5d4 === (phase === 1 ? 0x2ef : 0x2ff),
+      'index1 phase2 emits output10 without canonical10, whereas phase1 emits none');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const phase of [1, 2]) {
+    const x = ninthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf70; m.byte610 = phase; m.byte611 = 7; m.byte612 = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'descriptor3958: indexed halfword outside explicit12-byte descriptor'); retained();
+    checkNinthMachineBytes(x, [phase, 6, 2, 0], 'indexed handlers retain timer decrement before explicit descriptor bound refusal');
+    check(x.sourceActor.inputEdge5d4 === 0x2ef, 'index2 cannot read tenth descriptor3964 or invent ninth output10');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['dispatch', 'phaseBound', 'index', 'phase', 'timer', 'flags', 'mask', 'duration', 'tail', 'descriptorOwner'] as const) {
+    const x = ninthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf70;
+    if (fault === 'dispatch') {m.byte610 = 1; x.machineTables.dispatch3988[1] = 0x80000000;}
+    else if (fault === 'phaseBound') m.byte610 = 3;
+    else if (fault === 'flags') x.ninthDescriptor[1] = NaN;
+    else if (fault === 'mask') x.ninthDescriptor[4] = NaN;
+    else if (fault === 'duration') x.ninthDescriptor[3] = NaN;
+    else if (fault === 'descriptorOwner') x.machineTables.descriptor3958 = [...x.ninthDescriptor];
+    else Object.defineProperty(m, fault === 'index' ? 'byte612' : fault === 'phase' ? 'byte610' : fault === 'timer' ? 'byte611' : 'byte613', {writable: false});
+    const expected = fault === 'dispatch' ? [1, 1, 3, 0] : fault === 'phaseBound' ? [3, 1, 3, 0] :
+      fault === 'index' || fault === 'descriptorOwner' ? [0, 1, 3, 0] : fault === 'phase' ? [0, 1, 0, 0] :
+      fault === 'timer' ? [2, 1, 0, 0] : fault === 'tail' || fault === 'duration' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'phaseBound' ? 'outside explicit three-entry table' :
+      fault === 'flags' || fault === 'mask' || fault === 'duration' ? 'integer out of bounds' :
+      fault === 'descriptorOwner' ? 'descriptor3958: owner changed' : fault === 'index' ? 'byte612' :
+      fault === 'phase' ? 'byte610' : fault === 'timer' ? 'byte611' : 'byte613';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 8).forEach((assertBytes, n) => assertBytes(x, complete[n]!, `${fault} preserves completed machine${n + 1}`));
+    checkNinthMachineBytes(x, expected, `${fault} preserves exactly the reached ninth partial stores`);
+    check(x.sourceActor.inputEdge5d4 === 0x2ef, `${fault} neither erases preceding outputs nor fabricates output10`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkNinthMachineBytes(x, expected, `${fault} consumes epoch before ninth handler/wrapper replay`);
+    check(x.inputState.byte5ff === 19 && x.tier.timerFrames === 7 && x.machineState.byte603 === 15,
+      `${fault} cannot replay input/gauge work or drain preceding fifth tail`);
+  }
+  {
+    const x = ninthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf70; m.byte610 = 2; m.byte611 = 1; m.byte612 = 0; m.byte613 = 255;
+    Object.defineProperty(m, 'byte613', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte613'); retained(); checkInputPrefixEarlierStores(x);
+    checkNinthMachineBytes(x, [0, 0, 0, 255], 'expired ninth resets phase before wrapper tail destination fails');
+    check(x.sourceActor.inputEdge5d4 === 0x2ef && x.machineState.byte603 === 15,
+      'failed ninth tail decrement retains preceding outputs without OR10');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['firstMask', 'secondMask', 'thirdMask', 'fourthMask', 'fifthMask', 'sixthMask', 'seventhMask', 'eighthMask', 'cue', 'inputTimer', 'mash', 'edge'] as const) {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf70;
+    const descriptorKeys = ['descriptor38f8', 'descriptor3904', 'descriptor3910', 'descriptor391c', 'descriptor3928', 'descriptor3934', 'descriptor3940', 'descriptor394c'] as const;
+    const n = ['firstMask', 'secondMask', 'thirdMask', 'fourthMask', 'fifthMask', 'sixthMask', 'seventhMask', 'eighthMask'].indexOf(fault);
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'inputTimer' ? 'byte5fd' : fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    if (n >= 0) x.machineTables[descriptorKeys[n]!]![4] = NaN;
+    else Object.defineProperty(fault === 'cue' ? x.gates : fault === 'inputTimer' ? x.inputState : fault === 'mash' ? x.host : a, key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), n >= 0 ? `${descriptorKeys[n]}[4]` : key); retained();
+    checkNinthMachineBytes(x, initial[8]!, `${fault} preceding failure cannot enter ninth handler/wrapper`);
+    check(a.inputEdge5d4 === (n >= 0 ? [0, 0x20, 0x60, 0xe0, 0x2e0, 0x2e1, 0x2e3, 0x2e7][n] : 0x87654321) && x.tier.timerFrames === 7,
+      `${fault} preserves canonical edge exactly at reached source point`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkNinthMachineBytes(x, initial[8]!, `${fault} consumed epoch cannot enter ninth later`);
+  }
+  for (const alias of ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'dispatch', 'tables', 'actor', 'borg', 'machine', 'input', 'processor'] as const) {
+    const processor: SourceActorInputProcessorState = {gqr4: 0x00070007};
+    const x = ninthInputMachineHydratedControlFixture(undefined, processor);
+    const owner = alias === 'first' ? x.machineTables.descriptor38f8 : alias === 'second' ? x.machineTables.descriptor3904 :
+      alias === 'third' ? x.machineTables.descriptor3910 : alias === 'fourth' ? x.machineTables.descriptor391c :
+      alias === 'fifth' ? x.machineTables.descriptor3928 : alias === 'sixth' ? x.machineTables.descriptor3934 :
+      alias === 'seventh' ? x.machineTables.descriptor3940 : alias === 'eighth' ? x.machineTables.descriptor394c :
+      alias === 'dispatch' ? x.machineTables.dispatch3988 : alias === 'tables' ? x.machineTables : alias === 'actor' ? x.sourceActor :
+      alias === 'borg' ? x.host : alias === 'machine' ? x.machineState : alias === 'input' ? x.inputState : processor;
+    Object.defineProperty(x.machineTables, 'descriptor3958', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${alias} alias preflight preserves all machine${n + 1} cells`));
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.sourceActor.inputHeld5d8 === 0xabcd &&
+      x.inputState.byte5ff === 9 && x.host.sourceArrowMash749 === 77,
+      `${alias} ninth alias preserves preceding gauge/stage/cues but precedes angular/input stores`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const alias of ['angular', 'direction', 'atan', 'high', 'low', 'coefficients'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true, true, true);
+    const owner = alias === 'angular' ? x.angularData : alias === 'direction' ? x.angularData.direction80433928 :
+      alias === 'atan' ? x.atanData : alias === 'high' ? x.atanData.atanHi802b5168 :
+      alias === 'low' ? x.atanData.atanLo802b5188 : x.atanData.coefficients802b51a8;
+    Object.defineProperty(x.machineTables, 'descriptor3958', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${alias} arithmetic owner cannot replace machine storage`));
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.inputState.byte5ff === 9, `${alias} alias precedes angular/input work`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const key of cells[8]) {
+    const x = ninthInputMachineHydratedControlFixture();
+    Object.defineProperty(x.sourceActor, key, {value: 1, writable: true, configurable: true});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${key}: competing source owner`); retained(); checkInputMachinePrecedingStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${key} late rival refuses at first genuine machine entry`));
+    check(x.sourceActor.inputEdge5d4 === 0, `${key} rival retains genuine input clear before any wrapper`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  {
+    const x = ninthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf70;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained();
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit status/wait advances attached animation after nine genuine input calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices after ninth returns');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6,
+      'attribute/movement/history cadence remains explicit after tenth refusal');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputEdge5d4 === 0x2ff && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4 && x.tier.timerFrames === 7,
+      'later genuine setup replaces animation without implicit nine-machine/input/gauge/matrix/history work');
+    checks.forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'explicit downstream calls never replay machine or tail work'));
+  }
+  console.log('[actor-ninth-input-machine-composition] PASS: genuine DAT/setup/status/gauge/stage/cue/input graph, distinct3958 and610..613, all128 input combinations under both control40 states, nine independent states/outputs, canonical5bc10 versus equal-numbered output10/held-direction10/control10/5b4 with authenticated flags0, duration1 versus fifth16 and sixth control gate, genuine angular/finite-atan routes without host atan, historical defaults/source ordering, partial stores/lazy bounds/signed expiry/index1 semantics/consumed epochs, cross-owner/rival exclusions and explicit downstream cadence; exact tenth686d0/3964/628/2000 refusal, synthetic offline only/no hardware/fulltick/production activation');
+}
+
+/** Tenth3964's authenticated flags10 matches ANY canonical5bc low-nibble
+ * bit. Its output2000 and noncontiguous628..62b state remain separate from
+ * all nine predecessors. Explicit decoded tables and synthetic actor inputs
+ * do not hydrate PAD state, execute charge686f0 or activate a production tick. */
+function tenthInputMachineHydratedControlFixture(missing?: 'second' | 'third' | 'fourth' | 'fifth' | 'sixth' | 'seventh' | 'eighth' | 'ninth',
+  processor?: SourceActorInputProcessorState) {
+  const x = inputMachineHydratedControlFixture(processor, missing !== 'second', missing !== 'third', missing !== 'fourth',
+    missing !== 'fifth', missing !== 'sixth', missing !== 'seventh', missing !== 'eighth', missing !== 'ninth', true);
+  const tenthDescriptor = x.machineTables.descriptor3964;
+  if (!tenthDescriptor || !x.firstMachine.hasTenthMachine()) throw Error('tenth-machine fixture requires explicit descriptor3964');
+  return Object.assign(x, {tenthDescriptor});
+}
+function checkTenthMachineBytes(x: InputMachineHydratedFixture, expected: readonly number[], message: string): void {
+  const m = x.machineState;
+  check([m.byte628, m.byte629, m.byte62a, m.byte62b].every((value, i) => value === expected[i]), message);
+}
+export function runTenthInputMachineHydratedControlTests(): void {
+  const tenthCall = '800686d0 reached unsupported tenth source call 80068b8c (descriptor802d3964, actor+628, mask2000)';
+  const chargeCall = '800686d8 reached unsupported source charge helper 800686f0';
+  const checks = [checkMachineBytes, checkSecondMachineBytes, checkThirdMachineBytes, checkFourthMachineBytes,
+    checkFifthMachineBytes, checkSixthMachineBytes, checkSeventhMachineBytes, checkEighthMachineBytes, checkNinthMachineBytes, checkTenthMachineBytes];
+  const initial = [[0, 77, 99, 0], [0, 31, 55, 0], [0, 17, 33, 0], [0, 13, 21, 0],
+    [0, 9, 17, 0], [0, 5, 11, 0], [0, 3, 7, 0], [0, 2, 5, 0], [0, 1, 3, 0], [0, 23, 41, 0]];
+  const complete = checks.map((_, n) => [0, 126, 0, n === 4 ? 15 : 0]);
+  const cells = [['byte614', 'byte615', 'byte616', 'byte617'], ['byte618', 'byte619', 'byte61a', 'byte61b'],
+    ['byte61c', 'byte61d', 'byte61e', 'byte61f'], ['byte624', 'byte625', 'byte626', 'byte627'],
+    ['byte600', 'byte601', 'byte602', 'byte603'], ['byte604', 'byte605', 'byte606', 'byte607'],
+    ['byte608', 'byte609', 'byte60a', 'byte60b'], ['byte60c', 'byte60d', 'byte60e', 'byte60f'],
+    ['byte610', 'byte611', 'byte612', 'byte613'], ['byte628', 'byte629', 'byte62a', 'byte62b']] as const;
+  const outputs = [0x20, 0x40, 0x80, 0x200, 1, 2, 4, 8, 0x10, 0x2000];
+  const descriptorKeys = ['descriptor38f8', 'descriptor3904', 'descriptor3910', 'descriptor391c', 'descriptor3928',
+    'descriptor3934', 'descriptor3940', 'descriptor394c', 'descriptor3958', 'descriptor3964'] as const;
+  {
+    const x = ninthInputMachineHydratedControlFixture(), retained = retainInputPrefixCadence(x);
+    check(!x.firstMachine.hasTenthMachine() && !Object.hasOwn(x.machineTables, 'descriptor3964') &&
+      cells[9].every(key => !Object.hasOwn(x.machineState, key)), 'historical nine-machine graph acquires no tenth descriptor, state or defaults');
+    rejects(() => x.runRawPrefix(1, 64, 20), tenthCall); retained(); checkInputMachinePrecedingStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0x260, 'missing tenth retains former ninth completion and exact tenth refusal');
+  }
+  {
+    const x = inputPrefixHydratedControlFixture(false, undefined, true, undefined, true, true, true, true, true, true, true, true);
+    x.sourceActor.statusWord5bc = 0xf7f;
+    const retained = retainInputPrefixCadence(x);
+    check(x.firstMachine === undefined && Object.hasOwn(x.machineTables, 'descriptor3964'), 'tenth table cannot fabricate a missing genuine machine runtime');
+    rejects(() => x.runRawPrefix(1, 64, 20), '800685f8 reached unsupported source call 80068b8c'); retained(); checkInputPrefixEarlierStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0 && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4,
+      'missing runtime retains input clear and cannot skip to any later wrapper');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [n, missing] of (['second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth'] as const).entries()) {
+    const x = tenthInputMachineHydratedControlFixture(missing), retained = retainInputPrefixCadence(x);
+    x.sourceActor.statusWord5bc = 0xf7f;
+    const present = [x.firstMachine.hasSecondMachine(), x.firstMachine.hasThirdMachine(), x.firstMachine.hasFourthMachine(),
+      x.firstMachine.hasFifthMachine(), x.firstMachine.hasSixthMachine(), x.firstMachine.hasSeventhMachine(), x.firstMachine.hasEighthMachine(), x.firstMachine.hasNinthMachine()];
+    check(x.firstMachine.hasTenthMachine() && !present[n], `${missing} absence is not supplied by tenth ownership`);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${['80068610', '80068628', '80068640', '80068658', '80068670', '80068688', '800686a0', '800686b8'][n]} reached unsupported ${missing} source call`);
+    retained(); checkInputPrefixEarlierStores(x);
+    for (let p = 0; p <= n; p++) checks[p]!(x, complete[p]!, `${missing} retains completed predecessor${p + 1}`);
+    checks.slice(n + 2).forEach((assertBytes, p) => assertBytes(x, initial[n + 2 + p]!, `${missing} cannot enter a later supplied machine`));
+    check(x.sourceActor.inputEdge5d4 === [0x20, 0x60, 0xe0, 0x2e0, 0x2e1, 0x2e3, 0x2e7, 0x2ef][n],
+      `${missing} preserves only the preceding source-ordered outputs`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkTenthMachineBytes(x, initial[9]!, `${missing} consumes epoch before tenth retry`);
+  }
+  // Every prior seven-bit input combination crossed with all16 low-nibble
+  // values and both control40 states. This is4096 actual retained graphs,
+  // not callback effects or independent helper-only Boolean expectations.
+  for (const control of [0, 0x40]) for (let bits = 0; bits < 2048; bits++) {
+    const mask = ((bits & 15) << 8) | ((bits & 16) ? 0x20 : 0) | ((bits & 32) ? 0x40 : 0) |
+      ((bits & 64) ? 0x10 : 0) | ((bits >>> 7) & 15);
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.statusWord5bc = mask; a.controlWord = 0x100000 | control;
+    check(x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a && x.status.getActualActor(x.actor) === a &&
+      x.world.getActualActor(x.actor) === a && x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host &&
+      x.stageBounds.getWorldBinding(x.actor) === x.header && x.stageBounds.getStatusBinding(x.actor) === x.statusState &&
+      x.world.getMappingActor(x.actor) === x.mapping.getActor(x.actor) &&
+      x.firstMachine.getTables() === x.machineTables && x.firstMachine.getActorBinding(x.actor) === x.machineState &&
+      x.firstMachine.hasSecondMachine() && x.firstMachine.hasThirdMachine() && x.firstMachine.hasFourthMachine() &&
+      x.firstMachine.hasFifthMachine() && x.firstMachine.hasSixthMachine() && x.firstMachine.hasSeventhMachine() &&
+      x.firstMachine.hasEighthMachine() && x.firstMachine.hasNinthMachine() && x.firstMachine.hasTenthMachine() &&
+      new Set([x.machineTables.dispatch3988, ...descriptorKeys.map(key => x.machineTables[key])]).size === 11 &&
+      [1, 0x10, 0, 1, 0xf, 0].every((value, n) => x.tenthDescriptor[n] === value) &&
+      [...cells.flat(), 'inputFlags5d4', 'inputEdges5bc', 'flags5e0'].every(key => !Object.hasOwn(a, key)) && isSourceActorTickPrefixClaimedActor(a),
+      'ten distinct descriptors share canonical DAT/setup/status/gauge/stage/cue/input owners without rivals');
+    check((a.inputEdge5d4 & 0x2000) === 0, 'tenth own output2000 starts clear so later OR is not vacuous');
+    const hits = [(mask & 0x200) !== 0, (mask & 0x200) !== 0, (mask & 0x400) !== 0, (mask & 0x800) !== 0,
+      (mask & 0x100) !== 0, (mask & 0x100) !== 0 && control === 0x40, (mask & 0x20) !== 0, (mask & 0x40) !== 0,
+      (mask & 0x10) !== 0, (mask & 15) !== 0];
+    const expectedEdge = hits.reduce((edge, hit, n) => edge | (hit ? outputs[n]! : 0), 0);
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained();
+    if (control === 0x40) checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, [hits[n] ? 0 : 2, 126, 0, n === 4 && hits[n] ? 15 : 0],
+      `${mask}/${control} machine${n + 1} independently owns phase, timer, index, tail and output`));
+    check(a.controlWord === control && a.inputEdge5d4 === expectedEdge && a.statusWord5bc === mask && a.inputHeld5d8 === 0x200 &&
+      i.byte5fc === 11 && i.byte5fd === 0 && i.byte5fe === 0 && i.byte5ff === 19 &&
+      x.host.sourceArrowMash749 === [0x100, 0x200, 0x400, 0x800].filter(value => (mask & value) !== 0).length,
+      `${mask}/${control} caller clears once, discards ten real0/1 returns, then refuses unconditional charge without counting low nibble in mash`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkTenthMachineBytes(x, [hits[9] ? 0 : 2, 126, 0, 0], `${mask}/${control} charge refusal consumes tenth epoch`);
+    check(a.inputEdge5d4 === expectedEdge && i.byte5ff === 19 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${mask}/${control} consumed epoch cannot replay any source prefix or machine effect`);
+  }
+  for (const control of [0, 0x40]) for (const canonicalHit of [false, true]) for (const status of [0, 0x60000]) {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    a.controlWord = 0x10200f | control; a.statusWord5bc = 0xf70 | (canonicalHit ? 5 : 0x2000);
+    a.statusWord5b4 = status | (canonicalHit ? 0 : 0x200f); a.inputHeld5d8 = canonicalHit ? 0 : 0xf;
+    i.byte5fc = canonicalHit || status === 0 ? 3 : 11; i.byte5fd = 0; i.byte5fe = 0; i.byte5ff = canonicalHit ? 0 : 4;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained();
+    check(a.controlWord === (control | 0x200f) && a.inputHeld5d8 === (canonicalHit ? 0 : 0xf) &&
+      a.statusWord5b4 === (status | (canonicalHit ? 0 : 0x200f)) && a.statusWord5bc === (0xf70 | (canonicalHit ? 5 : 0x2000)) &&
+      a.inputEdge5d4 === (0x2fd | (control ? 2 : 0) | (canonicalHit ? 0x2000 : 0)),
+      `control${control}/status${status} tenth reads only canonical5bc low bits, never held/control/status low bits or equal-numbered2000`);
+    checkSixthMachineBytes(x, [control ? 0 : 2, 126, 0, 0], 'sixth alone retains authenticated control40 gate');
+    checkTenthMachineBytes(x, [canonicalHit ? 0 : 2, 126, 0, 0], 'flags10 any-bit matching has no control/status gate');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const [descriptorMask, canonical, expected] of [[0x80, 0x80, 0x2000], [0x30, 0x10, 0x2010],
+    [0x30, 0x20, 0x2004], [0x30, 0x30, 0x2014], [0, 0, 0]] as const) {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    x.tenthDescriptor[4] = descriptorMask; a.statusWord5bc = canonical;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained(); checkInputPrefixEarlierStores(x);
+    check(a.statusWord5bc === canonical && a.inputEdge5d4 === expected && x.host.sourceArrowMash749 === 0,
+      `${descriptorMask}/${canonical} live any-bit mask is separate from fixed wrapper output2000 and canonical seventh/ninth inputs`);
+    checkTenthMachineBytes(x, [(expected & 0x2000) ? 0 : 2, 126, 0, 0], 'mutated descriptor mask preserves independent tenth state');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const flags of [0, 0x10]) for (const canonical of [0, 1, 2, 3]) {
+    const x = tenthInputMachineHydratedControlFixture(); x.tenthDescriptor[1] = flags; x.tenthDescriptor[4] = 3;
+    x.sourceActor.statusWord5bc = canonical;
+    const hit = flags === 0 ? canonical === 3 : canonical !== 0, retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained();
+    check(x.sourceActor.inputEdge5d4 === (hit ? 0x2000 : 0), 'live flags select all-bit versus any-bit semantics, not cached tenth expectations');
+    checkTenthMachineBytes(x, [hit ? 0 : 2, 126, 0, 0], 'mutable flags change only tenth matching');
+  }
+  for (const duration of [0, 1, 2, 255, 256, 257, 65535]) {
+    const x = tenthInputMachineHydratedControlFixture(); x.tenthDescriptor[3] = duration; x.sourceActor.statusWord5bc = 1;
+    const tail = duration & 255, retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained();
+    checkTenthMachineBytes(x, [0, 126, 0, tail === 0 ? 0 : tail - 1], 'live duration is truncated to a byte before independent wrapper decrement');
+    check(x.sourceActor.inputEdge5d4 === (tail ? 0x2000 : 0), 'duration0/256 yields return0 yet caller still reaches charge boundary');
+  }
+  for (const [sx, sy, direction] of [[19, 0, 0], [20, 0, 2], [51, 0, 2], [52, 0, 2], [0, 52, 8],
+    [-52, 0, 1], [0, -52, 4], [52, 52, 10], [-52, 52, 9], [-52, -52, 5], [52, -52, 6],
+    [1, 52, 8], [1, -52, 4], [70, -29, 2]] as const) for (const hit of [false, true]) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true, true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = sx; i.stickY5cb = sy; i.byte5fc = 0; a.statusWord5bc = hit ? 0xf71 : 0xf70;
+    check(x.firstMachine.hasTenthMachine() && x.angular.getProcessor() === x.angularProcessor &&
+      x.angular.getAtanRuntime()?.getProcessor() === x.angularProcessor && (a.inputEdge5d4 & 0x2000) === 0,
+      'tenth uses actual angular/finite-atan ownership, not callback-generated direction masks');
+    const retained = retainInputPrefixCadence(x), strong = sx * sx + sy * sy >= 2704;
+    const hostAtan = Math.atan, hostAtan2 = Math.atan2;
+    try {
+      Math.atan = () => {throw Error('host atan is not source tenth composition');};
+      Math.atan2 = () => {throw Error('host atan2 is not source tenth composition');};
+      rejects(() => x.runRawPrefix(1, 64, 20), chargeCall);
+    } finally {Math.atan = hostAtan; Math.atan2 = hostAtan2;}
+    retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (direction === 0 ? 0x200 : strong ? 0x200 | direction | (direction << 4) : 0x2c0 | direction) &&
+      i.byte5fc === (direction === 0 ? 8 : strong ? 11 : 9) && i.byte5fd === (direction === 0 ? 0 : strong ? 19 : 1) &&
+      i.byte5ff === 19 && a.inputEdge5d4 === (hit ? 0x22ff : 0x2ff) && x.host.sourceArrowMash749 === 4,
+      `tenth${sx}/${sy}/${hit} keeps radius/axis/quadrant/X1/bin paths separate from canonical5bc low-nibble input`);
+    checks.slice(0, 9).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'actual angular chain preserves each predecessor'));
+    checkTenthMachineBytes(x, [hit ? 0 : 2, 126, 0, 0], 'held directional bits cannot become canonical tenth input');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['coefficient', 'tenthMask'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true, true, true, true), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = -52; i.stickY5cb = 52; i.byte5fc = 0; a.statusWord5bc = 0xf7f;
+    if (fault === 'coefficient') x.atanData.coefficients802b51a8[0] = 0; else x.machineTables.descriptor3964![4] = NaN;
+    const retained = retainInputPrefixCadence(x), late = fault === 'tenthMask';
+    rejects(() => x.runRawPrefix(1, 64, 20), late ? 'descriptor3964[4]' : 'coefficients802b51a8'); retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (late ? 0x299 : 0xabcd) && a.inputEdge5d4 === (late ? 0x2ff : 0x87654321) &&
+      i.byte5fc === (late ? 11 : 0) && i.byte5fd === (late ? 19 : 1) && i.byte5ff === (late ? 19 : 9) &&
+      x.host.sourceArrowMash749 === (late ? 4 : 77), `${fault} preserves exactly reached angular/input prefix stores`);
+    checks.slice(0, 9).forEach((assertBytes, n) => assertBytes(x, (late ? complete : initial)[n]!, `${fault} preserves reached predecessor`));
+    checkTenthMachineBytes(x, late ? [2, 126, 0, 0] : initial[9]!, `${fault} cannot fabricate tenth tail or output2000`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (let expired = 0; expired < 10; expired++) {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState, row = cells[expired]!;
+    a.statusWord5bc = 0xf7f; m[row[0]] = 2; m[row[1]] = 1; m[row[2]] = 0;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, n === expired ? [0, 0, 0, 0] : complete[n]!, `expired${expired + 1} preserves independent machine${n + 1}`));
+    check(a.inputEdge5d4 === (0x22ff & ~outputs[expired]!), 'one genuine return0 cannot gate later wrappers, erase prior outputs or skip charge refusal');
+  }
+  {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    x.tier.timerFrames = 64;
+    for (let epoch = 1; epoch <= 17; epoch++) {
+      a.statusWord5bc = epoch === 1 ? 0xf7f : 0xe00;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), chargeCall); retained();
+      checkFifthMachineBytes(x, epoch === 1 ? [0, 126, 0, 15] : [2, 128 - epoch, 0, Math.max(16 - epoch, 0)],
+        `epoch${epoch} fifth duration16 remains separate from tenth duration1`);
+      checks.slice(5).forEach(assertBytes => assertBytes(x, [epoch === 1 ? 0 : 2, epoch === 1 ? 126 : 128 - epoch, 0, 0], 'sixth through tenth each consume only their own duration1 tail'));
+      check(a.inputEdge5d4 === (epoch === 1 ? 0x22ff : epoch <= 16 ? 0x2e1 : 0x2e0) &&
+        x.host.sourceArrowMash749 === (epoch === 1 ? 4 : 3), `epoch${epoch} tenth adds no persistent output2000`);
+      checks.slice(0, 4).forEach(assertBytes => assertBytes(x, [0, 126, 0, 0], 'first four outputs remain independently retriggered'));
+      rejects(() => x.runRawPrefix(epoch, 128, 40), 'epoch'); retained();
+      check(x.machineState.byte603 === Math.max(16 - epoch, 0) && cells.slice(5).every(row => x.machineState[row[3]] === 0) &&
+        x.tier.timerFrames === 64 - epoch, 'consumed epoch cannot drain a machine tail or genuine gauge frame');
+    }
+  }
+  for (const expired of [false, true]) {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.controlWord = 0x100000; a.statusWord5bc = 0xe00;
+    m.byte628 = 2; m.byte629 = expired ? 1 : 7; m.byte62a = 0; m.byte62b = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained();
+    checkTenthMachineBytes(x, [expired ? 0 : 2, expired ? 0 : 6, 0, 1], 'existing tenth tail survives miss or expiry and decrements once');
+    check(a.inputEdge5d4 === 0x22e0, 'existing tenth tail ORs2000 without canonical low bits, control40 or fifth-through-ninth tails');
+  }
+  {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0;
+    const timers = [127, 7, 11, 15, 19, 23, 27, 31, 35, 39];
+    cells.slice(1).forEach((row, n) => {m[row[0]] = 2; m[row[1]] = timers[n + 1]!; m[row[2]] = 0;});
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      if (epoch === 3) a.statusWord5bc = 0xf7f;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), chargeCall); retained();
+      checks.forEach((assertBytes, n) => assertBytes(x, [epoch === 3 ? 0 : 2, timers[n]! - epoch, 0, n === 4 && epoch === 3 ? 15 : 0], `epoch${epoch} machine${n + 1} countdown is independent`));
+      check(a.inputEdge5d4 === (epoch === 3 ? 0x22ff : 0) && x.tier.timerFrames === 8 - epoch, 'live canonical change reaches each of ten wrappers after exactly one gauge step');
+    }
+  }
+  {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    const expected = [[0, 126, 0, 0], [2, 126, 0, 0], [0, 125, 0, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 4; epoch++) {
+      a.statusWord5bc = epoch === 2 ? 0x170 : 0x171; a.controlWord = epoch % 2 === 0 ? 0x40 : 0;
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), chargeCall); retained();
+      checkTenthMachineBytes(x, expected[epoch - 1]!, 'tenth retriggers from canonical low bits despite alternating control40');
+      checkFifthMachineBytes(x, [0, 126, 0, 15], 'tenth retrigger changes neither fifth input100 nor duration16');
+      check(a.inputEdge5d4 === [0x201d, 0x1f, 0x201d, 0x201f][epoch - 1], 'tenth2000 and fifth-through-ninth1/2/4/8/10 outputs remain independent');
+    }
+  }
+  for (const control of [0, 0x40]) {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf7f; a.controlWord = 0x100000 | control;
+    m.byte628 = 1; m.byte629 = 2; m.byte62a = 0; // Explicit supplied phase1, not mode1 reachability.
+    const expected = [[1, 0, 1, 0], [0, 255, 1, 0], [0, 126, 0, 0]];
+    for (let epoch = 1; epoch <= 3; epoch++) {
+      const retained = retainInputPrefixCadence(x);
+      rejects(() => x.runRawPrefix(epoch, 64, 20), chargeCall); retained();
+      checkTenthMachineBytes(x, expected[epoch - 1]!, 'phase1 any-mask reloads0 and advances index, then signed expiry precedes phase0 restart');
+      check(a.inputEdge5d4 === (0x2fd | (control ? 2 : 0) | (epoch === 3 ? 0x2000 : 0)), 'phase1 does not borrow phase2 flags or sixth control gate');
+    }
+  }
+  for (const lazy of ['flags', 'mask', 'duration', 'index'] as const) {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf70; m.byte628 = 2; m.byte629 = lazy === 'duration' ? 7 : 1; m.byte62a = lazy === 'index' ? 255 : 0;
+    if (lazy !== 'index') x.tenthDescriptor[lazy === 'flags' ? 1 : lazy === 'mask' ? 4 : 3] = NaN;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained();
+    checkTenthMachineBytes(x, lazy === 'duration' ? [2, 6, 0, 0] : [0, 0, lazy === 'index' ? 255 : 0, 0], 'expiry skips flags/mask/index and a genuine miss skips duration');
+    a.statusWord5bc = 0xf7f;
+    if (lazy === 'index') {m.byte628 = 2; m.byte629 = 7;}
+    rejects(() => x.runRawPrefix(2, 64, 20), lazy === 'index' ? 'outside explicit12-byte descriptor' : `descriptor3964[${lazy === 'flags' ? 1 : lazy === 'mask' ? 4 : 3}]`); retained();
+    checkTenthMachineBytes(x, lazy === 'duration' ? [0, 5, 0, 0] : lazy === 'index' ? [2, 6, 255, 0] : [2, 126, 0, 0], 'later reached invalid value retains exact phase/timer/index writes');
+    check(a.inputEdge5d4 === 0x2ff && x.tier.timerFrames === 6, 'lazy tenth failure retains all nine outputs and second-epoch gauge work');
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch'); retained();
+  }
+  for (const phase of [1, 2]) for (const timer of [0, 1, 2, 127, 128, 129, 255]) {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf70; m.byte628 = phase; m.byte629 = timer; m.byte62a = 0; m.byte62b = 2;
+    const next = (timer - 1) & 255, active = next > 0 && next < 128, retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 9).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'signed tenth timer preserves preceding machine'));
+    checkTenthMachineBytes(x, [active ? phase : 0, next, 0, 1], `phase${phase}/timer${timer} byte decrement precedes signed expiry`);
+    check(a.inputEdge5d4 === 0x22ff, 'existing tenth tail still emits after signed expiry or canonical miss');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkTenthMachineBytes(x, [active ? phase : 0, next, 0, 1], 'consumed epoch cannot drain retained tenth tail');
+  }
+  for (const phase of [1, 2]) {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor, m = x.machineState;
+    a.statusWord5bc = 0xf7f; m.byte628 = phase; m.byte629 = 7; m.byte62a = 1;
+    x.tenthDescriptor[3] = NaN; // Both authenticated any-bit handlers must skip duration on zero mask.
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 9).forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'index1 preserves all nine predecessors'));
+    checkTenthMachineBytes(x, [phase, 6, 1, 0], 'authenticated index1 zero mask matches neither phase1 nor flags10 phase2, unlike earlier all-bit descriptors');
+    check(a.inputEdge5d4 === 0x2ff, 'zero-mask any-bit miss never fabricates output2000');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const phase of [1, 2]) {
+    const x = tenthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf7f; m.byte628 = phase; m.byte629 = 7; m.byte62a = 2;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'descriptor3964: indexed halfword outside explicit12-byte descriptor'); retained();
+    checkTenthMachineBytes(x, [phase, 6, 2, 0], 'both indexed handlers retain decrement before the explicit descriptor bound refusal');
+    check(x.sourceActor.inputEdge5d4 === 0x2ff, 'index2 cannot read following charge table3970 or emit2000');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of ['dispatch', 'phaseBound', 'index', 'phase', 'timer', 'mode', 'flags', 'mask', 'duration', 'tail', 'descriptorOwner'] as const) {
+    const x = tenthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf7f;
+    if (fault === 'dispatch') {m.byte628 = 1; x.machineTables.dispatch3988[1] = 0x80000000;}
+    else if (fault === 'phaseBound') m.byte628 = 3;
+    else if (fault === 'mode') x.tenthDescriptor[0] = NaN;
+    else if (fault === 'flags') x.tenthDescriptor[1] = NaN;
+    else if (fault === 'mask') x.tenthDescriptor[4] = NaN;
+    else if (fault === 'duration') x.tenthDescriptor[3] = NaN;
+    else if (fault === 'descriptorOwner') x.machineTables.descriptor3964 = [...x.tenthDescriptor];
+    else Object.defineProperty(m, fault === 'index' ? 'byte62a' : fault === 'phase' ? 'byte628' : fault === 'timer' ? 'byte629' : 'byte62b', {writable: false});
+    const expected = fault === 'dispatch' ? [1, 23, 41, 0] : fault === 'phaseBound' ? [3, 23, 41, 0] :
+      fault === 'index' || fault === 'descriptorOwner' ? initial[9]! : fault === 'phase' || fault === 'mode' ? [0, 23, 0, 0] :
+      fault === 'timer' ? [2, 23, 0, 0] : fault === 'tail' || fault === 'duration' ? [0, 126, 0, 0] : [2, 126, 0, 0];
+    const diagnostic = fault === 'dispatch' ? '80068bc8' : fault === 'phaseBound' ? 'outside explicit three-entry table' :
+      ['mode', 'flags', 'mask', 'duration'].includes(fault) ? 'integer out of bounds' : fault === 'descriptorOwner' ? 'descriptor3964: owner changed' :
+      fault === 'index' ? 'byte62a' : fault === 'phase' ? 'byte628' : fault === 'timer' ? 'byte629' : 'byte62b';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    checks.slice(0, 9).forEach((assertBytes, n) => assertBytes(x, complete[n]!, `${fault} retains preceding machine${n + 1}`));
+    checkTenthMachineBytes(x, expected, `${fault} preserves precisely reached tenth partial stores`);
+    check(x.sourceActor.inputEdge5d4 === 0x2ff, `${fault} preserves preceding outputs without fabricated2000`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    checkTenthMachineBytes(x, expected, `${fault} consumes epoch before handler/wrapper replay`);
+    check(x.inputState.byte5ff === 19 && x.tier.timerFrames === 7 && x.machineState.byte603 === 15, 'late failure cannot replay earlier input/gauge or drain fifth tail');
+  }
+  {
+    const x = tenthInputMachineHydratedControlFixture(), m = x.machineState;
+    x.sourceActor.statusWord5bc = 0xf7f; m.byte628 = 2; m.byte629 = 1; m.byte62a = 0; m.byte62b = 255;
+    Object.defineProperty(m, 'byte62b', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte62b'); retained(); checkInputPrefixEarlierStores(x);
+    checkTenthMachineBytes(x, [0, 0, 0, 255], 'expired tenth resets phase before wrapper tail write fails');
+    check(x.sourceActor.inputEdge5d4 === 0x2ff && x.machineState.byte603 === 15, 'failed tail decrement leaves prior outputs without2000');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const fault of [...descriptorKeys.slice(0, 9), 'cue', 'inputTimer', 'mash', 'edge'] as const) {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf7f;
+    const n = (descriptorKeys as readonly string[]).indexOf(fault);
+    const key = fault === 'cue' ? 'marker1db3' : fault === 'inputTimer' ? 'byte5fd' : fault === 'mash' ? 'sourceArrowMash749' : 'inputEdge5d4';
+    if (n >= 0) x.machineTables[descriptorKeys[n]!]![4] = NaN;
+    else Object.defineProperty(fault === 'cue' ? x.gates : fault === 'inputTimer' ? x.inputState : fault === 'mash' ? x.host : a, key, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), n >= 0 ? `${descriptorKeys[n]}[4]` : key); retained();
+    checkTenthMachineBytes(x, initial[9]!, `${fault} prior failure cannot enter tenth handler or wrapper`);
+    check(a.inputEdge5d4 === (n >= 0 ? [0, 0x20, 0x60, 0xe0, 0x2e0, 0x2e1, 0x2e3, 0x2e7, 0x2ef][n] : 0x87654321) && x.tier.timerFrames === 7,
+      `${fault} retains canonical edge at the reached source point`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const alias of [...descriptorKeys.slice(0, 9), 'dispatch', 'tables', 'actor', 'borg', 'machine', 'input', 'processor'] as const) {
+    const processor: SourceActorInputProcessorState = {gqr4: 0x00070007};
+    const x = tenthInputMachineHydratedControlFixture(undefined, processor);
+    const n = (descriptorKeys as readonly string[]).indexOf(alias);
+    const owner = n >= 0 ? x.machineTables[descriptorKeys[n]!] : alias === 'dispatch' ? x.machineTables.dispatch3988 :
+      alias === 'tables' ? x.machineTables : alias === 'actor' ? x.sourceActor : alias === 'borg' ? x.host :
+      alias === 'machine' ? x.machineState : alias === 'input' ? x.inputState : processor;
+    Object.defineProperty(x.machineTables, 'descriptor3964', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${alias} preflight preserves every machine state`));
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.sourceActor.inputHeld5d8 === 0xabcd && x.inputState.byte5ff === 9 && x.host.sourceArrowMash749 === 77,
+      'tenth alias preflight retains earlier stage/gauge/cues but precedes angular/input stores');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const alias of ['angular', 'direction', 'atan', 'high', 'low', 'coefficients'] as const) {
+    const x = diagonalInputHydratedControlFixture(true, true, true, true, true, true, true);
+    const owner = alias === 'angular' ? x.angularData : alias === 'direction' ? x.angularData.direction80433928 :
+      alias === 'atan' ? x.atanData : alias === 'high' ? x.atanData.atanHi802b5168 : alias === 'low' ? x.atanData.atanLo802b5188 : x.atanData.coefficients802b51a8;
+    Object.defineProperty(x.machineTables, 'descriptor3964', {value: owner});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'retained input/global/processor storage owner alias'); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${alias} arithmetic owner cannot alias tenth storage`));
+    check(x.sourceActor.inputEdge5d4 === 0x87654321 && x.inputState.byte5ff === 9, 'arithmetic alias refuses before angular/input work');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  for (const key of [...cells[9], 'inputFlags5d4', 'inputEdges5bc', 'flags5e0'] as const) {
+    const x = tenthInputMachineHydratedControlFixture();
+    Object.defineProperty(x.sourceActor, key, {value: 1, writable: true, configurable: true});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${key}: competing source owner`); retained(); checkInputPrefixEarlierStores(x);
+    checks.forEach((assertBytes, n) => assertBytes(x, initial[n]!, `${key} rival refuses before any real wrapper`));
+    const inputRival = key === 'inputFlags5d4' || key === 'inputEdges5bc';
+    check(x.sourceActor.inputEdge5d4 === (inputRival ? 0x87654321 : 0), 'rival refusal retains exactly reached input clear or prior edge');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+  }
+  {
+    const x = tenthInputMachineHydratedControlFixture(), a = x.sourceActor;
+    a.statusWord5bc = 0xf7f;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeCall); retained();
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit status/wait advances real attached animation after ten input calls');
+    a.pos.y = 6; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'only explicit normal traversal rebuilds and copies linked matrices');
+    x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6,
+      'attribute/movement/history cadence stays explicit after charge refusal');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.gates.marker1db3 === 0 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory &&
+      a.inputEdge5d4 === 0x22ff && x.inputState.byte5ff === 19 && x.host.sourceArrowMash749 === 4 && x.tier.timerFrames === 7,
+      'later genuine setup replaces attachment without implicit ten-machine/input/gauge/matrix/history work');
+    checks.forEach((assertBytes, n) => assertBytes(x, complete[n]!, 'explicit downstream calls do not replay a machine or its tail'));
+  }
+  console.log('[actor-tenth-input-machine-composition] PASS: genuine DAT/setup/status/gauge/stage/cue/input graph, distinct3964 and628..62b, all2048 canonical input combinations under both control40 states, ten independent states/outputs, authenticated flags10 any-bit low-nibble matching versus separate output2000/held/control/5b4 words, duration1 versus fifth16 and sixth control gate, mutable flags/mask/duration, genuine angular/finite-atan routes without host atan, absent optional predecessors, source ordering, partial stores/lazy bounds/signed expiry/zero-mask index1 misses/consumed epochs, alias/rival exclusions and explicit downstream cadence; exact unconditional686d8 charge686f0 refusal, synthetic offline only/no hardware/fulltick/production activation');
+}
+
+/** Explicit source constants and processor controls close only the bounded
+ * axis/table path. No default profile, diagonal approximation or PAD producer. */
+function angularInputHydratedControlFixture() {
+  const processor = {gqr4: 0x00060006, gqr0: 0, gqr5: 0x00070007, fpscrControl: 0};
+  const data = {scale8043707c: 10430.3779296875, pi8043cd78: Math.PI,
+    negativeHalfPi8043cd88: -Math.PI / 2, halfPi8043cd90: Math.PI / 2,
+    direction80433928: [2, 10, 8, 9, 1, 5, 4, 6]};
+  const angular = createSourceInputAngleRuntime({processor, data});
+  const x = inputPrefixHydratedControlFixture(true, processor, true, angular), firstMachine = x.firstMachine;
+  if (!firstMachine) throw Error('angular graph requires the genuine machine runtime');
+  return Object.assign(x, {angular, angularProcessor: processor, angularData: data,
+    firstMachine, machineState: firstMachine.getActorBinding(x.actor)});
+}
+export function runAngularInputHydratedControlTests(): void {
+  const thirdCall = '80068628 reached unsupported third source call 80068b8c (descriptor802d3910, actor+61c, mask80)';
+  const axes = [{x: 1, y: 0, mask: 2}, {x: 0, y: 1, mask: 8}, {x: -1, y: 0, mask: 1}, {x: 0, y: -1, mask: 4}];
+  for (const magnitude of [20, 51, 52]) for (const axis of axes) {
+    const x = angularInputHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    i.byte5fc = 0; i.stickX5ca = axis.x === 0 ? 0 : axis.x * magnitude;
+    i.stickY5cb = axis.y === 0 ? 0 : axis.y * magnitude;
+    check(x.angular.getProcessor() === x.processor && x.angular.getProcessor() === x.angularProcessor &&
+      x.angular.getData() === x.angularData && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host,
+      'genuine angular projection borrows the same explicit processor and actual DAT/status/gauge/stage/cue/input graph');
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), thirdCall); retained(); checkInputPrefixEarlierStores(x);
+    const strong = magnitude === 52;
+    const held = strong ? 0x200 | axis.mask | (axis.mask << 4) : 0x2c0 | axis.mask;
+    const timer = strong ? 19 : (axis.mask & 0xc) === 0 ? 1 : 2;
+    check(i.byte5fc === (strong ? 11 : 9) && i.byte5fd === timer && i.byte5fe === 0 && i.byte5ff === 19 &&
+      a.inputHeld5d8 === held && a.inputEdge5d4 === 0x60 && x.host.sourceArrowMash749 === 4,
+      `${magnitude} axis${axis.mask} uses genuine source angle/table: weak first-only latch/timer2or3, strong both latches/timer20, then actual decrements and release`);
+    checkMachineBytes(x, [0, 126, 0, 0], `${magnitude} axis${axis.mask} reaches actual first machine after real direction stores`);
+    checkSecondMachineBytes(x, [0, 126, 0, 0], `${magnitude} axis${axis.mask} reaches actual second machine then exact third refusal`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check(i.byte5fc === (strong ? 11 : 9) && i.byte5fd === timer && a.inputHeld5d8 === held &&
+      a.inputEdge5d4 === 0x60 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${magnitude} axis${axis.mask} third refusal consumes epoch before direction, timer, machine or gauge replay`);
+  }
+  {
+    const x = angularInputHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    i.byte5fc = 1; i.stickX5ca = 52; a.inputHeld5d8 = 0xab01;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), thirdCall); retained(); checkInputPrefixEarlierStores(x);
+    check(i.byte5fc === 11 && i.byte5fd === 19 && a.inputHeld5d8 === 0x201 && a.inputEdge5d4 === 0x60 &&
+      x.host.sourceArrowMash749 === 4,
+      'second strong axis preserves H|((H&mask)<<4): unmatched retained low bit1 does not fabricate direction2 high nibble20');
+    checkSecondMachineBytes(x, [0, 126, 0, 0], 'second-only direction gate still reaches both descriptor machines');
+  }
+  for (const latch of [0, 1]) {
+    const x = angularInputHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    i.byte5fc = latch; i.stickX5ca = 52; i.stickY5cb = 52;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '80239a78 reached unsupported non-axis'); retained(); checkInputPrefixEarlierStores(x);
+    check(i.byte5fc === latch && i.byte5fd === 1 && i.byte5fe === 1 && i.byte5ff === 9 &&
+      a.inputHeld5d8 === 0xabcd && a.inputEdge5d4 === 0x87654321 && x.host.sourceArrowMash749 === 77,
+      `${latch === 0 ? 'first' : 'second'} direction diagonal refuses before latches/timers/held/mash/edge, retaining actual preceding cues/gauge/stage`);
+    checkMachineBytes(x, [0, 77, 99, 0], 'diagonal continuation cannot enter first machine');
+    checkSecondMachineBytes(x, [0, 31, 55, 0], 'diagonal continuation cannot enter second machine');
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check(i.byte5fc === latch && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      'unsupported diagonal consumes epoch before any angular or preceding prefix replay');
+  }
+  for (const fault of ['gqr4', 'gqr0Store', 'gqr0Load', 'gqr5', 'fpscr'] as const) {
+    const x = angularInputHydratedControlFixture(), a = x.sourceActor, i = x.inputState, p = x.angularProcessor;
+    i.byte5fc = 0; i.stickX5ca = 52;
+    if (fault === 'gqr4') p.gqr4 = 0;
+    else if (fault === 'gqr0Store') p.gqr0 = 6;
+    else if (fault === 'gqr0Load') p.gqr0 = 0x00060000;
+    else if (fault === 'gqr5') p.gqr5 = 0;
+    else p.fpscrControl = 1;
+    const diagnostic = fault === 'gqr4' ? 'signed8 load type6' : fault === 'gqr0Store' ? 'float store type0' :
+      fault === 'gqr0Load' ? 'float load type0' : fault === 'gqr5' ? 'signed16 store type7' : 'FPSCR RN00';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    check(i.byte5fc === 0 && i.byte5fd === 1 && i.byte5fe === 1 && i.byte5ff === 9 &&
+      a.inputHeld5d8 === 0xabcd && a.inputEdge5d4 === 0x87654321 && x.host.sourceArrowMash749 === 77,
+      `${fault} unsupported explicit processor control refuses before input effects without rolling back actual stage/cues/gauge`);
+    checkMachineBytes(x, [0, 77, 99, 0], `${fault} prevents first descriptor call`);
+    checkSecondMachineBytes(x, [0, 31, 55, 0], `${fault} prevents second descriptor call`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check(i.byte5fc === 0 && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${fault} consumes epoch even before the direction result becomes available`);
+  }
+  console.log('[actor-angular-input-composition] PASS: explicit same-processor genuine axis/constant/table path on actual DAT/setup/status/gauge/stage/cue/input graph, all four axes20/51/52, weak/strong latch and timer order, second H&mask negative control, first20 plus second40 then exact third refusal; retained diagonal/GQR/FPSCR failures and consumed epochs, unchanged downstream cadence; bounded offline projection only, no diagonal approximation/hardware replay/fulltick/production activation');
+}
+
+/** Explicit authenticated source bits are fixture inputs, never production
+ * defaults or captured CPU/PAD state. The additional genuine atan owner is
+ * opt-in; angularInputHydratedControlFixture above remains axis-only. */
+function diagonalInputHydratedControlFixture(withFourth = false, withFifth = false, withSixth = false, withSeventh = false, withEighth = false, withNinth = false, withTenth = false, chargeHydration?: ChargeInputHydration) {
+  const decoded = (bits: bigint): number => {
+    const bytes = new DataView(new ArrayBuffer(8)); bytes.setBigUint64(0, bits, false); return bytes.getFloat64(0, false);
+  };
+  const processor = {gqr4: 0x00060006, gqr0: 0, gqr5: 0x00070007, fpscrControl: 0};
+  const atanData = {huge8043d128: decoded(0x7e37e43c8800759cn), one8043d130: 1, two8043d138: 2,
+    onePointFive8043d140: 1.5, negativeOne8043d148: -1,
+    atanHi802b5168: [0x3fddac670561bb4fn, 0x3fe921fb54442d18n, 0x3fef730bd281f69bn, 0x3ff921fb54442d18n].map(decoded),
+    atanLo802b5188: [0x3c7a2b7f222f65e2n, 0x3c81a62633145c07n, 0x3c7007887af0cbbdn, 0x3c91a62633145c07n].map(decoded),
+    coefficients802b51a8: [0x3fd555555555550dn, 0xbfc999999998ebc4n, 0x3fc24924920083ffn,
+      0xbfbc71c6fe231671n, 0x3fb745cdc54c206en, 0xbfb3b0f2af749a6dn, 0x3fb10d66a0d03d51n,
+      0xbfadde2d52defd9an, 0x3fa97b4b24760debn, 0xbfa2b4442c6a6c2fn, 0x3f90ad3ae322da11n].map(decoded)};
+  const atanRuntime = createSourceInputAtanRuntime({processor, data: atanData});
+  const data = {scale8043707c: 10430.3779296875, pi8043cd78: decoded(0x400921fb54442d18n),
+    negativeHalfPi8043cd88: decoded(0xbff921fb54442d18n), halfPi8043cd90: decoded(0x3ff921fb54442d18n),
+    piLow8043cdc8: decoded(0x3ca1a62633145c07n), direction80433928: [2, 10, 8, 9, 1, 5, 4, 6]};
+  const angular = createSourceInputAngleRuntime({processor, data, atanRuntime});
+  const x = inputPrefixHydratedControlFixture(true, processor, true, angular, true, withFourth, withFifth, withSixth, withSeventh, withEighth, withNinth, withTenth, chargeHydration), firstMachine = x.firstMachine;
+  if (!firstMachine?.hasThirdMachine()) throw Error('diagonal graph requires the genuine third machine');
+  return Object.assign(x, {angular, angularProcessor: processor, angularData: data, atanRuntime, atanData,
+    firstMachine, machineState: firstMachine.getActorBinding(x.actor)});
+}
+export function runDiagonalInputHydratedControlTests(): void {
+  const fourthCall = '80068640 reached unsupported fourth source call 80068b8c (descriptor802d391c, actor+624, mask200)';
+  {
+    const x = diagonalInputHydratedControlFixture(), a = x.sourceActor, i = x.inputState, m = x.machineState;
+    check(x.angular.getProcessor() === x.processor && x.atanRuntime.getProcessor() === x.processor &&
+      x.angular.getData() === x.angularData && x.atanRuntime.getData() === x.atanData &&
+      x.firstMachine.getActualActor(x.actor) === a && x.inputPrefix.getActualActor(x.actor) === a &&
+      x.prefix.getActualActor(x.actor) === a && x.world.getActualActor(x.actor) === a &&
+      x.status.getActualActor(x.actor) === a && x.gauges.getActualActor(x.actor) === a &&
+      x.cues.getActualActor(x.actor) === a && x.inputPrefix.getActualBorg(x.actor) === x.host,
+      'optional finite angular path shares one explicit processor and the actual DAT/setup/status/gauge/stage/cue/input graph');
+    const retained = retainInputPrefixCadence(x);
+    // Independent host numeric comparison only, not a source arithmetic oracle.
+    // Compute expectations before forbidding host atan/atan2 during execution.
+    // Retain source f32 projection, signed16 truncation/saturation and binning:
+    // conventional nearest-octant tests miss negative29/70 boundary asymmetry.
+    const expected = new Uint8Array(65536), directions = [2, 10, 8, 9, 1, 5, 4, 6];
+    for (let sx = -128; sx <= 127; sx++) for (let sy = -128; sy <= 127; sy++) {
+      const scaled = Math.fround(Math.fround(Math.atan2(sy, sx)) * 10430.3779296875);
+      const short = Math.max(-32768, Math.min(32767, Math.trunc(scaled)));
+      expected[(sx + 128) * 256 + sy + 128] = directions[(((short & 0xffff) + 4096) >>> 13) & 7]!;
+    }
+    const hostAtan = Math.atan, hostAtan2 = Math.atan2;
+    Math.atan = () => {throw Error('host atan cannot replace the composed genuine source runtime');};
+    Math.atan2 = () => {throw Error('host atan2 cannot replace the composed genuine source runtime');};
+    let epoch = 0, weak = 0, strong = 0, zero = 0;
+    try {
+      for (let sx = -128; sx <= 127; sx++) for (let sy = -128; sy <= 127; sy++) {
+        // New explicit synthetic inputs on the same retained graph. This does
+        // not claim a PAD producer or reachability of reset states from retail.
+        a.modelScale = 2; x.tier.timerFrames = 8; a.statusWord5bc = 0x600;
+        a.statusWord5b4 = 0x60000; a.inputHeld5d8 = 0xabcd; a.inputEdge5d4 = 0x87654321;
+        i.stickX5ca = sx; i.stickY5cb = sy; i.byte5fc = 0; i.byte5fd = 1; i.byte5fe = 1; i.byte5ff = 9;
+        m.byte614 = 0; m.byte615 = 77; m.byte616 = 99; m.byte617 = 0;
+        m.byte618 = 0; m.byte619 = 31; m.byte61a = 55; m.byte61b = 0;
+        m.byte61c = 0; m.byte61d = 17; m.byte61e = 33; m.byte61f = 0;
+        const radius = sx * sx + sy * sy, mask = radius < 400 ? 0 : expected[(sx + 128) * 256 + sy + 128]!;
+        const isStrong = radius >= 2704;
+        if (mask === 0) zero++; else if (isStrong) strong++; else weak++;
+        rejects(() => x.runRawPrefix(++epoch, 64, 20), fourthCall);
+        const held = mask === 0 ? 0x200 : isStrong ? 0x200 | mask | (mask << 4) : 0x2c0 | mask;
+        const timer = mask === 0 ? 0 : isStrong ? 19 : (mask & 0xc) === 0 ? 1 : 2;
+        check(a.inputHeld5d8 === held && i.byte5fc === (mask === 0 ? 8 : isStrong ? 11 : 9) &&
+          i.byte5fd === timer && i.byte5fe === 0 && i.byte5ff === 19 && a.inputEdge5d4 === 0xe0 &&
+          x.host.sourceArrowMash749 === 2 && x.tier.timerFrames === 7 && a.targetDistance760 === 32 && a.horizontalDistance764 === 10,
+          `signed-byte${sx}/${sy} keeps independent radius20/52 gates, actual latch/timer/release stores and all three canonical edges`);
+        checkMachineBytes(x, [0, 126, 0, 0], `signed-byte${sx}/${sy} completes first wrapper`);
+        checkSecondMachineBytes(x, [0, 126, 0, 0], `signed-byte${sx}/${sy} completes second wrapper`);
+        checkThirdMachineBytes(x, [0, 126, 0, 0], `signed-byte${sx}/${sy} completes third wrapper`);
+      }
+    } finally {Math.atan = hostAtan; Math.atan2 = hostAtan2;}
+    check(epoch === 65536 && zero > 0 && weak > 0 && strong > 0, 'entire signed-byte square reaches the fourth boundary across both radius gates');
+    retained(); checkInputPrefixEarlierStores(x);
+    const before = [a.inputHeld5d8, a.inputEdge5d4, i.byte5fc, i.byte5fd, i.byte5fe, i.byte5ff, x.tier.timerFrames];
+    rejects(() => x.runRawPrefix(epoch, 128, 40), 'epoch'); retained();
+    check([a.inputHeld5d8, a.inputEdge5d4, i.byte5fc, i.byte5fd, i.byte5fe, i.byte5ff, x.tier.timerFrames]
+      .every((value, n) => value === before[n]), 'full-square final refusal consumes epoch without replaying direction or three-machine work');
+  }
+  for (const [sx, sy, mask] of [[52, 52, 10], [-52, 52, 9], [-52, -52, 5], [52, -52, 6],
+    [70, 29, 10], [70, -29, 2], [29, 70, 10], [-29, 70, 9], [1, 52, 8], [1, -52, 4],
+    [-128, -128, 5], [127, 127, 10]] as const) {
+    const x = diagonalInputHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = sx; i.stickY5cb = sy; i.byte5fc = 0; a.statusWord5bc = 0x600;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fourthCall); retained(); checkInputPrefixEarlierStores(x);
+    check(a.inputHeld5d8 === (0x200 | mask | (mask << 4)) && a.inputEdge5d4 === 0xe0 && i.byte5fc === 11 && i.byte5fd === 19,
+      `fixed${sx}/${sy} preserves genuine quadrant/negative-bin/X1/boundary behavior before all three calls`);
+  }
+  {
+    const x = diagonalInputHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = 52; i.stickY5cb = 52; i.byte5fc = 1; a.inputHeld5d8 = 0xab01; a.statusWord5bc = 0x600;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fourthCall); retained();
+    check(a.inputHeld5d8 === 0x201 && i.byte5fc === 11 && i.byte5fd === 19 && a.inputEdge5d4 === 0xe0,
+      'second-only diagonal gate uses actual H&mask and does not fabricate high nibble from an unmatched retained low bit');
+  }
+  for (const fault of ['coefficient', 'piLow', 'gqr0', 'gqr5', 'fpscr', 'table', 'thirdMask'] as const) {
+    const x = diagonalInputHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = -52; i.stickY5cb = 52; i.byte5fc = 0; a.statusWord5bc = 0x600;
+    if (fault === 'coefficient') x.atanData.coefficients802b51a8[0] = 0;
+    else if (fault === 'piLow') x.angularData.piLow8043cdc8 = 0;
+    else if (fault === 'gqr0') x.angularProcessor.gqr0 = 6;
+    else if (fault === 'gqr5') x.angularProcessor.gqr5 = 0;
+    else if (fault === 'fpscr') x.angularProcessor.fpscrControl = 1;
+    else if (fault === 'table') x.angularData.direction80433928[3] = NaN;
+    else x.machineTables.descriptor3910![4] = NaN;
+    const diagnostic = fault === 'coefficient' ? 'coefficients802b51a8' : fault === 'piLow' ? 'piLow8043cdc8' :
+      fault === 'gqr0' ? 'float store type0' : fault === 'gqr5' ? 'signed16 store type7' :
+      fault === 'fpscr' ? 'FPSCR' : fault === 'table' ? 'direction table[3]' : 'descriptor3910[4]';
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained(); checkInputPrefixEarlierStores(x);
+    const late = fault === 'thirdMask';
+    check(i.byte5fc === (late ? 11 : 0) && i.byte5fd === (late ? 19 : 1) && i.byte5fe === (late ? 0 : 1) &&
+      i.byte5ff === (late ? 19 : 9) && a.inputHeld5d8 === (late ? 0x299 : 0xabcd) &&
+      a.inputEdge5d4 === (late ? 0x60 : 0x87654321) && x.host.sourceArrowMash749 === (late ? 2 : 77),
+      `${fault} retains exactly the reached diagonal input stores before its actual refusal`);
+    checkMachineBytes(x, late ? [0, 126, 0, 0] : [0, 77, 99, 0], `${fault} preserves reached first-machine state`);
+    checkSecondMachineBytes(x, late ? [0, 126, 0, 0] : [0, 31, 55, 0], `${fault} preserves reached second-machine state`);
+    checkThirdMachineBytes(x, late ? [2, 126, 0, 0] : [0, 17, 33, 0], `${fault} preserves reached third-machine state`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check(a.inputEdge5d4 === (late ? 0x60 : 0x87654321) && x.tier.timerFrames === 7 && a.targetDistance760 === 32,
+      `${fault} consumes epoch without replaying angular/machine or earlier real gauge/cue work`);
+  }
+  {
+    const x = diagonalInputHydratedControlFixture(), a = x.sourceActor, i = x.inputState;
+    i.stickX5ca = 52; i.stickY5cb = 52; i.byte5fc = 0; a.statusWord5bc = 0x600;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fourthCall); retained();
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.historyState.previousStepHeight6d4 === history,
+      'diagonal and three-machine continuation leaves status/wait and real animation cadence explicit');
+    a.pos.y = 6; x.updateNormal(); x.refreshAttributes(); x.snapshot();
+    check(x.targetMatrices[1]!.every((value, n) => Object.is(value, x.worldMatrix[n])) &&
+      !x.worldMatrix.every((value, n) => Object.is(value, matrix[n])) && x.movementCallCount() === moves + 1 &&
+      x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === 6,
+      'explicit normal/attribute/movement/history owners consume the retained actual graph after the diagonal path');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+      {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && a.inputHeld5d8 === 0x2aa && a.inputEdge5d4 === 0xe0 &&
+      i.byte5fd === 19 && i.byte5ff === 19 && x.tier.timerFrames === 7 &&
+      x.worldMatrix.every((value, n) => Object.is(value, settledMatrix[n])) && x.historyState.previousStepHeight6d4 === settledHistory,
+      'later actual setup changes attachment without replaying diagonal inputs or adding an implicit matrix/history suffix');
+  }
+  console.log('[actor-diagonal-input-composition] PASS: all65536 signed-byte pairs through the same actual DAT/setup/status/gauge/stage/cue/input graph with explicit finite atan owner and three descriptors, radius20/52 gates, X1 and negative-bin boundaries, no host atan execution, retained late failures/epochs and explicit downstream cadence; host numeric comparison is not a source arithmetic oracle, exact fourth-call refusal remains, synthetic offline only/no hardware/fulltick/production activation');
+}
+
+/** Charge is an explicit opt-in to the existing graph. Earlier fixtures retain
+ * their one-byte descriptor and threshold-free parameter unchanged. These new
+ * genuine identities preserve every earlier selected scalar and map byte; the
+ * extra bytes/thresholds are supplied synthetic inputs, not runtime padding. */
+interface ChargeInputHydration {
+  actorControl?: Partial<SourceActorControlLifecycleBinding>;
+  /** Explicit absent4c8/4dc/6bc/1d9 only; canonical movement/status/cues are shared. */
+  normalLifecycle?: Partial<SourceActorNormalLifecycleBinding>;
+  /** Explicit cue0 byte only; terrain/history/attribute/cue owners stay shared. */
+  cue0?: Partial<SourceActorCue0LifecycleBinding>;
+  /** Explicit negative composition input; never a fallback for shared terrain. */
+  cue0TerrainGlobals?: SourceActorTerrainGlobals;
+  /** Supplied +b0 bytes share the existing raw8c descriptor; corrections are
+   * admitted by the original world owner before any lifecycle is constructed. */
+  rotation?: {jointsB0: readonly number[]; corrections18d4: readonly SourceActorWorldMatrixCorrection[]};
+  ready?: ReadyLifecycleHydration;
+  actionRequest?: Partial<SourceActorActionRequestBinding>;
+  actorRates?: RateLifecycleHydration;
+  /** Explicit additional80433934 byte; absent preserves the historical graph. */
+  ceiling?: {byteD9?: number};
+  /** Opt-in source74b/c/d, match1f and the selected SAME4ac descriptor byteA3. */
+  tierHydration?: TierLifecycleHydration;
+  effects?: ChargeEffectsHydration;
+  initial: Partial<SourceActorInputChargeBinding>;
+  global: SourceActorInputChargeGlobal;
+  data: SourceActorInputChargeData;
+  slots: readonly [number, number, number];
+  thresholds: Partial<{field184: number; field188: number; field18c: number}>;
+}
+function chargeInputHydration(): ChargeInputHydration {
+  return {initial: {byte58e: 0, field63c: 4, field640: 5, field644: 6,
+    field648: 20, field64c: 30, field650: 40, byte654: 255, byte655: 0},
+  global: {byte1829: 0}, data: {float80437628: 10, float8043762c: 0, float80437630: 1,
+    float80437634: 2, held3970: [0x200, 0x200, 0x400], release397c: [0x400, 0x800, 0x1000]},
+  slots: [255, 255, 255], thresholds: {field184: 20, field188: 30, field18c: 40}};
+}
+function hydrateChargeInputOwners(x: GaugeScaleFixture, supplied: ChargeInputHydration) {
+  const oldDescriptorIdentity = x.mapping.getActor(x.actor).descriptor4b0!;
+  const oldDescriptor = x.mapping.getDescriptor(oldDescriptorIdentity), oldParameter = x.parameter;
+  const raw8c = Array<number>(0x32).fill(255);
+  oldDescriptor.forEach((value, index) => {raw8c[index] = value;});
+  supplied.slots.forEach((value, index) => {raw8c[0x2f + index] = value;});
+  if (supplied.rotation !== undefined) {
+    check(supplied.rotation.jointsB0.length === 8, 'rotation fixture requires eight explicit +b0 bytes');
+    supplied.rotation.jointsB0.forEach((value, index) => {raw8c[0x24 + index] = value;});
+  }
+  const descriptorIdentity = x.mapping.createDescriptor(raw8c);
+  x.attributes.bindDescriptor(descriptorIdentity, {...x.scalarDescriptor});
+  x.movement.bindDescriptor(descriptorIdentity, {...x.movementDescriptor});
+  const parameterIdentity = x.attributes.createParameterDescriptor({...oldParameter, ...supplied.thresholds,
+    ...(supplied.tierHydration === undefined ? {} : supplied.tierHydration.parameter)});
+  x.mapping.getActor(x.actor).descriptor4b0 = descriptorIdentity;
+  x.attributeState.parameter4ac = parameterIdentity;
+  x.descriptorIdentity = descriptorIdentity;
+  x.scalarDescriptor = x.attributes.getDescriptorBinding(descriptorIdentity);
+  x.movementDescriptor = x.movement.getDescriptorBinding(descriptorIdentity);
+  x.parameter = x.attributes.getParameterDescriptor(parameterIdentity);
+  const effectsOwners = supplied.effects === undefined ? undefined : hydrateChargeEffectOwners(x, supplied.effects);
+  // D2/D9/1829/1f are fields of the SAME PTR_DAT_80433934. Only explicit
+  // ceiling/tier hydration seeds additional bytes on the retained matrix owner,
+  // before charge captures it. Never adopt a later snapshot or replace it.
+  const chargeGlobal = supplied.ceiling === undefined && supplied.tierHydration === undefined ? supplied.global :
+    Object.assign(x.globals, supplied.ceiling, supplied.global, supplied.tierHydration?.global);
+  const chargeSources = {world: x.world, status: x.status, mapping: x.mapping, attributes: x.attributes,
+    global: chargeGlobal, data: supplied.data, ...(effectsOwners === undefined ? {} : {effects: effectsOwners.effects})};
+  const charge = createSourceActorInputChargeRuntime(chargeSources);
+  charge.bindActor(x.actor, supplied.initial);
+  return {charge, chargeState: charge.getActorBinding(x.actor), chargeSources, chargeGlobal,
+    chargeData: supplied.data, chargeDescriptor: x.mapping.getDescriptor(descriptorIdentity),
+    oldDescriptorIdentity, oldDescriptor, oldParameter, parameterIdentity,
+    ...(effectsOwners === undefined ? {} : {effectsOwners})};
+}
+function chargeInputHydratedControlFixture(supplied = chargeInputHydration()) {
+  const x = diagonalInputHydratedControlFixture(true, true, true, true, true, true, true, supplied);
+  if (!x.chargeOwners || !x.firstMachine.hasTenthMachine()) throw Error('charge fixture requires explicit genuine charge and all ten wrappers');
+  return Object.assign(x, x.chargeOwners);
+}
+type ChargeInputFixture = ReturnType<typeof chargeInputHydratedControlFixture>;
+const chargeWarmups = ['field63c', 'field640', 'field644'] as const;
+const chargeBanks = ['field648', 'field64c', 'field650'] as const;
+const chargeThresholds = ['field184', 'field188', 'field18c'] as const;
+const chargeOuterCall = '800590bc reached unsupported source call 8005a190';
+const chargeMatureCall = '80068838 reached unsupported source call 800f0104 (actor,1,4)';
+const chargeFallingCall = '80068960 reached unsupported source call 800061cc (actor,0x14)';
+function chargeSlot(x: ChargeInputFixture, slot: number): void {x.chargeDescriptor[0x2f + slot] = 0;}
+function checkChargeConsumedEpoch(x: ChargeInputFixture): void {
+  const before = [x.sourceActor.targetDistance760, x.sourceActor.horizontalDistance764, x.sourceActor.inputEdge5d4,
+    x.inputState.byte5ff, x.tier.timerFrames, ...Object.values(x.chargeState), ...Object.values(x.machineState)];
+  rejects(() => x.runRawPrefix(1, 128, 40), 'epoch');
+  check([x.sourceActor.targetDistance760, x.sourceActor.horizontalDistance764, x.sourceActor.inputEdge5d4,
+    x.inputState.byte5ff, x.tier.timerFrames, ...Object.values(x.chargeState), ...Object.values(x.machineState)]
+    .every((value, index) => Object.is(value, before[index])), 'charge success/refusal consumes the epoch without replaying any earlier or charge store');
+}
+export function runChargeInputHydratedControlTests(): void {
+  {
+    const old = tenthInputMachineHydratedControlFixture();
+    check(!Object.hasOwn(old, 'chargeOwners') && old.chargeOwners === undefined && old.mapping.getDescriptor(old.descriptorIdentity).length === 1 &&
+      chargeThresholds.every(key => !Object.hasOwn(old.parameter, key)), 'historical ten-wrapper fixture gets no charge storage, descriptor expansion or thresholds');
+    rejects(() => old.runRawPrefix(1, 64, 20), '800686d8 reached unsupported source charge helper 800686f0');
+    const x = chargeInputHydratedControlFixture(), retained = retainInputPrefixCadence(x);
+    check(x.charge.getActualActor(x.actor) === x.sourceActor && x.charge.getStatusBinding(x.actor) === x.statusState &&
+      x.charge.getMappingActor(x.actor) === x.sourceClock && x.charge.getAttributeBinding(x.actor) === x.attributeState &&
+      x.charge.getData() === x.chargeData && x.charge.getGlobal() === x.chargeGlobal &&
+      x.attributes.getParameterDescriptor(x.attributeState.parameter4ac!) === x.parameter &&
+      x.mapping.getDescriptor(x.sourceClock.descriptor4b0!) === x.chargeDescriptor &&
+      x.attributes.getDescriptorBinding(x.sourceClock.descriptor4b0!) === x.scalarDescriptor &&
+      x.movement.getDescriptorBinding(x.sourceClock.descriptor4b0!) === x.movementDescriptor &&
+      x.oldDescriptor !== x.chargeDescriptor && x.oldDescriptor.length === 1 && x.oldDescriptor[0] === x.chargeDescriptor[0] &&
+      x.oldParameter !== x.parameter && Reflect.ownKeys(x.oldParameter).every(key => Object.is(Reflect.get(x.oldParameter, key), Reflect.get(x.parameter, key))) &&
+      [x.chargeState, x.chargeDescriptor, x.parameter].every(Object.isSealed),
+      'charge shares actual source actors and new selected owner identities while preserving sealed original records and earlier consumer values');
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall); retained(); checkInputPrefixEarlierStores(x);
+    check(x.sourceActor.inputEdge5d4 === 0x2260 && x.chargeState.byte655 === 0 && x.chargeState.byte654 === 255 &&
+      chargeWarmups.every((key, index) => x.chargeState[key] === index + 4) &&
+      chargeBanks.every((key, index) => x.chargeState[key] === 20 + 10 * index),
+      'all ten wrappers complete before disabled charge returns and leaves the next real outer call unsupported');
+    checkChargeConsumedEpoch(x);
+    check(x.charge.updateActor(x.actor) === undefined, 'ordinary genuine charge return is undefined, not a fabricated success marker');
+  }
+  for (const global of [1, 128, 255]) {
+    const supplied = chargeInputHydration(); supplied.global.byte1829 = global; supplied.initial = {}; supplied.data = {};
+    const x = chargeInputHydratedControlFixture(supplied); delete (x.sourceActor as Partial<typeof x.sourceActor>).aimRateScale;
+    x.statusState.byte6fc = NaN; x.sourceClock.descriptor4b0 = null; x.attributeState.parameter4ac = null;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall); retained(); checkChargeConsumedEpoch(x);
+    check(Object.keys(x.chargeState).length === 0 && x.sourceActor.inputEdge5d4 === 0x2260,
+      'signed nonzero global returns after all wrappers without reading missing charge state, rate, descriptor or parameter');
+  }
+  {
+    const supplied = chargeInputHydration(); supplied.initial = {byte655: 0}; supplied.data = {};
+    const x = chargeInputHydratedControlFixture(supplied); x.sourceActor.prevActionIndex = NaN;
+    x.sourceActor.statusWord5b4 = 0; x.attributeState.parameter4ac = null;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall); retained();
+    check(Object.keys(x.chargeState).join() === 'byte655', 'all disabled slots need no charge cells, masks, constants or threshold owner after entry');
+  }
+  for (let slot = 0; slot < 3; slot++) for (const reset of ['584', '58e'] as const) {
+    const x = chargeInputHydratedControlFixture(), s = x.chargeState; chargeSlot(x, slot);
+    s[chargeWarmups[slot]!] = NaN; s[chargeBanks[slot]!] = NaN;
+    x.attributeState.parameter4ac = null; delete x.chargeData.held3970;
+    if (reset === '584') {x.sourceActor.controlWord = 0x100001; x.sourceActor.prevActionIndex = slot + 3; s.byte58e = NaN;}
+    else {s.byte58e = 1 << (slot + 3); x.sourceActor.prevActionIndex = NaN;}
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall); retained(); checkChargeConsumedEpoch(x);
+    check(Object.is(s[chargeWarmups[slot]!], 0) && Object.is(s[chargeBanks[slot]!], 0) &&
+      s.byte654 === (255 & ~(1 << slot)) && s.byte655 === 0 &&
+      chargeBanks.every((key, index) => index === slot || s[key] === 20 + 10 * index),
+      `slot${slot} reset${reset} stores both zeros then clears only its654 bit without reading bypassed scalars`);
+  }
+  for (let slot = 0; slot < 3; slot++) for (const atThreshold of [false, true]) {
+    const x = chargeInputHydratedControlFixture(), s = x.chargeState; chargeSlot(x, slot);
+    x.sourceActor.statusWord5b4 = 0; x.sourceActor.aimRateScale = 1.5; x.statusState.byte6fc = 255;
+    s[chargeBanks[slot]!] = atThreshold ? x.parameter[chargeThresholds[slot]!]! : 4;
+    const before = s[chargeBanks[slot]!]!, retained = retainInputPrefixCadence(x);
+    if (!atThreshold) delete x.chargeData.release397c;
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall); retained(); checkChargeConsumedEpoch(x);
+    check(s[chargeBanks[slot]!] === before - 3 && s[chargeWarmups[slot]!] === 0 &&
+      s.byte654 === (255 & ~(1 << slot)) && s.byte655 === 0 &&
+      x.sourceActor.inputEdge5d4 === (0x2260 | (atThreshold ? [0x400, 0x800, 0x1000][slot]! : 0)),
+      `slot${slot} readiness is tested before fresh unboosted decay despite nonzero6fc, with conditional release-mask read`);
+  }
+  {
+    const x = chargeInputHydratedControlFixture(); [0, 1, 2].forEach(slot => chargeSlot(x, slot));
+    x.sourceActor.statusWord5b4 = 0; x.sourceActor.aimRateScale = 1;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall); retained();
+    check(x.sourceActor.inputEdge5d4 === 0x3e60 && x.chargeState.byte654 === 248 && x.chargeState.byte655 === 0 &&
+      chargeBanks.every((key, index) => x.chargeState[key] === 18 + index * 10),
+      'three independent release masks OR into the already completed ten-wrapper edge word before each separate decay');
+  }
+  for (let slot = 0; slot < 3; slot++) for (const warmup of [-1, 0, 9, 9.5]) {
+    const x = chargeInputHydratedControlFixture(), s = x.chargeState; chargeSlot(x, slot);
+    x.sourceActor.statusWord5b4 = [0x200, 0x200, 0x400][slot]!; x.statusState.byte6fc = 1;
+    s[chargeWarmups[slot]!] = warmup; s.byte654 = NaN; x.attributeState.parameter4ac = null;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall); retained(); checkChargeConsumedEpoch(x);
+    check(s[chargeWarmups[slot]!] === Math.min(10, warmup + 1) &&
+      s[chargeBanks[slot]!] === 20 + 10 * slot + (warmup === 9.5 ? 0.5 : 0) && s.byte655 === 0 && Number.isNaN(s.byte654),
+      `slot${slot} warmup${warmup} adds one unscaled step, only strict overshoot adds excess, and reads no654 or threshold`);
+  }
+  {
+    const supplied = chargeInputHydration(); supplied.slots = [0, 255, 255]; supplied.initial = {byte58e: 0, field63c: 9, byte655: 0};
+    const x = chargeInputHydratedControlFixture(supplied); x.sourceActor.statusWord5b4 = 0x200;
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall);
+    check(x.chargeState.field63c === 10 && !Object.hasOwn(x.chargeState, 'field648') && !Object.hasOwn(x.chargeState, 'byte654'),
+      'warmup equality at10 returns without hydrating or reading absent bank and active bits');
+  }
+  for (let slot = 0; slot < 3; slot++) for (const burst of [0, 1, 255]) {
+    const x = chargeInputHydratedControlFixture(), s = x.chargeState; chargeSlot(x, slot);
+    x.sourceActor.statusWord5b4 = [0x200, 0x200, 0x400][slot]!; x.sourceActor.aimRateScale = 0.5;
+    x.statusState.byte6fc = burst; s[chargeWarmups[slot]!] = 10; s.byte654 = 0; s.byte655 = 128;
+    x.attributeState.parameter4ac = null;
+    if (slot < 2) x.chargeDescriptor[0x30 + slot] = NaN;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeMatureCall); retained(); checkChargeConsumedEpoch(x);
+    check(s[chargeBanks[slot]!] === 20 + 10 * slot + (burst === 0 ? 0.5 : 5) &&
+      s[chargeWarmups[slot]!] === 10 && s.byte654 === 1 << slot && s.byte655 === 0 &&
+      chargeBanks.every((key, index) => index === slot || s[key] === 20 + 10 * index),
+      `slot${slot} mature path uses retained${burst ? ' boosted' : ''} rate, writes bank/654 and refuses exact effect before threshold, ready clamp or later slot`);
+  }
+  for (const oldReady of [1, 128, 255]) {
+    const x = chargeInputHydratedControlFixture(); [0, 1, 2].forEach(slot => chargeSlot(x, slot));
+    x.sourceActor.statusWord5b4 = 0; x.chargeState.byte655 = oldReady;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeFallingCall); retained(); checkChargeConsumedEpoch(x);
+    check(x.chargeState.byte655 === 0 && x.chargeState.byte654 === 248 && x.sourceActor.inputEdge5d4 === 0x3e60 &&
+      chargeBanks.every((key, index) => x.chargeState[key] === 19 + index * 10),
+      'old signed nonzero655 clears at entry, all releases finish, then exact actor/14 transition refuses without sound callback');
+  }
+  // Each arithmetic witness is independent of the implementation's float helper.
+  for (const [rate, bank, firstStore] of [[1, 2, -0], [-0, 0, 0], [-0, -0, -0],
+    [2 ** 127, (2 - 2 ** -23) * 2 ** 127, -(2 ** 104)]] as const) {
+    const x = chargeInputHydratedControlFixture(); chargeSlot(x, 0); x.sourceActor.statusWord5b4 = 0;
+    x.sourceActor.aimRateScale = rate; x.chargeState.field648 = bank;
+    Object.defineProperty(x.chargeState, 'byte654', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'byte654: non-writable'); retained(); checkChargeConsumedEpoch(x);
+    check(Object.is(x.chargeState.field648, firstStore) && x.chargeState.field63c === 0 && x.chargeState.byte654 === 255,
+      'exact fnmsubs negates after one fused rounding and its first signed store remains visible before654/floor');
+    if (rate === 2 ** 127) check(!Number.isFinite(Math.fround(2 * rate)), 'finite fused cancellation witness distinguishes rounded overflowing product');
+  }
+  for (const bank of [-5, -0, 0, 1, 2, 3]) {
+    const x = chargeInputHydratedControlFixture(); chargeSlot(x, 0); x.sourceActor.statusWord5b4 = 0;
+    x.sourceActor.aimRateScale = 1; x.chargeState.field648 = bank;
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall);
+    check(Object.is(x.chargeState.field648, bank <= 2 ? 0 : 1) && x.chargeState.byte654 === 254,
+      'post654 reload floors nonpositive decay to positivezero and preserves positive results');
+  }
+  runChargeInputFailureCompositionTests();
+  runChargeInputOwnerCompositionTests();
+  console.log('[actor-charge-input-composition] PASS: genuine DAT/setup/world/gauge/status/stage/cue/angular/ten-wrapper/charge graph with explicit complete selected4b0/4ac owners; signed global/disabled/reset/warmup/release branches for all three slots, strict equality/overshoot, readiness-before-fresh-unboosted-decay and exact fused witnesses; retained mature bank/654 prefix then exact68838->f0104 refusal, reachable falling655 transition68960->061cc and genuine return to outer590bc->5a190 refusal; lazy partial reads/stores, owner identities/aliases, consumed epochs and explicit downstream cadence; synthetic offline only, no sound/effect callback, rising13 reachability, hardware/fulltick or production claim');
+}
+function runChargeInputFailureCompositionTests(): void {
+  // Source-failure pairs select the earlier instruction, not a grouped preflight.
+  for (const fault of ['global', 'status-before-rate', 'rate', 'boost', 'ready-load', 'ready-store'] as const) {
+    const supplied = chargeInputHydration(); supplied.initial.byte655 = 128;
+    if (fault === 'ready-load') delete supplied.initial.byte655;
+    const x = chargeInputHydratedControlFixture(supplied), s = x.chargeState;
+    let expected: string = fault;
+    if (fault === 'global') {delete x.chargeGlobal.byte1829; x.statusState.byte6fc = NaN; expected = 'byte1829';}
+    if (fault === 'status-before-rate') {x.statusState.byte6fc = NaN; x.sourceActor.aimRateScale = NaN; expected = 'byte6fc';}
+    if (fault === 'rate') {delete (x.sourceActor as Partial<typeof x.sourceActor>).aimRateScale; expected = 'aimRateScale';}
+    if (fault === 'boost') {x.statusState.byte6fc = 1; delete x.chargeData.float80437628; expected = 'float80437628';}
+    if (fault === 'ready-load') expected = 'byte655';
+    if (fault === 'ready-store') {Object.defineProperty(s, 'byte655', {writable: false}); expected = 'byte655: non-writable';}
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), expected); retained(); checkChargeConsumedEpoch(x);
+    check(s.byte655 === (fault === 'ready-load' ? undefined : 128) && s.field63c === 4 && s.field648 === 20 &&
+      x.sourceActor.inputEdge5d4 === 0x2260 && x.machineState.byte628 === 0,
+      `${fault} preserves all ten-wrapper stores but no charge entry store occurs before the reached failure`);
+  }
+  for (let slot = 0; slot < 3; slot++) for (const fault of ['descriptor', 'reset-warmup', 'reset-bank', 'reset654-read', 'reset654-store'] as const) {
+    const x = chargeInputHydratedControlFixture(), s = x.chargeState;
+    for (let earlier = 0; earlier <= slot; earlier++) chargeSlot(x, earlier);
+    s.byte58e = 0x38;
+    if (fault === 'descriptor') x.chargeDescriptor[0x2f + slot] = NaN;
+    if (fault === 'reset-warmup') Object.defineProperty(s, chargeWarmups[slot]!, {writable: false});
+    if (fault === 'reset-bank') Object.defineProperty(s, chargeBanks[slot]!, {writable: false});
+    // A654 fault on a later slot would correctly occur in an earlier enabled
+    // slot, so disable those slots for these two shared-byte failures.
+    if (fault.startsWith('reset654')) {
+      for (let earlier = 0; earlier < slot; earlier++) x.chargeDescriptor[0x2f + earlier] = 255;
+      if (fault === 'reset654-read') s.byte654 = NaN;
+      else Object.defineProperty(s, 'byte654', {writable: false});
+    }
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'descriptor' ? String(0x2f + slot) : fault === 'reset654-read' ? 'byte654' : 'non-writable');
+    retained(); checkChargeConsumedEpoch(x);
+    check(s.byte655 === 0 && s[chargeWarmups[slot]!] === (fault === 'descriptor' || fault === 'reset-warmup' ? slot + 4 : 0) &&
+      s[chargeBanks[slot]!] === (fault.startsWith('reset654') ? 0 : 20 + 10 * slot) &&
+      chargeBanks.every((key, index) => index === slot || s[key] === (index < slot && !fault.startsWith('reset654') ? 0 : 20 + 10 * index)),
+      `slot${slot}/${fault} retains only earlier slots and reached warmup/bank stores before654`);
+  }
+  for (const fault of ['pointer-before-bank', 'bank-before-threshold', 'threshold', 'release-mask', 'zero', 'two',
+    'warmup-store', 'bank-store', 'active-read', 'active-store'] as const) {
+    const x = chargeInputHydratedControlFixture(), s = x.chargeState; chargeSlot(x, 0);
+    x.sourceActor.statusWord5b4 = 0; x.sourceActor.aimRateScale = 1; s.field648 = 20;
+    let expected: string = fault;
+    if (fault === 'pointer-before-bank') {x.attributeState.parameter4ac = null; s.field648 = NaN; expected = 'parameter4ac';}
+    if (fault === 'bank-before-threshold') {s.field648 = NaN; x.parameter.field184 = NaN; expected = 'field648';}
+    if (fault === 'threshold') {x.parameter.field184 = NaN; expected = 'field184';}
+    if (fault === 'release-mask') {(x.chargeData.release397c as number[])[0] = NaN; expected = 'release397c';}
+    if (fault === 'zero') {delete x.chargeData.float8043762c; expected = 'float8043762c';}
+    if (fault === 'two') {delete x.chargeData.float80437634; expected = 'float80437634';}
+    if (fault === 'warmup-store') {Object.defineProperty(s, 'field63c', {writable: false}); expected = 'field63c: non-writable';}
+    if (fault === 'bank-store') {Object.defineProperty(s, 'field648', {writable: false}); expected = 'field648: non-writable';}
+    if (fault === 'active-read') {s.byte654 = NaN; expected = 'byte654';}
+    if (fault === 'active-store') {Object.defineProperty(s, 'byte654', {writable: false}); expected = 'byte654: non-writable';}
+    const retained = retainInputPrefixCadence(x);
+    // The table cell diagnostic names its numeric index, not a fabricated source alias.
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'release-mask' ? '0: integer' : expected);
+    retained(); checkChargeConsumedEpoch(x);
+    const edgeWritten = ['zero', 'two', 'warmup-store', 'bank-store', 'active-read', 'active-store'].includes(fault);
+    const warmupWritten = ['bank-store', 'active-read', 'active-store'].includes(fault);
+    check(s.byte655 === 0 && x.sourceActor.inputEdge5d4 === (edgeWritten ? 0x2660 : 0x2260) &&
+      s.field63c === (warmupWritten ? 0 : 4) &&
+      (fault.includes('before-') ? Number.isNaN(s.field648) : s.field648 === (fault.startsWith('active-') ? 18 : 20)) &&
+      s.field640 === 5 && s.field64c === 30,
+      `${fault} preserves exact release pointer/bank/threshold/edge/constants/warmup/fusedbank/654 ordering without later slots`);
+  }
+  for (const fault of ['held-table', 'warmup-load', 'limit', 'one', 'warmup-store', 'overshoot-bank-load', 'overshoot-bank-store',
+    'mature-bank-load', 'mature-bank-store', 'mature654-read', 'mature654-store'] as const) {
+    const x = chargeInputHydratedControlFixture(), s = x.chargeState; chargeSlot(x, 0);
+    x.sourceActor.statusWord5b4 = 0x200;
+    s.field63c = fault.startsWith('mature') ? 10 : fault.startsWith('overshoot') ? 9.5 : 4;
+    let expected: string = fault;
+    if (fault === 'held-table') {(x.chargeData.held3970 as number[])[0] = NaN; expected = '0: integer';}
+    if (fault === 'warmup-load') {s.field63c = NaN; expected = 'field63c';}
+    if (fault === 'limit') {delete x.chargeData.float80437628; expected = 'float80437628';}
+    if (fault === 'one') {delete x.chargeData.float80437630; expected = 'float80437630';}
+    if (fault === 'warmup-store') {Object.defineProperty(s, 'field63c', {writable: false}); expected = 'field63c: non-writable';}
+    if (fault.endsWith('bank-load')) {s.field648 = NaN; expected = 'field648';}
+    if (fault.endsWith('bank-store')) {Object.defineProperty(s, 'field648', {writable: false}); expected = 'field648: non-writable';}
+    if (fault === 'mature654-read') {s.byte654 = NaN; expected = 'byte654';}
+    if (fault === 'mature654-store') {Object.defineProperty(s, 'byte654', {writable: false}); expected = 'byte654: non-writable';}
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), expected); retained(); checkChargeConsumedEpoch(x);
+    check(s.byte655 === 0 && (fault === 'warmup-load' ? Number.isNaN(s.field63c) :
+      s.field63c === (fault.startsWith('mature') ? 10 : fault.startsWith('overshoot') ? 10.5 : 4)) &&
+      (fault.endsWith('bank-load') ? Number.isNaN(s.field648) : s.field648 === (fault.startsWith('mature654') ? 20.5 : 20)) &&
+      s.field640 === 5 && s.field64c === 30,
+      `${fault} retains warmup overshoot or mature bank exactly where source instructions have already stored them`);
+  }
+  for (const absent of ['byte58e', 'field648', 'byte654'] as const) {
+    const supplied = chargeInputHydration(); supplied.slots = [0, 255, 255]; delete supplied.initial[absent];
+    const x = chargeInputHydratedControlFixture(supplied); x.sourceActor.statusWord5b4 = 0;
+    rejects(() => x.runRawPrefix(1, 64, 20), absent); checkChargeConsumedEpoch(x);
+    check(!Object.hasOwn(x.chargeState, absent) && x.chargeState.byte655 === 0 &&
+      x.chargeState.field63c === (absent === 'byte654' ? 0 : 4), 'missing reached charge fields remain absent with exact partial prefix');
+  }
+  {
+    const x = chargeInputHydratedControlFixture(); chargeSlot(x, 0); x.sourceActor.statusWord5b4 = 0;
+    x.parameter.field184 = 21; delete x.chargeData.release397c;
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall);
+    check(x.sourceActor.inputEdge5d4 === 0x2260 && x.chargeState.field648 === 19,
+      'live same parameter threshold changes readiness and leaves skipped result table unread');
+    const y = chargeInputHydratedControlFixture(); chargeSlot(y, 0); y.sourceActor.statusWord5b4 = 0x400;
+    (y.chargeData.held3970 as number[])[0] = 0x400;
+    rejects(() => y.runRawPrefix(1, 64, 20), chargeOuterCall);
+    check(y.chargeState.field63c === 5 && y.chargeState.field648 === 20, 'live reached held-mask cell affects genuine slot selection');
+  }
+}
+function runChargeInputOwnerCompositionTests(): void {
+  for (const descriptor of ['descriptor38f8', 'descriptor3904', 'descriptor3910', 'descriptor391c', 'descriptor3928',
+    'descriptor3934', 'descriptor3940', 'descriptor394c', 'descriptor3958', 'descriptor3964'] as const) {
+    const x = chargeInputHydratedControlFixture(); x.machineTables[descriptor]![4] = NaN;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), descriptor); retained(); checkChargeConsumedEpoch(x);
+    check(x.chargeState.byte654 === 255 && x.chargeState.byte655 === 0 && x.chargeState.field63c === 4 && x.chargeState.field648 === 20,
+      `earlier genuine${descriptor} refusal never executes a later charge store`);
+  }
+  for (const alias of ['machine', 'direction', 'atan'] as const) {
+    const x = chargeInputHydratedControlFixture();
+    x.chargeData.held3970 = alias === 'machine' ? x.machineTables.descriptor3964! :
+      alias === 'direction' ? x.angularData.direction80433928 : x.atanData.coefficients802b51a8;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'owner alias'); retained(); checkChargeConsumedEpoch(x);
+    check(x.chargeState.byte654 === 255 && x.chargeState.field648 === 20 && x.machineState.byte628 === 0 &&
+      x.machineState.byte629 === 23 && x.inputState.byte5ff === 9,
+      `late charge/${alias} table alias is rejected before any input or wrapper work`);
+  }
+  {
+    const x = chargeInputHydratedControlFixture();
+    const rivalKeys = ['doubleNinjaXInput', 'doubleNinjaLegacyChargeActive', 'sourceDoubleNinjaInputBlock58e',
+      'teleportXInput', 'sourceTeleportInputBlock58e', 'charge', 'chargeWarmup', ...chargeWarmups, ...chargeBanks, 'byte654', 'byte655'];
+    rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall);
+    check(rivalKeys.every(key => !Object.hasOwn(x.host, key) && !Object.hasOwn(x.sourceActor, key)),
+      'source opt-in creates no legacy charge, Double, Teleport or Borg state mirrors');
+  }
+  {
+    const x = chargeInputHydratedControlFixture(), duplicate = createSourceActorInputChargeRuntime(x.chargeSources);
+    rejects(() => duplicate.bindActor(x.actor, {}), 'already claimed');
+    rejects(() => createSourceActorInputPrefixRuntime({world: x.world, gauges: x.gauges,
+      charge: {...x.charge}}), 'genuine');
+    const y = chargeInputHydratedControlFixture();
+    rejects(() => createSourceActorInputChargeRuntime({...x.chargeSources, status: y.status}).bindActor(x.actor, {}), 'unknown');
+    rejects(() => createSourceActorInputChargeRuntime({...x.chargeSources, attributes: y.attributes}).bindActor(x.actor, {}), 'unknown');
+    rejects(() => createSourceActorInputChargeRuntime({...x.chargeSources,
+      data: {...x.chargeData, release397c: x.chargeData.held3970!}}), 'alias');
+  }
+  for (const rival of ['field63c', 'field650', 'byte58e', 'byte654', 'byte655', 'byte6fc', 'flags5e0', 'inputFlags5d4', 'sourceAmmoRefillRate']) {
+    const x = chargeInputHydratedControlFixture(); Object.defineProperty(x.sourceActor, rival, {value: undefined});
+    rejects(() => x.runRawPrefix(1, 64, 20), 'competing'); checkChargeConsumedEpoch(x);
+    check(x.chargeState.field63c === 4 && x.chargeState.field648 === 20 && x.chargeState.byte654 === 255,
+      `late competing${rival} cannot silently shadow actual source ownership`);
+  }
+  {
+    const x = chargeInputHydratedControlFixture(); chargeSlot(x, 0);
+    x.chargeData.held3970 = [...x.chargeData.held3970!];
+    rejects(() => x.runRawPrefix(1, 64, 20), 'owner changed'); checkChargeConsumedEpoch(x);
+    check(x.chargeState.byte655 === 0 && x.chargeState.field648 === 20, 'replacing a captured table owner fails at its reached read after entry clear');
+  }
+  {
+    const x = chargeInputHydratedControlFixture(); chargeSlot(x, 0); x.sourceActor.statusWord5b4 = 0x60000;
+    x.inputState.stickX5ca = 52; x.inputState.stickY5cb = 52; x.inputState.byte5fc = 0;
+    const hostAtan = Math.atan, hostAtan2 = Math.atan2;
+    try {
+      Math.atan = () => {throw Error('charge composition must use genuine finite atan');};
+      Math.atan2 = () => {throw Error('charge composition must not use host atan2');};
+      rejects(() => x.runRawPrefix(1, 64, 20), chargeOuterCall);
+    } finally {Math.atan = hostAtan; Math.atan2 = hostAtan2;}
+    check(x.sourceActor.inputHeld5d8 === 0x2aa && x.sourceActor.inputEdge5d4 === 0x2660 &&
+      x.chargeState.field648 === 19 && x.chargeState.byte655 === 0,
+      'real diagonal angular and finite atan calculation precedes all ten wrappers and actual release charge on the same actor');
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    const chargeState = Object.values(x.chargeState), inputEdge = x.sourceActor.inputEdge5d4;
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, index) => Object.is(value, matrix[index])) && x.historyState.previousStepHeight6d4 === history,
+      'actual status/wait animation remains a separate explicit cadence after successful charge');
+    x.sourceActor.pos.y = 6; x.updateNormal(); x.refreshAttributes(); x.snapshot();
+    check(x.targetMatrices[1]!.every((value, index) => Object.is(value, x.worldMatrix[index])) &&
+      !x.worldMatrix.every((value, index) => Object.is(value, matrix[index])) && x.movementCallCount() === moves + 1 &&
+      x.historyState.previousStepHeight6d4 === x.sourceActor.stepHeight && x.sourceActor.savedGroundPos.y === 6 &&
+      x.parameter.field74 === 11 && x.parameter.field04 === 20 && x.scalarDescriptor.field44 === 2,
+      'explicit normal/attribute/movement/history consumers read the new genuine preserved descriptor/parameter identities');
+    const settledMatrix = Array.from(x.worldMatrix), settledHistory = x.historyState.previousStepHeight6d4;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.sourceActor.inputEdge5d4 === inputEdge &&
+      Object.values(x.chargeState).every((value, index) => Object.is(value, chargeState[index])) &&
+      x.worldMatrix.every((value, index) => Object.is(value, settledMatrix[index])) && x.historyState.previousStepHeight6d4 === settledHistory,
+      'later actual setup attachment uses preserved joint mapping with no hidden input/charge/matrix/history replay');
+  }
+}
+
+/** Explicit decoded control inputs on the SAME source DAT/setup/world/status/
+ * stage/cue/angular/ten-wrapper/charge graph. This extends no old fixture by
+ * default and supplies neither native hydration nor a successful full tick. */
+function actorControlHydratedControlFixture(initial: Partial<SourceActorControlLifecycleBinding> =
+  {byte490: 0, short49a: 3, short49c: 3}, supplied = chargeInputHydration()) {
+  const x = chargeInputHydratedControlFixture({...supplied, actorControl: initial});
+  if (x.actorControl === undefined) throw Error('control composition requires the genuine explicitly bound source owner');
+  x.header.mode4a0 = 0; // Explicit decoded admission to5a190, not a changed legacy fixture default.
+  return Object.assign(x, {actorControl: x.actorControl, actorControlState: x.actorControl.getActorBinding(x.actor)});
+}
+function actorControlTableBoundary(raw: number): string {
+  // Independent signed-byte arithmetic and four-byte pointer-table indexing.
+  const signed = raw < 128 ? raw : raw - 256;
+  return `800590e0 reached unsupported source table802d3300 entry ${(0x802d3300 + signed * 4).toString(16)} before indirect call800590e8`;
+}
+const actorControlReady49c = '8005a204 reached unsupported source call 8006aab0';
+const actorControlReady49a = '8005a25c reached unsupported source call 8006a980';
+export function runActorControlHydratedCompositionTests(): void {
+  {
+    const old = chargeInputHydratedControlFixture();
+    check(!Object.hasOwn(old, 'actorControl') && old.actorControl === undefined,
+      'historical charge opt-in gains no implicit control owner or control sidecar');
+    rejects(() => old.runRawPrefix(1, 64, 20), chargeOuterCall);
+    const x = actorControlHydratedControlFixture(), s = x.actorControlState;
+    check(x.actorControl.getActualActor(x.actor) === x.sourceActor &&
+      x.actorControl.getWorldBinding(x.actor) === x.header &&
+      x.actorControl.getStatusBinding(x.actor) === x.statusState &&
+      x.status.getWorldBinding(x.actor) === x.header && x.prefix.getActualActor(x.actor) === x.sourceActor &&
+      Object.isSealed(s) && Reflect.ownKeys(s).join(',') === 'byte490,short49a,short49c',
+      'control shares actual DAT/setup world/status/actor identities and owns only explicit490/49a/49c');
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); retained();
+    checkInputPrefixEarlierStores(x); checkChargeConsumedEpoch(x);
+    check(x.sourceActor.inputEdge5d4 === 0x2260 && x.machineState.byte628 === 0 &&
+      x.chargeState.byte654 === 255 && x.chargeState.byte655 === 0 && s.short49a === 3 && s.short49c === 3 &&
+      x.actorControl.updateActor(x.actor) === 0,
+      'all genuine ten-wrapper and disabled-charge stores precede actual returned0 and exact first unresolved indirect dispatch');
+  }
+  // The exact source gate order is4a1,4a0,6fc,48a,490. Each earlier nonzero
+  // gate suppresses malformed later scalars without fabricating returned1.
+  for (const gate of ['mode4a1', 'mode4a0', 'byte6fc'] as const) for (const raw of [1, 128, 255]) {
+    const supplied = chargeInputHydration(); supplied.global.byte1829 = 1;
+    const x = actorControlHydratedControlFixture({}, supplied);
+    if (gate === 'mode4a1') {x.header.mode4a1 = raw; x.header.mode4a0 = NaN; x.statusState.byte6fc = NaN;}
+    if (gate === 'mode4a0') {x.header.mode4a0 = raw; x.statusState.byte6fc = NaN;}
+    if (gate === 'byte6fc') x.statusState.byte6fc = raw;
+    x.header.flags48a = NaN;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(gate === 'mode4a1' ? 201 : 9));
+    retained(); checkChargeConsumedEpoch(x);
+    check(x.actorControl.updateActor(x.actor) === 0 && Reflect.ownKeys(x.actorControlState).length === 0 &&
+      x.sourceActor.inputEdge5d4 === 0x2260 && x.machineState.byte628 === 0,
+      `${gate}/${raw} is a genuine zero-return gate before unprovided control counters and malformed later owners`);
+  }
+  for (const count of [-32768, -1, 0, 1, 2, 32767]) {
+    const x = actorControlHydratedControlFixture({short49c: count}); x.header.flags48a = 2;
+    x.sourceActor.controlWord = 0x100041; // Bit0 blocks only the49c leaf.
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); retained(); checkChargeConsumedEpoch(x);
+    check(x.actorControlState.short49c === (count > 0 ? count - 1 : count) &&
+      !Object.hasOwn(x.actorControlState, 'byte490') && !Object.hasOwn(x.actorControlState, 'short49a'),
+      `signed49c${count} decrements once only when positive, with flags48a==2 preceding absent490/49a`);
+  }
+  {
+    const x = actorControlHydratedControlFixture({short49c: 1}); x.header.flags48a = 2;
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); checkChargeConsumedEpoch(x);
+    check(x.actorControlState.short49c === 0, '49c1->0 genuinely returns0 without readiness on that call');
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), actorControlReady49c); retained();
+    check(x.actorControlState.short49c === 0 && x.tier.timerFrames === 6 && x.sourceActor.inputEdge5d4 === 0x2260,
+      'next explicit epoch reaches readiness then6aab0 without transition writes or invented returned1');
+  }
+  for (const count of [-32768, -1, 0, 1, 2, 32767]) {
+    const x = actorControlHydratedControlFixture({byte490: 2, short49a: count});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), count === 1 ? actorControlReady49a : actorControlTableBoundary(9));
+    retained(); checkChargeConsumedEpoch(x);
+    check(x.actorControlState.short49a === (count > 0 ? count - 1 : count) && !Object.hasOwn(x.actorControlState, 'short49c'),
+      `signed49a${count} reaches readiness only on the positive1->0 branch and retains the prior decrement on refusal`);
+  }
+  for (const branch of ['short49a', 'short49c'] as const) {
+    const x = actorControlHydratedControlFixture(branch === 'short49a' ? {byte490: 2, short49a: 1} : {short49c: 0});
+    if (branch === 'short49c') x.header.flags48a = 2;
+    rejects(() => x.runRawPrefix(1, 64, 20), branch === 'short49a' ? actorControlReady49a : actorControlReady49c);
+    checkChargeConsumedEpoch(x); x.header.mode4a0 = 255;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), 'known incomplete control transition'); retained();
+    check(x.actorControlState[branch] === 0 && x.tier.timerFrames === 6 && x.sourceActor.inputEdge5d4 === 0x2260,
+      `${branch} prior ready refusal cannot be bypassed on a later epoch using stored0 or a newly nonzero gate`);
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch');
+    const fresh = actorControlHydratedControlFixture();
+    rejects(() => fresh.runRawPrefix(1, 64, 20), actorControlTableBoundary(9));
+    check(fresh.actorControl.updateActor(fresh.actor) === 0,
+      'known-incomplete transition admission restriction is tied to its actual actor, not independent source graphs');
+  }
+  for (const bit of [1, 2, 0x1000, 0x1000000, 0x10000000, 0x80000000]) {
+    const c = actorControlHydratedControlFixture({short49c: 0}); c.header.flags48a = 2;
+    c.sourceActor.controlWord = (0x100040 | bit) >>> 0;
+    rejects(() => c.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); checkChargeConsumedEpoch(c);
+    const a = actorControlHydratedControlFixture({byte490: 2, short49a: 1});
+    a.sourceActor.controlWord = (0x100040 | bit) >>> 0;
+    rejects(() => a.runRawPrefix(1, 64, 20), bit < 4 ? actorControlReady49a : actorControlTableBoundary(9));
+    checkChargeConsumedEpoch(a);
+    check(a.actorControlState.short49a === (bit < 4 ? 0 : 1) && c.actorControlState.short49c === 0,
+      `actual controlWord bit${bit.toString(16)} distinguishes91001003 from91001000 and restores blocked49a to1`);
+  }
+  for (const flag of [0, 1, 3, 128, 255]) for (const mode of [0, 1, 3, 128, 255]) {
+    const x = actorControlHydratedControlFixture({byte490: mode}); x.header.flags48a = flag;
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9));
+    check(Reflect.ownKeys(x.actorControlState).length === 1,
+      `flags48a${flag}/byte490${mode} compares exact2 rather than mask/sign and leaves missing shorts unread`);
+  }
+  for (const fault of ['flags48a', 'byte490', 'short49a', 'short49c', 'readonly49a', 'readonly49c'] as const) {
+    const initial: Partial<SourceActorControlLifecycleBinding> = {byte490: 2, short49a: 1, short49c: 1};
+    if (fault === 'byte490' || fault === 'short49a' || fault === 'short49c') delete initial[fault];
+    const x = actorControlHydratedControlFixture(initial);
+    if (fault === 'flags48a') x.header.flags48a = NaN;
+    if (fault.endsWith('49c')) x.header.flags48a = 2;
+    if (fault.startsWith('readonly')) Object.defineProperty(x.actorControlState,
+      fault === 'readonly49a' ? 'short49a' : 'short49c', {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault.startsWith('readonly') ?
+      `${fault === 'readonly49a' ? 'short49a' : 'short49c'}: non-writable` : fault);
+    retained(); checkInputPrefixEarlierStores(x); checkChargeConsumedEpoch(x);
+    check(x.sourceActor.inputEdge5d4 === 0x2260 && x.chargeState.byte654 === 255 &&
+      x.actorControlState.short49a === initial.short49a && x.actorControlState.short49c === initial.short49c,
+      `${fault} refuses its reached field only after all prior real source stores, retaining untouched counters`);
+  }
+  {
+    const x = actorControlHydratedControlFixture({byte490: 2, short49a: 1});
+    x.sourceActor.controlWord = NaN;
+    rejects(() => x.actorControl.updateActor(x.actor), 'controlWord');
+    check(x.actorControlState.short49a === 0, '49a decrement is retained when its later readiness word is invalid');
+    const y = actorControlHydratedControlFixture({short49c: 1}); y.header.flags48a = 2; y.sourceActor.controlWord = NaN;
+    check(y.actorControl.updateActor(y.actor) === 0 && y.actorControlState.short49c === 0,
+      '49c positive path never reads the malformed later readiness word');
+    rejects(() => y.actorControl.updateActor(y.actor), 'controlWord');
+  }
+  {
+    const x = actorControlHydratedControlFixture(); x.sourceActor.pos.x = 100; x.tier.timerFrames = 300;
+    const retained = retainInputPrefixCadence(x);
+    for (let raw = 0; raw < 256; raw++) {
+      x.sourceActor.ubCue = raw;
+      rejects(() => x.runRawPrefix(raw + 1, 64, 20), actorControlTableBoundary(raw));
+      check(x.sourceActor.ubCue === raw && x.actorControlState.short49a === 3 && x.actorControlState.short49c === 3,
+        `raw ubCue${raw} retains its actual byte and reaches independently calculated signed table address`);
+    }
+    retained();
+    rejects(() => x.runRawPrefix(256, 128, 40), 'epoch');
+  }
+  for (const raw of [-1, 256, NaN, 1.5]) {
+    const x = actorControlHydratedControlFixture(); x.sourceActor.pos.x = 100; x.sourceActor.ubCue = raw;
+    rejects(() => x.runRawPrefix(1, 64, 20), 'ubCue'); checkChargeConsumedEpoch(x);
+    check(Object.is(x.sourceActor.ubCue, raw) && x.chargeState.byte655 === 0 && x.machineState.byte628 === 0,
+      'malformed reached ubCue is not silently masked after the real control zero return');
+  }
+  for (const rival of ['byte490', 'short49a', 'short49c', 'flags48a', 'mode4a0', 'mode4a1', 'byte6fc', 'word5e0']) {
+    const x = actorControlHydratedControlFixture(); Object.defineProperty(x.sourceActor, rival, {value: undefined});
+    rejects(() => x.runRawPrefix(1, 64, 20), 'competing'); checkChargeConsumedEpoch(x);
+    check(x.actorControlState.short49a === 3 && x.actorControlState.short49c === 3,
+      `late rival${rival} never becomes an alternate control owner`);
+  }
+  {
+    const x = actorControlHydratedControlFixture(), y = actorControlHydratedControlFixture();
+    rejects(() => createSourceActorControlLifecycleRuntime({world: x.world, status: x.status}).bindActor(x.actor, {}), 'already claimed');
+    rejects(() => createSourceActorTickPrefixRuntime({world: x.world, gauges: x.gauges,
+      actorControl: {...x.actorControl}}), 'genuine');
+    const fresh = gaugeScaleHydratedControlFixture();
+    rejects(() => createSourceActorControlLifecycleRuntime({world: fresh.world, status: y.status}).bindActor(fresh.actor, {}), 'unknown');
+    const changedStatus = {...fresh.status, getWorldBinding: () => y.header};
+    rejects(() => createSourceActorControlLifecycleRuntime({world: fresh.world, status: changedStatus}).bindActor(fresh.actor, {}), 'owner changed');
+    check(['byte490', 'short49a', 'short49c', 'mode4a0', 'mode4a1', 'flags48a', 'byte6fc'].every(key =>
+      !Object.hasOwn(x.sourceActor, key) && !Object.hasOwn(x.host, key)), 'composition adds no actual-actor or Borg mirrors');
+  }
+  {
+    const x = actorControlHydratedControlFixture({short49c: 2}); x.header.flags48a = 2;
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const history = x.historyState.previousStepHeight6d4, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9));
+    rejects(() => x.runRawPrefix(2, 66, 22), actorControlTableBoundary(9));
+    check(x.actorControlState.short49c === 0 && x.tier.timerFrames === 6 && x.receiverTracks.length === callbacks &&
+      x.movementCallCount() === moves && x.worldMatrix.every((v, i) => Object.is(v, matrix[i])) &&
+      x.historyState.previousStepHeight6d4 === history, 'two genuine control epochs never schedule downstream owners');
+    x.header.flags48a = 0; x.header.mode4a0 = 1; // Explicit decoded modes for the separate downstream calls.
+    x.updateStatus(); x.control.update(x.actor, 2);
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((v, i) => Object.is(v, matrix[i])), 'actual status and animation wait still need explicit calls');
+    x.sourceActor.pos.y = 6; x.updateNormal(); x.refreshAttributes(); x.snapshot();
+    check(x.targetMatrices[1]!.every((v, i) => Object.is(v, x.worldMatrix[i])) &&
+      x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === x.sourceActor.stepHeight,
+      'explicit normal/movement/attribute/history consumers preserve the same genuine source graph after control');
+    const settled = Array.from(x.worldMatrix);
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.actorControlState.short49c === 0 &&
+      x.worldMatrix.every((v, i) => Object.is(v, settled[i])), 'actual setup replacement does not replay the control decrement');
+  }
+  console.log('[actor-control-composition] PASS: explicit genuine control on the actual DAT/setup/world/status/gauge/stage/cue/angular/ten-wrapper/charge graph; ordered gates, exact2 branches, signed counters and distinct readiness masks, genuine0 then all256 signed ubCue dispatch addresses, retained failures/consumed epochs and explicit downstream cadence; no returned1 fabrication, full tick, native hydration or production claim');
+}
+
+interface ChargeEffectsHydration {
+  initial: Partial<SourceActorChargeEffectsBinding>;
+  data: SourceActorChargeEffectsData;
+  sound: SourceActorChargeSoundSources;
+}
+function chargeEffectsHydration(sound: SourceActorChargeSoundSources = {}): ChargeEffectsHydration {
+  return {initial: {byte7df: 17, field7e4: 23, pointer7ec: 0, byte7f4: 31, byte7f5: 32, byte7f6: 33, byte7f7: 34},
+    data: {float80436a20: 0, colorPointer802c37bc: 0x802c36b0, colorPointer802c37c0: 0x802c36e0}, sound};
+}
+function hydrateChargeEffectOwners(x: GaugeScaleFixture, supplied: ChargeEffectsHydration) {
+  const effects = createSourceActorChargeEffectsRuntime({world: x.world, data: supplied.data, sound: supplied.sound});
+  effects.bindActor(x.actor, supplied.initial);
+  return {effects, effectsState: effects.getActorBinding(x.actor), effectsData: supplied.data, effectsSound: supplied.sound};
+}
+function chargeEffectsHydratedControlFixture(supplied = chargeInputHydration(), effectInputs = chargeEffectsHydration()) {
+  const x = actorControlHydratedControlFixture({byte490: 0, short49a: 3, short49c: 3}, {...supplied, effects: effectInputs});
+  if (x.effectsOwners === undefined) throw Error('effect composition requires explicit genuine effect owners');
+  return Object.assign(x, x.effectsOwners);
+}
+/** Explicit decoded EXISTING active scheduler input for offline fixtures only.
+ * This alternate numeric pointer and its head are synthetic supplied inputs,
+ * never activation, a timestamp/audio result or fabricated production state. */
+function activeChargeSoundInputs(firstS16 = 126, currentPointer = 0x80310000) {
+  const current = {firstS16}, desired = {firstS16: 126};
+  const soundRecord = {script58: currentPointer, owner5c: null as ReturnType<typeof createRomActor> | null,
+    countdown54: 19, timestamp50: 987654};
+  const sound: SourceActorChargeSoundSources = {cue1Pointer8031b698: 0x8031b454,
+    records3ae8: {64: soundRecord}, scripts: currentPointer === 0x8031b454 ? {[currentPointer]: desired} :
+      {[currentPointer]: current, [0x8031b454]: desired}};
+  return {sound, soundRecord, current, desired};
+}
+function checkChargeColor(x: ReturnType<typeof chargeEffectsHydratedControlFixture>, cue: 0x13 | 0x14): void {
+  const s = x.effectsState;
+  check(s.byte7df === 0 && s.pointer7ec === (cue === 0x13 ? 0x802c36b0 : 0x802c36e0) &&
+    Object.is(s.field7e4, 0) && s.byte7f7 === 255 && s.byte7f4 === 0 && s.byte7f5 === 0 && s.byte7f6 === 0,
+    `real61cc->61f0 cue${cue.toString(16)} initializes the explicit owned channel0 fields only`);
+}
+export function runChargeEffectsHydratedCompositionTests(): void {
+  {
+    const old = actorControlHydratedControlFixture();
+    check(old.charge.getEffects() === undefined && !Object.hasOwn(old, 'effectsOwners'),
+      'old charge/control opt-ins do not allocate effects, sound records or color data');
+    chargeSlot(old, 0); old.sourceActor.statusWord5b4 = 0x200; old.chargeState.field63c = 10;
+    rejects(() => old.runRawPrefix(1, 64, 20), chargeMatureCall); checkChargeConsumedEpoch(old);
+    const x = chargeEffectsHydratedControlFixture(chargeInputHydration(), {initial: {}, data: {}, sound: {}});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); retained(); checkChargeConsumedEpoch(x);
+    check(x.charge.getEffects() === x.effects && x.effects.getActualActor(x.actor) === x.sourceActor &&
+      x.effects.getData() === x.effectsData && x.effects.getSound() === x.effectsSound &&
+      Reflect.ownKeys(x.effectsState).length === 0 && Object.isSealed(x.effectsState) &&
+      !Object.hasOwn(x.effectsSound, 'records3ae8') && !Object.hasOwn(x.effectsSound, 'scripts'),
+      'genuine optional effect owner shares actual actor but seeds no missing color, sound, timestamp or active production state');
+  }
+  for (const oldReady of [1, 128, 255]) {
+    const supplied = chargeInputHydration(); supplied.initial.byte655 = oldReady; supplied.slots = [0, 0, 0];
+    const x = chargeEffectsHydratedControlFixture(supplied); x.sourceActor.statusWord5b4 = 0;
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); retained();
+    checkInputPrefixEarlierStores(x); checkChargeConsumedEpoch(x); checkChargeColor(x, 0x14);
+    check(x.chargeState.byte655 === 0 && x.chargeState.byte654 === 248 && x.sourceActor.inputEdge5d4 === 0x3e60 &&
+      chargeBanks.every((key, index) => x.chargeState[key] === 19 + 10 * index) &&
+      chargeWarmups.every(key => x.chargeState[key] === 0) && Reflect.ownKeys(x.effectsSound).length === 0,
+      `falling signed-nonzero655${oldReady} completes all three releases then genuine14 color and actual control0 without a sound owner`);
+  }
+  for (let slot = 0; slot < 3; slot++) for (const relation of ['below', 'equal', 'above'] as const) {
+    const active = activeChargeSoundInputs(), supplied = chargeInputHydration();
+    supplied.slots = [slot === 0 ? 0 : 255, slot === 1 ? 0 : 255, slot === 2 ? 0 : 255];
+    supplied.initial[chargeWarmups[slot]!] = 10;
+    const bank = 20 + 10 * slot, threshold = bank + (relation === 'below' ? 1 : relation === 'equal' ? 0.5 : 0);
+    supplied.thresholds[chargeThresholds[slot]!] = threshold;
+    const x = chargeEffectsHydratedControlFixture(supplied, chargeEffectsHydration(active.sound));
+    x.sourceActor.statusWord5b4 = slot === 2 ? 0x400 : 0x200;
+    const retained = retainInputPrefixCadence(x), color = Object.values(x.effectsState);
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); retained(); checkChargeConsumedEpoch(x);
+    check(active.soundRecord.script58 === 0x80310000 && active.soundRecord.owner5c === x.sourceActor &&
+      active.soundRecord.countdown54 === 2 && active.soundRecord.timestamp50 === 987654 &&
+      x.chargeState[chargeBanks[slot]!] === (relation === 'below' ? bank + 0.5 : threshold) &&
+      x.chargeState.byte655 === (relation === 'below' ? 0 : 1 << slot) && x.chargeState[chargeWarmups[slot]!] === 10 &&
+      x.chargeState.byte654 === 255 && chargeBanks.every((key, index) => index === slot || x.chargeState[key] === 20 + 10 * index),
+      `slot${slot}/${relation} genuine equal-first-s16 sound return precedes live threshold comparison, clamp and ready bit`);
+    if (relation === 'below') check(Object.values(x.effectsState).every((value, index) => Object.is(value, color[index])),
+      'no-ready mature sound keepalive leaves all unrelated color fields untouched');
+    else checkChargeColor(x, 0x13);
+  }
+  {
+    const active = activeChargeSoundInputs(), supplied = chargeInputHydration();
+    supplied.slots = [0, 0, 0]; chargeWarmups.forEach(key => {supplied.initial[key] = 10;});
+    const x = chargeEffectsHydratedControlFixture(supplied, chargeEffectsHydration(active.sound));
+    x.sourceActor.statusWord5b4 = 0x600;
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); checkChargeConsumedEpoch(x); checkChargeColor(x, 0x13);
+    check(x.chargeState.byte655 === 7 && chargeBanks.every((key, index) => x.chargeState[key] === 20 + 10 * index) &&
+      active.soundRecord.owner5c === x.sourceActor && active.soundRecord.countdown54 === 2 && active.soundRecord.timestamp50 === 987654,
+      'all three genuine mature slots return through one shared active sound record before one rising13 color transition');
+    const color = Object.values(x.effectsState); x.effectsData.colorPointer802c37bc = NaN;
+    rejects(() => x.runRawPrefix(2, 66, 22), actorControlTableBoundary(9));
+    check(x.chargeState.byte655 === 7 && Object.values(x.effectsState).every((value, i) => Object.is(value, color[i])),
+      'nonzero-ready to nonzero-ready next epoch does not reread or reinitialize color13');
+    x.sourceActor.statusWord5b4 = 0;
+    rejects(() => x.runRawPrefix(3, 68, 24), actorControlTableBoundary(9)); checkChargeColor(x, 0x14);
+    check(x.chargeState.byte655 === 0 && x.tier.timerFrames === 5 && active.soundRecord.countdown54 === 2,
+      'persistent mature/release epochs reach13 then14 without a hidden scheduler countdown or sound tick');
+  }
+  // Signed slot selection is actual actor96, never a fixture-local lookup key.
+  for (const raw of [0, 1, 127, 128, 255]) {
+    const active = activeChargeSoundInputs(), supplied = chargeInputHydration();
+    const offset = (raw < 128 ? raw : raw - 256) * 128 + 64;
+    active.sound.records3ae8 = {[offset]: active.soundRecord}; supplied.slots = [0, 255, 255]; supplied.initial.field63c = 10;
+    const x = chargeEffectsHydratedControlFixture(supplied, chargeEffectsHydration(active.sound));
+    x.sourceActor.carriedSlot96 = raw; x.sourceActor.statusWord5b4 = 0x200;
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); checkChargeConsumedEpoch(x);
+    check(active.soundRecord.owner5c === x.sourceActor && active.soundRecord.countdown54 === 2,
+      `actual raw slot${raw} selects explicit signed byte offset${offset} without fabricating rows`);
+  }
+  for (const kind of ['null', 'unequal'] as const) {
+    const active = activeChargeSoundInputs(kind === 'unequal' ? 125 : 126), supplied = chargeInputHydration();
+    if (kind === 'null') {active.soundRecord.script58 = 0; delete active.sound.scripts;}
+    supplied.slots = [0, 0, 0]; supplied.initial.field63c = 10; supplied.initial.byte654 = 0; supplied.initial.byte655 = 128;
+    const x = chargeEffectsHydratedControlFixture(supplied, chargeEffectsHydration(active.sound));
+    x.sourceActor.statusWord5b4 = 0x600; x.attributeState.parameter4ac = null;
+    const retained = retainInputPrefixCadence(x), color = Object.values(x.effectsState);
+    rejects(() => x.runRawPrefix(1, 64, 20), kind === 'null' ?
+      '800f01a4 reached unsupported source call 80207058 after script58 pointer store' :
+      '800f0180 reached unsupported source call 800f02d0 before replacement stores');
+    retained(); checkChargeConsumedEpoch(x);
+    check(active.soundRecord.script58 === (kind === 'null' ? 0x8031b454 : 0x80310000) &&
+      active.soundRecord.owner5c === null && active.soundRecord.countdown54 === 19 && active.soundRecord.timestamp50 === 987654 &&
+      x.chargeState.field648 === 20.5 && x.chargeState.byte654 === 1 && x.chargeState.byte655 === 0 &&
+      x.chargeState.field640 === 5 && x.chargeState.field64c === 30 &&
+      Object.values(x.effectsState).every((value, i) => Object.is(value, color[i])),
+      `${kind} source sound boundary retains only mature bank/654 and exact preceding sound stores, before threshold/later slots/color`);
+    if (kind === 'null') {
+      rejects(() => x.runRawPrefix(2, 66, 22), 'known-incomplete sound activation');
+      check(x.chargeState.field648 === 21 && x.chargeState.byte654 === 1 && x.chargeState.byte655 === 0 &&
+        active.soundRecord.script58 === 0x8031b454 && active.soundRecord.owner5c === null &&
+        active.soundRecord.countdown54 === 19 && active.soundRecord.timestamp50 === 987654 &&
+        Object.values(x.effectsState).every((value, i) => Object.is(value, color[i])),
+        'later epoch cannot reinterpret the retained cold pointer as a completed active sound initialization');
+      rejects(() => x.runRawPrefix(2, 128, 40), 'epoch');
+      const y = chargeEffectsHydratedControlFixture({...supplied, initial: {...supplied.initial}}, chargeEffectsHydration(active.sound));
+      y.sourceActor.statusWord5b4 = 0x600; y.attributeState.parameter4ac = null;
+      rejects(() => y.runRawPrefix(1, 64, 20), 'known-incomplete sound activation'); checkChargeConsumedEpoch(y);
+      check(y.chargeState.field648 === 20.5 && y.chargeState.byte655 === 0 && y.effectsState.byte7df === 17 &&
+        active.soundRecord.owner5c === null && active.soundRecord.countdown54 === 19,
+        'a second genuine effect owner sharing the same incomplete row also refuses before keepalive, threshold or color');
+    }
+  }
+  for (const fault of ['parameter', 'threshold', 'later-slot', 'owner5c', 'countdown54'] as const) {
+    const active = activeChargeSoundInputs(), supplied = chargeInputHydration(); supplied.slots = [0, 0, 255];
+    supplied.initial.field63c = 10; supplied.initial.byte654 = 0;
+    const x = chargeEffectsHydratedControlFixture(supplied, chargeEffectsHydration(active.sound));
+    x.sourceActor.statusWord5b4 = 0x200;
+    if (fault === 'parameter') x.attributeState.parameter4ac = null;
+    if (fault === 'threshold') x.parameter.field184 = NaN;
+    if (fault === 'later-slot') x.chargeDescriptor[0x30] = NaN;
+    if (fault === 'owner5c' || fault === 'countdown54') Object.defineProperty(active.soundRecord, fault, {writable: false});
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'parameter' ? 'parameter4ac' : fault === 'threshold' ?
+      'field184' : fault === 'later-slot' ? '48: integer' : `${fault}: non-writable`);
+    retained(); checkChargeConsumedEpoch(x);
+    check(x.chargeState.field648 === (fault === 'later-slot' ? 20 : 20.5) && x.chargeState.byte654 === 1 &&
+      x.chargeState.byte655 === (fault === 'later-slot' ? 1 : 0) && x.chargeState.field640 === 5 &&
+      active.soundRecord.owner5c === (fault === 'owner5c' ? null : x.sourceActor) &&
+      active.soundRecord.countdown54 === (fault === 'owner5c' || fault === 'countdown54' ? 19 : 2) &&
+      x.effectsState.byte7df === 17 && active.soundRecord.timestamp50 === 987654,
+      `${fault} retains exact mature/sound/threshold partial stores and prevents later color initialization`);
+  }
+  const colorOrder = ['byte7df', 'pointer7ec', 'field7e4', 'byte7f7', 'byte7f4', 'byte7f5', 'byte7f6'] as const;
+  for (const fault of ['zero', 'table', ...colorOrder] as const) {
+    const supplied = chargeInputHydration(); supplied.initial.byte655 = 1;
+    const inputs = chargeEffectsHydration();
+    if (fault === 'zero') delete inputs.data.float80436a20;
+    if (fault === 'table') delete inputs.data.colorPointer802c37c0;
+    const x = chargeEffectsHydratedControlFixture(supplied, inputs), s = x.effectsState;
+    if (fault !== 'zero' && fault !== 'table') Object.defineProperty(s, fault, {writable: false});
+    const before = colorOrder.map(key => s[key]), expected = [0, 0x802c36e0, 0, 255, 0, 0, 0];
+    const completed = fault === 'zero' || fault === 'table' ? 1 : colorOrder.indexOf(fault);
+    const retained = retainInputPrefixCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'zero' ? 'float80436a20' :
+      fault === 'table' ? 'colorPointer802c37c0' : `${fault}: non-writable`);
+    retained(); checkChargeConsumedEpoch(x);
+    check(colorOrder.every((key, index) => Object.is(s[key], index < completed ? expected[index] : before[index])) &&
+      x.chargeState.byte655 === 0 && x.actorControlState.short49a === 3 && x.actorControlState.short49c === 3,
+      `falling color ${fault} failure preserves61fc/620c/6210/621c/6220/6224/6228/622c/6230 order and consumed prefix`);
+  }
+  {
+    const active = activeChargeSoundInputs(), supplied = chargeInputHydration();
+    supplied.slots = [0, 255, 255]; supplied.initial.field63c = 10;
+    const x = chargeEffectsHydratedControlFixture(supplied, chargeEffectsHydration(active.sound));
+    const y = chargeEffectsHydratedControlFixture({...supplied, initial: {...supplied.initial}}, chargeEffectsHydration(active.sound));
+    x.sourceActor.statusWord5b4 = y.sourceActor.statusWord5b4 = 0x200;
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9));
+    check(active.soundRecord.owner5c === x.sourceActor, 'first composed actor writes the shared actual sound record owner');
+    rejects(() => y.runRawPrefix(1, 64, 20), actorControlTableBoundary(9));
+    check(active.soundRecord.owner5c === y.sourceActor && active.soundRecord.countdown54 === 2 &&
+      x.effects.getSound() === y.effects.getSound() && x.effectsState !== y.effectsState,
+      'second genuine composed actor refreshes the same shared record rather than a per-actor sound copy');
+    rejects(() => createSourceActorChargeEffectsRuntime({world: x.world, data: {}, sound: {}}).bindActor(x.actor, {}), 'already claimed');
+    rejects(() => createSourceActorInputChargeRuntime({...x.chargeSources, effects: {...x.effects}}), 'genuine');
+    rejects(() => createSourceActorInputChargeRuntime({...x.chargeSources, effects: y.effects}).bindActor(x.actor, {}), 'unknown');
+  }
+  {
+    const x = chargeEffectsHydratedControlFixture(); Reflect.set(x.effectsSound, 'records3ae8', {64: x.parameter});
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9));
+    check(x.chargeState.field648 === 20 && x.chargeState.byte655 === 0,
+      'all-disabled charge never resolves its skipped selected parameter merely to inspect an unused sound row');
+    chargeSlot(x, 0); x.sourceActor.statusWord5b4 = 0;
+    rejects(() => x.runRawPrefix(2, 66, 22), 'alias');
+    check(x.chargeState.field648 === 20 && x.effectsState.byte7df === 17,
+      'a later real release resolves4ac and rejects that previously-unreached parameter/sound alias before bank stores');
+  }
+  for (const owner of ['charge', 'machine', 'parameter', 'descriptor', 'direction'] as const) {
+    const x = chargeEffectsHydratedControlFixture();
+    Reflect.set(x.effectsSound, 'records3ae8', {64: owner === 'charge' ? x.chargeState : owner === 'machine' ?
+      x.machineState : owner === 'parameter' ? x.parameter : owner === 'descriptor' ? x.chargeDescriptor : x.angularData.direction80433928});
+    if (owner === 'parameter') {chargeSlot(x, 0); x.sourceActor.statusWord5b4 = 0;}
+    rejects(() => x.runRawPrefix(1, 64, 20), 'alias'); checkChargeConsumedEpoch(x);
+    check(x.chargeState.field648 === 20 && x.effectsState.byte7df === 17,
+      `late sound-record/${owner} alias is rejected before effect or bank stores, with selected descriptor/parameter owners checked only when reached`);
+  }
+  {
+    const active = activeChargeSoundInputs(), supplied = chargeInputHydration(); supplied.slots = [0, 255, 255]; supplied.initial.field63c = 10;
+    const x = chargeEffectsHydratedControlFixture(supplied, chargeEffectsHydration(active.sound)); x.sourceActor.statusWord5b4 = 0x200;
+    const callbacks = x.receiverTracks.length, moves = x.movementCallCount(), matrix = Array.from(x.worldMatrix);
+    const attached = x.joints.getBinding(x.joint).aobj7c, history = x.historyState.previousStepHeight6d4;
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); checkChargeColor(x, 0x13);
+    check(x.receiverTracks.length === callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, index) => Object.is(value, matrix[index])) && x.historyState.previousStepHeight6d4 === history,
+      'real charge sound/color returns still schedule no animation, matrix, movement or history suffix');
+    const colors = Object.values(x.effectsState); x.header.mode4a0 = 1;
+    x.updateStatus(); x.control.update(x.actor, 2); x.sourceActor.pos.y = 6; x.updateNormal(); x.refreshAttributes(); x.snapshot();
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves + 1 &&
+      x.joints.getBinding(x.joint).aobj7c !== attached && x.historyState.previousStepHeight6d4 === x.sourceActor.stepHeight &&
+      Object.values(x.effectsState).every((value, index) => Object.is(value, colors[index])) &&
+      active.soundRecord.countdown54 === 2 && active.soundRecord.timestamp50 === 987654,
+      'explicit real downstream cadence preserves effect channel and shared scheduler state without pretending to render color or play audio');
+  }
+  console.log('[actor-charge-effects-composition] PASS: explicit genuine color13/14 and equal-first-s16 active sound keepalive on the same DAT/setup/world/status/gauge/stage/cue/angular/ten-wrapper/charge/control graph; all mature slots and threshold branches, rising/falling/persistent epochs, shared signed-slot scheduler owners, retained null/unequal/readonly/late failures and unchanged historical boundaries; explicit decoded offline inputs only, no native hydration, timestamp/audio/render/fulltick or production activation');
+}
+
+/** Explicit opt-ins on the existing graph; no old fixture receives new Borg
+ * fields, source storage, helper owners or fabricated downstream call results. */
+interface ReadyLifecycleHydration {
+  initial: Partial<SourceActorReadyTransitionsBinding>;
+  borg: Partial<Pick<BorgRuntime, 'hp' | 'maxHp' | 'colorVariant'>>;
+}
+function readyLifecycleHydration(): ReadyLifecycleHydration {
+  return {initial: {byte19: 19, byte1a: 21, byte1b: 22, byte489: 23,
+    short48c: -101, byte48e: 24, byte48f: 25, short494: -102, short496: -103,
+    short49e: -301, short3ea: -201, byte3ef: 241}, borg: {maxHp: 0x8001, colorVariant: 233}};
+}
+function readyLifecycleHydratedControlFixture(ready = readyLifecycleHydration(),
+  initial: Partial<SourceActorControlLifecycleBinding> = {byte490: 2, short49a: 1, short49c: 0},
+  actionRequest?: Partial<SourceActorActionRequestBinding>, supplied = chargeInputHydration()) {
+  const x = actorControlHydratedControlFixture(initial, {...supplied, ready,
+    ...(actionRequest === undefined ? {} : {actionRequest})});
+  if (x.readyTransitions === undefined) throw Error('ready composition requires explicit genuine helper');
+  return Object.assign(x, {readyTransitions: x.readyTransitions,
+    readyState: x.readyTransitions.getActorBinding(x.actor), readyBorg: x.readyTransitions.getActualBorg(x.actor)});
+}
+type ReadyLifecycleFixture = ReturnType<typeof readyLifecycleHydratedControlFixture>;
+const readyActionCall = '80059110 reached unsupported source call 8005a298';
+const readyPostActionCall = '80059118 reached unsupported source call 8005a378';
+const readyTeamCall = '8005a218 reached unsupported source call 80176ec0';
+function retainReadyLifecycleCadence(x: ReadyLifecycleFixture): () => void {
+  const attached = x.joints.getBinding(x.joint).aobj7c!;
+  const rows: object[] = [x.sourceClock, x.sourceActor.pos, x.sourceActor.savedGroundPos,
+    x.sourceActor.targetCache5e8, x.sourceActor.aimOrigin518, x.sourceActor.actionSpeedRows, ...x.sourceActor.parts,
+    x.normalState, x.historyState, x.historyState.rotation76, x.historyState.preRotation1d6a, x.historyState.aimOrigin524,
+    x.targetActor, x.targetHeader, x.targetHeader.scale58, x.targetPose, x.targetPose.translation, x.targetPose.quaternion,
+    x.clocks, x.part, x.stream, x.waitControl, x.control.getActorBinding(x.actor), x.start,
+    ...x.cells, ...x.ammoSlots, x.attributeState, x.parameter, x.scalarDescriptor, x.movementState,
+    x.ready.getActorBinding(x.actor), x.joints.getBinding(x.joint), x.joints.getJoint(x.joint), x.feedback.getAObj(attached),
+    ...x.worldStorage.matrices8d4.map(id => x.matrices.getMatrix(id)),
+    ...[x.worldStorage.copy114, x.worldStorage.copy1aa4, x.worldStorage.scratch].map(id => x.matrices.getMatrix(id)),
+    ...x.targetMatrices, ...x.targetCopies];
+  for (const bank of x.mapping.getLayout(x.actor).poses) for (const id of bank) {
+    const pose = x.feedback.getPose(id); rows.push(pose, pose.translation, pose.quaternion);
+  }
+  let node = x.feedback.getAObj(attached).fobjs;
+  while (node !== null) {const row = x.fobjs.getNode(node); rows.push(row); node = row.next00;}
+  const saved = rows.map(record => ({record, keys: Reflect.ownKeys(record)}))
+    .map(row => ({...row, values: row.keys.map(key => Reflect.get(row.record, key))}));
+  const requests = x.requestCalls, ends = x.endCalls, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+  return () => check(saved.every(({record, keys, values}) => Reflect.ownKeys(record).length === keys.length &&
+    keys.every((key, index) => Object.is(Reflect.get(record, key), values[index]))) &&
+    x.requestCalls === requests && x.endCalls === ends && x.receiverTracks.length === callbacks && x.movementCallCount() === moves,
+    'ready/control/action source stores do not implicitly advance real setup, animation, movement, matrices, status ammo or history');
+}
+function checkReady490Stores(x: ReadyLifecycleFixture, previous272: number): void {
+  const r = x.readyState;
+  check(x.stageState.lifecycle18 === 2 && r.byte19 === 3 && r.byte1a === 0 && r.byte1b === 0 &&
+    x.statusState.short272 === ((previous272 | 0x443) << 16 >> 16) && x.actorControlState.byte490 === 4 &&
+    x.actorControlState.short49a === 0 && r.short48c === r.short3ea && r.byte48e === x.readyBorg.colorVariant &&
+    r.byte48f === r.byte3ef && r.short494 === x.host.hp && r.short496 === (x.readyBorg.maxHp! << 16 >> 16) &&
+    x.header.mode4a1 === 0 && r.byte489 === 4,
+    'actual49a1->0,6a980 ordered stores and caller489=4/19=3 precede source returned1');
+}
+export function runReadyLifecycleHydratedCompositionTests(): void {
+  {
+    const old = chargeEffectsHydratedControlFixture();
+    check(old.actorControl.getReadyRuntime() === undefined && !Object.hasOwn(old, 'readyTransitions') &&
+      !Object.hasOwn(old, 'actionRequest') && !Object.hasOwn(old.host, 'maxHp') && !Object.hasOwn(old.host, 'colorVariant'),
+      'historical control/effects constructors allocate no ready/action owners or missing Borg data');
+    const x = readyLifecycleHydratedControlFixture({initial: {}, borg: {}}, {byte490: 0}, {});
+    const retained = retainReadyLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9)); retained();
+    check(Reflect.ownKeys(x.readyState).length === 0 && Object.isSealed(x.readyState) &&
+      Reflect.ownKeys(x.actionRequest!.getActorBinding(x.actor)).length === 0 &&
+      !Object.hasOwn(x.host, 'maxHp') && !Object.hasOwn(x.host, 'colorVariant'),
+      'explicit empty owners remain empty on genuine control0 and no unreached ready/action scalar is loaded');
+  }
+  for (const withAction of [false, true]) {
+    const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined,
+      withAction ? {byte7d2: 1, byte73c: 21} : undefined), r = x.readyTransitions;
+    const before272 = x.statusState.short272!, retained = retainReadyLifecycleCadence(x);
+    check(x.actorControl.getReadyRuntime() === r && r.getControlRuntime() === x.actorControl &&
+      r.getActualActor(x.actor) === x.sourceActor && r.getWorldBinding(x.actor) === x.header &&
+      r.getStatusBinding(x.actor) === x.statusState && r.getStageBinding(x.actor) === x.stageState &&
+      r.getControlBinding(x.actor) === x.actorControlState && r.getActualBorg(x.actor) === x.host &&
+      x.status.getActualBorg(x.actor) === x.host && Object.isSealed(x.readyState),
+      'ready borrows canonical shared actor/world/status/stage18/control/Borg rather than look-alike copies');
+    rejects(() => x.runRawPrefix(1, 64, 20), withAction ? readyPostActionCall : readyActionCall); retained();
+    checkReady490Stores(x, before272); checkInputPrefixEarlierStores(x); checkChargeConsumedEpoch(x);
+    check(x.machineState.byte628 === 0 && x.sourceActor.inputEdge5d4 === 0x2260 &&
+      (!withAction || x.actionRequest!.getActorBinding(x.actor).byte73c === 4),
+      'all ten genuine input machines and charge run before ready1 skips both indirect dispatches and reaches the real action boundary');
+  }
+  {
+    const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined, {byte7d2: 1, byte73c: 31});
+    x.sourceActor.pos.x = 100; x.sourceActor.ubCue = NaN; x.sourceActor.fbCue = NaN;
+    const retained = retainReadyLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), readyPostActionCall); retained();
+    check(Number.isNaN(x.sourceActor.ubCue) && Number.isNaN(x.sourceActor.fbCue) &&
+      x.readyState.byte489 === 4 && x.actionRequest!.getActorBinding(x.actor).byte73c === 4,
+      'genuine returned1 skips both signed cue table loads, indirect calls,59f5c and5a144 rather than synthesizing dispatch success');
+  }
+  {
+    const active = activeChargeSoundInputs(), supplied = chargeInputHydration();
+    supplied.effects = chargeEffectsHydration(active.sound); supplied.slots = [0, 0, 0];
+    chargeWarmups.forEach(key => {supplied.initial[key] = 10;});
+    const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined, {byte7d2: 1, byte73c: 31}, supplied);
+    x.sourceActor.statusWord5b4 = 0x600;
+    const retained = retainReadyLifecycleCadence(x), before272 = x.statusState.short272!;
+    rejects(() => x.runRawPrefix(1, 64, 20), readyPostActionCall); retained(); checkReady490Stores(x, before272);
+    check(x.chargeState.byte655 === 7 && x.effectsOwners!.effectsState.pointer7ec === 0x802c36b0 &&
+      active.soundRecord.owner5c === x.sourceActor && active.soundRecord.countdown54 === 2 &&
+      active.soundRecord.timestamp50 === 987654 && x.actionRequest!.getActorBinding(x.actor).byte73c === 4,
+      'all three actual mature charge slots and genuine sound/color effects precede ready stores and action request on one graph');
+  }
+  {
+    const x = readyLifecycleHydratedControlFixture(), before272 = x.statusState.short272!;
+    rejects(() => x.runRawPrefix(1, 64, 20), readyActionCall); checkReady490Stores(x, before272);
+    x.sourceActor.noClamp6cb = 0; x.stageState.short6cc = 29; x.sourceActor.ubCue = 37; x.sourceActor.fbCue = 39;
+    rejects(() => x.runRawPrefix(2, 66, 22), actorControlTableBoundary(37));
+    check(x.stageState.lifecycle18 === 2 && x.stageState.short6cc === 29 && x.sourceActor.noClamp6cb === 0 &&
+      x.sourceActor.ubCue === 37 && x.sourceActor.fbCue === 39 && x.tier.timerFrames === 6 &&
+      x.readyState.byte19 === 3 && x.actorControlState.short49a === 0,
+      'successful transition changes canonical18, naturally gating next stage call while control490=4 returns0 without replay');
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch');
+    x.stageState.lifecycle18 = 1;
+    rejects(() => x.runRawPrefix(3, 68, 24), actorControlTableBoundary(9));
+    check(x.stageState.short6cc === 0 && x.sourceActor.noClamp6cb === 1 && x.sourceActor.ubCue === 9 &&
+      x.sourceActor.fbCue === 9 && x.readyState.byte19 === 3,
+      'an explicit later lifecycle18 input restores genuine stage/cue behavior without a separate ready lifecycle mirror');
+  }
+  for (const team of [0, 128, 255]) {
+    const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), {byte490: 2, short49c: 1}, {byte7d2: 1, byte73c: 31});
+    x.header.flags48a = 2; x.sourceActor.team = team;
+    const before272 = x.statusState.short272!, retained = retainReadyLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), actorControlTableBoundary(9));
+    check(x.actorControlState.short49c === 0 && x.stageState.lifecycle18 === 1 && x.readyState.byte19 === 19,
+      '48a countdown1->0 returns0 before its transition on the next epoch');
+    rejects(() => x.runRawPrefix(2, 66, 22), `${readyTeamCall}(actor, team=${team < 128 ? team : team - 256}, 0)`); retained();
+    check(x.stageState.lifecycle18 === 2 && x.readyState.byte19 === 2 && x.readyState.byte1a === 0 &&
+      x.readyState.byte1b === 0 && x.statusState.short272 === ((before272 | 0x443) << 16 >> 16) &&
+      x.header.flags48a === 4 && x.actorControlState.byte490 === 4 && x.readyState.short48c === -301 &&
+      x.readyState.byte48e === 233 && x.readyState.byte48f === 25 && x.readyState.short494 === 87 &&
+      x.readyState.short496 === -32767 && x.readyState.byte489 === 23 &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === 31,
+      '6aab0 leaf completes exact stores, preserves490-only fields, then stops176ec0 without returned1 or action execution');
+    x.header.mode4a0 = 255;
+    rejects(() => x.runRawPrefix(3, 68, 24), 'known incomplete control transition');
+    rejects(() => x.runRawPrefix(3, 128, 40), 'epoch');
+    check(x.readyState.byte19 === 2 && x.tier.timerFrames === 5 && x.actorControlState.short49c === 0,
+      'later input epochs retain earlier stores but cannot bypass an incomplete48a caller using changed gates');
+  }
+  for (const [hp, maxHp, color] of [[-32768, 0, 0], [-1, 0x7fff, 127], [0, 0x8000, 128], [32767, 0xffff, 255]] as const) {
+    const supplied = readyLifecycleHydration(); supplied.borg = {hp, maxHp, colorVariant: color};
+    const x = readyLifecycleHydratedControlFixture(supplied);
+    rejects(() => x.runRawPrefix(1, 64, 20), readyActionCall);
+    check(x.readyState.short494 === hp && x.readyState.short496 === (maxHp < 0x8000 ? maxHp : maxHp - 0x10000) &&
+      x.readyState.byte48e === color && x.host.hp === hp && x.readyBorg.maxHp === maxHp,
+      `decoded hp${hp}, rawu16maxHp${maxHp} and rawcolor${color} preserve source lha/lbz widths without a clamp or default`);
+  }
+  // Each write destination is checked only at its source store. Earlier real
+  // writes survive; the counter and incomplete-call guards cannot be reset.
+  for (let fault = 0; fault < 13; fault++) {
+    const x = readyLifecycleHydratedControlFixture(), r = x.readyState;
+    const order: [object, string, number][] = [[x.stageState, 'lifecycle18', 2], [r, 'byte19', 2],
+      [r, 'byte1a', 0], [r, 'byte1b', 0], [x.statusState, 'short272', (x.statusState.short272! | 0x443) << 16 >> 16],
+      [x.actorControlState, 'byte490', 4], [r, 'short48c', -201], [r, 'byte48e', 233], [r, 'byte48f', 241],
+      [r, 'short494', 87], [r, 'short496', -32767], [x.header, 'mode4a1', 0], [r, 'byte489', 4]];
+    const before = order.map(([owner, key]) => Reflect.get(owner, key)), [owner, key] = order[fault]!;
+    Object.defineProperty(owner, key, {writable: false});
+    const retained = retainReadyLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${key}: non-writable`); retained(); checkChargeConsumedEpoch(x);
+    check(order.every(([record, field, value], index) => Object.is(Reflect.get(record, field), index < fault ? value : before[index])) &&
+      x.actorControlState.short49a === 0 && x.chargeState.byte655 === 0 && x.sourceActor.inputEdge5d4 === 0x2260,
+      `readonly${key} preserves exact transition instruction prefix and earlier ten-machine/charge stores`);
+    rejects(() => x.runRawPrefix(2, 66, 22), 'known incomplete control transition');
+    check(x.tier.timerFrames === 6, 'new incomplete epoch still executes only the earlier genuine prefix');
+  }
+  for (const field of ['byte19', 'byte1a', 'byte1b', 'short3ea', 'short48c', 'byte48e', 'byte3ef', 'byte48f',
+    'short494', 'short496', 'byte489'] as const) {
+    const supplied = readyLifecycleHydration(); delete supplied.initial[field];
+    const x = readyLifecycleHydratedControlFixture(supplied);
+    rejects(() => x.runRawPrefix(1, 64, 20), `${field}: own data property required`);
+    check(x.actorControlState.short49a === 0 && !Object.hasOwn(x.readyState, field) && x.stageState.lifecycle18 === 2,
+      `missing${field} remains absent and refuses only when the real reached instruction needs it`);
+    rejects(() => x.runRawPrefix(2, 66, 22), 'known incomplete control transition');
+  }
+  for (const field of ['hp', 'maxHp', 'colorVariant'] as const) for (const invalid of [false, true]) {
+    const supplied = readyLifecycleHydration();
+    if (invalid) supplied.borg[field] = field === 'hp' ? 32768 : field === 'maxHp' ? -1 : 256;
+    else delete supplied.borg[field];
+    const x = readyLifecycleHydratedControlFixture(supplied);
+    if (!invalid && field === 'hp') delete (x.host as Partial<typeof x.host>).hp;
+    rejects(() => x.runRawPrefix(1, 64, 20), field);
+    check(x.actorControlState.short49a === 0 && x.stageState.lifecycle18 === 2 &&
+      x.readyState.short48c === -201 && x.readyState.byte489 === 23 &&
+      x.readyState.short494 === (field === 'maxHp' ? 87 : -102),
+      `Borg${field}/${invalid ? 'invalid' : 'missing'} has no silent decoding/default and preserves earlier source stores`);
+  }
+  for (const mode of [1, 128, 255]) {
+    const x = readyLifecycleHydratedControlFixture(); x.header.mode4a0 = mode;
+    const retained = retainReadyLifecycleCadence(x);
+    rejects(() => x.readyTransitions.transition490(x.actor), '8006aa00 reached unsupported source call 80066198(form=65335, color=-23, variant=-15)'); retained();
+    check(x.stageState.lifecycle18 === 2 && x.readyState.byte19 === 2 && x.readyState.byte48f === 241 &&
+      x.readyState.short494 === -102 && x.readyState.short496 === -103 && x.readyState.byte489 === 23,
+      'direct nonzero4a0 leaf retains its prefix, raw halfword form and signed-byte call arguments before unsupported ratio path');
+    x.header.mode4a0 = 0;
+    rejects(() => x.readyTransitions.transition490(x.actor), 'known incomplete ready transition');
+    rejects(() => x.actorControl.updateActor(x.actor), 'known incomplete ready transition');
+    check(x.actorControlState.byte490 === 4 && x.readyState.byte19 === 2 && x.readyState.short494 === -102,
+      'direct partial helper cannot become control0 through its already-stored490=4 or changed4a0 gate');
+    rejects(() => x.runRawPrefix(1, 64, 20), 'known incomplete ready transition'); retained();
+    check(x.tier.timerFrames === 7 && x.sourceActor.inputEdge5d4 === 0x2260 && x.machineState.byte628 === 0 &&
+      x.stageState.lifecycle18 === 2 && x.stageState.short6cc === 29 && x.sourceActor.noClamp6cb === 0 &&
+      x.readyState.byte19 === 2 && x.readyState.short494 === -102 && x.actorControlState.short49a === 1,
+      'new epoch runs earlier genuine input/charge prefix and natural stage18 gate, then refuses the attached incomplete helper before control reads');
+    checkChargeConsumedEpoch(x);
+  }
+  for (const [flag, status, old73c, expected73c] of [[1, 0, 31, 4], [5, 16, 31, 31],
+    [129, 0x80000000, 255, 4], [253, 0x80000010, 0, 0]] as const) {
+    const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined, {byte7d2: flag, byte73c: old73c});
+    x.sourceActor.statusWord5b4 = status;
+    rejects(() => x.runRawPrefix(1, 64, 20), readyPostActionCall);
+    check(x.actionRequest!.getActorBinding(x.actor).byte73c === expected73c && x.readyState.byte19 === 3,
+      `actual5b4 bit0x10/${status} controls73c after low7d2${flag} equals1, not a fabricated global predicate`);
+  }
+  for (const [housekeeping, request] of [[1, 0], [128, 0], [255, 0], [0, 1], [0, 128], [0, 255]] as const) {
+    const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined, {byte7d2: 2, byte73c: request});
+    x.sourceActor.housekeeping73f = housekeeping;
+    rejects(() => x.runRawPrefix(1, 64, 20), readyPostActionCall);
+    check(x.sourceActor.housekeeping73f === housekeeping && x.actionRequest!.getActorBinding(x.actor).byte73c === request,
+      'nonzero actual73f or supplied73c returns without implicit action, target or dispatch work');
+  }
+  for (const slot of [0, 127, 128, 255]) {
+    const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined, {byte7d2: 0, byte73c: 0});
+    x.sourceActor.slot = slot; x.sourceActor.housekeeping73f = 0;
+    const retained = retainReadyLifecycleCadence(x), before272 = x.statusState.short272!;
+    rejects(() => x.runRawPrefix(1, 64, 20), `8005a300 reached unsupported source call 80010514(slot=${slot < 128 ? slot : slot - 256})`);
+    retained(); checkReady490Stores(x, before272); checkChargeConsumedEpoch(x);
+    check(x.sourceActor.inputEdge5d4 === 0x2260 && x.actionRequest!.getActorBinding(x.actor).byte73c === 0,
+      'unsupported10514 retains completed ready and input stores without executing later5a298 action writes');
+    x.header.mode4a1 = 128;
+    rejects(() => x.actionRequest!.updateActor(x.actor), '8005a34c reached unsupported source pointer508 load');
+    check(x.sourceActor.inputEdge5d4 === 0x2260, 'nonzero4a1 refuses actual508/4a4 ownership without invented links');
+  }
+  for (const fault of ['missing7d2', 'missing73c', 'readonly73c'] as const) {
+    const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined,
+      fault === 'missing7d2' ? {} : fault === 'missing73c' ? {byte7d2: 1} : {byte7d2: 1, byte73c: 31});
+    if (fault === 'readonly73c') Object.defineProperty(x.actionRequest!.getActorBinding(x.actor), 'byte73c', {writable: false});
+    const before272 = x.statusState.short272!, retained = retainReadyLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'missing7d2' ? 'byte7d2' : 'byte73c'); retained();
+    checkReady490Stores(x, before272); checkChargeConsumedEpoch(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), actorControlTableBoundary(9));
+    check(x.readyState.byte19 === 3 && x.actorControlState.byte490 === 4,
+      'postready action failure never rolls back completed transition or invents a failed ready guard on the next genuine control0');
+  }
+  {
+    const x = readyLifecycleHydratedControlFixture(), y = readyLifecycleHydratedControlFixture();
+    rejects(() => createSourceActorReadyTransitionsRuntime({world: x.world, status: x.status,
+      stageBounds: x.stageBounds, control: x.actorControl}).bindActor(x.actor, {}), 'already claimed');
+    rejects(() => createSourceActorReadyTransitionsRuntime({world: x.world, status: x.status,
+      stageBounds: {...x.stageBounds}, control: x.actorControl}), 'genuine');
+    const old = actorControlHydratedControlFixture();
+    rejects(() => old.actorControl.bindReadyRuntime({...x.readyTransitions}), 'genuine');
+    rejects(() => createSourceActorReadyTransitionsRuntime({world: old.world, status: old.status,
+      stageBounds: y.stageBounds, control: old.actorControl}).bindActor(old.actor, {}), 'unknown');
+    rejects(() => createSourceActorReadyTransitionsRuntime({world: old.world,
+      status: {...old.status, getActualBorg: () => old.header as unknown as typeof old.host}, stageBounds: old.stageBounds,
+      control: old.actorControl}).bindActor(old.actor, {}), 'alias');
+    rejects(() => createSourceActorTickPrefixRuntime({world: x.world, gauges: x.gauges,
+      actionRequest: {...createSourceActorActionRequestRuntime({world: x.world})}}), 'genuine');
+    const action = createSourceActorActionRequestRuntime({world: x.world}); action.bindActor(x.actor, {});
+    rejects(() => createSourceActorActionRequestRuntime({world: x.world}).bindActor(x.actor, {}), 'already claimed');
+    check(['lifecycle18', 'byte19', 'byte489', 'short494', 'short496', 'byte7d2', 'byte73c'].every(key =>
+      !Object.hasOwn(x.sourceActor, key) && !Object.hasOwn(x.host, key)), 'no ready/action shadows appear on actual actor or Borg');
+  }
+  for (const [owner, key] of [['actor', 'short494'], ['borg', 'lifecycle18'], ['actor', 'maxHp']] as const) {
+    const x = readyLifecycleHydratedControlFixture();
+    check(Reflect.defineProperty(owner === 'actor' ? x.sourceActor : x.host, key, {value: undefined}), 'negative fixture installs the competing owner');
+    rejects(() => x.runRawPrefix(1, 64, 20), 'competing');
+    check(x.stageState.lifecycle18 === 1 && x.readyState.byte19 === 19,
+      `late${owner}/${key} shadow is refused before transition writes rather than adopted as another source owner`);
+  }
+  {
+    const x = actorControlHydratedControlFixture();
+    const ready = createSourceActorReadyTransitionsRuntime({world: x.world, status: x.status, stageBounds: x.stageBounds, control: x.actorControl});
+    ready.bindActor(x.actor, {}); x.actorControl.bindReadyRuntime(ready);
+    const before = x.sourceActor.targetDistance760;
+    rejects(() => x.runRawPrefix(1, 64, 20), 'ready runtime changed after tick admission');
+    check(x.sourceActor.targetDistance760 === before && x.tier.timerFrames === 8,
+      'an admitted tick cannot quietly acquire a new ready owner after its canonical owner graph was captured');
+  }
+  {
+    const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined, {byte7d2: 1, byte73c: 31});
+    const attached = x.joints.getBinding(x.joint).aobj7c, matrix = Array.from(x.worldMatrix);
+    const callbacks = x.receiverTracks.length, moves = x.movementCallCount(), history = x.historyState.previousStepHeight6d4;
+    rejects(() => x.runRawPrefix(1, 64, 20), readyPostActionCall);
+    check(x.receiverTracks.length === callbacks && x.movementCallCount() === moves &&
+      x.worldMatrix.every((value, index) => Object.is(value, matrix[index])) && x.historyState.previousStepHeight6d4 === history,
+      'successful helpers still stop the tick before animation, movement, matrix and history suffixes');
+    const readyValues = Object.values(x.readyState); x.header.mode4a0 = 1;
+    x.updateStatus(); x.control.update(x.actor, 2); x.sourceActor.pos.y = 6; x.updateNormal(); x.refreshAttributes(); x.snapshot();
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.receiverTracks.length > callbacks && x.movementCallCount() === moves + 1 &&
+      x.joints.getBinding(x.joint).aobj7c !== attached && x.historyState.previousStepHeight6d4 === x.sourceActor.stepHeight &&
+      Object.values(x.readyState).every((value, index) => Object.is(value, readyValues[index])) &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === 4,
+      'separately explicit real downstream calls reuse the same graph without replaying ready or action effects');
+  }
+  console.log('[actor-ready-lifecycle-composition] PASS: explicit genuine ready/control/action owners on the same DAT/setup/world/status/Borg/stage/angular/ten-machine/charge/effects graph; real0/1 branches and postready refusal boundaries, signed HP/maxHP and raw color, ordered retained failures, canonical18 next-stage behavior, epochs/ownership and explicit downstream cadence; synthetic offline inputs only, no full tick or production claim');
+}
+
+/** Explicit opt-in decoded rate inputs, seeded on the already-selected owners.
+ * These synthetic tests establish composition, not native actor/RAM hydration,
+ * timer/aura producers, retail execution, full-tick scheduling or activation. */
+interface RateLifecycleHydration {
+  withMatrix?: boolean;
+  initial: Partial<SourceActorRateLifecycleBinding>;
+  borg: Partial<Pick<BorgRuntime, 'slowHitTimer' | 'hasteHitTimer' | 'slowAuraLevel' |
+    'hasteAuraLevel' | 'slowHitLevel' | 'hasteHitLevel'>>;
+}
+function rateLifecycleHydration(): RateLifecycleHydration {
+  return {initial: {field1dd0: 2}, borg: {slowHitTimer: 2, hasteHitTimer: 3,
+    slowAuraLevel: 0, hasteAuraLevel: 1, slowHitLevel: 0, hasteHitLevel: 2}};
+}
+function rateLifecycleHydratedControlFixture(rates = rateLifecycleHydration()) {
+  const supplied = chargeInputHydration(); supplied.actorRates = rates;
+  const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined,
+    {byte7d2: 1, byte73c: 31}, supplied);
+  if (x.actorRates === undefined) throw Error('rate composition requires explicit genuine owner');
+  return Object.assign(x, {actorRates: x.actorRates,
+    rateState: x.actorRates.getActorBinding(x.actor), rateBorg: x.actorRates.getActualBorg(x.actor)});
+}
+type RateLifecycleFixture = ReturnType<typeof rateLifecycleHydratedControlFixture>;
+const ratePostCall = '80059120 reached unsupported source call 80068030';
+function retainRateLifecycleCadence(x: RateLifecycleFixture): () => void {
+  const attached = x.joints.getBinding(x.joint).aobj7c!;
+  const rows: object[] = [x.sourceActor.pos, x.sourceActor.savedGroundPos,
+    x.sourceActor.targetCache5e8, x.sourceActor.aimOrigin518, x.sourceActor.actionSpeedRows, ...x.sourceActor.parts,
+    x.normalState, x.historyState, x.historyState.rotation76, x.historyState.preRotation1d6a, x.historyState.aimOrigin524,
+    x.targetActor, x.targetHeader, x.targetHeader.scale58, x.targetPose, x.targetPose.translation, x.targetPose.quaternion,
+    x.clocks, x.part, x.stream, x.waitControl, x.control.getActorBinding(x.actor), x.start,
+    ...x.cells, ...x.ammoSlots, x.attributeState, x.parameter, x.scalarDescriptor, x.movementState,
+    x.ready.getActorBinding(x.actor), x.joints.getBinding(x.joint), x.joints.getJoint(x.joint), x.feedback.getAObj(attached),
+    ...x.worldStorage.matrices8d4.map(id => x.matrices.getMatrix(id)),
+    ...[x.worldStorage.copy114, x.worldStorage.copy1aa4, x.worldStorage.scratch].map(id => x.matrices.getMatrix(id)),
+    ...x.targetMatrices, ...x.targetCopies];
+  for (const bank of x.mapping.getLayout(x.actor).poses) for (const id of bank) {
+    const pose = x.feedback.getPose(id); rows.push(pose, pose.translation, pose.quaternion);
+  }
+  let node = x.feedback.getAObj(attached).fobjs;
+  while (node !== null) {const row = x.fobjs.getNode(node); rows.push(row); node = row.next00;}
+  const saved = rows.map(record => ({record, keys: Reflect.ownKeys(record)}))
+    .map(row => ({...row, values: row.keys.map(key => Reflect.get(row.record, key))}));
+  const requests = x.requestCalls, ends = x.endCalls, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+  return () => check(saved.every(({record, keys, values}) => Reflect.ownKeys(record).length === keys.length &&
+    keys.every((key, index) => Object.is(Reflect.get(record, key), values[index]))) &&
+    x.requestCalls === requests && x.endCalls === ends && x.receiverTracks.length === callbacks && x.movementCallCount() === moves,
+    'rate/control/action source stores do not implicitly advance real setup, animation, movement, matrices, status ammo or history');
+}
+export function runRateLifecycleHydratedCompositionTests(): void {
+  {
+    const old = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined, {byte7d2: 1, byte73c: 31});
+    check(old.actorRates === undefined && !Object.hasOwn(old, 'actorRates') && old.sourceActor.dt === 13 &&
+      !Object.hasOwn(old.host, 'slowHitTimer') && !Object.hasOwn(old.host, 'hasteAuraLevel'),
+      'historical ready/action graph retains its exact clocks and absent rate fields without implicit hydration');
+    rejects(() => old.runRawPrefix(1, 64, 20), readyPostActionCall);
+    const x = rateLifecycleHydratedControlFixture(), r = x.actorRates;
+    check(r.getActualActor(x.actor) === x.sourceActor && r.getActualBorg(x.actor) === x.host &&
+      r.getWorldBinding(x.actor) === x.header && r.getMappingActor(x.actor) === x.sourceClock &&
+      r.getStatusBinding(x.actor) === x.statusState && x.status.getMappingActor(x.actor) === x.sourceClock &&
+      x.world.getMappingActor(x.actor) === x.sourceClock && x.status.getActualBorg(x.actor) === x.rateBorg &&
+      Reflect.ownKeys(x.rateState).join() === 'field1dd0' && Object.isSealed(x.rateState) &&
+      !Object.hasOwn(x.sourceActor, 'dt') && !Object.hasOwn(x.host, 'freezeFrames'),
+      'rates borrow the actual shared world/mapping/status/Borg and own only1dd0, with no legacy dt/freeze mirror');
+    const retained = retainRateLifecycleCadence(x), before272 = x.statusState.short272!;
+    rejects(() => x.runRawPrefix(1, 64, 20), ratePostCall); retained();
+    checkReady490Stores(x, before272); checkInputPrefixEarlierStores(x); checkChargeConsumedEpoch(x);
+    check(x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2 &&
+      x.sourceActor.aimRateScale === 1.875 && x.sourceActor.timescale === 1.875 && x.sourceClock.timestep1dc8 === 1.875 &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === 4,
+      'real ready returned1 and action stores precede actual5a378 timers,768/5f4/1dc8 writes and exact next68030 refusal');
+    const rates = [x.rateBorg.slowHitTimer, x.rateBorg.hasteHitTimer, x.sourceActor.aimRateScale,
+      x.sourceActor.timescale, x.sourceClock.timestep1dc8];
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check([x.rateBorg.slowHitTimer, x.rateBorg.hasteHitTimer, x.sourceActor.aimRateScale,
+      x.sourceActor.timescale, x.sourceClock.timestep1dc8].every((value, index) => Object.is(value, rates[index])),
+      'consumed input epoch cannot replay the new timer or rate stores');
+
+    // Separate explicit later source calls consume the values just written.
+    // No fixture assigns/copies rates into a replacement animation/status clock.
+    x.sourceActor.stateTimer = 8; x.statusState.field690 = 8; x.statusState.field69c = 8;
+    x.cells[2].timer = 8; x.host.downResetDelay = 8;
+    x.updateStatus();
+    check(x.sourceActor.stateTimer === 6.125 && x.statusState.field690 === 6.125 && x.statusState.field69c === 6.125 &&
+      x.cells[2].timer === 6.125 && x.host.downResetDelay === 7.5 && !Object.hasOwn(x.sourceActor, 'dt'),
+      'real5568c/6dcc0 consume actual768 and mapping1dc8 while canonical1dcc independently drives host delay');
+    const attached = x.joints.getBinding(x.joint).aobj7c!, clock = x.feedback.getAObj(attached);
+    const elapsed = x.clocks.elapsed08, callbacks = x.receiverTracks.length;
+    x.dispatch.updatePart(x.actor, 1);
+    check(x.clocks.elapsed08 === Math.fround(elapsed + 1.875) && clock.rate === 1.875 &&
+      x.receiverTracks.length > callbacks && x.part.frame0c === clock.frame,
+      'real48648 playback and JObj/AObj/FObj work read fresh canonical mapping timestep, not legacy dt or a test playback substitute');
+    x.header.mode4a0 = 1; x.updateNormal(); x.sourceActor.stepHeight = -777;
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.sourceActor.stepHeight >= 0 &&
+      x.ready.getActorBinding(x.actor).movement6d8 === 1 && x.targetMatrices[1]!.every((v, i) => Object.is(v, x.worldMatrix[i])) &&
+      x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2,
+      'explicit genuine matrix/setup/attachment/movement consumers reuse the graph without replaying rate lifecycle');
+    // Existing host physics consumer witness only, not a binary32 instruction
+    // oracle or a claim that the refused68030 suffix has run.
+    x.sourceActor.hSpeed = 0; x.sourceActor.yVel = 4; x.sourceActor.tierScale = 2;
+    const y = x.sourceActor.pos.y;
+    check(integratePosition(0, x.sourceActor, 0) === 3.75 && x.sourceActor.pos.y === y + 15 &&
+      !Object.hasOwn(x.sourceActor, 'dt'), 'existing separate position consumer sees source-written5f4 directly without a dt mirror');
+  }
+  {
+    const x = rateLifecycleHydratedControlFixture(); rejects(() => x.runRawPrefix(1, 64, 20), ratePostCall);
+    x.statusState.byte71c = 2; x.rateState.field1dd0 = NaN; x.statusState.field1dcc = NaN;
+    const retained = retainRateLifecycleCadence(x);
+    x.actorRates.updateActor(x.actor); retained();
+    check(x.rateBorg.slowHitTimer === 0 && x.rateBorg.slowHitLevel === 0 && x.rateBorg.hasteHitTimer === 1 &&
+      x.statusState.byte71c === 1 && x.sourceActor.aimRateScale === 1.875 &&
+      x.sourceActor.timescale === Math.fround(0.03) && x.sourceClock.timestep1dc8 === Math.fround(0.03),
+      'fresh timer expiration and freeze2->1 retain768 but override5f4/1dc8 without reading bypassed1dd0/1dcc');
+    x.rateState.field1dd0 = 3; x.statusState.field1dcc = 0.5;
+    x.actorRates.updateActor(x.actor); retained();
+    check(x.rateBorg.hasteHitTimer === 0 && x.rateBorg.hasteHitLevel === 0 && x.statusState.byte71c === 0 &&
+      x.sourceActor.aimRateScale === 1.25 && x.sourceActor.timescale === 1.25 && x.sourceClock.timestep1dc8 === 1.875,
+      'freeze1->0 restores fresh products after real haste expiry rather than retaining previous rate or cached clocks');
+    x.header.mode4a1 = 255; x.rateBorg.hasteAuraLevel = NaN; x.rateBorg.slowHitTimer = NaN;
+    x.statusState.byte71c = NaN; x.rateState.field1dd0 = NaN; x.statusState.field1dcc = NaN;
+    x.actorRates.updateActor(x.actor); retained();
+    check(x.sourceActor.aimRateScale === 1 && x.sourceActor.timescale === 1 && x.sourceClock.timestep1dc8 === 1 &&
+      Number.isNaN(x.statusState.byte71c) && Number.isNaN(x.rateBorg.slowHitTimer),
+      'current signed nonzero4a1 resets all three real rates without reading bypassed timers, tables or clocks');
+  }
+  for (const fault of ['index', 'readonly-timescale', 'readonly-timestep', 'missing1dd0'] as const) {
+    const supplied = rateLifecycleHydration();
+    if (fault === 'index') supplied.borg.slowAuraLevel = 4;
+    if (fault === 'missing1dd0') supplied.initial = {};
+    const x = rateLifecycleHydratedControlFixture(supplied), initialTimescale = x.sourceActor.timescale,
+      initialTimestep = x.sourceClock.timestep1dc8;
+    if (fault === 'readonly-timescale') Object.defineProperty(x.sourceActor, 'timescale', {writable: false});
+    if (fault === 'readonly-timestep') Object.defineProperty(x.sourceClock, 'timestep1dc8', {writable: false});
+    const retained = retainRateLifecycleCadence(x), before272 = x.statusState.short272!;
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'index' ? '8005a4d0 unsupported 802dd57c table index 4' :
+      fault === 'readonly-timescale' ? 'timescale: non-writable' : fault === 'readonly-timestep' ? 'timestep1dc8: non-writable' : 'field1dd0');
+    retained(); checkReady490Stores(x, before272); checkChargeConsumedEpoch(x);
+    check(x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2 && x.sourceActor.aimRateScale === 1.875 &&
+      x.sourceActor.timescale === (fault === 'index' || fault === 'readonly-timescale' ? initialTimescale : 1.875) &&
+      x.sourceClock.timestep1dc8 === initialTimestep,
+      `${fault} retains ordered real ready/action/rate prefix while later clock and every downstream consumer remain unchanged`);
+  }
+  {
+    const x = rateLifecycleHydratedControlFixture();
+    Object.defineProperty(x.sourceActor, 'dt', {value: 13});
+    const retained = retainRateLifecycleCadence(x), before272 = x.statusState.short272!;
+    rejects(() => x.runRawPrefix(1, 64, 20), 'dt: competing'); retained();
+    checkReady490Stores(x, before272); checkChargeConsumedEpoch(x);
+    check(x.rateBorg.slowHitTimer === 2 && x.rateBorg.hasteHitTimer === 3 &&
+      x.sourceActor.aimRateScale === 0.5 && x.sourceClock.timestep1dc8 === 2,
+      'late dt ownership conflict refuses at the reached rate boundary after earlier genuine ready/action stores, before rate writes');
+  }
+  {
+    const x = rateLifecycleHydratedControlFixture();
+    rejects(() => createSourceActorTickPrefixRuntime({world: x.world, gauges: x.gauges,
+      actorRates: {...x.actorRates}}), 'genuine');
+    rejects(() => createSourceActorRateLifecycleRuntime({world: x.world, mapping: x.mapping, status: x.status})
+      .bindActor(x.actor, {}), 'already claimed');
+    x.header.mode4a0 = 2;
+    const retained = retainRateLifecycleCadence(x);
+    rejects(() => x.actorRates.updateActor(x.actor), '8005a3a4 reached unsupported source pointer4a4 load'); retained();
+    check(x.rateBorg.slowHitTimer === 2 && x.rateBorg.hasteHitTimer === 3 && x.sourceActor.aimRateScale === 0.5 &&
+      x.sourceActor.timescale === 1 && x.sourceClock.timestep1dc8 === 2,
+      'current mode2 cannot borrow a coincidental matrix link or invent a linked actor rate owner');
+  }
+  {
+    const x = rateLifecycleHydratedControlFixture({...rateLifecycleHydration(), withMatrix: true});
+    x.header.mode4a0 = 2; x.normalState.link4a4 = x.actor;
+    x.sourceActor.aimRateScale = 0.75; x.sourceActor.timescale = 1.25; x.sourceClock.timestep1dc8 = 2.5;
+    x.rateBorg.slowHitTimer = NaN; x.rateBorg.hasteAuraLevel = NaN;
+    x.statusState.byte71c = NaN; x.rateState.field1dd0 = NaN;
+    const retained = retainRateLifecycleCadence(x);
+    check(x.actorRates.getMatrixBinding(x.actor) === x.normalState && x.normal.getActualActor(x.actor) === x.sourceActor &&
+      x.normal.getMappingActor(x.actor) === x.sourceClock && x.normal.getWorldBinding(x.actor) === x.header,
+      'mode2 uses the existing genuine normal-matrix4a4 owner and the same world/actual/mapping graph');
+    x.actorRates.updateActor(x.actor); retained();
+    check(x.sourceActor.aimRateScale === 0.75 && x.sourceActor.timescale === 1.25 && x.sourceClock.timestep1dc8 === 2.5 &&
+      Number.isNaN(x.rateBorg.slowHitTimer) && Number.isNaN(x.statusState.byte71c),
+      'genuine self4a4 copies current distinct768/5f4/1dc8 without reading bypassed status/base/timer inputs or supplying defaults');
+    Object.defineProperty(x.sourceActor, 'timescale', {writable: false});
+    rejects(() => x.actorRates.updateActor(x.actor), 'timescale: non-writable'); retained();
+    check(x.sourceActor.aimRateScale === 0.75 && x.sourceActor.timescale === 1.25 && x.sourceClock.timestep1dc8 === 2.5,
+      'self-copy still executes ordered768 then5f4 stores and refuses readonly5f4 before the final mapping clock copy');
+  }
+  {
+    // A transparent source-owner test adapter exposes only existing graph
+    // records; switching its Borg result later must not silently rebind rates.
+    const x = readyLifecycleHydratedControlFixture(), other = readyLifecycleHydratedControlFixture();
+    delete (x.sourceActor as Partial<typeof x.sourceActor>).dt;
+    Object.assign(x.host, rateLifecycleHydration().borg);
+    let borrowed = x.status.getActualBorg(x.actor);
+    const rate = createSourceActorRateLifecycleRuntime({world: x.world, mapping: x.mapping,
+      status: {...x.status, getActualBorg() {return borrowed;}}});
+    rate.bindActor(x.actor, {field1dd0: 2}); borrowed = other.status.getActualBorg(other.actor);
+    rejects(() => rate.updateActor(x.actor), 'actual Borg: owner changed');
+    check(rate.getActualBorg(x.actor) === x.host && rate.getActualBorg(x.actor).slowHitTimer === 2 &&
+      x.sourceActor.aimRateScale === 0.5 && x.sourceClock.timestep1dc8 === 2,
+      'stale borrowed Borg is refused rather than adopted, before any reached timer or scalar write');
+  }
+  console.log('[actor-rate-lifecycle-composition] PASS: genuine5a378 opt-in on the full DAT/setup/world/status/gauge/stage/angular/ten-machine/charge/control/ready/action graph; canonical rate/timer/freeze owners, exact68030 next boundary, retained failures and epochs; explicit source status/AObj/setup/movement consumers and separate existing host5f4 witness, synthetic offline only/no producer/RAM/fulltick/production claim');
+}
+
+/** The final admitted59068 callee is opt-in. The explicit D9/1829 bytes are
+ * seeded on the existing matrix global before charge binds, not substituted
+ * after admission. All other inputs come from the existing real owner graph. */
+function ceilingLifecycleHydratedControlFixture(ceiling: NonNullable<ChargeInputHydration['ceiling']> = {byteD9: 0},
+  tierHydration?: TierLifecycleHydration) {
+  const supplied = chargeInputHydration(); supplied.actorRates = rateLifecycleHydration(); supplied.ceiling = ceiling;
+  if (tierHydration !== undefined) {supplied.tierHydration = tierHydration; supplied.actorRates.withMatrix = true;}
+  const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(), undefined,
+    {byte7d2: 1, byte73c: 31}, supplied);
+  if (x.actorRates === undefined || x.ceiling === undefined) throw Error('ceiling composition requires genuine rates and ceiling');
+  return Object.assign(x, {actorRates: x.actorRates, ceiling: x.ceiling,
+    rateState: x.actorRates.getActorBinding(x.actor), rateBorg: x.actorRates.getActualBorg(x.actor),
+    matchGlobals: x.ceiling.getMatchGlobals()});
+}
+type CeilingLifecycleFixture = ReturnType<typeof ceilingLifecycleHydratedControlFixture>;
+function retainCeilingLifecycleCadence(x: CeilingLifecycleFixture): () => void {
+  const attached = x.joints.getBinding(x.joint).aobj7c!;
+  const rows: object[] = [x.sourceActor.savedGroundPos, x.sourceActor.targetCache5e8, x.sourceActor.aimOrigin518,
+    x.sourceActor.actionSpeedRows, ...x.sourceActor.parts, x.normalState, x.historyState,
+    x.historyState.rotation76, x.historyState.preRotation1d6a, x.historyState.aimOrigin524,
+    x.targetActor, x.targetHeader, x.targetHeader.scale58, x.targetPose, x.targetPose.translation, x.targetPose.quaternion,
+    x.clocks, x.part, x.stream, x.waitControl, x.control.getActorBinding(x.actor), x.start,
+    ...x.cells, ...x.ammoSlots, x.attributeState, x.parameter, x.scalarDescriptor, x.movementState,
+    x.ready.getActorBinding(x.actor), x.joints.getBinding(x.joint), x.joints.getJoint(x.joint), x.feedback.getAObj(attached),
+    ...x.worldStorage.matrices8d4.map(id => x.matrices.getMatrix(id)),
+    ...[x.worldStorage.copy114, x.worldStorage.copy1aa4, x.worldStorage.scratch].map(id => x.matrices.getMatrix(id)),
+    ...x.targetMatrices, ...x.targetCopies];
+  for (const bank of x.mapping.getLayout(x.actor).poses) for (const id of bank) {
+    const pose = x.feedback.getPose(id); rows.push(pose, pose.translation, pose.quaternion);
+  }
+  let node = x.feedback.getAObj(attached).fobjs;
+  while (node !== null) {const row = x.fobjs.getNode(node); rows.push(row); node = row.next00;}
+  const saved = rows.map(record => ({record, keys: Reflect.ownKeys(record)}))
+    .map(row => ({...row, values: row.keys.map(key => Reflect.get(row.record, key))}));
+  const requests = x.requestCalls, ends = x.endCalls, callbacks = x.receiverTracks.length, moves = x.movementCallCount();
+  const position = x.sourceActor.pos, px = position.x, pz = position.z, hover = x.sourceActor.hoverOffset668;
+  return () => check(saved.every(({record, keys, values}) => Reflect.ownKeys(record).length === keys.length &&
+    keys.every((key, index) => Object.is(Reflect.get(record, key), values[index]))) &&
+    x.requestCalls === requests && x.endCalls === ends && x.receiverTracks.length === callbacks && x.movementCallCount() === moves &&
+    x.sourceActor.pos === position && Object.is(position.x, px) && Object.is(position.z, pz) && Object.is(x.sourceActor.hoverOffset668, hover),
+    'completed bounded59068 retains actual DAT/setup/animation/movement/matrix/linked/history cadence and untouched position axes/hover producer');
+}
+export function runCeilingLifecycleHydratedCompositionTests(): void {
+  {
+    const old = rateLifecycleHydratedControlFixture();
+    check(old.ceiling === undefined && !Object.hasOwn(old, 'ceiling') &&
+      Reflect.ownKeys(old.globals).join() === 'maskD2' && old.chargeGlobal !== old.globals &&
+      !Object.hasOwn(old.chargeGlobal, 'byteD9'),
+      'historical rate fixture retains its absent ceiling and original separate one-byte charge global without new defaults');
+    rejects(() => old.runRawPrefix(1, 64, 20), ratePostCall);
+
+    const x = ceilingLifecycleHydratedControlFixture(), c = x.ceiling, a = x.sourceActor;
+    check(c.getActualActor(x.actor) === a && c.getWorldBinding(x.actor) === x.header &&
+      c.getMappingActor(x.actor) === x.sourceClock && c.getMatrixBinding(x.actor) === x.normalState &&
+      c.getMatchGlobals() === x.globals && x.normal.getGlobals() === x.globals && x.chargeGlobal === x.globals &&
+      x.inputPrefix.getChargeRuntime() === x.charge && x.charge.getGlobal() === x.globals &&
+      c.getTerrainGlobals() === x.terrain && x.query.getTerrainGlobals() === x.terrain &&
+      x.stageBounds.getTerrainGlobals() === x.terrain && Reflect.ownKeys(x.globals).join() === 'maskD2,byteD9,byte1829' &&
+      a.hoverOffset668 === 6 && x.movementCallCount() === 1,
+      'ceiling borrows genuine shared actor/world/mapping/matrix/stage owners, actual55dcc hover and one80433934 record for matrix/charge/ceiling');
+    a.pos.y = 1002; a.yVel = 7;
+    const retained = retainCeilingLifecycleCadence(x), before272 = x.statusState.short272!;
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'genuine admitted59068 reaches its own void return after68030 returns1');
+    retained(); checkReady490Stores(x, before272); checkInputPrefixEarlierStores(x); checkChargeConsumedEpoch(x);
+    check(a.pos.y === 994 && Object.is(a.yVel, 0) && a.savedGroundPos.y === 2 &&
+      a.hoverOffset668 === 6 && x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2 &&
+      a.aimRateScale === 1.875 && a.timescale === 1.875 && x.sourceClock.timestep1dc8 === 1.875 &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === 4,
+      'ready1 skips only source-dispatched branch, then real action/rates/ceiling execute in order with no implicit attribute refresh or history update');
+    const values = [a.pos.y, a.yVel, a.targetDistance760, a.horizontalDistance764, x.tier.timerFrames,
+      x.rateBorg.slowHitTimer, x.rateBorg.hasteHitTimer, ...Object.values(x.chargeState)];
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check([a.pos.y, a.yVel, a.targetDistance760, a.horizontalDistance764, x.tier.timerFrames,
+      x.rateBorg.slowHitTimer, x.rateBorg.hasteHitTimer, ...Object.values(x.chargeState)]
+      .every((value, index) => Object.is(value, values[index])), 'successful void completion consumes raw epoch exactly as refusals do');
+
+    // These remain separate source calls, never an invented outer-frame tail.
+    a.stateTimer = 8; x.statusState.field690 = 8; x.cells[2].timer = 8; x.updateStatus();
+    check(a.stateTimer === 6.125 && x.statusState.field690 === 6.125 && x.cells[2].timer === 6.125 &&
+      a.savedGroundPos.y === 2, 'explicit later status reads source rates without taking history or rerunning ceiling');
+    const attached = x.joints.getBinding(x.joint).aobj7c!, clock = x.feedback.getAObj(attached);
+    const elapsed = x.clocks.elapsed08, callbacks = x.receiverTracks.length;
+    x.dispatch.updatePart(x.actor, 1);
+    check(x.clocks.elapsed08 === Math.fround(elapsed + 1.875) && clock.rate === 1.875 &&
+      x.receiverTracks.length > callbacks && a.pos.y === 994 && x.worldMatrix[7] === 95,
+      'only explicit animation updates the real AObj/FObj graph while retained matrices still precede the ceiling position');
+    x.header.mode4a0 = 1; x.updateNormal();
+    check(x.worldMatrix[7]! > 900 && x.targetMatrices[1]!.every((value, index) => Object.is(value, x.worldMatrix[index])) &&
+      x.targetActor.pos.y === -99 && a.savedGroundPos.y === 2,
+      'explicit normal-matrix call consumes clamped actualY and copies linked matrices without copying actor/history state');
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && a.pos.y === 994 && a.savedGroundPos.y === 2 &&
+      x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2,
+      'separate real setup replaces animation and consumes retained matrices without replaying the completed59068');
+    x.snapshot();
+    check(a.savedGroundPos.y === 994 && x.historyState.previousStepHeight6d4 === a.stepHeight && x.tier.timerFrames === 7,
+      'explicit5685c alone copies the new ceiling position into actual saved30');
+  }
+  {
+    const x = ceilingLifecycleHydratedControlFixture(), a = x.sourceActor;
+    a.pos.y = 1002; a.yVel = 7; check(x.runRawPrefix(1, 64, 20) === undefined, 'first source epoch completes');
+    a.pos.y = 1100; a.yVel = 9;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), actorControlTableBoundary(9)); retained();
+    check(x.actorControlState.byte490 === 4 && x.actorControlState.short49a === 0 && x.tier.timerFrames === 6 &&
+      x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2 && a.pos.y === 1100 && a.yVel === 9,
+      'next genuine control0 epoch still refuses unresolved802d3300 and cannot use prior ready1 to skip dispatch or fake another completion');
+    const distances = [a.targetDistance760, a.horizontalDistance764];
+    rejects(() => x.runRawPrefix(2, 200, 100), 'epoch');
+    check(a.targetDistance760 === distances[0] && a.horizontalDistance764 === distances[1] && x.tier.timerFrames === 6,
+      'reentry after the next refused source epoch does not replay ingress or the earlier completed ceiling');
+  }
+  for (const byteD9 of [1, 128, 255]) {
+    const x = ceilingLifecycleHydratedControlFixture({byteD9}), a = x.sourceActor;
+    a.pos.y = 1002; a.yVel = 7; a.hoverOffset668 = NaN;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && a.pos.y === 1002 && a.yVel === 7,
+      'nonzero actual matchD9 returns0 before missing downstream float input and59068 still returnsvoid');
+    retained(); checkChargeConsumedEpoch(x);
+  }
+  for (const supportContact1db of [1, 128, 255]) {
+    const x = ceilingLifecycleHydratedControlFixture(), a = x.sourceActor;
+    a.supportContact1db = supportContact1db; a.hoverOffset668 = NaN; a.yVel = NaN; x.terrain.upper34 = NaN;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.ceiling.updateActor(x.actor) === 0 && Number.isNaN(a.yVel),
+      'direct genuine68030 signed nonzero1db gate returns0 without reading later position/hover/upper/velocity'); retained();
+  }
+  for (const [y, upper, velocity, saved, expected, result] of [
+    [94, 100, NaN, NaN, 94, 0], [93, 100, NaN, NaN, 93, 0],
+    [95, 100, 0, NaN, 95, 0], [95, 100, -1, NaN, 95, 0],
+    [95, 100, 7, 2, 94, 1], [95, 100, 7, 97, 97, 1],
+  ] as const) {
+    const x = ceilingLifecycleHydratedControlFixture(), a = x.sourceActor;
+    a.pos.y = y; a.yVel = velocity; a.savedGroundPos.y = saved; x.terrain.upper34 = upper;
+    // The scalar68030 tail has no grid query. Deliberately unusable layers
+    // catch an accidental floorSnap/grid substitute while stage globals remain.
+    for (const key of ['floor1c', 'ceiling20', 'ceiling24']) Object.defineProperty(x.terrain, key, {value: null});
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.ceiling.updateActor(x.actor) === result && a.pos.y === expected &&
+      Object.is(a.yVel, result === 1 ? 0 : velocity),
+      'native0/1 uses strict raisedY/positive-velocity gates and max(saved30, shared upper34-actual55dcc hover), never terrain-grid inference'); retained();
+  }
+  {
+    const x = ceilingLifecycleHydratedControlFixture(), a = x.sourceActor;
+    a.pos.y = 100; a.yVel = 7; x.terrain.upper34 = 100;
+    x.scalarDescriptor.field4c = 4; x.refreshAttributes();
+    check(a.hoverOffset668 === 8 && x.ceiling.updateActor(x.actor) === 1 && a.pos.y === 92,
+      'explicit real55dcc changes actual668 consumed directly by68030, without a copied ceiling-height field');
+    x.terrain.upper34 = 200; a.pos.y = 195; a.yVel = 7;
+    check(x.ceiling.updateActor(x.actor) === 1 && a.pos.y === 192 && x.query.getTerrainGlobals().upper34 === 200,
+      'next helper reads live upper34 on the same stage/query record, not its admission-time value');
+  }
+  {
+    const x = ceilingLifecycleHydratedControlFixture({byteD9: 255}), a = x.sourceActor, match = x.matchGlobals;
+    match.byte1829 = 1; a.pos.y = 1002; a.yVel = 7;
+    check(x.runRawPrefix(1, 64, 20) === undefined && a.pos.y === 1002 && a.yVel === 7,
+      'separate live match1829 andD9 gates both bypass their own source work during completed59068');
+    chargeSlot(x, 0); a.statusWord5b4 = 0; x.chargeState.field63c = 4;
+    x.charge.updateActor(x.actor);
+    check(x.chargeState.field63c === 4, 'same match1829 remains a fresh charge gate after59068 completion');
+    match.byte1829 = 0; x.charge.updateActor(x.actor);
+    check(x.chargeState.field63c === 0 && x.chargeState.field648 === 16.25 && a.pos.y === 1002 && a.yVel === 7,
+      'explicit charge observes changed1829 and fresh source768 without invoking ceiling or matrices');
+    match.byteD9 = 0;
+    check(x.ceiling.updateActor(x.actor) === 1 && a.pos.y === 994 && Object.is(a.yVel, 0) && x.chargeState.field648 === 16.25,
+      'explicit ceiling observes changedD9 on the same owner without invoking charge');
+    x.updateStatus(); // Actual status clears prior yaw before the bounded matrix consumer.
+    x.header.mode4a0 = 1; x.metadata.getActorBinding(x.actor).byte1d98 = 1; a.visibilityBit = 2; match.maskD2 = 2;
+    x.updateNormal();
+    const copied = [...x.targetMatrices[1]!]; match.maskD2 = 0;
+    rejects(x.updateNormal, '47904 active body is unsupported');
+    check(x.targetMatrices[1]!.every((value, index) => Object.is(value, copied[index])) &&
+      x.normal.getGlobals() === match && x.charge.getGlobal() === match && x.ceiling.getMatchGlobals() === match,
+      'later explicit matrix reads changedD2 from that very80433934 owner and refuses before linked-copy suffix, without replacing match records');
+  }
+  for (const fault of ['missingD9', 'missingHover', 'readonlyVelocity', 'invalidSaved', 'readonlyY'] as const) {
+    const x = ceilingLifecycleHydratedControlFixture(fault === 'missingD9' ? {} : {byteD9: 0}), a = x.sourceActor;
+    a.pos.y = 1002; a.yVel = 7;
+    if (fault === 'missingHover') delete (a as Partial<typeof a>).hoverOffset668;
+    if (fault === 'readonlyVelocity') Object.defineProperty(a, 'yVel', {writable: false});
+    if (fault === 'invalidSaved') a.savedGroundPos.y = NaN;
+    if (fault === 'readonlyY') Object.defineProperty(a.pos, 'y', {writable: false});
+    const retained = retainCeilingLifecycleCadence(x), before272 = x.statusState.short272!;
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'missingD9' ? 'byteD9: own data' :
+      fault === 'missingHover' ? 'hoverOffset668: own data' : fault === 'readonlyVelocity' ? 'yVel: non-writable' :
+      fault === 'readonlyY' ? 'y: non-writable' : 'y: finite exact');
+    retained(); checkReady490Stores(x, before272); checkInputPrefixEarlierStores(x); checkChargeConsumedEpoch(x);
+    check(a.pos.y === 1002 && Object.is(a.yVel, fault === 'invalidSaved' || fault === 'readonlyY' ? 0 : 7) &&
+      x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2 && x.sourceClock.timestep1dc8 === 1.875,
+      `${fault} preserves real ready/action/rate prefix and only the source-ordered ceiling writes completed before refusal`);
+  }
+  console.log('[actor-ceiling-lifecycle-composition] PASS: actual68030/8b290 on genuine DAT/setup/world/status/gauge/stage/angular/ten-machine/charge/control/ready/action/rate graph; one retained80433934 D2/D9/1829 owner, shared stage upper34 and actual55dcc hover668, native0/1 and genuinely completed bounded59068 void-return branch; clamp/bypass/fresh reads/partial failures, consumed and next refusing epochs; later source status/setup/animation/matrix/history calls remain explicit; synthetic offline only, no outer-frame/full-dispatch/producer/RAM/replay/production claim');
+}
+
+/** Synthetic missing source inputs, never new defaults on historical fixtures.
+ * byteA3 is seeded while the actual attribute registry record is created;
+ * byte1f is seeded on the existing matrix global before charge captures it. */
+interface TierLifecycleHydration {
+  initial: Partial<SourceActorTierLifecycleBinding>;
+  parameter: Partial<{byteA3: number}>;
+  global: Partial<{byte1f: number}>;
+}
+function tierLifecycleHydration(selector = 0): TierLifecycleHydration {
+  return {initial: {signed74b: -7, signed74c: 15, signed74d: 17}, parameter: {byteA3: selector}, global: {byte1f: 0}};
+}
+function tierLifecycleHydratedControlFixture(supplied = tierLifecycleHydration()) {
+  const x = ceilingLifecycleHydratedControlFixture({byteD9: 0}, supplied);
+  const tierSources = {world: x.world, status: x.status, attributes: x.attributes,
+    gauges: x.gauges, rates: x.actorRates, matrix: x.normal};
+  const tiers = createSourceActorTierLifecycleRuntime(tierSources);
+  tiers.bindActor(x.actor, supplied.initial);
+  // This is intentionally after59068 admission but before invocation. The
+  // gauge/row dependency is cyclic; no successful callee is replaced by a stub.
+  x.gauges.bindTierLifecycleSources(x.actor, tiers);
+  x.tier.timerFrames = 1; x.tier.deltaAccum = -1; x.sourceActor.tierScale = 7;
+  return Object.assign(x, {tiers, tierSources, tierState: tiers.getActorBinding(x.actor),
+    refreshTier: () => tiers.refreshActor(x.actor)});
+}
+type TierLifecycleFixture = ReturnType<typeof tierLifecycleHydratedControlFixture>;
+function tierFloatBits(value: number): number {
+  const view = new DataView(new ArrayBuffer(4)); view.setFloat32(0, value, false); return view.getUint32(0, false);
+}
+function tierFloatFromBits(word: number): number {
+  const view = new DataView(new ArrayBuffer(4)); view.setUint32(0, word, false); return view.getFloat32(0, false);
+}
+function checkTierRow(x: TierLifecycleFixture, expected: readonly number[], message: string): void {
+  const actual = [x.gaugeState.targetScaleB8!, x.rateState.field1dd0!, x.sourceActor.tierScale];
+  check(actual.every((value, index) => Object.is(value, Math.fround(value)) && tierFloatBits(value) === expected[index]), message);
+}
+export function runTierLifecycleHydratedCompositionTests(): void {
+  {
+    const old = ceilingLifecycleHydratedControlFixture();
+    check(old.gauges.getTierLifecycleRuntime(old.actor) === undefined && !Object.hasOwn(old.parameter, 'byteA3') &&
+      !Object.hasOwn(old.matchGlobals, 'byte1f') && Reflect.ownKeys(old.tier).join() === 'tier,deltaAccum,timerFrames',
+      'historical completed ceiling graph retains absent tier callee/selector/match byte without implicit hydration');
+    old.tier.timerFrames = 1;
+    rejects(() => old.runRawPrefix(1, 64, 20), '8005baf4 reached unsupported source call 8006817c');
+    check(old.tier.timerFrames === 0 && old.tier.deltaAccum === 5 && old.tier.tier === 16 && old.rateState.field1dd0 === 2,
+      'historical expiry still stops at the exact6817c call after750 decrement, before74e clear or row stores');
+  }
+  for (const selector of [0, 1]) {
+    const x = tierLifecycleHydratedControlFixture(tierLifecycleHydration(selector)), t = x.tiers, a = x.sourceActor;
+    const sizeWord = selector === 0 ? 0x3fb33333 : 0x3f99999a;
+    check(t.getActualActor(x.actor) === a && t.getActualBorg(x.actor) === x.host &&
+      t.getWorldBinding(x.actor) === x.header && t.getMappingActor(x.actor) === x.sourceClock &&
+      t.getStatusBinding(x.actor) === x.statusState && t.getAttributeBinding(x.actor) === x.attributeState &&
+      t.getGaugeBinding(x.actor) === x.gaugeState && t.getRateBinding(x.actor) === x.rateState &&
+      t.getMatrixBinding(x.actor) === x.normalState && t.getTierOwner(x.actor) === x.tier &&
+      t.getMatchGlobals() === x.matchGlobals && x.normal.getGlobals() === x.matchGlobals &&
+      x.charge.getGlobal() === x.matchGlobals && x.ceiling.getMatchGlobals() === x.matchGlobals &&
+      x.attributes.getParameterDescriptor(x.attributeState.parameter4ac!) === x.parameter &&
+      x.parameter.byteA3 === selector && Object.isSealed(x.parameter) && Object.isSealed(x.tierState) &&
+      Reflect.ownKeys(x.tierState).join() === 'signed74b,signed74c,signed74d' &&
+      x.gauges.getTierLifecycleRuntime(x.actor) === t,
+      'genuine tier callee borrows the same actual actor/Borg/74a/4ac/gauge/rate/matrix and shared match owner, with only absent74b/c/d storage');
+    const retained = retainCeilingLifecycleCadence(x), before272 = x.statusState.short272!;
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'real expiry6817c/6826c returns into5bab8 and completes the admitted59068 branch');
+    retained(); checkReady490Stores(x, before272); checkChargeConsumedEpoch(x);
+    checkTierRow(x, [sizeWord, 0x3f7ae148, sizeWord], 'authenticated selector-specific row17 words reach actualB8/1dd0/5f8 in the completed graph');
+    const clock = Math.fround(tierFloatFromBits(0x3f7ae148) * 0.9375);
+    check(x.tier.tier === 17 && x.tierState.signed74b === 17 && x.tier.timerFrames === 0 && x.tier.deltaAccum === 0 &&
+      a.targetDistance760 === 32 && a.horizontalDistance764 === 10 && a.aimRateScale === 1.875 && a.timescale === 1.875 &&
+      x.sourceClock.timestep1dc8 === clock && x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2 &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === 4 && a.hoverOffset668 === 6,
+      'real negated74e increments actual74a, clears750/74e after void return, then actual5a378 consumes new1dd0 without copying source clocks');
+    checkScaleStores(x, tierFloatFromBits(0x3ff9999a), 'same5bab8 immediately interpolates downward toward newly selectedB8 and copies actual scale owners');
+    const completed = [x.tier.tier, x.tierState.signed74b, a.modelScale, a.timescale, x.sourceClock.timestep1dc8];
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check([x.tier.tier, x.tierState.signed74b, a.modelScale, a.timescale, x.sourceClock.timestep1dc8]
+      .every((value, index) => Object.is(value, completed[index])), 'completed epoch cannot replay expiry, interpolation or source rates');
+
+    // Each consumer is an explicit separate call. No row refresh schedules it.
+    a.stateTimer = 8; x.statusState.field690 = 8; x.cells[2].timer = 8; x.updateStatus();
+    check(a.stateTimer === Math.fround(8 - clock) && x.statusState.field690 === 6.125 &&
+      x.cells[2].timer === 6.125 && x.worldMatrix[7] === 95,
+      'later genuine status consumes distinct new1dc8 and existing768 without implicit matrix refresh');
+    const attached = x.joints.getBinding(x.joint).aobj7c!, aobj = x.feedback.getAObj(attached);
+    const elapsed = x.clocks.elapsed08, callbacks = x.receiverTracks.length;
+    x.dispatch.updatePart(x.actor, 1);
+    check(aobj.rate === clock && x.clocks.elapsed08 === Math.fround(elapsed + clock) &&
+      x.receiverTracks.length > callbacks && x.worldMatrix[7] === 95,
+      'explicit real animation reads source-produced mapping clock through retained JObj/AObj/FObj owners');
+    x.header.mode4a0 = 1; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, index) => Object.is(value, x.worldMatrix[index])) &&
+      x.rootMatrix[0] === a.modelScale && a.savedGroundPos.y === 2,
+      'explicit matrix consumer sees fresh model scale and copies genuine linked matrices, retaining history');
+    const moves = x.movementCallCount(); x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && a.hoverOffset668 === Math.fround(3 * a.modelScale) &&
+      x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === a.pos.y &&
+      x.tier.timerFrames === 0 && x.tier.deltaAccum === 0,
+      'only explicit attribute/movement/history consumers see scale changes without replaying tier expiry');
+    a.hSpeed = 0; a.yVel = 4; const y = a.pos.y, velocityScale = 1.875 * tierFloatFromBits(sizeWord);
+    check(integratePosition(0, a, 0) === velocityScale && a.pos.y === y + 4 * velocityScale &&
+      a.tierScale === tierFloatFromBits(sizeWord),
+      'existing separate host position consumer uses source-written5f8 directly; this is not a binary32 physics oracle or an implicit59068 tail');
+  }
+  {
+    const x = tierLifecycleHydratedControlFixture(); x.runRawPrefix(1, 64, 20);
+    // Poison data that only another6817c/6826c call would read. Timer0 skips it.
+    x.parameter.byteA3 = 255; x.tierState.signed74c = NaN; x.matchGlobals.byte1f = NaN;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), actorControlTableBoundary(9)); retained();
+    check(x.tier.tier === 17 && x.tierState.signed74b === 17 && x.tier.timerFrames === 0 && x.tier.deltaAccum === 0 &&
+      x.sourceActor.modelScale === tierFloatFromBits(0x3ff33334) && x.rateBorg.slowHitTimer === 1 &&
+      x.rateBorg.hasteHitTimer === 2, 'next epoch interpolates once but never replays expired tier refresh; real control0 still refuses unresolved dispatch');
+    rejects(() => x.runRawPrefix(2, 200, 100), 'epoch');
+    check(x.sourceActor.modelScale === tierFloatFromBits(0x3ff33334), 'refused next epoch is consumed without a second interpolation');
+  }
+  for (const selector of [0, 1]) for (const [tier, lower, upper, selected] of [
+    [15, 15, 17, 15], [16, 15, 17, 16], [17, 15, 17, 17],
+    [127, NaN, 17, 17], [-128, 15, 17, 15], [16, 17, 15, 15], [15, 16, 17, 16],
+  ]) {
+    const x = tierLifecycleHydratedControlFixture(tierLifecycleHydration(selector));
+    x.tier.tier = tier!; x.tierState.signed74c = lower!; x.tierState.signed74d = upper!;
+    const retained = retainCeilingLifecycleCadence(x); x.refreshTier(); retained();
+    const size = selected === 15 ? 0x3f4f5c29 : selected === 16 ? 0x3f800000 : selector === 0 ? 0x3fb33333 : 0x3f99999a;
+    check(x.tier.tier === tier && x.tierState.signed74b === selected && x.tier.timerFrames === 1 &&
+      x.tier.deltaAccum === -1 && x.sourceActor.modelScale === 2 && x.sourceClock.timestep1dc8 === 2,
+      'direct refresh keeps signed74a/750/74e and clocks untouched; source upper-first/lower-second clamp only writes74b');
+    checkTierRow(x, [size, selected === 17 ? 0x3f7ae148 : 0x3f800000, size],
+      'all six authenticated selector/row combinations preserve exact words without rounded JSON, inferred rows or defaults');
+  }
+  for (const [tier, delta, expected] of [[16, 1, 17], [127, 2147483647, -127], [-128, -2147483648, 127],
+    [16, -2147483648, -127], [16, 2147483600, 127]] as const) {
+    const x = tierLifecycleHydratedControlFixture(); x.tier.tier = tier;
+    const retained = retainCeilingLifecycleCadence(x); x.tiers.applyDelta127(x.actor, delta); retained();
+    check(x.tier.tier === expected && x.tierState.signed74b === (expected < 15 ? 15 : expected > 17 ? 17 : expected) &&
+      x.tier.timerFrames === 1 && x.tier.deltaAccum === -1,
+      'direct6817c uses signed32 wrapped sum and[-127,127] clamp, then genuine bounded row refresh without caller750/74e clears');
+  }
+  {
+    const x = tierLifecycleHydratedControlFixture(); x.tier.tier = 17; x.refreshTier();
+    x.parameter.byteA3 = 1; x.refreshTier();
+    checkTierRow(x, [0x3f99999a, 0x3f7ae148, 0x3f99999a], 'next explicit refresh reads live selector on the same sealed4ac registry record');
+    const replacement = x.attributes.createParameterDescriptor({...x.parameter, byteA3: 0});
+    x.attributeState.parameter4ac = replacement; x.parameter.byteA3 = 255; x.refreshTier();
+    checkTierRow(x, [0x3fb33333, 0x3f7ae148, 0x3fb33333], 'next explicit refresh resolves current4ac through the existing registry, ignoring invalid old descriptor');
+    x.matchGlobals.byte1f = 128; x.tiers.applyDelta127(x.actor, NaN);
+    check(x.tier.tier === 17 && x.tier.timerFrames === 1 && x.tier.deltaAccum === -1,
+      'fresh signed shared1f bypass occurs before even an invalid direct delta argument');
+    x.matchGlobals.byte1f = 0; x.tiers.applyDelta127(x.actor, -1);
+    check(x.tier.tier === 16 && x.tierState.signed74b === 16 && x.sourceClock.timestep1dc8 === 2,
+      'next direct call sees changed shared1f without replacing globals or scheduling rates');
+    checkTierRow(x, [0x3f800000, 0x3f800000, 0x3f800000], 'changed global admits real refreshed row16 through the current parameter pointer');
+  }
+  for (const byte1f of [1, 128, 255]) {
+    const supplied = tierLifecycleHydration(); supplied.global.byte1f = byte1f;
+    const x = tierLifecycleHydratedControlFixture(supplied);
+    x.tier.tier = NaN; x.tierState.signed74d = NaN; x.parameter.byteA3 = 255;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && Number.isNaN(x.tier.tier) && x.tierState.signed74b === -7 &&
+      x.tier.timerFrames === 0 && x.tier.deltaAccum === 0 && x.gaugeState.targetScaleB8 === 2.0625 &&
+      x.rateState.field1dd0 === 2 && x.sourceActor.tierScale === 7 && x.sourceClock.timestep1dc8 === 1.875,
+      'signed nonzero shared1f gate returnsvoid before tier/limits/selector reads, but actual5bab8 still clears750/74e and completes59068');
+    retained(); checkScaleStores(x, tierFloatFromBits(0x40033333), 'global bypass continues genuine prior-target interpolation');
+  }
+  {
+    const x = tierLifecycleHydratedControlFixture({initial: {}, parameter: {}, global: {byte1f: 0}});
+    x.attributeState.parameter4ac = null; x.tier.tier = NaN;
+    const retained = retainCeilingLifecycleCadence(x); x.refreshTier(); retained();
+    check(Reflect.ownKeys(x.tierState).length === 0 && Number.isNaN(x.tier.tier) &&
+      x.gaugeState.targetScaleB8 === 2.0625 && x.rateState.field1dd0 === 2 && x.sourceActor.tierScale === 7,
+      'actual null4ac refresh returns before absent74b/c/d/byteA3 without seeding fields or returning fabricated success effects');
+    x.tier.tier = 16; x.matchGlobals.byte1829 = 1;
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.tier.tier === 17 && x.tier.timerFrames === 0 &&
+      x.tier.deltaAccum === 0 && x.rateState.field1dd0 === 2,
+      '6817c writes74a before genuine null4ac return and5bab8 performs its caller clears before completing admitted59068');
+  }
+  for (const fault of ['missing1f', 'missingA3', 'row14', 'selector2', 'readonly74b', 'readonlyB8',
+    'readonly1dd0', 'readonly5f8', 'readonly74e'] as const) {
+    const supplied = tierLifecycleHydration();
+    if (fault === 'missing1f') supplied.global = {};
+    if (fault === 'missingA3') supplied.parameter = {};
+    const x = tierLifecycleHydratedControlFixture(supplied);
+    if (fault === 'row14') {x.tier.tier = 13; x.tierState.signed74c = 14;}
+    if (fault === 'selector2') x.parameter.byteA3 = 2;
+    const readonly = fault === 'readonly74b' ? [x.tierState, 'signed74b'] as const :
+      fault === 'readonlyB8' ? [x.gaugeState, 'targetScaleB8'] as const :
+      fault === 'readonly1dd0' ? [x.rateState, 'field1dd0'] as const :
+      fault === 'readonly5f8' ? [x.sourceActor, 'tierScale'] as const :
+      fault === 'readonly74e' ? [x.tier, 'deltaAccum'] as const : undefined;
+    if (readonly !== undefined) Object.defineProperty(readonly[0], readonly[1], {writable: false});
+    const retained = retainCeilingLifecycleCadence(x);
+    const diagnostic = fault === 'missing1f' ? 'byte1f: own data' : fault === 'missingA3' ? 'byteA3: own data' :
+      fault === 'row14' ? '800682dc unsupported table row 14' : fault === 'selector2' ? '800682d4 unsupported selector 2' :
+      `${readonly![1]}: non-writable`;
+    rejects(() => x.runRawPrefix(1, 64, 20), diagnostic); retained();
+    const stores = fault === 'readonly74e' ? 3 : fault === 'readonly5f8' ? 2 : fault === 'readonly1dd0' ? 1 : 0;
+    check(x.tier.timerFrames === 0 && x.tier.deltaAccum === -1 &&
+      x.tier.tier === (fault === 'missing1f' ? 16 : fault === 'row14' ? 14 : 17) &&
+      x.tierState.signed74b === (fault === 'missing1f' || fault === 'readonly74b' ? -7 : fault === 'row14' ? 14 : 17) &&
+      x.gaugeState.targetScaleB8 === (stores >= 1 ? tierFloatFromBits(0x3fb33333) : 2.0625) &&
+      x.rateState.field1dd0 === (stores >= 2 ? tierFloatFromBits(0x3f7ae148) : 2) &&
+      x.sourceActor.tierScale === (stores >= 3 ? tierFloatFromBits(0x3fb33333) : 7) &&
+      x.sourceActor.modelScale === 2 && x.sourceActor.targetDistance760 === 32 && x.sourceActor.horizontalDistance764 === 10 &&
+      x.prefixState.byte598 === 7 && x.stageState.short6cc === 29 && x.actorControlState.byte490 === 2 &&
+      x.rateBorg.slowHitTimer === 2 && x.rateBorg.hasteHitTimer === 3 && x.sourceClock.timestep1dc8 === 2,
+      `${fault} keeps reached distance/decrement/tier/clamp/ordered row-store prefix and stops before interpolation, stage, control, rates or ceiling`);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'epoch'); retained();
+    check(x.tier.timerFrames === 0 && x.tier.deltaAccum === -1 && x.sourceActor.targetDistance760 === 32,
+      'failed row/clear attempt consumes raw epoch without reapplying negated delta or copying unsupported values');
+  }
+  {
+    const x = tierLifecycleHydratedControlFixture(), old = ceilingLifecycleHydratedControlFixture();
+    rejects(() => old.gauges.bindTierLifecycleSources(old.actor, {...x.tiers}), 'genuine');
+    rejects(() => x.gauges.bindTierLifecycleSources(x.actor, x.tiers), 'already bound');
+    rejects(() => createSourceActorTierLifecycleRuntime(x.tierSources).bindActor(x.actor, {}), 'already claimed');
+    for (const owner of [x.tierState, x.attributeState, x.rateState, x.matchGlobals]) {
+      const epoch = [x.tierState, x.attributeState, x.rateState, x.matchGlobals].indexOf(owner) + 1;
+      rejects(() => x.prefix.ingestRawDistancesAndRun(x.actor, epoch, owner as never), 'raw input must not alias');
+      rejects(() => x.runRawPrefix(epoch, 64, 20), 'epoch');
+    }
+    check(x.tier.tier === 16 && x.tier.timerFrames === 1 && x.tier.deltaAccum === -1 &&
+      x.sourceActor.targetDistance760 === -760 && x.sourceActor.modelScale === 2,
+      'late tier admission checks genuine ownership and rejects raw aliases before ingestion, consuming every attempted epoch');
+  }
+  console.log('[actor-tier-lifecycle-composition] PASS: genuine6817c/6826c expiry through actual5bab8 and completed bounded59068; same74a/4ac/B8/1dd0/5f8/shared1f owners, exact six authenticated selector rows, ordered signed clamps, global/null returns and caller clears; retained partial stores/readonly failures/consumed epochs, no replay and explicit status/animation/matrix/movement/history/host velocity consumers; synthetic offline composition only, no full table/producer/RAM/full-frame/retail replay/production claim');
+}
+
+/** Explicit normal-path inputs on the genuine retained DAT graph. The caller
+ * must supply4c8; no family/constructor inference fills it. Movement10 is also
+ * opt-in: the historical poststage move0 must retain its rotation refusal. */
+function normalLifecycleHydratedControlFixture(initial: Partial<SourceActorNormalLifecycleBinding>,
+  move661 = 0, tierHydration?: TierLifecycleHydration, rotationHydration?: ChargeInputHydration['rotation'],
+  cue0Hydration?: Partial<SourceActorCue0LifecycleBinding>) {
+  const supplied = chargeInputHydration();
+  supplied.normalLifecycle = initial; supplied.actorRates = rateLifecycleHydration(); supplied.ceiling = {byteD9: 0};
+  if (rotationHydration !== undefined) supplied.rotation = rotationHydration;
+  if (cue0Hydration !== undefined) supplied.cue0 = cue0Hydration;
+  if (tierHydration !== undefined) {supplied.tierHydration = tierHydration; supplied.actorRates.withMatrix = true;}
+  const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(),
+    {byte490: 0, short49a: 3, short49c: 3}, {byte7d2: 1, byte73c: 31}, supplied);
+  if (x.normalLifecycle === undefined || x.actorRates === undefined || x.ceiling === undefined)
+    throw Error('normal composition requires genuine explicit normal/rates/ceiling owners');
+  x.movementState.byte661 = move661;
+  const tiers = tierHydration === undefined ? undefined : createSourceActorTierLifecycleRuntime({
+    world: x.world, status: x.status, attributes: x.attributes, gauges: x.gauges, rates: x.actorRates, matrix: x.normal});
+  if (tiers !== undefined) {
+    tiers.bindActor(x.actor, tierHydration!.initial); x.gauges.bindTierLifecycleSources(x.actor, tiers);
+    x.tier.timerFrames = 1; x.tier.deltaAccum = -1; x.sourceActor.tierScale = 7;
+  }
+  return Object.assign(x, {normalLifecycle: x.normalLifecycle,
+    normalLifecycleState: x.normalLifecycle.getActorBinding(x.actor), actorRates: x.actorRates, ceiling: x.ceiling,
+    rateState: x.actorRates.getActorBinding(x.actor), rateBorg: x.actorRates.getActualBorg(x.actor),
+    matchGlobals: x.ceiling.getMatchGlobals(), tiers});
+}
+type NormalLifecycleFixture = ReturnType<typeof normalLifecycleHydratedControlFixture>;
+function checkNormalControlZeroStores(x: NormalLifecycleFixture): void {
+  check(x.stageState.lifecycle18 === 1 && x.actorControlState.byte490 === 0 && x.actorControlState.short49a === 3 &&
+    x.actorControlState.short49c === 3 && x.readyState.byte19 === 19 && x.readyState.byte489 === 23,
+    'actual control0 follows the normal branch without fabricating ready transition writes or returned1');
+}
+function checkNormalCommonTailUnreached(x: NormalLifecycleFixture): void {
+  check(x.actionRequest!.getActorBinding(x.actor).byte73c === 31 && x.rateBorg.slowHitTimer === 2 &&
+    x.rateBorg.hasteHitTimer === 3 && x.sourceActor.aimRateScale === 0.5 && x.sourceClock.timestep1dc8 === 2,
+    'normal refusal does not execute action/rate/ceiling common suffix');
+}
+export function runNormalLifecycleHydratedCompositionTests(): void {
+  // Independently authenticated Double constructor6f60c reads cell802d3b28
+  // and stores target8006f950 into4c8. These remain explicitly supplied inputs,
+  // not constructor hydration or inference from this synthetic actor's family.
+  const binding = (): Partial<SourceActorNormalLifecycleBinding> =>
+    ({callback4c8: 0x8006f950, callback4dc: null, short6bc: 2, byte1d9: 0});
+  const create = (initial = binding(), move661 = 10, tier?: TierLifecycleHydration) =>
+    normalLifecycleHydratedControlFixture(initial, move661, tier);
+  {
+    const old = ceilingLifecycleHydratedControlFixture(); old.actorControlState.byte490 = 0;
+    check(!Object.hasOwn(old, 'normalLifecycle') && old.normalLifecycle === undefined &&
+      ['callback4c8', 'callback4dc', 'short6bc', 'byte1d9'].every(key => !Object.hasOwn(old.sourceActor, key)),
+      'historical completed ready graph receives no normal owner, source callback or countdown defaults');
+    rejects(() => old.runRawPrefix(1, 64, 20), actorControlTableBoundary(9));
+    const x = create(binding(), 0), n = x.normalLifecycle, a = x.sourceActor;
+    check(n.getActualActor(x.actor) === a && n.getWorldBinding(x.actor) === x.header &&
+      n.getMappingActor(x.actor) === x.sourceClock && n.getMovementBinding(x.actor) === x.movementState &&
+      n.getStatusBinding(x.actor) === x.statusState && x.status.getMovementBinding(x.actor) === x.movementState &&
+      n.getCueRuntime() === x.cues && x.stageBounds.getCueRuntime() === x.cues &&
+      n.getCueBinding(x.actor) === x.cueState && n.getDispatchBinding(x.actor) === x.gates &&
+      Object.isSealed(x.normalLifecycleState) &&
+      Reflect.ownKeys(x.normalLifecycleState).join() === 'callback4c8,callback4dc,short6bc,byte1d9',
+      'normal shares genuine world/mapping/movement/status and the identical stage cue runtime, owning only four missing cells');
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '80059fac'); retained();
+    checkInputPrefixEarlierStores(x); checkNormalControlZeroStores(x); checkNormalCommonTailUnreached(x); checkChargeConsumedEpoch(x);
+    check(a.inputEdge5d4 === 0x2260 && x.normalLifecycleState.short6bc === 2 && x.movementState.byte661 === 0 &&
+      a.controlWord === 0x40 && a.ubCue === 9 && a.fbCue === 9,
+      'genuine cue9 and actual Double4c8 return before honest move0 rotation refusal; countdown and common tail remain unreached');
+  }
+  {
+    const x = create(), a = x.sourceActor, n = x.normalLifecycleState;
+    a.pos.y = 1002; a.yVel = 7;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'control0 completes genuine normal59068 and the shared action/rate/ceiling suffix');
+    retained(); checkInputPrefixEarlierStores(x); checkNormalControlZeroStores(x); checkChargeConsumedEpoch(x);
+    check(n.short6bc === 1 && x.actionRequest!.getActorBinding(x.actor).byte73c === 4 &&
+      x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2 && a.aimRateScale === 1.875 &&
+      a.timescale === 1.875 && x.sourceClock.timestep1dc8 === 1.875 && a.pos.y === 994 && Object.is(a.yVel, 0) &&
+      a.savedGroundPos.y === 2 && x.worldMatrix[7] === 95 && x.targetMatrices[1]![7] === -77,
+      'actual countdown follows source cue/callback/59f5c and precedes action request, rates and ceiling, without hidden matrix/history calls');
+    const scale = a.modelScale; a.pos.y = 1100; a.yVel = 9;
+    check(x.runRawPrefix(2, 66, 22) === undefined && n.short6bc === 0 && x.tier.timerFrames === 6 &&
+      a.targetDistance760 === Math.fround(66 / scale) && a.horizontalDistance764 === Math.fround(22 / scale) &&
+      x.rateBorg.slowHitTimer === 0 && x.rateBorg.hasteHitTimer === 1 && a.pos.y === 994 && Object.is(a.yVel, 0),
+      'next fresh epoch repeats genuine normal path, source1->0/null4dc return and common suffix once');
+    retained(); const saved = [a.modelScale, a.targetDistance760, a.inputEdge5d4, n.short6bc, x.tier.timerFrames];
+    rejects(() => x.runRawPrefix(2, 128, 40), 'epoch'); retained();
+    check([a.modelScale, a.targetDistance760, a.inputEdge5d4, n.short6bc, x.tier.timerFrames]
+      .every((value, index) => Object.is(value, saved[index])), 'successful normal epoch cannot replay any input, countdown or common-tail writes');
+
+    // Every later consumer is an explicit call on retained genuine owners.
+    a.stateTimer = 8; x.statusState.field690 = 8; x.cells[2].timer = 8;
+    const clockStep = x.sourceClock.timestep1dc8, rate = a.aimRateScale;
+    x.updateStatus();
+    check(a.stateTimer === Math.fround(8 - clockStep) && x.statusState.field690 === Math.fround(8 - rate) &&
+      x.cells[2].timer === Math.fround(8 - rate) && a.savedGroundPos.y === 2 && n.short6bc === 0,
+      'explicit genuine status/ammo consume source mapping/768 rates without another normal lifecycle');
+    const attached = x.joints.getBinding(x.joint).aobj7c!, clock = x.feedback.getAObj(attached);
+    const elapsed = x.clocks.elapsed08, callbacks = x.receiverTracks.length;
+    x.dispatch.updatePart(x.actor, 1);
+    check(clock.rate === clockStep && x.clocks.elapsed08 === Math.fround(elapsed + clockStep) &&
+      x.receiverTracks.length > callbacks && x.worldMatrix[7] === 95,
+      'explicit real animation alone advances retained AObj/FObj/JObj playback from normal-produced rates');
+    x.header.mode4a0 = 1; x.updateNormal();
+    check(x.worldMatrix[7]! > 900 && x.targetMatrices[1]!.every((value, index) => Object.is(value, x.worldMatrix[index])) &&
+      a.savedGroundPos.y === 2 && x.targetActor.pos.y === -99,
+      'separate normal-matrix owner consumes ceiling position and copies linked matrices, not actor/history state');
+    const moves = x.movementCallCount(); x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight &&
+      a.savedGroundPos.y === a.pos.y && x.tier.timerFrames === 6 && n.short6bc === 0,
+      'explicit attribute/movement/history consumers preserve lifecycle countdown and input epoch');
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+      {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && n.short6bc === 0 && x.tier.timerFrames === 6,
+      'later real archive/setup replaces attachment without a hidden normal lifecycle call');
+  }
+  {
+    const x = create(), a = x.sourceActor, n = x.normalLifecycleState;
+    x.actorControlState.byte490 = 2; x.actorControlState.short49a = 1;
+    n.callback4c8 = null; n.callback4dc = NaN; n.short6bc = NaN; n.byte1d9 = NaN;
+    const retained = retainCeilingLifecycleCadence(x), previous272 = x.statusState.short272!;
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'genuine control1 skips only the normal branch and still completes the common suffix');
+    retained(); checkReady490Stores(x, previous272);
+    check(Number.isNaN(n.short6bc) && n.callback4c8 === null && a.aimRateScale === 1.875,
+      'control1 does not read unused invalid normal callback/countdown/scalar fields or manufacture normal stores');
+  }
+  for (const cue of [0, 1, 8, 10, 127, 128, 255]) {
+    const x = create(), a = x.sourceActor; x.stageState.lifecycle18 = 0; a.ubCue = cue;
+    x.normalLifecycleState.callback4c8 = null;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), cue === 0 ? 'target8005913c' : actorControlTableBoundary(cue)); retained();
+    check(a.ubCue === cue && x.normalLifecycleState.short6bc === 2 && a.inputEdge5d4 === 0x2260 && x.tier.timerFrames === 7,
+      'live signed5e4 determines authenticated/unsupported table dispatch before actual4c8, not the earlier stage cue value');
+    checkNormalCommonTailUnreached(x); checkChargeConsumedEpoch(x);
+  }
+  for (const callback4c8 of [null, 0, 0x8006f954, 0x8006f958, 0x8018cfe8, 0x80059138]) {
+    const x = create({...binding(), callback4c8});
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '800590f8'); retained();
+    checkInputPrefixEarlierStores(x); checkNormalCommonTailUnreached(x); checkChargeConsumedEpoch(x);
+    check(x.normalLifecycleState.short6bc === 2,
+      'only the exact explicitly bound authenticated4c8 address dispatches; null/adjacent/other return-only address is not inferred');
+  }
+  {
+    const supplied = binding(); delete supplied.callback4c8;
+    const x = create(supplied), retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'callback4c8: own data'); retained();
+    checkInputPrefixEarlierStores(x); checkNormalCommonTailUnreached(x);
+    const y = create({...binding(), callback4c8: 0x8018cfe4});
+    check(y.runRawPrefix(1, 64, 20) === undefined && y.normalLifecycleState.short6bc === 1,
+      'independently authenticated GRED return target is selected only by explicit address, never by synthetic actor family');
+    const noAccess = new Proxy({}, {get() {throw Error('empty leaf must not read actor');},
+      getOwnPropertyDescriptor() {throw Error('empty leaf must not inspect actor');},
+      set() {throw Error('empty leaf must not write actor');}});
+    check(sourceActorNormalReturn80059138(noAccess) === undefined && sourceActorNormalReturn8018cfe4(noAccess) === undefined &&
+      sourceActorNormalReturn8006f950(noAccess) === undefined,
+      'authenticated return-only leaves perform no actor access, scalar checks or invented effects');
+  }
+  for (const fault of ['none', 'sentinel', 'readonly542', 'rotation'] as const) {
+    const x = create(binding(), fault === 'rotation' ? 0 : 10), a = x.sourceActor, c = x.cueState;
+    // Retain the same genuine6a6fc runtime as stage but bypass stage resetting
+    // both cues, so59f5c reaches the real unequal-cue branch itself.
+    x.stageState.lifecycle18 = 0; a.ubCue = 9; a.fbCue = 4; a.fbState = -13; a.prevFbState = -22;
+    if (fault === 'sentinel') a.cueTable![18] = -1;
+    if (fault === 'readonly542') Object.defineProperty(c, 'byte542', {writable: false});
+    const retained = retainCeilingLifecycleCadence(x);
+    if (fault === 'none' || fault === 'sentinel') check(x.runRawPrefix(1, 64, 20) === undefined,
+      'genuine unequal-cue callee native1 and sentinel0 both return into source59f5c');
+    else rejects(() => x.runRawPrefix(1, 64, 20), fault === 'readonly542' ? 'byte542: non-writable' : '80059fac');
+    retained(); checkChargeConsumedEpoch(x);
+    const changed = fault !== 'sentinel';
+    check(c.byte7cf === (changed ? 4 : 20) && a.fbCue === (changed ? 9 : 4) &&
+      a.prevFbState === (changed ? -13 : -22) && a.fbState === (changed ? -8 : -13) &&
+      c.byte543 === (changed ? 0 : 13) && c.byte542 === (changed && fault !== 'readonly542' ? 0 : 12) &&
+      c.byte541 === (changed && fault !== 'readonly542' ? 0 : 11) && a.fbPhase === (changed && fault !== 'readonly542' ? 0 : 23),
+      `${fault} retains precisely the real6a6fc ordered full-cue prefix, including sentinel no-writes and late readonly failure`);
+    check(c.byte7ce === 19 && c.byte547 === 17 && a.onLand754 !== null && x.gates.marker1db3 === 1 && x.landCalls() === 0,
+      'normal full-cue synchronization does not clear upper-cue bytes, landing pointer or dispatch marker');
+    check(x.normalLifecycleState.short6bc === (fault === 'none' || fault === 'sentinel' ? 1 : 2),
+      'real6a6fc failure or following rotation boundary precedes countdown');
+    if (fault === 'readonly542' || fault === 'rotation') checkNormalCommonTailUnreached(x);
+    if (fault === 'readonly542') {
+      //6a6fc already wrote matching cues before its late failure. Neither
+      // replacing both cues nor a would-return1 control branch may launder
+      // that unfinished source call into a future successful normal tick.
+      a.ubCue = 7; a.fbCue = 7; x.actorControlState.byte490 = 2; x.actorControlState.short49a = 1;
+      const records = [a, a.pos, x.header, x.stageState, x.gaugeState, x.tier, x.host, x.statusState,
+        c, x.gates, x.normalLifecycleState, x.actorControlState, x.readyState, x.actionRequest!.getActorBinding(x.actor),
+        x.rateState, x.sourceClock, x.inputState, x.machineState, x.chargeState];
+      const before = records.map(record => ({record, keys: Reflect.ownKeys(record),
+        values: Reflect.ownKeys(record).map(key => Reflect.get(record, key))}));
+      rejects(() => x.runRawPrefix(2, 66, 22), 'known incomplete cue synchronization'); retained();
+      rejects(() => x.runRawPrefix(2, 128, 40), 'epoch'); retained();
+      rejects(() => x.normalLifecycle.updateActor(x.actor), 'known incomplete cue synchronization');
+      check(before.every(({record, keys, values}) => Reflect.ownKeys(record).length === keys.length &&
+        keys.every((key, index) => Object.is(Reflect.get(record, key), values[index]))),
+        'permanent incomplete cue synchronization consumes the future epoch before raw ingestion or any source effect, even with changed matching cues and future control1');
+      checkNormalCommonTailUnreached(x);
+    } else if (fault === 'none') {
+      c.byte541 = 31; a.fbPhase = 29;
+      check(x.runRawPrefix(2, 66, 22) === undefined && c.byte541 === 31 && a.fbPhase === 29 &&
+        a.fbCue === 9 && a.fbState === -8 && x.normalLifecycleState.short6bc === 0 && x.tier.timerFrames === 6,
+        'verified real6a6fc success clears the host guard; a fresh equal-cue epoch reaches countdown/common tail without replaying phase resets');
+      retained(); rejects(() => x.runRawPrefix(2, 128, 40), 'epoch'); retained();
+    }
+  }
+  for (const highNibble of [0, 0x10, 0xf0]) {
+    const x = create(binding(), 0), a = x.sourceActor;
+    x.stageState.lifecycle18 = 0; a.controlWord = 0x100041; a.ubCue = 9; a.fbCue = 4;
+    x.normalLifecycleState.byte1d9 = highNibble | 3;
+    a.stateFlagA = highNibble === 0 ? NaN : 0x25; a.stateFlagB = highNibble === 0 ? NaN : 0x81;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && a.fbCue === 4 &&
+      (highNibble === 0 ? Number.isNaN(a.stateFlagA) : a.stateFlagA === 0xa5) && x.normalLifecycleState.short6bc === 1,
+      'actual81000003 gate reads1d9 high nibble, optionally ORs genuine57a/57b, then skips cue synchronization and rotation'); retained();
+  }
+  {
+    const x = create(binding(), 0), a = x.sourceActor;
+    x.stageState.lifecycle18 = 0; a.controlWord = 0x100041; a.ubCue = 9;
+    x.normalLifecycleState.byte1d9 = 0x10; a.stateFlagA = 0x25; a.stateFlagB = 0x81;
+    Object.defineProperty(a, 'stateFlagA', {writable: false});
+    rejects(() => x.runRawPrefix(1, 64, 20), 'stateFlagA: non-writable');
+    check(a.stateFlagA === 0x25 && x.normalLifecycleState.short6bc === 2 && x.tier.timerFrames === 7,
+      'reached readonly57a refuses after genuine earlier tick stages, without countdown or tail');
+    checkNormalCommonTailUnreached(x); checkChargeConsumedEpoch(x);
+  }
+  for (const before of [-32768, -1, 0, 2, 32767]) {
+    const supplied = binding(); supplied.short6bc = before; delete supplied.callback4dc;
+    const x = create(supplied), retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.normalLifecycleState.short6bc === (before > 0 ? before - 1 : before) &&
+      !Object.hasOwn(x.normalLifecycleState, 'callback4dc'),
+      'signed nonpositive and still-positive6bc branches return without reading or creating absent4dc'); retained();
+  }
+  for (const callback4dc of [null, 0]) {
+    const x = create({...binding(), short6bc: 1, callback4dc});
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.normalLifecycleState.short6bc === 0 &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === 4,
+      'actual6bc1->0 store precedes the explicit address0 callback branch and allows genuine common tail');
+  }
+  for (const fault of ['missing6bc', 'readonly6bc', 'missing4dc', 'unknown4dc', 'invalid4dc'] as const) {
+    const supplied = binding(); supplied.short6bc = fault === 'readonly6bc' ? 2 : 1;
+    if (fault === 'missing6bc') delete supplied.short6bc;
+    if (fault === 'missing4dc') delete supplied.callback4dc;
+    if (fault === 'unknown4dc') supplied.callback4dc = 0x8006f950;
+    const x = create(supplied), a = x.sourceActor, n = x.normalLifecycleState;
+    if (fault === 'readonly6bc') Object.defineProperty(n, 'short6bc', {writable: false});
+    if (fault === 'invalid4dc') n.callback4dc = NaN;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'missing6bc' ? 'short6bc: own data' :
+      fault === 'readonly6bc' ? 'short6bc: non-writable' : fault === 'missing4dc' ? 'callback4dc: own data' :
+      fault === 'invalid4dc' ? 'callback4dc: integer' : '8005a17c'); retained();
+    checkInputPrefixEarlierStores(x); checkNormalCommonTailUnreached(x); checkChargeConsumedEpoch(x);
+    const afterStore = fault === 'missing4dc' || fault === 'unknown4dc' || fault === 'invalid4dc';
+    check(n.short6bc === (afterStore ? 0 : fault === 'missing6bc' ? undefined : 2),
+      `${fault} preserves only the source countdown stores preceding its reached failure`);
+    if (afterStore) {
+      // The failed1->0 cannot be laundered by changing either the countdown or
+      // the control branch. Guard must run before raw ingestion or any callee.
+      x.actorControlState.byte490 = 2; x.actorControlState.short49a = 1;
+      n.short6bc = -1; if (Object.hasOwn(n, 'callback4dc')) n.callback4dc = null;
+      const before = [a.targetDistance760, a.horizontalDistance764, a.modelScale, x.tier.timerFrames,
+        x.inputState.byte5ff, x.actorControlState.short49a, x.readyState.byte489, ...Object.values(x.machineState)];
+      rejects(() => x.runRawPrefix(2, 66, 22), 'known incomplete6bc expiry'); retained();
+      rejects(() => x.normalLifecycle.updateActor(x.actor), 'known incomplete6bc expiry');
+      rejects(() => x.normalLifecycle.updateCountdown(x.actor), 'known incomplete6bc expiry');
+      check([a.targetDistance760, a.horizontalDistance764, a.modelScale, x.tier.timerFrames,
+        x.inputState.byte5ff, x.actorControlState.short49a, x.readyState.byte489, ...Object.values(x.machineState)]
+        .every((value, index) => Object.is(value, before[index])) && x.stageState.lifecycle18 === 1,
+        'permanent incomplete expiry blocks even a would-return1 control branch before every raw/source write');
+    }
+  }
+  for (const fault of ['action', 'rate', 'ceiling'] as const) {
+    const x = create(), a = x.sourceActor; a.pos.y = 1002; a.yVel = 7;
+    if (fault === 'action') Object.defineProperty(x.actionRequest!.getActorBinding(x.actor), 'byte73c', {writable: false});
+    if (fault === 'rate') Object.defineProperty(x.rateBorg, 'slowHitTimer', {writable: false});
+    if (fault === 'ceiling') Object.defineProperty(a, 'yVel', {writable: false});
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'action' ? 'byte73c: non-writable' :
+      fault === 'rate' ? 'slowHitTimer: non-writable' : 'yVel: non-writable'); retained();
+    checkInputPrefixEarlierStores(x); checkNormalControlZeroStores(x); checkChargeConsumedEpoch(x);
+    check(x.normalLifecycleState.short6bc === 1 && x.actionRequest!.getActorBinding(x.actor).byte73c === (fault === 'action' ? 31 : 4) &&
+      x.rateBorg.slowHitTimer === (fault === 'ceiling' ? 1 : 2) && x.sourceClock.timestep1dc8 === (fault === 'ceiling' ? 1.875 : 2) &&
+      a.pos.y === 1002 && a.yVel === 7,
+      `${fault} common-tail failure retains completed genuine normal prefix and only preceding action/rate stores`);
+  }
+  {
+    const x = create();
+    const owners = [x.normalLifecycleState, x.movementState, x.cueState, x.gates, x.statusState, x.sourceClock];
+    for (const [index, owner] of owners.entries()) {
+      rejects(() => x.prefix.ingestRawDistancesAndRun(x.actor, index + 1, owner as never), 'raw input must not alias');
+      rejects(() => x.runRawPrefix(index + 1, 64, 20), 'epoch');
+    }
+    check(x.sourceActor.targetDistance760 === -760 && x.sourceActor.modelScale === 2 && x.tier.timerFrames === 8 &&
+      x.normalLifecycleState.short6bc === 2 && x.inputState.byte5ff === 9,
+      'raw inputs cannot alias any canonical normal/movement/cue/status owner and each refused ingress consumes its epoch before stores');
+    rejects(() => createSourceActorNormalLifecycleRuntime({world: x.world, movement: x.movement, status: x.status, cues: x.cues})
+      .bindActor(x.actor, binding()), 'already claimed');
+  }
+  for (const selector of [0, 1]) {
+    const x = create(binding(), 10, tierLifecycleHydration(selector)), a = x.sourceActor;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.tiers !== undefined && x.gauges.getTierLifecycleRuntime(x.actor) === x.tiers,
+      'real tier expiry6817c/6826c returns into5bab8 before the genuine control0/normal59068 path'); retained();
+    const size = tierFloatFromBits(selector === 0 ? 0x3fb33333 : 0x3f99999a);
+    check(x.tier.tier === 17 && x.tiers!.getActorBinding(x.actor).signed74b === 17 && x.tier.timerFrames === 0 &&
+      x.tier.deltaAccum === 0 && x.gaugeState.targetScaleB8 === size && a.tierScale === size &&
+      x.normalLifecycleState.short6bc === 1 && a.aimRateScale === 1.875 &&
+      x.sourceClock.timestep1dc8 === Math.fround(tierFloatFromBits(0x3f7ae148) * 0.9375),
+      'same selected tier row reachesB8/1dd0/5f8 and normal common rates without copied timer, movement, status or mapping owners');
+    checkNormalControlZeroStores(x); checkChargeConsumedEpoch(x);
+    const before = x.sourceClock.timestep1dc8; x.parameter.byteA3 = 255;
+    check(x.runRawPrefix(2, 66, 22) === undefined && x.normalLifecycleState.short6bc === 0 &&
+      x.tier.timerFrames === 0 && x.tiers!.getActorBinding(x.actor).signed74b === 17 && x.sourceClock.timestep1dc8 === before &&
+      x.rateBorg.slowHitTimer === 0 && x.rateBorg.hasteHitTimer === 1,
+      'next completed normal epoch decrements live rate timers and reaches null countdown expiry without replaying expired tier selection');
+  }
+  console.log('[actor-normal-lifecycle-composition] PASS: genuine control0 normal59068 with signed cue dispatch, exact authenticated Double/GRED4c8 leaves, shared6a6fc/57a/57b/movement/status owners, bounded59f5c and signed6bc countdown before shared action/rate/ceiling tail; retained move0 rotation boundary, ordered partial failures, permanent incomplete-expiry guard, raw aliases/epochs, real tier expiry and explicit downstream consumers; synthetic decoded offline only, no constructor/producer/RAM/full-frame/replay/production claim');
+}
+
+/** Explicit offline +b0/correction hydration on the same DAT graph. The world
+ * owns thirteen correction rows but only two matrices/poses; no expanded model,
+ * constructor, actor family, native memory or general-rotation claim follows. */
+function rotationDampingHydratedControlFixture(jointsB0: readonly number[] = [12, 2, 7, 11, 255, 255, 255, 255],
+  tierHydration?: TierLifecycleHydration) {
+  const corrections18d4 = Array.from({length: 13}, (_, joint) =>
+    joint === 1 ? {y: 0, z: 0} : {x: 0, y: 0, z: 0});
+  const x = normalLifecycleHydratedControlFixture(
+    {callback4c8: 0x8006f950, callback4dc: null, short6bc: 2, byte1d9: 0}, 0, tierHydration,
+    {jointsB0, corrections18d4});
+  if (x.rotation === undefined) throw Error('rotation composition requires explicit genuine rotation owner');
+  return Object.assign(x, {rotation: x.rotation, corrections: x.worldStorage.corrections18d4});
+}
+type RotationDampingFixture = ReturnType<typeof rotationDampingHydratedControlFixture>;
+// Independent arithmetic witnesses use authenticated bits, never the ordinary
+// 0.1f constant. Every selected fixture product is exact in binary64 before
+// its explicit final binary32 rounding; no runtime helper is reused here.
+function rotationExpectedShort(angle: number, timestep: number): number {
+  const coefficient = Math.fround(tierFloatFromBits(0x3dccccd0) * Math.fround(1 - timestep) + tierFloatFromBits(0x3f666666));
+  return Math.trunc(Math.fround(angle * coefficient)) << 16 >> 16;
+}
+function rotationStoredRows(x: RotationDampingFixture): number[][] {
+  return x.corrections.map((row, joint) => [joint === 1 ? x.sourceActor.steerYaw << 16 >> 16 : row.x!, row.y, row.z]);
+}
+function checkRotationRows(x: RotationDampingFixture, before: readonly (readonly number[])[],
+  joints: readonly number[], timestep: number, message: string): void {
+  const expected = before.map(row => [...row]);
+  for (const joint of joints) {
+    if (joint === 255) break;
+    expected[joint] = expected[joint]!.map(value => rotationExpectedShort(value, timestep));
+  }
+  expected[1] = expected[1]!.map(value => rotationExpectedShort(value, timestep));
+  const actual = rotationStoredRows(x);
+  check(actual.every((row, joint) => row.every((value, axis) => Object.is(value, expected[joint]![axis]))) &&
+    x.sourceActor.steerYaw === (expected[1]![0]! & 0xffff) && !Object.hasOwn(x.corrections[1]!, 'x'), message);
+}
+export function runRotationDampingHydratedCompositionTests(): void {
+  const doubleList = [12, 2, 7, 11, 255, 255, 255, 255];
+  {
+    const old = normalLifecycleHydratedControlFixture(
+      {callback4c8: 0x8006f950, callback4dc: null, short6bc: 2, byte1d9: 0});
+    check(old.normalLifecycle.getRotationRuntime() === undefined && !Object.hasOwn(old, 'rotation') &&
+      old.worldStorage.corrections18d4.length === 2 && old.chargeDescriptor.slice(0x24, 0x2c).every(value => value === 255),
+      'historical no-rotation graph retains its original two-row storage and sentinel descriptor bytes without new owners or list hydration');
+    rejects(() => old.runRawPrefix(1, 64, 20), '80059fac');
+    check(old.normalLifecycleState.short6bc === 2, 'historical sentinel list still refuses at the absent actual rotation runtime before countdown');
+    checkNormalCommonTailUnreached(old); checkChargeConsumedEpoch(old);
+  }
+  {
+    const x = rotationDampingHydratedControlFixture(), a = x.sourceActor;
+    check(x.normalLifecycle.getRotationRuntime() === x.rotation && x.world.getActualActor(x.actor) === a &&
+      x.rotation.getActualActor(x.actor) === a && x.rotation.getWorldBinding(x.actor) === x.header &&
+      x.rotation.getMappingActor(x.actor) === x.sourceClock && x.rotation.getWorldStorage(x.actor) === x.worldStorage &&
+      x.mapping.getDescriptor(x.sourceClock.descriptor4b0!) === x.chargeDescriptor &&
+      x.chargeDescriptor.length === 0x32 && x.chargeDescriptor.slice(0x24, 0x2c).join() === doubleList.join() &&
+      x.worldStorage.corrections18d4 === x.corrections && x.corrections.length === 13 &&
+      x.worldStorage.matrices8d4.length === 2 && x.mapping.getLayout(x.actor).poses[0]!.length === 2 &&
+      !Object.hasOwn(x.corrections[1]!, 'x'),
+      'explicit genuine rotation shares original world/storage/mapping and the single canonical charge raw8c descriptor; joint1 X has no sidecar');
+    Object.assign(x.corrections[0]!, {x: 19, y: -21, z: 23});
+    Object.assign(x.corrections[12]!, {x: 1000, y: -1000, z: 32767});
+    Object.assign(x.corrections[2]!, {x: -32768, y: 3, z: -3});
+    Object.assign(x.corrections[7]!, {x: 999, y: -999, z: 7});
+    Object.assign(x.corrections[11]!, {x: -19, y: 17, z: -13});
+    Object.assign(x.corrections[1]!, {y: -100, z: 5}); a.steerYaw = 0xff9c;
+    const before = rotationStoredRows(x), raw = [...x.chargeDescriptor], retained = retainCeilingLifecycleCadence(x);
+    a.pos.y = 1002; a.yVel = 7;
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'movement0 completes genuine cue9/Double4c8/rotation/6bc/action/rate/ceiling sequence');
+    retained(); checkInputPrefixEarlierStores(x); checkNormalControlZeroStores(x); checkChargeConsumedEpoch(x);
+    checkRotationRows(x, before, doubleList, 2,
+      'real Double indices12/2/7/11 and unconditional trailing joint1 consume old1dc8=2 with signed truncation and unsigned steerYaw storage');
+    check(x.normalLifecycleState.short6bc === 1 && x.actionRequest!.getActorBinding(x.actor).byte73c === 4 &&
+      x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2 && x.sourceClock.timestep1dc8 === 1.875 &&
+      a.pos.y === 994 && Object.is(a.yVel, 0) && a.ubCue === 9 && a.fbCue === 9 &&
+      x.chargeDescriptor.every((value, index) => value === raw[index]),
+      'rotation precedes countdown and clock replacement by common5a378, then actual ceiling clamps; descriptor bytes remain inputs');
+    // The same registry record changes live; unrelated charge/map bytes remain
+    // shared, and the next call must use the clock from the previous common tail.
+    const nextList = [2, 12, 255, 31, 31, 31, 31, 31];
+    nextList.forEach((joint, index) => {x.chargeDescriptor[0x24 + index] = joint;});
+    const next = rotationStoredRows(x);
+    check(x.runRawPrefix(2, 66, 22) === undefined && x.normalLifecycleState.short6bc === 0,
+      'fresh epoch reads changed +b0 bytes on the original selected registry record and completes null6bc expiry');
+    checkRotationRows(x, next, nextList, 1.875, 'next rotation consumes prior common clock and ignores invalid indices after the first sentinel');
+    retained(); rejects(() => x.runRawPrefix(2, 128, 40), 'epoch');
+    // Nonzero corrections remain an honest separate matrix admission boundary.
+    rejects(x.updateNormal, 'nonzero short correction');
+  }
+  for (const joints of [[255, 31, 31, 31, 31, 31, 31, 31], [0, 2, 3, 4, 5, 6, 7, 8],
+    [1, 1, 2, 2, 12, 12, 255, 31]]) {
+    const x = rotationDampingHydratedControlFixture(joints);
+    x.corrections.forEach((row, joint) => {if (joint !== 1) row.x = joint * 101 - 500; row.y = joint * -53 + 300; row.z = joint * 13 - 100;});
+    x.sourceActor.steerYaw = 0xf800;
+    const before = rotationStoredRows(x), retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'sentinel/full-eight/repeated-index traversal returns through actual normal/tick callers');
+    checkRotationRows(x, before, joints, 2,
+      'source list preserves all eight entries, sentinel early stop, duplicate visits and mandatory additional joint1 visit');
+    retained(); checkChargeConsumedEpoch(x);
+  }
+  for (const [bits, expected] of [[0x349dddc4, -32767], [0x468e66fb, 59695088 << 16 >> 16]]) {
+    const x = rotationDampingHydratedControlFixture([2, 255, 255, 255, 255, 255, 255, 255]);
+    x.sourceClock.timestep1dc8 = tierFloatFromBits(bits!); x.corrections[2]!.x = -32768;
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.corrections[2]!.x === expected &&
+      x.sourceClock.timestep1dc8 === 1.875 && x.normalLifecycleState.short6bc === 1,
+      'integrated source fused coefficient witness and large signed conversion/low16 wrapping execute before the common clock overwrite');
+  }
+  // Late writes are retained in source joint/axis order. No callback observer
+  // or substitute callee is used: readonly actual destinations mark the boundary.
+  for (const [joint, axis, completed] of [[12, 'x', 0], [12, 'y', 1], [12, 'z', 2], [2, 'x', 3],
+    [2, 'y', 4], [2, 'z', 5], [1, 'x', 6], [1, 'y', 7], [1, 'z', 8]] as const) {
+    const x = rotationDampingHydratedControlFixture([12, 2, 255, 255, 255, 255, 255, 255]);
+    for (const index of [12, 2, 1]) {
+      if (index !== 1) x.corrections[index]!.x = 1000;
+      x.corrections[index]!.y = 1000; x.corrections[index]!.z = 1000;
+    }
+    x.sourceActor.steerYaw = 1000;
+    Object.defineProperty(joint === 1 && axis === 'x' ? x.sourceActor : x.corrections[joint]!,
+      joint === 1 && axis === 'x' ? 'steerYaw' : axis, {writable: false});
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'non-writable'); retained();
+    const values = [12, 2, 1].flatMap(index => rotationStoredRows(x)[index]!);
+    check(values.every((value, index) => value === (index < completed ? rotationExpectedShort(1000, 2) : 1000)) &&
+      x.normalLifecycleState.short6bc === 2 && x.sourceActor.ubCue === 9 && x.sourceActor.fbCue === 9,
+      'readonly axis keeps exactly the completed joint/XYZ prefix after real cue9/Double return and before6bc/common tail');
+    checkNormalCommonTailUnreached(x); checkChargeConsumedEpoch(x);
+    if (completed > 0) {
+      const previous = [x.sourceActor.targetDistance760, x.sourceActor.modelScale, x.tier.timerFrames,
+        x.actorControlState.short49a, x.readyState.byte489, x.inputState.byte5ff, ...values];
+      for (const bypass of ['movement10', 'control-mask', 'ready'] as const) {
+        x.movementState.byte661 = bypass === 'movement10' ? 10 : 0;
+        x.sourceActor.controlWord = bypass === 'control-mask' ? 0x41 : 0x40;
+        x.actorControlState.byte490 = bypass === 'ready' ? 2 : 0; x.actorControlState.short49a = 1;
+        const epoch = 2 + ['movement10', 'control-mask', 'ready'].indexOf(bypass);
+        rejects(() => x.runRawPrefix(epoch, 66, 22), 'known incomplete rotation damping');
+        rejects(() => x.runRawPrefix(epoch, 128, 40), 'epoch');
+        check(x.sourceActor.targetDistance760 === previous[0] && x.sourceActor.modelScale === previous[1] &&
+          x.tier.timerFrames === previous[2] && x.actorControlState.short49a === 1 &&
+          x.readyState.byte489 === previous[4] && x.inputState.byte5ff === previous[5] &&
+          [12, 2, 1].flatMap(index => rotationStoredRows(x)[index]!).every((value, index) => value === values[index]),
+          'incomplete post-store rotation blocks every future normal/ready bypass before raw ingestion and all source effects');
+      }
+      rejects(() => x.normalLifecycle.updateActor(x.actor), 'known incomplete rotation damping');
+    }
+  }
+  for (const fault of ['clock', 'descriptor-missing', 'index-range', 'axis-range', 'missing-steer'] as const) {
+    const x = rotationDampingHydratedControlFixture([fault === 'missing-steer' ? 255 : 12, 255, 255, 255, 255, 255, 255, 255]);
+    const selected = x.sourceClock.descriptor4b0;
+    if (fault === 'clock') x.sourceClock.timestep1dc8 = NaN;
+    if (fault === 'descriptor-missing') {
+      // Genuine earlier charge global bypass lets this short canonical
+      // descriptor reach rotation's +b0 load instead of charge's later+c0 slot.
+      x.matchGlobals.byte1829 = 1; x.sourceClock.descriptor4b0 = x.mapping.createDescriptor([1]);
+    }
+    if (fault === 'index-range') x.chargeDescriptor[0x24] = 32;
+    if (fault === 'axis-range') x.corrections[12]!.x = 32768;
+    if (fault === 'missing-steer') delete (x.sourceActor as Partial<typeof x.sourceActor>).steerYaw;
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'clock' ? 'float32' : fault === 'descriptor-missing' ? 'descriptor+b0: addressing outside' :
+      fault === 'missing-steer' ? 'steerYaw' : 'bounds');
+    check(x.normalLifecycleState.short6bc === 2 && x.actionRequest!.getActorBinding(x.actor).byte73c === 31 &&
+      x.rateBorg.slowHitTimer === 2 && x.tier.timerFrames === 7,
+      'pre-store missing/range/scalar failure leaves all rotation outputs and6bc/common suffix unreached');
+    checkChargeConsumedEpoch(x);
+    x.sourceClock.timestep1dc8 = 2; x.sourceClock.descriptor4b0 = selected; x.matchGlobals.byte1829 = 0;
+    x.chargeDescriptor[0x24] = fault === 'missing-steer' ? 255 : 12;
+    x.corrections[12]!.x = 1000; x.sourceActor.steerYaw = 1000;
+    check(x.runRawPrefix(2, 66, 22) === undefined && x.normalLifecycleState.short6bc === 1 &&
+      x.sourceActor.steerYaw === rotationExpectedShort(1000, 2) && x.tier.timerFrames === 6,
+      'a corrected pre-write failure admits a fresh epoch without a false incomplete marker or replaying the failed epoch');
+  }
+  for (const fault of ['missing-tail-steer', 'late-index32', 'late-row13', 'late-axis', 'late-byte'] as const) {
+    const x = rotationDampingHydratedControlFixture([12, 255, 255, 255, 255, 255, 255, 255]);
+    Object.assign(x.corrections[12]!, {x: 1000, y: 1000, z: 1000});
+    Object.assign(x.corrections[1]!, {y: 1000, z: 1000}); x.sourceActor.steerYaw = 1000;
+    if (fault === 'missing-tail-steer') delete (x.sourceActor as Partial<typeof x.sourceActor>).steerYaw;
+    if (fault === 'late-index32') x.chargeDescriptor[0x25] = 32;
+    if (fault === 'late-row13') x.chargeDescriptor[0x25] = 13;
+    if (fault === 'late-axis') x.corrections[12]!.y = 32768;
+    if (fault === 'late-byte') x.chargeDescriptor[0x25] = NaN;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'missing-tail-steer' ? 'steerYaw: own data' :
+      fault === 'late-row13' ? 'addressing outside explicitly owned storage' : 'integer out of bounds'); retained();
+    check(x.corrections[12]!.x === rotationExpectedShort(1000, 2) &&
+      x.corrections[12]!.y === (fault === 'late-axis' ? 32768 : rotationExpectedShort(1000, 2)) &&
+      x.corrections[12]!.z === (fault === 'late-axis' ? 1000 : rotationExpectedShort(1000, 2)) &&
+      x.corrections[1]!.y === 1000 && x.corrections[1]!.z === 1000 && x.normalLifecycleState.short6bc === 2 &&
+      (fault === 'missing-tail-steer' ? !Object.hasOwn(x.sourceActor, 'steerYaw') : x.sourceActor.steerYaw === 1000),
+      'late missing/range/raw-byte failure retains only earlier actual XYZ stores, never a trailing joint1/countdown/common suffix');
+    checkNormalCommonTailUnreached(x); checkChargeConsumedEpoch(x);
+    rejects(() => x.runRawPrefix(2, 66, 22), 'known incomplete rotation damping');
+    rejects(() => x.rotation.updateActor(x.actor), 'known incomplete rotation damping');
+  }
+  for (const fault of ['callback', 'countdown', 'action', 'rate', 'ceiling'] as const) {
+    const x = rotationDampingHydratedControlFixture([12, 255, 255, 255, 255, 255, 255, 255]);
+    x.corrections[12]!.x = 1000; x.sourceActor.steerYaw = 1000;
+    x.sourceActor.pos.y = 1002; x.sourceActor.yVel = 7;
+    if (fault === 'callback') {x.normalLifecycleState.callback4c8 = null; x.corrections[12]!.y = NaN;}
+    if (fault === 'countdown') Object.defineProperty(x.normalLifecycleState, 'short6bc', {writable: false});
+    if (fault === 'action') Object.defineProperty(x.actionRequest!.getActorBinding(x.actor), 'byte73c', {writable: false});
+    if (fault === 'rate') Object.defineProperty(x.rateBorg, 'slowHitTimer', {writable: false});
+    if (fault === 'ceiling') Object.defineProperty(x.sourceActor, 'yVel', {writable: false});
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'callback' ? '800590f8' :
+      fault === 'countdown' ? 'short6bc: non-writable' : fault === 'action' ? 'byte73c: non-writable' :
+      fault === 'rate' ? 'slowHitTimer: non-writable' : 'yVel: non-writable'); retained();
+    check(x.corrections[12]!.x === (fault === 'callback' ? 1000 : rotationExpectedShort(1000, 2)) &&
+      x.sourceActor.steerYaw === (fault === 'callback' ? 1000 : rotationExpectedShort(1000, 2)) &&
+      x.normalLifecycleState.short6bc === (fault === 'callback' || fault === 'countdown' ? 2 : 1) &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === (fault === 'rate' || fault === 'ceiling' ? 4 : 31) &&
+      x.sourceClock.timestep1dc8 === (fault === 'ceiling' ? 1.875 : 2) && x.sourceActor.pos.y === 1002,
+      'exact callback-before-rotation-before-countdown-before-action/rate/ceiling source ordering retains only the reached prefixes');
+    // A later unrelated refusal cannot mark the already completed rotation as
+    // incomplete. Conversely a refused4c8 never reads its invalid correction.
+    x.rotation.assertActorComplete(x.actor); checkChargeConsumedEpoch(x);
+  }
+  for (const gate of ['movement10', 'control-mask', 'ready'] as const) {
+    const x = rotationDampingHydratedControlFixture();
+    // +b0 and correction scalars are unused by all three genuine bypasses.
+    // Mapping1dc8 is deliberately left valid: the shared common-rate suffix
+    // legitimately owns and updates that clock after skipping rotation.
+    x.chargeDescriptor[0x24] = NaN; x.corrections[12]!.x = NaN; x.sourceActor.steerYaw = NaN;
+    if (gate === 'movement10') x.movementState.byte661 = 10;
+    if (gate === 'control-mask') {x.stageState.lifecycle18 = 0; x.sourceActor.ubCue = 9; x.sourceActor.controlWord = 0x100041;}
+    if (gate === 'ready') {x.actorControlState.byte490 = 2; x.actorControlState.short49a = 1;}
+    check(x.runRawPrefix(1, 64, 20) === undefined && Number.isNaN(x.corrections[12]!.x) &&
+      Number.isNaN(x.sourceActor.steerYaw) && x.sourceClock.timestep1dc8 === 1.875 &&
+      x.normalLifecycleState.short6bc === (gate === 'ready' ? 2 : 1),
+      'movement10/control-mask/ready skips unread invalid rotation-only scalars and still completes the actual shared common suffix');
+  }
+  {
+    const x = rotationDampingHydratedControlFixture();
+    // Resolve the selected descriptor through a real completed zero-correction
+    // body first; alias admission must not eagerly read unused descriptor scalars.
+    x.rotation.updateActor(x.actor);
+    const owners = [x.worldStorage, x.corrections, ...x.corrections, x.chargeDescriptor];
+    for (const [index, owner] of owners.entries()) {
+      rejects(() => x.prefix.ingestRawDistancesAndRun(x.actor, index + 1, owner as never), 'raw input must not alias');
+      rejects(() => x.runRawPrefix(index + 1, 64, 20), 'epoch');
+    }
+    check(x.sourceActor.targetDistance760 === -760 && x.sourceActor.modelScale === 2 && x.tier.timerFrames === 8 &&
+      x.normalLifecycleState.short6bc === 2 && x.corrections.every(row => row.y === 0 && row.z === 0),
+      'canonical storage, correction container/every row and live raw8c descriptor cannot serve as raw ingress aliases; attempted epochs are consumed without writes');
+  }
+  for (const selector of [0, 1]) {
+    const x = rotationDampingHydratedControlFixture(doubleList, tierLifecycleHydration(selector)), a = x.sourceActor;
+    for (const index of [12, 2, 7, 11]) Object.assign(x.corrections[index]!, {x: 1, y: -1, z: 1});
+    Object.assign(x.corrections[1]!, {y: -1, z: 1}); a.steerYaw = 0xffff;
+    const before = rotationStoredRows(x), retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.tiers !== undefined && x.tier.tier === 17 &&
+      x.tier.timerFrames === 0 && x.tier.deltaAccum === 0 && x.normalLifecycleState.short6bc === 1 &&
+      x.sourceClock.timestep1dc8 === Math.fround(tierFloatFromBits(0x3f7ae148) * 0.9375),
+      'real6817c/6826c expiry and5bab8 return into movement0 rotation then the actual normal common tail');
+    checkRotationRows(x, before, doubleList, 2, 'rotation uses the pre-tail clock even after genuine tier expiry changes1dd0'); retained();
+    check(x.corrections.every(row => row.y === 0 && row.z === 0 && (row.x === undefined || row.x === 0)) && a.steerYaw === 0,
+      'small signed corrections truncate to zero, admitting the matrix owner bounded zero-rotation domain without general trig');
+    const clockStep = x.sourceClock.timestep1dc8;
+    a.stateTimer = 8; x.statusState.field690 = 8; x.cells[2].timer = 8;
+    x.updateStatus();
+    check(a.stateTimer === Math.fround(8 - clockStep) && x.statusState.field690 === Math.fround(8 - a.aimRateScale) &&
+      x.cells[2].timer === Math.fround(8 - a.aimRateScale), 'explicit real status/ammo consume completed common mapping/768 clocks');
+    const attached = x.joints.getBinding(x.joint).aobj7c!, animation = x.feedback.getAObj(attached), callbacks = x.receiverTracks.length;
+    x.dispatch.updatePart(x.actor, 1);
+    check(animation.rate === clockStep && x.receiverTracks.length > callbacks && x.worldMatrix[7] === 95,
+      'explicit actual AObj/FObj/JObj playback uses the resulting source rate without an automatic matrix update');
+    x.header.mode4a0 = 1; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, index) => Object.is(value, x.worldMatrix[index])) &&
+      x.targetActor.pos.y === -99 && x.normalLifecycleState.short6bc === 1,
+      'genuine separate normal matrix consumes damped zero corrections and copies actual linked storage without replaying lifecycle');
+    const moves = x.movementCallCount(); x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.rotation76.z === 0 &&
+      x.historyState.previousStepHeight6d4 === a.stepHeight && a.savedGroundPos.y === a.pos.y &&
+      x.normalLifecycleState.short6bc === 1 && x.tier.timerFrames === 0,
+      'later explicit attributes/movement/history consume retained zero correction state and preserve completed tier/lifecycle cadence');
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && x.normalLifecycleState.short6bc === 1,
+      'later real archive setup replaces attached animation without an implicit rotation or normal tick');
+  }
+  console.log('[actor-rotation-damping-composition] PASS: genuine movement0 cue9/Double4c8/59fac/6bc/action/rate/ceiling, canonical raw8c +b0 and retained world corrections including sole steerYaw alias; authenticated Double list, sentinel/full8/duplicates/live bytes, prior clock/fused/low16 witnesses, ordered partial failures and permanent incomplete protection, pre-write recovery/epochs/raw aliases/bypasses, actual tier expiry and explicit bounded downstream consumers; synthetic offline only, no constructor/native hydration/general trig/full-frame/replay/browser-playability claim');
+}
+
+/** Cue0 remains explicit decoded input on the retained genuine DAT graph.
+ * Only byte732 is new storage. The live cue table, movement, attribute, world,
+ * history and terrain owners below are the same objects used by the older
+ * consumers; no source callee is replaced with a successful test callback. */
+function cue0LifecycleHydratedControlFixture(move661 = 3,
+  initial: Partial<SourceActorCue0LifecycleBinding> = {byte732: 0}, tierHydration?: TierLifecycleHydration) {
+  const x = normalLifecycleHydratedControlFixture(
+    {callback4c8: 0x8006f950, callback4dc: null, short6bc: 2, byte1d9: 0}, move661, tierHydration,
+    {jointsB0: [255, 255, 255, 255, 255, 255, 255, 255], corrections18d4: [{x: 0, y: 0, z: 0}, {y: 0, z: 0}]}, initial);
+  if (x.cue0 === undefined || x.rotation === undefined) throw Error('cue0 composition requires genuine cue0 and rotation owners');
+  // Stage bounds must not replace the cue being tested with9. These are live,
+  // explicit source gate inputs, not a different scheduling path.
+  x.stageState.lifecycle18 = 0; x.sourceActor.ubCue = 0; x.sourceActor.controlWord = 0x40;
+  const cueTable = new Int8Array(56); cueTable[18] = -8; cueTable[19] = -7;
+  cueTable[54] = -18; cueTable[55] = -17; x.sourceActor.cueTable = cueTable;
+  return Object.assign(x, {cue0: x.cue0, cue0State: x.cue0.getActorBinding(x.actor), rotation: x.rotation, cueTable});
+}
+function cue0TerrainHydratedControlFixture(initial: Partial<SourceActorCue0LifecycleBinding> = {byte732: 0}) {
+  const x = cue0LifecycleHydratedControlFixture(0, initial), a = x.sourceActor;
+  a.controlWord = 0; a.hoverOffset668 = 0; a.stepHeight = 0; a.tierScale = 1; a.hSpeed = 4; a.slopeMode698 = 7;
+  x.header.mode4a0 = 0; x.attributeState.field674 = 10; x.historyState.previousStepHeight6d4 = 0;
+  Object.assign(a.pos, {x: 101, y: 2, z: 300}); Object.assign(a.savedGroundPos, {x: 100, y: 2, z: 300});
+  return x;
+}
+type Cue0LifecycleFixture = ReturnType<typeof cue0LifecycleHydratedControlFixture>;
+function checkCue0CommonUnreached(x: Cue0LifecycleFixture): void {
+  check(x.normalLifecycleState.short6bc === 2, 'cue0 refusal precedes actual4c8, rotation and countdown');
+  checkNormalCommonTailUnreached(x);
+}
+function checkCue0PermanentRefusal(x: Cue0LifecycleFixture): void {
+  const a = x.sourceActor;
+  const records: object[] = [a, a.pos, a.savedGroundPos, x.cue0State, x.cueState, x.gates,
+    x.normalLifecycleState, x.inputState, x.machineState, x.chargeState, x.tier, x.rateBorg,
+    x.sourceClock, x.statusState, x.attributeState, x.historyState, x.movementState,
+    x.actorControlState, x.readyState, x.actionRequest!.getActorBinding(x.actor)];
+  for (const [index, bypass] of ['cue9', 'ready', 'control-mask', 'movement3'].entries()) {
+    a.ubCue = bypass === 'cue9' ? 9 : 0;
+    a.controlWord = bypass === 'control-mask' ? 0x41 : 0x40;
+    x.movementState.byte661 = bypass === 'movement3' ? 3 : 0;
+    x.actorControlState.byte490 = bypass === 'ready' ? 2 : 0; x.actorControlState.short49a = 1;
+    const saved = records.map(owner => ({owner, keys: Reflect.ownKeys(owner)}))
+      .map(row => ({...row, values: row.keys.map(key => Reflect.get(row.owner, key))}));
+    rejects(() => x.runRawPrefix(index + 2, 128, 40), 'known incomplete cue0');
+    rejects(() => x.runRawPrefix(index + 2, 256, 80), 'epoch');
+    check(saved.every(({owner, keys, values}) => keys.length === Reflect.ownKeys(owner).length &&
+      keys.every((key, n) => Object.is(Reflect.get(owner, key), values[n]))),
+      'incomplete cue0 blocks changed cue, ready, control and movement gates before raw ingestion or any tick effect');
+  }
+  for (const run of [() => x.normalLifecycle.updateActor(x.actor), () => x.normalLifecycle.dispatchCue(x.actor),
+    () => x.normalLifecycle.updateCueState(x.actor), () => x.normalLifecycle.updateCountdown(x.actor)])
+    rejects(run, 'known incomplete cue0');
+}
+export function runCue0LifecycleHydratedCompositionTests(): void {
+  {
+    const old = rotationDampingHydratedControlFixture(); old.stageState.lifecycle18 = 0; old.sourceActor.ubCue = 0;
+    check(old.normalLifecycle.getCue0Runtime() === undefined && !Object.hasOwn(old, 'cue0'),
+      'historical normal/rotation graph does not acquire a cue0 owner or byte732 defaults');
+    rejects(() => old.runRawPrefix(1, 64, 20), 'target8005913c');
+    checkNormalCommonTailUnreached(old);
+  }
+  {
+    const x = cue0LifecycleHydratedControlFixture(), a = x.sourceActor, n = x.normalLifecycleState;
+    check(x.normalLifecycle.getCue0Runtime() === x.cue0 && x.cue0.getActualActor(x.actor) === a &&
+      x.query.getActualActor(x.actor) === a && x.query.getHistoryBinding(x.actor) === x.historyState &&
+      x.cue0.getWorldBinding(x.actor) === x.header && x.cue0.getMovementBinding(x.actor) === x.movementState &&
+      x.cue0.getAttributeBinding(x.actor) === x.attributeState && x.status.getAttributeBinding(x.actor) === x.attributeState &&
+      x.cue0.getMappingActor(x.actor) === x.sourceClock && x.cue0.getHistoryBinding(x.actor) === x.historyState &&
+      x.cue0.getTerrainRuntime() === x.query && x.cue0.getTerrainGlobals() === x.stageBounds.getTerrainGlobals() &&
+      x.cue0.getCueRuntime() === x.cues && x.normalLifecycle.getCueRuntime() === x.cues &&
+      x.cue0.getCueBinding(x.actor) === x.cueState && x.cue0.getDispatchBinding(x.actor) === x.gates &&
+      Object.isSealed(x.cue0State) && Reflect.ownKeys(x.cue0State).join() === 'byte732',
+      'cue0 is a genuine opt-in and terrain retains the same actual actor/history; only missing732 has a sealed owner');
+    a.pos.y = 1002; a.yVel = 7; a.steerYaw = 1;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'movement3 cue0 completes real upper/full1b then4c8/rotation/countdown/action/rates/ceiling');
+    retained(); checkChargeConsumedEpoch(x);
+    check(a.ubCue === 0x1b && a.fbCue === 0x1b && a.ubState === -17 && a.fbState === -18 &&
+      a.prevUbState === -12 && a.prevFbState === -13 && x.cueState.byte7ce === 0 && x.cueState.byte7cf === 202 &&
+      [x.cueState.byte544, x.cueState.byte545, x.cueState.byte546, x.cueState.byte547, x.cueState.byte588,
+        x.cueState.byte541, x.cueState.byte542, x.cueState.byte543, a.fbPhase].every(value => value === 0) &&
+      a.onLand754 === null && x.gates.marker1db3 === 0 && a.steerYaw === 0 && n.short6bc === 1 &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === 4 && x.sourceClock.timestep1dc8 === 1.875 &&
+      x.rateBorg.slowHitTimer === 1 && x.rateBorg.hasteHitTimer === 2 && a.pos.y === 994 && Object.is(a.yVel, 0),
+      'real cue table signed states and descending phase clears precede old-clock rotation and common-tail clock replacement/ceiling');
+    check(x.cue0State.byte732 === 0 && x.landCalls() === 0 && a.savedGroundPos.y === 2 && x.worldMatrix[7] === 95,
+      'movement3 returns before terrain and no later matrix/history/landing callback runs implicitly');
+    // Subsequent consumers remain explicit on the same retained graph.
+    a.stateTimer = 8; x.statusState.field690 = 8; x.cells[2].timer = 8; x.updateStatus();
+    check(a.stateTimer === 6.125 && x.statusState.field690 === 6.125 && x.cells[2].timer === 6.125 && n.short6bc === 1,
+      'explicit source status/ammo consume resulting mapping and actor rates without repeating cue0');
+    const attached = x.joints.getBinding(x.joint).aobj7c!, clock = x.feedback.getAObj(attached), callbacks = x.receiverTracks.length;
+    x.dispatch.updatePart(x.actor, 1);
+    check(clock.rate === 1.875 && x.receiverTracks.length > callbacks && x.worldMatrix[7] === 95,
+      'actual AObj/FObj/JObj animation advances only on explicit playback after cue0 completion');
+    x.header.mode4a0 = 1; x.updateNormal();
+    check(x.targetMatrices[1]!.every((value, index) => Object.is(value, x.worldMatrix[index])) &&
+      x.targetActor.pos.y === -99 && a.savedGroundPos.y === 2 && n.short6bc === 1,
+      'explicit normal-matrix traversal copies linked matrices without duplicating actor/history/cue0 state');
+    const moves = x.movementCallCount(); x.refreshAttributes(); x.snapshot();
+    check(x.movementCallCount() === moves + 1 && x.historyState.previousStepHeight6d4 === a.stepHeight &&
+      a.savedGroundPos.y === a.pos.y && n.short6bc === 1 && x.tier.timerFrames === 7,
+      'explicit attributes/movement/history consume retained results without an extra lifecycle or input epoch');
+    x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor), {frame: 0, group: 0, action: 1, transition: 2, mode: 0});
+    check(x.joints.getBinding(x.joint).aobj7c !== attached && n.short6bc === 1,
+      'later genuine archive setup replaces playback without implicitly redispatching cue0');
+  }
+  for (const gate of ['control40', 'world2'] as const) {
+    const x = cue0LifecycleHydratedControlFixture(0), a = x.sourceActor;
+    if (gate === 'world2') {a.controlWord = 0; x.header.mode4a0 = 2;}
+    x.movementState.field670 = NaN; x.attributeState.field674 = NaN; x.cue0State.byte732 = NaN;
+    a.stepHeight = NaN; a.yVel = NaN;
+    if (gate === 'control40') x.header.mode4a0 = NaN;
+    check(x.cue0.updateTerrain(x.actor) === 0, 'genuine terrain gate returns literal0 before unused terrain/step/attribute/cue0 fields');
+    if (gate === 'control40') x.header.mode4a0 = 0;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '800699d8'); retained(); checkCue0CommonUnreached(x);
+    check(a.ubCue === 0 && a.fbCue === 202 && Number.isNaN(x.cue0State.byte732),
+      'terrain gate completion is not a fake completed cue0: real next699d8 boundary precedes4c8 and all later consumers');
+  }
+  for (const failure of ['upper-first', 'upper-last', 'full-first', 'full-late', 'table'] as const) {
+    const x = cue0LifecycleHydratedControlFixture(), a = x.sourceActor, c = x.cueState;
+    if (failure === 'table') a.cueTable = new Int8Array(32);
+    else Object.defineProperty(failure === 'upper-last' ? x.gates : c,
+      failure === 'upper-first' ? 'byte7ce' : failure === 'upper-last' ? 'marker1db3' :
+        failure === 'full-first' ? 'byte7cf' : 'byte541', {writable: false});
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), failure === 'table' ? 'indexed byte' : 'non-writable'); retained();
+    checkCue0CommonUnreached(x); checkChargeConsumedEpoch(x);
+    const upperStarted = failure !== 'upper-first' && failure !== 'table';
+    const upperComplete = failure === 'full-first' || failure === 'full-late';
+    check(a.ubCue === (upperStarted ? 0x1b : 0) && a.ubState === (upperStarted ? -17 : -12) &&
+      c.byte7ce === (upperStarted ? 0 : 19) && x.gates.marker1db3 === (upperComplete ? 0 : 1) &&
+      a.fbCue === (failure === 'full-late' ? 0x1b : 202) &&
+      c.byte7cf === (failure === 'full-late' ? 202 : 20) && a.fbPhase === 23 &&
+      c.byte543 === (failure === 'full-late' ? 0 : 13) && c.byte542 === (failure === 'full-late' ? 0 : 12) && c.byte541 === 11,
+      'genuine upper then full call failure retains exactly completed state/descending-byte prefixes and never reaches downstream calls');
+    checkCue0PermanentRefusal(x);
+  }
+  {
+    const x = cue0LifecycleHydratedControlFixture(0), a = x.sourceActor;
+    // Genuine gate returns0 and cue0 stops at699d8 without any cue/terrain
+    // stores. A fresh epoch may retry a different live movement input.
+    rejects(() => x.runRawPrefix(1, 64, 20), '800699d8');
+    x.movementState.byte661 = 3;
+    check(x.runRawPrefix(2, 66, 22) === undefined && a.ubCue === 0x1b && a.fbCue === 0x1b &&
+      x.normalLifecycleState.short6bc === 1 && x.tier.timerFrames === 6,
+      'pre-store terrain-gated refusal allows a fresh epoch and real cue3 recovery without replaying the consumed epoch');
+  }
+  {
+    const x = cue0LifecycleHydratedControlFixture();
+    const owners = [x.cue0State, x.attributeState, x.historyState, x.sourceActor.pos, x.sourceActor.savedGroundPos,
+      x.historyState.rotation76, x.historyState.preRotation1d6a, x.historyState.aimOrigin524, x.terrain];
+    for (const [index, owner] of owners.entries()) {
+      rejects(() => x.prefix.ingestRawDistancesAndRun(x.actor, index + 1, owner as never), 'raw input must not alias');
+      rejects(() => x.runRawPrefix(index + 1, 64, 20), 'epoch');
+    }
+    check(x.sourceActor.targetDistance760 === -760 && x.sourceActor.modelScale === 2 && x.tier.timerFrames === 8 &&
+      x.normalLifecycleState.short6bc === 2 && x.sourceActor.ubCue === 0 && x.cue0State.byte732 === 0,
+      'cue0 extension/attribute/history/position raw aliases consume epochs before ingress, input work or any source write');
+  }
+  {
+    const x = cue0LifecycleHydratedControlFixture(3, {}), a = x.sourceActor;
+    a.hoverOffset668 = NaN; a.stepHeight = NaN; x.attributeState.field674 = NaN; x.header.mode4a0 = NaN;
+    check(x.cue0.dispatchCue0(x.actor) === undefined && a.ubCue === 0x1b && a.fbCue === 0x1b &&
+      !Object.hasOwn(x.cue0State, 'byte732') && Number.isNaN(a.hoverOffset668),
+      'movement3 genuine cue calls skip absent732 and invalid terrain-only fields instead of prevalidating the unused branch');
+  }
+  for (const sentinel of ['upper', 'full', 'both'] as const) {
+    const x = cue0LifecycleHydratedControlFixture(), a = x.sourceActor;
+    if (sentinel !== 'full') x.cueTable[55] = -1;
+    if (sentinel !== 'upper') x.cueTable[54] = -1;
+    x.cue0.dispatchCue0(x.actor);
+    check(a.ubCue === (sentinel === 'full' ? 0x1b : 0) && a.fbCue === (sentinel === 'upper' ? 0x1b : 202) &&
+      x.cueState.byte7ce === (sentinel === 'full' ? 0 : 19) && x.cueState.byte7cf === (sentinel === 'upper' ? 202 : 20),
+      'cue0 ignores genuine independent sentinel0 results and still executes upper then full helper without fabricated table success');
+  }
+  for (const throughNormal of [false, true]) {
+    const x = cue0TerrainHydratedControlFixture(), a = x.sourceActor, retained = retainCeilingLifecycleCadence(x);
+    if (throughNormal) rejects(() => x.runRawPrefix(1, 64, 20), '800699d8');
+    else check(x.cue0.updateTerrain(x.actor) === 0, 'direct genuine terrain helper returns0 after actual ground snap');
+    retained();
+    check(a.pos.x === 101 && Object.is(a.pos.y, 0) && a.pos.z === 300 && a.savedGroundPos.y === 2 &&
+      a.hSpeed === 4 && a.slopeMode698 === 7 && x.cue0State.byte732 === 0 && a.ubCue === 0 && a.fbCue === 202,
+      'real3d6e4 flat floor yields source0 and writes only positionY before the ordinary terrain completion');
+    checkCue0CommonUnreached(x);
+    if (throughNormal) {checkChargeConsumedEpoch(x); checkCue0PermanentRefusal(x);}
+    else {
+      a.pos.y = 3;
+      check(x.cue0.updateTerrain(x.actor) === 0 && Object.is(a.pos.y, 0),
+        'completed direct helper clears only its own incomplete marker and may run again on live actor/terrain values');
+    }
+  }
+  for (const change of ['x', 'z', 'none'] as const) {
+    const x = cue0TerrainHydratedControlFixture(), a = x.sourceActor;
+    Object.assign(a.savedGroundPos, {x: 100, y: -20, z: 300});
+    Object.assign(a.pos, {x: change === 'x' ? 101 : 100, y: 2, z: change === 'z' ? 301 : 300});
+    rejects(() => x.runRawPrefix(1, 64, 20), '800699d8');
+    check(a.pos.x === 100 && a.pos.z === 300 && a.pos.y === (change === 'none' ? 0 : -20) &&
+      a.hSpeed === 4 && a.slopeMode698 === 7 && x.historyState.previousStepHeight6d4 === 0 &&
+      x.worldMatrix[7] === 95 && x.targetMatrices[1]![7] === -77,
+      'uphill source delta20>67410 restores exact oldXYZ only if X or subsequently Z differs; sameXZ retains snapped floorY');
+    checkCue0CommonUnreached(x); checkCue0PermanentRefusal(x);
+  }
+  for (const fault of ['rollback-x', 'rollback-z', 'old-z'] as const) {
+    const x = cue0TerrainHydratedControlFixture(), a = x.sourceActor;
+    Object.assign(a.savedGroundPos, {x: 100, y: -20, z: fault === 'old-z' ? NaN : 300});
+    Object.assign(a.pos, {x: 101, y: 2, z: 301});
+    if (fault !== 'old-z') Object.defineProperty(a.pos, fault === 'rollback-x' ? 'x' : 'z', {writable: false});
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === 'old-z' ? 'z: finite exact' : 'non-writable');
+    check(a.pos.x === (fault === 'rollback-x' ? 101 : 100) && a.pos.y === (fault === 'rollback-x' ? 0 : -20) &&
+      a.pos.z === 301 && a.hSpeed === 4 && a.slopeMode698 === 7,
+      'uphill rollback preserves lwz oldX/oldY then storeX/storeY then late oldZ/storeZ ordering after actual groundY');
+    checkCue0CommonUnreached(x); checkCue0PermanentRefusal(x);
+  }
+  for (const fault of ['missing732', '732', '674'] as const) {
+    const x = cue0TerrainHydratedControlFixture(fault === 'missing732' ? {} : {byte732: 0}), a = x.sourceActor;
+    a.savedGroundPos.y = 100;
+    if (fault === '732') x.cue0State.byte732 = NaN;
+    if (fault === '674') x.attributeState.field674 = NaN;
+    rejects(() => x.runRawPrefix(1, 64, 20), fault === '674' ? 'field674' : 'byte732');
+    check(Object.is(a.pos.y, 0) && a.pos.x === 101 && a.hSpeed === 4 && a.slopeMode698 === 7,
+      'actual groundY store precedes eager732 and674 loads even when drop would satisfy a C-style short-circuit; no restoredY or later arithmetic yet');
+    checkCue0CommonUnreached(x); checkCue0PermanentRefusal(x);
+  }
+  for (const activate of ['drop', 'positive732', 'negative732'] as const) {
+    const x = cue0TerrainHydratedControlFixture({byte732: activate === 'drop' ? 0 : activate === 'positive732' ? 1 : 255}), a = x.sourceActor;
+    if (activate === 'drop') a.savedGroundPos.y = 20;
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), '80068eb8 reached unsupported frsqrte'); retained();
+    check(a.pos.x === 101 && a.pos.y === 2 && a.pos.z === 300 && a.hSpeed === 4 && a.slopeMode698 === 7,
+      'drop or either signed nonzero732 restores pre-queryY before positive squared displacement refuses the real reciprocal-square-root instruction');
+    checkCue0CommonUnreached(x); checkCue0PermanentRefusal(x);
+  }
+  for (const branch of ['speed', 'negative-zero-speed', 'slope', 'zero-divisor', 'speed-read', 'speed-destination', 'slope-destination'] as const) {
+    const x = cue0TerrainHydratedControlFixture({byte732: 255}), a = x.sourceActor;
+    a.pos.x = a.savedGroundPos.x; a.hSpeed = branch === 'speed' || branch === 'negative-zero-speed' || branch === 'speed-destination' ? -1 : 4;
+    if (branch === 'negative-zero-speed') a.tierScale = -1;
+    if (branch === 'zero-divisor') a.tierScale = 0;
+    if (branch === 'speed-read') {a.tierScale = 0; a.hSpeed = NaN;}
+    if (branch === 'speed-destination') Object.defineProperty(a, 'hSpeed', {writable: false});
+    if (branch === 'slope-destination') Object.defineProperty(a, 'slopeMode698', {writable: false});
+    const expected = branch === 'zero-divisor' ? 'fdivs zero divisor' : branch === 'speed-read' ? 'hSpeed: finite exact' :
+      branch.endsWith('destination') ? 'non-writable' : branch === 'slope' ? '8006a5a4' : '800452a0';
+    const retained = retainCeilingLifecycleCadence(x);
+    rejects(() => x.runRawPrefix(1, 64, 20), expected); retained();
+    check(a.pos.y === 2 && a.slopeMode698 === (branch === 'slope' ? 30 : 7) &&
+      (branch === 'speed' ? Object.is(a.hSpeed, 0) : branch === 'negative-zero-speed' ? Object.is(a.hSpeed, -0) :
+        branch === 'speed-read' ? Number.isNaN(a.hSpeed) : a.hSpeed === (branch === 'speed-destination' ? -1 : 4)),
+      'zero norm loads tierScale then hSpeed before fdivs, retaining signed-zero speed or30f slope store only before its exact next atan/cue boundary');
+    checkCue0CommonUnreached(x); checkCue0PermanentRefusal(x);
+  }
+  {
+    const x = cue0TerrainHydratedControlFixture(), a = x.sourceActor;
+    Object.defineProperty(a.pos, 'y', {writable: false});
+    rejects(() => x.runRawPrefix(1, 64, 20), 'y: non-writable');
+    check(a.pos.y === 2 && a.ubCue === 0 && x.normalLifecycleState.short6bc === 2,
+      'readonly initial ground destination refuses after genuine read-only query with no cue0 source writes');
+    Object.defineProperty(a.pos, 'y', {writable: true}); x.movementState.byte661 = 3; a.controlWord = 0x40;
+    check(x.runRawPrefix(2, 66, 22) === undefined && a.ubCue === 0x1b && x.normalLifecycleState.short6bc === 1,
+      'first-store refusal has no unfinished source effects and permits a fresh epoch after destination repair');
+  }
+  {
+    const x = cue0LifecycleHydratedControlFixture();
+    for (const fake of [{...x.cue0}, {dispatchCue0() {}}, null, undefined])
+      rejects(() => createSourceActorNormalLifecycleRuntime({world: x.world, movement: x.movement, status: x.status,
+        cues: x.cues, cue0: fake as never}), 'cue0 requires genuine source runtime');
+    for (const key of ['terrain', 'cues'] as const) {
+      const sources = {world: x.world, movement: x.movement, attribute: x.attributes, terrain: x.query, cues: x.cues};
+      rejects(() => createSourceActorCue0LifecycleRuntime({...sources, [key]: {...sources[key]}}),
+        `${key} requires genuine source runtime`);
+    }
+    check(x.sourceActor.ubCue === 0 && x.normalLifecycleState.short6bc === 2 && x.tier.timerFrames === 8,
+      'copied methods and successful callback lookalikes cannot establish genuine cue0/terrain/cue source contracts');
+  }
+  for (const fault of ['attribute', 'cues'] as const) {
+    const x = readyLifecycleHydratedControlFixture(), cue0 = createSourceActorCue0LifecycleRuntime({
+      world: x.world, movement: x.movement, attribute: x.attributes, terrain: x.query, cues: x.cues});
+    cue0.bindActor(x.actor, {byte732: 0});
+    const normal = createSourceActorNormalLifecycleRuntime({world: x.world, movement: x.movement,
+      status: fault === 'attribute' ? {...x.status, getAttributeBinding() {return {...x.attributeState};}} : x.status,
+      ...(fault === 'cues' ? {} : {cues: x.cues}), cue0});
+    rejects(() => normal.bindActor(x.actor, {callback4c8: 0x8006f950, callback4dc: null, short6bc: 2, byte1d9: 0}),
+      fault === 'attribute' ? 'cue0/status attribute' : 'same genuine cue runtime');
+    check(x.sourceActor.targetDistance760 === -760 && x.sourceActor.ubCue === 201 && x.tier.timerFrames === 8 &&
+      cue0.getActualActor(x.actor) === x.sourceActor,
+      'normal admission rejects a second attribute snapshot or absent shared cue source before source calls or raw ingress');
+  }
+  {
+    const other = cue0LifecycleHydratedControlFixture(), supplied = chargeInputHydration();
+    supplied.normalLifecycle = {callback4c8: 0x8006f950, callback4dc: null, short6bc: 2, byte1d9: 0};
+    supplied.cue0 = {byte732: 0}; supplied.cue0TerrainGlobals = {...other.terrain};
+    rejects(() => chargeInputHydratedControlFixture(supplied), 'cue0/stage must share the same terrain-global owner');
+    check(other.sourceActor.targetDistance760 === -760 && other.sourceActor.ubCue === 0 && other.tier.timerFrames === 8,
+      'tick admission rejects a genuine query over field-identical but different8043625c storage; no stage/normal terrain copy is accepted');
+  }
+  for (const savedY of [-10, 10]) {
+    const x = cue0TerrainHydratedControlFixture(), a = x.sourceActor;
+    a.savedGroundPos.y = savedY;
+    rejects(() => x.runRawPrefix(1, 64, 20), '800699d8');
+    check(a.pos.x === 101 && Object.is(a.pos.y, 0) && a.pos.z === 300 && a.slopeMode698 === 7 && a.hSpeed === 4,
+      'delta exactly plus/minus retained674 uses strict comparisons, without uphill rollback or active ledge correction');
+    checkCue0CommonUnreached(x); checkCue0PermanentRefusal(x);
+  }
+  for (const selector of [0, 1]) {
+    const x = cue0LifecycleHydratedControlFixture(3, {byte732: 0}, tierLifecycleHydration(selector)), a = x.sourceActor;
+    const retained = retainCeilingLifecycleCadence(x);
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.tiers !== undefined && x.tier.tier === 17 &&
+      x.tier.timerFrames === 0 && x.tier.deltaAccum === 0 && x.normalLifecycleState.short6bc === 1 &&
+      a.ubCue === 0x1b && a.fbCue === 0x1b &&
+      x.sourceClock.timestep1dc8 === Math.fround(tierFloatFromBits(0x3f7ae148) * 0.9375),
+      'actual6817c/6826c expiry and5bab8 return through movement3 cue0 into common rates with the sole canonical tier/attribute owner');
+    retained(); checkChargeConsumedEpoch(x);
+    check(x.cue0.getAttributeBinding(x.actor) === x.tiers!.getAttributeBinding(x.actor),
+      'tier and cue0 consume the same retained attribute binding rather than admitting a second threshold or parameter owner');
+  }
+  {
+    const x = cue0LifecycleHydratedControlFixture(), a = x.sourceActor;
+    x.normalLifecycleState.callback4c8 = null;
+    rejects(() => x.runRawPrefix(1, 64, 20), '800590f8');
+    check(a.ubCue === 0x1b && a.fbCue === 0x1b && a.ubState === -17 && a.fbState === -18 &&
+      x.normalLifecycleState.short6bc === 2 && x.gates.marker1db3 === 0,
+      'real movement3 cue completion precedes the separate actual4c8 dispatch; its failure retains both completed cue resets');
+    checkNormalCommonTailUnreached(x);
+    x.normalLifecycleState.callback4c8 = 0x8006f950;
+    rejects(() => x.runRawPrefix(2, 66, 22), 'source table802d3300');
+    check(a.ubCue === 0x1b && x.normalLifecycleState.short6bc === 2 && x.tier.timerFrames === 6,
+      'next epoch honestly refuses unimplemented live cue1b instead of silently treating cue0 completion as a general dispatcher');
+    a.ubCue = 9; a.fbCue = 9;
+    check(x.runRawPrefix(3, 68, 24) === undefined && x.normalLifecycleState.short6bc === 1 && x.tier.timerFrames === 5,
+      'completed cue0 clears its own marker even when a later independent4c8 dispatch fails; repaired normal9 may run in a fresh epoch');
+  }
+  console.log('[actor-cue0-lifecycle-composition] PASS: genuine movement3 upper/full1b and complete4c8/rotation/rates/ceiling, real ground snap/uphill rollback/active ledge ordered refusals, eager732/674 and strict thresholds, permanent incomplete guards and raw aliases/epochs, canonical terrain/attribute/cue contracts, actual tier expiry and explicit downstream consumers; synthetic offline only, no producer/RAM/full-frame/replay/browser-playability claim');
 }
