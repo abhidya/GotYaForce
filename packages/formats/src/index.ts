@@ -13,3 +13,4 @@ export * as mdt from "./mdt.js";
 export * as mdlArc from "./mdl-arc.js";
 export * as hsdAnim from "./hsd-anim.js";
 export * as hitBin from "./hit-bin.js";
+export * as sourceTerrainGrid from "./source-terrain-grid.js";

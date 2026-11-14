@@ -1,3 +1,4 @@
+import {beginDoubleCloneReactionObservation,finalizeDoubleCloneReactionObservation} from './doubleCloneReactionObservation.js';
 import {stepDoubleNinjaXInput} from './doubleNinjaXInput.js';
 import {spawnSwitchingSource,stepSwitchingForcedMove} from './switchingProjectile.js';
 import {isSourceSwitchingX,stepSwitchingXInput} from './switchingX.js';
@@ -1153,6 +1154,7 @@ class BattleImpl implements Battle {
     // returns: ordinary movement, airborne/hit/death frames also produce history.
     for (const b of all) {
       if (b.alive) b.romDriver?.beginFrame(b, this.state.frame);
+      beginDoubleCloneReactionObservation(b,this.state.frame);
     }
 
     // Source order: actor status/movement consumes the previous contact phase, then
@@ -1444,6 +1446,7 @@ class BattleImpl implements Battle {
         cpuHalvingEnabled: this.isChallengeMode,
       },
     );
+    for(const b of all)finalizeDoubleCloneReactionObservation(b,this.state.frame);
     const survivingProjectileUids = new Set(this.state.projectiles.map((projectile) => projectile.uid));
     this.projectileDespawns = projectilesBeforeStep.flatMap((projectile) => {
       if (survivingProjectileUids.has(projectile.uid) || !projectile.despawnReason) return [];

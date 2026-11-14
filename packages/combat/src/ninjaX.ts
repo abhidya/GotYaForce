@@ -12,10 +12,22 @@ import {createNinjaXStream,tickNinjaXStream,type NinjaXStream} from './ninjaXStr
 
 type Actor=RomActor&RomHelperScratch&{grounded?:boolean;stateMode?:number};
 export const isSourceNinjaX=(id:string):boolean=>id==='pl0000'||id==='pl000a'||id==='pl0003';
+export interface DoubleNinjaOwnerState {arm7c8:number;offset7b0:Vec3}
+// Source6f7c0/6f8d4 and6f88c access owner7c8/7b0 across actions. The ordinary
+// action cleanup must not own their lifetime. A fresh RomActor gets an unarmed
+// record on first ordinary-X use; this is not a charged producer or reset policy.
+const doubleOwners=new WeakMap<RomActor,DoubleNinjaOwnerState>();
+export function getDoubleNinjaOwnerState(a:RomActor):DoubleNinjaOwnerState|undefined{return doubleOwners.get(a);}
+function doubleOwner(a:RomActor):DoubleNinjaOwnerState|null{
+  if(a.borgNumber!==3)return null;
+  let owner=doubleOwners.get(a);
+  if(!owner){owner={arm7c8:0,offset7b0:{x:0,y:0,z:0}};doubleOwners.set(a,owner);}
+  return owner;
+}
 export interface NinjaXState {
-  /** Source7c8/7b0 fixture seam only. Live ordinary entry starts unarmed;
-   * clone lifecycle/rendering and the charged producer are NOT integrated. */
-  doubleClone: {arm7c8:number;offset7b0:Vec3}|null;
+  /** Reference to persistent owner storage, not action-local clone state.
+   * Charged arming, rendering and authoritative reaction reset remain unbound. */
+  doubleClone: DoubleNinjaOwnerState|null;
   targetUid:string|null;targetPoint:Vec3|null;noTargetLatch541:number;
   stream:NinjaXStream|null;streamMask:number;callbackCount:number;fireCount:number;
   resourceDenied:boolean;flags6e8:number;flags6e9:number;stateMode71d:number;
@@ -31,11 +43,12 @@ export function stepNinjaXInput(b:BorgRuntime,held:boolean){
 const states=new WeakMap<RomActor,NinjaXState>();
 export function getNinjaXState(a:RomActor):NinjaXState|undefined{return states.get(a);}
 export function prepareNinjaX(a:RomActor,targetUid:string|null,targetPoint:Vec3|null):NinjaXState{
-  const s:NinjaXState={doubleClone:a.borgNumber===3?{arm7c8:0,offset7b0:{x:0,y:0,z:0}}:null,targetUid,targetPoint:targetPoint?{...targetPoint}:null,noTargetLatch541:0,
+  const s:NinjaXState={doubleClone:doubleOwner(a),targetUid,targetPoint:targetPoint?{...targetPoint}:null,noTargetLatch541:0,
     stream:null,streamMask:0,callbackCount:0,fireCount:0,resourceDenied:false,flags6e8:0,flags6e9:0,
     stateMode71d:0,supportHeight6d0:null,lastGroundProbe:0,exitKind:null};
   states.set(a,s);return s;
 }
+/** End only the X action. Generic interruption is not evidence of source6f88c. */
 export function clearNinjaX(a:RomActor):void{states.delete(a);}
 const f=Math.fround;
 function probe(a:Actor,s:NinjaXState):0|1{

@@ -100,6 +100,9 @@ importers:
       '@gf/camera-math':
         specifier: workspace:*
         version: link:../camera-math
+      '@gf/formats':
+        specifier: workspace:*
+        version: link:../formats
       '@gf/physics':
         specifier: workspace:*
         version: link:../physics

@@ -1,3 +1,4 @@
+import {observeDoubleCloneAcceptedContact} from './doubleCloneReactionObservation.js';
 import {stepDoubleNinjaXInput} from './doubleNinjaXInput.js';
 import {isSourceSwitchingX,stepSwitchingXInput} from './switchingX.js';
 import {advanceSwitchingSource,createSwitchingSwapPass,stageSwitchingSwap,commitSwitchingSwapPass} from './switchingProjectile.js';
@@ -1644,6 +1645,8 @@ export function applyHit(
   if (__sourceCollisionDeferHandled.has(victim.uid)) {
     return 0;
   }
+
+  observeDoubleCloneAcceptedContact(victim,record,source?.attacker.uid??null);
 
   source?.onContactAccepted?.();
 

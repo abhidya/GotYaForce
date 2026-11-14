@@ -59,7 +59,10 @@ export function runNinjaProjectileSelfTest():void{
   assert(pr.ninjaSource?.kind==='primary','explicit armed fixture permits row2');
   const allocation=ninjaMuzzle(actor.pos,0,2,'pl0003');
   near(pr.pos.x,Math.fround(allocation.x+150),'allocation adds fixture offset once');
-  s.doubleClone!.offset7b0={x:-50,y:3,z:4};
+  clearNinjaX(actor);
+  const next=prepareNinjaX(actor,target.uid,target.pos);
+  assert(next!==s&&next.doubleClone===s.doubleClone,'new action references the same owner record');
+  next.doubleClone!.offset7b0={x:-50,y:3,z:4};
   advanceNinjaSource(pr,map);
   const current=ninjaMuzzle(owner.pos,owner.rotY,2,'pl0003');
   near(pr.ninjaSource.flight.previousPos.x,Math.fround(current.x-50),'phase0 resamples current offset rather than allocation snapshot');

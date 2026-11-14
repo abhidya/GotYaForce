@@ -9,7 +9,7 @@
 import { battleStateForSelfcheck, createBattle } from './battle.js';
 import { RomDriverBridge } from './bridge.js';
 import { STATE } from './constants.js';
-import { getNinjaXState } from './ninjaX.js';
+import { getNinjaXState, getDoubleNinjaOwnerState } from './ninjaX.js';
 import type { Vec3 } from './rom/actor.js';
 import type { BorgStats } from './stats.js';
 import { emptyInput, type Projectile, type StageCollision } from './types.js';
@@ -584,7 +584,47 @@ function testOwnerDeathAndFamilyIsolation(): void {
   }
 }
 
+/** Storage-only fixture adjunct: injected arm is NOT a charged producer or
+ * proof that the source clone survives a hit. Authoritative6f88c stays unbound. */
+function testPersistentOwnerStorage():void {
+  const t=setup({ownerReplacement:true});
+  t.press();waitRelease(t);
+  const action=getNinjaXState(t.driver.actor)!;
+  const owner=action.doubleClone!;
+  owner.arm7c8=2;owner.offset7b0={x:123,y:7,z:-9};
+  t.inputs.p1.special=false;waitIdle(t);
+  assert(!getNinjaXState(t.driver.actor),'actual finish removes only action state');
+  assert(getDoubleNinjaOwnerState(t.driver.actor)===owner&&owner.arm7c8===2,
+    'ordinary finish retains owner record without implementing a reset policy');
+  t.press();
+  assert(getNinjaXState(t.driver.actor)?.doubleClone===owner,'actual restart reuses owner record');
+  // Interrupt before another release, so this storage test never activates row2.
+  t.owner.state='hit';t.owner.stateTime=0;t.owner.cooldowns['hitstun']=20;t.tick();
+  assert(!getNinjaXState(t.driver.actor)&&getDoubleNinjaOwnerState(t.driver.actor)===owner,
+    'host interruption discards action state, not persistent owner storage');
+  same(owner.offset7b0,{x:123,y:7,z:-9},'cleanup does not normalize or replace owner displacement');
+  assert(owner.arm7c8===2&&t.events.every(e=>e.row!==2),'no blanket reset or charged activation added');
+  t.inputs.p1.special=false;t.owner.hp=0;t.owner.state='death';t.owner.stateTime=STATE.DEATH_DURATION-1;
+  let replacement=t.owner;
+  for(let i=0;i<360;i++){
+    t.tick();replacement=t.state.borgs.find(b=>b.ownerPlayer==='p1'&&b!==t.owner&&b.alive)??t.owner;
+    if(replacement!==t.owner&&replacement.state!=='spawn')break;
+  }
+  assert(replacement!==t.owner&&replacement.romDriver instanceof RomDriverBridge,'actual redeployment creates replacement bridge');
+  const replacementDriver=replacement.romDriver;
+  assert(replacementDriver.actor!==t.driver.actor&&!getDoubleNinjaOwnerState(replacementDriver.actor),
+    'replacement cannot inherit dead owner storage');
+  t.press();
+  const fresh=getNinjaXState(replacementDriver.actor)?.doubleClone;
+  assert(fresh&&fresh!==owner&&fresh.arm7c8===0,'replacement ordinary X begins unarmed');
+  same(fresh.offset7b0,{x:0,y:0,z:0},'replacement displacement is fresh');
+  const independent=setup();independent.press();
+  assert(getNinjaXState(independent.driver.actor)?.doubleClone!==owner,
+    'separate Battle with repeated identity cannot share owner record');
+}
+
 export function runDoubleNinjaXBattleSelfTest(): void {
+  testPersistentOwnerStorage();
   testAdmissionAndRelease();
   testShortHoldsAndChargedBoundary();
   testChargedActionInputLifetime();
