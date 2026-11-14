@@ -70,6 +70,11 @@ function setup(make:Make,profile:unknown=configured,hasSelection=true) {
   return Object.assign(x,{stack,vector,aim,processor,pos,data,mappingActor,matrix,matrixIds,id,bytes,frame,outerSources,profileSource:profileSource!,hasSelection});
 }
 type Fixture=ReturnType<typeof setup>;
+/** Explicit zero-candidate source input for later genuine actor compositions.
+ * This does not replace the selector result or execute any outer frame. */
+export function createActorSecondaryNullTestFixture(make:Make) {
+  return setup(make,configured,false);
+}
 const tail='unknown/non-owned admission actor';
 let injectedAdmissionDepth=0;
 function failAdmission(x:Fixture):void {
