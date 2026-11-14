@@ -53,6 +53,8 @@
 import {isSourceActorCue0LifecycleRuntime, hasIncompleteSourceActorCue0Lifecycle,
   type SourceActorCue0LifecycleRuntime} from './actor-cue0-lifecycle.js';
 import type {RomActor} from './actor.js';
+import {requireCompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
+import {isPendingSourceActorFrameClaim, type SourceActorFrameLifecycleRuntime} from './actor-frame-lifecycle.js';
 import {isSourceActorCommandAdmissionRuntime, hasIncompleteSourceActorCommandAdmission,
   type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorCue0TailRuntime, hasIncompleteSourceActorCue0Tail,
@@ -83,6 +85,12 @@ export interface SourceActorTickRawDistances {
   readonly targetDistance760: number;
   readonly horizontalDistance764: number;
 }
+export interface SourceActorFrameRawDistances {
+  readonly boundary: 'externally-decoded-pre55568-raw';
+  readonly targetDistance760: number;
+  readonly horizontalDistance764: number;
+}
+type SourceActorRawDistances = SourceActorTickRawDistances | SourceActorFrameRawDistances;
 export interface SourceActorTickPrefixSources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor' | 'getActorBinding'> &
     Partial<Pick<SourceActorWorldMatrixRuntime, 'getMappingActor'>>;
@@ -111,6 +119,35 @@ export interface SourceActorTickPrefixRuntime {
   /** A fully admitted ready or normal branch returns source void; other reached gaps refuse.
    * This does not execute the enclosing actor frame or produce raw target inputs. */
   ingestRawDistancesAndRun(identity: symbol, epoch: number, raw: SourceActorTickRawDistances): void;
+}
+/** Internal one-time composition capability. No source callbacks are supplied by
+ * callers, and it is deliberately absent from the public tick runtime surface. */
+export interface SourceActorTickFrameOwners {
+  readonly actual: RomActor; readonly borg: object; readonly world: object;
+  readonly status: object; readonly mapping: object;
+}
+export interface SourceActorTickFrameCapability {
+  beginHostIngress(epoch: number): void;
+  ingestRawDistances(raw: SourceActorFrameRawDistances): void;
+  beginSourceFrame(): void;
+  runActor(): void;
+}
+const frameClaims = new WeakMap<object, (id: symbol, expected: SourceActorTickFrameOwners) => SourceActorTickFrameCapability>();
+const incompleteFrames = new WeakSet<object>();
+export function isSourceActorTickPrefixRuntime(value: unknown): value is SourceActorTickPrefixRuntime {
+  return value !== null && typeof value === 'object' && frameClaims.has(value);
+}
+export function hasIncompleteSourceActorFrame(value: unknown): boolean {
+  return value !== null && typeof value === 'object' && incompleteFrames.has(value);
+}
+/** Internal frame-lifecycle join. The WeakMap resolves the genuine implementation,
+ * never a caller-provided method. All owners are checked before the permanent claim. */
+export function claimSourceActorTickFrame(frame: SourceActorFrameLifecycleRuntime, runtime: SourceActorTickPrefixRuntime, id: symbol,
+  expected: SourceActorTickFrameOwners): SourceActorTickFrameCapability {
+  if (!isPendingSourceActorFrameClaim(frame, id, expected)) fail('frame claim requires active genuine frame binding');
+  const claim = frameClaims.get(runtime);
+  if (!claim) fail('frame requires the genuine source tick runtime, not callback effects');
+  return claim(id, expected);
 }
 const claimedActors = new WeakSet<object>();
 /** Genuine permanent claim, not a mutable property a bridge adapter can copy. */
@@ -189,6 +226,8 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     return (id: symbol): unknown => {const result = Reflect.apply(fn, receiver, [id]); check(); return result;};
   };
   const worldActor = capture('world', 'getActualActor'), worldBinding = capture('world', 'getActorBinding');
+  const frameMapping = Object.getOwnPropertyDescriptor(own(sources, 'world'), 'getMappingActor') === undefined
+    ? undefined : capture('world', 'getMappingActor');
   const gaugeActor = capture('gauges', 'getActualActor'), gaugeBorg = capture('gauges', 'getActualBorg');
   const gaugeStatus = capture('gauges', 'getStatusBinding'), gaugeBinding = capture('gauges', 'getActorBinding');
   const updateGauge = capture('gauges', 'updateActor');
@@ -305,6 +344,9 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     binding: Partial<SourceActorTickPrefixBinding>; lastEpoch: number;
   }
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
+  // Retain the existing mapping header when supplied, including graphs without
+  // normal/rate/ceiling. Mapping-less historical prefixes remain admitted.
+  const canonicalMappings = new Map<symbol, object>();
   const entry = (id: symbol): Entry => {const actor = actors.get(id); if (!actor) fail('unknown/non-owned tick-prefix actor'); return actor;};
   const stable = (get: (id: symbol) => unknown, id: symbol, expected: object, where: string): void => {
     if (get(id) !== expected) fail(`${where}: owner changed its actual record or returned asynchronously`);
@@ -750,7 +792,83 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     if (key in actual || !Object.isExtensible(actual)) fail(`${key}: absent raw-input destination cannot be established`);
     Object.defineProperty(actual, key, {value, writable: true, enumerable: true, configurable: true}); check();
   };
-  return Object.freeze({
+  const frameOwned = new WeakSet<object>();
+  const assertSourceComplete = (id: symbol, actor: Entry): void => {
+    const mapping = canonicalMappings.get(id);
+    if (mapping) {requireCompleteSourceActorAnimationTransition(mapping); check();}
+    if (mapping && frameMapping!(id) !== mapping) fail('canonical source mapping owner changed');
+    // A prior6bc expiry may already have stored zero before an unsupported4dc.
+    // Never let a later ready branch silently skip that outstanding source call.
+    if (hasIncompleteSourceActorCommandAdmission(actor.actual)) fail('actual actor has known incomplete command admission; source continuation is unsupported');
+    if (hasIncompleteSourceActorCue0Tail(actor.actual)) fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
+    if (hasIncompleteSourceActorInputTesters(actor.actual)) fail('actual actor has known incomplete input testers; source continuation is unsupported');
+    if (hasIncompleteSourceActorCue0Lifecycle(actor.actual)) fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
+    if (hasIncompleteSourceActorRotationDamping(actor.actual)) fail('actual actor has a known incomplete rotation damping; source continuation is unsupported');
+    if (hasIncompleteSourceActorNormalCueSync(actor.actual)) fail('actual actor has a known incomplete cue synchronization; source continuation is unsupported');
+    if (hasIncompleteSourceActorNormalCountdown(actor.actual)) fail('actual actor has a known incomplete6bc expiry; source continuation is unsupported');
+    if (assertNormalComplete && assertNormalComplete(id) !== undefined) fail('normal completion assertion returned unexpectedly');
+  };
+  const consumeEpoch = (actor: Entry, epoch: number): void => {
+    const next = integer(epoch, 0, Number.MAX_SAFE_INTEGER, 'pre59068 raw-input epoch');
+    if (next <= actor.lastEpoch) fail('pre59068 raw-input epoch already consumed or out of order');
+    actor.lastEpoch = next; // Once attempted, never retry or silently normalize twice.
+  };
+  const prepareRaw = (id: symbol, raw: SourceActorRawDistances, boundary: SourceActorRawDistances['boundary']): void => {
+    const actor = entry(id);
+    assertSourceComplete(id, actor);
+    owners(id, actor); noLegacyDistances(actor.actual); record(raw, 'explicit decoded raw distances');
+    assertCommandOwners(id, actor, raw); assertCueControlOwners(id, actor, raw);
+    if (raw === canonicalMappings.get(id) || (actor.normal?.tail && (nestedTailStorage(actor).includes(raw) || teamOwners(actor.normal.tail, id).includes(raw) || actor.normal.tail.descriptors().includes(raw) ||
+        raw === actor.normal.tail.global || raw === actor.normal.tail.data || raw === actor.normal.tail.chargeBinding)) || assigned.has(raw) || (actor.normal?.testers && testerDescriptors(actor.normal.testers, id).includes(raw)) || (actor.normal?.rotation && rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id).includes(raw)) || tierOwners(id, actor).includes(raw) || raw === actor.normal?.cue0Terrain || raw === actor.ceiling?.globals || raw === actor.ceiling?.terrain ||
+        raw === read(actor.world, 'scale58') || raw === read(actor.borg, 'paramTier'))
+      fail('raw input must not alias a bound source owner');
+    if (read(raw, 'boundary') !== boundary) fail(`explicit externally decoded ${boundary === 'externally-decoded-pre59068-raw' ? 'pre59068' : 'pre55568'} raw boundary required`);
+    ingest(actor.actual, 'targetDistance760', f(raw, 'targetDistance760'));
+    ingest(actor.actual, 'horizontalDistance764', f(raw, 'horizontalDistance764'));
+  };
+  const runSource = (id: symbol, raw: SourceActorRawDistances): void => {
+    const actor = entry(id);
+    // Actual instruction order starts here. Each divisor is a fresh B4 load;
+    // real5bab8 cannot change B4 until BOTH division/store pairs finish.
+    const distance760 = f(actor.actual, 'targetDistance760'), scale760 = f(actor.actual, 'modelScale');
+    write(actor.actual, 'targetDistance760', div32(distance760, scale760));
+    const distance764 = f(actor.actual, 'horizontalDistance764'), scale764 = f(actor.actual, 'modelScale');
+    write(actor.actual, 'horizontalDistance764', div32(distance764, scale764));
+    if (updateGauge(id) !== undefined) fail('genuine gauge stage returned asynchronously or unexpectedly');
+    // Genuine67a70 prefix: source raw byte1db is explicitly sign-extended.
+    write(actor.actual, 'controlWord', (integer(read(actor.actual, 'controlWord'), 0, 0xffffffff, 'controlWord') & ~0x100000) >>> 0);
+    write(actor.binding, 'byte598', 0);
+    const contact = integer(read(actor.actual, 'supportContact1db'), 0, 255, 'supportContact1db') << 24 >> 24;
+    if (contact !== 0) fail('80067a70 nonzero support reached unsupported actual pointer1e4 ownership');
+    if (!updateStage) fail('800590ac reached unsupported source call 80059e58');
+    if (updateStage(id) !== undefined) fail('genuine stage-boundary stage returned asynchronously or unexpectedly');
+    if (!updateInput) fail('800590b4 reached unsupported source call 800685c0');
+    if (updateInput(id) !== undefined) fail('genuine input prefix returned asynchronously or unexpectedly');
+    if (!updateControl) fail('800590bc reached unsupported source call 8005a190');
+    const controlResult = updateControl(id);
+    if (controlResult !== 0 && controlResult !== 1) fail('bounded genuine actor control returned unexpectedly or asynchronously');
+    if (controlResult === 0) {
+      if (!updateNormal) {
+        // Historical boundary: signed5e4 is read before the unresolved table.
+        const cue = integer(read(actor.actual, 'ubCue'), 0, 255, 'ubCue');
+        const dispatchAddress = (0x802d3300 + ((cue << 24 >> 24) << 2)) >>> 0;
+        fail(`800590e0 reached unsupported source table802d3300 entry ${dispatchAddress.toString(16)} before indirect call800590e8`);
+      }
+      if (updateNormal(id) !== undefined) fail('genuine normal lifecycle returned asynchronously or unexpectedly');
+      assertTeamOwners(id, actor, raw); assertCommandOwners(id, actor, raw);
+    }
+    // Both source branches meet here only after every reached call completes.
+    if (!updateAction) fail('80059110 reached unsupported source call 8005a298');
+    if (updateAction(id) !== undefined) fail('genuine action request returned asynchronously or unexpectedly');
+    if (!updateRates) fail('80059118 reached unsupported source call 8005a378');
+    if (updateRates(id) !== undefined) fail('genuine actor rates returned asynchronously or unexpectedly');
+    if (!updateCeiling) fail('80059120 reached unsupported source call 80068030');
+    const ceilingResult = updateCeiling(id);
+    if (ceilingResult !== 0 && ceilingResult !== 1) fail('genuine ceiling tail returned asynchronously or unexpectedly');
+    // Source59068 ignores68030's native result and returns void at59134.
+    return;
+  };
+  const runtime: SourceActorTickPrefixRuntime = {
     bindActor(id: symbol, actualBorg: SourceActorGaugeBorgOwner,
       initial: Readonly<Partial<SourceActorTickPrefixBinding>>): void {guard(() => {
       if (typeof id !== 'symbol' || actors.has(id)) fail('new symbol actor identity required');
@@ -905,7 +1023,13 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
         ...(normalOwnersAtBind === undefined ? {} : {normal: normalOwnersAtBind}),
         ...(ceilingOwnersAtBind === undefined ? {} : {ceiling: ceilingOwnersAtBind}),
         ...(ready === undefined ? {} : {ready}), binding: Object.seal(binding), lastEpoch: -1};
-      readyOwners(id, actor); ceilingOwners(id, actor); normalOwners(id, actor); tierOwners(id, actor); check(); actors.set(id, actor);
+      readyOwners(id, actor); ceilingOwners(id, actor); normalOwners(id, actor); tierOwners(id, actor);
+      const mapping = frameMapping === undefined ? undefined : record(frameMapping(id), 'canonical source mapping');
+      if (mapping && ((actor.normal && actor.normal.mapping !== mapping) ||
+          (actor.rates && actor.rates.mapping !== mapping) || (actor.ceiling && actor.ceiling.mapping !== mapping)))
+        fail('canonical source lifecycle mapping owners differ');
+      check(); actors.set(id, actor);
+      if (mapping) canonicalMappings.set(id, mapping);
       records.forEach(value => assigned.add(value)); assigned.add(binding); claimedActors.add(actual);
     });},
     getActualActor(id: symbol) {return entry(id).actual;},
@@ -913,67 +1037,50 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     getActorBinding(id: symbol) {return entry(id).binding;},
     ingestRawDistancesAndRun(id: symbol, epoch: number, raw: SourceActorTickRawDistances): void {return guard(() => {
       const actor = entry(id);
-      const next = integer(epoch, 0, Number.MAX_SAFE_INTEGER, 'pre59068 raw-input epoch');
-      if (next <= actor.lastEpoch) fail('pre59068 raw-input epoch already consumed or out of order');
-      actor.lastEpoch = next; // Once attempted, never retry or silently normalize twice.
-      // A prior6bc expiry may already have stored zero before an unsupported4dc.
-      // Never let a later ready branch silently skip that outstanding source call.
-      if (hasIncompleteSourceActorCommandAdmission(actor.actual)) fail('actual actor has known incomplete command admission; source continuation is unsupported');
-      if (hasIncompleteSourceActorCue0Tail(actor.actual)) fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
-      if (hasIncompleteSourceActorInputTesters(actor.actual)) fail('actual actor has known incomplete input testers; source continuation is unsupported');
-      if (hasIncompleteSourceActorCue0Lifecycle(actor.actual)) fail('actual actor has a known incomplete cue0 lifecycle; source continuation is unsupported');
-      if (hasIncompleteSourceActorRotationDamping(actor.actual)) fail('actual actor has a known incomplete rotation damping; source continuation is unsupported');
-      if (hasIncompleteSourceActorNormalCueSync(actor.actual)) fail('actual actor has a known incomplete cue synchronization; source continuation is unsupported');
-      if (hasIncompleteSourceActorNormalCountdown(actor.actual)) fail('actual actor has a known incomplete6bc expiry; source continuation is unsupported');
-      if (assertNormalComplete && assertNormalComplete(id) !== undefined) fail('normal completion assertion returned unexpectedly');
-      owners(id, actor); noLegacyDistances(actor.actual); record(raw, 'explicit decoded raw distances');
-      assertCommandOwners(id, actor, raw); assertCueControlOwners(id, actor, raw);
-      if ((actor.normal?.tail && (nestedTailStorage(actor).includes(raw) || teamOwners(actor.normal.tail, id).includes(raw) || actor.normal.tail.descriptors().includes(raw) ||
-          raw === actor.normal.tail.global || raw === actor.normal.tail.data || raw === actor.normal.tail.chargeBinding)) || assigned.has(raw) || (actor.normal?.testers && testerDescriptors(actor.normal.testers, id).includes(raw)) || (actor.normal?.rotation && rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id).includes(raw)) || tierOwners(id, actor).includes(raw) || raw === actor.normal?.cue0Terrain || raw === actor.ceiling?.globals || raw === actor.ceiling?.terrain ||
-          raw === read(actor.world, 'scale58') || raw === read(actor.borg, 'paramTier'))
-        fail('raw input must not alias a bound source owner');
-      if (read(raw, 'boundary') !== 'externally-decoded-pre59068-raw') fail('explicit externally decoded pre59068 raw boundary required');
-      ingest(actor.actual, 'targetDistance760', f(raw, 'targetDistance760'));
-      ingest(actor.actual, 'horizontalDistance764', f(raw, 'horizontalDistance764'));
-      // Actual instruction order starts here. Each divisor is a fresh B4 load;
-      // real5bab8 cannot change B4 until BOTH division/store pairs finish.
-      const distance760 = f(actor.actual, 'targetDistance760'), scale760 = f(actor.actual, 'modelScale');
-      write(actor.actual, 'targetDistance760', div32(distance760, scale760));
-      const distance764 = f(actor.actual, 'horizontalDistance764'), scale764 = f(actor.actual, 'modelScale');
-      write(actor.actual, 'horizontalDistance764', div32(distance764, scale764));
-      if (updateGauge(id) !== undefined) fail('genuine gauge stage returned asynchronously or unexpectedly');
-      // Genuine67a70 prefix: source raw byte1db is explicitly sign-extended.
-      write(actor.actual, 'controlWord', (integer(read(actor.actual, 'controlWord'), 0, 0xffffffff, 'controlWord') & ~0x100000) >>> 0);
-      write(actor.binding, 'byte598', 0);
-      const contact = integer(read(actor.actual, 'supportContact1db'), 0, 255, 'supportContact1db') << 24 >> 24;
-      if (contact !== 0) fail('80067a70 nonzero support reached unsupported actual pointer1e4 ownership');
-      if (!updateStage) fail('800590ac reached unsupported source call 80059e58');
-      if (updateStage(id) !== undefined) fail('genuine stage-boundary stage returned asynchronously or unexpectedly');
-      if (!updateInput) fail('800590b4 reached unsupported source call 800685c0');
-      if (updateInput(id) !== undefined) fail('genuine input prefix returned asynchronously or unexpectedly');
-      if (!updateControl) fail('800590bc reached unsupported source call 8005a190');
-      const controlResult = updateControl(id);
-      if (controlResult !== 0 && controlResult !== 1) fail('bounded genuine actor control returned unexpectedly or asynchronously');
-      if (controlResult === 0) {
-        if (!updateNormal) {
-          // Historical boundary: signed5e4 is read before the unresolved table.
-          const cue = integer(read(actor.actual, 'ubCue'), 0, 255, 'ubCue');
-          const dispatchAddress = (0x802d3300 + ((cue << 24 >> 24) << 2)) >>> 0;
-          fail(`800590e0 reached unsupported source table802d3300 entry ${dispatchAddress.toString(16)} before indirect call800590e8`);
-        }
-        if (updateNormal(id) !== undefined) fail('genuine normal lifecycle returned asynchronously or unexpectedly');
-        assertTeamOwners(id, actor, raw); assertCommandOwners(id, actor, raw);
-      }
-      // Both source branches meet here only after every reached call completes.
-      if (!updateAction) fail('80059110 reached unsupported source call 8005a298');
-      if (updateAction(id) !== undefined) fail('genuine action request returned asynchronously or unexpectedly');
-      if (!updateRates) fail('80059118 reached unsupported source call 8005a378');
-      if (updateRates(id) !== undefined) fail('genuine actor rates returned asynchronously or unexpectedly');
-      if (!updateCeiling) fail('80059120 reached unsupported source call 80068030');
-      const ceilingResult = updateCeiling(id);
-      if (ceilingResult !== 0 && ceilingResult !== 1) fail('genuine ceiling tail returned asynchronously or unexpectedly');
-      // Source59068 ignores68030's native result and returns void at59134.
-      return;
+      if (frameOwned.has(actor.actual)) fail('actor is exclusively owned by source frame lifecycle; direct tick ingress is unsupported');
+      consumeEpoch(actor, epoch); prepareRaw(id, raw, 'externally-decoded-pre59068-raw'); runSource(id, raw);
     });},
-  });
+  };
+  frameClaims.set(runtime, (id, expected) => guard(() => {
+    const actor = entry(id);
+    if (frameOwned.has(actor.actual)) fail('actor already has a source frame owner');
+    assertSourceComplete(id, actor); owners(id, actor);
+    if (expected.actual !== actor.actual || expected.borg !== actor.borg || expected.world !== actor.world ||
+        expected.status !== actor.status || !frameMapping || frameMapping(id) !== expected.mapping)
+      fail('frame canonical actual/Borg/world/status/mapping owners differ');
+    if ((actor.normal && actor.normal.mapping !== expected.mapping) ||
+        (actor.rates && actor.rates.mapping !== expected.mapping) ||
+        (actor.ceiling && actor.ceiling.mapping !== expected.mapping)) fail('frame canonical lifecycle mapping differs');
+    let prepared: SourceActorFrameRawDistances | undefined, begun = false, attempted = false, hostPending = false;
+    const ready = (): void => {
+      if (begun || incompleteFrames.has(actor.actual)) fail('actual actor has an incomplete source frame; continuation is unsupported');
+      assertSourceComplete(id, actor); owners(id, actor);
+      if (frameMapping!(id) !== expected.mapping) fail('frame mapping owner changed');
+    };
+    const capability = Object.freeze({
+      beginHostIngress(epoch: number): void {guard(() => {
+        // Prior source-frame failures refuse before any new host boundary. Other
+        // ingress failures consume their attempted epoch before owner/alias checks.
+        if (begun || incompleteFrames.has(actor.actual)) fail('actual actor has an incomplete source frame; continuation is unsupported');
+        consumeEpoch(actor, epoch); prepared = undefined; hostPending = true;
+      });},
+      ingestRawDistances(raw: SourceActorFrameRawDistances): void {guard(() => {
+        if (!hostPending) fail('frame raw ingress requires a consumed input epoch');
+        hostPending = false; ready(); prepareRaw(id, raw, 'externally-decoded-pre55568-raw'); prepared = raw;
+      });},
+      beginSourceFrame(): void {guard(() => {
+        ready(); if (!prepared) fail('frame requires explicitly prepared raw input');
+        begun = true; incompleteFrames.add(actor.actual);
+      });},
+      runActor(): void {guard(() => {
+        if (!begun || !prepared || attempted) fail('frame59068 stage requires one begun frame and cannot be replayed');
+        attempted = true;
+        if (frameMapping!(id) !== expected.mapping) fail('frame mapping owner changed');
+        assertSourceComplete(id, actor); owners(id, actor); noLegacyDistances(actor.actual);
+        runSource(id, prepared);
+      });},
+    });
+    check(); frameOwned.add(actor.actual); return capability;
+  }));
+  return Object.freeze(runtime);
 }

@@ -1,3 +1,7 @@
+import {createSourceActorJointMappingRuntime, type SourceActorJointMappingHeader} from './actor-joint-mapping.js';
+import {createSourceJObjAnimationRuntime} from './jobj-animation.js';
+import {createSourceJointAnimationFeedbackRuntime} from './joint-animation-feedback.js';
+import {markIncompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
 import {createSourceActorInputPrefixRuntime} from './actor-input-prefix.js';
 import {createSourceActorTickPrefixRuntime, isSourceActorTickPrefixClaimedActor,
   type SourceActorTickRawDistances, type SourceActorTickPrefixBinding} from './actor-tick-prefix.js';
@@ -22,18 +26,20 @@ const raw = (targetDistance760 = 12, horizontalDistance764 = 10): SourceActorTic
 /** Real5bab8 executes, with isolated actual owner records behind getters.
  * The attached graph separately supplies real world/status owners. No Proxy,
  * accessor execution or fake callee success is used to claim source ordering. */
-function fixture(defer = false) {
-  const id = Symbol('tick-prefix actor'), actual = Object.assign(createRomActor(), {collisionScale: 7});
+function fixture(defer = false, sourceMapping?: {id: symbol; header: SourceActorJointMappingHeader}) {
+  const id = sourceMapping?.id ?? Symbol('tick-prefix actor'), actual = Object.assign(createRomActor(), {collisionScale: 7});
   actual.modelScale = 2; actual.controlWord = 0x80100041;
   const borg = {downGaugeBase: 100, downGauge: 7, paramTier: {tier: 16, deltaAccum: 7, timerFrames: 3}};
   const state = {field7d8: 44}, scale = {x: 9, y: 8, z: 7}, worldState = {scale58: scale};
   const hooks: {worldActor?: () => unknown; world?: () => unknown; statusActor?: () => unknown;
-    borg?: () => unknown; status?: () => unknown} = {};
+    borg?: () => unknown; status?: () => unknown; mapping?: () => unknown} = {};
   const world = {
     getActualActor(key: symbol) {check(this === world && key === id, 'world actor receiver/identity');
       return (hooks.worldActor ? hooks.worldActor() : actual) as typeof actual;},
     getActorBinding(key: symbol) {check(this === world && key === id, 'world binding receiver/identity');
       return (hooks.world ? hooks.world() : worldState) as ReturnType<SourceActorWorldMatrixRuntime['getActorBinding']>;},
+    ...(sourceMapping ? {getMappingActor(key: symbol) {check(this === world && key === id, 'world mapping receiver/identity');
+      return (hooks.mapping ? hooks.mapping() : sourceMapping.header) as SourceActorJointMappingHeader;}} : {}),
   };
   const status = {
     getActualActor(key: symbol) {check(this === status && key === id, 'status actor receiver/identity');
@@ -259,6 +265,33 @@ export function runActorTickPrefixSelfTests(): void {
     const joined = createSourceActorTickPrefixRuntime({...x.sources, inputPrefix});
     rejects(() => joined.bindActor(x.id, x.borg, {}), 'input Borg');
     check(!isSourceActorTickPrefixClaimedActor(x.actual), 'mismatched input owner never claims tick');
+  }
+  {
+    // A genuine mapping header exists even though this bounded tick graph has
+    // no normal/rate/ceiling or55568 frame. Its shared animation poison is not
+    // bypassed merely because the outer frame was never attached.
+    const unsupported = (): never => {throw Error('unexpected mapping operation');};
+    const joints = createSourceJObjAnimationRuntime(), feedback = createSourceJointAnimationFeedbackRuntime(joints);
+    const mapping = createSourceActorJointMappingRuntime(joints, feedback,
+      {interpretAObj: unsupported, animateRObjs: unsupported, animateDObjs: unsupported}, {convertEulerToQuaternion: unsupported});
+    const parts = Array.from({length: 2}, () => Array.from({length: 4}, () => mapping.createPart(
+      {frame0c: 0, duration24: 0, segment2d: 0, complete2e: 0, mode2f: 0, mirror30: 0},
+      {descriptor00: null, scaleIndex32: 0, jointBank33: 0, poseBuffer35: 0})));
+    const id = mapping.createActor({descriptor4b0: null, jointCount1d90: 0, boundary1d91: 0, boundary1d92: 0,
+      boundary1d93: 0, jointBank1db4: null, jointBank1db8: null, timestep1dc8: 1}, {parts, poses: [[], []]});
+    const header = mapping.getActor(id), x = fixture(false, {id, header});
+    markIncompleteSourceActorAnimationTransition(header);
+    rejects(() => x.run(0), 'incomplete mode1 operation');
+    check(!Object.hasOwn(x.actual, 'targetDistance760') && !Object.hasOwn(x.actual, 'horizontalDistance764'),
+      'standalone tick rejects animation poison before raw stores');
+    equal(x.actual.controlWord, 0x80100041, 'animation poison cannot clear support flags');
+    equal(x.borg.paramTier.timerFrames, 3, 'animation poison cannot update gauge');
+    rejects(() => x.run(0), 'epoch already consumed');
+    // Replacing the producer with an unpoisoned copy cannot erase the retained
+    // canonical header's incomplete marker.
+    x.hooks.mapping = () => ({...header});
+    rejects(() => x.run(1), 'incomplete mode1 operation');
+    check(!Object.hasOwn(x.actual, 'targetDistance760'), 'clean copy cannot bypass retained poison');
   }
   console.log('[actor-tick-prefix-test] explicit raw-input epochs, real gauge prefix, support clears and honest refusals passed');
 }

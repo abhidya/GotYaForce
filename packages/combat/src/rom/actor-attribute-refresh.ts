@@ -62,6 +62,9 @@ export interface SourceActorAttributeRefreshSources {
 }
 export interface SourceActorAttributeRefreshRuntime {
   getActualActor(identity: symbol): RomActor;
+  getMappingActor(identity: symbol): object;
+  getMovementBinding(identity: symbol): object;
+  getMovementRuntime(): SourceActorAttributeRefreshSources['movement'];
   bindActor(identity: symbol, initial: Readonly<Partial<SourceActorAttributeRefreshBinding>>): void;
   getActorBinding(identity: symbol): Partial<SourceActorAttributeRefreshBinding>;
   bindDescriptor(identity: symbol, initial: Readonly<Partial<SourceActorAttributeDescriptorBinding>>): void;
@@ -76,6 +79,10 @@ const ROW_DESTINATIONS = ['field814', 'field818', 'field81c', 'field820', 'field
   'field82c', 'field830', 'field834', 'field838', 'field83c', 'field840', 'field844', 'field848', 'field84c'] as const;
 const ACTOR_FLOATS = ['field674', 'field770', ...ROW_SOURCES.filter((key): key is Exclude<typeof key, number> => typeof key === 'string'),
   ...ROW_DESTINATIONS] as const;
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceActorAttributeRefreshRuntime(value: unknown): value is SourceActorAttributeRefreshRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
+}
 function fail(reason: string): never {
   throw Error(`[actor-attribute-refresh] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
@@ -120,6 +127,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
     if (value === null || typeof value !== 'object' || value instanceof Promise) fail(`${where}: synchronous actual owned record required`);
     return value;
   };
+  const movementRuntime = own(sources, 'movement') as SourceActorAttributeRefreshSources['movement'];
   const worldActor = capture('world', 'getActualActor'), mappingActor = capture('mapping', 'getActor');
   const mappingDescriptor = capture('mapping', 'getDescriptor'), movementActor = capture('movement', 'getActualActor');
   const movementBinding = capture('movement', 'getActorBinding'), updateMovement = capture('movement', 'updateActor');
@@ -154,7 +162,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
     if (movementActor(id) !== actor.actual || movementBinding(id) !== actor.movement) fail('movement owner changed its actual record');
     return actor.movement;
   };
-  return Object.freeze({
+  const runtime: SourceActorAttributeRefreshRuntime = {
     bindActor(id: symbol, initial: Readonly<Partial<SourceActorAttributeRefreshBinding>>): void {guard(() => {
       if (typeof id !== 'symbol') fail('actor identity must be a symbol');
       if (actors.has(id)) fail('actor already bound');
@@ -173,6 +181,9 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
       for (const value of records) assigned.add(value);
     });},
     getActualActor(id: symbol) {return actorEntry(id).actual;},
+    getMappingActor(id: symbol) {return actorEntry(id).mapping;},
+    getMovementBinding(id: symbol) {return actorEntry(id).movement;},
+    getMovementRuntime() {return movementRuntime;},
     getActorBinding(id: symbol) {return actorEntry(id).binding;},
     bindDescriptor(id: symbol, initial: Readonly<Partial<SourceActorAttributeDescriptorBinding>>): void {guard(() => {
       if (typeof id !== 'symbol') fail('descriptor identity must be a symbol');
@@ -238,5 +249,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
       movement(id, actor);
       if (updateMovement(id) !== undefined) fail('movement effect must complete synchronously and return undefined');
     });},
-  });
+  };
+  genuineRuntimes.add(runtime);
+  return Object.freeze(runtime);
 }

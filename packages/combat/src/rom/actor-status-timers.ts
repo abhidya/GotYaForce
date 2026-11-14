@@ -84,6 +84,10 @@ const FLOATS = ['field690', 'field69c', 'field6a0', 'field6a4', 'field1dcc', 'fi
 const BYTES = ['byte6fc', 'byte7de', 'byte71c', 'byte656', 'byte593', 'byte594', 'byte596',
   'byte707', 'byte708', 'bytea8', 'bytea9', 'byteaa', 'byteab', 'byteac', 'bytead', 'byte747', 'byte7d4', 'byte6fd', 'byte702'] as const;
 const SHORTS = ['short736', 'short738', 'short73a', 'short272', 'short282', 'short284', 'short6b6'] as const;
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceActorStatusTimersRuntime(value: unknown): value is SourceActorStatusTimersRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
+}
 function fail(reason: string): never {
   throw Error(`[actor-status-timers] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
@@ -195,7 +199,7 @@ export function createSourceActorStatusTimersRuntime(sources: SourceActorStatusT
       }
     }
   };
-  return Object.freeze({
+  const runtime: SourceActorStatusTimersRuntime = {
     bindActor(id: symbol, actualBorg: SourceActorStatusBorgOwner,
       initial: Readonly<Partial<SourceActorStatusTimersBinding>>,
       ammoSlots: readonly [SourceActorStatusAmmoSlot, SourceActorStatusAmmoSlot, SourceActorStatusAmmoSlot]): void {guard(() => {
@@ -368,5 +372,7 @@ export function createSourceActorStatusTimersRuntime(sources: SourceActorStatusT
         if (timer >= 0) write(s, 'field8c8', addSourceFloat32(timer, f(s, 'field1dcc')));
       } else write(s, 'field8c8', 0);
     });},
-  });
+  };
+  genuineRuntimes.add(runtime);
+  return Object.freeze(runtime);
 }

@@ -61,6 +61,10 @@ export interface SourceJointAnimationFeedbackRuntime {
   capturePoseAndFrame(part: symbol, joint: symbol, pose: symbol, effects: SourceJointPoseEffects): void;
 }
 const partKeys = ['frame0c', 'duration24', 'segment2d', 'complete2e', 'mode2f', 'mirror30'] as const;
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceJointAnimationFeedbackRuntime(value: unknown): value is SourceJointAnimationFeedbackRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
+}
 function fail(reason: string): never {
   throw Error(`[joint-feedback] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
@@ -113,7 +117,7 @@ export function createSourceJointAnimationFeedbackRuntime(joints: SourceJObjAnim
     for (const key of keys) {const value = own(initial, key, false); f32(value, key); copied[key] = value;}
     return Object.seal(copied) as unknown as T;
   };
-  return Object.freeze({
+  const runtime: SourceJointAnimationFeedbackRuntime = Object.freeze({
     createAObj(initial: SourceAObj): symbol {
       enter();
       try {
@@ -204,4 +208,5 @@ export function createSourceJointAnimationFeedbackRuntime(joints: SourceJObjAnim
       } finally {busy = false;}
     },
   });
+  genuineRuntimes.add(runtime); return runtime;
 }

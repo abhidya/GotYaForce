@@ -17,10 +17,17 @@ export interface SourceAnimationArchiveBankSources {
   archives: Pick<SourceArchiveJointSetupRuntime, 'getPartBinding' | 'getDescriptor'>;
 }
 export interface SourceAnimationArchiveBankRuntime {
+  getActualArchives(): SourceAnimationArchiveBankSources['archives'];
+  getActualMetadata(): SourceAnimationArchiveBankSources['metadata'];
+  getActualMapping(): SourceAnimationArchiveBankSources['mapping'];
   createPointerTable(entries: readonly (symbol | null)[]): symbol;
   pointerAt(root: symbol, index: number): symbol;
   getPointerTable(root: symbol): (symbol | null)[];
   resolveArchive(part: symbol): -1 | 0 | 1;
+}
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceAnimationArchiveBankRuntime(value: unknown): value is SourceAnimationArchiveBankRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
 }
 function fail(reason: string): never {throw Error(`[animation-archive-bank] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);}
 function own(record: unknown, key: string, writable = false): unknown {
@@ -72,7 +79,10 @@ export function createSourceAnimationArchiveBankRuntime(sources: SourceAnimation
   };
   const loadArchive = (part: symbol) => pointer(own(partArchive(part), 'descriptor04'));
   const selector = (part: symbol, key: string): number => integer(own(invoke(metadata, metadataGet, [part]), key), 0, 255, key);
-  return Object.freeze({
+  const runtime: SourceAnimationArchiveBankRuntime = Object.freeze({
+    getActualArchives() {return archives as SourceAnimationArchiveBankSources['archives'];},
+    getActualMetadata() {return metadata as SourceAnimationArchiveBankSources['metadata'];},
+    getActualMapping() {return mapping as SourceAnimationArchiveBankSources['mapping'];},
     createPointerTable(entries: readonly (symbol | null)[]): symbol {
       enter(); try {
         if (!Array.isArray(entries)) fail('decoded pointer array required');
@@ -112,4 +122,5 @@ export function createSourceAnimationArchiveBankRuntime(sources: SourceAnimation
       } finally {busy = false;}
     },
   });
+  genuineRuntimes.add(runtime); return runtime;
 }

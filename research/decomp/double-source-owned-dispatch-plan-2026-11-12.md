@@ -4727,8 +4727,8 @@ live actor constructor, or runtime pointer-driven archive read is supplied.
 ### Next actual playback boundary
 
 Source55568 still needs its outer schedule: marker578=2;55dcc;5568c;59068;
-position snapshot; actual4bc; saved signed full-body5da; marker578=1 and live
-upper-state dispatch; marker578=0 and saved full-state dispatch; marker578=2;
+position snapshot; actual4bc; capture upper5db then full5da; marker578=1 and
+captured upper-state dispatch; marker578=0 and saved full-state dispatch; marker578=2;
 actual4c0;55ee4; conditional position restore;5b880. Marker578 is the existing
 animation-dispatch binding, not a new outer flag. Source-owned graph operations
 must be joined at these exact boundaries rather than inserted as extra refreshes.
@@ -4752,3 +4752,83 @@ Source mode1 setup487ec, mode1 playback4a00c and reached authored opcodes remain
 work. Later resource debit, projectile/clone allocation, source posthook and
 render scheduling are also unfinished. This checkpoint makes no full55568,
 sustained attack/clone behavior, production selection or browser-playability claim.
+
+
+## Source mode1 animation and outer-frame prefix, 2026-11-14
+
+The next bounded slice authenticates seven complete functions and seven scalar
+constants in both archived snapshots. All553 instructions and operands are
+represented, including the whole55568 envelope, setup487ec, playback4a00c,
+copy4b94c, blend4a8cc, three-component paired scale8020ba9c and quaternion
+slerp8020bf08. See [mode1/envelope evidence](actor-mode1-envelope-evidence-2026-11-14.md).
+This is static evidence plus bounded offline integration, not original execution,
+matching-decompilation MATCH, full action2 playback or browser acceptance.
+
+### Real mode1 operations
+
+Opcode01 mode1 can now reach actual487ec rather than being changed into mode0.
+A zero transition takes the source4871c fallback. A nonzero transition first
+copies the entire64-byte inline part to the opposite bank in eight ordered
+load/load/store/store pairs. Existing mapping, feedback, dispatch, attached,
+metadata, archive and setup records retain their canonical fields. Only the
+previously absent bytes34 and39..3f get explicit raw storage; none are defaulted.
+Destination33 is then updated, channel0 copies visibility history, and selected
+quaternion and translation poses are copied between the existing independent
+banks. A packed source word cannot partially write its component fields on a
+host readonly failure.
+
+The same source metadata/archive/mapping setup then prepares mode1, seeds its
+blend clock from the actual mapping1dc8, converts wrapped signed duration+1,
+and computes the exact RN00/NI0 fdivs/subtraction weight. No shadow clock or
+copied descriptor owner is introduced. Genuine direct runtime identities are
+reconciled; the older explicit lower animation-effect adapter contracts remain
+bounded requirements, not a proof of arbitrary transitive adapter behavior.
+
+Blend4a8cc updates translation before quaternion processing, using two actual
+paired vector scales and vector addition with separate single rounding. It
+performs the source hemisphere comparison and real linear branch of8020bf08.
+The strict threshold is0.9999899864196777; equality still reaches the unsupported
+nonlinear call8023cc8c. There is no host trig, identity shortcut, normalization,
+clamping or fused replacement. Successful slerp then performs the two-entry
+signed descriptor42/43 visibility selection, using old visibility only when
+weight>0.5. The actual GQR0 float/scale0 and finite RN00/NI0 domain is a host
+precondition, not an observed machine configuration.
+
+Playback4a00c increments elapsed08 then blendElapsed1c with two fresh1dc8 loads.
+The unfinished branch calls real mapping with flags0 before blending. On
+completion it adds the source overshoot to frame0c, calls real mapping with
+flags1, and only then stores mode0. It does not inspect linked36. The composed
+synthetic DAT witness exercises old-pose preservation, real archive/JObj/AObj/
+FObj replacement and feedback. With blend6 and timestep1, six updates reach
+mode0; the sixth may reattach/evaluate frame0, and the seventh genuinely advances
+the current AObj to frame1. Failed containing mode1 operations keep completed
+writes and block later setup/playback despite changed mode or readiness gates.
+
+### Actual55568 prefix, without skipped action dispatch
+
+A separate genuine frame runtime now joins the existing55dcc,5568c and59068
+operations on the same actual actor, Borg, world, attributes, movement, status,
+mapping and marker578 owners. Its explicitly tagged pre55568 raw-distance
+input is a host boundary before the first source write. The source sequence is
+marker578=2, attributes, status, control, then actual position20/24/28 snapshots.
+The next actual4bc family prehook remains a refusal. No hook, state machine,
+posthook,55ee4, conditional position restore or5b880 is invented or skipped.
+No465fc matrix refresh is inserted.
+
+The tick's private one-time frame claim is available only during a genuine
+frame binding with its exact private pending owner record. It permanently
+closes direct standalone tick ingress. Failed host preflights consume their
+epoch; once source execution begins, an incomplete frame cannot replay or be
+bypassed by a later ready/control branch. A prior incomplete mode1 operation
+also refuses before frame ingress. This remains an offline graph: the browser
+still uses its existing bridge/stepRomActor route.
+
+Next required work is actual4bc/Double6f7c0 with canonical582,58e,272 and
+persistent clone7c8 ownership, followed by authenticated UB0/full61/root/action2/
+variant/phase dispatch. The exact archived55568 instructions capture upper5db
+then full5da after the prehook and before marker1; full dispatch uses that saved
+full byte after upper returns. Phase0 still needs6d144,669d0,66a30 and the distinct
+677b0/3e0a8 ground path. General nonlinear quaternion interpolation, root-motion/
+mirrored mapping, later authored opcodes, posthooks, projectile/clone allocation
+and the render scheduler remain separate reached boundaries. This slice does
+not claim a playable clone or completed action2 lifecycle.

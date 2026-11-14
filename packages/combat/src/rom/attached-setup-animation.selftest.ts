@@ -1,4 +1,7 @@
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
+import {addSourceFloat32} from './source-float.js';
+import {createSourceActorAnimationTransitionRuntime} from './actor-animation-transition.js';
+import {createSourceActorFrameLifecycleRuntime, hasIncompleteSourceActorFrame} from './actor-frame-lifecycle.js';
 import type {BorgRuntime, WeaponCell} from '../types.js';
 import {NeoGredMeleeState} from '../neoGredMelee.js';
 import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
@@ -62,6 +65,15 @@ function check(ok: boolean, message: string): void {if (!ok) throw Error(`[attac
 function rejects(run: () => void, expected: string): void {
   let diagnostic = ''; try {run();} catch (e) {diagnostic = String(e);}
   check(diagnostic.includes(expected), `expected ${expected}, got ${diagnostic || 'success'}`);
+}
+/** New complete compositions opt into the genuine owners at factory time.
+ * Historical observer fixtures retain their original receiver/count assertions.
+ * This synchronous construction scope never patches a running source runtime. */
+let genuineCompositionConstruction = false;
+function constructGenuineComposition<T>(build: () => T): T {
+  const previous = genuineCompositionConstruction;
+  genuineCompositionConstruction = true;
+  try {return build();} finally {genuineCompositionConstruction = previous;}
 }
 const zeroEuler: SourceJointPoseEffects = {convertEulerToQuaternion(rotation, output) {
   if (![rotation.x, rotation.y, rotation.z].every(v => Object.is(v, 0))) throw Error('fixture supports positive zero Euler only');
@@ -341,7 +353,7 @@ function readyControlFixture(partNumber: 0 | 1 = 0, modelDat?: Uint8Array, poseC
     },
     finishPartOneSetup(actor: symbol) {check(this === readyAdapter, 'part1 adapter receiver'); ready.finishPartOneSetup(actor);},
   };
-  x.dispatch.bindSetupRuntime(readyAdapter);
+  x.dispatch.bindSetupRuntime(genuineCompositionConstruction ? ready : readyAdapter);
   return Object.assign(x, {control, targets, metadata, archiveBanks, ready, readyAdapter, readyHooks, commands, bank, selected, fallbackWrapper,
     initialAObj, mask, stream: targets.getStreamPart(x.actor, partNumber), waitControl: control.getPartBinding(x.actor, partNumber),
     begin: () => control.startStream(x.actor, mask, 0, 1)});
@@ -542,7 +554,7 @@ function attributeHydratedControlFixture(parameterShorts?: {field04: number; fie
       movementCalls++; x.movement.updateActor(id);
     },
   };
-  const attributes = createSourceActorAttributeRefreshRuntime({world: x.world, mapping: x.mapping, movement: movementObserver});
+  const attributes = createSourceActorAttributeRefreshRuntime({world: x.world, mapping: x.mapping, movement: genuineCompositionConstruction ? x.movement : movementObserver});
   attributes.bindDescriptor(descriptorIdentity, {field44: 2, field48: 0.5, field4c: 3, field50: 5, field54: 4});
   const parameter4ac = attributes.createParameterDescriptor({field74: 11, field78: 12, field7c: 13, ...parameterShorts});
   const initial: Partial<SourceActorAttributeRefreshBinding> = {byte87: 9, field674: -674, field770: -770, parameter4ac};
@@ -2813,6 +2825,8 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runCue0TailHydratedCompositionTests();
   runCommandAdmissionHydratedCompositionTests();
   runCue44LifecycleHydratedCompositionTests();
+  runMode1HydratedCompositionTests();
+  runFrameLifecycleHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -11094,4 +11108,421 @@ export function runCue44LifecycleHydratedCompositionTests(): void {
     checkCue44PermanentRefusal(x);
   }
   console.log('[actor-cue44-lifecycle-composition] PASS: real raw-input ordinary-X admission then next ground44 control epochs on canonical clock/status/cue owners; genuine terrain/tester/tail short circuits and upper5/mask prefix,588 first/equal/readonly ordering, air69210 and active5c080 boundaries, aliases/reentry/permanent poison and consumed epochs; synthetic decoded offline graph only, no action2 stream playback/full attack/retail replay/production claim');
+}
+
+/** Bind the complete second inline part, never a copied stand-in record. The
+ * otherwise-unused raw bytes are explicit synthetic inputs to the full40-byte
+ * source copy. Descriptor42/43 are supplied visibility data, not model topology. */
+function installHydratedTransition<T extends ReturnType<typeof modelHydratedControlFixture>>(x: T) {
+  const oldPartId = x.mapping.getLayout(x.actor).parts[1]![1]!;
+  x.setup.bindPart(oldPartId, {rewind26: -17, loop2c: 0});
+  x.archiveFront.bindPart(oldPartId, {descriptor04: x.wrapper});
+  x.dispatch.bindPart(oldPartId, {elapsed08: -18, previous10: -19, previous14: -20, linked36: 0});
+  x.metadata.bindPart(oldPartId, {selector2a: 21, selector2b: 22, auxiliary37: 23});
+  x.ready.bindPart(oldPartId, {group28: 24, action29: 25, bank31: 0, status38: 26,
+    field18: -27, field1c: -28, field20: -29});
+  const transitionSources = {mapping: x.mapping, feedback: x.feedback, dispatch: x.dispatch,
+    setup: x.ready, attached: x.setup, metadata: x.metadata, archives: x.archiveFront};
+  const transition = createSourceActorAnimationTransitionRuntime(transitionSources);
+  const raw = {byte34: 34, byte39: 39, byte3a: 40, byte3b: 41, byte3c: 42, byte3d: 43, byte3e: 44, byte3f: 45};
+  transition.bindPartRaw(x.partId, raw);
+  transition.bindPartRaw(oldPartId, {byte34: 134, byte39: 139, byte3a: 140, byte3b: 141, byte3c: 142, byte3d: 143, byte3e: 144, byte3f: 145});
+  transition.bindDescriptor(x.mapping.getActor(x.actor).descriptor4b0!, {byte42: 1, byte43: 1});
+  x.ready.bindTransitionRuntime(transition); x.dispatch.bindTransitionRuntime(transition);
+  const oldPose = x.feedback.getPose(x.mapping.getLayout(x.actor).poses[1]![1]!);
+  return Object.assign(x, {transitionSources, transition, oldPartId, oldPart: x.feedback.getPart(oldPartId), oldPose,
+    blendState: x.ready.getPartBinding(x.partId)});
+}
+function modeOneHydratedCompositionFixture() {
+  const dat = hydrationDatFixture(); new DataView(dat.buffer).setFloat32(0x44, 7);
+  const x = constructGenuineComposition(() => modelHydratedControlFixture(modelDatFixture(), dat));
+  x.begin(); // Real old animation at2, including attachment, packed FObj playback and pose capture.
+  x.mapping.getActor(x.actor).timestep1dc8 = 1;
+  const joined = installHydratedTransition(x);
+  // Actual opcode01 bytes select mode1, transition6 and frame0. The terminal
+  // relative wait stays unmet throughout the blend; it is not a callback trigger.
+  const bytes = Uint8Array.from([1, 0, 1, 1, 6, 0, 0, 0, 0, 3, 0, 7]);
+  const command = x.control.createStream(bytes);
+  return Object.assign(joined, {modeCommand: command,
+    beginModeOne: () => x.control.parseWaitRecord(x.actor, 2, command)});
+}
+function retainCompositionRecords(records: readonly object[]): () => void {
+  const saved = records.map(owner => ({owner, keys: Reflect.ownKeys(owner), values: Reflect.ownKeys(owner).map(key => Reflect.get(owner, key))}));
+  return () => check(saved.every(({owner, keys, values}) => Reflect.ownKeys(owner).length === keys.length &&
+    keys.every((key, index) => Object.is(Reflect.get(owner, key), values[index]))), 'failed source operation retains the recorded completed prefix');
+}
+function checkModeOnePermanentRefusal(x: ReturnType<typeof modeOneHydratedCompositionFixture>): void {
+  const retained = retainCompositionRecords([x.part, x.clocks, x.blendState, x.oldPart,
+    x.oldPose.translation, x.oldPose.quaternion, x.pose.translation, x.pose.quaternion]);
+  for (const run of [() => x.transition.copyPart(x.actor, 0, 1, 0), () => x.transition.blendPart(x.actor, 1, 0.5),
+    () => x.transition.updateModeOne(x.actor, 1), () => x.dispatch.updatePart(x.actor, 1),
+    () => x.ready.setupModeZero(x.actor, 1, {frame: 0, group: 0, action: 1, transition: 0, mode: 0})]) {
+    rejects(run, 'incomplete mode1'); retained();
+  }
+  if (Object.getOwnPropertyDescriptor(x.part, 'mode2f')!.writable) x.part.mode2f = 0;
+  x.dispatch.getActorBinding(x.actor).family1d88 = null;
+  const changed = retainCompositionRecords([x.part, x.clocks]);
+  rejects(() => x.dispatch.updatePart(x.actor, 1), 'incomplete mode1'); changed();
+  rejects(() => x.dispatch.setupPart(x.actor, 1, x.control.getActorBinding(x.actor),
+    {frame: 0, group: 0, action: 1, transition: 0, mode: 0}), 'incomplete mode1'); changed();
+}
+export function runMode1HydratedCompositionTests(): void {
+  {
+    const x = modeOneHydratedCompositionFixture(), old = {...x.pose.translation};
+    const oldQuaternion = {...x.pose.quaternion}, priorAttached = x.joints.getBinding(x.joint).aobj7c;
+    const oldFrame = x.part.frame0c, oldDuration = x.part.duration24, sourceArchive = x.archiveFront.getPartBinding(x.partId).descriptor04;
+    const raw = {...x.transition.getPartRaw(x.partId)};
+    x.beginModeOne();
+    const attached = x.joints.getBinding(x.joint).aobj7c!;
+    const aobj = x.feedback.getAObj(attached), current = x.joints.getJoint(x.joint);
+    check(attached !== priorAttached && x.part.mode2f === 1 && x.part.duration24 === 7 && x.part.frame0c === 0 &&
+      x.blendState.field18 === 7 && x.blendState.field1c === 1 && x.blendState.field20 === Math.fround(1 - Math.fround(1 / 7)) &&
+      aobj.frame === 0 && x.oldPart.frame0c === oldFrame && x.oldPart.duration24 === oldDuration,
+      'actual opcode01 selects genuine mode1 setup, full old-part copy, fresh archive AObj/FObjs and duration7');
+    check(x.oldPose !== x.pose && x.oldPose.translation !== x.pose.translation && x.oldPose.quaternion !== x.pose.quaternion &&
+      ['x', 'y', 'z'].every(key => Reflect.get(x.oldPose.translation, key) === Reflect.get(old, key)) &&
+      ['x', 'y', 'z', 'w'].every(key => Reflect.get(x.oldPose.quaternion, key) === Reflect.get(oldQuaternion, key)) &&
+      x.archiveFront.getPartBinding(x.oldPartId).descriptor04 === sourceArchive &&
+      Object.keys(raw).every(key => Reflect.get(x.transition.getPartRaw(x.oldPartId), key) === Reflect.get(raw, key)),
+      'nonempty old poses and every raw byte are copied without aliasing canonical old/source records');
+    const weight = x.blendState.field20;
+    check(x.pose.translation.x === addSourceFloat32(Math.fround(current.translation38 * Math.fround(1 - weight)), Math.fround(old.x * weight)) &&
+      x.pose.translation.x !== current.translation38 && x.oldPose.translation.x === old.x && x.pose.quaternion.w === 1 &&
+      x.metadata.getActorBinding(x.actor).byte1d94 === 3 && x.metadata.getActorBinding(x.actor).byte1d95 === 6,
+      'actual nonempty near-one quaternion and translation blend consumes new captured pose plus independent old pose');
+    const callbacks = x.receiverTracks.length;
+    for (let update = 1; update <= 6; update++) {
+      x.dispatch.updatePart(x.actor, 1);
+      check(x.part.frame0c === 0 && x.feedback.getAObj(x.joints.getBinding(x.joint).aobj7c!).frame === 0 && x.clocks.elapsed08 === update &&
+        x.part.mode2f === (update === 6 ? 0 : 1) && x.oldPose.translation.x === old.x &&
+        x.metadata.getActorBinding(x.actor).byte1d94 === (update < 3 ? 3 : 1),
+        `blend update${update} retains AObj frame0 and independent old pose until the sixth mode0 switch`);
+    }
+    check(x.receiverTracks.length === callbacks + 6 && x.part.complete2e === 0 && x.blendState.field1c === 7,
+      'sixth update genuinely reattaches/evaluates frame0 without advancing playback or completion');
+    x.dispatch.updatePart(x.actor, 1);
+    check(x.part.frame0c === 1 && x.feedback.getAObj(x.joints.getBinding(x.joint).aobj7c!).frame === 1 && x.clocks.elapsed08 === 7 && x.receiverTracks.length > callbacks &&
+      x.pose.translation.x === x.joints.getJoint(x.joint).translation38 && x.part.complete2e === 0,
+      'only seventh update reaches actual mode0 playback and feeds frame1 from the real attached AObj into the part');
+  }
+  {
+    const x = modeOneHydratedCompositionFixture(), retained = retainCompositionRecords([
+      x.oldPart, x.oldPose.translation, x.oldPose.quaternion, x.transition.getPartRaw(x.oldPartId)]);
+    const command = x.control.createStream(Uint8Array.from([1, 0, 1, 1, 0, 0, 0, 0, 0, 3, 0, 7]));
+    x.control.parseWaitRecord(x.actor, 2, command); retained();
+    check(x.part.mode2f === 0 && x.blendState.field18 === 0 && x.blendState.field1c === 0 && x.blendState.field20 === 0,
+      'mode1 request with transition0 takes real mode0 setup without copying or blending old bank');
+  }
+  {
+    const x = modeOneHydratedCompositionFixture();
+    const owners = (id: symbol) => [x.mapping.getPartBinding(id), x.feedback.getPart(id), x.dispatch.getPartBinding(id),
+      x.ready.getPartBinding(id), x.setup.getPartBinding(id), x.metadata.getPartBinding(id),
+      x.archiveFront.getPartBinding(id), x.transition.getPartRaw(id)];
+    const source = owners(x.partId), previous = owners(x.oldPartId);
+    source.forEach(Object.freeze);
+    const oldPose = retainCompositionRecords([x.oldPose.translation, x.oldPose.quaternion]);
+    x.transition.copyPart(x.actor, 0, 1, 1); oldPose();
+    check(source.every((record, index) => previous[index] !== record && Reflect.ownKeys(record).every(key =>
+      key === 'jointBank33' ? Reflect.get(previous[index]!, key) === 1 : Object.is(Reflect.get(previous[index]!, key), Reflect.get(record, key)))),
+      'complete40-byte copy reads readonly canonical source owners, preserving all fields and only replacing destination33');
+  }
+  {
+    const x = modeOneHydratedCompositionFixture(), visibility = x.metadata.getActorBinding(x.actor);
+    const descriptor = x.transition.getDescriptorBinding(x.mapping.getActor(x.actor).descriptor4b0!);
+    descriptor.byte42 = 0; descriptor.byte43 = 1;
+    x.beginModeOne();
+    check(visibility.byte1d94 === 5 && visibility.byte1d95 === 4,
+      'descriptor43 selects actual second visibility byte from old bank for weight greater than half');
+    x.transition.blendPart(x.actor, 1, 0.5);
+    check(visibility.byte1d95 === 2 && visibility.byte1d94 === 5,
+      'exact half selects current visibility through the same live descriptor and metadata owners');
+  }
+  {
+    const x = modeOneHydratedCompositionFixture(), visibility = x.metadata.getActorBinding(x.actor);
+    for (const bank of [0, 1]) {
+      const part = x.mapping.getLayout(x.actor).parts[bank]![0]!;
+      x.setup.bindPart(part, {rewind26: 0, loop2c: 0});
+      x.archiveFront.bindPart(part, {descriptor04: x.wrapper});
+      x.dispatch.bindPart(part, {elapsed08: bank, previous10: -1, previous14: -2, linked36: 0});
+      x.metadata.bindPart(part, {selector2a: 0, selector2b: 0, auxiliary37: 0});
+      x.ready.bindPart(part, {group28: 0, action29: 1, bank31: 0, status38: 0, field18: 0, field1c: 0, field20: 0});
+      x.transition.bindPartRaw(part, {byte34: 34, byte39: 39, byte3a: 40, byte3b: 41, byte3c: 42, byte3d: 43, byte3e: 44, byte3f: 45});
+    }
+    x.mapping.getActor(x.actor).boundary1d91 = 1;
+    const oldPose = retainCompositionRecords([x.oldPose.translation, x.oldPose.quaternion]);
+    x.transition.copyPart(x.actor, 0, 0, 1); oldPose();
+    check(visibility.byte1d76 === 1 && visibility.byte1d77 === 2,
+      'channel0 copyMode1 copies canonical visibility after full part copy while intentionally bypassing pose copy');
+    visibility.byte1d76 = 71; visibility.byte1d77 = 72;
+    x.transition.copyPart(x.actor, 1, 0, 1);
+    check(visibility.byte1d74 === 71 && visibility.byte1d75 === 72,
+      'reverse bank copy selects the actual opposite visibility source, not a fixed current-bank snapshot');
+  }
+  for (const fault of ['raw-read', 'packed-write', 'pose-write'] as const) {
+    const x = modeOneHydratedCompositionFixture(), destinationRaw = x.transition.getPartRaw(x.oldPartId);
+    const old38 = x.ready.getPartBinding(x.oldPartId).status38, old39 = destinationRaw.byte39;
+    const priorAttached = x.joints.getBinding(x.joint).aobj7c, initialMode = x.part.mode2f;
+    if (fault === 'raw-read') x.transition.getPartRaw(x.partId).byte3c = NaN;
+    if (fault === 'packed-write') Object.defineProperty(destinationRaw, 'byte3b', {writable: false});
+    if (fault === 'pose-write') Object.defineProperty(x.oldPose.translation, 'x', {writable: false});
+    rejects(x.beginModeOne, fault === 'raw-read' ? 'byte3c' : fault === 'packed-write' ? 'byte3b' : 'x: non-writable');
+    check(x.oldPart.frame0c === x.part.frame0c && x.oldPart.duration24 === x.part.duration24 &&
+      x.joints.getBinding(x.joint).aobj7c === priorAttached && x.part.mode2f === initialMode,
+      `${fault} keeps full earlier source-copy prefix and refuses before descriptor setup or new attachment`);
+    if (fault !== 'pose-write') check(x.ready.getPartBinding(x.oldPartId).status38 === old38 && destinationRaw.byte39 === old39 &&
+      x.mapping.getPartBinding(x.oldPartId).jointBank33 === 0,
+      'paired final word reads and atomic packed destination preserve all later bytes and precede33 overwrite');
+    else check(x.mapping.getPartBinding(x.oldPartId).jointBank33 === 1 && x.oldPose.quaternion.w === 1 && x.oldPose.translation.x === -1,
+      'pose refusal follows complete part/33 and quaternion stores, preserving the first unwritable translation');
+    checkModeOnePermanentRefusal(x);
+  }
+  {
+    const x = modeOneHydratedCompositionFixture(), oldAttached = x.joints.getBinding(x.joint).aobj7c;
+    Object.assign(x.pose.quaternion, {x: 1, y: 0, z: 0, w: 0});
+    rejects(x.beginModeOne, '8023cc8c');
+    check(x.part.mode2f === 1 && x.blendState.field18 === 7 && x.part.frame0c === 0 &&
+      x.joints.getBinding(x.joint).aobj7c !== oldAttached && x.oldPose.quaternion.x === 1 &&
+      x.pose.translation.x !== x.joints.getJoint(x.joint).translation38 && x.pose.quaternion.w === 1,
+      'nonlinear quaternion refusal retains real new attachment/frame0, old pose and completed translation blend without inventing slerp');
+    checkModeOnePermanentRefusal(x);
+  }
+  {
+    const x = modeOneHydratedCompositionFixture(); x.beginModeOne();
+    Object.defineProperty(x.blendState, 'field1c', {writable: false});
+    rejects(() => x.dispatch.updatePart(x.actor, 1), 'field1c: non-writable');
+    check(x.clocks.previous10 === 0 && x.clocks.previous14 === 0 && x.clocks.elapsed08 === 1 && x.blendState.field1c === 1 && x.part.frame0c === 0,
+      'dispatch snapshots and elapsed08 precede the reached readonly mode1 timer without advancing frame');
+    checkModeOnePermanentRefusal(x);
+  }
+  {
+    const x = modeOneHydratedCompositionFixture(), original = Object.getOwnPropertyDescriptor;
+    x.oldPart.frame0c = -22;
+    let caught = false, armed = true;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (armed && owner === x.part && key === 'duration24' && x.oldPart.frame0c === x.part.frame0c) {
+        armed = false;
+        try {x.transition.copyPart(x.actor, 0, 1, 0);} catch {caught = true;}
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(x.beginModeOne, 'caught same-runtime reentry');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(caught && x.oldPart.frame0c === x.part.frame0c && x.oldPart.duration24 === 99,
+      'caught reentry retains earlier word-pair copies and refuses before the duration/rewind pair stores');
+    checkModeOnePermanentRefusal(x);
+  }
+  {
+    const old = modelHydratedControlFixture(); old.begin();
+    rejects(() => old.dispatch.setupPart(old.actor, 1, old.control.getActorBinding(old.actor),
+      {frame: 0, group: 0, action: 1, transition: 6, mode: 1}), 'unsupported setup mode');
+    const x = modeOneHydratedCompositionFixture();
+    for (const key of ['dispatch', 'setup', 'mapping', 'feedback'] as const)
+      rejects(() => createSourceActorAnimationTransitionRuntime({...x.transitionSources, [key]: {...x.transitionSources[key]}}), 'genuine');
+    check(!genuineCompositionConstruction, 'genuine construction scope restores historical fixture selection even after new compositions');
+  }
+  {
+    const x = modeOneHydratedCompositionFixture(); x.beginModeOne();
+    const prior = {...x.pose.translation}; Object.defineProperty(x.pose.translation, 'y', {writable: false});
+    rejects(() => x.transition.blendPart(x.actor, 1, 0.5), 'y: non-writable');
+    check(x.pose.translation.x === prior.x && x.pose.translation.y === prior.y && x.pose.translation.z === prior.z,
+      'paired translation xy destination admission refuses readonly y before changing writable x or later z');
+    checkModeOnePermanentRefusal(x);
+  }
+  console.log('[actor-mode1-composition] PASS: genuine opcode01, full canonical old-part copy, nonempty archive/AObj/FObj pose blend, independent old pose and six-update mode0 boundary followed by real frame1 feedback; explicit synthetic DAT inputs, offline only');
+}
+
+/** Source row61/0 is an explicit authenticated Double witness. All other DAT,
+ * command and scalar inputs here remain synthetic, not retail actor hydration.
+ * Complete59068 is the existing genuine normal/cue/tester/tail/rate graph. */
+function frameLifecycleHydratedCompositionFixture(bind = true) {
+  const x = constructGenuineComposition(() => commandAdmissionHydratedControlFixture(commandAdmissionHydration(), true));
+  x.cueTable[89] = 0; x.header.mode4a1 = 1; x.sourceActor.statusWord5bc = 0x400;
+  const frameSources = {attributes: x.attributes, status: x.status, tick: x.prefix, dispatch: x.dispatch};
+  const frame = createSourceActorFrameLifecycleRuntime(frameSources);
+  if (bind) frame.bindActor(x.actor);
+  return Object.assign(x, {frameSources, frame,
+    runFrame: (epoch = 1, targetDistance760 = 64, horizontalDistance764 = 20) =>
+      frame.ingestRawDistancesAndRun(x.actor, epoch, {boundary: 'externally-decoded-pre55568-raw', targetDistance760, horizontalDistance764})});
+}
+export function runFrameLifecycleHydratedCompositionTests(): void {
+  {
+    const x = frameLifecycleHydratedCompositionFixture();
+    const retained = retainCompositionRecords([x.part, x.clocks, x.stream, x.waitControl, x.historyState,
+      x.historyState.rotation76!, x.historyState.preRotation1d6a!, x.historyState.aimOrigin524!,
+      x.sourceActor.savedGroundPos, x.worldMatrix, x.rootMatrix]);
+    const attached = x.joints.getBinding(x.joint).aobj7c, callbacks = x.receiverTracks.length;
+    rejects(() => x.runFrame(), 'unsupported actual4bc');
+    check(x.frame.getActualActor(x.actor) === x.sourceActor && x.frame.getDispatchBinding(x.actor) === x.gates &&
+      x.sourceActor.fbState === 61 && x.sourceActor.ubState === 0 && x.sourceActor.actionIndex === 2 &&
+      x.sourceActor.targetDistance760 === 20000 && x.sourceActor.horizontalDistance764 === 20000 &&
+      hasIncompleteSourceActorFrame(x.sourceActor),
+      'real55568 prefix executes source attributes/status/full59068 and actual Double cue44 state before honest4bc refusal');
+    retained();
+    check(x.joints.getBinding(x.joint).aobj7c === attached && x.receiverTracks.length === callbacks,
+      'bounded frame does not fabricate stream/action2, animation, matrix or history suffix after4bc');
+    const stopped = retainCommandAdmissionRecords(x);
+    rejects(() => x.runFrame(2, 128, 40), 'incomplete source frame'); stopped();
+    rejects(() => x.runRawPrefix(2, 128, 40), 'exclusively owned'); stopped();
+  }
+  for (const key of ['attributes', 'status', 'tick', 'dispatch'] as const) {
+    const x = frameLifecycleHydratedCompositionFixture(false);
+    rejects(() => createSourceActorFrameLifecycleRuntime({...x.frameSources, [key]: {...x.frameSources[key]}}), 'genuine');
+    check(!hasIncompleteSourceActorFrame(x.sourceActor), 'spread/fake owner rejects before frame ownership or source stores');
+  }
+  {
+    const old = commandAdmissionHydratedControlFixture(commandAdmissionHydration(), true);
+    rejects(() => createSourceActorFrameLifecycleRuntime({attributes: old.attributes, status: old.status,
+      tick: old.prefix, dispatch: old.dispatch}), 'genuine source movement');
+    check(old.attributes.getMovementRuntime() !== old.movement && !genuineCompositionConstruction,
+      'historical observational movement fixture remains distinct and does not quietly satisfy genuine frame ownership');
+  }
+  for (const key of ['rootAction', 'preState', 'postState'] as const) {
+    const x = frameLifecycleHydratedCompositionFixture(false);
+    x.sourceActor[key] = () => {throw Error('legacy callable must never execute');};
+    rejects(() => x.frame.bindActor(x.actor), `legacy callable ${key}`);
+    x.sourceActor[key] = null; x.frame.bindActor(x.actor);
+    rejects(() => x.runRawPrefix(1, 64, 20), 'exclusively owned');
+    rejects(() => createSourceActorFrameLifecycleRuntime(x.frameSources).bindActor(x.actor), 'already has a source frame owner');
+    check(!hasIncompleteSourceActorFrame(x.sourceActor) && x.gates.marker578 === 1,
+      'successful bind exclusively claims tick without running source or treating null legacy hooks as callable success');
+  }
+  {
+    const x = frameLifecycleHydratedCompositionFixture();
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.frame.ingestRawDistancesAndRun(x.actor, 0, x.gates as never), 'raw input must not alias'); retained();
+    rejects(() => x.runFrame(0), 'epoch'); retained();
+    check(!hasIncompleteSourceActorFrame(x.sourceActor), 'host-only alias rejection consumes epoch but does not begin source frame');
+    rejects(() => x.runFrame(1), 'unsupported actual4bc');
+  }
+  {
+    const x = frameLifecycleHydratedCompositionFixture(), marker = x.gates.marker578;
+    rejects(() => x.runFrame(0, 64, NaN), 'horizontalDistance764');
+    check(x.sourceActor.targetDistance760 === 64 && x.sourceActor.horizontalDistance764 === -764 &&
+      x.gates.marker578 === marker && x.sourceActor.hoverOffset668 === 0 && !hasIncompleteSourceActorFrame(x.sourceActor),
+      'distinct host ingress may retain its first raw store but precedes marker and all source writes');
+    rejects(() => x.runFrame(0), 'epoch');
+    rejects(() => x.runFrame(1), 'unsupported actual4bc');
+  }
+  for (const marker of [1, 2]) {
+    const x = frameLifecycleHydratedCompositionFixture(); x.gates.marker578 = marker;
+    Object.defineProperty(x.gates, 'marker578', {writable: false});
+    const status = retainCompositionRecords([x.statusState, x.host, x.attributeState]);
+    rejects(() => x.runFrame(), 'marker578: non-writable'); status();
+    check(x.sourceActor.targetDistance760 === 64 && x.sourceActor.horizontalDistance764 === 20 &&
+      x.gates.marker578 === marker && x.sourceActor.hoverOffset668 === 0 && hasIncompleteSourceActorFrame(x.sourceActor),
+      'first source578 store is required even when already2, after host ingress and before attributes/status');
+    rejects(() => x.runFrame(2), 'incomplete source frame');
+  }
+  {
+    const x = frameLifecycleHydratedCompositionFixture();
+    const status = retainCompositionRecords([x.statusState, x.host]);
+    Object.defineProperty(x.sourceActor, 'hoverOffset668', {writable: false});
+    rejects(() => x.runFrame(), 'hoverOffset668: non-writable'); status();
+    check(x.gates.marker578 === 2 && x.attributeState.byte87 === 0 && x.attributeState.field674 === 10 &&
+      x.sourceActor.targetDistance760 === 64 && x.prefixState.byte598 === 7,
+      'actual55dcc fails after578/87 but before later attribute products, status or59068 normalization');
+    rejects(() => x.runFrame(2), 'incomplete source frame');
+  }
+  {
+    const x = frameLifecycleHydratedCompositionFixture(); x.statusState.field690 = 3;
+    x.sourceActor.stateTimer = 3; Object.defineProperty(x.statusState, 'field690', {writable: false});
+    rejects(() => x.runFrame(), 'field690: non-writable');
+    check(x.gates.marker578 === 2 && x.sourceActor.hoverOffset668 === 6 && x.attributeState.field674 === 8 &&
+      x.sourceActor.stateTimer === 1 && x.statusState.field690 === 3 && x.sourceActor.targetDistance760 === 64 &&
+      x.prefixState.byte598 === 7 && x.sourceClock.timestep1dc8 === 2,
+      'actual5568c retains complete55dcc and its earlier timer store before readonly690;59068 has not run');
+    rejects(() => x.runFrame(2), 'incomplete source frame');
+  }
+  {
+    const x = frameLifecycleHydratedCompositionFixture(); x.sourceActor.supportContact1db = 1;
+    x.sourceActor.stateTimer = 3;
+    rejects(() => x.runFrame(), 'actual pointer1e4');
+    check(x.gates.marker578 === 2 && x.sourceActor.stateTimer === 1 && x.sourceActor.hoverOffset668 === 6 &&
+      x.sourceActor.targetDistance760 === 32 && x.sourceActor.horizontalDistance764 === 10 && x.prefixState.byte598 === 0 &&
+      x.sourceClock.timestep1dc8 === 2 && x.sourceActor.actionIndex === 67,
+      'reached59068 failure proves attributes/status precede actual normalization/gauge/contact with no command or suffix replay');
+    rejects(() => x.runRawPrefix(2, 128, 40), 'exclusively owned');
+    rejects(() => x.runFrame(2), 'incomplete source frame');
+  }
+  {
+    const x = frameLifecycleHydratedCompositionFixture();
+    Object.defineProperty(x.sourceActor.pos, 'x', {writable: false});
+    Object.defineProperty(x.sourceActor.pos, 'z', {writable: false});
+    rejects(() => x.runFrame(), 'unsupported actual4bc');
+    check(x.sourceActor.fbState === 61 && x.sourceActor.ubState === 0,
+      'frame snapshots and reached source reads accept readonly position operands without requiring invented writes');
+  }
+  {
+    const x = frameLifecycleHydratedCompositionFixture(), original = Object.getOwnPropertyDescriptor;
+    const status = retainCompositionRecords([x.statusState, x.host]);
+    let armed = true, caught = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (armed && owner === x.sourceActor && key === 'modelScale' && x.gates.marker578 === 2) {
+        armed = false;
+        try {x.runFrame(2);} catch {caught = true;}
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), 'caught same-runtime reentry');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    status();
+    check(caught && x.gates.marker578 === 2 && x.sourceActor.hoverOffset668 === 6 && x.sourceActor.targetDistance760 === 64 &&
+      hasIncompleteSourceActorFrame(x.sourceActor),
+      'fault-only caught frame reentry retains real578/55dcc stores but prevents source5568c and any hidden successful continuation');
+    rejects(() => x.runFrame(3), 'incomplete source frame');
+  }
+  {
+    // Join both new owners onto the same existing full genuine graph. This
+    // supplied animation has end3; transition duration remains6+1. No actual
+    // Double action2 stream selection is inferred from its cue44 state.
+    const x = installHydratedTransition(frameLifecycleHydratedCompositionFixture());
+    x.gates.marker1db3 = 0; x.control.getActorBinding(x.actor).blockedMask1d9a = 0;
+    x.sourceClock.timestep1dc8 = 1;
+    const command = x.control.createStream(Uint8Array.from([1, 0, 1, 1, 6, 0, 0, 0, 0, 3, 0, 7]));
+    x.control.parseWaitRecord(x.actor, 2, command);
+    const attached = x.joints.getBinding(x.joint).aobj7c!, aobj = x.feedback.getAObj(attached);
+    const retained = retainCompositionRecords([x.part, x.clocks, x.blendState, x.oldPart,
+      x.oldPose.translation, x.oldPose.quaternion, x.pose.translation, x.pose.quaternion, aobj]);
+    rejects(() => x.runFrame(), 'unsupported actual4bc'); retained();
+    check(x.part.mode2f === 1 && x.part.frame0c === 0 && x.blendState.field18 === 7 &&
+      x.joints.getBinding(x.joint).aobj7c === attached && aobj.frame === 0 &&
+      x.sourceActor.fbState === 61 && x.sourceActor.ubState === 0,
+      'source55568 prefix on an active genuine mode1 graph stops before action2, stream update or animation playback');
+  }
+  {
+    // Fault-only observation of the final source lwz order. The final rate
+    // producer has selected1 before ceiling reads y; final snapshots are xyz.
+    const x = frameLifecycleHydratedCompositionFixture(), original = Object.getOwnPropertyDescriptor;
+    const reads: PropertyKey[] = [];
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (owner === x.sourceActor.pos && x.sourceClock.timestep1dc8 === 1 && ['x', 'y', 'z'].includes(String(key))) {
+        reads.push(key);
+        if (key === 'x') x.sourceActor.pos.z = NaN;
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(), 'position28');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(reads.slice(-3).join() === 'x,y,z' && x.sourceActor.fbState === 61 && x.sourceActor.ubState === 0 &&
+      x.normalLifecycleState.short6bc === 1 && hasIncompleteSourceActorFrame(x.sourceActor),
+      'final position20/24/28 snapshots follow completed real59068 in xyz order and retain its prefix on a last-position refusal');
+    rejects(() => x.runFrame(2), 'incomplete source frame');
+  }
+  {
+    const x = installHydratedTransition(frameLifecycleHydratedCompositionFixture(false));
+    x.gates.marker1db3 = 0; x.control.getActorBinding(x.actor).blockedMask1d9a = 0;
+    x.sourceClock.timestep1dc8 = 1; Object.assign(x.pose.quaternion, {x: 1, y: 0, z: 0, w: 0});
+    const command = x.control.createStream(Uint8Array.from([1, 0, 1, 1, 6, 0, 0, 0, 0, 3, 0, 7]));
+    rejects(() => x.control.parseWaitRecord(x.actor, 2, command), '8023cc8c');
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.runRawPrefix(0, 64, 20), 'incomplete mode1'); retained();
+    rejects(() => x.runRawPrefix(0, 128, 40), 'epoch'); retained();
+    x.actorControlState.byte490 = 2; x.part.mode2f = 0; x.gates.family1d88 = null;
+    const changed = retainCommandAdmissionRecords(x);
+    rejects(() => x.runRawPrefix(1, 128, 40), 'incomplete mode1'); changed();
+    check(x.sourceActor.targetDistance760 === -760 && x.sourceActor.horizontalDistance764 === -764 &&
+      !hasIncompleteSourceActorFrame(x.sourceActor),
+      'genuine failed transition poisons standalone59068 before raw stores even without a frame claim or through ready/mode/readiness bypass');
+  }
+  console.log('[actor-frame-lifecycle-composition] PASS: genuine marker/55dcc/5568c/59068 prefix with explicit pre55568 host ingress, actual position snapshot and honest4bc stop; exclusive claim and permanent incomplete frame prevent retry/direct-tick bypass; offline only, no full frame or playback claim');
 }
