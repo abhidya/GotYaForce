@@ -54,7 +54,7 @@ export interface SourceActorMatrixUpdateStorage {
 /** The same retained PTR_DAT_80433934 record. Optional cells are established
  * only by an explicit source-input boundary, never by this constructor. */
 export interface SourceActorMatrixUpdateGlobals {
-  maskD2: number; byteD9?: number; byte1829?: number; byte1f?: number;
+  maskD2: number; byteD9?: number; byte1829?: number; byte1f?: number; byte45?: number;
   /** Explicit source team-indexed row references. No inferred player mapping;
    * charged borrows the existing +103 owner in its boolean0/1 subset. */
   teamRows103?: readonly Pick<BurstMeterState, 'charged'>[];

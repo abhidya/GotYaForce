@@ -136,6 +136,27 @@ function referenceProduct(a: number, b: number): number {
 export function runActorAttributeRefreshSelfTests(): void {
   {
     const x = fixture();
+    equal(x.runtime.getDescriptorBinding(x.descriptor).byte10, undefined, 'historical descriptors do not gain a joint10 default');
+    for (let raw = 0; raw < 256; raw++) {
+      const descriptor = x.mapping.createDescriptor([]), initial = {byte10: raw};
+      x.runtime.bindDescriptor(descriptor, initial); initial.byte10 = 255 - raw;
+      const binding = x.runtime.getDescriptorBinding(descriptor);
+      equal(binding.byte10, raw, 'explicit raw joint10 is copied on the existing descriptor identity');
+      check(Object.isSealed(binding), 'joint selector descriptor extension stays sealed');
+    }
+    for (const value of [-1, 256, 0.5, NaN, Infinity]) {
+      const descriptor = x.mapping.createDescriptor([]);
+      rejects(() => x.runtime.bindDescriptor(descriptor, {byte10: value}), 'unsigned integer');
+      x.runtime.bindDescriptor(descriptor, {byte10: 0});
+    }
+    const descriptor = x.mapping.createDescriptor([]); let reads = 0;
+    const initial = Object.defineProperty({}, 'byte10', {get() {reads++; return 0;}});
+    rejects(() => x.runtime.bindDescriptor(descriptor, initial), 'own data property');
+    equal(reads, 0, 'joint10 accessor is never invoked');
+    x.runtime.bindDescriptor(descriptor, {byte10: 127});
+  }
+  {
+    const x = fixture();
     check(!Object.hasOwn(x.runtime.getParameterDescriptor(x.parameter), 'byteA3'), 'no default tier selector');
     for (const selector of [0, 1, 127, 128, 255]) {
       const initial = {byteA3: selector}, id = x.runtime.createParameterDescriptor(initial);

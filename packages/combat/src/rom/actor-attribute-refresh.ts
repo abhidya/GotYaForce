@@ -42,6 +42,8 @@ export interface SourceActorAttributeRefreshBinding {
 }
 /** Scalar extension of the SAME descriptor identity owned by joint mapping. */
 export interface SourceActorAttributeDescriptorBinding {
+  /** Raw signed-joint selector read at descriptor+10 by actual6bda8. */
+  byte10: number;
   field44: number; field48: number; field4c: number; field50: number; field54: number;
 }
 export interface SourceActorAttributeParameterDescriptor {
@@ -177,7 +179,11 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
       if (descriptors.has(id)) fail('descriptor already bound');
       const actual = record(mappingDescriptor(id), 'mapping descriptor');
       if (descriptorRecords.has(actual) || assigned.has(actual)) fail('mapping descriptor aliases another actual owner');
-      const binding = Object.seal(copy<SourceActorAttributeDescriptorBinding>(initial, ['field44', 'field48', 'field4c', 'field50', 'field54']));
+      const binding = copy<SourceActorAttributeDescriptorBinding>(initial, ['field44', 'field48', 'field4c', 'field50', 'field54']);
+      const joint = Object.getOwnPropertyDescriptor(initial, 'byte10'); check();
+      if (joint !== undefined)
+        binding.byte10 = integer(read(initial, 'byte10'), 255, 'byte10');
+      Object.seal(binding);
       descriptors.set(id, {actual, binding}); descriptorRecords.add(actual);
     });},
     getDescriptorBinding(id: symbol) {return descriptorEntry(id).binding;},

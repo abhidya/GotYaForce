@@ -4628,3 +4628,56 @@ explicit decoded inputs and genuine offline composition, not live player/team
 hydration, original execution, a complete frame, production activation or
 browser-playability evidence. See [tail evidence](actor-cue0-tail-evidence-2026-11-14.md)
 for the authenticated159-instruction schedule and its limits.
+
+### Ordinary X command admission, 2026-11-14
+
+The optional genuine command-admission runtime continues the actual mode1
+descriptor branch from `69dd0`. `69ea4` stays in input-testers, which owns595;
+it loads694 before the authenticated zero constant only when595 is zero,
+retains one5e0 word for subtype priority, and reads7cc/5e4 only on their reached
+branches. Only absent7cc joins the tester binding.586/587 remain the actual
+`cmdSubtype`/`cmdChargedRanged` fields. Omission preserves the old69ea4 boundary.
+
+The child performs the real6c674 null508 return, stores587, then reloads the
+three signed selectors before loading actual `commandTable` at4ec. Its optional
+`sourceTables` extension retains source pointer slots and raw byte rows;
+legacy normalized records cannot supply the omitted cue/mode bytes. Double's
+existing derived table evidence identifies root8033b180, X pointer slot8033b188,
+and ground record8033b108 `[44,3,2,0]`. The pointer slot is not the root, and
+the JSON's type2 denotes the command slot, not a Borg type. These addresses and
+record bytes remain derived evidence, not newly authenticated table payloads.
+
+Real6a104 sentinel returns0 before capture. Non-sentinel dispatch stores584 and
+executes the mandatory6bda8 prefix. Explicit504/508/C8/D0 cells are partial;
+missing pointers never mean null. CC remains actual `visibilityTarget`,7d2
+belongs to genuine actionRequest, and6b8 is world `yawOffset6b8`. No-target
+capture stores the authenticated20000f raw distances, performs source zero-yaw
+trig, and reads the descriptor-selected actual world matrix lane7 for51c.
+Descriptor byte10 extends the same attribute/mapping descriptor identity.
+Existing aimOrigin518 and distance760/764 owners receive the actual stores.
+
+The narrow45204/45238 wrappers require the explicitly supplied GQR5
+signed16/scale0 profile, positive factor38c90fdb and the existing authenticated
+zero sin/cos kernel paths. No host sine/cosine or general nonzero trig is
+substituted. Constants and the six authenticated57a/b mask pairs share the
+existing charge data owner; reached values are checked, never defaulted.
+
+Admission then executes actual action/variant/control/timer writes, canonical
+stream marker709 and blockedMask1d9a clears, and all six explicit shared
+visibility references in source order. Genuine6a6fc/6a750 perform cue resets.
+The status runtime exposes its retained ammo slot/cell by identity; max0 or
+refillType3 genuinely skips6dbe0. The finalea2c8/ea2ec path returns before RNG
+only when the same explicit match-global byte45 is signed>=5. This is a bounded
+non-normal-match voice gate, not full active-match voice behavior. Unsupported
+targeting, nonzero trig, transition4beb8, ammo checking/sound and active voice
+remain ordered failures with their completed writes retained.
+
+The genuine attached graph demonstrates an X edge from the third input machine
+through69b98/69dd0/69ea4 and the ground record to native1, followed by the existing
+normal/action/rate/ceiling suffix. Partial command effects block later cue9,
+ready and raw-ingress bypasses. A subsequent unsupported cue44 still refuses.
+This does not supply live target/table/global hydration, full55568 scheduling,
+source family playback, sustained attack effects, production activation or
+browser acceptance. See [command-admission evidence](actor-command-admission-evidence-2026-11-14.md)
+for421 primary plus54 bounded support instructions and explicit libm/voice
+coverage omissions.

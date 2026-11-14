@@ -34,12 +34,17 @@ export interface SourceActorInputChargeBinding {
 }
 export interface SourceActorInputChargeGlobal {
   byte1829?: number;
+  /** Same80433934 owner; reached voice gate, not a default audio policy. */
+  byte45?: number;
   /** Same matrix-global owner; explicit source team rows, never a copied flag. */
   teamRows103?: readonly Pick<BurstMeterState, 'charged'>[];
 }
 export interface SourceActorInputChargeData {
   float80437628?: number; float8043762c?: number;
   float80437630?: number; float80437634?: number;
+  /** Explicit authenticated command-capture/trig constants on this data owner. */
+  float80437678?: number; float80437078?: number;
+  flags3994?: readonly number[];
   /** Explicit decoded big-endian u32 arrays at802d3970/397c. */
   held3970?: readonly number[]; release397c?: readonly number[];
 }

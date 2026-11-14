@@ -33,6 +33,8 @@
  * or counters. They are admission bounds, not additional source stores.
  */
 import type {RomActor} from './actor.js';
+import {isSourceActorCommandAdmissionRuntime, hasIncompleteSourceActorCommandAdmission,
+  type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorCue0TailRuntime, hasIncompleteSourceActorCue0Tail,
   type SourceActorCue0TailRuntime} from './actor-cue0-tail.js';
 import {isSourceActorInputTestersRuntime, hasIncompleteSourceActorInputTesters,
@@ -197,6 +199,21 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     return (...args: unknown[]): unknown => {const value = Reflect.apply(method, testers, args); check(); return value;};
   };
   const testerStatus = captureTester('getStatusBinding'), testerDescriptors = captureTester('getKnownDescriptorRecords');
+  const testerCommand = captureTester('getCommandAdmissionRuntime');
+  const command = testerCommand?.();
+  if (command !== undefined && !isSourceActorCommandAdmissionRuntime(command))
+    fail('input tester command admission requires genuine source runtime');
+  const captureCommand = (key: keyof SourceActorCommandAdmissionRuntime) => {
+    if (command === undefined) return undefined;
+    const method = read(command, key);
+    if (typeof method !== 'function') fail(`command admission ${key}: own data-function required`);
+    return (...args: unknown[]): unknown => {const value = Reflect.apply(method, command, args); check(); return value;};
+  };
+  const commandStatus = captureCommand('getStatusBinding'), commandStorage = captureCommand('getKnownStorageEntries');
+  const commandGlobal = captureCommand('getGlobal'), commandData = captureCommand('getData');
+  const commandBinding = captureCommand('getActorBinding'), commandStart = captureCommand('getStartBinding'), commandStream = captureCommand('getStreamBinding');
+  const commandGlobals = commandGlobal === undefined ? undefined : record(commandGlobal(), 'command match global');
+  const commandConstants = commandData === undefined ? undefined : record(commandData(), 'command data');
   const cue0Tail = cue0 === undefined ? undefined : capture('cue0', 'getTailRuntime');
   const tail = cue0Tail?.();
   if (tail !== undefined && !isSourceActorCue0TailRuntime(tail)) fail('cue0 tail requires genuine source runtime');
@@ -244,6 +261,7 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     rotationStorage?: object; rotationOwners?: readonly object[];
     cue0Owners?: readonly object[]; cue0Terrain?: object; cue0Attribute?: object;
     tailBorg?: object; tailCharge?: object;
+    commandBinding?: object; commandStart?: object; commandStream?: object;
   }
   const owners = (e: Entry): object[] => [e.actual, e.world, e.mapping, e.movement, e.status, e.binding,
     ...(e.cue === undefined ? [] : [e.cue]), ...(e.dispatch === undefined ? [] : [e.dispatch]), ...(e.rotationOwners ?? []), ...(e.cue0Owners ?? []),
@@ -265,19 +283,68 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
         teams.some(owner => owner === global || owner === data || forbidden(owner)))
       fail('tail shared storage aliases a normal source owner or descriptor');
   };
+  const commandEntries = (): readonly Readonly<{owner: object; kind: string}>[] => {
+    if (commandStorage === undefined) return [];
+    const values = commandStorage();
+    if (!Array.isArray(values)) fail('known command storage entry array required');
+    return values.map(value => {
+      const owner = record(read(value, 'owner'), 'known command storage owner'), kind = read(value, 'kind');
+      if (typeof kind !== 'string') fail('known command storage kind required');
+      return {owner, kind};
+    });
+  };
+  const commandReferences = (e: Entry): object[] => {
+    const result: object[] = [];
+    // Existing borrowed roots only. Never load a selected table element or
+    // invoke a getter for an unreached source pointer.
+    const fields: [object, string][] = [[e.actual, 'cueTable'], [e.actual, 'actionSpeedRows'], [e.actual, 'parts'],
+      [e.world, 'scale58'], [e.world, 'offset1dbc'], [e.world, 'adjusted1d54'], [e.world, 'preRotation1d64']];
+    if (commandConstants) fields.push([commandConstants, 'held3970'], [commandConstants, 'release397c']);
+    for (const [owner, key] of fields) {
+      const p = Object.getOwnPropertyDescriptor(owner, key); check();
+      if (p && 'value' in p && p.value !== null && typeof p.value === 'object') result.push(p.value);
+    }
+    return result;
+  };
+  const assertCommandOwners = (e: Entry): void => {
+    if (commandGlobals === undefined) return;
+    const records = owners(e), descriptors = [
+      ...ownerList(testerDescriptors!(), 'known input tester descriptors'),
+      ...(rotationDescriptors === undefined ? [] : ownerList(rotationDescriptors(), 'known rotation descriptors')),
+    ];
+    const forbidden = (owner: object): boolean => records.includes(owner) || assigned.has(owner) ||
+      owner === e.cue0Terrain || descriptors.includes(owner) || commandReferences(e).includes(owner);
+    if (commandGlobals === commandConstants || forbidden(commandGlobals) || forbidden(commandConstants!))
+      fail('command shared globals/data alias a normal source owner');
+    if (global !== undefined && (global !== commandGlobals || data !== commandConstants))
+      fail('command/tail shared global/data owner mismatch');
+    if (commandEntries().some(({owner}) => forbidden(owner) ||
+        owner === commandGlobals || owner === commandConstants || teamOwners().includes(owner)))
+      fail('command storage aliases a normal source owner or descriptor');
+  };
   const noShadows = (e: Entry): void => {
     const canonical = new Map<string, object>([
       ['controlWord', e.actual], ['ubCue', e.actual], ['fbCue', e.actual],
       ['stateFlagA', e.actual], ['stateFlagB', e.actual], ['byte661', e.movement],
       ['callback4c8', e.binding], ['callback4dc', e.binding], ['short6bc', e.binding], ['byte1d9', e.binding],
     ]);
+    if (commandGlobals !== undefined) {
+      for (const key of ['pointer504', 'pointer508', 'pointerc8', 'byteD0']) canonical.set(key, e.commandBinding!);
+      canonical.set('marker709', e.commandStart!); canonical.set('blockedMask1d9a', e.commandStream!);
+      canonical.set('byte45', commandGlobals);
+      for (const key of ['float8043762c', 'float80437678', 'float80437078', 'flags3994']) canonical.set(key, commandConstants!);
+    }
     const aliases = ['byte5e4', 'byte5e5', 'word5e0', 'flags5e0', 'field5e0', 'field4c8', 'pointer4c8',
       'field4dc', 'pointer4dc', 'field6bc', 'timer6bc', 'countdown6bc', 'metadata1d9', 'flags1d9',
       'field1d9', 'hitReact', 'flyingBounce1d9', 'aerialXDamaged',
-      'flags57a', 'flags57b', 'byte57a', 'byte57b', 'field57a', 'field57b', 'field661', 'move661'];
-    for (const owner of [...owners(e), ...(global === undefined ? [] : [global, data!]), ...teamOwners()]) {
+      'flags57a', 'flags57b', 'byte57a', 'byte57b', 'field57a', 'field57b', 'field661', 'move661',
+      ...(commandGlobals === undefined ? [] : ['field504', 'field508', 'fieldc8', 'pointerC8', 'pointerCC', 'pointercc', 'fieldD0', 'byte709', 'byte1d9a'])];
+    const known = new Map(commandEntries().map(({owner, kind}) => [owner, kind]));
+    for (const owner of [...owners(e), ...(global === undefined ? [] : [global, data!]), ...teamOwners(),
+      ...(commandGlobals === undefined ? [] : [commandGlobals, commandConstants!]), ...known.keys()]) {
       for (const [key, expected] of canonical) {
-        if (owner !== expected && Object.getOwnPropertyDescriptor(owner, key) !== undefined)
+        if (owner !== expected && !(key === 'controlWord' && known.get(owner) === 'visibility-target') &&
+            Object.getOwnPropertyDescriptor(owner, key) !== undefined)
           fail(`${key}: competing normal-lifecycle storage on another owner`);
         check();
       }
@@ -337,6 +404,16 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
           fail('input tester descriptor aliases a normal source owner');
       }
     }
+    if (testerCommand?.() !== command) fail('input tester command admission runtime changed');
+    if (commandStatus) {
+      stable(commandStatus(id), e.status, 'command/normal status');
+      stable(commandBinding!(id), e.commandBinding!, 'command binding'); stable(commandStart!(id), e.commandStart!, 'command start');
+      stable(commandStream!(id), e.commandStream!, 'command stream');
+      if (![e.commandBinding!, e.commandStart!, e.commandStream!].every(owner => e.cue0Owners!.includes(owner)))
+        fail('cue0 must retain command binding and canonical stream owners');
+      stable(commandGlobal!(), commandGlobals!, 'command match global'); stable(commandData!(), commandConstants!, 'command data');
+      assertCommandOwners(e);
+    }
     noShadows(e);
   };
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
@@ -344,6 +421,8 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     const e = actors.get(id); if (!e) fail('unknown/non-owned normal-lifecycle actor'); return e;
   };
   const assertComplete = (actual: object): void => {
+    if (hasIncompleteSourceActorCommandAdmission(actual))
+      fail('actual actor has known incomplete command admission; source continuation is unsupported');
     if (hasIncompleteSourceActorCue0Tail(actual))
       fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
     if (hasIncompleteSourceActorInputTesters(actual))
@@ -358,6 +437,8 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
       fail('actual actor has a known incomplete6bc expiry; source continuation is unsupported');
   };
   const dispatch = (id: symbol, e: Entry): void => {
+    if (hasIncompleteSourceActorCommandAdmission(e.actual))
+      fail('actual actor has known incomplete command admission; source continuation is unsupported');
     if (hasIncompleteSourceActorCue0Tail(e.actual))
       fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
     if (hasIncompleteSourceActorInputTesters(e.actual))
@@ -372,7 +453,7 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
         fail('800590e8 reached unsupported actual cue target8005913c from authenticated table802d3300 entry802d3300');
       assertComplete(e.actual);
       if (dispatchCue0(id) !== undefined) fail('genuine cue0 returned asynchronously or unexpectedly');
-      assertTeamOwners(e);
+      assertTeamOwners(e); assertCommandOwners(e); noShadows(e);
       return;
     }
     fail(`800590e0 reached unsupported source table802d3300 entry ${cell.toString(16)} before indirect call800590e8`);
@@ -443,6 +524,10 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
         e.cue0Terrain = record(cue0Terrain!(), 'cue0 terrain');
         e.cue0Attribute = record(cue0Attribute!(id), 'cue0 attribute');
       }
+      if (commandBinding) {
+        e.commandBinding = record(commandBinding(id), 'command binding'); e.commandStart = record(commandStart!(id), 'command start');
+        e.commandStream = record(commandStream!(id), 'command stream');
+      }
       if (tailBorg) {
         e.tailBorg = record(tailBorg(id), 'tail Borg');
         e.tailCharge = record(tailCharge!(id), 'tail charge binding');
@@ -472,6 +557,8 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
     assertActorComplete(id) {assertComplete(entry(id).actual);},
     dispatchCue(id) {guard(() => {
       const e = entry(id);
+      if (hasIncompleteSourceActorCommandAdmission(e.actual))
+        fail('actual actor has known incomplete command admission; source continuation is unsupported');
       if (hasIncompleteSourceActorCue0Tail(e.actual))
         fail('actual actor has a known incomplete cue0 tail; source continuation is unsupported');
       if (hasIncompleteSourceActorInputTesters(e.actual))

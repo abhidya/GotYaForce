@@ -62,6 +62,10 @@ export interface SourceStreamWaitRuntime {
   getPartBinding(actor: symbol, index: number): SourceStreamWaitPartBinding;
   update(actor: symbol, mask: number): 0 | 1;
 }
+const sourceStreamWaitRuntimes = new WeakSet<object>();
+export function isSourceStreamWaitRuntime(value: unknown): value is SourceStreamWaitRuntime {
+  return value !== null && typeof value === 'object' && sourceStreamWaitRuntimes.has(value);
+}
 function fail(reason: string): never {throw Error(`[stream-wait] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);}
 function own(record: object, key: string, writable = false): unknown {
   if (record === null || typeof record !== 'object') fail(`${key}: data record required`);
@@ -264,7 +268,7 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
     write(part, 'wait14', 0);
     write(part, 'finished1a', 0);
   };
-  return Object.freeze({
+  const runtime: SourceStreamWaitRuntime = Object.freeze({
     bindStartActor(id: symbol, initial: Readonly<SourceStreamWaitStartBinding>): void {
       enter(); try {
         actorRecord(id);
@@ -441,4 +445,6 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
       } finally {busy = false;}
     },
   });
+  sourceStreamWaitRuntimes.add(runtime);
+  return runtime;
 }

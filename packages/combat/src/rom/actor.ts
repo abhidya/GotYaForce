@@ -562,6 +562,10 @@ export interface RomDescriptor {
 /** Command-move table (actor+0x4ec). Already extracted fleet-wide into
  *  packages/combat/src/data/commandMoveTables.json — the ROM runtime consumes that data. */
 export interface RomCommandTable {
+  /** Explicit source pointer slots at4ec, indexed by signed585. Each selected
+   * table retains raw bytes; subtype/direction addressing is performed by the
+   * genuine command-admission runtime. Absent data is not inferred from records. */
+  sourceTables?: readonly (readonly number[] | null)[];
   /** Per-(button, subtype, direction) record: actionIndex/variantIndex + disabled flag. */
   records: ReadonlyArray<{
     button: number; subtype: number; direction: number | null;

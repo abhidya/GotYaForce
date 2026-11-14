@@ -72,6 +72,10 @@ export interface SourceActorStatusTimersRuntime {
   getAttributeBinding(identity: symbol): object;
   getMovementBinding(identity: symbol): object;
   getActualBorg(identity: symbol): SourceActorStatusBorgOwner;
+  /** Same actual stream-start owner already retained for source marker709. */
+  getStartBinding(identity: symbol): object;
+  /** Exact retained source slot/cell. No scalar read or inferred HUD cell. */
+  getAmmoSlot(identity: symbol, index: number): SourceActorStatusAmmoSlot;
   /** Explicit late connection to the genuine reset pair on these same owners. */
   bindGaugeResetSources(identity: symbol, gauges: SourceActorGaugeScaleRuntime): void;
   updateActor(identity: symbol): void;
@@ -230,6 +234,14 @@ export function createSourceActorStatusTimersRuntime(sources: SourceActorStatusT
     getAttributeBinding(id: symbol) {return entry(id).attribute;},
     getMovementBinding(id: symbol) {return entry(id).movement;},
     getActualBorg(id: symbol) {return entry(id).borg;},
+    getStartBinding(id: symbol) {return entry(id).stream;},
+    getAmmoSlot(id: symbol, index: number) {return guard(() => {
+      const actor = entry(id), at = integer(index, 0, 2, 'source ammo slot index');
+      const slot = actor.slotRecords[at]!;
+      if (read(actor.slots, String(at)) !== slot || read(slot, 'cell') !== actor.cells[at])
+        fail('source ammo slot/cell owner changed');
+      return slot as SourceActorStatusAmmoSlot;
+    });},
     bindGaugeResetSources(id: symbol, gauges: SourceActorGaugeScaleRuntime): void {guard(() => {
       const actor = entry(id);
       if (gaugeSources.has(id)) fail('gauge reset sources already bound');

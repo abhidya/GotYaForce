@@ -1,4 +1,4 @@
-import {createSourceStreamWaitRuntime, type SourceStreamWaitPartInitial} from './stream-wait.js';
+import {createSourceStreamWaitRuntime, isSourceStreamWaitRuntime, type SourceStreamWaitPartInitial} from './stream-wait.js';
 import {createSourceStreamWaitTargetRuntime} from './stream-wait-target.js';
 import {createSourceActorAnimationDispatchRuntime, type SourceActorAnimationSetupRequest} from './actor-animation-dispatch.js';
 import {createSourceActorJointMappingRuntime} from './actor-joint-mapping.js';
@@ -78,6 +78,12 @@ function fixture(flags = 1, synthetic = false, gqr5?: number, maxCommands?: numb
     run: (mask = 1) => runtime.update(actor, mask)};
 }
 export function runSourceStreamWaitSelfTest(): void {
+  {
+    const x = fixture();
+    check(isSourceStreamWaitRuntime(x.runtime) && Object.isFrozen(x.runtime), 'genuine frozen stream runtime is branded');
+    for (const value of [undefined, null, {}, {...x.runtime}, Object.create(x.runtime)])
+      check(!isSourceStreamWaitRuntime(value), 'copied/inherited stream methods do not confer source runtime ownership');
+  }
   {
     const x = fixture(); x.input[0]!.wait14 = 999;
     check(x.control().wait14 === 3 && Object.isSealed(x.control()) && Object.isSealed(x.gate) &&

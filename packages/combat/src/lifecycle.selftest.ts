@@ -9,6 +9,7 @@ import {runActorReadyTransitionsSelfTests} from './rom/actor-ready-transitions.s
 import {runActorInputTestersSelfTests} from './rom/actor-input-testers.selftest.js';
 import {runActorCue0LifecycleSelfTests} from './rom/actor-cue0-lifecycle.selftest.js';
 import {runActorCue0TailSelfTests} from './rom/actor-cue0-tail.selftest.js';
+import {runActorCommandAdmissionSelfTests} from './rom/actor-command-admission.selftest.js';
 import {runActorRotationDampingSelfTests} from './rom/actor-rotation-damping.selftest.js';
 import {runActorNormalLifecycleSelfTests} from './rom/actor-normal-lifecycle.selftest.js';
 import {runActorTierLifecycleSelfTests} from './rom/actor-tier-lifecycle.selftest.js';
@@ -541,6 +542,7 @@ runGredRangedProjectileSelfTest();
   runActorRotationDampingSelfTests();
   runActorCue0LifecycleSelfTests();
   runActorCue0TailSelfTests();
+  runActorCommandAdmissionSelfTests();
   runActorInputTestersSelfTests();
   runActorChargeEffectsSelfTests();
   runActorInputAxisSelfTests();

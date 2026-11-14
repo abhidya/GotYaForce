@@ -23,6 +23,7 @@ import {createSourceActorWorldMatrixRuntime, type SourceActorWorldMatrixCorrecti
 import {createSourceActorRotationDampingRuntime} from './actor-rotation-damping.js';
 import {createSourceActorCue0LifecycleRuntime, type SourceActorCue0LifecycleBinding} from './actor-cue0-lifecycle.js';
 import {createSourceActorInputTestersRuntime, type SourceActorInputTestersBinding} from './actor-input-testers.js';
+import {createSourceActorCommandAdmissionRuntime, type SourceActorCommandAdmissionBinding} from './actor-command-admission.js';
 import {createSourceActorCue0TailRuntime, type SourceActorCue0TailBinding} from './actor-cue0-tail.js';
 import {createSourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
 import {createSourceJObjModelHydrationRuntime} from './jobj-model-hydration.js';
@@ -2810,6 +2811,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runCue0LifecycleHydratedCompositionTests();
   runInputTestersHydratedCompositionTests();
   runCue0TailHydratedCompositionTests();
+  runCommandAdmissionHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -3315,10 +3317,19 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
   const actionRequest = chargeHydration?.actionRequest === undefined ? undefined :
     createSourceActorActionRequestRuntime({world: x.world});
   if (actionRequest !== undefined) actionRequest.bindActor(x.actor, chargeHydration!.actionRequest!);
+  const commandAdmission = chargeHydration?.commandAdmission === undefined ? undefined : (() => {
+    if (chargeOwners === undefined || actionRequest === undefined)
+      throw Error('explicit command admission requires the same genuine charge and action owners');
+    const runtime = createSourceActorCommandAdmissionRuntime({world: x.world, status: x.status,
+      attributes: x.attributes, charge: chargeOwners.charge, actionRequest, cues, streams: x.control, gqr5: 0x00070007});
+    runtime.bindActor(x.actor, chargeHydration.commandAdmission.initial);
+    return runtime;
+  })();
   const inputTesters = chargeHydration?.inputTesters === undefined ? undefined : (() => {
     if (chargeOwners === undefined) throw Error('explicit input testers require the same genuine charge owner');
     const runtime = createSourceActorInputTestersRuntime({world: x.world, status: x.status, mapping: x.mapping,
-      charge: chargeOwners.charge, ...(actionRequest === undefined ? {} : {actionRequest})});
+      charge: chargeOwners.charge, ...(actionRequest === undefined ? {} : {actionRequest}),
+      ...(commandAdmission === undefined ? {} : {commandAdmission})});
     runtime.bindActor(x.actor, chargeHydration.inputTesters);
     return runtime;
   })();
@@ -3378,6 +3389,7 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
     ...(normalLifecycle === undefined ? {} : {normalLifecycle}), ...(rotation === undefined ? {} : {rotation}),
     ...(cue0 === undefined ? {} : {cue0}), ...(inputTesters === undefined ? {} : {inputTesters}),
     ...(cue0Tail === undefined ? {} : {cue0Tail}),
+    ...(commandAdmission === undefined ? {} : {commandAdmission}),
     runRawPrefix: (epoch: number, targetDistance760: number, horizontalDistance764: number) =>
       prefix.ingestRawDistancesAndRun(x.actor, epoch, {boundary: 'externally-decoded-pre59068-raw', targetDistance760, horizontalDistance764})});
 }
@@ -7060,6 +7072,8 @@ interface ChargeInputHydration {
   inputTesters?: Partial<SourceActorInputTestersBinding>;
   /** Tail-only partial cells and explicit existing actor/Borg/global source inputs. */
   cue0Tail?: Cue0TailHydration;
+  /** Missing command pointers and scalar metadata are explicit opt-in inputs. */
+  commandAdmission?: CommandAdmissionHydration;
   /** Explicit negative composition input; never a fallback for shared terrain. */
   cue0TerrainGlobals?: SourceActorTerrainGlobals;
   /** Supplied +b0 bytes share the existing raw8c descriptor; corrections are
@@ -7097,7 +7111,8 @@ function hydrateChargeInputOwners(x: GaugeScaleFixture, supplied: ChargeInputHyd
     supplied.rotation.jointsB0.forEach((value, index) => {raw8c[0x24 + index] = value;});
   }
   const descriptorIdentity = x.mapping.createDescriptor(raw8c);
-  x.attributes.bindDescriptor(descriptorIdentity, {...x.scalarDescriptor});
+  x.attributes.bindDescriptor(descriptorIdentity, {...x.scalarDescriptor,
+    ...(supplied.commandAdmission?.byte10 === undefined ? {} : {byte10: supplied.commandAdmission.byte10})});
   x.movement.bindDescriptor(descriptorIdentity, {...x.movementDescriptor});
   const parameterIdentity = x.attributes.createParameterDescriptor({...oldParameter, ...supplied.thresholds,
     ...(supplied.tierHydration === undefined ? {} : supplied.tierHydration.parameter)});
@@ -8849,7 +8864,7 @@ export function runTierLifecycleHydratedCompositionTests(): void {
 function normalLifecycleHydratedControlFixture(initial: Partial<SourceActorNormalLifecycleBinding>,
   move661 = 0, tierHydration?: TierLifecycleHydration, rotationHydration?: ChargeInputHydration['rotation'],
   cue0Hydration?: Partial<SourceActorCue0LifecycleBinding>, inputTestersHydration?: Partial<SourceActorInputTestersBinding>,
-  cue0TailHydration?: Cue0TailHydration) {
+  cue0TailHydration?: Cue0TailHydration, commandAdmissionHydration?: CommandAdmissionHydration) {
   const supplied = chargeInputHydration();
   supplied.normalLifecycle = initial; supplied.actorRates = rateLifecycleHydration(); supplied.ceiling = {byteD9: 0};
   if (rotationHydration !== undefined) supplied.rotation = rotationHydration;
@@ -8858,6 +8873,11 @@ function normalLifecycleHydratedControlFixture(initial: Partial<SourceActorNorma
   if (cue0TailHydration !== undefined) {
     supplied.cue0Tail = cue0TailHydration;
     if (cue0TailHydration.teamRows103 !== undefined) supplied.global.teamRows103 = cue0TailHydration.teamRows103;
+  }
+  if (commandAdmissionHydration !== undefined) {
+    supplied.commandAdmission = commandAdmissionHydration;
+    Object.assign(supplied.global, commandAdmissionHydration.global);
+    Object.assign(supplied.data, commandAdmissionHydration.data);
   }
   if (tierHydration !== undefined) {supplied.tierHydration = tierHydration; supplied.actorRates.withMatrix = true;}
   const x = readyLifecycleHydratedControlFixture(readyLifecycleHydration(),
@@ -9452,10 +9472,11 @@ export function runRotationDampingHydratedCompositionTests(): void {
  * consumers; no source callee is replaced with a successful test callback. */
 function cue0LifecycleHydratedControlFixture(move661 = 3,
   initial: Partial<SourceActorCue0LifecycleBinding> = {byte732: 0}, tierHydration?: TierLifecycleHydration,
-  inputTestersHydration?: Partial<SourceActorInputTestersBinding>, cue0TailHydration?: Cue0TailHydration) {
+  inputTestersHydration?: Partial<SourceActorInputTestersBinding>, cue0TailHydration?: Cue0TailHydration,
+  commandAdmissionHydration?: CommandAdmissionHydration) {
   const x = normalLifecycleHydratedControlFixture(
     {callback4c8: 0x8006f950, callback4dc: null, short6bc: 2, byte1d9: 0}, move661, tierHydration,
-    {jointsB0: [255, 255, 255, 255, 255, 255, 255, 255], corrections18d4: [{x: 0, y: 0, z: 0}, {y: 0, z: 0}]}, initial, inputTestersHydration, cue0TailHydration);
+    {jointsB0: [255, 255, 255, 255, 255, 255, 255, 255], corrections18d4: [{x: 0, y: 0, z: 0}, {y: 0, z: 0}]}, initial, inputTestersHydration, cue0TailHydration, commandAdmissionHydration);
   if (x.cue0 === undefined || x.rotation === undefined) throw Error('cue0 composition requires genuine cue0 and rotation owners');
   // Stage bounds must not replace the cue being tested with9. These are live,
   // explicit source gate inputs, not a different scheduling path.
@@ -9785,8 +9806,9 @@ export function runCue0LifecycleHydratedCompositionTests(): void {
  * actual command585, status593 and charge58e remain owned by their existing
  * genuine producers; only missing595/748 receive supplied partial storage. */
 function inputTestersHydratedControlFixture(initial: Partial<SourceActorInputTestersBinding> = {byte595: 77, byte748: 0},
-  tierHydration?: TierLifecycleHydration, cue0TailHydration?: Cue0TailHydration) {
-  const x = cue0LifecycleHydratedControlFixture(0, {byte732: 0}, tierHydration, initial, cue0TailHydration);
+  tierHydration?: TierLifecycleHydration, cue0TailHydration?: Cue0TailHydration,
+  commandAdmissionHydration?: CommandAdmissionHydration) {
+  const x = cue0LifecycleHydratedControlFixture(0, {byte732: 0}, tierHydration, initial, cue0TailHydration, commandAdmissionHydration);
   if (x.inputTesters === undefined) throw Error('input tester composition requires explicit genuine owner');
   x.sourceActor.inputEdge5d4 = 0; x.sourceActor.inputHeld5d8 = 0;
   x.sourceActor.statusWord5b4 = 0; x.sourceActor.statusWord5bc = 0;
@@ -10455,4 +10477,378 @@ export function runCue0TailHydratedCompositionTests(): void {
       'a genuine runtime belonging to a different actor graph cannot substitute charge or cue ownership');
   }
   console.log('[actor-cue0-tail-composition] PASS: real69814/696f4/694c0/69038/69354/68f9c on retained DAT/setup/status/Borg/charge/cue graph; real signed cue successes and sentinels, zero-input normal completion, team charged/edge200 actual6fb, source-ordered57c/58f/held writes and readonly partial failures, optional hydration and permanent standalone guards, canonical shared tier/ceiling global; synthetic decoded offline graph only, no live team mapping/original-DOL/full-tick/replay/browser-playability claim');
+}
+
+/** Explicit decoded ordinary-X input on the retained genuine graph. The raw
+ * pointer-row is synthetic fixture data for Double's authenticated4ec root
+ * 8033b180: its X slot8033b188 points to record8033b108 [44,3,2,0]. Neither
+ * addresses nor this opt-in claim constructor hydration or live activation. */
+interface CommandAdmissionHydration {
+  initial: Partial<SourceActorCommandAdmissionBinding>;
+  byte10?: number;
+  testers?: Partial<SourceActorInputTestersBinding>;
+  global: Partial<{byte45: number}>;
+  data: Partial<SourceActorInputChargeData>;
+}
+function commandAdmissionHydration(): CommandAdmissionHydration {
+  return {initial: {pointer504: null, pointer508: null, pointerc8: null, byteD0: 89}, byte10: 1,
+    global: {byte45: 5}, data: {float80437678: 20000, float80437078: tierFloatFromBits(0x38c90fdb),
+      flags3994: [58, 4, 56, 4, 56, 0, 56, 0, 56, 0, 56, 0]}};
+}
+function commandAdmissionHydratedControlFixture(supplied = commandAdmissionHydration(), withTail = false) {
+  const x = inputTestersHydratedControlFixture(supplied.testers, undefined, withTail ? cue0TailHydration() : undefined, supplied);
+  if (x.commandAdmission === undefined) throw Error('command composition requires explicit genuine admission owner');
+  const a = x.sourceActor;
+  a.inputEdge5d4 = 0x80; a.inputHeld5d8 = 0; a.stateTimer = 0; a.controlWord = 0; a.heading = 0;
+  a.cmdSubtype = 73; a.cmdChargedRanged = 75; a.actionIndex = 67; a.variantIndex = 71; a.prevActionIndex = 69;
+  a.stateFlagA = 65; a.stateFlagB = 66; a.visibilityBit = 4;
+  x.header.yawOffset6b8 = 0; x.chargeDescriptor[0x2e] = 1;
+  // These source terrain fields merely let the existing cue0 terrain helper
+  // finish its real ground branch before the actual tester chain executes.
+  a.hoverOffset668 = 0; a.stepHeight = 0; a.tierScale = 1; a.hSpeed = 4; a.slopeMode698 = 7;
+  x.attributeState.field674 = 10; x.historyState.previousStepHeight6d4 = 0;
+  Object.assign(a.pos, {x: 101, y: 2, z: 300}); Object.assign(a.savedGroundPos, {x: 100, y: 2, z: 300});
+  Object.assign(a.aimOrigin518, {x: -51, y: -52, z: -53});
+  const commandRow = Array<number>(96).fill(255);
+  // One supplied four-byte record at each selected subtype. Distinct untouched
+  // bytes make signed selectors and sentinel reads observable, not normalized.
+  for (const subtype of [0, 1, 2, 3, 4, 5]) commandRow.splice(subtype * 16, 4, 44, 3, 2, 0);
+  const commandRows = [null, null, commandRow, null, null, null];
+  const commandTable = {records: [], sourceTables: commandRows}; a.commandTable = commandTable;
+  const visibility = Array.from({length: 6}, (_, i) => ({eligibility83: i, controlWord: 0x80000000,
+    visibilityMask5e6: 0x44 | i << 4})); a.visibilityRoster = visibility;
+  const cueTable = new Int8Array(96); cueTable.fill(-1); cueTable[0] = 0; cueTable[1] = 0;
+  cueTable[18] = -8; cueTable[19] = -7; cueTable[88] = 61; cueTable[89] = 62; a.cueTable = cueTable;
+  x.cells[2].max = 0; x.cells[2].refillType = 7; // max0 must bypass this malformed/unimplemented refill branch.
+  x.start.marker709 = 0x35; x.control.getActorBinding(x.actor).blockedMask1d9a = 0x83;
+  return Object.assign(x, {commandAdmission: x.commandAdmission,
+    admissionState: x.commandAdmission.getActorBinding(x.actor), commandRow, commandRows, commandTable, visibility, cueTable,
+    admissionGlobal: x.charge.getGlobal(), admissionData: x.charge.getData()});
+}
+type CommandAdmissionFixture = ReturnType<typeof commandAdmissionHydratedControlFixture>;
+function retainCommandAdmissionRecords(x: CommandAdmissionFixture): () => void {
+  const owners: object[] = [x.sourceActor, x.sourceActor.aimOrigin518, x.sourceActor.pos, x.sourceActor.savedGroundPos,
+    x.admissionState, x.testerState, x.chargeState, x.cueState, x.gates, x.statusState, x.sourceClock,
+    x.commandTable, x.commandRows, x.commandRow, x.visibility, ...x.visibility,
+    x.start, x.control.getActorBinding(x.actor), ...x.cells, ...x.ammoSlots, x.admissionGlobal, x.admissionData,
+    x.normalLifecycleState, x.actorControlState, x.readyState, x.actionRequest!.getActorBinding(x.actor), x.tier];
+  const saved = owners.map(owner => ({owner, keys: Reflect.ownKeys(owner)}))
+    .map(row => ({...row, values: row.keys.map(key => Reflect.get(row.owner, key))}));
+  return () => check(saved.every(({owner, keys, values}) => keys.length === Reflect.ownKeys(owner).length &&
+    keys.every((key, index) => Object.is(Reflect.get(owner, key), values[index]))),
+  'rejected command continuation preserves every completed source store and never rolls back or replays effects');
+}
+function checkCommandAdmissionPermanentRefusal(x: CommandAdmissionFixture, childIncomplete = true): void {
+  for (const [index, bypass] of ['cue9', 'ready', 'control-mask', 'movement3'].entries()) {
+    if (Object.getOwnPropertyDescriptor(x.sourceActor, 'ubCue')!.writable) x.sourceActor.ubCue = bypass === 'cue9' ? 9 : 0;
+    if (Object.getOwnPropertyDescriptor(x.sourceActor, 'controlWord')!.writable)
+      x.sourceActor.controlWord = bypass === 'control-mask' ? 0x41 : 0;
+    x.movementState.byte661 = bypass === 'movement3' ? 3 : 0;
+    x.actorControlState.byte490 = bypass === 'ready' ? 2 : 0; x.actorControlState.short49a = 1;
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.runRawPrefix(index + 10, 128, 40), 'known incomplete');
+    rejects(() => x.runRawPrefix(index + 10, 256, 80), 'epoch'); retained();
+  }
+  if (childIncomplete) rejects(() => x.commandAdmission.dispatchSubtypeDirection(x.actor), 'known incomplete');
+  for (const run of [() => x.inputTesters.updateActor(x.actor), () => x.inputTesters.testDescriptor(x.actor),
+    () => x.cue0.dispatchCue0(x.actor), () => x.normalLifecycle.updateActor(x.actor)])
+    rejects(run, 'known incomplete');
+}
+function checkCommandNativeOne(x: CommandAdmissionFixture): void {
+  const a = x.sourceActor;
+  check(a.cmdButton === 2 && a.cmdSubtype === 0 && a.cmdChargedRanged === 0 && a.prevActionIndex === 2 &&
+    a.actionIndex === 2 && a.variantIndex === 0 && a.controlWord === 3 && Object.is(a.stateTimer, 0),
+    'actual X edge stores585, real69ea4 stores586 and null508->6c674 stores587 before raw4ec [44,3,2,0] writes real6a104');
+  check(x.admissionState.pointerc8 === null && a.visibilityTarget === null && x.admissionState.byteD0 === 1 &&
+    a.targetDistance760 === 20000 && a.horizontalDistance764 === 20000 && Object.is(a.aimOrigin518.x, 0) &&
+    a.aimOrigin518.y === x.worldMatrix[7] && a.aimOrigin518.z === 20000,
+    'actual6bda8 writes shared target snapshot, exact yaw0 X/Z and descriptor-selected retained real matrix Y without adding actor position');
+  check(a.stateFlagA === 56 && a.stateFlagB === 0 && x.start.marker709 === 0 &&
+    x.control.getActorBinding(x.actor).blockedMask1d9a === 0 && x.visibility.every((v, i) => v.visibilityMask5e6 === (0x40 | i << 4)),
+    'real command flag table, same stream709/1d9a owners and all six actual visibility records receive source-ordered stores');
+  check(a.fbCue === 44 && a.ubCue === 44 && a.fbState === 61 && a.ubState === 62 &&
+    a.prevFbState === -13 && a.prevUbState === -12 && a.fbPhase === 0 && a.onLand754 === null &&
+    x.cueState.byte7cf === 202 && x.cueState.byte7ce === 0 && x.cueState.byte588 === 0 &&
+    ['byte541', 'byte542', 'byte543', 'byte544', 'byte545', 'byte546', 'byte547']
+      .every(key => Reflect.get(x.cueState, key) === 0) && x.gates.marker1db3 === 0,
+    'genuine full then upper44 cues retain old states/cues and complete actual phase/landing/dispatch resets');
+  check(x.cells[2].max === 0 && x.cells[2].cur === 3 && x.cells[2].refillType === 7 && x.cells[2].timer === 0.5 &&
+    x.ammoSlots[2].mirror776 === 13 && x.testerState.byte595 === 0 && x.admissionGlobal === x.globals,
+    'actual source ammo.max0 bypasses consume/refillType, non-normal-match signed byte45>=5 exits genuine voice and595 remains tester-only');
+}
+export function runCommandAdmissionHydratedCompositionTests(): void {
+  {
+    const old = inputTestersHydratedControlFixture(); old.sourceActor.inputEdge5d4 = 0x80; old.chargeDescriptor[0x2e] = 1;
+    check(old.inputTesters.getCommandAdmissionRuntime() === undefined && !Object.hasOwn(old, 'commandAdmission') &&
+      !Object.hasOwn(old.scalarDescriptor, 'byte10') && !Object.hasOwn(old.charge.getGlobal(), 'byte45') &&
+      !Object.hasOwn(old.charge.getData(), 'flags3994'), 'historical graph retains absent admission, metadata/global/table inputs and original69ea4 refusal');
+    rejects(() => old.inputTesters.updateActor(old.actor), '80069ea4'); checkInputTestersPermanentRefusal(old);
+  }
+  {
+    const x = commandAdmissionHydratedControlFixture(), r = x.commandAdmission;
+    check(x.inputTesters.getCommandAdmissionRuntime() === r && r.getActualActor(x.actor) === x.sourceActor &&
+      r.getWorldBinding(x.actor) === x.header && r.getStatusBinding(x.actor) === x.statusState &&
+      r.getMappingActor(x.actor) === x.sourceClock && r.getAttributeBinding(x.actor) === x.attributeState &&
+      r.getChargeRuntime() === x.charge && r.getActionRuntime() === x.actionRequest && r.getCueRuntime() === x.cues &&
+      r.getActorBinding(x.actor) === x.admissionState && Object.isSealed(x.admissionState) &&
+      !Object.hasOwn(x.admissionState, 'byte595'), 'admission shares genuine actual/world/status/mapping/attribute/charge/action/cue owners and owns no595');
+    const attached = x.joints.getBinding(x.joint).aobj7c, beforeMatrix = [...x.worldMatrix], beforeHistory = x.historyState.previousStepHeight6d4;
+    check(x.inputTesters.updateActor(x.actor) === 1, 'ordinary X reaches actual native1 without fake helper results or legacy command dispatch');
+    checkCommandNativeOne(x);
+    check(x.joints.getBinding(x.joint).aobj7c === attached && x.worldMatrix.every((v, i) => Object.is(v, beforeMatrix[i])) &&
+      x.historyState.previousStepHeight6d4 === beforeHistory && x.normalLifecycleState.short6bc === 2 &&
+      x.actionRequest!.getActorBinding(x.actor).byte73c === 31, 'standalone admission does not run later lifecycle/setup/matrix/history behind caller');
+    r.assertActorComplete(x.actor); x.inputTesters.assertActorComplete(x.actor);
+  }
+  {
+    const x = commandAdmissionHydratedControlFixture(), a = x.sourceActor; x.header.mode4a1 = 1; a.statusWord5bc = 0x400;
+    check(x.runRawPrefix(1, 64, 20) === undefined, 'real ordinary-X native1 completes genuine cue0 and normal caller suffix');
+    checkCommandNativeOne(x); checkChargeConsumedEpoch(x);
+    check(x.normalLifecycleState.short6bc === 1 && x.actionRequest!.getActorBinding(x.actor).byte73c === 4 &&
+      x.sourceClock.timestep1dc8 === 1 && a.pos.y === 0 && x.tier.timerFrames === 7,
+      'actual terrain precedes admission and caller continues through4c8/normal flags/countdown/action/rate/ceiling without automatic animation');
+    x.sourceActor.stateTimer = 8; x.statusState.field690 = 8; x.cells[2].timer = 8; x.cells[2].refillType = 0;
+    x.updateStatus();
+    check(a.stateTimer === 8 && x.statusState.field690 === 7 && x.cells[2].timer === 7 && x.normalLifecycleState.short6bc === 1,
+      'explicit later genuine status keeps694 while admitted mode3 is active, decrements other status/ammo at the new clock and never replays command/cues');
+    rejects(() => x.runRawPrefix(2, 64, 20), 'source table802d3300');
+    check(a.ubCue === 44 && a.fbCue === 44, 'later active cue44 remains honest unsupported lifecycle boundary rather than implicit full attack support');
+  }
+  // A live raw sentinel may finish without any snapshot/cue/ammo/voice owner.
+  // This exercises real69ea4/null direction and actual6a104 first-byte return.
+  {
+    const supplied = commandAdmissionHydration(); supplied.initial = {pointer508: null}; supplied.global = {}; supplied.data = {}; delete supplied.byte10;
+    const x = commandAdmissionHydratedControlFixture(supplied); x.commandRow.splice(0, 4, 255, NaN, NaN, NaN);
+    x.sourceActor.heading = NaN; x.sourceActor.aimOrigin518 = null as never; x.sourceActor.visibilityRoster = [];
+    x.sourceActor.cueTable = null; x.cells[2].max = NaN;
+    check(x.inputTesters.updateActor(x.actor) === 0 && x.sourceActor.cmdButton === 2 && x.sourceActor.cmdSubtype === 0 &&
+      x.sourceActor.cmdChargedRanged === 0 && x.sourceActor.prevActionIndex === 69 && x.sourceActor.actionIndex === 67 &&
+      x.sourceActor.variantIndex === 71 && x.testerState.byte595 === 0,
+      'raw cueff native0 leaves absent504/c8/D0/descriptor10/data/global/visibility/cue/ammo lazy after real586/587');
+    x.commandAdmission.assertActorComplete(x.actor); x.inputTesters.assertActorComplete(x.actor);
+  }
+  {
+    const supplied = commandAdmissionHydration(); supplied.initial = {}; supplied.global = {}; supplied.data = {}; delete supplied.byte10;
+    const x = commandAdmissionHydratedControlFixture(supplied); x.sourceActor.stateTimer = 1;
+    x.sourceActor.commandTable = null; x.sourceActor.heading = NaN; x.sourceActor.visibilityRoster = [];
+    check(x.inputTesters.updateActor(x.actor) === 0 && x.sourceActor.cmdSubtype === 73 && x.sourceActor.cmdChargedRanged === 75 &&
+      x.sourceActor.prevActionIndex === 69 && Reflect.ownKeys(x.admissionState).length === 0,
+      'source uncharged cooldown returns0 before586 or any absent target/table/snapshot dependencies, retaining tester595=0');
+    x.commandAdmission.assertActorComplete(x.actor);
+  }
+  for (const byte45 of [5, 127]) {
+    const supplied = commandAdmissionHydration(); supplied.global.byte45 = byte45;
+    const x = commandAdmissionHydratedControlFixture(supplied);
+    check(x.inputTesters.updateActor(x.actor) === 1, 'signed non-normal-match byte45>=5 is actual voice early return'); checkCommandNativeOne(x);
+  }
+  for (const byte45 of [0, 4, 128, 255]) {
+    const supplied = commandAdmissionHydration(); supplied.global.byte45 = byte45;
+    const x = commandAdmissionHydratedControlFixture(supplied);
+    rejects(() => x.inputTesters.updateActor(x.actor), '800055fc');
+    checkCommandNativeOne(x); checkCommandAdmissionPermanentRefusal(x);
+  }
+  for (const [control, upper, byte7cc, subtype] of [
+    [0, 0, 0, 0], [0x10, 0, 0, 1], [0x20, 0, 0, 0], [0x60, 0, 0, 3],
+    [0x20, 0, 1, 2], [0x20, 0, 255, 2], [0x80, 0, 0, 4], [0x100, 0, 0, 5], [0, 4, 0, 3],
+  ] as const) {
+    const supplied = commandAdmissionHydration(); supplied.testers = {byte595: 77, byte748: 0, byte7cc};
+    const x = commandAdmissionHydratedControlFixture(supplied); x.sourceActor.controlWord = control; x.sourceActor.ubCue = upper;
+    for (let index = 0; index < 6; index++) {x.commandRow[index * 16 + 2] = 10 + index; x.commandRow[index * 16 + 3] = 20 + index;}
+    check(x.inputTesters.updateActor(x.actor) === 1 && x.sourceActor.cmdSubtype === subtype &&
+      x.sourceActor.cmdChargedRanged === 0 && x.sourceActor.actionIndex === 10 + subtype && x.sourceActor.variantIndex === 20 + subtype,
+      'real69ea4 source priority and byte7cc branch address the selected16-byte subtype before raw four-byte dispatch');
+  }
+  for (const selector of ['button', 'subtype'] as const) {
+    const x = commandAdmissionHydratedControlFixture(); x.sourceActor.cmdButton = selector === 'button' ? 255 : 2;
+    x.sourceActor.cmdSubtype = selector === 'subtype' ? 255 : 0;
+    rejects(() => x.commandAdmission.dispatchSubtypeDirection(x.actor), selector === 'button' ? 'signed585' : 'command record address');
+    check(x.sourceActor.cmdChargedRanged === 0 && x.sourceActor.prevActionIndex === 69 && x.sourceActor.actionIndex === 67,
+      'signed585 and586 reject negative source addressing after required587 zero without normalized button/subtype lookup');
+    checkCommandAdmissionPermanentRefusal(x);
+  }
+  // Destination checks cannot omit required source zero stores merely because
+  // the cell already contains zero. Each row also pins the completed prefix.
+  const readonlyCases: readonly [string, (x: CommandAdmissionFixture) => object, unknown, (x: CommandAdmissionFixture) => boolean][] = [
+    ['cmdSubtype', x => x.sourceActor, 0, x => x.sourceActor.cmdButton === 2 && x.sourceActor.cmdChargedRanged === 75],
+    ['cmdChargedRanged', x => x.sourceActor, 0, x => x.sourceActor.cmdSubtype === 0 && x.sourceActor.prevActionIndex === 69],
+    ['prevActionIndex', x => x.sourceActor, 2, x => x.sourceActor.cmdChargedRanged === 0 && x.admissionState.byteD0 === 89],
+    ['pointerc8', x => x.admissionState, null, x => x.sourceActor.prevActionIndex === 2 && x.admissionState.byteD0 === 89],
+    ['visibilityTarget', x => x.sourceActor, null, x => x.admissionState.pointerc8 === null && x.admissionState.byteD0 === 89],
+    ['byteD0', x => x.admissionState, 1, x => x.sourceActor.prevActionIndex === 2 && x.sourceActor.targetDistance760 === -760],
+    ['horizontalDistance764', x => x.sourceActor, 20000, x => x.admissionState.byteD0 === 1 && x.sourceActor.targetDistance760 === -760],
+    ['targetDistance760', x => x.sourceActor, 20000, x => x.sourceActor.horizontalDistance764 === 20000 && x.sourceActor.aimOrigin518.x === -51],
+    ['x', x => x.sourceActor.aimOrigin518, 0, x => x.sourceActor.targetDistance760 === 20000 && x.sourceActor.aimOrigin518.y === -52],
+    ['y', x => x.sourceActor.aimOrigin518, 0, x => Object.is(x.sourceActor.aimOrigin518.x, 0) && x.sourceActor.aimOrigin518.z === -53],
+    ['z', x => x.sourceActor.aimOrigin518, 20000, x => x.sourceActor.aimOrigin518.y === x.worldMatrix[7] && x.sourceActor.actionIndex === 67],
+    ['actionIndex', x => x.sourceActor, 2, x => x.sourceActor.aimOrigin518.z === 20000 && x.sourceActor.variantIndex === 71],
+    ['variantIndex', x => x.sourceActor, 0, x => x.sourceActor.actionIndex === 2 && x.sourceActor.controlWord === 0],
+    ['controlWord', x => x.sourceActor, 0, x => x.sourceActor.variantIndex === 0 && x.start.marker709 === 0x35],
+    ['stateTimer', x => x.sourceActor, 0, x => x.sourceActor.controlWord === 3 && x.start.marker709 === 0x35],
+    ['marker709', x => x.start, 0, x => x.sourceActor.controlWord === 3 && x.sourceActor.stateFlagA === 65],
+    ['stateFlagA', x => x.sourceActor, 56, x => x.start.marker709 === 0 && x.sourceActor.stateFlagB === 66],
+    ['stateFlagB', x => x.sourceActor, 0, x => x.sourceActor.stateFlagA === 56 && x.control.getActorBinding(x.actor).blockedMask1d9a === 0x83],
+    ['blockedMask1d9a', x => x.control.getActorBinding(x.actor), 0, x => x.sourceActor.stateFlagB === 0 && x.visibility[0]!.visibilityMask5e6 === 0x44],
+    ['visibilityMask5e6', x => x.visibility[3]!, 0x70, x => x.visibility.slice(0, 3).every((v, i) => v.visibilityMask5e6 === (0x40 | i << 4)) && x.visibility[4]!.visibilityMask5e6 === 0x44],
+    ['fbCue', x => x.sourceActor, 44, x => x.cueState.byte7cf === 44 && x.sourceActor.fbState === -13],
+    ['fbState', x => x.sourceActor, 61, x => x.sourceActor.fbCue === 44 && x.sourceActor.prevFbState === 61 && x.cueState.byte543 === 13],
+    ['ubCue', x => x.sourceActor, 44, x => x.sourceActor.fbState === 61 && x.sourceActor.fbPhase === 0 && x.sourceActor.ubState === -12],
+    ['ubState', x => x.sourceActor, 62, x => x.sourceActor.ubCue === 44 && x.sourceActor.prevUbState === 62 && x.cueState.byte547 === 17],
+    ['byte588', x => x.cueState, 0, x => x.cueState.byte544 === 0 && x.sourceActor.onLand754 !== null && x.gates.marker1db3 === 1],
+    ['onLand754', x => x.sourceActor, null, x => x.cueState.byte588 === 0 && x.gates.marker1db3 === 1],
+    ['marker1db3', x => x.gates, 0, x => x.sourceActor.onLand754 === null && x.sourceActor.ubState === 62],
+  ];
+  for (const [key, owner, value, prefix] of readonlyCases) {
+    const x = commandAdmissionHydratedControlFixture(), target = owner(x);
+    Object.defineProperty(target, key, {value, writable: false});
+    rejects(() => x.inputTesters.updateActor(x.actor), `${key}: non-writable`);
+    check(prefix(x), `readonly${key} preserves exactly the genuine completed prefix, including equal-value required stores`);
+    checkCommandAdmissionPermanentRefusal(x, key !== 'cmdSubtype' && key !== 'cmdChargedRanged');
+  }
+  for (const target of ['missing508', 'nonnull508', 'missing504', 'yaw', 'descriptor', 'ammo', 'flags', 'global'] as const) {
+    const supplied = commandAdmissionHydration();
+    if (target === 'missing508') delete supplied.initial.pointer508;
+    if (target === 'missing504') delete supplied.initial.pointer504;
+    if (target === 'descriptor') supplied.byte10 = 255;
+    if (target === 'global') supplied.global = {};
+    const x = commandAdmissionHydratedControlFixture(supplied);
+    if (target === 'nonnull508') x.admissionState.pointer508 = x.visibility[0]!;
+    if (target === 'yaw') x.sourceActor.heading = 1;
+    if (target === 'ammo') x.cells[2].max = 1;
+    if (target === 'flags') (x.admissionData.flags3994 as number[])[4] = 57;
+    rejects(() => x.inputTesters.updateActor(x.actor), target === 'missing508' ? 'pointer508' : target === 'nonnull508' ? '80066408' :
+      target === 'missing504' ? 'pointer504' : target === 'yaw' ? 'nonzero source trig' : target === 'descriptor' ? 'world matrix: addressing outside' :
+      target === 'ammo' ? '8006dbe0' : target === 'flags' ? 'authenticated selected byte' : 'byte45');
+    check(x.testerState.byte595 === 0 && x.sourceActor.cmdButton === 2 && x.sourceActor.cmdSubtype === 0 &&
+      x.sourceActor.cmdChargedRanged === (target === 'missing508' || target === 'nonnull508' ? 75 : 0),
+      'reached missing pointers/active direction/trig/descriptor/ammo/global refuse after exact586/587 prefix without invented null targets');
+    if (target === 'yaw' || target === 'descriptor') check(x.sourceActor.targetDistance760 === 20000 &&
+      x.sourceActor.horizontalDistance764 === 20000 && x.admissionState.byteD0 === 1 && x.sourceActor.actionIndex === 67,
+      'unsupported snapshot retains target capture and both distance stores, never dispatches later action/cues');
+    if (target === 'ammo' || target === 'global') check(x.sourceActor.ubCue === 44 && x.sourceActor.fbCue === 44 &&
+      x.visibility.every((v, i) => v.visibilityMask5e6 === (0x40 | i << 4)), 'late ammo/voice refusal preserves completed six visibility stores and both genuine cues');
+    checkCommandAdmissionPermanentRefusal(x, target !== 'missing508' && target !== 'nonnull508');
+  }
+  for (const replace of ['root', 'pointers', 'row'] as const) {
+    const x = commandAdmissionHydratedControlFixture(); x.commandRow[0] = 255;
+    check(x.inputTesters.updateActor(x.actor) === 0, 'prime genuine lazy command owners through real sentinel');
+    if (replace === 'root') x.sourceActor.commandTable = {...x.commandTable};
+    if (replace === 'pointers') x.commandTable.sourceTables = [...x.commandRows];
+    if (replace === 'row') x.commandRows[2] = [...x.commandRow];
+    rejects(() => x.inputTesters.updateActor(x.actor), 'owner changed');
+    check(x.sourceActor.prevActionIndex === 69 && x.sourceActor.aimOrigin518.x === -51,
+      'equal copied command root/pointer table/byte row cannot replace canonical first-reached source owners');
+    checkCommandAdmissionPermanentRefusal(x);
+  }
+  for (const replace of ['roster', 'target', 'aim', 'flags', 'ammo-slot', 'ammo-cell'] as const) {
+    const x = commandAdmissionHydratedControlFixture(); check(x.inputTesters.updateActor(x.actor) === 1, 'prime actual complete command owners');
+    x.sourceActor.controlWord = 0; x.sourceActor.ubCue = 0;
+    if (replace === 'roster') x.sourceActor.visibilityRoster = [...x.visibility];
+    if (replace === 'target') x.visibility[3] = {...x.visibility[3]!};
+    if (replace === 'aim') x.sourceActor.aimOrigin518 = {...x.sourceActor.aimOrigin518};
+    if (replace === 'flags') x.admissionData.flags3994 = [...x.admissionData.flags3994!];
+    if (replace === 'ammo-slot') (x.ammoSlots as unknown as SourceActorStatusAmmoSlot[])[2] = {...x.ammoSlots[2]};
+    if (replace === 'ammo-cell') (x.ammoSlots[2] as {cell: WeaponCell}).cell = {...x.cells[2]};
+    rejects(() => x.inputTesters.updateActor(x.actor), 'owner changed');
+    checkCommandAdmissionPermanentRefusal(x);
+  }
+  {
+    const x = commandAdmissionHydratedControlFixture(); check(x.inputTesters.updateActor(x.actor) === 1, 'prime known owned source records');
+    const known = x.commandAdmission.getKnownStorageOwners();
+    check([x.commandTable, x.commandRows, x.commandRow, x.sourceActor.aimOrigin518, x.scalarDescriptor, x.worldMatrix,
+      x.admissionData.flags3994!, x.visibility, ...x.visibility, x.ammoSlots[2], x.cells[2]].every(owner => known.includes(owner)),
+      'source table/snapshot/descriptor/matrix/flags/six targets/actual ammo are registered only when genuinely reached');
+    for (const [index, owner] of [x.admissionState, x.admissionGlobal, x.admissionData, x.start, x.control.getActorBinding(x.actor), ...known].entries()) {
+      rejects(() => x.prefix.ingestRawDistancesAndRun(x.actor, index + 100, owner as never), 'raw input must not alias');
+      rejects(() => x.runRawPrefix(index + 100, 128, 40), 'epoch');
+    }
+    check(x.sourceActor.targetDistance760 === 20000 && x.sourceActor.horizontalDistance764 === 20000 && x.normalLifecycleState.short6bc === 2,
+      'all additional known source owners reject raw input aliasing and consume epochs before ingress or lifecycle continuation');
+  }
+  for (const fault of ['charge', 'actionRequest', 'cues', 'streams', 'status-world', 'attribute', 'stream-owner'] as const) {
+    const x = inputTestersHydratedControlFixture(), other = inputTestersHydratedControlFixture();
+    const sources = {world: x.world, status: x.status, attributes: x.attributes, charge: x.charge,
+      actionRequest: x.actionRequest!, cues: x.cues, streams: x.control, gqr5: 0x00070007};
+    if (fault === 'charge' || fault === 'actionRequest' || fault === 'cues' || fault === 'streams') {
+      rejects(() => createSourceActorCommandAdmissionRuntime({...sources, [fault]: {...sources[fault]}}), 'genuine');
+    } else {
+      const changed = fault === 'status-world' ? {...sources, status: {...x.status, getWorldBinding() {return {...x.header};}}} :
+        fault === 'attribute' ? {...sources, attributes: {...x.attributes, getActorBinding() {return {...x.attributeState};}}} :
+        {...sources, streams: other.control};
+      const runtime = createSourceActorCommandAdmissionRuntime(changed);
+      rejects(() => runtime.bindActor(x.actor, commandAdmissionHydration().initial), fault === 'stream-owner' ? 'unknown' : 'owner changed');
+    }
+    check(x.sourceActor.cmdButton === 93 && x.testerState.byte595 === 77 && x.start.marker709 === 0x15 &&
+      x.sourceActor.variantIndex === 71, 'copied genuine methods or noncanonical shared world/attribute/stream ownership cannot admit before source writes');
+  }
+  for (const key of ['pointer508', 'pointerc8', 'byteD0', 'byte45', 'float80437678', 'flags3994', 'marker709', 'byte587'] as const) {
+    const x = commandAdmissionHydratedControlFixture(); Object.defineProperty(x.sourceActor, key, {value: undefined});
+    const retained = retainCommandAdmissionRecords(x);
+    rejects(() => x.commandAdmission.dispatchSubtypeDirection(x.actor), 'competing'); retained();
+    x.commandAdmission.assertActorComplete(x.actor);
+  }
+  for (const yawOffset of [0, 1, -1]) {
+    const x = commandAdmissionHydratedControlFixture(), targetIdentity = {};
+    x.admissionState.pointer504 = targetIdentity; x.header.yawOffset6b8 = yawOffset;
+    check(x.inputTesters.updateActor(x.actor) === 1 && x.admissionState.pointer504 === targetIdentity &&
+      x.admissionState.pointerc8 === (yawOffset === 0 ? targetIdentity : null) &&
+      x.sourceActor.visibilityTarget === null && x.admissionState.byteD0 === (yawOffset === 0 ? 1 : 0) &&
+      x.sourceActor.aimOrigin518.y === x.worldMatrix[7],
+      'genuine snapshot copies explicit504 while independent508=null selects no-target and signed nonzero6b8 actually clears c8/cc/D0');
+  }
+  for (const selector of [0, 1]) {
+    const supplied = commandAdmissionHydration(); supplied.byte10 = selector;
+    const x = commandAdmissionHydratedControlFixture(supplied);
+    check(x.rootMatrix[7] !== x.worldMatrix[7], 'real source matrix rows provide distinct Y witnesses');
+    check(x.inputTesters.updateActor(x.actor) === 1 && x.sourceActor.aimOrigin518.y ===
+      (selector === 0 ? x.rootMatrix[7] : x.worldMatrix[7]),
+      'same descriptor10 metadata selects retained real world Y without deriving a joint from actor position or raw8c');
+  }
+  {
+    const x = commandAdmissionHydratedControlFixture(commandAdmissionHydration(), true); x.commandRow[0] = 255;
+    x.header.mode4a1 = 1; x.sourceActor.statusWord5bc = 0x400;
+    check(x.runRawPrefix(1, 64, 20) === undefined && x.cue0Tail !== undefined && x.sourceActor.prevActionIndex === 69 &&
+      x.sourceActor.actionIndex === 67 && x.sourceActor.aimOrigin518.x === -51 && x.normalLifecycleState.short6bc === 1,
+      'real command sentinel0 flows onward through the genuine optional cue0 tail and normal caller without a false partial marker');
+    x.commandAdmission.assertActorComplete(x.actor); x.inputTesters.assertActorComplete(x.actor); x.cue0Tail!.assertActorComplete(x.actor);
+  }
+  for (const upperSentinel of [false, true]) {
+    const x = commandAdmissionHydratedControlFixture(); x.cueTable[upperSentinel ? 89 : 88] = -1;
+    check(x.inputTesters.updateActor(x.actor) === 1 &&
+      x.sourceActor.fbCue === (upperSentinel ? 44 : 202) && x.sourceActor.ubCue === (upperSentinel ? 0 : 44) &&
+      x.sourceActor.fbState === (upperSentinel ? 61 : -13) && x.sourceActor.ubState === (upperSentinel ? -12 : 62),
+      'actual6a104 ignores genuine full/upper cue sentinel0 returns and still completes ammo.max0 and bounded voice return');
+    x.commandAdmission.assertActorComplete(x.actor);
+  }
+  {
+    const x = commandAdmissionHydratedControlFixture(), sine = Math.sin, cosine = Math.cos;
+    Math.sin = () => {throw Error('host sine must not execute in source yaw0 admission');};
+    Math.cos = () => {throw Error('host cosine must not execute in source yaw0 admission');};
+    try {check(x.inputTesters.updateActor(x.actor) === 1, 'zero-yaw uses authenticated source direct kernels, never host trig');}
+    finally {Math.sin = sine; Math.cos = cosine;}
+    checkCommandNativeOne(x);
+  }
+  {
+    const x = commandAdmissionHydratedControlFixture(); delete (x.cells[2] as Partial<WeaponCell>).refillType;
+    x.cells[2].cur = NaN; x.cells[2].timer = NaN;
+    check(x.inputTesters.updateActor(x.actor) === 1 && !Object.hasOwn(x.cells[2], 'refillType') &&
+      Number.isNaN(x.cells[2].cur) && Number.isNaN(x.cells[2].timer),
+      'actual source cell.max0 returns before absent refillType and unneeded cur/timer instead of filling ammunition defaults');
+  }
+  {
+    const x = inputTestersHydratedControlFixture();
+    const admission = createSourceActorCommandAdmissionRuntime({world: x.world, status: x.status, attributes: x.attributes,
+      charge: x.charge, actionRequest: x.actionRequest!, cues: x.cues, streams: x.control, gqr5: 0x00070007});
+    admission.bindActor(x.actor, {pointer508: null}); x.sourceActor.cmdButton = 2; x.sourceActor.cmdSubtype = 0;
+    rejects(() => admission.dispatchSubtypeDirection(x.actor), 'commandTable4ec');
+    check(x.sourceActor.cmdChargedRanged === 0 && x.inputTesters.getCommandAdmissionRuntime() === undefined,
+      'separately bound genuine admission preserves587 prefix even when optional caller branch remains absent');
+    for (const [index, bypass] of ['cue9', 'ready'].entries()) {
+      x.sourceActor.ubCue = 9; x.actorControlState.byte490 = bypass === 'ready' ? 2 : 0;
+      rejects(() => x.runRawPrefix(index + 1, 128, 40), 'known incomplete command admission');
+      rejects(() => x.runRawPrefix(index + 1, 256, 80), 'epoch');
+      check(x.sourceActor.targetDistance760 === -760 && x.sourceActor.horizontalDistance764 === -764 && x.tier.timerFrames === 8,
+        'generic actual-actor incomplete guard blocks changed cue/ready before ingress even without configured optional admission');
+    }
+  }
+  console.log('[actor-command-admission-composition] PASS: genuine ordinary X edge69b98/69dd0/69ea4/null508 direction/raw4ec [44,3,2,0]/6a104 on retained source graph; exact zero-yaw snapshot and descriptor-selected matrix Y, shared flags/stream/six visibility records/full+upper cues/ammo.max0 and signed non-normal-match voice return, lazy sentinel/cooldown, retained partial writes and permanent incomplete re-entry guards; synthetic offline only, no active-match voice/general trig/target arithmetic/full attack/production activation');
 }
