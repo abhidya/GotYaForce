@@ -7,7 +7,8 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 /** Explicit synthetic inputs on the genuine allocator, stage, world and Double
  * lifecycle graph. Observe the selected original OBJECT+20 load, never inject a
  * distance result, alternate actor-position representation or selector callback.
- * The real nonnull/null postselection source paths remain unsupported. */
+ * Nonnull ordinary fixtures intentionally stop at their absent descriptor; null
+ * winner fixtures reach the first absent canonical target-vector destination. */
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Bytes=Partial<Record<number,number>>;
 type Stack={x:number;y:number;z:number};
@@ -45,6 +46,9 @@ function setup(make: Make,half=1) {
   const matrix=x.matrices.getMatrix(x.world.getStorage(x.actor).matrices8d4[1]!);
   matrix[3]=0;matrix[7]=0;matrix[11]=0;
   position(x.objectBytes,5);position(x.nextObjectBytes,3);
+  // These are ordinary projectile records, not registered HIT descriptors.
+  // Explicitly stop the newly supported suffix at its null descriptor input.
+  x.allocator.writePointer(x.child,0x28,null);x.allocator.writePointer(x.nextChild,0x28,null);
   if(half>1) {x.list[1]=x.nextChild;x.allocator.writePointer(x.nextChild,0x20,x.target);}
   return Object.assign(x,{stack,processor,matrix});
 }
@@ -56,7 +60,7 @@ function extra(x: Fixture,value: number,y=0,z=0) {
   return {id,bytes};
 }
 function finish(x: Fixture,nullable=false): void {
-  rejects(()=>x.targetDispatch.dispatchActor(x.actor),nullable?'8006ba18':'8006b9c4');
+  rejects(()=>x.targetDispatch.dispatchActor(x.actor),nullable?'8006ba34':'8006b9c8');
 }
 function closed(x: Fixture): void {
   check(hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),'distance refusal closes actual caller');
@@ -94,9 +98,14 @@ function winner(x: Fixture,expected: Bytes,mutate?: (owner: object,key: Property
     if(/^\d+$/.test(String(key))&&Number(key)>=0x20&&Number(key)<0x24 &&
       owner!==x.matrix&&owner!==x.scratch&&owner!==x.list) {owners.push(owner);loads.push(String(key));}
   }));
-  equal(loads.join(','),'32,33,34,35','only the final selected OBJECT+20 is read after distances');
+  equal(loads.join(','),nullable?'32,33,34,35,32,33,34,35':'32,33,34,35',
+    'selected OBJECT+20 is captured after distances, and freshly reloaded only by the commit path');
   owners.forEach(owner=>equal(owner,expected,'winner is the original captured OBJECT, not actor or reloaded scratch'));
-  unchanged(x);
+  if(nullable) {
+    equal(x.sourceActor.byte502,1,'null winner actor stores state before missing target-vector destination');
+    equal(x.admissionState.pointer504,expected,'null winner actor stores the chosen original OBJECT bytes');
+    equal(x.admissionState.pointer508,null,'fresh null actor store precedes missing target vector');
+  } else unchanged(x);
 }
 
 function orderTests(make: Make): void {
@@ -123,7 +132,7 @@ function orderTests(make: Make): void {
     equal(events.join(','),'a.y,a.z,b.68,b.69,b.6a,b.6b,b.6c,b.6d,b.6e,b.6f,a.x,a.y,b.64,b.65,b.66,b.67,b.68,b.69,b.6a,b.6b,count,winner.20,winner.21,winner.22,winner.23',
       'actual paired load order, repeated Y loads, loop count and final pointer load');
     equal(profile,4,'GQR0 is freshly read at each of the four paired loads');
-    equal(downstream,0,'no sibling descriptor load or target destination admission after selected pointer');
+    equal(downstream,4,'null sibling pointer is loaded completely, then fails before descriptor flags or target destinations');
     equal(work,0,'direct distance helper does not execute scheduler mask/group work');
     equal(isSourceActorDoubleFrameClaimed(x.sourceActor),claimed,'distance helper does not create frame claim');
     equal(x.joints.getBinding(x.joint).aobj7c,attached,'distance does not advance attached animation');
@@ -508,7 +517,7 @@ function acceptedCandidateClosureTests(make: Make): void {
 }
 function outerTests(make: Make): void {
   const x=setup(make,2),frame=outer(x);let distance=0,selected=false;
-  observe(()=>rejects(()=>frame.runFrame(),'8006b9c4'),(owner,key)=>{
+  observe(()=>rejects(()=>frame.runFrame(),'8006b9c8'),(owner,key)=>{
     if(owner===x.targetPreparation&&key==='targetDispatch') selected=true;
     if(selected&&owner===x.objectBytes&&key==='100') distance++;
   });
@@ -526,5 +535,5 @@ function outerTests(make: Make): void {
 export function runActorTargetDistanceSelfTests(make: Make): void {
   orderTests(make);liveAndSelectionTests(make);arithmeticAndFaultTests(make);
   profileAndOwnerTests(make);selectedPointerFaultTests(make);interruptionTests(make);acceptedCandidateClosureTests(make);outerTests(make);liveCountTests(make);
-  console.log('[actor-target-distance] PASS: genuine8020bc88 paired load and finite f32 arithmetic order, live BE OBJECT/stack repeated Y reads and shared processor, signed fresh loop counts/growth/shrink/host bound, nearest and later ties with captured original pointers, late selected OBJECT+20 null/nonnull boundaries, faults/aliases/reentry/independently closed caller and candidate, real outer integration; explicit synthetic offline inputs only, no final target stores or completed-frame/console/full-game claim');
+  console.log('[actor-target-distance] PASS: genuine8020bc88 paired load and finite f32 arithmetic order, live BE OBJECT/stack repeated Y reads and shared processor, signed fresh loop counts/growth/shrink/host bound, nearest and later ties with captured original pointers, late selected OBJECT+20 null commit/nonnull missing-descriptor boundaries, faults/aliases/reentry/independently closed caller and candidate, real outer integration; explicit synthetic offline inputs only, no default target vector or completed-frame/console/full-game claim');
 }

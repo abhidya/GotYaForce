@@ -447,15 +447,39 @@ function faultTests(make: Make): void {
   }
 }
 
+/** The850 helper may return, but the mandatory same-actor af8c source
+ * continuation is still unavailable. No later pass may absorb that return. */
+function continuationProbe(x: Joined) {
+  let selected=false,pointer508=0,physicalReloads=0,nextIdentity=0,nextActive=0;
+  return {
+    visit(owner: object,key: PropertyKey): void {
+      if(owner===x.targetPreparation&&key==='targetDispatch') selected=true;
+      if(!selected) return;
+      if(owner===x.admissionState&&key==='pointer508') pointer508++;
+      if(owner===x.massPreparation&&key==='physicalBlock') physicalReloads++;
+      if(owner===x.physicalIdentities&&key==='1') nextIdentity++;
+      if(owner===x.slotTargets[1]&&key==='active0') nextActive++;
+    },
+    assert(helper508Stores: number): void {
+      check(selected,'outer reached the genuine target dispatcher');
+      equal(pointer508,helper508Stores,'only helper508 stores occur, never the unsupported af8c or later pointer reload');
+      equal(physicalReloads,0,'returned helper never reaches the third-pass physical-block reload');
+      equal(nextIdentity,0,'returned helper never advances to the next second-pass physical identity');
+      equal(nextActive,0,'returned helper never reads the next second-pass actor active byte');
+    },
+  };
+}
+
 function outerTests(make: Make): void {
   {
-    const x=setup(make),{frame}=outer(x);let target=false,actionHousekeeping=0,dispatchHousekeeping=0;
-    noSchedulerWork(x,()=>observe(()=>rejects(()=>frame.runFrame(),'unknown'),(owner,key)=>{
+    const x=setup(make),{frame}=outer(x),probe=continuationProbe(x);let target=false,actionHousekeeping=0,dispatchHousekeeping=0;
+    noSchedulerWork(x,()=>observe(()=>rejects(()=>frame.runFrame(),'8006af8c'),(owner,key)=>{
+      probe.visit(owner,key);
       if(owner===x.targetPreparation && key==='targetDispatch') target=true;
       if(owner===x.sourceActor && key==='housekeeping73f') {if(target) dispatchHousekeeping++;else actionHousekeeping++;}
     }));
     equal(actionHousekeeping,1,'outer first executes real prepareTarget73f return');
-    equal(dispatchHousekeeping,1,'outer then executes genuine6b85073f return');
+    equal(dispatchHousekeeping,1,'outer then executes genuine6b85073f return');probe.assert(0);
     equal(x.sourceActor.byte502,0,'active dispatcher does not mutate502');
     equal(x.massPreparation.orderCount.count80436260,6,'new dispatcher follows whole mass ordering');
     equal(x.massHost.sourceArrowMass204,1200,'new dispatcher retains mass update');
@@ -464,22 +488,24 @@ function outerTests(make: Make): void {
     closed(x,frame);
   }
   {
-    const x=setup(make),{frame}=outer(x);let selected=false,tableReads=0;
+    const x=setup(make),{frame}=outer(x),probe=continuationProbe(x);let selected=false,tableReads=0;
     x.sourceActor.byte502=211;x.admissionState.pointer508=x.visibility[0]!;x.admissionState.pointer504=x.visibility[1]!;
-    observe(()=>rejects(()=>frame.runFrame(),'unknown'),(owner,key)=>{
+    observe(()=>rejects(()=>frame.runFrame(),'8006af8c'),(owner,key)=>{
+      probe.visit(owner,key);
       if(!selected && owner===x.targetPreparation && key==='targetDispatch') {selected=true;x.sourceActor.active0=0;}
       if(owner===x.targetDispatchSources && key==='dispatch39a0') tableReads++;
     });
     check(selected,'live active change occurs after real action target return');prefix(x,3,'outer selects live inactive dispatcher');
-    equal(tableReads,0,'outer inactive dispatcher never loads table evidence');closed(x,frame);
+    equal(tableReads,0,'outer inactive dispatcher never loads table evidence');probe.assert(1);closed(x,frame);
   }
   {
     const x=setup(make);x.sourceActor.housekeeping73f=0;const {frame}=outer(x);
     rejects(()=>frame.runFrame(),'candidateGlobals: own data');closed(x,frame);
   }
   for(const half of [0,1,65535]) {
-    const x=setup(make),globals=candidates(x,half),{frame}=outer(x);
-    rejects(()=>frame.runFrame(),half===0?'unknown':'candidate list803c1d7c load');
+    const x=setup(make),globals=candidates(x,half),{frame}=outer(x),probe=continuationProbe(x);
+    observe(()=>rejects(()=>frame.runFrame(),half===0?'8006af8c':'candidate list803c1d7c load'),probe.visit);
+    probe.assert(0);
     equal(globals.count804361a0,0,'outer preserves genuine candidate scratch reset before later refusal');closed(x,frame);
   }
   for(const fault of ['missing','copied','foreign'] as const) {
@@ -534,5 +560,5 @@ function outerTests(make: Make): void {
 
 export function runActorTargetDispatchSelfTests(make: Make): void {
   helperTests(make);candidateTests(make);lateOwnerTests(make);faultTests(make);outerTests(make);
-  console.log('[actor-target-dispatch] PASS: all256 active/state/housekeeping bytes, ordered canonical502/508/504 clears, authenticated signed-index0 dispatch, genuine73f and zero-candidate returns, ordered scratch reset/reload, lazy owner/scalar faults, data aliases and caught reentry, real outer integration and permanent closure; bounded offline synthetic composition only, no source hydration, candidate-list load, scheduler execution or full-frame claim');
+  console.log('[actor-target-dispatch] PASS: all256 active/state/housekeeping bytes, ordered canonical502/508/504 clears, authenticated signed-index0 dispatch, genuine73f and zero-candidate returns, ordered scratch reset/reload, lazy owner/scalar faults, data aliases and caught reentry, real outer exact6af8c return boundary before further pointer/actor/pass reads and permanent closure; bounded offline synthetic composition only, no source hydration, candidate-list load, scheduler execution or full-frame claim');
 }

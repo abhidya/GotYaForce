@@ -186,7 +186,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
   const noShadows = (e: Entry, extras: readonly object[] = []): void => {
     const canonical = new Map<string, object>([
       ...['fbPhase','actionIndex','variantIndex','ubState','fbState','visibilityTarget','activeYaw','turnErrorYaw','heading','lockYaw',
-        'hSpeed','yVel','hDecel','gravityCoeff','borgNumber','poseAccum80','poseAccum7e','poseAccum7c','pos','motion','targetCache5e8','streamSlot','accumulator80c','byte6e8','byte6e9','controlWord'].map(key => [key,e.actual] as [string, object]),
+        'hSpeed','yVel','hDecel','gravityCoeff','borgNumber','poseAccum80','poseAccum7e','poseAccum7c','pos','motion','targetCache5e8','lockTarget','streamSlot','accumulator80c','byte6e8','byte6e9','controlWord'].map(key => [key,e.actual] as [string, object]),
       ['byte541', e.cue], ['pointer4b4', e.prehook], ['pointer4bc', e.prehook], ['pointer4c0', e.prehook],
       ['parameter4ac', e.attribute], ['timestep1dc8', e.mapping], ['marker578', e.dispatch],
       ...['familyBank1d80','sharedBank1d84','defaultSelector582','marker709'].map(key => [key,e.start] as [string, object]),
@@ -208,7 +208,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
         fail('fieldAe: competing parameter4ac storage owner');
       check();
       for (const key of ['byte540','phase540','byte580','action580','byte581','variant581','byte5da','byte5db','pointerCC','pointercc',
-        'field4ac','pointer4ac','field1dc8','phaseSlots','fbPhaseSlots','lockTarget',
+        'field4ac','pointer4ac','field1dc8','phaseSlots','fbPhaseSlots',
         'byte1cef','state1cef','field1cef','byte1cf0','auxiliary1cf0','field1cf0',
         'byte1d0f','state1d0f','field1d0f','byte1d10','auxiliary1d10','field1d10']) {
         if (Object.getOwnPropertyDescriptor(owner, key) !== undefined) fail(`${key}: competing source storage alias`);

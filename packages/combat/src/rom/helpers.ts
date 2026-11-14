@@ -1,7 +1,7 @@
 // Shared low-level actor helpers recovered from chunk_0008.c/chunk_0009.c.
 // These keep family ports on the actual ROM contracts instead of host booleans.
 
-import type { RomActor, Vec3 } from "./actor.js";
+import type { RomActor } from "./actor.js";
 import type { StreamContext } from "./stream-vm.js";
 
 /**
@@ -14,8 +14,7 @@ import type { StreamContext } from "./stream-vm.js";
  */
 const TARGET_LOSS_DECAY = 0.8999999761581421;
 
-export interface RomHelperScratch {
-  lockTarget?: Vec3 | null;
+export interface RomHelperScratch extends Pick<RomActor, "lockTarget"> {
   /** +0x18e0/+0x18e2: dual-axis aim accumulators used by zz_006ea9c_. */
   aimPitch18e0?: number;
   aimYaw18e2?: number;

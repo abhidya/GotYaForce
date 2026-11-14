@@ -9,7 +9,7 @@
  * lifecycle owners. Rejected lists return; accepted candidates preserve ordered
  * scratch count/list stores. Explicit projection stack continues descriptor4b0
  * and three ordered translation stores. An explicit existing root processor profile
- * continues live SquareDistance and nearest selection through winner OBJECT+20. All source
+ * continues live SquareDistance, nearest/sibling selection and ordered target stores. All source
  * data is explicit and live; there are no defaults, callbacks or scheduler
  * capabilities. Stable synchronous non-proxy own-data records are host bounds.
  */
@@ -35,6 +35,9 @@ export interface SourceActorTargetDispatchRuntime {
   getRetainedStorageOwners(): readonly object[];
   dispatchActor(identity: symbol): void;
 }
+const positionAliases=['field50c','field50C','field510','field514','position50c','targetPosition50c',
+  ...Array.from({length:12},(_,index)=>0x50c+index).flatMap(offset=>
+    [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
 const runtimes=new WeakSet<object>(),claims=new WeakMap<object,SourceActorTargetDispatchRuntime>();
 export function isSourceActorTargetDispatchRuntime(value: unknown): value is SourceActorTargetDispatchRuntime {
   return value!==null && typeof value==='object' && runtimes.has(value);
@@ -63,7 +66,8 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
     admission=spawns.getAdmissionRuntime(),action=admission.getActionRuntime(),world=spawns.getWorldRuntime();
   let busy=false,poisoned=false,activeId: symbol|undefined,activeCandidate: object|undefined,tableOwner: object|undefined,globalsOwner: object|undefined,projectionOwner: object|undefined;
   const bindings=new Map<symbol,object>(),lists=new Map<string,object>(),candidateStages=new Map<symbol,object>();
-  const acceptedActors=new Set<object>();
+  const acceptedActors=new Set<object>(),positions=new Map<symbol,object>();
+  const floatWords=new DataView(new ArrayBuffer(4));
   const check=(): void=>{
     if(poisoned) fail('caught same-runtime reentry');
     if(activeId!==undefined) allocator.assertActorComplete(activeId);
@@ -71,7 +75,7 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
     for(const accepted of acceptedActors) requireCompleteSourceActorDoubleLifecycle(accepted);
   };
   const read=(owner: unknown,key: string): unknown=>{const value=own(owner,key);check();return value;};
-  const write=(owner: object,key: string,value: number|symbol|null): void=>{
+  const write=(owner: object,key: string,value: unknown): void=>{
     own(owner,key,true);check();(owner as Record<string,unknown>)[key]=value;check();
   };
   const call=<T>(run: ()=>T): T=>{const result=run();check();return result;};
@@ -82,7 +86,7 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
   const forbidden=(): readonly object[]=>[sources,scheduler,root,spawns,allocator,admission,action,
     ...call(()=>scheduler.getRetainedStorageOwners()),...call(()=>world.getRetainedMatrixOwners()),
     ...call(()=>spawns.getPrehookRuntime().getStatusRuntime().getRetainedStorageOwners()),
-    ...call(()=>action.getRetainedStorageOwners()),...call(()=>admission.getKnownStorageOwners()),...bindings.values(),...candidateStages.values(),
+    ...call(()=>action.getRetainedStorageOwners()),...call(()=>admission.getKnownStorageOwners()),...bindings.values(),...candidateStages.values(),...positions.values(),
     ...(call(()=>action.getSlotStatusRuntime())?.getRetainedStorageOwners()??[]),
     ...(call(()=>action.getSlotStatusRuntime())?.getDeclaredStorageOwners()??[])];
   const dispatchTable=(): object=>{
@@ -153,7 +157,7 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
       write(list('scratchCandidates2208'),String(captured),object);
     }
   };
-  const project = (id: symbol, actual: object, globals: object): never => {
+  const project = (id: symbol, actual: object, globals: object, binding: object): void => {
     // This optional host ingress preserves the former unsupported operation.
     // Its value is not touched until the source reaches its first stack store.
     const supplied=Object.getOwnPropertyDescriptor(sources,'projectionStack');check();
@@ -222,8 +226,8 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
       fusedMultiplyAddSourceFloat32(dy,dy,zz);check(); // unused paired lane executes
       const result=addSourceFloat32(xy,zz);check();return result;
     };
-    let winner=first,best=squareDistance(first);
-    for(let index=1;index<(uint(read(globals,'count804361a0'),0xffffffff,'count804361a0')|0);index++) {
+    let winner=first,best=squareDistance(first),savedCount=0;
+    for(let index=1;index<((savedCount=uint(read(globals,'count804361a0'),0xffffffff,'count804361a0'))|0);index++) {
       if(index>=4096) fail('8006b984 nearest candidate index outside host bound4096');
       const next=read(list('scratchCandidates2208'),String(index));
       if(next!==null && typeof next!=='symbol') fail('scratch nearest candidate: source pointer identity required');
@@ -233,13 +237,98 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
       if(!(distance>best)) {winner=next;best=distance;}
     }
     if(winner===null) fail('8006b9b8 null winner OBJECT at reached pointer load');
-    const actor=call(()=>allocator.readPointer(winner,0x20));
-    if(actor===null) fail('8006ba18 reached target commit after null winner actor; target stores unsupported');
-    fail('8006b9c4 reached selected winner OBJECT+28 sibling descriptor load; target selection suffix unsupported');
+    const nearest=winner;
+    const actor=call(()=>allocator.readPointer(nearest,0x20));
+    const flags=(object: symbol,site: string): number=>{
+      const descriptor=call(()=>allocator.readPointer(object,0x28));
+      if(descriptor===null) fail(`${site} null OBJECT+28 at reached descriptor flags`);
+      // HIT+28 is already an allocator-owned base+offset into pointer3fc.
+      // It need not be a pool0 descriptor, and its bytes are never copied.
+      const interior=call(()=>allocator.getInteriorAddress(descriptor));
+      const bytes=call(()=>allocator.getPointerTarget(interior?.base??descriptor));
+      // A pointer registration does not turn scalar actor/vector owners into
+      // byte storage. Exclude known structured source owners and their retained
+      // references before reading descriptor bytes, not later at target commit.
+      const structured: object[]=[sources,scheduler,root,spawns,allocator,admission,action,actual,binding,profile,
+        ...bindings.values(),...candidateStages.values(),...acceptedActors,...positions.values(),
+        ...call(()=>world.getRetainedMatrixOwners()),...call(()=>admission.getKnownStorageOwners()),
+        ...call(()=>spawns.getPrehookRuntime().getStatusRuntime().getRetainedStorageOwners()),
+        ...call(()=>action.getRetainedStorageOwners()),call(()=>root.getDrawList()),
+        ...(tableOwner?[tableOwner]:[]),...(globalsOwner?[globalsOwner]:[]),...(projectionOwner?[projectionOwner]:[]),...lists.values(),
+        ...(call(()=>action.getSlotStatusRuntime())?.getRetainedStorageOwners()??[]),
+        ...(call(()=>action.getSlotStatusRuntime())?.getDeclaredStorageOwners()??[])];
+      const admitBytes=(): void=>{
+        if(structured.includes(bytes)) fail(`${site} descriptor byte owner aliases structured source storage`);
+        for(const owner of structured) {
+          const fields=Object.getOwnPropertyDescriptors(owner);check();
+          for(const p of Object.values(fields)) if('value' in p && p.value===bytes)
+            fail(`${site} descriptor byte owner aliases canonical source reference`);
+        }
+      };
+      admitBytes();
+      const offset=(interior?.byteOffset??0)+2;
+      if(offset>0xfffe || (offset&1)!==0) fail(`${site} descriptor halfword outside aligned host byte range`);
+      const high=byte(bytes,String(offset));admitBytes();
+      const low=byte(bytes,String(offset+1));admitBytes();
+      return high*256+low;
+    };
+    if(actor!==null && (flags(winner,'8006b9c8')&0x200)===0 && (savedCount|0)>0) {
+      // r5 from the LAST nearest-loop comparison becomes CTR. Do not reload
+      // the global count or the captured winner actor while scanning siblings.
+      for(let index=0;index<savedCount;index++) {
+        if(index>=4096) fail('8006b9e8 sibling candidate index outside host bound4096');
+        const sibling=read(list('scratchCandidates2208'),String(index));
+        if(typeof sibling!=='symbol') fail('8006b9ec sibling requires nonnull OBJECT pointer identity');
+        call(()=>allocator.getObject(sibling));
+        if(call(()=>allocator.readPointer(sibling,0x20))===actor && (flags(sibling,'8006b9fc')&0x200)!==0) {
+          winner=sibling;break;
+        }
+      }
+    }
+    // Integer lwz/stw copies, not three float loads or a copied target actor.
+    // Decode each captured word only at its destination's reached store.
+    const position=(site: string): object=>{
+      const field=Object.getOwnPropertyDescriptor(actual,'lockTarget');check();
+      if(!field || !('value' in field)) fail(`${site} lockTarget: own data property required`);
+      const selected=record(field.value,`${site} selected position lockTarget`);
+      if(Array.isArray(selected)) fail('lockTarget: ordinary own-data record required');
+      const old=positions.get(id);if(old!==undefined && old!==selected) fail('lockTarget canonical owner changed');
+      const direct=[sources,scheduler,root,spawns,allocator,admission,action,actual,binding,tableOwner,globalsOwner,projectionOwner,
+        ...lists.values(),...bindings.values(),...candidateStages.values(),...call(()=>spawns.getRetainedStorageOwners()),
+        ...call(()=>world.getRetainedMatrixOwners()),...call(()=>admission.getKnownStorageOwners()),
+        ...call(()=>spawns.getPrehookRuntime().getStatusRuntime().getRetainedStorageOwners()),
+        ...call(()=>action.getRetainedStorageOwners())];
+      if(direct.includes(selected) || [...positions].some(([other,value])=>other!==id&&value===selected))
+        fail('lockTarget aliases canonical source storage');
+      // Root/scheduler inventories include this declared vector itself. Inspect
+      // references instead, allowing only THIS actor's lockTarget declaration.
+      for(const owner of forbidden()) if(owner!==selected) {
+        const fields=Object.getOwnPropertyDescriptors(owner);check();
+        for(const [key,p] of Object.entries(fields)) if('value' in p && p.value===selected && !(owner===actual && key==='lockTarget'))
+          fail(`lockTarget aliases canonical ${key} storage`);
+      }
+      if(!claimSourceHelperStorage(selected,runtime)) fail('lockTarget storage already claimed');
+      noShadows(selected,['lockTarget','active0','team','byte502','pointer504','pointer508','descriptor4b0','lifecycle18',
+        'half80436242','count804361a0',...positionAliases]);
+      positions.set(id,selected);return selected;
+    };
+    const storeWord=(axis: 'x'|'y'|'z',word: number): void=>{
+      floatWords.setUint32(0,word,false);
+      const site={x:'8006ba34',y:'8006ba38',z:'8006ba40'}[axis];
+      const value=float(floatWords.getFloat32(0,false),`${site} target ${axis} raw word`);
+      write(position(site),axis,value);
+    };
+    write(actual,'byte502',1);
+    write(binding,'pointer504',call(()=>allocator.getObject(winner)));
+    const selectedActor=call(()=>allocator.readPointer(winner,0x20));
+    write(binding,'pointer508',selectedActor===null?null:call(()=>allocator.getPointerTarget(selectedActor)));
+    const x=call(()=>allocator.readU32(winner,0x64)),y=call(()=>allocator.readU32(winner,0x68));
+    storeWord('x',x);storeWord('y',y);
+    const z=call(()=>allocator.readU32(winner,0x6c));storeWord('z',z);
   };
   const runtime: SourceActorTargetDispatchRuntime={
     getSchedulerRuntime() {return scheduler;},
-    getRetainedStorageOwners() {return Object.freeze([sources,...(tableOwner?[tableOwner]:[]),...(globalsOwner?[globalsOwner]:[]),...lists.values(),...(projectionOwner?[projectionOwner]:[])]);},
+    getRetainedStorageOwners() {return Object.freeze([sources,...(tableOwner?[tableOwner]:[]),...(globalsOwner?[globalsOwner]:[]),...lists.values(),...(projectionOwner?[projectionOwner]:[]),...positions.values()]);},
     dispatchActor(id) {
       if(busy) {poisoned=true;fail('same-runtime reentry unsupported');}
       busy=true;poisoned=false;let actual: object|undefined;
@@ -265,11 +354,12 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
           call(()=>admission.getCueBinding(id)),call(()=>admission.getDispatchBinding(id)),
           call(()=>admission.getStartBinding(id)),call(()=>admission.getStreamBinding(id))];
         for(const owner of owners) {
-          if(owner!==actual) noShadows(owner,['active0','byte502','housekeeping73f']);
+          if(owner!==actual) noShadows(owner,['active0','byte502','housekeeping73f','lockTarget']);
           if(owner!==binding) noShadows(owner,['pointer504','pointer508']);
           noShadows(owner,['state502','targetState502','field502','1282','field504','field508',
             'byte504','byte505','byte506','byte507','byte508','byte509','byte50a','byte50b','byte50A','byte50B',
-            '1284','1285','1286','1287','1288','1289','1290','1291']);
+            '1284','1285','1286','1287','1288','1289','1290','1291',
+            ...positionAliases]);
         }
         // The source loads no previous destination value on this branch.
         if(byte(actual,'active0')===0) {
@@ -290,7 +380,7 @@ export function createSourceActorTargetDispatchRuntime(sources: SourceActorTarge
         write(globals,'count804361a0',0);
         scan(actual,count,globals);
         if(uint(read(globals,'count804361a0'),0xffffffff,'count804361a0')===0) return;
-        project(id,actual,globals);
+        project(id,actual,globals,binding);
       } catch(error) {if(actual) markIncompleteSourceActorDoubleLifecycle(actual);throw error;}
       finally {acceptedActors.clear();activeCandidate=undefined;activeId=undefined;busy=false;}
     },

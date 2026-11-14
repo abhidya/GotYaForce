@@ -197,7 +197,7 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
       ['cmdButton', e.actual], ['cmdSubtype', e.actual], ['cmdChargedRanged', e.actual], ['prevActionIndex', e.actual],
       ['actionIndex', e.actual], ['variantIndex', e.actual], ['controlWord', e.actual], ['stateTimer', e.actual],
       ['visibilityTarget', e.actual], ['visibilityRoster', e.actual], ['visibilityBit', e.actual], ['heading', e.actual],
-      ['aimOrigin518', e.actual], ['targetDistance760', e.actual], ['horizontalDistance764', e.actual],
+      ['aimOrigin518', e.actual], ['lockTarget', e.actual], ['targetDistance760', e.actual], ['horizontalDistance764', e.actual],
       ['stateFlagA', e.actual], ['stateFlagB', e.actual], ['commandTable', e.actual], ['descriptor4b0', e.mapping],
       ['yawOffset6b8', e.world], ['byte7d2', e.action], ['marker709', e.start], ['blockedMask1d9a', e.stream],
       ['pointer504', e.binding], ['pointer508', e.binding], ['pointerc8', e.binding], ['byteD0', e.binding],
@@ -222,7 +222,7 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
     const refs: [object, string, string][] = [[data, 'held3970', 'held'], [data, 'release397c', 'release'], [data, 'flags3994', 'flags']];
     for (const e of actors.values()) for (const [key, kind] of [['pos','position'],['motion','motion'],['savedGroundPos','saved-position'],
       ['afterimageSamplePos','afterimage-position'],['targetCache5e8','target-cache'],['partAimAnchors','legacy-anchors'],
-      ['actionSpeedRows','speed-rows'],['aimOrigin518','aim'],
+      ['actionSpeedRows','speed-rows'],['aimOrigin518','aim'],['lockTarget','selected-target'],
       ['commandTable','command-root'],['visibilityRoster','roster'],['cueTable','cue-table']] as const) refs.push([e.actual,key,kind]);
     for (const [owner, key, kind] of refs) {
       const p = property(owner, key);

@@ -98,6 +98,11 @@ export interface RomActor {
    *  is retained for codec compatibility; this is never a target position.
    *  @romfield targetCache5e8 +0x5e8 vec3 */
   targetCache5e8: Vec3;
+  /** Source-owned actors: explicit selected OBJECT position at +0x50c..+0x514.
+   * No constructor default. The historical legacy field also carries approximate
+   * or captured aiming state; that host path is not evidence for these cells.
+   * @romfield lockTarget +0x50c vec3 */
+  lockTarget?: Vec3 | null;
   /** +0x518: host-resolved actor aim origin consumed by zz_006e514_.
    *  @romfield aimOrigin518 +0x518 vec3 */
   aimOrigin518: Vec3;

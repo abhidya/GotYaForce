@@ -483,6 +483,33 @@ class SyntheticTests(unittest.TestCase):
         self.assertEqual((rows[0x8006b9bc]['mnemonic'],rows[0x8006b9bc]['rA'],rows[0x8006b9bc]['immediate']),('cmpli',6,0))
         self.assertEqual((rows[0x8006b9c0]['BO'],rows[0x8006b9c0]['BI'],rows[0x8006b9c0]['target']),(12,2,'8006ba18'))
 
+    def test_canonical_sibling_flags_saved_count_and_ordered_target_words(self):
+        rows={int(r['address'],16):r for r in EXPECTED[0x8006b850]}
+        self.assertEqual((rows[0x8006b9c4]['rD'],rows[0x8006b9c4]['rA'],rows[0x8006b9c4]['displacement']),(3,31,0x28))
+        self.assertEqual((rows[0x8006b9c8]['mnemonic'],rows[0x8006b9c8]['rD'],rows[0x8006b9c8]['rA'],rows[0x8006b9c8]['displacement']),('lhz',0,3,2))
+        for pc in (0x8006b9cc,0x8006ba00):
+            self.assertEqual((rows[pc]['SH'],rows[pc]['MB'],rows[pc]['ME'],rows[pc]['Rc']),(0,22,22,1))
+        self.assertEqual((rows[0x8006b9d0]['BO'],rows[0x8006b9d0]['BI'],rows[0x8006b9d0]['target']),(4,2,'8006ba18'))
+        self.assertEqual((rows[0x8006b9dc]['mnemonic'],rows[0x8006b9dc]['rS']),('mtctr',5))
+        self.assertEqual((rows[0x8006b9e0]['mnemonic'],rows[0x8006b9e0]['rA'],rows[0x8006b9e0]['immediate']),('cmpi',5,0))
+        self.assertEqual((rows[0x8006b9e4]['BO'],rows[0x8006b9e4]['BI'],rows[0x8006b9e4]['target']),(4,1,'8006ba18'))
+        self.assertFalse(any(r.get('rA')==13 for r in EXPECTED[0x8006b850] if 0x8006b9b8<=int(r['address'],16)<0x8006ba44))
+        self.assertEqual((rows[0x8006b9e8]['rD'],rows[0x8006b9e8]['rA'],rows[0x8006b9e8]['displacement']),(5,4,0))
+        self.assertEqual((rows[0x8006b9ec]['rD'],rows[0x8006b9ec]['rA'],rows[0x8006b9ec]['displacement']),(0,5,0x20))
+        self.assertEqual((rows[0x8006b9f0]['mnemonic'],rows[0x8006b9f0]['rA'],rows[0x8006b9f0]['rB']),('cmpl',6,0))
+        self.assertEqual((rows[0x8006b9f4]['BO'],rows[0x8006b9f4]['BI'],rows[0x8006b9f4]['target']),(4,2,'8006ba10'))
+        self.assertEqual((rows[0x8006b9f8]['rD'],rows[0x8006b9f8]['rA'],rows[0x8006b9f8]['displacement']),(3,5,0x28))
+        self.assertEqual((rows[0x8006b9fc]['mnemonic'],rows[0x8006b9fc]['rD'],rows[0x8006b9fc]['rA'],rows[0x8006b9fc]['displacement']),('lhz',0,3,2))
+        self.assertEqual((rows[0x8006ba04]['BO'],rows[0x8006ba04]['BI'],rows[0x8006ba04]['target']),(12,2,'8006ba10'))
+        self.assertEqual((rows[0x8006ba08]['rS'],rows[0x8006ba08]['rA'],rows[0x8006ba08]['rB']),(5,31,5))
+        self.assertEqual(rows[0x8006ba0c]['target'],'8006ba18')
+        self.assertEqual((rows[0x8006ba14]['BO'],rows[0x8006ba14]['BI'],rows[0x8006ba14]['target']),(16,0,'8006b9e8'))
+        expected=[('stb',0,30,0x502),('stw',31,30,0x504),('lwz',0,31,0x20),('stw',0,30,0x508),
+                  ('lwz',3,31,0x64),('lwz',0,31,0x68),('stw',3,30,0x50c),('stw',0,30,0x510),('lwz',0,31,0x6c),('stw',0,30,0x514)]
+        self.assertEqual([(rows[pc]['mnemonic'],rows[pc].get('rS',rows[pc].get('rD')),rows[pc]['rA'],rows[pc]['displacement'])
+                          for pc in range(0x8006ba1c,0x8006ba44,4)],expected)
+        self.assertEqual(rows[0x8006ba5c]['mnemonic'],'blr')
+
     def test_invalid_ranges_widths_mappings_and_decoder_bounds(self):
         for pc,width,_ in INVENTORY:
             for address,size in [(bad,width) for bad in (pc-4,pc+4,pc+1,float(pc),True,-1,1<<32,CELL_ADDRESS)]+[(pc,bad) for bad in (0,width-4,width+4,-width,True,float(width))]:

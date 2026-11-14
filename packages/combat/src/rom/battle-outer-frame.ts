@@ -587,6 +587,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(!isSourceActorTargetDispatchRuntime(dispatch) || dispatch.getSchedulerRuntime()!==scheduler)
           fail('6b7f4 exact genuine target-dispatch/scheduler owner required');
         call(()=>dispatch.dispatchActor(id));
+        //8006af8c starts mandatory per-actor primary distance preparation.
+        //Do not skip it to the next physical actor or third-pass target83.
+        fail('8006af8c reached unsupported source primary-target distance preparation after8006b7f4');
       }
     }
     //8006b358 reload. The active BYTE LOAD precedes the unconditional508
