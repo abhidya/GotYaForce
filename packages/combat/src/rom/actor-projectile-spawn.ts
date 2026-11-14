@@ -55,6 +55,8 @@ export interface SourceActorProjectileSpawnRuntime {
   getCueRuntime(): ReturnType<SourceActorCommandAdmissionRuntime['getCueRuntime']>;
   getAllocatorRuntime(): SourceObjectAllocationRuntime;
   getWorldRuntime(): SourceActorWorldMatrixRuntime;
+  /** Same captured command owner, not a second target/admission registry. */
+  getAdmissionRuntime(): SourceActorCommandAdmissionRuntime;
   /** Same retained80433934 owner shared with command admission/charge. */
   getMatchGlobals(): object;
   getSpawnRow1(): Readonly<SourceActorProjectileSpawnRow>;
@@ -232,6 +234,7 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
     getActualActor(id) {return entry(id).actual;}, getActorBinding(id) {return entry(id).binding;},
     getPrehookRuntime() {return prehook;}, getCueRuntime() {return cues;}, getAllocatorRuntime() {return allocator;},
     getWorldRuntime() {return world;},
+    getAdmissionRuntime() {return admission;},
     getMatchGlobals() {if (admission.getGlobal() !== matchGlobals) fail('shared match globals changed');return matchGlobals;}, getSpawnRow1() {return row;},
     getAdmissionBinding(id) {entry(id);return admission.getActorBinding(id);},
     getSourceOwners(id) {return Object.freeze([...new Set([...ownRecords(entry(id)),row,row.local04,...allocator.getSourceOwners(id)])]);},

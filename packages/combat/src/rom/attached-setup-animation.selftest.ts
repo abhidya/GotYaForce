@@ -1,3 +1,4 @@
+import {runBattleTargetPreparationSelfTests} from './battle-target-preparation.selftest.js';
 import {runBattleMassOrderingSelfTests} from './battle-mass-ordering.selftest.js';
 import {runBattleMassPreparationSelfTests} from './battle-mass-preparation.selftest.js';
 import {runBattleOuterFrameSelfTests} from './battle-outer-frame.selftest.js';
@@ -94,6 +95,9 @@ function rejects(run: () => void, expected: string): void {
  * This synchronous construction scope never patches a running source runtime. */
 let genuineCompositionConstruction = false;
 let projectileFixtureConstruction = false;
+/** Negative target fixtures omit a cell BEFORE its genuine sealed binding is
+ * constructed. This scope never replaces a running owner or source getter. */
+let targetPreparationMissingCell: 'byte7d2'|'pointer508'|undefined;
 function constructGenuineComposition<T>(build: () => T): T {
   const previous = genuineCompositionConstruction;
   genuineCompositionConstruction = true;
@@ -2873,6 +2877,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleOuterFrameHydratedCompositionTests();
   runBattleMassPreparationHydratedCompositionTests();
   runBattleMassOrderingHydratedCompositionTests();
+  runBattleTargetPreparationHydratedCompositionTests();
   runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
@@ -3378,13 +3383,21 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
   })();
   const actionRequest = chargeHydration?.actionRequest === undefined ? undefined :
     createSourceActorActionRequestRuntime({world: x.world});
-  if (actionRequest !== undefined) actionRequest.bindActor(x.actor, chargeHydration!.actionRequest!);
+  if (actionRequest !== undefined) {
+    const initial=targetPreparationMissingCell==='byte7d2'
+      ? {...chargeHydration!.actionRequest!} : chargeHydration!.actionRequest!;
+    if(targetPreparationMissingCell==='byte7d2') delete initial.byte7d2;
+    actionRequest.bindActor(x.actor, initial);
+  }
   const commandAdmission = chargeHydration?.commandAdmission === undefined ? undefined : (() => {
     if (chargeOwners === undefined || actionRequest === undefined)
       throw Error('explicit command admission requires the same genuine charge and action owners');
     const runtime = createSourceActorCommandAdmissionRuntime({world: x.world, status: x.status,
       attributes: x.attributes, charge: chargeOwners.charge, actionRequest, cues, streams: x.control, gqr5: 0x00070007});
-    runtime.bindActor(x.actor, chargeHydration.commandAdmission.initial);
+    const initial=targetPreparationMissingCell==='pointer508'
+      ? {...chargeHydration.commandAdmission.initial} : chargeHydration.commandAdmission.initial;
+    if(targetPreparationMissingCell==='pointer508') delete initial.pointer508;
+    runtime.bindActor(x.actor, initial);
     return runtime;
   })();
   const inputTesters = chargeHydration?.inputTesters === undefined ? undefined : (() => {
@@ -13324,4 +13337,23 @@ export function createBattleMassOrderingTestFixture() {
 }
 export function runBattleMassOrderingHydratedCompositionTests(): void {
   runBattleMassOrderingSelfTests(createBattleMassOrderingTestFixture);
+}
+
+/** Target-only explicit bytes on the same bounded six-physical-row map. One
+ * actor has genuine action/admission/stage owners; five inactive rows do not.
+ * The old mass-ordering fixture still has no target ingress or new bytes. */
+export function createBattleTargetPreparationTestFixture(omit?: 'byte7d2'|'pointer508') {
+  const previous=targetPreparationMissingCell;
+  targetPreparationMissingCell=omit;
+  try {
+    const x=createBattleMassOrderingTestFixture();
+    Object.assign(x.sourceActor,{byte58a:91,byte58b:92,byte58c:93,byte58d:94,byte7d3:96});
+    const targetAction=x.commandAdmission.getActionBinding(x.actor);
+    if(omit!=='byte7d2') targetAction.byte7d2=95;
+    const targetPreparation={admission:x.commandAdmission};
+    return Object.assign(x,{targetAction,targetPreparation});
+  } finally {targetPreparationMissingCell=previous;}
+}
+export function runBattleTargetPreparationHydratedCompositionTests(): void {
+  runBattleTargetPreparationSelfTests(createBattleTargetPreparationTestFixture,createBattleMassOrderingTestFixture);
 }

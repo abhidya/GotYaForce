@@ -67,6 +67,17 @@ export interface RomActor {
   /** Explicit source53b30 ordering reset. No constructor default.
    * @romfield field664 +0x664 f32 */
   field664?: number;
+  /** Explicit6ae60 target masks; no constructor defaults or7d2 shadow.
+   * @romfield byte58a +0x58a u8 */
+  byte58a?: number;
+  /** @romfield byte58b +0x58b u8 */
+  byte58b?: number;
+  /** @romfield byte58c +0x58c u8 */
+  byte58c?: number;
+  /** @romfield byte58d +0x58d u8 */
+  byte58d?: number;
+  /** @romfield byte7d3 +0x7d3 u8 */
+  byte7d3?: number;
   /** Port-side runtime dependency. Kept on the actor so concurrent battles cannot
    *  overwrite one another's floor behavior.
    *  @romfield physicsRuntime port_side */

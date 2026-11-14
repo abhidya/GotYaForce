@@ -4,7 +4,9 @@
  * normal53b30 or unconditional pausedbef4 remains a hard ordered boundary unless
  * explicit mass ingress supplies the bounded53b30 prefix. That path stops before
  * nonzero passenger1e4 or missing RNG/ordering ingress. The no-contact ordering
- * suffix can return53b30 and then stops before mandatory6ae60.
+ * suffix can return53b30. Optional target ingress executes the ordered6ae60
+ * clears, then refuses at6b450 or the first unsupported canonical508/target83
+ * operation. Its bounded return still cannot skip mandatory27764.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
  *
@@ -21,6 +23,7 @@ import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRu
 import {markIncompleteSourceActorDoubleLifecycle, requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {addSourceFloat32} from './source-float.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
+import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import type {SourceBattleOuterGlobalFields, SourceBattleSystemGlobals} from './battle-global-layout.js';
 
 /** Explicit metadata for source pointer arithmetic, not a copied actor table.
@@ -48,12 +51,19 @@ export interface SourceBattleMassPreparationSources {
   /** SAME genuine465fc binding owns4a4. Reached only by role1 parent scans. */
   matrices?: SourceActorMatrixUpdateRuntime;
 }
+export interface SourceBattleTargetPreparationSources {
+  /** Exactly the admission runtime already retained by genuine projectile
+   * spawn. Supplies the existing action7d2 and pointer508 cells, no copies. */
+  admission?: SourceActorCommandAdmissionRuntime;
+}
 export interface SourceBattleOuterFrameSources {
   scheduler: SourceObjectSchedulerRuntime;
   /** Same explicit80433930 owner, reached only after a team/slot match. */
   systemGlobals?: SourceBattleSystemGlobals;
   /** Optional genuine53b30 prefix. Missing ingress retains the old boundary. */
   massPreparation?: SourceBattleMassPreparationSources;
+  /** Optional genuine6ae60 continuation, no callback or inferred target list. */
+  targetPreparation?: SourceBattleTargetPreparationSources;
 }
 export interface SourceBattleOuterFrameRuntime {
   getSchedulerRuntime(): SourceObjectSchedulerRuntime;
@@ -204,6 +214,35 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       storeCharged(row,meter>=threshold);
     }
   };
+  const slotPointer=(index: number): symbol|null=>{
+    const table=call(()=>scheduler.getActorSlotTable());
+    // Getter retains this very source table; no new roster or alias is made.
+    const old=retained.get('mass actorSlots');
+    if(old!==undefined && old!==table) fail('mass actorSlots: canonical owner changed');
+    if([...retained].some(([role,value])=>role!=='mass actorSlots' && value===table)) fail('mass actorSlots: source storage alias');
+    retained.set('mass actorSlots',table);
+    const id=read(table,String(index));
+    if(id!==null && typeof id!=='symbol') fail('53b30 actor slot: source pointer identity required');
+    return id;
+  };
+  const actual=(id: symbol|null): object=>{
+    if(id===null) fail('53b30 null actor at reached dereference');
+    if(call(()=>allocator.getInteriorAddress(id))!==null) fail('53b30 actual actor base identity required');
+    const value=record(call(()=>allocator.getPointerTarget(id)),'53b30 actual actor');
+    const old=massActors.get(id);
+    if(old!==undefined && old!==value) fail('53b30 actual actor changed');
+    if([...retained.values()].includes(value)) fail('53b30 actual actor aliases mass/global storage');
+    // Retain the resolved actual before fallible field admission so a new
+    // physical actor with an alias/missing cell cannot escape failure closure.
+    massActors.set(id,value);
+    noShadows(value,['0','byte0','mass204','sourceArrowMass204','field204','float204','516',
+      'field208','float208','520','byte204','byte205','byte206','byte207','byte208','byte209','byte20a','byte20b',
+      'byte20A','byte20B','byte88','field88','136','floatB4','fieldB4','floatb4','fieldb4',
+      '180','181','182','183','byteb4','byteb5','byteb6','byteb7','byteB4','byteB5','byteB6','byteB7',
+      'byte1db','byte1DB','field1db','field1DB','475','lifecycle18','byte18','field18','state18',
+      'parameter4ac','pointer4ac','1196','24','517','518','519','521','522','523']);
+    call(()=>requireCompleteSourceActorDoubleLifecycle(value));return value;
+  };
   const prepareMass=(): void=>{
     const supplied=Object.getOwnPropertyDescriptor(sources,'massPreparation');check();
     if(supplied===undefined) fail('80029458 reached mandatory80053b30 normal-stage predecessor');
@@ -222,35 +261,6 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     const storeCount=(index: number,value: number): void=>{
       if(index<0 || index>=4) fail('53b30 team count index outside explicit4-byte owner');
       write(counts(),String(index),value&255);
-    };
-    const slotPointer=(index: number): symbol|null=>{
-      const table=call(()=>scheduler.getActorSlotTable());
-      // Getter retains this very source table; no new roster or alias is made.
-      const old=retained.get('mass actorSlots');
-      if(old!==undefined && old!==table) fail('mass actorSlots: canonical owner changed');
-      if([...retained].some(([role,value])=>role!=='mass actorSlots' && value===table)) fail('mass actorSlots: source storage alias');
-      retained.set('mass actorSlots',table);
-      const id=read(table,String(index));
-      if(id!==null && typeof id!=='symbol') fail('53b30 actor slot: source pointer identity required');
-      return id;
-    };
-    const actual=(id: symbol|null): object=>{
-      if(id===null) fail('53b30 null actor at reached dereference');
-      if(call(()=>allocator.getInteriorAddress(id))!==null) fail('53b30 actual actor base identity required');
-      const value=record(call(()=>allocator.getPointerTarget(id)),'53b30 actual actor');
-      const old=massActors.get(id);
-      if(old!==undefined && old!==value) fail('53b30 actual actor changed');
-      if([...retained.values()].includes(value)) fail('53b30 actual actor aliases mass/global storage');
-      // Retain the resolved actual before fallible field admission so a new
-      // physical actor with an alias/missing cell cannot escape failure closure.
-      massActors.set(id,value);
-      noShadows(value,['0','byte0','mass204','sourceArrowMass204','field204','float204','516',
-        'field208','float208','520','byte204','byte205','byte206','byte207','byte208','byte209','byte20a','byte20b',
-        'byte20A','byte20B','byte88','field88','136','floatB4','fieldB4','floatb4','fieldb4',
-        '180','181','182','183','byteb4','byteb5','byteb6','byteb7','byteB4','byteB5','byteB6','byteB7',
-        'byte1db','byte1DB','field1db','field1DB','475','lifecycle18','byte18','field18','state18',
-        'parameter4ac','pointer4ac','1196','24','517','518','519','521','522','523']);
-      call(()=>requireCompleteSourceActorDoubleLifecycle(value));return value;
     };
     const status=spawns.getPrehookRuntime().getStatusRuntime(), stage=root.getStageRuntime();
     const borg=(id: symbol,actor: object): object=>{
@@ -480,6 +490,101 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     //Genuine53b30 return for the fully reached bounded no-contact path.
 
   };
+  const prepareTargets=(): void=>{
+    const supplied=Object.getOwnPropertyDescriptor(sources,'targetPreparation');check();
+    if(supplied===undefined) fail('8002945c reached mandatory8006ae60 normal-stage predecessor');
+    const target=retain('targetPreparation',read(sources,'targetPreparation'));
+    const stage=root.getStageRuntime(),world=spawns.getWorldRuntime(),status=spawns.getPrehookRuntime().getStatusRuntime();
+    const admission=(): SourceActorCommandAdmissionRuntime=>{
+      if(read(sources,'targetPreparation')!==target) fail('targetPreparation: canonical owner changed');
+      const selected=read(target,'admission'),canonical=spawns.getAdmissionRuntime();
+      if(selected!==canonical) fail('6ae60 exact retained command admission required');return canonical;
+    };
+    const physical=(): readonly symbol[]=>{
+      // A new source load of803c4e84 occurs at every pass. The frozen block is
+      // pointer-arithmetic metadata from53b30, not a source actor-table copy.
+      const base=slotPointer(0),mass=retained.get('massPreparation'),block=retained.get('mass physicalBlock'),
+        ids=retained.get('mass physical identities');
+      if(!mass || !block || !ids || read(sources,'massPreparation')!==mass ||
+        read(mass,'physicalBlock')!==block || read(block,'identities')!==ids)
+        fail('6ae60 canonical physical block owner changed');
+      if(read(block,'base')!==base) fail('6ae60 physical base differs from explicit block');
+      if(!Array.isArray(ids) || !Object.isFrozen(ids) || read(ids,'length')!==6)
+        fail('6ae60 six frozen physical identities required');
+      return ids as readonly symbol[];
+    };
+    const actorAt=(ids: readonly symbol[],index: number): {id: symbol;actor: object}=>{
+      const id=read(ids,String(index));if(typeof id!=='symbol') fail('6ae60 physical actor identity required');
+      return {id,actor:actual(id)};
+    };
+    const actualByte=(actor: object,key: 'byte58a'|'byte58b'|'byte58c'|'byte58d'|'byte7d3'): void=>{
+      const hex=key.slice(4),offset=parseInt(hex,16);
+      noShadows(actor,[`byte${hex.toUpperCase()}`,`field${hex}`,`field${hex.toUpperCase()}`,
+        `flags${hex}`,`mask${hex}`,String(offset)]);
+      write(actor,key,0);
+    };
+    const commandOwners=new Map<symbol,{binding: object;action: object}>();
+    const command=(id: symbol,actor: object,needAction: boolean): object=>{
+      const runtime=admission();
+      if(call(()=>runtime.getActualActor(id))!==actor || call(()=>world.getActualActor(id))!==actor ||
+        call(()=>status.getActualActor(id))!==actor ||
+        call(()=>runtime.getWorldBinding(id))!==call(()=>world.getActorBinding(id)) ||
+        call(()=>runtime.getWorldBinding(id))!==call(()=>status.getWorldBinding(id)) ||
+        call(()=>runtime.getMappingActor(id))!==call(()=>status.getMappingActor(id)))
+        fail('6ae60 canonical command actor/world/mapping differs');
+      const binding=record(call(()=>runtime.getActorBinding(id)),'6ae60 canonical508 binding');
+      const actionRuntime=runtime.getActionRuntime(),action=record(call(()=>runtime.getActionBinding(id)),'6ae60 canonical7d2 binding');
+      if(call(()=>actionRuntime.getActorBinding(id))!==action || call(()=>actionRuntime.getActualActor(id))!==actor ||
+        call(()=>actionRuntime.getWorldBinding(id))!==call(()=>runtime.getWorldBinding(id)))
+        fail('6ae60 canonical action7d2 owner differs');
+      const old=commandOwners.get(id);
+      if(old && (old.binding!==binding || old.action!==action)) fail('6ae60 canonical command owner changed');
+      if(binding===action || [binding,action].some(owner=>owner===actor || [...retained.values()].includes(owner)))
+        fail('6ae60 command source storage alias');
+      commandOwners.set(id,{binding,action});return needAction?action:binding;
+    };
+    //8006ae78 captures base once. Signed active!=0, six unrolled physical rows.
+    const initial=physical();
+    for(let index=0;index<6;index++) {
+      const {id,actor}=actorAt(initial,index);
+      if(s8(byte(actor,'active0'))===0) continue;
+      actualByte(actor,'byte58a');actualByte(actor,'byte58b');actualByte(actor,'byte58c');actualByte(actor,'byte58d');
+      const action=command(id,actor,true);
+      noShadows(actor,['byte7d2','byte7D2','field7d2','flags7d2','2002']);
+      noShadows(action,['byte7D2','field7d2','flags7d2','2002']);
+      write(action,'byte7d2',0);
+      actualByte(actor,'byte7d3');
+    }
+    //8006af5c reload. Status is reached only after the signed active test.
+    const second=physical();
+    for(let index=0;index<6;index++) {
+      const {id,actor}=actorAt(second,index);
+      if(s8(byte(actor,'active0'))===0) continue;
+      if(root.getStageRuntime()!==stage || call(()=>stage.getActualActor(id))!==actor)
+        fail('6ae60 canonical stage actor differs');
+      const binding=record(call(()=>stage.getActorBinding(id)),'6ae60 same lifecycle18 binding');
+      if(binding===actor || [...retained.values()].includes(binding)) fail('6ae60 stage source storage alias');
+      if(s8(byte(binding,'lifecycle18'))>=1)
+        fail('8006af80 reached mandatory8006b450 target-selection predecessor');
+    }
+    //8006b358 reload. The active BYTE LOAD precedes the unconditional508
+    // pointer load, but the active TEST follows it. Inactive rows still need
+    // their genuine existing508 binding; no default-null pointer is admitted.
+    const third=physical();
+    for(let index=0;index<6;index++) {
+      const {id,actor}=actorAt(third,index),active=byte(actor,'active0');
+      const binding=command(id,actor,false);
+      noShadows(actor,['pointer508','field508','byte508','byte509','byte50a','byte50b','byte50A','byte50B',
+        '1288','1289','1290','1291']);
+      noShadows(binding,['field508','byte508','byte509','byte50a','byte50b','byte50A','byte50B',
+        '1288','1289','1290','1291']);
+      const pointer=read(binding,'pointer508');
+      if(pointer!==null) record(pointer,'6ae60 pointer508');
+      if(s8(active)===0 || pointer===null) continue;
+      fail('8006b374 reached unsupported source target83 ownership after nonnull508');
+    }
+    //Genuine void return only if every reached canonical508 owner completed.
+  };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
     runFrame(): never {
@@ -493,7 +598,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         applyPending();updateTeams();
         if(s8(byte(match(),'byte66'))===0) {
           prepareMass();
-          fail('8002945c reached mandatory8006ae60 normal-stage predecessor');
+          prepareTargets();
+          fail('80029460 reached mandatory80027764 normal-stage predecessor');
         }
         fail('80029464 reached mandatory8000bef4 outer-frame predecessor');
       } catch(error) {
