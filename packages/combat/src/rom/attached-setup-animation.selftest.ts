@@ -1,4 +1,5 @@
 import {runBattleTargetPreparationSelfTests} from './battle-target-preparation.selftest.js';
+import {runActorSlotStatusSelfTests} from './actor-slot-status.selftest.js';
 import {runBattleMassOrderingSelfTests} from './battle-mass-ordering.selftest.js';
 import {runBattleMassPreparationSelfTests} from './battle-mass-preparation.selftest.js';
 import {runBattleOuterFrameSelfTests} from './battle-outer-frame.selftest.js';
@@ -31,7 +32,8 @@ import {createSourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
 import {createSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleBinding} from './actor-control-lifecycle.js';
 import {createSourceActorReadyTransitionsRuntime, type SourceActorReadyTransitionsBinding} from './actor-ready-transitions.js';
-import {createSourceActorActionRequestRuntime, type SourceActorActionRequestBinding} from './actor-action-request.js';
+import {createSourceActorActionRequestRuntime, type SourceActorActionRequestBinding,
+  type SourceActorActionRequestSources} from './actor-action-request.js';
 import {createSourceActorRateLifecycleRuntime, type SourceActorRateLifecycleBinding} from './actor-rate-lifecycle.js';
 import {createSourceActorCeilingLifecycleRuntime} from './actor-ceiling-lifecycle.js';
 import {createSourceActorTierLifecycleRuntime, type SourceActorTierLifecycleBinding} from './actor-tier-lifecycle.js';
@@ -2878,6 +2880,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleMassPreparationHydratedCompositionTests();
   runBattleMassOrderingHydratedCompositionTests();
   runBattleTargetPreparationHydratedCompositionTests();
+  runActorSlotStatusHydratedCompositionTests();
   runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
@@ -3381,8 +3384,12 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
     runtime.bindActor(x.actor, readyInputs.initial); actorControl.bindReadyRuntime(runtime);
     return runtime;
   })();
+  // Keep the exact construction source for later explicit optional joins. A
+  // genuine scheduler can only be constructed after the spawn/root graph, so
+  // a shared slot helper must be supplied here without rebuilding this owner.
+  const actionRequestSources: SourceActorActionRequestSources = {world: x.world};
   const actionRequest = chargeHydration?.actionRequest === undefined ? undefined :
-    createSourceActorActionRequestRuntime({world: x.world});
+    createSourceActorActionRequestRuntime(actionRequestSources);
   if (actionRequest !== undefined) {
     const initial=targetPreparationMissingCell==='byte7d2'
       ? {...chargeHydration!.actionRequest!} : chargeHydration!.actionRequest!;
@@ -3459,7 +3466,8 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
     inputPrefix, inputState: inputPrefix.getActorBinding(x.actor), prefix, prefixState: prefix.getActorBinding(x.actor),
     firstMachine, machineTables, processor, ...(chargeOwners === undefined ? {} : {chargeOwners}),
     ...(actorControl === undefined ? {} : {actorControl}),
-    ...(readyTransitions === undefined ? {} : {readyTransitions}), ...(actionRequest === undefined ? {} : {actionRequest}),
+    ...(readyTransitions === undefined ? {} : {readyTransitions}),
+    actionRequestSources, ...(actionRequest === undefined ? {} : {actionRequest}),
     ...(actorRates === undefined ? {} : {actorRates}), ...(ceiling === undefined ? {} : {ceiling}),
     ...(normalLifecycle === undefined ? {} : {normalLifecycle}), ...(rotation === undefined ? {} : {rotation}),
     ...(cue0 === undefined ? {} : {cue0}), ...(inputTesters === undefined ? {} : {inputTesters}),
@@ -13356,4 +13364,7 @@ export function createBattleTargetPreparationTestFixture(omit?: 'byte7d2'|'point
 }
 export function runBattleTargetPreparationHydratedCompositionTests(): void {
   runBattleTargetPreparationSelfTests(createBattleTargetPreparationTestFixture,createBattleMassOrderingTestFixture);
+}
+export function runActorSlotStatusHydratedCompositionTests(): void {
+  runActorSlotStatusSelfTests(createBattleTargetPreparationTestFixture);
 }

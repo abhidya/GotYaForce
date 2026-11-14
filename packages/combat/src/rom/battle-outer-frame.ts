@@ -5,8 +5,9 @@
  * explicit mass ingress supplies the bounded53b30 prefix. That path stops before
  * nonzero passenger1e4 or missing RNG/ordering ingress. The no-contact ordering
  * suffix can return53b30. Optional target ingress executes the ordered6ae60
- * clears, then refuses at6b450 or the first unsupported canonical508/target83
- * operation. Its bounded return still cannot skip mandatory27764.
+ * clears. Optional shared10514 ingress supports6b450 early returns before
+ * mandatory6b7f4; skipped lifecycle rows retain canonical508/target83 bounds.
+ * Its bounded return still cannot skip mandatory27764.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
  *
@@ -24,6 +25,7 @@ import {markIncompleteSourceActorDoubleLifecycle, requireCompleteSourceActorDoub
 import {addSourceFloat32} from './source-float.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
+import type {SourceActorSlotStatusRuntime} from './actor-slot-status.js';
 import type {SourceBattleOuterGlobalFields, SourceBattleSystemGlobals} from './battle-global-layout.js';
 
 /** Explicit metadata for source pointer arithmetic, not a copied actor table.
@@ -55,6 +57,8 @@ export interface SourceBattleTargetPreparationSources {
   /** Exactly the admission runtime already retained by genuine projectile
    * spawn. Supplies the existing action7d2 and pointer508 cells, no copies. */
   admission?: SourceActorCommandAdmissionRuntime;
+  /** SAME optional10514 owner retained by the canonical action runtime. */
+  slotStatus?: SourceActorSlotStatusRuntime;
 }
 export interface SourceBattleOuterFrameSources {
   scheduler: SourceObjectSchedulerRuntime;
@@ -564,8 +568,16 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         fail('6ae60 canonical stage actor differs');
       const binding=record(call(()=>stage.getActorBinding(id)),'6ae60 same lifecycle18 binding');
       if(binding===actor || [...retained.values()].includes(binding)) fail('6ae60 stage source storage alias');
-      if(s8(byte(binding,'lifecycle18'))>=1)
-        fail('8006af80 reached mandatory8006b450 target-selection predecessor');
+      if(s8(byte(binding,'lifecycle18'))>=1) {
+        const present=Object.getOwnPropertyDescriptor(target,'slotStatus');check();
+        if(present===undefined) fail('8006af80 reached mandatory8006b450 target-selection predecessor');
+        const helper=read(target,'slotStatus'),action=admission().getActionRuntime(),
+          canonical=call(()=>action.getSlotStatusRuntime());
+        if(helper!==canonical || canonical===undefined || canonical.getSchedulerRuntime()!==scheduler)
+          fail('6b450 exact shared slot-status/scheduler owner required');
+        call(()=>action.prepareTarget(id));
+        fail('8006af88 reached mandatory8006b7f4 target-dispatch predecessor');
+      }
     }
     //8006b358 reload. The active BYTE LOAD precedes the unconditional508
     // pointer load, but the active TEST follows it. Inactive rows still need

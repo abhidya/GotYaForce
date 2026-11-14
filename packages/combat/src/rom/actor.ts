@@ -256,6 +256,8 @@ export interface RomActor {
   /** +0x3e4: slot index (0..5).
    *  @romfield slot +0x3e4 u8 */
   slot: number;
+  /** Explicit current status, no constructor default. @romfield byte43d +0x43d u8 */
+  byte43d?: number;
   /** +0x88: team (0 = player/ally, 1 = enemy).
    *  @romfield team +0x88 u8 */
   team: number;
