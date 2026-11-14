@@ -29,6 +29,7 @@
  * after a store permanently closes the allocator. Caller capabilities separately
  * close actors whose subsequent spawn initialization was incomplete.
  */
+import {reserveSourcePointerStorage} from './source-storage-claims.js';
 import {requireSourceObjectSchedulerSnapshot, type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
@@ -185,6 +186,7 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     if (prior !== undefined && prior !== target) fail('pointer identity changed its actual owner');
     if (priorId !== undefined && priorId !== id) fail('actual pointer owner already has a different identity');
     if (prior === undefined) {
+      if(!reserveSourcePointerStorage(target)) fail('pointer target source storage already claimed');
       if (nextHandle > 0xffffffff) fail('opaque pointer handle capacity exhausted');
       targets.set(id, target); targetIds.set(target, id); handles.set(id, nextHandle); identities.set(nextHandle++, id);
     }

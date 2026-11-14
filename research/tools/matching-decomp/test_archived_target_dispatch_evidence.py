@@ -413,6 +413,34 @@ class SyntheticTests(unittest.TestCase):
         self.assertEqual([(rows[p]['mnemonic'],rows[p].get('displacement')) for p in range(0x8006ba1c,0x8006ba44,4)],
             [('stb',0x502),('stw',0x504),('lwz',0x20),('stw',0x508),('lwz',0x64),('lwz',0x68),('stw',0x50c),('stw',0x510),('lwz',0x6c),('stw',0x514)])
 
+    def test_candidate_scan_register_order_signed_gates_and_original_pointer_store(self):
+        rows={int(r['address'],16):r for r in EXPECTED[0x8006b850]}
+        loads=[(r['address'],r['mnemonic'],r.get('rD'),r.get('rA'),r.get('displacement'))
+               for r in EXPECTED[0x8006b850] if 0x8006b898<=int(r['address'],16)<0x8006b918 and r['mnemonic'] in ('lwz','lbz','lhz')]
+        self.assertEqual(loads,[('8006b898','lwz',7,6,0),('8006b8a4','lwz',5,7,0x20),
+            ('8006b8b0','lbz',0,5,0),('8006b8c4','lbz',0,30,0x88),
+            ('8006b8c8','lbz',4,5,0x88),('8006b8e4','lbz',0,5,0x18),
+            ('8006b8f4','lwz',5,13,-21504)])
+        self.assertEqual((rows[0x8006b8bc]['mnemonic'],rows[0x8006b8bc]['rA'],rows[0x8006b8bc]['rB']),('cmpl',30,5))
+        self.assertEqual((rows[0x8006b8cc]['rS'],rows[0x8006b8cc]['rA']), (0,3))
+        self.assertEqual((rows[0x8006b8d0]['rS'],rows[0x8006b8d0]['rA']), (4,0))
+        self.assertEqual((rows[0x8006b8d4]['rA'],rows[0x8006b8d4]['rB']), (3,0))
+        self.assertEqual((rows[0x8006b8dc]['rA'],rows[0x8006b8dc]['immediate']), (0,4))
+        self.assertEqual(rows[0x8006b8e8]['mnemonic'],'extsb')
+        self.assertEqual((rows[0x8006b8f0]['BO'],rows[0x8006b8f0]['BI'],rows[0x8006b8f0]['target']), (4,0,'8006b910'))
+        admitted=[raw for raw in range(256) if (raw if raw<128 else raw-256)<2]
+        self.assertEqual(admitted,[0,1]+list(range(128,256)))
+        self.assertEqual((rows[0x8006b900]['rD'],rows[0x8006b900]['rA'],rows[0x8006b900]['immediate']), (4,5,1))
+        self.assertEqual((rows[0x8006b904]['rS'],rows[0x8006b904]['rA'],rows[0x8006b904]['SH']), (5,0,2))
+        self.assertEqual((rows[0x8006b908]['rS'],rows[0x8006b908]['rA'],rows[0x8006b908]['displacement']), (4,13,-21504))
+        self.assertEqual((rows[0x8006b90c]['rS'],rows[0x8006b90c]['rA'],rows[0x8006b90c]['rB']), (7,3,0))
+        # r7 remains the original list object. r5 became actor, then old count.
+        writes7=[r['address'] for r in EXPECTED[0x8006b850] if 0x8006b898<=int(r['address'],16)<=0x8006b90c and r.get('rD')==7]
+        self.assertEqual(writes7,['8006b898'])
+        self.assertEqual((rows[0x8006b88c]['mnemonic'],rows[0x8006b88c]['rS']),('mtctr',4))
+        self.assertEqual((rows[0x8006b914]['BO'],rows[0x8006b914]['BI'],rows[0x8006b914]['target']), (16,0,'8006b898'))
+        self.assertEqual((rows[0x8006b910]['rD'],rows[0x8006b910]['rA'],rows[0x8006b910]['immediate']), (6,6,4))
+
     def test_invalid_ranges_widths_mappings_and_decoder_bounds(self):
         for pc,width,_ in INVENTORY:
             for address,size in [(bad,width) for bad in (pc-4,pc+4,pc+1,float(pc),True,-1,1<<32,CELL_ADDRESS)]+[(pc,bad) for bad in (0,width-4,width+4,-width,True,float(width))]:
