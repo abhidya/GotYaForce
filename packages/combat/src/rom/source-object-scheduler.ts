@@ -24,6 +24,8 @@ export interface SourceObjectSchedulerRuntime {
   getRootRuntime(): SourceProjectileRootRuntime;
   getAllocatorRuntime(): SourceObjectAllocationRuntime;
   getMatchGlobals(): object;
+  /** Actual retained803c4e84 pointer owner, without loading its slot cells. */
+  getActorSlotTable(): Readonly<Record<number,symbol|null>>;
   /** Host identity inventory; no slot scalar loads or source pointer traversal. */
   getRetainedStorageOwners(): readonly object[];
   /** Arguments are raw u32 register bits; source comparisons are signed. */
@@ -145,14 +147,17 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
     if ((bits|0)<0x38 && (bits&7)!==7 && (mask(bits)&0x80)!==0) return;
     walk(head(bits));
   };
+  const actorSlotTable = (): Readonly<Record<number,symbol|null>> => {
+    const actual=record(read(sources,'actorSlots'),'actual803c4e84 table');
+    if(actual===sources || actual===globals || actual===root.getDrawList() ||
+      call(()=>root.getRetainedStorageOwners()).includes(actual)) fail('actor slots alias another source owner');
+    if(slotsOwner!==undefined && slotsOwner!==actual) fail('actor-slot table owner changed');
+    slotsOwner=actual;return actual as Readonly<Record<number,symbol|null>>;
+  };
   const slots = (bits: number): void => {
     if ((bits|0)>=0x38) return;
     for(let i=0;i<6;i++) {
-      const actual=record(read(sources,'actorSlots'),'actual803c4e84 table');
-      if(actual===sources || actual===globals || actual===root.getDrawList() ||
-        call(()=>allocator.getRetainedStorageOwners()).includes(actual)) fail('actor slots alias another source owner');
-      if(slotsOwner!==undefined && slotsOwner!==actual) fail('actor-slot table owner changed');
-      slotsOwner=actual;
+      const actual=actorSlotTable();
       const id=pointer(read(actual,String(i)),'actor-slot pointer');
       if(id===null) fail('null source actor slot at reached active0 dereference');
       const actor=call(()=>allocator.getPointerTarget(id));
@@ -183,6 +188,7 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
   };
   const runtime: SourceObjectSchedulerRuntime = {
     getRootRuntime() {return root;},getAllocatorRuntime() {return allocator;},getMatchGlobals() {return globals;},
+    getActorSlotTable() {return actorSlotTable();},
     getRetainedStorageOwners() {
       const records: object[]=[sources,globals,...root.getRetainedStorageOwners()];
       const supplied=Object.getOwnPropertyDescriptor(sources,'actorSlots');

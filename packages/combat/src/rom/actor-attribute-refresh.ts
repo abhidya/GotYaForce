@@ -52,6 +52,8 @@ export interface SourceActorAttributeParameterDescriptor {
   /** Signed yaw rate on this SAME4ac owner, consumed by800669d0 maskC1. */
   fieldAe: number;
   field74: number; field78: number; field7c: number;
+  /** Explicit source base mass on the SAME4ac parameter owner. */
+  field98?: number;
   /** Unsigned table selector on this SAME 4ac owner, consumed by8006826c. */
   byteA3: number;
   /** Explicit unsigned limit on this SAME4ac owner, consumed by80069210. */
@@ -205,7 +207,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
     });},
     getDescriptorBinding(id: symbol) {return descriptorEntry(id).binding;},
     createParameterDescriptor(initial: Readonly<Partial<SourceActorAttributeParameterDescriptor>>): symbol {return guard(() => {
-      const binding = copy<SourceActorAttributeParameterDescriptor>(initial, ['field74', 'field78', 'field7c', 'field184', 'field188', 'field18c']);
+      const binding = copy<SourceActorAttributeParameterDescriptor>(initial, ['field74', 'field78', 'field7c', 'field98', 'field184', 'field188', 'field18c']);
       for (const key of ['field04', 'field08', 'fieldAe'] as const) {
         if (Object.getOwnPropertyDescriptor(initial, key) !== undefined) {
           const value = read(initial, key);

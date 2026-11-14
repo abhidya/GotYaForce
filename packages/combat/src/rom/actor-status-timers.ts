@@ -47,7 +47,7 @@ export type SourceActorStatusBorgOwner = Pick<BorgRuntime, 'hp' | 'hitDrainFrame
   'comboWindow' | 'comboAccum' | 'comboRank' | 'invincTimer' | 'sourceAmmoRefillPauseMask'> &
   /** Existing Borg cells, required lazily by reached ready/rate/cue-tail paths. */
   Partial<Pick<BorgRuntime, 'maxHp' | 'colorVariant' | 'slowHitTimer' | 'hasteHitTimer' |
-    'slowAuraLevel' | 'hasteAuraLevel' | 'slowHitLevel' | 'hasteHitLevel' | 'burstArmFrames'>>;
+    'slowAuraLevel' | 'hasteAuraLevel' | 'slowHitLevel' | 'hasteHitLevel' | 'burstArmFrames' | 'sourceArrowMass204'>>;
 export interface SourceActorStatusAmmoSlot {
   readonly cell: WeaponCell;
   /** Explicit otherwise-missing source +776 (+8*slot), not a HUD alias. */
@@ -72,6 +72,8 @@ export interface SourceActorStatusTimersRuntime {
   getAttributeBinding(identity: symbol): object;
   getMovementBinding(identity: symbol): object;
   getActualBorg(identity: symbol): SourceActorStatusBorgOwner;
+  /** Already retained owner identities only; no actor scalar reads. */
+  getRetainedStorageOwners(): readonly object[];
   /** Same actual stream-start owner already retained for source marker709. */
   getStartBinding(identity: symbol): object;
   /** Exact retained source slot/cell. No scalar read or inferred HUD cell. */
@@ -238,6 +240,15 @@ export function createSourceActorStatusTimersRuntime(sources: SourceActorStatusT
     getAttributeBinding(id: symbol) {return entry(id).attribute;},
     getMovementBinding(id: symbol) {return entry(id).movement;},
     getActualBorg(id: symbol) {return entry(id).borg;},
+    getRetainedStorageOwners() {
+      const records: object[]=[sources,...parameterOwners.values()];
+      for(const e of actors.values()) {
+        records.push(e.actual,e.world,e.mapping,e.movement,e.attribute,e.stream,e.borg,e.binding,
+          e.slots,...e.slotRecords,...e.cells);
+        if(e.children!==undefined) records.push(e.children);
+      }
+      return Object.freeze([...new Set(records)]);
+    },
     getStartBinding(id: symbol) {return entry(id).stream;},
     getAmmoSlot(id: symbol, index: number) {return guard(() => {
       const actor = entry(id), at = integer(index, 0, 2, 'source ammo slot index');

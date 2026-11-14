@@ -1,3 +1,4 @@
+import {runBattleMassPreparationSelfTests} from './battle-mass-preparation.selftest.js';
 import {runBattleOuterFrameSelfTests} from './battle-outer-frame.selftest.js';
 import {runObjectSchedulerSelfTests} from './source-object-scheduler.selftest.js';
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
@@ -2869,6 +2870,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runProjectileRetirementHydratedCompositionTests();
   runProjectileCleanupHydratedCompositionTests();
   runBattleOuterFrameHydratedCompositionTests();
+  runBattleMassPreparationHydratedCompositionTests();
   runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
@@ -13270,4 +13272,34 @@ export function createBattleOuterFrameTestFixture() {
 }
 export function runBattleOuterFrameHydratedCompositionTests(): void {
   runBattleOuterFrameSelfTests(createBattleOuterFrameTestFixture);
+}
+
+/** Explicit bounded synthetic53b30 input, NOT six retail-hydrated actors. The
+ * physical block keeps six distinct identities from the original fixture.
+ * Only its first actor owns genuine status/stage/4ac bindings; the live second
+ * traversal deliberately repeats that actor six times. Inactive physical rows
+ * have no invented Borg/status owner and their missing scalar fields stay lazy.
+ * No underlying owner or callee is replaced and no successful frame is claimed.
+ */
+export function createBattleMassPreparationTestFixture() {
+  const x=createBattleOuterFrameTestFixture();
+  const physicalIdentities=Object.freeze(Array.from({length:6},(_,i)=>x.actorSlots[i]!));
+  const physicalBlock=Object.freeze({base:x.actor,identities:physicalIdentities});
+  for(let i=0;i<6;i++) x.actorSlots[i]=x.actor;
+  const host=x.status.getActualBorg(x.actor);
+  host.sourceArrowMass204=73;
+  Object.assign(x.sourceActor,{active0:1,mass208:79,modelScale:2,team:0,supportContact1db:0});
+  x.stageState.lifecycle18=1;
+  const binding=x.attributes.getActorBinding(x.actor),old=x.attributes.getParameterDescriptor(binding.parameter4ac!);
+  binding.parameter4ac=x.attributes.createParameterDescriptor({...old,field98:100});
+  const massParameter=x.attributes.getParameterDescriptor(binding.parameter4ac);
+  const teamPointers: Record<number,symbol|null>={},teamCounts: Record<number,number>={};
+  for(let i=0;i<24;i++) teamPointers[i]=x.actor;
+  for(let i=0;i<4;i++) teamCounts[i]=91+i;
+  const massPreparation={teamPointers,teamCounts,physicalBlock,attributes:x.attributes,
+    data:{float80437250:0,float80437254:50000}};
+  return Object.assign(x,{massPreparation,massParameter,massHost:host,physicalIdentities});
+}
+export function runBattleMassPreparationHydratedCompositionTests(): void {
+  runBattleMassPreparationSelfTests(createBattleMassPreparationTestFixture);
 }

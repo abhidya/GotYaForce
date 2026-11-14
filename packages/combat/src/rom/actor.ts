@@ -163,6 +163,10 @@ export interface RomActor {
   collisionScale?: number;
   /** Source1db supporting-actor contact, not terrain grounded status. Flat-floor host default0. */
   supportContact1db: number;
+  /** Explicit unaccumulated source mass. No host constructor default.
+   * Accumulated+204 retains BorgRuntime.sourceArrowMass204.
+   * @romfield mass208 +0x208 f32 */
+  mass208?: number;
   /** Actual+6cb stage-exit/no-clamp byte, shared with physicsExtras.
    * Explicit source owner only; no lifecycle/default host hydration. */
   noClamp6cb?: number;

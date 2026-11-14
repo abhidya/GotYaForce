@@ -57,6 +57,8 @@ export interface SourceProjectileRootRuntime {
   getObject(projectile: symbol): SourceAllocationBytes;
   getDrawList(): SourceProjectileDrawList;
   getSpawnRuntime(): SourceActorProjectileSpawnRuntime;
+  /** Same retained source18 owner, not a replacement lifecycle adapter. */
+  getStageRuntime(): SourceActorStageBoundsRuntime;
   getSourceOwners(projectile: symbol): readonly object[];
   /** Host alias inventory of already retained graph records, not source reads. */
   getRetainedStorageOwners(): readonly object[];
@@ -368,10 +370,11 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
         fail('draw list or projectile source owner alias');
       owners(e); children.set(id, e); claimedChildren.add(bytes);
     });},
-    getObject(id) {return entry(id).bytes;}, getDrawList() {return draw;}, getSpawnRuntime() {return spawns;},
+    getObject(id) {return entry(id).bytes;}, getDrawList() {return draw;}, getSpawnRuntime() {return spawns;}, getStageRuntime() {return stage;},
     getSourceOwners(id) {const e = entry(id); return Object.freeze([e.bytes, e.actual, e.stage, e.world, e.status, draw]);},
     getRetainedStorageOwners() {
-      const records: object[]=[sources,draw,...spawns.getRetainedStorageOwners()];
+      const records: object[]=[sources,draw,...spawns.getRetainedStorageOwners(),
+        ...prehook.getStatusRuntime().getRetainedStorageOwners()];
       for(const e of children.values()) records.push(e.bytes,e.actual,e.stage,e.world,e.status);
       if(hits!==undefined) records.push(...hits.getRetainedStorageOwners());
       // Immediate record identities also exclude actor vectors and retained
