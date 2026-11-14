@@ -49,9 +49,15 @@ export interface SourceAttachedJointSetupSources {
   fobjs: {getFObj(aobjId: symbol, nodeId: symbol): SourceFObjHeader};
 }
 export interface SourceAttachedJointSetupRuntime {
+  getActualFeedback(): SourceAttachedJointSetupSources['feedback'];
+  getActualMapping(): SourceAttachedJointSetupSources['actors'];
   bindPart(identity: symbol, initial: SourceAttachedJointSetupBinding): void;
   getPartBinding(identity: symbol): SourceAttachedJointSetupBinding;
   continueAttachedSetupTail(actor: symbol, part: symbol, joint: symbol | null): void;
+}
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceAttachedJointSetupRuntime(value: unknown): value is SourceAttachedJointSetupRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
 }
 function fail(reason: string): never {
   throw Error(`[attached-joint-setup] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -109,7 +115,9 @@ export function createSourceAttachedJointSetupRuntime(sources: SourceAttachedJoi
     return id === null ? null : {id, aobj: resolve(feedback, getAObj, [id]) as SourceAObj};
   };
   const partEntry = (id: symbol) => {const value = parts.get(id); if (!value) fail('unknown/non-owned setup part'); return value;};
-  return Object.freeze({
+  const runtime: SourceAttachedJointSetupRuntime = Object.freeze({
+    getActualFeedback() {return feedback as SourceAttachedJointSetupSources['feedback'];},
+    getActualMapping() {return actors as SourceAttachedJointSetupSources['actors'];},
     bindPart(id: symbol, initial: SourceAttachedJointSetupBinding): void {
       enter();
       try {
@@ -162,4 +170,5 @@ export function createSourceAttachedJointSetupRuntime(sources: SourceAttachedJoi
       } finally {busy = false;}
     },
   });
+  genuineRuntimes.add(runtime); return runtime;
 }

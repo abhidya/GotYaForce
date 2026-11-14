@@ -1,15 +1,20 @@
-import {createSourceStreamWaitRuntime, type SourceStreamWaitPartInitial} from './stream-wait.js';
+import {createSourceStreamWaitRuntime, isSourceStreamWaitRuntime, type SourceStreamWaitPartInitial} from './stream-wait.js';
 import {createSourceStreamWaitTargetRuntime} from './stream-wait-target.js';
 import {createSourceActorAnimationDispatchRuntime, type SourceActorAnimationSetupRequest} from './actor-animation-dispatch.js';
 import {createSourceActorJointMappingRuntime} from './actor-joint-mapping.js';
 import {createSourceJointAnimationFeedbackRuntime} from './joint-animation-feedback.js';
 import {createSourceJObjAnimationRuntime} from './jobj-animation.js';
+import {createRomActor, type RomActor} from './actor.js';
+import {createSourceActorMovementFollowupRuntime} from './actor-movement-followup.js';
+import {createSourceActorAnimationSetupRuntime} from './actor-animation-setup.js';
+import {createSourceAnimationDescriptorBankRuntime} from './animation-descriptor-bank.js';
+import {hasIncompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 function check(value: boolean, message: string): void {if (!value) throw Error(`[stream-wait-test] ${message}`);}
 function rejects(run: () => unknown, expected: string): void {
   let error = ''; try {run();} catch (e) {error = String(e);}
   check(error.includes(expected), `expected ${expected}, got ${error}`);
 }
-function fixture(flags = 1, synthetic = false, gqr5?: number, maxCommands?: number) {
+function fixture(flags = 1, synthetic = false, gqr5?: number, maxCommands?: number, initialState?: {state1b?: number; auxiliary1c?: number}) {
   const count = 0;
   const joints = createSourceJObjAnimationRuntime(), feedback = createSourceJointAnimationFeedbackRuntime(joints);
   const mapping = createSourceActorJointMappingRuntime(joints, feedback, {
@@ -63,7 +68,7 @@ function fixture(flags = 1, synthetic = false, gqr5?: number, maxCommands?: numb
     targets: synthetic ? targetAdapter : targets, ...(gqr5 === undefined ? {} : {gqr5}), ...(maxCommands === undefined ? {} : {maxCommands})};
   const runtime = createSourceStreamWaitRuntime(options);
   const command = runtime.createCommand({flags01: flags});
-  const input: SourceStreamWaitPartInitial[] = Array.from({length: 4}, () => ({current00: command, wait14: 3, finished1a: 0, event1e: 9}));
+  const input: SourceStreamWaitPartInitial[] = Array.from({length: 4}, () => ({current00: command, wait14: 3, finished1a: 0, event1e: 9, ...initialState}));
   runtime.bindActor(actor, {activeMask579: 15, blockedMask1d9a: 0}, input);
   return {runtime, mapping, feedback, dispatch, targets, actor, parts, command, input, hooks, options,
     mappingAdapter, feedbackAdapter, dispatchAdapter, targetAdapter,
@@ -77,7 +82,234 @@ function fixture(flags = 1, synthetic = false, gqr5?: number, maxCommands?: numb
     binding: (i = 0) => dispatch.getPartBinding(parts[0]![i]!),
     run: (mask = 1) => runtime.update(actor, mask)};
 }
+// Real setup/movement retain the same actor, mapping and stream gate owners.
+// Unreached metadata/archive dependencies refuse rather than simulate effects.
+function stateFixture(actual: RomActor = createRomActor(), deferJoin = false) {
+  const x = fixture(), unsupported = (): never => {throw Error('unexpected state-command setup effect');};
+  x.runtime.bindStartActor(x.actor, {familyBank1d80: null, sharedBank1d84: null, defaultSelector582: 73, marker709: 19});
+  const setup = createSourceActorAnimationSetupRuntime({mapping: x.mapping, feedback: x.feedback, dispatch: x.dispatch,
+    descriptors: createSourceAnimationDescriptorBankRuntime(), starts: x.runtime,
+    metadata: {getPartBinding: unsupported, applyMetadata: unsupported}, archiveBanks: {resolveArchive: unsupported}});
+  setup.bindActor(x.actor, {familyBank1d78: null, sharedBank1d7c: null, movement6d8: 1});
+  const movement = createSourceActorMovementFollowupRuntime({mapping: x.mapping, waits: x.runtime, setup});
+  movement.bindActor(x.actor, actual, {byte661: 0, field66c: 0, field670: 0});
+  if (!deferJoin) x.runtime.bindActualActor(x.actor, movement);
+  const parse = (bytes: readonly number[], mask = 3) => {
+    const base = x.runtime.createStream(new Uint8Array(bytes));
+    x.runtime.parseWaitRecord(x.actor, mask, base); return base;
+  };
+  return {...x, actual, setup, movement, parse, start: x.runtime.getStartActorBinding(x.actor)};
+}
+function runStateCommandTests(): void {
+  const op2 = [2, 255, 128, 255, 17, 18, 0, 0], op3 = [3, 255, 128, 0, 0, 0, 0xab, 0xcd], wait = [0, 1, 0, 7];
+  {
+    const x = stateFixture();
+    check(x.runtime.hasActualActorBinding(x.actor) && x.runtime.getActualActor(x.actor) === x.actual && x.runtime.getMappingActor(x.actor) === x.header,
+      'one-time actual join exposes only the retained canonical actor/mapping');
+    check(!Object.hasOwn(x.actual, 'byte6e8') && !Object.hasOwn(x.actual, 'byte6e9') &&
+      x.control().state1b === undefined && x.control().auxiliary1c === undefined,
+      'new source fields have no fabricated allocation bytes');
+    rejects(() => x.runtime.bindActualActor(x.actor, x.movement), 'already bound');
+    rejects(() => x.runtime.getActualActor(Symbol()), 'unknown/non-owned');
+    rejects(() => x.runtime.bindActor(x.actor, {activeMask579: 15, blockedMask1d9a: 0}, x.input), 'already bound');
+    check(Object.isSealed(x.control()) && Object.isFrozen(x.runtime), 'canonical parts and getter methods cannot be replaced');
+  }
+  for (const field of ['state1b', 'auxiliary1c'] as const) {
+    for (const bad of [-1, 256, 0.5, NaN, Infinity])
+      rejects(() => fixture(1, false, undefined, undefined, {[field]: bad}), `${field}: unsigned integer`);
+    for (const good of [0, 127, 128, 255]) {
+      const x = fixture(1, false, undefined, undefined, {[field]: good});
+      check(x.control()[field] === good, 'explicit source part initialization retains unsigned byte bits');
+    }
+  }
+  {
+    const x = stateFixture(createRomActor(), true);
+    check(!x.runtime.hasActualActorBinding(x.actor), 'unjoined stream reports no invented actual owner');
+    rejects(() => x.runtime.bindActualActor(x.actor, {...x.movement}), 'genuine mapping and movement');
+    const other = stateFixture();
+    rejects(() => x.runtime.bindActualActor(x.actor, other.movement), 'unknown/non-owned movement actor');
+    const wrongWait = createSourceStreamWaitRuntime(x.options);
+    wrongWait.bindActor(x.actor, {activeMask579: 15, blockedMask1d9a: 0}, x.input);
+    const wrongMovement = createSourceActorMovementFollowupRuntime({mapping: x.mapping, waits: wrongWait, setup: x.setup});
+    wrongMovement.bindActor(x.actor, x.actual, {byte661: 0, field66c: 0, field670: 0});
+    rejects(() => x.runtime.bindActualActor(x.actor, wrongMovement), 'matched canonical');
+    x.runtime.bindActualActor(x.actor, x.movement);
+    check(x.runtime.getActualActor(x.actor) === x.actual, 'rejected owner substitution cannot replace canonical join');
+    rejects(() => wrongWait.bindActualActor(x.actor, wrongMovement), 'already assigned to a stream identity');
+  }
+  for (const mask of [0, 1, 2, 3, 4, 8, 15, 0xfffffff0, 0xffffffff]) {
+    const x = stateFixture(); x.actual.prevActionIndex = 197; x.actual.controlWord = 0x87654fed;
+    x.actual.contactP0 = 43; x.actual.contactP1 = 44; x.actual.dashStrength1d0f = 45; x.actual.faceGate1d10 = 46;
+    x.actual.parts[0]!.stateByte = 47; x.actual.parts[1]!.stateByte = 48;
+    x.actual.byte6e8 = NaN; x.actual.byte6e9 = NaN;
+    const base = x.parse([...op2, ...op3, ...wait], mask);
+    check(x.control().state1b === ((mask & 1) ? 128 : undefined) &&
+      x.control().auxiliary1c === ((mask & 1) ? 255 : undefined) &&
+      x.control(1).state1b === ((mask & 2) ? 255 : undefined) &&
+      x.control(1).auxiliary1c === ((mask & 2) ? 128 : undefined), 'opcode02/03 use fixed parts0/1 and independent mask bits');
+    check((mask & 1) ? x.actual.byte6e8 === 17 && x.actual.byte6e9 === 18 : Number.isNaN(x.actual.byte6e8) && Number.isNaN(x.actual.byte6e9),
+      'actual byte stores overwrite without stale-value validation only for mask1');
+    check(x.actual.controlWord === ((mask & 2) ? 0x87654bcd : 0x87654fed) && x.actual.prevActionIndex === 197 && x.start.defaultSelector582 === 73,
+      'opcode03 masks bits4..11, opcode02ff preserves582, neither touches584');
+    for (let i = 0; i < 4; i++) if (mask & (1 << i))
+      check(x.control(i).current00 === x.runtime.cursorAt(base, 16) && x.control(i).wait14 === 7,
+        'both state records advance by8 including mask-skipped records');
+    check(x.control(2).state1b === undefined && x.control(3).auxiliary1c === undefined, 'no legacy/per-part-index state fanout');
+    check(x.actual.contactP0 === 43 && x.actual.contactP1 === 44 && x.actual.dashStrength1d0f === 45 &&
+      x.actual.faceGate1d10 === 46 && x.actual.parts[0]!.stateByte === 47 && x.actual.parts[1]!.stateByte === 48,
+      'source state stores never update competing legacy actor/contact/part fields');
+  }
+  for (let selector = 0; selector <= 255; selector++) {
+    const x = stateFixture(); x.start.defaultSelector582 = selector === 254 ? 128 : NaN;
+    if (selector === 255) Object.defineProperty(x.start, 'defaultSelector582', {writable: false});
+    x.parse([2, selector, 0, 0, 0, 0, 0, 0, ...wait], 1);
+    check(selector === 255 ? Number.isNaN(x.start.defaultSelector582) : x.start.defaultSelector582 === (selector === 254 ? 129 : selector),
+      'all opcode02 selector bytes preserve ff, XOR fe, or overwrite without old-value validation');
+  }
+  {
+    const x = stateFixture(); x.start.defaultSelector582 = NaN;
+    rejects(() => x.parse([2, 254, 128, 255, 17, 18, 0, 0, ...wait], 1), 'defaultSelector582: unsigned');
+    check(x.control().state1b === 128 && x.control().auxiliary1c === 255 && x.actual.byte6e8 === 17 && x.actual.byte6e9 === 18,
+      'invalid toggle operand refuses after four prior stores');
+    check(hasIncompleteSourceActorDoubleLifecycle(x.actual), 'canonical partial stream execution permanently poisons caller lifecycle');
+    x.start.defaultSelector582 = 0;
+    rejects(() => x.parse(wait, 0), 'known incomplete source Double lifecycle');
+    rejects(() => x.runtime.startStream(x.actor, 0, 4, 0), 'known incomplete source Double lifecycle');
+    rejects(() => x.runtime.update(x.actor, 0), 'known incomplete source Double lifecycle');
+  }
+  // Selected store admission stays lazy: each earlier write survives the first
+  // readonly destination, and none of the later fields/cursor installs changes.
+  for (let fault = 0; fault < 5; fault++) {
+    const x = stateFixture(); x.actual.byte6e8 = 31; x.actual.byte6e9 = 32;
+    x.control().state1b = 11; x.control().auxiliary1c = 12;
+    const slots = [[x.control(), 'state1b', 128], [x.control(), 'auxiliary1c', 255],
+      [x.actual, 'byte6e8', 17], [x.actual, 'byte6e9', 18], [x.start, 'defaultSelector582', 7]] as const;
+    const before = slots.map(([owner, key]) => Object.getOwnPropertyDescriptor(owner, key)!.value);
+    Object.defineProperty(slots[fault]![0], slots[fault]![1], {writable: false});
+    rejects(() => x.parse([2, 7, ...op2.slice(2), ...wait], 1), `${slots[fault]![1]}: non-writable`);
+    for (let i = 0; i < slots.length; i++) {
+      const [owner, key, after] = slots[i]!;
+      check(Object.is(Object.getOwnPropertyDescriptor(owner, key)!.value, i < fault ? after : before[i]), 'opcode02 exact ordered store prefix');
+    }
+    check(x.control().current00 === x.command && x.actual.prevActionIndex === 0, 'failed handler installs no wait and preserves584');
+  }
+  for (let fault = 0; fault < 3; fault++) {
+    const x = stateFixture(); x.control(1).state1b = 11; x.control(1).auxiliary1c = 12; x.actual.controlWord = 0x12345fed;
+    const slots = [[x.control(1), 'state1b'], [x.control(1), 'auxiliary1c'], [x.actual, 'controlWord']] as const;
+    Object.defineProperty(slots[fault]![0], slots[fault]![1], {writable: false});
+    rejects(() => x.parse([...op3, ...wait], 2), `${slots[fault]![1]}: non-writable`);
+    check(x.control(1).state1b === (fault > 0 ? 255 : 11) && x.control(1).auxiliary1c === (fault > 1 ? 128 : 12) &&
+      x.actual.controlWord === 0x12345fed, 'opcode03 states precede control and preserve readonly prefix');
+  }
+  for (const opcode of [2, 3]) for (let length = 1; length < 8; length++) {
+    const x = stateFixture(), record = opcode === 2 ? op2 : op3;
+    rejects(() => x.parse(record.slice(0, length), opcode === 2 ? 1 : 2), 'out of bounds');
+    if (opcode === 2) check(x.control().state1b === (length > 2 ? 128 : undefined) &&
+      x.control().auxiliary1c === (length > 3 ? 255 : undefined) && x.actual.byte6e8 === (length > 4 ? 17 : undefined) &&
+      x.actual.byte6e9 === (length > 5 ? 18 : undefined), 'opcode02 reached truncation preserves only preceding byte stores');
+    else check(x.control(1).state1b === (length > 1 ? 255 : undefined) && x.control(1).auxiliary1c === (length > 2 ? 128 : undefined) &&
+      x.actual.controlWord === 0, 'opcode03 halfword truncation comes after state stores');
+    check(x.control().current00 === x.command, 'truncated handler never installs a terminal wait');
+  }
+  {
+    const x = stateFixture(createRomActor(), true);
+    rejects(() => x.parse([...op2, ...wait], 1), 'genuine movement actual-actor join required');
+    check(x.control().state1b === 128 && x.control().auxiliary1c === 255, 'missing actual owner is reached after prior state stores');
+    rejects(() => x.runtime.bindActualActor(x.actor, x.movement), 'incomplete mode1');
+    rejects(() => x.parse(wait, 0), 'incomplete mode1');
+    rejects(() => x.runtime.startStream(x.actor, 0, 4, 0), 'incomplete mode1');
+    rejects(() => x.runtime.update(x.actor, 0), 'incomplete mode1');
+  }
+  for (const opcode of [2, 3]) {
+    const x = fixture(), selection = opcode === 2 ? 2 : 1;
+    Object.defineProperty(x.control(opcode - 2), 'state1b', {writable: false});
+    const base = x.runtime.createStream(new Uint8Array([opcode, 0, 0, 0, 0, 0, 0, 0, ...wait]));
+    x.runtime.parseWaitRecord(x.actor, selection, base);
+    check(x.control(opcode - 2).state1b === undefined, 'skipped mask does not demand actual join or readonly destination');
+    const truncated = x.runtime.createStream(new Uint8Array([opcode]));
+    rejects(() => x.runtime.parseWaitRecord(x.actor, 0, truncated), 'out of bounds');
+  }
+  {
+    const x = stateFixture(createRomActor(), true);
+    x.parse([3, 255, 128, 0, 0, 0, 255, 255, ...wait], 2);
+    check(x.control(1).state1b === 255 && x.control(1).auxiliary1c === 128, 'opcode03 ffff state stores do not require actual control owner');
+  }
+  {
+    const x = stateFixture(); x.actual.controlWord = NaN; Object.defineProperty(x.actual, 'controlWord', {writable: false});
+    x.parse([3, 255, 128, 0, 0, 0, 255, 255, ...wait], 2);
+    check(Number.isNaN(x.actual.controlWord), 'ffff never validates or writes actual controlWord');
+  }
+  {
+    const x = stateFixture(); Object.preventExtensions(x.actual);
+    rejects(() => x.parse([...op2, ...wait], 1), 'byte6e8: absent actual byte storage is non-extensible');
+    check(x.control().state1b === 128 && x.control().auxiliary1c === 255 && !Object.hasOwn(x.actual, 'byte6e8'),
+      'non-extensible actual record fails lazily after part stores, without seeded zero slots');
+  }
+  {
+    const x = stateFixture(); x.control().state1b = 128; x.control().auxiliary1c = 255;
+    x.control(1).state1b = 254; x.control(1).auxiliary1c = 129;
+    x.runtime.startStream(x.actor, 15, 4, 0);
+    check(x.control().state1b === 128 && x.control().auxiliary1c === 255 && x.control(1).state1b === 254 &&
+      x.control(1).auxiliary1c === 129, '4c020 reset has exactly its existing stores and never resets1b/1c');
+  }
+  // Adversarial proxy instrumentation is outside the non-proxy host contract;
+  // it observes genuine stored fields, never supplies replacement source owners
+  // or callbacks. It checks split stores, fresh reads, and caught reentry.
+  for (const mode of ['observe', 'mutate', 'readonly-second', 'invalid-reload', 'reentry'] as const) {
+    const target = createRomActor(); target.controlWord = 0x87654fed;
+    const stores: number[] = [], descriptorReads: number[] = [];
+    let x: ReturnType<typeof stateFixture>, armed = false;
+    const proxy = new Proxy(target, {
+      getOwnPropertyDescriptor(owner, key) {
+        if (armed && key === 'controlWord') descriptorReads.push(owner.controlWord);
+        return Reflect.getOwnPropertyDescriptor(owner, key);
+      },
+      set(owner, key, value) {
+        const result = Reflect.set(owner, key, value, owner);
+        if (armed && key === 'controlWord') {
+          stores.push(value as number);
+          check(x.control(1).state1b === 255 && x.control(1).auxiliary1c === 128, 'states precede both actual control stores');
+          if (stores.length === 1) {
+            if (mode === 'mutate') owner.controlWord = 0x80000005;
+            if (mode === 'readonly-second') Object.defineProperty(owner, 'controlWord', {writable: false});
+            if (mode === 'invalid-reload') owner.controlWord = NaN;
+            if (mode === 'reentry') try {x.runtime.update(x.actor, 0);} catch { /* swallowed by adversary */ }
+          }
+        }
+        return result;
+      },
+    });
+    x = stateFixture(proxy); armed = true;
+    if (mode === 'readonly-second') rejects(() => x.parse([...op3, ...wait], 2), 'controlWord: non-writable');
+    else if (mode === 'invalid-reload') rejects(() => x.parse([...op3, ...wait], 2), 'controlWord: unsigned');
+    else if (mode === 'reentry') rejects(() => x.parse([...op3, ...wait], 2), 'reentry');
+    else x.parse([...op3, ...wait], 2);
+    check(stores[0] === 0x8765400d && stores.length === ((mode === 'observe' || mode === 'mutate') ? 2 : 1),
+      'first cleared controlWord store is observable and survives later refusal');
+    if (mode === 'observe') check(stores[1] === 0x87654bcd && descriptorReads.join(',') ===
+      [0x87654fed, 0x87654fed, 0x8765400d, 0x8765400d].join(','), 'opcode03 two actual reads and two reached writable checks');
+    if (mode === 'mutate') check(stores[1] === 0x80000bc5, 'second control operation uses fresh actual current word');
+    if (mode === 'reentry') {
+      check(target.controlWord === 0x8765400d && hasIncompleteSourceActorDoubleLifecycle(proxy), 'caught store reentry preserves first effect and poisons actor');
+      armed = false; rejects(() => x.runtime.update(x.actor, 0), 'known incomplete');
+    }
+  }
+  {
+    const x = stateFixture(), bytes = new Uint8Array([...op2, ...op3, ...wait]);
+    const base = x.runtime.createStream(bytes); bytes.fill(255);
+    x.runtime.parseWaitRecord(x.actor, 3, base);
+    check(x.control().state1b === 128 && x.actual.byte6e9 === 18 && x.actual.controlWord === 0xbc0,
+      'external input mutations cannot change copied state-command operands');
+  }
+}
 export function runSourceStreamWaitSelfTest(): void {
+  runStateCommandTests();
+  {
+    const x = fixture();
+    check(isSourceStreamWaitRuntime(x.runtime) && Object.isFrozen(x.runtime), 'genuine frozen stream runtime is branded');
+    for (const value of [undefined, null, {}, {...x.runtime}, Object.create(x.runtime)])
+      check(!isSourceStreamWaitRuntime(value), 'copied/inherited stream methods do not confer source runtime ownership');
+  }
   {
     const x = fixture(); x.input[0]!.wait14 = 999;
     check(x.control().wait14 === 3 && Object.isSealed(x.control()) && Object.isSealed(x.gate) &&
@@ -443,7 +675,7 @@ export function runSourceStreamWaitSelfTest(): void {
     check(x.targetCalls() === 0 && x.control().current00 === x.command, 'zero/high-only mask does not load wait or flags');
     rejects(() => x.runtime.parseWaitRecord(x.actor, mask, x.runtime.createStream(new Uint8Array())), 'out of bounds');
   }
-  for (const opcode of [2, 3, 255]) {
+  for (const opcode of [4, 8, 255]) {
     const x = fixture(1, true), base = x.runtime.createStream(new Uint8Array([opcode]));
     rejects(() => x.runtime.parseWaitRecord(x.actor, 15, base), 'unsupported zz_004c050_ opcode');
     check(x.targetCalls() === 0 && x.control().current00 === x.command, 'nonzero opcode refuses before fallback');
@@ -521,7 +753,7 @@ export function runSourceStreamWaitSelfTest(): void {
     check(x.run() === 1 && x.targetCalls() === 1 && x.control().finished1a === 1, 'next update reads installed stop flags from bytes');
   }
   {
-    const x = fixture(8, true), base = x.runtime.createStream(new Uint8Array([2]));
+    const x = fixture(8, true), base = x.runtime.createStream(new Uint8Array([4]));
     x.control().wait14 = .25; x.control().next04 = base;
     rejects(x.run, 'unsupported zz_004c050_ opcode');
     check(x.control().wait14 === 0 && x.control().event1e === 0 && x.targetCalls() === 0, 'unsupported continuation preserves countdown/event prefix');
@@ -601,7 +833,7 @@ export function runSourceStreamWaitSelfTest(): void {
     if (mask === 1) rejects(() => x.runtime.parseWaitRecord(x.actor, mask, valid), 'out of bounds');
     else x.runtime.parseWaitRecord(x.actor, mask, valid);
   }
-  for (const bytes of [[16], [16, 0], [16, 0, 1], [16, 0, 1, 7], [16, 0, 1, 7, 2], [16, 0, 1, 7, 16, 0, 0]]) {
+  for (const bytes of [[16], [16, 0], [16, 0, 1], [16, 0, 1, 7], [16, 0, 1, 7, 4], [16, 0, 1, 7, 16, 0, 0]]) {
     const x = fixture(1, true), base = x.runtime.createStream(new Uint8Array(bytes));
     rejects(() => x.runtime.parseWaitRecord(x.actor, 1, base), bytes.length <= 4 ? 'out of bounds' : 'unsupported');
     check(x.targets.getStreamPart(x.actor, 0).accumulator10 === (bytes.length >= 4 ? 7 : 2) &&
@@ -940,7 +1172,7 @@ export function runSourceStreamWaitSelfTest(): void {
     check(x.start.marker709 === 9, 'zero effective mask leaves marker');
   }
   for (const mask of [0, 1, 2, 4, 8, 15, 0xffffffff]) {
-    const x = startFixture(2); x.gate.activeMask579 = 0x85;
+    const x = startFixture(4); x.gate.activeMask579 = 0x85;
     rejects(() => x.begin(mask), 'unsupported zz_004c050_ opcode');
     check(x.start.marker709 === 9, 'marker uses effective bit value2, not original mask');
     for (let i = 0; i < 4; i++) {
@@ -962,7 +1194,7 @@ export function runSourceStreamWaitSelfTest(): void {
     }
   }
   {
-    const x = startFixture(2, true); x.start.familyBank1d80 = Symbol('foreign');
+    const x = startFixture(4, true); x.start.familyBank1d80 = Symbol('foreign');
     rejects(() => x.begin(2), 'owned byte cursor');
     check(x.start.marker709 === 0 && x.control(1).current00 === x.command, 'marker clears before reached foreign bank rejection');
     x.start.familyBank1d80 = x.base; x.start.sharedBank1d84 = Symbol('unused foreign');
@@ -1010,7 +1242,7 @@ export function runSourceStreamWaitSelfTest(): void {
       'final stream pointer host underflow fails before selected stores');
   }
   {
-    const x = startFixture(2, true); const order: number[] = [];
+    const x = startFixture(4, true); const order: number[] = [];
     x.hooks.targetGet = i => {
       order.push(i);
       if (i === 2) check(x.control(0).current00 === null && x.control(1).current00 === null, 'earlier parts reset before later getter');
@@ -1020,7 +1252,7 @@ export function runSourceStreamWaitSelfTest(): void {
     check(order.join(',') === '0,1,2,3' && x.control(3).current00 === null, 'snapshot mask, ascending all resets before parser');
   }
   for (let fault = 0; fault < 9; fault++) {
-    const x = startFixture(2), target = x.targets.getStreamPart(x.actor, 0), control = x.control();
+    const x = startFixture(4), target = x.targets.getStreamPart(x.actor, 0), control = x.control();
     control.status1d = 8; control.event1e = 9; control.next04 = x.base; control.finished1a = 7;
     const stores: [object, string, number | symbol | null][] = [
       [target, 'previous0c', 0], [target, 'accumulator10', 0], [target, 'target08', 0],
@@ -1039,14 +1271,14 @@ export function runSourceStreamWaitSelfTest(): void {
       'ordered reset faults follow selector stamps and precede other parts');
   }
   for (const field of ['previous0c', 'accumulator10', 'target08'] as const) {
-    const x = startFixture(2), target = x.targets.getStreamPart(x.actor, 0);
+    const x = startFixture(4), target = x.targets.getStreamPart(x.actor, 0);
     Object.defineProperty(target, field, {writable: false});
     rejects(() => x.begin(), `${field}: non-writable`);
     check(x.control().group18 === 1 && x.control().current00 === x.command &&
       target.previous0c === (field === 'previous0c' ? 99 : 0) && target.accumulator10 === (field === 'target08' ? 0 : 2), 'target reset store order prefix');
   }
   for (const field of ['group18', 'action19', 'status1d', 'event1e', 'next04', 'current00', 'wait14', 'finished1a'] as const) {
-    const x = startFixture(2); x.control().status1d = 8; x.control().finished1a = 9; x.control().next04 = x.base;
+    const x = startFixture(4); x.control().status1d = 8; x.control().finished1a = 9; x.control().next04 = x.base;
     Object.defineProperty(x.control(), field, {writable: false});
     rejects(() => x.begin(), `${field}: non-writable`);
     check(x.control(1).current00 === x.command, 'failure never resets later unselected control');
@@ -1078,7 +1310,7 @@ export function runSourceStreamWaitSelfTest(): void {
     check(x.control().wait14 === 7 && x.targetCalls() === 1, 'start captures actual target getter receiver and uses real parser once');
   }
   for (const mutation of ['start', 'bind', 'cursor'] as const) {
-    const x = startFixture(2, true);
+    const x = startFixture(4, true);
     x.hooks.targetGet = i => {
       if (i !== 1) return;
       try {
@@ -1115,7 +1347,7 @@ export function runSourceStreamWaitSelfTest(): void {
       'start feeds existing opcode0x10 chain once, then actual terminal fallbacks');
   }
   for (const active of [0x7f, 0x80, 0x82, 0xff]) {
-    const x = startFixture(2); x.gate.activeMask579 = active;
+    const x = startFixture(4); x.gate.activeMask579 = active;
     rejects(() => x.begin(0x80000002), 'unsupported zz_004c050_ opcode');
     check(x.control(1).current00 === ((active & 2) ? null : x.command) && x.start.marker709 === ((active & 2) ? 0 : 9),
       'sign-extended active masks admit high uint32 bits without changing low-four routing');

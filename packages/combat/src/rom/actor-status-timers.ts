@@ -44,7 +44,10 @@ export interface SourceActorStatusTimersBinding {
 /** A borrow of the actual intended host runtime, never a copied snapshot. */
 export type SourceActorStatusBorgOwner = Pick<BorgRuntime, 'hp' | 'hitDrainFrames' |
   'balanceGauge' | 'balanceGaugeMax' | 'balanceRefillDelay' | 'downResetDelay' |
-  'comboWindow' | 'comboAccum' | 'comboRank' | 'invincTimer' | 'sourceAmmoRefillPauseMask'>;
+  'comboWindow' | 'comboAccum' | 'comboRank' | 'invincTimer' | 'sourceAmmoRefillPauseMask'> &
+  /** Existing Borg cells, required lazily by reached ready/rate/cue-tail paths. */
+  Partial<Pick<BorgRuntime, 'maxHp' | 'colorVariant' | 'slowHitTimer' | 'hasteHitTimer' |
+    'slowAuraLevel' | 'hasteAuraLevel' | 'slowHitLevel' | 'hasteHitLevel' | 'burstArmFrames' | 'sourceArrowMass204'>>;
 export interface SourceActorStatusAmmoSlot {
   readonly cell: WeaponCell;
   /** Explicit otherwise-missing source +776 (+8*slot), not a HUD alias. */
@@ -63,7 +66,18 @@ export interface SourceActorStatusTimersRuntime {
     ammoSlots: readonly [SourceActorStatusAmmoSlot, SourceActorStatusAmmoSlot, SourceActorStatusAmmoSlot]): void;
   getActorBinding(identity: symbol): Partial<SourceActorStatusTimersBinding>;
   getActualActor(identity: symbol): RomActor;
+  /** Existing borrowed owners, exposed for source charge/lifecycle agreement. */
+  getWorldBinding(identity: symbol): object;
+  getMappingActor(identity: symbol): object;
+  getAttributeBinding(identity: symbol): object;
+  getMovementBinding(identity: symbol): object;
   getActualBorg(identity: symbol): SourceActorStatusBorgOwner;
+  /** Already retained owner identities only; no actor scalar reads. */
+  getRetainedStorageOwners(): readonly object[];
+  /** Same actual stream-start owner already retained for source marker709. */
+  getStartBinding(identity: symbol): object;
+  /** Exact retained source slot/cell. No scalar read or inferred HUD cell. */
+  getAmmoSlot(identity: symbol, index: number): SourceActorStatusAmmoSlot;
   /** Explicit late connection to the genuine reset pair on these same owners. */
   bindGaugeResetSources(identity: symbol, gauges: SourceActorGaugeScaleRuntime): void;
   updateActor(identity: symbol): void;
@@ -72,6 +86,10 @@ const FLOATS = ['field690', 'field69c', 'field6a0', 'field6a4', 'field1dcc', 'fi
 const BYTES = ['byte6fc', 'byte7de', 'byte71c', 'byte656', 'byte593', 'byte594', 'byte596',
   'byte707', 'byte708', 'bytea8', 'bytea9', 'byteaa', 'byteab', 'byteac', 'bytead', 'byte747', 'byte7d4', 'byte6fd', 'byte702'] as const;
 const SHORTS = ['short736', 'short738', 'short73a', 'short272', 'short282', 'short284', 'short6b6'] as const;
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceActorStatusTimersRuntime(value: unknown): value is SourceActorStatusTimersRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
+}
 function fail(reason: string): never {
   throw Error(`[actor-status-timers] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
@@ -183,7 +201,7 @@ export function createSourceActorStatusTimersRuntime(sources: SourceActorStatusT
       }
     }
   };
-  return Object.freeze({
+  const runtime: SourceActorStatusTimersRuntime = {
     bindActor(id: symbol, actualBorg: SourceActorStatusBorgOwner,
       initial: Readonly<Partial<SourceActorStatusTimersBinding>>,
       ammoSlots: readonly [SourceActorStatusAmmoSlot, SourceActorStatusAmmoSlot, SourceActorStatusAmmoSlot]): void {guard(() => {
@@ -217,7 +235,28 @@ export function createSourceActorStatusTimersRuntime(sources: SourceActorStatusT
     });},
     getActorBinding(id: symbol) {return entry(id).binding;},
     getActualActor(id: symbol) {return entry(id).actual;},
+    getWorldBinding(id: symbol) {return entry(id).world;},
+    getMappingActor(id: symbol) {return entry(id).mapping;},
+    getAttributeBinding(id: symbol) {return entry(id).attribute;},
+    getMovementBinding(id: symbol) {return entry(id).movement;},
     getActualBorg(id: symbol) {return entry(id).borg;},
+    getRetainedStorageOwners() {
+      const records: object[]=[sources,...parameterOwners.values()];
+      for(const e of actors.values()) {
+        records.push(e.actual,e.world,e.mapping,e.movement,e.attribute,e.stream,e.borg,e.binding,
+          e.slots,...e.slotRecords,...e.cells);
+        if(e.children!==undefined) records.push(e.children);
+      }
+      return Object.freeze([...new Set(records)]);
+    },
+    getStartBinding(id: symbol) {return entry(id).stream;},
+    getAmmoSlot(id: symbol, index: number) {return guard(() => {
+      const actor = entry(id), at = integer(index, 0, 2, 'source ammo slot index');
+      const slot = actor.slotRecords[at]!;
+      if (read(actor.slots, String(at)) !== slot || read(slot, 'cell') !== actor.cells[at])
+        fail('source ammo slot/cell owner changed');
+      return slot as SourceActorStatusAmmoSlot;
+    });},
     bindGaugeResetSources(id: symbol, gauges: SourceActorGaugeScaleRuntime): void {guard(() => {
       const actor = entry(id);
       if (gaugeSources.has(id)) fail('gauge reset sources already bound');
@@ -344,5 +383,7 @@ export function createSourceActorStatusTimersRuntime(sources: SourceActorStatusT
         if (timer >= 0) write(s, 'field8c8', addSourceFloat32(timer, f(s, 'field1dcc')));
       } else write(s, 'field8c8', 0);
     });},
-  });
+  };
+  genuineRuntimes.add(runtime);
+  return Object.freeze(runtime);
 }

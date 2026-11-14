@@ -42,12 +42,24 @@ export interface SourceActorAttributeRefreshBinding {
 }
 /** Scalar extension of the SAME descriptor identity owned by joint mapping. */
 export interface SourceActorAttributeDescriptorBinding {
+  /** Raw signed-joint selector read at descriptor+10 by actual6bda8. */
+  byte10: number;
   field44: number; field48: number; field4c: number; field50: number; field54: number;
 }
 export interface SourceActorAttributeParameterDescriptor {
   /** Signed-short extension of this SAME 4ac owner, consumed by 8005568c. */
   field04: number; field08: number;
+  /** Signed yaw rate on this SAME4ac owner, consumed by800669d0 maskC1. */
+  fieldAe: number;
   field74: number; field78: number; field7c: number;
+  /** Explicit source base mass on the SAME4ac parameter owner. */
+  field98?: number;
+  /** Unsigned table selector on this SAME 4ac owner, consumed by8006826c. */
+  byteA3: number;
+  /** Explicit unsigned limit on this SAME4ac owner, consumed by80069210. */
+  byte9f?: number;
+  /** Charge thresholds on this SAME 4ac owner, consumed by800686f0. */
+  field184: number; field188: number; field18c: number;
 }
 export interface SourceActorAttributeRefreshSources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor'>;
@@ -55,12 +67,18 @@ export interface SourceActorAttributeRefreshSources {
   movement: Pick<SourceActorMovementFollowupRuntime, 'getActualActor' | 'getActorBinding' | 'updateActor'>;
 }
 export interface SourceActorAttributeRefreshRuntime {
+  getActualActor(identity: symbol): RomActor;
+  getMappingActor(identity: symbol): object;
+  getMovementBinding(identity: symbol): object;
+  getMovementRuntime(): SourceActorAttributeRefreshSources['movement'];
   bindActor(identity: symbol, initial: Readonly<Partial<SourceActorAttributeRefreshBinding>>): void;
   getActorBinding(identity: symbol): Partial<SourceActorAttributeRefreshBinding>;
   bindDescriptor(identity: symbol, initial: Readonly<Partial<SourceActorAttributeDescriptorBinding>>): void;
   getDescriptorBinding(identity: symbol): Partial<SourceActorAttributeDescriptorBinding>;
   createParameterDescriptor(initial: Readonly<Partial<SourceActorAttributeParameterDescriptor>>): symbol;
   getParameterDescriptor(identity: symbol): Partial<SourceActorAttributeParameterDescriptor>;
+  /** Metadata-only retained registry owners; no actor4ac or descriptor scalar reads. */
+  getKnownParameterDescriptors(): readonly object[];
   refreshActor(identity: symbol): void;
 }
 const ROW_SOURCES = ['field850', 'field854', 'field858', 'field85c', 'field860', 'field864',
@@ -69,6 +87,10 @@ const ROW_DESTINATIONS = ['field814', 'field818', 'field81c', 'field820', 'field
   'field82c', 'field830', 'field834', 'field838', 'field83c', 'field840', 'field844', 'field848', 'field84c'] as const;
 const ACTOR_FLOATS = ['field674', 'field770', ...ROW_SOURCES.filter((key): key is Exclude<typeof key, number> => typeof key === 'string'),
   ...ROW_DESTINATIONS] as const;
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceActorAttributeRefreshRuntime(value: unknown): value is SourceActorAttributeRefreshRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
+}
 function fail(reason: string): never {
   throw Error(`[actor-attribute-refresh] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
@@ -113,6 +135,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
     if (value === null || typeof value !== 'object' || value instanceof Promise) fail(`${where}: synchronous actual owned record required`);
     return value;
   };
+  const movementRuntime = own(sources, 'movement') as SourceActorAttributeRefreshSources['movement'];
   const worldActor = capture('world', 'getActualActor'), mappingActor = capture('mapping', 'getActor');
   const mappingDescriptor = capture('mapping', 'getDescriptor'), movementActor = capture('movement', 'getActualActor');
   const movementBinding = capture('movement', 'getActorBinding'), updateMovement = capture('movement', 'updateActor');
@@ -147,7 +170,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
     if (movementActor(id) !== actor.actual || movementBinding(id) !== actor.movement) fail('movement owner changed its actual record');
     return actor.movement;
   };
-  return Object.freeze({
+  const runtime: SourceActorAttributeRefreshRuntime = {
     bindActor(id: symbol, initial: Readonly<Partial<SourceActorAttributeRefreshBinding>>): void {guard(() => {
       if (typeof id !== 'symbol') fail('actor identity must be a symbol');
       if (actors.has(id)) fail('actor already bound');
@@ -165,19 +188,27 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
       check(); actors.set(id, {actual, mapping, movement: state, rows, binding: Object.seal(binding)});
       for (const value of records) assigned.add(value);
     });},
+    getActualActor(id: symbol) {return actorEntry(id).actual;},
+    getMappingActor(id: symbol) {return actorEntry(id).mapping;},
+    getMovementBinding(id: symbol) {return actorEntry(id).movement;},
+    getMovementRuntime() {return movementRuntime;},
     getActorBinding(id: symbol) {return actorEntry(id).binding;},
     bindDescriptor(id: symbol, initial: Readonly<Partial<SourceActorAttributeDescriptorBinding>>): void {guard(() => {
       if (typeof id !== 'symbol') fail('descriptor identity must be a symbol');
       if (descriptors.has(id)) fail('descriptor already bound');
       const actual = record(mappingDescriptor(id), 'mapping descriptor');
       if (descriptorRecords.has(actual) || assigned.has(actual)) fail('mapping descriptor aliases another actual owner');
-      const binding = Object.seal(copy<SourceActorAttributeDescriptorBinding>(initial, ['field44', 'field48', 'field4c', 'field50', 'field54']));
+      const binding = copy<SourceActorAttributeDescriptorBinding>(initial, ['field44', 'field48', 'field4c', 'field50', 'field54']);
+      const joint = Object.getOwnPropertyDescriptor(initial, 'byte10'); check();
+      if (joint !== undefined)
+        binding.byte10 = integer(read(initial, 'byte10'), 255, 'byte10');
+      Object.seal(binding);
       descriptors.set(id, {actual, binding}); descriptorRecords.add(actual);
     });},
     getDescriptorBinding(id: symbol) {return descriptorEntry(id).binding;},
     createParameterDescriptor(initial: Readonly<Partial<SourceActorAttributeParameterDescriptor>>): symbol {return guard(() => {
-      const binding = copy<SourceActorAttributeParameterDescriptor>(initial, ['field74', 'field78', 'field7c']);
-      for (const key of ['field04', 'field08'] as const) {
+      const binding = copy<SourceActorAttributeParameterDescriptor>(initial, ['field74', 'field78', 'field7c', 'field98', 'field184', 'field188', 'field18c']);
+      for (const key of ['field04', 'field08', 'fieldAe'] as const) {
         if (Object.getOwnPropertyDescriptor(initial, key) !== undefined) {
           const value = read(initial, key);
           if (typeof value !== 'number' || !Number.isInteger(value) || value < -32768 || value > 32767)
@@ -185,10 +216,15 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
           binding[key] = value === 0 ? 0 : value;
         }
       }
+      for (const key of ['byteA3', 'byte9f'] as const) {
+        const p = Object.getOwnPropertyDescriptor(initial, key); check();
+        if (p !== undefined) binding[key] = integer(read(initial, key), 255, key);
+      }
       Object.seal(binding);
       const id = Symbol('owned actor parameter4ac'); parameters.set(id, binding); return id;
     });},
     getParameterDescriptor(id: symbol) {return parameterEntry(id);},
+    getKnownParameterDescriptors() {return Object.freeze([...parameters.values()]);},
     refreshActor(id: symbol): void {guard(() => {
       const actor = actorEntry(id), actual = actor.actual, binding = actor.binding;
       if (worldActor(id) !== actual) fail('world owner changed its actual record');
@@ -224,5 +260,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
       movement(id, actor);
       if (updateMovement(id) !== undefined) fail('movement effect must complete synchronously and return undefined');
     });},
-  });
+  };
+  genuineRuntimes.add(runtime);
+  return Object.freeze(runtime);
 }

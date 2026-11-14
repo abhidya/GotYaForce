@@ -37,6 +37,8 @@ export interface SourceArchiveJointSetupSources {
   tail: Pick<SourceAttachedJointSetupRuntime, 'continueAttachedSetupTail'>;
 }
 export interface SourceArchiveJointSetupRuntime {
+  getActualMapping(): SourceArchiveJointSetupSources['actors'];
+  getActualTail(): SourceArchiveJointSetupSources['tail'];
   createDescriptor(initial: SourceArchiveJointSetupDescriptor): symbol;
   getDescriptor(id: symbol): SourceArchiveJointSetupDescriptor;
   bindPart(id: symbol, initial: SourceArchiveJointSetupPart): void;
@@ -49,6 +51,10 @@ export interface SourceArchiveJointSetupRuntime {
   setupActorJoint(actor: symbol, part: symbol, joint: symbol | null, index: number): void;
   bindAddress(base: symbol, address: symbol, descriptor: symbol): void;
   continueResolvedArchiveSetup(actor: symbol, part: symbol, joint: symbol | null, index: number, poses: symbol): void;
+}
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceArchiveJointSetupRuntime(value: unknown): value is SourceArchiveJointSetupRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
 }
 function fail(reason: string): never {throw Error(`[archive-joint-setup] ${reason}; offline execution aborted, prior effects are not rolled back`);}
 function own(record: unknown, key: string): unknown {
@@ -126,7 +132,9 @@ export function createSourceArchiveJointSetupRuntime(sources: SourceArchiveJoint
         invoke(attachment, add, [joint, anim], true);
         invoke(tail, finish, [actor, part, joint], true);
   };
-  return Object.freeze({
+  const runtime: SourceArchiveJointSetupRuntime = Object.freeze({
+    getActualMapping() {return actors as SourceArchiveJointSetupSources['actors'];},
+    getActualTail() {return tail as SourceArchiveJointSetupSources['tail'];},
     createDescriptor(initial: SourceArchiveJointSetupDescriptor): symbol {
       enter(); try {const archive0c = id(own(initial, 'archive0c'), 'archive0c');
         invoke(archives, archive, [archive0c]); const key = Symbol('archive setup descriptor');
@@ -209,4 +217,5 @@ export function createSourceArchiveJointSetupRuntime(sources: SourceArchiveJoint
       } finally {busy = false;}
     },
   });
+  genuineRuntimes.add(runtime); return runtime;
 }

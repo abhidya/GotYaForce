@@ -58,7 +58,153 @@ function positivePrimaryExpected(bend: number): {current: number[]; next: number
       next: [cc, -s, 0, s, ss, c, 0, c, 0, 0, q, 0]};
   }
 }
+function runActorJointStandaloneMatrixSelfTests(): void {
+  const one = 0x3f800000, minusZero = 0x80000000;
+  // Independently written raw words, not production rotation helper output.
+  // sin(+0)=+0, sin(-0)=-0, cos(±0)=+1; ps_neg changes only sine's sign.
+  const rotations = [
+    {axis: 'x', angle: 0, words: [one, 0, 0, 0, 0, one, minusZero, 0, 0, 0, one, 0]},
+    {axis: 'x', angle: -0, words: [one, 0, 0, 0, 0, one, 0, 0, 0, minusZero, one, 0]},
+    {axis: 'y', angle: 0, words: [one, 0, 0, 0, 0, one, 0, 0, minusZero, 0, one, 0]},
+    {axis: 'y', angle: -0, words: [one, 0, minusZero, 0, 0, one, 0, 0, 0, 0, one, 0]},
+    {axis: 'z', angle: 0, words: [one, minusZero, 0, 0, 0, one, 0, 0, 0, 0, one, 0]},
+    {axis: 'z', angle: -0, words: [one, 0, 0, 0, minusZero, one, 0, 0, 0, 0, one, 0]},
+  ] as const;
+  const storeOrder = {
+    x: [0, 1, 2, 3, 4, 7, 8, 11, 9, 10, 5, 6],
+    y: [6, 7, 0, 1, 10, 11, 4, 5, 2, 3, 8, 9],
+    z: [2, 3, 6, 7, 8, 9, 4, 5, 0, 1, 10, 11],
+  } as const;
+  for (const {axis, angle, words} of rotations) {
+    const f = fixture();
+    // RotRad never reads the old destination values, including poisoned ones.
+    f.output.fill(NaN);
+    f.runtime.rotateRadiansZero(axis, f.destination, angle);
+    check(f.output.every((v, i) => bits(v) === words[i]), `${axis} radians raw zero signs ${bits(angle).toString(16)}`);
+    f.runtime.rotateRadiansZero(axis, f.destination, -angle);
+    f.runtime.rotateRadiansZero(axis, f.destination, angle);
+    check(f.output.every((v, i) => bits(v) === words[i]), `${axis} explicit repeated radians call reloads sign`);
+    // Each single lane fault checks the exact instruction store ordering,
+    // including a successful first lane before a failed second paired lane.
+    for (let stop = 0; stop < 12; stop++) {
+      const failed = fixture(), order = storeOrder[axis];
+      Object.defineProperty(failed.output, String(order[stop]), {writable: false});
+      rejects(() => failed.runtime.rotateRadiansZero(axis, failed.destination, angle), 'non-writable');
+      const prefix = new Set<number>(order.slice(0, stop));
+      check(failed.output.every((v, i) => bits(v) === (prefix.has(i) ? words[i] : bits(19))),
+        `${axis} signed-zero radians retains source store prefix through lane${stop}`);
+      failed.runtime.rotateRadiansZero(axis, failed.parent, angle);
+      check(failed.runtime.getMatrix(failed.parent).every((v, i) => bits(v) === words[i]),
+        `${axis} radians recovers after destination fault`);
+    }
+  }
+  {
+    const f = fixture();
+    for (const angle of [1, -1, fromBits(1), fromBits(0x80000001), fromBits(0x7f7fffff)]) {
+      rejects(() => f.runtime.rotateRadiansZero('x', f.destination, angle), '8020b260 sinf: nonzero radians');
+      check(f.output.every(v => v === 19), 'nonzero radians stop at sinf before any RotTrig store');
+    }
+    for (const angle of [NaN, Infinity, -Infinity, Number.MIN_VALUE, 1 + 2 ** -30, '0', null, undefined, new Number(0)]) {
+      rejects(() => f.runtime.rotateRadiansZero('x', f.destination, angle as number), 'expected finite source float32');
+      check(f.output.every(v => v === 19), 'invalid scalar cannot be rounded/coerced into zero-radian domain');
+    }
+    rejects(() => f.runtime.rotateRadiansZero('q' as 'x', f.destination, 0), 'rotation axis');
+    const foreign = fixture();
+    rejects(() => f.runtime.rotateRadiansZero('y', foreign.destination, -0), 'unknown/non-owned matrix');
+    // The real sinf call precedes RotTrig and destination access. Do not move
+    // the nonzero boundary after any write or invent a destination snapshot.
+    rejects(() => f.runtime.rotateRadiansZero('y', foreign.destination, 1), '8020b260 sinf: nonzero radians');
+    Object.defineProperty(f.output, '0', {writable: false});
+    rejects(() => f.runtime.rotateRadiansZero('x', f.destination, 1), '8020b260 sinf: nonzero radians');
+    check(f.output.every(v => v === 19) && foreign.output.every(v => v === 19), 'all failed radians calls preserve destinations');
+  }
+  {
+    const f = fixture(), x = f.parent, y = f.runtime.createMatrix(Array(12).fill(29));
+    f.runtime.rotateRadiansZero('x', x, -0); f.runtime.rotateRadiansZero('y', y, 0);
+    const beforeY = f.runtime.getMatrix(y).map(bits);
+    check(bits(f.runtime.getMatrix(x)[9]!) === minusZero && beforeY[8] === minusZero,
+      'explicit scratch X/Y retain separate source signed-zero results');
+    f.runtime.concat(y, x, x);
+    check(f.runtime.getMatrix(x).every((v, i) => bits(v) === bits(identity[i]!)),
+      'projectile Y/X/X alias executes actual arithmetic and removes both negative-zero lanes');
+    check(f.runtime.getMatrix(y).every((v, i) => bits(v) === beforeY[i]), 'Y/X/X does not alter left scratch matrix');
+  }
+  const leftValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  const rightValues = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
+  const product = [110, 116, 122, 132, 314, 332, 350, 376, 518, 548, 578, 620];
+  for (const alias of ['none', 'left', 'right', 'both'] as const) {
+    const f = fixture(), left = f.runtime.createMatrix(leftValues);
+    const right = alias === 'both' ? left : f.runtime.createMatrix(rightValues);
+    const destination = alias === 'none' ? f.destination : alias === 'right' ? right : left;
+    f.runtime.concat(left, right, destination);
+    const expected = alias === 'both' ? [38, 44, 50, 60, 98, 116, 134, 160, 158, 188, 218, 260] : product;
+    check(f.runtime.getMatrix(destination).every((v, i) => bits(v) === bits(expected[i]!)),
+      `standalone Concat supports complete ${alias} alias without premature stores`);
+    if (destination !== left) check(f.runtime.getMatrix(left).every((v, i) => v === leftValues[i]), 'Concat preserves non-output left');
+    if (destination !== right) check(f.runtime.getMatrix(right).every((v, i) => v === rightValues[i]), 'Concat preserves non-output right');
+  }
+  {
+    const f = fixture(), left = f.runtime.createMatrix([-1, 1 - 2 ** -23, 0, 0, ...identity.slice(4)]);
+    const right = f.runtime.createMatrix([1, 0, 0, 0, 1 + 2 ** -23, 1, 0, 0, 0, 0, 1, 0]);
+    f.runtime.concat(left, right, f.destination);
+    check(bits(f.output[0]!) === 0xa8800000, 'standalone Concat preserves fused -2^-46 cancellation');
+    const signed = f.runtime.createMatrix([-0, -0, -0, 0, -0, -0, -0, 0, -0, -0, -0, 0]);
+    f.runtime.concat(signed, f.parent, f.destination);
+    check(f.output.every((v, i) => bits(v) === (i % 4 < 2 ? minusZero : 0)),
+      'standalone Concat executes column2 positive-zero translation FMA, never copies identity input');
+  }
+  const concatOrder = [0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 10, 11];
+  for (let stop = 0; stop < 12; stop++) {
+    const f = fixture(), left = f.runtime.createMatrix(leftValues), right = f.runtime.createMatrix(rightValues);
+    Object.defineProperty(f.output, String(concatOrder[stop]), {writable: false});
+    rejects(() => f.runtime.concat(left, right, f.destination), 'non-writable');
+    const prefix = new Set(concatOrder.slice(0, stop));
+    check(f.output.every((v, i) => bits(v) === bits(prefix.has(i) ? product[i]! : 19)),
+      `standalone Concat retains paired-store prefix through lane${stop}`);
+    f.runtime.concat(left, right, left);
+    check(f.runtime.getMatrix(left).every((v, i) => v === product[i]), 'standalone Concat recovers after failed store');
+  }
+  for (const side of ['left', 'right'] as const) {
+    const f = fixture(), left = f.runtime.createMatrix(leftValues), right = f.runtime.createMatrix(rightValues);
+    f.runtime.getMatrix(side === 'left' ? left : right)[11] = NaN;
+    rejects(() => f.runtime.concat(left, right, f.destination), 'expected finite source float32');
+    check(f.output.every(v => v === 19), `standalone Concat reads complete ${side} before first destination store`);
+  }
+  {
+    const f = fixture(), largest = fromBits(0x7f7fffff);
+    const left = f.runtime.createMatrix([1, 0, 0, 0, largest, 0, 0, 0, 0, 0, 1, 0]);
+    const right = f.runtime.createMatrix([2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0]);
+    rejects(() => f.runtime.concat(left, right, f.destination), 'concat product');
+    check(f.output[0] === 2 && bits(f.output[1]!) === 0 && f.output.slice(2).every(v => v === 19),
+      'standalone Concat retains first pair before second-pair finite-intermediate overflow refusal');
+  }
+  for (const slot of ['left', 'right', 'destination'] as const) {
+    const f = fixture(), other = fixture();
+    rejects(() => f.runtime.concat(slot === 'left' ? other.parent : f.parent,
+      slot === 'right' ? other.parent : f.parent, slot === 'destination' ? other.destination : f.destination),
+    'unknown/non-owned matrix');
+    check(f.output.every(v => v === 19) && other.output.every(v => v === 19), `standalone Concat requires same owner for ${slot}`);
+  }
+  for (const operation of ['rotation', 'concat'] as const) {
+    const f = fixture();
+    f.hooks.get = () => {
+      try {
+        if (operation === 'rotation') f.runtime.rotateRadiansZero('x', f.destination, -0);
+        else f.runtime.concat(f.parent, f.parent, f.destination);
+      } catch { /* a swallowed nested call must still poison composeJoint */ }
+    };
+    rejects(f.compose, 'reentry was caught');
+    check(f.output.every(v => v === 19), `${operation} nested call cannot mutate before outer poison refusal`);
+    delete f.hooks.get;
+    f.runtime.rotateRadiansZero('y', f.destination, -0);
+    check(bits(f.output[2]!) === minusZero, `${operation} shares runtime reentry recovery`);
+    f.runtime.concat(f.parent, f.parent, f.destination);
+    check(f.output.every((v, i) => bits(v) === bits(identity[i]!)), `${operation} leaves Concat usable after reentry refusal`);
+  }
+}
 export function runActorJointMatrixSelfTests(): void {
+  runActorJointMatrixBytesSelfTests();
+  runActorJointStandaloneMatrixSelfTests();
   {
     // Binary64 witnesses are necessary: final frsp happens to hide the first
     // sine's stage2 split-multiply error. Exercise the production internal
@@ -825,5 +971,263 @@ export function runActorJointMatrixSelfTests(): void {
     rejects(f.compose, 'reentry was caught');
     check(f.currentMatrix[0] === 1 && f.nextMatrix[7] === 2, 'primary entry participates in same-runtime reentry poison');
     delete f.hooks.get; f.run(); check(bits(f.currentMatrix[0]!) === 0x3f7ffffe, 'primary runtime recovers after refusal');
+  }
+}
+
+/** The byte sink has the same authenticated 8020b7a8 arithmetic/load schedule
+ * as the vector sink. Expected words below are independent dyadic witnesses,
+ * not values obtained by invoking transformPoint or a production FP helper.
+ * Evidence: terrain-orientation-evidence-2026-11-13.md, "Secondary effect and
+ * point transformation". These are bounded host tests, not console parity. */
+export function runActorJointMatrixBytesSelfTests(): void {
+  const base = 0x20, sentinel = 0xa5;
+  const normal = [2, 0, 0, 5, 0, 3, 0, 6, 5, 0, 4, 7];
+  const expected = [0x41100000, 0x41700000, 0x42040000]; // 9,15,33.
+  const point = {x: 2, y: 3, z: 4};
+  type Bytes = Partial<Record<number, number>>;
+  function bytes(offset = base, old = sentinel): Bytes {
+    const result: Bytes = Object.create(null) as Bytes;
+    for (let i = -1; i <= 12; i++) result[offset + i] = old;
+    return result;
+  }
+  function expectWords(output: Bytes, words: readonly number[], why: string, offset = base): void {
+    for (let i = 0; i < words.length * 4; i++) {
+      check(output[offset + i] === ((words[i >>> 2]! >>> ((3 - i % 4) * 8)) & 255), `${why}, byte${i}`);
+    }
+  }
+  function expectPrefix(output: Bytes, before: ReturnType<typeof Object.getOwnPropertyDescriptors>,
+    completed: number, why: string, words: readonly number[] = expected): void {
+    expectWords(output, words.slice(0, completed), why);
+    for (const key of Object.keys(before)) {
+      const offset = Number(key);
+      if (offset >= base && offset < base + completed * 4) continue;
+      const old = before[key]!, current = Object.getOwnPropertyDescriptor(output, key);
+      check(current !== undefined && current.value === old.value && current.get === old.get &&
+        current.set === old.set && current.writable === old.writable &&
+        current.configurable === old.configurable && current.enumerable === old.enumerable,
+      `${why}, retained descriptor${key}`);
+    }
+  }
+  {
+    const f = fixture(), matrix = f.runtime.createMatrix(normal), output = bytes();
+    const held = output, before = Object.getOwnPropertyDescriptors(output);
+    f.runtime.transformPointBytes(matrix, point, output, base);
+    check(output === held, 'byte transform keeps the canonical backing identity');
+    expectPrefix(output, before, 3, 'normal transform exact BE bytes and untouched guards');
+    check(f.runtime.getMatrix(matrix).every((v, i) => Object.is(v, normal[i])), 'byte transform leaves source matrix intact');
+    // Existing destination bytes are stores, not source values to be validated.
+    for (let i = 0; i < 12; i++) output[base + i] = [NaN, Infinity, -1, 0.1][i % 4]!;
+    f.runtime.transformPointBytes(matrix, zero, output, base);
+    expectWords(output, [0x40a00000, 0x40c00000, 0x40e00000], 'old destination values are never loaded');
+  }
+  {
+    const f = fixture(), output = bytes(), nearOne = 1 + 2 ** -23;
+    const cases = [
+      {row: [-1, 0, 1 - 2 ** -23, 0], input: {x: 1, y: 0, z: nearOne}, word: 0xa8800000,
+        why: 'fused cancellation retains exact -2^-46'},
+      {row: [nearOne, 0, -(1 + 2 ** -22), 0], input: {x: nearOne, y: 0, z: 1}, word: 0,
+        why: 'first product rounds before the later fused cancellation'},
+      {row: [2 ** 24, 1, -(2 ** 24), 0], input: unit, word: 0x3f800000,
+        why: 'Z+X and translation+Y paired lanes are not reassociated'},
+      {row: [2 ** 24, -(2 ** 24), 1, 1], input: unit, word: 0x3f800000,
+        why: 'each fused lane rounds before the final sum'},
+      {row: [1, 0, 0, 2 ** -24], input: unit, word: 0x3f800000,
+        why: 'final halfway sum rounds down to even'},
+      {row: [nearOne, 0, 0, 2 ** -24], input: unit, word: 0x3f800002,
+        why: 'final halfway sum rounds up to even'},
+      {row: [-0, -0, -0, -0], input: zero, word: 0x80000000,
+        why: 'two negative-zero lanes retain a negative-zero result'},
+      {row: [-0, 0, -0, 0], input: zero, word: 0,
+        why: 'opposite zero signs produce positive zero'},
+    ];
+    for (const {row, input, word, why} of cases) {
+      const matrix = f.runtime.createMatrix([...row, ...row, ...row]);
+      f.runtime.transformPointBytes(matrix, input, output, base);
+      expectWords(output, [word, word, word], why);
+    }
+    f.runtime.transformPointBytes(f.parent, {x: 2 ** -149, y: -(2 ** -149), z: fromBits(0x7f7fffff)}, output, base);
+    expectWords(output, [1, 0x80000001, 0x7f7fffff], 'identity preserves admitted finite extremes and gradual underflow');
+    f.runtime.transformPointBytes(f.parent, {x: -0, y: -0, z: -0}, output, base);
+    expectWords(output, [0, 0, 0], 'identity still executes source zero-sign arithmetic');
+  }
+  {
+    const f = fixture(), matrix = f.runtime.createMatrix(normal);
+    const aliased = Object.assign(bytes(), point);
+    f.runtime.transformPointBytes(matrix, aliased, aliased, base);
+    expectWords(aliased, expected, 'input and destination may be the same own-data record');
+    check(aliased.x === 2 && aliased.y === 3 && aliased.z === 4, 'numeric byte stores leave aliased XYZ fields intact');
+    aliased.x = 3;
+    f.runtime.transformPointBytes(matrix, aliased, aliased, base);
+    expectWords(aliased, [0x41300000, 0x41700000, 0x42180000], 'next explicit call reloads live aliased input');
+    // A matrix array is also ordinary own-data byte storage. Rows that the
+    // first word overwrites were already loaded; later rows are loaded lazily.
+    const source = f.runtime.getMatrix(matrix);
+    f.runtime.transformPointBytes(matrix, point, source, 0);
+    expectWords(source, expected, 'matrix and byte destination alias follows loaded-source schedule', 0);
+    check(f.runtime.getMatrix(matrix) === source, 'matrix byte alias retains its owned array identity');
+  }
+  {
+    // Every byte participates in whole-word admission. An invalid fourth byte
+    // cannot leave three new bytes, and an invalid later word cannot undo X/Y.
+    for (const fault of ['missing', 'inherited', 'readonly', 'accessor'] as const) {
+      for (let i = 0; i < 12; i++) {
+        const f = fixture(), matrix = f.runtime.createMatrix(normal), output = bytes(), key = base + i;
+        let accessorCalls = 0;
+        if (fault === 'missing' || fault === 'inherited') delete output[key];
+        if (fault === 'inherited') Object.setPrototypeOf(output, {[key]: sentinel});
+        if (fault === 'readonly') Object.defineProperty(output, key, {writable: false});
+        if (fault === 'accessor') Object.defineProperty(output, key, {
+          get() {accessorCalls++; return sentinel;}, set(_value: number) {accessorCalls++;}, configurable: true,
+        });
+        const before = Object.getOwnPropertyDescriptors(output);
+        rejects(() => f.runtime.transformPointBytes(matrix, point, output, base),
+          fault === 'readonly' ? 'non-writable' : 'own data');
+        expectPrefix(output, before, i >>> 2, `${fault} byte${i} rejects its entire word`);
+        if (fault === 'missing' || fault === 'inherited') check(!Object.hasOwn(output, key), 'failed admission never invents missing byte');
+        check(accessorCalls === 0, 'byte admission never invokes destination accessors');
+      }
+    }
+  }
+  {
+    for (let i = 0; i < 12; i++) {
+      const f = fixture(), matrix = f.runtime.createMatrix(normal), output = bytes();
+      const before = Object.getOwnPropertyDescriptors(output);
+      f.runtime.getMatrix(matrix)[i] = NaN;
+      rejects(() => f.runtime.transformPointBytes(matrix, point, output, base), `matrix[${i}]`);
+      expectPrefix(output, before, i < 8 ? 0 : 1, `matrix${i} load fault preserves only source-scheduled words`);
+    }
+    for (const i of [4, 5, 6, 7, 8, 9, 10, 11]) {
+      const f = fixture(), matrix = f.runtime.createMatrix(normal), output = bytes();
+      // Second-row loads precede X admission; third-row loads follow it but
+      // precede Y admission, including the final pair at b7e0.
+      const blockedWord = i < 8 ? 0 : 1;
+      Object.defineProperty(output, base + blockedWord * 4, {writable: false});
+      f.runtime.getMatrix(matrix)[i] = Infinity;
+      const before = Object.getOwnPropertyDescriptors(output);
+      rejects(() => f.runtime.transformPointBytes(matrix, point, output, base), `matrix[${i}]`);
+      expectPrefix(output, before, blockedWord, `matrix${i} is reached before its competing destination fault`);
+    }
+    const f = fixture(), output = bytes();
+    Object.defineProperty(output, base, {writable: false});
+    f.runtime.getMatrix(f.parent)[8] = NaN;
+    rejects(() => f.runtime.transformPointBytes(f.parent, unit, output, base), 'non-writable');
+    check(output[base] === sentinel && output[base + 4] === sentinel, 'X admission precedes any third-row load');
+  }
+  {
+    const largest = fromBits(0x7f7fffff);
+    const cases = [
+      {row: 0, lane: 'product', completed: 0}, {row: 1, lane: 'product', completed: 0},
+      {row: 2, lane: 'product', completed: 1}, {row: 0, lane: 'fma', completed: 0},
+      {row: 1, lane: 'fma', completed: 1}, {row: 2, lane: 'fma', completed: 2},
+      {row: 0, lane: 'sum', completed: 0}, {row: 1, lane: 'sum', completed: 1},
+      {row: 2, lane: 'sum', completed: 2},
+    ];
+    for (const {row, lane, completed} of cases) {
+      const f = fixture(), matrix = f.runtime.createMatrix(normal), source = f.runtime.getMatrix(matrix), output = bytes();
+      source[row * 4] = lane === 'product' ? largest : 0;
+      source[row * 4 + 1] = lane === 'sum' ? largest / 2 : 0;
+      source[row * 4 + 2] = lane === 'fma' ? largest : 0;
+      source[row * 4 + 3] = lane === 'sum' ? largest / 2 : 0;
+      // Y=3 makes the sum witness's second product overflow instead. Use
+      // unit Y for that witness, preserving the known earlier-row values.
+      const input = lane === 'sum' ? {x: 2, y: 1, z: 4} : point;
+      if (lane === 'sum') source[row * 4] = largest / 2;
+      const before = Object.getOwnPropertyDescriptors(output);
+      rejects(() => f.runtime.transformPointBytes(matrix, input, output, base),
+        lane === 'product' ? 'single product' : lane === 'fma' ? 'overflow' : 'single sum');
+      expectPrefix(output, before, completed, `row${row} ${lane} fault keeps exact store prefix`,
+        lane === 'sum' ? [0x41100000, 0x41100000, 0x42040000] : expected);
+    }
+  }
+  {
+    for (const key of ['x', 'y', 'z'] as const) {
+      const f = fixture(), input = {...point}, output = bytes(), before = Object.getOwnPropertyDescriptors(output);
+      let reads = 0;
+      Object.defineProperty(input, key, {get() {reads++; throw Error('must not execute');}});
+      rejects(() => f.runtime.transformPointBytes(f.parent, input, output, base), 'own data');
+      expectPrefix(output, before, 0, `input${key} accessor refuses before byte stores`);
+      check(reads === 0, 'point accessors are rejected without execution');
+    }
+    const f = fixture(), input = {...point}, output = bytes();
+    input.y = NaN; f.runtime.getMatrix(f.parent)[0] = Infinity;
+    rejects(() => f.runtime.transformPointBytes(f.parent, input, output, base), 'point.y');
+    input.y = 3; input.z = NaN;
+    rejects(() => f.runtime.transformPointBytes(f.parent, input, output, base), 'matrix[0]');
+    f.runtime.getMatrix(f.parent)[0] = 1; f.runtime.getMatrix(f.parent)[1] = Infinity;
+    rejects(() => f.runtime.transformPointBytes(f.parent, input, output, base), 'matrix[1]');
+    f.runtime.getMatrix(f.parent)[1] = 0;
+    rejects(() => f.runtime.transformPointBytes(f.parent, input, output, base), 'point.z');
+    check(Object.values(output).every(v => v === sentinel), 'XY, first matrix pair, Z source schedule refuses without stores');
+  }
+  {
+    const f = fixture(), output = bytes(), before = Object.getOwnPropertyDescriptors(output);
+    for (const offset of [NaN, Infinity, -Infinity, -4, 0.5, 2, 0xfffffff8, 2 ** 32, Number.MAX_SAFE_INTEGER]) {
+      rejects(() => f.runtime.transformPointBytes(Symbol('unknown'), {x: NaN, y: NaN, z: NaN}, output, offset), 'aligned uint32');
+      expectPrefix(output, before, 0, 'range admission precedes source access or destination changes');
+    }
+    rejects(() => f.runtime.transformPointBytes(Symbol('unknown'), unit, output, base), 'unknown/non-owned');
+    rejects(() => f.runtime.transformPointBytes(fixture().parent, unit, output, base), 'unknown/non-owned');
+    expectPrefix(output, before, 0, 'foreign and unknown matrix identities retain destination');
+    for (const offset of [0, -0, 0xfffffff4]) {
+      const boundary = bytes(offset);
+      f.runtime.transformPointBytes(f.parent, unit, boundary, offset);
+      expectWords(boundary, [0x3f800000, 0x3f800000, 0x3f800000], 'aligned inclusive uint32 boundary', offset);
+      check(boundary[offset - 1] === sentinel && boundary[offset + 12] === sentinel, 'boundary stores preserve neighbors');
+    }
+  }
+  {
+    const f = fixture(), output = bytes(), before = Object.getOwnPropertyDescriptors(output);
+    f.hooks.get = () => {
+      try {f.runtime.transformPointBytes(f.parent, point, output, base);} catch { /* swallowed adapter reentry */ }
+    };
+    rejects(f.compose, 'reentry was caught');
+    expectPrefix(output, before, 0, 'nested byte transform does not start stores');
+    check(f.output.every(value => value === 19), 'caught nested byte transform poisons enclosing compose');
+    delete f.hooks.get;
+    f.runtime.transformPointBytes(f.parent, unit, output, base);
+    expectWords(output, [0x3f800000, 0x3f800000, 0x3f800000], 'byte route recovers after caught reentry');
+  }
+  {
+    // Hostile proxies are fault injection ONLY. The runtime's successful-input
+    // contract remains non-proxy own-data records, never arbitrary callbacks.
+    for (const phase of ['admission', 'store'] as const) {
+      for (let i = 0; i < 12; i++) {
+        const f = fixture(), matrix = f.runtime.createMatrix(normal), target = bytes();
+        const before = Object.getOwnPropertyDescriptors(target);
+        let nested = 0;
+        const attempt = (): void => {
+          nested++;
+          try {f.runtime.identity(matrix);} catch { /* adversarial trap catches nested refusal */ }
+        };
+        const output = new Proxy(target, {
+          getOwnPropertyDescriptor(record, key) {
+            if (phase === 'admission' && key === String(base + i)) attempt();
+            return Reflect.getOwnPropertyDescriptor(record, key);
+          },
+          set(record, key, value: number) {
+            if (phase === 'store' && key === String(base + i)) attempt();
+            return Reflect.set(record, key, value);
+          },
+        });
+        rejects(() => f.runtime.transformPointBytes(matrix, point, output, base), 'caught same-runtime reentry');
+        check(nested === 1, 'hostile trap performs exactly one caught nested attempt');
+        expectPrefix(target, before, (i >>> 2) + (phase === 'store' ? 1 : 0),
+          `${phase} reentry at byte${i} stops after the current admitted word`);
+        check(f.runtime.getMatrix(matrix).every((v, j) => Object.is(v, normal[j])), 'reentrant matrix mutation never executes');
+        f.runtime.transformPointBytes(matrix, point, target, base);
+        expectWords(target, expected, 'runtime recovers after hostile byte trap refusal');
+      }
+    }
+    for (const key of ['x', 'y', 'z']) {
+      const f = fixture(), output = bytes(), before = Object.getOwnPropertyDescriptors(output);
+      const input = new Proxy(point, {getOwnPropertyDescriptor(record, field) {
+        if (field === key) {
+          try {f.runtime.transformPointBytes(f.parent, point, output, base);} catch { /* swallowed source-trap reentry */ }
+        }
+        return Reflect.getOwnPropertyDescriptor(record, field);
+      }});
+      rejects(() => f.runtime.transformPointBytes(f.parent, input, output, base), 'caught same-runtime reentry');
+      expectPrefix(output, before, 0, `point${key} reentry is checked before byte stores`);
+    }
   }
 }

@@ -9,6 +9,9 @@
  * selecting 80045838's PSMTXCopy branch, never an approximation of source trig.
  * 800457d4 zero-short wrappers retain RotRad and Concat semantics: audited zero
  * sin/cos return +0/1, and X/Y/Z rotation matrices have -0 at [6]/[8]/[1].
+ * Standalone RotRad admits exactly radians +0/-0: kernel_sin returns its
+ * unchanged signed argument, kernel_cos returns +1. RotTrig's actual store
+ * order and sine negation execute; this is not a zero-short wrapper or Copy.
  * The wrapper additionally assumes GQR5 signed-short loads with scale 0; live
  * register initialization/invariance has not been established.
  * PSMTXConcat uses audited paired-single multiply/FMA order including the +0
@@ -51,8 +54,15 @@ export interface SourceActorJointMatrixRuntime {
   correctShort(matrix: symbol, correction: Readonly<SourceJointVector>): void;
   scale(matrix: symbol, scaling: Readonly<SourceJointVector>): void;
   copy(source: symbol, destination: symbol): void;
+  /** SDK 8020af5c; all three matrices are explicitly owned. Either input may alias output. */
+  concat(left: symbol, right: symbol, destination: symbol): void;
+  /** SDK 8020b238/8020b2a8 only, with actual +0 or -0 radians. No wrapper/Concat. */
+  rotateRadiansZero(axis: 'x' | 'y' | 'z', destination: symbol, angle: number): void;
   /** SDK 8020b7a8; caller owns the explicit output vector, which may alias input. */
   transformPoint(matrix: symbol, input: Readonly<SourceJointVector>, output: SourceJointVector): void;
+  /** Same8020b7a8 schedule into canonical BE object bytes; no temporary vector. */
+  transformPointBytes(matrix: symbol, input: Readonly<SourceJointVector>,
+    output: Partial<Record<number, number>>, byteOffset: number): void;
   /** Bounded 45918 path; no general terrain orientation/estimate implementation. */
   orientTerrainMatrix(matrix: symbol, normal: Readonly<SourceJointVector>, axisA: number, axisB: number): void;
   /** Historical name: 47368 (2,.5) folded and (1,1) positive-sine subsets only.
@@ -69,6 +79,10 @@ export interface SourceActorJointMatrixRuntime {
   composeJoint(parent: symbol, destination: symbol, pose: symbol,
     correction: Readonly<SourceJointVector>, scale: Readonly<SourceJointVector>,
     translationOverride?: Readonly<SourceJointVector>): void;
+}
+const sourceJointMatrixRuntimes = new WeakSet<object>();
+export function isSourceActorJointMatrixRuntime(value: unknown): value is SourceActorJointMatrixRuntime {
+  return value !== null && typeof value === 'object' && sourceJointMatrixRuntimes.has(value);
 }
 function fail(reason: string): never {
   throw Error(`[actor-joint-matrix] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -97,39 +111,48 @@ function load(matrix: number[], i: number): number {
 function vectorLoad(vector: Readonly<SourceJointVector>, key: 'x' | 'y' | 'z', where: string): number {
   return float(own(vector, key), `${where}.${key}`);
 }
-function vectorStore(vector: SourceJointVector, key: 'x' | 'y' | 'z', value: number): void {
-  own(vector, key, true); vector[key] = value;
-}
 function multiply(a: number, b: number): number {
   return float(Math.fround(a * b), 'single product');
 }
 function add(a: number, b: number): number {
   return float(Math.fround(a + b), 'single sum');
 }
-function transformPoint(matrix: number[], input: Readonly<SourceJointVector>, output: SourceJointVector): void {
+/** Internal writer is constructed only by genuine methods below, never supplied
+ * as a host callback. All routes share this one authenticated arithmetic tree. */
+function transformPointStores(matrix: number[], input: Readonly<SourceJointVector>,
+  writeOutput: (axis: 'x' | 'y' | 'z', value: number) => void, check: () => void): void {
+  const readVector = (key: 'x' | 'y' | 'z'): number => {const v = vectorLoad(input, key, 'point'); check(); return v;};
+  const readMatrix = (index: number): number => {const v = load(matrix, index); check(); return v;};
   // 8020b7a8..b7f4: each paired row accumulates Z into X's product and
   // translation into Y's product, THEN sums the lanes. Reassociating the
   // dot product (or using Concat's ordering) loses real rounding/zero behavior.
-  const x = vectorLoad(input, 'x', 'point'), y = vectorLoad(input, 'y', 'point');
-  const m0 = load(matrix, 0), m1 = load(matrix, 1);
-  const z = vectorLoad(input, 'z', 'point'); // W=1 supplies exactly +1.
+  const x = readVector('x'), y = readVector('y');
+  const m0 = readMatrix(0), m1 = readMatrix(1);
+  const z = readVector('z'); // W=1 supplies exactly +1.
   const p0 = multiply(m0, x), p1 = multiply(m1, y);
-  const m2 = load(matrix, 2), m3 = load(matrix, 3);
+  const m2 = readMatrix(2), m3 = readMatrix(3);
   const q0 = fma(m2, z, p0), q1 = fma(m3, 1, p1);
-  const m4 = load(matrix, 4), m5 = load(matrix, 5);
+  const m4 = readMatrix(4), m5 = readMatrix(5);
   const resultX = add(q0, q1);
-  const m6 = load(matrix, 6), m7 = load(matrix, 7);
+  const m6 = readMatrix(6), m7 = readMatrix(7);
   const p4 = multiply(m4, x), p5 = multiply(m5, y);
-  vectorStore(output, 'x', resultX);
+  writeOutput('x', resultX);
   const q4 = fma(m6, z, p4), q5 = fma(m7, 1, p5);
-  const m8 = load(matrix, 8), m9 = load(matrix, 9);
+  const m8 = readMatrix(8), m9 = readMatrix(9);
   const resultY = add(q4, q5);
-  const m10 = load(matrix, 10), m11 = load(matrix, 11);
+  const m10 = readMatrix(10), m11 = readMatrix(11);
   const p8 = multiply(m8, x), p9 = multiply(m9, y);
-  vectorStore(output, 'y', resultY);
+  writeOutput('y', resultY);
   const q8 = fma(m10, z, p8), q9 = fma(m11, 1, p9);
-  vectorStore(output, 'z', add(q8, q9));
+  writeOutput('z', add(q8, q9));
 }
+function transformPoint(matrix: number[], input: Readonly<SourceJointVector>, output: SourceJointVector,
+  check: () => void = () => {}): void {
+  transformPointStores(matrix, input, (axis, value) => {
+    own(output, axis, true); check(); output[axis] = value; check();
+  }, check);
+}
+
 function short(value: unknown, where: string): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || value < -32768 || value > 32767) fail(`${where}: signed short required`);
   return value;
@@ -366,10 +389,42 @@ function primarySine(cosine: number): number {
 }
 function primaryRotation(axis: 'x' | 'y' | 'z', sine: number, cosine: number): number[] {
   // 8020b2a8's actual paired merges, not the misleading decompiled Y/Z
-  // assignments. All stores target the private source-stack temporary.
+  // assignments. Primary placement uses a private source-stack temporary;
+  // standalone RotRad separately applies the observable source store order.
   if (axis === 'x') return [1, 0, 0, 0, 0, cosine, -sine, 0, 0, sine, cosine, 0];
   if (axis === 'y') return [cosine, 0, sine, 0, 0, 1, 0, 0, -sine, 0, cosine, 0];
   return [cosine, -sine, 0, 0, sine, cosine, 0, 0, 0, 0, 1, 0];
+}
+/** Actual RotTrig stores, including X's unaligned pairs and W=1 singles.
+ * Existing traversal reader's fixed 8020b2a8 span (SHA256 832e4fbd...b19a8d7)
+ * and actor-matrix-traversal-evidence-2026-11-13.md establish these merges.
+ * X: b2dc[0],b2e0[1,2],b2e8[3,4],b2f0[7,8],b2f4[11],b2f8[9,10],b2fc[5,6].
+ * Y: b30c[6,7],b310[0,1],b31c[10,11],b320[4,5],b324[2,3],b328[8,9].
+ * Z: b330[2,3],b33c[6,7],b340[8,9],b348[4,5],b34c[0,1],b350[10,11].
+ * Retain this runtime's existing per-lane host store-fault contract, not a
+ * claim about original machine memory faults or atomic paired stores. */
+const rotationStores = {
+  x: [0, 1, 2, 3, 4, 7, 8, 11, 9, 10, 5, 6],
+  y: [6, 7, 0, 1, 10, 11, 4, 5, 2, 3, 8, 9],
+  z: [2, 3, 6, 7, 8, 9, 4, 5, 0, 1, 10, 11],
+} as const;
+function zeroRadiansRotation(axis: 'x' | 'y' | 'z', angle: number): number[] {
+  const radians = float(angle, 'radians');
+  // RotRad first calls sinf at8020b260, before any destination access/store.
+  // This boundary deliberately admits no nonzero value, even one that might
+  // round to zero or share a kernel's early-return branch. No host trig runs.
+  if (radians !== 0) fail('PSMTXRotRad 8020b260 sinf: nonzero radians are unsupported');
+  // sinf8023cc44 -> sin8023c9e8 masks the high word's sign for its branch.
+  // kernel_sin8023bf8c masks it again, fctiwz(±0) is integer0, and bfbc
+  // returns f1 UNCHANGED. Thus both +0 and -0 survive sinf's frsp atcc58.
+  const sine = Math.fround(radians);
+  // cosf8023cc68 -> cos8023c480 takes the same magnitude-only branch.
+  // kernel_cos8023b044 loads authenticated f64+1 atb074 (8043d030),
+  // without using the sign of zero; cosf frsp atcc7c keeps exact+1.
+  const cosine = Math.fround(1);
+  // RotTrig frsp b2a8/b2ac and ps_neg b2bc preserve/toggle sine's sign.
+  // Reuse the authenticated paired-merge values, not an Identity shortcut.
+  return primaryRotation(axis, Math.fround(sine), Math.fround(cosine));
 }
 function primaryFoldedPlacement(parent: number[], current: number[], next: number[], end: number[],
   translation: Readonly<SourceJointVector>, nextTranslation: Readonly<SourceJointVector>,
@@ -474,7 +529,7 @@ export function createSourceActorJointMatrixRuntime(
     concat(getMatrix(parent), local, output);
     return output;
   }
-  return Object.freeze({
+  const runtime: SourceActorJointMatrixRuntime = Object.freeze({
     createMatrix(initial: readonly number[]): symbol {
       enter();
       try {
@@ -511,9 +566,40 @@ export function createSourceActorJointMatrixRuntime(
       enter();
       try {copy(getMatrix(source), getMatrix(destination));} finally {busy = false;}
     },
+    concat(left: symbol, right: symbol, destination: symbol): void {
+      enter();
+      try {concat(getMatrix(left), getMatrix(right), getMatrix(destination));} finally {busy = false;}
+    },
+    rotateRadiansZero(axis: 'x' | 'y' | 'z', destination: symbol, angle: number): void {
+      enter();
+      try {
+        if (axis !== 'x' && axis !== 'y' && axis !== 'z') fail('rotation axis must be x, y or z');
+        const rotation = zeroRadiansRotation(axis, angle), output = getMatrix(destination);
+        for (const i of rotationStores[axis]) store(output, i, rotation[i]!);
+      } finally {busy = false;}
+    },
     transformPoint(matrix: symbol, input: Readonly<SourceJointVector>, output: SourceJointVector): void {
       enter();
-      try {transformPoint(getMatrix(matrix), input, output);} finally {busy = false;}
+      try {transformPoint(getMatrix(matrix), input, output, () => {if (reentered) fail('caught same-runtime reentry');});} finally {busy = false;}
+    },
+    transformPointBytes(matrix: symbol, input: Readonly<SourceJointVector>,
+      output: Partial<Record<number, number>>, byteOffset: number): void {
+      enter();
+      const check = (): void => {if (reentered) fail('caught same-runtime reentry');};
+      try {
+        if (!Number.isSafeInteger(byteOffset) || byteOffset < 0 || byteOffset > 0xfffffff4 || byteOffset % 4 !== 0)
+          fail('matrix byte destination requires aligned uint32 range');
+        const encoding = new DataView(new ArrayBuffer(4));
+        transformPointStores(getMatrix(matrix), input, (axis, value) => {
+          const offset = byteOffset + (axis === 'x' ? 0 : axis === 'y' ? 4 : 8);
+          // One stfs: validate all four ordinary own-data destinations before
+          // any store. This host fault rule does not emulate memory bus faults.
+          for (let i = 0; i < 4; i++) {own(output, String(offset + i), true); check();}
+          encoding.setFloat32(0, value, false);
+          for (let i = 0; i < 4; i++) output[offset + i] = encoding.getUint8(i);
+          check();
+        }, check);
+      } finally {busy = false;}
     },
     orientTerrainMatrix(matrix: symbol, normal: Readonly<SourceJointVector>, axisA: number, axisB: number): void {
       enter();
@@ -561,4 +647,5 @@ export function createSourceActorJointMatrixRuntime(
       } finally {busy = false;}
     },
   });
+  sourceJointMatrixRuntimes.add(runtime); return runtime;
 }

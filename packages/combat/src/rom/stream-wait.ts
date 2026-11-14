@@ -1,6 +1,6 @@
 /** Bounded zz_004beb8_ stream start and zz_004c020_ reset (:1430–1530),
  * zz_004cd24_ actor update (chunk_0006.c:1995–2121) and
- * bounded zz_004c050_ parsing (:1538–1603), opcode01 (:1615–1675) and opcode0x10 (:1850–1970), offline only.
+ * bounded zz_004c050_ parsing (:1538–1603), opcode01 (:1615–1675), opcode02/03 (8004c424/8004c488), and opcode0x10 (:1850–1970), offline only.
  * Covers entry/null/selection/block/finished routing and default/countdown/relative/percentage waits.
  * Actual mapping, feedback, dispatch and target runtimes retain their fields;
  * these sidecars own gates, copied command bytes/cursors and stream controls.
@@ -36,8 +36,20 @@
  * Bindings are copied/sealed; methods fixed with original receivers. Readonly
  * operands are accepted, writability checked only at reached stores. Caught
  * same-runtime mutation reentry poisons the outer operation; prior effects stand.
+ * Opcode02/03 follow authenticated8004c424/100 and8004c488/84 instruction
+ * windows, not legacy partState event labels. State bytes remain raw u8 and
+ * uninitialized until explicit input/store. Actual6e8/6e9 and5e0 come from a
+ * once-bound genuine movement join; source582 remains the start owner,584 is
+ * untouched. Opcode03 retains both5e0 stores and both operand/current loads.
+ * Joined execution uses the existing private frame stream capability and
+ * permanent actor/mapping failure guards. Even unjoined state-command failures
+ * poison the canonical mapping so a later join cannot replay partial effects.
  */
-import type {SourceActorJointMappingRuntime, SourceActorJointMappingHeader} from './actor-joint-mapping.js';
+import {isSourceActorJointMappingRuntime, type SourceActorJointMappingRuntime, type SourceActorJointMappingHeader} from './actor-joint-mapping.js';
+import type {RomActor} from './actor.js';
+import {isSourceActorMovementFollowupRuntime, type SourceActorMovementFollowupRuntime} from './actor-movement-followup.js';
+import {markIncompleteSourceActorDoubleLifecycle, requireCompleteSourceActorDoubleLifecycle, requireSourceActorDoubleInvocation} from './actor-double-prehook.js';
+import {markIncompleteSourceActorAnimationTransition, requireCompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
 import type {SourceJointAnimationFeedbackRuntime} from './joint-animation-feedback.js';
 import type {SourceActorAnimationDispatchRuntime} from './actor-animation-dispatch.js';
 import type {SourceStreamWaitTargetRuntime} from './stream-wait-target.js';
@@ -45,9 +57,18 @@ export interface SourceStreamWaitCommand {flags01: number;}
 export interface SourceStreamWaitActorBinding {activeMask579: number; blockedMask1d9a: number; marker71d: number;}
 export type SourceStreamWaitActorInitial = Omit<SourceStreamWaitActorBinding, 'marker71d'> & {marker71d?: number};
 export interface SourceStreamWaitStartBinding {familyBank1d80: symbol | null; sharedBank1d84: symbol | null; defaultSelector582: number; marker709: number;}
-export interface SourceStreamWaitPartBinding {group18: number; action19: number; status1d: number; current00: symbol | null; next04: symbol | null; wait14: number; finished1a: number; event1e: number;}
+/** 1b/1c are raw unsigned bytes on the genuine retained part owner. Undefined
+ * means no initialized source value, not a retail allocation default. The sealed
+ * shape reserves slots so a reached source store can initialize them. */
+export interface SourceStreamWaitPartBinding {state1b?: number | undefined; auxiliary1c?: number | undefined; group18: number; action19: number; status1d: number; current00: symbol | null; next04: symbol | null; wait14: number; finished1a: number; event1e: number;}
 export type SourceStreamWaitPartInitial = Omit<SourceStreamWaitPartBinding, 'next04' | 'group18' | 'action19' | 'status1d'> & {next04?: symbol | null; group18?: number; action19?: number; status1d?: number};
 export interface SourceStreamWaitRuntime {
+  getDispatchRuntime(): SourceActorAnimationDispatchRuntime;
+  /** Once-bound identity join via genuine movement, after movement.bindActor. */
+  bindActualActor(actor: symbol, movement: SourceActorMovementFollowupRuntime): void;
+  hasActualActorBinding(actor: symbol): boolean;
+  getActualActor(actor: symbol): RomActor;
+  getMappingActor(actor: symbol): SourceActorJointMappingHeader;
   bindStartActor(actor: symbol, initial: Readonly<SourceStreamWaitStartBinding>): void;
   getStartActorBinding(actor: symbol): SourceStreamWaitStartBinding;
   startStream(actor: symbol, mask: number, selector: number, actionIndex: number, startFrame?: number, transition?: number, mode?: number): void;
@@ -61,6 +82,10 @@ export interface SourceStreamWaitRuntime {
   getActorBinding(actor: symbol): SourceStreamWaitActorBinding;
   getPartBinding(actor: symbol, index: number): SourceStreamWaitPartBinding;
   update(actor: symbol, mask: number): 0 | 1;
+}
+const sourceStreamWaitRuntimes = new WeakSet<object>(), assignedActualActors = new WeakSet<object>();
+export function isSourceStreamWaitRuntime(value: unknown): value is SourceStreamWaitRuntime {
+  return value !== null && typeof value === 'object' && sourceStreamWaitRuntimes.has(value);
 }
 function fail(reason: string): never {throw Error(`[stream-wait] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);}
 function own(record: object, key: string, writable = false): unknown {
@@ -137,13 +162,55 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
     return value;
   };
   const commands = new Map<symbol, SourceStreamWaitCommand>();
-  const actors = new Map<symbol, {source: SourceActorJointMappingHeader; binding: SourceStreamWaitActorBinding; parts: readonly SourceStreamWaitPartBinding[]}>();
+  const actors = new Map<symbol, {source: SourceActorJointMappingHeader; binding: SourceStreamWaitActorBinding;
+    parts: readonly SourceStreamWaitPartBinding[]; actual?: RomActor; movement?: SourceActorMovementFollowupRuntime; stateCommandsUsed?: boolean}>();
   let busy = false, reentered = false;
   const enter = (): void => {if (busy) {reentered = true; fail('same-runtime reentry is unsupported');} busy = true; reentered = false;};
   const invoke = (fn: (...args: never[]) => unknown, receiver: object, args: unknown[]): unknown => {
     const result = Reflect.apply(fn, receiver, args); if (reentered) fail('same-runtime reentry was caught inside an adapter'); return result;
   };
   const actorRecord = (id: symbol) => {const found = actors.get(id); if (!found) fail('unknown/non-owned actor binding'); return found;};
+  const check = (): void => {if (reentered) fail('same-runtime reentry was caught inside an adapter');};
+  const read = (record: object, key: string): unknown => {const value = own(record, key); check(); return value;};
+  const readByteField = (record: object, key: string): number => {const value = read(record, key); integer(value, 255, key); return value;};
+  const readWord = (record: object, key: string): number => {const value = read(record, key); integer(value, 0xffffffff, key); return value;};
+  const store = (record: object, key: string, value: number): void => {
+    own(record, key, true); check(); (record as Record<string, unknown>)[key] = value; check();
+  };
+  const actualActor = (id: symbol): RomActor => {
+    const actor = actorRecord(id);
+    if (actor.actual === undefined || actor.movement === undefined) fail('genuine movement actual-actor join required');
+    if (actor.movement.getActualActor(id) !== actor.actual || actor.movement.getMappingActor(id) !== actor.source ||
+        actor.movement.getWaitBinding(id) !== actor.binding || invoke(actorGet, mapping, [id]) !== actor.source)
+      fail('canonical actual-actor owners changed');
+    check(); return actor.actual;
+  };
+  // A proved byte store may create missing actual storage. No read/validation of
+  // an overwritten value, no constructor zeros, and no duplicate stream mirror.
+  const storeActualByte = (actual: RomActor, key: 'byte6e8' | 'byte6e9', value: number): void => {
+    const property = Object.getOwnPropertyDescriptor(actual, key); check();
+    if (property === undefined) {
+      if (!Object.isExtensible(actual)) fail(`${key}: absent actual byte storage is non-extensible`);
+      check(); Object.defineProperty(actual, key, {value, writable: true, enumerable: true, configurable: true}); check();
+    } else store(actual, key, value);
+  };
+  const sourceOperation = <T>(id: symbol, run: () => T): T => {
+    const actor = actorRecord(id);
+    if (actor.actual !== undefined) {
+      requireSourceActorDoubleInvocation(actor.actual, 'stream', runtime);
+    }
+    if (actor.actual !== undefined || actor.stateCommandsUsed) requireCompleteSourceActorAnimationTransition(actor.source);
+    try {
+      if (actor.actual !== undefined) actualActor(id);
+      const result = run(); check(); return result;
+    } catch (error) {
+      if (actor.actual !== undefined) {
+        markIncompleteSourceActorDoubleLifecycle(actor.actual);
+      }
+      if (actor.actual !== undefined || actor.stateCommandsUsed) markIncompleteSourceActorAnimationTransition(actor.source);
+      throw error;
+    }
+  };
   const getCommand = (id: symbol): SourceStreamWaitCommand => {const found = commands.get(id); if (!found) fail('unknown/non-owned command'); return found;};
   const commandFlags = (part: SourceStreamWaitPartBinding): number => {
     const id = own(part, 'current00'); if (typeof id !== 'symbol') fail('current00: owned command identity required'); return cursors.has(id) ? readByte(id, 1) : byte(getCommand(id), 'flags01');
@@ -217,6 +284,44 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
         setupCompleted = true;
         continue;
       }
+      if (opcode === 2 || opcode === 3) {
+        const record = cursor, position = ownedCursor(record);
+        // Authenticated stackless handlers advance the parser-local cursor by8
+        // even for an unselected mask. Operands/destinations remain lazy.
+        cursor = intern(position.stream, position.offset + 8);
+        if (opcode === 2) {
+          if (!(mask & 1)) continue;
+          requireCompleteSourceActorAnimationTransition(actor.source); actor.stateCommandsUsed = true;
+          store(actor.parts[0]!, 'state1b', readByte(record, 2));
+          store(actor.parts[0]!, 'auxiliary1c', readByte(record, 3));
+          const byte6e8 = readByte(record, 4);
+          const actual = actualActor(id);
+          storeActualByte(actual, 'byte6e8', byte6e8);
+          storeActualByte(actual, 'byte6e9', readByte(record, 5));
+          // b1 is loaded after all four preceding stores. ff never accesses582;
+          // fe XORs its current raw byte; other values overwrite without a read.
+          const selector = readByte(record, 1);
+          if (selector !== 255) {
+            const start = startRecord(id);
+            store(start, 'defaultSelector582', selector === 254 ? readByteField(start, 'defaultSelector582') ^ 1 : selector);
+          }
+        } else {
+          if (!(mask & 2)) continue;
+          requireCompleteSourceActorAnimationTransition(actor.source); actor.stateCommandsUsed = true;
+          store(actor.parts[1]!, 'state1b', readByte(record, 1));
+          store(actor.parts[1]!, 'auxiliary1c', readByte(record, 2));
+          const operand = (): number => readByte(record, 6) * 256 + readByte(record, 7);
+          if (operand() !== 0xffff) {
+            const actual = actualActor(id);
+            store(actual, 'controlWord', (readWord(actual, 'controlWord') & 0xfffff00f) >>> 0);
+            // c4c4 reloads the halfword, then c4c8 reloads the now-current5e0.
+            // Preserve both observable stores, including a failing second one.
+            const reloaded = operand(), current = readWord(actual, 'controlWord');
+            store(actual, 'controlWord', (current | (reloaded & 0x0ff0)) >>> 0);
+          }
+        }
+        continue;
+      }
       if (opcode !== 0x10) fail('unsupported zz_004c050_ opcode');
       const record = cursor, position = ownedCursor(record);
       // Source advances its local cursor before the handler reads record+2.
@@ -264,7 +369,30 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
     write(part, 'wait14', 0);
     write(part, 'finished1a', 0);
   };
-  return Object.freeze({
+  const runtime: SourceStreamWaitRuntime = Object.freeze({
+    getDispatchRuntime() {return dispatch;},
+    bindActualActor(id: symbol, movement: SourceActorMovementFollowupRuntime): void {
+      enter(); try {
+        const actor = actorRecord(id);
+        if (actor.actual !== undefined) fail('actual actor is already bound');
+        if (!isSourceActorJointMappingRuntime(mapping) || !isSourceActorMovementFollowupRuntime(movement))
+          fail('genuine mapping and movement runtimes required');
+        if (movement.getMappingActor(id) !== actor.source || movement.getWaitBinding(id) !== actor.binding ||
+            invoke(actorGet, mapping, [id]) !== actor.source) fail('matched canonical mapping and wait owners required');
+        const actual = movement.getActualActor(id);
+        if (actual === null || typeof actual !== 'object') fail('actual RomActor data record required');
+        if (assignedActualActors.has(actual)) fail('actual actor already assigned to a stream identity');
+        requireCompleteSourceActorDoubleLifecycle(actual); requireCompleteSourceActorAnimationTransition(actor.source);
+        actor.actual = actual; actor.movement = movement; assignedActualActors.add(actual);
+      } finally {busy = false;}
+    },
+    hasActualActorBinding(id: symbol) {return actorRecord(id).actual !== undefined;},
+    getActualActor(id: symbol) {
+      const actual = actorRecord(id).actual;
+      if (actual === undefined) fail('genuine movement actual-actor join required');
+      return actual;
+    },
+    getMappingActor(id: symbol) {return actorRecord(id).source;},
     bindStartActor(id: symbol, initial: Readonly<SourceStreamWaitStartBinding>): void {
       enter(); try {
         actorRecord(id);
@@ -276,7 +404,7 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
     },
     getStartActorBinding: startRecord,
     startStream(id: symbol, mask: number, selector: number, actionIndex: number, startFrame = -1, transition = 0xffffffff, mode = 0xffffffff): void {
-      enter(); try {
+      enter(); try {sourceOperation(id, () => {
         // Argument-domain checks are host admission, not emulated source instructions.
         integer(mask, 0xffffffff, 'mask'); integer(selector, 0xffffffff, 'selector');
         if (!Number.isInteger(actionIndex) || actionIndex < -0x80000000 || actionIndex > 0x7fffffff) fail('actionIndex: signed32 integer required');
@@ -301,7 +429,7 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
         }
         // Resolve the pointer before stores (archived bfbc); parse after all resets.
         parse(id, effective, stream, startFrame, transition, mode);
-      } finally {busy = false;}
+      });} finally {busy = false;}
     },
     createStream(bytes: Uint8Array): symbol {
       enter(); try {
@@ -332,7 +460,7 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
       return found.offset;
     },
     parseWaitRecord(id: symbol, mask: number, cursor: symbol, startFrame = -1, transition = 0xffffffff, mode = 0xffffffff): void {
-      enter(); try {parse(id, mask, cursor, startFrame, transition, mode);} finally {busy = false;}
+      enter(); try {sourceOperation(id, () => parse(id, mask, cursor, startFrame, transition, mode));} finally {busy = false;}
     },
     createCommand(initial: Readonly<SourceStreamWaitCommand>): symbol {
       enter(); try {const flags01 = byte(initial, 'flags01'), id = Symbol('stream command'); commands.set(id, Object.seal({flags01})); return id;} finally {busy = false;}
@@ -356,7 +484,10 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
           // Compatibility fixture defaults only, not evidence of source allocation state.
           const optionalByte = (key: string): number => Object.getOwnPropertyDescriptor(input, key) === undefined ? 0 : byte(input, key);
           const group18 = optionalByte('group18'), action19 = optionalByte('action19'), status1d = optionalByte('status1d');
-          parts.push(Object.seal({current00, next04, wait14, finished1a, event1e, group18, action19, status1d}));
+          const initializedByte = (key: string): number | undefined =>
+            Object.getOwnPropertyDescriptor(input, key) === undefined ? undefined : byte(input, key);
+          const state1b = initializedByte('state1b'), auxiliary1c = initializedByte('auxiliary1c');
+          parts.push(Object.seal({current00, next04, wait14, finished1a, event1e, group18, action19, status1d, state1b, auxiliary1c}));
         }
         actors.set(id, {source, binding: Object.seal({activeMask579, blockedMask1d9a, marker71d}), parts: Object.freeze(parts)});
       } finally {busy = false;}
@@ -364,7 +495,7 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
     getActorBinding(id: symbol) {return actorRecord(id).binding;},
     getPartBinding(id: symbol, index: number) {const actor = actorRecord(id); integer(index, 3, 'index'); return actor.parts[index]!;},
     update(id: symbol, mask: number): 0 | 1 {
-      enter(); try {
+      enter(); try {return sourceOperation(id, () => {
         integer(mask, 0xffffffff, 'mask');
         const actor = actorRecord(id), active = byte(actor.binding, 'activeMask579');
         if (own(actor.parts[0]!, 'current00') === null) {
@@ -438,7 +569,9 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
           write(part, 'finished1a', 1); result = 1;
         }
         return result;
-      } finally {busy = false;}
+      });} finally {busy = false;}
     },
   });
+  sourceStreamWaitRuntimes.add(runtime);
+  return runtime;
 }

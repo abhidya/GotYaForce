@@ -28,6 +28,8 @@
 // A field WITHOUT a tag extracts as kind "unmapped" — visible and codec-refused, never
 // guessed (plan §3.3 mechanism 3).
 
+import type {SourceActorSoundEventTable} from './actor-sound-table.js';
+
 export interface Vec3 { x: number; y: number; z: number; }
 
 /** Battle-local physics behavior used by ROM family integration. */
@@ -58,6 +60,24 @@ export interface RomPhysicsRuntime {
  * (FUN_80067310, chunk_0008.c:3794-3828. yaw = `+0x5ae` lock-yaw passed as param_3.)
  */
 export interface RomActor {
+  /** Explicit source object active byte, never inferred from HP or lifecycle.
+   * No constructor default; supplied only by a source hydration boundary.
+   * @romfield active0 +0x0 u8 */
+  active0?: number;
+  /** Explicit source53b30 ordering reset. No constructor default.
+   * @romfield field664 +0x664 f32 */
+  field664?: number;
+  /** Explicit6ae60 target masks; no constructor defaults or7d2 shadow.
+   * @romfield byte58a +0x58a u8 */
+  byte58a?: number;
+  /** @romfield byte58b +0x58b u8 */
+  byte58b?: number;
+  /** @romfield byte58c +0x58c u8 */
+  byte58c?: number;
+  /** @romfield byte58d +0x58d u8 */
+  byte58d?: number;
+  /** @romfield byte7d3 +0x7d3 u8 */
+  byte7d3?: number;
   /** Port-side runtime dependency. Kept on the actor so concurrent battles cannot
    *  overwrite one another's floor behavior.
    *  @romfield physicsRuntime port_side */
@@ -78,6 +98,10 @@ export interface RomActor {
   /** +0x518: host-resolved actor aim origin consumed by zz_006e514_.
    *  @romfield aimOrigin518 +0x518 vec3 */
   aimOrigin518: Vec3;
+  /** Optional explicit +0x1dfc signed16 aim accumulator. Shared with the
+   * existing helper scratch owner; source admission supplies no default.
+   * @romfield aimRoll1dfc +0x1dfc s16 */
+  aimRoll1dfc?: number;
   /** +0x8e0/+0x8f0/+0x900 plus part*0x30: renderer-authored world aim anchors.
    *  Three 0x10-spaced float rows per part block; the TS field keeps one Vec3 anchor
    *  per part, so the codec refuses this record until the row semantics are pinned.
@@ -153,6 +177,13 @@ export interface RomActor {
   collisionScale?: number;
   /** Source1db supporting-actor contact, not terrain grounded status. Flat-floor host default0. */
   supportContact1db: number;
+  /** Explicit unaccumulated source mass. No host constructor default.
+   * Accumulated+204 retains BorgRuntime.sourceArrowMass204.
+   * @romfield mass208 +0x208 f32 */
+  mass208?: number;
+  /** Actual+6cb stage-exit/no-clamp byte, shared with physicsExtras.
+   * Explicit source owner only; no lifecycle/default host hydration. */
+  noClamp6cb?: number;
   /** Actual+760 full3D captured-target distance. Legacy bridge may pre-normalize
    * this field; source tick-prefix requires explicit fresh raw input instead. */
   targetDistance760?: number;
@@ -163,6 +194,13 @@ export interface RomActor {
   /** Monotonic host/presentation edge emitted when zz_00b2190_(actor, 1) succeeds.
    *  @romfield afterimageSerial port_side */
   afterimageSerial: number;
+
+  /** Existing stream-vm +57a/+57b storage, promoted without host defaults.
+   * Source59f5c consumes these exact actual-actor bytes, not copied flags.
+   * @romfield stateFlagA +0x57a u8
+   * @romfield stateFlagB +0x57b u8 */
+  stateFlagA?: number;
+  stateFlagB?: number;
 
   // ===== Weapon/part animation host state (zz_0048d54_ @0x80048d54) =====
   /** +0x579 descriptor-owned part-enable mask. Part 1 is deliberately skipped by
@@ -218,6 +256,8 @@ export interface RomActor {
   /** +0x3e4: slot index (0..5).
    *  @romfield slot +0x3e4 u8 */
   slot: number;
+  /** Explicit current status, no constructor default. @romfield byte43d +0x43d u8 */
+  byte43d?: number;
   /** +0x88: team (0 = player/ally, 1 = enemy).
    *  @romfield team +0x88 u8 */
   team: number;
@@ -253,6 +293,15 @@ export interface RomActor {
    *  zz_006a104_:620/634, behavior-notes.md §u.
    *  @romfield controlWord +0x5e0 u32 */
   controlWord: number;
+
+  /** Actual raw byte written by source stream opcode02 (8004c44c). Missing until
+   *  an explicit initialized-state input or reached store; no allocation default.
+   *  @romfield byte6e8 +0x6e8 u8 */
+  byte6e8?: number;
+  /** Actual raw byte written by source stream opcode02 (8004c454). No stream or
+   *  lifecycle mirror is permitted; future source consumers use this same actor.
+   *  @romfield byte6e9 +0x6e9 u8 */
+  byte6e9?: number;
 
   // ===== Command dispatch (cue-script-stream-decode, zz_006a104_) =====
   /** +0x580: actionIndex (the family action-table row; 0=dash, 1=B-melee, 2=air-B/X,
@@ -322,7 +371,7 @@ export interface RomActor {
   sharedAnimDescBank: Uint8Array | null;
   /** +0x4e8: family sound-event table (per-anim whoosh/voice index list).
    *  @romfield soundEventTable +0x4e8 ptr */
-  soundEventTable: Uint8Array | null;
+  soundEventTable: SourceActorSoundEventTable | null;
   /** +0x582: default stream group (group==0 → this; cue-script-stream-decode §3).
    *  @romfield defaultGroup +0x582 u8 */
   defaultGroup: number;
@@ -393,9 +442,11 @@ export interface RomActor {
   /** +0x5b4: live action status word.
    *  @romfield statusWord5b4 +0x5b4 u32 */
   statusWord5b4: number;
-  /** +0x5d4/+0x5d8: raw edge and held input words.
+  /** +0x5bc: explicit raw press-edge word; existing family owner, no default. */
+  statusWord5bc?: number;
+  /** +0x5d4 word / +0x5d8 HALFWORD: input state. Adjacent5da/5db are states.
    *  @romfield inputEdge5d4 +0x5d4 u32
-   *  @romfield inputHeld5d8 +0x5d8 u32 */
+   *  @romfield inputHeld5d8 +0x5d8 u16 */
   inputEdge5d4: number;
   inputHeld5d8: number;
   /** +0x694: state-timer float (e.g. deploy lock, post-state cooldown; zz_005568c_ decays it).
@@ -550,6 +601,10 @@ export interface RomDescriptor {
 /** Command-move table (actor+0x4ec). Already extracted fleet-wide into
  *  packages/combat/src/data/commandMoveTables.json — the ROM runtime consumes that data. */
 export interface RomCommandTable {
+  /** Explicit source pointer slots at4ec, indexed by signed585. Each selected
+   * table retains raw bytes; subtype/direction addressing is performed by the
+   * genuine command-admission runtime. Absent data is not inferred from records. */
+  sourceTables?: readonly (readonly number[] | null)[];
   /** Per-(button, subtype, direction) record: actionIndex/variantIndex + disabled flag. */
   records: ReadonlyArray<{
     button: number; subtype: number; direction: number | null;

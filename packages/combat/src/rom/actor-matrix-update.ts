@@ -29,6 +29,7 @@
  * checked at each store. Caught reentry poisons the call. Prior work survives
  * refusal, including count clears, damping, matrix rebuilds and partial copies.
  */
+import type {SourceBattleOuterGlobalFields} from './battle-global-layout.js';
 import {addSourceFloat32, fusedMultiplyAddSourceFloat32} from './source-float.js';
 import type {SourceActorTerrainQueryRuntime} from './actor-terrain-query.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorCorrectedTraversalState,
@@ -50,7 +51,13 @@ export interface SourceActorMatrixUpdateStorage {
   readonly primary1a14?: readonly Readonly<SourceActorPrimaryTerrainCorrection>[];
   readonly secondary1a94?: readonly Readonly<SourceActorSecondaryTerrainCorrection>[];
 }
-export interface SourceActorMatrixUpdateGlobals {maskD2: number}
+/** The same retained PTR_DAT_80433934 record. Optional cells are established
+ * only by an explicit source-input boundary, never by this constructor. */
+export interface SourceActorMatrixUpdateGlobals extends SourceBattleOuterGlobalFields {
+  /** Explicit scheduler high-group mask on this same global owner. */
+  maskD1?: number;
+  maskD2: number; byteD9?: number; byte1829?: number; byte1f?: number; byte45?: number;
+}
 export interface SourceActorMatrixUpdateSources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor' | 'getActorBinding' |
     'getWorldMatrix' | 'bindCorrectedTraversalState' | 'prepareActor' | 'rebuildActor' | 'copyActorMatrices'>;
@@ -65,7 +72,16 @@ export interface SourceActorMatrixUpdateSources {
 export interface SourceActorMatrixUpdateRuntime {
   bindActor(identity: symbol, initial: Readonly<SourceActorMatrixUpdateInitial>, storage?: SourceActorMatrixUpdateStorage): void;
   getActorBinding(identity: symbol): SourceActorMatrixUpdateBinding;
+  /** Retained owner identities for source lifecycle composition; no scalar reads. */
+  getActualActor(identity: symbol): object;
+  getWorldBinding(identity: symbol): object;
+  getMappingActor(identity: symbol): object;
+  getGlobals(): SourceActorMatrixUpdateGlobals;
   updateActor(identity: symbol): void;
+}
+const runtimes = new WeakSet<object>();
+export function isSourceActorMatrixUpdateRuntime(value: unknown): value is SourceActorMatrixUpdateRuntime {
+  return value !== null && typeof value === 'object' && runtimes.has(value);
 }
 // Archived ProgramDB bytes at802d0d60, all16 entries reachable by selector&15.
 const DISPATCH = Object.freeze([
@@ -140,7 +156,7 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
     if (actual !== expected) fail(`${name} owner changed its actual record`);
     return actual;
   };
-  return Object.freeze({
+  const runtime: SourceActorMatrixUpdateRuntime = {
     bindActor(id: symbol, initial: Readonly<SourceActorMatrixUpdateInitial>, storage?: SourceActorMatrixUpdateStorage): void {guard(() => {
       if (typeof id !== 'symbol') fail('actual actor symbol required');
       if (actors.has(id)) fail('matrix-update actor already bound');
@@ -177,6 +193,10 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
       actors.set(id, {actual, position, world, movement, metadata, mapping, binding}); assignedActors.add(actual);
     });},
     getActorBinding(id: symbol): SourceActorMatrixUpdateBinding {return entry(id).binding;},
+    getActualActor(id: symbol) {return entry(id).actual;},
+    getWorldBinding(id: symbol) {return entry(id).world;},
+    getMappingActor(id: symbol) {return entry(id).mapping;},
+    getGlobals() {return globals as SourceActorMatrixUpdateGlobals;},
     updateActor(id: symbol): void {guard(() => {
       const actor = entry(id), state = actor.binding;
       if (byte(stable(getWorld, id, actor.world, 'world'), 'mode4a0') === 2) return;
@@ -300,5 +320,6 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
         effect(copy, id, pointer(read(state, 'link4a4'), 'link4a4'));
       }
     });},
-  });
+  };
+  runtimes.add(runtime); return Object.freeze(runtime);
 }

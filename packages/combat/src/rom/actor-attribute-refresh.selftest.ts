@@ -135,6 +135,87 @@ function referenceProduct(a: number, b: number): number {
 }
 export function runActorAttributeRefreshSelfTests(): void {
   {
+    const x = fixture(), missing = x.runtime.createParameterDescriptor({});
+    check(!Object.hasOwn(x.runtime.getParameterDescriptor(missing), 'byte9f'), 'missing4ac+9f has no default');
+    for (let value = 0; value < 256; value++) {
+      const initial = {byte9f: value}, id = x.runtime.createParameterDescriptor(initial);
+      const parameter = x.runtime.getParameterDescriptor(id);
+      equal(parameter.byte9f, value, 'all explicit unsigned9f values');
+      check(parameter !== initial && Object.isSealed(parameter), '9f uses copied sealed existing parameter owner');
+      equal(x.runtime.getParameterDescriptor(id), parameter, 'same4ac identity resolves same9f owner');
+      check(x.runtime.getKnownParameterDescriptors().includes(parameter), '9f owner in same genuine parameter registry');
+      initial.byte9f = 0; equal(parameter.byte9f, value, 'caller mutation does not hydrate9f');
+    }
+    for (const value of [-1, 256, 1.5, NaN, Infinity, '1', null, undefined]) {
+      rejects(() => x.runtime.createParameterDescriptor({byte9f: value as number}), 'byte9f: unsigned integer');
+    }
+    let invoked = false;
+    const accessor = Object.defineProperty({}, 'byte9f', {get() {invoked = true; return 1;}});
+    rejects(() => x.runtime.createParameterDescriptor(accessor), 'byte9f: own data');
+    check(!invoked, 'parameter9f accessor never executes');
+    const inherited = x.runtime.createParameterDescriptor(Object.create({byte9f: 1}) as {byte9f: number});
+    check(!Object.hasOwn(x.runtime.getParameterDescriptor(inherited), 'byte9f'), 'inherited9f is not explicit hydration');
+  }
+  {
+    const x = fixture();
+    equal(x.runtime.getDescriptorBinding(x.descriptor).byte10, undefined, 'historical descriptors do not gain a joint10 default');
+    for (let raw = 0; raw < 256; raw++) {
+      const descriptor = x.mapping.createDescriptor([]), initial = {byte10: raw};
+      x.runtime.bindDescriptor(descriptor, initial); initial.byte10 = 255 - raw;
+      const binding = x.runtime.getDescriptorBinding(descriptor);
+      equal(binding.byte10, raw, 'explicit raw joint10 is copied on the existing descriptor identity');
+      check(Object.isSealed(binding), 'joint selector descriptor extension stays sealed');
+    }
+    for (const value of [-1, 256, 0.5, NaN, Infinity]) {
+      const descriptor = x.mapping.createDescriptor([]);
+      rejects(() => x.runtime.bindDescriptor(descriptor, {byte10: value}), 'unsigned integer');
+      x.runtime.bindDescriptor(descriptor, {byte10: 0});
+    }
+    const descriptor = x.mapping.createDescriptor([]); let reads = 0;
+    const initial = Object.defineProperty({}, 'byte10', {get() {reads++; return 0;}});
+    rejects(() => x.runtime.bindDescriptor(descriptor, initial), 'own data property');
+    equal(reads, 0, 'joint10 accessor is never invoked');
+    x.runtime.bindDescriptor(descriptor, {byte10: 127});
+  }
+  {
+    const x = fixture();
+    check(!Object.hasOwn(x.runtime.getParameterDescriptor(x.parameter), 'byteA3'), 'no default tier selector');
+    check(!Object.hasOwn(x.runtime.getParameterDescriptor(x.parameter), 'fieldAe'), 'no default yaw rate');
+    const known = x.runtime.getKnownParameterDescriptors();
+    check(Object.isFrozen(known) && known.includes(x.runtime.getParameterDescriptor(x.parameter)), 'known parameter metadata retains actual sealed owner');
+    const originalPointer = x.runtime.getActorBinding(x.id).parameter4ac;
+    x.runtime.getActorBinding(x.id).parameter4ac = Symbol('unreached foreign pointer');
+    equal(x.runtime.getKnownParameterDescriptors()[0], known[0], 'known metadata never dereferences actor4ac');
+    x.runtime.getActorBinding(x.id).parameter4ac = originalPointer!;
+    for (const value of [-32768, -1, 0, 1, 32767]) {
+      const initial = {fieldAe: value}, id = x.runtime.createParameterDescriptor(initial);
+      const descriptor = x.runtime.getParameterDescriptor(id);
+      equal(descriptor.fieldAe, value, 'same4ac registry retains signed+ae');
+      initial.fieldAe = 99; equal(descriptor.fieldAe, value, 'yaw rate copied once');
+      equal(Object.keys(descriptor).join(','), 'fieldAe', 'yaw rate invents no other fields');
+      check(Object.isSealed(descriptor), 'yaw-rate descriptor sealed');
+    }
+    for (const value of [-32769, 32768, 0.5, NaN, Infinity])
+      rejects(() => x.runtime.createParameterDescriptor({fieldAe: value}), 'fieldAe: signed-short');
+    let rateAccessor = false;
+    rejects(() => x.runtime.createParameterDescriptor({get fieldAe() {rateAccessor = true; return 0;}}), 'fieldAe: own data');
+    check(!rateAccessor, 'yaw rate accessor never invoked');
+    for (const selector of [0, 1, 127, 128, 255]) {
+      const initial = {byteA3: selector}, id = x.runtime.createParameterDescriptor(initial);
+      const descriptor = x.runtime.getParameterDescriptor(id);
+      equal(descriptor.byteA3, selector, 'same4ac registry retains unsigned+a3');
+      initial.byteA3 = 42; equal(descriptor.byteA3, selector, 'initial selector copied once');
+      check(Object.isSealed(descriptor), 'parameter descriptor remains sealed');
+      equal(Object.keys(descriptor).join(','), 'byteA3', 'selector extension invents no constructor limits or floats');
+      descriptor.byteA3 = 3; equal(x.runtime.getParameterDescriptor(id).byteA3, 3, 'selector stays live on same registry owner');
+    }
+    for (const selector of [-1, 256, 1.5, NaN, Infinity])
+      rejects(() => x.runtime.createParameterDescriptor({byteA3: selector}), 'byteA3: unsigned integer');
+    let invoked = false;
+    rejects(() => x.runtime.createParameterDescriptor({get byteA3() {invoked = true; return 0;}}), 'byteA3: own data');
+    check(!invoked, 'selector admission does not invoke accessor');
+  }
+  {
     const x = fixture(), rows = x.actual.actionSpeedRows, before = [...x.world.getWorldMatrix(x.id, 1)]; x.run();
     products(x); copied(x); equal(x.actual.maxHSpeed, 7, 'explicit parameter74'); equal(x.actual.maxRise, 8, 'explicit parameter78');
     equal(x.actual.maxFall, 9, 'explicit parameter7c'); equal(x.runtime.getActorBinding(x.id).byte87, 1, 'bit6 copied');

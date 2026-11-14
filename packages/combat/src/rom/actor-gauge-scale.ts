@@ -10,8 +10,9 @@
  * decoded signed shorts. Actual RomActor.modelScale/collisionScale, world
  * scale58, status7d8 and Borg.paramTier retain their existing owners. A missing
  * collisionScale is NOT replaced with modelScale. No clock or tier copy exists.
- * The reached6817c call refuses after750 decrement and74e signed conversion:
- * its global gate/table effects are not the approximated host clamp helper.
+ * Optional genuine tier lifecycle supplies6817c at the reached750 expiry,
+ * then the caller clears750/74e and continues its source scale interpolation.
+ * Without that explicit binding the historical call-boundary refusal remains.
  * This neither implements full59068 nor activates any production/tick route.
  *
  * Non-proxy own-data records, stable synchronous owners, lazy reached reads
@@ -23,6 +24,7 @@ import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import type {SourceActorStatusTimersRuntime} from './actor-status-timers.js';
 import {addSourceFloat32} from './source-float.js';
+import {isSourceActorTierLifecycleRuntime, type SourceActorTierLifecycleRuntime} from './actor-tier-lifecycle.js';
 
 export interface SourceActorGaugeScaleBinding {
   short7d6: number; short7dc: number;
@@ -39,7 +41,12 @@ export interface SourceActorGaugeScaleRuntime {
   getActualActor(identity: symbol): RomActor;
   getActualBorg(identity: symbol): SourceActorGaugeBorgOwner;
   getStatusBinding(identity: symbol): object;
+  getWorldBinding(identity: symbol): object;
+  getTierOwner(identity: symbol): object;
   getActorBinding(identity: symbol): Partial<SourceActorGaugeScaleBinding>;
+  /** One-time late binding breaks the real gauge/tier owner construction cycle. */
+  bindTierLifecycleSources(identity: symbol, tiers: SourceActorTierLifecycleRuntime): void;
+  getTierLifecycleRuntime(identity: symbol): SourceActorTierLifecycleRuntime | undefined;
   resetDownGauge(identity: symbol): void;
   resetSecondaryGauge(identity: symbol): void;
   updateActor(identity: symbol): void;
@@ -105,6 +112,18 @@ export function createSourceActorGaugeScaleRuntime(sources: SourceActorGaugeScal
     actual: RomActor; borg: SourceActorGaugeBorgOwner; tier: object;
     world: object; scale: object; status: object; binding: Partial<SourceActorGaugeScaleBinding>;
   }
+  interface TierSources {
+    runtime: SourceActorTierLifecycleRuntime;
+    actor: () => unknown; borg: () => unknown; status: () => unknown;
+    world: () => unknown; gauge: () => unknown; tier: () => unknown;
+    apply: (delta: number) => unknown;
+  }
+  const tierSources = new Map<symbol, TierSources>();
+  const checkTierSources = (bound: TierSources, actor: Entry): void => {
+    if (bound.actor() !== actor.actual || bound.borg() !== actor.borg || bound.status() !== actor.status ||
+        bound.world() !== actor.world || bound.gauge() !== actor.binding || bound.tier() !== actor.tier)
+      fail('tier lifecycle actual actor/Borg/status/world/gauge/tier owners differ');
+  };
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
   const entry = (id: symbol): Entry => {const actor = actors.get(id); if (!actor) fail('unknown/non-owned gauge actor'); return actor;};
   const stable = (get: (id: symbol) => unknown, id: symbol, expected: object, where: string): void => {
@@ -153,7 +172,24 @@ export function createSourceActorGaugeScaleRuntime(sources: SourceActorGaugeScal
     getActualActor(id: symbol) {return entry(id).actual;},
     getActualBorg(id: symbol) {return entry(id).borg;},
     getStatusBinding(id: symbol) {return entry(id).status;},
+    getWorldBinding(id: symbol) {return entry(id).world;},
+    getTierOwner(id: symbol) {return entry(id).tier;},
     getActorBinding(id: symbol) {return entry(id).binding;},
+    getTierLifecycleRuntime(id: symbol) {entry(id); return tierSources.get(id)?.runtime;},
+    bindTierLifecycleSources(id: symbol, tiers: SourceActorTierLifecycleRuntime): void {guard(() => {
+      const actor = entry(id);
+      if (tierSources.has(id)) fail('tier lifecycle sources already bound');
+      if (!isSourceActorTierLifecycleRuntime(tiers)) fail('tier lifecycle requires the genuine source runtime, not callback effects');
+      const method = (key: keyof SourceActorTierLifecycleRuntime) => {
+        const fn = read(tiers, key);
+        if (typeof fn !== 'function') fail(`${key}: own data-function required`);
+        return (...args: unknown[]): unknown => {const result = Reflect.apply(fn, tiers, [id, ...args]); check(); return result;};
+      };
+      const bound: TierSources = {runtime: tiers, actor: method('getActualActor'), borg: method('getActualBorg'),
+        status: method('getStatusBinding'), world: method('getWorldBinding'), gauge: method('getGaugeBinding'),
+        tier: method('getTierOwner'), apply: method('applyDelta127')};
+      checkTierSources(bound, actor); check(); tierSources.set(id, bound);
+    });},
     resetDownGauge(id: symbol): void {guard(() => reset(id, entry(id), false));},
     resetSecondaryGauge(id: symbol): void {guard(() => reset(id, entry(id), true));},
     updateActor(id: symbol): void {guard(() => {
@@ -165,10 +201,15 @@ export function createSourceActorGaugeScaleRuntime(sources: SourceActorGaugeScal
         const remaining = s16(timer - 1);
         write(actor.tier, 'timerFrames', remaining);
         if (remaining <= 0) {
-          // lbz/extsb/neg precede the actual call. Existing host tier74a helper
-          // lacks the global gate and table effects, so never invoke it here.
-          integer(read(actor.tier, 'deltaAccum'), -128, 127, 'deltaAccum');
-          fail('8005baf4 reached unsupported source call 8006817c (global gate and parameter table owner required)');
+          // lbz/extsb/neg precede the actual call, even when6817c's global
+          // gate later returns. Its genuine return precedes BOTH caller clears.
+          const delta = -integer(read(actor.tier, 'deltaAccum'), -128, 127, 'deltaAccum');
+          const tiers = tierSources.get(id);
+          if (!tiers) fail('8005baf4 reached unsupported source call 8006817c (global gate and parameter table owner required)');
+          checkTierSources(tiers, actor);
+          if (tiers.apply(delta) !== undefined) fail('genuine tier lifecycle returned asynchronously or unexpectedly');
+          write(actor.tier, 'timerFrames', 0); //5bafc, after genuine return.
+          write(actor.tier, 'deltaAccum', 0); //5bb00, not before6817c.
         }
       }
       // Archived loads are B8 then B4, unlike the decompiler's printed order.

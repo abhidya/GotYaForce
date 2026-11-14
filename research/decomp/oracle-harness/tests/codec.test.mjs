@@ -33,6 +33,22 @@ test("field map carries the damage-core RomActor fields with correct offsets", (
   assert.equal(f.controlWord.kind, "u32");
 });
 
+test("normal lifecycle flag bytes retain separate canonical actor offsets", () => {
+  const f = fieldMap.byInterface.RomActor;
+  assert.equal(f.stateFlagA.offset, 0x57a);
+  assert.equal(f.stateFlagB.offset, 0x57b);
+  assert.equal(f.stateFlagA.kind, "u8");
+  assert.equal(f.stateFlagB.kind, "u8");
+  const { codec, u8 } = makeCodec();
+  codec.beginCase();
+  codec.encodeField(BASE, "stateFlagA", 0x25);
+  codec.encodeField(BASE, "stateFlagB", 0x81);
+  assert.equal(u8[BASE + 0x579], 0xa5);
+  assert.equal(u8[BASE + 0x57a], 0x25);
+  assert.equal(u8[BASE + 0x57b], 0x81);
+  assert.equal(u8[BASE + 0x57c], 0xa5);
+});
+
 test("u16be preserves big-endian byte order at the data boundary", () => {
   const { codec, u8 } = makeCodec();
   codec.beginCase();
@@ -182,4 +198,16 @@ test("host stream cursors and active flags cannot overwrite source wait pointers
       }
     }
   }
+});
+
+
+test("source held5d8 is a halfword and never overwrites adjacent cue states5da/5db", () => {
+  const rec = fieldMap.byInterface.RomActor.inputHeld5d8;
+  assert.equal(rec.kind, "u16"); assert.equal(rec.offset, 0x5d8); assert.equal(rec.width, 2);
+  const { codec, u8 } = makeCodec(); codec.beginCase();
+  codec.encodeField(BASE, "fbState", -128); codec.encodeField(BASE, "ubState", 127);
+  const before = u8.slice(BASE + 0x5da, BASE + 0x5dc);
+  codec.encodeField(BASE, "inputHeld5d8", 0xabcd);
+  assert.deepEqual(u8.slice(BASE + 0x5d8, BASE + 0x5da), Uint8Array.of(0xcd, 0xab));
+  assert.deepEqual(u8.slice(BASE + 0x5da, BASE + 0x5dc), before);
 });

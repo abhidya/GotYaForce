@@ -82,4 +82,66 @@ export function runAnimationDescriptorBankSelfTests(): void {
   }});
   rejects(() => r.resolveDescriptor(proxy, selector, 1, 0), 'caught same-runtime reentry');
   check(trapped && resolve(1, 1) === r.cursorAt(root, 44), 'poisoned reentry resets after failure');
+
+  // Disjoint synthetic windows use real logical coordinates, never a fabricated
+  // contiguous zero bank. The high/low group displacement crosses adjacent views.
+  const ground = new Uint8Array(20), air = new Uint8Array(20); ground[3] = 91; air[3] = 92;
+  const windowInput = [
+    {offset: 0x5f4, bytes: air}, {offset: 8, bytes: new Uint8Array([0x01])},
+    {offset: 9, bytes: new Uint8Array([0x24])}, {offset: 0x124, bytes: new Uint8Array([0x04, 0xbc, 0x04, 0xd0])},
+    {offset: 0x5e0, bytes: ground},
+  ];
+  const sparseRoot = r.createByteWindows(windowInput), sparseReady = {family1d88: sparseRoot, shared1d8c: null};
+  const sparseResolve = (action: number) => r.resolveDescriptor(sparseReady, {defaultSelector582: 4}, 4, action);
+  const groundCursor = sparseResolve(0), airCursor = sparseResolve(1);
+  check(groundCursor === r.cursorAt(sparseRoot, 0x5e0) && airCursor === r.cursorAt(sparseRoot, 0x5f4),
+    'sparse lookup returns the same canonical interned descriptor cursors');
+  check(r.readByte(groundCursor, 3) === 91 && r.readByte(airCursor, 3) === 92, 'explicit descriptor bytes reached through genuine bank lookup');
+  ground.fill(255); air.fill(255); windowInput[0]!.offset = 0; windowInput.length = 0;
+  check(r.readByte(sparseResolve(0), 3) === 91 && r.readByte(sparseResolve(1), 3) === 92,
+    'sparse input mutation cannot replace owned records or lookup bytes');
+  for (const offset of [0, 7, 10, 0x123, 0x128, 0x5df, 0x608, 0xffffffff])
+    rejects(() => r.readByte(r.cursorAt(sparseRoot, offset)), 'uncovered');
+  rejects(() => sparseResolve(2), 'byte296: uncovered');
+  rejects(() => r.resolveDescriptor(sparseReady, selector, 3, 0), 'byte6: uncovered');
+  rejects(() => r.readByte(groundCursor, -0x5e1), 'read coordinate');
+  const sparseLazy = r.createByteWindows([{offset: 8, bytes: new Uint8Array([0, 10, 0, 20])}]);
+  const sparseLazyResult = r.resolveDescriptor({family1d88: sparseLazy, shared1d8c: null}, selector, 4, 0);
+  check(sparseLazyResult === r.cursorAt(sparseLazy, 30), 'missing descriptor coverage is not read during pointer resolution');
+  rejects(() => r.readByte(sparseLazyResult), 'uncovered');
+  const emptySparse = r.createByteWindows([]);
+  rejects(() => r.readByte(emptySparse), 'uncovered');
+  const sparseLast = r.createByteWindows([{offset: 0xffffffff, bytes: new Uint8Array([37])}]);
+  check(r.readByte(r.cursorAt(sparseLast, 0xffffffff)) === 37, 'last logical coordinate is independent of copy budget');
+  rejects(() => r.readByte(r.cursorAt(sparseLast, 0xffffffff), 1), 'read coordinate');
+  rejects(() => r.cursorOffset(root, groundCursor), 'does not belong');
+  const otherRuntime = createSourceAnimationDescriptorBankRuntime();
+  rejects(() => otherRuntime.readByte(groundCursor), 'owned byte cursor');
+  for (const offset of [-1, NaN, Infinity, 0.5, 0x100000000])
+    rejects(() => r.createByteWindows([{offset, bytes: new Uint8Array([1])}]), 'window offset');
+  rejects(() => r.createByteWindows([{offset: 0xffffffff, bytes: new Uint8Array(2)}]), 'extent overflows');
+  rejects(() => r.createByteWindows([{offset: 0, bytes: new Uint8Array(0)}]), 'nonempty');
+  rejects(() => r.createByteWindows([{offset: 5, bytes: new Uint8Array(2)}, {offset: 4, bytes: new Uint8Array(2)}]), 'overlapping');
+  rejects(() => r.createByteWindows([{offset: 0, bytes: new Proxy(new Uint8Array(1), {})}]), 'Uint8Array');
+  if (typeof SharedArrayBuffer !== 'undefined')
+    rejects(() => r.createByteWindows([{offset: 0, bytes: new Uint8Array(new SharedArrayBuffer(1))}]), 'non-shared');
+  rejects(() => r.createByteWindows([{offset: 0, bytes: new Uint8Array(2)}], {maxBytes: 1}), 'aggregate copied byte budget');
+  rejects(() => r.createByteWindows([{offset: 0, bytes: new Uint8Array(1)}, {offset: 2, bytes: new Uint8Array(1)}], {maxWindows: 1}),
+    'window count budget');
+  const sparseExotic = new Uint8Array([73]);
+  for (const key of ['buffer', 'length', 'byteLength', Symbol.iterator])
+    Object.defineProperty(sparseExotic, key, {get() {throw Error('getter invoked');}});
+  check(r.readByte(r.createByteWindows([{offset: 0, bytes: sparseExotic}])) === 73, 'window copy bypasses view getters and iterator');
+  let windowGetter = false;
+  const badWindow = {get offset() {windowGetter = true; return 0;}, bytes: new Uint8Array(1)};
+  rejects(() => r.createByteWindows([badWindow]), 'offset: own data property');
+  check(!windowGetter, 'window accessors rejected without invocation');
+  const reentrantWindow = new Proxy({offset: 0, bytes: new Uint8Array(1)}, {getOwnPropertyDescriptor(target, key) {
+    try {r.readByte(groundCursor);} catch {trapped = true;}
+    return Object.getOwnPropertyDescriptor(target, key);
+  }});
+  trapped = false;
+  rejects(() => r.createByteWindows([reentrantWindow]), 'caught same-runtime reentry');
+  check(trapped && r.readByte(groundCursor, 3) === 91, 'window import reentry poisons and resets same bank guard');
+  console.log('[animation-descriptor-bank] PASS: complete and disjoint copied bytes, canonical cursors and reached uncovered-byte refusals; synthetic inputs only, no source provenance or archive parsing claim');
 }

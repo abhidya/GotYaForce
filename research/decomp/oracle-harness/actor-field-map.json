@@ -2,10 +2,52 @@
  "generated_by": "research/decomp/oracle-harness/gen_actor_field_map.py",
  "map_schema": 1,
  "source": "packages/combat/src/rom/actor.ts",
- "source_sha256": "95a8622db7cbb59d7eab4b562230b2729bdea535cd920e41ae75786453106356",
+ "source_sha256": "3706558381cd4b8fcaa4df4fde52ea1432651f5473a7ea220e04fb3625fcc295",
  "interfaces": {
   "RomActor": {
    "fields": [
+    {
+     "offset": 0,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "active0"
+    },
+    {
+     "offset": 1636,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "field664"
+    },
+    {
+     "offset": 1418,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "byte58a"
+    },
+    {
+     "offset": 1419,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "byte58b"
+    },
+    {
+     "offset": 1420,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "byte58c"
+    },
+    {
+     "offset": 1421,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "byte58d"
+    },
+    {
+     "offset": 2003,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "byte7d3"
+    },
     {
      "kind": "port_side",
      "tsField": "physicsRuntime"
@@ -33,6 +75,12 @@
      "kind": "vec3",
      "width": 12,
      "tsField": "aimOrigin518"
+    },
+    {
+     "offset": 7676,
+     "kind": "s16",
+     "width": 2,
+     "tsField": "aimRoll1dfc"
     },
     {
      "kind": "struct",
@@ -187,6 +235,16 @@
      "kind": "unmapped"
     },
     {
+     "offset": 520,
+     "kind": "f32",
+     "width": 4,
+     "tsField": "mass208"
+    },
+    {
+     "tsField": "noClamp6cb",
+     "kind": "unmapped"
+    },
+    {
      "tsField": "targetDistance760",
      "kind": "unmapped"
     },
@@ -203,6 +261,18 @@
     {
      "kind": "port_side",
      "tsField": "afterimageSerial"
+    },
+    {
+     "offset": 1402,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "stateFlagA"
+    },
+    {
+     "offset": 1403,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "stateFlagB"
     },
     {
      "offset": 1401,
@@ -303,6 +373,12 @@
      "tsField": "slot"
     },
     {
+     "offset": 1085,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "byte43d"
+    },
+    {
      "offset": 136,
      "kind": "u8",
      "width": 1,
@@ -381,6 +457,18 @@
      "kind": "u32",
      "width": 4,
      "tsField": "controlWord"
+    },
+    {
+     "offset": 1768,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "byte6e8"
+    },
+    {
+     "offset": 1769,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "byte6e9"
     },
     {
      "offset": 1408,
@@ -641,6 +729,10 @@
      "tsField": "statusWord5b4"
     },
     {
+     "tsField": "statusWord5bc",
+     "kind": "unmapped"
+    },
+    {
      "offset": 1492,
      "kind": "u32",
      "width": 4,
@@ -648,8 +740,8 @@
     },
     {
      "offset": 1496,
-     "kind": "u32",
-     "width": 4,
+     "kind": "u16",
+     "width": 2,
      "tsField": "inputHeld5d8"
     },
     {

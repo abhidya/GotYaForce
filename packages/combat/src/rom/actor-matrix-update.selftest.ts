@@ -1,5 +1,5 @@
 import {createRomActor} from './actor.js';
-import {createSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateBinding} from './actor-matrix-update.js';
+import {createSourceActorMatrixUpdateRuntime, isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateBinding} from './actor-matrix-update.js';
 import {createSourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {createSourceActorJointMappingRuntime} from './actor-joint-mapping.js';
 import {createSourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
@@ -102,6 +102,17 @@ function fixture(deferBind = false) {
     state: () => runtime.getActorBinding(source.id), update: () => runtime.updateActor(source.id)};
 }
 export function runActorMatrixUpdateSelfTests(): void {
+  {
+    const f = fixture();
+    check(isSourceActorMatrixUpdateRuntime(f.runtime) && Object.isFrozen(f.runtime), 'genuine frozen matrix owner');
+    check(!isSourceActorMatrixUpdateRuntime({...f.runtime}), 'copied methods do not copy matrix provenance');
+    check(f.runtime.getActualActor(f.id) === f.actual && f.runtime.getWorldBinding(f.id) === f.worldState &&
+      f.runtime.getMappingActor(f.id) === f.mapping.getActor(f.id), 'retained canonical identities are shared with rate lifecycle');
+    check(f.runtime.getGlobals() === f.globals && Reflect.ownKeys(f.globals).join() === 'maskD2',
+      'match global identity is borrowed without hydrating D9 or1829 defaults');
+    check(f.events.length === 0, 'identity reads never perform source matrix effects');
+    rejects(() => f.runtime.getActualActor(Symbol('unknown')), 'unknown/non-owned');
+  }
   {
     const f = fixture(); f.update();
     check(f.events.join(',') === 'prepare,rebuild:0,rebuild:1', 'one preparation and two actual root rebuilds');
