@@ -192,6 +192,14 @@ export interface RomActor {
   /** Actual+6cb stage-exit/no-clamp byte, shared with physicsExtras.
    * Explicit source owner only; no lifecycle/default host hydration. */
   noClamp6cb?: number;
+  /** Actual+758 primary-target distance, distinct from captured-target+760.
+   * Explicit source destination only; no constructor/default hydration.
+   * @romfield targetDistance758 +0x758 f32 */
+  targetDistance758?: number;
+  /** Actual+75c primary horizontal distance, distinct from captured+764.
+   * Explicit source destination only; no constructor/default hydration.
+   * @romfield horizontalDistance75c +0x75c f32 */
+  horizontalDistance75c?: number;
   /** Actual+760 full3D captured-target distance. Legacy bridge may pre-normalize
    * this field; source tick-prefix requires explicit fresh raw input instead. */
   targetDistance760?: number;

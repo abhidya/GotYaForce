@@ -117,6 +117,8 @@ export interface SourceActorWorldMatrixRuntime {
   /** Same retained mapping header, for identity-preserving composition. */
   getMappingActor(identity: symbol): object;
   getActorBinding(identity: symbol): SourceActorWorldMatrixBinding;
+  /** Identity-only actual actor inventory, for actor-scoped inline storage. */
+  getRetainedActorOwners(): readonly object[];
   /** Canonical inline20 vector already retained at binding; no scalar reads. */
   getPositionOwner(identity: symbol): object;
   /** Live owned record, with lazy element reads left to the caller. */
@@ -482,6 +484,7 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       for (const [matrixId, value] of matrices) {assignedMatrixIds.add(matrixId); assignedMatrixRecords.add(value);}
     });},
     getActorBinding(id: symbol): SourceActorWorldMatrixBinding {return entry(id).binding;},
+    getRetainedActorOwners() {return Object.freeze([...actors.values()].map(e=>e.actual));},
     getPositionOwner(id: symbol): object {return entry(id).position;},
     getWorldMatrix(id: symbol, index: number): readonly number[] {
       let result!: readonly number[];

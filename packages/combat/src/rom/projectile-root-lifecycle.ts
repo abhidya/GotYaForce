@@ -411,8 +411,11 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
         ...prehook.getStatusRuntime().getRetainedStorageOwners()];
       // Declared stack/profile identities are host alias metadata, not source
       // loads. Do not call accessors or inspect unrelated source fields.
+      // This is a metadata inventory, not a source read of an unconsumed
+      // processor or stack. Never invoke accessors or demand their presence.
+      const declared=Object.getOwnPropertyDescriptors(sources);
       for(const key of ['targetStack','initializationStack','processor']) {
-        const p=Object.getOwnPropertyDescriptor(sources,key);
+        const p=declared[key];
         if(p && 'value' in p && p.value!==null && typeof p.value==='object') records.push(p.value);
       }
       for(const e of children.values()) records.push(e.bytes,e.actual,e.stage,e.world,e.status);

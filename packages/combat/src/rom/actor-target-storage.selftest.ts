@@ -456,7 +456,7 @@ function outerTests(make:Make):void {
         captured=true;for(let i=0x20;i<0x24;i++) x.bytes[i]=0;
       }
     });
-    observe(()=>rejects(()=>frame.runFrame(),nullable?'8006b180':'8006afb0'),(owner,key)=>{
+    observe(()=>rejects(()=>frame.runFrame(),nullable?'horizontalDistance75c':'8006afb0'),(owner,key)=>{
       nullWinner(owner,key);
       if(owner===x.targetPreparation&&key==='targetDispatch') selected=true;
       if(!selected) return;
@@ -482,5 +482,5 @@ function outerTests(make:Make):void {
 
 export function runActorTargetStorageSelfTests(make:Make):void {
   basicAndFlags(make);liveRedirect(make);finalReloads(make);orderAndFaults(make);redirectFaultsAndBounds(make);savedRedirectLimit(make);descriptorFaults(make);descriptorOwnerAliases(make);aliasesAndInterruptions(make);outerTests(make);
-  console.log('[actor-target-storage] PASS: genuine HIT interior descriptor reuse, live BE0200 sibling selection and saved signed count, original OBJECT/actual identity stores and raw XY-before-stores/Z-after-Y order, lazy failures and partial writes, aliases/reentry/independent closure, state1 refusal and real outer primary null-constant/SquareDistance-threshold boundaries before next-actor or third-pass reads; explicit offline synthetic operands only, no completed-frame/console/full-game claim');
+  console.log('[actor-target-storage] PASS: genuine HIT interior descriptor reuse, live BE0200 sibling selection and saved signed count, original OBJECT/actual identity stores and raw XY-before-stores/Z-after-Y order, lazy failures and partial writes, aliases/reentry/independent closure, state1 refusal and real outer primary absent-first-destination/missing-threshold boundaries before next-actor or third-pass reads; explicit offline synthetic operands only, no completed-frame/console/full-game claim');
 }

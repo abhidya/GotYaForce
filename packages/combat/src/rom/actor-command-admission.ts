@@ -213,7 +213,7 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
         fail(`${key}: competing command-admission storage on another owner`);
       for (const key of aliases) if (property(owner, key) !== undefined) fail(`${key}: competing command-admission storage alias`);
       if (owner !== global && property(owner, 'byte45') !== undefined) fail('byte45: competing match-global storage');
-      for (const key of ['float8043762c', 'float80437678', 'float80437078', 'flags3994'])
+      for (const key of ['float8043762c', 'float80437658', 'float80437678', 'float80437078', 'flags3994'])
         if (owner !== data && property(owner, key) !== undefined) fail(`${key}: competing shared data storage`);
     }
   };

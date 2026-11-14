@@ -8,8 +8,8 @@
  * clears. Optional shared10514 ingress supports6b450 early returns before
  * mandatory6b7f4. Its optional genuine target-dispatch owner continues inactive
  * clearing and entry0 bounded returns; skipped lifecycle rows and dispatch
- * returns execute the primary508/504 live SquareDistance path through its next
- * constant boundary. Skipped lifecycle rows retain canonical508/target83 bounds.
+ * returns execute the primary508/504 live SquareDistance path and ordered zero/null
+ * distance stores through the next mandatory direction helper or estimator. Skipped lifecycle rows retain canonical508/target83 bounds.
  * Its bounded return still cannot skip mandatory27764.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
@@ -116,6 +116,11 @@ function unsigned(value: unknown,max: number,where: string): number {
   return value===0 ? 0 : value;
 }
 const s8=(value: number): number=>value<<24>>24;
+// Final host destination check uses the native intrinsic retained at module load.
+// For the declared synchronous nonproxy records it cannot invoke application
+// callbacks. A stale earlier metadata snapshot cannot authorize creation or a
+// setter call after the observable ownership checks have completed.
+const primaryStoreDescriptor=Reflect.getOwnPropertyDescriptor;
 export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFrameSources): SourceBattleOuterFrameRuntime {
   const scheduler=own(sources,'scheduler');
   if(!isSourceObjectSchedulerRuntime(scheduler)) fail('genuine source scheduler required');
@@ -563,6 +568,80 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           fail('6ae60 primary canonical actor/command/world changed');
       };
       const load=(owner: object,key: string): unknown=>{const value=read(owner,key);basicGuard();return value;};
+      let data: object|undefined;
+      let operandsGuard=basicGuard;
+      const distanceKeys=['targetDistance758','horizontalDistance75c'] as const;
+      const shadowKeys=['field758','field75c','field75C','float758','float75c','float75C',
+        ...Array.from({length:8},(_,index)=>0x758+index).flatMap(offset=>
+          [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
+      const distanceGuard=(): void=>{
+        operandsGuard();
+        const commandRuntime=admission(),actionRuntime=commandRuntime.getActionRuntime();
+        if(data!==undefined && commandRuntime.getData()!==data) fail('6ae60 primary shared data owner changed');
+        const actualActors=world.getRetainedActorOwners();
+        if(!actualActors.includes(actor)) fail('6ae60 primary actual actor owner missing');
+        const canonical=[sources,globals,root,scheduler,allocator,spawns,world,binding,
+          commandRuntime.getGlobal(),commandRuntime.getWorldBinding(id),commandRuntime.getStatusBinding(id),
+          commandRuntime.getMappingActor(id),commandRuntime.getAttributeBinding(id),commandRuntime.getChargeBinding(id),
+          commandRuntime.getActionBinding(id),commandRuntime.getCueBinding(id),commandRuntime.getDispatchBinding(id),
+          commandRuntime.getStartBinding(id),commandRuntime.getStreamBinding(id),...retained.values(),
+          ...world.getRetainedMatrixOwners(),...commandRuntime.getKnownStorageOwners(),
+          ...actionRuntime.getRetainedStorageOwners(),...status.getRetainedStorageOwners(),
+          ...allocator.getRetainedStorageOwners(),root.getDrawList(),...dispatch.getRetainedStorageOwners(),
+          ...root.getRetainedStorageOwners(),...scheduler.getRetainedStorageOwners()];
+        // Host metadata inventories, not extra source scalar or target reads.
+        const records=[...new Set([...canonical,...actualActors,...massActors.values(),...(data?[data]:[])])];
+        const snapshots=records.map(owner=>({owner,fields:Object.getOwnPropertyDescriptors(owner)}));basicGuard();
+        const nested=snapshots.flatMap(({fields})=>Object.values(fields).flatMap(p=>
+          'value' in p && p.value!==null && typeof p.value==='object' ? [p.value as object]:[]));
+        const owners=[...new Set([...records,...nested])];
+        if(data!==undefined && (actualActors.includes(data) || [sources,globals,root,scheduler,allocator,spawns,world,binding,
+          commandRuntime.getWorldBinding(id),commandRuntime.getStatusBinding(id),commandRuntime.getMappingActor(id),
+          commandRuntime.getAttributeBinding(id),commandRuntime.getChargeBinding(id),commandRuntime.getActionBinding(id),
+          commandRuntime.getCueBinding(id),commandRuntime.getDispatchBinding(id),commandRuntime.getStartBinding(id),
+          commandRuntime.getStreamBinding(id),...retained.values(),...world.getRetainedMatrixOwners()].includes(data)))
+          fail('6ae60 primary data aliases canonical source storage');
+        for(const owner of owners) {
+          const fields=Object.getOwnPropertyDescriptors(owner);basicGuard();
+          for(const key of distanceKeys) if(!actualActors.includes(owner) && fields[key]!==undefined)
+            fail(`${key}: competing primary distance storage`);
+          for(const key of shadowKeys) if(fields[key]!==undefined)
+            fail(`${key}: competing primary distance storage alias`);
+          for(const key of ['float80437658','float80437678']) if(owner!==data && fields[key]!==undefined)
+            fail(`${key}: competing primary shared data storage`);
+        }
+        operandsGuard();
+      };
+      const sourceFloat=(value: unknown,key: string): number=>{
+        if(typeof value!=='number' || !Number.isFinite(value) || !Object.is(value,Math.fround(value)))
+          fail(`${key}: finite exact source float32 required`);return value;
+      };
+      const constant=(key: 'float80437658'|'float80437678',expected: number,address: string): number=>{
+        if(data===undefined) data=record(admission().getData(),'6ae60 primary shared data');
+        distanceGuard();
+        const field=Object.getOwnPropertyDescriptor(data,key);distanceGuard();
+        if(!field || !('value' in field)) fail(`${address} ${key}: own data property required`);
+        const value=sourceFloat(field.value,key);
+        if(!Object.is(value,expected)) fail(`${address} ${key}: differs from authenticated source bits`);
+        return value;
+      };
+      const store=(key: typeof distanceKeys[number],value: number): void=>{
+        distanceGuard();
+        const field=Object.getOwnPropertyDescriptor(actor,key);distanceGuard();
+        if(!field || !('value' in field)) fail(`${key}: own data property required`);
+        if(!field.writable) fail(`${key}: non-writable field`);
+        // Host admission may discover a changed descriptor. Do not turn a
+        // reached plain store into property creation or an accessor callback.
+        const current=Object.getOwnPropertyDescriptors(actor)[key];distanceGuard();
+        if(!current || !('value' in current)) fail(`${key}: own data property changed before store`);
+        if(!current.writable) fail(`${key}: non-writable field before store`);
+        const live=primaryStoreDescriptor(actor,key);
+        if(!live || !('value' in live)) fail(`${key}: live own data property required before store`);
+        if(!live.writable) fail(`${key}: live non-writable field before store`);
+        // No application callback occurs between this final intrinsic and the
+        // plain own-data overwrite. The old scalar is never validated or used.
+        (actor as Record<string,unknown>)[key]=value;distanceGuard();
+      };
       for(const owner of [actor,binding]) noShadows(owner,['field504','field508',
         ...Array.from({length:8},(_,index)=>0x504+index).flatMap(offset=>
           [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])]);
@@ -570,7 +649,16 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       //af8c compares this captured pointer only. It does not dereference the
       //target, infer eligibility, or recover the OBJECT from that target actor.
       const targetPointer=load(binding,'pointer508');
-      if(targetPointer===null) fail('8006b180 reached unsupported80437678 primary null-target constant');
+      if(targetPointer===null) {
+        const missing=constant('float80437678',20000,'8006b180');
+        store('horizontalDistance75c',missing);store('targetDistance758',missing);
+        noShadows(actor,['field72','short72','yaw72','114','115','byte72','byte73']);
+        const headingWord=load(actor,'heading');distanceGuard();
+        const raw=unsigned(headingWord,65535,'heading');
+        const heading=raw<<16>>16; //b18c lha; actual heading retains raw BAM16 bits.
+        void heading;
+        fail('8006b190 reached mandatory80045204 primary null-target heading helper');
+      }
       record(targetPointer,'6ae60 primary pointer508');
       //af98 captures504 before forming both vector addresses. Pointer-domain
       //admission for B is deferred until its first actual paired load.
@@ -609,15 +697,36 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           fail('6ae60 position20 aliases canonical source storage');
         basicGuard();
       };
-      positionGuard();
+      operandsGuard=positionGuard;positionGuard();
       const processor=call(()=>root.getVectorProcessorProfile());
       if(processor===undefined) fail('8006afac reached authenticated8020bc88 PSVECSquareDistance; explicit processor profile unavailable');
       if(processor===position) fail('6ae60 position20 aliases processor storage');
-      readSourceSquareDistance({a:position,aName:'position20',b:provider,bRepresentation:'record',
+      const distance=readSourceSquareDistance({a:position,aName:'position20',b:provider,bRepresentation:'record',
         allocator,root,processor,guard:positionGuard});
-      //Only now does the caller reach its first threshold load. Never replace
-      //frsqrte with host sqrt, or skip the remaining same-actor preparation.
-      fail('8006afb0 reached unsupported80437658 primary distance threshold load');
+      //The authenticated finite model can return zero, not a negative square.
+      //Positive values still require the actual estimator; no sqrt substitute.
+      if(distance>constant('float80437658',0,'8006afb0'))
+        fail('8006afbc reached unsupported frsqrte primary distance estimator');
+      store('targetDistance758',distance);
+      const zero=constant('float80437658',0,'8006b00c');
+      //These are ordinary scalar lfs loads. No GQR read or vector snapshot.
+      const scalar=(owner: object,key: string): number=>{
+        const value=read(owner,key);distanceGuard();return sourceFloat(value,key);
+      };
+      const ax=scalar(position,'x');
+      const object=call(()=>allocator.getPointerIdentity(record(provider,'captured primary OBJECT')));distanceGuard();
+      const bx=call(()=>allocator.readF32(object,0x64));distanceGuard();
+      const az=scalar(position,'z'),bz=call(()=>allocator.readF32(object,0x6c));distanceGuard();
+      const dx=addSourceFloat32(ax,-bx),dz=addSourceFloat32(az,-bz);distanceGuard();
+      const xx=sourceFloat(Math.fround(dx*dx),'primary horizontal X square'),
+        zz=sourceFloat(Math.fround(dz*dz),'primary horizontal Z square');distanceGuard();
+      const horizontal=addSourceFloat32(xx,zz);distanceGuard();
+      if(horizontal>zero) fail('8006b03c reached unsupported frsqrte primary horizontal estimator');
+      store('horizontalDistance75c',horizontal);
+      //b094 reloads508, even if an observer changed it after the initial compare.
+      const fresh=read(binding,'pointer508');distanceGuard();
+      if(fresh!==null) record(fresh,'6ae60 fresh primary pointer508');
+      fail('8006b098 reached mandatory8006d228 primary direction helper');
     };
     //8006ae78 captures base once. Signed active!=0, six unrolled physical rows.
     const initial=physical();

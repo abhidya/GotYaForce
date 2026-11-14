@@ -42,6 +42,8 @@ export interface SourceActorInputChargeData {
   float80437630?: number; float80437634?: number;
   /** Explicit authenticated command-capture/trig constants on this data owner. */
   float80437678?: number; float80437078?: number;
+  /** Authenticated primary-distance +0 threshold, no default. */
+  float80437658?: number;
   flags3994?: readonly number[];
   /** Explicit decoded big-endian u32 arrays at802d3970/397c. */
   held3970?: readonly number[]; release397c?: readonly number[];

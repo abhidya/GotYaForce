@@ -398,6 +398,8 @@ export function runActorWorldMatrixSelfTests(): void {
   {
     const f = fixture(),original=f.actual.pos;
     check(f.runtime.getPositionOwner(f.id)===original,'position query returns the already bound canonical owner');
+    const actors=f.runtime.getRetainedActorOwners();
+    check(Object.isFrozen(actors) && actors.includes(f.actual),'actor inventory retains actual actor identities without scalar reads');
     f.actual.pos = {x: 1, y: 2, z: 3};
     check(f.runtime.getPositionOwner(f.id)===original,'position ownership query never adopts a replacement');
     rejects(f.update, 'position record changed'); check(f.output(0)[7] === 0, 'replacement of fixed position record refuses after identity');

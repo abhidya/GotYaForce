@@ -6,8 +6,8 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 
 /** Explicit offline operands on the genuine allocator/HIT/dispatcher graph.
  * The completed6b850 stores precede every main witness. Only the primary
- * SquareDistance call is newly reached; every outer frame still refuses before
- * its threshold load, distance stores, later actor or third target pass. */
+ * SquareDistance call is newly reached; these fixtures leave the new threshold/destinations absent, so every frame
+ * still refuses before distance stores, later actor or third target pass. */
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Bytes=Partial<Record<number,number>>;
 type Vector={x:number;y:number;z:number};
@@ -107,7 +107,7 @@ function branchAndOrderTests(make:Make):void {
     equal(events.join(','),'508,504,gqr0,a.y,a.z,gqr0,b.68,b.69,b.6a,b.6b,b.6c,b.6d,b.6e,b.6f,gqr0,a.x,a.y,gqr0,b.64,b.65,b.66,b.67,b.68,b.69,b.6a,b.6b',
       'canonical508 then captured504 and four exact paired source loads');
     equal(profiles,4,'each primary paired load reads GQR0 freshly');equal(p504,1,'primary504 is captured once');
-    equal(p508,1,'primary508 is read exactly once');equal(forbidden,0,'no later actor/pass, scheduler or distance cell read');
+    equal(p508,1,'primary508 is read exactly once');equal(forbidden,1,'only the newly reached missing threshold load; no later actor/pass, scheduler or distance cell read');
     equal(isSourceActorDoubleFrameClaimed(x.sourceActor),claimed,'primary helper does not grant frame authority');
     equal(x.admissionState.pointer504,x.bytes,'original OBJECT504 store retained');
     equal(x.admissionState.pointer508,x.targetActor,'actual actor508 store retained');
@@ -120,7 +120,7 @@ function branchAndOrderTests(make:Make):void {
   }
   {
     const x=setup(make);let selected=false,changed=false,primary=false,p504=0,profiles=0,scalars=0,constants=0;
-    observe(()=>rejects(()=>x.frame.runFrame(),'8006b180'),(owner,key)=>{
+    observe(()=>rejects(()=>x.frame.runFrame(),'horizontalDistance75c'),(owner,key)=>{
       if(owner===x.targetPreparation&&key==='targetDispatch') selected=true;
       if(selected&&!changed&&owner===x.admissionState&&key==='pointer504') {
         changed=true;x.allocator.writePointer(x.id,0x20,null);
@@ -133,7 +133,7 @@ function branchAndOrderTests(make:Make):void {
     });
     check(changed,'genuine helper final actor reload changed to null');equal(x.admissionState.pointer508,null,'genuine helper stores null508');
     equal(p504,0,'null508 branches before504');equal(profiles,0,'null508 reads no processor profile');
-    equal(scalars,0,'null508 reads no source position owner or coordinates');equal(constants,0,'null508 stops before its threshold constant');retained(x);closed(x);
+    equal(scalars,0,'null508 reads no source position owner or coordinates');equal(constants,1,'null508 reads its one constant then refuses absent first destination');retained(x);closed(x);
   }
   {
     const x=setup(make),opaque={};let touched=0;
@@ -383,5 +383,5 @@ function faultsAndClosureTests(make:Make):void {
 
 export function runActorPrimaryDistanceSelfTests(make:Make):void {
   branchAndOrderTests(make);capturedAndLiveTests(make);arithmeticTests(make);profileTests(make);positionOwnerTests(make);faultsAndClosureTests(make);
-  console.log('[actor-primary-distance] PASS: genuine post6b7f4 canonical508 null/opaque gates, captured original OBJECT504 and actual pos, live four-pair8020bc88 load/byte/GQR0 order, float32 arithmetic and unused-lane refusal, lazy profile/source faults, readonly sources and permanent outer closure retaining earlier stores; stops before primary threshold, distance stores, next actor/pass or scheduler authority; explicit offline operands only, no completed-frame/console/playability claim');
+  console.log('[actor-primary-distance] PASS: genuine post6b7f4 canonical508 null/opaque gates, captured original OBJECT504 and actual pos, live four-pair8020bc88 load/byte/GQR0 order, float32 arithmetic and unused-lane refusal, lazy profile/source faults, readonly sources and permanent outer closure retaining earlier stores; missing-threshold or absent-first-destination boundaries before distance stores, next actor/pass or scheduler authority; explicit offline operands only, no completed-frame/console/playability claim');
 }
