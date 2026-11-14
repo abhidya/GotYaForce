@@ -63,6 +63,7 @@ export interface SourceStreamWaitStartBinding {familyBank1d80: symbol | null; sh
 export interface SourceStreamWaitPartBinding {state1b?: number | undefined; auxiliary1c?: number | undefined; group18: number; action19: number; status1d: number; current00: symbol | null; next04: symbol | null; wait14: number; finished1a: number; event1e: number;}
 export type SourceStreamWaitPartInitial = Omit<SourceStreamWaitPartBinding, 'next04' | 'group18' | 'action19' | 'status1d'> & {next04?: symbol | null; group18?: number; action19?: number; status1d?: number};
 export interface SourceStreamWaitRuntime {
+  getDispatchRuntime(): SourceActorAnimationDispatchRuntime;
   /** Once-bound identity join via genuine movement, after movement.bindActor. */
   bindActualActor(actor: symbol, movement: SourceActorMovementFollowupRuntime): void;
   hasActualActorBinding(actor: symbol): boolean;
@@ -369,6 +370,7 @@ export function createSourceStreamWaitRuntime({mapping, feedback, dispatch, targ
     write(part, 'finished1a', 0);
   };
   const runtime: SourceStreamWaitRuntime = Object.freeze({
+    getDispatchRuntime() {return dispatch;},
     bindActualActor(id: symbol, movement: SourceActorMovementFollowupRuntime): void {
       enter(); try {
         const actor = actorRecord(id);

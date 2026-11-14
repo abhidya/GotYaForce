@@ -9,6 +9,10 @@ import {NeoGredMeleeState} from '../neoGredMelee.js';
 import {bindDoubleNinjaOwnerState, getDoubleNinjaOwnerState} from '../ninjaX.js';
 import {createSourceActorDoublePrehookRuntime, hasIncompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {createSourceActorDoubleActionRuntime, type SourceActorDoubleActionTables} from './actor-double-action.js';
+import {createSourceObjectAllocationRuntime, type SourceAllocationBytes, type SourceObjectGroup} from './source-object-allocation.js';
+import {createSourceActorProjectileSpawnRuntime} from './actor-projectile-spawn.js';
+import {runActorProjectileSpawnSelfTests} from './actor-projectile-spawn.selftest.js';
+import {runSourceObjectAllocationSelfTests} from './source-object-allocation.selftest.js';
 import {createSourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
 import {createSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleBinding} from './actor-control-lifecycle.js';
@@ -76,6 +80,7 @@ function rejects(run: () => void, expected: string): void {
  * Historical observer fixtures retain their original receiver/count assertions.
  * This synchronous construction scope never patches a running source runtime. */
 let genuineCompositionConstruction = false;
+let projectileFixtureConstruction = false;
 function constructGenuineComposition<T>(build: () => T): T {
   const previous = genuineCompositionConstruction;
   genuineCompositionConstruction = true;
@@ -456,7 +461,7 @@ function matrixHydratedControlFixture() {
  * Source setup still consumes retained matrices, never an automatic refresh. */
 function worldMatrixHydratedControlFixture(correctionDescriptor = false, primaryChain = false,
   rotationCorrections?: readonly SourceActorWorldMatrixCorrection[]) {
-  const capacity = primaryChain ? 4 : 2;
+  const capacity = primaryChain ? 4 : projectileFixtureConstruction ? 12 : 2;
   const x = modelHydratedControlFixture(modelDatFixture(), hydrationDatFixture(), capacity); x.begin();
   x.sourceActor.pos.x = 100; x.sourceActor.pos.y = 2; x.sourceActor.pos.z = 300;
   x.sourceActor.stepHeight = 9;
@@ -2843,6 +2848,9 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runControl40DoubleGroundContinuationTests();
   runPhase1DoubleGroundContinuationTests();
   runCallbackAmmoGroundContinuationTests();
+  runSourceObjectAllocationSelfTests();
+  runProjectileSpawnHydratedCompositionTests();
+  runProjectileFrameGroundContinuationTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -11575,13 +11583,41 @@ function doubleFrameHydratedCompositionFixture(bind = true, withGround: boolean 
   const groundSources = {gauges: x.gauges, terrain: groundTerrain};
   const ground = withGround ? createSourceActorGroundProbeRuntime(groundSources) : undefined;
   ground?.bindActor(x.actor);
+  // Optional test-only composition of genuine source owners. Pool contents are
+  // explicit synthetic current free lists, not guessed retail heap hydration.
+  const projectileFixture = projectileFixtureConstruction ? (() => {
+    const bytes = (size: number): SourceAllocationBytes => Object.fromEntries(Array.from({length: size}, (_, i) => [i, 0xa5]));
+    const child = Symbol('source projectile'), nextChild = Symbol('next source projectile');
+    const descriptor = Symbol('source descriptor'), nextDescriptor = Symbol('next source descriptor');
+    const objectBytes = bytes(0x2e4), nextObjectBytes = bytes(0x2e4), descriptorBytes = bytes(0x2c), nextDescriptorBytes = bytes(0x2c);
+    const objectPool = {head: child as symbol | null, tail: nextChild as symbol | null, count: 2};
+    const descriptorPool = {freeHead: descriptor as symbol | null, activeHead: null as symbol | null, count: 2, initCallback14: 0x80006f60};
+    const groups: Record<number, SourceObjectGroup> = Object.fromEntries(Array.from({length: 7}, (_, i) => [i + 8, {head: null, tail: null}]));
+    const allocator = createSourceObjectAllocationRuntime({world: x.world, objectPools: {3: objectPool}, descriptorPools: {0: descriptorPool},
+      groups, typeSizes: {3: 0x2e4}, groupEligibility: {8: 16, 9: 16, 10: 16, 11: 16, 12: 16, 13: 16, 14: 16}});
+    for (const [id, raw] of [[child, objectBytes], [nextChild, nextObjectBytes]] as const) allocator.registerObject(id, raw);
+    for (const [id, raw] of [[descriptor, descriptorBytes], [nextDescriptor, nextDescriptorBytes]] as const) allocator.registerDescriptor(id, raw);
+    allocator.writeU8(child, 2, 3); allocator.writeU8(nextChild, 2, 3);
+    allocator.writePointer(child, 4, nextChild); allocator.writePointer(nextChild, 4, null);
+    allocator.writePointer(descriptor, 0, nextDescriptor); allocator.writePointer(nextDescriptor, 0, null);
+    allocator.bindActor(x.actor, {byte83: 0});
+    const row1 = {family2e: 3, joint02: 11, local04: {x: 55, y: 0, z: 0}, offset2c: 0};
+    const projectileSources = {prehook, world: x.world, admission: x.commandAdmission, gauges: x.gauges, setup: x.ready, allocator, row1};
+    const projectiles = createSourceActorProjectileSpawnRuntime(projectileSources);
+    const projectileInitial = {pointer90: a as object | null};
+    return {projectiles, allocator, objectPool, descriptorPool, groups, child, nextChild, descriptor, nextDescriptor,
+      objectBytes, nextObjectBytes, descriptorBytes, nextDescriptorBytes, row1, projectileSources, projectileInitial};
+  })() : undefined;
   const actionSources = {prehook, attributes: x.attributes, cues: x.cues, tables: actionTables, processor: {gqr0: 0},
-    ...(ground === undefined ? {} : {ground})};
-  const action = createSourceActorDoubleActionRuntime(actionSources); action.bindActor(x.actor);
+    ...(ground === undefined ? {} : {ground}), ...(projectileFixture === undefined ? {} : {projectiles: projectileFixture.projectiles})};
+  const action = createSourceActorDoubleActionRuntime(actionSources);
+  // Source part0 setup is installed by the outer genuine stream fixture below.
+  // Defer only this new composition's binding until that actual owner exists.
+  if (!projectileFixtureConstruction) action.bindActor(x.actor);
   const frameSources = {...x.frameSources, prehook, action}, frame = createSourceActorFrameLifecycleRuntime(frameSources);
   if (bind) frame.bindActor(x.actor);
   return Object.assign(x, {doubleOwner, prehookSources, prehook, prehookState: prehook.getActorBinding(x.actor),
-    actionTables, actionSources, action, groundSources, ground, frameSources, frame,
+    actionTables, actionSources, action, groundSources, ground, frameSources, frame, projectileFixture,
     runFrame: (epoch = 1, targetDistance760 = 64, horizontalDistance764 = 20) =>
       frame.ingestRawDistancesAndRun(x.actor, epoch, {boundary: 'externally-decoded-pre55568-raw', targetDistance760, horizontalDistance764})});
 }
@@ -12906,4 +12942,128 @@ export function runCallbackAmmoGroundContinuationTests():void {
     checkCompletedDoubleFramePermanentRefusal(x);
   }
   console.log('[actor-callback-ammo-ground-continuation] PASS: explicit positive canonical state selects genuine715f8 backflip and6dbe0 on same retained slot2, without max0 unlimited shortcut; real stream/movement/ground prefix and partial stores survive precise7db5c projectile refusal or unconditional estimator boundary; ordinary authored zero state remains unchanged, no naturally reached release/full phase1/clone/browser completion claim');
+}
+
+/** Genuine graph with explicit current pool contents and retained joint11 input.
+ * The authored two-joint synthetic DAT does not hydrate joint11; supplying its
+ * existing inline matrix slot here proves spawn consumption, not model fidelity.
+ * Old fixtures and the ordinary authored zero release state remain unchanged. */
+export function createProjectileSpawnTestFixture(bindFrame = false) {
+  const previous = projectileFixtureConstruction;
+  projectileFixtureConstruction = true;
+  try {
+    const x = control40DoubleGroundContinuationFixture(false), extra = x.projectileFixture;
+    if (!extra) throw Error('projectile construction scope was not retained');
+    const matrix = x.matrices.getMatrix(x.world.getStorage(x.actor).matrices8d4[11]!);
+    [2, .25, -.5, 101, 1, -3, 4, 202, -2, 1, .5, 303].forEach((v, i) => {matrix[i] = v;});
+    extra.projectiles.bindActor(x.actor, extra.projectileInitial); x.action.bindActor(x.actor);
+    if (bindFrame) x.frame.bindActor(x.actor);
+    const setupPart0 = x.ready.getPartBinding(x.mapping.getLayout(x.actor).parts[0]![0]!);
+    return Object.assign(x, extra, {setupPart0});
+  } finally {projectileFixtureConstruction = previous;}
+}
+export function runProjectileSpawnHydratedCompositionTests(): void {
+  runActorProjectileSpawnSelfTests(() => {
+    const x = createProjectileSpawnTestFixture();
+    return {id: x.actor, actual: x.sourceActor, spawn: x.projectiles, allocator: x.allocator, child: x.child,
+      childBytes: x.objectBytes, objectPool: x.objectPool, descriptorPool: x.descriptorPool,
+      sources: x.projectileSources, setupPart0: x.setupPart0, initial: x.projectileInitial};
+  });
+}
+
+/** Real private full-action invocation reaches7db5c after715f8 and6dbe0.
+ * Positive release state and joint11 are explicit test inputs; no source stream
+ * command is fabricated and the ordinary authored release remains zero. */
+export function runProjectileFrameGroundContinuationTests(): void {
+  for (const backflip of [false, true]) {
+    const x = createProjectileSpawnTestFixture(true), a = x.sourceActor;
+    const before = retainCompositionRecords([a, x.objectPool, x.descriptorPool, x.objectBytes, x.descriptorBytes]);
+    rejects(() => x.projectiles.spawn(x.actor, 1), 'exclusively owned'); before();
+    x.runFrame(1);
+    check(x.objectPool.count === 2 && x.descriptorPool.count === 2 && x.objectBytes[0] === 0xa5 && a.fbPhase === 1 &&
+      x.control.getPartBinding(x.actor, 0).state1b === 0, 'authored first frame does not invent a release or consume either pool');
+    const slot = x.status.getAmmoSlot(x.actor, 2), cell = slot.cell, position = a.pos;
+    x.control.getPartBinding(x.actor, 0).state1b = 1;
+    x.control.getPartBinding(x.actor, 1).state1b = backflip ? 255 : 0;
+    rejects(() => x.runFrame(2), '8020bb38 frsqrte');
+    check(a.pos === position && a.fbPhase === 2 && cell.cur === 2 && slot.mirror776 === 3 &&
+      a.lockYaw === (backflip ? 0x8000 : 0) && a.hSpeed === (backflip ? 10 : 0) && a.yVel === (backflip ? 15 : 0),
+      'actual callback physics and one source ammo debit precede one real projectile allocation');
+    check(x.objectPool.count === 1 && x.descriptorPool.count === 1 && x.objectPool.head === x.nextChild &&
+      x.descriptorPool.freeHead === x.nextDescriptor && x.groups[9]!.head === x.child && x.groups[9]!.tail === x.child &&
+      x.allocator.getObject(x.child) === x.objectBytes && x.allocator.getDescriptor(x.descriptor) === x.descriptorBytes,
+      'private frame allocates same canonical child and descriptor through real slot0 group9 insertion');
+    check(x.allocator.readU8(x.child, 0) === 1 && x.allocator.readU8(x.child, 0x10) === 15 &&
+      x.allocator.readU8(x.child, 0x11) === 1 && x.allocator.readPointer(x.child, 0x8c) === x.actor &&
+      x.allocator.readPointer(x.child, 0x90) === x.actor && x.allocator.readPointer(x.child, 0xe0) === x.descriptor &&
+      x.allocator.readU32(x.child, 0xc) === 0x8007dcec && x.allocator.readU32(x.child, 0x10c) === 0x8007e698,
+      'real callback constructs projectile metadata and future callbacks, never invoking those unimplemented lifecycles');
+    check(x.allocator.readF32(x.child, 0x20) === 211 && x.allocator.readF32(x.child, 0x24) === 257 &&
+      x.allocator.readF32(x.child, 0x28) === 193 && x.allocator.readU8(x.child, 0x150) === x.setupPart0.group28 &&
+      x.allocator.readU8(x.child, 0x151) === x.setupPart0.action29,
+      'real PSMTXMultVec consumes retained joint11, then actual part0 animation selectors in source order');
+    check(x.clocks.elapsed08 === 1 && x.blendState.field1c === 2 && x.normalLifecycleState.short6bc === 8 && x.gates.marker578 === 0,
+      'full stream/normal/movement prefix remains visible at honest post-spawn magnitude boundary');
+    const after = retainCompositionRecords([x.objectPool, x.descriptorPool, x.objectBytes, x.descriptorBytes]);
+    checkCompletedDoubleFramePermanentRefusal(x);
+    rejects(() => x.projectiles.spawn(x.actor, 1), 'incomplete');
+    rejects(() => x.allocator.writeU8(x.nextChild, 0, 1), 'incomplete'); after();
+  }
+  {
+    const x = createProjectileSpawnTestFixture(true); x.runFrame(1);
+    rejects(() => x.runFrame(2), '8020bb38 frsqrte');
+    check(x.objectPool.count === 2 && x.descriptorPool.count === 2 && x.objectBytes[0] === 0xa5 &&
+      x.status.getAmmoSlot(x.actor, 2).cell.cur === 3 && x.sourceActor.fbPhase === 1,
+      'ordinary authored zero-state callback still does not spawn or consume ammo');
+  }
+  {
+    const x = createProjectileSpawnTestFixture(true); x.runFrame(1);
+    x.control.getPartBinding(x.actor, 0).state1b = 1;
+    // Explicit late host mutation isolates the post-row1 branch. Setting7c8
+    // before this frame would correctly stop earlier in6f7c0 normalization.
+    const original = Object.getOwnPropertyDescriptor; let changed = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (!changed && owner === x.setupPart0 && key === 'action29' && x.objectBytes[0] === 1) {
+        changed = true; x.doubleOwner.arm7c8 = 1;
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(2), 'row2 is not authenticated');} finally {Object.getOwnPropertyDescriptor = original;}
+    check(changed, 'explicit late7c8 mutation reached after real prehook and first spawn');
+    check(x.objectPool.count === 1 && x.descriptorPool.count === 1 && x.allocator.readU8(x.child, 0x11) === 1 &&
+      x.allocator.readU8(x.child, 0x151) === x.setupPart0.action29 && x.nextObjectBytes[0] === 0xa5,
+      'second-arm branch reads actual7c8 after completed row1 and refuses unread row2 before a second allocation');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  for (const empty of ['descriptor', 'object'] as const) {
+    const x = createProjectileSpawnTestFixture(true); x.runFrame(1);
+    x.control.getPartBinding(x.actor, 0).state1b = 1;
+    if (empty === 'descriptor') {x.descriptorPool.count = 0; x.descriptorPool.freeHead = null;}
+    else {x.objectPool.count = 0; x.objectPool.head = null; x.objectPool.tail = null;}
+    rejects(() => x.runFrame(2), '8020bb38 frsqrte');
+    check(x.status.getAmmoSlot(x.actor, 2).cell.cur === 2 && x.sourceActor.fbPhase === 2 &&
+      x.objectBytes[0] === 0xa5 && x.descriptorBytes[9] === 0xa5 && x.groups[9]!.head === null &&
+      x.objectPool.count === (empty === 'object' ? 0 : 2) && x.descriptorPool.count === (empty === 'descriptor' ? 0 : 2),
+      'real allocator exhaustion returns null after actual ammo debit without fabricated object or descriptor effects');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x = createProjectileSpawnTestFixture(true); x.runFrame(1);
+    x.control.getPartBinding(x.actor, 0).state1b = 1;
+    let injected = false; const original = Object.getOwnPropertyDescriptor;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (!injected && owner === x.sourceActor && key === 'borgMirror94' && x.objectBytes[0] === 1) {
+        injected = true; Object.defineProperty(x.objectBytes, '149', {writable: false});
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {rejects(() => x.runFrame(2), 'non-writable');} finally {Object.getOwnPropertyDescriptor = original;}
+    check(injected && x.objectPool.count === 1 && x.descriptorPool.count === 1 &&
+      x.allocator.readU16(x.child, 0x94) === 0 && x.allocator.readPointer(x.child, 0x90) === x.actor &&
+      x.allocator.readF32(x.child, 0x20) === 0 && x.status.getAmmoSlot(x.actor, 2).cell.cur === 2,
+      'frame94 width fault preserves allocation and pointer90 but neither halfword byte nor later transform; no rollback');
+    checkCompletedDoubleFramePermanentRefusal(x);
+    rejects(() => x.allocator.writeU8(x.nextChild, 0, 1), 'incomplete');
+  }
+  console.log('[actor-projectile-frame-continuation] PASS: genuine frame715f8/6dbe0/7db5c/88aa0/06d4c with actual two-pool allocation, same-byte metadata and joint11 transform; ordered ammo/physics, true exhaustion, unread second-arm boundary, atomic failures and permanent closure; explicit synthetic release/pools/joint11, no flight/retail hydration/browser claim');
 }

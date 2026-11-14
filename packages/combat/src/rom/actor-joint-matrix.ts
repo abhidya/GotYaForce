@@ -53,6 +53,9 @@ export interface SourceActorJointMatrixRuntime {
   copy(source: symbol, destination: symbol): void;
   /** SDK 8020b7a8; caller owns the explicit output vector, which may alias input. */
   transformPoint(matrix: symbol, input: Readonly<SourceJointVector>, output: SourceJointVector): void;
+  /** Same8020b7a8 schedule into canonical BE object bytes; no temporary vector. */
+  transformPointBytes(matrix: symbol, input: Readonly<SourceJointVector>,
+    output: Partial<Record<number, number>>, byteOffset: number): void;
   /** Bounded 45918 path; no general terrain orientation/estimate implementation. */
   orientTerrainMatrix(matrix: symbol, normal: Readonly<SourceJointVector>, axisA: number, axisB: number): void;
   /** Historical name: 47368 (2,.5) folded and (1,1) positive-sine subsets only.
@@ -69,6 +72,10 @@ export interface SourceActorJointMatrixRuntime {
   composeJoint(parent: symbol, destination: symbol, pose: symbol,
     correction: Readonly<SourceJointVector>, scale: Readonly<SourceJointVector>,
     translationOverride?: Readonly<SourceJointVector>): void;
+}
+const sourceJointMatrixRuntimes = new WeakSet<object>();
+export function isSourceActorJointMatrixRuntime(value: unknown): value is SourceActorJointMatrixRuntime {
+  return value !== null && typeof value === 'object' && sourceJointMatrixRuntimes.has(value);
 }
 function fail(reason: string): never {
   throw Error(`[actor-joint-matrix] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -97,39 +104,48 @@ function load(matrix: number[], i: number): number {
 function vectorLoad(vector: Readonly<SourceJointVector>, key: 'x' | 'y' | 'z', where: string): number {
   return float(own(vector, key), `${where}.${key}`);
 }
-function vectorStore(vector: SourceJointVector, key: 'x' | 'y' | 'z', value: number): void {
-  own(vector, key, true); vector[key] = value;
-}
 function multiply(a: number, b: number): number {
   return float(Math.fround(a * b), 'single product');
 }
 function add(a: number, b: number): number {
   return float(Math.fround(a + b), 'single sum');
 }
-function transformPoint(matrix: number[], input: Readonly<SourceJointVector>, output: SourceJointVector): void {
+/** Internal writer is constructed only by genuine methods below, never supplied
+ * as a host callback. All routes share this one authenticated arithmetic tree. */
+function transformPointStores(matrix: number[], input: Readonly<SourceJointVector>,
+  writeOutput: (axis: 'x' | 'y' | 'z', value: number) => void, check: () => void): void {
+  const readVector = (key: 'x' | 'y' | 'z'): number => {const v = vectorLoad(input, key, 'point'); check(); return v;};
+  const readMatrix = (index: number): number => {const v = load(matrix, index); check(); return v;};
   // 8020b7a8..b7f4: each paired row accumulates Z into X's product and
   // translation into Y's product, THEN sums the lanes. Reassociating the
   // dot product (or using Concat's ordering) loses real rounding/zero behavior.
-  const x = vectorLoad(input, 'x', 'point'), y = vectorLoad(input, 'y', 'point');
-  const m0 = load(matrix, 0), m1 = load(matrix, 1);
-  const z = vectorLoad(input, 'z', 'point'); // W=1 supplies exactly +1.
+  const x = readVector('x'), y = readVector('y');
+  const m0 = readMatrix(0), m1 = readMatrix(1);
+  const z = readVector('z'); // W=1 supplies exactly +1.
   const p0 = multiply(m0, x), p1 = multiply(m1, y);
-  const m2 = load(matrix, 2), m3 = load(matrix, 3);
+  const m2 = readMatrix(2), m3 = readMatrix(3);
   const q0 = fma(m2, z, p0), q1 = fma(m3, 1, p1);
-  const m4 = load(matrix, 4), m5 = load(matrix, 5);
+  const m4 = readMatrix(4), m5 = readMatrix(5);
   const resultX = add(q0, q1);
-  const m6 = load(matrix, 6), m7 = load(matrix, 7);
+  const m6 = readMatrix(6), m7 = readMatrix(7);
   const p4 = multiply(m4, x), p5 = multiply(m5, y);
-  vectorStore(output, 'x', resultX);
+  writeOutput('x', resultX);
   const q4 = fma(m6, z, p4), q5 = fma(m7, 1, p5);
-  const m8 = load(matrix, 8), m9 = load(matrix, 9);
+  const m8 = readMatrix(8), m9 = readMatrix(9);
   const resultY = add(q4, q5);
-  const m10 = load(matrix, 10), m11 = load(matrix, 11);
+  const m10 = readMatrix(10), m11 = readMatrix(11);
   const p8 = multiply(m8, x), p9 = multiply(m9, y);
-  vectorStore(output, 'y', resultY);
+  writeOutput('y', resultY);
   const q8 = fma(m10, z, p8), q9 = fma(m11, 1, p9);
-  vectorStore(output, 'z', add(q8, q9));
+  writeOutput('z', add(q8, q9));
 }
+function transformPoint(matrix: number[], input: Readonly<SourceJointVector>, output: SourceJointVector,
+  check: () => void = () => {}): void {
+  transformPointStores(matrix, input, (axis, value) => {
+    own(output, axis, true); check(); output[axis] = value; check();
+  }, check);
+}
+
 function short(value: unknown, where: string): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || value < -32768 || value > 32767) fail(`${where}: signed short required`);
   return value;
@@ -474,7 +490,7 @@ export function createSourceActorJointMatrixRuntime(
     concat(getMatrix(parent), local, output);
     return output;
   }
-  return Object.freeze({
+  const runtime: SourceActorJointMatrixRuntime = Object.freeze({
     createMatrix(initial: readonly number[]): symbol {
       enter();
       try {
@@ -513,7 +529,26 @@ export function createSourceActorJointMatrixRuntime(
     },
     transformPoint(matrix: symbol, input: Readonly<SourceJointVector>, output: SourceJointVector): void {
       enter();
-      try {transformPoint(getMatrix(matrix), input, output);} finally {busy = false;}
+      try {transformPoint(getMatrix(matrix), input, output, () => {if (reentered) fail('caught same-runtime reentry');});} finally {busy = false;}
+    },
+    transformPointBytes(matrix: symbol, input: Readonly<SourceJointVector>,
+      output: Partial<Record<number, number>>, byteOffset: number): void {
+      enter();
+      const check = (): void => {if (reentered) fail('caught same-runtime reentry');};
+      try {
+        if (!Number.isSafeInteger(byteOffset) || byteOffset < 0 || byteOffset > 0xfffffff4 || byteOffset % 4 !== 0)
+          fail('matrix byte destination requires aligned uint32 range');
+        const encoding = new DataView(new ArrayBuffer(4));
+        transformPointStores(getMatrix(matrix), input, (axis, value) => {
+          const offset = byteOffset + (axis === 'x' ? 0 : axis === 'y' ? 4 : 8);
+          // One stfs: validate all four ordinary own-data destinations before
+          // any store. This host fault rule does not emulate memory bus faults.
+          for (let i = 0; i < 4; i++) {own(output, String(offset + i), true); check();}
+          encoding.setFloat32(0, value, false);
+          for (let i = 0; i < 4; i++) output[offset + i] = encoding.getUint8(i);
+          check();
+        }, check);
+      } finally {busy = false;}
     },
     orientTerrainMatrix(matrix: symbol, normal: Readonly<SourceJointVector>, axisA: number, axisB: number): void {
       enter();
@@ -561,4 +596,5 @@ export function createSourceActorJointMatrixRuntime(
       } finally {busy = false;}
     },
   });
+  sourceJointMatrixRuntimes.add(runtime); return runtime;
 }

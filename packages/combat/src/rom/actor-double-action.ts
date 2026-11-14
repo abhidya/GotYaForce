@@ -24,7 +24,9 @@
  * and677b0 before its signed part0.state1b load. Positive state increments540
  * then runs the actual nonnull715f8 callback: conditional part1 backflip stores,
  * genuine6dbe0 slot2 consumption and signed family dispatch. Successful Ninja
- * consumption refuses the first actual7db5c projectile call, before Double7c8.
+ * consumption reaches the optional genuine7db5c row1 runtime. Without it, the
+ * historical boundary remains before Double7c8. Row1 completion precedes7c8;
+ * nonzero7c8 reaches the unauthenticated row2 boundary before its allocation.
  * A returned callback reaches the explicit8020bb38 frsqrte boundary after the
  * authenticated8020bb14 square prefix. Its genuine zero-square return is
  * retained, never manufactured. Callback/ammo instruction order and constants:
@@ -36,6 +38,7 @@
  * operations retain prior stores and permanently latch the shared incomplete
  * Double lifecycle, so changed selectors cannot replay a partial handler.
  */
+import {isSourceActorProjectileSpawnRuntime, bindSourceActorProjectileSpawnFrame, markIncompleteSourceActorProjectileSpawn, type SourceActorProjectileSpawnRuntime} from './actor-projectile-spawn.js';
 import {isPendingSourceActorFrameClaim, type SourceActorFrameLifecycleRuntime} from './actor-frame-lifecycle.js';
 import type {SourceActorTickFrameOwners} from './actor-tick-prefix.js';
 import {isSourceActorGroundProbeRuntime, type SourceActorGroundProbeRuntime} from './actor-ground-probe.js';
@@ -63,6 +66,8 @@ export interface SourceActorDoubleActionSources {
   tables: SourceActorDoubleActionTables;
   /** Genuine677b0 continuation; absence preserves the historical boundary. */
   ground?: SourceActorGroundProbeRuntime;
+  /** Genuine8007db5c row1 continuation; absence preserves the historical boundary. */
+  projectiles?: SourceActorProjectileSpawnRuntime;
   /** Required only when a reached vector helper uses GQR0 float loads/stores. */
   processor?: {gqr0: number};
 }
@@ -73,6 +78,7 @@ export interface SourceActorDoubleActionRuntime {
   getActualActor(identity: symbol): RomActor;
   getPrehookRuntime(): SourceActorDoublePrehookRuntime;
   getGroundRuntime(): SourceActorGroundProbeRuntime | undefined;
+  getProjectileRuntime(): SourceActorProjectileSpawnRuntime | undefined;
   getPrehookBinding(identity: symbol): object;
   getMappingActor(identity: symbol): object;
   getAttributeBinding(identity: symbol): object;
@@ -127,6 +133,8 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
   if (!isSourceActorCueResetRuntime(cues)) fail('genuine source cue-reset runtime required');
   const ground = Object.getOwnPropertyDescriptor(sources, 'ground') === undefined ? undefined : own(sources, 'ground');
   if (ground !== undefined && !isSourceActorGroundProbeRuntime(ground)) fail('genuine source ground-probe runtime required');
+  const projectiles = Object.getOwnPropertyDescriptor(sources, 'projectiles') === undefined ? undefined : own(sources, 'projectiles');
+  if (projectiles !== undefined && !isSourceActorProjectileSpawnRuntime(projectiles)) fail('genuine source projectile spawn runtime required');
   const streams = prehook.getStreamsRuntime();
   let busy = false, poisoned = false;
   const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
@@ -238,6 +246,12 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
       stable(call(() => ground.getWorldBinding(id)), call(() => prehook.getWorldBinding(id)), 'ground world');
       stable(call(() => ground.getStatusBinding(id)), call(() => prehook.getStatusBinding(id)), 'ground status');
       noShadows(e, call(() => ground.getSourceOwners(id)));
+    }
+    if (projectiles !== undefined) {
+      stable(call(() => projectiles.getActualActor(id)),e.actual,'projectile actual');
+      stable(call(() => projectiles.getPrehookRuntime()),prehook,'projectile prehook');
+      stable(call(() => projectiles.getCueRuntime()),cues,'projectile cues');
+      call(() => projectiles.assertActorComplete(id));
     }
     for (const key of TABLES) stable(read(tables, key), arrays[key], key);
     stable(read(e.actual, 'pos'), e.pos, 'position20'); stable(read(e.actual, 'motion'), e.motion, 'motion38');
@@ -417,7 +431,17 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
       const variant = borg === 0 ? 0 : borg === 3 ? 1 : 3;
       // Double's optional second variant2 and7c8 load are AFTER variant1 returns.
       // No clone owner is read or manufactured before this genuine first call.
-      fail(`800715f8 reached unsupported actual8007db5c projectile variant${variant} after genuine8006dbe0 consumption`);
+      if (projectiles === undefined)
+        fail(`800715f8 reached unsupported actual8007db5c projectile variant${variant} after genuine8006dbe0 consumption`);
+      const access = frameAccesses.get(id), spawn = (selected: number) => projectiles.spawn(id,selected);
+      call(() => access === undefined ? spawn(variant) : access.invoke('projectile',projectiles,() => spawn(variant)));
+      if (borg === 3) {
+        // Actual7169c reads current7c8 only after the complete variant1 return.
+        const clone = call(() => prehook.getCloneOwner(id));
+        if (clone === undefined) fail('actual7c8 requires existing explicit persistent clone owner');
+        if (byte(clone,'arm7c8') !== 0)
+          call(() => access === undefined ? spawn(2) : access.invoke('projectile',projectiles,() => spawn(2)));
+      }
     }
   };
   const phaseOne = (id: symbol, e: Entry): void => {
@@ -474,7 +498,11 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
       else fail(`${upper ? 'upper' : 'full'} state: unsupported target0x${address.toString(16)}`);
       check();
       if (!upper) pending.delete(id);
-    } catch (error) {markIncompleteSourceActorDoubleLifecycle(e.actual); throw error;}
+    } catch (error) {
+      markIncompleteSourceActorDoubleLifecycle(e.actual);
+      if (projectiles !== undefined) markIncompleteSourceActorProjectileSpawn(projectiles,id);
+      throw error;
+    }
   });
   const runtime: SourceActorDoubleActionRuntime = {
     bindActor(id) {guard(() => {
@@ -497,13 +525,14 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
         fail('Double action source owner alias');
       owners(id, e); actors.set(id, e); values.forEach(value => assigned.add(value)); claimed.add(actual);
     });},
-    getActualActor(id) {return entry(id).actual;}, getPrehookRuntime() {return prehook;}, getGroundRuntime() {return ground;},
+    getActualActor(id) {return entry(id).actual;}, getPrehookRuntime() {return prehook;}, getGroundRuntime() {return ground;}, getProjectileRuntime() {return projectiles;},
     getPrehookBinding(id) {return entry(id).prehook;}, getMappingActor(id) {return entry(id).mapping;},
     getAttributeBinding(id) {return entry(id).attribute;}, getCueBinding(id) {return entry(id).cue;},
     getDispatchBinding(id) {return entry(id).dispatch;}, getTables() {return tables;},
     getSourceOwners(id) {return Object.freeze([...new Set([...Object.values(entry(id)), ...shared(), ...attributes.getKnownParameterDescriptors(),
       ...(ammoOwners.has(id) ? Object.values(ammoOwners.get(id)!) : []),
-      ...(ground === undefined ? [] : ground.getSourceOwners(id))])]);},
+      ...(ground === undefined ? [] : ground.getSourceOwners(id)),
+      ...(projectiles === undefined ? [] : projectiles.getSourceOwners(id))])]);},
     assertActorComplete(id) {requireCompleteSourceActorDoubleLifecycle(entry(id).actual);},
     captureStateSelectors(id) {return guard(() => {
       const e = entry(id); requireSourceActorDoubleInvocation(e.actual, 'capture', runtime); owners(id, e);
@@ -514,6 +543,8 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     dispatchUpper(id, saved) {dispatch(id, saved, true);}, dispatchFull(id, saved) {dispatch(id, saved, false);},
   };
   runtimes.add(runtime);
-  frameBinders.set(runtime, (id, access) => {entry(id); if (frameAccesses.has(id)) fail('action already has a frame binding'); frameAccesses.set(id, access);});
+  frameBinders.set(runtime, (id, access) => {entry(id); if (frameAccesses.has(id)) fail('action already has a frame binding'); frameAccesses.set(id, access);
+    if (projectiles !== undefined) bindSourceActorProjectileSpawnFrame(runtime,projectiles,id,access);
+  });
   return Object.freeze(runtime);
 }

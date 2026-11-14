@@ -58,6 +58,8 @@ export interface SourceActorAnimationSetupRequest {
 }
 export interface SourceActorAnimationDispatchRuntime {
   getActualMapping(): SourceActorJointMappingRuntime;
+  /** Exact bound setup table; absence stays absent. */
+  getSetupRuntime(): object | undefined;
   getActualFeedback(): SourceJointAnimationFeedbackRuntime;
   /** Same mapping header bound to this actor, never a snapshot. */
   getSourceActor(actor: symbol): SourceActorJointMappingHeader;
@@ -123,6 +125,7 @@ export function createSourceActorAnimationDispatchRuntime(mapping: SourceActorJo
   const partRecord = (id: symbol) => {const value = parts.get(id); if (!value) fail('unknown/non-owned part binding'); return value;};
   const runtime: SourceActorAnimationDispatchRuntime = Object.freeze({
     getActualMapping() {return mapping;},
+    getSetupRuntime() {return readySetup?.table;},
     getActualFeedback() {return feedback;},
     bindTransitionRuntime(value: SourceActorAnimationTransitionRuntime): void {
       enter(); try {

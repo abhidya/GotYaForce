@@ -39,6 +39,7 @@ export interface SourceActorAnimationSetupSources {
 }
 export interface SourceActorAnimationSetupRuntime {
   getActualMapping(): SourceActorAnimationSetupSources['mapping'];
+  getActualStarts(): SourceActorAnimationSetupSources['starts'];
   getActualFeedback(): SourceActorAnimationSetupSources['feedback'];
   getActualDispatch(): SourceActorAnimationSetupSources['dispatch'];
   getActualMetadata(): SourceActorAnimationSetupSources['metadata'];
@@ -74,6 +75,7 @@ function float(value: unknown, key: string): number {
 }
 function link(value: unknown, key: string): symbol | null {if (value !== null && typeof value !== 'symbol') fail(`${key}: decoded symbol or null required`); return value;}
 export function createSourceActorAnimationSetupRuntime(sources: SourceActorAnimationSetupSources): SourceActorAnimationSetupRuntime {
+  const actualStarts = own(sources, 'starts') as SourceActorAnimationSetupSources['starts'];
   const actualMapping = own(sources, 'mapping') as SourceActorAnimationSetupSources['mapping'];
   const actualFeedback = own(sources, 'feedback') as SourceActorAnimationSetupSources['feedback'];
   const actualDispatch = own(sources, 'dispatch') as SourceActorAnimationSetupSources['dispatch'];
@@ -164,6 +166,7 @@ export function createSourceActorAnimationSetupRuntime(sources: SourceActorAnima
   };
   const runtime: SourceActorAnimationSetupRuntime = Object.freeze({
     getActualMapping() {return actualMapping;},
+    getActualStarts() {return actualStarts;},
     getActualFeedback() {return actualFeedback;},
     getActualDispatch() {return actualDispatch;},
     getActualMetadata() {return actualMetadata;},
