@@ -1,6 +1,7 @@
 /** Bounded stored8007dcec callback and initial8007dd84 prefix, not a scheduler.
  * See projectile-callback/initialization-evidence-2026-11-14.md. Only source
- * state0 and row1 are authenticated. An optional genuine8ac80 continuation
+ * states0/2 and row1 are authenticated. Explicit state2 data admits its real
+ * retirement handler; state3/freeing remains unsupported. A genuine8ac80 continuation
  * preserves actual zero return or refreshes the same child position, then
  * refuses at the reached flight helper. Missing HIT remains an explicit bound.
  *
@@ -34,6 +35,8 @@ export interface SourceProjectileRootSources {
   /** Explicit decoded802d6f98[0] and selected802d6da3, copied and validated. */
   initialState0: number;
   row1Hit03: number;
+  /** Optional decoded802d6fa0, admitted only at actual signed state2 dispatch. */
+  retirementState2?: number;
   /** Optional genuine continuation, never a caller-supplied success callback. */
   hits?: SourceProjectileHitRuntime;
   /** Explicit source temporary matrix storage, distinct from all actor matrices. */
@@ -294,6 +297,20 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
           if (retire) {put8(id, 0x18, 2); invalidation(id); put8(id, 0x82, 0);}
         }
         const selected = s8(id, 0x18);
+        if (selected === 2) {
+          // Cell802d6fa0 is a distinct explicit source input. Do not inspect it
+          // while another state is selected or default a missing cell to code.
+          const supplied = Object.getOwnPropertyDescriptor(sources,'retirementState2');check();
+          if (!supplied || ('value' in supplied && supplied.value === undefined))
+            fail('8007dd64 reached unauthenticated projectile state2 dispatch cell');
+          if (!('value' in supplied)) fail('retirementState2: own data dispatch cell required');
+          const target = unsigned(supplied.value,0xffffffff,'retirementState2');
+          if (target !== 0x8007e63c) fail('retirementState2: authenticated dispatch target differs');
+          // Actual7e654 stores3 before7e658 calls8aff0. The saved child then
+          // receives82=0 at7e660 only after that helper returns. This is one
+          // complete invocation, not an inline state3/free-list continuation.
+          put8(id,0x18,3); invalidation(id); put8(id,0x82,0); return;
+        }
         if (selected !== 0) fail(`8007dd64 reached unauthenticated projectile state${selected} dispatch cell`);
         if (state0 !== 0x8007dd84) fail('initial source dispatch target changed');
         initialize(e);

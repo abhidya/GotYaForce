@@ -20,6 +20,7 @@ import {createDoubleProjectileHitExportSlice} from './projectile-hit-export-slic
 import {runProjectileHitRegistrationSelfTests} from './projectile-hit-registration.selftest.js';
 import {runProjectileFlightPrefixSelfTests} from './projectile-flight-prefix.selftest.js';
 import {runProjectileTargetPrefixSelfTests} from './projectile-target-prefix.selftest.js';
+import {runProjectileRetirementSelfTests} from './projectile-retirement.selftest.js';
 import {createSourceActorGroundProbeRuntime} from './actor-ground-probe.js';
 import {createSourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
 import {createSourceActorControlLifecycleRuntime, type SourceActorControlLifecycleBinding} from './actor-control-lifecycle.js';
@@ -2862,6 +2863,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runProjectileHitHydratedCompositionTests();
   runProjectileFlightHydratedCompositionTests();
   runProjectileTargetHydratedCompositionTests();
+  runProjectileRetirementHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -13132,6 +13134,16 @@ export function createProjectileTargetTestFixture() {
   const x=createProjectileFlightTestFixture(),targetStack={displacement:{x:71,y:-23,z:59}},targetProcessor=x.actionSources.processor;
   const rootSources=Object.assign(x.rootSources,{targetStack,processor:targetProcessor});
   return Object.assign(x,{rootSources,targetStack,targetProcessor});
+}
+/** Explicit authenticated state2 cell, with no forced HIT result or state byte.
+ * The tests reach retirement through genuine HIT-zero or source owner guards. */
+export function createProjectileRetirementTestFixture() {
+  const x=createProjectileHitTestFixture();
+  const rootSources=Object.assign(x.rootSources,{retirementState2:0x8007e63c});
+  return Object.assign(x,{rootSources});
+}
+export function runProjectileRetirementHydratedCompositionTests(): void {
+  runProjectileRetirementSelfTests(createProjectileRetirementTestFixture);
 }
 export function runProjectileTargetHydratedCompositionTests(): void {
   runProjectileTargetPrefixSelfTests(createProjectileTargetTestFixture);
