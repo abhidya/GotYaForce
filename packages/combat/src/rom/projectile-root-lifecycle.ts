@@ -8,12 +8,15 @@
  *
  * A separate explicit dispatch consumes a successfully spawned object's SAME
  * bytes. It never runs inline inside7db5c, invents an actor constructor, resumes
- * a failed frame, or claims source8997c/89898 snapshot/loop semantics. Frame-owned
- * actors remain unsupported until that actual later scheduler is implemented.
+ * a failed frame. The separate genuine object scheduler can own this root and
+ * enter its private selected-callback body without duplicating the0c load.
+ * Frame-owned actors still require the unimplemented outer-frame scheduler join.
  * Draw head/tail and104/108 links are distinct from allocator group4/8 lists.
  * Synchronous non-proxy own-data records are the admitted host storage domain.
  * Prior writes remain on failure; the child, parent and allocator cannot replay.
  */
+import {requireSourceObjectSchedulerInvocation, requireStandaloneSourceProjectileRoot,
+  type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import {isSourceActorProjectileSpawnRuntime, markIncompleteSourceActorProjectileSpawn,
   type SourceActorProjectileSpawnRuntime} from './actor-projectile-spawn.js';
 import {isSourceActorStageBoundsRuntime, type SourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
@@ -56,6 +59,21 @@ export interface SourceProjectileRootRuntime {
   getSpawnRuntime(): SourceActorProjectileSpawnRuntime;
   getSourceOwners(projectile: symbol): readonly object[];
   dispatchStoredRoot(projectile: symbol): void;
+}
+interface SchedulerJoin {prepare(scheduler: SourceObjectSchedulerRuntime, child: symbol): symbol;
+  invoke(scheduler: SourceObjectSchedulerRuntime, child: symbol): void; close(scheduler: SourceObjectSchedulerRuntime): void}
+const schedulerJoins = new WeakMap<object, SchedulerJoin>();
+function schedulerJoin(root: SourceProjectileRootRuntime): SchedulerJoin {
+  const join=schedulerJoins.get(root);if(!join || !isSourceProjectileRootRuntime(root)) fail('genuine scheduled projectile root required');return join;
+}
+export function prepareSourceProjectileScheduledRoot(root: SourceProjectileRootRuntime,scheduler: SourceObjectSchedulerRuntime,child: symbol): symbol {
+  return schedulerJoin(root).prepare(scheduler,child);
+}
+export function invokeSourceProjectileScheduledRoot(root: SourceProjectileRootRuntime,scheduler: SourceObjectSchedulerRuntime,child: symbol): void {
+  schedulerJoin(root).invoke(scheduler,child);
+}
+export function markIncompleteSourceProjectileScheduledRoot(root: SourceProjectileRootRuntime,scheduler: SourceObjectSchedulerRuntime): void {
+  schedulerJoin(root).close(scheduler);
 }
 const runtimes = new WeakSet<object>(), claimedChildren = new WeakSet<object>(), claimedDrawLists = new WeakSet<object>(),
   claimedStackMatrices = new WeakSet<object>(), claimedTargetStacks = new WeakSet<object>();
@@ -278,29 +296,15 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     }
     fail('8007e074 reached actual8020bab8 Normalize after source flight-direction stores; reciprocal-square-root estimate remains unsupported');
   };
-  const runtime: SourceProjectileRootRuntime = {
-    bindProjectile(id) {guard(() => {
-      if (typeof id !== 'symbol' || (children.has(id) && !children.get(id)!.released)) fail('new projectile identity required');
-      const origin = call(() => spawns.getSpawnOwnerIdentity(id)), actual = call(() => spawns.getActualActor(origin));
-      const bytes = call(() => allocator.getObject(id));
-      if (claimedChildren.has(bytes)) fail('child already claimed by source root');
-      const e: Entry = {id, origin, actual, bytes, stage: call(() => stage.getActorBinding(origin)),
-        world: call(() => stage.getWorldBinding(origin)), status: call(() => stage.getStatusBinding(origin)), incomplete: false,
-        released:false,lifetime:call(() => spawns.getSpawnLifetime(id))};
-      const owned = call(() => spawns.getSourceOwners(origin));
-      if (owned.includes(draw) || draw === bytes || new Set([actual, bytes, e.stage, e.world, e.status, draw]).size !== 6)
-        fail('draw list or projectile source owner alias');
-      owners(e); children.set(id, e); claimedChildren.add(bytes);
-    });},
-    getObject(id) {return entry(id).bytes;}, getDrawList() {return draw;}, getSpawnRuntime() {return spawns;},
-    getSourceOwners(id) {const e = entry(id); return Object.freeze([e.bytes, e.actual, e.stage, e.world, e.status, draw]);},
-    dispatchStoredRoot(id) {guard(() => {
+  const dispatch = (id: symbol,scheduler?: SourceObjectSchedulerRuntime): void => {guard(() => {
+      if(scheduler===undefined) requireStandaloneSourceProjectileRoot(runtime);
       const e = entry(id);
+      if(scheduler!==undefined) requireSourceObjectSchedulerInvocation(scheduler,runtime,id,'callback',e.lifetime);
       if (e.released) fail('released projectile requires a new completed spawn and explicit rebind');
       if (isSourceActorDoubleFrameClaimed(e.actual)) fail('frame-owned actor requires its unimplemented later source object scheduler');
       try {
         owners(e);
-        if (word(id, 0xc) !== 0x8007dcec) fail('unsupported stored projectile root callback');
+        if (scheduler===undefined && word(id, 0xc) !== 0x8007dcec) fail('unsupported stored projectile root callback');
         //7dd00 captures18,7dd04 loads90, then the SAVED byte is signed/tested.
         const rawState = u8(id, 0x18), pointer = ptr(id, 0x90), state = rawState << 24 >> 24;
         if (state < 2) {
@@ -346,8 +350,43 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
       } catch (error) {
         e.incomplete = true; markIncompleteSourceActorProjectileSpawn(spawns, e.origin); throw error;
       }
+
+    });};
+  const runtime: SourceProjectileRootRuntime = {
+    bindProjectile(id) {guard(() => {
+      if (typeof id !== 'symbol' || (children.has(id) && !children.get(id)!.released)) fail('new projectile identity required');
+      const origin = call(() => spawns.getSpawnOwnerIdentity(id)), actual = call(() => spawns.getActualActor(origin));
+      const bytes = call(() => allocator.getObject(id));
+      if (claimedChildren.has(bytes)) fail('child already claimed by source root');
+      const e: Entry = {id, origin, actual, bytes, stage: call(() => stage.getActorBinding(origin)),
+        world: call(() => stage.getWorldBinding(origin)), status: call(() => stage.getStatusBinding(origin)), incomplete: false,
+        released:false,lifetime:call(() => spawns.getSpawnLifetime(id))};
+      const owned = call(() => spawns.getSourceOwners(origin));
+      if (owned.includes(draw) || draw === bytes || new Set([actual, bytes, e.stage, e.world, e.status, draw]).size !== 6)
+        fail('draw list or projectile source owner alias');
+      owners(e); children.set(id, e); claimedChildren.add(bytes);
     });},
+    getObject(id) {return entry(id).bytes;}, getDrawList() {return draw;}, getSpawnRuntime() {return spawns;},
+    getSourceOwners(id) {const e = entry(id); return Object.freeze([e.bytes, e.actual, e.stage, e.world, e.status, draw]);},
+    dispatchStoredRoot(id) {dispatch(id);},
   };
+  schedulerJoins.set(runtime,{
+    prepare(scheduler,id) {
+      requireSourceObjectSchedulerInvocation(scheduler,runtime,id,'prepare');
+      let lifetime: symbol | undefined;
+      guard(()=>{const e=entry(id);
+        if(e.released) fail('released projectile requires a new completed spawn and explicit rebind');
+        if(isSourceActorDoubleFrameClaimed(e.actual)) fail('frame-owned actor requires its unimplemented later source object scheduler');
+        owners(e);lifetime=e.lifetime;
+      });
+      return lifetime!;
+    },
+    invoke(scheduler,id) {dispatch(id,scheduler);},
+    close(scheduler) {
+      requireSourceObjectSchedulerInvocation(scheduler,runtime,undefined,'closure');
+      for(const e of children.values()) {e.incomplete=true;markIncompleteSourceActorProjectileSpawn(spawns,e.origin);}
+    },
+  });
   cleanupScopes.set(runtime,(producer,child) => {
     const e=cleanupEntry;
     if (!busy || poisoned || !e || e.id!==child || e.released || e.incomplete || producer!==spawns)

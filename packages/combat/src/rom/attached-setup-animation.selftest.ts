@@ -1,3 +1,4 @@
+import {runObjectSchedulerSelfTests} from './source-object-scheduler.selftest.js';
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {addSourceFloat32} from './source-float.js';
 import {createSourceActorAnimationTransitionRuntime} from './actor-animation-transition.js';
@@ -2866,6 +2867,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runProjectileTargetHydratedCompositionTests();
   runProjectileRetirementHydratedCompositionTests();
   runProjectileCleanupHydratedCompositionTests();
+  runObjectSchedulerHydratedCompositionTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -13157,6 +13159,23 @@ export function createProjectileCleanupTestFixture() {
   const descriptorPool=Object.assign(x.descriptorPool,{releaseCallback18:0x80006ed8});
   const rootSources=Object.assign(x.rootSources,{retirementState2:0x8007e63c,cleanupState3:0x8007e678});
   return Object.assign(x,{rootSources,descriptorPool});
+}
+/** Explicit current slot pointers/active bytes and the SAME global record.
+ * No masks/slots are manufactured by the production scheduler. */
+export function createObjectSchedulerTestFixture() {
+  const x=createProjectileCleanupTestFixture();
+  const matchGlobals=Object.assign(x.projectiles.getMatchGlobals(),{maskD1:0,maskD2:0});
+  x.sourceActor.active0=1;
+  const actorSlots: Record<number,symbol|null>={0:x.actor};
+  const slotTargets: {active0?:number}[]=[x.sourceActor];
+  for(let i=1;i<6;i++) {const target={active0:0},id=Symbol(`explicit inactive actor slot${i}`);
+    x.allocator.registerExternal(id,target);actorSlots[i]=id;slotTargets.push(target);}
+  x.groups[15]={head:null,tail:null};
+  const schedulerSources={root:x.root,actorSlots};
+  return Object.assign(x,{matchGlobals,actorSlots,slotTargets,schedulerSources});
+}
+export function runObjectSchedulerHydratedCompositionTests(): void {
+  runObjectSchedulerSelfTests(createObjectSchedulerTestFixture);
 }
 export function runProjectileCleanupHydratedCompositionTests(): void {
   runProjectileCleanupSelfTests(createProjectileCleanupTestFixture);

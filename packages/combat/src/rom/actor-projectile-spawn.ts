@@ -55,6 +55,8 @@ export interface SourceActorProjectileSpawnRuntime {
   getCueRuntime(): ReturnType<SourceActorCommandAdmissionRuntime['getCueRuntime']>;
   getAllocatorRuntime(): SourceObjectAllocationRuntime;
   getWorldRuntime(): SourceActorWorldMatrixRuntime;
+  /** Same retained80433934 owner shared with command admission/charge. */
+  getMatchGlobals(): object;
   getSpawnRow1(): Readonly<SourceActorProjectileSpawnRow>;
   getAdmissionBinding(identity: symbol): ReturnType<SourceActorCommandAdmissionRuntime['getActorBinding']>;
   getSourceOwners(identity: symbol): readonly object[];
@@ -117,7 +119,7 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
   const matrices = world.getMatricesRuntime(), mapping = setup.getActualMapping(), dispatch = setup.getActualDispatch();
   if (!isSourceActorJointMatrixRuntime(matrices) || !isSourceActorJointMappingRuntime(mapping) ||
       !isSourceActorAnimationDispatchRuntime(dispatch)) fail('genuine shared matrix/mapping/dispatch runtimes required');
-  const streams = prehook.getStreamsRuntime(), cues = admission.getCueRuntime();
+  const streams = prehook.getStreamsRuntime(), cues = admission.getCueRuntime(), matchGlobals = admission.getGlobal();
   if (setup.getActualStarts() !== streams || streams.getDispatchRuntime() !== dispatch || dispatch.getSetupRuntime() !== setup ||
       dispatch.getActualMapping() !== mapping) fail('setup/stream/dispatch runtime graph differs');
   const initialRow = own(sources, 'row1'), initialLocal = own(initialRow, 'local04');
@@ -227,7 +229,8 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
     });},
     getActualActor(id) {return entry(id).actual;}, getActorBinding(id) {return entry(id).binding;},
     getPrehookRuntime() {return prehook;}, getCueRuntime() {return cues;}, getAllocatorRuntime() {return allocator;},
-    getWorldRuntime() {return world;}, getSpawnRow1() {return row;},
+    getWorldRuntime() {return world;},
+    getMatchGlobals() {if (admission.getGlobal() !== matchGlobals) fail('shared match globals changed');return matchGlobals;}, getSpawnRow1() {return row;},
     getAdmissionBinding(id) {entry(id);return admission.getActorBinding(id);},
     getSourceOwners(id) {return Object.freeze([...new Set([...ownRecords(entry(id)),row,row.local04,...allocator.getSourceOwners(id)])]);},
     assertActorComplete(id) {const e = entry(id); requireCompleteSourceActorDoubleLifecycle(e.actual); allocator.assertActorComplete(id);},

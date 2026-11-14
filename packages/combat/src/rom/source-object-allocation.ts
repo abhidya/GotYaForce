@@ -29,6 +29,7 @@
  * after a store permanently closes the allocator. Caller capabilities separately
  * close actors whose subsequent spawn initialization was incomplete.
  */
+import {requireSourceObjectSchedulerSnapshot, type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {requireCompleteSourceActorDoubleLifecycle, requireSourceActorDoubleInvocation} from './actor-double-prehook.js';
@@ -75,6 +76,12 @@ export interface SourceObjectAllocationRuntime {
   /** Actual88e50 helper chain, only through the spawn owner private capability. */
   releaseProjectile(identity: symbol, caller: symbol, projectile: symbol, drawList0: SourceObjectGroup): void;
   markActorIncomplete(identity: symbol, caller: symbol): void;
+  /** Actual retained DAT_803c706c group record; no copied list or head. */
+  getGroup(index: number): SourceObjectGroup;
+  /** Host identity-only admission inventory, never a copied source list. */
+  getRetainedStorageOwners(): readonly object[];
+  /** Narrow actual scheduler stw+76, never a general unaligned scalar API. */
+  writeSchedulerRotation76(identity: symbol, value: number, scheduler: SourceObjectSchedulerRuntime): void;
   getObject(identity: symbol): SourceAllocationBytes;
   getDescriptor(identity: symbol): SourceAllocationBytes;
   getPointerTarget(identity: symbol): object;
@@ -95,6 +102,12 @@ export interface SourceObjectAllocationRuntime {
   writeU32(identity: symbol, offset: number, value: number): void;
   writeF32(identity: symbol, offset: number, value: number): void;
   writePointer(identity: symbol, offset: number, value: symbol | null): void;
+}
+const schedulerIncomplete = new WeakSet<object>();
+/** Permanent failure closure only; grants no execution authority. */
+export function markIncompleteSourceObjectAllocation(runtime: SourceObjectAllocationRuntime): void {
+  if (!isSourceObjectAllocationRuntime(runtime)) fail('genuine allocator required');
+  schedulerIncomplete.add(runtime);
 }
 const runtimes = new WeakSet<object>(), claimedStorage = new WeakSet<object>(), claimedActors = new WeakSet<object>();
 export function isSourceObjectAllocationRuntime(value: unknown): value is SourceObjectAllocationRuntime {
@@ -124,7 +137,7 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
   const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
   const guard = <T>(run: () => T, mutation = false): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
-    if (mutation && incomplete) fail('permanently incomplete allocation owner');
+    if (mutation && (incomplete || schedulerIncomplete.has(runtime))) fail('permanently incomplete allocation owner');
     busy = true; poisoned = false;
     try {const result = run(); check(); return result;}
     catch (error) {if (allocating && dirty) incomplete = true; throw error;}
@@ -203,18 +216,18 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     if (!value || (kind !== undefined && value.kind !== kind)) fail(`unknown/non-owned ${kind ?? 'memory'} identity`);
     return value.bytes;
   };
-  const address = (offset: number, width: number): void => {
+  const address = (offset: number, width: number, schedulerWord76 = false): void => {
     integer(offset, 0xffff, 'byte offset');
     if (offset + width > 0x10000) fail('byte range exceeds bounded source record');
-    if (width > 1 && offset % width !== 0) fail('unaligned source scalar outside admitted domain');
+    if (width > 1 && offset % width !== 0 && !(schedulerWord76 && offset === 0x76 && width === 4)) fail('unaligned source scalar outside admitted domain');
   };
   const load = (id: symbol, offset: number, width: number): number => {
     address(offset, width); const bytes = memory(id); let value = 0;
     for (let i = 0; i < width; i++) value = value * 256 + integer(read(bytes, String(offset + i)), 255, `byte${(offset + i).toString(16)}`);
     return value;
   };
-  const store = (id: symbol, offset: number, width: number, value: number): void => {
-    address(offset, width); integer(value, 2 ** (width * 8) - 1, 'source scalar store');
+  const store = (id: symbol, offset: number, width: number, value: number, schedulerWord76 = false): void => {
+    address(offset, width, schedulerWord76); integer(value, 2 ** (width * 8) - 1, 'source scalar store');
     const bytes = memory(id);
     // One PPC scalar store is indivisible in this admitted synchronous model.
     for (let i = 0; i < width; i++) {own(bytes, String(offset + i), true); check();}
@@ -415,7 +428,7 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     getSourceOwners(id) {const a = actor(id); return [a.actual, a.binding, ...owners.values()];},
     assertActorComplete(id) {
       const a = actor(id); requireCompleteSourceActorDoubleLifecycle(a.actual);
-      if (incomplete || a.incomplete) fail('permanently incomplete allocation owner');
+      if (incomplete || schedulerIncomplete.has(runtime) || a.incomplete) fail('permanently incomplete allocation owner');
     },
     claimActor(id, caller) {guard(() => {
       const a = actor(id); if (typeof caller !== 'symbol' || a.caller !== undefined) fail('actor caller already claimed or not a symbol');
@@ -429,6 +442,12 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     allocateProjectile(id, caller) {return guard(() => allocate(id, caller, 3), true);},
     allocateProjectileHit(id, caller) {return guard(() => allocate(id, caller, 4), true);},
     releaseProjectile(id, caller, child, draw) {guard(() => release(id,caller,child,draw),true);},
+    getRetainedStorageOwners() {return Object.freeze([...new Set([...owners.values(),...targets.values()])]);},
+    getGroup(index) {return guard(() => {integer(index,0x3fffffff,'effective group index');return pool('groups',index) as SourceObjectGroup;});},
+    writeSchedulerRotation76(id,value,scheduler) {
+      requireSourceObjectSchedulerSnapshot(scheduler,runtime,id);
+      guard(() => store(id,0x76,4,value,true),true);
+    },
     getObject(id) {return memory(id, 'object');},
     getDescriptor(id) {return memory(id, 'descriptor');},
     getPointerTarget(id) {return target(id);},

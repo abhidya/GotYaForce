@@ -60,6 +60,10 @@ export interface RomPhysicsRuntime {
  * (FUN_80067310, chunk_0008.c:3794-3828. yaw = `+0x5ae` lock-yaw passed as param_3.)
  */
 export interface RomActor {
+  /** Explicit source object active byte, never inferred from HP or lifecycle.
+   * No constructor default; supplied only by a source hydration boundary.
+   * @romfield active0 +0x0 u8 */
+  active0?: number;
   /** Port-side runtime dependency. Kept on the actor so concurrent battles cannot
    *  overwrite one another's floor behavior.
    *  @romfield physicsRuntime port_side */
