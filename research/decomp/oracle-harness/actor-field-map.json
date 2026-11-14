@@ -2,7 +2,7 @@
  "generated_by": "research/decomp/oracle-harness/gen_actor_field_map.py",
  "map_schema": 1,
  "source": "packages/combat/src/rom/actor.ts",
- "source_sha256": "b561799b5534dbdfd30a769ebf7e81ebcd053038a68cd01a254d99baf4517ef9",
+ "source_sha256": "95a8622db7cbb59d7eab4b562230b2729bdea535cd920e41ae75786453106356",
  "interfaces": {
   "RomActor": {
    "fields": [
@@ -184,6 +184,14 @@
     },
     {
      "tsField": "supportContact1db",
+     "kind": "unmapped"
+    },
+    {
+     "tsField": "targetDistance760",
+     "kind": "unmapped"
+    },
+    {
+     "tsField": "horizontalDistance764",
      "kind": "unmapped"
     },
     {
@@ -679,15 +687,11 @@
   "RomPartState": {
    "fields": [
     {
-     "offset": 0,
-     "kind": "s32",
-     "width": 4,
+     "kind": "port_side",
      "tsField": "streamPtr"
     },
     {
-     "offset": 4,
-     "kind": "f32",
-     "width": 4,
+     "kind": "port_side",
      "tsField": "frameClock"
     },
     {
@@ -709,9 +713,7 @@
      "tsField": "animTime"
     },
     {
-     "offset": 26,
-     "kind": "u8",
-     "width": 1,
+     "kind": "port_side",
      "tsField": "active"
     },
     {

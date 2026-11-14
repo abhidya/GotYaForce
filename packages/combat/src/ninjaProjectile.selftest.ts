@@ -1,26 +1,26 @@
 import {createRomActor} from './rom/actor.js';
 import type {BorgRuntime} from './types.js';
-import {prepareNinjaX,clearNinjaX} from './ninjaX.js';
+import {prepareNinjaX,clearNinjaX,getNinjaXState} from './ninjaX.js';
 import {spawnNinjaSource,advanceNinjaSource,ninjaMuzzle,createNinjaImpact} from './ninjaProjectile.js';
 function assert(ok:unknown,msg:string):asserts ok{if(!ok)throw Error(`[ninjaProjectile] ${msg}`);}
 function near(a:number,b:number,msg:string){assert(Math.abs(a-b)<1e-5,`${msg}: ${a} != ${b}`);}
 function fixture(id='pl0000'){
  const owner={uid:'owner',borgId:id,team:0,alive:true,hp:100,state:'idle',pos:{x:10,y:300,z:20},rotY:.3} as BorgRuntime;
  const target={uid:'target',borgId:'pl0615',team:1,alive:true,hp:100,state:'idle',pos:{x:10,y:300,z:2020},rotY:0} as BorgRuntime;
- const actor=createRomActor();actor.actionIndex=2;actor.borgNumber=id==='pl0000'?0:10;actor.pos={...owner.pos};actor.heading=0;
+ const actor=createRomActor();actor.actionIndex=2;actor.borgNumber=id==='pl0003'?3:id==='pl0000'?0:10;actor.pos={...owner.pos};actor.heading=0;
  actor.modelScale=2;actor.collisionScale=.5;prepareNinjaX(actor,target.uid,target.pos);
- const pr=spawnNinjaSource(owner,actor,0x8007db5c,id==='pl0000'?0:3,[owner,target])![0]!;
+ const pr=spawnNinjaSource(owner,actor,0x8007db5c,id==='pl0003'?1:id==='pl0000'?0:3,[owner,target])![0]!;
  return {owner,target,actor,pr,map:new Map([[owner.uid,owner],[target.uid,target]])};
 }
 export function runNinjaProjectileSelfTest():void{
- for(const id of ['pl0000','pl000a']){
+ for(const id of ['pl0000','pl000a','pl0003']){
   const {owner,target,actor,pr,map}=fixture(id);assert(pr.ninjaSource?.kind==='primary','dedicated source allocation');const s=pr.ninjaSource;
   assert(s.flight.phase==='pending'&&pr.damageRecord?.hpDamage===10&&pr.damageRecord.flagsA===0,'pending and exact family damage1');
   near(pr.hitRadius,5,'radius10 uses independent inheritedc0');
   const saved={...s.flight.initialAimPoint!};target.pos.z+=300;owner.pos.x+=10;
   advanceNinjaSource(pr,map);assert(String(s.flight.phase)==='active'&&s.flight.life===599&&s.flight.hitActive,'same-pass init and active');
   assert(JSON.stringify(s.flight.initialAimPoint)===JSON.stringify(saved),'allocation-saved aim is not replaced during init');
-  const origin=ninjaMuzzle(owner.pos,owner.rotY,2);
+  const origin=ninjaMuzzle(owner.pos,owner.rotY,2,id);
   near(s.flight.previousPos.x,origin.x,'init recomputes current static attachment');near(s.flight.visualScale,4,'draw2 is separate fromHITc0');
   clearNinjaX(actor);advanceNinjaSource(pr,map);assert(String(s.flight.phase)==='active','owner action completion does not destroy independent child');
   s.hitUids.push('old-victim');s.contactPending=true;const contactPos={...pr.pos};const out=advanceNinjaSource(pr,map);
@@ -49,6 +49,24 @@ export function runNinjaProjectileSelfTest():void{
  {
   const {pr,map}=fixture();const out=advanceNinjaSource(pr,map,{outsideBounds:()=>true});
   assert(out.length===1&&pr.ninjaSource?.kind==='primary'&&pr.ninjaSource.flight.reason==='bounds','bounds never emits damaging impact');
+ }
+ {
+  const {owner,target,actor,map}=fixture('pl0003');
+  const s=getNinjaXState(actor)!;
+  assert(spawnNinjaSource(owner,actor,0x8007db5c,2,[owner,target])===null,'unarmed live Double cannot spawn row2');
+  s.doubleClone!.arm7c8=1;s.doubleClone!.offset7b0={x:150,y:7,z:-3};
+  const pr=spawnNinjaSource(owner,actor,0x8007db5c,2,[owner,target])![0]!;
+  assert(pr.ninjaSource?.kind==='primary','explicit armed fixture permits row2');
+  const allocation=ninjaMuzzle(actor.pos,0,2,'pl0003');
+  near(pr.pos.x,Math.fround(allocation.x+150),'allocation adds fixture offset once');
+  clearNinjaX(actor);
+  const next=prepareNinjaX(actor,target.uid,target.pos);
+  assert(next!==s&&next.doubleClone===s.doubleClone,'new action references the same owner record');
+  next.doubleClone!.offset7b0={x:-50,y:3,z:4};
+  advanceNinjaSource(pr,map);
+  const current=ninjaMuzzle(owner.pos,owner.rotY,2,'pl0003');
+  near(pr.ninjaSource.flight.previousPos.x,Math.fround(current.x-50),'phase0 resamples current offset rather than allocation snapshot');
+  near(pr.ninjaSource.flight.previousPos.y,Math.fround(current.y+3),'source fixture offset is world-space');
  }
  console.log('[ninjaProjectile] PASS: static attachment, allocation snapshots, independent scales, lifecycle, impact identity and owner isolation');
 }

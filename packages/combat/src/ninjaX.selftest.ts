@@ -37,5 +37,14 @@ export function runNinjaXSelfTest():void{
  {
   const {a,s,ctx}=fixture();a.borgNumber=0xa;releaseNinjaX(a,s,ctx);assert(s.fireCount===1,'Sasuke callback allocated');
  }
+ {
+  const {a,ctx,events}=fixture();a.borgNumber=3;const s=prepareNinjaX(a,null,null);
+  releaseNinjaX(a,s,ctx);
+  same(events,['ammo:2/1/1','child:8007db5c/1'],'fresh Double ordinary X emits only row1');
+  events.length=0;s.doubleClone!.arm7c8=2;releaseNinjaX(a,s,ctx);
+  same(events,['ammo:2/1/1','child:8007db5c/1','child:8007db5c/2'],'explicit source clone fixture emits rows1/2 after one debit');
+  events.length=0;releaseNinjaX(a,s,{...ctx,onAllocateResource:()=>false});
+  same(events,[],'denied allocation emits neither primary nor clone fixture child');
+ }
  console.log('[ninjaX] PASS: own-history startup, authored trigger, conditional recoil, ammo order, support reset and completion');
 }

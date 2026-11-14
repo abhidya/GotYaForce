@@ -127,3 +127,59 @@ test("struct-kind fields are refused by the scalar encoder (no invented layouts)
   codec.beginCase();
   assert.throws(() => codec.encodeField(BASE, "parts", []), BlockedCodecError);
 });
+
+
+test("synthetic part clock has no source pointer mapping and cannot overwrite continuation bytes", () => {
+  const rec = fieldMap.byInterface.RomPartState.frameClock;
+  assert.equal(rec.kind, "port_side");
+  assert.equal(Object.hasOwn(rec, "offset"), false);
+  assert.equal(Object.hasOwn(rec, "width"), false);
+  // There is no field-hydration API: decode primitives are explicit post-state
+  // assertions only. No mapped field may reinterpret source part+04 as a clock.
+  const mapped = Object.values(fieldMap.byInterface.RomPartState)
+    .filter(field => Number.isInteger(field.offset));
+  assert.equal(mapped.some(field => field.offset <= 4 && field.offset + field.width > 4), false);
+  const { codec, u8 } = makeCodec();
+  codec.beginCase();
+  codec.wU32(BASE + 4, 0x802bc084);
+  const before = u8.slice(BASE, BASE + 0x20);
+  const writesBefore = codec.writes.length;
+  assert.throws(() => codec.encodeField(BASE, "frameClock", 1.5, "RomPartState"),
+    error => error instanceof BlockedCodecError && /port_side/.test(error.message));
+  assert.deepEqual(u8.slice(BASE, BASE + 0x20), before);
+  assert.equal(codec.writes.length, writesBefore);
+});
+
+test("host stream cursors and active flags cannot overwrite source wait pointers or completion", () => {
+  for (const field of ["streamPtr", "active"]) {
+    const record = fieldMap.byInterface.RomPartState[field];
+    assert.equal(record.kind, "port_side");
+    assert.equal(Object.hasOwn(record, "offset"), false);
+    assert.equal(Object.hasOwn(record, "width"), false);
+  }
+  const mapped = Object.values(fieldMap.byInterface.RomPartState)
+    .filter(field => Number.isInteger(field.offset));
+  for (const offset of [0, 0x1a]) {
+    assert.equal(mapped.some(field => field.offset <= offset && field.offset + field.width > offset), false);
+  }
+  const { codec, u8 } = makeCodec();
+  for (const completion of [0, 1]) {
+    codec.beginCase();
+    codec.wU32(BASE, 0x802bc080);
+    codec.wU32(BASE + 4, 0x802bc084);
+    codec.wU8(BASE + 0x1a, completion);
+    const before = u8.slice(BASE, BASE + 0x20);
+    const writesBefore = codec.writes.length;
+    for (const [field, values] of [
+      ["streamPtr", [-1, 0, 48, Number.MAX_SAFE_INTEGER]],
+      ["active", [0, 1]],
+    ]) {
+      for (const value of values) {
+        assert.throws(() => codec.encodeField(BASE, field, value, "RomPartState"),
+          error => error instanceof BlockedCodecError && /port_side/.test(error.message));
+        assert.deepEqual(u8.slice(BASE, BASE + 0x20), before);
+        assert.equal(codec.writes.length, writesBefore);
+      }
+    }
+  }
+});

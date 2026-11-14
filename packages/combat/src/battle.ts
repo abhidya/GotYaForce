@@ -1,3 +1,5 @@
+import {beginDoubleCloneReactionObservation,finalizeDoubleCloneReactionObservation} from './doubleCloneReactionObservation.js';
+import {stepDoubleNinjaXInput} from './doubleNinjaXInput.js';
 import {spawnSwitchingSource,stepSwitchingForcedMove} from './switchingProjectile.js';
 import {isSourceSwitchingX,stepSwitchingXInput} from './switchingX.js';
 import {isSourceTeleportX,stepTeleportXInput} from './teleportX.js';
@@ -1152,6 +1154,7 @@ class BattleImpl implements Battle {
     // returns: ordinary movement, airborne/hit/death frames also produce history.
     for (const b of all) {
       if (b.alive) b.romDriver?.beginFrame(b, this.state.frame);
+      beginDoubleCloneReactionObservation(b,this.state.frame);
     }
 
     // Source order: actor status/movement consumes the previous contact phase, then
@@ -1302,7 +1305,8 @@ class BattleImpl implements Battle {
       if (isRevolver(b.borgId)) stepRevolverInput(b, input.special);
       if (b.borgId === "pl0102") stepGatlingInput(b,input.special);
       if(isSourceSwitchingX(b.borgId))stepSwitchingXInput(b,input.special);
-      if(isSourceNinjaX(b.borgId))stepNinjaXInput(b,input.special);
+      if(isSourceNinjaX(b.borgId)&&b.borgId!=='pl0003')stepNinjaXInput(b,input.special);
+      if(b.borgId==='pl0003')stepDoubleNinjaXInput(b,input.special);
       if(isSourceTeleportX(b.borgId))stepTeleportXInput(b,input.special,b.state==="special"&&b.command?.type===5);
       if (b.borgId === "pl0106") {
         const sample = stepTimeBomberInput(b,input.special);
@@ -1442,6 +1446,7 @@ class BattleImpl implements Battle {
         cpuHalvingEnabled: this.isChallengeMode,
       },
     );
+    for(const b of all)finalizeDoubleCloneReactionObservation(b,this.state.frame);
     const survivingProjectileUids = new Set(this.state.projectiles.map((projectile) => projectile.uid));
     this.projectileDespawns = projectilesBeforeStep.flatMap((projectile) => {
       if (survivingProjectileUids.has(projectile.uid) || !projectile.despawnReason) return [];
