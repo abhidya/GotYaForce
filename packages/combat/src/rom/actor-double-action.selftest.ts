@@ -19,11 +19,15 @@ import {createSourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {createSourceStreamWaitRuntime} from './stream-wait.js';
 import {createSourceStreamWaitTargetRuntime} from './stream-wait-target.js';
 import {createRomActor} from './actor.js';
+import {bindDoubleNinjaOwnerState} from '../ninjaX.js';
 function check(ok: boolean, why: string): void {if (!ok) throw Error(`[double-action-test] ${why}`);}
 function equal(a: unknown, b: unknown, why: string): void {check(Object.is(a, b), `${why}: got ${String(a)}, expected ${String(b)}`);}
 function rejects(run: () => unknown, text: string): void {
   let error = ''; try {run();} catch (e) {error = String(e);}
   check(error.includes(text), `expected ${text}, got ${error || 'success'}`);
+}
+function deletes(owner: object, keys: readonly string[]): void {
+  for (const key of keys) delete (owner as Record<string, unknown>)[key];
 }
 /** Genuine upper owners. Unreached lower setup adapters expose owned records only;
  * all executable unimplemented adapters throw, never synthesize source success. */
@@ -74,7 +78,8 @@ function fixture(bind = true, profile = true, withGround = false) {
   const borg = {downGauge: 0, downGaugeBase: 0, paramTier: {tier: 0, deltaAccum: 0, timerFrames: 0}, hp: 1, hitDrainFrames: 0, balanceGauge: 1, balanceGaugeMax: 1, balanceRefillDelay: 0,
     downResetDelay: 0, comboWindow: 0, comboAccum: 0, comboRank: 0, invincTimer: 0, sourceAmmoRefillPauseMask: 0};
   const slot = () => ({cell: {cur:0,max:0,refillType:0,refillParam:0,timer:0}});
-  status.bindActor(id, borg, {}, [slot(),slot(),slot()]);
+  const ammoSlots: Parameters<typeof status.bindActor>[3] = [slot(),slot(),slot()];
+  status.bindActor(id, borg, {}, ammoSlots);
   const charge = createSourceActorInputChargeRuntime({world, mapping, status, attributes, global: {byte1829: 0}, data: {}});
   charge.bindActor(id, {});
   const prehook = createSourceActorDoublePrehookRuntime({status, charge, streams});
@@ -101,7 +106,8 @@ function fixture(bind = true, profile = true, withGround = false) {
   const capture = () => action.captureStateSelectors(id);
   const run = () => {const saved = capture(); action.dispatchUpper(id, saved); action.dispatchFull(id, saved);};
   return {id, actual, raw, mapping, attributes, parameter, prehook, cues, animation, tables, upper, full, actions, variants, phases,
-    action, sources, processor, hooks, capture, run, ground, gauges, terrain, streams, movement, setupState, parameterState: attributes.getParameterDescriptor(parameter)};
+    action, sources, processor, hooks, capture, run, ground, gauges, terrain, streams, movement, setupState, status, ammoSlots,
+    parameterState: attributes.getParameterDescriptor(parameter)};
 }
 /** Explicit offline action-level phase1 entry, not a demonstrated second55568
  * frame. Ordinary nonzero motion is retained, no input/control/pose bypasses. */
@@ -110,7 +116,17 @@ function phaseOneFixture(withGround = true, profile = true) {
   x.streams.bindActualActor(x.id, x.movement);
   x.actual.fbPhase = 1; x.phases[1] = 0x800ff418;
   x.streams.getPartBinding(x.id, 0).state1b = 0;
+  x.streams.getPartBinding(x.id, 1).state1b = 0;
   return x;
+}
+/** Explicit callback vectors only; no retail schedule or complete-frame claim. */
+function callbackFixture(part1 = 0) {
+  const x = phaseOneFixture();
+  x.streams.getPartBinding(x.id, 0).state1b = 1;
+  x.streams.getPartBinding(x.id, 1).state1b = part1;
+  const slot = x.status.getAmmoSlot(x.id, 2), cell = slot.cell;
+  slot.mirror776 = 13;
+  return {...x, slot, cell};
 }
 function countdown(x: ReturnType<typeof phaseOneFixture>, wait = 2): void {
   x.streams.getActorBinding(x.id).activeMask579 = 15;
@@ -141,6 +157,7 @@ export function runActorDoubleActionSelfTests(): void {
     const x = fixture(); check(isSourceActorDoubleActionRuntime(x.action), 'genuine action brand');
     check(!isSourceActorDoubleActionRuntime({...x.action}), 'copied methods cannot forge action brand');
     equal(x.action.getActualActor(x.id), x.actual, 'canonical actual'); equal(x.action.getPrehookRuntime(), x.prehook, 'canonical prehook');
+    equal(x.prehook.getStatusRuntime(), x.status, 'canonical genuine status runtime retained for ammo');
     equal(x.action.getPrehookBinding(x.id), x.prehook.getActorBinding(x.id), 'one4b4 owner');
     equal(x.action.getCueBinding(x.id), x.cues.getActorBinding(x.id), 'one541 owner');
     equal(x.action.getAttributeBinding(x.id), x.attributes.getActorBinding(x.id), 'one4ac owner');
@@ -384,12 +401,13 @@ export function runActorDoubleActionSelfTests(): void {
     x.actual.contactP0 = state > 0 && state < 128 ? 0 : 127;
     x.actual.contactP1 = 127; x.actual.dashStrength1d0f = -128; x.actual.faceGate1d10 = 127;
     const positive = state > 0 && state < 128;
-    rejects(x.run, positive ? 'actual800715f8 callback from fixed8043386c after phase increment' : 'at8020bb38 frsqrte');
+    rejects(x.run, 'at8020bb38 frsqrte');
     equal(x.actual.fbPhase, positive ? 2 : 1, 'signed canonical part0 state alone controls phase increment');
     equal(part.state1b, state, 'state remains raw u8, never sign-normalized in storage');
     equal(x.streams.getPartBinding(x.id, 1).state1b, 127, 'part1 state is retained independently');
-    equal(x.actual.motion.x, Math.fround(91 * Math.fround(.95)), 'callback refusal retains scale');
-    equal(x.actual.pos.x, Math.fround(3 + x.actual.motion.x), 'callback refusal retains add');
+    equal(x.actual.motion.x, Math.fround(91 * Math.fround(.95)), 'returned callback retains scale');
+    equal(x.actual.pos.x, Math.fround(3 + x.actual.motion.x), 'returned callback retains add');
+    equal(x.actual.hSpeed, positive ? 10 : 7, 'only positive part0 invokes part1 callback physics');
   }
   {
     const x = fixture(true, true, true); x.actual.fbPhase = 1; x.phases[1] = 0x800ff418;
@@ -462,7 +480,7 @@ export function runActorDoubleActionSelfTests(): void {
     // after the later ground call proves the increment reloads current540.
     // This does not bypass a source boundary or manufacture a successful frame.
     let changed = false;
-    observeDescriptors(() => rejects(y.run, 'actual800715f8'), (owner,key) => {
+    observeDescriptors(() => rejects(y.run, 'at8020bb38 frsqrte'), (owner,key) => {
       if (!changed && owner === y.streams.getPartBinding(y.id, 0) && key === 'state1b' && y.actual.pos.x !== 3) {
         changed = true; y.actual.fbPhase = 255;
       }
@@ -489,7 +507,7 @@ export function runActorDoubleActionSelfTests(): void {
     const next = x.streams.createStream(new Uint8Array([2,255,state,4,6,7,0,0, 0,9,0,2]));
     Object.assign(part, {current00:x.streams.createCommand({flags01:8}), next04:next, wait14:1});
     x.streams.getActorBinding(x.id).activeMask579 = 1;
-    rejects(x.run, state === 1 ? 'actual800715f8' : 'at8020bb38 frsqrte');
+    rejects(x.run, 'at8020bb38 frsqrte');
     equal(part.state1b,state,'actual4cd24 continuation writes canonical02 state before phase1 reads it');
     equal(part.auxiliary1c,4,'real02 auxiliary store retained');
     equal(x.actual.byte6e8,6,'real02 actual6e8 store retained'); equal(x.actual.byte6e9,7,'real02 actual6e9 store retained');
@@ -513,13 +531,178 @@ export function runActorDoubleActionSelfTests(): void {
     });
     equal(early.filter(key=>['x','y','z'].includes(key)).join(','),'x,y','paired XY product fault precedes numerical Z load');
     equal(y.actual.pos.x,Math.fround(3+y.actual.motion.x),'numerical finite-domain refusal retains prior source add');
-    const z = phaseOneFixture(); z.streams.getPartBinding(z.id,0).state1b = 1;
+    const z = callbackFixture(); z.cell.cur = 1;
     const unreached: string[] = []; let callbackState = false;
-    observeDescriptors(() => rejects(z.run,'actual800715f8'), (owner,key) => {
+    observeDescriptors(() => rejects(z.run,'actual8007db5c'), (owner,key) => {
       if (owner === z.streams.getPartBinding(z.id,0) && key === 'state1b' && z.actual.pos.x !== 3) callbackState = true;
       if (owner === z.actual.motion && callbackState) unreached.push(String(key));
     });
-    equal(unreached.filter(key=>['x','y','z'].includes(key)).join(','),'','nonnull callback boundary precedes every magnitude operand load');
+    equal(unreached.filter(key=>['x','y','z'].includes(key)).join(','),'','first projectile boundary precedes every magnitude operand load');
+  }
+  for (const state of [0, 1, 127, 128, 255]) {
+    const x = callbackFixture(state), stores: string[] = [];
+    x.actual.heading = 0xffff; x.actual.activeYaw = 0xffff;
+    x.actual.contactP1 = state === 0 ? 1 : 0; x.actual.dashStrength1d0f = state === 0 ? 1 : 0;
+    x.hooks.store = key => {if (x.actual.fbPhase === 2) stores.push(key);};
+    rejects(x.run, 'at8020bb38 frsqrte'); // actual insufficient count0, ordinary nonzero motion
+    equal(stores.join(','), state === 0 ? 'fbPhase' : 'fbPhase,lockYaw,hSpeed,hDecel,yVel,gravityCoeff',
+      'callback71630/38/3c/40/44 stores follow increment and canonical signed part1');
+    equal(x.actual.lockYaw, state === 0 ? 0xffff : 0x7fff, 'signed source heading and sth wrapping');
+    equal(x.actual.hSpeed, state === 0 ? 7 : 10, 'source backflip speed');
+    equal(x.actual.hDecel, state === 0 ? 9 : 0, 'source backflip positive zero deceleration');
+    equal(x.actual.yVel, state === 0 ? 8 : 15, 'source backflip vertical speed');
+    equal(x.actual.gravityCoeff, state === 0 ? 10 : -1, 'source backflip gravity');
+    equal(x.cell.cur, 0, 'insufficient ammo never debited'); equal(x.slot.mirror776, 13, 'insufficient mirror untouched');
+    equal(x.streams.getPartBinding(x.id, 1).state1b, state, 'callback does not sign-normalize byte owner');
+  }
+  {
+    const x = callbackFixture(); x.streams.getPartBinding(x.id, 1).state1b = undefined;
+    deletes(x.cell, ['cur']); rejects(x.run, 'state1b: integer out of bounds');
+    equal(x.actual.fbPhase, 2, 'missing part1 fails after phase increment'); equal(x.actual.hSpeed, 7, 'missing part1 before physics');
+    const y = callbackFixture(); deletes(y.raw, ['hSpeed','hDecel','yVel','gravityCoeff','borgNumber']);
+    rejects(y.run, 'at8020bb38 frsqrte');
+    equal(y.cell.cur, 0, 'zero part1 skips absent callback destinations; ammo failure skips absent borg');
+  }
+  for (const failed of ['lockYaw','hSpeed','hDecel','yVel','gravityCoeff'] as const) {
+    const x = callbackFixture(255), ordered = ['lockYaw','hSpeed','hDecel','yVel','gravityCoeff'] as const;
+    const prior = {lockYaw:0xa34,hSpeed:7,hDecel:9,yVel:8,gravityCoeff:10};
+    const after = {lockYaw:0x8a34,hSpeed:10,hDecel:0,yVel:15,gravityCoeff:-1};
+    x.hooks.store = key => {if (key === 'fbPhase') Object.defineProperty(x.raw, failed, {writable:false});};
+    deletes(x.cell, ['cur']); rejects(x.run, `${failed}: non-writable`);
+    for (const key of ordered) equal(x.actual[key], ordered.indexOf(key) < ordered.indexOf(failed) ? after[key] : prior[key],
+      'callback readonly fault preserves exactly earlier scalar stores');
+    equal(x.actual.fbPhase, 2, 'callback scalar fault retains increment'); rejects(x.capture, 'incomplete');
+  }
+  for (const count of [-32768, -1, 0]) {
+    const x = callbackFixture(1); x.cell.cur = count;
+    deletes(x.cell, ['max','refillType','refillParam','timer']); deletes(x.slot, ['mirror776']); deletes(x.raw, ['borgNumber']);
+    rejects(x.run, 'at8020bb38 frsqrte');
+    equal(x.cell.cur, count, 'signed insufficient count is not treated as unsigned or unlimited');
+    equal(x.actual.hSpeed, 10, 'callback physics precedes failed ammo');
+  }
+  for (const count of [32768, 65535, NaN]) {
+    const x = callbackFixture(1); x.cell.cur = count;
+    rejects(x.run, 'cur: integer out of bounds'); equal(x.slot.mirror776, 13, 'invalid signed ammo before mirror');
+    equal(x.actual.gravityCoeff, -1, 'invalid ammo retains all earlier callback physics');
+  }
+  for (const mode of [-32768,-1,0,1,2,3,4,32767]) for (const count of [1,3]) {
+    const x = callbackFixture(); x.actual.borgNumber = 3;
+    Object.assign(x.cell, {cur:count,max:0,refillType:mode,refillParam:-17,timer:0.5});
+    if (mode < 0 || mode >= 4 || (mode === 0 && count > 1)) deletes(x.cell, ['refillParam','timer']);
+    if (mode === 2 || mode === 3) {deletes(x.cell, ['refillParam']); x.cell.timer = NaN;}
+    rejects(x.run, 'actual8007db5c projectile variant1');
+    equal(x.slot.mirror776, count, 'mirror keeps original signed count'); equal(x.cell.cur, count - 1, 'max0 never grants unlimited ammo');
+    if (mode === 0 && count === 1) equal(x.cell.timer, -17, 'mode0 newly empty starts signed refill debt');
+    else if (mode === 1) equal(x.cell.timer, -16.5, 'mode1 adds signed parameter to existing float timer');
+    else if (mode === 2 || mode === 3) equal(x.cell.timer, 0, 'mode2/3 overwrites timer with authenticated positive zero');
+    else check(!Object.hasOwn(x.cell, 'timer'), 'unreached timer is not read or manufactured');
+    equal(x.actual.fbPhase, 2, 'spawn boundary keeps phase');
+    check(hasIncompleteSourceActorDoubleLifecycle(x.actual), 'first unsupported projectile permanently poisons actual');
+  }
+  for (const [timer,parameter,expected] of [[16777216,1,16777216],[16777218,1,16777220],[-0,0,0],[0,-32768,-32768]] as const) {
+    const x = callbackFixture(); Object.assign(x.cell,{cur:2,refillType:1,refillParam:parameter,timer});
+    rejects(x.run,'actual8007db5c projectile variant0'); equal(x.cell.timer,expected,'mode1 correctly rounds fadds ties and signed zero');
+  }
+  for (const [borg,variant] of [[0,0],[3,1],[10,3]] as const) {
+    const x = callbackFixture(); x.actual.borgNumber = borg; Object.assign(x.cell,{cur:3,refillType:7});
+    rejects(x.run, `actual8007db5c projectile variant${variant}`);
+    equal(x.cell.cur,2,'first projectile requires actual debit'); equal(x.slot.mirror776,3,'first projectile requires actual mirror');
+    equal(x.prehook.getCloneOwner(x.id),undefined,'first projectile must not require or create clone owner');
+    rejects(() => x.streams.update(x.id,15),'incomplete'); rejects(() => x.prehook.runActor(x.id),'incomplete');
+  }
+  for (const borg of [1,2,4,9,11,0x8000,0xffff]) {
+    const x = callbackFixture(); x.actual.borgNumber = borg; Object.assign(x.cell,{cur:3,refillType:7});
+    rejects(x.run,'at8020bb38 frsqrte'); equal(x.cell.cur,2,'other signed borg returns after consumption');
+    equal(x.actual.motion.x,Math.fround(91*Math.fround(.95)),'returned callback reaches ordinary nonzero-motion norm');
+  }
+  {
+    const x = callbackFixture(); x.actual.borgNumber = 3; Object.assign(x.cell,{cur:3,refillType:7});
+    const clone = {arm7c8:1,offset7b0:{x:1,y:2,z:3}}; bindDoubleNinjaOwnerState(x.actual,clone);
+    deletes(clone,['arm7c8']); // proves no required scalar load occurs before first7db5c
+    rejects(x.run,'actual8007db5c projectile variant1'); equal(x.cell.cur,2,'armed Double cannot skip first unimplemented projectile');
+    const y = callbackFixture(); Object.assign(y.cell,{cur:3,refillType:7}); deletes(y.raw,['borgNumber']);
+    rejects(y.run,'borgNumber: own data property required'); equal(y.cell.cur,2,'missing family reached only after successful debit');
+    const z = callbackFixture(); Object.assign(z.cell,{cur:3,refillType:7}); z.actual.borgNumber = -1;
+    rejects(z.run,'borgNumber: integer out of bounds'); equal(z.slot.mirror776,3,'raw u16 borg contract preserved despite signed load');
+  }
+  {
+    const x = callbackFixture(1); deletes(x.cell,['cur']); rejects(x.run,'cur: own data property required');
+    equal(x.actual.gravityCoeff,-1,'missing current count follows all physics stores');
+    const y = callbackFixture(); y.cell.cur = 3; deletes(y.slot,['mirror776']);
+    rejects(y.run,'mirror776: own data property required'); equal(y.cell.cur,3,'missing mirror refuses before debit');
+    const z = callbackFixture(); z.cell.cur = 3; Object.defineProperty(z.cell,'cur',{writable:false});
+    rejects(z.run,'cur: non-writable'); equal(z.slot.mirror776,3,'readonly count retains earlier mirror');
+    const w = callbackFixture(); w.cell.cur = 3; deletes(w.cell,['refillType']);
+    rejects(w.run,'refillType: own data property required'); equal(w.cell.cur,2,'missing mode after debit');
+  }
+  for (const mode of [0,1,2,3]) {
+    const x = callbackFixture(); Object.assign(x.cell,{cur:1,refillType:mode,refillParam:17,timer:0.5});
+    Object.defineProperty(x.cell,'timer',{writable:false}); rejects(x.run,'timer: non-writable');
+    equal(x.cell.cur,0,'readonly timer keeps completed debit'); equal(x.slot.mirror776,1,'readonly timer keeps completed mirror');
+    equal(x.cell.timer,0.5,'readonly timer retains prior debt');
+  }
+  for (const mode of [0,1]) {
+    const x = callbackFixture(); Object.assign(x.cell,{cur:1,refillType:mode}); deletes(x.cell,['refillParam','timer']);
+    rejects(x.run,'refillParam: own data property required'); equal(x.cell.cur,0,'missing parameter follows debit and empty test');
+  }
+  {
+    const x = callbackFixture(); Object.assign(x.cell,{cur:3,refillType:1,refillParam:17,timer:NaN});
+    rejects(x.run,'timer: finite exact source float32'); equal(x.cell.cur,2,'invalid old timer is loaded after debit');
+    const y = callbackFixture(); Object.assign(y.cell,{cur:3,refillType:32768});
+    rejects(y.run,'refillType: integer out of bounds'); equal(y.cell.cur,2,'mode uses existing signed-half owner domain');
+    const z = callbackFixture(); Object.assign(z.cell,{cur:1,refillType:0,refillParam:32768});
+    rejects(z.run,'refillParam: integer out of bounds'); equal(z.cell.cur,0,'parameter signed-half refusal retains debit');
+  }
+  {
+    const x = callbackFixture(); Object.assign(x.cell,{cur:3,refillType:7}); let loads = 0;
+    observeDescriptors(() => rejects(x.run,'actual8007db5c'),(owner,key) => {
+      if (owner === x.cell && key === 'cur' && ++loads === 2) x.cell.cur = -32768;
+    });
+    equal(x.slot.mirror776,3,'mirror uses original comparison count'); equal(x.cell.cur,32767,'debit reload is signed and sth wraps');
+    const y = callbackFixture(); Object.assign(y.cell,{cur:3,refillType:0,refillParam:17,timer:0.5});
+    observeDescriptors(() => rejects(y.run,'actual8007db5c'),(owner,key) => {
+      if (owner === y.cell && key === 'refillType') y.cell.cur = 0;
+    });
+    equal(y.cell.timer,17,'mode0 reloads current after mode instead of reusing debit result');
+    const z = callbackFixture(); Object.assign(z.cell,{cur:3,refillType:1,refillParam:17,timer:0.5});
+    observeDescriptors(() => rejects(z.run,'actual8007db5c'),(owner,key) => {
+      if (owner === z.cell && key === 'timer') z.cell.refillParam = -17;
+    });
+    equal(z.cell.timer,17.5,'mode1 captures parameter before old timer read');
+  }
+  {
+    const x = callbackFixture(1); const original = x.slot.cell;
+    (x.slot as {cell: typeof original}).cell = {...original};
+    rejects(x.run,'source ammo slot/cell owner changed'); equal(x.actual.gravityCoeff,-1,'changed cell refuses lazily after callback physics');
+    equal(original.cur,0,'changed owner cannot debit retained old cell');
+    const y = callbackFixture(); (y.ammoSlots as unknown as object[])[2] = {cell:y.cell};
+    rejects(y.run,'source ammo slot/cell owner changed'); equal(y.cell.cur,0,'changed slot cannot select fabricated source owner');
+    const z = callbackFixture(); Object.assign(z.cell,{cur:3,refillType:7,hSpeed:99});
+    rejects(z.run,'hSpeed: competing source storage owner'); equal(z.cell.cur,3,'ammo owner cannot shadow actual physics');
+  }
+  for (const alias of ['short784','cur784','field786','mirror786','float788','timer788','short7a0','refillType7a0','short7a2','refillParam7a2']) {
+    const x = callbackFixture(1); Object.assign(x.cell,{cur:3,refillType:7,[alias]:0});
+    rejects(x.run,`${alias}: competing slot2 source storage alias`);
+    equal(x.actual.gravityCoeff,-1,'slot2 raw aliases checked lazily after callback physics'); equal(x.cell.cur,3,'duplicate raw offset cannot override ammo');
+    const y = phaseOneFixture(); Object.assign(y.actual,{[alias]:0});
+    rejects(y.run,'at8020bb38 frsqrte'); equal(y.actual.fbPhase,1,'unreached ammo aliases do not require eager owner admission');
+  }
+  for (const key of ['cur','timer','refillType','refillParam','mirror776']) {
+    const x = callbackFixture(); Object.assign(key === 'mirror776' ? x.cell : x.slot,{[key]:0});
+    x.cell.cur = 3; rejects(x.run,`${key}: competing slot2 source storage owner`);
+    equal(x.cell.cur,3,'wrong canonical ammo storage owner cannot consume');
+  }
+  {
+    const x = callbackFixture(); Object.assign(x.cell,{cur:3,refillType:7}); let reentered = false;
+    observeDescriptors(() => rejects(x.run,'reentry'),(owner,key) => {
+      if (!reentered && owner === x.cell && key === 'refillType') {
+        reentered = true; try {x.capture();} catch { /* caught reentry remains poisoned */ }
+      }
+    });
+    check(reentered,'reentry observes genuine reached refill load'); equal(x.cell.cur,2,'caught reentry retains earlier debit');
+    equal(x.slot.mirror776,3,'caught reentry retains earlier mirror'); rejects(x.capture,'incomplete');
+    check(x.action.getSourceOwners(x.id).includes(x.slot) && x.action.getSourceOwners(x.id).includes(x.cell),
+      'lazily reached ammo owners remain visible for genuine frame owner checks');
   }
   for (const alias of ['byte1cef','state1cef','byte1cf0','byte1d0f','state1d0f','byte1d10']) {
     const x = phaseOneFixture(); (x.actual as unknown as Record<string, unknown>)[alias] = 0;
@@ -547,5 +730,5 @@ export function runActorDoubleActionSelfTests(): void {
     equal(x.streams.getPartBinding(x.id,0).wait14,1,'wrong-owner refusal retains real stream prefix');
     check(hasIncompleteSourceActorDoubleLifecycle(x.actual),'late wrong owner permanently poisons actual');
   }
-  console.log('[double-action-test] genuine phase0/phase1 dispatch, actual mask15 stream waits, canonical raw states, signed yaw, vector order, callback/numerical boundaries and permanent partial refusal passed');
+  console.log('[double-action-test] genuine phase0/phase1,715f8 callback,6dbe0 ammo, signed source owners, exact partial stores, projectile/numerical boundaries and permanent refusal passed');
 }

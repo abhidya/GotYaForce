@@ -43,6 +43,8 @@ export interface SourceActorDoublePrehookRuntime {
   getStartBinding(identity: symbol): object;
   /** Same genuine runtime used by source action stream starts. */
   getStreamsRuntime(): SourceStreamWaitRuntime;
+  /** Retained genuine owner for source action ammo consumption, not a shim. */
+  getStatusRuntime(): SourceActorStatusTimersRuntime;
   getChargeBinding(identity: symbol): object;
   getStatusBinding(identity: symbol): object;
   getCloneOwner(identity: symbol): DoubleNinjaOwnerState | undefined;
@@ -223,7 +225,7 @@ export function createSourceActorDoublePrehookRuntime(sources: SourceActorDouble
     getActualActor(id) {return entry(id).actual;}, getActorBinding(id) {return entry(id).binding;},
     getMappingActor(id) {return entry(id).mapping;}, getWorldBinding(id) {return entry(id).world;},
     getAttributeBinding(id) {return entry(id).attribute;}, getStartBinding(id) {return entry(id).start;},
-    getStreamsRuntime() {return streams;},
+    getStreamsRuntime() {return streams;}, getStatusRuntime() {return status;},
     getChargeBinding(id) {return entry(id).charge;}, getStatusBinding(id) {return entry(id).status;},
     getCloneOwner(id) {return getDoubleNinjaOwnerState(entry(id).actual);},
     getSourceOwners(id) {

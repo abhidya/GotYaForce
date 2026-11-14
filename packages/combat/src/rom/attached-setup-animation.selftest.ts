@@ -2842,6 +2842,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runAuthoredDoubleGroundPrefixCompositionTests();
   runControl40DoubleGroundContinuationTests();
   runPhase1DoubleGroundContinuationTests();
+  runCallbackAmmoGroundContinuationTests();
   runAngularInputHydratedControlTests();
   runDiagonalInputHydratedControlTests();
   console.log('[attached-setup-animation] PASS: owned allocation/removal and single-JObj replacement, post-allocation descriptors, explicit non-loop setup, actual playback/feedback, wrapped targets and actor-level source waits; byte-backed waits, opcode10 accumulator/mirror commands and source bank start/reset; actual archive name/address selection with explicit decoded inputs, shared descriptor-bank metadata and bounded non-null ready mode0 opcode01 setup with actual pose-pool lookup and mapping capture, real part1 movement follow-up, bounded original-byte DAT hydration and null-descriptor display attachment preserving actual shared display playback owners; bounded DAT joint transform topology consumed by actual setup and dirty propagation; explicit source matrix helper, bounded first-pass traversal and normal damping/corrected traversal, selector3 adjusted-Y correction and selector2 no-query descriptor scans with actual linked-actor matrix copying and retained shared-matrix movement consumption and explicit source transform-history snapshots around real wait/setup/movement/matrix calls; genuine bounded source terrain grid/triangle queries, explicit correction entries, real positive-list normal alignment, bounded folded and positive-sine primary two-bone placement with special topology and retained linked-matrix consumers; unsupported tagged source archive parsing, setup rewind conversion, other command handlers, production ownership, general quaternion backend and original replay');
@@ -12815,10 +12816,11 @@ export function runPhase1DoubleGroundContinuationTests():void {
   for(const state of [1,127,128,255]){
     const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);const a=x.sourceActor,prior={...a.pos};
     // Explicit synthetic boundary variant. This is not an authored event or a
-    // manufactured completion; its real nonnull callback must still refuse.
+    // manufactured completion; its real callback consumes ammo before the
+    // still unsupported projectile call, while the ordinary norm path refuses.
     x.control.getPartBinding(x.actor,0).state1b=state;
     a.contactP0=state<128?0:1;a.contactP1=77;
-    rejects(()=>x.runFrame(2),state<128?'actual800715f8 callback':'8020bb38 frsqrte');
+    rejects(()=>x.runFrame(2),state<128?'actual8007db5c':'8020bb38 frsqrte');
     check(a.fbPhase===(state<128?2:1) && a.pos.x>prior.x && a.pos.y>prior.y && x.clocks.elapsed08===1 &&
       x.normalLifecycleState.short6bc===8 && x.gates.marker578===0,
       'fresh raw canonical part0 state is signed only at source load; positive increments phase before fixednonnull callback, ignoring legacy contact fields');
@@ -12832,5 +12834,76 @@ export function runPhase1DoubleGroundContinuationTests():void {
       'missing canonical state stays missing after real stream/motion/ground; no legacy state or constructor default supplies it');
     checkCompletedDoubleFramePermanentRefusal(x);
   }
-  console.log('[actor-phase1-ground-continuation] PASS: actual second55568 frame runs genuine4cd24 two-part mode1 blend advancement, yaw, existing-motion decay/add, SAME677b0 and signed canonical state; positive state preserves540 before715f8 refusal, ordinary motion reaches exact8020bb38; source-order/partial-effects/private guards retained, no full phase1/audio/clone/browser completion claim');
+  console.log('[actor-phase1-ground-continuation] PASS: actual second55568 frame runs genuine4cd24 two-part mode1 blend advancement, yaw, existing-motion decay/add, SAME677b0 and signed canonical state; positive state preserves540 then real715f8/6dbe0 before7db5c refusal, ordinary motion reaches exact8020bb38; source-order/partial-effects/private guards retained, no full phase1/audio/clone/browser completion claim');
+}
+
+
+/** Explicit positive stream-state variants exercise the selected real callback.
+ * The authored prefix above still supplies zero and reaches the estimator gap;
+ * these variants do not claim a naturally reached release or a completed clone. */
+export function runCallbackAmmoGroundContinuationTests():void {
+  for(const backflip of [false,true]){
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);
+    const a=x.sourceActor,slot=x.status.getAmmoSlot(x.actor,2),cell=slot.cell;
+    const priorMotion={...a.motion},priorPosition={...a.pos};
+    check(a.borgNumber===3 && cell.cur===3 && cell.max===0 && cell.refillType===7 && cell.timer===.5 && slot.mirror776===13,
+      'retained ordinary composed fixture supplies actual finite ammo despite legacy max0 capacity');
+    x.control.getPartBinding(x.actor,0).state1b=1;
+    x.control.getPartBinding(x.actor,1).state1b=backflip?255:0;
+    a.contactP0=0;a.contactP1=backflip?0:1;a.dashStrength1d0f=backflip?0:1;
+    rejects(()=>x.runFrame(2),'actual8007db5c');
+    check(a.fbPhase===2 && x.status.getAmmoSlot(x.actor,2)===slot && slot.cell===cell &&
+      cell.cur===2 && slot.mirror776===3 && cell.timer===.5 && cell.max===0 && cell.refillType===7,
+      'actual715f8 consumes retained source slot2, stores pre-debit mirror and ignores legacy max0 unlimited shortcut');
+    check(a.lockYaw===(backflip?0x8000:0) && a.hSpeed===(backflip?10:0) && a.hDecel===0 &&
+      a.yVel===(backflip?15:0) && a.gravityCoeff===(backflip?-1:0),
+      'fresh actual part1 state selects authenticated backflip values; conflicting legacy contact/dash bytes are inert');
+    for(const key of ['x','y','z'] as const){const next=Math.fround(priorMotion[key]*Math.fround(.95));
+      check(a.motion[key]===next && a.pos[key]===addSourceFloat32(priorPosition[key],next),
+        'callback does not overwrite already executed phase1 motion or teleport the actual position');}
+    check(x.clocks.elapsed08===1 && x.blendState.field1c===2 && x.normalLifecycleState.short6bc===8 && x.gates.marker578===0,
+      'actual stream/normal/ground progress survives the precise first projectile boundary; no callback shim claims a clone');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);const a=x.sourceActor,slot=x.status.getAmmoSlot(x.actor,2);
+    // Synthetic insufficient-ammo boundary only. No ordinary fixture count or
+    // stream source is altered to claim a naturally completed gameplay frame.
+    slot.cell.cur=0;x.control.getPartBinding(x.actor,0).state1b=1;x.control.getPartBinding(x.actor,1).state1b=1;
+    rejects(()=>x.runFrame(2),'8020bb38 frsqrte');
+    check(a.fbPhase===2 && a.lockYaw===0x8000 && a.hSpeed===10 && a.yVel===15 && a.gravityCoeff===-1 &&
+      slot.cell.cur===0 && slot.mirror776===13 && slot.cell.timer===.5,
+      'genuine insufficient count skips mirror/debit/refill and projectile, retaining earlier backflip before unconditional magnitude');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  for(const field of ['mirror776','cur'] as const){
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);const a=x.sourceActor,slot=x.status.getAmmoSlot(x.actor,2);
+    x.control.getPartBinding(x.actor,0).state1b=1;x.control.getPartBinding(x.actor,1).state1b=1;
+    Object.defineProperty(field==='mirror776'?slot:slot.cell,field,{writable:false});
+    rejects(()=>x.runFrame(2),`${field}: non-writable`);
+    check(a.fbPhase===2 && a.hSpeed===10 && a.hDecel===0 && a.yVel===15 && a.gravityCoeff===-1 &&
+      slot.cell.cur===3 && slot.mirror776===(field==='cur'?3:13) && slot.cell.timer===.5 && x.clocks.elapsed08===1,
+      'callback ammo write fault preserves preceding phase/physics and only source-ordered mirror progress');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);const a=x.sourceActor,slot=x.status.getAmmoSlot(x.actor,2);
+    x.control.getPartBinding(x.actor,0).state1b=1;x.control.getPartBinding(x.actor,1).state1b=1;
+    Object.defineProperty(a,'hDecel',{writable:false});
+    rejects(()=>x.runFrame(2),'hDecel: non-writable');
+    check(a.fbPhase===2 && a.lockYaw===0x8000 && a.hSpeed===10 && a.hDecel===0 && a.yVel===0 && a.gravityCoeff===0 &&
+      slot.cell.cur===3 && slot.mirror776===13 && slot.cell.timer===.5 && x.clocks.elapsed08===1,
+      'backflip store failure retains yaw and speed, not later vertical/gravity or ammo effects');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  {
+    const x=phase1DoubleGroundContinuationFixture();x.runFrame(1);const a=x.sourceActor,slot=x.status.getAmmoSlot(x.actor,2);
+    x.control.getPartBinding(x.actor,0).state1b=1;x.control.getPartBinding(x.actor,1).state1b=undefined;
+    a.contactP1=1;a.dashStrength1d0f=1;
+    rejects(()=>x.runFrame(2),'state1b');
+    check(a.fbPhase===2 && a.hSpeed===0 && a.yVel===0 && slot.cell.cur===3 && slot.mirror776===13 && x.clocks.elapsed08===1,
+      'missing canonical part1 remains missing at715f8 after phase increment; legacy bytes cannot hydrate it');
+    checkCompletedDoubleFramePermanentRefusal(x);
+  }
+  console.log('[actor-callback-ammo-ground-continuation] PASS: explicit positive canonical state selects genuine715f8 backflip and6dbe0 on same retained slot2, without max0 unlimited shortcut; real stream/movement/ground prefix and partial stores survive precise7db5c projectile refusal or unconditional estimator boundary; ordinary authored zero state remains unchanged, no naturally reached release/full phase1/clone/browser completion claim');
 }

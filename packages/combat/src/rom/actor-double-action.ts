@@ -22,9 +22,13 @@
  * real copied commands/setup/mode1 with explicit inputs, not retail schedules.
  * Phase1 calls the same genuine4cd24(mask15), then yaw, existing-motion scale/add
  * and677b0 before its signed part0.state1b load. Positive state increments540
- * then refuses the actual nonnull715f8 callback. Nonpositive state reaches the
- * explicit8020bb38 frsqrte boundary after the authenticated8020bb14 square
- * prefix. Its genuine zero-square return is retained, never manufactured.
+ * then runs the actual nonnull715f8 callback: conditional part1 backflip stores,
+ * genuine6dbe0 slot2 consumption and signed family dispatch. Successful Ninja
+ * consumption refuses the first actual7db5c projectile call, before Double7c8.
+ * A returned callback reaches the explicit8020bb38 frsqrte boundary after the
+ * authenticated8020bb14 square prefix. Its genuine zero-square return is
+ * retained, never manufactured. Callback/ammo instruction order and constants:
+ * the fixed read_archived_callback_ammo_evidence.py reader, not C expression order.
  * Both stream-part states stay on their retained genuine owners, never legacy
  * contact/dash fields. Source byte/float reads and writability remain lazy.
  * Float32 RN00/NI0, paired-single enablement and finite signed32 conversion are
@@ -42,6 +46,7 @@ import {isSourceActorDoublePrehookRuntime, markIncompleteSourceActorDoubleLifecy
   type SourceActorDoubleFrameAccess, type SourceActorDoublePrehookRuntime} from './actor-double-prehook.js';
 import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import {isSourceActorCueResetRuntime, type SourceActorCueResetRuntime} from './actor-cue-reset.js';
+import {isSourceActorStatusTimersRuntime} from './actor-status-timers.js';
 
 export interface SourceActorDoubleActionTables {
   /** Decoded source u32 code words. Sparse arrays retain missing-cell refusals. */
@@ -152,6 +157,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
   const signedByte = (owner: unknown, key: string): number => byte(owner, key) << 24 >> 24;
   const state = (owner: unknown, key: string): number => integer(read(owner, key), -128, 127, key);
   const bam = (owner: unknown, key: string): number => integer(read(owner, key), 0, 65535, key);
+  const half = (owner: unknown, key: string): number => integer(read(owner, key), -32768, 32767, key);
   const f = (owner: unknown, key: string): number => float(read(owner, key), key);
   const word = (owner: unknown, key: string): number => integer(read(owner, key), 0, 0xffffffff, key);
   const s16 = (value: number): number => value << 16 >> 16;
@@ -164,6 +170,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
   const shared = (): object[] => [tables, ...Object.values(arrays), ...(processor ? [processor] : [])];
   const parameters = new Set<object>();
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
+  const ammoOwners = new Map<symbol, {slot: object; cell: object}>();
   const snapshots = new WeakMap<object, {id: symbol; stage: 'upper' | 'full' | 'done'}>();
   const pending = new Map<symbol, SourceActorDoubleStateSelectors>();
   const frameAccesses = new Map<symbol, SourceActorDoubleFrameAccess>();
@@ -171,7 +178,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
   const noShadows = (e: Entry, extras: readonly object[] = []): void => {
     const canonical = new Map<string, object>([
       ...['fbPhase','actionIndex','variantIndex','ubState','fbState','visibilityTarget','activeYaw','turnErrorYaw','heading','lockYaw',
-        'hSpeed','yVel','hDecel','gravityCoeff','poseAccum80','poseAccum7e','poseAccum7c','pos','motion','targetCache5e8','streamSlot','accumulator80c','byte6e8','byte6e9','controlWord'].map(key => [key,e.actual] as [string, object]),
+        'hSpeed','yVel','hDecel','gravityCoeff','borgNumber','poseAccum80','poseAccum7e','poseAccum7c','pos','motion','targetCache5e8','streamSlot','accumulator80c','byte6e8','byte6e9','controlWord'].map(key => [key,e.actual] as [string, object]),
       ['byte541', e.cue], ['pointer4b4', e.prehook], ['pointer4bc', e.prehook], ['pointer4c0', e.prehook],
       ['parameter4ac', e.attribute], ['timestep1dc8', e.mapping], ['marker578', e.dispatch],
       ...['familyBank1d80','sharedBank1d84','defaultSelector582','marker709'].map(key => [key,e.start] as [string, object]),
@@ -338,6 +345,81 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     if (square === zero) return square; // source bb30/34 -> bb54 bare return
     fail('800ff418 reached unsupported actual8020bb14 motion magnitude at8020bb38 frsqrte numerical boundary before threshold804392c8 and conditional800b22f4');
   };
+  const consumeCallbackAmmo = (id: symbol, e: Entry): boolean => {
+    // The actual fixed call is6dbe0(actor,2,1,1). Do not substitute the legacy
+    // allocator's callback/default success or its max0 unlimited convention.
+    // The genuine status runtime retains784/786/788/7a0/7a2 on this same cell.
+    const status = call(() => prehook.getStatusRuntime());
+    if (!isSourceActorStatusTimersRuntime(status)) fail('actual8006dbe0 requires genuine status runtime');
+    stable(call(() => status.getActualActor(id)), e.actual, 'ammo actual');
+    stable(call(() => status.getMappingActor(id)), e.mapping, 'ammo mapping');
+    stable(call(() => status.getWorldBinding(id)), call(() => prehook.getWorldBinding(id)), 'ammo world');
+    stable(call(() => status.getActorBinding(id)), call(() => prehook.getStatusBinding(id)), 'ammo status');
+    stable(call(() => status.getAttributeBinding(id)), e.attribute, 'ammo attribute');
+    stable(call(() => status.getStartBinding(id)), e.start, 'ammo stream start');
+    const slot = record(call(() => status.getAmmoSlot(id, 2)), 'source slot2'), cell = record(read(slot, 'cell'), 'source slot2 cell');
+    const existing = [...Object.values(e), ...shared(), ...call(() => attributes.getKnownParameterDescriptors()),
+      ...call(() => prehook.getSourceOwners(id)), ...(ground === undefined ? [] : call(() => ground.getSourceOwners(id)))];
+    const prior = ammoOwners.get(id);
+    if (prior !== undefined) {
+      stable(slot, prior.slot, 'source slot2'); stable(cell, prior.cell, 'source slot2 cell');
+    } else {
+      if (slot === cell || existing.includes(slot) || existing.includes(cell)) fail('source slot2 owner alias');
+      ammoOwners.set(id, {slot, cell});
+    }
+    noShadows(e, [slot, cell]); // identity/storage admission, never an ammo scalar load
+    // Metadata-only exclusions are local to this reached slot2. Other actual
+    // source slots legitimately have their own cur/timer/etc, so do not inspect
+    // them or demand any of their fields here.
+    for (const owner of [...existing, slot, cell]) {
+      for (const key of ['cur','timer','refillType','refillParam','mirror776']) {
+        const expected = key === 'mirror776' ? slot : cell;
+        if (owner !== expected && Object.getOwnPropertyDescriptor(owner, key) !== undefined)
+          fail(`${key}: competing slot2 source storage owner`);
+        check();
+      }
+      for (const key of ['byte784','short784','field784','cur784','byte786','short786','field786','mirror786',
+        'float788','field788','timer788','short7a0','field7a0','refillType7a0','short7a2','field7a2','refillParam7a2']) {
+        if (Object.getOwnPropertyDescriptor(owner, key) !== undefined) fail(`${key}: competing slot2 source storage alias`);
+        check();
+      }
+    }
+    const current = half(cell, 'cur'); //6dbec lha; signed comparison against1
+    if (current < 1) return false;
+    write(slot, 'mirror776', current); //6dc10 keeps the initially captured count
+    write(cell, 'cur', s16(half(cell, 'cur') - 1)); //6dc14 reload,6dc1c sth
+    const mode = half(cell, 'refillType'); //6dc20, after both stores
+    if (mode === 1) {
+      const parameter = half(cell, 'refillParam'); //6dc7c precedes old timer load
+      const timer = f(cell, 'timer'); //6dc94, before conversion subtraction
+      //804376a0's signed-half conversion is exact; fsubs rounds to the same f32.
+      write(cell, 'timer', addSourceFloat32(timer, parameter)); //6dca0/4
+    } else if (mode === 0) {
+      if (half(cell, 'cur') === 0) { //6dc48 fresh post-debit lha
+        const parameter = half(cell, 'refillParam');
+        write(cell, 'timer', parameter); //6dc70/74 exact signed-half conversion
+      }
+    } else if (mode === 2 || mode === 3) write(cell, 'timer', 0); //80437658 +0
+    return true; // negative and >=4 modes genuinely skip timer/parameter reads
+  };
+  const throwCallback = (id: symbol, e: Entry): void => {
+    // Authenticated715f8, fixed8043386c; the part1 lbz/extsb tests nonzero.
+    // The four constants are41200000/00000000/41700000/bf800000 respectively.
+    if (signedByte(e.part1, 'state1b') !== 0) {
+      const heading = s16(bam(e.actual, 'heading')); //71618 lha
+      write(e.actual, 'lockYaw', (heading - 0x8000) & 65535); //71630 sth
+      write(e.actual, 'hSpeed', 10); write(e.actual, 'hDecel', 0);
+      write(e.actual, 'yVel', 15); write(e.actual, 'gravityCoeff', -1);
+    }
+    if (!consumeCallbackAmmo(id, e)) return;
+    const borg = s16(bam(e.actual, 'borgNumber')); //71664 lha only after success
+    if (borg === 0 || borg === 3 || borg === 10) {
+      const variant = borg === 0 ? 0 : borg === 3 ? 1 : 3;
+      // Double's optional second variant2 and7c8 load are AFTER variant1 returns.
+      // No clone owner is read or manufactured before this genuine first call.
+      fail(`800715f8 reached unsupported actual8007db5c projectile variant${variant} after genuine8006dbe0 consumption`);
+    }
+  };
   const phaseOne = (id: symbol, e: Entry): void => {
     const a = e.actual, access = frameAccesses.get(id);
     // Host identity admission is lazy at this reached source call. It also
@@ -358,7 +440,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
       write(a, 'fbPhase', (byte(a, 'fbPhase') + 1) & 255);
       // Actual715d4 retains fixed config80433868. Its authenticated+4 word is
       // nonnull800715f8, not an injectable callback or a nullable fixture knob.
-      fail('800ff418 reached unsupported actual800715f8 callback from fixed8043386c after phase increment');
+      throwCallback(id, e);
     }
     // ff4a4 always reads current motion after the optional callback returns.
     // No positive state bypasses its earlier nonnull callback. The restricted
@@ -420,6 +502,7 @@ export function createSourceActorDoubleActionRuntime(sources: SourceActorDoubleA
     getAttributeBinding(id) {return entry(id).attribute;}, getCueBinding(id) {return entry(id).cue;},
     getDispatchBinding(id) {return entry(id).dispatch;}, getTables() {return tables;},
     getSourceOwners(id) {return Object.freeze([...new Set([...Object.values(entry(id)), ...shared(), ...attributes.getKnownParameterDescriptors(),
+      ...(ammoOwners.has(id) ? Object.values(ammoOwners.get(id)!) : []),
       ...(ground === undefined ? [] : ground.getSourceOwners(id))])]);},
     assertActorComplete(id) {requireCompleteSourceActorDoubleLifecycle(entry(id).actual);},
     captureStateSelectors(id) {return guard(() => {
