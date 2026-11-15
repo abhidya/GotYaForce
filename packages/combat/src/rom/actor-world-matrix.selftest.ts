@@ -122,7 +122,7 @@ function copyTarget(f: ReturnType<typeof fixture>, count = 6) {
 }
 // Explicit source cells, including one actual flat floor triangle. The helper
 // owns synthetic source bytes; no StageCollision or normal-success callback.
-function correctionLayer(offset: sourceTerrainGrid.SourceTerrainLayerOffset, floor: boolean) {
+function correctionLayer(offset: sourceTerrainGrid.SourceTerrainLayerOffset, floor: boolean, normal = {x: 0, y: 1, z: 0}) {
   const recordBase = 0x54, bytes = new Uint8Array(recordBase + (floor ? 0x38 : 0));
   const view = new DataView(bytes.buffer), word = (at: number, value: number) => view.setUint32(at, value, false);
   word(0, 0x53544948); word(4, bytes.length); word(8, 500); word(12, 500); word(16, 2); word(20, 2);
@@ -131,11 +131,11 @@ function correctionLayer(offset: sourceTerrainGrid.SourceTerrainLayerOffset, flo
   word(0x38, floor ? 0 : 0xffffffff); word(0x3c, 0xffffffff);
   if (floor) {
     word(recordBase, 7);
-    [0, 0, 0, 0, 0, 500, 500, 0, 0, 0, 1, 0, NaN].forEach((value, i) => view.setFloat32(recordBase + 4 + i * 4, value, false));
+    [0, 0, 0, 0, -500 * normal.z / normal.y, 500, 500, -500 * normal.x / normal.y, 0, normal.x, normal.y, normal.z, NaN].forEach((value, i) => view.setFloat32(recordBase + 4 + i * 4, value, false));
   }
   return sourceTerrainGrid.createSourceTerrainGrid(bytes, hitBin.parseStageHitGrid(bytes), offset);
 }
-function terrainCorrectionFixture(f: ReturnType<typeof fixture>, bind = true) {
+function terrainCorrectionFixture(f: ReturnType<typeof fixture>, bind = true, normal = {x: 0, y: 1, z: 0}) {
   const unsupported = (): never => {throw Error('unrelated animation/setup effect was reached');};
   const dispatch = createSourceActorAnimationDispatchRuntime(f.mapping, f.feedback);
   dispatch.bindActor(f.id, {family1d88: null, shared1d8c: null, marker578: 0, marker1db3: 0});
@@ -155,7 +155,7 @@ function terrainCorrectionFixture(f: ReturnType<typeof fixture>, bind = true) {
   const history = createSourceActorTransformHistoryRuntime({world: f.runtime});
   history.bindActor(f.id, {rotation76: zero(), preRotation1d6a: zero(), previousStepHeight6d4: 0, aimOrigin524: zero()});
   const terrain = createSourceActorTerrainQueryRuntime({world: f.runtime, history,
-    terrain: {floor1c: correctionLayer(0x1c, true), ceiling20: correctionLayer(0x20, false),
+    terrain: {floor1c: correctionLayer(0x1c, true, normal), ceiling20: correctionLayer(0x20, false),
       ceiling24: correctionLayer(0x24, false), upper34: 100, lower68: -100}});
   terrain.bindActor(f.id);
   const hooks: {movement?: () => void; normal?: () => void; replaceMovement?: boolean; result?: unknown} = {};
@@ -201,6 +201,7 @@ function primaryFixture(maxVisits = 4096) {
   return {...f, counts, placement: counts.primary1a14[0]!};
 }
 export function runActorWorldMatrixSelfTests(): void {
+  runActorWorldNonflatTerrainBoundarySelfTests();
   {
     const f = fixture();
     check(f.runtime.getWorldMatrix(f.id, 0) === f.output(0), 'world lookup returns actual full record without copying');
@@ -1032,5 +1033,29 @@ export function runActorWorldMatrixSelfTests(): void {
     rejects(() => f.runtime.copyActorMatrices(f.id, target.id), 'caught same-runtime reentry');
     check(target.output(0)[7] === -20 && f.state.adjusted1d54.y === 82, 'outer copy keeps completed copy and blocks nested preparation');
     delete f.hooks.copied; f.runtime.copyActorMatrices(f.id, target.id);
+  }
+}
+
+
+/** Genuine secondary4784c consumes3de80's slope but does not expand the
+ * independent45918 estimator/flat-normal host domain. */
+export function runActorWorldNonflatTerrainBoundarySelfTests(): void {
+  for (const normal of [{x: 1 / 64, y: 1, z: 0}, {x: 0, y: -2, z: 1 / 32}]) {
+    const f = fixture(), g = terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    const output = {x: 71, y: 72, z: 73}, globals = g.terrain.getTerrainGlobals();
+    check(g.terrain.queryNormal8003de80(f.id, {x: 11, y: 22, z: 33}, 0, output) === 1 &&
+      Object.is(output.x, normal.x) && Object.is(output.y, normal.y) && Object.is(output.z, normal.z),
+    'genuine3de80 returns an actual sloped raw normal, including negative nonunit Y');
+    f.events.length = 0;
+    const before = [...f.output(1)], descendant = [...f.output(3)];
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'only flat');
+    check(f.events.join(',') === 'identity,translate,correct,scale,copy114,copy1aa4,transform:0,movement,normal:0,orient:1:2:1',
+      'genuine4784c reaches3de80 then actual45918 refusal, never a fake normal/orientation success');
+    check(f.output(1).every((value, index) => Object.is(value, index === 3 ? 11 : index === 7 ? 22 : index === 11 ? 33 : before[index])),
+      'later flat-domain orientation refusal preserves exactly the earlier XYZ matrix translation stores');
+    check(f.output(3).every((value, index) => Object.is(value, descendant[index])),
+      'orientation refusal stops before descendant topology work');
+    check(g.terrain.getTerrainGlobals() === globals && f.runtime.getActualActor(f.id) === f.actual,
+      'secondary query/orientation boundary retains actual actor and terrain owners');
   }
 }

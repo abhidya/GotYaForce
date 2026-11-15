@@ -2879,6 +2879,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runDoubleFrameHydratedCompositionTests();
   runDoubleGroundStreamHydratedCompositionTests();
   runNonflatDoubleGroundCompositionTests();
+  runAllSlopedDoubleGroundCompositionTests();
   runDoubleFrameMarkerCompositionTests();
   runCompletedDoubleFrameHydratedCompositionTests();
   runNonnullDoubleSoundHydratedCompositionTests();
@@ -12357,6 +12358,138 @@ export function runNonflatDoubleGroundCompositionTests(): void {
     checkStandaloneDoublePermanentRefusal(x);
   }
   console.log('[actor-nonflat-ground-composition] PASS: finite non-flat3e0a8 through genuine677b0 and standalone phase0 stream continuation; retained actor/history/terrain/grid owners, strict above/equal/below contact boundary, arithmetic-failure prefixes and enclosing action no-replay; synthetic offline inputs only, no landing/full-frame/hydration claim');
+}
+
+/** One genuinely sloped triangle covers both the original cue0 point and the
+ * actual Double-carried point. Install all source bytes before the first query;
+ * neither a flat prefix triangle nor a changed actor/control word supplies the
+ * continuation. The older flat-prefix/non-flat-action regression stays above. */
+export function runAllSlopedDoubleGroundCompositionTests(): void {
+  const normal = {x: 1 / 64, y: 2, z: 1 / 32};
+  const fixture = (height = 4, planeNormal = normal, bind = false,
+    vertices = {y2: height - 15.625, y3: height - 7.8125, x3: 1000}) => {
+    const x = doubleGroundStreamHydratedCompositionFixture(false);
+    const floor = sourceTerrainDatFixture(true, height, planeNormal), bytes = new DataView(floor.bytes.buffer);
+    // Matching vertex Y values make this actual sloped geometry, not just a
+    // non-flat normal over three horizontal vertices. Explicit fault operands
+    // are also installed here, never substituted during a query or action.
+    bytes.setFloat32(0x50 + 0x14, vertices.y2);
+    bytes.setFloat32(0x50 + 0x1c, vertices.x3);
+    bytes.setFloat32(0x50 + 0x20, vertices.y3);
+    const grid = sourceTerrainGrid.createSourceTerrainGrid(floor.bytes, hitBin.parseStageHitGrid(floor.bytes), 0x1c);
+    Object.defineProperty(x.terrain, 'floor1c', {value: grid, writable: false, configurable: false});
+    if (bind) x.frame.bindActor(x.actor);
+    return Object.assign(x, {slopedGrid: grid});
+  };
+  const checkOwners = (x: ReturnType<typeof fixture>, position: object, motion: object, history: object): void => {
+    check(x.cue0.getActualActor(x.actor) === x.sourceActor && x.query.getActualActor(x.actor) === x.sourceActor &&
+      x.action.getActualActor(x.actor) === x.sourceActor && x.ground.getActualActor(x.actor) === x.sourceActor &&
+      x.sourceActor.pos === position && x.sourceActor.motion === motion && x.sourceActor.targetCache5e8 === history &&
+      x.ground.getPositionBinding(x.actor) === position && x.query.getHistoryBinding(x.actor) === x.historyState &&
+      x.cue0.getHistoryBinding(x.actor) === x.historyState && x.ground.getHistoryBinding(x.actor) === x.historyState &&
+      x.cue0.getTerrainRuntime() === x.query && x.ground.getTerrainRuntime() === x.query &&
+      x.cue0.getTerrainGlobals() === x.terrain && x.ground.getTerrainGlobals() === x.terrain &&
+      x.terrain.floor1c === x.slopedGrid && x.action.getMappingActor(x.actor) === x.sourceClock &&
+      x.action.getAttributeBinding(x.actor) === x.attributeState && x.action.getDispatchBinding(x.actor) === x.gates &&
+      x.action.getPrehookBinding(x.actor) === x.prehookState && x.prehook.getStartBinding(x.actor) === x.start,
+      'all-sloped cue0/action/ground/stream retain the same actual actor, vectors, history, query, grid and canonical source owners');
+  };
+  const checkFrameNoReplay = (x: ReturnType<typeof fixture>): void => {
+    check(hasIncompleteSourceActorFrame(x.sourceActor) && hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+      'all-sloped partial frame retains both enclosing frame and Double failure guards');
+    const records = retainCommandAdmissionRecords(x), suffix = retainDoubleFrameUnreached(x);
+    const motion = retainCompositionRecords([x.sourceActor.motion, x.sourceActor.targetCache5e8]);
+    for (const run of [() => x.runFrame(2), () => x.runFrame(3)]) {
+      rejects(run, 'incomplete source frame'); records(); suffix(); motion();
+    }
+    rejects(() => x.runRawPrefix(4, 128, 40), 'exclusively owned'); records(); suffix(); motion();
+    for (const run of [() => x.prehook.runActor(x.actor), () => x.action.captureStateSelectors(x.actor),
+      () => x.ground.runActor(x.actor), () => x.cue0.updateTerrain(x.actor)]) {
+      rejects(run, 'incomplete source Double'); records(); suffix(); motion();
+    }
+  };
+  for (const planeNormal of [normal, {x: -1 / 64, y: -2, z: -1 / 32}]) {
+    const x = fixture(4, planeNormal), a = x.sourceActor;
+    const position = a.pos, motion = a.motion, history = a.targetCache5e8, retained = retainDoubleGroundSuffix(x);
+    const oldAttached = x.joints.getBinding(x.joint).aobj7c, oldX = x.pose.translation.x;
+    const oldFrame = x.part.frame0c, oldDuration = x.part.duration24;
+    check(a.pos.x === 101 && a.pos.y === 2 && a.pos.z === 300 && a.controlWord === 0 &&
+      a.savedGroundPos.y === 2 && a.targetCache5e8.y === -2 && a.stepHeight === 0 && x.gaugeState.byte7c9 === 0,
+      'all-sloped composition starts with unchanged genuine fixture actor, control, history and probe operands');
+    check(x.runRawPrefix(1, 64, 20) === undefined && a.pos.x === 101 && a.pos.y === -1.4765625 && a.pos.z === 300 &&
+      a.motion.x === 41 && a.motion.y === 42 && a.motion.z === 43 && a.fbState === 61 && a.fbPhase === 0 &&
+      a.controlWord === 3 && x.start.defaultSelector582 === 7 && x.normalLifecycleState.short6bc === 1,
+      'actual3d6e4 writes -1.4765625 through68e4c before ordinary-X admission; delta from savedY2 stays within real field674=10');
+    retained(); checkOwners(x, position, motion, history);
+    x.prehook.runActor(x.actor);
+    const saved = x.action.captureStateSelectors(x.actor); x.action.dispatchUpper(x.actor, saved);
+    check(x.action.dispatchFull(x.actor, saved) === undefined,
+      'all-sloped prefix returns through genuine Double phase0,3e0a8/677b0 no-contact and real nonnull stream');
+    checkDoubleGroundStreamSetup(x, oldAttached, oldX, oldFrame, oldDuration, 0);
+    check(a.motion.x === 96.9000015258789 && a.motion.y === 0.49726560711860657 && a.motion.z === 0 &&
+      a.pos.x === 197.89999389648438 && a.pos.y === -0.9792969226837158 && a.pos.z === 300 &&
+      a.controlWord === 3 && a.stepHeight === 0 && x.gaugeState.byte7c9 === 0 &&
+      a.pos.y > -2.2335939407348633 && x.landCalls() === 0 &&
+      !hasIncompleteSourceActorFrame(a) && !hasIncompleteSourceActorDoubleLifecycle(a),
+      'actual motion subtracts priorY=-2 from the stored slope height, scales by source0.95 and carries above the same plane height=-2.2335939407348633');
+    retained(); checkOwners(x, position, motion, history);
+  }
+  {
+    const x = fixture(4, normal, true), a = x.sourceActor;
+    const position = a.pos, motion = a.motion, history = a.targetCache5e8, retained = retainDoubleGroundSuffix(x);
+    const oldAttached = x.joints.getBinding(x.joint).aobj7c, oldX = x.pose.translation.x;
+    const oldFrame = x.part.frame0c, oldDuration = x.part.duration24;
+    rejects(() => x.runFrame(), 'actual4c0');
+    checkDoubleGroundStreamSetup(x, oldAttached, oldX, oldFrame, oldDuration, 0);
+    check(a.pos.x === 197.89999389648438 && a.pos.y === -0.9792969226837158 && a.pos.z === 300 &&
+      a.motion.y === 0.49726560711860657 && x.gates.marker578 === 2 && x.landCalls() === 0,
+      'uninterrupted actual55568 uses the same sloped prefix height and action carry through stream return, stopping honestly at its missing4c0 suffix');
+    retained(); checkOwners(x, position, motion, history); checkFrameNoReplay(x);
+  }
+  for (const fault of ['contact', 'action-overflow'] as const) {
+    const x = fault === 'contact' ? fixture(0) :
+      fixture(0, {x: 2 ** 121, y: 2 ** 125, z: 0}, false, {y2: 0, y3: -31.25, x3: 500});
+    const a = x.sourceActor, suffix = retainDoubleFrameUnreached(x);
+    const prefixY = fault === 'contact' ? -5.4765625 : -6.3125;
+    check(x.runRawPrefix(1, 64, 20) === undefined && a.pos.y === prefixY && a.fbPhase === 0,
+      `${fault} first observes the finite sloped3d6e4 height store, without changing geometry or actor operands for the action`);
+    x.prehook.runActor(x.actor);
+    const saved = x.action.captureStateSelectors(x.actor); x.action.dispatchUpper(x.actor, saved);
+    rejects(() => x.action.dispatchFull(x.actor, saved), fault === 'contact' ? '8020ba78' : 'fmuls result'); suffix();
+    check(a.fbPhase === 1 && a.pos.x === 197.89999389648438 && a.pos.z === 300 &&
+      a.pos.y === (fault === 'contact' ? -8.779296875 : -10.409374237060547) &&
+      a.motion.x === 96.9000015258789 && a.motion.y === (fault === 'contact' ? -3.302734375 : -4.096874713897705) && a.motion.z === 0 &&
+      a.streamSlot === 219 && a.accumulator80c === 901 && x.landCalls() === 0 &&
+      !hasIncompleteSourceActorFrame(a) && hasIncompleteSourceActorDoubleLifecycle(a),
+      `${fault} retains the height-derived phase/yaw/motion/carry prefix, refuses at actual3e0a8/677b0 and poisons Double without claiming a frame`);
+    const records = retainCommandAdmissionRecords(x), motion = retainCompositionRecords([a.motion, a.targetCache5e8]);
+    for (const run of [() => x.action.dispatchFull(x.actor, saved), () => x.action.dispatchUpper(x.actor, saved),
+      () => x.prehook.runActor(x.actor), () => x.ground.runActor(x.actor), () => x.runRawPrefix(2, 128, 40)]) {
+      rejects(run, 'incomplete source Double'); records(); motion(); suffix();
+    }
+    rejects(() => x.runRawPrefix(2, 256, 80), 'epoch'); records(); motion(); suffix();
+  }
+  for (const fault of ['contact', 'zero-normal-y', 'overflow'] as const) {
+    const x = fixture(0, fault === 'contact' ? normal : fault === 'zero-normal-y' ?
+      {x: 1 / 64, y: 0, z: 1 / 32} : {x: Math.fround(3.4028235e38), y: 2, z: 1 / 32}, true);
+    const a = x.sourceActor, position = a.pos, motion = a.motion, history = a.targetCache5e8;
+    const retained = retainDoubleFrameUnreached(x), previousGround = retainDoubleGroundSuffix(x);
+    rejects(() => x.runFrame(), fault === 'contact' ? '8020ba78' : fault === 'zero-normal-y' ? 'fdivs zero divisor' : 'fmuls result');
+    retained(); previousGround(); checkOwners(x, position, motion, history);
+    check(a.streamSlot === 219 && a.accumulator80c === 901 &&
+      x.start.marker709 === (fault === 'contact' ? 0 : 0x35) && x.landCalls() === 0,
+      `${fault} retains the original nonnull stream/animation and only reached admission marker stores, without action config, wait, landing or80c effects`);
+    if (fault === 'contact') check(a.fbPhase === 1 && a.pos.x === 197.89999389648438 && a.pos.y === -8.779296875 &&
+      a.pos.z === 300 && a.motion.x === 96.9000015258789 && a.motion.y === -3.302734375 && a.motion.z === 0 &&
+      a.pos.y < -6.233593940734863 && x.start.defaultSelector582 === 1 && x.gates.marker578 === 0,
+      'contact retains source prefixY=-5.4765625 and actual phase/yaw/motion/carry before the same plane rejects677b0 below height=-6.233593940734863');
+    else check(a.fbPhase === 23 && a.pos.x === 101 && a.pos.y === 2 && a.pos.z === 300 &&
+      a.motion.x === 41 && a.motion.y === 42 && a.motion.z === 43 && a.gravityCoeff === 17 &&
+      x.start.defaultSelector582 === 7 && x.normalLifecycleState.short6bc === 2 && x.gates.marker578 === 2,
+      `${fault} stops the original3d6e4 arithmetic before68e4c height write, tester/admission, prehook or action mutation`);
+    checkFrameNoReplay(x);
+  }
+  console.log('[actor-all-sloped-double-ground-composition] PASS: one geometrically sloped floor through real3d6e4/cue0 height store, genuine Double motion,3e0a8/677b0 no-contact and actual nonnull stream/DAT/AObj/FObj mode1; positive/negative divisors, untouched canonical owners, contact/arithmetic prefixes and permanent frame no-replay without operand resets; explicit synthetic offline inputs only, no landing/complete-frame/retail-playability claim');
 }
 
 /** Explicit suffix admission on the existing real Double/ground/stream graph.

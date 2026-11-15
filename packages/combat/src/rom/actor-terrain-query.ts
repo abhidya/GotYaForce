@@ -13,9 +13,9 @@
  * stable non-proxy own-data owners; source pointer arithmetic must address an
  * explicitly owned cell. Nonzero support refuses before its matrix/copy branch;
  * reached nonempty ceiling cells refuse before their triangle bodies. Floor
- * triangles execute the actual edge and plane arithmetic. The height-plus-normal
- * query admits finite non-flat normals and nonzero Y divisors; the two sibling
- * queries remain bounded to flat normals (+/-0,1,+/-0).
+ * triangles execute the actual edge and plane arithmetic. All three floor
+ * queries admit finite non-flat normals and signed nonzero Y divisors. Each
+ * retains its distinct source load/selection schedule and caller stores.
  * Source loads and arithmetic remain ordered, including local clearance
  * adjustment, current/history reloads, and all three height-query accumulators.
  * The normal-only query has no minimum/maximum fallback. The distinct
@@ -144,12 +144,6 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
   const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
   const read = (value: unknown, key: string): unknown => {const result = own(value, key); check(); return result;};
   const f = (value: unknown, key: string): number => float(read(value, key), key);
-  const writeNormal = (output: object, key: 'x' | 'y' | 'z', next: number): void => {
-    const descriptor = Object.getOwnPropertyDescriptor(output, key); check();
-    if (!descriptor || !('value' in descriptor)) fail(`normal output ${key}: own data property required`);
-    if (!descriptor.writable) fail(`normal output ${key}: non-writable field unsupported`);
-    (output as SourceJointVector)[key] = next; check();
-  };
   const capture = (name: 'world' | 'history', key: string) => {
     const receiver = own(sources, name), method = own(receiver, key);
     if (typeof method !== 'function') fail(`${name}.${key}: own data-function required`);
@@ -294,10 +288,8 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
         if (edge1a < edge1b) continue;
         if (mul32(dz2, dx3) < mul32(dx2, dz3)) continue;
         if (mul32(dz3, dx1) < mul32(dx3, dz1)) continue;
-        const nx = tf(0x28);
-        if (nx !== 0) fail('nonflat source normal X unsupported');
-        const nz = tf(0x30); if (nz !== 0) fail('nonflat source normal Z unsupported');
-        const ny = tf(0x2c); if (ny !== 1) fail('nonflat source normal Y unsupported');
+        // 3d86c..898 captures X/Z/Y before either product or vertex Y.
+        const nx = tf(0x28), nz = tf(0x30), ny = tf(0x2c);
         const xProduct = mul32(nx, dx1), zProduct = mul32(nz, dz1), vertexY = tf(0x08);
         const xz = addSourceFloat32(xProduct, zProduct), yProduct = mul32(ny, vertexY);
         const height = div32(addSourceFloat32(xz, yProduct), ny);
@@ -312,12 +304,59 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
     queryNormal8003de80(id: symbol, callerLocalPoint: Readonly<SourceJointVector>, savedClearance: number,
       callerLocalNormalOutput: SourceJointVector): 0 | 1 {return guard(() => {
       const actor = actors.get(id); if (!actor) fail('unknown/non-owned terrain-query actor');
-      const support = integer(read(actual(actor, id), 'supportContact1db'), 0, 255, 'supportContact1db');
+      const actualOwner = actual(actor, id);
+      const support = integer(read(actualOwner, 'supportContact1db'), 0, 255, 'supportContact1db');
       if (support !== 0) fail('nonzero supporting contact normal-copy branch unsupported');
       const output = record(callerLocalNormalOutput, 'caller-local normal output');
       if (output === callerLocalPoint || assigned.has(output) || output === terrain || output === sources)
         fail('aliased caller-local normal output unsupported');
-      writeNormal(output, 'x', 0); writeNormal(output, 'y', 1); writeNormal(output, 'z', 0);
+      // Unbranded caller scratch must not become an actor/history/global
+      // field. Keep the existing public SourceJointVector contract. Inspect owner
+      // metadata only, without invoking accessors, validating
+      // source scalars, traversing layers, or requesting an early history reload.
+      const admitOutput = (): void => {
+        const knownOwners: object[] = [terrain, sources];
+        for (const known of actors.values()) knownOwners.push(known.actual, known.position, known.savedPosition, known.history);
+        for (const owner of knownOwners) {
+          const descriptors = Object.getOwnPropertyDescriptors(owner); check();
+          for (const descriptor of Object.values(descriptors)) {
+            if ('value' in descriptor && descriptor.value === output)
+              fail('aliased caller-local normal output adopted by source owner');
+          }
+        }
+        // Replaced vectors are also invalid on an outside-bounds query. Check
+        // identities, never X/Y/Z values, and recheck before subsequent writes.
+        if (read(actualOwner, 'pos') !== actor.position) fail('pos owner changed its actual record');
+        if (read(actualOwner, 'savedGroundPos') !== actor.savedPosition) fail('savedGroundPos owner changed its actual record');
+        // Observed metadata/identity reads above can themselves expose a late
+        // owner change. Finish with intrinsic metadata only, so no accessor or
+        // replaceable descriptor observer lies between admission and the store.
+        for (const owner of knownOwners) for (const key of outputOwnerKeys(owner)) {
+          const descriptor = outputDescriptor(owner, key);
+          if (descriptor && 'value' in descriptor && descriptor.value === output)
+            fail('aliased caller-local normal output adopted by source owner');
+        }
+        for (const [key, expected] of [['pos', actor.position], ['savedGroundPos', actor.savedPosition]] as const) {
+          const descriptor = outputDescriptor(actualOwner, key);
+          if (!descriptor || !('value' in descriptor)) fail(`${key}: own data property required`);
+          if (descriptor.value !== expected) fail(`${key} owner changed its actual record`);
+        }
+      };
+      const storeNormal = (key: 'x' | 'y' | 'z', next: number): void => {
+        const descriptor = Object.getOwnPropertyDescriptor(output, key); check();
+        if (!descriptor || !('value' in descriptor)) fail(`normal output ${key}: own data property required`);
+        if (!descriptor.writable) fail(`normal output ${key}: non-writable field unsupported`);
+        // Reconcile adoption/vector identities after the last observable
+        // destination check, including the final Z store. Inspect no scalar.
+        admitOutput();
+        const current = outputDescriptor(output, key);
+        if (!current || !('value' in current)) fail(`normal output ${key}: own data property required`);
+        if (!current.writable) fail(`normal output ${key}: non-writable field unsupported`);
+        if (!storeOutputData(output, key, {value: next})) fail(`normal output ${key}: own data store failed`);
+        check();
+      };
+      admitOutput();
+      storeNormal('x', 0); storeNormal('y', 1); storeNormal('z', 0);
       if (!inBounds(callerLocalPoint)) return 0;
       const localX = f(callerLocalPoint, 'x'), localY = f(callerLocalPoint, 'y');
       const localStep = f(actual(actor, id), 'stepHeight');
@@ -348,18 +387,17 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
         if (firstLeft < firstRight) continue;
         if (mul32(delta2Z, delta3X) < mul32(delta2X, delta3Z)) continue;
         if (mul32(delta3Z, delta1X) < mul32(delta3X, delta1Z)) continue;
-        const normalX = load(0x28); if (normalX !== 0) fail('nonflat source normal X unsupported');
-        const normalZ = load(0x30); if (normalZ !== 0) fail('nonflat source normal Z unsupported');
-        const normalY = load(0x2c); if (normalY !== 1) fail('nonflat source normal Y unsupported');
+        // 3dff8..e024 preserves X/Z/Y captures, including signed/nonunit Y.
+        const normalX = load(0x28), normalZ = load(0x30), normalY = load(0x2c);
         const productX = mul32(normalX, delta1X), productZ = mul32(normalZ, delta1Z), planeY = load(0x08);
         const productXZ = addSourceFloat32(productX, productZ), productY = mul32(normalY, planeY);
         const candidateHeight = div32(addSourceFloat32(productXZ, productY), normalY);
         if (candidateHeight < normalLimit && candidateHeight < ceilingHeight && bestHeight <= candidateHeight) {
           // Source stores the preserved raw X/Y/Z words, without reloading the
           // triangle. The best scalar changes between the X and Y stores.
-          writeNormal(output, 'x', normalX);
+          storeNormal('x', normalX);
           bestHeight = candidateHeight;
-          writeNormal(output, 'y', normalY); writeNormal(output, 'z', normalZ);
+          storeNormal('y', normalY); storeNormal('z', normalZ);
         }
       }
       return 1;
