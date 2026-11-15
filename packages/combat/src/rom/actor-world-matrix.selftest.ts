@@ -1,3 +1,4 @@
+import {flatHalfPrimaryMode0, flatHalfPrimaryWitnesses} from './actor-primary-flat-half-witness.selftest.js';
 import {slopedPrimaryWitnesses, slopedPrimaryOrientation} from './actor-primary-sloped-witness.selftest.js';
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {createRomActor} from './actor.js';
@@ -203,6 +204,7 @@ function primaryFixture(maxVisits = 4096) {
 }
 export function runActorWorldMatrixSelfTests(): void {
   runActorWorldSlopedPrimaryPlacementSelfTests();
+  runActorWorldFlatHalfPrimaryPlacementSelfTests();
   runActorWorldSlopedTerrainContinuationSelfTests();
   {
     const f = fixture();
@@ -1305,5 +1307,111 @@ export function runActorWorldSlopedPrimaryPlacementSelfTests(): void {
     changed = true;
     rejects(() => runtime.rebuildActor(f.id, 1), `${owner} owner changed`);
     check(!f.events.some(e => e.startsWith('primary:')), 'mapping/pose/matrix identity refusal precedes sloped placement');
+  }
+}
+
+function flatHalfPrimaryFixture() {
+  const f = primaryFixture();
+  // The owned mode0 scale produces the basis. Never reseed any matrix.
+  (f.storage.scales15d4[1] as {x: number}).x = 2;
+  f.runtime.prepareActor(f.id); f.runtime.rebuildActor(f.id, 0);
+  const word = new DataView(new ArrayBuffer(4));
+  for (const i of [1, 2, 3]) check(f.output(i).every((v, k) => {
+    word.setFloat32(0, v); return word.getUint32(0) === flatHalfPrimaryMode0[i - 1]![k];
+  }), 'owned X2 mode0 produces exact retained basis/translations without reseeding');
+  check(f.state.adjusted1d54.y === 8 && f.pose(1).translation.y === 10 && f.state.flags48a === 0,
+    'adjusted1d54 differs from raw bank-zero pose with flags48a&6 clear');
+  f.placement.y = 30.5; f.events.length = 0; return f;
+}
+export function runActorWorldFlatHalfPrimaryPlacementSelfTests(): void {
+  const word = new DataView(new ArrayBuffer(4));
+  const bits = (v: number) => {word.setFloat32(0, v); return word.getUint32(0);};
+  const same = (m: readonly number[], w: readonly number[]) => m.every((v, i) => bits(v) === w[i]);
+  const prefix = 'identity,translate,correct,scale,copy114,copy1aa4,primary:1:0';
+  const suffix = ',joint:4:0,joint:5:4,joint:6:1,joint:7:6,joint:3:2';
+  for (const witness of flatHalfPrimaryWitnesses) {
+    const f = flatHalfPrimaryFixture(); f.placement.bend0f = witness.bend;
+    const owned = [f.output(1), f.output(2), f.output(3)]; let calls = 0;
+    f.hooks.placed = () => {
+      calls++;
+      check(same(f.output(1), witness.current) && same(f.output(2), witness.adjacent) && same(f.output(3), witness.retainedEnd),
+        'genuine half world mode0-to-mode1 six-bend exact placement boundary');
+    };
+    f.runtime.rebuildActor(f.id, 1);
+    check(calls === 1 && f.events.join(',') === prefix + suffix, 'half placement followed once by genuine world continuation');
+    check(owned.every((m, i) => m === f.output(i + 1)) && !same(f.output(3), witness.retainedEnd),
+      'world owners persist but continuation really rebuilds end after placement');
+  }
+  {
+    const f = flatHalfPrimaryFixture(); f.topology(1)[0] = 4; f.topology(1)[1] = 255;
+    f.topology(4)[0] = 255; f.topology(4)[1] = 255; f.pose(4).translation.y = NaN;
+    f.runtime.rebuildActor(f.id, 1);
+    check(f.events.join(',') === prefix && same(f.output(2), flatHalfPrimaryWitnesses[3]!.adjacent),
+      'half uses physical adjacency and raw pose2, not skipped topology node4');
+  }
+  {
+    const f = flatHalfPrimaryFixture(); let changed = false;
+    f.placement.axis0d = 0; f.placement.axis0e = 0; f.placement.bend0f = 0; f.placement.y = 99;
+    f.hooks.matrix = id => {if (!changed && id === f.matrixIds[1]) {
+      changed = true; f.pose(1).translation.y = 99;
+      Object.assign(f.placement, {axis0d: 2, axis0e: 1, bend0f: 254, y: 30.5});
+    }};
+    f.hooks.placed = () => {
+      const witness = flatHalfPrimaryWitnesses[1]!;
+      check(same(f.output(1), witness.current) && same(f.output(2), witness.adjacent), 'captured raw current and fresh correction survive late observer mutation');
+      f.counts.count1d96 = 0; f.topology(1)[1] = 255; f.topology(2)[0] = 255; f.topology(2)[1] = 255;
+    };
+    f.runtime.rebuildActor(f.id, 1); check(changed && f.events.join(',') === prefix, 'post-placement topology/counts remain live');
+  }
+  for (const stage of ['reentry', 'promise'] as const) {
+    const f = flatHalfPrimaryFixture();
+    f.hooks.placed = () => {if (stage === 'promise') return Promise.resolve();
+      try {f.runtime.rebuildActor(f.id, 1);} catch { /* deliberately swallowed */ } return undefined;};
+    rejects(() => f.runtime.rebuildActor(f.id, 1), stage === 'reentry' ? 'caught same-runtime reentry' : 'synchronously');
+    check(f.events.join(',') === prefix && same(f.output(1), flatHalfPrimaryWitnesses[3]!.current) &&
+      same(f.output(2), flatHalfPrimaryWitnesses[3]!.adjacent) && same(f.output(3), flatHalfPrimaryMode0[2]!),
+      'half observer poison retains completed placement but prevents continuation');
+    // Fresh genuine mode0 rebuild explicitly restores retained operands.
+    delete f.hooks.placed; f.runtime.rebuildActor(f.id, 0); f.events.length = 0;
+    f.runtime.rebuildActor(f.id, 1); check(f.events.join(',') === prefix + suffix, 'fresh mode0 rebuild supports explicit retry, not frame closure');
+  }
+  for (const scale of [1, 2]) {
+    const f = flatHalfPrimaryFixture();
+    if (scale === 1) {(f.storage.scales15d4[1] as {x: number}).x = 1; f.runtime.rebuildActor(f.id, 0);}
+    else f.placement.y = 32;
+    f.events.length = 0;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), scale === 1 ? 'finite estimate proof domain' : 'positive sine square');
+    check(f.events.join(',') === prefix && f.output(1)[7] === 30 && f.output(2)[7] === 30 && f.output(3)[7] === 30.5,
+      'half negative witnesses stop at reached operation after translation without continuation');
+    check(bits(f.output(1)[0]!) === (scale === 1 ? 0x3f800000 : 0x3ffffffe), 'identity fails before basis while Y2 preserves completed basis');
+  }
+  for (const stop of [0, 4, 8, 1, 5, 9, 2, 6, 10]) {
+    const f = flatHalfPrimaryFixture(); Object.defineProperty(f.output(1), String(stop), {writable: false});
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'non-writable');
+    check(f.events.join(',') === prefix && same(f.output(2), flatHalfPrimaryMode0[1]!), 'half world basis fault blocks next/traversal');
+  }
+  for (const change of ['array', 'record'] as const) {
+    const f = flatHalfPrimaryFixture(); f.runtime.rebuildActor(f.id, 1);
+    if (change === 'array') f.counts.primary1a14 = [f.placement]; else f.counts.primary1a14[0] = {...f.placement};
+    f.events.length = 0;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), change === 'array' ? 'correction storage owner changed' : 'correction slot owner changed');
+    check(!f.events.some(e => e.startsWith('primary:')), 'half replacement correction owner refuses before placement');
+  }
+  {
+    const f = flatHalfPrimaryFixture(); f.counts.count1d96 = 2; f.counts.primary1a14.push(f.placement); f.placement.joint0c = 255;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'aliased correction slots');
+  }
+  for (const owner of ['mapping', 'pose', 'matrix'] as const) {
+    const f = flatHalfPrimaryFixture(); let changed = false; const sources = {...f.sources};
+    if (owner === 'mapping') sources.mapping = {getActor: f.mapping.getActor, getLayout(id: symbol) {
+      const original = f.mapping.getLayout(id); return changed ? {...original} : original;}};
+    if (owner === 'pose') sources.feedback = {getPose(id: symbol) {
+      const original = f.feedback.getPose(id); return changed ? {...original} : original;}};
+    if (owner === 'matrix') sources.matrices = {...f.sources.matrices, getMatrix(id: symbol) {
+      const original = f.matrices.getMatrix(id); return changed ? original.slice() : original;}};
+    const runtime = createSourceActorWorldMatrixRuntime(sources);
+    runtime.bindActor(f.id, f.actual, f.state, f.storageInput); runtime.bindCorrectedTraversalState(f.id, f.counts); changed = true;
+    rejects(() => runtime.rebuildActor(f.id, 1), `${owner} owner changed`);
+    check(!f.events.some(e => e.startsWith('primary:')), 'half ownership identity failure before placement');
   }
 }

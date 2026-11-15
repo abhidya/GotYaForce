@@ -319,7 +319,7 @@ function cross(a: LocalVector, b: LocalVector, secondary = false): LocalVector {
   const negativeZ = madd(ay, bx, -byAx);
   return [x, -negativeY, -negativeZ];
 }
-function orientTerrainMatrix(matrix: number[], normal: Readonly<SourceJointVector>, axisA: number, axisB: number, domain: 'axis' | 'secondary' | 'primary-sloped' = 'axis', check: () => void = () => {}): void {
+function orientTerrainMatrix(matrix: number[], normal: Readonly<SourceJointVector>, axisA: number, axisB: number, domain: 'axis' | 'secondary' | 'primary-sloped' | 'primary-flat-positive' = 'axis', check: () => void = () => {}): void {
   const secondary = domain !== 'axis'; // Shared arithmetic, separate caller admission.
   const magnitude = secondary ? secondaryMagnitude : axisMagnitude;
   const normalize = secondary ? secondaryNormalize : normalizeAxis;
@@ -506,13 +506,17 @@ function primaryFoldedPlacement(parent: number[], current: number[], next: numbe
   const delta = {x: addSourceFloat32(targetX, -local.x), y: addSourceFloat32(targetY, -local.y), z: NaN};
   delta.z = addSourceFloat32(vectorLoad(correction, 'z', 'primary target', check), -local.z);
   const axisA = primarySignedByte(correction, 'axis0d', check), axisB = primarySignedByte(correction, 'axis0e', check);
-  // Preserve the original flat primary domain. Sloped displacement reaches
-  // each actual SDK norm check in order, not a target-bit or ideal-length
-  // preflight. This does not change standalone secondary admission.
+  // Keep unit and nonpositive flat displacement on the original axis lane.
+  // Positive nonunit flat placement uses the same five ACTUAL rounded norm
+  // operands as the sloped lane, not an ideal-length/fixture-bit preflight.
+  // In particular identity/+Y.5 reaches the second-cross norm refusal, and
+  // X2/+Y2 reaches the later sine refusal after completed orientation writes.
   const sloped = delta.x !== 0 || delta.z !== 0;
-  orientTerrainMatrix(current, delta, axisA, axisB, sloped ? 'primary-sloped' : 'axis', check);
+  const positiveFlat = !sloped && delta.y > 0 && delta.y !== 1;
+  orientTerrainMatrix(current, delta, axisA, axisB, sloped ? 'primary-sloped' :
+    positiveFlat ? 'primary-flat-positive' : 'axis', check);
   // 47560 follows the completed orientation (including its Scale/Concat).
-  let distance = (sloped ? secondaryMagnitude : axisMagnitude)([delta.x, delta.y, delta.z]);
+  let distance = ((sloped || positiveFlat) ? secondaryMagnitude : axisMagnitude)([delta.x, delta.y, delta.z]);
   const reach = multiply(0.9990000128746033, add(firstLength, secondLength)); // 804370d0=3f7fbe77
   if (reach < distance) distance = reach;
   // Exact instruction ordering at47584..475c4. In particular both rounded

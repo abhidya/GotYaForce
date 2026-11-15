@@ -1,3 +1,4 @@
+import {flatHalfPrimaryMode0, flatHalfPrimaryWitnesses, flatHalfPrimaryNormalized} from './actor-primary-flat-half-witness.selftest.js';
 import {slopedPrimaryWitnesses, slopedPrimaryOrientation, slopedPrimaryNormalized} from './actor-primary-sloped-witness.selftest.js';
 import {createSourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
 import {primarySineCorrection} from './actor-primary-float.js';
@@ -208,6 +209,7 @@ export function runActorJointMatrixSelfTests(): void {
   runActorJointStandaloneMatrixSelfTests();
   runActorJointSlopedOrientationSelfTests();
   runActorJointSlopedPrimaryPlacementSelfTests();
+  runActorJointFlatHalfPrimaryPlacementSelfTests();
   {
     // Binary64 witnesses are necessary: final frsp happens to hide the first
     // sine's stage2 split-multiply error. Exercise the production internal
@@ -824,8 +826,8 @@ export function runActorJointMatrixSelfTests(): void {
   }
   {
     const f = primaryFixture(); f.correction.y = 2;
-    rejects(f.run, 'only flat'); check(f.currentMatrix[0] === 1 && f.nextMatrix[7] === 2,
-      'unadmitted target direction/distance does not replace source normalization with arbitrary sqrt');
+    rejects(f.run, 'positive sine square'); check(bits(f.currentMatrix[0]!) === 0x3f7ffffe && f.nextMatrix[7] === 2,
+      'positive nonunit target reaches unsupported sine only after finite-norm orientation');
   }
   {
     const f = primaryFixture(); Object.defineProperty(f.nextMatrix, '4', {writable: false});
@@ -934,9 +936,9 @@ export function runActorJointMatrixSelfTests(): void {
       'unit-pair late bend accessor preserves orientation without invoking getter');
     for (const target of [NaN, 2]) {
       const f = positivePrimaryFixture(); f.translation.x = 3; f.correction.x = 3; f.correction.y = target;
-      rejects(f.run, Number.isNaN(target) ? 'primary target.y' : 'only flat');
-      check(f.currentMatrix[3] === 3 && f.currentMatrix[0] === 1 && f.nextMatrix[7] === 1,
-        'unit-pair target refusal retains translation but never invents an orientation');
+      rejects(f.run, Number.isNaN(target) ? 'primary target.y' : 'positive sine square');
+      check(f.currentMatrix[3] === 3 && bits(f.currentMatrix[0]!) === (Number.isNaN(target) ? 0x3f800000 : 0x3f7ffffe) && f.nextMatrix[7] === 1,
+        'unit-pair target refusal retains its reached translation or finite orientation prefix');
     }
   }
   {
@@ -1426,5 +1428,111 @@ export function runActorJointSlopedPrimaryPlacementSelfTests(): void {
     check(f.currentMatrix[0] === 1 && f.nextMatrix[7] === 2, 'sloped placement participates in same-call matrix reentry poison');
     delete f.hooks.get; f.run();
     check(bits(f.currentMatrix[5]!) === 0x3f199997, 'fresh matrix call can retry after refusal');
+  }
+}
+
+function flatHalfPrimaryFixture() {
+  const f = primaryFixture();
+  for (const [matrix, words] of [[f.currentMatrix, flatHalfPrimaryMode0[0]!],
+    [f.nextMatrix, flatHalfPrimaryMode0[1]!], [f.endMatrix, flatHalfPrimaryMode0[2]!]] as const) {
+    matrix.splice(0, 12, ...words.map(fromBits));
+  }
+  const parent = f.runtime.getMatrix(f.parent); parent[3] = 10; parent[7] = 20; parent[11] = 30;
+  f.translation.y = 10; Object.assign(f.correction, {x: 10, y: 30.5, z: 30});
+  return f;
+}
+export function runActorJointFlatHalfPrimaryPlacementSelfTests(): void {
+  const same = (m: readonly number[], w: readonly number[]) => m.every((v, i) => bits(v) === w[i]);
+  const translated = flatHalfPrimaryMode0[0]!.slice(); translated[7] = bits(30);
+  const oriented = flatHalfPrimaryWitnesses[0]!.current;
+  const normalizedOrder = [0, 4, 8, 1, 5, 9, 2, 6, 10];
+  const concatOrder = [0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 10, 11];
+  for (const witness of flatHalfPrimaryWitnesses) {
+    const f = flatHalfPrimaryFixture(); f.correction.bend0f = witness.bend; f.run();
+    check(same(f.currentMatrix, witness.current) && same(f.nextMatrix, witness.adjacent) && same(f.endMatrix, witness.retainedEnd),
+      'half primary exact six signed bends including translated subtraction and adjacent rounding to 32');
+    // Repair retained coordinates only, never the output basis: the repeated
+    // call must refuse at its incoming norm rather than invent a new seed.
+    f.currentMatrix[7] = 28; f.nextMatrix[7] = 30;
+    rejects(f.run, 'finite estimate proof domain');
+    check(same(f.currentMatrix, witness.current), 'repeated norm refusal preserves translation and previous output basis');
+  }
+  for (let stop = 0; stop < normalizedOrder.length; stop++) {
+    const f = flatHalfPrimaryFixture(), expected = translated.slice();
+    Object.defineProperty(f.currentMatrix, String(normalizedOrder[stop]), {writable: false});
+    rejects(f.run, 'non-writable');
+    for (const k of normalizedOrder.slice(0, stop)) expected[k] = flatHalfPrimaryNormalized[k]!;
+    check(same(f.currentMatrix, expected) && same(f.nextMatrix, flatHalfPrimaryMode0[1]!), 'half normalization exact column-major fault prefix');
+  }
+  for (const stop of [3, 7, 11]) {
+    const f = flatHalfPrimaryFixture(); Object.defineProperty(f.currentMatrix, String(stop), {writable: false});
+    rejects(f.run, 'non-writable');
+    const expected = flatHalfPrimaryMode0[0]!.slice(); if (stop === 11) expected[7] = bits(30);
+    check(same(f.currentMatrix, expected), 'half translation exact store prefix before any orientation');
+  }
+  for (const witness of flatHalfPrimaryWitnesses) for (let stop = 0; stop < 12; stop++) {
+    const f = flatHalfPrimaryFixture(); f.correction.bend0f = witness.bend;
+    Object.defineProperty(f.nextMatrix, String(concatOrder[stop]), {writable: false});
+    rejects(f.run, 'non-writable');
+    const expected = flatHalfPrimaryMode0[1]!.slice();
+    for (const k of concatOrder.slice(0, stop)) expected[k] = witness.adjacent[k]!;
+    check(same(f.currentMatrix, witness.current) && same(f.nextMatrix, expected) && same(f.endMatrix, witness.retainedEnd),
+      'half adjacent Concat exact fault prefix and placement end preservation');
+  }
+  {
+    const f = flatHalfPrimaryFixture(); f.currentMatrix[0] = 1;
+    rejects(f.run, 'finite estimate proof domain');
+    const expected = translated.slice(); expected[0] = bits(1);
+    check(same(f.currentMatrix, expected) && same(f.nextMatrix, flatHalfPrimaryMode0[1]!),
+      'identity half reaches unsupported second-cross square .0625 after translation before basis writes');
+  }
+  {
+    const f = flatHalfPrimaryFixture(); f.correction.y = 32;
+    rejects(f.run, 'positive sine square');
+    check(same(f.currentMatrix, oriented) && same(f.nextMatrix, flatHalfPrimaryMode0[1]!),
+      'X2 Y2 reaches unsupported sine square 3d7c0000 after full orientation');
+  }
+  for (const y of [30, 29.5]) {
+    const f = flatHalfPrimaryFixture(); f.correction.y = y;
+    rejects(f.run, 'only flat'); check(same(f.currentMatrix, translated), 'zero/negative flat remains unsupported');
+  }
+  for (const key of ['axis0d', 'axis0e', 'bend0f'] as const) {
+    const f = flatHalfPrimaryFixture(); f.correction[key] = 0;
+    rejects(f.run, key === 'bend0f' ? 'primary bend axis' : 'positive terrain axes');
+    check(same(f.currentMatrix, key === 'bend0f' ? oriented : translated), 'half fresh axis/bend refusal at actual source boundary');
+    const g = flatHalfPrimaryFixture();
+    Object.defineProperty(g.correction, key, {get() {throw Error('accessor must not execute');}});
+    rejects(g.run, 'own data');
+  }
+  // Public descriptor observer verifies late reads, and same-call poison at
+  // both the last correction read and last destination store.
+  for (const stage of ['axis0e', 'bend-first', 'bend-second', 'basis', 'adjacent-last'] as const) {
+    const f = flatHalfPrimaryFixture(), original = Object.getOwnPropertyDescriptor;
+    const key = stage === 'axis0e' ? 'axis0e' : stage.startsWith('bend') ? 'bend0f' : stage === 'basis' ? '4' : '11';
+    const target = stage === 'basis' ? f.currentMatrix : stage === 'adjacent-last' ? f.nextMatrix : f.correction;
+    const occurrence = stage === 'basis' ? 3 : stage === 'bend-second' || stage === 'adjacent-last' ? 2 : 1;
+    let seen = 0, nested = false;
+    Object.getOwnPropertyDescriptor = (object: object, property: PropertyKey): PropertyDescriptor | undefined => {
+      const descriptor = original(object, property);
+      if (object === target && property === key && ++seen === occurrence) {
+        nested = true; try {f.run();} catch { /* deliberately swallowed */ }
+      }
+      return descriptor;
+    };
+    try {rejects(f.run, 'caught same-runtime reentry during primary placement');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    const expected = stage === 'axis0e' || stage === 'basis' ? translated.slice() : oriented.slice();
+    if (stage === 'basis') expected[0] = flatHalfPrimaryNormalized[0]!;
+    const nextExpected = stage === 'adjacent-last' ? flatHalfPrimaryWitnesses[3]!.adjacent.slice() : flatHalfPrimaryMode0[1]!.slice();
+    check(nested && same(f.currentMatrix, expected) && same(f.nextMatrix, nextExpected), 'half same-call poison exact preceding stores');
+    f.currentMatrix.splice(0, 12, ...flatHalfPrimaryMode0[0]!.map(fromBits));
+    f.nextMatrix.splice(0, 12, ...flatHalfPrimaryMode0[1]!.map(fromBits)); f.run();
+    check(same(f.currentMatrix, oriented), 'fresh explicit half retry after retained input repair');
+  }
+  {
+    const f = flatHalfPrimaryFixture();
+    rejects(() => f.runtime.primaryFoldedPlacement(f.parent, f.current, f.current, f.end, f.translation, f.nextTranslation, f.correction), 'distinct');
+    rejects(() => f.runtime.primaryFoldedPlacement(Symbol(), f.current, f.next, f.end, f.translation, f.nextTranslation, f.correction), 'unknown/non-owned');
+    check(same(f.currentMatrix, flatHalfPrimaryMode0[0]!), 'ownership/alias refusal precedes stores');
   }
 }
