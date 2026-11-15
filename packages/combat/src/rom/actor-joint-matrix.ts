@@ -19,9 +19,9 @@
  * types with no quantization; initialization/live invariance is not established.
  * RN=00/NI=0 finite-f32 bounds are assumptions,
  * not original-runtime parity. No arbitrary quaternion/fres emulation is claimed.
- * Terrain 45918 admits only axes (2,1), flat (±0,1,±0), and nondegenerate
- * signed-axis columns with magnitudes .5,1,2,4,8; the first construction must
- * succeed. Mag/Normalize use the real SDK refinement of a separately derived
+ * Secondary terrain 45918 admits axes (2,1) and computed paired squared
+ * norms .25,1,4,16,64 at every Mag/Normalize; the first construction must
+ * succeed. Primary placement retains its signed-axis/flat-only admission. Mag/Normalize use the real SDK refinement of a separately derived
  * finite reciprocal-estimate specialization, not sqrt or an identity shortcut.
  * This specialization is canonical Dolphin-model-backed, not a hardware capture.
  * Primary47368 additionally admits measured signed-axis length pairs (2,.5)
@@ -227,11 +227,30 @@ function finiteAxisMagnitude(vector: LocalVector): number {
   if (![0.5, 1, 2, 4, 8].includes(magnitude)) fail('terrain magnitude outside finite estimate proof domain');
   return magnitude;
 }
-function squareMagnitude(vector: LocalVector): number {
+function secondaryNormal(value: number): number {
+  if (value !== 0 && Math.abs(value) < 2 ** -126) fail('terrain denormal arithmetic outside proof domain');
+  return value;
+}
+function secondaryMultiply(a: number, b: number): number {
+  secondaryNormal(a); secondaryNormal(b);
+  const result = secondaryNormal(multiply(a, b));
+  if (result === 0 && a !== 0 && b !== 0) fail('terrain denormal arithmetic outside proof domain');
+  return result;
+}
+function secondaryFma(a: number, b: number, c: number): number {
+  secondaryNormal(a); secondaryNormal(b); secondaryNormal(c);
+  const result = secondaryNormal(fma(a, b, c));
+  if (result === 0 && a * b + c !== 0) fail('terrain denormal arithmetic outside proof domain');
+  return result;
+}
+function squareMagnitude(vector: LocalVector, secondary = false): number {
+  const mul = secondary ? secondaryMultiply : multiply;
+  const madd = secondary ? secondaryFma : fma;
   // Both SDK sites use ps_mul XY, ps_madd Z, then ps_sum0. Even though
-  // only one axis is nonzero in this domain, retain that exact operation tree.
-  const xSquared = multiply(vector[0], vector[0]), ySquared = multiply(vector[1], vector[1]);
-  return add(fma(vector[2], vector[2], xSquared), ySquared);
+  // the secondary domain can have multiple components, retain that exact tree.
+  const xSquared = mul(vector[0], vector[0]), ySquared = mul(vector[1], vector[1]);
+  const squared = add(madd(vector[2], vector[2], xSquared), ySquared);
+  return secondary ? secondaryNormal(squared) : squared;
 }
 function refinedAxisReciprocal(magnitude: number, squared: number): number {
   // Independently derived finite facts, not copied emulator code/table:
@@ -261,44 +280,74 @@ function normalizeAxis(vector: LocalVector): LocalVector {
   const x = multiply(vector[0], reciprocal), y = multiply(vector[1], reciprocal);
   return [x, y, multiply(vector[2], reciprocal)];
 }
-function cross(a: LocalVector, b: LocalVector): LocalVector {
+/** Select only the five proven seeds by the ACTUAL rounded SDK operand.
+ * No sqrt, ideal vector length, or input normal classification substitutes for it. */
+function pairedNormMagnitude(squared: number): number {
+  switch (squared) {
+    case 0.25: return 0.5;
+    case 1: return 1;
+    case 4: return 2;
+    case 16: return 4;
+    case 64: return 8;
+    default: return fail('terrain squared norm outside finite estimate proof domain');
+  }
+}
+function secondaryMagnitude(vector: LocalVector): number {
+  const squared = squareMagnitude(vector, true);
+  return multiply(squared, refinedAxisReciprocal(pairedNormMagnitude(squared), squared));
+}
+function secondaryNormalize(vector: LocalVector): LocalVector {
+  const squared = squareMagnitude(vector, true);
+  const reciprocal = refinedAxisReciprocal(pairedNormMagnitude(squared), squared);
+  const x = secondaryMultiply(vector[0], reciprocal), y = secondaryMultiply(vector[1], reciprocal);
+  return [x, y, secondaryMultiply(vector[2], reciprocal)];
+}
+function cross(a: LocalVector, b: LocalVector, secondary = false): LocalVector {
+  const mul = secondary ? secondaryMultiply : multiply;
+  const madd = secondary ? secondaryFma : fma;
   // 8020bb78: ps_msub subtracts a separately rounded product. Y and Z are
   // explicitly negated AFTER that fused subtraction, including zero results.
   const bx = b[0], by = b[1], az = a[2], ax = a[0], ay = a[1], bz = b[2];
-  const bxAz = multiply(bx, az), byAz = multiply(by, az);
-  const bxAx = multiply(bx, ax), byAx = multiply(by, ax);
-  const negativeY = fma(ax, bz, -bxAz), x = fma(ay, bz, -byAz);
+  const bxAz = mul(bx, az), byAz = mul(by, az);
+  const bxAx = mul(bx, ax), byAx = mul(by, ax);
+  const negativeY = madd(ax, bz, -bxAz), x = madd(ay, bz, -byAz);
   // Both lanes execute even though the first is not stored by this routine.
-  fma(ax, by, -bxAx);
-  const negativeZ = fma(ay, bx, -byAx);
+  madd(ax, by, -bxAx);
+  const negativeZ = madd(ay, bx, -byAx);
   return [x, -negativeY, -negativeZ];
 }
-function orientTerrainMatrix(matrix: number[], normal: Readonly<SourceJointVector>, axisA: number, axisB: number): void {
+function orientTerrainMatrix(matrix: number[], normal: Readonly<SourceJointVector>, axisA: number, axisB: number, secondary = false): void {
+  const magnitude = secondary ? secondaryMagnitude : axisMagnitude;
+  const normalize = secondary ? secondaryNormalize : normalizeAxis;
   // 45954..459a0 load ALL three columns, column-major, before the three
   // Mag calls at459a8/b4/c0. Translation is first read by final Concat.
   const oldX: LocalVector = [load(matrix, 0), load(matrix, 4), load(matrix, 8)];
   const oldY: LocalVector = [load(matrix, 1), load(matrix, 5), load(matrix, 9)];
   const oldZ: LocalVector = [load(matrix, 2), load(matrix, 6), load(matrix, 10)];
-  const magnitudeX = axisMagnitude(oldX), magnitudeY = axisMagnitude(oldY), magnitudeZ = axisMagnitude(oldZ);
+  const magnitudeX = magnitude(oldX), magnitudeY = magnitude(oldY), magnitudeZ = magnitude(oldZ);
   const y: LocalVector = [vectorLoad(normal, 'x', 'normal'), vectorLoad(normal, 'y', 'normal'),
     vectorLoad(normal, 'z', 'normal')];
-  if (y[0] !== 0 || y[1] !== 1 || y[2] !== 0) fail('only flat (±0,1,±0) terrain normal is supported');
+  if (!secondary && (y[0] !== 0 || y[1] !== 1 || y[2] !== 0)) fail('only flat (±0,1,±0) terrain normal is supported');
   if (axisA !== 2 || axisB !== 1) fail('only positive terrain axes (2,1) are supported');
   // 45a10/18/20 freshly load the selected reference column. The authenticated
   // lookup at802d0d34+7 selects2; dispatch cell802d0d4c selects80046158.
   let x: LocalVector = [load(matrix, 0), load(matrix, 4), load(matrix, 8)];
-  if (new Set([oldX, oldY, oldZ].map(column => column.findIndex(value => value !== 0))).size !== 3) {
+  if (!secondary && new Set([oldX, oldY, oldZ].map(column => column.findIndex(value => value !== 0))).size !== 3) {
     fail('terrain basis must have three distinct signed axes');
   }
-  const z = cross(x, y);
+  const z = cross(x, y, secondary);
   // 461c4/cc/d4 separately square XYZ, then add X+Y and that sum+Z.
-  const zx2 = multiply(z[0], z[0]), zy2 = multiply(z[1], z[1]), zz2 = multiply(z[2], z[2]);
-  const lengthSquared = add(zz2, add(zx2, zy2));
+  const mul = secondary ? secondaryMultiply : multiply;
+  const zx2 = mul(z[0], z[0]), zy2 = mul(z[1], z[1]), zz2 = mul(z[2], z[2]);
+  const xySquared = add(zx2, zy2);
+  if (secondary) secondaryNormal(xySquared);
+  const lengthSquared = add(zz2, xySquared);
+  if (secondary) secondaryNormal(lengthSquared);
   // Authenticated 80437080 bits2edbe6fe. A failed first construction would
   // select another reference/dispatch entry; none is silently synthesized.
   if (!(lengthSquared > 9.999999439624929e-11)) fail('terrain fallback construction is unsupported');
-  x = cross(y, z);
-  const normalizedX = normalizeAxis(x), normalizedY = normalizeAxis(y), normalizedZ = normalizeAxis(z);
+  x = cross(y, z, secondary);
+  const normalizedX = normalize(x), normalizedY = normalize(y), normalizedZ = normalize(z);
   // 45f70..45fb0 stores column-major, only after all three normalizations.
   // Per-store host refusals preserve precisely the completed output prefix.
   for (const [column, values] of [[0, normalizedX], [1, normalizedY], [2, normalizedZ]] as const) {
@@ -603,7 +652,7 @@ export function createSourceActorJointMatrixRuntime(
     },
     orientTerrainMatrix(matrix: symbol, normal: Readonly<SourceJointVector>, axisA: number, axisB: number): void {
       enter();
-      try {orientTerrainMatrix(getMatrix(matrix), normal, axisA, axisB);} finally {busy = false;}
+      try {orientTerrainMatrix(getMatrix(matrix), normal, axisA, axisB, true);} finally {busy = false;}
     },
     primaryFoldedPlacement(parent: symbol, current: symbol, next: symbol, end: symbol,
       translation: Readonly<SourceJointVector>, nextTranslation: Readonly<SourceJointVector>,

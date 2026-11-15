@@ -205,6 +205,7 @@ function runActorJointStandaloneMatrixSelfTests(): void {
 export function runActorJointMatrixSelfTests(): void {
   runActorJointMatrixBytesSelfTests();
   runActorJointStandaloneMatrixSelfTests();
+  runActorJointSlopedOrientationSelfTests();
   {
     // Binary64 witnesses are necessary: final frsp happens to hide the first
     // sine's stage2 split-multiply error. Exercise the production internal
@@ -652,18 +653,17 @@ export function runActorJointMatrixSelfTests(): void {
       rejects(() => f.runtime.orientTerrainMatrix(f.parent, flat, axes[0]!, axes[1]!), 'positive terrain axes');
       check(matrix.every((v, i) => Object.is(v, identity[i])), 'unsupported axes refuse without a guessed constructor');
     }
-    for (const normal of [{x: 0, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 2 ** -149, y: 1, z: 0}]) {
-      rejects(() => f.runtime.orientTerrainMatrix(f.parent, normal, 2, 1), 'only flat');
-    }
+    rejects(() => f.runtime.orientTerrainMatrix(f.parent, {x: 0, y: 0, z: 0}, 2, 1), 'fallback construction');
     for (const value of [0, 0.25, 0.5 - 2 ** -25, 1 - 2 ** -24, 1 + 2 ** -23, 16]) {
       matrix[0] = value;
       rejects(() => f.runtime.orientTerrainMatrix(f.parent, flat, 2, 1), 'proof domain');
       check(Object.is(matrix[0], value) && matrix[5] === 1 && matrix[10] === 1, 'out-of-proof magnitudes refuse without output');
     }
     matrix[0] = 1; matrix[4] = 1;
-    rejects(() => f.runtime.orientTerrainMatrix(f.parent, flat, 2, 1), 'signed-axis');
+    rejects(() => f.runtime.orientTerrainMatrix(f.parent, flat, 2, 1), 'finite estimate proof domain');
     matrix[4] = 0; matrix[1] = 1; matrix[5] = 0;
-    rejects(() => f.runtime.orientTerrainMatrix(f.parent, flat, 2, 1), 'three distinct');
+    // Secondary captures each column magnitude independently, even for duplicate axes.
+    f.runtime.orientTerrainMatrix(f.parent, flat, 2, 1);
     matrix.splice(0, 12, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0);
     const before = matrix.slice();
     rejects(() => f.runtime.orientTerrainMatrix(f.parent, flat, 2, 1), 'fallback construction');
@@ -1229,5 +1229,98 @@ export function runActorJointMatrixBytesSelfTests(): void {
       rejects(() => f.runtime.transformPointBytes(f.parent, input, output, base), 'caught same-runtime reentry');
       expectPrefix(output, before, 0, `point${key} reentry is checked before byte stores`);
     }
+  }
+}
+
+/** Raw words independently derived with rational arithmetic and nearest-even
+ * rounding, not this implementation's arithmetic helpers. Every case checks
+ * both the normalized store prefix and the completed Scale/Concat output. */
+export function runActorJointSlopedOrientationSelfTests(): void {
+  const cases = [
+    {name: "witness unit", normal: [0x00000000, 0x3f199999, 0x3f4ccccd],
+      incoming: [0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000],
+      normalized: [0x3f7fffff, 0x00000000, 0x00000000, 0x00000000, 0x80000000, 0x3f199998, 0xbf4ccccc, 0x00000000, 0x80000000, 0x3f4ccccc, 0x3f199998, 0x00000000],
+      final: [0x3f7ffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f199997, 0xbf4ccccb, 0x00000000, 0x00000000, 0x3f4ccccb, 0x3f199997, 0x00000000]},
+    {name: "witness signs -1,1", normal: [0x00000000, 0xbf199999, 0x3f4ccccd],
+      incoming: [0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000],
+      normalized: [0x3f7fffff, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xbf199998, 0xbf4ccccc, 0x00000000, 0x80000000, 0x3f4ccccc, 0xbf199998, 0x00000000],
+      final: [0x3f7ffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xbf199997, 0xbf4ccccb, 0x00000000, 0x00000000, 0x3f4ccccb, 0xbf199997, 0x00000000]},
+    {name: "witness signs 1,-1", normal: [0x00000000, 0x3f199999, 0xbf4ccccd],
+      incoming: [0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000],
+      normalized: [0x3f7fffff, 0x00000000, 0x80000000, 0x00000000, 0x80000000, 0x3f199998, 0x3f4ccccc, 0x00000000, 0x00000000, 0xbf4ccccc, 0x3f199998, 0x00000000],
+      final: [0x3f7ffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f199997, 0x3f4ccccb, 0x00000000, 0x00000000, 0xbf4ccccb, 0x3f199997, 0x00000000]},
+    {name: "witness signs -1,-1", normal: [0x00000000, 0xbf199999, 0xbf4ccccd],
+      incoming: [0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000],
+      normalized: [0x3f7fffff, 0x00000000, 0x00000000, 0x00000000, 0x80000000, 0xbf199998, 0x3f4ccccc, 0x00000000, 0x00000000, 0xbf4ccccc, 0xbf199998, 0x00000000],
+      final: [0x3f7ffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xbf199997, 0x3f4ccccb, 0x00000000, 0x00000000, 0xbf4ccccb, 0xbf199997, 0x00000000]},
+    {name: "witness normal scale 2", normal: [0x00000000, 0x3f999999, 0x3fcccccd],
+      incoming: [0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f800000, 0x00000000],
+      normalized: [0x3f7fffff, 0x00000000, 0x00000000, 0x00000000, 0x80000000, 0x3f199998, 0xbf4ccccc, 0x00000000, 0x80000000, 0x3f4ccccc, 0x3f199998, 0x00000000],
+      final: [0x3f7ffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f199997, 0xbf4ccccb, 0x00000000, 0x00000000, 0x3f4ccccb, 0x3f199997, 0x00000000]},
+    {name: "witness incoming scale -1", normal: [0x00000000, 0x3f199999, 0x3f4ccccd],
+      incoming: [0xbf800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xbf800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xbf800000, 0x00000000],
+      normalized: [0xbf7fffff, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f199998, 0x3f4ccccc, 0x00000000, 0x80000000, 0x3f4ccccc, 0xbf199998, 0x00000000],
+      final: [0xbf7ffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f199997, 0x3f4ccccb, 0x00000000, 0x00000000, 0x3f4ccccb, 0xbf199997, 0x00000000]},
+    {name: "witness incoming scale 0.5", normal: [0x00000000, 0x3f199999, 0x3f4ccccd],
+      incoming: [0x3f000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f000000, 0x00000000],
+      normalized: [0x3f7fffff, 0x00000000, 0x00000000, 0x00000000, 0x80000000, 0x3f199998, 0xbf4ccccc, 0x00000000, 0x80000000, 0x3f4ccccc, 0x3f199998, 0x00000000],
+      final: [0x3efffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3e999997, 0xbecccccb, 0x00000000, 0x00000000, 0x3ecccccb, 0x3e999997, 0x00000000]},
+    {name: "witness incoming scale 2", normal: [0x00000000, 0x3f199999, 0x3f4ccccd],
+      incoming: [0x40000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000],
+      normalized: [0x3f7fffff, 0x00000000, 0x00000000, 0x00000000, 0x80000000, 0x3f199998, 0xbf4ccccc, 0x00000000, 0x80000000, 0x3f4ccccc, 0x3f199998, 0x00000000],
+      final: [0x3ffffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f999997, 0xbfcccccb, 0x00000000, 0x00000000, 0x3fcccccb, 0x3f999997, 0x00000000]},
+    {name: "witness incoming scale 4", normal: [0x00000000, 0x3f199999, 0x3f4ccccd],
+      incoming: [0x40800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40800000, 0x00000000],
+      normalized: [0x3f7fffff, 0x00000000, 0x00000000, 0x00000000, 0x80000000, 0x3f199998, 0xbf4ccccc, 0x00000000, 0x80000000, 0x3f4ccccc, 0x3f199998, 0x00000000],
+      final: [0x407ffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40199997, 0xc04ccccb, 0x00000000, 0x00000000, 0x404ccccb, 0x40199997, 0x00000000]},
+    {name: "witness incoming scale 8", normal: [0x00000000, 0x3f199999, 0x3f4ccccd],
+      incoming: [0x41000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x41000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x41000000, 0x00000000],
+      normalized: [0x3f7fffff, 0x00000000, 0x00000000, 0x00000000, 0x80000000, 0x3f199998, 0xbf4ccccc, 0x00000000, 0x80000000, 0x3f4ccccc, 0x3f199998, 0x00000000],
+      final: [0x40fffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40999997, 0xc0cccccb, 0x00000000, 0x00000000, 0x40cccccb, 0x40999997, 0x00000000]},
+  ];
+  check(cases.length === 10, 'ten independent successful slope/scale/sign witnesses');
+  for (const witness of cases) {
+    const normal = {x: fromBits(witness.normal[0]!), y: fromBits(witness.normal[1]!), z: fromBits(witness.normal[2]!)};
+    const f = fixture(), matrix = f.runtime.getMatrix(f.parent);
+    matrix.splice(0, 12, ...witness.incoming.map(fromBits));
+    f.runtime.orientTerrainMatrix(f.parent, normal, 2, 1);
+    check(matrix.every((v, i) => bits(v) === witness.final[i]), `${witness.name}: exact Scale/Concat words`);
+    const completed = matrix.slice();
+    rejects(() => f.runtime.orientTerrainMatrix(f.parent, normal, 2, 1), 'finite estimate proof domain');
+    check(matrix.every((v, i) => Object.is(v, completed[i])), `${witness.name}: repeated pass has no replay or stores`);
+    matrix.splice(0, 12, ...witness.incoming.map(fromBits)); matrix[3] = NaN;
+    rejects(() => f.runtime.orientTerrainMatrix(f.parent, normal, 2, 1), 'matrix[3]');
+    check(matrix.every((v, i) => i === 3 ? Number.isNaN(v) : bits(v) === witness.normalized[i]),
+      `${witness.name}: normalization and signed zero before final rescale`);
+  }
+  const normal = {x: 0, y: fromBits(0x3f199999), z: fromBits(0x3f4ccccd)};
+  for (const tiny of [2 ** -149, 2 ** -126, 2 ** -75]) {
+    const f = fixture();
+    rejects(() => f.runtime.orientTerrainMatrix(f.parent, {x: tiny, y: 1, z: 0}, 2, 1), 'denormal arithmetic');
+    check(f.runtime.getMatrix(f.parent).every((v, i) => Object.is(v, identity[i])), 'secondary denormal boundary has no stores');
+  }
+  const order = [0, 4, 8, 1, 5, 9, 2, 6, 10];
+  for (let stop = 0; stop < order.length; stop++) {
+    const f = fixture(), matrix = f.runtime.getMatrix(f.parent), expected = identity.slice();
+    Object.defineProperty(matrix, String(order[stop]), {writable: false});
+    rejects(() => f.runtime.orientTerrainMatrix(f.parent, normal, 2, 1), 'non-writable');
+    for (const i of order.slice(0, stop)) expected[i] = fromBits(cases[0]!.normalized[i]!);
+    check(matrix.every((v, i) => Object.is(v, expected[i])), `slope normalized basis prefix ${stop}`);
+  }
+  for (const unsupported of [{x: 0, y: Math.fround(.6), z: Math.fround(.8)},
+    ...[.5, 4, 8].map(scale => ({x: 0, y: normal.y * scale, z: normal.z * scale}))]) {
+    const f = fixture(), matrix = f.runtime.getMatrix(f.parent);
+    rejects(() => f.runtime.orientTerrainMatrix(f.parent, unsupported, 2, 1), 'finite estimate proof domain');
+    check(matrix.every((v, i) => Object.is(v, identity[i])), 'computed normalization norm, not ideal normal norm, controls admission');
+  }
+  {
+    const f = primaryFixture(); f.correction.y = normal.y; f.correction.z = normal.z;
+    rejects(f.run, 'only flat');
+    check(f.currentMatrix.every((v, i) => Object.is(v, identity[i])), 'primary retains flat-only admission');
+  }
+  {
+    const f = primaryFixture(); f.currentMatrix[0] = 0; f.currentMatrix[4] = normal.y; f.currentMatrix[8] = normal.z;
+    rejects(f.run, 'signed-axis');
+    check(f.currentMatrix[4] === normal.y && f.currentMatrix[8] === normal.z, 'primary retains axis-only incoming magnitude admission');
   }
 }

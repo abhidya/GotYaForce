@@ -8,7 +8,7 @@
  * normal-actor-matrix-evidence-2026-11-13.md / read_archived_normal_matrix_evidence.py
  * and chunk_0005.c:2986–3310,3696–3716. Secondary4784c follows the
  * authenticated read_archived_terrain_orientation_evidence.py span. Its
- * orientation domain is the matrix owner's explicit flat-normal (2,1) subset,
+ * orientation domain is the matrix owner's (2,1), five-computed-norm subset,
  * with no idealized normalization shortcut. Primary47368 follows
  * primary-terrain-placement-evidence-2026-11-13.md and
  * primary-positive-bending-evidence-2026-11-13.md: retained pairs2/.5 or1/1,

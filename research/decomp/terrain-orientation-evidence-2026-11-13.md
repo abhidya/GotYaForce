@@ -446,3 +446,67 @@ The baseline translation is `(134,47,448)` and diagonal bits are
 and produces height `9.449999809265137`. No original game execution, new hardware
 capture, full primary IK, arbitrary terrain normal or production activation is
 inferred from these checks.
+
+## Bounded secondary slope continuation (2026-11-15)
+
+The secondary 4784c → 3de80 → 45918 path now selects the same five proven
+reciprocal seeds from the **actual computed paired squared norm** at each
+reached incoming Mag and X/Y/Z Normalize. The supported operands are exactly
+0.25, 1, 4, 16 and 64. This changes the admission boundary, not the source
+arithmetic schedule or estimator implementation. Normal-or-zero arithmetic,
+finite exact binary32 inputs, nearest-even, positive axes (2,1), and success
+of the first constructor remain required. Primary placement explicitly keeps
+its previous signed-axis incoming vectors and flat target displacement.
+
+An independently rational-rounded witness has normal words
+`00000000 3f199999 3f4ccccd`, with identity incoming columns. Cross Z is
+`00000000 bf4ccccd 3f199999`; the separate constructor threshold operand is
+`3f800000`. Cross X is `3f800000 80000000 80000000`. All six reached paired
+norms are `3f800000`. The unit seed's square, half, correction and reciprocal
+are `3f7fe801`, `3efff400`, `40000600`, `3f7fffff` respectively.
+
+Normalized columns, before any rescale:
+
+- X: `3f7fffff 80000000 80000000`.
+- Y: `00000000 3f199998 3f4ccccc`.
+- Z: `00000000 bf4ccccc 3f199998`.
+
+The completed row-major matrix has words:
+
+```
+3f7ffffe 00000000 00000000 00000000
+00000000 3f199997 bf4ccccb 00000000
+00000000 3f4ccccb 3f199997 00000000
+```
+
+In contrast, literal binary32 0.6/0.8 has normal words
+`00000000 3f19999a 3f4ccccd`. Although its paired normal norm is one, its
+second cross X is `3f800001 80000000 80000000` and its computed normalization
+norm is `3f800002`. It is refused before basis stores. The implementation
+must not replace that fused cross by an ideal identity or select a seed from
+the original normal alone.
+
+The matrix aggregate includes an exported sloped suite with ten independent
+word fixtures: four Y/Z signs, doubled normal, and incoming uniform scales
+−1, 0.5, 2, 4, 8. Each checks all normalized words separately from all final
+Scale/Concat words, repeated-pass refusal, and unchanged failed-pass output.
+All nine basis-store fault prefixes, unsupported computed norms, denormal
+arithmetic and unchanged primary admission are covered. The world aggregate
+also includes a genuine secondary/terrain continuation suite: actual owners,
+raw normal bytes, world dispatch, and descendant matrix work remain involved.
+Failures retain completed translation/basis prefixes; no same-call replay is
+introduced. A new explicit invocation is not globally disabled by a failure.
+
+The first completed witness has incoming column norms `3f7ffffc`,
+`3f7ffffa`, `3f7ffffa` on its next pass, so repeated orientation is unsupported.
+No general estimator, fallback constructor, other-axis dispatch, arbitrary
+normal support, full-frame/retail hydration or console parity is claimed.
+No new archive/DOL selection or raw game payload extraction was used.
+
+The existing `actor-frame-lifecycle.ts` frame sequence does not call matrix
+`updateActor`: its frame transaction covers attributes/status/tick/Double
+action/suffix work. The genuine normal-matrix control fixture invokes its
+mode-1 update explicitly, outside that transaction. Consequently these slope
+tests do not claim enclosing-frame permanent failure closure. Proving that
+would require a genuine scheduler matrix-call edge; no injected callback or
+manual incomplete marker was introduced to simulate it.

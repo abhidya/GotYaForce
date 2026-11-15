@@ -201,7 +201,7 @@ function primaryFixture(maxVisits = 4096) {
   return {...f, counts, placement: counts.primary1a14[0]!};
 }
 export function runActorWorldMatrixSelfTests(): void {
-  runActorWorldNonflatTerrainBoundarySelfTests();
+  runActorWorldSlopedTerrainContinuationSelfTests();
   {
     const f = fixture();
     check(f.runtime.getWorldMatrix(f.id, 0) === f.output(0), 'world lookup returns actual full record without copying');
@@ -1037,25 +1037,127 @@ export function runActorWorldMatrixSelfTests(): void {
 }
 
 
-/** Genuine secondary4784c consumes3de80's slope but does not expand the
- * independent45918 estimator/flat-normal host domain. */
+/** Compatibility entry point for callers of the former flat-only boundary suite. */
 export function runActorWorldNonflatTerrainBoundarySelfTests(): void {
-  for (const normal of [{x: 1 / 64, y: 1, z: 0}, {x: 0, y: -2, z: 1 / 32}]) {
+  runActorWorldSlopedTerrainContinuationSelfTests();
+}
+
+/** Genuine 4784c -> 3de80 -> 45918 and its descendant continuation. These are
+ * synthetic, explicit source cells, not retail hydration or a normal callback. */
+export function runActorWorldSlopedTerrainContinuationSelfTests(): void {
+  const word = new DataView(new ArrayBuffer(4));
+  const fromBits = (bits: number): number => {word.setUint32(0, bits); return word.getFloat32(0);};
+  const bits = (value: number): number => {word.setFloat32(0, value); return word.getUint32(0);};
+  const normal = {x: 0, y: fromBits(0x3f199999), z: fromBits(0x3f4ccccd)};
+  const prefix = 'identity,translate,correct,scale,copy114,copy1aa4,transform:0,movement,normal:0,orient:1:2:1';
+  const suffix = ',joint:3:0,joint:4:3,joint:2:1,joint:5:1';
+  const finalBits = [0x3f7ffffe, 0, 0, 0x41300000, 0, 0x3f199997, 0xbf4ccccb, 0x41b00000,
+    0, 0x3f4ccccb, 0x3f199997, 0x42040000];
+  const normalizedBits = [0x3f7fffff, 0, 0, 0x41300000, 0x80000000, 0x3f199998, 0xbf4ccccc, 0x41b00000,
+    0x80000000, 0x3f4ccccc, 0x3f199998, 0x42040000];
+  const sameBits = (matrix: number[], expected: number[]): boolean => matrix.every((v, i) => bits(v) === expected[i]);
+  const translated = (initial: number[]): number[] => initial.map((v, i) => i === 3 ? 11 : i === 7 ? 22 : i === 11 ? 33 : v);
+  const unchanged = (a: number[], b: number[]): boolean => a.every((v, i) => Object.is(v, b[i]));
+  {
     const f = fixture(), g = terrainCorrectionFixture(f, true, normal); bindSecondary(f);
-    const output = {x: 71, y: 72, z: 73}, globals = g.terrain.getTerrainGlobals();
-    check(g.terrain.queryNormal8003de80(f.id, {x: 11, y: 22, z: 33}, 0, output) === 1 &&
-      Object.is(output.x, normal.x) && Object.is(output.y, normal.y) && Object.is(output.z, normal.z),
-    'genuine3de80 returns an actual sloped raw normal, including negative nonunit Y');
+    const matrix = f.output(1), globals = g.terrain.getTerrainGlobals();
+    const queried = {x: 71, y: 72, z: 73};
+    check(g.terrain.queryNormal8003de80(f.id, {x: 11, y: 22, z: 33}, 0, queried) === 1 &&
+      bits(queried.x) === 0 && bits(queried.y) === 0x3f199999 && bits(queried.z) === 0x3f4ccccd,
+      'genuine 3de80 loads the viable raw slope from the owned triangle');
+    f.events.length = 0; f.runtime.rebuildActor(f.id, 1);
+    check(sameBits(matrix, finalBits), 'sloped secondary final basis, translation and Concat zero signs match independent bit witness');
+    check(f.events.join(',') === prefix + suffix, 'sloped secondary completes exactly once before both genuine descendant branches');
+    check(f.output(3)[3] === 13 && f.output(3)[7] === 26 && f.output(3)[11] === 39 && f.output(4)[7] === 34,
+      'sloped current does not replace incoming parent for the side branch');
+    check(sameBits(f.output(2), [0x3f7ffffe, 0, 0, 0x41500000, 0, 0x3f199997, 0xbf4ccccb, 0x419ccccd,
+      0, 0x3f4ccccb, 0x3f199997, 0x421f3333]) &&
+      sameBits(f.output(5), [0x3f7ffffe, 0, 0, 0x41800000, 0, 0x3f199997, 0xbf4ccccb, 0x41800000,
+        0, 0x3f4ccccb, 0x3f199997, 0x4247ffff]),
+      'both continuation matrices consume the actual slope with independently rounded descendant bit witnesses');
+    check(f.runtime.getWorldMatrix(f.id, 1) === matrix && f.runtime.getActualActor(f.id) === f.actual &&
+      g.terrain.getTerrainGlobals() === globals, 'sloped continuation retains actual world, actor, matrix and terrain owners');
+    const before = matrix.slice(), descendants = [f.output(2).slice(), f.output(3).slice()];
     f.events.length = 0;
-    const before = [...f.output(1)], descendant = [...f.output(3)];
-    rejects(() => f.runtime.rebuildActor(f.id, 1), 'only flat');
-    check(f.events.join(',') === 'identity,translate,correct,scale,copy114,copy1aa4,transform:0,movement,normal:0,orient:1:2:1',
-      'genuine4784c reaches3de80 then actual45918 refusal, never a fake normal/orientation success');
-    check(f.output(1).every((value, index) => Object.is(value, index === 3 ? 11 : index === 7 ? 22 : index === 11 ? 33 : before[index])),
-      'later flat-domain orientation refusal preserves exactly the earlier XYZ matrix translation stores');
-    check(f.output(3).every((value, index) => Object.is(value, descendant[index])),
-      'orientation refusal stops before descendant topology work');
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'finite estimate proof domain');
+    check(unchanged(matrix, before) && unchanged(f.output(2), descendants[0]!) && unchanged(f.output(3), descendants[1]!) &&
+      f.events.join(',') === prefix, 'a second orientation refuses its reached shrunken incoming norm without replaying descendants');
+  }
+  let accepted = 0;
+  for (const sy of [-1, 1]) for (const sz of [-1, 1]) for (const scale of [0.5, 1, 2, 4, 8]) {
+    const f = fixture(); terrainCorrectionFixture(f, true, {x: 0, y: sy * normal.y, z: sz * normal.z}); bindSecondary(f);
+    f.actual.pos.y = 100; // Keep all signed planes below the real normal-query point.
+    f.output(1)[0] = scale; f.output(1)[5] = scale; f.output(1)[10] = scale;
+    f.runtime.rebuildActor(f.id, 1);
+    const expected = finalBits.map(fromBits); expected[7] = 102;
+    expected[0] = fromBits(0x3f7ffffe) * scale;
+    expected[5] = sy * fromBits(0x3f199997) * scale; expected[6] = -sz * fromBits(0x3f4ccccb) * scale;
+    expected[9] = sz * fromBits(0x3f4ccccb) * scale; expected[10] = sy * fromBits(0x3f199997) * scale;
+    check(unchanged(f.output(1), expected) && f.events.join(',') === prefix + suffix,
+      `signed sloped normal and incoming scale ${sy}/${sz}/${scale} retain genuine continuation`);
+    accepted++;
+  }
+  check(accepted === 20, 'all four slope signs and five positive incoming scales were executed');
+  for (const doubled of [false, true]) {
+    const f = fixture(); terrainCorrectionFixture(f, true, doubled ? {x: 0, y: 2 * normal.y, z: 2 * normal.z} : normal); bindSecondary(f);
+    if (!doubled) {f.output(1)[0] = -1; f.output(1)[5] = -1; f.output(1)[10] = -1;}
+    f.runtime.rebuildActor(f.id, 1);
+    const expected = finalBits.slice();
+    if (!doubled) {expected[0] = 0xbf7ffffe; expected[6] = 0x3f4ccccb; expected[10] = 0xbf199997;}
+    check(sameBits(f.output(1), expected) && f.events.join(',') === prefix + suffix,
+      doubled ? 'doubled raw normal reaches norms 16/4/4 and real descendants' : 'negative incoming basis restores actual positive magnitudes and reference sign');
+  }
+  for (const rejected of [{x: 0, y: Math.fround(0.6), z: Math.fround(0.8)},
+    {x: 1 / 64, y: 1, z: 0}, {x: 0, y: -2, z: 1 / 32},
+    {x: 0, y: normal.y / 2, z: normal.z / 2}, {x: 0, y: normal.y * 4, z: normal.z * 4}]) {
+    const f = fixture(), g = terrainCorrectionFixture(f, true, rejected); bindSecondary(f);
+    const before = translated(f.output(1)), descendant = f.output(3).slice(), globals = g.terrain.getTerrainGlobals();
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'finite estimate proof domain');
+    check(unchanged(f.output(1), before) && unchanged(f.output(3), descendant) && f.events.join(',') === prefix,
+      'unsupported actual computed normalization norm preserves translation only, without guessed normalization or replay');
     check(g.terrain.getTerrainGlobals() === globals && f.runtime.getActualActor(f.id) === f.actual,
-      'secondary query/orientation boundary retains actual actor and terrain owners');
+      'unsupported sloped norm retains actual terrain and actor owners');
+  }
+  {
+    const f = fixture(); terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    // A retained reference parallel to the raw nonflat normal reaches a
+    // near-zero first cross below the authenticated constructor threshold.
+    f.output(1)[0] = 0; f.output(1)[4] = normal.y; f.output(1)[8] = normal.z;
+    const before = translated(f.output(1));
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'fallback construction');
+    check(unchanged(f.output(1), before) && f.events.join(',') === prefix,
+      'degenerate first construction retains only translation and never synthesizes another reference');
+  }
+  {
+    const f = fixture(); terrainCorrectionFixture(f, true, {x: 0, y: normal.y * 2 ** 65, z: normal.z * 2 ** 65}); bindSecondary(f);
+    const before = translated(f.output(1));
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'single product: expected finite source float32');
+    check(unchanged(f.output(1), before) && f.events.join(',') === prefix,
+      'constructor arithmetic overflow is lazy after genuine terrain and translation, with no basis or descendant output');
+  }
+  const order = [0, 4, 8, 1, 5, 9, 2, 6, 10];
+  for (let stop = 0; stop < order.length; stop++) {
+    const f = fixture(); terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    const expected = translated(f.output(1));
+    Object.defineProperty(f.output(1), String(order[stop]), {writable: false});
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'non-writable');
+    for (const index of order.slice(0, stop)) expected[index] = fromBits(normalizedBits[index]!);
+    check(unchanged(f.output(1), expected) && f.events.join(',') === prefix && f.output(3)[7] === -23,
+      `sloped secondary non-writable basis store ${stop} retains exactly its signed-zero column-major prefix`);
+  }
+  for (const index of [3, 7, 11]) {
+    const f = fixture(); terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    Object.defineProperty(f.output(1), String(index), {writable: false});
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'non-writable');
+    check(f.output(1)[3] === (index === 3 ? -11 : 11) && f.output(1)[7] === (index <= 7 ? -21 : 22) &&
+      f.output(1)[11] === -31 && !f.events.includes('movement'),
+      'sloped secondary translation refusal stops before terrain query and retains only earlier stores');
+  }
+  {
+    const f = fixture(); terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    f.hooks.oriented = () => {try {f.runtime.rebuildActor(f.id, 1);} catch { /* deliberately caught */ }};
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'caught same-runtime reentry');
+    check(sameBits(f.output(1), finalBits) && f.events.join(',') === prefix && f.output(3)[7] === -23,
+      'completed real sloped orientation remains visible while reentry poison prevents any descendant replay');
   }
 }
