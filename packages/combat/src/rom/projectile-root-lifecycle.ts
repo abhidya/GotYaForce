@@ -1,4 +1,4 @@
-import {claimSourceHelperStorage} from './source-storage-claims.js';
+import {claimSourceHelperStorage,isSourcePlayerTableAddressStorage} from './source-storage-claims.js';
 /** Bounded stored8007dcec callback and initial8007dd84 prefix, not a scheduler.
  * See projectile-callback/initialization-evidence-2026-11-14.md. Only source
  * states0/2/3 and row1 are authenticated. Explicit state2 data admits its real
@@ -423,7 +423,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
       // Immediate record identities also exclude actor vectors and retained
       // descriptor matrices. Accessors are not called and scalar values ignored.
       const nested: object[]=[];
-      for(const owner of records) if(owner!==sources) {
+      for(const owner of records) if(owner!==sources && !isSourcePlayerTableAddressStorage(owner,allocator)) {
         for(const p of Object.values(Object.getOwnPropertyDescriptors(owner)))
           if('value' in p && p.value!==null && typeof p.value==='object') nested.push(p.value);
       }

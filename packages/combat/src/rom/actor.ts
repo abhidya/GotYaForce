@@ -74,6 +74,9 @@ export interface RomActor {
   /** Explicit leader marker; source stores one byte, separate from330.
    * @romfield byte335 +0x335 u8 */
   byte335?: number;
+  /** Explicit current participant view index written by8000bef4; no default.
+   * @romfield byte487 +0x487 u8 */
+  byte487?: number;
   /** Explicit6b7f4 target-dispatch state. No constructor default.
    * @romfield byte502 +0x502 u8 */
   byte502?: number;

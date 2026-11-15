@@ -8,9 +8,11 @@
  * are metadata admission, not source scalar reads. No successful callback,
  * copied target list, cached pointer target or implicit dispatch word is used.
  */
-import {claimSourceHelperStorage} from './source-storage-claims.js';
+import {claimSourceHelperStorage,isSourcePlayerTableStorage} from './source-storage-claims.js';
 import {isSourceObjectSchedulerRuntime,type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
-export interface SourceActorPlayerSlotRecord {state18?: number}
+import {getSourceActorPlayerTablePointer,type SourceObjectAllocationRuntime} from './source-object-allocation.js';
+import {requireSourceActorActionSlotStatusOwner} from './actor-action-request.js';
+export interface SourceActorPlayerSlotRecord {state18?: number;byte10?:number}
 export interface SourceActorSlotStatusSources {
   scheduler: SourceObjectSchedulerRuntime;
   slotRecords?: Readonly<Record<number,SourceActorPlayerSlotRecord>>;
@@ -24,8 +26,22 @@ export interface SourceActorSlotStatusRuntime {
   /** Metadata-only explicit reference inventory, including unreached rows. */
   getDeclaredStorageOwners(): readonly object[];
   readSlot(slot: number): number;
+  /** Opaque803c73b0 + index*3e4 +394. Formation reads no row scalar. */
+  getViewPointer(recordIndex:number):symbol;
+  /** Fresh canonical row+10 read through a genuine retained view identity. */
+  readViewMetadata(pointer:symbol):number;
 }
 const runtimes=new WeakSet<object>(),claims=new WeakMap<object,SourceActorSlotStatusRuntime>();
+const addressScopes=new WeakMap<object,(allocator:SourceObjectAllocationRuntime,table:object)=>void>();
+const terminalDescriptor=Reflect.getOwnPropertyDescriptor;
+const terminalDescriptors=Object.getOwnPropertyDescriptors;
+/** Private exact synchronous scope; knowing the helper or table is insufficient. */
+export function requireSourceActorPlayerTableAddressability(helper:SourceActorSlotStatusRuntime,
+  allocator:SourceObjectAllocationRuntime,table:object):void {
+  const scope=addressScopes.get(helper);
+  if(!isSourceActorSlotStatusRuntime(helper)||!scope)fail('private player-table addressability required');
+  scope(allocator,table);
+}
 export function isSourceActorSlotStatusRuntime(value: unknown): value is SourceActorSlotStatusRuntime {
   return value!==null && typeof value==='object' && runtimes.has(value);
 }
@@ -52,7 +68,8 @@ export function createSourceActorSlotStatusRuntime(sources: SourceActorSlotStatu
   if(claims.has(scheduler)) fail('scheduler already has a canonical slot-status owner');
   const root=scheduler.getRootRuntime(),spawns=root.getSpawnRuntime(),allocator=scheduler.getAllocatorRuntime(),
     action=spawns.getAdmissionRuntime().getActionRuntime();
-  let busy=false,poisoned=false,tableOwner: object|undefined;
+  let busy=false,poisoned=false,tableOwner: object|undefined,addressTable:object|undefined;
+  const views=new Map<symbol,{table:object;index:number;base:symbol}>();
   const retained=new Map<string,object>();
   const check=(): void=>{if(poisoned) fail('caught same-runtime reentry');};
   const read=(owner: unknown,key: string): unknown=>{const value=own(owner,key);check();return value;};
@@ -65,10 +82,45 @@ export function createSourceActorSlotStatusRuntime(sources: SourceActorSlotStatu
   const retain=(name: string,value: unknown): object=>{
     const selected=record(value,name),old=retained.get(name);
     if(old && old!==selected) fail(`${name}: canonical owner changed`);
-    if(selected===tableOwner || forbidden().includes(selected) ||
+    const otherOwners=forbidden(),addressable=name==='slotRecords'&&isSourcePlayerTableStorage(selected,runtime,allocator);
+    if(selected===tableOwner || (otherOwners.includes(selected) && !addressable) ||
       [...retained].some(([key,owner])=>key!==name && owner===selected)) fail(`${name}: source storage alias`);
+    if(addressable) {
+      // The pointer target itself is a deliberate shared identity, not an
+      // exemption for other root/stack/profile/actor roles pointing at it.
+      // Only genuine frozen allocator interior metadata may refer to its base.
+      for(const owner of otherOwners)if(owner!==selected)for(const [key,field]of Object.entries(terminalDescriptors(owner))) {
+        check();if(!('value'in field)||field.value!==selected||(owner===sources&&key==='slotRecords'))continue;
+        let interior=false;
+        if(key==='base'&&Object.isFrozen(owner)) {
+          let id:symbol|undefined;try{id=allocator.getPointerIdentity(owner);}catch{/* Not an allocator pointer target. */}
+          if(id!==undefined) {
+            const address=call(()=>allocator.getInteriorAddress(id));
+            interior=address!==null&&allocator.getPointerTarget(address.base)===selected;
+          }
+        }
+        if(!interior)fail('player table aliases another source storage role');
+      }
+    }
     if(!claimSourceHelperStorage(selected,runtime)) fail(`${name}: storage already claimed`);
     retained.set(name,selected);return selected;
+  };
+  const graph=():void=>{
+    if(read(sources,'scheduler')!==scheduler || scheduler.getRootRuntime()!==root ||
+      root.getSpawnRuntime()!==spawns || scheduler.getAllocatorRuntime()!==allocator ||
+      spawns.getAdmissionRuntime().getActionRuntime()!==action || call(()=>action.getSlotStatusRuntime())!==runtime)
+      fail('exact canonical player-table scheduler/action graph required');
+  };
+  const viewOperation=<T>(run:()=>T):T=>{
+    if(busy){poisoned=true;fail('same-runtime reentry unsupported');}
+    busy=true;poisoned=false;
+    try{
+      graph();const result=run();check();requireSourceActorActionSlotStatusOwner(action,runtime);
+      const selected=terminalDescriptor(sources,'scheduler'),rows=terminalDescriptor(sources,'slotRecords');
+      if(!selected||!('value'in selected)||selected.value!==scheduler || !rows||!('value'in rows)||
+        rows.value!==retained.get('slotRecords'))fail('terminal canonical player graph changed');
+      return result;
+    }finally{addressTable=undefined;busy=false;}
   };
   const runtime: SourceActorSlotStatusRuntime={
     getSchedulerRuntime() {return scheduler;},
@@ -88,6 +140,43 @@ export function createSourceActorSlotStatusRuntime(sources: SourceActorSlotStatu
       if(rows) for(let index=0;index<13;index++) reference(rows,String(index));
       reference(sources,'dispatch3938');return Object.freeze(values);
     },
+    getViewPointer(index) {return viewOperation(()=>{
+      if(!Number.isInteger(index)||index<0||index>=13)fail('view record outside bounded13-record owner');
+      const rows=retain('slotRecords',read(sources,'slotRecords'));addressTable=rows;
+      const base=call(()=>getSourceActorPlayerTablePointer(allocator,runtime,rows));
+      const pointer=call(()=>allocator.getInteriorPointer(base,(index*0x3e4+0x394)>>>0));
+      requireSourceActorPlayerTableAddressability(runtime,allocator,rows);
+      retain('slotRecords',read(sources,'slotRecords'));
+      views.set(pointer,{table:rows,index,base});return pointer;
+    });},
+    readViewMetadata(pointer) {return viewOperation(()=>{
+      const view=views.get(pointer);if(!view)fail('genuine owned player view pointer required');
+      const rows=retain('slotRecords',read(sources,'slotRecords'));
+      if(rows!==view.table)fail('captured player view table changed');
+      const address=call(()=>allocator.getInteriorAddress(pointer));
+      if(address?.base!==view.base || address.byteOffset!==view.index*0x3e4+0x394 ||
+        call(()=>allocator.getPointerTarget(view.base))!==rows)fail('canonical player view address changed');
+      const row=retain(`slotRecord${view.index}`,read(rows,String(view.index)));
+      const uniqueRow=():void=>{
+        for(let index=0;index<13;index++)if(index!==view.index) {
+          const field=terminalDescriptor(rows,String(index));
+          if(field&&'value'in field&&field.value===row)fail('player view row aliases another logical record');
+        }
+      };
+      uniqueRow();
+      noShadows(row,['metadata10','field10','16']);
+      const value=uint(read(row,'byte10'),255,'byte10');
+      graph();
+      retain('slotRecords',rows); // Terminal role/alias admission, no repeated scalar read.
+      // Last observable metadata hooks cannot swap the row/table behind a
+      // captured interior pointer. No source scalar is reread here.
+      const sourceTable=terminalDescriptor(sources,'slotRecords'),selected=terminalDescriptor(rows,String(view.index));
+      if(!sourceTable||!('value'in sourceTable)||sourceTable.value!==rows ||
+        !selected||!('value'in selected)||selected.value!==row)fail('canonical player view row changed');
+      for(const key of ['metadata10','field10','16'])if(terminalDescriptor(row,key))fail('competing player metadata owner');
+      uniqueRow();
+      check();return value;
+    });},
     readSlot(slot) {
       if(busy) {poisoned=true;fail('same-runtime reentry unsupported');}
       busy=true;poisoned=false;
@@ -125,6 +214,17 @@ export function createSourceActorSlotStatusRuntime(sources: SourceActorSlotStatu
       } finally {busy=false;}
     },
   };
+  addressScopes.set(runtime,(selected,table)=>{
+    if(!busy||poisoned||addressTable!==table||selected!==allocator||retained.get('slotRecords')!==table)
+      fail('private active player-table addressability required');
+    if(scheduler.getAllocatorRuntime()!==allocator||scheduler.getRootRuntime()!==root||
+      root.getSpawnRuntime()!==spawns||spawns.getAdmissionRuntime().getActionRuntime()!==action||
+      action.getSlotStatusRuntime()!==runtime)fail('player-table address graph changed');
+    const tableField=terminalDescriptor(sources,'slotRecords'),schedulerField=terminalDescriptor(sources,'scheduler');
+    if(!tableField||!('value'in tableField)||tableField.value!==table ||
+      !schedulerField||!('value'in schedulerField)||schedulerField.value!==scheduler||poisoned)
+      fail('canonical player-table address owner changed');
+  });
   if(!claimSourceHelperStorage(sources,runtime)) fail('slot-status sources storage already claimed');
   runtimes.add(runtime);claims.set(scheduler,runtime);return Object.freeze(runtime);
 }

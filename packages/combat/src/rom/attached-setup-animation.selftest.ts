@@ -1,3 +1,4 @@
+import {runBattleParticipantViewSelfTest} from './battle-participant-view.selftest.js';
 import {runBattleLeaderSelectionSelfTests} from './battle-leader-selection.selftest.js';
 import {runActorSecondaryPositiveSelfTests} from './actor-secondary-positive.selftest.js';
 import {createBattlePassengerAccumulationFixture,runBattlePassengerAccumulationSelfTests,runBattlePassengerFiniteTraversalSelfTests} from './battle-passenger-accumulation.selftest.js';
@@ -2918,6 +2919,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runActorSecondaryPositiveHydratedCompositionTests();
   runActorThirdPassHydratedCompositionTests();
   runBattleLeaderSelectionHydratedCompositionTests();
+  runBattleParticipantViewHydratedCompositionTests();
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();
@@ -13745,7 +13747,12 @@ export function runActorPrimaryNonunitAttachedRefusalSelfTest(): void {
     'late primary sine refusal leaves every linked clone matrix and copy unchanged');
 }
 
-/** Complete27764 on a genuine six-active source graph, still beforebef4. */
+/** Complete27764 on a genuine six-active source graph; bef4 lacks byte40. */
 export function runBattleLeaderSelectionHydratedCompositionTests(): void {
   runBattleLeaderSelectionSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+/** Complete bounded bef4, refusing the first reached scheduler call. */
+export function runBattleParticipantViewHydratedCompositionTests(): void {
+  runBattleParticipantViewSelfTest(createBattleTargetPreparationTestFixture);
 }

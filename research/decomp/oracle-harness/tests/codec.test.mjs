@@ -254,3 +254,18 @@ test("leader pointer330 is an atomic word requiring an explicit arena address", 
     assert.equal(u8[BASE + 0x334], 0xa5); assert.equal(u8[BASE + 0x335], 0xa5);
   }
 });
+
+test("participant actor487 is one byte; system view pointers have no implicit arena codec", () => {
+  const field=fieldMap.byInterface.RomActor.byte487;
+  assert.equal(field.offset,0x487);assert.equal(field.kind,"u8");assert.equal(field.width,1);
+  const {codec,u8}=makeCodec();
+  for(const value of [0,1,2,3,255]) {
+    codec.beginCase();codec.encodeField(BASE,"byte487",value);
+    assert.deepEqual(codec.writes,[[BASE+0x487,1]]);assert.equal(u8[BASE+0x487],value);
+    assert.equal(u8[BASE+0x486],0xa5);assert.equal(u8[BASE+0x488],0xa5);
+  }
+  for(const field of ["pointer14","pointer18","pointer1c","pointer20"]) {
+    codec.beginCase();assert.throws(()=>codec.encodeField(BASE,field,Symbol("player interior")),BlockedCodecError);
+    assert.equal(codec.writes.length,0);
+  }
+});

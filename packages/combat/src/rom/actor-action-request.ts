@@ -41,6 +41,14 @@ export interface SourceActorActionRequestRuntime {
   updateActor(identity: symbol): void;
 }
 const runtimes = new WeakSet<object>(), claimedActors = new WeakSet<object>();
+const slotOwnerDescriptor=Reflect.getOwnPropertyDescriptor;
+const slotOwnerChecks=new WeakMap<object,(helper:SourceActorSlotStatusRuntime)=>void>();
+/** Terminal metadata check only; grants no action/frame execution authority. */
+export function requireSourceActorActionSlotStatusOwner(action:SourceActorActionRequestRuntime,helper:SourceActorSlotStatusRuntime):void {
+  const check=slotOwnerChecks.get(action);
+  if(!isSourceActorActionRequestRuntime(action)||!check)fail('genuine action slot-status owner required');
+  check(helper);
+}
 export function isSourceActorActionRequestRuntime(value: unknown): value is SourceActorActionRequestRuntime {
   return value !== null && typeof value === 'object' && runtimes.has(value);
 }
@@ -169,7 +177,12 @@ export function createSourceActorActionRequestRuntime(sources: SourceActorAction
     getActualActor(id) {return entry(id).actual;},
     getWorldBinding(id) {return entry(id).world;},
     getActorBinding(id) {return entry(id).binding;},
-    getSlotStatusRuntime() {return slotRuntime();},
+    getSlotStatusRuntime() {
+      const selected=slotRuntime(),field=slotOwnerDescriptor(sources,'slotStatus');
+      if(selected===undefined?field!==undefined:!field||!('value'in field)||field.value!==selected)
+        fail('slotStatus: terminal canonical owner changed');
+      return selected;
+    },
     getRetainedStorageOwners() {return Object.freeze([sources,receiver as object,...[...actors.values()].flatMap(e=>[e.actual,e.world,e.binding])]);},
     prepareTarget(id) {guard(()=>{
       const e=entry(id),{actual,binding}=e;
@@ -207,5 +220,11 @@ export function createSourceActorActionRequestRuntime(sources: SourceActorAction
       fail('8005a34c reached unsupported source pointer508 load; actual target508 and link4a4 identities are unreconciled, later4a4 load/comparison/store have not executed');
     });},
   };
+  slotOwnerChecks.set(runtime,helper=>{
+    const field=slotOwnerDescriptor(sources,'slotStatus');
+    if(!isSourceActorSlotStatusRuntime(helper)||slotOwner!==helper||!field||!('value'in field)||field.value!==helper)
+      fail('slotStatus: terminal canonical owner changed');
+    if(poisoned)fail('caught same-runtime reentry');
+  });
   runtimes.add(runtime); return Object.freeze(runtime);
 }

@@ -5,8 +5,8 @@
  * Nonzero continues later rows; zero calls recorded matched8b480 for fresh byteEB.
  * Its mask admits signed half18 decrement/expiry; positive timers stop before
  * unsupported80029de0 floating arithmetic. First reached
- * normal53b30 or unconditional pausedbef4 remains a hard ordered boundary unless
- * explicit mass ingress supplies the bounded53b30 prefix. That path stops before
+ * normal53b30 remains a hard ordered boundary unless explicit mass ingress
+ * supplies the bounded53b30 prefix. That path stops before
  * missing passenger1e4 or missing RNG/ordering ingress. Explicit same-world
  * passenger pointers with allocation-owned signed nonzero83 skip propagation;
  * zero83 accumulates freshly loaded original mass through finite passengers
@@ -19,7 +19,10 @@
  * distance stores through the next mandatory direction helper or estimator. Skipped lifecycle rows retain canonical508 bounds; active nonnull targets may
  * use the SAME allocation-owned83 byte, caller7d3, signed teams and finite
  * distance guards, then the six-position inner scan and ordered association bits.
- * Its bounded return feeds complete27764 selection/publication, then mandatorybef4.
+ * Its bounded return feeds complete27764 selection/publication and boundedbef4.
+ * Paused source flow reachesbef4 directly. Both require explicit current system,
+ * player and actor cells; after binding the fresh mode selects the first still
+ * unjoined scheduler call,89a94(40) or89898(58), before any scheduler work.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
  *
@@ -44,7 +47,9 @@ import {readSourceShortTrig} from './source-short-trig.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
-import type {SourceActorSlotStatusRuntime} from './actor-slot-status.js';
+import {isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
+import {claimSourceHelperStorage} from './source-storage-claims.js';
+import {requireSourceActorActionSlotStatusOwner} from './actor-action-request.js';
 import type {SourceBattleOuterGlobalFields, SourceBattleSystemGlobals} from './battle-global-layout.js';
 
 /** Explicit metadata for source pointer arithmetic, not a copied actor table.
@@ -89,6 +94,9 @@ export interface SourceBattleOuterFrameSources {
   massPreparation?: SourceBattleMassPreparationSources;
   /** Optional genuine6ae60 continuation, no callback or inferred target list. */
   targetPreparation?: SourceBattleTargetPreparationSources;
+  /** Only the special bef4 branch reads this explicit current global byte.
+   * Ordinary binding does not inspect or require this optional owner. */
+  participantViews?: {byte804360dc?:number};
 }
 export interface SourceBattleOuterFrameRuntime {
   getSchedulerRuntime(): SourceObjectSchedulerRuntime;
@@ -145,7 +153,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   if(spawns.getMatchGlobals()!==globals || spawns.getAllocatorRuntime()!==allocator) fail('canonical scheduler graph differs');
   if(globals===sources || claimedGlobals.has(globals)) fail('battle globals alias sources or are already outer-owned');
   let busy=false,poisoned=false,incomplete=false,closing=false;
-  const retained=new Map<string,object>(), massActors=new Map<symbol,object>();
+  const retained=new Map<string,object>(), massActors=new Map<symbol,object>(),participantActors=new Map<symbol,object>();
   const check=(): void=>{if(poisoned) fail('caught same-runtime reentry');};
   const read=(owner: unknown,key: string): unknown=>{const value=own(owner,key);check();return value;};
   const call=<T>(run: ()=>T): T=>{const result=run();check();return result;};
@@ -1879,12 +1887,149 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(s8(load(actor,'team'))===group)put(actor,'pointer330',leader.id);
       }
     }
-    finish(); // Genuine return; the caller still refuses mandatory8000bef4.
+    finish(); // Genuine return; the caller next enters8000bef4.
+  };
+  /** Complete bounded8000bef4; only current canonical inputs, no camera copy. */
+  const prepareParticipantViews=():void=>{
+    const captured=system(),world=spawns.getWorldRuntime(),action=spawns.getAdmissionRuntime().getActionRuntime();
+    if(!claimSourceHelperStorage(captured,runtime))fail('participant system storage already claimed');
+    let helper:SourceActorSlotStatusRuntime|undefined,special:object|undefined;
+    const viewKeys=['pointer14','pointer18','pointer1c','pointer20','byte0c','byte0d','byte0e','byte0f'];
+    const reachedSystem=new Set<string>(),reachedMatch=new Set<string>();
+    const systemAliases:Record<string,readonly string[]>={
+      controllerMask:['byte2','2'],byte40:['64','special40','field40'],byte29:['41','mode29','field29'],
+      pointer14:['20','21','22','23','word14','field14','byte14','byte15','byte16','byte17'],
+      pointer18:['24','25','26','27','word18','field18','byte18','byte19','byte1a','byte1b'],
+      pointer1c:['28','29','30','31','pointer1C','word1c','word1C','field1c','byte1c','byte1d','byte1e','byte1f'],
+      pointer20:['32','33','34','35','word20','field20','byte20','byte21','byte22','byte23'],
+      byte0c:['12','byteC','bytec','byte0C','field0c'],byte0d:['13','byteD','byted','byte0D','field0d'],
+      byte0e:['14','byteE','bytee','byte0E','field0e'],byte0f:['15','byteF','bytef','byte0F','field0f'],
+    };
+    for(const key of Object.keys(systemAliases))systemAliases[key]=[...new Set(systemAliases[key]!.flatMap(alias=>
+      [alias,alias.replace(/^(byte|pointer|word|field)([0-9a-f]+)$/i,(_match,prefix:string,suffix:string)=>prefix+suffix.toUpperCase())]))];
+    const terminalShadows=(owner:object,keys:readonly string[]):void=>{
+      for(const key of keys)if(primaryStoreDescriptor(owner,key)!==undefined)fail(`${key}: competing participant storage`);
+    };
+    const metadata=(shadows:typeof noShadows):void=>{
+      for(const key of reachedSystem)shadows(captured,systemAliases[key]??[]);
+      for(const key of reachedMatch) {
+        const hex=key.slice(4).toLowerCase(),offset=parseInt(hex,16);
+        shadows(globals,[String(offset),`field${hex}`,`field${hex.toUpperCase()}`,`byte${hex}`,`byte${hex.toUpperCase()}`].filter(alias=>alias!==key));
+      }
+      if(special)shadows(special,['byte804360DC','global804360dc','804360dc']);
+      for(const actor of participantActors.values())shadows(actor,['field487','view487','1159']);
+      // The explicit helper owns all player rows. None may double as an
+      // outer source/system/match/actor record, including an unreached row.
+      if(helper) {
+        const owners=[...helper.getRetainedStorageOwners(),...helper.getDeclaredStorageOwners()];check();
+        const outer=[sources,globals,captured,...retained.values(),...massActors.values(),...participantActors.values()];
+        if(owners.some(owner=>outer.includes(owner)))fail('participant player storage aliases an outer owner');
+      }
+    };
+    const finish=():void=>{
+      check();
+      if(terminalRead(sources,'scheduler')!==scheduler||terminalRead(sources,'systemGlobals')!==captured||
+        scheduler.getRootRuntime()!==root||scheduler.getAllocatorRuntime()!==allocator||root.getSpawnRuntime()!==spawns||
+        spawns.getWorldRuntime()!==world||spawns.getMatchGlobals()!==globals||scheduler.getMatchGlobals()!==globals||
+        spawns.getAdmissionRuntime().getActionRuntime()!==action)fail('bef4 canonical participant graph changed');
+      if(special&&terminalRead(sources,'participantViews')!==special)fail('bef4 special global owner changed');
+      if(helper && (action.getSlotStatusRuntime()!==helper || helper.getSchedulerRuntime()!==scheduler))
+        fail('bef4 canonical slot-status owner changed');
+      for(const [id,actor]of participantActors) {
+        if(allocator.getPointerTarget(id)!==actor||world.getActualActor(id)!==actor)fail('bef4 canonical actual actor changed');
+        requireCompleteSourceActorDoubleLifecycle(actor);
+      }
+      // Run observable owner inventories first, then the final native source
+      // link/alias checks. Stable nonproxy records cannot invoke application code.
+      metadata(noShadows);check();
+      if(helper)requireSourceActorActionSlotStatusOwner(action,helper);
+      if(terminalRead(sources,'systemGlobals')!==captured||terminalRead(sources,'scheduler')!==scheduler||
+        (special&&terminalRead(sources,'participantViews')!==special))fail('bef4 terminal participant owner changed');
+      for(const key of reachedSystem)terminalShadows(captured,systemAliases[key]??[]);
+      for(const key of reachedMatch) {
+        const hex=key.slice(4).toLowerCase();terminalShadows(globals,[String(parseInt(hex,16)),`field${hex}`,`field${hex.toUpperCase()}`,`byte${hex}`,`byte${hex.toUpperCase()}`].filter(alias=>alias!==key));
+      }
+      for(const actor of participantActors.values())terminalShadows(actor,['field487','view487','1159']);
+      for(const [id,actor]of participantActors) {
+        if(allocator.getPointerTarget(id)!==actor||world.getActualActor(id)!==actor)fail('bef4 terminal actor changed');
+        requireCompleteSourceActorDoubleLifecycle(actor);
+      }
+      check();
+    };
+    const systemByte=(key:'byte40'|'controllerMask'|'byte29'):number=>{
+      reachedSystem.add(key);noShadows(captured,systemAliases[key]!);
+      const value=byte(captured,key);check();return value;
+    };
+    const sharedHelper=():SourceActorSlotStatusRuntime=>{
+      const selected=call(()=>action.getSlotStatusRuntime());
+      if(!isSourceActorSlotStatusRuntime(selected)||selected.getSchedulerRuntime()!==scheduler||
+        (helper!==undefined&&helper!==selected))fail('bef4 exact shared slot-status owner required');
+      helper=selected;finish();return selected;
+    };
+    const actualSlot=(slot:number):object=>{
+      if(!Number.isInteger(slot)||slot<0||slot>=6)fail('bef4 reached actor slot outside bounded six-word table');
+      const table=call(()=>scheduler.getActorSlotTable()),id=read(table,String(slot));
+      if(typeof id!=='symbol')fail('bef4 nonnull actor slot pointer required');
+      if(call(()=>allocator.getInteriorAddress(id))!==null)fail('bef4 actor slot requires a base identity');
+      const actor=record(call(()=>allocator.getPointerTarget(id)),'bef4 actual actor');
+      if(call(()=>world.getActualActor(id))!==actor)fail('bef4 same canonical world actor required');
+      if([sources,globals,captured,...retained.values()].includes(actor))fail('bef4 actor storage alias');
+      const old=participantActors.get(id);if(old&&old!==actor)fail('bef4 actor owner changed');
+      participantActors.set(id,actor);requireCompleteSourceActorDoubleLifecycle(actor);check();return actor;
+    };
+    const store=(owner:object,key:string,value:number|symbol):void=>{
+      if(owner===captured)reachedSystem.add(key);
+      finish();own(owner,key,true);check();finish();
+      const destination=primaryStoreDescriptor(owner,key);
+      if(!destination||!('value'in destination))fail(`${key}: live own data property required`);
+      if(!destination.writable)fail(`${key}: live non-writable field`);
+      (owner as Record<string,unknown>)[key]=value;finish();
+    };
+    const publish=(pointer:symbol,index:number,firstOwner?:object):void=>{
+      const pointerKey=viewKeys[index]!,metadataKey=viewKeys[4+index]!;
+      store(firstOwner??system(),pointerKey,pointer);
+      const value=call(()=>sharedHelper().readViewMetadata(pointer));
+      store(system(),metadataKey,value);
+    };
+    const markSlot=(slot:number,index:number):void=>store(actualSlot(slot),'byte487',index);
+    if(s8(systemByte('byte40'))!==0) {
+      special=retain('participantViews',read(sources,'participantViews'));
+      const slot=s8(byte(special,'byte804360dc'));
+      const pointer=call(()=>sharedHelper().getViewPointer(12));
+      publish(pointer,0,captured);for(let i=1;i<4;i++)publish(pointer,i);
+      markSlot(slot,0);finish();return;
+    }
+    let fallback=0;
+    for(let slot=0;slot<6;slot++) {
+      if((s8(systemByte('controllerMask'))&(1<<slot))===0)continue;
+      const actor=actualSlot(slot);noShadows(actor,['0','byte0']);
+      if(s8(byte(actor,'active0'))!==0){fallback=slot;break;}
+    }
+    const mode=s8(systemByte('byte29')),count=mode===2?4:mode===1?2:1;
+    for(let i=0;i<count;i++) {
+      const owner=match(),key=`byteC${i}`;reachedMatch.add(key);
+      let selected=s8(byte(owner,key));
+      if(selected===-1)selected=fallback;
+      else {
+        reachedMatch.add('byte15db');const mask=byte(owner,'byte15db'),shift=selected&63;
+        const bit=(shift&32)!==0?0:(1<<shift)>>>0;
+        if((mask&bit)===0)selected=fallback;
+      }
+      const status=call(()=>sharedHelper().readSlot(selected));
+      const recordIndex=(selected+((status&0x7fffffff)!==0?6:0))|0;
+      const pointer=call(()=>sharedHelper().getViewPointer(recordIndex));
+      if(mode===2)publish(pointer,i);
+      else if(mode===1){publish(pointer,i);publish(pointer,i+2);}
+      else for(let view=0;view<4;view++)publish(pointer,view);
+      markSlot(selected,i);
+    }
+    finish();
   };
   const close=(): void=>{
     if(incomplete) return;
     incomplete=true;closing=true;
     for(const actor of massActors.values()) markIncompleteSourceActorDoubleLifecycle(actor);
+    for(const actor of participantActors.values()) markIncompleteSourceActorDoubleLifecycle(actor);
     try {closeSourceObjectSchedulerOuterFrame(scheduler,runtime);} finally {closing=false;}
   };
   const runtime: SourceBattleOuterFrameRuntime={
@@ -1903,7 +2048,11 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           prepareTargets();
           prepareLeaders();
         }
-        fail('80029464 reached mandatory8000bef4 outer-frame predecessor');
+        prepareParticipantViews();
+        // Outer ownership grants failure closure, not a runnable scheduler join.
+        // The fresh source mode load selects the first actual call boundary.
+        if(s8(byte(match(),'byte66'))===0)fail('8002947c reached mandatory80089a94(40) scheduler execution capability');
+        fail('800294bc reached mandatory80089898(58) scheduler execution capability');
       } catch(error) {
         close();throw error;
       } finally {busy=false;}

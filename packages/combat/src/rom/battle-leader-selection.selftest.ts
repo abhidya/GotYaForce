@@ -5,7 +5,7 @@ import type {RomActor} from './actor.js';
 import type {createBattleTargetPreparationTestFixture} from './attached-setup-animation.selftest.js';
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const NEXT='80029464 reached mandatory8000bef4',HIGH='byte804360c7',LOW='byte804360c6';
+const NEXT='byte40: own data property required',HIGH='byte804360c7',LOW='byte804360c6';
 let fixtures=0;
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[battle-leader-selection-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}
@@ -229,5 +229,5 @@ function mutations(make:Make):void {
 }
 export function runBattleLeaderSelectionSelfTests(make:Make):void {
  fixtures=0;baseline(make);branches(make);failures(make);publicationFailures(make);mutations(make);
- console.log(`[battle-leader-selection] PASS (${fixtures} genuine shared-graph fixtures): six distinct active canonical actors from entry complete real mass/target preparation and27764; shared third RNG, opaque row38 copies, signed last-tie leaders, byte335 then word330, fresh ordered publication, lazy/partial effects, owner/alias/reentry closure; next mandatorybef4 remains blocked, no scheduler/frame/browser claim`);
+ console.log(`[battle-leader-selection] PASS (${fixtures} genuine shared-graph fixtures): six distinct active canonical actors from entry complete real mass/target preparation and27764; shared third RNG, opaque row38 copies, signed last-tie leaders, byte335 then word330, fresh ordered publication, lazy/partial effects, owner/alias/reentry closure; bef4 stops at absent current byte40, no scheduler/frame/browser claim`);
 }

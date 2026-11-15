@@ -2,7 +2,7 @@
  "generated_by": "research/decomp/oracle-harness/gen_actor_field_map.py",
  "map_schema": 1,
  "source": "packages/combat/src/rom/actor.ts",
- "source_sha256": "ff8b4560088a99d37135dd250ca7a92107b96fa6dd98762e1de7ce1697603043",
+ "source_sha256": "c596ffc74a0ad7c68c06025b0fc56da7928de71599b27da649517eb917d8a424",
  "interfaces": {
   "RomActor": {
    "fields": [
@@ -29,6 +29,12 @@
      "kind": "u8",
      "width": 1,
      "tsField": "byte335"
+    },
+    {
+     "offset": 1159,
+     "kind": "u8",
+     "width": 1,
+     "tsField": "byte487"
     },
     {
      "offset": 1282,

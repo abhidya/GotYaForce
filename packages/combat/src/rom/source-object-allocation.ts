@@ -29,7 +29,8 @@
  * after a store permanently closes the allocator. Caller capabilities separately
  * close actors whose subsequent spawn initialization was incomplete.
  */
-import {reserveSourcePointerStorage} from './source-storage-claims.js';
+import {reserveSourcePointerStorage,reserveSourcePlayerTableStorage,isSourceHelperStorageClaimed} from './source-storage-claims.js';
+import {requireSourceActorPlayerTableAddressability,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
 import {requireSourceObjectSchedulerSnapshot, type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
@@ -105,6 +106,14 @@ export interface SourceObjectAllocationRuntime {
   writePointer(identity: symbol, offset: number, value: symbol | null): void;
 }
 const schedulerIncomplete = new WeakSet<object>();
+const playerTableJoins=new WeakMap<object,(helper:SourceActorSlotStatusRuntime,table:object)=>symbol>();
+/** Private synchronous addressability, not generic external registration. */
+export function getSourceActorPlayerTablePointer(allocator:SourceObjectAllocationRuntime,
+  helper:SourceActorSlotStatusRuntime,table:object):symbol {
+  const join=playerTableJoins.get(allocator);
+  if(!join || !isSourceObjectAllocationRuntime(allocator))fail('genuine player-table allocator required');
+  requireSourceActorPlayerTableAddressability(helper,allocator,table);return join(helper,table);
+}
 /** Permanent failure closure only; grants no execution authority. */
 export function markIncompleteSourceObjectAllocation(runtime: SourceObjectAllocationRuntime): void {
   if (!isSourceObjectAllocationRuntime(runtime)) fail('genuine allocator required');
@@ -180,13 +189,15 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
   const interiorIds = new Map<symbol, Map<number, symbol>>(), interiorAddresses = new Map<symbol, Readonly<SourceObjectInteriorAddress>>();
   const handles = new Map<symbol, number>(), identities = new Map<number, symbol>();
   let nextHandle = 1;
-  const identify = (id: symbol, target: object): void => {
+  const identify = (id: symbol, target: object,playerHelper?:SourceActorSlotStatusRuntime): void => {
+    if(!playerHelper&&isSourceHelperStorageClaimed(target))fail('pointer target source storage already claimed');
     if (typeof id !== 'symbol') fail('symbol identity required');
     const prior = targets.get(id), priorId = targetIds.get(target);
     if (prior !== undefined && prior !== target) fail('pointer identity changed its actual owner');
     if (priorId !== undefined && priorId !== id) fail('actual pointer owner already has a different identity');
     if (prior === undefined) {
-      if(!reserveSourcePointerStorage(target)) fail('pointer target source storage already claimed');
+      if(!(playerHelper?reserveSourcePlayerTableStorage(target,playerHelper,runtime):reserveSourcePointerStorage(target)))
+        fail('pointer target source storage already claimed');
       if (nextHandle > 0xffffffff) fail('opaque pointer handle capacity exhausted');
       targets.set(id, target); targetIds.set(target, id); handles.set(id, nextHandle); identities.set(nextHandle++, id);
     }
@@ -475,5 +486,15 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     }, true);},
     writePointer(id, offset, value) {guard(() => putPointer(id, offset, value), true);},
   };
+  playerTableJoins.set(runtime,(helper,table)=>guard(()=>{
+    requireSourceActorPlayerTableAddressability(helper,runtime,table);
+    const old=targetIds.get(table);
+    if(old!==undefined) {
+      if(!reserveSourcePlayerTableStorage(table,helper,runtime))fail('canonical player-table address owner differs');
+      return old;
+    }
+    const id=Symbol('source player-record table');identify(id,table,helper);
+    requireSourceActorPlayerTableAddressability(helper,runtime,table);return id;
+  },true));
   runtimes.add(runtime); return Object.freeze(runtime);
 }

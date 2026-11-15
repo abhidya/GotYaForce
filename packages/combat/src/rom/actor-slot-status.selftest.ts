@@ -1,5 +1,7 @@
 import {createSourceActorSlotStatusRuntime, isSourceActorSlotStatusRuntime,
-  type SourceActorPlayerSlotRecord, type SourceActorSlotStatusSources} from './actor-slot-status.js';
+  requireSourceActorPlayerTableAddressability,type SourceActorPlayerSlotRecord, type SourceActorSlotStatusSources} from './actor-slot-status.js';
+import {getSourceActorPlayerTablePointer} from './source-object-allocation.js';
+import {claimSourceHelperStorage,reserveSourcePointerStorage,reserveSourcePlayerTableStorage} from './source-storage-claims.js';
 import {createSourceObjectSchedulerRuntime, requireSourceObjectSchedulerSnapshot} from './source-object-scheduler.js';
 import {createSourceBattleOuterFrameRuntime, type SourceBattleOuterFrameSources} from './battle-outer-frame.js';
 import {hasIncompleteSourceActorDoubleLifecycle, isSourceActorDoubleFrameClaimed} from './actor-double-prehook.js';
@@ -498,8 +500,95 @@ function targetTests(make: Make): void {
   }
 }
 
+export function runActorPlayerViewOwnerSelfTests(make:Make):void {
+  {
+    const x=setup(make);x.slotRecords[0]!.byte10=71;x.slotRecords[12]={byte10:219};
+    const p=x.slotStatus.getViewPointer(0),special=x.slotStatus.getViewPointer(12),a=x.allocator.getInteriorAddress(p)!;
+    equal(x.allocator.getPointerTarget(a.base),x.slotRecords,'view addresses SAME player table');equal(a.byteOffset,0x394,'row0 view offset');
+    equal(x.allocator.getInteriorAddress(special)!.byteOffset,12*0x3e4+0x394,'canonical row12 interior arithmetic');
+    equal(x.slotStatus.getViewPointer(0),p,'repeated pointer identity is interned');
+    equal(x.slotStatus.readViewMetadata(p),71,'metadata from canonical row0');x.slotRecords[0]!.byte10=72;
+    equal(x.slotStatus.readViewMetadata(p),72,'metadata is live');equal(x.slotStatus.readViewMetadata(special),219,'special row requires no state18');
+    equal(x.slotStatus.readSlot(0),0,'10514 survives table addressability');
+    check(x.scheduler.getRetainedStorageOwners().includes(x.slotRecords),'table stays in canonical owner inventory');
+    check(!x.scheduler.getRetainedStorageOwners().includes(x.slotRecords[0]!), 'symbolic table base does not transfer row ownership');
+    equal(claimSourceHelperStorage(x.slotRecords,x.slotStatus),true,'same canonical helper retains its table claim');
+    equal(claimSourceHelperStorage(x.slotRecords,{}),false,'different helper cannot claim addressable table');
+    equal(reserveSourcePointerStorage(x.slotRecords),false,'generic reservation remains rejected');
+    rejects(()=>x.allocator.registerExternal(Symbol('new identity'),x.slotRecords),'already claimed');
+    rejects(()=>x.allocator.registerExternal(a.base,x.slotRecords),'already claimed');
+    rejects(()=>x.allocator.registerExternal(Symbol('row'),x.slotRecords[0]!),'already claimed');
+    rejects(()=>x.slotStatus.readViewMetadata(Symbol('forged view')),'genuine owned');
+    const otherOffset=x.allocator.getInteriorPointer(a.base,0x395);
+    rejects(()=>x.slotStatus.readViewMetadata(otherOffset),'genuine owned');
+    // Mere access to the real helper, table and allocator is never authority.
+    rejects(()=>getSourceActorPlayerTablePointer(x.allocator,x.slotStatus,x.slotRecords),'private active');
+    rejects(()=>reserveSourcePlayerTableStorage(x.slotRecords,x.slotStatus,x.allocator),'private active');
+    rejects(()=>requireSourceActorPlayerTableAddressability(x.slotStatus,x.allocator,x.slotRecords),'private active');
+    rejects(()=>getSourceActorPlayerTablePointer(x.allocator,{...x.slotStatus},x.slotRecords),'private player');
+    rejects(()=>x.slotStatus.getViewPointer(13),'bounded13');rejects(()=>x.slotStatus.getViewPointer(-1),'bounded13');
+    const absent=x.slotStatus.getViewPointer(6);rejects(()=>x.slotStatus.readViewMetadata(absent),'6: own data');
+    x.slotRecords[6]={byte10:66};equal(x.slotStatus.readViewMetadata(absent),66,'pointer formation did not preflight absent row');
+  }
+  {
+    const x=setup(make),other=setup(make);x.slotRecords[0]!.byte10=1;other.slotRecords[0]!.byte10=2;
+    const p=x.slotStatus.getViewPointer(0),foreign=other.slotStatus.getViewPointer(0);
+    rejects(()=>x.slotStatus.readViewMetadata(foreign),'genuine owned');
+    rejects(()=>getSourceActorPlayerTablePointer(other.allocator,x.slotStatus,x.slotRecords),'private active');
+    x.slotStatusSources.slotRecords={...x.slotRecords};rejects(()=>x.slotStatus.readViewMetadata(p),'canonical owner changed');
+  }
+  for(const fault of ['row-swap','row-alias','root-alias','accessor','range','shadow','removed-helper'] as const) {
+    const x=setup(make);x.slotRecords[0]!.byte10=9;const p=x.slotStatus.getViewPointer(0);x.slotStatus.readViewMetadata(p);
+    let getters=0;
+    if(fault==='row-swap')x.slotRecords[0]={byte10:10};
+    if(fault==='row-alias')x.slotRecords[1]=x.slotRecords[0]!;
+    if(fault==='root-alias')x.slotRecords[1]=x.rootSources as SourceActorPlayerSlotRecord;
+    if(fault==='accessor')Object.defineProperty(x.slotRecords[0]!,'byte10',{get(){getters++;return 0;}});
+    if(fault==='range')x.slotRecords[0]!.byte10=256;
+    if(fault==='shadow')Reflect.set(x.slotRecords[0]!,'metadata10',9);
+    if(fault==='removed-helper')delete x.actionRequestSources.slotStatus;
+    if(fault==='root-alias')rejects(()=>x.slotStatus.readViewMetadata(x.slotStatus.getViewPointer(1)),'source storage alias');
+    else rejects(()=>x.slotStatus.readViewMetadata(p),fault==='row-swap'?'canonical owner changed':fault==='row-alias'?'aliases':
+      fault==='accessor'?'byte10: own data':fault==='range'?'raw unsigned':fault==='shadow'?'competing':'canonical');
+    equal(getters,0,'metadata accessor never invoked');
+  }
+  for(const key of ['targetStack','initializationStack','processor','borrowedPlayerTable']) {
+    const x=setup(make);x.slotStatus.getViewPointer(0);
+    Reflect.set(key==='borrowedPlayerTable'?x.sourceActor:x.rootSources,key,x.slotRecords);
+    rejects(()=>x.slotStatus.getViewPointer(1),'aliases another source storage role');
+  }
+  {
+    const x=setup(make);x.slotRecords[0]!.byte10=4;const p=x.slotStatus.getViewPointer(0);let hit=false;
+    observe(()=>rejects(()=>x.slotStatus.readViewMetadata(p),'aliases another source storage role'),()=>{},(owner,key)=>{
+      if(!hit&&owner===x.slotRecords[0]&&key==='byte10'){hit=true;Reflect.set(x.rootSources,'targetStack',x.slotRecords);}
+    });check(hit,'last scalar hook adds competing root storage role');
+  }
+  for(const phase of ['form','metadata'] as const) {
+    const x=setup(make);x.slotRecords[0]!.byte10=3;const p=x.slotStatus.getViewPointer(0);let hit=false;
+    observe(()=>rejects(()=>phase==='form'?x.slotStatus.getViewPointer(0):x.slotStatus.readViewMetadata(p),'caught same-runtime reentry'),(owner,key)=>{
+      if(!hit && (phase==='form'?owner===x.slotStatusSources&&key==='slotRecords':owner===x.slotRecords[0]&&key==='byte10')) {
+        hit=true;rejects(()=>x.slotStatus.getViewPointer(0),'same-runtime reentry');
+      }
+    });check(hit,'reentry hook was reached');
+  }
+  {
+    const x=setup(make);x.slotRecords[0]!.byte10=5;const p=x.slotStatus.getViewPointer(0);let hit=false;
+    observe(()=>rejects(()=>x.slotStatus.readViewMetadata(p),'slotStatus'),()=>{},(owner,key)=>{
+      if(!hit&&owner===x.slotRecords[0]&&key==='byte10') {hit=true;x.actionRequestSources.slotStatus={...x.slotStatus};}
+    });check(hit,'last scalar hook swaps canonical action/helper reference');
+  }
+  {
+    const x=setup(make);x.slotRecords[0]!.byte10=7;const p=x.slotStatus.getViewPointer(0),{frame}=outer(x);
+    x.matchGlobals.byte66=1;rejects(()=>frame.runFrame(),'byte40: own data');closed(x,frame);
+    equal(x.slotStatus.readViewMetadata(p),7,'readonly diagnostic metadata grants no frame authority');
+    rejects(()=>x.slotStatus.getViewPointer(0),'permanently incomplete');
+  }
+  console.log('[actor-player-view-owner] PASS: same-table interior identities, lazy/live metadata and genuine10514, exact private allocator join, unchanged generic rejection, foreign/stale/alias/reentry and post-closure authority refusal');
+}
+
 export function runActorSlotStatusSelfTests(make: Make): void {
   helperTests(make);
+  runActorPlayerViewOwnerSelfTests(make);
   actionTests(make);targetTests(make);
   console.log('[actor-slot-status] PASS: all25643d/state bytes and authentic dispatch words, fresh allocator targets and ordered lazy reads, exact shared action/scheduler graph, zero4a1 one-word input priorities and signed6b450 early returns, readonly/alias/reentry failures and permanent outer6b7f4 closure; bounded offline synthetic composition only, no source hydration, active target selection, scheduler run or full-frame claim');
 }

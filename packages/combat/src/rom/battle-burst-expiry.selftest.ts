@@ -6,7 +6,7 @@ import type {SourceBattleOuterFrameTestFixture} from './battle-outer-frame.selft
 
 type Make=()=>SourceBattleOuterFrameTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const normal='80029458 reached mandatory80053b30',paused='80029464 reached mandatory8000bef4',
+const normal='80029458 reached mandatory80053b30',paused='byte40: own data property required',
   positive='80029de0 reached unsupported positive burst timer floating suffix';
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[battle-burst-expiry-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}

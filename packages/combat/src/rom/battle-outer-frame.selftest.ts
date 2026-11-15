@@ -24,7 +24,7 @@ export interface SourceBattleOuterFrameTestFixture extends SourceObjectScheduler
   teamRows103: TeamRow[];
 }
 type Fixture = SourceBattleOuterFrameTestFixture;
-const NORMAL = '80053b30', PAUSED = '8000bef4', BURST = 'byteEB: own data property required';
+const NORMAL = '80053b30', PAUSED = 'byte40: own data property required', BURST = 'byteEB: own data property required';
 function check(ok: boolean, why: string): void {if (!ok) throw Error(`[battle-outer-frame-test] ${why}`);}
 function equal(actual: unknown, expected: unknown, why: string): void {
   check(Object.is(actual, expected), `${why}: got ${String(actual)}, expected ${String(expected)}`);
@@ -495,5 +495,5 @@ export function runBattleOuterFrameSelfTests(make: () => SourceBattleOuterFrameT
     sources.scheduler = {...scheduler}; const keep = retained(x.matchGlobals, ...x.teamRows103);
     rejects(() => outer.runFrame(), 'canonical scheduler graph changed'); keep(); closed(x, scheduler, outer);
   }
-  console.log('[battle-outer-frame-test] PASS: genuine closure-only scheduler ownership; signed pause request and four live six-slot team refreshes preserve exact ordered writes through unsigned8b290 before missing 8b480 byteEB, mandatory53b30 or bef4 refusal; lazy fields, unsigned charge, scalar faults, owner aliases, mutation and caught reentry permanently close the retained graph; no scheduler snapshots, actor frame, complete battle frame, retail execution or browser claim');
+  console.log('[battle-outer-frame-test] PASS: genuine closure-only scheduler ownership; signed pause request and four live six-slot team refreshes preserve exact ordered writes through unsigned8b290 before missing 8b480 byteEB, mandatory53b30 or absent bef4 byte40; lazy fields, unsigned charge, scalar faults, owner aliases, mutation and caught reentry permanently close the retained graph; no scheduler snapshots, actor frame, complete battle frame, retail execution or browser claim');
 }

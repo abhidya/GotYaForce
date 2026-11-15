@@ -17,6 +17,7 @@ export interface SourceBattleTeamRow extends Pick<BurstMeterState, 'charged'> {
   meter?: number;
 }
 export interface SourceBattleOuterGlobalFields {
+  byteC0?:number;byteC1?:number;byteC2?:number;byteC3?:number;byte15db?:number;
   byte15d4?: number; byte66?: number; halfD6?: number;
   /** SAME unsigned80433934+d9 cell already used by actor-matrix/ceiling. */
   byteD9?: number;
@@ -28,4 +29,8 @@ export interface SourceBattleOuterGlobalFields {
 }
 /** Existing ChallengeFlowState spelling for80433930+2. Explicit owner ingress,
  * not the challenge VM's constructor or a default controller selection. */
-export interface SourceBattleSystemGlobals {controllerMask?: number}
+export interface SourceBattleSystemGlobals {
+  controllerMask?:number;byte40?:number;byte29?:number;
+  pointer14?:symbol|null;pointer18?:symbol|null;pointer1c?:symbol|null;pointer20?:symbol|null;
+  byte0c?:number;byte0d?:number;byte0e?:number;byte0f?:number;
+}
