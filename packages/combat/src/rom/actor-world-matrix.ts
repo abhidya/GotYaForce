@@ -282,6 +282,10 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
     // physical matrix base and independently of either topology byte.
     poseId(actor, id, current + 1);
     const nextTranslation = read(actor.poseRecords[current + 1], 'translation');
+    // Primary orientation consumes correction target minus this transformed
+    // RAW pose, including bounded sloped displacement. It never queries the
+    // secondary terrain normal. End is retained only for the second length;
+    // later ordinary traversal may still rebuild it after placement returns.
     effect(primaryPlacement, parent, destination, next, end, local, nextTranslation, correction);
   }
   function secondaryCorrection(actor: Entry, id: symbol, current: number, parentIndex: number, index: number): void {

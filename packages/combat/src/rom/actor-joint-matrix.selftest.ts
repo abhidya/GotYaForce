@@ -1,3 +1,4 @@
+import {slopedPrimaryWitnesses, slopedPrimaryOrientation, slopedPrimaryNormalized} from './actor-primary-sloped-witness.selftest.js';
 import {createSourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
 import {primarySineCorrection} from './actor-primary-float.js';
 import {createSourceJointAnimationFeedbackRuntime} from './joint-animation-feedback.js';
@@ -206,6 +207,7 @@ export function runActorJointMatrixSelfTests(): void {
   runActorJointMatrixBytesSelfTests();
   runActorJointStandaloneMatrixSelfTests();
   runActorJointSlopedOrientationSelfTests();
+  runActorJointSlopedPrimaryPlacementSelfTests();
   {
     // Binary64 witnesses are necessary: final frsp happens to hide the first
     // sine's stage2 split-multiply error. Exercise the production internal
@@ -1315,12 +1317,114 @@ export function runActorJointSlopedOrientationSelfTests(): void {
   }
   {
     const f = primaryFixture(); f.correction.y = normal.y; f.correction.z = normal.z;
-    rejects(f.run, 'only flat');
-    check(f.currentMatrix.every((v, i) => Object.is(v, identity[i])), 'primary retains flat-only admission');
+    f.run();
+    check(f.currentMatrix.every((v, i) => bits(v) === slopedPrimaryOrientation[i]), 'primary slope completes the folded first placement');
   }
   {
     const f = primaryFixture(); f.currentMatrix[0] = 0; f.currentMatrix[4] = normal.y; f.currentMatrix[8] = normal.z;
     rejects(f.run, 'signed-axis');
     check(f.currentMatrix[4] === normal.y && f.currentMatrix[8] === normal.z, 'primary retains axis-only incoming magnitude admission');
+  }
+}
+
+function slopedPrimaryFixture(firstLength = 2) {
+  const f = firstLength === 2 ? primaryFixture() : positivePrimaryFixture();
+  f.correction.y = fromBits(0x3f199999); f.correction.z = fromBits(0x3f4ccccd);
+  return f;
+}
+export function runActorJointSlopedPrimaryPlacementSelfTests(): void {
+  // Last-public-descriptor observer injection uses genuine own-data records,
+  // not accessors/Proxies. Catching the inner refusal must poison THIS call.
+  for (const stage of ['axis0e', 'bend-first', 'bend-second', 'basis', 'adjacent-last'] as const) {
+    const f = slopedPrimaryFixture(), original = Object.getOwnPropertyDescriptor;
+    const key = stage === 'axis0e' ? 'axis0e' : stage.startsWith('bend') ? 'bend0f' : stage === 'basis' ? '4' : '11';
+    const target = stage === 'basis' ? f.currentMatrix : stage === 'adjacent-last' ? f.nextMatrix : f.correction;
+    const occurrence = stage === 'basis' ? 3 : stage === 'bend-second' || stage === 'adjacent-last' ? 2 : 1;
+    let seen = 0, nested = false;
+    Object.getOwnPropertyDescriptor = (object: object, property: PropertyKey): PropertyDescriptor | undefined => {
+      const descriptor = original(object, property);
+      if (object === target && property === key && ++seen === occurrence) {
+        nested = true; try {f.run();} catch { /* intentionally swallowed */ }
+      }
+      return descriptor;
+    };
+    try {rejects(f.run, 'caught same-runtime reentry during primary placement');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(nested, `primary descriptor observer was reached at ${stage}`);
+    const expected = stage === 'axis0e' ? identity.map(bits) : stage === 'basis' ?
+      identity.map((v, i) => i === 0 ? slopedPrimaryNormalized[0]! : bits(v)) : slopedPrimaryOrientation;
+    check(f.currentMatrix.every((v, i) => bits(v) === expected[i]), 'caught primary reentry retains exact preceding translation/basis/Concat prefix');
+    const nextExpected = stage === 'adjacent-last' ? slopedPrimaryWitnesses[3]!.adjacent.slice() : identity.map(bits);
+    if (stage === 'adjacent-last') nextExpected[11] = 0; else nextExpected[7] = bits(2);
+    check(f.nextMatrix.every((v, i) => bits(v) === nextExpected[i]), 'caught reentry prevents the observed next store and all later stores');
+    f.currentMatrix.splice(0, 12, ...identity); f.nextMatrix.splice(0, 12, ...identity); f.nextMatrix[7] = 2;
+    f.run(); check(f.currentMatrix.every((v, i) => bits(v) === slopedPrimaryOrientation[i]), 'fresh call recovers from caught primary reentry after explicit input repair');
+  }
+  for (const witness of slopedPrimaryWitnesses) {
+    const f = slopedPrimaryFixture(witness.firstLength); f.correction.bend0f = witness.bend;
+    f.run();
+    check(f.currentMatrix.every((v, i) => bits(v) === witness.current[i]), 'sloped primary exact current matrix for both pairs and six signed bends');
+    check(f.nextMatrix.every((v, i) => bits(v) === witness.adjacent[i]), 'sloped primary exact physically adjacent matrix including signed zeros');
+    check(f.endMatrix.every((v, i) => bits(v) === witness.retainedEnd[i]), 'placement never writes retained end');
+    // Reset only retained translations: repeated orientation must still refuse
+    // the actual output basis norms, not pretend the first pass is replayable.
+    f.nextMatrix[3] = 0; f.nextMatrix[7] = witness.firstLength; f.nextMatrix[11] = 0;
+    const before = f.currentMatrix.slice();
+    rejects(f.run, 'finite estimate proof domain');
+    check(f.currentMatrix.every((v, i) => Object.is(v, before[i])), 'repeated output has unsupported incoming norms before basis stores');
+  }
+  const normalizedOrder = [0, 4, 8, 1, 5, 9, 2, 6, 10];
+  for (let stop = 0; stop < normalizedOrder.length; stop++) {
+    const f = slopedPrimaryFixture(), expected = identity.slice();
+    Object.defineProperty(f.currentMatrix, String(normalizedOrder[stop]), {writable: false});
+    rejects(f.run, 'non-writable');
+    for (const index of normalizedOrder.slice(0, stop)) expected[index] = fromBits(slopedPrimaryNormalized[index]!);
+    check(f.currentMatrix.every((v, i) => Object.is(v, expected[i])), `sloped primary normalization store prefix ${stop}`);
+    check(f.nextMatrix[7] === 2 && f.endMatrix[7] === 2.5, 'normalization failure precedes adjacent writes');
+  }
+  const concatOrder = [0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 10, 11];
+  for (const witness of slopedPrimaryWitnesses) for (let stop = 0; stop < 12; stop++) {
+    const f = slopedPrimaryFixture(witness.firstLength), before = f.nextMatrix.slice(); f.correction.bend0f = witness.bend;
+    Object.defineProperty(f.nextMatrix, String(concatOrder[stop]), {writable: false});
+    rejects(f.run, 'non-writable');
+    const written = new Set(concatOrder.slice(0, stop));
+    check(f.currentMatrix.every((v, i) => bits(v) === witness.current[i]), 'adjacent fault retains first completed Concat');
+    check(f.nextMatrix.every((v, i) => bits(v) === (written.has(i) ? witness.adjacent[i] : bits(before[i]!))), 'adjacent Concat exact paired store prefix');
+    check(f.endMatrix.every((v, i) => bits(v) === witness.retainedEnd[i]), 'adjacent fault leaves end unchanged');
+  }
+  for (const bad of [
+    {x: 0, y: Math.fround(.6), z: Math.fround(.8), error: 'finite estimate proof domain'},
+    {x: 1, y: 0, z: 0, error: 'fallback construction'},
+    {x: 2 ** -149, y: 1, z: 0, error: 'denormal arithmetic'},
+    {x: 2 ** -75, y: 1, z: 0, error: 'denormal arithmetic'},
+    {x: 0, y: NaN, z: 1, error: 'primary target.y'},
+    {x: 0, y: 1, z: Infinity, error: 'primary target.z'},
+  ]) {
+    const f = slopedPrimaryFixture(); Object.assign(f.correction, bad);
+    // A nonzero old retained position distinguishes real translation stores
+    // from an early normal/target preflight, while preserving measured lengths.
+    f.currentMatrix[3] = f.nextMatrix[3] = f.endMatrix[3] = 9;
+    rejects(f.run, bad.error);
+    check(f.currentMatrix.every((v, i) => Object.is(v, identity[i])) && f.nextMatrix[3] === 9,
+      'source norm/target boundary follows current translation but precedes basis and adjacent writes');
+  }
+  for (const key of ['axis0d', 'axis0e', 'bend0f'] as const) {
+    const f = slopedPrimaryFixture(); f.correction[key] = 0;
+    rejects(f.run, key === 'bend0f' ? 'primary bend axis' : 'positive terrain axes');
+    const expected = key === 'bend0f' ? slopedPrimaryOrientation : identity.map(bits);
+    check(f.currentMatrix.every((v, i) => bits(v) === expected[i]) && f.nextMatrix[7] === 2,
+      'fresh axes refuse after translation, fresh bend after orientation');
+  }
+  {
+    const f = slopedPrimaryFixture();
+    rejects(() => f.runtime.primaryFoldedPlacement(f.parent, f.current, f.current, f.end,
+      f.translation, f.nextTranslation, f.correction), 'distinct');
+    rejects(() => f.runtime.primaryFoldedPlacement(Symbol(), f.current, f.next, f.end,
+      f.translation, f.nextTranslation, f.correction), 'unknown/non-owned');
+    f.hooks.get = () => {try {f.run();} catch { /* deliberately caught */ }};
+    rejects(f.compose, 'reentry was caught');
+    check(f.currentMatrix[0] === 1 && f.nextMatrix[7] === 2, 'sloped placement participates in same-call matrix reentry poison');
+    delete f.hooks.get; f.run();
+    check(bits(f.currentMatrix[5]!) === 0x3f199997, 'fresh matrix call can retry after refusal');
   }
 }

@@ -1,3 +1,4 @@
+import {slopedPrimaryWitnesses, slopedPrimaryOrientation} from './actor-primary-sloped-witness.selftest.js';
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {createRomActor} from './actor.js';
 import {createSourceActorWorldMatrixRuntime, type SourceActorWorldMatrixBinding,
@@ -201,6 +202,7 @@ function primaryFixture(maxVisits = 4096) {
   return {...f, counts, placement: counts.primary1a14[0]!};
 }
 export function runActorWorldMatrixSelfTests(): void {
+  runActorWorldSlopedPrimaryPlacementSelfTests();
   runActorWorldSlopedTerrainContinuationSelfTests();
   {
     const f = fixture();
@@ -1159,5 +1161,149 @@ export function runActorWorldSlopedTerrainContinuationSelfTests(): void {
     rejects(() => f.runtime.rebuildActor(f.id, 1), 'caught same-runtime reentry');
     check(sameBits(f.output(1), finalBits) && f.events.join(',') === prefix && f.output(3)[7] === -23,
       'completed real sloped orientation remains visible while reentry poison prevents any descendant replay');
+  }
+}
+
+// Zero origin is deliberate: RN32(target - MultVec(parent, rawPose)) is the
+// exact independent witness, with no assumed reversibility of target+offset.
+function slopedPrimaryFixture(firstLength = 2) {
+  const f = primaryFixture(), secondLength = firstLength === 2 ? .5 : 1;
+  Object.assign(f.actual.pos, zero()); Object.assign(f.state.offset1dbc, zero());
+  Object.assign(f.pose(1).translation, zero());
+  f.pose(2).translation.y = firstLength; f.pose(3).translation.y = secondLength;
+  f.runtime.prepareActor(f.id); f.runtime.rebuildActor(f.id, 0);
+  // Verify mode0 produced the exact incoming basis too; no fixture reseeding
+  // hides quaternion/Concat signed zeros or substitutes retained world data.
+  for (const i of [1, 2, 3]) {
+    const matrix = f.output(i);
+    check(matrix[3] === 0 && matrix[7] === (i === 1 ? 0 : i === 2 ? firstLength : firstLength + secondLength) && matrix[11] === 0,
+      'real mode0 retained positions provide the measured bone pair');
+    for (const k of [0, 1, 2, 4, 5, 6, 8, 9, 10]) check(Object.is(matrix[k], k % 5 === 0 ? 1 : 0),
+      'mode0 retained basis matches exact independent incoming identity');
+  }
+  const word = new DataView(new ArrayBuffer(4));
+  word.setUint32(0, 0x3f199999); f.placement.y = word.getFloat32(0);
+  word.setUint32(0, 0x3f4ccccd); f.placement.z = word.getFloat32(0); f.placement.x = 0;
+  f.events.length = 0;
+  return f;
+}
+export function runActorWorldSlopedPrimaryPlacementSelfTests(): void {
+  const word = new DataView(new ArrayBuffer(4));
+  const bits = (v: number): number => {word.setFloat32(0, v); return word.getUint32(0);};
+  const same = (matrix: readonly number[], words: readonly number[]) => matrix.every((v, i) => bits(v) === words[i]);
+  const prefix = 'identity,translate,correct,scale,copy114,copy1aa4,primary:1:0';
+  const suffix = ',joint:4:0,joint:5:4,joint:6:1,joint:7:6,joint:3:2';
+  for (const witness of slopedPrimaryWitnesses) {
+    const f = slopedPrimaryFixture(witness.firstLength); f.placement.bend0f = witness.bend;
+    const ownedCurrent = f.runtime.getWorldMatrix(f.id, 1), ownedNext = f.output(2), ownedEnd = f.output(3);
+    let placementCalls = 0;
+    f.hooks.placed = () => {
+      placementCalls++;
+      check(same(ownedCurrent, witness.current) && same(ownedNext, witness.adjacent), 'real world placement exact two Concat matrices');
+      check(same(ownedEnd, witness.retainedEnd), 'retained end unchanged at placement boundary');
+    };
+    f.runtime.rebuildActor(f.id, 1);
+    check(placementCalls === 1 && f.events.join(',') === prefix + suffix, 'sloped primary completes once before genuine branches and skipped-next continuation');
+    check(f.runtime.getWorldMatrix(f.id, 1) === ownedCurrent && f.output(2) === ownedNext && f.output(3) === ownedEnd,
+      'actual live matrix records and handles remain owned');
+    check(f.output(4)[7] === 4 && f.output(5)[7] === 9, 'current side branch retains incoming root parent');
+    check(!same(ownedEnd, witness.retainedEnd), 'later ordinary end traversal really writes end, unlike placement boundary');
+  }
+  {
+    const f = slopedPrimaryFixture();
+    // Physical adjacent matrix2 remains the placement destination, even though
+    // current byte0 selects a different skipped node and raw pose4 is invalid.
+    f.topology(1)[0] = 4; f.topology(1)[1] = 255;
+    f.topology(4)[0] = 255; f.topology(4)[1] = 255;
+    f.pose(4).translation.y = NaN;
+    f.runtime.rebuildActor(f.id, 1);
+    check(f.events.join(',') === prefix && same(f.output(2), slopedPrimaryWitnesses[3]!.adjacent),
+      'physical current+0x30 and raw pose current+1 are independent of topology-selected skipped node');
+  }
+  {
+    const f = slopedPrimaryFixture(1), witness = slopedPrimaryWitnesses.find(w => w.firstLength === 1 && w.bend === 254)!;
+    let changed = false;
+    f.placement.axis0d = 0; f.placement.axis0e = 0; f.placement.bend0f = 0;
+    f.hooks.matrix = id => {
+      if (!changed && id === f.matrixIds[1]) {
+        changed = true;
+        // Current raw pose was captured before destination lookup. Adjacent raw
+        // pose and axes/bend are later live reads, never cached during scan.
+        f.pose(1).translation.y = 99; f.pose(2).translation.y = 1;
+        f.placement.axis0d = 2; f.placement.axis0e = 1; f.placement.bend0f = 254;
+      }
+    };
+    f.hooks.placed = () => {
+      check(same(f.output(1), witness.current) && same(f.output(2), witness.adjacent), 'captured current raw pose and fresh axes/bend survive live callback mutation');
+      f.counts.count1d96 = 0; f.topology(1)[1] = 255; f.topology(2)[0] = 255; f.topology(2)[1] = 255;
+    };
+    f.runtime.rebuildActor(f.id, 1);
+    check(changed && f.events.join(',') === prefix, 'post-placement topology and correction counts are read live');
+  }
+  {
+    const f = slopedPrimaryFixture();
+    f.hooks.matrix = id => {if (id === f.matrixIds[1]) f.pose(2).translation.z = NaN;};
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'primary next.z');
+    check(f.output(1)[0] === 1 && f.output(2)[7] === 2, 'adjacent raw pose failure precedes current translation and basis work');
+  }
+  for (const stop of [0, 4, 8, 1, 5, 9, 2, 6, 10]) {
+    const f = slopedPrimaryFixture(); Object.defineProperty(f.output(1), String(stop), {writable: false});
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'non-writable');
+    check(f.events.join(',') === prefix && f.output(2)[7] === 2, 'world orientation partial-store refusal does not traverse later branches');
+  }
+  {
+    const f = slopedPrimaryFixture(); f.placement.y = Math.fround(.6);
+    f.output(1)[3] = f.output(2)[3] = f.output(3)[3] = 9;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'finite estimate proof domain');
+    check(f.output(1)[3] === 0 && f.output(1)[5] === 1 && f.output(2)[3] === 9 && f.events.join(',') === prefix,
+      'literal .6/.8 refuses reached normalization after raw translation, before basis or traversal');
+    // Standalone world retry is allowed, but restore valid explicit retained
+    // geometry rather than pretending a failed call rolls its stores back.
+    f.output(2)[3] = f.output(3)[3] = 0; word.setUint32(0, 0x3f199999); f.placement.y = word.getFloat32(0);
+    f.events.length = 0; f.runtime.rebuildActor(f.id, 1);
+    check(f.events.join(',') === prefix + suffix, 'fresh world call retries after input repair, without invented frame poison');
+  }
+  for (const stage of ['reentry', 'promise'] as const) {
+    const f = slopedPrimaryFixture();
+    f.hooks.placed = () => {
+      if (stage === 'promise') return Promise.resolve();
+      try {f.runtime.rebuildActor(f.id, 1);} catch { /* deliberately swallowed */ }
+      return undefined;
+    };
+    rejects(() => f.runtime.rebuildActor(f.id, 1), stage === 'reentry' ? 'caught same-runtime reentry' : 'synchronously');
+    check(same(f.output(1), slopedPrimaryOrientation) && same(f.output(2), slopedPrimaryWitnesses[3]!.adjacent) &&
+      same(f.output(3), slopedPrimaryWitnesses[3]!.retainedEnd) && f.events.join(',') === prefix,
+      'same-call poison preserves real completed placement and blocks traversal');
+  }
+  for (const change of ['array', 'record'] as const) {
+    const f = slopedPrimaryFixture(); f.runtime.rebuildActor(f.id, 1);
+    if (change === 'array') f.counts.primary1a14 = [f.placement];
+    else f.counts.primary1a14[0] = {...f.placement};
+    f.events.length = 0;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), change === 'array' ? 'correction storage owner changed' : 'correction slot owner changed');
+    check(!f.events.some(e => e.startsWith('primary:')), 'replaced live correction owner cannot enter placement');
+  }
+  {
+    const f = slopedPrimaryFixture(); f.counts.count1d96 = 2; f.counts.primary1a14.push(f.placement); f.placement.joint0c = 255;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'aliased correction slots');
+    check(!f.events.some(e => e.startsWith('primary:')), 'duplicate record aliases refuse at reached scan slot');
+  }
+  for (const owner of ['mapping', 'pose', 'matrix'] as const) {
+    const f = slopedPrimaryFixture(); let changed = false;
+    const sources = {...f.sources};
+    if (owner === 'mapping') sources.mapping = {getActor: f.mapping.getActor, getLayout(id: symbol) {
+      const original = f.mapping.getLayout(id); return changed ? {...original} : original;
+    }};
+    if (owner === 'pose') sources.feedback = {getPose(id: symbol) {
+      const original = f.feedback.getPose(id); return changed ? {...original} : original;
+    }};
+    if (owner === 'matrix') sources.matrices = {...f.sources.matrices, getMatrix(id: symbol) {
+      const original = f.matrices.getMatrix(id); return changed ? original.slice() : original;
+    }};
+    const runtime = createSourceActorWorldMatrixRuntime(sources);
+    runtime.bindActor(f.id, f.actual, f.state, f.storageInput); runtime.bindCorrectedTraversalState(f.id, f.counts);
+    changed = true;
+    rejects(() => runtime.rebuildActor(f.id, 1), `${owner} owner changed`);
+    check(!f.events.some(e => e.startsWith('primary:')), 'mapping/pose/matrix identity refusal precedes sloped placement');
   }
 }
