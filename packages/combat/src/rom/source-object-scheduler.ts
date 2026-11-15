@@ -270,7 +270,10 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
       requireSourceBattleOuterFrameFailure(outer,runtime);
       if(outerOwner!==outer) fail('exact outer-owned scheduler required for closure');
       const wasBusy=busy;
-      incomplete=true;poisoned=true;busy=true;closing=true;
+      // Closure is permanent execution refusal, not itself reentry. Poison
+      // only an in-flight scheduler turn so caught cross-layer attempts abort
+      // it; an idle metadata/readonly slot lookup grants no execution rights.
+      incomplete=true;if(wasBusy) poisoned=true;busy=true;closing=true;
       try {markIncompleteSourceObjectAllocation(allocator);markIncompleteSourceProjectileScheduledRoot(root,runtime);}
       finally {active=undefined;closing=false;busy=wasBusy;}
     },

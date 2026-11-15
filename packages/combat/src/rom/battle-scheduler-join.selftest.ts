@@ -122,6 +122,27 @@ function authority(make:Make):void{
      operation==='out-of-order'?0x800294c4:0x800294bc,operation==='wrong-group'||operation==='out-of-order'?57:58);
    }catch{/* Deliberately caught: the enclosing graph still must close. */}
   }});check(attempted,'active misuse exercised');
+  refuses(()=>x.scheduler.getActorSlotTable(),'reentry');
+  refuses(()=>x.slotStatus.readSlot(0),'reentry');
+ }
+}
+function closedReadonlyDiagnostics(make:Make):void{
+ {
+  const x=makeFixture(make,true);delete x.system.byte40;
+  refuses(()=>x.frame.runFrame(),'byte40: own data');
+  equal(x.scheduler.getActorSlotTable(),x.actorSlots,'pre-scheduler ordinary refusal preserves identity diagnostics');
+  equal(x.slotStatus.readSlot(0),0,'pre-scheduler readonly10514 remains distinct from closed action authority');
+  closed(x);
+ }
+ for(const nonzero of [false,true]) {
+  const x=makeFixture(make,nonzero);run(x);
+  equal(x.scheduler.getActorSlotTable(),x.actorSlots,'ordinary completed closure preserves identity-only slot lookup');
+  equal(x.slotStatus.readSlot(0),0,'readonly10514 after normal boundary grants no execution authority');
+  x.slotRecords[0]!.state18=2;
+  equal(x.slotStatus.readSlot(0),0x80000000,'readonly helper still observes original live source cells');
+  // Read-only diagnostics cannot reopen outer, allocator, snapshot or callback
+  // authority. Existing caught-reentry cases separately require active poison.
+  closed(x);
  }
 }
 function aliases(make:Make):void{
@@ -142,6 +163,6 @@ function aliases(make:Make):void{
  }
 }
 export function runBattleSchedulerJoinSelfTests(make:Make):void{
- fixtures=0;normal(make);nonzero(make);live(make);inactiveAndUnsupported(make);authority(make);aliases(make);
+ fixtures=0;normal(make);nonzero(make);live(make);inactiveAndUnsupported(make);authority(make);closedReadonlyDiagnostics(make);aliases(make);
  console.log(`[battle-scheduler-join] PASS (${fixtures} explicit shared-owner fixtures): real40/32 wrappers and58/57 groups; live pause/eligibility/next, absent-input and active-domain refusal, exact private authority and cross-layer closure;53a2c/89554, actor55568 and full frame remain unsupported`);
 }
