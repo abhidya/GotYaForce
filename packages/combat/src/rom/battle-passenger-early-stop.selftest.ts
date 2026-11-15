@@ -113,7 +113,7 @@ function capture(make:Make):void {
  }
  {
   const x=createBattlePassengerEarlyStopFixture(make);let once=false;
-  trace(x,'80053d14',()=>{},(owner,key)=>{if(owner===x.passenger83&&key==='byte83'&&!once){once=true;x.sourceActor.linkedOwner1e4=x.sourceActor;}});
+  trace(x,'repeated zero83 passenger',()=>{},(owner,key)=>{if(owner===x.passenger83&&key==='byte83'&&!once){once=true;x.sourceActor.linkedOwner1e4=x.sourceActor;}});
   check(once,'first passenger byte captured before pointer retarget');prefix(x,600);closed(x);
  }
  for(const replacement of ['null','inactive'] as const) {

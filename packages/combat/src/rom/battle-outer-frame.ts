@@ -9,9 +9,9 @@
  * explicit mass ingress supplies the bounded53b30 prefix. That path stops before
  * missing passenger1e4 or missing RNG/ordering ingress. Explicit same-world
  * passenger pointers with allocation-owned signed nonzero83 skip propagation;
- * zero83 accumulates the original mass through one passenger and its local
- * count, then continues only for passenger contact zero. The bounded ordering
- * suffix can return53b30. Optional target ingress executes the ordered6ae60
+ * zero83 accumulates freshly loaded original mass through finite passengers
+ * admitted by a captured canonical registry, with per-original repeat refusal.
+ * The bounded ordering suffix can return53b30. Optional target ingress executes the ordered6ae60
  * clears. Optional shared10514 ingress supports6b450 early returns before
  * mandatory6b7f4. Its optional genuine target-dispatch owner continues inactive
  * clearing and entry0 bounded returns; skipped lifecycle rows and dispatch
@@ -491,9 +491,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         storePointer(team*6+s8(count),id);
       }
     }
-    // Capture the first passenger once. Nonzero83 remains completely lazy
+    // Capture each current passenger once. Nonzero83 remains completely lazy
     // about its slot, Borg mass, contact and further chain.
-    const passenger83=(id: symbol,actor: object,callerBorg: object)=>{
+    const passenger83=(id: symbol,actor: object,callerBorg: object,originalGuard: ()=>void)=>{
       const pointerAliases=['linkedOwner1E4','pointer1e4','pointer1E4','field1e4','field1E4',
         'byte1e4','byte1e5','byte1e6','byte1e7','byte1E4','byte1E5','byte1E6','byte1E7','484','485','486','487'];
       const callerWorld=call(()=>world.getActorBinding(id));
@@ -544,7 +544,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         terminalRead(actor,'linkedOwner1e4');terminalRead(owner,'byte83');
         pointerMetadata(terminalShadows);byteMetadata(terminalShadows);
         requireCompleteSourceActorDoubleLifecycle(actor);requireCompleteSourceActorDoubleLifecycle(targetActor);
-        allocator.assertActorComplete(id);allocator.assertActorComplete(targetId);check();
+        allocator.assertActorComplete(id);allocator.assertActorComplete(targetId);originalGuard();check();
       };
       const guard=(): void=>{
         check();call(()=>allocator.assertActorComplete(id));call(()=>allocator.assertActorComplete(targetId));
@@ -561,7 +561,10 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       guard();const captured=byte(owner,'byte83');guard();
       return {captured,targetId,targetActor,owner,callerBorg,guard,finish};
     };
-    const accumulatePassenger=(selected: ReturnType<typeof passenger83>,actor: object,index: number): void=>{
+    const accumulatePassenger=(selected: ReturnType<typeof passenger83>,original: {
+      id: symbol; actor: object; worldBinding: object; allocation: object;
+    }): {contact: number; owner: object}=>{
+      const {id:originalId,actor}=original;
       const {targetId,targetActor}=selected;
       let massBorg:object|undefined,slotReached=false,massReached=false,originalMassReached=false,contactReached=false;
       const terminalShadows=(owner: object,keys: readonly string[]): void=>{
@@ -573,7 +576,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         // Inspect reached roles only: another genuine unvisited Borg may
         // already own204, without being a shadow of this passenger.
         const records=new Set([sources,globals,mass,actor,targetActor,selected.owner,
-          world.getActorBinding(targetId),...retained.values(),...allocator.getSourceOwners(targetId),
+          world.getActorBinding(targetId),original.worldBinding,original.allocation,
+          ...allocator.getSourceOwners(originalId),...retained.values(),...allocator.getSourceOwners(targetId),
           ...(massBorg===undefined?[]:[status.getActorBinding(targetId),status.getWorldBinding(targetId),
             status.getMappingActor(targetId),status.getAttributeBinding(targetId),status.getMovementBinding(targetId)]),
           ...knownBorgs]);
@@ -642,9 +646,11 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(!destination.writable) fail('sourceArrowMass204: live non-writable field');
       (massBorg as {sourceArrowMass204:number}).sourceArrowMass204=sum;guard();
       contactReached=true;guard();const contact=byte(targetActor,'supportContact1db');guard();
-      if(s8(contact)!==0)
-        fail(`800${index%2===0?'53cb8':'53d14'} reached unsupported second passenger link1e4 continuation`);
+      return {contact,owner:massBorg};
     };
+    // A private identity-only snapshot bounds host work, not source depth.
+    // Later registrations remain lazy: a newly reached nonzero83 still exits.
+    const traversalActors=new Set<object>(world.getRetainedActorOwners());
     // Three original unrolled pairs. No active/lifecycle test or pointer
     // snapshot: every one of the six table cells is loaded when reached.
     for(let index=0;index<6;index++) {
@@ -661,9 +667,48 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(!destination.writable) fail('sourceArrowMass204: live non-writable field');
       (owner as {sourceArrowMass204:number}).sourceArrowMass204=accumulated;check();
       if(s8(byte(actor,'supportContact1db'))!==0) {
-        const selected=passenger83(id,actor,owner);
-        if(s8(selected.captured)!==0) continue;
-        accumulatePassenger(selected,actor,index);
+        const original={id,actor,owner,worldBinding:world.getActorBinding(id),
+          allocation:allocator.getActorBinding(id)};
+        // r8 remains guarded after r9 advances, including a later nonzero83
+        // early exit. These native descriptor checks add no source scalar loads.
+        const originalGuard=(): void=>{
+          if(allocator.getPointerTarget(id)!==actor || allocator.getActualActor(id)!==actor ||
+            allocator.getActorBinding(id)!==original.allocation ||
+            world.getActualActor(id)!==actor || world.getActorBinding(id)!==original.worldBinding ||
+            status.getActualActor(id)!==actor || status.getActualBorg(id)!==owner ||
+            owner===actor || [...retained.values()].includes(owner) || [...massActors.values()].includes(owner) ||
+            [...borgs].some(([other,borgOwner])=>other!==id && borgOwner===owner))
+            fail('53b30 terminal canonical original contribution owner changed or aliases storage');
+          for(const record of new Set([actor,owner,original.worldBinding,original.allocation,
+            ...allocator.getSourceOwners(id)])) {
+            const aliases=['mass204','field204','float204','byte204','byte205','byte206','byte207',
+              'field208','float208','byte208','byte209','byte20a','byte20b','byte20A','byte20B'];
+            if(record!==actor) aliases.push('mass208');
+            if(record!==owner) aliases.push('sourceArrowMass204');
+            if(record===actor || record===owner) aliases.push('516','517','518','519','520','521','522','523');
+            for(const key of aliases) if(primaryStoreDescriptor(record,key)!==undefined)
+              fail(`${key}: competing source cell owner`);
+          }
+          terminalRead(actor,'mass208');terminalRead(owner,'sourceArrowMass204');
+          requireCompleteSourceActorDoubleLifecycle(actor);requireCompleteSourceActorDoubleLifecycle(owner);
+          allocator.assertActorComplete(id);check();
+        };
+        let currentId=id,currentActor=actor,currentBorg=owner;
+        // Do not seed with the original: a first self-passenger update is
+        // source-visible and is admitted before a subsequent repeat refusal.
+        const processed=new Set<object>();
+        for(;;) {
+          const selected=passenger83(currentId,currentActor,currentBorg,originalGuard);
+          if(s8(selected.captured)!==0) break;
+          if(!traversalActors.has(selected.targetActor))
+            fail('53b30 unsupported host-domain passenger outside captured registry');
+          if(processed.has(selected.targetActor))
+            fail('53b30 unsupported host-domain repeated zero83 passenger');
+          processed.add(selected.targetActor);
+          const accumulated=accumulatePassenger(selected,original);
+          if(s8(accumulated.contact)===0) break;
+          currentId=selected.targetId;currentActor=selected.targetActor;currentBorg=accumulated.owner;
+        }
       }
     }
     const randomByte=(): number=>{

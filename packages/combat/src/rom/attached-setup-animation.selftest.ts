@@ -1,4 +1,4 @@
-import {createBattlePassengerAccumulationFixture,runBattlePassengerAccumulationSelfTests} from './battle-passenger-accumulation.selftest.js';
+import {createBattlePassengerAccumulationFixture,runBattlePassengerAccumulationSelfTests,runBattlePassengerFiniteTraversalSelfTests} from './battle-passenger-accumulation.selftest.js';
 import {createBattlePassengerEarlyStopFixture,runBattlePassengerEarlyStopSelfTests} from './battle-passenger-early-stop.selftest.js';
 import {runActorSecondaryNonnullSelfTests} from './actor-secondary-nonnull.selftest.js';
 import {runActorAssociationScanSelfTests} from './actor-association-scan.selftest.js';
@@ -408,11 +408,13 @@ function readyControlFixture(partNumber: 0 | 1 = 0, modelDat?: Uint8Array, poseC
 }
 /** Part1 completes through real 4d08c on shared RomActor state. World matrices
  * remain separate explicitly decoded inputs, never local-pose approximations. */
+// Host fixture capacity only; finite passenger tests bind a larger genuine registry.
+let testMatrixCapacity=128;
 function movementControlFixture(modelDat?: Uint8Array, poseCapacity = 2) {
   const x = readyControlFixture(1, modelDat, poseCapacity), sourceActor = createRomActor();
   sourceActor.borgNumber = 0x0300; sourceActor.stepHeight = 99; sourceActor.modelScale = 2;
   sourceActor.pos.y = 2; sourceActor.yVel = 7; sourceActor.parts[1].frameClock = 123;
-  const matrices = createSourceActorJointMatrixRuntime(x.feedback);
+  const matrices = createSourceActorJointMatrixRuntime(x.feedback,testMatrixCapacity);
   const movement = createSourceActorMovementFollowupRuntime({mapping: x.mapping, waits: x.control, setup: x.ready, matrixOwner: matrices});
   movement.bindActor(x.actor, sourceActor, {byte661: 0, field66c: 4, field670: 1});
   x.ready.bindMovementRuntime(movement);
@@ -2902,6 +2904,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleMassPreparationHydratedCompositionTests();
   runBattlePassengerEarlyStopHydratedCompositionTests();
   runBattlePassengerAccumulationHydratedCompositionTests();
+  runBattlePassengerFiniteTraversalHydratedCompositionTests();
   runBattleMassOrderingHydratedCompositionTests();
   runBattleTargetPreparationHydratedCompositionTests();
   runActorSlotStatusHydratedCompositionTests();
@@ -13699,4 +13702,10 @@ export function createBattlePassengerAccumulationTestFixture() {
 }
 export function runBattlePassengerAccumulationHydratedCompositionTests(): void {
   runBattlePassengerAccumulationSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+export function runBattlePassengerFiniteTraversalHydratedCompositionTests(): void {
+  const previous=testMatrixCapacity;testMatrixCapacity=512;
+  try {runBattlePassengerFiniteTraversalSelfTests(createBattleTargetPreparationTestFixture);}
+  finally {testMatrixCapacity=previous;}
 }
