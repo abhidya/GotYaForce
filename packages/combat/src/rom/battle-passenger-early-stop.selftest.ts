@@ -6,7 +6,7 @@ import type {createBattleMassPreparationTestFixture} from './attached-setup-anim
 
 type Make=typeof createBattleMassPreparationTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const RNG='800055fc',ZERO0='80053cc8',ZERO1='80053d24';
+const RNG='800055fc',ZERO0='unknown/non-owned status actor',ZERO1=ZERO0;
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[battle-passenger-early-stop-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}
 function refuses(run:()=>unknown,part:string):string {let message='';try{run();}catch(error){message=String(error);}check(message.includes(part),`expected ${part}, got ${message||'success'}`);return message;}
@@ -64,7 +64,7 @@ function closed(x:Fixture,target=true):void {
 }
 function branches(make:Make):void {
  check(!Object.hasOwn(createRomActor(),'linkedOwner1e4'),'new pointer has no constructor default');
- for(const value of [0,1,2,127,128,254,255])for(const contact of [1,128,255]) {
+ for(const value of [1,2,127,128,254,255])for(const contact of [1,128,255]) {
   const x=createBattlePassengerEarlyStopFixture(make,value);x.sourceActor.supportContact1db=contact;
   let getters=0;
   for(const key of ['slot','mass208','supportContact1db','linkedOwner1e4'])Object.defineProperty(x.targetActor,key,{get(){getters++;throw Error('unreached passenger continuation');},configurable:true});
@@ -113,8 +113,8 @@ function capture(make:Make):void {
  }
  {
   const x=createBattlePassengerEarlyStopFixture(make);let once=false;
-  trace(x,ZERO1,()=>{},(owner,key)=>{if(owner===x.passenger83&&key==='byte83'&&!once){once=true;x.sourceActor.linkedOwner1e4=x.sourceActor;}});
-  check(once,'first passenger byte captured before pointer retarget');prefix(x,400);closed(x);
+  trace(x,'80053d14',()=>{},(owner,key)=>{if(owner===x.passenger83&&key==='byte83'&&!once){once=true;x.sourceActor.linkedOwner1e4=x.sourceActor;}});
+  check(once,'first passenger byte captured before pointer retarget');prefix(x,600);closed(x);
  }
  for(const replacement of ['null','inactive'] as const) {
   const x=createBattlePassengerEarlyStopFixture(make);let once=false;
@@ -202,5 +202,5 @@ function failures(make:Make):void {
 }
 export function runBattlePassengerEarlyStopSelfTests(make:Make):void {
  let count=0;const counted:Make=()=>{count++;return make();};branches(counted);capture(counted);failures(counted);
- console.log(`[battle-passenger-early-stop] PASS (${count} genuine shared-graph fixtures): actual1e4 capture, allocation-owned signed83, both half exits, six live table reloads, lazy continuation, alias/lifecycle/late-descriptor refusal and permanent closure; zero83 stops before slot/mass/count, no passenger propagation or complete frame`);
+ console.log(`[battle-passenger-early-stop] PASS (${count} genuine shared-graph fixtures): actual1e4 capture, allocation-owned signed83, both half exits, six live table reloads, lazy continuation, alias/lifecycle/late-descriptor refusal and permanent closure; nonzero83 stays lazy; zero83 now reaches genuine missing status/Borg admission or bounded self accumulation, no complete frame`);
 }

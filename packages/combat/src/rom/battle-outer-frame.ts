@@ -9,7 +9,8 @@
  * explicit mass ingress supplies the bounded53b30 prefix. That path stops before
  * missing passenger1e4 or missing RNG/ordering ingress. Explicit same-world
  * passenger pointers with allocation-owned signed nonzero83 skip propagation;
- * zero83 still stops before passenger3e4/mass/count loads. The bounded ordering
+ * zero83 accumulates the original mass through one passenger and its local
+ * count, then continues only for passenger contact zero. The bounded ordering
  * suffix can return53b30. Optional target ingress executes the ordered6ae60
  * clears. Optional shared10514 ingress supports6b450 early returns before
  * mandatory6b7f4. Its optional genuine target-dispatch owner continues inactive
@@ -490,9 +491,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         storePointer(team*6+s8(count),id);
       }
     }
-    // Only the first passenger83 predicate of each unrolled half is bounded.
-    // No passenger slot, mass, contact, chain pointer or local count is read.
-    const passenger83=(id: symbol,actor: object,callerBorg: object): number=>{
+    // Capture the first passenger once. Nonzero83 remains completely lazy
+    // about its slot, Borg mass, contact and further chain.
+    const passenger83=(id: symbol,actor: object,callerBorg: object)=>{
       const pointerAliases=['linkedOwner1E4','pointer1e4','pointer1E4','field1e4','field1E4',
         'byte1e4','byte1e5','byte1e6','byte1e7','byte1E4','byte1E5','byte1E6','byte1E7','484','485','486','487'];
       const callerWorld=call(()=>world.getActorBinding(id));
@@ -557,7 +558,92 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           fail('53b30 passenger allocation83 storage alias');
         pointerMetadata(noShadows);byteMetadata(noShadows);finish();
       };
-      guard();const captured=byte(owner,'byte83');guard();return captured;
+      guard();const captured=byte(owner,'byte83');guard();
+      return {captured,targetId,targetActor,owner,callerBorg,guard,finish};
+    };
+    const accumulatePassenger=(selected: ReturnType<typeof passenger83>,actor: object,index: number): void=>{
+      const {targetId,targetActor}=selected;
+      let massBorg:object|undefined,slotReached=false,massReached=false,originalMassReached=false,contactReached=false;
+      const terminalShadows=(owner: object,keys: readonly string[]): void=>{
+        for(const key of keys) if(primaryStoreDescriptor(owner,key)!==undefined)
+          fail(`${key}: competing source cell owner`);
+      };
+      const metadata=(shadows: typeof noShadows): void=>{
+        const actuals=world.getRetainedActorOwners(),knownBorgs=[...borgs.values()];
+        // Inspect reached roles only: another genuine unvisited Borg may
+        // already own204, without being a shadow of this passenger.
+        const records=new Set([sources,globals,mass,actor,targetActor,selected.owner,
+          world.getActorBinding(targetId),...retained.values(),...allocator.getSourceOwners(targetId),
+          ...(massBorg===undefined?[]:[status.getActorBinding(targetId),status.getWorldBinding(targetId),
+            status.getMappingActor(targetId),status.getAttributeBinding(targetId),status.getMovementBinding(targetId)]),
+          ...knownBorgs]);
+        for(const owner of records) {
+          if(slotReached) {
+            if(!actuals.includes(owner)) shadows(owner,['slot']);
+            shadows(owner,['slot3e4','byte3e4','byte3E4','field3e4','field3E4']);
+            if(owner===targetActor) shadows(owner,['996']);
+          }
+          if(massReached) {
+            if(!knownBorgs.includes(owner)) shadows(owner,['sourceArrowMass204']);
+            shadows(owner,['mass204','field204','float204','byte204','byte205','byte206','byte207']);
+            if(owner===targetActor || owner===massBorg) shadows(owner,['516','517','518','519']);
+          }
+          if(originalMassReached) {
+            if(!actuals.includes(owner)) shadows(owner,['mass208']);
+            shadows(owner,['field208','float208','byte208','byte209','byte20a','byte20b','byte20A','byte20B']);
+            if(owner===actor || owner===massBorg) shadows(owner,['520','521','522','523']);
+          }
+          if(contactReached) {
+            if(!actuals.includes(owner)) shadows(owner,['supportContact1db']);
+            shadows(owner,['byte1db','byte1DB','field1db','field1DB']);
+            if(owner===targetActor) shadows(owner,['475']);
+          }
+        }
+      };
+      const finish=(): void=>{
+        selected.finish();
+        for(const [name,owner] of retained) {
+          if(name.startsWith('mass ') && name!=='mass actorSlots' && name!=='mass physical identities' &&
+            terminalRead(mass,name.slice(5))!==owner)
+            fail(`53b30 terminal ${name} owner changed`);
+        }
+        if(terminalRead(block,'identities')!==ids) fail('53b30 terminal physical identities owner changed');
+        if(massBorg!==undefined && (status.getActualActor(targetId)!==targetActor ||
+          status.getActualBorg(targetId)!==massBorg || massBorg===targetActor ||
+          [...retained.values()].includes(massBorg) || [...massActors.values()].includes(massBorg) ||
+          [...borgs].some(([id,owner])=>id!==targetId && owner===massBorg)))
+          fail('53b30 terminal canonical passenger Borg owner changed or aliases storage');
+        metadata(terminalShadows);
+        if(slotReached) terminalRead(targetActor,'slot');
+        if(massReached) terminalRead(massBorg!,'sourceArrowMass204');
+        if(originalMassReached) terminalRead(actor,'mass208');
+        if(contactReached) terminalRead(targetActor,'supportContact1db');
+        requireCompleteSourceActorDoubleLifecycle(targetActor);
+        requireCompleteSourceActorDoubleLifecycle(selected.callerBorg);
+        if(massBorg!==undefined) requireCompleteSourceActorDoubleLifecycle(massBorg);
+        check();
+      };
+      const guard=(): void=>{selected.guard();metadata(noShadows);selected.guard();finish();};
+      //53cc8/53d24: raw slot is captured BEFORE either floating load. The
+      // signed address and sparse local byte are used only AFTER both loads.
+      slotReached=true;guard();const rawSlot=byte(targetActor,'slot');guard();
+      massBorg=borg(targetId,targetActor);massReached=true;
+      guard();const passengerMass=f(massBorg,'sourceArrowMass204');guard();
+      originalMassReached=true;guard();const originalMass=f(actor,'mass208');guard();
+      const slot=s8(rawSlot),counter=passengerCounts[slot];
+      if(slot<0 || slot>=6 || counter===undefined)
+        fail('53b30 reached uninitialized or out-of-domain local passenger count');
+      const old=unsigned(counter,255,'local passenger count');
+      const sum=addSourceFloat32(passengerMass,originalMass); // overflow before BOTH stores.
+      guard();passengerCounts[slot]=(old+1)&255; //53ce4/53d40: unsigned lbzx, low-byte stb.
+      own(massBorg,'sourceArrowMass204',true);guard();
+      const destination=primaryStoreDescriptor(massBorg,'sourceArrowMass204');
+      if(!destination || !('value' in destination)) fail('sourceArrowMass204: live own data property required');
+      if(!destination.writable) fail('sourceArrowMass204: live non-writable field');
+      (massBorg as {sourceArrowMass204:number}).sourceArrowMass204=sum;guard();
+      contactReached=true;guard();const contact=byte(targetActor,'supportContact1db');guard();
+      if(s8(contact)!==0)
+        fail(`800${index%2===0?'53cb8':'53d14'} reached unsupported second passenger link1e4 continuation`);
     };
     // Three original unrolled pairs. No active/lifecycle test or pointer
     // snapshot: every one of the six table cells is loaded when reached.
@@ -575,8 +661,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(!destination.writable) fail('sourceArrowMass204: live non-writable field');
       (owner as {sourceArrowMass204:number}).sourceArrowMass204=accumulated;check();
       if(s8(byte(actor,'supportContact1db'))!==0) {
-        if(s8(passenger83(id,actor,owner))!==0) continue;
-        fail(`800${index%2===0?'53cc8':'53d24'} reached unsupported zero83 passenger slot3e4/mass propagation`);
+        const selected=passenger83(id,actor,owner);
+        if(s8(selected.captured)!==0) continue;
+        accumulatePassenger(selected,actor,index);
       }
     }
     const randomByte=(): number=>{
@@ -705,7 +792,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         writeOrderPointer(position,id);writeOrderCount(fresh+1);break;
       }
     }
-    //Genuine53b30 return for the fully reached bounded no-contact path.
+    //Genuine53b30 return for the fully reached bounded propagation path.
 
   };
   const prepareTargets=(): void=>{

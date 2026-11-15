@@ -1,3 +1,4 @@
+import {createBattlePassengerAccumulationFixture,runBattlePassengerAccumulationSelfTests} from './battle-passenger-accumulation.selftest.js';
 import {createBattlePassengerEarlyStopFixture,runBattlePassengerEarlyStopSelfTests} from './battle-passenger-early-stop.selftest.js';
 import {runActorSecondaryNonnullSelfTests} from './actor-secondary-nonnull.selftest.js';
 import {runActorAssociationScanSelfTests} from './actor-association-scan.selftest.js';
@@ -2899,6 +2900,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleBurstExpiryHydratedCompositionTests();
   runBattleMassPreparationHydratedCompositionTests();
   runBattlePassengerEarlyStopHydratedCompositionTests();
+  runBattlePassengerAccumulationHydratedCompositionTests();
   runBattleMassOrderingHydratedCompositionTests();
   runBattleTargetPreparationHydratedCompositionTests();
   runActorSlotStatusHydratedCompositionTests();
@@ -13557,4 +13559,11 @@ export function runActorAssociationScanHydratedCompositionTests(): void {
 /** Bounded synthetic graph composition, not a retail hydration claim. */
 export function runActorSecondaryNonnullHydratedCompositionTests(): void {
   runActorSecondaryNonnullSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+export function createBattlePassengerAccumulationTestFixture() {
+  return createBattlePassengerAccumulationFixture(createBattleTargetPreparationTestFixture);
+}
+export function runBattlePassengerAccumulationHydratedCompositionTests(): void {
+  runBattlePassengerAccumulationSelfTests(createBattleTargetPreparationTestFixture);
 }
