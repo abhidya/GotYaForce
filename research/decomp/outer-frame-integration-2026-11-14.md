@@ -5,6 +5,9 @@ source-owned allocation, projectile, root and scheduler graph. It is **not a
 successful outer frame, runnable actor scheduler, browser activation or
 playability claim**. See [fixed archive evidence](outer-frame-evidence-2026-11-14.md).
 The caller's mandatory predecessors are not substituted with successful callbacks.
+The later [team-refresh leaf continuation](team-refresh-leaf-integration-2026-11-15.md)
+uses the independently authenticated complete `8008b290` body from the existing
+actor-ceiling evidence; its zero path still refuses at `8008b480`.
 
 ## Canonical storage
 
@@ -17,6 +20,8 @@ The new optional layout interface adds only explicitly supplied fields:
 
 - `byte15d4`, `byte66`, and `halfD6` represent the pending request, mode and
   source halfword at those hexadecimal offsets on the same `80433934` owner.
+- Optional `byteD9` is the same unsigned `80433934+d9` cell already used by
+  actor-matrix/ceiling, required only at a reached active-burst leaf.
 - `activeMask` and `slotTeam` borrow the established names and storage layout
   from `battle/spawnFromSlotTables.ts` and `battle/forceSetup.ts`. The reached
   mask is a raw byte, not an inferred roster or actor-visibility bitset.
@@ -51,9 +56,11 @@ are refused; the interfaces do not create properties or default data.
    row2, then writes the row3 membership mask and next compact roster slot.
 3. Only rows with signed count1 greater than zero inspect active-burst byte10.
    Empty rows retain charged and do not require meter, threshold or burst cells.
-   A nonzero burst byte clears charged, then refuses at callsite `80029d90`
-   before mandatory `8008b290`. No later timer, pause-mask or floating-point
-   branch is executed.
+   A nonzero burst byte clears charged, then calls the complete `8008b290` leaf
+   at `80029d90`: load the same match-global owner and unsigned `byteD9`. Its
+   full-word nonzero result skips the rest of this row and continues later rows;
+   zero refuses at `80029d9c` before mandatory `8008b480`. No later timer,
+   pause-mask or floating-point branch is executed.
 4. Nonburst rows compare unsigned meter32 against threshold30 and write charged
    true iff meter is at least the threshold. This may clear a previously true
    flag. After all four rows, the caller reloads mode66. Zero mode refuses at

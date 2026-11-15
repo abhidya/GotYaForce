@@ -1,6 +1,8 @@
 /** Bounded genuine80029434 prefix, not a successful outer battle frame.
  * Executes8b048→8b010 and29d48→29e98 over the SAME80433934 owner and
- * existing teamRows103/charged/meter owners. First reached active-burst8b290,
+ * existing teamRows103/charged/meter owners. The authenticated8b290 leaf reads
+ * the SAME unsigned match-global byteD9 freshly for each reached burst row.
+ * Nonzero continues later rows; zero stops at mandatory8b480. First reached
  * normal53b30 or unconditional pausedbef4 remains a hard ordered boundary unless
  * explicit mass ingress supplies the bounded53b30 prefix. That path stops before
  * nonzero passenger1e4 or missing RNG/ordering ingress. The no-contact ordering
@@ -21,7 +23,8 @@
  * Stable synchronous nonproxy own-data records are host bounds. Destinations
  * are checked at each store; prior writes survive refusal and close the whole
  * retained scheduler graph. Identity checks are host admission, not ROM reads.
- * Evidence: outer-frame-evidence-2026-11-14.md (five complete archived bodies).
+ * Evidence: outer-frame-evidence-2026-11-14.md (five complete archived bodies)
+ * and actor-ceiling-lifecycle-evidence-2026-11-14.md (complete8b290 leaf).
  */
 import {isSourceObjectSchedulerRuntime, claimSourceObjectSchedulerOuterFrame,
   closeSourceObjectSchedulerOuterFrame, type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
@@ -187,7 +190,14 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   };
   const storeCharged=(row: object,value: boolean): void=>{
     if(typeof read(row,'charged')!=='boolean') fail('charged: existing boolean source0/1 owner required');
-    write(row,'charged',value);
+    own(row,'charged',true);check();
+    // A final observable descriptor hook cannot replace this destination with
+    // an accessor, missing cell or nonboolean owner and let the store through.
+    const live=primaryStoreDescriptor(row,'charged');
+    if(!live || !('value' in live)) fail('charged: live own data property required');
+    if(!live.writable) fail('charged: live non-writable field');
+    if(typeof live.value!=='boolean') fail('charged: live boolean source0/1 owner required');
+    (row as {charged:boolean}).charged=value;check();
   };
   const applyPending=(): void=>{
     const request=s8(byte(match(),'byte15d4'));
@@ -221,6 +231,63 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       write(row,'byte3',mask|bit);write(row,`byte${destination}`,slot);
     }
   };
+  const teamRefreshLeaf=(table: object,row: object,index: number): number=>{
+    // Complete8008b290: lwz r3,-31852(r13); lbz r3,217(r3); blr.
+    // The pointer and scalar are live at each reached call, never frame-cached.
+    const owner=match(),aliases=['byted9','byte0d9','byte0D9','fieldD9','fieldd9','globalD9','globald9'];
+    const nativeRead=(record: object,key: string): unknown=>{
+      const field=primaryStoreDescriptor(record,key);
+      if(!field || !('value' in field)) fail(`${key}: terminal own data property required`);
+      return field.value;
+    };
+    const metadata=(shadows: typeof noShadows,records: readonly object[]): void=>{
+      for(const record of records) {
+        if(record!==owner) shadows(record,['byteD9']);
+        shadows(record,aliases);
+        // Decimal217 is an alias on the global, not unrelated raw byte windows.
+        if(record===owner) shadows(record,['217']);
+      }
+    };
+    const guard=(): void=>{
+      const records=[sources,globals,table,row,...retained.values(),
+        ...call(()=>scheduler.getRetainedStorageOwners())];
+      metadata(noShadows,[...new Set(records)]);
+      // Rebuild immediate record identities after the LAST observable metadata
+      // check. The remaining native snapshots cannot invoke host callbacks on
+      // our declared synchronous nonproxy domain. These are admission metadata,
+      // not extra ROM scalar loads or a new source-global owner.
+      const current=[...new Set([...records,...call(()=>scheduler.getRetainedStorageOwners())])];
+      const nested=current.flatMap(record=>Object.values(primaryStoreDescriptors(record)).flatMap(field=>
+        'value' in field && field.value!==null && typeof field.value==='object'?[field.value as object]:[]));
+      const all=[...new Set([...current,...nested])];
+      if(nativeRead(sources,'scheduler')!==scheduler || scheduler.getRootRuntime()!==root ||
+        root.getSpawnRuntime()!==spawns || scheduler.getAllocatorRuntime()!==allocator ||
+        scheduler.getMatchGlobals()!==owner || spawns.getMatchGlobals()!==owner)
+        fail('8008b290 canonical scheduler/global owner changed');
+      if(nativeRead(owner,'teamRows103')!==table || nativeRead(table,String(index))!==row)
+        fail('8008b290 canonical team owner changed');
+      for(const [name,record] of retained) {
+        if(name.startsWith('team row') && nativeRead(table,name.slice(8))!==record)
+          fail('8008b290 retained team row owner changed');
+        if(name==='slotTeam' && nativeRead(owner,'slotTeam')!==record ||
+          name==='systemGlobals' && nativeRead(sources,'systemGlobals')!==record)
+          fail(`8008b290 ${name}: canonical owner changed`);
+      }
+      metadata((record,keys)=>{
+        for(const key of keys) if(primaryStoreDescriptor(record,key)!==undefined)
+          fail(`${key}: competing source cell owner`);
+      },all);
+      for(const record of all) requireCompleteSourceActorDoubleLifecycle(record);
+      check();
+    };
+    guard();
+    const result=byte(owner,'byteD9'); // One unsigned source byte read.
+    guard();
+    // Preserve the captured r3 value, but reject a late missing/accessor/invalid
+    // canonical cell instead of using stale descriptor metadata to continue.
+    unsigned(nativeRead(owner,'byteD9'),255,'byteD9');
+    return result;
+  };
   const updateTeams=(): void=>{
     const table=teamTable(match()); //29d60–64 captures original row base once.
     for(let i=0;i<4;i++) {
@@ -228,7 +295,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(s8(byte(row,'byte1'))<=0) continue;
       if(s8(byte(row,'byte10'))!==0) {
         storeCharged(row,false);
-        fail('80029d90 reached mandatory8008b290 active-burst predecessor');
+        if(teamRefreshLeaf(table,row,i)!==0) continue; // Full returned r3,29d94..98.
+        fail('80029d9c reached mandatory8008b480 active-burst predecessor');
       }
       const meter=half(row,'meter'),threshold=half(row,'threshold30');
       storeCharged(row,meter>=threshold);

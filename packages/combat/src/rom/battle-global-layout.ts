@@ -13,6 +13,8 @@ export interface SourceBattleTeamRow extends Pick<BurstMeterState, 'charged'> {
 }
 export interface SourceBattleOuterGlobalFields {
   byte15d4?: number; byte66?: number; halfD6?: number;
+  /** SAME unsigned80433934+d9 cell already used by actor-matrix/ceiling. */
+  byteD9?: number;
   /** Borrowed SlotTableState names on this SAME80433934 owner. */
   activeMask?: number; slotTeam?: readonly number[];
   teamRows103?: readonly SourceBattleTeamRow[];
