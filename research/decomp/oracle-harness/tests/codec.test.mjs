@@ -211,3 +211,24 @@ test("source held5d8 is a halfword and never overwrites adjacent cue states5da/5
   assert.deepEqual(u8.slice(BASE + 0x5d8, BASE + 0x5da), Uint8Array.of(0xcd, 0xab));
   assert.deepEqual(u8.slice(BASE + 0x5da, BASE + 0x5dc), before);
 });
+
+test("actual linkedOwner1e4 needs an explicit arena address, never object-to-zero coercion", () => {
+  const field = fieldMap.byInterface.RomActor.linkedOwner1e4;
+  assert.equal(field.offset, 0x1e4); assert.equal(field.kind, "ptr");
+  const { codec, u8 } = makeCodec();
+  let coercions = 0;
+  const tricky = { valueOf() { coercions++; return 0x1234; } };
+  for (const value of [{}, tricky, [], new Number(12), Symbol("pointer"), undefined, "123", NaN, Infinity, -1, 1.5, 0x100000000]) {
+    codec.beginCase();
+    assert.throws(() => codec.encodeField(BASE, "linkedOwner1e4", value), BlockedCodecError);
+    assert.deepEqual([...u8.slice(BASE + 0x1e4, BASE + 0x1e8)], [0xa5, 0xa5, 0xa5, 0xa5]);
+    assert.equal(codec.writes.length, 0);
+  }
+  assert.equal(coercions, 0);
+  for (const value of [null, 0, 0x12345678, 0xffffffff]) {
+    codec.beginCase(); codec.encodeField(BASE, "linkedOwner1e4", value);
+    assert.equal(codec.rU32(BASE + 0x1e4), value ?? 0);
+    assert.deepEqual(codec.writes, [[BASE + 0x1e4, 4]]);
+    assert.equal(u8[BASE + 0x1e3], 0xa5); assert.equal(u8[BASE + 0x1e8], 0xa5);
+  }
+});

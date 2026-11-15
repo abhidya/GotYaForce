@@ -82,6 +82,14 @@ export class Codec {
     if (!rec) throw new BlockedCodecError(tsField, `has no record in the field map (${iface})`);
     if (rec.kind === "unmapped") throw new BlockedCodecError(tsField, "is unmapped in actor.ts — annotate, never guess");
     if (rec.kind === "port_side") throw new BlockedCodecError(tsField, "is port_side (no ROM storage)");
+    // This new TS field holds an actual object identity, not a GC address.
+    // Until an explicit arena resolver exists, never coerce that identity to0.
+    // Keep legacy pointer fields' codec contracts unchanged.
+    if (iface === "RomActor" && tsField === "linkedOwner1e4" && rec.kind === "ptr") {
+      if (value === null) value = 0;
+      else if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 0xffffffff)
+        throw new BlockedCodecError(tsField, "requires an explicit u32 arena address or null; object identities are unsupported");
+    }
     this._encodeScalar(base, rec, value, tsField);
   }
 

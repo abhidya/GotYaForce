@@ -7,7 +7,9 @@
  * unsupported80029de0 floating arithmetic. First reached
  * normal53b30 or unconditional pausedbef4 remains a hard ordered boundary unless
  * explicit mass ingress supplies the bounded53b30 prefix. That path stops before
- * nonzero passenger1e4 or missing RNG/ordering ingress. The no-contact ordering
+ * missing passenger1e4 or missing RNG/ordering ingress. Explicit same-world
+ * passenger pointers with allocation-owned signed nonzero83 skip propagation;
+ * zero83 still stops before passenger3e4/mass/count loads. The bounded ordering
  * suffix can return53b30. Optional target ingress executes the ordered6ae60
  * clears. Optional shared10514 ingress supports6b450 early returns before
  * mandatory6b7f4. Its optional genuine target-dispatch owner continues inactive
@@ -399,7 +401,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(index<0 || index>=4) fail('53b30 team count index outside explicit4-byte owner');
       write(counts(),String(index),value&255);
     };
-    const status=spawns.getPrehookRuntime().getStatusRuntime(), stage=root.getStageRuntime();
+    const status=spawns.getPrehookRuntime().getStatusRuntime(), stage=root.getStageRuntime(), world=spawns.getWorldRuntime();
     const borg=(id: symbol,actor: object): object=>{
       if(call(()=>status.getActualActor(id))!==actor) fail('53b30 canonical status actual differs');
       const value=record(call(()=>status.getActualBorg(id)),'53b30 same Borg204');
@@ -488,15 +490,94 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         storePointer(team*6+s8(count),id);
       }
     }
+    // Only the first passenger83 predicate of each unrolled half is bounded.
+    // No passenger slot, mass, contact, chain pointer or local count is read.
+    const passenger83=(id: symbol,actor: object,callerBorg: object): number=>{
+      const pointerAliases=['linkedOwner1E4','pointer1e4','pointer1E4','field1e4','field1E4',
+        'byte1e4','byte1e5','byte1e6','byte1e7','byte1E4','byte1E5','byte1E6','byte1E7','484','485','486','487'];
+      const callerWorld=call(()=>world.getActorBinding(id));
+      const pointerMetadata=(shadows: typeof noShadows): void=>{
+        for(const candidate of new Set([sources,globals,actor,callerWorld,callerBorg,...retained.values(),
+          ...allocator.getSourceOwners(id)])) {
+          // Another genuine actor's further-chain pointer is not this cell.
+          if(candidate!==actor) shadows(candidate,['linkedOwner1e4']);
+          shadows(candidate,pointerAliases.slice(0,-4));
+          // Allocation byte buffers legitimately own numeric offset484.
+          if(candidate===actor || candidate===callerWorld || candidate===callerBorg)
+            shadows(candidate,pointerAliases.slice(-4));
+        }
+      };
+      const terminalShadows=(owner: object,keys: readonly string[]): void=>{
+        for(const key of keys) if(primaryStoreDescriptor(owner,key)!==undefined)
+          fail(`${key}: competing source cell owner`);
+      };
+      const supplied=Object.getOwnPropertyDescriptor(actor,'linkedOwner1e4');check();
+      if(supplied===undefined) fail('80053b30 mass propagation reached unsupported actual pointer1e4 ownership: explicit linkedOwner1e4 required');
+      // Exactly one actual lwz capture, never a collision binding or symbol cast.
+      if(!('value' in supplied)) fail('linkedOwner1e4: own data property required');
+      pointerMetadata(noShadows);
+      const pointer=record(supplied.value,'53b30 captured linkedOwner1e4');
+      const targetId=call(()=>allocator.getPointerIdentity(pointer)),targetActor=actual(targetId);
+      const owner=record(call(()=>allocator.getActorBinding(targetId)),'53b30 canonical passenger allocation83');
+      const targetWorld=call(()=>world.getActorBinding(targetId));
+      const byteMetadata=(shadows: typeof noShadows): void=>{
+        for(const candidate of new Set([targetActor,targetWorld,...allocator.getSourceOwners(targetId)])) {
+          if(candidate!==owner) shadows(candidate,['byte83']);
+          shadows(candidate,['eligibility83','groupEligibility83','field83']);
+          if(candidate===targetActor || candidate===targetWorld || candidate===owner) shadows(candidate,['131']);
+        }
+      };
+      const finish=(): void=>{
+        // Native terminal descriptors cannot invoke the observer that just ran.
+        // Pointer and byte values remain captured even if their live cells change.
+        if(terminalRead(sources,'scheduler')!==scheduler || scheduler.getAllocatorRuntime()!==allocator ||
+          scheduler.getRootRuntime()!==root || root.getSpawnRuntime()!==spawns ||
+          spawns.getWorldRuntime()!==world || terminalRead(sources,'massPreparation')!==mass ||
+          allocator.getPointerTarget(id)!==actor || allocator.getActualActor(id)!==actor ||
+          status.getActualActor(id)!==actor || status.getActualBorg(id)!==callerBorg ||
+          world.getActualActor(id)!==actor || world.getActorBinding(id)!==callerWorld ||
+          targetActor!==pointer || allocator.getPointerTarget(targetId)!==targetActor ||
+          allocator.getActualActor(targetId)!==targetActor || allocator.getActorBinding(targetId)!==owner ||
+          world.getActualActor(targetId)!==targetActor || world.getActorBinding(targetId)!==targetWorld)
+          fail('53b30 terminal canonical caller/passenger owner changed');
+        terminalRead(actor,'linkedOwner1e4');terminalRead(owner,'byte83');
+        pointerMetadata(terminalShadows);byteMetadata(terminalShadows);
+        requireCompleteSourceActorDoubleLifecycle(actor);requireCompleteSourceActorDoubleLifecycle(targetActor);
+        allocator.assertActorComplete(id);allocator.assertActorComplete(targetId);check();
+      };
+      const guard=(): void=>{
+        check();call(()=>allocator.assertActorComplete(id));call(()=>allocator.assertActorComplete(targetId));
+        if(targetActor!==pointer || call(()=>allocator.getActualActor(targetId))!==targetActor ||
+          call(()=>world.getActualActor(targetId))!==targetActor ||
+          call(()=>allocator.getPointerTarget(targetId))!==targetActor ||
+          call(()=>allocator.getActorBinding(targetId))!==owner)
+          fail('53b30 canonical passenger allocator/world owner differs');
+        if(!Object.isSealed(owner) || owner===targetActor || [...retained.values()].includes(owner) ||
+          [...massActors.values()].includes(owner) || [...borgs.values()].includes(owner))
+          fail('53b30 passenger allocation83 storage alias');
+        pointerMetadata(noShadows);byteMetadata(noShadows);finish();
+      };
+      guard();const captured=byte(owner,'byte83');guard();return captured;
+    };
     // Three original unrolled pairs. No active/lifecycle test or pointer
     // snapshot: every one of the six table cells is loaded when reached.
     for(let index=0;index<6;index++) {
       const id=slotPointer(index),actor=actual(id);
       if(id===null) fail('53b30 null actor'); // narrowed after reached dereference.
       const owner=borg(id,actor),total=f(owner,'sourceArrowMass204'),massValue=f(actor,'mass208');
-      write(owner,'sourceArrowMass204',addSourceFloat32(total,massValue));
-      if(s8(byte(actor,'supportContact1db'))!==0)
-        fail('80053b30 mass propagation reached unsupported actual pointer1e4 ownership');
+      const accumulated=addSourceFloat32(total,massValue);
+      own(owner,'sourceArrowMass204',true);check();
+      // A prior passenger skip exposes the next actual table half. Refuse a
+      // destination changed by the last observable preflight before invoking
+      // any setter or recreating a deleted cell. Source operands stay captured.
+      const destination=primaryStoreDescriptor(owner,'sourceArrowMass204');
+      if(!destination || !('value' in destination)) fail('sourceArrowMass204: live own data property required');
+      if(!destination.writable) fail('sourceArrowMass204: live non-writable field');
+      (owner as {sourceArrowMass204:number}).sourceArrowMass204=accumulated;check();
+      if(s8(byte(actor,'supportContact1db'))!==0) {
+        if(s8(passenger83(id,actor,owner))!==0) continue;
+        fail(`800${index%2===0?'53cc8':'53d24'} reached unsupported zero83 passenger slot3e4/mass propagation`);
+      }
     }
     const randomByte=(): number=>{
       const supplied=Object.getOwnPropertyDescriptor(mass,'rngState');check();
@@ -528,7 +609,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     const writeOrderPointer=(index: number,id: symbol|null): void=>{
       orderIndex(index);write(massOwner('orderPointers'),String(index),id);
     };
-    const world=spawns.getWorldRuntime(),worlds=new Map<symbol,object>();
+    const worlds=new Map<symbol,object>();
     const worldOwner=(id: symbol,actor: object): object=>{
       if(spawns.getWorldRuntime()!==world || call(()=>world.getActualActor(id))!==actor ||
         call(()=>status.getActualActor(id))!==actor) fail('53b30 canonical world actual differs');

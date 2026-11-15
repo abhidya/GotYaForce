@@ -185,6 +185,11 @@ export interface RomActor {
   collisionScale?: number;
   /** Source1db supporting-actor contact, not terrain grounded status. Flat-floor host default0. */
   supportContact1db: number;
+  /** Explicit actual supporting-actor pointer. No constructor/default hydration.
+   * Distinct from collision-runtime linkedOwner; only the same allocator/world
+   * may resolve this object identity. The oracle codec requires an arena address.
+   * @romfield linkedOwner1e4 +0x1e4 ptr */
+  linkedOwner1e4?: RomActor | null;
   /** Explicit unaccumulated source mass. No host constructor default.
    * Accumulated+204 retains BorgRuntime.sourceArrowMass204.
    * @romfield mass208 +0x208 f32 */

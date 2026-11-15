@@ -1,3 +1,4 @@
+import {createBattlePassengerEarlyStopFixture,runBattlePassengerEarlyStopSelfTests} from './battle-passenger-early-stop.selftest.js';
 import {runActorSecondaryNonnullSelfTests} from './actor-secondary-nonnull.selftest.js';
 import {runActorAssociationScanSelfTests} from './actor-association-scan.selftest.js';
 import {runActorAssociationGuardsSelfTests} from './actor-association-guards.selftest.js';
@@ -2897,6 +2898,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleTeamRefreshLeafHydratedCompositionTests();
   runBattleBurstExpiryHydratedCompositionTests();
   runBattleMassPreparationHydratedCompositionTests();
+  runBattlePassengerEarlyStopHydratedCompositionTests();
   runBattleMassOrderingHydratedCompositionTests();
   runBattleTargetPreparationHydratedCompositionTests();
   runActorSlotStatusHydratedCompositionTests();
@@ -13446,6 +13448,13 @@ export function createBattleMassPreparationTestFixture() {
 }
 export function runBattleMassPreparationHydratedCompositionTests(): void {
   runBattleMassPreparationSelfTests(createBattleMassPreparationTestFixture);
+}
+
+export function createBattlePassengerEarlyStopTestFixture(value:number|null=1,bind=true) {
+  return createBattlePassengerEarlyStopFixture(createBattleMassPreparationTestFixture,value,bind);
+}
+export function runBattlePassengerEarlyStopHydratedCompositionTests(): void {
+  runBattlePassengerEarlyStopSelfTests(createBattleMassPreparationTestFixture);
 }
 
 /** Optional ordering ingress added only for this bounded synthetic witness.
