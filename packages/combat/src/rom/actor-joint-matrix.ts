@@ -37,6 +37,7 @@
  * overflow refusal is host admission policy, not source FP exception behavior.
  * Symbols are local ownership handles, not emulated source addresses. Matrix capacity is host policy.
  */
+import {checkActiveSourceActorOrderedInvocation} from './actor-ordered-frame.js';
 import type {SourceJointAnimationFeedbackRuntime, SourceJointVector} from './joint-animation-feedback.js';
 import {addSourceFloat32, fusedMultiplyAddSourceFloat32 as fma} from './source-float.js';
 import {primarySineCorrection} from './actor-primary-float.js';
@@ -91,7 +92,7 @@ function fail(reason: string): never {
 }
 function own(record: unknown, key: string, writable = false): unknown {
   if (record === null || typeof record !== 'object') fail(`${key}: data record required`);
-  const p = Object.getOwnPropertyDescriptor(record, key);
+  const p = Object.getOwnPropertyDescriptor(record, key);checkActiveSourceActorOrderedInvocation();
   if (!p || !('value' in p)) fail(`${key}: own data property required`);
   if (writable && !p.writable) fail(`${key}: non-writable field is unsupported`);
   return p.value;

@@ -37,6 +37,7 @@
  * cross-actor aliases. Per-access validation and caught-reentry poison are
  * host admission bounds. Failures preserve completed writes, never roll back.
  */
+import {checkActiveSourceActorOrderedInvocation} from './actor-ordered-frame.js';
 import {reserveSourcePointerStorage} from './source-storage-claims.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorJointMappingRuntime} from './actor-joint-mapping.js';
@@ -169,7 +170,7 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
   if (!Number.isSafeInteger(maxVisits) || maxVisits < 1) fail('positive safe traversal budget required');
   const matricesRuntime = own(sources, 'matrices') as SourceActorJointMatrixRuntime;
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');checkActiveSourceActorOrderedInvocation();};
   const read = (record: unknown, key: string): unknown => {const value = own(record, key); check(); return value;};
   const write = (record: unknown, key: string, value: number): void => {
     own(record, key, true); check(); (record as Record<string, unknown>)[key] = value; check();

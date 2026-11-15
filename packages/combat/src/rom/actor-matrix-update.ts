@@ -29,6 +29,7 @@
  * checked at each store. Caught reentry poisons the call. Prior work survives
  * refusal, including count clears, damping, matrix rebuilds and partial copies.
  */
+import {checkActiveSourceActorOrderedInvocation} from './actor-ordered-frame.js';
 import type {SourceBattleOuterGlobalFields} from './battle-global-layout.js';
 import {addSourceFloat32, fusedMultiplyAddSourceFloat32} from './source-float.js';
 import type {SourceActorTerrainQueryRuntime} from './actor-terrain-query.js';
@@ -118,7 +119,7 @@ function record(value: unknown, where: string): object {
 }
 export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixUpdateSources): SourceActorMatrixUpdateRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');checkActiveSourceActorOrderedInvocation();};
   const read = (value: unknown, key: string): unknown => {const result = own(value, key); check(); return result;};
   const write = (value: unknown, key: string, next: number): void => {
     own(value, key, true); check(); (value as Record<string, unknown>)[key] = next; check();

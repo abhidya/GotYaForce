@@ -18,6 +18,7 @@
  * reached lazily. Methods retain captured receivers; caught mutation reentry
  * poisons the enclosing call. Prior writes are never rolled back.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {RomActor} from './actor.js';
 import {isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
@@ -71,6 +72,7 @@ export function createSourceActorActionRequestRuntime(sources: SourceActorAction
   let busy = false, poisoned = false, joinedCheck: (()=>void) | undefined;
   const check = (): void => {
     if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
     joinedCheck?.();
   };
   const guard = (run: () => void): void => {

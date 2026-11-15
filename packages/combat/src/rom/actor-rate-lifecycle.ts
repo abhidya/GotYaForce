@@ -17,6 +17,7 @@
  * stores survive every refusal. Captured methods retain receivers and caught
  * same-runtime mutation reentry poisons the enclosing call.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
 import type {SourceActorJointMappingRuntime, SourceActorJointMappingHeader} from './actor-joint-mapping.js';
@@ -81,7 +82,10 @@ const HASTE1 = fromBits(0x3fa00000), HASTE2 = fromBits(0x3fc00000);
 
 export function createSourceActorRateLifecycleRuntime(sources: SourceActorRateLifecycleSources): SourceActorRateLifecycleRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
+  };
   const guard = (run: () => void): void => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;

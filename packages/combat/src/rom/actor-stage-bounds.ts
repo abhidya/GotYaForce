@@ -15,6 +15,7 @@
  * stable owners are explicit bounds, not live FPSCR/RAM or retail-input proof.
  * No rollback, automatic cadence, movement, pose, history or live activation.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
 import type {SourceActorStatusTimersRuntime, SourceActorStatusTimersBinding} from './actor-status-timers.js';
@@ -65,7 +66,10 @@ function float(value: unknown, where: string): number {
 }
 export function createSourceActorStageBoundsRuntime(sources: SourceActorStageBoundsSources): SourceActorStageBoundsRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
+  };
   const guard = (run: () => void): void => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;

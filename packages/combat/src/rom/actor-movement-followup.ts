@@ -20,6 +20,7 @@
  * at binding; readonly inputs are allowed, destinations checked at each store.
  * Caught same-runtime mutation reentry poisons the enclosing operation.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
 import type {SourceActorJointMappingRuntime} from './actor-joint-mapping.js';
@@ -100,24 +101,24 @@ function product(a: number, b: number): number {
 export function createSourceActorMovementFollowupRuntime(sources: SourceActorMovementFollowupSources): SourceActorMovementFollowupRuntime {
   let busy = false, poisoned = false;
   const read = (record: unknown, key: string): unknown => {
-    const value = own(record, key); if (poisoned) fail('caught same-runtime reentry'); return value;
+    const value = own(record, key); if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation(); return value;
   };
   const write = (record: unknown, key: string, value: number): void => {
-    own(record, key, true); if (poisoned) fail('caught same-runtime reentry');
+    own(record, key, true); if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation();
     (record as Record<string, unknown>)[key] = value;
-    if (poisoned) fail('caught same-runtime reentry');
+    if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation();
   };
   const guard = (run: () => void): void => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;
-    try {run(); if (poisoned) fail('caught same-runtime reentry');} finally {busy = false;}
+    try {run(); if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation();} finally {busy = false;}
   };
   const capture = (name: keyof SourceActorMovementFollowupSources, key: string) => {
     const receiver = own(sources, name), fn = own(receiver, key);
     if (typeof fn !== 'function') fail(`${name}.${key}: own data-function required`);
     return (id: symbol): unknown => {
       const result = Reflect.apply(fn, receiver, [id]);
-      if (poisoned) fail('caught same-runtime reentry');
+      if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation();
       if (result instanceof Promise) fail('adapter must complete synchronously');
       if (result === null || typeof result !== 'object') fail('adapter must return an actual owned record');
       return result;

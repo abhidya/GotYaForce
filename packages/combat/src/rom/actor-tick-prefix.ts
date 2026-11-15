@@ -55,7 +55,7 @@ import {isSourceActorCue0LifecycleRuntime, hasIncompleteSourceActorCue0Lifecycle
 import type {RomActor} from './actor.js';
 import {requireCompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
 import {requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
-import {isPendingSourceActorFrameClaim, type SourceActorFrameLifecycleRuntime} from './actor-frame-lifecycle.js';
+import {isPendingSourceActorFrameClaim, checkSourceActorFrameOrderedInvocation, type SourceActorFrameLifecycleRuntime} from './actor-frame-lifecycle.js';
 import {isSourceActorCommandAdmissionRuntime, hasIncompleteSourceActorCommandAdmission,
   type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorCue0TailRuntime, hasIncompleteSourceActorCue0Tail,
@@ -136,12 +136,14 @@ export interface SourceActorTickFrameOwners {
 export interface SourceActorTickFrameCapability {
   beginHostIngress(epoch: number): void;
   ingestRawDistances(raw: SourceActorFrameRawDistances): void;
+  /** Private frame admission only: identity context, never raw scalar ingress. */
+  acceptSourceProducedDistances(token: object): void;
   beginSourceFrame(): void;
   runActor(): void;
   /** Private caller certifies genuine5b880 return, never a finally/failure cleanup. */
   completeSourceFrame(): void;
 }
-const frameClaims = new WeakMap<object, (id: symbol, expected: SourceActorTickFrameOwners) => SourceActorTickFrameCapability>();
+const frameClaims = new WeakMap<object, (frame: SourceActorFrameLifecycleRuntime, id: symbol, expected: SourceActorTickFrameOwners) => SourceActorTickFrameCapability>();
 const incompleteFrames = new WeakSet<object>();
 export function isSourceActorTickPrefixRuntime(value: unknown): value is SourceActorTickPrefixRuntime {
   return value !== null && typeof value === 'object' && frameClaims.has(value);
@@ -156,7 +158,7 @@ export function claimSourceActorTickFrame(frame: SourceActorFrameLifecycleRuntim
   if (!isPendingSourceActorFrameClaim(frame, id, expected)) fail('frame claim requires active genuine frame binding');
   const claim = frameClaims.get(runtime);
   if (!claim) fail('frame requires the genuine source tick runtime, not callback effects');
-  return claim(id, expected);
+  return claim(frame, id, expected);
 }
 const claimedActors = new WeakSet<object>();
 /** Genuine permanent claim, not a mutable property a bridge adapter can copy. */
@@ -212,7 +214,11 @@ function div32(a: number, b: number): number {
 }
 export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefixSources): SourceActorTickPrefixRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  let sourceInvocation: {frame: SourceActorFrameLifecycleRuntime; id: symbol; token: object} | undefined;
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    if (sourceInvocation) checkSourceActorFrameOrderedInvocation(sourceInvocation.frame, runtime, sourceInvocation.id, sourceInvocation.token);
+  };
   const guard = <T>(run: () => T): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;
@@ -824,7 +830,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     if (next <= actor.lastEpoch) fail('pre59068 raw-input epoch already consumed or out of order');
     actor.lastEpoch = next; // Once attempted, never retry or silently normalize twice.
   };
-  const prepareRaw = (id: symbol, raw: SourceActorRawDistances, boundary: SourceActorRawDistances['boundary']): void => {
+  const admitDistanceContext = (id: symbol, raw: object): void => {
     const actor = entry(id);
     assertSourceComplete(id, actor);
     owners(id, actor); noLegacyDistances(actor.actual); record(raw, 'explicit decoded raw distances');
@@ -833,11 +839,14 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
         raw === actor.normal.tail.global || raw === actor.normal.tail.data || raw === actor.normal.tail.chargeBinding)) || assigned.has(raw) || (actor.normal?.testers && testerDescriptors(actor.normal.testers, id).includes(raw)) || (actor.normal?.rotation && rotationRecords(actor.normal.rotation, 'getKnownDescriptorRecords', id).includes(raw)) || tierOwners(id, actor).includes(raw) || raw === actor.normal?.cue0Terrain || raw === actor.ceiling?.globals || raw === actor.ceiling?.terrain ||
         raw === read(actor.world, 'scale58') || raw === read(actor.borg, 'paramTier'))
       fail('raw input must not alias a bound source owner');
+  };
+  const prepareRaw = (id: symbol, raw: SourceActorRawDistances, boundary: SourceActorRawDistances['boundary']): void => {
+    admitDistanceContext(id, raw); const actor = entry(id);
     if (read(raw, 'boundary') !== boundary) fail(`explicit externally decoded ${boundary === 'externally-decoded-pre59068-raw' ? 'pre59068' : 'pre55568'} raw boundary required`);
     ingest(actor.actual, 'targetDistance760', f(raw, 'targetDistance760'));
     ingest(actor.actual, 'horizontalDistance764', f(raw, 'horizontalDistance764'));
   };
-  const runSource = (id: symbol, raw: SourceActorRawDistances): void => {
+  const runSource = (id: symbol, raw: object): void => {
     const actor = entry(id);
     // Actual instruction order starts here. Each divisor is a fresh B4 load;
     // real5bab8 cannot change B4 until BOTH division/store pairs finish.
@@ -1053,7 +1062,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       consumeEpoch(actor, epoch); prepareRaw(id, raw, 'externally-decoded-pre59068-raw'); runSource(id, raw);
     });},
   };
-  frameClaims.set(runtime, (id, expected) => guard(() => {
+  frameClaims.set(runtime, (frame, id, expected) => guard(() => {
     const actor = entry(id);
     if (frameOwned.has(actor.actual)) fail('actor already has a source frame owner');
     assertSourceComplete(id, actor); owners(id, actor);
@@ -1073,7 +1082,8 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       if (actor.normal?.cue0 && cue0Value(actor.normal.cue0, 'getHistoryBinding', id) !== ground.history)
         fail('frame ground canonical history differs');
     }
-    let prepared: SourceActorFrameRawDistances | undefined, begun = false, attempted = false, hostPending = false;
+    const consumedSourceTokens = new WeakSet<object>();
+    let prepared: object | undefined, begun = false, attempted = false, hostPending = false;
     const ready = (): void => {
       if (begun || incompleteFrames.has(actor.actual)) fail('actual actor has an incomplete source frame; continuation is unsupported');
       assertSourceComplete(id, actor); owners(id, actor);
@@ -1089,6 +1099,18 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       ingestRawDistances(raw: SourceActorFrameRawDistances): void {guard(() => {
         if (!hostPending) fail('frame raw ingress requires a consumed input epoch');
         hostPending = false; ready(); prepareRaw(id, raw, 'externally-decoded-pre55568-raw'); prepared = raw;
+      });},
+      acceptSourceProducedDistances(token: object): void {guard(() => {
+        // This capability never escapes the genuine frame. Its caller has
+        // consumed the exact active source-position authority before entry.
+        record(token, 'private source distance context');
+        if (consumedSourceTokens.has(token)) fail('source distance context cannot be replayed');
+        consumedSourceTokens.add(token);
+        if (prepared || hostPending) fail('source distance context cannot replace pending ingress');
+        if (sourceInvocation) fail('source distance invocation already active');
+        sourceInvocation = {frame, id, token};
+        ready(); admitDistanceContext(id, token); prepared = token;
+        // No original epoch is inferred, and neither760 nor764 is read/stored.
       });},
       beginSourceFrame(): void {guard(() => {
         ready(); if (!prepared) fail('frame requires explicitly prepared raw input');
@@ -1110,7 +1132,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
         // This private capability is invoked only after genuine5b880 returns.
         // Child failure latches, exclusive ownership and consumed epochs stay.
         incompleteFrames.delete(actor.actual); begun = false; prepared = undefined;
-        attempted = false; hostPending = false;
+        attempted = false; hostPending = false; sourceInvocation = undefined;
       });},
     });
     check(); frameOwned.add(actor.actual); return capability;

@@ -52,6 +52,7 @@ import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} f
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
 import {isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
+import {isSourceActorOrderedFrameRuntime,invokeSourceActorOrderedFrameFromOuter,type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
 import {claimSourceHelperStorage} from './source-storage-claims.js';
 import {requireSourceActorActionSlotStatusOwner} from './actor-action-request.js';
 import type {SourceBattleOuterGlobalFields, SourceBattleSystemGlobals} from './battle-global-layout.js';
@@ -92,6 +93,8 @@ export interface SourceBattleTargetPreparationSources {
 }
 export interface SourceBattleOuterFrameSources {
   scheduler: SourceObjectSchedulerRuntime;
+  /** Genuine54070, reached only at the actual ordered-list call. */
+  orderedActors?:SourceActorOrderedFrameRuntime;
   /** Same explicit80433930 owner, reached only after a team/slot match. */
   systemGlobals?: SourceBattleSystemGlobals;
   /** Optional genuine53b30 prefix. Missing ingress retains the old boundary. */
@@ -146,6 +149,27 @@ export function checkSourceBattleOuterFrameSchedulerInvocation(outer:SourceBattl
 export function rejectSourceBattleOuterFrameSchedulerReentry(outer:SourceBattleOuterFrameRuntime):void {
   schedulerInvocations.get(outer)?.reject();
 }
+interface OrderedActorInvocationScope {
+  enter(stage:SourceActorOrderedFrameRuntime,id:symbol):object;
+  check(stage:SourceActorOrderedFrameRuntime,id:symbol):void;
+  consume(stage:SourceActorOrderedFrameRuntime,id:symbol):object;
+  matrices(stage:SourceActorOrderedFrameRuntime,id:symbol,owner:SourceActorMatrixUpdateRuntime):void;
+  reject():void;
+}
+const orderedActorInvocations=new WeakMap<object,OrderedActorInvocationScope>();
+export function enterSourceBattleOrderedActorInvocation(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol):object {
+  const scope=orderedActorInvocations.get(outer);if(!scope)fail('private ordered outer invocation required');return scope.enter(stage,id);
+}
+export function checkSourceBattleOrderedActorInvocation(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol):void {
+  const scope=orderedActorInvocations.get(outer);if(!scope)fail('private ordered outer invocation required');scope.check(stage,id);
+}
+export function consumeSourceBattleOrderedActorDistances(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol):object {
+  const scope=orderedActorInvocations.get(outer);if(!scope)fail('private source-produced distances required');return scope.consume(stage,id);
+}
+export function requireSourceBattleOrderedActorMatrices(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol,owner:SourceActorMatrixUpdateRuntime):void {
+  const scope=orderedActorInvocations.get(outer);if(!scope)fail('private ordered matrix owner required');scope.matrices(stage,id,owner);
+}
+export function rejectSourceBattleOrderedActorReentry(outer:SourceBattleOuterFrameRuntime):void {orderedActorInvocations.get(outer)?.reject();}
 function fail(reason: string): never {
   throw Error(`[battle-outer-frame] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
@@ -181,6 +205,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   if(spawns.getMatchGlobals()!==globals || spawns.getAllocatorRuntime()!==allocator) fail('canonical scheduler graph differs');
   if(globals===sources || claimedGlobals.has(globals)) fail('battle globals alias sources or are already outer-owned');
   let busy=false,poisoned=false,incomplete=false,closing=false;
+  let orderedInvocation:{stage:SourceActorOrderedFrameRuntime;id:symbol;actor:object;entered:boolean}|undefined;
+  let distancesPrepared=false;
+  const producedDistances=new Map<symbol,{actor:object;fields:number;consumed:boolean}>();
   let schedulerInvocation:{callsite:number;group:number;entered:boolean}|undefined;
   const retained=new Map<string,object>(), massActors=new Map<symbol,object>(),participantActors=new Map<symbol,object>();
   const check=(): void=>{if(poisoned) fail('caught same-runtime reentry');};
@@ -1203,6 +1230,12 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         // No application callback occurs between this final intrinsic and the
         // plain own-data overwrite. The old scalar is never validated or used.
         (actor as Record<string,unknown>)[key]=value;distanceGuard();
+        if(key==='targetDistance760'||key==='horizontalDistance764') {
+          const prior=producedDistances.get(id);
+          if(prior&&prior.actor!==actor)fail('6ae60 source-distance actual owner changed');
+          const production=prior??{actor,fields:0,consumed:false};
+          production.fields|=key==='targetDistance760'?1:2;producedDistances.set(id,production);
+        }
       };
       const preparePosition=(): {position: object;guard: ()=>void}=>{
       noShadows(actor,positionAliases20);
@@ -2154,9 +2187,18 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(read(mass,'orderPointers')!==ordered)fail('53a2c captured ordered-table owner changed');
       if(i>=6)fail('53a2c ordered table exceeds retained six-actor domain');
       const id=read(ordered,String(i));if(id!==null&&typeof id!=='symbol')fail('53a2c ordered actor pointer required');
-      actual(id);
+      const actor=actual(id);
       //54070 begins with mandatory5685c even for a paused actor.
-      fail('80053a58 reached mandatory80054070 transform-history predecessor8005685c');
+      const supplied=Object.getOwnPropertyDescriptor(sources,'orderedActors');check();
+      if(!supplied||!('value' in supplied))fail('80053a58 reached mandatory80054070 transform-history predecessor8005685c');
+      const selected=supplied.value;
+      if(!isSourceActorOrderedFrameRuntime(selected))fail('53a2c genuine54070 runtime required');
+      if(selected.getWorldRuntime()!==world||selected.getStageRuntime()!==stage||
+        selected.getStatusRuntime()!==spawns.getPrehookRuntime().getStatusRuntime()||selected.getMatchGlobals()!==globals)
+        fail('53a2c canonical ordered actor graph differs');
+      orderedInvocation={stage:selected,id:id as symbol,actor,entered:false};
+      try {call(()=>invokeSourceActorOrderedFrameFromOuter(runtime,selected,id as symbol));}
+      finally {orderedInvocation=undefined;}
     }
     //5b140 is still mandatory when the live signed ordered count is zero.
     const following=physical();
@@ -2243,10 +2285,11 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(read(sources,'scheduler')!==scheduler || scheduler.getRootRuntime()!==root ||
           root.getSpawnRuntime()!==spawns || scheduler.getAllocatorRuntime()!==allocator) fail('canonical scheduler graph changed');
         noShadows(globals,['5588','102','214','215','byteD6','byteD7','byted6','byted7','half214']);
+        distancesPrepared=false;producedDistances.clear();
         applyPending();updateTeams();
         if(s8(byte(match(),'byte66'))===0) {
           prepareMass();
-          prepareTargets();
+          prepareTargets();distancesPrepared=true;
           prepareLeaders();
         }
         prepareParticipantViews();
@@ -2259,7 +2302,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         fail('800294c8 reached mandatory80089554');
       } catch(error) {
         close();throw error;
-      } finally {schedulerInvocation=undefined;busy=false;}
+      } finally {orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
     },
   };
   failures.set(runtime,selected=>{if(!busy || !closing || !incomplete || selected!==scheduler) fail('private exact active outer failure required');});
@@ -2279,6 +2322,33 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       schedulerGraph();
     },
     reject:rejectScheduler,
+  });
+  const orderedCheck=(selected:SourceActorOrderedFrameRuntime,id:symbol):void=>{
+    const active=orderedInvocation;
+    if(!busy||closing||incomplete||poisoned||!active||active.stage!==selected||active.id!==id||!active.entered)
+      fail('private exact active ordered actor invocation required');
+    if(read(sources,'orderedActors')!==selected||actual(id)!==active.actor)fail('ordered actor invocation owner changed');
+    check();
+  };
+  orderedActorInvocations.set(runtime,{
+    enter(selected,id){
+      const active=orderedInvocation;
+      if(!busy||closing||incomplete||poisoned||!active||active.stage!==selected||active.id!==id||active.entered)
+        fail('private exact single-use54070 invocation required');
+      active.entered=true;orderedCheck(selected,id);return active.actor;
+    },
+    check:orderedCheck,
+    consume(selected,id){
+      orderedCheck(selected,id);const produced=producedDistances.get(id);
+      if(!distancesPrepared||!produced||produced.actor!==orderedInvocation!.actor||produced.fields!==3||produced.consumed)
+        fail('55568 requires same-actor completed source760/764 production once');
+      produced.consumed=true;return Object.freeze({});
+    },
+    matrices(selected,id,owner){
+      orderedCheck(selected,id);const mass=retain('massPreparation',read(sources,'massPreparation'));
+      if(read(mass,'matrices')!==owner)fail('54160 matrix owner differs from canonical mass4a4 owner');
+    },
+    reject(){if(busy){poisoned=true;close();}},
   });
   runtimes.add(runtime);pendingClaims.set(runtime,scheduler);
   try {claimSourceObjectSchedulerOuterFrame(scheduler,runtime);} finally {pendingClaims.delete(runtime);}

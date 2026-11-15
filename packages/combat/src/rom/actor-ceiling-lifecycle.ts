@@ -20,6 +20,7 @@
  * claims, alias checks and caught-reentry poison protect source ownership.
  * Nothing hydrates inputs, executes the host floor contract or activates ticks.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime,
@@ -64,7 +65,10 @@ function float(value: unknown, where: string): number {
 }
 export function createSourceActorCeilingLifecycleRuntime(sources: SourceActorCeilingLifecycleSources): SourceActorCeilingLifecycleRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
+  };
   const guard = <T>(run: () => T): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;

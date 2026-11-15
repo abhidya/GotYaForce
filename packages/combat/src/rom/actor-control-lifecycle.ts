@@ -18,6 +18,7 @@
  * instructions, and caught mutation reentry poisons the outer call. Earlier
  * stores survive refusal. No defaults, hydration, rollback or tick activation.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorWorldMatrixBinding} from './actor-world-matrix.js';
 import type {SourceActorStatusTimersRuntime, SourceActorStatusTimersBinding} from './actor-status-timers.js';
@@ -62,7 +63,10 @@ function integer(value: unknown, min: number, max: number, where: string): numbe
 }
 export function createSourceActorControlLifecycleRuntime(sources: SourceActorControlLifecycleSources): SourceActorControlLifecycleRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
+  };
   const guard = <T>(run: () => T): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;

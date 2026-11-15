@@ -20,6 +20,7 @@
  * Every reached failure retains prior writes. Binding permanently excludes
  * the legacy browser mash producer for this Borg, without implicit migration.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {BorgRuntime} from '../types.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
@@ -83,7 +84,10 @@ function integer(value: unknown, min: number, max: number, where: string): numbe
 const fields = ['ushort5b8', 'stickX5ca', 'stickY5cb', 'byte5fc', 'byte5fd', 'byte5fe', 'byte5ff'] as const;
 export function createSourceActorInputPrefixRuntime(sources: SourceActorInputPrefixSources): SourceActorInputPrefixRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
+  };
   const guard = <T>(run: () => T): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;

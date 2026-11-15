@@ -19,6 +19,7 @@
  * and destination checks are explicit host bounds. Refusals retain completed
  * effects; caught mutation reentry poisons the enclosing operation.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {BorgRuntime} from '../types.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
@@ -81,7 +82,10 @@ const s16 = (value: number): number => value << 16 >> 16;
 const STEP = 0.05000000074505806; // Archived80437420, bits3d4ccccd.
 export function createSourceActorGaugeScaleRuntime(sources: SourceActorGaugeScaleSources): SourceActorGaugeScaleRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
+  };
   const read = (r: unknown, key: string): unknown => {const value = own(r, key); check(); return value;};
   const write = (r: unknown, key: string, value: number): void => {
     own(r, key, true); check(); (r as Record<string, unknown>)[key] = value; check();

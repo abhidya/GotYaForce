@@ -17,6 +17,7 @@
  * the selected source720 owner; actors with legacy invulnTimer are refused.
  * Three explicit distinct source ammo cells avoid browser HUD/X-pool aliases.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {BorgRuntime, WeaponCell} from '../types.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorJointMappingRuntime} from './actor-joint-mapping.js';
@@ -112,7 +113,10 @@ function float(value: unknown, where: string): number {
 const s16 = (value: number): number => value << 16 >> 16;
 export function createSourceActorStatusTimersRuntime(sources: SourceActorStatusTimersSources): SourceActorStatusTimersRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
+  };
   const read = (record: unknown, key: string): unknown => {const value = own(record, key); check(); return value;};
   const write = (record: unknown, key: string, value: number): void => {
     own(record, key, true); check(); (record as Record<string, unknown>)[key] = value; check();

@@ -35,6 +35,7 @@
  * continue; host-only incomplete markers cannot be cleared by editing cues
  * or counters. They are admission bounds, not additional source stores.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {RomActor} from './actor.js';
 import {isSourceActorCommandAdmissionRuntime, hasIncompleteSourceActorCommandAdmission,
   type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
@@ -130,7 +131,10 @@ function integer(value: unknown, min: number, max: number, key: string): number 
 }
 export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNormalLifecycleSources): SourceActorNormalLifecycleRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
+  };
   const guard = <T>(run: () => T): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;

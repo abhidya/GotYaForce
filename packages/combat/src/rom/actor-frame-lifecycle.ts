@@ -7,6 +7,10 @@
  * Any reached gap preserves effects and all failure latches. No family hook,
  * sound event, unsupported phase or child error is skipped to reach completion.
  *
+ * A private ordered-stage claim can instead admit an exact one-attempt source
+ * position without copying, rewriting or pre-reading the produced760/764 cells.
+ * Its authority is separate from host numeric epochs; public ingress/binding
+ * is then exclusively closed, while idle diagnostic reads remain available.
  * Explicit decoded raw distances are host ingress before the first55568 write,
  * not a source producer. Epochs remain consumed on failed ingress. Exclusive
  * frame ownership persists across successful frames; public standalone source
@@ -17,6 +21,8 @@
  * playability. Null4e8 fixtures are explicit synthetic inputs, not source defaults.
  */
 import type {RomActor} from './actor.js';
+import {isPendingSourceActorOrderedFrameClaim, requireSourceActorOrderedFrameInvocation, checkSourceActorOrderedFrameInvocation,
+  rejectSourceActorOrderedFrameReentry, type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
 import {bindSourceActorCue0Frame} from './actor-cue0-lifecycle.js';
 import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import {isSourceActorStatusTimersRuntime, type SourceActorStatusTimersRuntime} from './actor-status-timers.js';
@@ -46,12 +52,64 @@ export interface SourceActorFrameLifecycleSources {
 export interface SourceActorFrameLifecycleRuntime {
   bindActor(identity: symbol): void;
   getActualActor(identity: symbol): RomActor;
+  getStatusRuntime(): SourceActorStatusTimersRuntime;
+  getTickRuntime(): SourceActorTickPrefixRuntime;
   /** No source-frame field copies are created. This is the existing578 owner. */
   getDispatchBinding(identity: symbol): object;
   /** Returns only after the genuine final suffix; reached gaps retain effects and refuse. */
   ingestRawDistancesAndRun(identity: symbol, epoch: number, raw: SourceActorFrameRawDistances): void;
 }
 const genuineRuntimes = new WeakSet<object>();
+const orderedOwners = new WeakMap<object, SourceActorOrderedFrameRuntime>();
+interface ActiveSourceInvocation {stage: SourceActorOrderedFrameRuntime; frame: SourceActorFrameLifecycleRuntime; id: symbol; token: object}
+let activeSourceInvocation: ActiveSourceInvocation | undefined;
+let checkingActiveSourceInvocation = false;
+/** Read-only synchronous liveness polling. The private source entry alone
+ * installs/restores this stack; no host caller can supply a checker or scope. */
+export function checkActiveSourceActorFrameInvocation(): void {
+  const active = activeSourceInvocation;
+  if (!active) return;
+  if (checkingActiveSourceInvocation) {
+    rejectSourceActorOrderedFrameReentry(active.stage);
+    fail('reentrant active source-frame liveness check');
+  }
+  checkingActiveSourceInvocation = true;
+  try {checkSourceActorOrderedFrameInvocation(active.stage, active.frame, active.id, active.token);}
+  finally {checkingActiveSourceInvocation = false;}
+}
+
+const orderedChecks = new WeakMap<object, (tick: SourceActorTickPrefixRuntime, id: symbol, token: object) => void>();
+const orderedClaims = new WeakMap<object, (stage: SourceActorOrderedFrameRuntime) => void>();
+const orderedInvocations = new WeakMap<object, (stage: SourceActorOrderedFrameRuntime, id: symbol, token: object) => void>();
+/** Child liveness polling; never consumes or grants source invocation authority. */
+export function checkSourceActorFrameOrderedInvocation(frame: SourceActorFrameLifecycleRuntime,
+  tick: SourceActorTickPrefixRuntime, id: symbol, token: object): void {
+  const check = orderedChecks.get(frame);
+  if (!isSourceActorFrameLifecycleRuntime(frame) || !check) fail('private active ordered frame check required');
+  check(tick, id, token);
+}
+/** Exclusive metadata claim during the genuine ordered-stage constructor. */
+export function claimSourceActorFrameForOrdered(stage: SourceActorOrderedFrameRuntime, frame: SourceActorFrameLifecycleRuntime): void {
+  if (!isSourceActorFrameLifecycleRuntime(frame) || !isPendingSourceActorOrderedFrameClaim(stage, frame))
+    fail('private genuine ordered frame claim required');
+  if (orderedOwners.has(frame)) fail('frame already exclusively ordered-owned');
+  const claim = orderedClaims.get(frame);
+  if (!claim) fail('genuine ordered frame claim missing');
+  claim(stage);
+}
+/** Neither a genuine object alone nor a copied token grants a source call. */
+export function invokeSourceActorFrameFromOrdered(stage: SourceActorOrderedFrameRuntime,
+  frame: SourceActorFrameLifecycleRuntime, id: symbol, token: object): void {
+  if (!isSourceActorFrameLifecycleRuntime(frame) || orderedOwners.get(frame) !== stage) {
+    const owner = orderedOwners.get(frame);
+    if (owner !== undefined) rejectSourceActorOrderedFrameReentry(owner);
+    fail('matching exclusively ordered-owned frame required');
+  }
+  const invoke = orderedInvocations.get(frame);
+  if (!invoke) fail('genuine ordered frame invocation missing');
+  invoke(stage, id, token);
+}
+
 // The join is callable only during this module's synchronous bind transaction,
 // with its exact private owner record. A genuine runtime alone is not authority
 // to manufacture a raw/body capability outside the55568 implementation.
@@ -103,7 +161,11 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
   const movement = attributes.getMovementRuntime();
   if (!isSourceActorMovementFollowupRuntime(movement)) fail('55dcc child4d08c requires genuine source movement runtime');
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  let sourceInvocation: {stage: SourceActorOrderedFrameRuntime; id: symbol; token: object} | undefined;
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    if (sourceInvocation) checkSourceActorOrderedFrameInvocation(sourceInvocation.stage, runtime, sourceInvocation.id, sourceInvocation.token);
+  };
   const guard = <T>(run: () => T): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;
@@ -200,51 +262,14 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
         fail('Double canonical source owners changed');
     }
   };
-  const runtime: SourceActorFrameLifecycleRuntime = {
-    bindActor(id: symbol): void {guard(() => {
-      if (typeof id !== 'symbol' || actors.has(id)) fail('new symbol actor identity required');
-      const actual = record(invoke(() => attributes.getActualActor(id)), 'actual actor') as RomActor;
-      if (owned.has(actual) || hasIncompleteSourceActorFrame(actual)) fail('actual actor already owned or incomplete');
-      const initial = {actual, borg: record(invoke(() => status.getActualBorg(id)), 'Borg'),
-        world: record(invoke(() => status.getWorldBinding(id)), 'world'),
-        mapping: record(invoke(() => attributes.getMappingActor(id)), 'mapping'),
-        attribute: record(invoke(() => attributes.getActorBinding(id)), 'attributes'),
-        status: record(invoke(() => status.getActorBinding(id)), 'status'),
-        start: record(invoke(() => status.getStartBinding(id)), 'stream start'),
-        movement: record(invoke(() => attributes.getMovementBinding(id)), 'movement'),
-        dispatch: record(invoke(() => dispatch.getActorBinding(id)), 'dispatch'),
-        pos: record(read(actual, 'pos'), 'position20'), tickBinding: record(invoke(() => tick.getActorBinding(id)), 'tick binding598')};
-      owners(id, initial);
-      const baseRecords = Object.values(initial), family = Object.freeze(familyOwners(id));
-      // Shared decoded dispatch tables/parameter records are not per-actor
-      // storage claims. Their genuine owners enforce their own alias rules.
-      if (new Set(baseRecords).size !== baseRecords.length || baseRecords.some(value => owned.has(value))) fail('source frame storage owner alias');
-      // No parallel numeric4b4/4bc/4c0 cells or callable family owners are admitted.
-      // Null legacy placeholders are not interpreted as source no-op pointers.
-      const ground = action?.getGroundRuntime();
-      const join: SourceActorTickFrameOwners = {...initial, normalRuntime: tick,
-        ...(ground === undefined ? {} : {ground: {
-          runtime: ground, gauge: invoke(() => ground.getGaugeBinding(id)), terrain: invoke(() => ground.getTerrainGlobals()),
-          history: invoke(() => ground.getHistoryBinding(id))}}),
-        ...(suffix === undefined ? {} : {suffixGauge: invoke(() => suffix.getGaugeBinding(id))})};
-      pendingClaims.set(runtime, {id, owners: join});
-      let capability: SourceActorTickFrameCapability, access: SourceActorDoubleFrameAccess;
-      try {
-        capability = invoke(() => claimSourceActorTickFrame(runtime, tick, id, join));
-        access = invoke(() => claimSourceActorDoubleFrame(runtime, id, join));
-        if (action !== undefined) invoke(() => bindSourceActorDoubleActionFrame(runtime, action, id, join, access));
-        if (cue0 !== undefined) invoke(() => bindSourceActorCue0Frame(runtime, cue0, id, join, access, tick));
-      } finally {pendingClaims.delete(runtime);}
-      actors.set(id, {...initial, capability, access, familyOwners: family}); baseRecords.forEach(value => owned.add(value));
-    });},
-    getActualActor(id: symbol) {return entry(id).actual;},
-    getDispatchBinding(id: symbol) {return entry(id).dispatch;},
-    ingestRawDistancesAndRun(id: symbol, epoch: number, raw: SourceActorFrameRawDistances): void {guard(() => {
-      const e = entry(id);
-      invoke(() => e.capability.beginHostIngress(epoch)); owners(id, e);
-      if (Object.values(e).includes(raw) || familyOwners(id).includes(raw)) fail('raw input must not alias a source frame owner');
-      // The tag describes a host boundary; it is not evidence of original producer provenance.
-      invoke(() => e.capability.ingestRawDistances(raw));
+  const denyPublicOrderedUse = (): void => {
+    const owner = orderedOwners.get(runtime);
+    if (owner !== undefined) {
+      rejectSourceActorOrderedFrameReentry(owner); check();
+      fail('frame is exclusively ordered-owned');
+    }
+  };
+  const runSourceFrame = (id: symbol, e: Entry): void => {
       invoke(() => e.capability.beginSourceFrame());
       try {
         read(e.dispatch, 'marker578', true); (e.dispatch as {marker578: number}).marker578 = 2; check();
@@ -304,7 +329,76 @@ export function createSourceActorFrameLifecycleRuntime(sources: SourceActorFrame
         markIncompleteSourceActorDoubleLifecycle(e.actual);
         throw error;
       }
+  };
+  const runtime: SourceActorFrameLifecycleRuntime = {
+    bindActor(id: symbol): void {denyPublicOrderedUse(); guard(() => {
+      if (typeof id !== 'symbol' || actors.has(id)) fail('new symbol actor identity required');
+      const actual = record(invoke(() => attributes.getActualActor(id)), 'actual actor') as RomActor;
+      if (owned.has(actual) || hasIncompleteSourceActorFrame(actual)) fail('actual actor already owned or incomplete');
+      const initial = {actual, borg: record(invoke(() => status.getActualBorg(id)), 'Borg'),
+        world: record(invoke(() => status.getWorldBinding(id)), 'world'),
+        mapping: record(invoke(() => attributes.getMappingActor(id)), 'mapping'),
+        attribute: record(invoke(() => attributes.getActorBinding(id)), 'attributes'),
+        status: record(invoke(() => status.getActorBinding(id)), 'status'),
+        start: record(invoke(() => status.getStartBinding(id)), 'stream start'),
+        movement: record(invoke(() => attributes.getMovementBinding(id)), 'movement'),
+        dispatch: record(invoke(() => dispatch.getActorBinding(id)), 'dispatch'),
+        pos: record(read(actual, 'pos'), 'position20'), tickBinding: record(invoke(() => tick.getActorBinding(id)), 'tick binding598')};
+      owners(id, initial);
+      const baseRecords = Object.values(initial), family = Object.freeze(familyOwners(id));
+      // Shared decoded dispatch tables/parameter records are not per-actor
+      // storage claims. Their genuine owners enforce their own alias rules.
+      if (new Set(baseRecords).size !== baseRecords.length || baseRecords.some(value => owned.has(value))) fail('source frame storage owner alias');
+      // No parallel numeric4b4/4bc/4c0 cells or callable family owners are admitted.
+      // Null legacy placeholders are not interpreted as source no-op pointers.
+      const ground = action?.getGroundRuntime();
+      const join: SourceActorTickFrameOwners = {...initial, normalRuntime: tick,
+        ...(ground === undefined ? {} : {ground: {
+          runtime: ground, gauge: invoke(() => ground.getGaugeBinding(id)), terrain: invoke(() => ground.getTerrainGlobals()),
+          history: invoke(() => ground.getHistoryBinding(id))}}),
+        ...(suffix === undefined ? {} : {suffixGauge: invoke(() => suffix.getGaugeBinding(id))})};
+      pendingClaims.set(runtime, {id, owners: join});
+      let capability: SourceActorTickFrameCapability, access: SourceActorDoubleFrameAccess;
+      try {
+        capability = invoke(() => claimSourceActorTickFrame(runtime, tick, id, join));
+        access = invoke(() => claimSourceActorDoubleFrame(runtime, id, join));
+        if (action !== undefined) invoke(() => bindSourceActorDoubleActionFrame(runtime, action, id, join, access));
+        if (cue0 !== undefined) invoke(() => bindSourceActorCue0Frame(runtime, cue0, id, join, access, tick));
+      } finally {pendingClaims.delete(runtime);}
+      actors.set(id, {...initial, capability, access, familyOwners: family}); baseRecords.forEach(value => owned.add(value));
+    });},
+    getActualActor(id: symbol) {return entry(id).actual;},
+    getStatusRuntime() {return status;},
+    getTickRuntime() {return tick;},
+    getDispatchBinding(id: symbol) {return entry(id).dispatch;},
+    ingestRawDistancesAndRun(id: symbol, epoch: number, raw: SourceActorFrameRawDistances): void {denyPublicOrderedUse(); guard(() => {
+      const e = entry(id);
+      invoke(() => e.capability.beginHostIngress(epoch)); owners(id, e);
+      if (Object.values(e).includes(raw) || familyOwners(id).includes(raw)) fail('raw input must not alias a source frame owner');
+      // The tag describes a host boundary; it is not evidence of original producer provenance.
+      invoke(() => e.capability.ingestRawDistances(raw));
+      runSourceFrame(id, e);
     });},
   };
+  orderedClaims.set(runtime, stage => guard(() => {orderedOwners.set(runtime, stage);}));
+  orderedInvocations.set(runtime, (stage, id, token) => guard(() => {
+    // Consume the active source position before any fallible owner admission.
+    requireSourceActorOrderedFrameInvocation(stage, runtime, id, token); check();
+    sourceInvocation = {stage, id, token};
+    const previousActive = activeSourceInvocation;
+    activeSourceInvocation = {stage, frame: runtime, id, token};
+    try {
+      const e = entry(id); owners(id, e);
+      if (Object.values(e).includes(token) || familyOwners(id).includes(token))
+        fail('source distance context must not alias a source frame owner');
+      invoke(() => e.capability.acceptSourceProducedDistances(token));
+      runSourceFrame(id, e); check();
+    } finally {activeSourceInvocation = previousActive; sourceInvocation = undefined;}
+  }));
+  orderedChecks.set(runtime, (selectedTick, id, token) => {
+    if (!sourceInvocation || selectedTick !== tick || sourceInvocation.id !== id || sourceInvocation.token !== token)
+      fail('private exact active frame/tick source position required');
+    check();
+  });
   genuineRuntimes.add(runtime); return Object.freeze(runtime);
 }

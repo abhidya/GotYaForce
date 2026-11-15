@@ -19,6 +19,7 @@
  * and writable destinations are checked only when reached. Refusal retains
  * completed stores/effects; caught mutation reentry poisons the outer call.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorJointMappingRuntime} from './actor-joint-mapping.js';
 import type {SourceActorMovementFollowupRuntime} from './actor-movement-followup.js';
@@ -116,7 +117,10 @@ function pointer(value: unknown, where: string): symbol | null {
 }
 export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAttributeRefreshSources): SourceActorAttributeRefreshRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorFrameInvocation();
+  };
   const read = (record: unknown, key: string): unknown => {const value = own(record, key); check(); return value;};
   const write = (record: unknown, key: string, value: number): void => {
     own(record, key, true); check(); (record as Record<string, unknown>)[key] = value; check();
