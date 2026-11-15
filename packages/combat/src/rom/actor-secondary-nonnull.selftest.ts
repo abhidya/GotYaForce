@@ -123,11 +123,11 @@ export function runActorSecondaryNonnullSelfTests(make:Make):void {
   equal(events.includes('byte108'),index===2,'Z not prevalidated before earlier stores');
  }
  {
-  const x=create();x.pos.x=4;trace(x,'8006b218');aim(x,[5,6,7]);distances(x);
+  const x=create();x.pos.x=2;trace(x,'8006b218');aim(x,[5,6,7]);distances(x);
  }
  {
   const x=create();let seen=false;
-  trace(x,'8006b298',(owner,key)=>{if(owner===x.sourceActor&&key==='targetDistance760'){seen=true;x.pos.x=4;}});
+  trace(x,'8006b298',(owner,key)=>{if(owner===x.sourceActor&&key==='targetDistance760'){seen=true;x.pos.x=2;}});
   check(seen,'total zero store reached');aim(x,[5,6,7]);distances(x,0);
  }
  for(const index of [0,1,2]) {
@@ -186,5 +186,5 @@ export function runActorSecondaryNonnullSelfTests(make:Make):void {
   });check(hit,'post-copy dependency fault reached');aim(x,[5,6,7]);distances(x);
  }
  terminalObservationTests(create);
- console.log(`[actor-secondary-nonnull] PASS (${fixtures} bounded synthetic graph fixtures): captured c8, opaque actual cc, ordered integer-copy bits, canonical aim ownership, total/horizontal zero stores and positive estimator barriers, partial-store and terminal closure; mandatory27764 remains blocked, no full-frame claim`);
+ console.log(`[actor-secondary-nonnull] PASS (${fixtures} bounded synthetic graph fixtures): captured c8, opaque actual cc, ordered integer-copy bits, canonical aim ownership, total/horizontal zero stores and unsupported positive estimator barriers, partial-store and terminal closure; mandatory27764 remains blocked, no full-frame claim`);
 }

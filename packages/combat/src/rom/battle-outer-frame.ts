@@ -39,6 +39,7 @@ import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRu
 import {markIncompleteSourceActorDoubleLifecycle, requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {addSourceFloat32} from './source-float.js';
 import {readSourceSquareDistance} from './source-square-distance.js';
+import {readSourceTargetDistance} from './source-target-distance.js';
 import {readSourceShortTrig} from './source-short-trig.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
@@ -904,6 +905,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       };
       const load=(owner: object,key: string): unknown=>{const value=read(owner,key);basicGuard();return value;};
       let data: object|undefined;
+      let estimatorProcessor: object|undefined,estimatorProcessorSource: object|undefined;
       let nullDirection=false,secondaryReached=false,ccReached=false,aimReached=false,c8Reached=false;
       let operandsGuard=basicGuard;
       let terminalRuntime: SourceActorCommandAdmissionRuntime|undefined;
@@ -927,6 +929,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
       const distanceGuard=(): void=>{
         operandsGuard();
+        if(estimatorProcessor!==undefined && call(()=>root.getVectorProcessorProfile())!==estimatorProcessor)
+          fail('secondary estimator processor profile owner changed');
         const commandRuntime=admission(),actionRuntime=commandRuntime.getActionRuntime();
         terminalRuntime=commandRuntime;
         if(data!==undefined && commandRuntime.getData()!==data) fail('6ae60 primary shared data owner changed');
@@ -960,7 +964,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
             fail(`${key}: competing primary distance storage`);
           for(const key of shadowKeys) if(fields[key]!==undefined)
             fail(`${key}: competing primary distance storage alias`);
-          for(const key of ['float80437658','float80437678']) if(owner!==data && fields[key]!==undefined)
+          for(const key of ['float80437658','float80437678','double80437660','double80437668']) if(owner!==data && fields[key]!==undefined)
             fail(`${key}: competing primary shared data storage`);
           if(ccReached) {
             if(!actualActors.includes(owner) && fields.visibilityTarget!==undefined)
@@ -1018,6 +1022,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           runtime.getActualActor(id)!==actor || runtime.getActorBinding(id)!==binding ||
           runtime.getData()!==data || world.getActualActor(id)!==actor || status.getActualActor(id)!==actor)
           fail('secondary terminal canonical actor/admission/data owner changed');
+        if(estimatorProcessor!==undefined && (estimatorProcessorSource===undefined ||
+          nativeRead(estimatorProcessorSource,'processor')!==estimatorProcessor))
+          fail('secondary terminal processor profile owner changed');
         if(terminalAim!==undefined && nativeRead(actor,'aimOrigin518')!==terminalAim)
           fail('secondary terminal aimOrigin518 owner changed');
         if(terminalSelected!==undefined && nativeRead(actor,'lockTarget')!==terminalSelected)
@@ -1049,8 +1056,11 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
             if(owner===terminalSelected) ban(['active0','team','byte502','pointer504','pointer508','descriptor4b0',
               'lifecycle18','half80436242','count804361a0']);
           }
-          if(owner!==data) ban(['float80437658','float80437678','float80437078']);
+          if(owner!==data) ban(['float80437658','float80437678','float80437078','double80437660','double80437668']);
           for(const [key,p] of Object.entries(fields)) if('value' in p) {
+            if(estimatorProcessor!==undefined && p.value===estimatorProcessor &&
+              !(owner===estimatorProcessorSource && key==='processor'))
+              fail('secondary terminal processor aliases canonical reference');
             if(terminalAim!==undefined && owner!==terminalAim && p.value===terminalAim && !(owner===actor&&key==='aimOrigin518'))
               fail('secondary terminal aimOrigin518 aliases canonical reference');
             if(terminalSelected!==undefined && owner!==terminalSelected && p.value===terminalSelected && !(owner===actor&&key==='lockTarget'))
@@ -1289,9 +1299,28 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           if(processor===position) fail('6ae60 position20 aliases processor storage');
           const distance=readSourceSquareDistance({a:position,aName:'position20',b:captured,bRepresentation:'record',
             allocator,root,processor,guard:distanceGuard});
-          if(distance>constant('float80437658',0,'8006b20c'))
-            fail('8006b218 reached unsupported frsqrte secondary distance estimator');
-          store('targetDistance760',distance);
+          const positiveGuard=(): void=>{
+            distanceGuard();
+            if(call(()=>root.getVectorProcessorProfile())!==processor) fail('secondary estimator processor profile owner changed');
+            distanceGuard();
+          };
+          const estimate=(square: number,address: '8006b218'|'8006b298'): number=>{
+            // The root owns this already captured profile. Retain its declaration
+            // for a callback-free terminal link check before either result store.
+            estimatorProcessor=processor;positiveGuard();
+            if(estimatorProcessorSource===undefined) {
+              const links=call(()=>root.getRetainedStorageOwners()).filter(owner=>{
+                const field=primaryStoreDescriptor(owner,'processor');
+                return field && 'value' in field && field.value===processor;
+              });
+              if(links.length!==1) fail('secondary estimator canonical processor declaration required');
+              estimatorProcessorSource=links[0];
+            }
+            return readSourceTargetDistance(square,processor,data!,positiveGuard,address);
+          };
+          const total=distance>constant('float80437658',0,'8006b20c')
+            ? estimate(distance,'8006b218'):distance;
+          store('targetDistance760',total);
           const zero=constant('float80437658',0,'8006b268');
           const scalar=(axis: 'x'|'z'): number=>{
             const value=read(position,axis);distanceGuard();return sourceFloat(value,axis);
@@ -1302,8 +1331,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           const xx=sourceFloat(Math.fround(dx*dx),'secondary horizontal X square'),
             zz=sourceFloat(Math.fround(dz*dz),'secondary horizontal Z square');distanceGuard();
           const horizontal=addSourceFloat32(xx,zz);distanceGuard();
-          if(horizontal>zero) fail('8006b298 reached unsupported frsqrte secondary horizontal estimator');
-          store('horizontalDistance764',horizontal);
+          const horizontalDistance=horizontal>zero
+            ? estimate(horizontal,'8006b298'):horizontal;
+          store('horizontalDistance764',horizontalDistance);
           return; //b2e8 rejoins the same b33c second-pass continuation.
         }
         const secondaryMissing=constant('float80437678',20000,'8006b2ec');

@@ -569,7 +569,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
       ['commandTable', actor.actual], ['visibilityTarget', actor.actual], ['visibilityRoster', actor.actual],
       ['pointer504', command.binding], ['pointer508', command.binding], ['pointerc8', command.binding], ['byteD0', command.binding],
       ['marker709', command.start], ['blockedMask1d9a', command.stream], ['byte45', command.global],
-      ['float8043762c', command.data], ['float80437658', command.data], ['float80437678', command.data], ['float80437078', command.data], ['flags3994', command.data],
+      ['float8043762c', command.data], ['float80437658', command.data], ['float80437678', command.data], ['float80437078', command.data], ['double80437660', command.data], ['double80437668', command.data], ['flags3994', command.data],
       ['byte598', actor.binding], ['callback4c8', n.binding], ['callback4dc', n.binding], ['short6bc', n.binding], ['byte1d9', n.binding],
     ]);
     for (const owner of [...records, command.global, command.data, ...known]) {

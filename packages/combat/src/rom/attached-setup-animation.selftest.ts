@@ -1,3 +1,4 @@
+import {runActorSecondaryPositiveSelfTests} from './actor-secondary-positive.selftest.js';
 import {createBattlePassengerAccumulationFixture,runBattlePassengerAccumulationSelfTests,runBattlePassengerFiniteTraversalSelfTests} from './battle-passenger-accumulation.selftest.js';
 import {createBattlePassengerEarlyStopFixture,runBattlePassengerEarlyStopSelfTests} from './battle-passenger-early-stop.selftest.js';
 import {runActorSecondaryNonnullSelfTests} from './actor-secondary-nonnull.selftest.js';
@@ -2918,6 +2919,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runActorNullDirectionHydratedCompositionTests();
   runActorSecondaryNullHydratedCompositionTests();
   runActorSecondaryNonnullHydratedCompositionTests();
+  runActorSecondaryPositiveHydratedCompositionTests();
   runActorThirdPassHydratedCompositionTests();
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
@@ -13708,4 +13710,9 @@ export function runBattlePassengerFiniteTraversalHydratedCompositionTests(): voi
   const previous=testMatrixCapacity;testMatrixCapacity=512;
   try {runBattlePassengerFiniteTraversalSelfTests(createBattleTargetPreparationTestFixture);}
   finally {testMatrixCapacity=previous;}
+}
+
+/** Bounded synthetic positive-secondary composition, not retail hydration. */
+export function runActorSecondaryPositiveHydratedCompositionTests(): void {
+  runActorSecondaryPositiveSelfTests(createBattleTargetPreparationTestFixture);
 }

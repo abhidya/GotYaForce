@@ -338,7 +338,7 @@ export function createSourceActorNormalLifecycleRuntime(sources: SourceActorNorm
       for (const key of ['pointer504', 'pointer508', 'pointerc8', 'byteD0']) canonical.set(key, e.commandBinding!);
       canonical.set('marker709', e.commandStart!); canonical.set('blockedMask1d9a', e.commandStream!);
       canonical.set('byte45', commandGlobals);
-      for (const key of ['float8043762c', 'float80437658', 'float80437678', 'float80437078', 'flags3994']) canonical.set(key, commandConstants!);
+      for (const key of ['float8043762c', 'float80437658', 'float80437678', 'float80437078', 'double80437660', 'double80437668', 'flags3994']) canonical.set(key, commandConstants!);
     }
     const aliases = ['byte5e4', 'byte5e5', 'word5e0', 'flags5e0', 'field5e0', 'field4c8', 'pointer4c8',
       'field4dc', 'pointer4dc', 'field6bc', 'timer6bc', 'countdown6bc', 'metadata1d9', 'flags1d9',

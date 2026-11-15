@@ -51,7 +51,7 @@ export interface SourceProjectileRootSources {
   /** Explicit retained source stack28/2c/30, not a target/actor vector alias. */
   targetStack?: SourceProjectileTargetStack;
   /** Explicit host profile for the reached paired-vector helper, never defaulted. */
-  processor?: {gqr0: number};
+  processor?: {gqr0: number; fpscrControl?: number};
 }
 export interface SourceProjectileRootRuntime {
   bindProjectile(projectile: symbol): void;
