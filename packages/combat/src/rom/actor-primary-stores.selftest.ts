@@ -508,5 +508,120 @@ export function runActorPrimaryStoresSelfTests(make:Make):void {
   let fixtures=0;const counted:Make=omit=>{fixtures++;return make(omit);};
   branchOrderTests(counted);captureAndFreshTests(counted);constantFaultTests(counted);destinationFaultTests(counted);
   horizontalFaultTests(counted);headingTests(counted);aliasAndOwnershipTests(counted);interruptionTests(counted);finalSnapshotInterruptionTests(counted);
-  console.log(`[actor-primary-stores] PASS (${fixtures} genuine graph fixtures): genuine post6b850 primary+0 gates, explicit actual758/75c partial stores, captured OBJECT horizontal scalar/byte/arithmetic order, fresh canonical508 and null20000/heading order, lazy source/destination faults and permanent outer closure; stops at afbc/b03c/b098/b190, no estimator, later actor/pass/scheduler, completed-frame or console claim`);
+  console.log(`[actor-primary-stores] PASS (${fixtures} genuine graph fixtures): genuine post6b850 primary+0 gates, explicit actual758/75c partial stores, captured OBJECT horizontal scalar/byte/arithmetic order, fresh canonical508 and null20000/heading order, lazy source/destination faults and permanent outer closure; stops at afbc/b03c/b098/b190, no general estimator, later actor/pass/scheduler, completed-frame or console claim`);
+}
+
+/** Positive primary lane: real selector, captured OBJECT and live bc88 operands.
+ * Every run stops at the mandatory6d228 call, never the secondary lane. */
+export function runActorPrimaryPositiveSelfTests(make:Make):void {
+  let count=0;
+  const half='double80437660',three='double80437668',next='8006b098';
+  const create=()=>{count++;if(count%10===0)console.log(`[actor-primary-positive] starting fixture ${count}`);const x=setup(make);Reflect.set(x.processor,'fpscrControl',0);
+    Reflect.set(x.data,half,.5);Reflect.set(x.data,three,3);return x;};
+  const trace=(x:Fixture,values:readonly number[]=[1,0,0],part=next,before:Visit=()=>{},after?:Visit):string[]=>{
+    let started=false;const events:string[]=[];
+    run(x,part,(owner,key)=>{
+      if(!started&&owner===x.admissionState&&key==='pointer508') {
+        started=true;position(x.bytes,0,0,0);axes.forEach((axis,i)=>x.pos[axis]=values[i]!);
+      }
+      if(owner===x.data&&[zero,half,three].includes(String(key))) events.push(String(key));
+      if(owner===x.sourceActor&&[distance,horizontal].includes(String(key))) events.push(String(key));
+      if(owner===x.pos&&axes.includes(key as typeof axes[number])) events.push('A'+String(key));
+      if(owner===x.bytes&&['100','104','108'].includes(String(key))) events.push('B'+String(key));
+      if(owner===x.admissionState&&key==='pointer508')events.push('508');
+      before(owner,key);
+    },after);
+    closed(x);return events;
+  };
+  for(const m of [.5,1,2,4,8])for(const values of [[m,0,0],[0,m,0],[0,0,m],[m,m/8192,m/8192],[Math.fround(.6*m),0,Math.fround(.8*m)]]) {
+    const x=create(),events=trace(x,values);distances(x,m,values[0]===0&&values[2]===0?0:m);
+    equal(events.filter(e=>e===half||e===three).join(','),[half,three,...(values[0]===0&&values[2]===0?[]:[half,three])].join(','),'fresh half then three at each primary positive estimator');
+    const index=events.indexOf(distance);
+    equal(events.slice(index,index+6).join(','),[distance,zero,'Ax','B100','Az','B108'].join(','),'primary total store, fresh zero and scalar A.x B.x A.z B.z order');
+    equal(events.at(-1),'508','fresh508 follows both distance stores');
+  }
+  {
+    const x=create();Reflect.deleteProperty(x.processor,'fpscrControl');Reflect.deleteProperty(x.data,half);Reflect.deleteProperty(x.data,three);
+    const events=trace(x,[0,0,0]);distances(x,0,0);check(!events.includes(half)&&!events.includes(three),'zero lane never requires optional refinement data');
+  }
+  for(const [initial,later,total,h] of [[[0,0,0],[1,0,0],0,1],[[1,0,0],[0,0,0],1,0],[[1,0,0],[4,0,0],1,4]] as const) {
+    const x=create();let hit=false;
+    trace(x,initial,next,(owner,key)=>{if(!hit&&owner===x.data&&key===zero&&x.sourceActor.targetDistance758!==91){hit=true;
+      axes.forEach((axis,i)=>x.pos[axis]=later[i]!);x.admissionState.pointer504=null;x.admissionState.pointer508=null;}});
+    check(hit,'live primary horizontal transition');distances(x,total,h);
+  }
+  const adjacent=(m:number,d:number):number=>{const v=new DataView(new ArrayBuffer(4));v.setFloat32(0,m,false);v.setUint32(0,v.getUint32(0,false)+d,false);return v.getFloat32(0,false);};
+  for(const m of [.5,1,2,4,8])for(const d of [-1,1])for(const late of [false,true]) {
+    const x=create();let hit=false;
+    const events=trace(x,late?[m,0,0]:[adjacent(m,d),0,0],late?'8006b03c':'8006afbc',(owner,key)=>{
+      if(late&&!hit&&owner===x.data&&key===zero&&x.sourceActor.targetDistance758===m){hit=true;x.pos.x=adjacent(m,d);}
+    });distances(x,late?m:91,93);equal(events.filter(e=>e===half).length,late?1:0,'unsupported actual square stops before its constants');
+  }
+  for(const late of [false,true])for(const key of [half,three,'fpscrControl'])for(const kind of ['missing','wrong','accessor'] as const) {
+    const x=create();let hit=false,invoked=0;
+    const mutate=()=>{hit=true;const owner=key==='fpscrControl'?x.processor:x.data;
+      if(kind==='missing')Reflect.deleteProperty(owner,key);
+      else if(kind==='wrong')Reflect.set(owner,key,key==='fpscrControl'?1:17);
+      else Object.defineProperty(owner,key,{get(){invoked++;return 0;},configurable:true});};
+    if(!late)mutate();
+    trace(x,[1,0,0],key,(owner,k)=>{if(late&&!hit&&owner===x.data&&k===zero&&x.sourceActor.targetDistance758===1)mutate();});
+    check(hit,'lazy primary fault reached');equal(invoked,0,'no data accessor invocation');distances(x,late?1:91,93);
+  }
+  for(const value of [undefined,true,-1,0x100000000,.5,NaN,...Array.from({length:8},(_,i)=>2**i)]) {
+    const x=create();Reflect.set(x.processor,'fpscrControl',value);trace(x,[1,0,0],'fpscrControl');distances(x,91,93);
+  }
+  for(const key of [distance,horizontal])for(const kind of ['readonly','accessor','processor','constant','position','provider','lifecycle','reentry'] as const) {
+    const x=create();let hit=false,invoked=0;
+    trace(x,[1,0,0],kind==='readonly'||kind==='accessor'?key:kind==='processor'?'processor':kind==='position'?'position':kind==='provider'?'provider':kind==='constant'?'competing':kind==='lifecycle'?'incomplete':'reentry',(owner,k)=>{
+      if(hit||owner!==x.sourceActor||k!==key)return;hit=true;
+      if(kind==='readonly')Object.defineProperty(owner,key,{writable:false});
+      else if(kind==='accessor')Object.defineProperty(owner,key,{get(){invoked++;return 0;},set(){invoked++;},configurable:true});
+      else if(kind==='processor')Reflect.set(x.rootSources,'processor',{gqr0:0,fpscrControl:0});
+      else if(kind==='constant')Reflect.set(x.outerSources,half,.5);
+      else if(kind==='position')Reflect.set(x.outerSources,'latePosition',x.pos);
+      else if(kind==='provider')Reflect.set(x.outerSources,'lateProvider',x.bytes);
+      else if(kind==='lifecycle')markIncompleteSourceActorDoubleLifecycle(x.sourceActor);
+      else rejects(()=>x.frame.runFrame(),'reentry');
+    });check(hit,'primary destination fault reached');equal(invoked,0,'destination accessor never called');
+    if(kind!=='accessor')distances(x,key===horizontal?1:91,93);
+    else equal(Reflect.get(x.sourceActor,key===distance?horizontal:distance),key===distance?93:1,'other primary store retained');
+  }
+  // Provider aliases introduced during the helper must not be blessed by
+  // taking an initial-reference inventory after that helper has returned.
+  for(const site of ['504','position','gqr','x'] as const) {
+    const x=create();let hit=false;
+    trace(x,[1,0,0],'provider',(owner,key)=>{
+      if(hit)return;
+      if(site==='504'&&owner===x.admissionState&&key==='pointer504'||
+        site==='position'&&owner===x.sourceActor&&key==='pos'||
+        site==='gqr'&&owner===x.processor&&key==='gqr0'||
+        site==='x'&&owner===x.pos&&key==='x') {
+        hit=true;Reflect.set(x.outerSources,'lateProvider',x.bytes);
+      }
+    });check(hit,'early provider-alias observer reached');distances(x,91,93);
+  }
+  // Replay the exact final public metadata observation, not an earlier hook.
+  const terminal=(x:Fixture,at=-1,mutate:()=>void=()=>{},part=next):number[]=>{
+    const descriptor=Object.getOwnPropertyDescriptor,descriptors=Object.getOwnPropertyDescriptors,native=Reflect.getOwnPropertyDescriptor;
+    let observations=0,index=0,hit=false;const last:number[]=[],keys=[distance,horizontal];
+    const observe=()=>{if(index<2&&native(x.sourceActor,keys[index]!)?.value===1){last[index]=observations;index++;}observations++;if(observations===at){hit=true;mutate();}};
+    Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{observe();return descriptor(owner,key);}) as typeof descriptor;
+    Object.getOwnPropertyDescriptors=((owner:object)=>{observe();return descriptors(owner);}) as typeof descriptors;
+    try{trace(x,[1,0,0],part);}finally{Object.getOwnPropertyDescriptor=descriptor;Object.getOwnPropertyDescriptors=descriptors;}
+    if(at>=0)check(hit,'final primary metadata observer reached');return last;
+  };
+  const baseline=terminal(create());equal(baseline.length,2,'both primary terminal sites witnessed');
+  for(let index=0;index<2;index++)for(const kind of ['direct','nested','processor','processor-reference','position','provider','destination'] as const) {
+    const x=create();terminal(x,baseline[index],()=>{
+      if(kind==='direct')Reflect.set(x.outerSources,half,.5);
+      else if(kind==='nested')Reflect.set(x.outerSources,'lateConstant',{[three]:3});
+      else if(kind==='processor')Reflect.set(x.rootSources,'processor',{gqr0:0,fpscrControl:0});
+      else if(kind==='processor-reference')Reflect.set(x.outerSources,'lateNestedProcessor',{alias:x.processor});
+      else if(kind==='position')Reflect.set(x.outerSources,'lateNestedPosition',{alias:x.pos});
+      else if(kind==='provider')Reflect.set(x.outerSources,'lateNestedProvider',{alias:x.bytes});
+      else Object.defineProperty(x.sourceActor,index===0?distance:horizontal,{writable:false});
+    },kind==='destination'?(index===0?distance:horizontal):'primary terminal');
+    distances(x,index===0?91:1,93);
+  }
+  console.log(`[actor-primary-positive] PASS (${count} bounded graph fixtures): five actual squares at both estimators, source load order, live/captured inputs, lazy controls/constants, exact partial stores and final observer guards without secondary c8; mandatory6d228 remains blocked`);
 }

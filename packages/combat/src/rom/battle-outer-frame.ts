@@ -910,6 +910,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       let operandsGuard=basicGuard;
       let terminalRuntime: SourceActorCommandAdmissionRuntime|undefined;
       let terminalRecords: object[]=[],terminalActors: readonly object[]=[];
+      let primaryReached=false,primaryProvider: object|undefined,primaryObject: symbol|undefined;
+      let primaryProviderReferences: Map<object,Set<string>>|undefined;
       let terminalAim: object|undefined,terminalPosition: object|undefined,terminalSelected: object|undefined;
       const distanceKeys=['targetDistance758','horizontalDistance75c','targetDistance760','horizontalDistance764'] as const;
       const secondaryAliases=['field760','field764','float760','float764',
@@ -1005,6 +1007,55 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         }
         operandsGuard();
       };
+      const terminalPrimary=(): void=>{
+        if(!primaryReached) return;
+        // Native descriptors close the last public metadata-observer window.
+        // No c8/cc/null-direction state belongs to this branch.
+        const nativeRead=(owner: object,key: string): unknown=>{
+          const p=primaryStoreDescriptor(owner,key);
+          if(!p || !('value' in p)) fail(`${key}: primary terminal own data property required`);
+          return p.value;
+        };
+        const runtime=terminalRuntime;
+        if(!runtime || nativeRead(sources,'targetPreparation')!==target || nativeRead(target,'admission')!==runtime ||
+          nativeRead(sources,'scheduler')!==scheduler || spawns.getAdmissionRuntime()!==runtime ||
+          runtime.getActualActor(id)!==actor || runtime.getActorBinding(id)!==binding ||
+          runtime.getData()!==data || world.getActualActor(id)!==actor || status.getActualActor(id)!==actor)
+          fail('primary terminal canonical actor/admission/data owner changed');
+        if(terminalPosition===undefined || nativeRead(actor,'pos')!==terminalPosition ||
+          world.getPositionOwner(id)!==terminalPosition) fail('primary terminal position20 owner changed');
+        if(primaryProvider===undefined || primaryObject===undefined ||
+          allocator.getPointerIdentity(primaryProvider)!==primaryObject || allocator.getObject(primaryObject)!==primaryProvider)
+          fail('primary terminal captured OBJECT provider changed');
+        if(estimatorProcessor!==undefined && (estimatorProcessorSource===undefined ||
+          nativeRead(estimatorProcessorSource,'processor')!==estimatorProcessor))
+          fail('primary terminal processor profile owner changed');
+        const snapshots=terminalRecords.map(owner=>({owner,fields:primaryStoreDescriptors(owner)}));
+        const nested=snapshots.flatMap(({fields})=>Object.values(fields).flatMap(p=>
+          'value' in p && p.value!==null && typeof p.value==='object'?[p.value as object]:[]));
+        for(const owner of new Set([...terminalRecords,...nested])) {
+          const fields=primaryStoreDescriptors(owner);
+          const ban=(keys: readonly string[]): void=>{
+            for(const key of keys) if(fields[key]!==undefined) fail(`${key}: competing primary terminal storage alias`);
+          };
+          if(!terminalActors.includes(owner)) ban(distanceKeys.slice(0,2));
+          ban(shadowKeys);
+          if(owner===actor) ban(positionAliases20);
+          if(owner!==data) ban(['float80437658','float80437678','double80437660','double80437668']);
+          for(const [key,p] of Object.entries(fields)) if('value' in p) {
+            if(estimatorProcessor!==undefined && p.value===estimatorProcessor &&
+              !(owner===estimatorProcessorSource && key==='processor'))
+              fail('primary terminal processor aliases canonical reference');
+            if(owner!==terminalPosition && p.value===terminalPosition && !(owner===actor && key==='pos'))
+              fail('primary terminal position20 aliases canonical reference');
+            if(owner!==primaryProvider && p.value===primaryProvider &&
+              !primaryProviderReferences?.get(owner)?.has(key) && !(owner===binding && key==='pointer504'))
+              fail('primary terminal captured provider aliases canonical reference');
+          }
+        }
+        check();requireCompleteSourceActorDoubleLifecycle(actor);
+        runtime.assertActorComplete(id);allocator.assertActorComplete(id);check();
+      };
       const terminalSecondary=(): void=>{
         if(!c8Reached) return;
         // Public metadata observers have finished. Rebuild nested ownership
@@ -1095,7 +1146,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         const current=Object.getOwnPropertyDescriptors(actor)[key];distanceGuard();
         if(!current || !('value' in current)) fail(`${key}: own data property changed before store`);
         if(!current.writable) fail(`${key}: non-writable field before store`);
-        terminalSecondary();
+        terminalSecondary();terminalPrimary();
         const live=primaryStoreDescriptor(actor,key);
         if(!live || !('value' in live)) fail(`${key}: live own data property required before store`);
         if(!live.writable) fail(`${key}: live non-writable field before store`);
@@ -1360,9 +1411,22 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         return;
       }
       record(targetPointer,'6ae60 primary pointer508');
+      // Snapshot host references before the public504/position/GQR observers.
+      // This is native metadata only: B remains unadmitted until its first
+      // actual paired load. A callback must not bless a newly added alias as
+      // an initial allocator/selector reference by preceding the first store.
+      distanceGuard();
+      const providerOwners=[...terminalRecords,...terminalRecords.flatMap(owner=>
+        Object.values(primaryStoreDescriptors(owner)).flatMap(p=>'value' in p && p.value!==null && typeof p.value==='object'?[p.value as object]:[]))];
+      const providerSnapshots=[...new Set(providerOwners)].map(owner=>({owner,fields:primaryStoreDescriptors(owner)}));
       //af98 captures504 before forming both vector addresses. Pointer-domain
       //admission for B is deferred until its first actual paired load.
       const provider=load(binding,'pointer504');
+      primaryProviderReferences=new Map();
+      for(const {owner,fields} of providerSnapshots) for(const [key,p] of Object.entries(fields))
+        if('value' in p && p.value===provider) {
+          const keys=primaryProviderReferences.get(owner)??new Set<string>();keys.add(key);primaryProviderReferences.set(owner,keys);
+        }
       const {position,guard:positionGuard}=preparePosition();
       operandsGuard=positionGuard;positionGuard();
       const processor=call(()=>root.getVectorProcessorProfile());
@@ -1370,11 +1434,30 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(processor===position) fail('6ae60 position20 aliases processor storage');
       const distance=readSourceSquareDistance({a:position,aName:'position20',b:provider,bRepresentation:'record',
         allocator,root,processor,guard:positionGuard});
-      //The authenticated finite model can return zero, not a negative square.
-      //Positive values still require the actual estimator; no sqrt substitute.
-      if(distance>constant('float80437658',0,'8006afb0'))
-        fail('8006afbc reached unsupported frsqrte primary distance estimator');
-      store('targetDistance758',distance);
+      primaryProvider=record(provider,'captured primary OBJECT');
+      primaryObject=call(()=>allocator.getPointerIdentity(primaryProvider!));
+      if(call(()=>allocator.getObject(primaryObject!))!==primaryProvider) fail('primary captured OBJECT bytes required');
+      primaryReached=true;
+      const positiveGuard=(): void=>{
+        distanceGuard();
+        if(call(()=>root.getVectorProcessorProfile())!==processor) fail('primary estimator processor profile owner changed');
+        distanceGuard();
+      };
+      const estimate=(square: number,address: '8006afbc'|'8006b03c'): number=>{
+        estimatorProcessor=processor;positiveGuard();
+        if(estimatorProcessorSource===undefined) {
+          const links=call(()=>root.getRetainedStorageOwners()).filter(owner=>{
+            const p=primaryStoreDescriptor(owner,'processor');return p && 'value' in p && p.value===processor;
+          });
+          if(links.length!==1) fail('primary estimator canonical processor declaration required');
+          estimatorProcessorSource=links[0];
+        }
+        return readSourceTargetDistance(square,processor,data!,positiveGuard,address);
+      };
+      //afbc..b004: model-backed seed, half then three, three binary64
+      //q/h/fnmsub/e rounds, product/frsp and stack+14 store/reload.
+      const total=distance>constant('float80437658',0,'8006afb0')?estimate(distance,'8006afbc'):distance;
+      store('targetDistance758',total);
       const zero=constant('float80437658',0,'8006b00c');
       //These are ordinary scalar lfs loads. No GQR read or vector snapshot.
       const scalar=(owner: object,key: string): number=>{
@@ -1388,8 +1471,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       const xx=sourceFloat(Math.fround(dx*dx),'primary horizontal X square'),
         zz=sourceFloat(Math.fround(dz*dz),'primary horizontal Z square');distanceGuard();
       const horizontal=addSourceFloat32(xx,zz);distanceGuard();
-      if(horizontal>zero) fail('8006b03c reached unsupported frsqrte primary horizontal estimator');
-      store('horizontalDistance75c',horizontal);
+      //b03c..b084 repeats that schedule with stack+10, without a GQR load.
+      const horizontalDistance=horizontal>zero?estimate(horizontal,'8006b03c'):horizontal;
+      store('horizontalDistance75c',horizontalDistance);
       //b094 reloads508, even if an observer changed it after the initial compare.
       const fresh=read(binding,'pointer508');distanceGuard();
       if(fresh!==null) record(fresh,'6ae60 fresh primary pointer508');

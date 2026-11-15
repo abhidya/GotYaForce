@@ -30,7 +30,7 @@ export function runSourceTargetDistanceRefinementSelfTests():void {
   equal(f64(result.product),row.product,'final binary64 product');
   equal(f32(result.value).toString(16).padStart(8,'0'),row.frsp,'frsp and stack reload f32');
   equal(f64(result.value),row.stack_reload_f64,'stack reload double representation');
-  for(const address of ['8006b218','8006b298'] as const)
+  for(const address of ['8006afbc','8006b03c','8006b218','8006b298'] as const)
    equal(readSourceTargetDistance(row.square,{fpscrControl:0},{[half]:.5,[three]:3},()=>{},address),result.value,'both estimator PCs');
   // Round two ALREADY has the same final f32. A final-value-only test cannot
   // kill dropping round three, exact-root substitution or alternate exact seed.

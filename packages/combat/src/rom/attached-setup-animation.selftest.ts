@@ -9,7 +9,7 @@ import {runActorThirdPassSelfTests} from './actor-third-pass.selftest.js';
 import {runActorSecondaryNullSelfTests} from './actor-secondary-null.selftest.js';
 import {runActorNullDirectionSelfTests} from './actor-null-direction.selftest.js';
 import {runActorPrimaryDistanceSelfTests} from './actor-primary-distance.selftest.js';
-import {runActorPrimaryStoresSelfTests} from './actor-primary-stores.selftest.js';
+import {runActorPrimaryStoresSelfTests,runActorPrimaryPositiveSelfTests} from './actor-primary-stores.selftest.js';
 import {runActorTargetStorageSelfTests} from './actor-target-storage.selftest.js';
 import {runActorTargetDistanceSelfTests} from './actor-target-distance.selftest.js';
 import {runActorTargetProjectionSelfTests} from './actor-target-projection.selftest.js';
@@ -2916,6 +2916,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runActorTargetStorageHydratedCompositionTests();
   runActorPrimaryDistanceHydratedCompositionTests();
   runActorPrimaryStoresHydratedCompositionTests();
+  runActorPrimaryPositiveHydratedCompositionTests();
   runActorNullDirectionHydratedCompositionTests();
   runActorSecondaryNullHydratedCompositionTests();
   runActorSecondaryNonnullHydratedCompositionTests();
@@ -13715,4 +13716,8 @@ export function runBattlePassengerFiniteTraversalHydratedCompositionTests(): voi
 /** Bounded synthetic positive-secondary composition, not retail hydration. */
 export function runActorSecondaryPositiveHydratedCompositionTests(): void {
   runActorSecondaryPositiveSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+export function runActorPrimaryPositiveHydratedCompositionTests(): void {
+  runActorPrimaryPositiveSelfTests(createBattleTargetPreparationTestFixture);
 }

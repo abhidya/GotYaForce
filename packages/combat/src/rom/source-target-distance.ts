@@ -1,4 +1,4 @@
-/** Bounded SECONDARY b218/b298 only. Model-backed frsqrte seeds transfer
+/** Bounded primary afbc/b03c and secondary b218/b298 only. Model-backed frsqrte seeds transfer
  * from terrain evidence, NOT its single-precision refinement. This does not
  * implement primary6d228, arbitrary estimates, FPSCR status or hardware parity.
  * Constants are authenticated by actor-command-admission evidence106–107.
@@ -37,11 +37,11 @@ export function sourceTargetDistanceSeed(square:number):number|undefined {
     square===4?16381/32768:square===16?16381/65536:square===64?16381/131072:undefined;
 }
 export function readSourceTargetDistance(square:number,processor:object,data:object,guard:()=>void,
-  address:'8006b218'|'8006b298'):number {
+  address:'8006afbc'|'8006b03c'|'8006b218'|'8006b298'):number {
   function fail(reason:string):never {throw Error(`[source-target-distance] ${address} ${reason}`);}
   // Admit the actual returned square, never an ideal norm or axis classification.
   const seed=sourceTargetDistanceSeed(square);
-  if(seed===undefined) fail(`reached unsupported frsqrte secondary ${address==='8006b298'?'horizontal ':''}distance estimator square`);
+  if(seed===undefined) fail(`reached unsupported frsqrte ${address==='8006afbc'||address==='8006b03c'?'primary':'secondary'} ${address==='8006b298'||address==='8006b03c'?'horizontal ':''}distance estimator square`);
   const read=(owner:object,key:string):unknown=>{
     const p=Object.getOwnPropertyDescriptor(owner,key);guard();
     if(!p || !('value' in p)) fail(`${key}: own data property required`);
