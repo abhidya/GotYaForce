@@ -1,3 +1,4 @@
+import {captureMissingLeaderIngress} from './battle-leader-ingress.selftest.js';
 import {createActorThirdPassTestFixture} from './actor-third-pass.selftest.js';
 import {hasIncompleteSourceActorDoubleLifecycle,markIncompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {requireSourceObjectSchedulerSnapshot} from './source-object-scheduler.js';
@@ -5,7 +6,7 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const axes=['x','y','z'] as const,next='80029460 reached mandatory80027764';
+const axes=['x','y','z'] as const,next='pointer38: own data property required';
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[actor-secondary-nonnull-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}
 function refuses(run:()=>unknown,part:string):void {let message='';try{run();}catch(error){message=String(error);}check(message.includes(part),`expected ${part}, got ${message||'success'}`);}
@@ -23,8 +24,10 @@ function fixture(make:Make) {
 }
 type Fixture=ReturnType<typeof fixture>;
 function trace(x:Fixture,part=next,before:Visit=()=>{},after?:Visit):string[] {
+ const leaderPrefix=captureMissingLeaderIngress(x);
  const native=Object.getOwnPropertyDescriptor,events:string[]=[];let secondary=false;
  Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+  leaderPrefix.observe(owner,key);
   if(owner===x.sourceActor&&key==='visibilityTarget')secondary=true;
   if(secondary) {
    if(owner===x.admissionState&&key==='pointerc8')events.push('c8');
@@ -38,6 +41,7 @@ function trace(x:Fixture,part=next,before:Visit=()=>{},after?:Visit):string[] {
   const result=native(owner,key);if(secondary)after?.(owner,key);return result;
  }) as typeof native;
  try{refuses(()=>x.frame.runFrame(),part);}finally{Object.getOwnPropertyDescriptor=native;}
+ if(part===next)leaderPrefix.assert();
  equal(x.dereferences(),0,'actual cc never dereferenced');equal(x.sourceActor.targetDistance758,20000,'primary758 retained');
  equal(x.sourceActor.horizontalDistance75c,20000,'primary75c retained');
  check(hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),'caller terminally closed');
@@ -186,5 +190,5 @@ export function runActorSecondaryNonnullSelfTests(make:Make):void {
   });check(hit,'post-copy dependency fault reached');aim(x,[5,6,7]);distances(x);
  }
  terminalObservationTests(create);
- console.log(`[actor-secondary-nonnull] PASS (${fixtures} bounded synthetic graph fixtures): captured c8, opaque actual cc, ordered integer-copy bits, canonical aim ownership, total/horizontal zero stores and unsupported positive estimator barriers, partial-store and terminal closure; mandatory27764 remains blocked, no full-frame claim`);
+ console.log(`[actor-secondary-nonnull] PASS (${fixtures} bounded synthetic graph fixtures): captured c8, opaque actual cc, ordered integer-copy bits, canonical aim ownership, total/horizontal zero stores and unsupported positive estimator barriers, partial-store and terminal closure; absent27764 row38 remains blocked after the third RNG draw, no full-frame claim`);
 }

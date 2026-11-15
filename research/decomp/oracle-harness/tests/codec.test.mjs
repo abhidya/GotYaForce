@@ -232,3 +232,25 @@ test("actual linkedOwner1e4 needs an explicit arena address, never object-to-zer
     assert.equal(u8[BASE + 0x1e3], 0xa5); assert.equal(u8[BASE + 0x1e8], 0xa5);
   }
 });
+
+
+test("leader pointer330 is an atomic word requiring an explicit arena address", () => {
+  const f = fieldMap.byInterface.RomActor;
+  assert.equal(f.pointer330.offset, 0x330); assert.equal(f.pointer330.kind, "ptr");
+  assert.equal(f.pointer330.width, 4);
+  assert.equal(f.byte334.offset, 0x334); assert.equal(f.byte334.width, 1);
+  assert.equal(f.byte335.offset, 0x335); assert.equal(f.byte335.width, 1);
+  const { codec, u8 } = makeCodec();
+  for (const value of [Symbol("leader"), {}, undefined, -1, 1.5, "12", NaN, Infinity, 0x100000000]) {
+    codec.beginCase();
+    assert.throws(() => codec.encodeField(BASE, "pointer330", value), BlockedCodecError);
+    assert.equal(codec.writes.length, 0);
+    assert.deepEqual([...u8.slice(BASE + 0x330, BASE + 0x336)], Array(6).fill(0xa5));
+  }
+  for (const value of [null, 0, 0x12345678, 0xffffffff]) {
+    codec.beginCase(); codec.encodeField(BASE, "pointer330", value);
+    assert.equal(codec.rU32(BASE + 0x330), value ?? 0);
+    assert.deepEqual(codec.writes, [[BASE + 0x330, 4]]);
+    assert.equal(u8[BASE + 0x334], 0xa5); assert.equal(u8[BASE + 0x335], 0xa5);
+  }
+});

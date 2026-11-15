@@ -64,6 +64,16 @@ export interface RomActor {
    * No constructor default; supplied only by a source hydration boundary.
    * @romfield active0 +0x0 u8 */
   active0?: number;
+  /** Canonical allocator identity written by80027764, never a copied actor.
+   * No constructor default or implicit arena address.
+   * @romfield pointer330 +0x330 ptr */
+  pointer330?: symbol | null;
+  /** Raw byte;80027764 compares its signed value. No constructor default.
+   * @romfield byte334 +0x334 u8 */
+  byte334?: number;
+  /** Explicit leader marker; source stores one byte, separate from330.
+   * @romfield byte335 +0x335 u8 */
+  byte335?: number;
   /** Explicit6b7f4 target-dispatch state. No constructor default.
    * @romfield byte502 +0x502 u8 */
   byte502?: number;

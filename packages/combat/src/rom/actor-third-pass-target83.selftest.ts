@@ -1,3 +1,4 @@
+import {captureMissingLeaderIngress} from './battle-leader-ingress.selftest.js';
 import {createActorThirdPassTestFixture} from './actor-third-pass.selftest.js';
 import {hasIncompleteSourceActorDoubleLifecycle,markIncompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {requireSourceObjectSchedulerSnapshot} from './source-object-scheduler.js';
@@ -5,7 +6,7 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Fixture=ReturnType<typeof createActorThirdPassTestFixture>;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const next='80029460 reached mandatory80027764',zero='byte7d3: own data property required';
+const next='pointer38: own data property required',zero='byte7d3: own data property required';
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[actor-third-pass-target83-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}
 function refuses(run:()=>unknown,part:string):string {let message='';try{run();}catch(error){message=String(error);}check(message.includes(part),`expected ${part}, got ${message||'success'}`);return message;}
@@ -18,9 +19,11 @@ function fixture(make:Make,value:number|null=1,targetRow=2,bind=true) {
 }
 type Bound=ReturnType<typeof fixture>;
 function run(x:Bound,expected=next,before:Visit=()=>{},after?:Visit,activate=true) {
+ const leaderPrefix=captureMissingLeaderIngress(x);
  const native=Object.getOwnPropertyDescriptor,events:string[]=[];
  let secondary=false,third=false,reads=0,flagReads=0,later=0,scheduler=0;
  Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+  leaderPrefix.observe(owner,key);
   if(owner===x.sourceActor&&key==='visibilityTarget')secondary=true;
   if(secondary&&owner===x.massPreparation&&key==='physicalBlock')third=true;
   if(third) {
@@ -38,6 +41,7 @@ function run(x:Bound,expected=next,before:Visit=()=>{},after?:Visit,activate=tru
   const result=native(owner,key);if(third)after?.(owner,key);return result;
  }) as typeof native;
  let message='';try{message=refuses(()=>x.frame.runFrame(),expected);}finally{Object.getOwnPropertyDescriptor=native;}
+ if(expected===next)leaderPrefix.assert();
  check(secondary&&third,'actual secondary return and third pass reached');equal(flagReads,expected===zero?1:0,'only zero target83 reaches absent caller7d3');equal(later,0,'no target association scalar read');equal(scheduler,0,'no scheduler execution reads');
  return {events,reads,message};
 }
@@ -102,5 +106,5 @@ function failures(make:Make):void {
 }
 export function runActorThirdPassTarget83SelfTests(make:Make):void {
  let count=0;const counted:Make=omit=>{count++;return make(omit);};branches(counted);captured(counted);failures(counted);
- console.log(`[actor-third-pass-target83] PASS (${count} genuine shared-graph fixtures): allocation-owned target83, active/null gating, signed nonzero skips, captured pointer/byte order, lazy faults, aliases and permanent failure closure; stops at absent caller7d3 or mandatory27764, no complete association, outer frame, scheduler execution or browser claim`);
+ console.log(`[actor-third-pass-target83] PASS (${count} genuine shared-graph fixtures): allocation-owned target83, active/null gating, signed nonzero skips, captured pointer/byte order, lazy faults, aliases and permanent failure closure; stops at absent caller7d3 or absent27764 row38 after the third RNG draw, no complete association, outer frame, scheduler execution or browser claim`);
 }

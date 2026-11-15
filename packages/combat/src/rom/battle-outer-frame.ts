@@ -19,7 +19,7 @@
  * distance stores through the next mandatory direction helper or estimator. Skipped lifecycle rows retain canonical508 bounds; active nonnull targets may
  * use the SAME allocation-owned83 byte, caller7d3, signed teams and finite
  * distance guards, then the six-position inner scan and ordered association bits.
- * Its bounded return still cannot skip mandatory27764.
+ * Its bounded return feeds complete27764 selection/publication, then mandatorybef4.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
  *
@@ -384,6 +384,32 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       'parameter4ac','pointer4ac','1196','24','517','518','519','521','522','523']);
     call(()=>requireCompleteSourceActorDoubleLifecycle(value));return value;
   };
+  const randomByte=(mass: object,where: string): number=>{
+    const supplied=Object.getOwnPropertyDescriptor(mass,'rngState');check();
+    if(supplied===undefined)fail(`${where} reached mandatory800055fc RNG predecessor`);
+    if(read(sources,'massPreparation')!==mass || retained.get('massPreparation')!==mass)
+      fail('RNG canonical mass owner changed');
+    const state=retain('mass rngState',read(mass,'rngState')),
+      aliases=['c6','c7','bytec6','bytec7','198','199','seed','state'];
+    const guard=():void=>{
+      noShadows(state,aliases);check();
+      if(terminalRead(sources,'massPreparation')!==mass || terminalRead(mass,'rngState')!==state ||
+        retained.get('mass rngState')!==state)fail('RNG canonical owner changed');
+      for(const key of aliases)if(primaryStoreDescriptor(state,key)!==undefined)fail(`${key}: competing source cell owner`);
+      check();
+    };
+    const load=(key:string):number=>{guard();const value=byte(state,key);guard();return value;};
+    const store=(key:string,value:number):void=>{
+      guard();own(state,key,true);guard();const destination=primaryStoreDescriptor(state,key);
+      if(!destination || !('value'in destination))fail(`${key}: live own data property required`);
+      if(!destination.writable)fail(`${key}: live non-writable field`);
+      (state as Record<string,unknown>)[key]=value;guard();
+    };
+    // Complete existing055fc: captured high/low, high store before low store.
+    const high=load('byte804360c7'),low=load('byte804360c6');
+    const nextHigh=(((high*256+low)*3)>>8)&255,nextLow=(low+nextHigh)&255;
+    store('byte804360c7',nextHigh);store('byte804360c6',nextLow);return nextLow;
+  };
   const prepareMass=(): void=>{
     const supplied=Object.getOwnPropertyDescriptor(sources,'massPreparation');check();
     if(supplied===undefined) fail('80029458 reached mandatory80053b30 normal-stage predecessor');
@@ -712,19 +738,6 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         }
       }
     }
-    const randomByte=(): number=>{
-      const supplied=Object.getOwnPropertyDescriptor(mass,'rngState');check();
-      if(supplied===undefined) fail('80053d60 reached mandatory800055fc RNG predecessor');
-      const state=massOwner('rngState');
-      noShadows(state,['c6','c7','bytec6','bytec7','198','199','seed','state']);
-      //13 authenticated instructions: old low is captured once. The high
-      // byte store precedes low; a failing low store retains updated high.
-      const high=byte(state,'byte804360c7'),low=byte(state,'byte804360c6');
-      const nextHigh=(((high*256+low)*3)>>8)&255,nextLow=(low+nextHigh)&255;
-      write(state,'byte804360c7',nextHigh);
-      write(state,'byte804360c6',nextLow);
-      return nextLow;
-    };
     const countOwner=(): object=>{
       const owner=massOwner('orderCount');noShadows(owner,['count','byte0','0']);return owner;
     };
@@ -785,8 +798,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       // list can reach only the remainder; preserve each load/store pair.
       for(let index=end;index>start;index--) writeOrderPointer(index,orderPointer(index-1));
     };
-    let selected=(randomByte()>>>2)%6;
-    const direction=(randomByte()&8)!==0?1:-1;
+    let selected=(randomByte(mass,'80053d60')>>>2)%6;
+    const direction=(randomByte(mass,'80053d80')&8)!==0?1:-1;
     writeOrderCount(0); //53d9c precedes authenticated1.0 load53da4.
     const one=constant('float80437258',1);
     for(let visit=0;visit<6;visit++) {
@@ -1750,6 +1763,124 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     }
     //Genuine void return only if every reached canonical508 owner completed.
   };
+  /** Complete authenticated80027764. The discarded RNG result still advances
+   * the SAME live byte owner. Initial row38 copies are not leader pointers.
+   * Source leaders are local registers; each nonnull publication reloads base0.
+   * Stable canonical records remain a host bound, not inferred source aliases. */
+  const prepareLeaders=(): void=>{
+    const mass=retained.get('massPreparation');
+    if(!mass) fail('80027770 missing canonical mass/RNG ingress');
+    randomByte(mass,'80027770');
+    const world=spawns.getWorldRuntime(),actorFields=new Set<string>(),rows=new Map<number,object>();
+    const capturedActors=new Map<symbol,object>();
+    let capturedTable:object|undefined,blockReached=false;
+    const terminalShadows=(owner:object,keys:readonly string[]):void=>{
+      for(const key of keys)if(primaryStoreDescriptor(owner,key)!==undefined)fail(`${key}: competing source cell owner`);
+    };
+    const aliases:Record<string,readonly string[]>={
+      pointer330:['word330','field330','leader330',...Array.from({length:4},(_,i)=>0x330+i).flatMap(n=>[String(n),'byte'+n.toString(16)])],
+      byte334:['field334','score334','820'],byte335:['field335','leader335','821'],
+      team:['byte88','field88','136'],active0:['byte0','0'],
+    };
+    const metadata=(shadows:typeof noShadows):void=>{
+      const actuals=world.getRetainedActorOwners();
+      const records=[sources,globals,...retained.values(),...massActors.values(),
+        ...scheduler.getRetainedStorageOwners(),...actuals];
+      for(const owner of new Set(records))for(const key of actorFields) {
+        if(!actuals.includes(owner))shadows(owner,[key]);
+        // Numeric actor offsets do not alias independent allocator byte buffers.
+        shadows(owner,aliases[key]!.filter(alias=>!/^\d+$/.test(alias)||actuals.includes(owner)));
+      }
+      for(const [index,row]of rows) {
+        const start=0xf4+index*0x3c+0x38;
+        shadows(row,['word38','field38','leader38','56','57','58','59','byte38','byte39','byte3a','byte3b','byte3A','byte3B']);
+        shadows(globals,[...Array.from({length:4},(_,i)=>start+i).flatMap(n=>[String(n),'byte'+n.toString(16),'byte'+n.toString(16).toUpperCase()]),
+          ...['pointer','word','field'].flatMap(prefix=>[prefix+start.toString(16),prefix+start.toString(16).toUpperCase()])]);
+      }
+    };
+    const finish=():void=>{
+      check();metadata(terminalShadows);
+      if(terminalRead(sources,'scheduler')!==scheduler || scheduler.getRootRuntime()!==root ||
+        root.getSpawnRuntime()!==spawns || spawns.getWorldRuntime()!==world || scheduler.getAllocatorRuntime()!==allocator ||
+        scheduler.getMatchGlobals()!==globals || spawns.getMatchGlobals()!==globals ||
+        terminalRead(sources,'massPreparation')!==mass || retained.get('massPreparation')!==mass)
+        fail('27764 terminal canonical graph changed');
+      if(blockReached) {
+        const block=retained.get('mass physicalBlock'),ids=retained.get('mass physical identities');
+        if(!block || !ids || terminalRead(mass,'physicalBlock')!==block || terminalRead(block,'identities')!==ids)
+          fail('27764 canonical physical metadata changed');
+      }
+      if(capturedTable!==undefined && terminalRead(globals,'teamRows103')!==capturedTable)
+        fail('27764 canonical team table changed');
+      for(const [index,row]of rows)if(terminalRead(capturedTable!,String(index))!==row)
+        fail('27764 canonical team row changed');
+      for(const [id,actor]of capturedActors) {
+        if(allocator.getPointerTarget(id)!==actor || world.getActualActor(id)!==actor)
+          fail('27764 canonical actual actor changed');
+        requireCompleteSourceActorDoubleLifecycle(actor);
+      }
+      check();
+    };
+    const guard=():void=>{check();metadata(noShadows);finish();};
+    const store=(owner:object,key:string,value:number|symbol|null):void=>{
+      guard();own(owner,key,true);guard();
+      const destination=primaryStoreDescriptor(owner,key);
+      if(!destination || !('value'in destination))fail(`${key}: live own data property required`);
+      if(!destination.writable)fail(`${key}: live non-writable field`);
+      (owner as Record<string,unknown>)[key]=value;guard();
+    };
+    const rowStore=(index:number,value:symbol|null,owner:object=match()):void=>{
+      const table=teamTable(owner),row=team(table,index);
+      if(capturedTable!==undefined && table!==capturedTable)fail('27764 canonical team table changed');
+      capturedTable=table;rows.set(index,row);store(row,'pointer38',value);
+    };
+    //27778..7b4: pointer copies only. Null/opaque slot2 or1 is not dereferenced.
+    const firstOwner=match(),slot2=slotPointer(2);
+    if(firstOwner!==globals)fail('27764 initial match owner changed');
+    rowStore(0,slot2,firstOwner);
+    const slot1=slotPointer(1);rowStore(1,slot1);
+    rowStore(2,null);rowStore(3,null);
+    const physical=():readonly symbol[]=>{
+      guard();const base=slotPointer(0),block=retained.get('mass physicalBlock'),ids=retained.get('mass physical identities');
+      if(!block || !ids || read(sources,'massPreparation')!==mass || read(mass,'physicalBlock')!==block ||
+        read(block,'identities')!==ids || read(block,'base')!==base)
+        fail('27764 physical base differs from canonical block');
+      if(!Array.isArray(ids)||!Object.isFrozen(ids)||read(ids,'length')!==6)fail('27764 six frozen physical identities required');
+      blockReached=true;guard();return ids as readonly symbol[];
+    };
+    const at=(ids:readonly symbol[],index:number):{id:symbol;actor:object}=>{
+      const id=read(ids,String(index));if(typeof id!=='symbol')fail('27764 physical actor identity required');
+      const actor=actual(id);capturedActors.set(id,actor);guard();return{id,actor};
+    };
+    const load=(actor:object,key:'active0'|'team'|'byte334'):number=>{
+      if(key==='byte334')actorFields.add(key);else noShadows(actor,aliases[key]!);
+      guard();const value=byte(actor,key);guard();return value;
+    };
+    const put=(actor:object,key:'pointer330'|'byte335',value:symbol|null|number):void=>{
+      actorFields.add(key);store(actor,key,value);
+    };
+    const initial=physical(),leaders:({id:symbol;actor:object}|undefined)[]=[undefined,undefined],best=[0,0];
+    for(let index=0;index<6;index++) {
+      const selected=at(initial,index),actor=selected.actor;
+      if(s8(load(actor,'active0'))===0)continue;
+      put(actor,'byte335',0);put(actor,'pointer330',null);
+      const group=s8(load(actor,'team'));if(group!==0&&group!==1)continue;
+      const score=load(actor,'byte334');
+      if(s8(score)<s8(best[group]!))continue;
+      leaders[group]=selected;best[group]=score; // Equality selects the LAST physical candidate.
+    }
+    for(let group=0;group<2;group++) {
+      const leader=leaders[group];if(leader===undefined)continue;
+      put(leader.actor,'byte335',1);
+      const ids=physical();
+      for(let index=0;index<6;index++) {
+        const {actor}=at(ids,index);
+        if(s8(load(actor,'active0'))===0)continue;
+        if(s8(load(actor,'team'))===group)put(actor,'pointer330',leader.id);
+      }
+    }
+    finish(); // Genuine return; the caller still refuses mandatory8000bef4.
+  };
   const close=(): void=>{
     if(incomplete) return;
     incomplete=true;closing=true;
@@ -1770,7 +1901,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(s8(byte(match(),'byte66'))===0) {
           prepareMass();
           prepareTargets();
-          fail('80029460 reached mandatory80027764 normal-stage predecessor');
+          prepareLeaders();
         }
         fail('80029464 reached mandatory8000bef4 outer-frame predecessor');
       } catch(error) {

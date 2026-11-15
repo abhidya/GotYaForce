@@ -1,3 +1,4 @@
+import {runBattleLeaderSelectionSelfTests} from './battle-leader-selection.selftest.js';
 import {runActorSecondaryPositiveSelfTests} from './actor-secondary-positive.selftest.js';
 import {createBattlePassengerAccumulationFixture,runBattlePassengerAccumulationSelfTests,runBattlePassengerFiniteTraversalSelfTests} from './battle-passenger-accumulation.selftest.js';
 import {createBattlePassengerEarlyStopFixture,runBattlePassengerEarlyStopSelfTests} from './battle-passenger-early-stop.selftest.js';
@@ -2916,6 +2917,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runActorSecondaryNonnullHydratedCompositionTests();
   runActorSecondaryPositiveHydratedCompositionTests();
   runActorThirdPassHydratedCompositionTests();
+  runBattleLeaderSelectionHydratedCompositionTests();
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();
@@ -13741,4 +13743,9 @@ export function runActorPrimaryNonunitAttachedRefusalSelfTest(): void {
     'unsupported Y2 sine retains exact completed orientation but no primary Concat or distal continuation');
   check(clones.every((matrix, i) => matrix.every((value, j) => Object.is(value, before[i]![j]))),
     'late primary sine refusal leaves every linked clone matrix and copy unchanged');
+}
+
+/** Complete27764 on a genuine six-active source graph, still beforebef4. */
+export function runBattleLeaderSelectionHydratedCompositionTests(): void {
+  runBattleLeaderSelectionSelfTests(createBattleTargetPreparationTestFixture);
 }

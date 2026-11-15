@@ -1,3 +1,4 @@
+import {captureMissingLeaderIngress} from './battle-leader-ingress.selftest.js';
 import {createActorThirdPassTestFixture} from './actor-third-pass.selftest.js';
 import {hasIncompleteSourceActorDoubleLifecycle,markIncompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {refineSourceTargetDistance,readSourceTargetDistance,sourceTargetDistanceSeed} from './source-target-distance.js';
@@ -5,7 +6,7 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const next='80029460 reached mandatory80027764',half='double80437660',three='double80437668';
+const next='pointer38: own data property required',half='double80437660',three='double80437668';
 const axes=['x','y','z'] as const;
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[actor-secondary-positive-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}
@@ -64,8 +65,10 @@ function fixture(make:Make,position:readonly number[]=[1,0,0]) {
 }
 type Fixture=ReturnType<typeof fixture>;
 function trace(x:Fixture,part=next,before:Visit=()=>{},after?:Visit):string[] {
+ const leaderPrefix=captureMissingLeaderIngress(x);
  const native=Object.getOwnPropertyDescriptor,events:string[]=[];let secondary=false;
  Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+  leaderPrefix.observe(owner,key);
   if(owner===x.sourceActor&&key==='visibilityTarget')secondary=true;
   if(secondary) {
    if(owner===x.admissionState&&key==='pointerc8')events.push('c8');
@@ -79,6 +82,7 @@ function trace(x:Fixture,part=next,before:Visit=()=>{},after?:Visit):string[] {
   const result=native(owner,key);if(secondary)after?.(owner,key);return result;
  }) as typeof native;
  try{refuses(()=>x.frame.runFrame(),part);}finally{Object.getOwnPropertyDescriptor=native;}
+ if(part===next)leaderPrefix.assert();
  equal(x.dereferences(),0,'actual cc opaque');equal(x.sourceActor.targetDistance758,20000,'primary total sentinel unchanged');
  equal(x.sourceActor.horizontalDistance75c,20000,'primary horizontal sentinel unchanged');
  check(hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),'refusal closes actor');
@@ -195,5 +199,5 @@ export function runActorSecondaryPositiveSelfTests(make:Make):void {
  console.log(`[actor-secondary-positive] computed-square domains/order PASS (${count} fixtures)`);
  admissionTests(create);console.log(`[actor-secondary-positive] lazy data/control/store faults PASS (${count} fixtures)`);
  terminalTests(create);
- console.log(`[actor-secondary-positive] PASS (${count} bounded synthetic graph fixtures): both positive estimators, actual multi-component squares, live horizontal/captured c8, exact constant/operand order, lazy controls/data, terminal aliases and partial stores; mandatory27764 remains blocked`);
+ console.log(`[actor-secondary-positive] PASS (${count} bounded synthetic graph fixtures): both positive estimators, actual multi-component squares, live horizontal/captured c8, exact constant/operand order, lazy controls/data, terminal aliases and partial stores; absent27764 row38 remains blocked after the third RNG draw`);
 }

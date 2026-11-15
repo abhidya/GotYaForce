@@ -9,6 +9,9 @@ export interface SourceBattleTeamRow extends Pick<BurstMeterState, 'charged'> {
   byte10?: number;
   /** Raw unsigned storage for source lha/sth row+18; reached lazily. */
   half18?: number;
+  /** Source row+38 pointer word.80027764 copies live slots2/1 then null/null;
+   * this is NOT a leader table. Canonical pointer identities, no dereference. */
+  pointer38?: symbol | null;
   threshold30?: number;
   /** Existing BurstMeterState owner for row+32, not a new raw halfword. */
   meter?: number;

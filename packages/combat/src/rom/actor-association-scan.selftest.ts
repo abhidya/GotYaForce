@@ -1,10 +1,11 @@
+import {captureMissingLeaderIngress} from './battle-leader-ingress.selftest.js';
 import {createActorThirdPassTestFixture} from './actor-third-pass.selftest.js';
 import {hasIncompleteSourceActorDoubleLifecycle,markIncompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {requireSourceObjectSchedulerSnapshot} from './source-object-scheduler.js';
 import type {createBattleTargetPreparationTestFixture} from './attached-setup-animation.selftest.js';
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Visit=(owner:object,key:PropertyKey,inner:boolean)=>void;
-const next='80029460 reached mandatory80027764';
+const next='pointer38: own data property required';
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[actor-association-scan-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}
 function refuses(f:()=>unknown,part:string):string {let message='';try{f();}catch(e){message=String(e);}check(message.includes(part),`expected ${part}, got ${message||'success'}`);return message;}
@@ -34,9 +35,11 @@ function closed(x:Fixture):void {
  refuses(()=>requireSourceObjectSchedulerSnapshot(x.scheduler,x.allocator,x.child),'private active');
 }
 function run(x:Fixture,expected=next,before:Visit=()=>{},after:Visit=()=>{}) {
+ const leaderPrefix=captureMissingLeaderIngress(x);
  const native=Object.getOwnPropertyDescriptor,events:string[]=[];
  let secondary=false,third=false,inner=false,physicalLoads=0,scheduler=0;
  Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+  leaderPrefix.observe(owner,key);
   if(owner===x.sourceActor&&key==='visibilityTarget')secondary=true;
   if(secondary&&owner===x.massPreparation&&key==='physicalBlock'){third=true;physicalLoads++;inner=physicalLoads>1;}
   if(third) {
@@ -54,6 +57,7 @@ function run(x:Fixture,expected=next,before:Visit=()=>{},after:Visit=()=>{}) {
   const result=native(owner,key);if(third)after(owner,key,inner);return result;
  }) as typeof native;
  let message='';try{message=refuses(()=>x.frame.runFrame(),expected);}finally{Object.getOwnPropertyDescriptor=native;}
+ if(expected===next)leaderPrefix.assert();
  check(secondary&&third,'genuine predecessors reached');equal(scheduler,0,'no scheduler access');retained(x);closed(x);
  return {events,message,physicalLoads};
 }
@@ -124,5 +128,5 @@ function faultTests(make:Make):void {
 }
 export function runActorAssociationScanSelfTests(make:Make):void {
  let count=0;const counted:Make=omit=>{count++;return make(omit);};branchTests(counted);captureTests(counted);faultTests(counted);
- console.log(`[actor-association-scan] PASS (${count} genuine shared-graph fixtures): fresh physical inner scan, lazy masks/teams, first-match sequential flags, captured values, role aliases and partial failure closure; still mandatory27764, no completed frame or browser claim`);
+ console.log(`[actor-association-scan] PASS (${count} genuine shared-graph fixtures): fresh physical inner scan, lazy masks/teams, first-match sequential flags, captured values, role aliases and partial failure closure; still absent27764 row38 after the third RNG draw, no completed frame or browser claim`);
 }

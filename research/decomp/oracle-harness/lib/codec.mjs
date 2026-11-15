@@ -85,7 +85,7 @@ export class Codec {
     // This new TS field holds an actual object identity, not a GC address.
     // Until an explicit arena resolver exists, never coerce that identity to0.
     // Keep legacy pointer fields' codec contracts unchanged.
-    if (iface === "RomActor" && tsField === "linkedOwner1e4" && rec.kind === "ptr") {
+    if (iface === "RomActor" && ["linkedOwner1e4", "pointer330"].includes(tsField) && rec.kind === "ptr") {
       if (value === null) value = 0;
       else if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 0xffffffff)
         throw new BlockedCodecError(tsField, "requires an explicit u32 arena address or null; object identities are unsupported");

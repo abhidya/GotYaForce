@@ -1,3 +1,4 @@
+import {captureMissingLeaderIngress} from './battle-leader-ingress.selftest.js';
 import type {SourceActorAttributeRefreshBinding} from './actor-attribute-refresh.js';
 import {createRomActor} from './actor.js';
 import {createActorSecondaryNullTestFixture} from './actor-secondary-null.selftest.js';
@@ -8,7 +9,7 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const next='80029460 reached mandatory80027764';
+const next='pointer38: own data property required';
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[actor-third-pass-test] ${why}`);}
 function equal(actual:unknown,expected:unknown,why:string):void {check(Object.is(actual,expected),`${why}: got ${String(actual)}, expected ${String(expected)}`);}
 function refuses(run:()=>unknown,part:string):string {let message='';try{run();}catch(error){message=String(error);}check(message.includes(part),`expected ${part}, got ${message||'success'}`);return message;}
@@ -22,7 +23,7 @@ function refuses(run:()=>unknown,part:string):string {let message='';try{run();}
  * The live mass table retains its documented repeated primary identity; this
  * fixture proves the distinct physical target pass, not six-actor mass setup.
  */
-function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<SourceActorCommandAdmissionBinding>>,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>) {
+function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<SourceActorCommandAdmissionBinding>>,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>,activePreparation=false) {
  const x=createActorSecondaryNullTestFixture(make);
  const ids=[...x.physicalIdentities],actuals:object[]=[...x.slotTargets];
  const bindings:(Partial<SourceActorCommandAdmissionBinding>|undefined)[]=[x.admissionState];
@@ -47,7 +48,7 @@ function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<
  for(const key of ['fbPhaseSlots','shotByte1db3','animState'])Reflect.deleteProperty(actual,key);
  x.cues.bindActor(id,{});
  const charge=x.commandAdmission.getChargeRuntime();charge.getEffects()?.bindActor(id,{});charge.bindActor(id,{});
- x.commandAdmission.getActionRuntime().bindActor(id,{});
+ x.commandAdmission.getActionRuntime().bindActor(id,activePreparation?{byte7d2:95}:{});
  x.commandAdmission.bindActor(id, i===1&&firstInitial!==undefined?firstInitial:i===omittedRow?{}:{pointer508:null});
  x.allocator.registerExternal(id,actual);
  ids[i]=id;actuals[i]=actual;bindings[i]=x.commandAdmission.getActorBinding(id);
@@ -59,13 +60,15 @@ function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<
 }
 type Fixture=ReturnType<typeof fixture>;
 /** Same genuine six-actor composition for later source continuation tests. */
-export function createActorThirdPassTestFixture(make:Make,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>) {return fixture(make,5,-1,undefined,attributes);}
+export function createActorThirdPassTestFixture(make:Make,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>,activePreparation=false) {return fixture(make,5,-1,undefined,attributes,activePreparation);}
 
 
 function trace(x:Fixture,expected=next,before:Visit=()=>{},after?:Visit) {
+ const leaderPrefix=captureMissingLeaderIngress(x);
  const native=Object.getOwnPropertyDescriptor,events:string[]=[];
  let secondary=false,third=false,schedulerReads=0;
  Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
+  leaderPrefix.observe(owner,key);
   if(owner===x.sourceActor&&key==='visibilityTarget')secondary=true;
   if(secondary&&owner===x.massPreparation&&key==='physicalBlock')third=true;
   if(secondary&&(owner===x.groups||owner===x.matchGlobals&&['maskD1','maskD2'].includes(String(key))))schedulerReads++;
@@ -79,6 +82,7 @@ function trace(x:Fixture,expected=next,before:Visit=()=>{},after?:Visit) {
   const result=native(owner,key);if(third)after?.(owner,key);return result;
  }) as typeof native;
  let message='';try{message=refuses(()=>x.frame.runFrame(),expected);}finally{Object.getOwnPropertyDescriptor=native;}
+ if(expected===next)leaderPrefix.assert();
  check(secondary&&third,'real secondary return and fresh third-pass physical base reached');
  equal(schedulerReads,0,'no scheduler masks or group authority after target preparation');
  return {events,message};
@@ -214,5 +218,5 @@ function ownerFailureTests(make:Make):void {
 export function runActorThirdPassSelfTests(make:Make):void {
  let fixtures=0;const counted:Make=omit=>{fixtures++;return make(omit);};
  compositionTests(counted);pointerTests(counted);capturedOrderTests(counted);ownerFailureTests(counted);
- console.log(`[actor-third-pass] PASS (${fixtures} genuine shared-graph fixtures): six distinct canonical admission owners, unconditional inactive508 reads, captured active/pointer order, opaque pointers, missing-owner and partial failure closure; target preparation reaches mandatory27764 only, no retail constructor, completed frame, scheduler execution or browser claim`);
+ console.log(`[actor-third-pass] PASS (${fixtures} genuine shared-graph fixtures): six distinct canonical admission owners, unconditional inactive508 reads, captured active/pointer order, opaque pointers, missing-owner and partial failure closure; target preparation reaches the absent27764 row38 destination after a third RNG draw, no retail constructor, completed frame, scheduler execution or browser claim`);
 }
