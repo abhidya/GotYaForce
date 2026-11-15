@@ -1366,13 +1366,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
       x.chainMatrices[2]![7] === 10 && x.chainMatrices[3]![7] === 10.5 && x.targetMatrices[1]![7] === -77,
       'late invalid bend retains reached primary translation and orientation but not either final Concat or linked copy');
   }
-  {
-    const x = primaryTerrainHydratedControlFixture(3, 11);
-    rejects(x.updateNormal, 'only flat');
-    check(x.normalState.primary1a14![0]!.y === 12 && x.chainMatrices[1]![7] === 10 && x.chainMatrices[1]![0] === 1 &&
-      x.chainMatrices[2]![7] === 10 && x.targetMatrices[1]![7] === -77,
-      'genuine changed floor target outside unit-displacement domain refuses after raw primary translation, with old basis and no clone copy');
-  }
+  runActorPrimaryNonunitAttachedRefusalSelfTest();
   {
     const x = primaryTerrainHydratedControlFixture();
     const reached: {x: number; y: number; z: number; height: number}[] = [];
@@ -13720,4 +13714,31 @@ export function runActorSecondaryPositiveHydratedCompositionTests(): void {
 
 export function runActorPrimaryPositiveHydratedCompositionTests(): void {
   runActorPrimaryPositiveSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+/** Genuine query and owned mode0→mode1 path; unsupported Y2 scalar remains
+ * a negative case after the now-admitted finite orientation. Not retail hydration. */
+export function runActorPrimaryNonunitAttachedRefusalSelfTest(): void {
+  const x = primaryTerrainHydratedControlFixture(3, 11);
+  const clones = [...x.targetMatrices, ...x.targetCopies];
+  const before = clones.map(matrix => matrix.slice());
+  rejects(x.updateNormal, 'primary positive sine square outside two-input estimate proof domain');
+  const word = new DataView(new ArrayBuffer(4));
+  const same = (matrix: readonly number[], expected: readonly number[]) => matrix.every((value, i) => {
+    word.setFloat32(0, value); return word.getUint32(0) === expected[i];
+  });
+  // Independently confirmed RN32 witness: incoming identity, actual Y2,
+  // Normalize squares16/4/4; first sine complement3d7c0000 is unsupported.
+  const current = [0x3f7ffffe, 0, 0, 0x42c80000, 0, 0x3f7ffffe, 0, 0x41200000,
+    0, 0, 0x3f7ffffe, 0x42c80000];
+  const adjacent = [0x3f800000, 0, 0, 0x42c80000, 0, 0x3f800000, 0, 0x41200000,
+    0, 0, 0x3f800000, 0x42c80000];
+  const end = adjacent.slice(); end[7] = 0x41280000;
+  check(x.queryCalls.length === 1 && x.queryCalls[0]!.height === 11 &&
+    x.normalState.count1d96 === 1 && x.normalState.count1d97 === 0 && x.normalState.primary1a14![0]!.y === 12,
+    'genuine changed floor query creates target12 and one owned primary correction');
+  check(same(x.chainMatrices[1]!, current) && same(x.chainMatrices[2]!, adjacent) && same(x.chainMatrices[3]!, end),
+    'unsupported Y2 sine retains exact completed orientation but no primary Concat or distal continuation');
+  check(clones.every((matrix, i) => matrix.every((value, j) => Object.is(value, before[i]![j]))),
+    'late primary sine refusal leaves every linked clone matrix and copy unchanged');
 }
