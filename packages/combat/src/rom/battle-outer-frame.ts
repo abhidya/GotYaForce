@@ -124,6 +124,7 @@ const s8=(value: number): number=>value<<24>>24;
 // callbacks. A stale earlier metadata snapshot cannot authorize creation or a
 // setter call after the observable ownership checks have completed.
 const primaryStoreDescriptor=Reflect.getOwnPropertyDescriptor;
+const primaryStoreDescriptors=Object.getOwnPropertyDescriptors;
 export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFrameSources): SourceBattleOuterFrameRuntime {
   const scheduler=own(sources,'scheduler');
   if(!isSourceObjectSchedulerRuntime(scheduler)) fail('genuine source scheduler required');
@@ -573,8 +574,11 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       };
       const load=(owner: object,key: string): unknown=>{const value=read(owner,key);basicGuard();return value;};
       let data: object|undefined;
-      let nullDirection=false,secondaryReached=false,ccReached=false,aimReached=false;
+      let nullDirection=false,secondaryReached=false,ccReached=false,aimReached=false,c8Reached=false;
       let operandsGuard=basicGuard;
+      let terminalRuntime: SourceActorCommandAdmissionRuntime|undefined;
+      let terminalRecords: object[]=[],terminalActors: readonly object[]=[];
+      let terminalAim: object|undefined,terminalPosition: object|undefined,terminalSelected: object|undefined;
       const distanceKeys=['targetDistance758','horizontalDistance75c','targetDistance760','horizontalDistance764'] as const;
       const secondaryAliases=['field760','field764','float760','float764',
         ...Array.from({length:8},(_,index)=>0x760+index).flatMap(offset=>
@@ -582,12 +586,19 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       const aimAliases=['field518','field51c','field51C','field520','position518','targetPosition518',
         ...Array.from({length:12},(_,index)=>0x518+index).flatMap(offset=>
           [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
+      const positionAliases20=['position20','field20','field24','field28',
+        ...Array.from({length:12},(_,index)=>0x20+index).flatMap(offset=>
+          [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
+      const selectedAliases=['field50c','field50C','field510','field514','position50c','targetPosition50c',
+        ...Array.from({length:12},(_,index)=>0x50c+index).flatMap(offset=>
+          [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
       const shadowKeys=['field758','field75c','field75C','float758','float75c','float75C',
         ...Array.from({length:8},(_,index)=>0x758+index).flatMap(offset=>
           [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])];
       const distanceGuard=(): void=>{
         operandsGuard();
         const commandRuntime=admission(),actionRuntime=commandRuntime.getActionRuntime();
+        terminalRuntime=commandRuntime;
         if(data!==undefined && commandRuntime.getData()!==data) fail('6ae60 primary shared data owner changed');
         const actualActors=world.getRetainedActorOwners();
         if(!actualActors.includes(actor)) fail('6ae60 primary actual actor owner missing');
@@ -602,6 +613,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           ...root.getRetainedStorageOwners(),...scheduler.getRetainedStorageOwners()];
         // Host metadata inventories, not extra source scalar or target reads.
         const records=[...new Set([...canonical,...actualActors,...massActors.values(),...(data?[data]:[])])];
+        terminalRecords=records;terminalActors=actualActors;
         const snapshots=records.map(owner=>({owner,fields:Object.getOwnPropertyDescriptors(owner)}));basicGuard();
         const nested=snapshots.flatMap(({fields})=>Object.values(fields).flatMap(p=>
           'value' in p && p.value!==null && typeof p.value==='object' ? [p.value as object]:[]));
@@ -637,6 +649,15 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
             if(!actualActors.includes(owner) && fields.aimOrigin518!==undefined)
               fail('aimOrigin518: competing secondary aim storage');
           }
+          if(c8Reached) {
+            if(fields.pointerc8!==undefined && ![...commandOwners.values()].some(entry=>entry.binding===owner))
+              fail('pointerc8: competing secondary canonical source storage');
+            for(const key of ['pointerC8','fieldc8','fieldC8','bytec8','bytec9','byteca','bytecb',
+              'byteC8','byteC9','byteCA','byteCB']) if(fields[key]!==undefined)
+              fail(`${key}: competing secondary pointerc8 alias`);
+            if(owner===actor) for(const key of ['pointerc8','200','201','202','203']) if(fields[key]!==undefined)
+              fail(`${key}: competing secondary pointerc8 storage`);
+          }
           if(aimReached) for(const key of aimAliases) if(fields[key]!==undefined)
             fail(`${key}: competing secondary aim storage alias`);
           if(nullDirection) {
@@ -649,6 +670,67 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           }
         }
         operandsGuard();
+      };
+      const terminalSecondary=(): void=>{
+        if(!c8Reached) return;
+        // Public metadata observers have finished. Rebuild nested ownership
+        // from native descriptors, so a final observer cannot add an alias or
+        // replace a canonical link and let the pending store slip through.
+        // These are host records, not extra loads of captured source scalars.
+        const nativeRead=(owner: object,key: string): unknown=>{
+          const field=primaryStoreDescriptor(owner,key);
+          if(!field || !('value' in field)) fail(`${key}: terminal own data property required`);
+          return field.value;
+        };
+        const runtime=terminalRuntime;
+        if(!runtime || nativeRead(sources,'targetPreparation')!==target || nativeRead(target,'admission')!==runtime ||
+          nativeRead(sources,'scheduler')!==scheduler || spawns.getAdmissionRuntime()!==runtime ||
+          runtime.getActualActor(id)!==actor || runtime.getActorBinding(id)!==binding ||
+          runtime.getData()!==data || world.getActualActor(id)!==actor || status.getActualActor(id)!==actor)
+          fail('secondary terminal canonical actor/admission/data owner changed');
+        if(terminalAim!==undefined && nativeRead(actor,'aimOrigin518')!==terminalAim)
+          fail('secondary terminal aimOrigin518 owner changed');
+        if(terminalSelected!==undefined && nativeRead(actor,'lockTarget')!==terminalSelected)
+          fail('secondary terminal selected position owner changed');
+        if(terminalPosition!==undefined && (nativeRead(actor,'pos')!==terminalPosition || world.getPositionOwner(id)!==terminalPosition))
+          fail('secondary terminal position20 owner changed');
+        const selectedAliasOwners=[actor,binding,terminalSelected,data,runtime.getGlobal(),runtime.getWorldBinding(id),
+          runtime.getStatusBinding(id),runtime.getMappingActor(id),runtime.getAttributeBinding(id),runtime.getChargeBinding(id),
+          runtime.getActionBinding(id),runtime.getCueBinding(id),runtime.getDispatchBinding(id),runtime.getStartBinding(id),runtime.getStreamBinding(id)];
+        const snapshots=terminalRecords.map(owner=>({owner,fields:primaryStoreDescriptors(owner)}));
+        const nested=snapshots.flatMap(({fields})=>Object.values(fields).flatMap(p=>
+          'value' in p && p.value!==null && typeof p.value==='object'?[p.value as object]:[]));
+        for(const owner of new Set([...terminalRecords,...nested])) {
+          const fields=primaryStoreDescriptors(owner);
+          const ban=(keys: readonly string[]): void=>{
+            for(const key of keys) if(fields[key]!==undefined) fail(`${key}: competing secondary terminal storage alias`);
+          };
+          if(!terminalActors.includes(owner)) ban([...distanceKeys,'visibilityTarget','aimOrigin518','heading']);
+          ban([...shadowKeys,...secondaryAliases,...aimAliases,'pointerCC','pointercc','fieldcc','fieldCC',
+            'bytecc','bytecd','bytece','bytecf','byteCC','byteCD','byteCE','byteCF',
+            'pointerC8','fieldc8','fieldC8','bytec8','bytec9','byteca','bytecb','byteC8','byteC9','byteCA','byteCB',
+            'field72','short72','yaw72','byte72','byte73']);
+          if(fields.pointerc8!==undefined && ![...commandOwners.values()].some(entry=>entry.binding===owner))
+            fail('pointerc8: competing secondary terminal canonical storage');
+          if(owner===actor) ban(['200','201','202','203','204','205','206','207']);
+          if(owner===actor && terminalPosition!==undefined) ban(positionAliases20);
+          if(terminalSelected!==undefined && selectedAliasOwners.includes(owner)) {
+            ban(selectedAliases);if(owner!==actor) ban(['lockTarget']);
+            if(owner===terminalSelected) ban(['active0','team','byte502','pointer504','pointer508','descriptor4b0',
+              'lifecycle18','half80436242','count804361a0']);
+          }
+          if(owner!==data) ban(['float80437658','float80437678','float80437078']);
+          for(const [key,p] of Object.entries(fields)) if('value' in p) {
+            if(terminalAim!==undefined && owner!==terminalAim && p.value===terminalAim && !(owner===actor&&key==='aimOrigin518'))
+              fail('secondary terminal aimOrigin518 aliases canonical reference');
+            if(terminalSelected!==undefined && owner!==terminalSelected && p.value===terminalSelected && !(owner===actor&&key==='lockTarget'))
+              fail('secondary terminal selected position aliases canonical reference');
+            if(terminalPosition!==undefined && owner!==terminalPosition && p.value===terminalPosition && !(owner===actor&&key==='pos'))
+              fail('secondary terminal position20 aliases canonical reference');
+          }
+        }
+        check();requireCompleteSourceActorDoubleLifecycle(actor);
+        runtime.assertActorComplete(id);allocator.assertActorComplete(id);check();
       };
       const sourceFloat=(value: unknown,key: string): number=>{
         if(typeof value!=='number' || !Number.isFinite(value) || !Object.is(value,Math.fround(value)))
@@ -673,12 +755,49 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         const current=Object.getOwnPropertyDescriptors(actor)[key];distanceGuard();
         if(!current || !('value' in current)) fail(`${key}: own data property changed before store`);
         if(!current.writable) fail(`${key}: non-writable field before store`);
+        terminalSecondary();
         const live=primaryStoreDescriptor(actor,key);
         if(!live || !('value' in live)) fail(`${key}: live own data property required before store`);
         if(!live.writable) fail(`${key}: live non-writable field before store`);
         // No application callback occurs between this final intrinsic and the
         // plain own-data overwrite. The old scalar is never validated or used.
         (actor as Record<string,unknown>)[key]=value;distanceGuard();
+      };
+      const preparePosition=(): {position: object;guard: ()=>void}=>{
+      noShadows(actor,positionAliases20);
+      const position=record(load(actor,'pos'),'6ae60 actual position20');
+      terminalPosition=position;
+      if(Array.isArray(position)) fail('6ae60 position20 requires ordinary source vector');
+      if(call(()=>world.getPositionOwner(id))!==position) fail('6ae60 actual position record changed');
+      const positionGuard=(): void=>{
+        basicGuard();
+        const field=Object.getOwnPropertyDescriptor(actor,'pos');check();
+        if(!field || !('value' in field) || field.value!==position || world.getPositionOwner(id)!==position)
+          fail('6ae60 actual position record changed');
+        const commandRuntime=admission(),actionRuntime=commandRuntime.getActionRuntime();
+        const structured=[sources,globals,root,scheduler,allocator,spawns,world,actor,binding,
+          commandRuntime.getGlobal(),commandRuntime.getData(),commandRuntime.getWorldBinding(id),
+          commandRuntime.getStatusBinding(id),commandRuntime.getMappingActor(id),commandRuntime.getAttributeBinding(id),
+          commandRuntime.getChargeBinding(id),commandRuntime.getActionBinding(id),commandRuntime.getCueBinding(id),
+          commandRuntime.getDispatchBinding(id),commandRuntime.getStartBinding(id),commandRuntime.getStreamBinding(id),
+          ...retained.values(),...massActors.values(),...world.getRetainedMatrixOwners(),
+          ...commandRuntime.getKnownStorageOwners(),...actionRuntime.getRetainedStorageOwners(),
+          ...status.getRetainedStorageOwners(),...allocator.getRetainedStorageOwners()];
+        //Only this actor's inline pos reference is admitted. The vector cannot
+        //also be canonical bytes, helper data, another actor or another vector.
+        const references=[...structured,root.getDrawList(),...dispatch.getRetainedStorageOwners(),
+          ...root.getRetainedStorageOwners(),...scheduler.getRetainedStorageOwners()];check();
+        for(const owner of references) {
+          if(owner===position) continue;
+          const fields=Object.getOwnPropertyDescriptors(owner);check();
+          for(const [key,p] of Object.entries(fields)) if('value' in p && p.value===position && !(owner===actor && key==='pos'))
+            fail('6ae60 position20 aliases canonical source reference');
+        }
+        if(structured.includes(position))
+          fail('6ae60 position20 aliases canonical source storage');
+        basicGuard();
+      };
+        positionGuard();return {position,guard:positionGuard};
       };
       for(const owner of [actor,binding]) noShadows(owner,['field504','field508',
         ...Array.from({length:8},(_,index)=>0x504+index).flatMap(offset=>
@@ -723,7 +842,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         const storeSelected=(axis: 'x'|'y'|'z',value: number): void=>{
           const borrowed=call(()=>dispatch.getSelectedPositionOwner(id));
           if(selected!==undefined && borrowed!==selected) fail('6ae60 selected position canonical owner changed');
-          selected=borrowed;operandsGuard=selectedGuard;distanceGuard();
+          selected=borrowed;terminalSelected=selected;operandsGuard=selectedGuard;distanceGuard();
           const field=Object.getOwnPropertyDescriptor(selected,axis);distanceGuard();
           if(!field || !('value' in field)) fail(`selected ${axis}: own data property required`);
           if(!field.writable) fail(`selected ${axis}: non-writable field`);
@@ -758,16 +877,12 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         const ccField=Object.getOwnPropertyDescriptor(actor,'visibilityTarget');distanceGuard();
         if(!ccField || !('value' in ccField)) fail('8006b1d0 visibilityTarget: own data property required');
         const secondary=ccField.value;
-        if(secondary!==null) {
-          record(secondary,'8006b1d0 visibilityTarget');
-          fail('8006b1dc reached mandatory captured secondary pointerc8 load');
-        }
+        if(secondary!==null) record(secondary,'8006b1d0 visibilityTarget');
         secondaryReached=true;distanceGuard();
-        const secondaryMissing=constant('float80437678',20000,'8006b2ec');
-        store('horizontalDistance764',secondaryMissing);store('targetDistance760',secondaryMissing);
+        let secondaryPositionGuard=(): void=>{};
         let aimed: object|undefined;
         const aimGuard=(): void=>{
-          selectedGuard();
+          selectedGuard();secondaryPositionGuard();
           if(aimed!==undefined) {
             const commandRuntime=admission();
             for(const owner of [actor,binding,aimed,commandRuntime.getData(),commandRuntime.getWorldBinding(id),
@@ -794,7 +909,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           aimReached=true;distanceGuard();
           const borrowed=call(()=>admission().getAimPositionOwner(id));
           if(aimed!==undefined && aimed!==borrowed) fail('aimOrigin518 canonical owner changed');
-          aimed=borrowed;operandsGuard=aimGuard;distanceGuard();
+          aimed=borrowed;terminalAim=aimed;operandsGuard=aimGuard;distanceGuard();
           for(const owner of [actor,binding,aimed,admission().getData(),admission().getWorldBinding(id),
             admission().getStatusBinding(id),admission().getMappingActor(id),admission().getActionBinding(id)])
             noShadows(owner,aimAliases);
@@ -804,11 +919,65 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           const current=Object.getOwnPropertyDescriptors(aimed)[axis];distanceGuard();
           if(!current || !('value' in current)) fail(`aim ${axis}: own data property changed before store`);
           if(!current.writable) fail(`aim ${axis}: non-writable field before store`);
+          terminalSecondary();
           const live=primaryStoreDescriptor(aimed,axis);
           if(!live || !('value' in live)) fail(`aim ${axis}: live own data property required before store`);
           if(!live.writable) fail(`aim ${axis}: live non-writable field before store`);
           (aimed as Record<string,unknown>)[axis]=value;distanceGuard();
         };
+        if(secondary!==null) {
+          //b1dc captures admission+c8 once. Actual+cc only selects this branch;
+          //it is never dereferenced or used as the original OBJECT provider.
+          c8Reached=true;distanceGuard();
+          const provider=load(binding,'pointerc8');distanceGuard();
+          const captured=record(provider,'8006b1dc captured secondary pointerc8');
+          const object=call(()=>allocator.getPointerIdentity(captured));distanceGuard();
+          //The copy dereferences an original OBJECT, not descriptor memory
+          //or an external actor registered under another pointer identity.
+          call(()=>allocator.getObject(object));distanceGuard();
+          const word=(offset: number): number=>{
+            const value=call(()=>allocator.readU32(object,offset));distanceGuard();return value;
+          };
+          const storeWord=(axis: 'x'|'y'|'z',bits: number): void=>{
+            //The source uses lwz/stw, not lfs/stfs. The canonical numeric aim
+            //owner supports every finite f32 bit pattern, including -0. Reject
+            //NaN/Inf only at this reached store, not at either earlier load.
+            if((bits&0x7f800000)===0x7f800000)
+              fail(`secondary aim ${axis}: unsupported nonfinite integer-copy bits`);
+            const view=new DataView(new ArrayBuffer(4));view.setUint32(0,bits,false);
+            storeAim(axis,view.getFloat32(0,false));
+          };
+          const xWord=word(0x64),yWord=word(0x68);
+          storeWord('x',xWord);storeWord('y',yWord);
+          const zWord=word(0x6c);storeWord('z',zWord);
+          //b1e0 forms an inline address, not a position operand load. Defer
+          //the numeric-vector admission until the reached bc88 call.
+          const {position,guard:positionGuard}=preparePosition();
+          secondaryPositionGuard=positionGuard;operandsGuard=aimGuard;distanceGuard();
+          const processor=call(()=>root.getVectorProcessorProfile());distanceGuard();
+          if(processor===undefined) fail('8006b208 reached authenticated8020bc88 PSVECSquareDistance; explicit processor profile unavailable');
+          if(processor===position) fail('6ae60 position20 aliases processor storage');
+          const distance=readSourceSquareDistance({a:position,aName:'position20',b:captured,bRepresentation:'record',
+            allocator,root,processor,guard:distanceGuard});
+          if(distance>constant('float80437658',0,'8006b20c'))
+            fail('8006b218 reached unsupported frsqrte secondary distance estimator');
+          store('targetDistance760',distance);
+          const zero=constant('float80437658',0,'8006b268');
+          const scalar=(axis: 'x'|'z'): number=>{
+            const value=read(position,axis);distanceGuard();return sourceFloat(value,axis);
+          };
+          const ax=scalar('x'),bx=call(()=>allocator.readF32(object,0x64));distanceGuard();
+          const az=scalar('z'),bz=call(()=>allocator.readF32(object,0x6c));distanceGuard();
+          const dx=addSourceFloat32(ax,-bx),dz=addSourceFloat32(az,-bz);distanceGuard();
+          const xx=sourceFloat(Math.fround(dx*dx),'secondary horizontal X square'),
+            zz=sourceFloat(Math.fround(dz*dz),'secondary horizontal Z square');distanceGuard();
+          const horizontal=addSourceFloat32(xx,zz);distanceGuard();
+          if(horizontal>zero) fail('8006b298 reached unsupported frsqrte secondary horizontal estimator');
+          store('horizontalDistance764',horizontal);
+          return; //b2e8 rejoins the same b33c second-pass continuation.
+        }
+        const secondaryMissing=constant('float80437678',20000,'8006b2ec');
+        store('horizontalDistance764',secondaryMissing);store('targetDistance760',secondaryMissing);
         const secondaryHorizontal=(): number=>{
           const value=read(actor,'horizontalDistance764');distanceGuard();return sourceFloat(value,'horizontalDistance764');
         };
@@ -834,40 +1003,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       //af98 captures504 before forming both vector addresses. Pointer-domain
       //admission for B is deferred until its first actual paired load.
       const provider=load(binding,'pointer504');
-      noShadows(actor,['position20','field20','field24','field28',
-        ...Array.from({length:12},(_,index)=>0x20+index).flatMap(offset=>
-          [String(offset),'byte'+offset.toString(16),'byte'+offset.toString(16).toUpperCase()])]);
-      const position=record(load(actor,'pos'),'6ae60 actual position20');
-      if(Array.isArray(position)) fail('6ae60 position20 requires ordinary source vector');
-      if(call(()=>world.getPositionOwner(id))!==position) fail('6ae60 actual position record changed');
-      const positionGuard=(): void=>{
-        basicGuard();
-        const field=Object.getOwnPropertyDescriptor(actor,'pos');check();
-        if(!field || !('value' in field) || field.value!==position || world.getPositionOwner(id)!==position)
-          fail('6ae60 actual position record changed');
-        const commandRuntime=admission(),actionRuntime=commandRuntime.getActionRuntime();
-        const structured=[sources,globals,root,scheduler,allocator,spawns,world,actor,binding,
-          commandRuntime.getGlobal(),commandRuntime.getData(),commandRuntime.getWorldBinding(id),
-          commandRuntime.getStatusBinding(id),commandRuntime.getMappingActor(id),commandRuntime.getAttributeBinding(id),
-          commandRuntime.getChargeBinding(id),commandRuntime.getActionBinding(id),commandRuntime.getCueBinding(id),
-          commandRuntime.getDispatchBinding(id),commandRuntime.getStartBinding(id),commandRuntime.getStreamBinding(id),
-          ...retained.values(),...massActors.values(),...world.getRetainedMatrixOwners(),
-          ...commandRuntime.getKnownStorageOwners(),...actionRuntime.getRetainedStorageOwners(),
-          ...status.getRetainedStorageOwners(),...allocator.getRetainedStorageOwners()];
-        //Only this actor's inline pos reference is admitted. The vector cannot
-        //also be canonical bytes, helper data, another actor or another vector.
-        const references=[...structured,root.getDrawList(),...dispatch.getRetainedStorageOwners(),
-          ...root.getRetainedStorageOwners(),...scheduler.getRetainedStorageOwners()];check();
-        for(const owner of references) {
-          if(owner===position) continue;
-          const fields=Object.getOwnPropertyDescriptors(owner);check();
-          for(const [key,p] of Object.entries(fields)) if('value' in p && p.value===position && !(owner===actor && key==='pos'))
-            fail('6ae60 position20 aliases canonical source reference');
-        }
-        if(structured.includes(position))
-          fail('6ae60 position20 aliases canonical source storage');
-        basicGuard();
-      };
+      const {position,guard:positionGuard}=preparePosition();
       operandsGuard=positionGuard;positionGuard();
       const processor=call(()=>root.getVectorProcessorProfile());
       if(processor===undefined) fail('8006afac reached authenticated8020bc88 PSVECSquareDistance; explicit processor profile unavailable');

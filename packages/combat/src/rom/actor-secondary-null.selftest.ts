@@ -208,7 +208,7 @@ function capturedOperandTests(make:Make):void {
   for(const initiallyNull of [false,true]) {
     const x=setup(make),opaque={};let changed=false;
     Reflect.set(x.sourceActor,'visibilityTarget',initiallyNull?null:opaque);
-    run(x,initiallyNull?tail:'8006b1dc',()=>{},(owner,key)=>{if(!changed&&owner===x.sourceActor&&key==='visibilityTarget') {
+    run(x,initiallyNull?tail:'pointerc8',()=>{},(owner,key)=>{if(!changed&&owner===x.sourceActor&&key==='visibilityTarget') {
       changed=true;Reflect.set(x.sourceActor,'visibilityTarget',initiallyNull?opaque:null);
     }});
     check(changed,'cc source mutated after actual descriptor capture');
@@ -531,5 +531,5 @@ export function runActorSecondaryNullSelfTests(make:Make):void {
   let fixtures=0;const counted:Make=omit=>{fixtures++;return make(omit);};
   orderAndBoundaryTests(counted);capturedOperandTests(counted);aimOwnershipTests(counted);sentinelTests(counted);arithmeticAndSourceTests(counted);destinationTests(counted);
   competingSourceTests(counted);interruptionTests(counted);finalSnapshotTests(counted);laterBoundaryTests(counted);
-  console.log(`[actor-secondary-null] PASS (${fixtures} genuine graph fixtures): actual nullcc, opaque nonnullcc boundary, retained764/760 sentinels, fresh signed trig/764 and descriptor row7, canonical admission aim ownership, exact partial stores and final snapshot closure; genuine remaining second pass and third-pass dependency boundary, no estimator, scheduler authority or completed outer frame`);
+  console.log(`[actor-secondary-null] PASS (${fixtures} genuine graph fixtures): actual nullcc, opaque nonnullcc / malformed c8 refusal, retained764/760 sentinels, fresh signed trig/764 and descriptor row7, canonical admission aim ownership, exact partial stores and final snapshot closure; genuine remaining second pass and third-pass dependency boundary, no estimator, scheduler authority or completed outer frame`);
 }

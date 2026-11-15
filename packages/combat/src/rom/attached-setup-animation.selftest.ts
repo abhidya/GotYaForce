@@ -1,3 +1,4 @@
+import {runActorSecondaryNonnullSelfTests} from './actor-secondary-nonnull.selftest.js';
 import {runActorAssociationScanSelfTests} from './actor-association-scan.selftest.js';
 import {runActorAssociationGuardsSelfTests} from './actor-association-guards.selftest.js';
 import {runActorThirdPassTarget83SelfTests} from './actor-third-pass-target83.selftest.js';
@@ -2903,6 +2904,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runActorPrimaryStoresHydratedCompositionTests();
   runActorNullDirectionHydratedCompositionTests();
   runActorSecondaryNullHydratedCompositionTests();
+  runActorSecondaryNonnullHydratedCompositionTests();
   runActorThirdPassHydratedCompositionTests();
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
@@ -13448,4 +13450,9 @@ export function runActorAssociationGuardsHydratedCompositionTests(): void {
 
 export function runActorAssociationScanHydratedCompositionTests(): void {
   runActorAssociationScanSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+/** Bounded synthetic graph composition, not a retail hydration claim. */
+export function runActorSecondaryNonnullHydratedCompositionTests(): void {
+  runActorSecondaryNonnullSelfTests(createBattleTargetPreparationTestFixture);
 }
