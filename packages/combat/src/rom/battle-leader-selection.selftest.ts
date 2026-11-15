@@ -14,8 +14,8 @@ function refuses(run:()=>unknown,part:string):string {let message='';try{run();}
  * status, stage, action and admission registries. Lifecycle0 legitimately skips
  * target selection while still executing all six mass/target preparation rows.
  * No activation hook, successful callback or retail constructor is supplied. */
-export function createBattleLeaderSelectionTestFixture(make:Make) {
- fixtures++;const x=createActorThirdPassTestFixture(make,undefined,true),actors=x.physicalActors as RomActor[];
+export function createBattleLeaderSelectionTestFixture(make:Make,status6fc?:number) {
+ fixtures++;const x=createActorThirdPassTestFixture(make,undefined,true,status6fc),actors=x.physicalActors as RomActor[];
  for(const [i,id]of x.physicalIdentities.entries()) {
   x.actorSlots[i]=id;
   const actor=actors[i]!,borg=x.status.getActualBorg(id);

@@ -7,7 +7,7 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Fixture=ReturnType<typeof createBattleParticipantViewTestFixture>;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const NORMAL='80029488 reached mandatory80053a2c',NONZERO='800294c8 reached mandatory80089554';
+const NORMAL='unknown/non-owned matrix-update actor',NONZERO='800294c8 reached mandatory80089554';
 const ORDER=[41,42,43,44,45,46,40,47,33,34,35,36,37,38,32,39];
 let fixtures=0;
 function check(ok:boolean,why:string):void{if(!ok)throw Error('[battle-scheduler-join-test] '+why);}
@@ -23,22 +23,25 @@ function closed(x:Fixture):void{
 }
 function run(x:Fixture,expected=x.paused?NONZERO:NORMAL,visit:Visit=()=>{}){
  const native=Object.getOwnPropertyDescriptor,groups:number[]=[],slots:number[]=[],masks:string[]=[];
- let inParticipant=false,started=false;
+ let inParticipant=false,started=false,prefix=false,prefixModes=0;
  Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
   if(owner===x.system&&key==='byte40')inParticipant=true;
   if(inParticipant&&owner===x.match&&key==='byte66')started=true;
-  if(started){
+  if(started&&!prefix){
    if(owner===x.groups&&/^\d+$/.test(String(key)))groups.push(Number(key));
    if(owner===x.actorSlots&&/^[0-5]$/.test(String(key)))slots.push(Number(key));
    if(owner===x.match&&['maskD1','maskD2'].includes(String(key)))masks.push(String(key));
    visit(owner,key);
+   if(owner===x.groups[39]&&key==='head')prefix=true;
   }
+  if(prefix&&key==='mode4a0')prefixModes++;
   return native(owner,key);
  }) as typeof native;
  let message='';try{message=refuses(()=>x.frame.runFrame(),expected);}finally{Object.getOwnPropertyDescriptor=native;}
  check(started,'fresh mode load reached after real participant binding');closed(x);
  equal(x.match.halfD6,0x1234,'unrequested mode-counter reset is not manufactured');
  equal(x.groups[9]!.head,x.child,'genuinely allocated projectile remains in source group9');
+ if(expected===NORMAL)check(prefixModes>0,'real5ace8 mode load follows completed scheduler');
  return{groups,slots,masks,message};
 }
 function normal(make:Make):void{
@@ -164,5 +167,5 @@ function aliases(make:Make):void{
 }
 export function runBattleSchedulerJoinSelfTests(make:Make):void{
  fixtures=0;normal(make);nonzero(make);live(make);inactiveAndUnsupported(make);authority(make);closedReadonlyDiagnostics(make);aliases(make);
- console.log(`[battle-scheduler-join] PASS (${fixtures} explicit shared-owner fixtures): real40/32 wrappers and58/57 groups; live pause/eligibility/next, absent-input and active-domain refusal, exact private authority and cross-layer closure;53a2c/89554, actor55568 and full frame remain unsupported`);
+ console.log(`[battle-scheduler-join] PASS (${fixtures} explicit shared-owner fixtures): real40/32 wrappers and58/57 groups; live pause/eligibility/next, absent-input and active-domain refusal, exact private authority and cross-layer closure; direct53a2c reaches its real matrix prerequisite;89554, actor55568 and full frame remain unsupported`);
 }

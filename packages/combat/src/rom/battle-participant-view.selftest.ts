@@ -6,7 +6,7 @@ import type {SourceActorPlayerSlotRecord} from './actor-slot-status.js';
 import type {createBattleTargetPreparationTestFixture} from './attached-setup-animation.selftest.js';
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const NORMAL='80029488 reached mandatory80053a2c',PAUSED='800294c8 reached mandatory80089554';
+const NORMAL='unknown/non-owned matrix-update actor',PAUSED='800294c8 reached mandatory80089554';
 const pointers=['pointer14','pointer18','pointer1c','pointer20'] as const;
 const metadata=['byte0c','byte0d','byte0e','byte0f'] as const;
 const selectors=['byteC0','byteC1','byteC2','byteC3'] as const;
@@ -16,8 +16,8 @@ function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why
 function refuses(run:()=>unknown,part:string):string {let message='';try{run();}catch(e){message=String(e);}check(message.includes(part),`expected ${part}, got ${message||'success'}`);return message;}
 /** Explicit current synthetic cells on the same six-actor leader graph. No
  * replacement helper, callback, actor activation hook or source constructor. */
-export function createBattleParticipantViewTestFixture(make:Make,paused=false) {
- fixtures++;const x=createBattleLeaderSelectionTestFixture(make);
+export function createBattleParticipantViewTestFixture(make:Make,paused=false,status6fc?:number) {
+ fixtures++;const x=createBattleLeaderSelectionTestFixture(make,status6fc);
  // Explicit empty source lists for the first outer scheduler calls. The
  // genuinely spawned projectile stays in its allocator-owned group9.
  for(const group of [...Array.from({length:16},(_,i)=>32+i),57,58])x.groups[group]={head:null,tail:null};
@@ -46,7 +46,7 @@ function closed(x:Fixture):void {
 /** Descriptor observation changes only declared input records, never methods.
  * Actual source loads are distinguished from immutable diagnostic metadata. */
 function run(x:Fixture,expected=x.paused?PAUSED:NORMAL,before:Visit=()=>{},after:Visit=()=>{}) {
- const native=Object.getOwnPropertyDescriptor,events:string[]=[];let started=false,finished=false,schedulerReads=0;
+ const native=Object.getOwnPropertyDescriptor,events:string[]=[];let started=false,finished=false,schedulerReads=0,prefixReached=false,prefixModes=0;
  Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
   if(owner===x.system&&key==='byte40')started=true;
   if(started&&!finished) {
@@ -62,9 +62,12 @@ function run(x:Fixture,expected=x.paused?PAUSED:NORMAL,before:Visit=()=>{},after
    before(owner,key);
    if(owner===x.match&&key==='byte66')finished=true;
   }
+  if(finished&&owner===x.groups[39]&&key==='head')prefixReached=true;
+  if(prefixReached&&key==='mode4a0')prefixModes++;
   const result=native(owner,key);if(started)after(owner,key);return result;
  }) as typeof native;
  let message='';try{message=refuses(()=>x.frame.runFrame(),expected);}finally{Object.getOwnPropertyDescriptor=native;}
+ if(expected===NORMAL)check(prefixReached&&prefixModes>0,'completed wrappers reach real5ace8 matrix prerequisite');
  check(started,'actual bef4 entry reached');equal(schedulerReads,0,'no scheduler masks/groups/snapshots before fresh mode load');closed(x);return{events,message};
 }
 function viewIndex(x:Fixture,index:number):number {

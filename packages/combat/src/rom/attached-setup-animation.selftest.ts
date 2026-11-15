@@ -1,3 +1,4 @@
+import {runBattleOrderedActorPrefixSelfTests} from './battle-ordered-actor-prefix.selftest.js';
 import {runBattleSchedulerJoinSelfTests} from './battle-scheduler-join.selftest.js';
 import {runBattleParticipantViewSelfTest} from './battle-participant-view.selftest.js';
 import {runBattleLeaderSelectionSelfTests} from './battle-leader-selection.selftest.js';
@@ -2922,6 +2923,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleLeaderSelectionHydratedCompositionTests();
   runBattleParticipantViewHydratedCompositionTests();
   runBattleSchedulerJoinHydratedCompositionTests();
+  runBattleOrderedActorPrefixHydratedCompositionTests();
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();
@@ -13763,4 +13765,8 @@ export function runBattleParticipantViewHydratedCompositionTests(): void {
 /** Actual first outer scheduler calls with explicit empty/inactive source lists. */
 export function runBattleSchedulerJoinHydratedCompositionTests(): void {
   runBattleSchedulerJoinSelfTests(createBattleTargetPreparationTestFixture);
+}
+
+export function runBattleOrderedActorPrefixHydratedCompositionTests():void{
+ runBattleOrderedActorPrefixSelfTests(createBattleTargetPreparationTestFixture);
 }

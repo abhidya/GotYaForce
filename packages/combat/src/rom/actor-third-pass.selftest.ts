@@ -23,7 +23,7 @@ function refuses(run:()=>unknown,part:string):string {let message='';try{run();}
  * The live mass table retains its documented repeated primary identity; this
  * fixture proves the distinct physical target pass, not six-actor mass setup.
  */
-function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<SourceActorCommandAdmissionBinding>>,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>,activePreparation=false) {
+function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<SourceActorCommandAdmissionBinding>>,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>,activePreparation=false,status6fc?:number) {
  const x=createActorSecondaryNullTestFixture(make);
  const ids=[...x.physicalIdentities],actuals:object[]=[...x.slotTargets];
  const bindings:(Partial<SourceActorCommandAdmissionBinding>|undefined)[]=[x.admissionState];
@@ -44,7 +44,7 @@ function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<
  x.movement.bindActor(id,actual,{byte661:0,field66c:0,field670:0});x.attributes.bindActor(id,attributes??{});
  Reflect.deleteProperty(actual,'invulnTimer');
  const slot=()=>({cell:{cur:0,max:0,refillType:0,refillParam:0,timer:0},mirror776:0});
- x.status.bindActor(id,{hp:1,hitDrainFrames:0,balanceGauge:0,balanceGaugeMax:0,balanceRefillDelay:0,downResetDelay:0,comboWindow:0,comboAccum:0,comboRank:0,invincTimer:0,sourceAmmoRefillPauseMask:0},{},[slot(),slot(),slot()]);
+ x.status.bindActor(id,{hp:1,hitDrainFrames:0,balanceGauge:0,balanceGaugeMax:0,balanceRefillDelay:0,downResetDelay:0,comboWindow:0,comboAccum:0,comboRank:0,invincTimer:0,sourceAmmoRefillPauseMask:0},status6fc===undefined?{}:{byte6fc:status6fc},[slot(),slot(),slot()]);
  for(const key of ['fbPhaseSlots','shotByte1db3','animState'])Reflect.deleteProperty(actual,key);
  x.cues.bindActor(id,{});
  const charge=x.commandAdmission.getChargeRuntime();charge.getEffects()?.bindActor(id,{});charge.bindActor(id,{});
@@ -60,7 +60,7 @@ function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<
 }
 type Fixture=ReturnType<typeof fixture>;
 /** Same genuine six-actor composition for later source continuation tests. */
-export function createActorThirdPassTestFixture(make:Make,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>,activePreparation=false) {return fixture(make,5,-1,undefined,attributes,activePreparation);}
+export function createActorThirdPassTestFixture(make:Make,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>,activePreparation=false,status6fc?:number) {return fixture(make,5,-1,undefined,attributes,activePreparation,status6fc);}
 
 
 function trace(x:Fixture,expected=next,before:Visit=()=>{},after?:Visit) {

@@ -23,7 +23,9 @@
  * Paused source flow reachesbef4 directly. Both require explicit current system,
  * player and actor cells; after binding the fresh mode selects genuine wrappers
  * 89a94(40),89a94(32) or singles89898(58),89898(57). Normal returns
- * stop at53a2c or89554 respectively, never skipping those predecessors.
+ * enter the bounded53a2c ordinary helper prefix or stop at89554 respectively.
+ * The live ordered loop stops before54070; an empty signed count still runs
+ * mandatory5b140 and the bounded5b2b8 clear/countdown paths before87cf0.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * complete frame or browser activation is manufactured.
  *
@@ -2085,6 +2087,152 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       fail('scheduler group storage aliases an outer/participant owner');
     check();
   };
+  /** Authenticated 53a2c prefix. These are source calls, not scheduler groups. */
+  const runOrderedActors=(): never=>{
+    const mass=retain('massPreparation',read(sources,'massPreparation'));
+    const massOwner=(key:string):object=>{
+      if(read(sources,'massPreparation')!==mass)fail('53a2c canonical mass owner changed');
+      return retain(`mass ${key}`,read(mass,key));
+    };
+    const world=spawns.getWorldRuntime(),stage=root.getStageRuntime();
+    const worlds=new Map<symbol,object>();
+    const physical=():object=>{
+      const base=slotPointer(0),block=massOwner('physicalBlock'),ids=retain('mass physical identities',read(block,'identities'));
+      if(!Object.isFrozen(block)||read(block,'base')!==base||!Array.isArray(ids)||!Object.isFrozen(ids)||read(ids,'length')!==6)
+        fail('53a2c canonical six-actor physical block required');
+      return ids;
+    };
+    const at=(ids:object,index:number):{id:symbol;actor:object}=>{
+      const id=read(ids,String(index));if(typeof id!=='symbol')fail('53a2c physical actor identity required');
+      return {id,actor:actual(id)};
+    };
+    const worldOwner=(id:symbol,actor:object):object=>{
+      if(spawns.getWorldRuntime()!==world||call(()=>world.getActualActor(id))!==actor)fail('53a2c canonical world actor changed');
+      const owner=record(call(()=>world.getActorBinding(id)),'53a2c world binding');
+      if(worlds.has(id)&&worlds.get(id)!==owner)fail('53a2c world binding changed');
+      if(owner===actor||[...retained.values()].includes(owner)||
+        [...worlds].some(([other,value])=>other!==id&&value===owner))fail('53a2c world storage alias');
+      worlds.set(id,owner);return owner;
+    };
+    const life=(id:symbol,actor:object):number=>{
+      if(root.getStageRuntime()!==stage||call(()=>stage.getActualActor(id))!==actor)fail('53a2c canonical stage actor changed');
+      return byte(record(call(()=>stage.getActorBinding(id)),'53a2c stage binding'),'lifecycle18');
+    };
+    const partner=(id:symbol,actor:object):unknown=>{
+      const matrices=read(mass,'matrices');
+      if(!isSourceActorMatrixUpdateRuntime(matrices))fail('53a2c genuine matrix owner required at reached4a4 load');
+      if(call(()=>matrices.getActualActor(id))!==actor||call(()=>matrices.getWorldBinding(id))!==call(()=>world.getActorBinding(id)))
+        fail('53a2c matrix actor/world differs');
+      const value=read(record(call(()=>matrices.getActorBinding(id)),'53a2c matrix binding'),'link4a4');
+      if(value!==null&&typeof value!=='symbol')fail('53a2c canonical4a4 pointer identity required');
+      return value;
+    };
+    //5ace8 captures physical base, but reloads team/global per actor. A
+    // combination owner is deliberately not requested on an ordinary branch.
+    const ids=physical();
+    for(let i=0;i<6;i++) {
+      const {id,actor}=at(ids,i),index=s8(byte(actor,'team')),row=team(teamTable(match()),index);
+      if(s8(byte(row,'byte10'))!==0)continue;
+      const header=worldOwner(id,actor),mode=byte(header,'mode4a0');
+      if(mode!==0) {
+        const lifecycle=life(id,actor);partner(id,actor);
+        if(lifecycle!==1)continue;
+        fail('8005ace8 reached unsupported combination lifecycle1 branch');
+      }
+      const charged=read(row,'charged');if(typeof charged!=='boolean')fail('charged: boolean source0/1 owner required');
+      if(!charged||s8(byte(actor,'active0'))===0||life(id,actor)!==1)continue;
+      const state=s8(byte(header,'mode4a1'));
+      if(state===2||state===5||state===7)fail('8005ace8 reached unsupported combination state branch');
+    }
+    //53a2c captures the table, not the count. A repeated entry is not elided.
+    // Capturing a fixed source address does not dereference an unused table.
+    // Native metadata snapshots preserve that laziness for a zero count.
+    const orderedField=primaryStoreDescriptor(mass,'orderPointers');
+    for(let i=0;i<s8(byte(massOwner('orderCount'),'count80436260'));i++) {
+      if(!orderedField||!('value' in orderedField))fail('53a2c captured ordered-table owner required');
+      const ordered=retain('mass orderPointers',orderedField.value);
+      if(read(mass,'orderPointers')!==ordered)fail('53a2c captured ordered-table owner changed');
+      if(i>=6)fail('53a2c ordered table exceeds retained six-actor domain');
+      const id=read(ordered,String(i));if(id!==null&&typeof id!=='symbol')fail('53a2c ordered actor pointer required');
+      actual(id);
+      //54070 begins with mandatory5685c even for a paused actor.
+      fail('80053a58 reached mandatory80054070 transform-history predecessor8005685c');
+    }
+    //5b140 is still mandatory when the live signed ordered count is zero.
+    const following=physical();
+    for(let i=0;i<6;i++) {
+      const {id,actor}=at(following,i);
+      if(s8(byte(actor,'active0'))===0)continue;
+      if(byte(worldOwner(id,actor),'mode4a0')!==2)continue;
+      const lifecycle=s8(life(id,actor));partner(id,actor);
+      if(lifecycle===1||lifecycle===2)fail('8005b140 reached unsupported partner-copy branch');
+      if(lifecycle===3 && (half(actor,'borgNumber')>>>8)===5)
+        fail('8005b140 reached unsupported lifecycle3 partner translations');
+    }
+    const status=spawns.getPrehookRuntime().getStatusRuntime();
+    const storeByte=(owner:object,key:string,value:number,verify:()=>void):void=>{
+      verify();own(owner,key,true);check();verify();
+      const field=primaryStoreDescriptor(owner,key);
+      if(!field||!('value' in field)||!field.writable)fail(`${key}: live writable own data property required`);
+      unsigned(field.value,255,key);
+      (owner as Record<string,unknown>)[key]=value;check();
+    };
+    const statusOwner=(id:symbol,actor:object):object=>{
+      if(call(()=>status.getActualActor(id))!==actor)fail('53a2c status actual differs');
+      return record(call(()=>status.getActorBinding(id)),'53a2c status binding');
+    };
+    const fieldGuard=(id:symbol,actor:object,key:'byte6fc'|'burstArmFrames',owner:object):void=>{
+      if(call(()=>status.getActualActor(id))!==actor||
+        (key==='byte6fc'?call(()=>status.getActorBinding(id)):call(()=>status.getActualBorg(id)))!==owner)
+        fail('53a2c canonical timer owner changed');
+      const records=[actor,record(call(()=>status.getWorldBinding(id)),'53a2c world'),
+        record(call(()=>status.getMappingActor(id)),'53a2c mapping'),
+        record(call(()=>status.getMovementBinding(id)),'53a2c movement'),
+        record(call(()=>status.getAttributeBinding(id)),'53a2c attributes'),
+        record(call(()=>status.getActorBinding(id)),'53a2c timers'),
+        record(call(()=>status.getActualBorg(id)),'53a2c Borg')];
+      const aliases=key==='byte6fc'?['byte6FC','field6fc','field6FC','1788']:
+        ['byte6fb','byte6FB','field6fb','field6FB','1787'];
+      for(const value of records)noShadows(value,value===owner?aliases:[key,...aliases]);
+      // An observable final metadata read cannot install a competing cell on
+      // an earlier inspected owner before the corresponding source store.
+      for(const value of records)for(const alias of value===owner?aliases:[key,...aliases])
+        if(primaryStoreDescriptor(value,alias)!==undefined)fail(`${alias}: competing source cell owner`);
+    };
+    //5b2b8 first pass has NO active guard. A later unsupported8c4 load
+    // cannot erase the preceding source6fc clear.
+    const clearing=physical();
+    for(let i=0;i<6;i++) {
+      const {id,actor}=at(clearing,i),index=s8(byte(actor,'team')),row=team(teamTable(match()),index);
+      if(s8(byte(row,'byte10'))!==0)continue;
+      const owner=statusOwner(id,actor);fieldGuard(id,actor,'byte6fc',owner);
+      const raw=byte(owner,'byte6fc');fieldGuard(id,actor,'byte6fc',owner);
+      if(s8(raw)===0)continue;
+      storeByte(owner,'byte6fc',0,()=>fieldGuard(id,actor,'byte6fc',owner));
+      fail('8005b2b8 reached unsupported canonical actor8c4 load after6fc clear');
+    }
+    //One captured team-row base; counts stay live. Candidate semantics are
+    //not manufactured when this bounded prefix reaches a nonempty scan.
+    const rows=teamTable(match());
+    for(let index=0;index<4;index++) {
+      if(s8(byte(massOwner('teamCounts'),String(index)))<=0)continue;
+      const row=team(rows,index);
+      if(s8(byte(row,'byte10'))!==0)continue;
+      const charged=read(row,'charged');if(typeof charged!=='boolean')fail('charged: boolean source0/1 owner required');
+      if(!charged)continue;
+      fail('8005b2b8 reached mandatory live candidate scan');
+    }
+    const countdown=physical();
+    for(let i=0;i<6;i++) {
+      const {id,actor}=at(countdown,i);
+      if(call(()=>status.getActualActor(id))!==actor)fail('53a2c countdown actual differs');
+      const owner=record(call(()=>status.getActualBorg(id)),'53a2c canonical Borg6fb');
+      fieldGuard(id,actor,'burstArmFrames',owner);
+      const raw=byte(owner,'burstArmFrames');fieldGuard(id,actor,'burstArmFrames',owner);
+      if(s8(raw)!==0)storeByte(owner,'burstArmFrames',(raw-1)&255,()=>fieldGuard(id,actor,'burstArmFrames',owner));
+    }
+    fail('8002948c reached mandatory80087cf0');
+  };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
     runFrame(): never {
@@ -2105,7 +2253,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         // Fresh source mode, not the mode observed before mass/participant work.
         if(s8(byte(match(),'byte66'))===0) {
           invokeScheduler(0x8002947c,40);invokeScheduler(0x80029484,32);
-          fail('80029488 reached mandatory80053a2c');
+          runOrderedActors();
         }
         invokeScheduler(0x800294bc,58);invokeScheduler(0x800294c4,57);
         fail('800294c8 reached mandatory80089554');
