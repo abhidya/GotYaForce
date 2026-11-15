@@ -21,13 +21,15 @@
  * distance guards, then the six-position inner scan and ordered association bits.
  * Its bounded return feeds complete27764 selection/publication and boundedbef4.
  * Paused source flow reachesbef4 directly. Both require explicit current system,
- * player and actor cells; after binding the fresh mode selects the first still
- * unjoined scheduler call,89a94(40) or89898(58), before any scheduler work.
+ * player and actor cells; after binding the fresh mode selects genuine wrappers
+ * 89a94(40),89a94(32) or singles89898(58),89898(57). Normal returns
+ * stop at53a2c or89554 respectively, never skipping those predecessors.
  * No success callback, skipped predecessor, source actor hydration, epoch,
- * scheduler invocation or browser activation is manufactured.
+ * complete frame or browser activation is manufactured.
  *
- * Owning the scheduler grants exclusivity and failure closure ONLY. Its public
- * entry points close on claim; no runnable outer scheduler capability exists.
+ * Owning the scheduler grants exclusivity and failure closure. Its public
+ * entry points close on claim; only private single-use exact source-position
+ * outer scopes grant scheduler execution, and unwind revokes them.
  * Stable synchronous nonproxy own-data records are host bounds. Destinations
  * are checked at each store; prior writes survive refusal and close the whole
  * retained scheduler graph. Identity checks are host admission, not ROM reads.
@@ -37,7 +39,7 @@
  * ProgramDB selection or fresh retail verification).
  */
 import {isSourceObjectSchedulerRuntime, claimSourceObjectSchedulerOuterFrame,
-  closeSourceObjectSchedulerOuterFrame, type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
+  closeSourceObjectSchedulerOuterFrame, invokeSourceObjectSchedulerOuterFrame, type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import {markIncompleteSourceActorDoubleLifecycle, requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {addSourceFloat32} from './source-float.js';
@@ -118,6 +120,30 @@ export function requireSourceBattleOuterFrameFailure(outer: SourceBattleOuterFra
   if(!isSourceBattleOuterFrameRuntime(outer) || !scope) fail('private active outer failure required');
   scope(scheduler);
 }
+interface SchedulerInvocationScope {
+  enter(scheduler:SourceObjectSchedulerRuntime,callsite:number,group:number):void;
+  check(scheduler:SourceObjectSchedulerRuntime):void;
+  reject():void;
+}
+const schedulerInvocations=new WeakMap<object,SchedulerInvocationScope>();
+/** Read-only to callers: the capability itself never leaves its outer closure. */
+export function requireSourceBattleOuterFrameSchedulerInvocation(outer:SourceBattleOuterFrameRuntime,
+  scheduler:SourceObjectSchedulerRuntime,callsite:number,group:number):void {
+  const scope=schedulerInvocations.get(outer);
+  if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active outer scheduler invocation required');
+  scope.enter(scheduler,callsite,group);
+}
+export function checkSourceBattleOuterFrameSchedulerInvocation(outer:SourceBattleOuterFrameRuntime,
+  scheduler:SourceObjectSchedulerRuntime):void {
+  const scope=schedulerInvocations.get(outer);
+  if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active outer scheduler invocation required');
+  scope.check(scheduler);
+}
+/** A caught cross-layer attempt must not leave the active retained graph usable.
+ * An idle unsupported request does not start a source frame or grant authority. */
+export function rejectSourceBattleOuterFrameSchedulerReentry(outer:SourceBattleOuterFrameRuntime):void {
+  schedulerInvocations.get(outer)?.reject();
+}
 function fail(reason: string): never {
   throw Error(`[battle-outer-frame] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
@@ -153,6 +179,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   if(spawns.getMatchGlobals()!==globals || spawns.getAllocatorRuntime()!==allocator) fail('canonical scheduler graph differs');
   if(globals===sources || claimedGlobals.has(globals)) fail('battle globals alias sources or are already outer-owned');
   let busy=false,poisoned=false,incomplete=false,closing=false;
+  let schedulerInvocation:{callsite:number;group:number;entered:boolean}|undefined;
   const retained=new Map<string,object>(), massActors=new Map<symbol,object>(),participantActors=new Map<symbol,object>();
   const check=(): void=>{if(poisoned) fail('caught same-runtime reentry');};
   const read=(owner: unknown,key: string): unknown=>{const value=own(owner,key);check();return value;};
@@ -2032,6 +2059,32 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     for(const actor of participantActors.values()) markIncompleteSourceActorDoubleLifecycle(actor);
     try {closeSourceObjectSchedulerOuterFrame(scheduler,runtime);} finally {closing=false;}
   };
+  const invokeScheduler=(callsite:number,group:number):void=>{
+    schedulerInvocation={callsite,group,entered:false};
+    try {call(()=>invokeSourceObjectSchedulerOuterFrame(scheduler,runtime,callsite,group));}
+    finally {schedulerInvocation=undefined;}
+  };
+  const rejectScheduler=():void=>{
+    if(busy && !closing) {poisoned=true;close();}
+  };
+  const schedulerGraph=():void=>{
+    check();
+    if(terminalRead(sources,'scheduler')!==scheduler || scheduler.getRootRuntime()!==root ||
+      root.getSpawnRuntime()!==spawns || scheduler.getAllocatorRuntime()!==allocator ||
+      scheduler.getMatchGlobals()!==globals || spawns.getMatchGlobals()!==globals ||
+      spawns.getAllocatorRuntime()!==allocator)fail('canonical outer scheduler graph changed');
+    // Group records/table become retained lazily at the real getGroup. They
+    // cannot reuse already reached outer, leader, system, participant or player
+    // storage. This identity inventory never loads pause, slot or group cells.
+    const helper=spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime();
+    const playerOwners=isSourceActorSlotStatusRuntime(helper)?
+      [...helper.getRetainedStorageOwners(),...helper.getDeclaredStorageOwners()]:[];
+    const forbidden=[sources,globals,root.getDrawList(),...retained.values(),
+      ...massActors.values(),...participantActors.values(),...playerOwners];
+    if(allocator.getRetainedGroupStorageOwners().some(owner=>forbidden.includes(owner)))
+      fail('scheduler group storage aliases an outer/participant owner');
+    check();
+  };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
     runFrame(): never {
@@ -2049,16 +2102,36 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           prepareLeaders();
         }
         prepareParticipantViews();
-        // Outer ownership grants failure closure, not a runnable scheduler join.
-        // The fresh source mode load selects the first actual call boundary.
-        if(s8(byte(match(),'byte66'))===0)fail('8002947c reached mandatory80089a94(40) scheduler execution capability');
-        fail('800294bc reached mandatory80089898(58) scheduler execution capability');
+        // Fresh source mode, not the mode observed before mass/participant work.
+        if(s8(byte(match(),'byte66'))===0) {
+          invokeScheduler(0x8002947c,40);invokeScheduler(0x80029484,32);
+          fail('80029488 reached mandatory80053a2c');
+        }
+        invokeScheduler(0x800294bc,58);invokeScheduler(0x800294c4,57);
+        fail('800294c8 reached mandatory80089554');
       } catch(error) {
         close();throw error;
-      } finally {busy=false;}
+      } finally {schedulerInvocation=undefined;busy=false;}
     },
   };
   failures.set(runtime,selected=>{if(!busy || !closing || !incomplete || selected!==scheduler) fail('private exact active outer failure required');});
+  schedulerInvocations.set(runtime,{
+    enter(selected,callsite,group) {
+      const active=schedulerInvocation;
+      if(!busy || closing || incomplete || poisoned || selected!==scheduler || !active || active.entered ||
+        active.callsite!==callsite || active.group!==group) {
+        rejectScheduler();fail('private exact single-use active outer scheduler invocation required');
+      }
+      active.entered=true;
+    },
+    check(selected) {
+      if(!busy || closing || incomplete || poisoned || selected!==scheduler || !schedulerInvocation?.entered) {
+        rejectScheduler();fail('private exact active outer scheduler invocation required');
+      }
+      schedulerGraph();
+    },
+    reject:rejectScheduler,
+  });
   runtimes.add(runtime);pendingClaims.set(runtime,scheduler);
   try {claimSourceObjectSchedulerOuterFrame(scheduler,runtime);} finally {pendingClaims.delete(runtime);}
   claimedGlobals.add(globals);return Object.freeze(runtime);

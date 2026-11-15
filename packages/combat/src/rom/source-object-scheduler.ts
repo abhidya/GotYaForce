@@ -8,9 +8,10 @@
  * No callback injection, copied lists, fabricated active slot, default mask,
  * estimator, source actor constructor, or browser activation is supplied.
  */
-import {claimSourceHelperStorage} from './source-storage-claims.js';
+import {claimSourceHelperStorage,isSourceHelperStorageClaimed} from './source-storage-claims.js';
 import {isPendingSourceBattleOuterFrameClaim, requireSourceBattleOuterFrameFailure,
-  type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
+  requireSourceBattleOuterFrameSchedulerInvocation, checkSourceBattleOuterFrameSchedulerInvocation,
+  rejectSourceBattleOuterFrameSchedulerReentry, type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
 import {isSourceProjectileRootRuntime, prepareSourceProjectileScheduledRoot,
   invokeSourceProjectileScheduledRoot, markIncompleteSourceProjectileScheduledRoot,
   type SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
@@ -36,10 +37,10 @@ export interface SourceObjectSchedulerRuntime {
 }
 type Stage = 'prepare' | 'snapshot' | 'callback' | 'after';
 interface Active {child: symbol; stage: Stage; lifetime?: symbol; callback?: number}
-interface OuterJoin {claim(outer: SourceBattleOuterFrameRuntime): void; close(outer: SourceBattleOuterFrameRuntime): void}
+interface OuterJoin {claim(outer: SourceBattleOuterFrameRuntime): void; close(outer: SourceBattleOuterFrameRuntime): void;
+  invoke(outer: SourceBattleOuterFrameRuntime,callsite:number,group:number):void; reject():void}
 const outerJoins = new WeakMap<object, OuterJoin>();
-/** Only an active private claim transaction can reserve this scheduler. No
- * execution capability is supplied: mandatory outer predecessors still refuse. */
+/** Only an active private claim transaction can reserve this scheduler. */
 export function claimSourceObjectSchedulerOuterFrame(scheduler: SourceObjectSchedulerRuntime, outer: SourceBattleOuterFrameRuntime): void {
   const join=outerJoins.get(scheduler);if(!join || !isSourceObjectSchedulerRuntime(scheduler)) fail('genuine scheduler required');
   join.claim(outer);
@@ -48,6 +49,17 @@ export function claimSourceObjectSchedulerOuterFrame(scheduler: SourceObjectSche
 export function closeSourceObjectSchedulerOuterFrame(scheduler: SourceObjectSchedulerRuntime, outer: SourceBattleOuterFrameRuntime): void {
   const join=outerJoins.get(scheduler);if(!join || !isSourceObjectSchedulerRuntime(scheduler)) fail('genuine scheduler required');
   join.close(outer);
+}
+/** Exact source-position join. The outer's unforgeable single-use active scope,
+ * not possession of either runtime or these scalar arguments, grants execution. */
+export function invokeSourceObjectSchedulerOuterFrame(scheduler: SourceObjectSchedulerRuntime,
+  outer: SourceBattleOuterFrameRuntime,callsite:number,group:number):void {
+  const join=outerJoins.get(scheduler);
+  if(!join || !isSourceObjectSchedulerRuntime(scheduler)) {
+    rejectSourceBattleOuterFrameSchedulerReentry(outer);
+    fail('genuine scheduler required');
+  }
+  join.invoke(outer,callsite,group);
 }
 const runtimes = new WeakSet<object>(), claims = new WeakMap<object, SourceObjectSchedulerRuntime>();
 const scopes = new WeakMap<object, (root: SourceProjectileRootRuntime | undefined,
@@ -60,8 +72,9 @@ export function isSourceObjectSchedulerRuntime(value: unknown): value is SourceO
 export function requireSourceObjectSchedulerInvocation(scheduler: SourceObjectSchedulerRuntime,
   root: SourceProjectileRootRuntime, child: symbol | undefined, stage: 'prepare' | 'callback' | 'closure', lifetime?: symbol): void {
   const scope = scopes.get(scheduler);
-  if (!isSourceObjectSchedulerRuntime(scheduler) || !scope || claims.get(root) !== scheduler)
-    fail('private active scheduler invocation required');
+  if (!isSourceObjectSchedulerRuntime(scheduler) || !scope || claims.get(root) !== scheduler) {
+    outerJoins.get(scheduler)?.reject();fail('private active scheduler invocation required');
+  }
   scope(root,undefined,child,stage,lifetime);
 }
 export function requireSourceObjectSchedulerSnapshot(scheduler: SourceObjectSchedulerRuntime,
@@ -71,7 +84,11 @@ export function requireSourceObjectSchedulerSnapshot(scheduler: SourceObjectSche
   scope(undefined,allocator,child,'snapshot');
 }
 export function requireStandaloneSourceProjectileRoot(root: SourceProjectileRootRuntime): void {
-  if (claims.has(root)) fail('root is exclusively owned by source scheduler; standalone dispatch unsupported');
+  const scheduler=claims.get(root);
+  if (scheduler!==undefined) {
+    outerJoins.get(scheduler)?.reject();
+    fail('root is exclusively owned by source scheduler; standalone dispatch unsupported');
+  }
 }
 function fail(why: string): never {
   throw Error(`[source-object-scheduler] ${why}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -102,15 +119,25 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
   if (claims.has(root)) fail('root already has a source scheduler');
   const spawns = root.getSpawnRuntime(), allocator = spawns.getAllocatorRuntime(), globals = record(spawns.getMatchGlobals(),'shared80433934');
   let outerOwner: SourceBattleOuterFrameRuntime | undefined;
-  let busy = false, poisoned = false, incomplete = false, active: Active | undefined, slotsOwner: object | undefined, visits = 0;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  let busy = false, poisoned = false, incomplete = false, closing = false, active: Active | undefined, slotsOwner: object | undefined, visits = 0;
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    if(busy && !incomplete && outerOwner!==undefined) checkSourceBattleOuterFrameSchedulerInvocation(outerOwner,runtime);
+  };
   const read = (owner: unknown,key: string): unknown => {const value=own(owner,key);check();return value;};
   const call = <T>(run: () => T): T => {const value=run();check();return value;};
   const sourceGlobal = (): object => {
     const actual=call(()=>spawns.getMatchGlobals());if(actual!==globals) fail('canonical80433934 owner changed');return actual;
   };
   const mask = (base: number): number => unsigned(read(sourceGlobal(),(base|0)<8?'maskD2':'maskD1'),255,'source pause byte');
-  const head = (index: number): symbol | null => pointer(read(call(()=>allocator.getGroup(index & 0x3fffffff)),'head'),'group head');
+  const head = (index: number): symbol | null => {
+    const selected=call(()=>allocator.getGroup(index & 0x3fffffff));
+    for(const owner of allocator.getRetainedGroupStorageOwners()) {
+      if(owner===sources || owner===globals || owner===slotsOwner || owner===root.getDrawList() ||
+        isSourceHelperStorageClaimed(owner)) fail('scheduler group storage aliases another source owner');
+    }
+    check();return pointer(read(selected,'head'),'group head');
+  };
   const walk = (first: symbol | null): void => {
     let child=first;
     while(child!==null) {
@@ -169,8 +196,11 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
       if((enabled<<24>>24)!==0 && (mask(bits)&(1<<i))===0) walk(head((bits+i+1)>>>0));
     }
   };
-  const run = (bits: number,operation: (bits: number) => void): void => {
-    if(outerOwner!==undefined) fail('scheduler is exclusively owned by source outer frame; standalone execution unsupported');
+  const run = (bits: number,operation: (bits: number) => void,outer?:SourceBattleOuterFrameRuntime): void => {
+    if(outerOwner!==undefined && outer!==outerOwner) {
+      rejectSourceBattleOuterFrameSchedulerReentry(outerOwner);
+      fail('scheduler is exclusively owned by source outer frame; standalone execution unsupported');
+    }
     unsigned(bits,0xffffffff,'group register');
     if(busy) {poisoned=true;fail('same-runtime reentry unsupported');}
     if(incomplete) fail('permanently incomplete source scheduler');
@@ -183,10 +213,15 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
       incomplete=true;
       // After cleanup there may be no completedSpawns entry. The root retains
       // its original captured actors, so closure does not recover a freed token.
-      markIncompleteSourceObjectAllocation(allocator);
-      markIncompleteSourceProjectileScheduledRoot(root,runtime);
+      closing=true;
+      try {markIncompleteSourceObjectAllocation(allocator);markIncompleteSourceProjectileScheduledRoot(root,runtime);}
+      finally {closing=false;}
       throw error;
     } finally {active=undefined;busy=false;}
+  };
+  const wrapper=(value:number):void=>{
+    if((value|0)<0x38 && (value&7)===0) {slots(value);group(value);group((value+7)>>>0);}
+    else group(value);
   };
   const runtime: SourceObjectSchedulerRuntime = {
     getRootRuntime() {return root;},getAllocatorRuntime() {return allocator;},getMatchGlobals() {return globals;},
@@ -199,32 +234,45 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
       return Object.freeze([...new Set(records)]);
     },
     runGroup(bits) {run(bits,group);}, runSlots(bits) {run(bits,slots);},
-    runWrapper(bits) {run(bits,value=>{
-      if((value|0)<0x38 && (value&7)===0) {slots(value);group(value);group((value+7)>>>0);}
-      else group(value);
-    });},
+    runWrapper(bits) {run(bits,wrapper);},
+  };
+  const reject=():void=>{
+    if(outerOwner!==undefined) rejectSourceBattleOuterFrameSchedulerReentry(outerOwner);
+    if(busy) poisoned=true;
   };
   scopes.set(runtime,(selectedRoot,selectedAllocator,child,stage,lifetime)=>{
+    const denied=(reason:string):never=>{reject();fail(reason);};
     if(!busy || (stage!=='closure' && (incomplete || poisoned)) ||
       (selectedRoot!==undefined && selectedRoot!==root) || (selectedAllocator!==undefined && selectedAllocator!==allocator))
-      fail('private active scheduler invocation required');
-    if(stage==='closure') return;
+      denied('private active scheduler invocation required');
+    if(stage==='closure') {if(!closing) denied('private active scheduler closure required');return;}
     if(!active || active.child!==child || active.stage!==stage ||
       (stage==='callback' && (active.callback!==0x8007dcec || active.lifetime!==lifetime)))
-      fail('private exact scheduler stage/child/lifetime required');
+      denied('private exact scheduler stage/child/lifetime required');
   });
   outerJoins.set(runtime,{
+    reject,
     claim(outer) {
       if(!isPendingSourceBattleOuterFrameClaim(outer,runtime)) fail('private outer-frame claim required');
       if(outerOwner!==undefined || busy || incomplete) fail('scheduler already owned, active or incomplete');
       outerOwner=outer;
     },
+    invoke(outer,callsite,bits) {
+      if(outerOwner!==outer) {
+        if(outerOwner!==undefined) rejectSourceBattleOuterFrameSchedulerReentry(outerOwner);
+        rejectSourceBattleOuterFrameSchedulerReentry(outer);
+        fail('exact outer-owned scheduler required');
+      }
+      requireSourceBattleOuterFrameSchedulerInvocation(outer,runtime,callsite,bits);
+      run(bits,callsite===0x8002947c || callsite===0x80029484?wrapper:group,outer);
+    },
     close(outer) {
       requireSourceBattleOuterFrameFailure(outer,runtime);
-      if(outerOwner!==outer || busy) fail('exact idle outer-owned scheduler required for closure');
-      incomplete=true;busy=true;
+      if(outerOwner!==outer) fail('exact outer-owned scheduler required for closure');
+      const wasBusy=busy;
+      incomplete=true;poisoned=true;busy=true;closing=true;
       try {markIncompleteSourceObjectAllocation(allocator);markIncompleteSourceProjectileScheduledRoot(root,runtime);}
-      finally {active=undefined;busy=false;}
+      finally {active=undefined;closing=false;busy=wasBusy;}
     },
   });
   if(!claimSourceHelperStorage(sources,runtime)) fail('scheduler sources storage already claimed');

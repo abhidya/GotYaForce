@@ -6,7 +6,7 @@ import type {SourceActorPlayerSlotRecord} from './actor-slot-status.js';
 import type {createBattleTargetPreparationTestFixture} from './attached-setup-animation.selftest.js';
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const NORMAL='8002947c reached mandatory80089a94(40)',PAUSED='800294bc reached mandatory80089898(58)';
+const NORMAL='80029488 reached mandatory80053a2c',PAUSED='800294c8 reached mandatory80089554';
 const pointers=['pointer14','pointer18','pointer1c','pointer20'] as const;
 const metadata=['byte0c','byte0d','byte0e','byte0f'] as const;
 const selectors=['byteC0','byteC1','byteC2','byteC3'] as const;
@@ -18,6 +18,9 @@ function refuses(run:()=>unknown,part:string):string {let message='';try{run();}
  * replacement helper, callback, actor activation hook or source constructor. */
 export function createBattleParticipantViewTestFixture(make:Make,paused=false) {
  fixtures++;const x=createBattleLeaderSelectionTestFixture(make);
+ // Explicit empty source lists for the first outer scheduler calls. The
+ // genuinely spawned projectile stays in its allocator-owned group9.
+ for(const group of [...Array.from({length:16},(_,i)=>32+i),57,58])x.groups[group]={head:null,tail:null};
  const system=x.systemGlobals as SourceBattleSystemGlobals,match=x.matchGlobals as typeof x.matchGlobals & SourceBattleOuterGlobalFields;
  Object.assign(system,{byte40:0,byte29:2,pointer14:null,pointer18:null,pointer1c:null,pointer20:null,
   byte0c:201,byte0d:202,byte0e:203,byte0f:204,controllerMask:63});
@@ -43,10 +46,10 @@ function closed(x:Fixture):void {
 /** Descriptor observation changes only declared input records, never methods.
  * Actual source loads are distinguished from immutable diagnostic metadata. */
 function run(x:Fixture,expected=x.paused?PAUSED:NORMAL,before:Visit=()=>{},after:Visit=()=>{}) {
- const native=Object.getOwnPropertyDescriptor,events:string[]=[];let started=false,schedulerReads=0;
+ const native=Object.getOwnPropertyDescriptor,events:string[]=[];let started=false,finished=false,schedulerReads=0;
  Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
   if(owner===x.system&&key==='byte40')started=true;
-  if(started) {
+  if(started&&!finished) {
    if(owner===x.system&&['byte40','controllerMask','byte29',...pointers,...metadata].includes(String(key)))events.push('P.'+String(key));
    if(owner===x.match&&[...selectors,'byte15db','byte66'].includes(String(key)))events.push('M.'+String(key));
    if(owner===x.actorSlots&&/^[0-9]+$/.test(String(key)))events.push('slot'+String(key));
@@ -57,11 +60,12 @@ function run(x:Fixture,expected=x.paused?PAUSED:NORMAL,before:Visit=()=>{},after
    if(owner===x.outerSources&&key==='systemGlobals')events.push('reloadP');
    if(owner===x.groups||owner===x.objectBytes||owner===x.nextObjectBytes||owner===x.match&&['maskD1','maskD2'].includes(String(key)))schedulerReads++;
    before(owner,key);
+   if(owner===x.match&&key==='byte66')finished=true;
   }
   const result=native(owner,key);if(started)after(owner,key);return result;
  }) as typeof native;
  let message='';try{message=refuses(()=>x.frame.runFrame(),expected);}finally{Object.getOwnPropertyDescriptor=native;}
- check(started,'actual bef4 entry reached');equal(schedulerReads,0,'no scheduler masks/groups/snapshots');closed(x);return{events,message};
+ check(started,'actual bef4 entry reached');equal(schedulerReads,0,'no scheduler masks/groups/snapshots before fresh mode load');closed(x);return{events,message};
 }
 function viewIndex(x:Fixture,index:number):number {
  const value=Reflect.get(x.system,pointers[index]!);
@@ -282,5 +286,5 @@ function uppercaseAliases(make:Make):void {
 }
 export function runBattleParticipantViewSelfTest(make:Make):void {
  baseline(make);inputLaziness(make);modes(make);shifts(make);fallback(make);helpers(make);special(make);liveReads(make);partial(make);refusalGuards(make);uppercaseAliases(make);
- console.log(`[battle-participant-view] PASS (${fixtures} genuine graph fixtures): complete bounded bef4, live source order, signed/PPC slot selection, same player-table interiors, interleaved metadata, fresh original actor487, partial writes and closure; first reached scheduler remains blocked, no full frame/epoch/browser claim`);
+ console.log(`[battle-participant-view] PASS (${fixtures} genuine graph fixtures): complete bounded bef4, live source order, signed/PPC slot selection, same player-table interiors, interleaved metadata, fresh original actor487, partial writes and closure; explicit first scheduler lists return to the next mandatory boundary, no full frame/epoch/browser claim`);
 }

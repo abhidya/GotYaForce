@@ -82,6 +82,8 @@ export interface SourceObjectAllocationRuntime {
   getGroup(index: number): SourceObjectGroup;
   /** Host identity-only admission inventory, never a copied source list. */
   getRetainedStorageOwners(): readonly object[];
+  /** Identity-only inventory of reached group table/records, not source reads. */
+  getRetainedGroupStorageOwners(): readonly object[];
   /** Narrow actual scheduler stw+76, never a general unaligned scalar API. */
   writeSchedulerRotation76(identity: symbol, value: number, scheduler: SourceObjectSchedulerRuntime): void;
   getObject(identity: symbol): SourceAllocationBytes;
@@ -142,6 +144,7 @@ function link(value: unknown, where: string): symbol | null {
   if (value !== null && typeof value !== 'symbol') fail(`${where}: opaque symbol or null required`);
   return value;
 }
+const groupOwnerDescriptor=Reflect.getOwnPropertyDescriptor;
 export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocationSources): SourceObjectAllocationRuntime {
   let busy = false, poisoned = false, incomplete = false, allocating = false, dirty = false;
   const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
@@ -456,6 +459,22 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     allocateProjectileHit(id, caller) {return guard(() => allocate(id, caller, 4), true);},
     releaseProjectile(id, caller, child, draw) {guard(() => release(id,caller,child,draw),true);},
     getRetainedStorageOwners() {return Object.freeze([...new Set([...owners.values(),...targets.values()])]);},
+    getRetainedGroupStorageOwners() {
+      // Host identity checks only: never source head/next/pause reads. A caller
+      // cannot replace a group table/record while the scheduler holds its head.
+      const groups=owners.get('groups'),records:object[]=[];
+      if(groups!==undefined) {
+        const table=groupOwnerDescriptor(sources,'groups');
+        if(!table || !('value'in table) || table.value!==groups) fail('groups: canonical owner changed');
+        records.push(groups);
+        for(const [role,owner]of owners)if(role.startsWith('groups[')) {
+          const row=groupOwnerDescriptor(groups,role.slice(7,-1));
+          if(!row || !('value'in row) || row.value!==owner) fail(`${role}: canonical owner changed`);
+          records.push(owner);
+        }
+      }
+      return Object.freeze(records);
+    },
     getGroup(index) {return guard(() => {integer(index,0x3fffffff,'effective group index');return pool('groups',index) as SourceObjectGroup;});},
     writeSchedulerRotation76(id,value,scheduler) {
       requireSourceObjectSchedulerSnapshot(scheduler,runtime,id);

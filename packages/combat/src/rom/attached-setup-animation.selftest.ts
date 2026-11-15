@@ -1,3 +1,4 @@
+import {runBattleSchedulerJoinSelfTests} from './battle-scheduler-join.selftest.js';
 import {runBattleParticipantViewSelfTest} from './battle-participant-view.selftest.js';
 import {runBattleLeaderSelectionSelfTests} from './battle-leader-selection.selftest.js';
 import {runActorSecondaryPositiveSelfTests} from './actor-secondary-positive.selftest.js';
@@ -2920,6 +2921,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runActorThirdPassHydratedCompositionTests();
   runBattleLeaderSelectionHydratedCompositionTests();
   runBattleParticipantViewHydratedCompositionTests();
+  runBattleSchedulerJoinHydratedCompositionTests();
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();
@@ -11682,9 +11684,10 @@ function doubleFrameHydratedCompositionFixture(bind = true, withGround: boolean 
     const hitIds = Array.from({length:4},(_,i)=>Symbol(`source HIT ${i}`)), hitBytes = hitIds.map(()=>bytes(0x1c0));
     const hitPool = {head:hitIds[0] as symbol|null,tail:hitIds[3] as symbol|null,count:4};
     for(let i=48;i<=54;i++) groups[i]={head:null,tail:null};
-    const allocator = createSourceObjectAllocationRuntime({world: x.world, objectPools: {3: objectPool,4:hitPool}, descriptorPools: {0: descriptorPool},
+    const allocatorSources = {world: x.world, objectPools: {3: objectPool,4:hitPool}, descriptorPools: {0: descriptorPool},
       groups, typeSizes: {3: 0x2e4,4:0x1c0}, groupEligibility: {8: 16, 9: 16, 10: 16, 11: 16, 12: 16, 13: 16, 14: 16,
-        48:26,49:26,50:26,51:26,52:26,53:26,54:26}});
+        48:26,49:26,50:26,51:26,52:26,53:26,54:26}};
+    const allocator = createSourceObjectAllocationRuntime(allocatorSources);
     for (const [id, raw] of [[child, objectBytes], [nextChild, nextObjectBytes]] as const) allocator.registerObject(id, raw);
     for (const [id, raw] of [[descriptor, descriptorBytes], [nextDescriptor, nextDescriptorBytes]] as const) allocator.registerDescriptor(id, raw);
     allocator.writeU8(child, 2, 3); allocator.writeU8(nextChild, 2, 3);
@@ -11698,7 +11701,7 @@ function doubleFrameHydratedCompositionFixture(bind = true, withGround: boolean 
     const projectileSources = {prehook, world: x.world, admission: x.commandAdmission, gauges: x.gauges, setup: x.ready, allocator, row1};
     const projectiles = createSourceActorProjectileSpawnRuntime(projectileSources);
     const projectileInitial = {pointer90: a as object | null};
-    return {projectiles, allocator, objectPool, descriptorPool, groups, child, nextChild, descriptor, nextDescriptor,
+    return {projectiles, allocator, allocatorSources, objectPool, descriptorPool, groups, child, nextChild, descriptor, nextDescriptor,
       objectBytes, nextObjectBytes, descriptorBytes, nextDescriptorBytes, row1, projectileSources, projectileInitial,
       hitIds,hitBytes,hitPool};
   })() : undefined;
@@ -13755,4 +13758,9 @@ export function runBattleLeaderSelectionHydratedCompositionTests(): void {
 /** Complete bounded bef4, refusing the first reached scheduler call. */
 export function runBattleParticipantViewHydratedCompositionTests(): void {
   runBattleParticipantViewSelfTest(createBattleTargetPreparationTestFixture);
+}
+
+/** Actual first outer scheduler calls with explicit empty/inactive source lists. */
+export function runBattleSchedulerJoinHydratedCompositionTests(): void {
+  runBattleSchedulerJoinSelfTests(createBattleTargetPreparationTestFixture);
 }
