@@ -5,6 +5,11 @@ reached by the active-burst branch of `80029d48`. This is a bounded offline
 continuation, **not a completed outer frame, runnable scheduler, browser
 activation, retail replay or playability claim**.
 
+The later [burst-expiry continuation](burst-expiry-integration-2026-11-15.md)
+implements the reached `8008b480` leaf from existing matched-source records and
+the integer expiry branch. The zero-path boundary described below is the prior
+checkpoint; fixtures without explicit `byteEB` now refuse that missing input.
+
 ## Existing evidence only
 
 The original [outer-frame evidence](outer-frame-evidence-2026-11-14.md) selected
@@ -95,7 +100,7 @@ fixtures** use explicitly synthetic cells and exercise:
   check, with no later row or scheduler work.
 
 The older outer-frame suite now supplies explicit zero `byteD9` for its burst
-boundary fixtures and expects `8008b480`. Its scheduler observation continues
+boundary fixtures and now expects missing `byteEB` when reaching `8008b480`. Its scheduler observation continues
 to distinguish numeric source traversal/snapshot fields from identity-only
 alias metadata. The existing full graph storage snapshots remain checked.
 Focused wrapper and workspace TypeScript results are reported with this

@@ -7,6 +7,8 @@ export interface SourceBattleTeamRow extends Pick<BurstMeterState, 'charged'> {
   byte0?: number; byte1?: number; byte2?: number; byte3?: number;
   byte4?: number; byte5?: number; byte6?: number; byte7?: number; byte8?: number; byte9?: number;
   byte10?: number;
+  /** Raw unsigned storage for source lha/sth row+18; reached lazily. */
+  half18?: number;
   threshold30?: number;
   /** Existing BurstMeterState owner for row+32, not a new raw halfword. */
   meter?: number;
@@ -15,6 +17,8 @@ export interface SourceBattleOuterGlobalFields {
   byte15d4?: number; byte66?: number; halfD6?: number;
   /** SAME unsigned80433934+d9 cell already used by actor-matrix/ceiling. */
   byteD9?: number;
+  /** SAME unsigned80433934+eb cell returned by recorded matched8008b480. */
+  byteEB?: number;
   /** Borrowed SlotTableState names on this SAME80433934 owner. */
   activeMask?: number; slotTeam?: readonly number[];
   teamRows103?: readonly SourceBattleTeamRow[];

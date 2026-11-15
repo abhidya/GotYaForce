@@ -7,7 +7,9 @@ playability claim**. See [fixed archive evidence](outer-frame-evidence-2026-11-1
 The caller's mandatory predecessors are not substituted with successful callbacks.
 The later [team-refresh leaf continuation](team-refresh-leaf-integration-2026-11-15.md)
 uses the independently authenticated complete `8008b290` body from the existing
-actor-ceiling evidence; its zero path still refuses at `8008b480`.
+actor-ceiling evidence. The subsequent [burst-expiry continuation](burst-expiry-integration-2026-11-15.md)
+uses existing recorded matched-source `8008b480` and implements only the
+integer timer-expiry branch; positive timers still refuse at `80029de0`.
 
 ## Canonical storage
 
@@ -59,7 +61,9 @@ are refused; the interfaces do not create properties or default data.
    A nonzero burst byte clears charged, then calls the complete `8008b290` leaf
    at `80029d90`: load the same match-global owner and unsigned `byteD9`. Its
    full-word nonzero result skips the rest of this row and continues later rows;
-   zero refuses at `80029d9c` before mandatory `8008b480`. No later timer,
+   zero originally refused at `80029d9c` before `8008b480`. The later linked
+   burst-expiry increment advances only its integer expiry branch. At this
+   original checkpoint no later timer,
    pause-mask or floating-point branch is executed.
 4. Nonburst rows compare unsigned meter32 against threshold30 and write charged
    true iff meter is at least the threshold. This may clear a previously true

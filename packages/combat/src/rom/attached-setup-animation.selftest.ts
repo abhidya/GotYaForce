@@ -17,6 +17,7 @@ import {runActorSlotStatusSelfTests} from './actor-slot-status.selftest.js';
 import {runBattleMassOrderingSelfTests} from './battle-mass-ordering.selftest.js';
 import {runBattleMassPreparationSelfTests} from './battle-mass-preparation.selftest.js';
 import {runBattleOuterFrameSelfTests} from './battle-outer-frame.selftest.js';
+import {runBattleBurstExpirySelfTests} from './battle-burst-expiry.selftest.js';
 import {runBattleTeamRefreshLeafSelfTests} from './battle-team-refresh-leaf.selftest.js';
 import {runObjectSchedulerSelfTests} from './source-object-scheduler.selftest.js';
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
@@ -2893,6 +2894,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runProjectileCleanupHydratedCompositionTests();
   runBattleOuterFrameHydratedCompositionTests();
   runBattleTeamRefreshLeafHydratedCompositionTests();
+  runBattleBurstExpiryHydratedCompositionTests();
   runBattleMassPreparationHydratedCompositionTests();
   runBattleMassOrderingHydratedCompositionTests();
   runBattleTargetPreparationHydratedCompositionTests();
@@ -13325,6 +13327,9 @@ export function createBattleOuterFrameTestFixture() {
 }
 export function runBattleOuterFrameHydratedCompositionTests(): void {
   runBattleOuterFrameSelfTests(createBattleOuterFrameTestFixture);
+}
+export function runBattleBurstExpiryHydratedCompositionTests(): void {
+  runBattleBurstExpirySelfTests(createBattleOuterFrameTestFixture);
 }
 export function runBattleTeamRefreshLeafHydratedCompositionTests(): void {
   runBattleTeamRefreshLeafSelfTests(createBattleOuterFrameTestFixture);

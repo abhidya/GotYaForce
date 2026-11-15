@@ -2,7 +2,9 @@
  * Executes8b048→8b010 and29d48→29e98 over the SAME80433934 owner and
  * existing teamRows103/charged/meter owners. The authenticated8b290 leaf reads
  * the SAME unsigned match-global byteD9 freshly for each reached burst row.
- * Nonzero continues later rows; zero stops at mandatory8b480. First reached
+ * Nonzero continues later rows; zero calls recorded matched8b480 for fresh byteEB.
+ * Its mask admits signed half18 decrement/expiry; positive timers stop before
+ * unsupported80029de0 floating arithmetic. First reached
  * normal53b30 or unconditional pausedbef4 remains a hard ordered boundary unless
  * explicit mass ingress supplies the bounded53b30 prefix. That path stops before
  * nonzero passenger1e4 or missing RNG/ordering ingress. The no-contact ordering
@@ -24,7 +26,9 @@
  * are checked at each store; prior writes survive refusal and close the whole
  * retained scheduler graph. Identity checks are host admission, not ROM reads.
  * Evidence: outer-frame-evidence-2026-11-14.md (five complete archived bodies)
- * and actor-ceiling-lifecycle-evidence-2026-11-14.md (complete8b290 leaf).
+ * and actor-ceiling-lifecycle-evidence-2026-11-14.md (complete8b290 leaf),
+ * burst-expiry-integration-2026-11-15.md (recorded matched8b480, not a new
+ * ProgramDB selection or fresh retail verification).
  */
 import {isSourceObjectSchedulerRuntime, claimSourceObjectSchedulerOuterFrame,
   closeSourceObjectSchedulerOuterFrame, type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
@@ -122,6 +126,7 @@ function unsigned(value: unknown,max: number,where: string): number {
   return value===0 ? 0 : value;
 }
 const s8=(value: number): number=>value<<24>>24;
+const s16=(value: number): number=>value<<16>>16;
 // Final host destination check uses the native intrinsic retained at module load.
 // For the declared synchronous nonproxy records it cannot invoke application
 // callbacks. A stale earlier metadata snapshot cannot authorize creation or a
@@ -179,14 +184,28 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     // replacement table; retain the existing row-reference representation.
     if(read(globals,'teamRows103')!==table) fail('teamRows103: canonical owner changed');
     const row=retain(`team row${index}`,read(table,String(index)));
+    teamLayout(noShadows,row,index);return row;
+  };
+  const teamLayout=(shadows: typeof noShadows,row: object,index: number): void=>{
     const base=0xf4+index*0x3c,offsets=[...Array.from({length:10},(_,i)=>i),0xf,0x10,0x30,0x31,0x32,0x33];
-    noShadows(globals,[...offsets.flatMap(offset=>{const address=base+offset,hex=address.toString(16);
+    shadows(globals,[...offsets.flatMap(offset=>{const address=base+offset,hex=address.toString(16);
       return [String(address),`byte${hex}`,`byte${hex.toUpperCase()}`];}),
       `field${(base+0xf).toString(16)}`,`word${(base+0x32).toString(16)}`,
       `half${(base+0x30).toString(16)}`,`half${(base+0x32).toString(16)}`]);
-    noShadows(row,['byteF','bytef','byte0F','byte0f','byte103','half30','half32','word126',
+    shadows(row,['byteF','bytef','byte0F','byte0f','byte103','half30','half32','word126',
       'byte30','byte31','byte32','byte33',...Array.from({length:10},(_,i)=>String(i)),'15','16','48','49','50','51']);
-    return row;
+  };
+  // Row-relative timer aliases are admitted only once that row reaches lha+18.
+  // Other rows and unrelated raw byte windows stay lazy.
+  const timerRows=new Map<number,object>();
+  const timerLayout=(shadows: typeof noShadows): void=>{
+    for(const [index,row] of timerRows) {
+      shadows(row,['24','25','byte18','byte19','short18','field18','timer18','half018','half0018']);
+      const address=0xf4+index*0x3c+0x18;
+      shadows(globals,[String(address),String(address+1),
+        ...[address,address+1].flatMap(offset=>[`byte${offset.toString(16)}`,`byte${offset.toString(16).toUpperCase()}`]),
+        ...['half','short','field'].flatMap(prefix=>[`${prefix}${address.toString(16)}`,`${prefix}${address.toString(16).toUpperCase()}`])]);
+    }
   };
   const storeCharged=(row: object,value: boolean): void=>{
     if(typeof read(row,'charged')!=='boolean') fail('charged: existing boolean source0/1 owner required');
@@ -231,47 +250,49 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       write(row,'byte3',mask|bit);write(row,`byte${destination}`,slot);
     }
   };
-  const teamRefreshLeaf=(table: object,row: object,index: number): number=>{
-    // Complete8008b290: lwz r3,-31852(r13); lbz r3,217(r3); blr.
-    // The pointer and scalar are live at each reached call, never frame-cached.
-    const owner=match(),aliases=['byted9','byte0d9','byte0D9','fieldD9','fieldd9','globalD9','globald9'];
-    const nativeRead=(record: object,key: string): unknown=>{
-      const field=primaryStoreDescriptor(record,key);
-      if(!field || !('value' in field)) fail(`${key}: terminal own data property required`);
-      return field.value;
-    };
+  const terminalRead=(record: object,key: string): unknown=>{
+    const field=primaryStoreDescriptor(record,key);
+    if(!field || !('value' in field)) fail(`${key}: terminal own data property required`);
+    return field.value;
+  };
+  const teamGuard=(table: object,row: object,index: number,keys: readonly ('byteD9'|'byteEB')[]): (()=>void)=>{
+    const owner=globals,callee=keys.includes('byteEB')?'8008b480':'8008b290';
     const metadata=(shadows: typeof noShadows,records: readonly object[]): void=>{
-      for(const record of records) {
-        if(record!==owner) shadows(record,['byteD9']);
-        shadows(record,aliases);
-        // Decimal217 is an alias on the global, not unrelated raw byte windows.
-        if(record===owner) shadows(record,['217']);
+      for(const record of records) for(const key of keys) {
+        if(record!==owner) shadows(record,[key]);
+        const suffix=key.slice(4),lower=suffix.toLowerCase();
+        shadows(record,[`byte${lower}`,`byte0${lower}`,`byte0${suffix}`,`field${suffix}`,`field${lower}`,`global${suffix}`,`global${lower}`]);
+        // Decimal offsets alias the global, not unrelated raw byte windows.
+        if(record===owner) shadows(record,[key==='byteD9'?'217':'235']);
+      }
+      if(keys.includes('byteEB')) {
+        for(const [name,record] of retained) if(name.startsWith('team row'))
+          teamLayout(shadows,record,Number(name.slice(8)));
+        timerLayout(shadows);
       }
     };
-    const guard=(): void=>{
+    return (): void=>{
       const records=[sources,globals,table,row,...retained.values(),
         ...call(()=>scheduler.getRetainedStorageOwners())];
       metadata(noShadows,[...new Set(records)]);
-      // Rebuild immediate record identities after the LAST observable metadata
-      // check. The remaining native snapshots cannot invoke host callbacks on
-      // our declared synchronous nonproxy domain. These are admission metadata,
-      // not extra ROM scalar loads or a new source-global owner.
+      // After the LAST observable inventory, native snapshots cannot call
+      // application code in the declared synchronous nonproxy host domain.
       const current=[...new Set([...records,...call(()=>scheduler.getRetainedStorageOwners())])];
       const nested=current.flatMap(record=>Object.values(primaryStoreDescriptors(record)).flatMap(field=>
         'value' in field && field.value!==null && typeof field.value==='object'?[field.value as object]:[]));
       const all=[...new Set([...current,...nested])];
-      if(nativeRead(sources,'scheduler')!==scheduler || scheduler.getRootRuntime()!==root ||
+      if(terminalRead(sources,'scheduler')!==scheduler || scheduler.getRootRuntime()!==root ||
         root.getSpawnRuntime()!==spawns || scheduler.getAllocatorRuntime()!==allocator ||
         scheduler.getMatchGlobals()!==owner || spawns.getMatchGlobals()!==owner)
-        fail('8008b290 canonical scheduler/global owner changed');
-      if(nativeRead(owner,'teamRows103')!==table || nativeRead(table,String(index))!==row)
-        fail('8008b290 canonical team owner changed');
+        fail(`${callee} canonical scheduler/global owner changed`);
+      if(terminalRead(owner,'teamRows103')!==table || terminalRead(table,String(index))!==row)
+        fail(`${callee} canonical team owner changed`);
       for(const [name,record] of retained) {
-        if(name.startsWith('team row') && nativeRead(table,name.slice(8))!==record)
-          fail('8008b290 retained team row owner changed');
-        if(name==='slotTeam' && nativeRead(owner,'slotTeam')!==record ||
-          name==='systemGlobals' && nativeRead(sources,'systemGlobals')!==record)
-          fail(`8008b290 ${name}: canonical owner changed`);
+        if(name.startsWith('team row') && terminalRead(table,name.slice(8))!==record)
+          fail(`${callee} retained team row owner changed`);
+        if(name==='slotTeam' && terminalRead(owner,'slotTeam')!==record ||
+          name==='systemGlobals' && terminalRead(sources,'systemGlobals')!==record)
+          fail(`${callee} ${name}: canonical owner changed`);
       }
       metadata((record,keys)=>{
         for(const key of keys) if(primaryStoreDescriptor(record,key)!==undefined)
@@ -280,13 +301,41 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       for(const record of all) requireCompleteSourceActorDoubleLifecycle(record);
       check();
     };
-    guard();
-    const result=byte(owner,'byteD9'); // One unsigned source byte read.
-    guard();
-    // Preserve the captured r3 value, but reject a late missing/accessor/invalid
-    // canonical cell instead of using stale descriptor metadata to continue.
-    unsigned(nativeRead(owner,'byteD9'),255,'byteD9');
-    return result;
+  };
+  const teamRefreshLeaf=(table: object,row: object,index: number): number=>{
+    // Complete8008b290: lwz r3,-31852(r13); lbz r3,217(r3); blr.
+    const owner=match(),guard=teamGuard(table,row,index,['byteD9']);
+    guard();const result=byte(owner,'byteD9');guard();
+    unsigned(terminalRead(owner,'byteD9'),255,'byteD9');return result;
+  };
+  const updateBurst=(table: object,row: object,index: number): void=>{
+    // Existing recorded matched-source8008b480: lwz r3,-31852(r13);
+    // lbz r3,235(r3); blr. No new archive/DOL verification is claimed.
+    const owner=match(),guard=teamGuard(table,row,index,['byteD9','byteEB']);
+    guard();const mask=byte(owner,'byteEB');guard();
+    unsigned(terminalRead(owner,'byteEB'),255,'byteEB');
+    const load=(key: string,max: number): number=>{
+      guard();const value=read(row,key);guard();
+      unsigned(terminalRead(row,key),max,key);return unsigned(value,max,key);
+    };
+    const store=(key: string,value: number): void=>{
+      guard();own(row,key,true);check();guard();
+      const field=primaryStoreDescriptor(row,key);
+      if(!field || !('value' in field)) fail(`${key}: live own data property required`);
+      if(!field.writable) fail(`${key}: live non-writable field`);
+      if(key==='half18') unsigned(field.value,65535,key);
+      // No observable callback between final metadata/native destination check
+      // and the overwrite. This is not a source read of the old destination.
+      (row as Record<string,unknown>)[key]=value;guard();
+    };
+    //80029da0..db4: unsigned returned r3 AND signed source row+3. Zero
+    // skips the row+3 load entirely; captured values survive valid mutations.
+    if(mask!==0 && (mask&s8(load('byte3',255)))===0) return;
+    timerRows.set(index,row);
+    const timer=s16(load('half18',65535)),next=s16(timer-1);
+    store('half18',next&65535); // sth uses low16, extsh sets the branch result.
+    if(next>0) fail('80029de0 reached unsupported positive burst timer floating suffix');
+    store('meter',0);store('byte10',0);store('meter',0); //29dd0/dd4/dd8, not deduplicated.
   };
   const updateTeams=(): void=>{
     const table=teamTable(match()); //29d60–64 captures original row base once.
@@ -296,7 +345,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(s8(byte(row,'byte10'))!==0) {
         storeCharged(row,false);
         if(teamRefreshLeaf(table,row,i)!==0) continue; // Full returned r3,29d94..98.
-        fail('80029d9c reached mandatory8008b480 active-burst predecessor');
+        updateBurst(table,row,i);continue;
       }
       const meter=half(row,'meter'),threshold=half(row,'threshold30');
       storeCharged(row,meter>=threshold);

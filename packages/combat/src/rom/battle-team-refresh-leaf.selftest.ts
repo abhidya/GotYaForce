@@ -7,7 +7,7 @@ import type {SourceBattleOuterFrameTestFixture} from './battle-outer-frame.selft
 type Make=()=>SourceBattleOuterFrameTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
 const normal='80029458 reached mandatory80053b30',paused='80029464 reached mandatory8000bef4',
-  zero='80029d9c reached mandatory8008b480';
+  zero='byteEB: own data property required';
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[battle-team-refresh-leaf-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}
 function refuses(run:()=>unknown,part:string):string {
@@ -179,5 +179,5 @@ function terminalMetadata(make:Make):void {
 export function runBattleTeamRefreshLeafSelfTests(make:Make):void {
   let count=0;const counted=()=>{count++;return make();};
   branches(counted);captures(counted);faults(counted);terminalMetadata(counted);
-  console.log(`[battle-team-refresh-leaf] PASS (${count} genuine shared-graph fixtures): fresh canonical unsigned byteD9, ordered charged clears, nonzero later-row continuation and zero8b480 refusal, lazy/captured loads, final metadata mutations, alias/lifecycle/reentry closure; no timer suffix, scheduler execution, complete frame, retail replay or browser claim`);
+  console.log(`[battle-team-refresh-leaf] PASS (${count} genuine shared-graph fixtures): fresh canonical unsigned byteD9, ordered charged clears, nonzero later-row continuation and zero requires explicit8b480 byteEB, lazy/captured loads, final metadata mutations, alias/lifecycle/reentry closure; no supplied timer continuation, scheduler execution, complete frame, retail replay or browser claim`);
 }
