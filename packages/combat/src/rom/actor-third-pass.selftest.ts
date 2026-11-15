@@ -1,3 +1,4 @@
+import type {SourceActorAttributeRefreshBinding} from './actor-attribute-refresh.js';
 import {createRomActor} from './actor.js';
 import {createActorSecondaryNullTestFixture} from './actor-secondary-null.selftest.js';
 import {createSourceActorCommandAdmissionRuntime,type SourceActorCommandAdmissionBinding} from './actor-command-admission.js';
@@ -21,7 +22,7 @@ function refuses(run:()=>unknown,part:string):string {let message='';try{run();}
  * The live mass table retains its documented repeated primary identity; this
  * fixture proves the distinct physical target pass, not six-actor mass setup.
  */
-function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<SourceActorCommandAdmissionBinding>>) {
+function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<SourceActorCommandAdmissionBinding>>,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>) {
  const x=createActorSecondaryNullTestFixture(make);
  const ids=[...x.physicalIdentities],actuals:object[]=[...x.slotTargets];
  const bindings:(Partial<SourceActorCommandAdmissionBinding>|undefined)[]=[x.admissionState];
@@ -39,7 +40,7 @@ function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<
  x.control.bindActor(id,{activeMask579:0,blockedMask1d9a:0,marker71d:0},Array.from({length:4},()=>({current00:null,next04:null,wait14:0,finished1a:0,event1e:0,group18:0,action19:0,status1d:0,state1b:0,auxiliary1c:0})));
  x.control.bindStartActor(id,{familyBank1d80:null,sharedBank1d84:null,defaultSelector582:0,marker709:0});
  x.ready.bindActor(id,{familyBank1d78:null,sharedBank1d7c:null,movement6d8:0});
- x.movement.bindActor(id,actual,{byte661:0,field66c:0,field670:0});x.attributes.bindActor(id,{});
+ x.movement.bindActor(id,actual,{byte661:0,field66c:0,field670:0});x.attributes.bindActor(id,attributes??{});
  Reflect.deleteProperty(actual,'invulnTimer');
  const slot=()=>({cell:{cur:0,max:0,refillType:0,refillParam:0,timer:0},mirror776:0});
  x.status.bindActor(id,{hp:1,hitDrainFrames:0,balanceGauge:0,balanceGaugeMax:0,balanceRefillDelay:0,downResetDelay:0,comboWindow:0,comboAccum:0,comboRank:0,invincTimer:0,sourceAmmoRefillPauseMask:0},{},[slot(),slot(),slot()]);
@@ -58,7 +59,7 @@ function fixture(make:Make,count=5,omittedRow=-1,firstInitial?:Readonly<Partial<
 }
 type Fixture=ReturnType<typeof fixture>;
 /** Same genuine six-actor composition for later source continuation tests. */
-export function createActorThirdPassTestFixture(make:Make) {return fixture(make);}
+export function createActorThirdPassTestFixture(make:Make,attributes?:Readonly<Partial<SourceActorAttributeRefreshBinding>>) {return fixture(make,5,-1,undefined,attributes);}
 
 
 function trace(x:Fixture,expected=next,before:Visit=()=>{},after?:Visit) {

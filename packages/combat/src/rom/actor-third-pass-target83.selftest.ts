@@ -5,7 +5,7 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Fixture=ReturnType<typeof createActorThirdPassTestFixture>;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const next='80029460 reached mandatory80027764',zero='8006b380';
+const next='80029460 reached mandatory80027764',zero='byte7d3: own data property required';
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[actor-third-pass-target83-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}
 function refuses(run:()=>unknown,part:string):string {let message='';try{run();}catch(error){message=String(error);}check(message.includes(part),`expected ${part}, got ${message||'success'}`);return message;}
@@ -19,7 +19,7 @@ function fixture(make:Make,value:number|null=1,targetRow=2,bind=true) {
 type Bound=ReturnType<typeof fixture>;
 function run(x:Bound,expected=next,before:Visit=()=>{},after?:Visit,activate=true) {
  const native=Object.getOwnPropertyDescriptor,events:string[]=[];
- let secondary=false,third=false,reads=0,later=0,scheduler=0;
+ let secondary=false,third=false,reads=0,flagReads=0,later=0,scheduler=0;
  Object.getOwnPropertyDescriptor=((owner:object,key:PropertyKey)=>{
   if(owner===x.sourceActor&&key==='visibilityTarget')secondary=true;
   if(secondary&&owner===x.massPreparation&&key==='physicalBlock')third=true;
@@ -29,7 +29,8 @@ function run(x:Bound,expected=next,before:Visit=()=>{},after?:Visit,activate=tru
    if(actor>=0&&key==='active0'){events.push('active'+actor);if(activate&&actor===1)Reflect.set(owner,'active0',1);}
    if(binding>=0&&key==='pointer508')events.push('508-'+binding);
    if(owner===x.target83&&key==='byte83'){reads++;events.push('target83');}
-   if((owner===x.physicalActors[1]&&key==='byte7d3')||(owner===x.targetActor&&['team','byte58a'].includes(String(key))))later++;
+   if(x.physicalActors.includes(owner)&&key==='byte7d3')flagReads++;
+   if(owner===x.targetActor&&['team','byte58a'].includes(String(key)))later++;
    // Alias metadata checks on the group-table object are not group loads.
    if(owner===x.groups&&/^\d+$/.test(String(key))||owner===x.matchGlobals&&['maskD1','maskD2'].includes(String(key)))scheduler++;
    before(owner,key);
@@ -37,7 +38,7 @@ function run(x:Bound,expected=next,before:Visit=()=>{},after?:Visit,activate=tru
   const result=native(owner,key);if(third)after?.(owner,key);return result;
  }) as typeof native;
  let message='';try{message=refuses(()=>x.frame.runFrame(),expected);}finally{Object.getOwnPropertyDescriptor=native;}
- check(secondary&&third,'actual secondary return and third pass reached');equal(later,0,'no actor7d3 or target association scalar read');equal(scheduler,0,'no scheduler execution reads');
+ check(secondary&&third,'actual secondary return and third pass reached');equal(flagReads,expected===zero?1:0,'only zero target83 reaches absent caller7d3');equal(later,0,'no target association scalar read');equal(scheduler,0,'no scheduler execution reads');
  return {events,reads,message};
 }
 function retained(x:Fixture):void {
@@ -78,7 +79,7 @@ function captured(make:Make):void {
   const x=fixture(make,1);x.physicalBindings[3]!.pointer508=x.targetActor;let first=true;
   const r=run(x,zero,(owner,key)=>{if(owner===x.physicalActors[3]&&key==='active0'){Reflect.set(owner,'active0',1);x.target83!.byte83=0;}
    if(owner===x.target83&&key==='byte83'){if(first)first=false;}});
-  equal(r.reads,2,'a later active actor reads the live same canonical target byte again');equal(r.events.at(-1),'target83','later zero byte stops before association');retained(x);closed(x);
+  equal(r.reads,2,'a later active actor reads the live same canonical target byte again');equal(r.events.at(-1),'target83','later zero byte stops at absent caller7d3');retained(x);closed(x);
  }
 }
 function failures(make:Make):void {
@@ -101,5 +102,5 @@ function failures(make:Make):void {
 }
 export function runActorThirdPassTarget83SelfTests(make:Make):void {
  let count=0;const counted:Make=omit=>{count++;return make(omit);};branches(counted);captured(counted);failures(counted);
- console.log(`[actor-third-pass-target83] PASS (${count} genuine shared-graph fixtures): allocation-owned target83, active/null gating, signed nonzero skips, captured pointer/byte order, lazy faults, aliases and permanent failure closure; stops before actor7d3 or mandatory27764, no complete association, outer frame, scheduler execution or browser claim`);
+ console.log(`[actor-third-pass-target83] PASS (${count} genuine shared-graph fixtures): allocation-owned target83, active/null gating, signed nonzero skips, captured pointer/byte order, lazy faults, aliases and permanent failure closure; stops at absent caller7d3 or mandatory27764, no complete association, outer frame, scheduler execution or browser claim`);
 }

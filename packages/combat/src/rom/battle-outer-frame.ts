@@ -10,7 +10,7 @@
  * clearing and entry0 bounded returns; skipped lifecycle rows and dispatch
  * returns execute the primary508/504 live SquareDistance path and ordered zero/null
  * distance stores through the next mandatory direction helper or estimator. Skipped lifecycle rows retain canonical508 bounds; active nonnull targets may
- * use the SAME allocation-owned83 byte, stopping before the actor7d3 association guard.
+ * use the SAME allocation-owned83 byte, then caller7d3, signed teams and finite distance guards before the inner scan.
  * Its bounded return still cannot skip mandatory27764.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
@@ -954,11 +954,41 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       // bounded domain accepts a genuine actor bound to this SAME allocator
       // and world; its canonical83 is already allocation-owned, not a new
       // eligibility83 field copied onto the actual actor or an ad hoc target.
-      const target83=(()=>{
+      // Final metadata snapshots use the retained native intrinsic. For the
+      // declared synchronous nonproxy records these checks cannot invoke the
+      // observer that just ran, nor read any captured source scalar again.
+      const terminalRead=(record:object,key:string):unknown=>{
+        const field=primaryStoreDescriptor(record,key);
+        if(!field || !('value' in field))fail(`${key}: terminal own data property required`);
+        return field.value;
+      };
+      const terminalShadows=(record:object,keys:readonly string[]):void=>{
+        for(const key of keys)if(primaryStoreDescriptor(record,key)!==undefined)fail(`${key}: competing source cell owner`);
+      };
+      const selected=(()=>{
         try {
+          const runtime=admission();
           const targetId=call(()=>allocator.getPointerIdentity(record(pointer,'6b374 captured target')));
           const targetActor=actual(targetId);
           const owner=record(call(()=>allocator.getActorBinding(targetId)),'6b374 canonical allocation83');
+          const finish=():void=>{
+            if(terminalRead(sources,'targetPreparation')!==target || terminalRead(target,'admission')!==runtime ||
+              spawns.getAdmissionRuntime()!==runtime || runtime.getActualActor(id)!==actor ||
+              runtime.getActorBinding(id)!==binding || world.getActualActor(id)!==actor || status.getActualActor(id)!==actor ||
+              allocator.getActualActor(targetId)!==targetActor || allocator.getPointerTarget(targetId)!==targetActor ||
+              allocator.getActorBinding(targetId)!==owner || world.getActualActor(targetId)!==targetActor)
+              fail('6b374 terminal canonical caller/target owner changed');
+            terminalShadows(actor,['pointer508','field508','byte508','byte509','byte50a','byte50b','byte50A','byte50B','1288','1289','1290','1291']);
+            terminalShadows(binding,['field508','byte508','byte509','byte50a','byte50b','byte50A','byte50B','1288','1289','1290','1291']);
+            const worldOwner=world.getActorBinding(targetId);
+            for(const candidate of new Set([targetActor,worldOwner,...allocator.getSourceOwners(targetId)])) {
+              if(candidate!==owner)terminalShadows(candidate,['byte83']);
+              terminalShadows(candidate,['eligibility83','groupEligibility83','field83']);
+              if(candidate===targetActor || candidate===worldOwner || candidate===owner)terminalShadows(candidate,['131']);
+            }
+            check();requireCompleteSourceActorDoubleLifecycle(actor);requireCompleteSourceActorDoubleLifecycle(targetActor);
+            runtime.assertActorComplete(id);allocator.assertActorComplete(targetId);check();
+          };
           const guard=(): void=>{
             check();requireCompleteSourceActorDoubleLifecycle(actor);
             call(()=>admission().assertActorComplete(id));
@@ -983,12 +1013,83 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
               // Numeric actor aliases apply only to these actor-role records.
               if(candidate===targetActor || candidate===worldOwner || candidate===owner)noShadows(candidate,['131']);
             }
+            finish();
           };
-          guard();const captured=byte(owner,'byte83');guard();return captured;
+          guard();const captured=byte(owner,'byte83');guard();return {captured,targetActor,targetId,owner,runtime,guard,finish};
         } catch(error) {fail(`8006b374 target83 ownership/load refused: ${String(error)}`);}
       })();
-      if(s8(target83)!==0) continue;
-      fail('8006b380 reached unsupported source actor7d3 association guard');
+      if(s8(selected.captured)!==0) continue;
+      let teamsReached=false,distanceReached=false,threshold:object|undefined;
+      let attributeRuntime:SourceActorAttributeRefreshRuntime|undefined,attributeMass:object|undefined;
+      const associationMetadata=(shadows:(owner:object,keys:readonly string[])=>void,
+        peek:(owner:object,key:string)=>unknown):void=>{
+        const runtime=selected.runtime;
+        const records=[actor,selected.targetActor,binding,selected.owner,globals,sources,
+          runtime.getWorldBinding(id),runtime.getStatusBinding(id),runtime.getMappingActor(id),
+          runtime.getAttributeBinding(id),runtime.getChargeBinding(id),runtime.getActionBinding(id),
+          runtime.getCueBinding(id),runtime.getDispatchBinding(id),runtime.getStartBinding(id),runtime.getStreamBinding(id),
+          world.getActorBinding(selected.targetId)];
+        const actuals=world.getRetainedActorOwners();
+        for(const candidate of new Set(records)) {
+          if(!actuals.includes(candidate))shadows(candidate,['byte7d3']);
+          shadows(candidate,['byte7D3','field7d3','field7D3','flags7d3','mask7d3']);
+          if(candidate===actor)shadows(candidate,['2003']);
+          if(teamsReached) {
+            if(!actuals.includes(candidate))shadows(candidate,['team']);
+            shadows(candidate,['byte88','field88']);
+            if(candidate===actor || candidate===selected.targetActor)shadows(candidate,['136']);
+          }
+          if(distanceReached) {
+            if(!actuals.includes(candidate))shadows(candidate,['horizontalDistance75c']);
+            shadows(candidate,['field75c','field75C','float75c','float75C']);
+            if(candidate===actor)shadows(candidate,['1884','1885','1886','1887','byte75c','byte75d','byte75e','byte75f','byte75C','byte75D','byte75E','byte75F']);
+          }
+          if(threshold!==undefined) {
+            if(candidate!==threshold)shadows(candidate,['field814']);
+            shadows(candidate,['float814','threshold814']);
+            if(candidate===actor || candidate===threshold)shadows(candidate,['2068','2069','2070','2071','byte814','byte815','byte816','byte817']);
+          }
+        }
+        if(threshold!==undefined && (runtime.getAttributeBinding(id)!==threshold ||
+          status.getAttributeBinding(id)!==threshold || !attributeRuntime || !attributeMass ||
+          peek(sources,'massPreparation')!==attributeMass || peek(attributeMass,'attributes')!==attributeRuntime ||
+          attributeRuntime.getActualActor(id)!==actor || attributeRuntime.getActorBinding(id)!==threshold))
+          fail('6b3a8 canonical814 owner changed');
+      };
+      const associationGuard=():void=>{
+        selected.guard();associationMetadata(noShadows,read);selected.guard();
+        associationMetadata(terminalShadows,terminalRead);selected.finish();
+      };
+      const associationLoad=(owner:object,key:string):unknown=>{
+        associationGuard();const value=read(owner,key);associationGuard();return value;
+      };
+      //8006b380..388: bit0 only, not a truthiness test on the whole byte.
+      const flags=unsigned(associationLoad(actor,'byte7d3'),255,'byte7d3');
+      if((flags&1)!==0)continue;
+      //8006b38c..3a0: target team BEFORE caller team; retain captured signed
+      // values even if either source cell changes during the following load.
+      teamsReached=true;
+      const targetTeam=s8(unsigned(associationLoad(selected.targetActor,'team'),255,'target team'));
+      const callerTeam=s8(unsigned(associationLoad(actor,'team'),255,'caller team'));
+      if(targetTeam===callerTeam)continue;
+      //8006b3a4..3b0: finite exact-f32 host domain only. Source skips on GT,
+      // not on !(LT||EQ). NaN/unordered and general FPSCR are not implemented.
+      distanceReached=true;
+      const finite=(value:unknown,key:string):number=>{
+        if(typeof value!=='number' || !Number.isFinite(value) || !Object.is(value,Math.fround(value)))
+          fail(`${key}: finite exact source float32 required`);return value;
+      };
+      const distance=finite(associationLoad(actor,'horizontalDistance75c'),'horizontalDistance75c');
+      const mass=retained.get('massPreparation');
+      if(!mass || read(sources,'massPreparation')!==mass)fail('6b3a8 canonical mass attribute ingress changed');
+      const attributes=read(mass,'attributes');
+      if(!isSourceActorAttributeRefreshRuntime(attributes) || call(()=>attributes.getActualActor(id))!==actor)
+        fail('6b3a8 genuine same-actor attribute owner required');
+      attributeRuntime=attributes;attributeMass=mass;
+      threshold=record(call(()=>attributes.getActorBinding(id)),'6b3a8 canonical attribute814');
+      const limit=finite(associationLoad(threshold,'field814'),'field814');
+      if(distance>limit)continue;
+      fail('8006b3bc reached unsupported source association inner physical scan');
     }
     //Genuine void return only if every reached canonical508 owner completed.
   };
