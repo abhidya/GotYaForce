@@ -13,8 +13,9 @@
  * stable non-proxy own-data owners; source pointer arithmetic must address an
  * explicitly owned cell. Nonzero support refuses before its matrix/copy branch;
  * reached nonempty ceiling cells refuse before their triangle bodies. Floor
- * triangles execute the actual edge and plane arithmetic, within explicit
- * flat normals (+/-0,1,+/-0). Other normals refuse only when reached.
+ * triangles execute the actual edge and plane arithmetic. The height-plus-normal
+ * query admits finite non-flat normals and nonzero Y divisors; the two sibling
+ * queries remain bounded to flat normals (+/-0,1,+/-0).
  * Source loads and arithmetic remain ordered, including local clearance
  * adjustment, current/history reloads, and all three height-query accumulators.
  * The normal-only query has no minimum/maximum fallback. The distinct
@@ -36,6 +37,11 @@ export interface SourceActorTerrainNormalOutput extends SourceJointVector {
   readonly [terrainNormalOutputBrand]: true;
 }
 const normalOutputs = new WeakSet<object>();
+// Caller outputs are ordinary allocations owned here, never proxies. Capture
+// intrinsic own-data operations so a descriptor observation cannot turn a later
+// height-normal store into an accessor call or conceal a changed destination.
+const outputDescriptor = Reflect.getOwnPropertyDescriptor, outputOwnerKeys = Reflect.ownKeys,
+  storeOutputData = Reflect.defineProperty;
 /** Uninitialized scratch: a query must perform its actual source stores before
  * any component is meaningful. The caller must keep this out of source owners. */
 export function createSourceActorTerrainNormalOutput(): SourceActorTerrainNormalOutput {
@@ -385,10 +391,36 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
         // identities, never X/Y/Z values, and recheck before subsequent writes.
         if (read(actualOwner, 'pos') !== actor.position) fail('pos owner changed its actual record');
         if (read(actualOwner, 'savedGroundPos') !== actor.savedPosition) fail('savedGroundPos owner changed its actual record');
+        // Observed metadata/identity reads above can themselves expose a late
+        // owner change. Finish with intrinsic metadata only, so no accessor or
+        // replaceable descriptor observer lies between admission and the store.
+        for (const owner of knownOwners) for (const key of outputOwnerKeys(owner)) {
+          const descriptor = outputDescriptor(owner, key);
+          if (descriptor && 'value' in descriptor && descriptor.value === output)
+            fail('aliased caller-local height-normal output adopted by source owner');
+        }
+        for (const [key, expected] of [['pos', actor.position], ['savedGroundPos', actor.savedPosition]] as const) {
+          const descriptor = outputDescriptor(actualOwner, key);
+          if (!descriptor || !('value' in descriptor)) fail(`${key}: own data property required`);
+          if (descriptor.value !== expected) fail(`${key} owner changed its actual record`);
+        }
+      };
+      const storeNormal = (key: 'x' | 'y' | 'z', next: number): void => {
+        const descriptor = Object.getOwnPropertyDescriptor(output, key); check();
+        if (!descriptor || !('value' in descriptor)) fail(`normal output ${key}: own data property required`);
+        if (!descriptor.writable) fail(`normal output ${key}: non-writable field unsupported`);
+        // Reconcile adoption/vector identities after the last observable
+        // destination check, including the final Z store. Inspect no scalar.
+        admitOutput();
+        const current = outputDescriptor(output, key);
+        if (!current || !('value' in current)) fail(`normal output ${key}: own data property required`);
+        if (!current.writable) fail(`normal output ${key}: non-writable field unsupported`);
+        if (!storeOutputData(output, key, {value: next})) fail(`normal output ${key}: own data store failed`);
+        check();
       };
       admitOutput();
       // 8003e130/134/138 precede the bounds call, including its outside return.
-      writeNormal(output, 'x', 0); writeNormal(output, 'y', 1); writeNormal(output, 'z', 0);
+      storeNormal('x', 0); storeNormal('y', 1); storeNormal('z', 0);
       // FLOAT_8043702c = c59c4000, independently authenticated in both snapshots.
       if (!inBounds(point)) return -5000;
       const initialUpper = f(terrain, 'upper34');
@@ -425,18 +457,17 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
         if (mul32(dz3, dx1) < mul32(dx3, dz1)) continue;
         // Preserve all three word captures before the first normal arithmetic.
         const nx = load(0x28), nz = load(0x30), ny = load(0x2c);
-        if (nx !== 0) fail('nonflat source normal X unsupported');
         const xProduct = mul32(nx, dx1);
-        if (nz !== 0) fail('nonflat source normal Z unsupported');
         const zProduct = mul32(nz, dz1), vertexY = load(0x08);
         const xz = addSourceFloat32(xProduct, zProduct);
-        if (ny !== 1) fail('nonflat source normal Y unsupported');
         // 3e2a4..2c0 uses separate fmuls/fadds, never a host fused operation.
+        // Y may be negative/nonunit. Zero refuses only at the reached divide,
+        // after preceding products, vertex-Y load and separately rounded sums.
         const yProduct = mul32(ny, vertexY), height = div32(addSourceFloat32(xz, yProduct), ny);
         if (limit > height && ceiling > height && best <= height) {
           admitOutput();
-          writeNormal(output, 'x', nx); best = height;
-          writeNormal(output, 'y', ny); writeNormal(output, 'z', nz);
+          storeNormal('x', nx); best = height;
+          storeNormal('y', ny); storeNormal('z', nz);
         }
         if (minimum >= height) {
           minimum = height; minimumNormal.x = nx; minimumNormal.y = ny; minimumNormal.z = nz;
@@ -448,9 +479,9 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
       if (selectMaximum) {
         admitOutput();
         const normalX = maximumNormal.x, normalY = maximumNormal.y;
-        writeNormal(output, 'x', normalX);
+        storeNormal('x', normalX);
         const normalZ = maximumNormal.z;
-        writeNormal(output, 'y', normalY); writeNormal(output, 'z', normalZ);
+        storeNormal('y', normalY); storeNormal('z', normalZ);
         return maximum;
       }
       const lower = f(terrain, 'lower68');
@@ -458,9 +489,9 @@ export function createSourceActorTerrainQueryRuntime(sources: SourceActorTerrain
       // Copy the minimum normal even if its height still equals the sentinel.
       admitOutput();
       const normalX = minimumNormal.x, normalY = minimumNormal.y;
-      writeNormal(output, 'x', normalX);
+      storeNormal('x', normalX);
       const normalZ = minimumNormal.z;
-      writeNormal(output, 'y', normalY); writeNormal(output, 'z', normalZ);
+      storeNormal('y', normalY); storeNormal('z', normalZ);
       const finalUpper = f(terrain, 'upper34');
       return minimum === finalUpper ? f(terrain, 'lower68') : minimum;
     });},

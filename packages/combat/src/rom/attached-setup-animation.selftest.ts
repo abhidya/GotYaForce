@@ -1151,7 +1151,7 @@ function runGaugeScaleHydratedControlTests(): void {
 }
 /** Independent tiny unrelocated STIH source bytes. Source cell pointers and
  * record base are +8 relative; tolerant host cell interpretation is not used. */
-function sourceTerrainDatFixture(floor: boolean, height = 0) {
+function sourceTerrainDatFixture(floor: boolean, height = 0, normal = {x: 0, y: 1, z: 0}) {
   const recordOffset = 0x50, bytes = new Uint8Array(recordOffset + (floor ? 0x38 : 0));
   const view = new DataView(bytes.buffer);
   view.setUint32(0, 0x53544948); view.setUint32(4, bytes.length);
@@ -1165,7 +1165,7 @@ function sourceTerrainDatFixture(floor: boolean, height = 0) {
   }
   if (floor) {
     view.setUint32(recordOffset, 0xfedcba98); // Source query does not filter marker.
-    const values = [0, height, 0, 0, height, 1000, 1000, height, 0, 0, 1, 0, 123];
+    const values = [0, height, 0, 0, height, 1000, 1000, height, 0, normal.x, normal.y, normal.z, 123];
     values.forEach((value, index) => view.setFloat32(recordOffset + 4 + index * 4, value));
   }
   return {bytes, grid: hitBin.parseStageHitGrid(bytes)};
@@ -2876,6 +2876,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runFrameLifecycleHydratedCompositionTests();
   runDoubleFrameHydratedCompositionTests();
   runDoubleGroundStreamHydratedCompositionTests();
+  runNonflatDoubleGroundCompositionTests();
   runDoubleFrameMarkerCompositionTests();
   runCompletedDoubleFrameHydratedCompositionTests();
   runNonnullDoubleSoundHydratedCompositionTests();
@@ -12270,6 +12271,88 @@ export function runDoubleGroundStreamHydratedCompositionTests(): void {
     retained(); check(caught && x.landCalls() === 0, 'caught ground reentry cannot continue to terrain, config, stream or landing');
   }
   console.log('[actor-double-ground-stream-composition] PASS: genuine55568/action2/677b0 distinct3e0a8 no-contact and copied nonnull group4 stream through actual opcode01/DAT/AObj/FObj mode1; fixed0/1 slots, ordered failures/80c after return, canonical owners/epochs and standalone explicit blend-to-frame1; historical no-suffix frame still stops at4c0, synthetic offline only, no clone/full-frame/retail-playability claim');
+}
+
+/** Explicit synthetic non-flat floor input, installed before the first query.
+ * No existing source actor/history/global scalar is edited to avoid contact.
+ * The genuine ground/action owners consume the same retained query and terrain. */
+export function runNonflatDoubleGroundCompositionTests(): void {
+  const fixture = (height = 0, normal = {x: 1 / 64, y: 2, z: 1 / 32}, forAction = false) => {
+    const x = doubleGroundStreamHydratedCompositionFixture(false);
+    const floor = !forAction ? sourceTerrainDatFixture(true, height, normal) : (() => {
+      // The unchanged control prefix reaches bounded3d6e4 at(101,300).
+      // A flat triangle covers that point. The genuine action carries X to
+      //197.9, reaching a separate non-flat triangle in the SAME cell/list.
+      // This is explicit synthetic geometry, not a late owner/byte replacement.
+      const recordOffset = 0x50, bytes = new Uint8Array(recordOffset + 2 * 0x38), view = new DataView(bytes.buffer);
+      bytes.set(sourceTerrainDatFixture(true).bytes.subarray(0, 0x28)); view.setUint32(4, bytes.length);
+      let at = 0x38;
+      for (let cell = 0; cell < 4; cell++) {
+        view.setInt32(0x28 + cell * 4, at - 8);
+        if (cell === 0) {view.setInt32(at, 0); view.setInt32(at + 4, 0x38); at += 8;}
+        view.setInt32(at, -1); at += 4;
+      }
+      const records = [
+        [0, 0, 0, 0, 0, 1000, 150, 0, 0, 0, 1, 0, 123],
+        [150, height, 0, 150, height, 1000, 1150, height, 0, normal.x, normal.y, normal.z, 123],
+      ];
+      records.forEach((values, index) => {
+        view.setUint32(recordOffset + index * 0x38, 0xfedcba98);
+        values.forEach((value, component) => view.setFloat32(recordOffset + index * 0x38 + 4 + component * 4, value));
+      });
+      return {bytes, grid: hitBin.parseStageHitGrid(bytes)};
+    })();
+    Object.defineProperty(x.terrain, 'floor1c', {value: sourceTerrainGrid.createSourceTerrainGrid(floor.bytes, floor.grid, 0x1c)});
+    return Object.assign(x, {floor});
+  };
+  for (const normal of [{x: 1 / 64, y: 2, z: 1 / 32}, {x: -1 / 64, y: -2, z: -1 / 32}]) {
+    const x = fixture(0, normal), a = x.sourceActor, retained = retainCommandAdmissionRecords(x);
+    const owners = [a, a.pos, x.historyState, x.terrain, x.terrain.floor1c];
+    check(a.pos.x === 101 && a.pos.y === 2 && a.pos.z === 300 && a.stepHeight === 0,
+      'non-flat ground uses the existing actor and step values, without moving the actor for a desired result');
+    check(x.ground.runActor(x.actor) === 0, 'actual677b0 returns genuine no-contact for finite non-flat plane below unchanged actor top');
+    retained();
+    check(x.ground.getActualActor(x.actor) === owners[0] && x.ground.getPositionBinding(x.actor) === owners[1] &&
+      x.ground.getHistoryBinding(x.actor) === owners[2] && x.ground.getTerrainGlobals() === owners[3] &&
+      x.terrain.floor1c === owners[4] && x.ground.getTerrainRuntime() === x.query && x.landCalls() === 0,
+      'non-flat no-contact retains canonical actor/vector/history/terrain/grid owners and invokes no host landing');
+  }
+  {
+    const x = fixture(0, undefined, true), saved = x.prepareStandalone(), retained = retainDoubleGroundSuffix(x);
+    const oldAttached = x.joints.getBinding(x.joint).aobj7c, oldX = x.pose.translation.x;
+    const oldFrame = x.part.frame0c, oldDuration = x.part.duration24;
+    check(x.action.dispatchFull(x.actor, saved) === undefined, 'genuine non-flat ground return allows actual phase0 config and nonnull stream continuation');
+    retained(); checkDoubleGroundStreamSetup(x, oldAttached, oldX, oldFrame, oldDuration, 0);
+    check(x.sourceActor.pos.x === Math.fround(101 + Math.fround(102 * Math.fround(0.95))) &&
+      x.sourceActor.pos.y === Math.fround(2 * Math.fround(0.95)) && x.sourceActor.pos.z === 300 &&
+      x.landCalls() === 0 && !hasIncompleteSourceActorDoubleLifecycle(x.sourceActor),
+      'unchanged genuine action motion/position prefix passes non-flat no-contact, without a full-frame or landing claim');
+  }
+  // At unchanged point(101,2,300), normal(1,1,-1) gives height=vertexY+199.
+  // Three explicit floor inputs bracket the strict top>height branch exactly.
+  for (const height of [-198, -197, -196]) {
+    const x = fixture(height, {x: 1, y: 1, z: -1}), retained = retainCommandAdmissionRecords(x);
+    if (height === -198) check(x.ground.runActor(x.actor) === 0, 'strictly above non-flat height returns native zero');
+    else rejects(() => x.ground.runActor(x.actor), '8020ba78');
+    retained();
+    check(x.landCalls() === 0 && x.sourceActor.streamSlot === 219 && x.sourceActor.accumulator80c === 901 &&
+      !hasIncompleteSourceActorFrame(x.sourceActor),
+      'equal/below non-flat height keeps the existing contact displacement/normalization/slope boundary and performs no landing or stream work');
+  }
+  for (const fault of ['contact', 'zero-normal-y', 'overflow'] as const) {
+    const x = fault === 'contact' ? fixture(100, {x: 1 / 64, y: 1, z: 1 / 32}, true) :
+      fault === 'zero-normal-y' ? fixture(0, {x: 1, y: 0, z: 1}, true) :
+      fixture(0, {x: Math.fround(3.4028235e38), y: 1, z: 0}, true);
+    const saved = x.prepareStandalone(), retained = retainDoubleFrameUnreached(x);
+    rejects(() => x.action.dispatchFull(x.actor, saved), fault === 'contact' ? '8020ba78' :
+      fault === 'zero-normal-y' ? 'fdivs zero divisor' : 'fmuls result');
+    retained();
+    check(x.sourceActor.fbPhase === 1 && x.sourceActor.streamSlot === 219 && x.sourceActor.accumulator80c === 901 &&
+      x.sourceActor.pos.y === Math.fround(2 * Math.fround(0.95)) && x.landCalls() === 0,
+      'non-flat ground failure retains phase/yaw/motion/position prefix and refuses before config/stream/landing');
+    checkStandaloneDoublePermanentRefusal(x);
+  }
+  console.log('[actor-nonflat-ground-composition] PASS: finite non-flat3e0a8 through genuine677b0 and standalone phase0 stream continuation; retained actor/history/terrain/grid owners, strict above/equal/below contact boundary, arithmetic-failure prefixes and enclosing action no-replay; synthetic offline inputs only, no landing/full-frame/hydration claim');
 }
 
 /** Explicit suffix admission on the existing real Double/ground/stream graph.
