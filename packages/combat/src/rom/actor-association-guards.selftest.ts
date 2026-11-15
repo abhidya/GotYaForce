@@ -4,7 +4,7 @@ import {requireSourceObjectSchedulerSnapshot} from './source-object-scheduler.js
 import type {createBattleTargetPreparationTestFixture} from './attached-setup-animation.selftest.js';
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Visit=(owner:object,key:PropertyKey)=>void;
-const next='80029460 reached mandatory80027764',scan='8006b3bc';
+const next='80029460 reached mandatory80027764',scan='byte58a: own data property required';
 function check(ok:boolean,why:string):void {if(!ok)throw Error(`[actor-association-guards-test] ${why}`);}
 function equal(a:unknown,b:unknown,why:string):void {check(Object.is(a,b),`${why}: got ${String(a)}, expected ${String(b)}`);}
 function refuses(f:()=>unknown,part:string):string {let message='';try{f();}catch(e){message=String(e);}check(message.includes(part),`expected ${part}, got ${message||'success'}`);return message;}
@@ -37,7 +37,7 @@ function run(x:Fixture,expected=scan,before:Visit=()=>{},after?:Visit) {
   const result=native(owner,key);if(third)after?.(owner,key);return result;
  }) as typeof native;
  let message='';try{message=refuses(()=>x.frame.runFrame(),expected);}finally{Object.getOwnPropertyDescriptor=native;}
- check(secondary&&third,'real predecessor source paths reached');equal(physicalLoads,1,'inner scan never reloads physical block');equal(inner,0,'no target58a read');equal(scheduler,0,'no scheduler field read');
+ check(secondary&&third,'real predecessor source paths reached');equal(physicalLoads,expected===scan?2:1,'fresh inner physical reload only after admitted guards');equal(inner,expected===scan?1:0,'unhydrated target58a stops at its reached load');equal(scheduler,0,'no scheduler field read');
  return {events,message};
 }
 const prefix=['row0','row1','83'];
@@ -126,5 +126,5 @@ function terminalMetadataTests(make:Make):void {
 }
 export function runActorAssociationGuardsSelfTests(make:Make):void {
  let count=0;const counted:Make=omit=>{count++;return make(omit);};branchTests(counted);captureTests(counted);faultTests(counted);terminalMetadataTests(counted);
- console.log(`[actor-association-guards] PASS (${count} genuine shared-graph fixtures): caller7d3 bit0, ordered signed teams, canonical75c/attribute814 finite GT-only gate, captured loads, lazy faults and permanent closure; stops before inner scan or mandatory27764, no unordered/FPSCR execution, association writes, completed outer frame or browser claim`);
+ console.log(`[actor-association-guards] PASS (${count} genuine shared-graph fixtures): caller7d3 bit0, ordered signed teams, canonical75c/attribute814 finite GT-only gate, captured loads, lazy faults and permanent closure; stops at missing target58a or mandatory27764, no unordered/FPSCR execution, association writes, completed outer frame or browser claim`);
 }

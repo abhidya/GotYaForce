@@ -10,7 +10,8 @@
  * clearing and entry0 bounded returns; skipped lifecycle rows and dispatch
  * returns execute the primary508/504 live SquareDistance path and ordered zero/null
  * distance stores through the next mandatory direction helper or estimator. Skipped lifecycle rows retain canonical508 bounds; active nonnull targets may
- * use the SAME allocation-owned83 byte, then caller7d3, signed teams and finite distance guards before the inner scan.
+ * use the SAME allocation-owned83 byte, caller7d3, signed teams and finite
+ * distance guards, then the six-position inner scan and ordered association bits.
  * Its bounded return still cannot skip mandatory27764.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * scheduler invocation or browser activation is manufactured.
@@ -1089,7 +1090,83 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       threshold=record(call(()=>attributes.getActorBinding(id)),'6b3a8 canonical attribute814');
       const limit=finite(associationLoad(threshold,'field814'),'field814');
       if(distance>limit)continue;
-      fail('8006b3bc reached unsupported source association inner physical scan');
+      //8006b3bc captures a FRESH physical base for each admitted outer actor.
+      // The inner index is a physical position, not actor.slot or a roster
+      // entry. Only a mask hit dereferences that candidate's actual record.
+      associationGuard();const inner=physical();associationGuard();
+      const innerMass=retained.get('massPreparation')!,innerBlock=retained.get('mass physicalBlock')!;
+      let candidate:{id:symbol;actor:object}|undefined,maskReached=false;
+      const flagOwners=new Set<object>();
+      const innerMetadata=(shadows:(owner:object,keys:readonly string[])=>void):void=>{
+        if(terminalRead(sources,'massPreparation')!==innerMass || terminalRead(innerMass,'physicalBlock')!==innerBlock ||
+          terminalRead(innerBlock,'identities')!==inner || retained.get('mass physical identities')!==inner)
+          fail('6b3bc captured inner physical metadata changed');
+        const records=[selected.targetActor,selected.owner,world.getActorBinding(selected.targetId),binding];
+        if(candidate!==undefined) {
+          if(allocator.getPointerTarget(candidate.id)!==candidate.actor ||
+            world.getActualActor(candidate.id)!==candidate.actor)
+            fail('6b3e8 canonical candidate actor changed');
+          records.push(candidate.actor,world.getActorBinding(candidate.id));
+        }
+        const actuals=world.getRetainedActorOwners();
+        for(const owner of new Set(records)) {
+          if(maskReached) {
+            if(!actuals.includes(owner))shadows(owner,['byte58a']);
+            shadows(owner,['byte58A','field58a','field58A','flags58a','mask58a']);
+            if(owner===selected.targetActor)shadows(owner,['1418']);
+          }
+          if(candidate!==undefined) {
+            if(!actuals.includes(owner))shadows(owner,['team']);
+            shadows(owner,['byte88','field88']);
+            if(owner===candidate.actor)shadows(owner,['136']);
+          }
+          if(flagOwners.size!==0) {
+            if(!actuals.includes(owner))shadows(owner,['byte7d3']);
+            shadows(owner,['byte7D3','field7d3','field7D3','flags7d3','mask7d3']);
+            if(flagOwners.has(owner))shadows(owner,['2003']);
+          }
+        }
+      };
+      const innerFinish=():void=>{
+        innerMetadata(terminalShadows);
+        if(candidate!==undefined) {
+          requireCompleteSourceActorDoubleLifecycle(candidate.actor);
+        }
+        associationMetadata(terminalShadows,terminalRead);selected.finish();
+      };
+      const innerGuard=():void=>{
+        associationGuard();innerMetadata(noShadows);associationGuard();innerFinish();
+      };
+      const innerLoad=(owner:object,key:string):number=>{
+        innerGuard();const value=read(owner,key);innerGuard();return unsigned(value,255,key);
+      };
+      const storeFlag=(owner:object,value:number):void=>{
+        innerGuard();const field=Object.getOwnPropertyDescriptor(owner,'byte7d3');innerGuard();
+        if(!field || !('value' in field))fail('byte7d3: own data property required before association store');
+        if(!field.writable)fail('byte7d3: non-writable association destination');
+        const live=primaryStoreDescriptor(owner,'byte7d3');
+        if(!live || !('value' in live))fail('byte7d3: live own data property required before association store');
+        if(!live.writable)fail('byte7d3: live non-writable association destination');
+        // No observable metadata callback between this final native snapshot
+        // and the existing own-data overwrite. Earlier completed stores stay.
+        (owner as Record<string,unknown>).byte7d3=value;innerGuard();
+      };
+      for(let position=0;position<6;position++) {
+        candidate=undefined;
+        if(position===index)continue; //3cc..3d0 BEFORE the target58a load.
+        maskReached=true;
+        const mask=s8(innerLoad(selected.targetActor,'byte58a'));
+        if((mask&(1<<position))===0)continue;
+        candidate=actorAt(inner,position);innerGuard();
+        const candidateTeam=s8(innerLoad(candidate.actor,'team'));
+        if(candidateTeam!==callerTeam)continue; // captured r8, not a fresh caller team.
+        //3f8..418: three distinct fresh read/modify/store pairs. In particular
+        // candidate===target must observe the preceding bit1 store before OR2.
+        flagOwners.add(actor);const callerFlags=innerLoad(actor,'byte7d3');storeFlag(actor,callerFlags|1);
+        flagOwners.add(candidate.actor);const candidateFlags=innerLoad(candidate.actor,'byte7d3');storeFlag(candidate.actor,candidateFlags|1);
+        flagOwners.add(selected.targetActor);const targetFlags=innerLoad(selected.targetActor,'byte7d3');storeFlag(selected.targetActor,targetFlags|2);
+        break; //3bc reloads again only for the next admitted outer actor.
+      }
     }
     //Genuine void return only if every reached canonical508 owner completed.
   };
