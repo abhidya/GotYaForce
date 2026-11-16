@@ -55,7 +55,7 @@ import {readSourceTargetDistance} from './source-target-distance.js';
 import {readSourceShortTrig} from './source-short-trig.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
-import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
+import {isSourceActorTargetDispatchRuntime,getSourceActorTargetDispatchForScheduler,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
 import {checkSourcePlayerContactStorage,isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
 import {isSourceActorOrderedFrameRuntime,invokeSourceActorOrderedFrameFromOuter,checkSourceActorOrderedVoicePosition,checkSourceActorOrderedSamplerInvocation,type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
 import type {SourceActorInputSamplerRuntime} from './actor-input-sampler.js';
@@ -2473,13 +2473,19 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       for(let offset=-3;offset<2;offset++){
         const n=start+offset,hex=n.toString(16);aliases.push(hex,hex.toUpperCase(),'0x'+hex,'0x'+hex.toUpperCase(),String(n));
       }
-      const records=[sources,globals,...retained.values(),...call(()=>scheduler.getRetainedStorageOwners())];
+      // Already-consumed candidate half42 must not silently gain a second
+      // representation. Sharing its writer needs a future explicit private join.
+      const candidateOwners=():readonly object[]=>{
+        const dispatch=getSourceActorTargetDispatchForScheduler(scheduler);
+        return dispatch?call(()=>dispatch.getRetainedStorageOwners()):[];
+      };
+      const records=[sources,globals,...retained.values(),...call(()=>scheduler.getRetainedStorageOwners()),...candidateOwners()];
       for(const record of new Set(records))noShadows(record,[...new Set(aliases)].filter(k=>record!==owner||k!==key));
       const destination=Object.getOwnPropertyDescriptor(owner,key);check();
       if(!destination||!('value'in destination)||!destination.writable)fail(key+': writable own counter destination required');
       schedulerGraph();check();
       // Terminal native checks follow the last observable descriptor hook.
-      const terminalRecords=[...new Set([...records,...call(()=>scheduler.getRetainedStorageOwners())])];
+      const terminalRecords=[...new Set([...records,...call(()=>scheduler.getRetainedStorageOwners()),...candidateOwners()])];
       const link=primaryStoreDescriptor(sources,'contactCounters');
       if(!link||!('value'in link)||link.value!==owner)fail('contact counter owner changed');
       const live=primaryStoreDescriptor(owner,key);
@@ -2488,6 +2494,48 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         for(const alias of new Set(aliases))if((record!==owner||alias!==key)&&primaryStoreDescriptor(record,alias))fail(alias+': competing counter cell owner');
       check();(owner as Record<string,number>)[key]=0;check();
     }
+  };
+  const runContactCallbacks=():void=>{
+    // Actual89aec, not89a94: group48, six live active actor gates49..54,
+    // then55. No pause-mask/snapshot/cleanup suffix belongs to this traversal.
+    const groups=new Map<number,object>();let slots:object|undefined,visits=0;
+    const guard=():void=>{
+      schedulerGraph();check();
+      for(const [index,owner]of groups)if(call(()=>allocator.getGroup(index))!==owner)fail('89aec group owner changed');
+      if(slots&&call(()=>scheduler.getActorSlotTable())!==slots)fail('89aec actor-slot owner changed');
+      check();
+    };
+    const checked=<T>(f:()=>T):T=>{const value=call(f);guard();return value;};
+    const pointer=(value:unknown):symbol|null=>{if(value!==null&&typeof value!=='symbol')fail('89aec explicit source pointer required');return value;};
+    const walk=(index:number,site:0x80089b30|0x80089b84|0x80089bd0):void=>{
+      let owner:object;
+      try{owner=call(()=>allocator.getGroup(index));}catch(error){fail('800294f0 reached required80089aec group'+index+': '+String(error));}
+      groups.set(index,owner);guard();
+      let node=pointer(checked(()=>read(owner,'head')));const seen=new Set<symbol>();
+      while(node!==null){
+        if(++visits>4096||seen.has(node))fail('89aec cyclic/over-budget source list unsupported');seen.add(node);
+        const current=node;
+        if(checked(()=>allocator.readS8(current,0))!==0){
+          const callback=checked(()=>allocator.readU32(current,0xc));
+          // Active bctrl is unconditional. Even callback0 is not a no-op.
+          // None of these contact callbacks is the ordinary7dcec scheduler.
+          fail(site.toString(16)+' reached required contact callback0c '+callback.toString(16)+'; callee unsupported');
+        }
+        node=pointer(checked(()=>allocator.readPointer(current,8)));
+      }
+    };
+    walk(48,0x80089b30);
+    slots=call(()=>scheduler.getActorSlotTable());guard();
+    for(let index=0;index<6;index++){
+      const id=pointer(checked(()=>read(slots!,String(index))));
+      if(id===null)fail('89aec null actor slot at active0 load');
+      const actor=checked(()=>allocator.getPointerTarget(id));
+      noShadows(actor,['0','byte0','half0','word0','field0']);guard();
+      const active=checked(()=>byte(actor,'active0'));
+      for(const alias of ['0','byte0','half0','word0','field0'])if(primaryStoreDescriptor(actor,alias))fail(alias+': competing89aec active cell');
+      if(s8(active)!==0)walk(49+index,0x80089b84);
+    }
+    walk(55,0x80089bd0);
   };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
@@ -2531,7 +2579,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         (counterOwner as {wordB0:number}).wordB0=(counter+1)>>>0;check();
         if(s8(byte(match(),'byte66'))===0){
           resetContactCounts();
-          fail('800294f0 reached required80089aec before2bb14; contact callback traversal unsupported');
+          runContactCallbacks();
+          fail('800294f4 reached required8002bb14; target/action frame helper unsupported');
         }
         const helper=call(()=>spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime());
         if(!isSourceActorSlotStatusRuntime(helper))fail('36e24 canonical slot-status owner required');

@@ -18,7 +18,7 @@ export function runBattleContactCountResetSelfTests(make:Make):void{
   })as typeof native;
   try{run();}finally{Object.getOwnPropertyDescriptor=native;}
  };
- const stop='800294f0 reached required80089aec';
+ const stop='required contact callback0c 8008a65c';
  {
   const x=fresh(),seen:string[]=[];
   observe(x,()=>refuses(()=>x.frame.runFrame(),stop),(o,k)=>{if(o===x.counters&&keys.includes(String(k))){check(keys.slice(0,seen.length).every(key=>x.counters[key]===0),'previous stores complete before fresh destination');seen.push(String(k));}});
@@ -31,6 +31,16 @@ export function runBattleContactCountResetSelfTests(make:Make):void{
   const x=fresh();Object.defineProperty(x.outerSources,'contactCounters',{get(){throw Error('paused must not load counters');}});
   observe(x,()=>refuses(()=>x.frame.runFrame(),'80029500 reached required80089658'),()=>{},false);
   check(keys.every((key,i)=>x.counters[key]===70+i),'paused branch never admits reset owner');
+ }
+ for(const normal of [false,true]){
+  const x=fresh();x.globals.half80436242=1;x.list[0]=null;x.sourceActor.housekeeping73f=0;
+  if(normal){x.match.byte66=0;x.stageState.lifecycle18=1;}else x.targetDispatch.dispatchActor(x.actor);
+  let participant=false;
+  observe(x,()=>refuses(()=>x.frame.runFrame(),'competing'),(o,k)=>{
+   if(normal&&!participant&&o===x.system&&k==='byte40'){participant=true;x.match.byte66=1;}
+  });
+  check(x.globals.half80436242===1&&x.counters.half80436242===77,'existing candidate count cannot be reset through a duplicate owner');
+  check(keys.slice(0,7).every(key=>x.counters[key]===0)&&x.counters.half80436240===78,'ordered refusal preserves earlier resets and later cells');
  }
  for(const alias of ['byte80436251','half8043624f','word8043624e','word8043624d',String(0x80436251)]){
   const x=fresh();Object.assign(x.counters,{[alias]:99});
@@ -76,5 +86,5 @@ export function runBattleContactCountResetSelfTests(make:Make):void{
   check(Object.values(x.slotRecords).every(r=>r.contact26f===77),'later player-contact clears not fabricated');
   refuses(()=>x.frame.runFrame(),'permanently incomplete');
  }
- console.log(`[battle-contact-count-reset] PASS: ${count} exact ordered-counter fixtures; stops before89aec, not normal frame completion`);
+ console.log(`[battle-contact-count-reset] PASS: ${count} exact ordered-counter fixtures; canonical candidate aliases refuse, not normal frame completion`);
 }
