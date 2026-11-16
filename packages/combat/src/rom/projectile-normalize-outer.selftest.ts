@@ -11,7 +11,7 @@ export function runProjectileNormalizeOuterSelfTests(make:Make):void{
  let count=0;const fresh=()=>{count++;return createProjectileNormalizeOuterTestFixture(make);};
  const setVector=(x:ReturnType<typeof fresh>,v:number[])=>{const b=new DataView(new ArrayBuffer(12));v.forEach((n,i)=>b.setFloat32(i*4,n,false));for(let i=0;i<12;i++)x.objectBytes[0x38+i]=b.getUint8(i);};
  {
-  const x=fresh();refuses(()=>x.frame.runFrame(),'8007e078 reached caller continuation');
+  const x=fresh();refuses(()=>x.frame.runFrame(),'8007e078 initializer tail missing explicit row1.speed10');
   check(x.allocator.readU32(x.child,0x40)===0x3f7fffff,'unit input follows actual model estimate/refinement, not identity shortcut');
   check(x.allocator.readU32(x.child,0x38)===0&&x.allocator.readU32(x.child,0x3c)===0,'source XY paired result');
  }

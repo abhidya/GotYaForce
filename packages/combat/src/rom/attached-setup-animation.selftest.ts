@@ -1,3 +1,4 @@
+import {runProjectileInitializerTailSelfTests} from './projectile-initializer-tail.selftest.js';
 import {runSourceDrawCallbackSelfTests} from './source-draw-callback.selftest.js';
 import {runBattleDrawOuterSelfTests} from './battle-draw-outer.selftest.js';
 import {runProjectileNormalizeOuterSelfTests} from './projectile-normalize-outer.selftest.js';
@@ -136,6 +137,7 @@ let projectileFixtureConstruction = false;
 let targetPreparationMissingCell: 'byte7d2'|'pointer508'|undefined;
 let orderedVoice438: number|undefined;
 let orderedSamplerLowHalf:number|undefined;
+let initializerRowTail:Readonly<Partial<Record<'speed10'|'word14'|'field28'|'field30'|'descriptor00',number>>>|undefined;
 let orderedMatrixCorrections:readonly SourceActorWorldMatrixCorrection[]|undefined;
 function constructGenuineComposition<T>(build: () => T): T {
   const previous = genuineCompositionConstruction;
@@ -2941,6 +2943,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleOrderedActorStageHydratedCompositionTests();
   runBattleStageDispatchHydratedCompositionTests();
   runProjectileNormalizeOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runProjectileInitializerTailSelfTests(createProjectileInitializerTailBaseTestFixture);
   runBattleDrawOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runSourceDrawCallbackSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runActorThirdPassTarget83HydratedCompositionTests();
@@ -11718,7 +11721,7 @@ function doubleFrameHydratedCompositionFixture(bind = true, withGround: boolean 
     hitIds.forEach((id,i)=>{allocator.writeU8(id,2,4);
       allocator.writePointer(id,4,hitIds[i+1]??null);});
     allocator.bindActor(x.actor, {byte83: 0});
-    const row1 = {family2e: 3, joint02: 11, local04: {x: 55, y: 0, z: 0}, offset2c: 0};
+    const row1 = {family2e: 3, joint02: 11, local04: {x: 55, y: 0, z: 0}, offset2c: 0,...initializerRowTail};
     const projectileSources = {prehook, world: x.world, admission: x.commandAdmission, gauges: x.gauges, setup: x.ready, allocator, row1};
     const projectiles = createSourceActorProjectileSpawnRuntime(projectileSources);
     const projectileInitial = {pointer90: a as object | null};
@@ -13669,6 +13672,12 @@ export function createBattleTargetPreparationMatrixActiveTestFixture() {
 export function createBattleTargetPreparationSamplerTestFixture() {
   const previous=orderedSamplerLowHalf;orderedSamplerLowHalf=0;
   try{return createBattleTargetPreparationMatrixActiveTestFixture();}finally{orderedSamplerLowHalf=previous;}
+}
+/** Explicit decoded initializer row cells supplied before the real spawn runtime
+ * copies its canonical row. Existing factories retain their missing-tail inputs. */
+export function createProjectileInitializerTailBaseTestFixture(tail: NonNullable<typeof initializerRowTail>) {
+  const previous=initializerRowTail;initializerRowTail=tail;
+  try{return createBattleTargetPreparationSamplerTestFixture();}finally{initializerRowTail=previous;}
 }
 export function runBattleTargetPreparationHydratedCompositionTests(): void {
   runBattleTargetPreparationSelfTests(createBattleTargetPreparationTestFixture,createBattleMassOrderingTestFixture);

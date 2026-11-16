@@ -348,6 +348,48 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     const nx=mul(x,scale),ny=mul(y,scale);storePair(0x38,[nx,ny]);
     const nz=mul(z,scale);mul(1,scale);storePair(0x40,[nz]);
   };
+  const initializerTail=(e:Entry,row:ReturnType<SourceActorProjectileSpawnRuntime['getSpawnRow1']>):never=>{
+    const cell=(key:'speed10'|'word14'|'field28'|'field30'|'descriptor00',expected:number):number=>{
+      const d=Object.getOwnPropertyDescriptor(row,key);check();
+      if(!d||!('value'in d))fail('8007e078 initializer tail missing explicit row1.'+key);
+      if(typeof d.value!=='number'||!Object.is(d.value,expected))fail('row1.'+key+' differs from authenticated initializer cell');
+      return d.value;
+    };
+    const speed=cell('speed10',40); // actual7e07c, before entering Scale
+    const processor=vectorProcessor();
+    if(processor===undefined)fail('8020ba9c Scale requires explicit processor');
+    const controls=():void=>{
+      read(processor,'gqr0');read(processor,'fpscrControl');
+      const owner=nativeStoreDescriptor(sources,'processor'),g=nativeStoreDescriptor(processor,'gqr0'),f=nativeStoreDescriptor(processor,'fpscrControl');
+      if(!owner||!('value'in owner)||owner.value!==processor)fail('Scale processor owner changed');
+      if(!g||!('value'in g)||g.value!==0)fail('Scale requires GQR0 float format scale0');
+      if(!f||!('value'in f)||typeof f.value!=='number'||!Number.isInteger(f.value)||f.value<0||f.value>0xffffffff||(f.value&255)!==0)fail('Scale requires explicit FPSCR RN00/NI0 and disabled exception enables');
+    };
+    const multiply=(a:number,b:number):number=>{const v=Math.fround(a*b);if(!Number.isFinite(v))fail('Scale finite binary32 product required');return v;};
+    const store=(offset:number,values:readonly number[]):void=>{
+      const bytes=new Uint8Array(values.length*4),data=new DataView(bytes.buffer);values.forEach((v,i)=>data.setFloat32(i*4,v,false));
+      for(let i=0;i<bytes.length;i++){own(e.bytes,String(offset+i),true);check();}
+      controls();
+      for(let i=0;i<bytes.length;i++){const d=nativeStoreDescriptor(e.bytes,String(offset+i));if(!d||!('value'in d)||!d.writable)fail('Scale paired destination changed before store');}
+      for(let i=0;i<bytes.length;i++)e.bytes[offset+i]=bytes[i]!;check();
+    };
+    controls();const x=call(()=>allocator.readF32(e.id,0x38)),y=call(()=>allocator.readF32(e.id,0x3c));
+    controls();const z=call(()=>allocator.readF32(e.id,0x40));
+    const sx=multiply(x,speed),sy=multiply(y,speed);store(0x38,[sx,sy]);
+    const sz=multiply(z,speed);multiply(1,speed);store(0x40,[sz]);
+    const freshSpeed=cell('speed10',40);
+    // Actual7e090 loads decoded804379a8(+0) before either scalar store.
+    // Fixed selected ROM literal, not an invented live constant-owner read.
+    const zero=0;
+    call(()=>allocator.writeF32(e.id,0x44,freshSpeed));call(()=>allocator.writeF32(e.id,0x48,zero));
+    const field28=cell('field28',0.30000001192092896);call(()=>allocator.writeF32(e.id,0x50,field28));
+    const word14=cell('word14',4);put16(e.id,0x1e,word14&65535);
+    put8(e.id,0x19,1);put16(e.id,0x1c,600);
+    const field30=cell('field30',2);call(()=>allocator.writeF32(e.id,0x154,field30));
+    const descriptor=cell('descriptor00',14); // signed lha; neither selected flag set
+    if((descriptor&0xc000)!==0)fail('initializer descriptor branch differs from authenticated row1');
+    fail('8007e140 reached mandatory80006f78 resource owner before80006fb4 descriptor14; initializer remains incomplete');
+  };
   const initialize = (e: Entry): void => {
     const variant = u8(e.id, 0x11), pointer = ptr(e.id, 0x90);
     put8(e.id, 0x18, 1);
@@ -411,7 +453,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
       call(()=>allocator.writeF32(e.id,offset,value));
     }
     normalizeDirection(e);
-    fail('8007e078 reached caller continuation after bounded model-backed8020bab8 Normalize; initializer tail remains unsupported');
+    initializerTail(e,row);
   };
   const frameParent=(e:Entry,scheduler:SourceObjectSchedulerRuntime|undefined):void=>{
     if(!isSourceActorDoubleFrameClaimed(e.actual))return;

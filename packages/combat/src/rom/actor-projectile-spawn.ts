@@ -36,6 +36,8 @@ import type {SourceJointVector} from './joint-animation-feedback.js';
 import {requireSourceProjectileCleanupInvocation, type SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
 
 export interface SourceActorProjectileSpawnRow {
+  /** Optional explicitly selected initializer cells; no absent-cell defaults. */
+  speed10?:number; word14?:number; field28?:number; field30?:number; descriptor00?:number;
   family2e: number; joint02: number; local04: Readonly<SourceJointVector>; offset2c: number;
 }
 export interface SourceActorProjectileSpawnBinding {pointer90: object | null}
@@ -140,7 +142,16 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
   if (setup.getActualStarts() !== streams || streams.getDispatchRuntime() !== dispatch || dispatch.getSetupRuntime() !== setup ||
       dispatch.getActualMapping() !== mapping) fail('setup/stream/dispatch runtime graph differs');
   const initialRow = own(sources, 'row1'), initialLocal = own(initialRow, 'local04');
+  // Host construction copies explicitly supplied static evidence cells. This
+  // own-data admission is not an emulated source read; value validation remains
+  // lazy at the actual initializer load. Accessor-backed profiles are rejected.
+  const tail:Partial<SourceActorProjectileSpawnRow>={};
+  for(const key of ['speed10','word14','field28','field30','descriptor00']as const){
+    const d=Object.getOwnPropertyDescriptor(initialRow as object,key);
+    if(d){if(!('value'in d))fail('row1.'+key+': explicit own data required');tail[key]=d.value as number;}
+  }
   const row: Readonly<SourceActorProjectileSpawnRow> = Object.freeze({
+    ...tail,
     family2e: integer(own(initialRow, 'family2e'), -32768, 32767, 'row1.family2e'),
     joint02: integer(own(initialRow, 'joint02'), 0, 255, 'row1.joint02'),
     local04: Object.freeze({x: float(own(initialLocal, 'x'), 'row1.x'), y: float(own(initialLocal, 'y'), 'row1.y'), z: float(own(initialLocal, 'z'), 'row1.z')}),
