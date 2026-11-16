@@ -28,7 +28,8 @@ import type {RomActor} from './actor.js';
 import type {SourceAllocationBytes} from './source-object-allocation.js';
 import {isSourceProjectileHitRuntime, invokeSourceProjectileHitFromRoot, type SourceProjectileHitRuntime} from './projectile-hit-registration.js';
 import {sourceProjectileHeadingRadians, sourceProjectileInitialPitch} from './projectile-heading.js';
-import {addSourceFloat32} from './source-float.js';
+import {addSourceFloat32,fusedMultiplyAddSourceFloat32} from './source-float.js';
+import {sourceTargetDistanceSeed} from './source-target-distance.js';
 import type {SourceJointVector} from './joint-animation-feedback.js';
 
 export interface SourceProjectileDrawList {head?: symbol | null; tail?: symbol | null}
@@ -298,6 +299,55 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     // loads379c0 before7df10 replaces stack28; neither is invented here.
     fail('8007df0c reached unauthenticated FLOAT_804379c0 after zero horizontal-square prefix');
   };
+  /** Actual8020bab8, bounded to existing model-backed estimator seeds. This is
+   * not physical Gekko parity or an independently proven hardware estimate. */
+  const normalizeDirection = (e:Entry):void => {
+    // Fixed decoded ROM literals8043ca90/94, in source load order; these are
+    // not claimed live memory-owner reads or runtime-captured constants.
+    const halfConstant=0.5,threeConstant=3;
+    const processor=vectorProcessor();
+    if(processor===undefined)fail('actual8020bab8 Normalize requires explicit processor profile');
+    const controls=():void=>{
+      read(processor,'gqr0');read(processor,'fpscrControl');
+      // Observe control hooks, then sample final fields without a callback gap.
+      const owner=nativeStoreDescriptor(sources,'processor');
+      if(!owner||!('value'in owner)||owner.value!==processor)fail('Normalize processor profile owner changed');
+      const g=nativeStoreDescriptor(processor,'gqr0'),f=nativeStoreDescriptor(processor,'fpscrControl');
+      if(!g||!('value'in g)||g.value!==0)fail('Normalize requires explicit GQR0 float load/store profile');
+      if(!f||!('value'in f)||typeof f.value!=='number'||!Number.isInteger(f.value)||f.value<0||f.value>0xffffffff||(f.value&255)!==0)
+        fail('Normalize requires explicit FPSCR RN00/NI0 and disabled exception enables');
+    };
+    const mul=(a:number,b:number):number=>{
+      const v=Math.fround(a*b);if(!Number.isFinite(v))fail('Normalize finite binary32 product required');return v;
+    };
+    const load=(offset:number):number=>call(()=>allocator.readF32(e.id,offset));
+    const storePair=(offset:number,values:readonly number[]):void=>{
+      const bytes=new Uint8Array(values.length*4),view=new DataView(bytes.buffer);
+      values.forEach((v,i)=>view.setFloat32(i*4,v,false));
+      for(let i=0;i<bytes.length;i++){own(e.bytes,String(offset+i),true);check();}
+      controls();
+      for(let i=0;i<bytes.length;i++){
+        const p=nativeStoreDescriptor(e.bytes,String(offset+i));
+        if(!p||!('value'in p)||!p.writable)fail('Normalize paired destination changed before store');
+      }
+      // One paired store: all destinations admitted before either lane changes.
+      for(let i=0;i<bytes.length;i++)e.bytes[offset+i]=bytes[i]!;
+      check();
+    };
+    controls();
+    const x=load(0x38),y=load(0x3c),xx=mul(x,x),yy=mul(y,y);
+    controls();const z=load(0x40);
+    const zx=fusedMultiplyAddSourceFloat32(z,z,xx);
+    fusedMultiplyAddSourceFloat32(1,1,yy); // actual unused paired lane
+    const square=addSourceFloat32(zx,yy); // ps_sum0's second lane is+1
+    controls();const seed=sourceTargetDistanceSeed(square);
+    if(seed===undefined)fail('actual8020bab8 Normalize reached unsupported model-backed estimator square');
+    const q=mul(seed,seed),half=mul(seed,halfConstant);
+    const correction=-fusedMultiplyAddSourceFloat32(q,square,-threeConstant);
+    const scale=mul(correction,half);
+    const nx=mul(x,scale),ny=mul(y,scale);storePair(0x38,[nx,ny]);
+    const nz=mul(z,scale);mul(1,scale);storePair(0x40,[nz]);
+  };
   const initialize = (e: Entry): void => {
     const variant = u8(e.id, 0x11), pointer = ptr(e.id, 0x90);
     put8(e.id, 0x18, 1);
@@ -360,7 +410,8 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
       if(typeof value!=='number'||!Number.isFinite(value)||!Object.is(value,Math.fround(value))) fail('source direction lane requires finite float32');
       call(()=>allocator.writeF32(e.id,offset,value));
     }
-    fail('8007e074 reached actual8020bab8 Normalize after source flight-direction stores; reciprocal-square-root estimate remains unsupported');
+    normalizeDirection(e);
+    fail('8007e078 reached caller continuation after bounded model-backed8020bab8 Normalize; initializer tail remains unsupported');
   };
   const frameParent=(e:Entry,scheduler:SourceObjectSchedulerRuntime|undefined):void=>{
     if(!isSourceActorDoubleFrameClaimed(e.actual))return;

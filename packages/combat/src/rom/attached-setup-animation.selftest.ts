@@ -1,3 +1,6 @@
+import {runSourceDrawCallbackSelfTests} from './source-draw-callback.selftest.js';
+import {runBattleDrawOuterSelfTests} from './battle-draw-outer.selftest.js';
+import {runProjectileNormalizeOuterSelfTests} from './projectile-normalize-outer.selftest.js';
 import {runBattleStageDispatchSelfTests} from './battle-stage-dispatch.selftest.js';
 import {runBattleTeamCandidatesSelfTests} from './battle-team-candidates.selftest.js';
 import {runBattleOrderedInputSamplerSelfTests,runBattleOrderedInputSamplerValidEntrySelfTests} from './battle-ordered-input-sampler.selftest.js';
@@ -2937,6 +2940,9 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleOrderedActorPrefixHydratedCompositionTests();
   runBattleOrderedActorStageHydratedCompositionTests();
   runBattleStageDispatchHydratedCompositionTests();
+  runProjectileNormalizeOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleDrawOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runSourceDrawCallbackSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();

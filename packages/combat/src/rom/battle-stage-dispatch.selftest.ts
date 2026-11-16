@@ -50,7 +50,7 @@ export function runBattleStageDispatchSelfTests(make:Make):void{
    if(later&&k==='head')for(const group of [1,0,7,17,16,23,9])if(o===x.groups[group])groups.push(group);
    return native(o,k);
   }) as typeof native;
-  try{refuses(()=>x.frame.runFrame(),'8007e074 reached actual8020bab8 Normalize');}finally{Object.getOwnPropertyDescriptor=native;}
+  try{refuses(()=>x.frame.runFrame(),'fpscrControl: own data property required');}finally{Object.getOwnPropertyDescriptor=native;}
   check(groups.join(',')==='1,0,7,17,16,23,9','actual slot-first wrapper0/16/8 group order');
   check(x.groups[9]!.head===child&&x.drawList.head===child&&x.drawList.tail===child,'real retained projectile is registered, never cleared or relocated');
   check(x.hitPool.count===before-1&&x.allocator.readU8(child,0x18)===1,'real pool4 allocation and state increment precede normalization');

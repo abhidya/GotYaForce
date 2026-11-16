@@ -1,3 +1,6 @@
+import {executeSourceDrawCallback47aa4} from './source-draw-callback.js';
+import type {SourceObjectAllocationRuntime} from './source-object-allocation.js';
+import type {SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
 /** Bounded genuine80029434 prefix, not a successful outer battle frame.
  * Executes8b048→8b010 and29d48→29e98 over the SAME80433934 owner and
  * existing teamRows103/charged/meter owners. The authenticated8b290 leaf reads
@@ -95,6 +98,7 @@ export interface SourceBattleTargetPreparationSources {
   targetDispatch?: SourceActorTargetDispatchRuntime;
 }
 export interface SourceBattleOuterFrameSources {
+  objectUpdates?: {roots36290:Record<number,symbol|null>;roots36280:Record<number,symbol|null>;roots6f54:Record<number,symbol|null>;draw:{constants:object;scratch?:Float32Array}};
   scheduler: SourceObjectSchedulerRuntime;
   /** Genuine54070, reached only at the actual ordered-list call. */
   orderedActors?:SourceActorOrderedFrameRuntime;
@@ -127,6 +131,14 @@ export function requireSourceBattleOuterFrameFailure(outer: SourceBattleOuterFra
   const scope=failures.get(outer);
   if(!isSourceBattleOuterFrameRuntime(outer) || !scope) fail('private active outer failure required');
   scope(scheduler);
+}
+export interface SourceBattleOuterDrawContext {allocator:SourceObjectAllocationRuntime;root:SourceProjectileRootRuntime;processor?:object|undefined;constants:object|undefined;scratch?:Float32Array|undefined}
+const drawInvocations=new WeakMap<object,{consume(node:symbol):SourceBattleOuterDrawContext;check(node:symbol):void}>();
+export function consumeSourceBattleOuterDrawInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):SourceBattleOuterDrawContext {
+ const scope=drawInvocations.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active outer draw invocation required');return scope.consume(node);
+}
+export function checkSourceBattleOuterDrawInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):void {
+ const scope=drawInvocations.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active outer draw invocation required');scope.check(node);
 }
 interface SchedulerInvocationScope {
   enter(scheduler:SourceObjectSchedulerRuntime,callsite:number,group:number):void;
@@ -228,6 +240,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   const completedOrderedActors=new Map<symbol,object>();
   let distancesPrepared=false;
   const producedDistances=new Map<symbol,{actor:object;fields:number;consumed:boolean}>();
+  let drawInvocation:{node:symbol;entered:boolean;context:SourceBattleOuterDrawContext;updates:object;draw:object;buffer?:ArrayBufferLike|undefined}|undefined;
+  let checkingDraw=false;
+  const drawOwners=new Map<string,unknown>();
   let schedulerInvocation:{callsite:number;group:number;entered:boolean}|undefined;
   const retained=new Map<string,object>(), massActors=new Map<symbol,object>(),participantActors=new Map<symbol,object>();
   const check=(): void=>{if(poisoned) fail('caught same-runtime reentry');};
@@ -250,7 +265,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         call(()=>p.value.getKnownParameterDescriptors()).includes(actual)) fail(`${name}: parameter storage alias`);
     }
     if(previous!==undefined && previous!==actual) fail(`${name}: canonical owner changed`);
-    if(actual===sources || actual===globals || actual===root.getDrawList() ||
+    if(actual===sources || actual===globals || [...drawOwners.values()].includes(actual) || actual===root.getDrawList() ||
       [...massActors.values()].includes(actual) ||
       call(()=>scheduler.getRetainedStorageOwners()).includes(actual) ||
       [...retained].some(([key,owner])=>key!==name && owner===actual)) fail(`${name}: source storage alias`);
@@ -2338,6 +2353,66 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     write('byte8',1);
     fail('87d2c reached unsupported scene setup after source byte0/byte8 stores');
   };
+  const drawCheck=(node:symbol):void=>{
+    const active=drawInvocation;
+    if(!busy||closing||incomplete||poisoned||!active||active.node!==node||!active.entered){rejectScheduler();fail('private exact active outer draw invocation required');}
+    if(checkingDraw)return;
+    checkingDraw=true;
+    try{
+      schedulerGraph();
+      if(root.getVectorProcessorProfile()!==active.context.processor)fail('draw processor owner changed');
+      check();
+      const exact=(o:object,k:string,v:unknown):void=>{const d=primaryStoreDescriptor(o,k);if(!d||!('value'in d)||d.value!==v)fail('draw context owner changed: '+k);};
+      exact(sources,'objectUpdates',active.updates);exact(active.updates,'draw',active.draw);
+      for(const key of ['roots36290','roots36280','roots6f54']){const d=primaryStoreDescriptor(active.updates,key);if(d&&'value'in d&&d.value!==undefined&&[active.draw,active.context.constants,active.context.scratch,active.context.processor].includes(d.value))fail('draw helper aliases root table');}
+      const cd=primaryStoreDescriptor(active.draw,'constants');if((cd&&!('value'in cd))||cd?.value!==active.context.constants)fail('draw constants owner changed');
+      const sd=primaryStoreDescriptor(active.draw,'scratch');
+      if((sd && !('value'in sd))||sd?.value!==active.context.scratch)fail('draw scratch owner changed');
+      if(active.context.scratch instanceof Float32Array && active.context.scratch.buffer!==active.buffer)fail('draw scratch backing changed');
+      check();
+    }finally{checkingDraw=false;}
+  };
+  const runObjectUpdates=():void=>{
+    const supplied=Object.getOwnPropertyDescriptor(sources,'objectUpdates');check();
+    if(!supplied||!('value'in supplied)||supplied.value===undefined)fail('800294c8 reached mandatory80089554');
+    const updates=retain('objectUpdates',supplied.value);
+    const link=(v:unknown):symbol|null=>{if(v!==null&&typeof v!=='symbol')fail('89554 explicit object pointer required');return v;};
+    const walk=(first:symbol|null):void=>{
+      let node=first;const visited=new Set<symbol>();
+      while(node!==null){
+        if(visited.has(node))fail('89554 cyclic source list unsupported');visited.add(node);
+        const callback=call(()=>allocator.readU32(node!,0x100));
+        if(callback!==0){
+          if(callback!==0x80047aa4)fail('89554 reached unsupported callback100 '+callback.toString(16));
+          const draw=record(read(updates,'draw'),'draw context');
+          const cd=Object.getOwnPropertyDescriptor(draw,'constants');check();
+          if(cd&&!('value'in cd))fail('draw constants own data required');
+          const constants=cd?.value as object|undefined;
+          const sd=Object.getOwnPropertyDescriptor(draw,'scratch');check();
+          if(sd&&!('value'in sd))fail('draw scratch own data required');
+          const scratch=sd?.value as Float32Array|undefined;
+          const processor=call(()=>root.getVectorProcessorProfile());
+          const tableOwners=['roots36290','roots36280','roots6f54'].map(k=>primaryStoreDescriptor(updates,k)).filter(d=>d&&'value'in d).map(d=>d!.value);
+          const owners=[sources,globals,updates,...tableOwners,root.getDrawList(),...retained.values(),...call(()=>root.getRetainedStorageOwners()),...call(()=>allocator.getRetainedStorageOwners())];
+          if(draw===constants||draw===processor||(constants!==undefined&&constants===processor)||owners.includes(draw)||(constants!==undefined&&owners.includes(constants))||
+             (scratch!==undefined&&(owners.includes(scratch)||scratch===processor||(ArrayBuffer.isView(scratch)&&owners.some(o=>ArrayBuffer.isView(o)&&o.buffer===scratch.buffer)))))fail('draw helper storage aliases retained owner');
+          for(const [key,value]of [['draw',draw],['constants',constants],['scratch',scratch]]as const){if(drawOwners.has(key)&&drawOwners.get(key)!==value)fail('draw retained owner changed: '+key);drawOwners.set(key,value);}
+          for(const o of [draw,constants,scratch,...(scratch instanceof Float32Array?[scratch.buffer]:[])])if(o!==null&&typeof o==='object'&&!claimSourceHelperStorage(o,runtime))fail('draw helper storage already claimed');
+          drawInvocation={node,entered:false,updates,draw,buffer:scratch instanceof Float32Array?scratch.buffer:undefined,context:Object.freeze({allocator,root,processor,constants,scratch})};
+          try{call(()=>executeSourceDrawCallback47aa4(runtime,node!));}finally{drawInvocation=undefined;}
+        }
+        node=link(call(()=>allocator.readPointer(node!,0x108)));
+      }
+    };
+    // Each later root family is loaded only after the preceding callbacks return.
+    walk(link(read(call(()=>root.getDrawList()),'tail')));
+    const family=(name:string,count:number,start=0):void=>{
+      const rows=retain('objectUpdates.'+name,read(updates,name));
+      if(name==='roots36290')noShadows(rows,['0']);
+      for(let i=start;i<count;i++)walk(link(read(rows,String(i))));
+    };
+    family('roots36290',2,1);family('roots36280',2);family('roots6f54',6);
+  };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
     runFrame(): never {
@@ -2365,12 +2440,14 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           invokeScheduler(0x800294b4,56);
         }
         invokeScheduler(0x800294bc,58);invokeScheduler(0x800294c4,57);
-        fail('800294c8 reached mandatory80089554');
+        runObjectUpdates();
+        fail('800294cc reached outer counter continuation after80089554');
       } catch(error) {
         close();throw error;
-      } finally {orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
+      } finally {drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
     },
   };
+  drawInvocations.set(runtime,{consume(node){const active=drawInvocation;if(!active||active.entered||active.node!==node){rejectScheduler();fail('private exact single-use draw invocation required');}active.entered=true;drawCheck(node);return active.context;},check:drawCheck});
   failures.set(runtime,selected=>{if(!busy || !closing || !incomplete || selected!==scheduler) fail('private exact active outer failure required');});
   schedulerInvocations.set(runtime,{
     parent(selected,id,actor){
