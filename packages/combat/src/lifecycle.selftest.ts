@@ -79,7 +79,16 @@ import {runFObjDescriptorSelfTest} from './rom/fobj-descriptor.selftest.js';
 import {runAnimationRequestSelfTest} from './rom/animation-request.selftest.js';
 import {runRequestedAnimationSelfTest} from './rom/requested-animation.selftest.js';
 import {runAttachedJointSetupSelfTest} from './rom/attached-joint-setup.selftest.js';
-import {runAttachedSetupAnimationSelfTest} from './rom/attached-setup-animation.selftest.js';
+import {
+  runAttachedSetupAnimationSelfTest,
+  runBattleOrderedVoiceHydratedCompositionTests,
+  runActorMatrixSpringHydratedCompositionTests,
+  runActorVoiceRngHydratedCompositionTests,
+  runBattleOrderedInputSamplerHydratedCompositionTests,
+  runActorMatrixActiveHydratedCompositionTests,
+  runBattleTeamCandidatesHydratedCompositionTests,
+  runBattleOrderedInputValidEntryHydratedCompositionTests,
+} from './rom/attached-setup-animation.selftest.js';
 import {runFObjCallbackSelfTest} from './rom/fobj-callback.selftest.js';
 import {runFObjLinearSelfTest} from './rom/fobj-linear.selftest.js';
 import {runFObjTimingSelfTest} from './rom/fobj-timing.selftest.js';
@@ -402,6 +411,15 @@ export function runSelfTest(): void {
   runRequestedAnimationSelfTest();
   runAttachedJointSetupSelfTest();
   runAttachedSetupAnimationSelfTest();
+  // Keep the observed-input/voice/matrix suites in the ordinary CI aggregate.
+  // Ordered-prefix and ordered-stage suites already run inside attached setup.
+  runBattleOrderedVoiceHydratedCompositionTests();
+  runActorMatrixSpringHydratedCompositionTests();
+  runActorVoiceRngHydratedCompositionTests();
+  runBattleOrderedInputSamplerHydratedCompositionTests();
+  runActorMatrixActiveHydratedCompositionTests();
+  runBattleTeamCandidatesHydratedCompositionTests();
+  runBattleOrderedInputValidEntryHydratedCompositionTests();
   runActorAnimationDispatchSelfTest();
   runSourceStreamWaitSelfTest();
   runStreamWaitTargetSelfTest();
