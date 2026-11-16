@@ -170,7 +170,11 @@ function pollGamepads(): void {
   const physical = navigator.getGamepads?.() ?? [];
   const touch = touchGamepad();
   const pads: (Gamepad | null)[] = touch ? [...physical, touch] : [...physical];
-  if (!touch) padStates.delete("touch"); // overlay hidden: drop its edge state
+  // Browsers may truncate the physical array after disconnect, leaving no null
+  // slot for the loop below to visit. Retire those edges before an index is reused.
+  for (const key of padStates.keys()) {
+    if (key === "touch" ? !touch : !physical[key]?.connected) padStates.delete(key);
+  }
   if (pads.length === 0) return;
   const now = performance.now();
   const touchIndex = touch ? pads.length - 1 : -1;
