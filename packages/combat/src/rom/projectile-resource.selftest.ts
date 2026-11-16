@@ -1,5 +1,5 @@
 import {createProjectileInitializerTailTestFixture} from './projectile-initializer-tail.selftest.js';
-import {createSourceProjectileResourceRuntime,invokeSourceProjectileResource,type SourceJObjClassFields} from './projectile-resource.js';
+import {createSourceProjectileResourceRuntime,invokeSourceProjectileResource,type SourceJObjClassFields,type SourceJObjMemoryEntry,type SourceJObjFreeBlock} from './projectile-resource.js';
 import type {createProjectileInitializerTailBaseTestFixture} from './attached-setup-animation.selftest.js';
 type Make=typeof createProjectileInitializerTailBaseTestFixture;
 function check(ok:boolean,why:string):void{if(!ok)throw Error('[resource-test] '+why);}
@@ -97,6 +97,49 @@ export function runProjectileResourceSelfTests(make:Make):void{
   (x.resourceTable as {14:object|null})[14]=null;if(nonnullOld)x.allocator.writePointer(descriptor,0x0c,x.child);
   refuses(()=>x.frame.runFrame(),nonnullOld?'8024fd74':'selected record pointer00 dereference is null');
   check(x.classes.jobj[4]===0,'nullable selected record preserves oldjoint gate ordering');
+ }
+ const heapFixture=()=>{
+  const x=fresh(),next:SourceJObjFreeBlock={0:null},head:SourceJObjFreeBlock={0:next},entry:SourceJObjMemoryEntry={8:2,12:head};
+  const heap={count80436a0c:5,table80436a08:{4:entry}};
+  Object.assign(x.resourceSources,{heapGlobals:heap});return Object.assign(x,{heap,entry,head,next});
+ };
+ {
+  const x=heapFixture();refuses(()=>x.frame.runFrame(),'8025d0fc memset');
+  check(x.entry[12]===x.next&&x.entry[8]===1&&x.head[0]===x.next,'pop preserves original head contents');
+  check(x.classes.jobj[32]===1&&x.classes.jobj[36]===1,'real current/max accounting');
+ }
+ {
+  const x=heapFixture();Object.defineProperty(x.entry,8,{writable:false});refuses(()=>x.frame.runFrame(),'writable source');
+  check(x.entry[12]===x.next&&x.entry[8]===2&&x.classes.jobj[32]===0,'readonly count preserves prior head pop only');
+ }
+ {
+  const x=heapFixture();x.entry[8]=0;refuses(()=>x.frame.runFrame(),'8025d0fc memset');check(x.entry[8]===0xffffffff,'raw free count wraps');
+ }
+ {
+  const x=heapFixture(),secondHead={0:null},secondEntry={8:7,12:secondHead},secondTable={4:secondEntry};
+  const native=Object.getOwnPropertyDescriptor;let loads=0;
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===x.heap&&k==='table80436a08'&&++loads===2)(x.heap as {table80436a08:object}).table80436a08=secondTable;return native(o,k);})as typeof native;
+  try{refuses(()=>x.frame.runFrame(),'8025d0fc memset');}finally{Object.getOwnPropertyDescriptor=native;}
+  check(loads===2&&secondEntry[12]===null&&secondEntry[8]===6&&x.entry[12]===x.head,'fresh table reload selects actual returned entry');
+ }
+ {
+  const x=heapFixture(),native=Object.getOwnPropertyDescriptor;let caught=false;
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(!caught&&o===x.entry&&String(k)==='8'){caught=true;try{x.frame.runFrame();}catch{}}return native(o,k);})as typeof native;
+  try{refuses(()=>x.frame.runFrame(),'private exact');}finally{Object.getOwnPropertyDescriptor=native;}
+  check(caught&&x.entry[12]===x.next&&x.entry[8]===2,'caught parent reentry after pop prevents decrement');
+ }
+ {
+  const x=heapFixture();(x.entry as {12:object})[12]=x.classes.jobj;refuses(()=>x.frame.runFrame(),'alias');check(x.entry[8]===2,'heap block alias refuses before pop');
+ }
+ {
+  const x=heapFixture(),native=Object.getOwnPropertyDescriptor;let popped=false,currentReads=0;
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{
+   if(o===x.entry&&String(k)==='8')popped=true;
+   if(popped&&o===x.classes.jobj&&String(k)==='32'&&++currentReads===3)x.classes.jobj[32]=9;
+   return native(o,k);
+  })as typeof native;
+  try{refuses(()=>x.frame.runFrame(),'8025d0fc memset');}finally{Object.getOwnPropertyDescriptor=native;}
+  check(currentReads===3&&x.classes.jobj[32]===9&&x.classes.jobj[36]===9,'class max compares freshly reloaded current');
  }
  console.log(`[projectile-resource] PASS ${count}: genuine nonnull descriptor, source class initialization/inheritance, allocator barrier and failure prefixes`);
 }

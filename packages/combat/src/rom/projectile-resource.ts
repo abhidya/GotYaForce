@@ -1,10 +1,14 @@
-/** Authenticated6f78/6fb4 and real class initialization prefix. No allocation,
- * LoadJoint success, retail resource hydration or libc internal fault order. */
+/** Authenticated6f78/6fb4, class initialization and bounded free-block allocation.
+ * No LoadJoint success, retail resource hydration or libc internal fault-order claim. */
 import {isSourceObjectAllocationRuntime,type SourceObjectAllocationRuntime} from './source-object-allocation.js';
 import {requireSourceProjectileResourceInvocation,checkSourceProjectileResourceInvocation,type SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
 import {claimSourceHelperStorage} from './source-storage-claims.js';
 export type SourceJObjClassFields=Record<number,unknown>;
+export interface SourceJObjFreeBlock {0:SourceJObjFreeBlock|null}
+export interface SourceJObjMemoryEntry {8:number;12:SourceJObjFreeBlock|null}
+export interface SourceJObjHeapGlobals {count80436a0c:number;table80436a08:Record<number,SourceJObjMemoryEntry|null>}
 export interface SourceProjectileResourceSources {
+ heapGlobals?:SourceJObjHeapGlobals;
  allocator:SourceObjectAllocationRuntime;
  banks:Record<number,{pointer600:object|null}>;
  loaderGlobals:{override80436980:SourceJObjClassFields|null};
@@ -64,6 +68,35 @@ export function createSourceProjectileResourceRuntime(sources:SourceProjectileRe
    for(const [k,v]of [[44,0x80251eb4],[48,0x802523ec],[56,0x80252484],[64,0x8024d224],[68,0x80253174],[72,0x80253380],[60,0x8024f638],[76,0x80251f18],[80,0x8024e120]])write(c,k!,v!);
   }else fail('unselected class initializer owner');
  };
+ // Only the authenticated size136/index4 path with an explicit existing free
+ // block is supported. No heap growth, splitting, zeroed memory or JObj result.
+ const allocateClass=(c:object):object|null=>{
+  const size=uint(read(c,16),65535)<<16>>16;
+  if(size!==136)fail('allocator8025cef0 unsupported signed object size');
+  const heap=bind('heapGlobals',sources,'heapGlobals');
+  const count=uint(read(heap,'count80436a0c'))|0;
+  if(4>=count)fail('actual GetMemoryEntry requires unsupported table growth');
+  const table1=retain('heapTableFirst',read(heap,'table80436a08'));
+  const first=read(table1,4);
+  if(first===null)fail('actual GetMemoryEntry requires unsupported entry creation');
+  const firstEntry=retain('heapEntryFirst',first);
+  // Source performs a fresh global/table load even on its existing-entry path.
+  // Mutable table pointer and entries are deliberately not retained edges.
+  const table2Value=read(heap,'table80436a08');
+  const table2=table2Value===table1?table1:retain('heapTableReload',table2Value);
+  const entryPointer=read(table2,4);
+  if(entryPointer===null)return null;
+  const entry=entryPointer===firstEntry?firstEntry:retain('heapEntryReload',entryPointer),headPointer=read(entry,12);
+  if(headPointer===null)fail('actual hsdAllocMemPiece requires unsupported empty free-list path');
+  const head=retain('allocatedBlock',headPointer),next=read(head,0);
+  if(next!==null){if(next===head)fail('cyclic free block');retain('nextFreeBlock',next);}
+  write(entry,12,next);
+  const freeCount=uint(read(entry,8));write(entry,8,(freeCount-1)>>>0);
+  const allocated=uint(read(c,32));write(c,32,(allocated+1)>>>0);
+  const current=uint(read(c,32)),maximum=uint(read(c,36));
+  if(current>maximum)write(c,36,current);
+  return head;
+ };
  const runtime:SourceProjectileResourceRuntime={getAllocatorRuntime:()=>allocator,getRetainedStorageOwners:()=>Object.freeze([sources,...owners.values()])};
  entries.set(runtime,(root,child,lifetime)=>{
   if(active){poisoned=true;fail('same-runtime resource reentry');}if(failed)fail('permanently incomplete resource runtime');
@@ -98,7 +131,15 @@ export function createSourceProjectileResourceRuntime(sources:SourceProjectileRe
    if(override!==null&&override!==jobj)fail('unselected explicit JObj class override');
    if((uint(read(jobj,4))&1)===0)initialize(jobj);
    method(jobj,40,0x8025cef0);
-   fail('actual8025d0c4 reached inherited allocator8025cef0; nonnull LoadJoint incomplete');
+   if(!native(sources,'heapGlobals'))fail('actual8025d0c4 reached inherited allocator8025cef0; nonnull LoadJoint incomplete');
+   const block=allocateClass(jobj);
+   if(block===null)fail('actual JObjAlloc null result reaches assertion; nonnull LoadJoint incomplete');
+   if((uint(read(jobj,4))&1)===0)initialize(jobj);
+   const objectSize=uint(read(jobj,16),65535)<<16>>16;
+   // Allocation returned this exact head, but no byte-storage mapping has yet
+   // been admitted for real memset. Never substitute a constructed JObj.
+   void block;void objectSize;
+   fail('actual8025d0fc memset requires explicit allocated block byte storage; nonnull LoadJoint incomplete');
   }catch(error){failed=true;throw error;}finally{active=undefined;}
  });return Object.freeze(runtime);
 }
