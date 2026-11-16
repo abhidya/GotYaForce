@@ -1,3 +1,4 @@
+import {runBattleStageDispatchSelfTests} from './battle-stage-dispatch.selftest.js';
 import {runBattleTeamCandidatesSelfTests} from './battle-team-candidates.selftest.js';
 import {runBattleOrderedInputSamplerSelfTests,runBattleOrderedInputSamplerValidEntrySelfTests} from './battle-ordered-input-sampler.selftest.js';
 import {runActorMatrixActiveSelfTests} from './actor-matrix-active.selftest.js';
@@ -2935,6 +2936,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleSchedulerJoinHydratedCompositionTests();
   runBattleOrderedActorPrefixHydratedCompositionTests();
   runBattleOrderedActorStageHydratedCompositionTests();
+  runBattleStageDispatchHydratedCompositionTests();
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();
@@ -13812,3 +13814,5 @@ export function runActorMatrixActiveHydratedCompositionTests():void {runActorMat
 
 export function runBattleTeamCandidatesHydratedCompositionTests():void {runBattleTeamCandidatesSelfTests(createBattleTargetPreparationTestFixture);}
 export function runBattleOrderedInputValidEntryHydratedCompositionTests():void {runBattleOrderedInputSamplerValidEntrySelfTests(createBattleTargetPreparationSamplerTestFixture);}
+
+export function runBattleStageDispatchHydratedCompositionTests():void {runBattleStageDispatchSelfTests(createBattleTargetPreparationSamplerTestFixture);}

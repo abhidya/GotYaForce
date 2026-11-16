@@ -11,9 +11,9 @@
 import {claimSourceHelperStorage,isSourceHelperStorageClaimed} from './source-storage-claims.js';
 import {isPendingSourceBattleOuterFrameClaim, requireSourceBattleOuterFrameFailure,
   requireSourceBattleOuterFrameSchedulerInvocation, checkSourceBattleOuterFrameSchedulerInvocation,
-  rejectSourceBattleOuterFrameSchedulerReentry, type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
+  rejectSourceBattleOuterFrameSchedulerReentry, requireSourceBattleOuterFrameCompletedParent, type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
 import {isSourceProjectileRootRuntime, prepareSourceProjectileScheduledRoot,
-  invokeSourceProjectileScheduledRoot, markIncompleteSourceProjectileScheduledRoot,
+  invokeSourceProjectileScheduledRoot, markIncompleteSourceProjectileScheduledRoot, requireSourceProjectileFrameParentClaim,
   type SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
 import {markIncompleteSourceObjectAllocation, type SourceObjectAllocationRuntime} from './source-object-allocation.js';
 
@@ -35,11 +35,33 @@ export interface SourceObjectSchedulerRuntime {
   runSlots(baseBits: number): void;
   runWrapper(baseBits: number): void;
 }
+/** Authenticated outer call positions. Wrapper and single-group sites are
+ * distinct even when a supplied list is empty. */
+export type SourceObjectSchedulerOuterCallsite = 0x8002947c | 0x80029484 |
+  0x80029494 | 0x8002949c | 0x800294a4 | 0x800294ac | 0x800294b4 | 0x800294bc | 0x800294c4;
 type Stage = 'prepare' | 'snapshot' | 'callback' | 'after';
 interface Active {child: symbol; stage: Stage; lifetime?: symbol; callback?: number}
 interface OuterJoin {claim(outer: SourceBattleOuterFrameRuntime): void; close(outer: SourceBattleOuterFrameRuntime): void;
   invoke(outer: SourceBattleOuterFrameRuntime,callsite:number,group:number):void; reject():void}
 const outerJoins = new WeakMap<object, OuterJoin>();
+const rootParentChecks = new WeakMap<object, (root: SourceProjectileRootRuntime, child: symbol, parent: symbol, actual: object) => void>();
+const rootExecutionChecks = new WeakMap<object, () => void>();
+/** Exact root-private one-attempt admission, not a public parent permit. */
+export function requireSourceObjectSchedulerFrameParent(scheduler: SourceObjectSchedulerRuntime,
+  root: SourceProjectileRootRuntime, child: symbol, parentId: symbol, actual: object): void {
+  const check = rootParentChecks.get(scheduler);
+  if (!isSourceObjectSchedulerRuntime(scheduler) || claims.get(root) !== scheduler || !check) {
+    outerJoins.get(scheduler)?.reject(); fail('private scheduled completed parent required');
+  }
+  check(root, child, parentId, actual);
+}
+/** Read-only continuous parent polling during the private root execution. */
+export function checkSourceObjectSchedulerRootExecution(scheduler: SourceObjectSchedulerRuntime,
+  root: SourceProjectileRootRuntime, child: symbol, stage: 'prepare'|'callback', lifetime?: symbol): void {
+  requireSourceObjectSchedulerInvocation(scheduler,root,child,stage,lifetime);
+  const check=rootExecutionChecks.get(scheduler);if(!check)fail('private root execution check required');check();
+}
+
 /** Only an active private claim transaction can reserve this scheduler. */
 export function claimSourceObjectSchedulerOuterFrame(scheduler: SourceObjectSchedulerRuntime, outer: SourceBattleOuterFrameRuntime): void {
   const join=outerJoins.get(scheduler);if(!join || !isSourceObjectSchedulerRuntime(scheduler)) fail('genuine scheduler required');
@@ -250,6 +272,25 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
       (stage==='callback' && (active.callback!==0x8007dcec || active.lifetime!==lifetime)))
       denied('private exact scheduler stage/child/lifetime required');
   });
+  let checkingRootParent=false;
+  rootExecutionChecks.set(runtime,()=>{
+    // The full outer graph inventory can reenter root read-only metadata.
+    // Exact local scheduler scope was checked even on that recursive poll.
+    if(checkingRootParent)return;
+    checkingRootParent=true;try{check();}finally{checkingRootParent=false;}
+  });
+  rootParentChecks.set(runtime,(selectedRoot,child,parentId,actual)=>{
+    if(selectedRoot!==root||!active||(active.stage!=='prepare'&&active.stage!=='callback')) {
+      reject();fail('private active root parent stage required');
+    }
+    requireSourceObjectSchedulerInvocation(runtime,root,child,active.stage,active.lifetime);
+    requireSourceProjectileFrameParentClaim(root,runtime,child,parentId,actual);
+    if(!outerOwner)fail('frame-owned actor requires its unimplemented later source object scheduler');
+    if(call(()=>spawns.getSpawnOwnerIdentity(child))!==parentId||call(()=>spawns.getActualActor(parentId))!==actual) {
+      reject();fail('scheduled child canonical producer parent differs');
+    }
+    requireSourceBattleOuterFrameCompletedParent(outerOwner,runtime,parentId,actual);check();
+  });
   outerJoins.set(runtime,{
     reject,
     claim(outer) {
@@ -264,7 +305,21 @@ export function createSourceObjectSchedulerRuntime(sources: SourceObjectSchedule
         fail('exact outer-owned scheduler required');
       }
       requireSourceBattleOuterFrameSchedulerInvocation(outer,runtime,callsite,bits);
-      run(bits,callsite===0x8002947c || callsite===0x80029484?wrapper:group,outer);
+      let base:number, wrapped:boolean;
+      switch(callsite) {
+        case 0x8002947c:base=40;wrapped=true;break;
+        case 0x80029484:base=32;wrapped=true;break;
+        case 0x80029494:base=0;wrapped=true;break;
+        case 0x8002949c:base=16;wrapped=true;break;
+        case 0x800294a4:base=8;wrapped=true;break;
+        case 0x800294ac:base=24;wrapped=true;break;
+        case 0x800294b4:base=56;wrapped=false;break;
+        case 0x800294bc:base=58;wrapped=false;break;
+        case 0x800294c4:base=57;wrapped=false;break;
+        default:rejectSourceBattleOuterFrameSchedulerReentry(outer);fail('unselected outer scheduler callsite');
+      }
+      if(bits!==base) {rejectSourceBattleOuterFrameSchedulerReentry(outer);fail('outer scheduler callsite/base differs');}
+      run(bits,wrapped?wrapper:group,outer);
     },
     close(outer) {
       requireSourceBattleOuterFrameFailure(outer,runtime);

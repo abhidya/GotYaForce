@@ -17,6 +17,8 @@
  *7b0. Finite binary32, stable synchronous own-data records and explicit pools
  * are host bounds; failed prefixes poison the shared actor and allocator.
  */
+import {requireSourceProjectileHitAllocation,checkSourceProjectileHitAllocation,type SourceProjectileHitRuntime} from './projectile-hit-registration.js';
+import {allocateSourceProjectileHitFromSpawn} from './source-object-allocation.js';
 import type {RomActor} from './actor.js';
 import {isSourceActorDoublePrehookRuntime, isSourceActorDoubleFrameAccess, requireSourceActorDoubleInvocation,
   requireCompleteSourceActorDoubleLifecycle, markIncompleteSourceActorDoubleLifecycle,
@@ -76,6 +78,17 @@ export interface SourceActorProjectileSpawnRuntime {
   spawn(identity: symbol, variant: number): symbol | null;
 }
 const runtimes = new WeakSet<object>(), claimed = new WeakSet<object>();
+const hitAllocations=new WeakMap<object,(hit:SourceProjectileHitRuntime,child:symbol)=>symbol|null>();
+const hitAllocatorScopes=new WeakMap<object,(allocator:SourceObjectAllocationRuntime,child:symbol,id:symbol,caller:symbol,consume:boolean)=>void>();
+export function invokeSourceProjectileHitAllocation(spawn:SourceActorProjectileSpawnRuntime,hit:SourceProjectileHitRuntime,child:symbol):symbol|null {
+  const invoke=hitAllocations.get(spawn);if(!invoke||!isSourceActorProjectileSpawnRuntime(spawn))fail('genuine private HIT spawn allocation required');return invoke(hit,child);
+}
+export function requireSourceProjectileHitAllocatorInvocation(spawn:SourceActorProjectileSpawnRuntime,allocator:SourceObjectAllocationRuntime,child:symbol,id:symbol,caller:symbol):void {
+  const scope=hitAllocatorScopes.get(spawn);if(!scope)fail('private HIT allocator scope required');scope(allocator,child,id,caller,true);
+}
+export function checkSourceProjectileHitAllocatorInvocation(spawn:SourceActorProjectileSpawnRuntime,allocator:SourceObjectAllocationRuntime,child:symbol,id:symbol,caller:symbol):void {
+  const scope=hitAllocatorScopes.get(spawn);if(!scope)fail('active HIT allocator scope required');scope(allocator,child,id,caller,false);
+}
 const frameBinders = new WeakMap<object, (id: symbol, access: SourceActorDoubleFrameAccess) => void>();
 const incompleters = new WeakMap<object, (id: symbol) => void>();
 /** Internal monotone failure propagation. This never supplies execution authority. */
@@ -137,11 +150,16 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
       !Object.is(row.local04.y, 0) || !Object.is(row.local04.z, 0) || row.offset2c !== 0)
     fail('row1 disagrees with authenticated802d6da0 cells');
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  let activeHit:{hit:SourceProjectileHitRuntime;child:symbol}|undefined;
+  let pendingHitAllocator:{child:symbol;id:symbol;caller:symbol;entered:boolean}|undefined;
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    if(activeHit)checkSourceProjectileHitAllocation(activeHit.hit,runtime,activeHit.child);
+  };
   const guard = <T>(run: () => T): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;
-    try {const result = run(); check(); return result;} finally {busy = false;}
+    try {const result = run(); check(); return result;} finally {activeHit=undefined;pendingHitAllocator=undefined;busy = false;}
   };
   const read = (value: unknown, key: string): unknown => {const result = own(value, key); check(); return result;};
   const call = <T>(run: () => T): T => {const result = run(); check(); return result;};
@@ -332,6 +350,23 @@ export function createSourceActorProjectileSpawnRuntime(sources: SourceActorProj
       }
     });},
   };
+  hitAllocatorScopes.set(runtime,(selected,child,id,caller,consume)=>{
+    const pending=pendingHitAllocator;
+    if(!busy||poisoned||!activeHit||activeHit.child!==child||selected!==allocator||!pending||pending.child!==child||pending.id!==id||pending.caller!==caller||pending.entered===consume) {
+      if(busy)poisoned=true;fail('private exact spawned HIT allocator invocation required');
+    }
+    if(consume)pending.entered=true;check();
+  });
+  hitAllocations.set(runtime,(hit,child)=>guard(()=>{
+    requireSourceProjectileHitAllocation(hit,runtime,child);activeHit={hit,child};
+    if(hit.getSpawnRuntime()!==runtime)fail('HIT allocation spawn owner differs');check();
+    const completed=completedSpawns.get(child);if(!completed)fail('HIT allocation requires completed genuine spawn');
+    const origin=completed.owner,e=entry(origin);
+    try {
+      owners(origin,e);pendingHitAllocator={child,id:origin,caller:e.caller,entered:false};
+      return call(()=>allocateSourceProjectileHitFromSpawn(allocator,runtime,child,origin,e.caller));
+    } catch(error){markIncompleteSourceActorDoubleLifecycle(e.actual);allocator.markActorIncomplete(origin,e.caller);throw error;}
+  }));
   runtimes.add(runtime);
   incompleters.set(runtime,id => {const e = entry(id); markIncompleteSourceActorDoubleLifecycle(e.actual); allocator.markActorIncomplete(id,e.caller);});
   frameBinders.set(runtime,(id,access) => {entry(id); if (frameAccesses.has(id)) fail('projectile already frame bound'); frameAccesses.set(id,access);});

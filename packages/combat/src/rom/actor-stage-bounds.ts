@@ -22,6 +22,9 @@ import type {SourceActorStatusTimersRuntime, SourceActorStatusTimersBinding} fro
 import type {SourceActorTerrainQueryRuntime, SourceActorTerrainGlobals} from './actor-terrain-query.js';
 import {isSourceActorCueResetRuntime, type SourceActorCueResetRuntime} from './actor-cue-reset.js';
 
+/** SAME8043625c owner used by terrain and87cf0. Explicit source bytes only;
+ * absence does not imply an initialized stage or a selected dispatch target. */
+export interface SourceActorStageGlobals extends SourceActorTerrainGlobals {byte0?: number; byte8?: number}
 export interface SourceActorStageBoundsBinding {lifecycle18: number; short6cc: number}
 export interface SourceActorStageBoundsSources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor' | 'getActorBinding'>;
@@ -34,7 +37,7 @@ export interface SourceActorStageBoundsRuntime {
   getWorldBinding(identity: symbol): SourceActorWorldMatrixBinding;
   getStatusBinding(identity: symbol): Partial<SourceActorStatusTimersBinding>;
   getActorBinding(identity: symbol): Partial<SourceActorStageBoundsBinding>;
-  getTerrainGlobals(): SourceActorTerrainGlobals;
+  getTerrainGlobals(): SourceActorStageGlobals;
   /** Once-only genuine helper binding. Does not activate a source tick. */
   bindCueRuntime(cues: SourceActorCueResetRuntime): void;
   getCueRuntime(): SourceActorCueResetRuntime | undefined;
@@ -92,7 +95,7 @@ export function createSourceActorStageBoundsRuntime(sources: SourceActorStageBou
   const worldActor = capture('world', 'getActualActor'), worldBinding = capture('world', 'getActorBinding');
   const statusActor = capture('status', 'getActualActor'), statusBinding = capture('status', 'getActorBinding');
   const terrainGlobals = capture('terrain', 'getTerrainGlobals');
-  const terrain = record(terrainGlobals(), 'shared DAT_8043625c terrain') as SourceActorTerrainGlobals;
+  const terrain = record(terrainGlobals(), 'shared DAT_8043625c terrain') as SourceActorStageGlobals;
   const byte = (r: unknown, key: string): number => integer(read(r, key), 0, 255, key);
   const short = (r: unknown, key: string): number => integer(read(r, key), -32768, 32767, key);
   const word = (r: unknown, key: string): number => integer(read(r, key), 0, 0xffffffff, key);

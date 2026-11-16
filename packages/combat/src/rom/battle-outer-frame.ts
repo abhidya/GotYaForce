@@ -131,6 +131,7 @@ export function requireSourceBattleOuterFrameFailure(outer: SourceBattleOuterFra
 interface SchedulerInvocationScope {
   enter(scheduler:SourceObjectSchedulerRuntime,callsite:number,group:number):void;
   check(scheduler:SourceObjectSchedulerRuntime):void;
+  parent(scheduler:SourceObjectSchedulerRuntime,id:symbol,actual:object):void;
   reject():void;
 }
 const schedulerInvocations=new WeakMap<object,SchedulerInvocationScope>();
@@ -140,6 +141,13 @@ export function requireSourceBattleOuterFrameSchedulerInvocation(outer:SourceBat
   const scope=schedulerInvocations.get(outer);
   if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active outer scheduler invocation required');
   scope.enter(scheduler,callsite,group);
+}
+/** Read-only source-position check; no actor/frame capability escapes. */
+export function requireSourceBattleOuterFrameCompletedParent(outer:SourceBattleOuterFrameRuntime,
+ scheduler:SourceObjectSchedulerRuntime,id:symbol,actual:object):void {
+ const scope=schedulerInvocations.get(outer);
+ if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private later scheduler completed-parent invocation required');
+ scope.parent(scheduler,id,actual);
 }
 export function checkSourceBattleOuterFrameSchedulerInvocation(outer:SourceBattleOuterFrameRuntime,
   scheduler:SourceObjectSchedulerRuntime):void {
@@ -217,6 +225,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   if(globals===sources || claimedGlobals.has(globals)) fail('battle globals alias sources or are already outer-owned');
   let busy=false,poisoned=false,incomplete=false,closing=false;
   let orderedInvocation:{stage:SourceActorOrderedFrameRuntime;id:symbol;actor:object;entered:boolean}|undefined;
+  const completedOrderedActors=new Map<symbol,object>();
   let distancesPrepared=false;
   const producedDistances=new Map<symbol,{actor:object;fields:number;consumed:boolean}>();
   let schedulerInvocation:{callsite:number;group:number;entered:boolean}|undefined;
@@ -2125,7 +2134,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     check();
   };
   /** Authenticated 53a2c prefix. These are source calls, not scheduler groups. */
-  const runOrderedActors=(): never=>{
+  const runOrderedActors=(): void=>{
     const mass=retain('massPreparation',read(sources,'massPreparation'));
     const massOwner=(key:string):object=>{
       if(read(sources,'massPreparation')!==mass)fail('53a2c canonical mass owner changed');
@@ -2201,7 +2210,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         selected.getStatusRuntime()!==spawns.getPrehookRuntime().getStatusRuntime()||selected.getMatchGlobals()!==globals)
         fail('53a2c canonical ordered actor graph differs');
       orderedInvocation={stage:selected,id:id as symbol,actor,entered:false};
-      try {call(()=>invokeSourceActorOrderedFrameFromOuter(runtime,selected,id as symbol));}
+      try {call(()=>invokeSourceActorOrderedFrameFromOuter(runtime,selected,id as symbol));completedOrderedActors.set(id as symbol,actor);}
       finally {orderedInvocation=undefined;}
     }
     //5b140 is still mandatory when the live signed ordered count is zero.
@@ -2300,7 +2309,34 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       const raw=byte(owner,'burstArmFrames');fieldGuard(id,actor,'burstArmFrames',owner);
       if(s8(raw)!==0)storeByte(owner,'burstArmFrames',(raw-1)&255,()=>fieldGuard(id,actor,'burstArmFrames',owner));
     }
-    fail('8002948c reached mandatory80087cf0');
+  };
+  const runStageDispatch=():void=>{
+    const stage=call(()=>root.getStageRuntime());
+    const owner=retain('stage8043625c',call(()=>stage.getTerrainGlobals()));
+    const guard=(key:'byte0'|'byte8'):void=>{
+      if(call(()=>root.getStageRuntime())!==stage||call(()=>stage.getTerrainGlobals())!==owner)fail('87cf0 canonical stage owner changed');
+      retain('stage8043625c',owner);
+      const aliases=key==='byte0'?['field0','0','stageByte0','stageState0']:['field8','8','stageByte8'];
+      noShadows(owner,aliases);
+      for(const alias of aliases)if(primaryStoreDescriptor(owner,alias)!==undefined)fail(`${alias}: competing stage source cell`);
+    };
+    guard('byte0');
+    // Missing explicitly supplied state is still the former honest boundary.
+    const cell=Object.getOwnPropertyDescriptor(owner,'byte0');check();
+    if(!cell||!('value'in cell))fail('8002948c reached mandatory80087cf0 byte0: own data property required');
+    const selector=s8(unsigned(cell.value,255,'87cf0 byte0'));guard('byte0');
+    if(selector===1)return; //8043391c→80087f20, authenticated BLR
+    if(selector!==0)fail('87cf0 reached unselected signed stage dispatch');
+    const write=(key:'byte0'|'byte8',value:number):void=>{
+      guard(key);own(owner,key,true);check();guard(key);
+      const p=primaryStoreDescriptor(owner,key);if(!p||!('value'in p)||!p.writable)fail(`${key}: live writable stage cell required`);
+      (owner as Record<string,unknown>)[key]=value;check();
+    };
+    //87d2c reloads owner, increments its actual state, reloads owner again,
+    //then writes8 before scene setup. This is not successful initialization.
+    guard('byte0');const previous=byte(owner,'byte0');guard('byte0');write('byte0',(previous+1)&255);
+    write('byte8',1);
+    fail('87d2c reached unsupported scene setup after source byte0/byte8 stores');
   };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
@@ -2312,7 +2348,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(read(sources,'scheduler')!==scheduler || scheduler.getRootRuntime()!==root ||
           root.getSpawnRuntime()!==spawns || scheduler.getAllocatorRuntime()!==allocator) fail('canonical scheduler graph changed');
         noShadows(globals,['5588','102','214','215','byteD6','byteD7','byted6','byted7','half214']);
-        distancesPrepared=false;producedDistances.clear();
+        distancesPrepared=false;producedDistances.clear();completedOrderedActors.clear();
         applyPending();updateTeams();
         if(s8(byte(match(),'byte66'))===0) {
           prepareMass();
@@ -2323,7 +2359,10 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         // Fresh source mode, not the mode observed before mass/participant work.
         if(s8(byte(match(),'byte66'))===0) {
           invokeScheduler(0x8002947c,40);invokeScheduler(0x80029484,32);
-          runOrderedActors();
+          runOrderedActors();runStageDispatch();
+          invokeScheduler(0x80029494,0);invokeScheduler(0x8002949c,16);
+          invokeScheduler(0x800294a4,8);invokeScheduler(0x800294ac,24);
+          invokeScheduler(0x800294b4,56);
         }
         invokeScheduler(0x800294bc,58);invokeScheduler(0x800294c4,57);
         fail('800294c8 reached mandatory80089554');
@@ -2334,6 +2373,13 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   };
   failures.set(runtime,selected=>{if(!busy || !closing || !incomplete || selected!==scheduler) fail('private exact active outer failure required');});
   schedulerInvocations.set(runtime,{
+    parent(selected,id,actor){
+      const invocation=schedulerInvocation;
+      if(!busy||closing||incomplete||poisoned||selected!==scheduler||!invocation?.entered||
+        ![0x80029494,0x8002949c,0x800294a4,0x800294ac,0x800294b4,0x800294bc,0x800294c4].includes(invocation.callsite)||
+        completedOrderedActors.get(id)!==actor||massActors.get(id)!==actor){rejectScheduler();fail('private completed54070 parent in later scheduler required');}
+      schedulerGraph();check();
+    },
     enter(selected,callsite,group) {
       const active=schedulerInvocation;
       if(!busy || closing || incomplete || poisoned || selected!==scheduler || !active || active.entered ||

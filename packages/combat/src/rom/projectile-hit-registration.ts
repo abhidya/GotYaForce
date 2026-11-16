@@ -6,7 +6,8 @@
  * No scheduler or failed-frame continuation is provided. Partial effects close
  * the shared parent/allocator permanently. Synchronous non-proxy storage only.
  */
-import {isSourceActorProjectileSpawnRuntime, markIncompleteSourceActorProjectileSpawn,
+import {isSourceProjectileRootRuntime,requireSourceProjectileRootHitInvocation,checkSourceProjectileRootHitInvocation,type SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
+import {isSourceActorProjectileSpawnRuntime, markIncompleteSourceActorProjectileSpawn, invokeSourceProjectileHitAllocation,
   type SourceActorProjectileSpawnRuntime} from './actor-projectile-spawn.js';
 import {isSourceActorDoubleFrameClaimed} from './actor-double-prehook.js';
 import type {SourceAllocationBytes} from './source-object-allocation.js';
@@ -24,6 +25,20 @@ export interface SourceProjectileHitRuntime {
   /** Already-bound HIT owner identities only; no future actor/pointer lookup. */
   getRetainedStorageOwners(): readonly object[];
   registerHit(projectile: symbol, kind: number): 0 | 1;
+}
+const allocationScopes=new WeakMap<object,(spawn:SourceActorProjectileSpawnRuntime,child:symbol,consume:boolean)=>void>();
+export function requireSourceProjectileHitAllocation(hit:SourceProjectileHitRuntime,spawn:SourceActorProjectileSpawnRuntime,child:symbol):void {
+  const scope=allocationScopes.get(hit);if(!scope)fail('private HIT allocation scope required');scope(spawn,child,true);
+}
+export function checkSourceProjectileHitAllocation(hit:SourceProjectileHitRuntime,spawn:SourceActorProjectileSpawnRuntime,child:symbol):void {
+  const scope=allocationScopes.get(hit);if(!scope)fail('active HIT allocation scope required');scope(spawn,child,false);
+}
+const rootInvocations=new WeakMap<object,(root:SourceProjectileRootRuntime,child:symbol,kind:number)=>0|1>();
+/** Only the actual active initializer call position can enter a scheduled HIT. */
+export function invokeSourceProjectileHitFromRoot(hit:SourceProjectileHitRuntime,root:SourceProjectileRootRuntime,child:symbol,kind:number):0|1 {
+  const invoke=rootInvocations.get(hit);
+  if(!isSourceProjectileHitRuntime(hit)||!isSourceProjectileRootRuntime(root)||!invoke)fail('genuine root/HIT invocation required');
+  return invoke(root,child,kind);
 }
 const runtimes = new WeakSet<object>(), claimedBindings = new WeakSet<object>(), claimedActors = new WeakSet<object>();
 export function isSourceProjectileHitRuntime(value: unknown): value is SourceProjectileHitRuntime {
@@ -46,12 +61,17 @@ export function createSourceProjectileHitRuntime(spawns: SourceActorProjectileSp
   if (!isSourceActorProjectileSpawnRuntime(spawns)) fail('genuine spawn runtime required');
   const allocator = spawns.getAllocatorRuntime();
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  let pendingAllocation:{child:symbol;entered:boolean}|undefined;
+  let activeRoot:{root:SourceProjectileRootRuntime;child:symbol;kind:number}|undefined;
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    if(activeRoot)checkSourceProjectileRootHitInvocation(activeRoot.root,runtime,activeRoot.child,activeRoot.kind);
+  };
   const call = <T>(run: () => T): T => {const value = run(); check(); return value;};
   const guard = <T>(run: () => T): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;
-    try {const result = run(); check(); return result;} finally {busy = false;}
+    try {const result = run(); check(); return result;} finally {pendingAllocation=undefined;activeRoot=undefined;busy = false;}
   };
   const read = (owner: unknown,key: string): unknown => {const value = own(owner,key); check(); return value;};
   interface Entry {actual: RomActor; binding: Partial<SourceProjectileHitOwnerBinding>; incomplete: boolean}
@@ -90,22 +110,14 @@ export function createSourceProjectileHitRuntime(spawns: SourceActorProjectileSp
     if (base === null) fail('null source base at reached interior pointer');
     return call(() => allocator.getInteriorPointer(base,offset));
   };
-  const runtime: SourceProjectileHitRuntime = {
-    bindActor(id,binding) {guard(() => {
-      if (typeof id !== 'symbol' || actors.has(id)) fail('new HIT owner identity required');
-      if (binding === null || typeof binding !== 'object' || Array.isArray(binding) || ArrayBuffer.isView(binding) || binding instanceof Promise)
-        fail('explicit synchronous HIT pointer binding required');
-      if (claimedBindings.has(binding) || spawns.getSourceOwners(id).includes(binding)) fail('HIT pointer binding already claimed or aliases source owner');
-      for (const key of Reflect.ownKeys(binding)) if (key !== 'pointer27c' && key !== 'pointer3fc') fail(`${String(key)}: not missing HIT pointer storage`);
-      const e = {actual:call(() => spawns.getActualActor(id)),binding,incomplete:false};
-      if (claimedActors.has(e.actual)) fail('actual actor already claimed by HIT pointer owner');
-      owners(id,e);actors.set(id,e);claimedBindings.add(binding);claimedActors.add(e.actual);
-    });},
-    getActorBinding(id) {return entry(id).binding;}, getActualActor(id) {return entry(id).actual;}, getSpawnRuntime() {return spawns;},
-    getRetainedStorageOwners() {return Object.freeze([...new Set([...actors.values()].flatMap(e=>[e.actual,e.binding]))]);},
-    registerHit(child,kind) {return guard(() => {
+  const register=(child:symbol,kind:number,root?:SourceProjectileRootRuntime):0|1=>guard(() => {
+      if(root) {
+        requireSourceProjectileRootHitInvocation(root,runtime,child,kind);
+        activeRoot={root,child,kind};
+        if(root.getSpawnRuntime()!==spawns)fail('scheduled HIT spawn owner differs');check();
+      }
       const origin = call(() => spawns.getSpawnOwnerIdentity(child)),e = entry(origin);
-      if (isSourceActorDoubleFrameClaimed(e.actual)) fail('frame-owned actor requires its unimplemented later source object scheduler');
+      if (!root && isSourceActorDoubleFrameClaimed(e.actual)) fail('frame-owned actor requires its unimplemented later source object scheduler');
       try {
         owners(origin,e); integer(kind,-0x80000000,0x7fffffff,'kind register');
         const parent = pointer(child,0x90);
@@ -118,7 +130,11 @@ export function createSourceProjectileHitRuntime(spawns: SourceActorProjectileSp
           // Source reloads/sign-tests the next remap BEFORE count<4, including
           // the fifth byte after four attempts. Never eager-read four entries.
           if ((byteAt(table,cursor)<<24>>24) < 0 || count >= 4) break;
-          const hit = call(() => spawns.allocateProjectileHit(child));
+          let hit:symbol|null;
+          if(activeRoot) {
+            pendingAllocation={child,entered:false};
+            try{hit=call(()=>invokeSourceProjectileHitAllocation(spawns,runtime,child));}finally{pendingAllocation=undefined;}
+          } else hit=call(()=>spawns.allocateProjectileHit(child));
           if (hit !== null) {
             put8(hit,0,1);put32(hit,0xc,0x8008a65c);putPointer(hit,0x20,child);put8(hit,0x14,kind&255);
             const owner = pointer(child,0x90);
@@ -145,7 +161,29 @@ export function createSourceProjectileHitRuntime(spawns: SourceActorProjectileSp
         }
         return result;
       } catch(error) {e.incomplete=true;markIncompleteSourceActorProjectileSpawn(spawns,origin);throw error;}
+  });
+  const runtime: SourceProjectileHitRuntime = {
+    bindActor(id,binding) {guard(() => {
+      if (typeof id !== 'symbol' || actors.has(id)) fail('new HIT owner identity required');
+      if (binding === null || typeof binding !== 'object' || Array.isArray(binding) || ArrayBuffer.isView(binding) || binding instanceof Promise)
+        fail('explicit synchronous HIT pointer binding required');
+      if (claimedBindings.has(binding) || spawns.getSourceOwners(id).includes(binding)) fail('HIT pointer binding already claimed or aliases source owner');
+      for (const key of Reflect.ownKeys(binding)) if (key !== 'pointer27c' && key !== 'pointer3fc') fail(`${String(key)}: not missing HIT pointer storage`);
+      const e = {actual:call(() => spawns.getActualActor(id)),binding,incomplete:false};
+      if (claimedActors.has(e.actual)) fail('actual actor already claimed by HIT pointer owner');
+      owners(id,e);actors.set(id,e);claimedBindings.add(binding);claimedActors.add(e.actual);
     });},
+    getActorBinding(id) {return entry(id).binding;}, getActualActor(id) {return entry(id).actual;}, getSpawnRuntime() {return spawns;},
+    getRetainedStorageOwners() {return Object.freeze([...new Set([...actors.values()].flatMap(e=>[e.actual,e.binding]))]);},
+    registerHit(child,kind) {return register(child,kind);},
   };
+  allocationScopes.set(runtime,(selected,child,consume)=>{
+    const pending=pendingAllocation;
+    if(!busy||poisoned||!activeRoot||activeRoot.child!==child||selected!==spawns||!pending||pending.child!==child||pending.entered===consume) {
+      if(busy)poisoned=true;fail('private exact HIT pool4 call required');
+    }
+    if(consume)pending.entered=true;check();
+  });
+  rootInvocations.set(runtime,(root,child,kind)=>register(child,kind,root));
   runtimes.add(runtime);return Object.freeze(runtime);
 }

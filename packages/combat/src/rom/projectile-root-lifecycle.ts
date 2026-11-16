@@ -11,12 +11,14 @@ import {claimSourceHelperStorage,isSourcePlayerTableAddressStorage} from './sour
  * bytes. It never runs inline inside7db5c, invents an actor constructor, resumes
  * a failed frame. The separate genuine object scheduler can own this root and
  * enter its private selected-callback body without duplicating the0c load.
- * Frame-owned actors still require the unimplemented outer-frame scheduler join.
+ * Frame-owned actors require an exact later outer call and a completed54070
+ * producer in that same frame; standalone/early/active55568 calls stay refused.
  * Draw head/tail and104/108 links are distinct from allocator group4/8 lists.
  * Synchronous non-proxy own-data records are the admitted host storage domain.
  * Prior writes remain on failure; the child, parent and allocator cannot replay.
  */
 import {requireSourceObjectSchedulerInvocation, requireStandaloneSourceProjectileRoot,
+  requireSourceObjectSchedulerFrameParent, checkSourceObjectSchedulerRootExecution,
   type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import {isSourceActorProjectileSpawnRuntime, markIncompleteSourceActorProjectileSpawn,
   type SourceActorProjectileSpawnRuntime} from './actor-projectile-spawn.js';
@@ -24,7 +26,7 @@ import {isSourceActorStageBoundsRuntime, type SourceActorStageBoundsRuntime} fro
 import {isSourceActorDoubleFrameClaimed} from './actor-double-prehook.js';
 import type {RomActor} from './actor.js';
 import type {SourceAllocationBytes} from './source-object-allocation.js';
-import {isSourceProjectileHitRuntime, type SourceProjectileHitRuntime} from './projectile-hit-registration.js';
+import {isSourceProjectileHitRuntime, invokeSourceProjectileHitFromRoot, type SourceProjectileHitRuntime} from './projectile-hit-registration.js';
 import {sourceProjectileHeadingRadians, sourceProjectileInitialPitch} from './projectile-heading.js';
 import {addSourceFloat32} from './source-float.js';
 import type {SourceJointVector} from './joint-animation-feedback.js';
@@ -70,6 +72,21 @@ export interface SourceProjectileRootRuntime {
 interface SchedulerJoin {prepare(scheduler: SourceObjectSchedulerRuntime, child: symbol): symbol;
   invoke(scheduler: SourceObjectSchedulerRuntime, child: symbol): void; close(scheduler: SourceObjectSchedulerRuntime): void}
 const schedulerJoins = new WeakMap<object, SchedulerJoin>();
+const hitInvocations=new WeakMap<object,(hit:SourceProjectileHitRuntime,child:symbol,kind:number,consume:boolean)=>void>();
+export function requireSourceProjectileRootHitInvocation(root:SourceProjectileRootRuntime,hit:SourceProjectileHitRuntime,child:symbol,kind:number):void {
+  const scope=hitInvocations.get(root);if(!scope)fail('private root HIT invocation required');scope(hit,child,kind,true);
+}
+export function checkSourceProjectileRootHitInvocation(root:SourceProjectileRootRuntime,hit:SourceProjectileHitRuntime,child:symbol,kind:number):void {
+  const scope=hitInvocations.get(root);if(!scope)fail('private active root HIT invocation required');scope(hit,child,kind,false);
+}
+const frameParentClaims = new WeakMap<object, (scheduler:SourceObjectSchedulerRuntime,child:symbol,parent:symbol,actual:object)=>void>();
+/** Consumes only the current root-private parent check, never caller data. */
+export function requireSourceProjectileFrameParentClaim(root:SourceProjectileRootRuntime,
+  scheduler:SourceObjectSchedulerRuntime,child:symbol,parentId:symbol,actual:object):void {
+  const claim=frameParentClaims.get(root);if(!claim||!isSourceProjectileRootRuntime(root))fail('private root parent claim required');
+  claim(scheduler,child,parentId,actual);
+}
+
 function schedulerJoin(root: SourceProjectileRootRuntime): SchedulerJoin {
   const join=schedulerJoins.get(root);if(!join || !isSourceProjectileRootRuntime(root)) fail('genuine scheduled projectile root required');return join;
 }
@@ -99,6 +116,7 @@ export function isSourceProjectileRootRuntime(value: unknown): value is SourcePr
 function fail(reason: string): never {
   throw Error(`[projectile-root-lifecycle] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
+const nativeStoreDescriptor=Reflect.getOwnPropertyDescriptor;
 function own(value: unknown, key: string, writable = false): unknown {
   if (value === null || typeof value !== 'object') fail(`${key}: own data record required`);
   const p = Object.getOwnPropertyDescriptor(value, key);
@@ -126,15 +144,21 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     fail('genuine HIT runtime with same completed-spawn owner required');
   const draw = list as SourceProjectileDrawList;
   let busy = false, poisoned = false, vectorProcessorOwner: object | undefined;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  let scheduledScope:{scheduler:SourceObjectSchedulerRuntime;child:symbol;stage:'prepare'|'callback';lifetime?:symbol}|undefined;
+  let hitPending:{child:symbol;kind:number;entered:boolean}|undefined;
+  let parentClaim:{scheduler:SourceObjectSchedulerRuntime;child:symbol;parent:symbol;actual:object;entered:boolean}|undefined;
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    if(scheduledScope)checkSourceObjectSchedulerRootExecution(scheduledScope.scheduler,runtime,scheduledScope.child,scheduledScope.stage,scheduledScope.lifetime);
+  };
   const guard = (run: () => void): void => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;
-    try {run(); check();} finally {busy = false;}
+    try {run(); check();} finally {scheduledScope=undefined;parentClaim=undefined;hitPending=undefined;busy = false;}
   };
   const call = <T>(run: () => T): T => {const value = run(); check(); return value;};
   const read = (owner: unknown, key: string): unknown => {const value = own(owner, key); check(); return value;};
-  const writeList = (key: 'head' | 'tail', value: symbol | null): void => {own(draw, key, true); check(); draw[key] = value; check();};
+  const writeList = (key: 'head' | 'tail', value: symbol | null): void => {own(draw, key, true); check(); const p=nativeStoreDescriptor(draw,key); if(!p||!('value'in p)||!p.writable)fail('draw destination changed before store'); draw[key] = value; check();};
   const same = (value: unknown, expected: unknown, where: string): void => {check(); if (value !== expected) fail(`${where}: source owner changed or differs`);};
   interface Entry {id: symbol; origin: symbol; actual: RomActor; bytes: SourceAllocationBytes; stage: object; world: object; status: object; incomplete: boolean; released: boolean; lifetime: symbol}
   const children = new Map<symbol, Entry>();
@@ -287,7 +311,11 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     if (hits === undefined)
       fail('8007de04 reached unsupported actual8008ac80 HIT registration(child,1); owner27c/3fc and type4 allocation are not hydrated');
     same(call(() => hits.getActualActor(e.origin)),e.actual,'HIT actual');
-    const result = call(() => hits.registerHit(e.id,1));
+    let result:0|1;
+    if(scheduledScope) {
+      hitPending={child:e.id,kind:1,entered:false};
+      try{result=call(()=>invokeSourceProjectileHitFromRoot(hits,runtime,e.id,1));}finally{hitPending=undefined;}
+    } else result=call(()=>hits.registerHit(e.id,1));
     if (result === 0) {put8(e.id,0x18,2);return;} //7de10/14 then actual epilogue
     // Saved initializer90, NOT a fresh child90/8c read after HIT registration.
     const world = call(() => spawns.getWorldRuntime()), matrices = call(() => world.getMatricesRuntime());
@@ -334,12 +362,21 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     }
     fail('8007e074 reached actual8020bab8 Normalize after source flight-direction stores; reciprocal-square-root estimate remains unsupported');
   };
+  const frameParent=(e:Entry,scheduler:SourceObjectSchedulerRuntime|undefined):void=>{
+    if(!isSourceActorDoubleFrameClaimed(e.actual))return;
+    if(!scheduler)fail('frame-owned actor requires its unimplemented later source object scheduler');
+    parentClaim={scheduler,child:e.id,parent:e.origin,actual:e.actual,entered:false};
+    try{requireSourceObjectSchedulerFrameParent(scheduler,runtime,e.id,e.origin,e.actual);}finally{parentClaim=undefined;}
+  };
   const dispatch = (id: symbol,scheduler?: SourceObjectSchedulerRuntime): void => {guard(() => {
       if(scheduler===undefined) requireStandaloneSourceProjectileRoot(runtime);
       const e = entry(id);
-      if(scheduler!==undefined) requireSourceObjectSchedulerInvocation(scheduler,runtime,id,'callback',e.lifetime);
+      if(scheduler!==undefined) {
+        requireSourceObjectSchedulerInvocation(scheduler,runtime,id,'callback',e.lifetime);
+        scheduledScope={scheduler,child:id,stage:'callback',lifetime:e.lifetime};
+      }
       if (e.released) fail('released projectile requires a new completed spawn and explicit rebind');
-      if (isSourceActorDoubleFrameClaimed(e.actual)) fail('frame-owned actor requires its unimplemented later source object scheduler');
+      frameParent(e,scheduler);
       try {
         owners(e);
         if (scheduler===undefined && word(id, 0xc) !== 0x8007dcec) fail('unsupported stored projectile root callback');
@@ -431,13 +468,29 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     },
     dispatchStoredRoot(id) {dispatch(id);},
   };
+  hitInvocations.set(runtime,(selected,child,kind,consume)=>{
+    const pending=hitPending;
+    if(!busy||poisoned||!scheduledScope||scheduledScope.stage!=='callback'||scheduledScope.child!==child||
+      selected!==hits||!pending||pending.child!==child||pending.kind!==kind||pending.entered===consume) {
+      if(busy)poisoned=true;fail('private exact8007de04 HIT invocation required');
+    }
+    if(consume)pending.entered=true;check();
+  });
+  frameParentClaims.set(runtime,(scheduler,child,parent,actual)=>{
+    const pending=parentClaim;
+    if(!busy||poisoned||!scheduledScope||!pending||pending.entered||pending.scheduler!==scheduler||
+      pending.child!==child||pending.parent!==parent||pending.actual!==actual||scheduledScope.scheduler!==scheduler||scheduledScope.child!==child) {
+      if(busy)poisoned=true;fail('private exact single-use root parent claim required');
+    }
+    pending.entered=true;check();
+  });
   schedulerJoins.set(runtime,{
     prepare(scheduler,id) {
       requireSourceObjectSchedulerInvocation(scheduler,runtime,id,'prepare');
       let lifetime: symbol | undefined;
-      guard(()=>{const e=entry(id);
+      guard(()=>{scheduledScope={scheduler,child:id,stage:'prepare'};const e=entry(id);
         if(e.released) fail('released projectile requires a new completed spawn and explicit rebind');
-        if(isSourceActorDoubleFrameClaimed(e.actual)) fail('frame-owned actor requires its unimplemented later source object scheduler');
+        frameParent(e,scheduler);
         owners(e);lifetime=e.lifetime;
       });
       return lifetime!;

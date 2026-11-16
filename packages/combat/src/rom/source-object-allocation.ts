@@ -29,6 +29,7 @@
  * after a store permanently closes the allocator. Caller capabilities separately
  * close actors whose subsequent spawn initialization was incomplete.
  */
+import {requireSourceProjectileHitAllocatorInvocation,checkSourceProjectileHitAllocatorInvocation,type SourceActorProjectileSpawnRuntime} from './actor-projectile-spawn.js';
 import {reserveSourcePointerStorage,reserveSourcePlayerTableStorage,isSourceHelperStorageClaimed} from './source-storage-claims.js';
 import {requireSourceActorPlayerTableAddressability,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
 import {requireSourceObjectSchedulerSnapshot, type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
@@ -121,6 +122,10 @@ export function markIncompleteSourceObjectAllocation(runtime: SourceObjectAlloca
   if (!isSourceObjectAllocationRuntime(runtime)) fail('genuine allocator required');
   schedulerIncomplete.add(runtime);
 }
+const hitAllocationJoins=new WeakMap<object,(spawn:SourceActorProjectileSpawnRuntime,child:symbol,id:symbol,caller:symbol)=>symbol|null>();
+export function allocateSourceProjectileHitFromSpawn(allocator:SourceObjectAllocationRuntime,spawn:SourceActorProjectileSpawnRuntime,child:symbol,id:symbol,caller:symbol):symbol|null {
+  const join=hitAllocationJoins.get(allocator);if(!join||!isSourceObjectAllocationRuntime(allocator))fail('genuine private pool4 allocator required');return join(spawn,child,id,caller);
+}
 const runtimes = new WeakSet<object>(), claimedStorage = new WeakSet<object>(), claimedActors = new WeakSet<object>();
 export function isSourceObjectAllocationRuntime(value: unknown): value is SourceObjectAllocationRuntime {
   return value !== null && typeof value === 'object' && runtimes.has(value);
@@ -147,18 +152,29 @@ function link(value: unknown, where: string): symbol | null {
 const groupOwnerDescriptor=Reflect.getOwnPropertyDescriptor;
 export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocationSources): SourceObjectAllocationRuntime {
   let busy = false, poisoned = false, incomplete = false, allocating = false, dirty = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  let activeHitAllocation:{spawn:SourceActorProjectileSpawnRuntime;child:symbol;id:symbol;caller:symbol}|undefined;
+  let checkingHitParent=false, activeMutation=false;
+  const check = (): void => {
+    if (poisoned) fail('caught same-runtime reentry');
+    if(activeMutation && (incomplete || schedulerIncomplete.has(runtime))) fail('permanently incomplete allocation owner');
+    if(activeHitAllocation&&!checkingHitParent) {
+      checkingHitParent=true;
+      try{checkSourceProjectileHitAllocatorInvocation(activeHitAllocation.spawn,runtime,activeHitAllocation.child,activeHitAllocation.id,activeHitAllocation.caller);}
+      finally{checkingHitParent=false;}
+    }
+  };
   const guard = <T>(run: () => T, mutation = false): T => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     if (mutation && (incomplete || schedulerIncomplete.has(runtime))) fail('permanently incomplete allocation owner');
-    busy = true; poisoned = false;
+    busy = true; poisoned = false; activeMutation=mutation;
     try {const result = run(); check(); return result;}
     catch (error) {if (allocating && dirty) incomplete = true; throw error;}
-    finally {busy = false; allocating = false;}
+    finally {activeHitAllocation=undefined;activeMutation=false;busy = false; allocating = false;}
   };
   const read = (r: unknown, key: string): unknown => {const v = own(r, key); check(); return v;};
   const write = (r: unknown, key: string, v: unknown): void => {
     own(r, key, true); check();
+    const p=groupOwnerDescriptor(r as object,key); if(!p||!('value'in p)||!p.writable)fail('destination changed before store');
     if (allocating) dirty = true;
     (r as Record<string, unknown>)[key] = v; check();
   };
@@ -247,6 +263,7 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     const bytes = memory(id);
     // One PPC scalar store is indivisible in this admitted synchronous model.
     for (let i = 0; i < width; i++) {own(bytes, String(offset + i), true); check();}
+    for (let i = 0; i < width; i++) {const p=groupOwnerDescriptor(bytes,String(offset+i));if(!p||!('value'in p)||!p.writable)fail('scalar destination changed before store');}
     if (allocating) dirty = true;
     for (let i = 0; i < width; i++) bytes[offset + i] = Math.floor(value / 2 ** (8 * (width - 1 - i))) % 256;
     check();
@@ -323,7 +340,10 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
   };
   const allocate = (id: symbol, caller: symbol, poolIndex: 3 | 4): symbol | null => {
     const a = authorize(id, caller);
-    requireSourceActorDoubleInvocation(a.actual, 'allocation', runtime);
+    if(activeHitAllocation) {
+      if(poolIndex!==4||activeHitAllocation.id!==id||activeHitAllocation.caller!==caller)fail('private HIT allocation pool/owner differs');
+      check();
+    } else requireSourceActorDoubleInvocation(a.actual, 'allocation', runtime);
     if (actualActor(id) !== a.actual) fail('world actor owner changed its actual record'); noShadow(a.actual);
     allocating = true; dirty = false;
     const requestedDescriptors = poolIndex === 3 ? 1 : 0, requestedGroup = poolIndex === 3 ? 8 : 48;
@@ -514,6 +534,11 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     }
     const id=Symbol('source player-record table');identify(id,table,helper);
     requireSourceActorPlayerTableAddressability(helper,runtime,table);return id;
+  },true));
+  hitAllocationJoins.set(runtime,(spawn,child,id,caller)=>guard(()=>{
+    requireSourceProjectileHitAllocatorInvocation(spawn,runtime,child,id,caller);
+    activeHitAllocation={spawn,child,id,caller};check();
+    return allocate(id,caller,4);
   },true));
   runtimes.add(runtime); return Object.freeze(runtime);
 }
