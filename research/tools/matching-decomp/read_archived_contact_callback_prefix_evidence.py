@@ -47,12 +47,25 @@ def summarize(rows):
                  (0x8008a6c0,'lbz',30,0x1ced,4),(0x8008a6c8,'lha',29,0x4c,5),
                  (0x8008a6ec,'stb',29,0x13,0),(0x8008a6f0,'lbz',29,0x10,0),
                  (0x8008a6f4,'lwz',29,0x28,31),(0x8008a71c,'lwz',29,0x60,3),
+                 (0x8008a72c,'lwz',29,0x30,3),(0x8008a730,'lwz',29,0x34,0),
+                 (0x8008a734,'stw',29,0x3c,3),(0x8008a738,'stw',29,0x40,0),
+                 (0x8008a73c,'lwz',29,0x38,0),(0x8008a740,'stw',29,0x44,0),
+                 (0x8008a744,'lha',29,0x48,3),(0x8008a88c,'lha',29,0x4a,3),
                  (0x8008a864,'lwz',29,0x30,3),(0x8008a86c,'lwz',29,0x34,0),
                  (0x8008a874,'stw',29,0x3c,3),(0x8008a878,'stw',29,0x40,0),
                  (0x8008a87c,'lwz',29,0x38,0),(0x8008a880,'stw',29,0x44,0),
                  (0x8008a884,'lwz',29,0x60,3),(0x8008a9f4,'lbz',30,0x281,0),
                  (0x8008aa04,'stb',29,0x10,0)):
         memory(*args)
+    # Both calls consume the descriptor retained in r31, not a fresh HIT28 load.
+    # These address computations do not dereference or select any descriptor data.
+    for pc,destination,base_register,offset in ((0x8008a720,4,31,0x0c),
+                                               (0x8008a724,5,29,0x30),
+                                               (0x8008a868,4,31,0x0c),
+                                               (0x8008a870,5,29,0x30)):
+        r=by_pc[pc]
+        c.require(r['mnemonic']=='addi'and (r['rD'],r['rA'],r['immediate'])==
+                  (destination,base_register,offset),'transform argument provenance')
     state=by_pc[0x8008a6f0];c.require(state['mnemonic']=='lbz','unsigned state byte')
     cmp=by_pc[0x8008a710];branch=by_pc[0x8008a714]
     c.require(cmp['mnemonic']=='cmpi'and cmp['rA']==0 and cmp['immediate']==3,'state upper branch')
@@ -72,6 +85,11 @@ def summarize(rows):
                 timer_compare=dict(hit_signed_half=74,owner_signed_bytes=[7404,7405],saved_hit_signed_half=76),
                 common_prefix=['clear hit13','load unsigned hit10','load hit28'],
                 state_ge3_returns=True,state0_transform_site='8008a728',
+                transform_arguments=dict(matrix_hit_offset=0x60,captured_descriptor_hit_offset=0x28,
+                                         input_descriptor_offset=0x0c,output_hit_offset=0x30),
+                state0_copy_order=['load30','load34','store3c','store40','load38','store44'],
+                next_loads={'8008a744':dict(signed_half_hit_offset=0x48),
+                            '8008a88c':dict(signed_half_hit_offset=0x4a)},
                 state1_copy_order=['load30','load34','store3c','store40','load38','store44','load60'],
                 state1_transform_site='8008a888',state2_owner_byte=641,
                 state2_zero_store=1,state2_matrix_validity_site='8008aa0c',

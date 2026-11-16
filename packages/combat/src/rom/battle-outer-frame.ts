@@ -1,3 +1,4 @@
+import {executeSourceContactTransform} from './source-contact-transform.js';
 import {executeSourcePlayerContact36e24} from './source-player-contact.js';
 import {executeSourceDrawCallback47aa4} from './source-draw-callback.js';
 import type {SourceObjectAllocationRuntime} from './source-object-allocation.js';
@@ -137,6 +138,14 @@ export function requireSourceBattleOuterFrameFailure(outer: SourceBattleOuterFra
   if(!isSourceBattleOuterFrameRuntime(outer) || !scope) fail('private active outer failure required');
   scope(scheduler);
 }
+export interface SourceBattleOuterContactTransformContext {allocator:SourceObjectAllocationRuntime;root:SourceProjectileRootRuntime;matrix:symbol|null;input:symbol|null;output:symbol}
+const contactTransforms=new WeakMap<object,{consume(node:symbol):SourceBattleOuterContactTransformContext;check(node:symbol):void}>();
+export function consumeSourceBattleOuterContactTransformInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):SourceBattleOuterContactTransformContext {
+ const scope=contactTransforms.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active contact transform invocation required');return scope.consume(node);
+}
+export function checkSourceBattleOuterContactTransformInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):void {
+ const scope=contactTransforms.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active contact transform invocation required');scope.check(node);
+}
 export interface SourceBattleOuterDrawContext {allocator:SourceObjectAllocationRuntime;root:SourceProjectileRootRuntime;processor?:object|undefined;constants:object|undefined;scratch?:Float32Array|undefined}
 const drawInvocations=new WeakMap<object,{consume(node:symbol):SourceBattleOuterDrawContext;check(node:symbol):void}>();
 export function consumeSourceBattleOuterDrawInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):SourceBattleOuterDrawContext {
@@ -260,6 +269,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   let distancesPrepared=false;
   const producedDistances=new Map<symbol,{actor:object;fields:number;consumed:boolean}>();
   let contactInvocation:{entered:boolean;helper:SourceActorSlotStatusRuntime}|undefined;
+  let contactTransformInvocation:{node:symbol;site:0x8008a728|0x8008a888;entered:boolean;checking:boolean;context:SourceBattleOuterContactTransformContext;guard():void}|undefined;
   let drawCallsite:0x800294c8|0x800294fc|0x80029500|undefined;
   let drawInvocation:{callsite:0x800294c8|0x800294fc|0x80029500;node:symbol;entered:boolean;context:SourceBattleOuterDrawContext;updates:object;draw:object;buffer?:ArrayBufferLike|undefined}|undefined;
   let checkingDraw=false;
@@ -2538,7 +2548,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       }
       store(0x13,0,1);
       const state=load8(hit,0x10);
-      checked(()=>allocator.readPointer(hit,0x28)); // Always loaded, even on the>=3 return.
+      const descriptor=pointer(checked(()=>allocator.readPointer(hit,0x28))); // Captured even on the>=3 return.
       if(state>=3)return;
       if(state===2){
         if(s8(load8(owner,0x281))===0)store(0x10,1,1);
@@ -2548,8 +2558,14 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         const x=load32(0x30),y=load32(0x34);store(0x3c,x,4);store(0x40,y,4);
         const z=load32(0x38);store(0x44,z,4);
       }
-      checked(()=>allocator.readPointer(hit,0x60));
-      fail((state===0?'8008a728':'8008a888')+' reached required8020b7a8 contact transform');
+      const matrix=pointer(checked(()=>allocator.readPointer(hit,0x60)));
+      contactTransformInvocation={node:hit,site:state===0?0x8008a728:0x8008a888,entered:false,checking:false,context:Object.freeze({allocator,root,matrix,input:descriptor,output:hit}),guard};
+      try{checked(()=>executeSourceContactTransform(runtime,hit));}finally{contactTransformInvocation=undefined;}
+      if(state===0){
+        const x=load32(0x30),y=load32(0x34);store(0x3c,x,4);store(0x40,y,4);
+        const z=load32(0x38);store(0x44,z,4);
+      }
+      fail((state===0?'8008a744':'8008a88c')+' reached contact timer continuation');
     };
     const walk=(index:number,site:0x80089b30|0x80089b84|0x80089bd0):void=>{
       let owner:object;
@@ -2635,7 +2651,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         fail('80029504 reached outer post-draw continuation');
       } catch(error) {
         close();throw error;
-      } finally {contactInvocation=undefined;drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
+      } finally {contactInvocation=undefined;contactTransformInvocation=undefined;drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
     },
   };
   const contactCheck=(helper?:SourceActorSlotStatusRuntime):void=>{
@@ -2664,6 +2680,18 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     constant(){contactCheck();const owner=retain('playerContact',read(sources,'playerContact'));
       const constants=retain('contactConstants',read(owner,'constants'));const value=read(constants,'float80436f68');contactCheck();return value;},
   });
+  const contactTransformCheck=(node:symbol):void=>{
+    const active=contactTransformInvocation;
+    if(!busy||closing||incomplete||poisoned||!active||!active.entered||active.node!==node||(active.site!==0x8008a728&&active.site!==0x8008a888)){
+      rejectScheduler();fail('private exact active contact transform invocation required');
+    }
+    if(active.checking)return;active.checking=true;
+    try{active.guard();check();}finally{active.checking=false;}
+  };
+  contactTransforms.set(runtime,{consume(node){const active=contactTransformInvocation;
+    if(!active||active.entered||active.node!==node){rejectScheduler();fail('private exact single-use contact transform invocation required');}
+    active.entered=true;contactTransformCheck(node);return active.context;
+  },check:contactTransformCheck});
   drawInvocations.set(runtime,{consume(node){const active=drawInvocation;if(!active||active.entered||active.node!==node){rejectScheduler();fail('private exact single-use draw invocation required');}active.entered=true;drawCheck(node);return active.context;},check:drawCheck});
   failures.set(runtime,selected=>{if(!busy || !closing || !incomplete || selected!==scheduler) fail('private exact active outer failure required');});
   schedulerInvocations.set(runtime,{

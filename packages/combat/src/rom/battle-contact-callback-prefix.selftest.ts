@@ -31,7 +31,7 @@ export function runBattleContactCallbackPrefixSelfTests(make:Make):void{
   check(Object.values(x.slotRecords).every(r=>r.contact26f===77),'later target/contact work not fabricated');
   refuses(()=>x.frame.runFrame(),'permanently incomplete');
  };
- const end='800294f4 reached required8002bb14',transform0='8008a728 reached required8020b7a8',transform1='8008a888 reached required8020b7a8';
+ const end='800294f4 reached required8002bb14',transform0='2812: own byte/data property required',transform1='2812: own byte/data property required';
  for(const state of [3,255]){
   const x=fresh();for(const b of x.contactHitBytes){b[0x10]=state;for(const k of [0x4a,0x4b,0x60,0x61,0x62,0x63])delete b[k];}
   run(x,end);check(x.contactHitBytes.every(b=>b[0x13]===0),'all real active callback returns clear13 and advance actualnext8');

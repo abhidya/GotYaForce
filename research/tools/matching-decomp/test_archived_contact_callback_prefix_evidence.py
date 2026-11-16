@@ -89,6 +89,11 @@ class ArchiveTests(unittest.TestCase):
             self.assertEqual(len(selected),1)
             facts=result['ranges'][0];self.assertEqual(facts['represented_instructions'],249)
             self.assertTrue(facts['semantics']['state_ge3_returns'])
+            self.assertEqual(facts['semantics']['transform_arguments'],dict(matrix_hit_offset=0x60,
+                captured_descriptor_hit_offset=0x28,input_descriptor_offset=0x0c,output_hit_offset=0x30))
+            self.assertEqual(facts['semantics']['state0_copy_order'],['load30','load34','store3c','store40','load38','store44'])
+            self.assertEqual(facts['semantics']['next_loads'],{'8008a744':dict(signed_half_hit_offset=0x48),
+                '8008a88c':dict(signed_half_hit_offset=0x4a)})
             self.assertEqual(facts['semantics']['state1_copy_order'],['load30','load34','store3c','store40','load38','store44','load60']);self.assertFalse(facts['semantics']['callee_bodies_selected'])
             self.assertEqual(result['selection']['data_cells'],0)
 
@@ -120,7 +125,16 @@ class ArchiveTests(unittest.TestCase):
                              ('8008a6f4','displacement',44),('8008a874','displacement',64),
                              ('8008a714','target','8008a71c'),('8008aa04','displacement',19),
                              ('8008a6c4','mnemonic','or'),('8008a6d0','SH',11),
-                             ('8008a9fc','BI',0)]:
+                             ('8008a9fc','BI',0),
+                             ('8008a720','immediate',0),('8008a720','rA',29),
+                             ('8008a724','immediate',0x3c),('8008a724','rD',4),
+                             ('8008a868','immediate',0),('8008a868','rA',29),
+                             ('8008a870','immediate',0x3c),('8008a870','rD',4),
+                             ('8008a72c','displacement',0x34),('8008a730','rD',3),
+                             ('8008a734','displacement',0x40),('8008a738','rS',3),
+                             ('8008a73c','displacement',0x34),('8008a740','displacement',0x40),
+                             ('8008a744','displacement',0x4a),('8008a744','mnemonic','lhz'),
+                             ('8008a88c','displacement',0x48),('8008a88c','mnemonic','lhz')]:
             rows=copy.deepcopy(captured);row=next(r for r in rows if r['address']==pc);row[key]=value
             with self.assertRaises(a.c.FormatError):a.summarize(rows)
 
