@@ -2480,8 +2480,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     }finally{drawCallsite=undefined;}
   };
   /** Bounded2bb14 caller and2cf80 prefix on canonical owners. Authenticated
-   * -10000 permits the remaining indexed stores. No collision helper is
-   * fabricated: distinct owner pairs stop after source-ordered scratch copies. */
+   * -10000 permits the remaining indexed stores. Actual3a05c performs bounded
+   * owner displacement additions; mandatory39f6c remains an honest boundary. */
   const runTargetActionPrefix=():never=>{
     const supplied=Object.getOwnPropertyDescriptor(sources,'targetAction');check();
     if(!supplied)fail('800294f4 reached required8002bb14; target/action frame helper unsupported');
@@ -2577,25 +2577,62 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       };
       const asFloat=(bits:number):number=>{const d=new DataView(new ArrayBuffer(4));d.setUint32(0,bits,false);const v=d.getFloat32(0,false);if(!Number.isFinite(v))fail('2cf80 finite source float required');return v;};
       let processor:object|undefined,processorDeclaration:object|undefined;
-      const terminalScalar=():void=>{
+      const terminalScalar=(paired=false):void=>{
         if(!processor||!processorDeclaration)fail('2cf80 scalar context required');
         const p=primaryStoreDescriptor(processorDeclaration,'processor');if(!p||!('value'in p)||p.value!==processor)fail('2cf80 processor changed');
         const d=primaryStoreDescriptor(processor,'fpscrControl');
         if(!d||!('value'in d)||typeof d.value!=='number'||!Number.isInteger(d.value)||d.value<0||d.value>0xffffffff||(d.value&255)!==0)fail('2cf80 FPSCR RN00/NI0 and disabled exceptions required');
+        if(paired){const g=primaryStoreDescriptor(processor,'gqr0');if(!g||!('value'in g)||g.value!==0)fail('3a05c explicit GQR0 float scale0 required');}
       };
-      const subtract=(a:number,b:number):number=>{
+      const scalarControls=(paired=false):void=>{
         const current=root.getVectorProcessorProfile();guard();if(!current)fail('2cf80 explicit scalar processor required');
         if(processor&&processor!==current)fail('2cf80 processor changed');processor=current;
         const declarations=root.getRetainedStorageOwners().filter(o=>{const d=primaryStoreDescriptor(o,'processor');return d&&'value'in d&&d.value===processor;});guard();
         if(declarations.length!==1)fail('2cf80 canonical scalar declaration required');
         if(processorDeclaration&&processorDeclaration!==declarations[0])fail('2cf80 scalar declaration changed');processorDeclaration=declarations[0];
-        get(processor,'fpscrControl');guard();terminalScalar();return addSourceFloat32(a,-b);
+        get(processor,'fpscrControl');if(paired)get(processor,'gqr0');guard();terminalScalar(paired);
       };
+      const subtract=(a:number,b:number):number=>{scalarControls();return addSourceFloat32(a,-b);};
       const copyWord=(address:number,value:number):void=>{
         const key='word'+address.toString(16);aliases(cells,key,address,4,true);
         const d=Object.getOwnPropertyDescriptor(cells,key);guard();if(!d||!('value'in d)||!d.writable)fail(key+': writable2bb14 destination required');
         const last=primaryStoreDescriptor(cells,key);if(!last||!('value'in last)||!last.writable)fail(key+':2bb14 destination changed');
         aliases(cells,key,address,4,true);(cells as Record<string,number>)[key]=value;guard();
+      };
+      const cellFloat=(address:number,paired=false):number=>{
+        const value=asFloat(load(cells,'word'+address.toString(16),address,4));terminalScalar(paired);return value;
+      };
+      const vectorStore=(address:number,values:readonly number[]):void=>{
+        // One psq_st commits its XY pair together within nonproxy admission.
+        // Later Z is a different instruction; it may fail after the XY pair.
+        const words=values.map(value=>{const d=new DataView(new ArrayBuffer(4));d.setFloat32(0,value,false);return d.getUint32(0,false);});
+        for(let i=0;i<words.length;i++){
+          const a=address+4*i,k='word'+a.toString(16);aliases(cells,k,a,4,true);
+          const d=Object.getOwnPropertyDescriptor(cells,k);guard();if(!d||!('value'in d)||!d.writable)fail('3a05c writable paired destination required');
+        }
+        scalarControls(true);guard();
+        for(let i=0;i<words.length;i++){
+          const a=address+4*i,k='word'+a.toString(16),d=primaryStoreDescriptor(cells,k);
+          if(!d||!('value'in d)||!d.writable)fail('3a05c paired destination changed');aliases(cells,k,a,4,true);
+        }
+        terminalScalar(true);
+        for(let i=0;i<words.length;i++)(cells as Record<string,number>)['word'+(address+4*i).toString(16)]=words[i]!;
+        guard();
+      };
+      const adjustContact=(firstOwner:symbol|null,secondOwner:symbol|null):void=>{
+        // Complete112-byte3a05c; reused36-byte8020ba54 Add. The second
+        // signed1dd byte is loaded only after the first optional call returns.
+        for(const [id,destination]of [[firstOwner,0x803b04dc],[secondOwner,0x803b0374]]as const){
+          if((raw(id,0x1dd,1)<<24>>24)===0)continue;
+          scalarControls(true);
+          const ax=asFloat(raw(id,0x1cc,4)),ay=asFloat(raw(id,0x1d0,4));terminalScalar(true);
+          const bx=cellFloat(destination,true),by=cellFloat(destination+4,true);
+          scalarControls();const x=addSourceFloat32(ax,bx),y=addSourceFloat32(ay,by);
+          vectorStore(destination,[x,y]);
+          scalarControls(true);const az=asFloat(raw(id,0x1d4,4));terminalScalar(true);
+          const bz=cellFloat(destination+8,true);scalarControls();
+          vectorStore(destination+8,[addSourceFloat32(az,bz)]);
+        }
       };
       let visits=0;
       for(let outer=0;outer<count(0x80436246);outer++){
@@ -2614,7 +2651,13 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
               const first=raw(source,0x58+8*pair,4),second=raw(source,0x5c+8*pair,4);
               copyWord(destination+8*pair,first);copyWord(destination+8*pair+4,second);
             }
-          fail('8002d080 reached required8003a05c after both source contact copies; collision helper unsupported');
+          adjustContact(owner,otherOwner);
+          if((raw(owner,0x83,1)<<24>>24)===0){
+            const slot=raw(owner,0x3e4,1);scalarControls();
+            const high=cellFloat(0x803b04e0),low=cellFloat(0x803b0500);
+            globalFloatStore(0x803b0708+(slot<<24>>24)*4,subtract(high,low),terminalScalar);
+          }
+          fail('8002d0cc reached required80039f6c after actual3a05c; collision predicate unsupported');
         }
       }
       guard();

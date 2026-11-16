@@ -3,19 +3,20 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 type Make=typeof createBattleTargetPreparationTestFixture;
 function check(ok:boolean,s:string):void{if(!ok)throw Error('[battle-contact-height-test] '+s);}
 function refuses(f:()=>unknown,want:string):void{let got='';try{f();}catch(e){got=String(e);}check(got.includes(want),`expected ${want}, got ${got}`);}
-/** Explicit same-owner source inputs, not retail initialization or a full frame. */
-export function runBattleContactHeightSelfTests(make:Make):void{
- let count=0;
- const fresh=()=>{
-  count++;const x=createBattleTargetActionResetTestFixture(make);
+export function createBattleContactHeightTestFixture(make:Make){
+  const x=createBattleTargetActionResetTestFixture(make);
   for(const id of x.physicalIdentities.slice(1))(x.allocator.getPointerTarget(id)as {active0:number}).active0=0;
   Object.assign(x.targetAction.constants,{float80436f6c:-10000});
   for(let i=0;i<6;i++)for(const [prefix,base,width]of [['byte',0x80436144,1],['word',0x803b06a8,4],['byte',0x8043613c,1],['byte',0x80436134,1],['float',0x803b0644,4],['byte',0x8043612c,1],['half',0x803b0638,2],['float',0x803b0708,4]]as const)x.cells[prefix+(base+i*width).toString(16)]=77;
   const counters=x.outerSources.contactCounters!as Record<string,number>;
   return Object.assign(x,{counters});
- };
+}
+/** Explicit same-owner source inputs, not retail initialization or a full frame. */
+export function runBattleContactHeightSelfTests(make:Make):void{
+ let count=0;
+ const fresh=()=>{count++;return createBattleContactHeightTestFixture(make);};
  type Fixture=ReturnType<typeof fresh>;
- const end='8002bd9c reached required8002d35c',pairEnd='8002d080 reached required8003a05c';
+ const end='8002bd9c reached required8002d35c',pairEnd='2cf80 null pointer at reached dereference';
  const run=(x:Fixture,want=end,hook:(o:object,k:PropertyKey)=>void=()=>{},inactivePhysical=false):void=>{
   const native=Object.getOwnPropertyDescriptor;let selected=false,entered=false;
   Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{
@@ -106,10 +107,10 @@ export function runBattleContactHeightSelfTests(make:Make):void{
   if(mode==='heightNegativeZero')check(Object.is(x.cells.float803b0710,-0),'scalar subtraction keeps negative zero');
   if(mode==='lateFpscr'||mode==='lateProcessor')check(changed&&x.cells.float803b0710===77,'late scalar-policy change refuses before store');
   if(mode==='outerOnly')check(innerLoads===0,'zero44 does not load inner table');
-  if(mode==='differentOwners'||mode==='copyLiveSecondPair')check(x.cells.word803b04d0===0xabcd0000&&x.cells.word803b0368===0x12340000&&x.cells.word803b04cc===0x12340059,'both90wordcopies precede mandatory helper');
+  if(mode==='differentOwners'||mode==='copyLiveSecondPair')check(x.cells.word803b04d0===0xabcd0000&&x.cells.word803b0368===0x12340000&&x.cells.word803b04cc===0x12340059,'both90wordcopies precede genuine helper and null-owner refusal');
   if(mode==='copyMissingSecond'||mode==='copyReentry')check(x.cells.word803b04d0===77,'second source load/caught reentry precedes first pair store');
   if(mode==='copyReadonlySecond')check(x.cells.word803b04d0===0xabcd0000&&x.cells.word803b04d4===77,'separate scalar stores retain first on second failure');
   if(mode==='copyLiveSecondPair')check(x.cells.word803b04d8===0xdeadbeef,'later source pair is not snapshotted');
  }
- console.log(`[battle-contact-height] PASS: ${count} caller-index/initial-contact fixtures; real bounded returns and mandatory collision boundary`);
+ console.log(`[battle-contact-height] PASS: ${count} caller-index/initial-contact fixtures; real bounded returns and explicit collision/helper boundaries`);
 }
