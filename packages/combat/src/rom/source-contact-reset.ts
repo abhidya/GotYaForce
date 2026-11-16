@@ -1,5 +1,6 @@
-/** Authentic2cda4 stores and2cc78 list traversal. Standalone source helper only:
- * no outer2bb14 admission, callback substitution, or completed-frame claim. */
+/** Authentic2cda4 stores and2cc78 list traversal. Standalone or private exact
+ * 2bb14 caller admission; no callback substitution or completed-frame claim. */
+import {consumeSourceBattleTargetResetInvocation,checkSourceBattleTargetResetInvocation,readSourceBattleTargetResetConstants,type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
 import {isSourceObjectSchedulerRuntime,type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import {isSourceActorNormalLifecycleRuntime,type SourceActorNormalLifecycleRuntime} from './actor-normal-lifecycle.js';
 import {isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
@@ -18,7 +19,14 @@ export interface SourceContactResetRuntime {
 const native=Reflect.getOwnPropertyDescriptor;
 function fail(why:string):never{throw Error('[source-contact-reset] '+why);}
 function raw(v:unknown,max:number,label:string):number{if(typeof v!=='number'||!Number.isInteger(v)||v<0||v>max)fail(label+': explicit raw unsigned value required');return v;}
-export function createSourceContactResetRuntime(sources:SourceContactResetSources):SourceContactResetRuntime{
+const outerResets=new WeakMap<object,SourceContactResetRuntime>();
+export function invokeSourceContactResetOuter(outer:SourceBattleOuterFrameRuntime,kind:'actor'|'player'|'group',value:symbol|number):void{
+ const sources=consumeSourceBattleTargetResetInvocation(outer,kind,value);
+ let runtime=outerResets.get(outer);if(!runtime){runtime=createReset(sources,outer);outerResets.set(outer,runtime);}
+ if(kind==='actor')runtime.resetActor(value as symbol);else if(kind==='player')runtime.resetPlayer(value as number);else runtime.runGroupReset(value as number);
+}
+export function createSourceContactResetRuntime(sources:SourceContactResetSources):SourceContactResetRuntime{return createReset(sources);}
+function createReset(sources:SourceContactResetSources,outer?:SourceBattleOuterFrameRuntime):SourceContactResetRuntime{
  const field=native(sources,'scheduler'),scheduler=field&&'value'in field?field.value:undefined;
  if(!isSourceObjectSchedulerRuntime(scheduler))fail('genuine scheduler required');
  const allocator=scheduler.getAllocatorRuntime(),root=scheduler.getRootRuntime(),spawns=root.getSpawnRuntime();
@@ -31,14 +39,17 @@ export function createSourceContactResetRuntime(sources:SourceContactResetSource
   for(const e of edges){const d=native(e.o,e.k);if(!d||!('value'in d)||d.value!==e.value)fail('retained reset owner changed');}
  };
  const check=():void=>{if(poisoned||incomplete)fail('incomplete reset invocation');if(validating)return;validating=true;
-  try{if(scheduler.getAllocatorRuntime()!==allocator||scheduler.getRootRuntime()!==root||root.getSpawnRuntime()!==spawns||spawns.getAllocatorRuntime()!==allocator)fail('canonical reset graph changed');if(slotTable&&scheduler.getActorSlotTable()!==slotTable)fail('reset actor-slot owner changed');for(const [index,owner]of groups)if(allocator.getGroup(index)!==owner)fail('reset group owner changed');exact();if(poisoned)fail('caught reset reentry');}finally{validating=false;}
+  try{if(outer)checkSourceBattleTargetResetInvocation(outer);if(scheduler.getAllocatorRuntime()!==allocator||scheduler.getRootRuntime()!==root||root.getSpawnRuntime()!==spawns||spawns.getAllocatorRuntime()!==allocator)fail('canonical reset graph changed');if(slotTable&&scheduler.getActorSlotTable()!==slotTable)fail('reset actor-slot owner changed');for(const [index,owner]of groups)if(allocator.getGroup(index)!==owner)fail('reset group owner changed');exact();if(poisoned)fail('caught reset reentry');}finally{validating=false;}
  };
  const own=(o:object,k:PropertyKey):unknown=>{const d=Object.getOwnPropertyDescriptor(o,k);check();if(!d||!('value'in d))fail(String(k)+': own data required');return d.value;};
  const record=(v:unknown,label:string):object=>{if(v===null||typeof v!=='object'||Array.isArray(v)||ArrayBuffer.isView(v)||v instanceof Promise)fail(label+': source record required');return v;};
  const keep=(name:string,o:object):object=>{const old=live.get(name);if(old&&old!==o)fail(name+': canonical owner changed');if([...live].some(([k,v])=>k!==name&&v===o)||o===sources)fail(name+': reset storage alias');if(name==='constants'&&[...actorOwners.values()].some(v=>v.actual===o||v.binding===o))fail('constants alias actor reset owner');live.set(name,o);return o;};
  const link=(name:string,o:object,k:PropertyKey):object=>{const v=keep(name,record(own(o,k),name));if(!edges.some(e=>e.o===o&&e.k===k))edges.push({o,k,value:v});exact();return v;};
- const aliases=(o:object,k:string,offset:number,terminal=false):void=>{
-  const hex=offset.toString(16),keys=[String(offset),...['field','byte','half','float','word'].flatMap(p=>[p+hex,p+hex.toUpperCase()])];
+ const aliases=(o:object,k:string,offset:number,terminal=false,width=1):void=>{
+  const keys:string[]=[];
+  for(const [prefix,size]of [['byte',1],['half',2],['short',2],['float',4],['word',4],['field',4]]as const)
+   for(let start=offset-size+1;start<offset+width;start++){if(start<0)continue;const hex=start.toString(16);keys.push(prefix+hex,prefix+hex.toUpperCase());}
+  for(let i=0;i<width;i++)keys.push(String(offset+i));
   for(const key of new Set(keys))if(key!==k){const d=terminal?native(o,key):Object.getOwnPropertyDescriptor(o,key);if(!terminal)check();if(d)fail(k+': competing reset source field');}
  };
  type Cell={o:object;k:string;offset:number};
@@ -58,11 +69,11 @@ export function createSourceContactResetRuntime(sources:SourceContactResetSource
    t.guard();for(let i=0;i<width;i++){const d=native(bytes,String(offset+i));if(!d||!('value'in d)||!d.writable)fail('node scalar destination changed');}
    exact();for(let i=0;i<width;i++)bytes[offset+i]=view.getUint8(i);check();return;
   }
-  const c=t.cell(offset,width);aliases(c.o,c.k,offset);const d=Object.getOwnPropertyDescriptor(c.o,c.k);check();if(!d||!('value'in d)||!d.writable)fail(c.k+': writable own destination required');
-  t.guard();const last=native(c.o,c.k);if(!last||!('value'in last)||!last.writable)fail(c.k+': destination changed');aliases(c.o,c.k,offset,true);exact();
+  const c=t.cell(offset,width);aliases(c.o,c.k,offset,false,width);const d=Object.getOwnPropertyDescriptor(c.o,c.k);check();if(!d||!('value'in d)||!d.writable)fail(c.k+': writable own destination required');
+  t.guard();const last=native(c.o,c.k);if(!last||!('value'in last)||!last.writable)fail(c.k+': destination changed');aliases(c.o,c.k,offset,true,width);exact();
   (c.o as Record<string,unknown>)[c.k]=value;check();
  };
- const zero=():number=>{const o=link('constants',sources,'constants'),v=own(o,'float80436f68');check();if(!Object.is(v,0))fail('authenticated float80436f68 +0 required');return 0;};
+ const zero=():number=>{const o=outer?keep('constants',readSourceBattleTargetResetConstants(outer)):link('constants',sources,'constants'),v=own(o,'float80436f68');check();if(!Object.is(v,0))fail('authenticated float80436f68 +0 required');return 0;};
  const reset=(t:Target):void=>{
   const z=zero();for(const offset of [0x1cc,0x1d0,0x1d4])store(t,offset,z,4);
   store(t,0x1d9,0,1);store(t,0x1da,0,1);const support=load(t,0x1db);store(t,0x1de,support,1);

@@ -1,3 +1,5 @@
+import {invokeSourceContactResetOuter,type SourceContactResetSources} from './source-contact-reset.js';
+import {isSourceActorNormalLifecycleRuntime,type SourceActorNormalLifecycleRuntime} from './actor-normal-lifecycle.js';
 import {executeSourceContactTransform} from './source-contact-transform.js';
 import {executeSourcePlayerContact36e24} from './source-player-contact.js';
 import {executeSourceDrawCallback47aa4} from './source-draw-callback.js';
@@ -100,6 +102,8 @@ export interface SourceBattleTargetPreparationSources {
   targetDispatch?: SourceActorTargetDispatchRuntime;
 }
 export interface SourceBattleOuterFrameSources {
+  /** Genuine2bb14 prefix. Explicit source globals, not generated defaults. */
+  targetAction?:{normal?:SourceActorNormalLifecycleRuntime;constants?:{float80436f68?:number};cells?:Record<string,number>};
   /** Same ten global halfword destinations used by8008a28c, not copied lists.
    * Reached only at294ec after the fresh mode selects the normal suffix. */
   contactCounters?: Partial<Record<`half804362${'50'|'4e'|'4c'|'4a'|'48'|'46'|'44'|'42'|'40'|'3e'}`,number>>;
@@ -137,6 +141,17 @@ export function requireSourceBattleOuterFrameFailure(outer: SourceBattleOuterFra
   const scope=failures.get(outer);
   if(!isSourceBattleOuterFrameRuntime(outer) || !scope) fail('private active outer failure required');
   scope(scheduler);
+}
+type TargetResetKind='actor'|'player'|'group';
+const targetResets=new WeakMap<object,{consume(kind:TargetResetKind,value:symbol|number):SourceContactResetSources;check():void;constants():object}>();
+export function consumeSourceBattleTargetResetInvocation(outer:SourceBattleOuterFrameRuntime,kind:TargetResetKind,value:symbol|number):SourceContactResetSources{
+ const scope=targetResets.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private exact target/reset invocation required');return scope.consume(kind,value);
+}
+export function checkSourceBattleTargetResetInvocation(outer:SourceBattleOuterFrameRuntime):void{
+ const scope=targetResets.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private target/reset invocation required');scope.check();
+}
+export function readSourceBattleTargetResetConstants(outer:SourceBattleOuterFrameRuntime):object{
+ const scope=targetResets.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private target/reset constants required');scope.check();return scope.constants();
 }
 export interface SourceBattleOuterContactTransformContext {allocator:SourceObjectAllocationRuntime;root:SourceProjectileRootRuntime;matrix:symbol|null;input:symbol|null;output:symbol}
 const contactTransforms=new WeakMap<object,{consume(node:symbol):SourceBattleOuterContactTransformContext;check(node:symbol):void}>();
@@ -268,6 +283,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   const completedOrderedActors=new Map<symbol,object>();
   let distancesPrepared=false;
   const producedDistances=new Map<symbol,{actor:object;fields:number;consumed:boolean}>();
+  let targetResetInvocation:{kind:TargetResetKind;value:symbol|number;entered:boolean;sources:SourceContactResetSources;guard():void;constants():object}|undefined;
   let contactInvocation:{entered:boolean;helper:SourceActorSlotStatusRuntime}|undefined;
   let contactTransformInvocation:{node:symbol;site:0x8008a728|0x8008a888;entered:boolean;checking:boolean;context:SourceBattleOuterContactTransformContext;guard():void}|undefined;
   let drawCallsite:0x800294c8|0x800294fc|0x80029500|undefined;
@@ -2463,6 +2479,101 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     else family('roots36270',2);
     }finally{drawCallsite=undefined;}
   };
+  /** Bounded2bb14: real caller effects and resets. Active rows stop at the
+   * unauthenticated second constant load, never invent its value. Inactive
+   * physical rows genuinely skip that load and reach all group/player resets. */
+  const runTargetActionPrefix=():never=>{
+    const supplied=Object.getOwnPropertyDescriptor(sources,'targetAction');check();
+    if(!supplied)fail('800294f4 reached required8002bb14; target/action frame helper unsupported');
+    const input=retain('targetAction',read(sources,'targetAction'));
+    const cells=retain('targetAction cells',read(input,'cells'));
+    const edges:{o:object;k:string;value:unknown}[]=[{o:sources,k:'targetAction',value:input},{o:input,k:'cells',value:cells}];
+    const resetSources:SourceContactResetSources={scheduler};
+    const actors=new Map<symbol,object>(),ownerChecks:(()=>void)[]=[];
+    const guard=():void=>{
+      schedulerGraph();check();
+      for(const e of edges){const d=primaryStoreDescriptor(e.o,e.k);if(!d||!('value'in d)||d.value!==e.value)fail('2bb14 retained owner changed');}
+      for(const [id,a]of actors)if(allocator.getPointerTarget(id)!==a)fail('2bb14 actual owner changed');
+      for(const validate of ownerChecks)validate();
+      check();
+    };
+    const edge=(o:object,k:string,value:unknown):void=>{const old=edges.find(e=>e.o===o&&e.k===k);if(old&&old.value!==value)fail('2bb14 retained owner changed');if(!old)edges.push({o,k,value});guard();};
+    const get=(o:object,k:string):unknown=>{const v=read(o,k);guard();return v;};
+    const aliases=(o:object,k:string,address:number,width:number,terminal=false):void=>{
+      const names=new Set<string>();
+      for(const [prefix,size]of [['byte',1],['half',2],['short',2],['word',4],['float',4],['field',4]]as const)
+        for(let start=address-size+1;start<address+width;start++){if(start<0)continue;const h=start.toString(16);names.add(prefix+h);names.add(prefix+h.toUpperCase());}
+      for(let i=0;i<width;i++)names.add(String(address+i));
+      for(const n of names)if(n!==k){const p=terminal?primaryStoreDescriptor(o,n):Object.getOwnPropertyDescriptor(o,n);if(!terminal)guard();if(p)fail(k+': competing2bb14 cell');}
+    };
+    const load=(o:object,k:string,address:number,width:number):number=>{aliases(o,k,address,width);const v=unsigned(get(o,k),width===1?255:width===2?65535:0xffffffff,k);aliases(o,k,address,width,true);return v;};
+    const put=(o:object,k:string,address:number,width:number,v:number,extra=()=>{}):void=>{
+      aliases(o,k,address,width);extra();const d=Object.getOwnPropertyDescriptor(o,k);guard();if(!d||!('value'in d)||!d.writable)fail(k+': writable2bb14 destination required');
+      extra();guard();const last=primaryStoreDescriptor(o,k);if(!last||!('value'in last)||!last.writable)fail(k+':2bb14 destination changed');aliases(o,k,address,width,true);
+      (o as Record<string,number>)[k]=v;guard();
+    };
+    const globalStore=(address:number,width:1|2|4,v:number):void=>put(cells,(width===1?'byte':width===2?'half':'word')+address.toString(16),address,width,v);
+    const owner=match(),rows=teamTable(owner);edge(owner,'teamRows103',rows);
+    const matchWord=(i:number):number=>{
+      const row=team(rows,i);edge(rows,String(i),row);const address=0x118+0x3c*i;
+      aliases(owner,'__no_flat_match_word',address,4);const v=load(row,'word24',0x24,4);aliases(owner,'__no_flat_match_word',address,4,true);return v;
+    };
+    globalStore(0x803b068c,4,matchWord(0));
+    const base=slotPointer(0); // Captured once at8002bb64, not each actor.
+    const mass=retain('massPreparation',read(sources,'massPreparation'));edge(sources,'massPreparation',mass);
+    const block=retain('mass physicalBlock',read(mass,'physicalBlock'));edge(mass,'physicalBlock',block);
+    const ids=retain('mass physical identities',read(block,'identities'));edge(block,'identities',ids);
+    if(!Object.isFrozen(block)||get(block,'base')!==base||!Array.isArray(ids)||!Object.isFrozen(ids)||get(ids,'length')!==6)fail('2bb14 six frozen physical identities required');
+    const identities=ids as readonly unknown[];
+    if(identities.some(id=>typeof id!=='symbol')||new Set(identities).size!==6||identities[0]!==base)fail('2bb14 distinct physical base identities required');
+    globalStore(0x80436154,2,0);
+    for(let i=1;i<4;i++){globalStore(0x803b068c+i*4,4,matchWord(i));globalStore(0x80436154+i*2,2,0);}
+    globalStore(0x80436128,1,0);
+    const constants=():object=>{const c=retain('targetAction constants',get(input,'constants'));edge(input,'constants',c);resetSources.constants=c;return c;};
+    const zero=():number=>{const c=constants(),v=get(c,'float80436f68');if(!Object.is(v,0))fail('authenticated float80436f68 +0 required');return 0;};
+    const reset=(kind:TargetResetKind,value:symbol|number):void=>{
+      // Bind only the reached real callee's owners. No public helper or caller
+      // supplied success callback grants this exact source-position scope.
+      if(kind==='player'){const p=spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime();guard();if(!isSourceActorSlotStatusRuntime(p))fail('2bb14 canonical players required');resetSources.players=p;}
+      targetResetInvocation={kind,value,entered:false,sources:resetSources,guard,constants};
+      try{invokeSourceContactResetOuter(runtime,kind,value);}finally{targetResetInvocation=undefined;}
+      guard();
+    };
+    for(let i=0;i<6;i++){
+      const id=identities[i] as symbol,a=actual(id);guard();if([...actors.values()].includes(a))fail('2bb14 physical actor storage overlap');actors.set(id,a);
+      if((load(a,'active0',0,1)<<24>>24)===0)continue;
+      const timer=load(a,'byte7d1',0x7d1,1)<<24>>24;
+      if(timer>0)put(a,'byte7d1',0x7d1,1,timer-1);else{put(a,'byte7d1',0x7d1,1,0);put(a,'byte7d0',0x7d0,1,255);}
+      const slot=load(a,'slot',0x3e4,1)<<24>>24;globalStore(0x8043614c+slot,1,0);
+      const normal=get(input,'normal');if(!isSourceActorNormalLifecycleRuntime(normal))fail('2bb14 genuine normal lifecycle required');edge(input,'normal',normal);
+      const status=spawns.getPrehookRuntime().getStatusRuntime(),world=spawns.getWorldRuntime();
+      const statusOwner=normal.getStatusBinding(id),borg=status.getActualBorg(id);
+      const verifyActor=():void=>{
+        if(normal.getActualActor(id)!==a||status.getActualActor(id)!==a||normal.getStatusBinding(id)!==statusOwner||status.getActorBinding(id)!==statusOwner||status.getActualBorg(id)!==borg||normal.getWorldBinding(id)!==world.getActorBinding(id)||normal.getMappingActor(id)!==world.getMappingActor(id))fail('2bb14 canonical lifecycle owners differ');
+        normal.assertActorComplete(id);check();
+      };
+      ownerChecks.push(verifyActor);const actorGuard=guard;
+      actorGuard();resetSources.normal=normal;reset('actor',id);
+      globalStore(0x803b069c+i*2,2,load(a,'half1c6',0x1c6,2));
+      if(load(a,'byte436',0x436,1)!==0)globalStore(0x80436128,1,1);
+      for(const [current,maximum,countdown]of [[0x4f4,0x4fc,0x4f8],[0x4f6,0x4fe,0x4fa]]as const){
+        const value=load(a,'half'+current.toString(16),current,2),old=load(a,'half'+maximum.toString(16),maximum,2);
+        if(value>=old)put(a,'half'+maximum.toString(16),maximum,2,value);
+        const n=load(a,'half'+countdown.toString(16),countdown,2);
+        if((n<<16>>16)!==0)put(a,'half'+countdown.toString(16),countdown,2,(n-1)&65535);else put(a,'half'+current.toString(16),current,2,0);
+      }
+      const split=(o:object,k:string,offset:number):void=>{
+        const cross=():void=>{actorGuard();for(const other of [a,statusOwner,borg])if(other!==o){aliases(other,'__no_split_'+k,offset,1,true);if(primaryStoreDescriptor(other,k))fail(k+': competing2bb14 split owner');}};
+        put(o,k,offset,1,0,cross);
+      };
+      split(statusOwner,'byte6fd',0x6fd);split(borg,'slowAuraLevel',0x70c);split(borg,'hasteAuraLevel',0x70d);
+      zero();split(statusOwner,'byte7d4',0x7d4);
+      fail('8002bcb0 reached unauthenticated float80436f6c load; byte599 and later stores not executed');
+    }
+    for(const group of [40,32,0,16,8,24])reset('group',group);
+    for(let i=0;i<12;i++)reset('player',i);
+    fail('8002bd98 reached required8002cf80; target/action contact pass unsupported');
+  };
   const resetContactCounts=():void=>{
     const supplied=Object.getOwnPropertyDescriptor(sources,'contactCounters');check();
     if(!supplied||!('value'in supplied)||supplied.value===undefined)
@@ -2645,7 +2756,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(s8(byte(match(),'byte66'))===0){
           resetContactCounts();
           runContactCallbacks();
-          fail('800294f4 reached required8002bb14; target/action frame helper unsupported');
+          runTargetActionPrefix();
         }
         const helper=call(()=>spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime());
         if(!isSourceActorSlotStatusRuntime(helper))fail('36e24 canonical slot-status owner required');
@@ -2655,9 +2766,14 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         fail('80029504 reached outer post-draw continuation');
       } catch(error) {
         close();throw error;
-      } finally {contactInvocation=undefined;contactTransformInvocation=undefined;drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
+      } finally {targetResetInvocation=undefined;contactInvocation=undefined;contactTransformInvocation=undefined;drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
     },
   };
+  targetResets.set(runtime,{
+    consume(kind,value){const c=targetResetInvocation;if(!c||c.entered||c.kind!==kind||c.value!==value){rejectScheduler();fail('private exact single-use2bb14 reset invocation required');}c.entered=true;this.check();return c.sources;},
+    check(){const c=targetResetInvocation;if(!busy||closing||incomplete||poisoned||!c?.entered){rejectScheduler();fail('private active2bb14 reset invocation required');}c.guard();check();},
+    constants(){this.check();return targetResetInvocation!.constants();},
+  });
   const contactCheck=(helper?:SourceActorSlotStatusRuntime):void=>{
     const c=contactInvocation;
     if(!busy||closing||incomplete||poisoned||!c?.entered||(helper!==undefined&&helper!==c.helper)){

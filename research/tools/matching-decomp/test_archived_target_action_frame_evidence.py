@@ -214,6 +214,36 @@ class ArchivedTests(unittest.TestCase):
                 cls.reports.append(a.inspect(raw, digest))
             cls.traces.append(trace[:]); cls.rows.append(rows); cls.words.append(words); cls.bodies.append(bodies)
 
+    def test_reset_prefix_semantics_and_mutations(self):
+        rows=[dict(address=f'{pc:08x}',**row)for pc,row in self.rows[0].items()]
+        facts=a.summarize_reset_prefix(rows)
+        self.assertEqual(facts['group_reset_order'],[40,32,0,16,8,24])
+        self.assertEqual((facts['actor_count'],facts['actor_stride']), (6,0x1e00))
+        self.assertEqual((facts['player_reset_base'],facts['player_count'],facts['player_stride']),('803c73b0',12,0x3e4))
+        self.assertTrue(facts['player_reset_uses_row_base'])
+        self.assertFalse(facts['constant_values_authenticated'])
+        self.assertTrue(facts['maximum_stores_use_captured_values'])
+        self.assertEqual(facts['active_clear_order'],[0x6fd,0x70c,0x70d,0x7d4])
+        self.assertEqual(facts['active_constant_boundary'],'8002bcb0')
+        self.assertEqual(facts['next_boundary'],'8002bd98')
+        for pc,key,value in [('8002bc04','mnemonic','lha'),('8002bc08','displacement',0x4f4),
+            ('8002bc0c','mnemonic','cmp'),('8002bc10','BI',1),('8002bc14','rS',0),
+            ('8002bc18','mnemonic','lhz'),('8002bc20','BI',1),('8002bc24','immediate',1),
+            ('8002bc28','displacement',0x4f4),('8002bc34','displacement',0x4fc),
+            ('8002bc48','rS',0),('8002bc54','BI',1),('8002bc68','displacement',0x4fe),
+            ('8002bc74','displacement',0x70c),('8002bc84','displacement',0x70d),
+            ('8002bc94','displacement',0x7d4),('8002bca4','rS',3),
+            ('8002bb64','displacement',0),('8002bb78','displacement',4),
+            ('8002bba0','BI',1),('8002bbc8','displacement',0x7d0),
+            ('8002bbe4','target','8002cc78'),('8002bc9c','displacement',-31412),
+            ('8002bcc8','displacement',0x3e5),('8002bd30','immediate',0x3e4),
+            ('8002bd34','immediate',12),('8002bd40','immediate',32),
+            ('8002bd78','immediate',0x7744),('8002bd90','immediate',6),
+            ('8002bd98','target','8002cda4')]:
+            changed=copy.deepcopy(rows)
+            next(r for r in changed if r['address']==pc)[key]=value
+            with self.assertRaises(a.c.FormatError):a.summarize_reset_prefix(changed)
+
     def test_exact_one_read_follow_full_unchanged_authentication(self):
         for trace, auth in zip(self.traces, self.auth_traces):
             self.assertTrue(auth); self.assertTrue(all(row[0] == 263 for row in auth))

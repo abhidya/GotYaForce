@@ -57,6 +57,87 @@ def decode_selected(word, pc):
     return base.decode_selected(word, pc)
 
 
+def summarize_reset_prefix(instructions):
+    """Derived caller ordering only; no selected data values or full listing."""
+    rows={int(r['address'],16):r for r in instructions}
+    def require(pc,name,**fields):
+        r=rows[pc]
+        c.require(r['mnemonic']==name and all(r.get(k)==v for k,v in fields.items()),
+                  'caller/reset prefix order')
+    for pc,base,offset,dest in ((0x8002bb3c,13,-31852,7),(0x8002bb4c,7,0x118,0),
+        (0x8002bb64,4,0x4e84,23),(0x8002bb70,7,0x154,0),
+        (0x8002bb7c,7,0x190,0),(0x8002bb88,7,0x1cc,0)):
+        require(pc,'lwz',rA=base,displacement=offset,rD=dest)
+    for pc,name,base,offset in ((0x8002bb5c,'stw',6,0),(0x8002bb6c,'sth',13,-21580),
+        (0x8002bb74,'stw',6,4),(0x8002bb78,'sth',31,2),(0x8002bb80,'stw',6,8),
+        (0x8002bb84,'sth',31,4),(0x8002bb8c,'stw',6,12),(0x8002bb90,'sth',31,6),
+        (0x8002bb94,'stb',13,-21624)):
+        require(pc,name,rA=base,displacement=offset,rS=0 if name=='stw'else 5)
+    require(0x8002bb98,'lbz',rA=23,displacement=0,rD=0)
+    require(0x8002bb9c,'extsb',rS=0,rA=0,Rc=1)
+    require(0x8002bba0,'bc',BO=12,BI=2,target='8002bd2c')
+    require(0x8002bba4,'lbz',rA=23,displacement=0x7d1,rD=3)
+    require(0x8002bbac,'bc',BO=12,BI=1,target='8002bbc4')
+    for pc,off,reg in ((0x8002bbb8,0x7d1,3),(0x8002bbbc,0x7d0,0),(0x8002bbc8,0x7d1,0)):
+        require(pc,'stb',rA=23,displacement=off,rS=reg)
+    require(0x8002bbc4,'addi',rD=0,rA=3,immediate=-1)
+    require(0x8002bbcc,'lbz',rD=0,rA=23,displacement=0x3e4)
+    require(0x8002bbdc,'extsb',rS=0,rA=0,Rc=0)
+    require(0x8002bbe0,'stbx',rS=5,rA=4,rB=0)
+    require(0x8002bbe4,'bl',target='8002cda4')
+    require(0x8002bbe8,'lha',rD=0,rA=23,displacement=0x1c6)
+    require(0x8002bbec,'sth',rS=0,rA=30,displacement=0)
+    # Max stores retain r3 from the first load: there is NO reload of4f4/4f6.
+    for start,current,maximum,timer in ((0x8002bc04,0x4f4,0x4fc,0x4f8),
+                                       (0x8002bc38,0x4f6,0x4fe,0x4fa)):
+        require(start,'lhz',rD=3,rA=23,displacement=current)
+        require(start+4,'lhz',rD=0,rA=23,displacement=maximum)
+        require(start+8,'cmpl',BF=0,L=0,rA=3,rB=0)
+        require(start+12,'bc',BO=12,BI=0,target=f'{start+20:08x}')
+        require(start+16,'sth',rS=3,rA=23,displacement=maximum)
+        require(start+20,'lha',rD=3,rA=23,displacement=timer)
+        require(start+24,'cmpi',BF=0,L=0,rA=3,immediate=0)
+        require(start+28,'bc',BO=12,BI=2,target=f'{start+44:08x}')
+        require(start+32,'addi',rD=0,rA=3,immediate=-1)
+        require(start+36,'sth',rS=0,rA=23,displacement=timer)
+        require(start+40,'b',target=f'{start+52:08x}')
+        require(start+44,'addi',rD=0,rA=0,immediate=0)
+        require(start+48,'sth',rS=0,rA=23,displacement=current)
+    require(0x8002bc6c,'addi',rD=0,rA=0,immediate=0)
+    for pc,offset in ((0x8002bc74,0x6fd),(0x8002bc84,0x70c),
+                      (0x8002bc94,0x70d),(0x8002bca4,0x7d4)):
+        require(pc,'stb',rS=0,rA=23,displacement=offset)
+    # Every indexed reset reloads the signed actor index rather than caching it.
+    for pc,reg in ((0x8002bcbc,11),(0x8002bcc8,10),(0x8002bcd8,9),(0x8002bce4,8),
+                   (0x8002bcf0,7),(0x8002bd00,6),(0x8002bd0c,5),(0x8002bd1c,0)):
+        require(pc,'lbz',rD=reg,rA=23,displacement=0x3e4)
+        require(pc+4,'extsb',rS=reg,rA=reg,Rc=0)
+    require(0x8002bc9c,'lfs',fD=1,rA=2,displacement=-31416)
+    require(0x8002bcb0,'lfs',fD=0,rA=2,displacement=-31412)
+    require(0x8002bd30,'addi',rD=23,rA=23,immediate=0x1e00)
+    require(0x8002bd34,'cmpi',rA=24,immediate=6)
+    require(0x8002bd38,'addi',rD=30,rA=30,immediate=2)
+    require(0x8002bd3c,'bc',BO=12,BI=0,target='8002bb98')
+    groups=[40,32,0,16,8,24]
+    for i,group in enumerate(groups):
+        require(0x8002bd40+i*8,'addi',rD=3,rA=0,immediate=group)
+        require(0x8002bd44+i*8,'bl',target='8002cc78')
+    require(0x8002bd70,'addis',rD=3,rA=0,immediate=-32708)
+    require(0x8002bd78,'addi',rD=0,rA=3,immediate=0x73b0)
+    require(0x8002bd84,'bl',target='8002cda4')
+    require(0x8002bd8c,'addi',rD=24,rA=24,immediate=0x3e4)
+    require(0x8002bd90,'cmpi',rA=23,immediate=12)
+    require(0x8002bd94,'bc',BO=12,BI=0,target='8002bd80')
+    require(0x8002bd98,'bl',target='8002cf80')
+    return dict(actor_count=6,actor_stride=0x1e00,group_reset_order=groups,
+                player_reset_base='803c73b0',player_count=12,player_stride=0x3e4,
+                player_reset_uses_row_base=True,index_load_count=8,
+                next_boundary='8002bd98',next_helper='8002cf80',
+                constant_values_authenticated=False,maximum_stores_use_captured_values=True,
+                active_clear_order=[0x6fd,0x70c,0x70d,0x7d4],
+                active_constant_boundary='8002bcb0')
+
+
 def range_evidence(db, mapping, address, width):
     c.require(type(address) is type(width) is int, 'range integer fields')
     selected = [item for item in RANGES if item[:2] == (address, width)]
@@ -91,7 +172,7 @@ def range_evidence(db, mapping, address, width):
                 unrepresented_instructions=0, operand_sha256=OPERAND_DIGESTS[address],
                 control_flow_count=len(flow), control_flow_sha256=FLOW_DIGESTS[address][1],
                 calls=[dict(site=site, target=target) for site, target in calls],
-                indirect_call_sites=list(indirect))
+                indirect_call_sites=list(indirect),reset_prefix=summarize_reset_prefix(instructions))
 
 
 def inspect(data, digest):

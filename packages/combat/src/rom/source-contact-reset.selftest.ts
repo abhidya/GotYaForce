@@ -6,8 +6,8 @@ function check(ok:boolean,s:string):void{if(!ok)throw Error('[source-contact-res
 function refuses(f:()=>unknown,s:string):void{let m='';try{f();}catch(e){m=String(e);}check(m.includes(s),`expected ${s}, got ${m}`);}
 const byteOffsets=[0x1d9,0x1da,0x1db,0x1de,0x1dc,0x1dd,0x280,0x274,0x275,0x1df,0x2ae,0x2af,0x1e8];
 function fields():Record<string,number>{return Object.fromEntries([...byteOffsets.map(v=>['byte'+v.toString(16),77]),...[0x270,0x286].map(v=>['half'+v.toString(16),0xabcd]),...[0x1cc,0x1d0,0x1d4].map(v=>['float'+v.toString(16),42])]);}
-export function createSourceContactResetTestFixture(make:Make){
- const x=createBattleDrawOuterTestFixture(make),actorFields=fields();delete actorFields.byte1d9;delete actorFields.byte1db;
+export function populateSourceContactResetTestFixture<T extends ReturnType<typeof createBattleDrawOuterTestFixture>>(x:T){
+ const actorFields=fields();delete actorFields.byte1d9;delete actorFields.byte1db;
  Object.assign(x.sourceActor,actorFields,{supportContact1db:91,byte1df:255,byte2ae:128,byte2af:1,byte1e8:0});
  if(!x.normalLifecycle)throw Error('explicit normal lifecycle required');x.normalLifecycle.getActorBinding(x.actor).byte1d9=67;
  for(let i=0;i<13;i++)Object.assign(x.slotRecords[i]!,fields());
@@ -18,6 +18,7 @@ export function createSourceContactResetTestFixture(make:Make){
  const resetSources={scheduler:x.scheduler,normal:x.normalLifecycle,players:x.slotStatus,constants:{float80436f68:0}};
  return Object.assign(x,{resetSources,resets:createSourceContactResetRuntime(resetSources)});
 }
+export function createSourceContactResetTestFixture(make:Make){return populateSourceContactResetTestFixture(createBattleDrawOuterTestFixture(make));}
 export function runSourceContactResetSelfTests(make:Make):void{
  let count=0;const fresh=()=>{count++;return createSourceContactResetTestFixture(make);};
  const observe=(run:()=>void,hook:(o:object,k:PropertyKey)=>void):void=>{const native=Object.getOwnPropertyDescriptor;Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{hook(o,k);return native(o,k);})as typeof native;try{run();}finally{Object.getOwnPropertyDescriptor=native;}};
