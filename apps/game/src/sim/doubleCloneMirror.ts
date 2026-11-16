@@ -45,17 +45,31 @@ export function createDoubleCloneMirror(source: THREE.Object3D): DoubleCloneMirr
   const geometries = new Set<THREE.BufferGeometry>();
   const materials = new Set<THREE.Material>();
   const skeletons = new Set<THREE.Skeleton>();
+  // A model can reuse a geometry/material across many draw nodes. Preserve that
+  // sharing within this private snapshot instead of allocating once per node.
+  const geometryCopies = new Map<THREE.BufferGeometry, THREE.BufferGeometry>();
+  const materialCopies = new Map<THREE.Material, THREE.Material>();
   function pair(owner: THREE.Object3D, copy: THREE.Object3D): void {
     if (owner.children.length !== copy.children.length || owner.type !== copy.type) {
       throw new Error("Double clone hierarchy was not preserved by cloning");
     }
     pairs.push({ source: owner, clone: copy, children: [...owner.children] });
     if (owner instanceof THREE.Mesh && copy instanceof THREE.Mesh) {
-      copy.geometry = owner.geometry.clone();
-      geometries.add(copy.geometry);
+      let geometry = geometryCopies.get(owner.geometry);
+      if (!geometry) {
+        const cloned: THREE.BufferGeometry = owner.geometry.clone();
+        geometryCopies.set(owner.geometry, cloned);
+        geometries.add(cloned);
+        geometry = cloned;
+      }
+      copy.geometry = geometry;
       const cloneMaterial = (material: THREE.Material): THREE.Material => {
-        const cloned = material.clone(); // Texture references intentionally remain shared.
-        materials.add(cloned);
+        let cloned = materialCopies.get(material);
+        if (!cloned) {
+          cloned = material.clone(); // Texture references intentionally remain shared.
+          materialCopies.set(material, cloned);
+          materials.add(cloned);
+        }
         return cloned;
       };
       copy.material = Array.isArray(owner.material) ? owner.material.map(cloneMaterial) : cloneMaterial(owner.material);
