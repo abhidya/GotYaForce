@@ -5,7 +5,8 @@
  * return for explicitly supplied signed match.byte45 >=5. Evidence:
  * read_archived_actor_command_admission_evidence.py and its fixed witness.
  *
- * This is NOT ordinary active-match audio: byte45<5 refuses at its RNG call.
+ * Active-match event2 admits only authenticated negative-return gates using the
+ * SAME ordered-frame RNG owner; reached voice pool/audio calls remain unsupported.
  * Non-null direction targets, active captured targets, nonzero trig, active
  * 4beb8 and ammo debit/sound remain ordered boundaries. No callbacks stand in
  * for those callees and no owner/default forces a skip. Zero trig requires the
@@ -17,6 +18,8 @@
  * Reads and destination checks stay lazy; failures retain their prefix and
  * permanently mark an effectful incomplete call. No tick or input hydration.
  */
+import {stepSourceByteRng} from './source-byte-rng.js';
+import {consumeActiveSourceActorOrderedVoiceRng, checkActiveSourceActorOrderedVoiceRng} from './actor-ordered-frame.js';
 import {readSourceShortTrig} from './source-short-trig.js';
 import {claimSourceHelperStorage} from './source-storage-claims.js';
 import {requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
@@ -34,6 +37,8 @@ import {isSourceActorCueResetRuntime, type SourceActorCueResetRuntime,
 import type {SourceActorAnimationDispatchBinding} from './actor-animation-dispatch.js';
 
 export interface SourceActorCommandAdmissionBinding {
+  /** Explicit missing source speaker byte; never initialized by this runtime. */
+  byte438: number;
   pointer504: object | null;
   /** Opaque captured source target, not the separate visibilityTarget/+cc view. */
   pointer508: object | null;
@@ -44,7 +49,8 @@ export interface SourceActorCommandAdmissionSources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor' | 'getActorBinding' | 'getMappingActor' | 'getWorldMatrix'>;
   status: Pick<SourceActorStatusTimersRuntime, 'getActualActor' | 'getActorBinding' | 'getWorldBinding' |
     'getMappingActor' | 'getAttributeBinding' | 'getAmmoSlot' | 'getStartBinding'>;
-  attributes: Pick<SourceActorAttributeRefreshRuntime, 'getActualActor' | 'getActorBinding' | 'getDescriptorBinding'>;
+  attributes: Pick<SourceActorAttributeRefreshRuntime, 'getActualActor' | 'getActorBinding' | 'getDescriptorBinding'> &
+    Partial<Pick<SourceActorAttributeRefreshRuntime, 'getParameterDescriptor'>>;
   charge: SourceActorInputChargeRuntime;
   actionRequest: SourceActorActionRequestRuntime;
   cues: SourceActorCueResetRuntime;
@@ -90,6 +96,22 @@ export function isSourceActorCommandAdmissionRuntime(value: unknown): value is S
   return value !== null && typeof value === 'object' && runtimes.has(value);
 }
 export function hasIncompleteSourceActorCommandAdmission(actual: object): boolean {return incomplete.has(actual);}
+type VoiceCallsite = 0x800ea324 | 0x800ea190;
+const voiceInvocations = new WeakMap<object, {id: symbol; callsite: VoiceCallsite; entered: boolean; check: () => void}>();
+/** Consumed only by the private active ordered55568 bridge. No invocation can
+ * be manufactured through these observers. */
+export function consumeSourceActorVoiceRngInvocation(runtime: SourceActorCommandAdmissionRuntime, id: symbol, callsite: number): void {
+  const invocation = voiceInvocations.get(runtime);
+  if (!invocation || invocation.id !== id || invocation.callsite !== callsite || invocation.entered)
+    fail('800055fc: missing, mismatched or replayed voice invocation');
+  invocation.entered = true; invocation.check();
+}
+export function checkSourceActorVoiceRngInvocation(runtime: SourceActorCommandAdmissionRuntime, id: symbol, callsite: number): void {
+  const invocation = voiceInvocations.get(runtime);
+  if (!invocation || invocation.id !== id || invocation.callsite !== callsite || !invocation.entered)
+    fail('800055fc: no consumed matching voice invocation');
+  invocation.check();
+}
 function fail(reason: string): never {
   throw Error(`[actor-command-admission] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
@@ -190,6 +212,10 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
   const matrixRows = new Map<symbol, Map<number, object>>(), ammoRows = new Map<symbol, Map<number, object>>();
   const ammoCells = new Map<object, object>();
   let roster: object | undefined, flagTable: object | undefined;
+  let voiceParameter: ((...args: unknown[]) => unknown) | undefined;
+  const voiceParameters = new Map<symbol, object>();
+  const voiceParameterIds = new Map<object, symbol>();
+  let voiceSlotOwners: object | undefined;
   const rosterRows = new Map<number, object>();
   const entry = (id: symbol): Entry => {const value = actors.get(id); if (!value) fail('unknown/non-owned admission actor'); return value;};
   const owners = (e: Entry): object[] => [e.actual, e.world, e.status, e.mapping, e.attribute, e.charge,
@@ -208,7 +234,7 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
       ['aimOrigin518', e.actual], ['lockTarget', e.actual], ['targetDistance760', e.actual], ['horizontalDistance764', e.actual],
       ['stateFlagA', e.actual], ['stateFlagB', e.actual], ['commandTable', e.actual], ['descriptor4b0', e.mapping],
       ['yawOffset6b8', e.world], ['byte7d2', e.action], ['marker709', e.start], ['blockedMask1d9a', e.stream],
-      ['pointer504', e.binding], ['pointer508', e.binding], ['pointerc8', e.binding], ['byteD0', e.binding],
+      ['byte438', e.binding], ['pointer504', e.binding], ['pointer508', e.binding], ['pointerc8', e.binding], ['byteD0', e.binding],
       ...WARMUPS.map(key => [key, e.charge] as [string, object]), ...BANKS.map(key => [key, e.charge] as [string, object]),
     ]);
     const aliases = ['byte585','byte586','byte587','byte584','byte580','byte581','field694','pointer4ec','field4ec',
@@ -219,7 +245,8 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
         !(key === 'controlWord' && (owner === target || storage.get(owner) === 'visibility-target')) && property(owner, key) !== undefined)
         fail(`${key}: competing command-admission storage on another owner`);
       for (const key of aliases) if (property(owner, key) !== undefined) fail(`${key}: competing command-admission storage alias`);
-      if (owner !== global && property(owner, 'byte45') !== undefined) fail('byte45: competing match-global storage');
+      for (const key of ['byte45', 'byte15dd', 'byte1828', 'byte26Slots'])
+        if (owner !== global && property(owner, key) !== undefined) fail(`${key}: competing match-global storage`);
       for (const key of ['float8043762c', 'float80437658', 'float80437678', 'float80437078', 'double80437660', 'double80437668', 'flags3994'])
         if (owner !== data && property(owner, key) !== undefined) fail(`${key}: competing shared data storage`);
     }
@@ -431,7 +458,47 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
     }
     // Actual ea2c8 supplies event2 and -1, then ea2ec first loads shared45.
     stable(cg(), global, 'shared voice global');
-    if (s8(byte(global, 'byte45')) < 5) fail('800ea324 reached unsupported source800055fc RNG before active-match audio');
+    if (s8(byte(global, 'byte45')) < 5) {
+      const random = (callsite: VoiceCallsite): number => {
+        if (voiceInvocations.has(runtime)) fail('800055fc: recursive voice invocation');
+        voiceInvocations.set(runtime, {id, callsite, entered: false, check});
+        try {
+          const state = consumeActiveSourceActorOrderedVoiceRng(runtime, id, callsite);
+          return stepSourceByteRng(state, () => {
+            check(); checkActiveSourceActorOrderedVoiceRng(runtime, id, callsite, state); check();
+          });
+        } finally {voiceInvocations.delete(runtime);}
+      };
+      const first = random(0x800ea324);
+      const captured438 = s8(byte(e.binding, 'byte438'));
+      let choice = first < 128;
+      if (captured438 >= 14) choice = false;
+      stable(cg(), global, 'captured voice global');
+      if (s8(byte(global, 'byte15dd')) === 0) choice = false;
+      const slot = s8(byte(e.actual, 'slot'));
+      const mask = byte(global, 'byte1828'), shift = slot & 63;
+      if ((mask & (shift >= 32 ? 0 : (1 << shift))) !== 0) return 1;
+      const slotOwners = record(read(global, 'byte26Slots'), 'voice slot owner bytes');
+      if (voiceSlotOwners !== undefined) stable(slotOwners, voiceSlotOwners, 'voice slot bytes');
+      retain(e, slotOwners, 'voice-slot-owner-bytes'); voiceSlotOwners = slotOwners;
+      if (s8(byte(slotOwners, String(slot))) < 0) return 1;
+      if (!choice) {
+        const selected = read(e.attribute, 'parameter4ac');
+        if (typeof selected !== 'symbol') fail('voice parameter4ac: explicit identity required');
+        voiceParameter ??= capture('attributes', 'getParameterDescriptor');
+        const parameter = record(voiceParameter(selected), 'voice actual parameter4ac');
+        if (voiceParameters.has(selected)) stable(parameter, voiceParameters.get(selected)!, 'voice parameter owner');
+        if (voiceParameterIds.has(parameter) && voiceParameterIds.get(parameter) !== selected)
+          fail('voice parameter owner aliases another identity');
+        retain(e, parameter, 'voice-parameter');
+        voiceParameters.set(selected, parameter); voiceParameterIds.set(parameter, selected);
+        // Parameter is owned by the existing attribute runtime, not copied here.
+        if (byte(parameter, 'byte183') !== 0) return 1;
+      }
+      if (random(0x800ea190) < 64)
+        fail('800ea1f4 reached unsupported source800e9e68 voice pool/audio selection');
+      // Real selector negative return: event2 second RNG >=64, no audio call.
+    }
     return 1;
   };
   const runtime: SourceActorCommandAdmissionRuntime = {
@@ -452,6 +519,7 @@ export function createSourceActorCommandAdmissionRuntime(sources: SourceActorCom
       record(initial, 'initial admission binding'); noShadows({...e, binding: initial});
       for (const key of ['pointer504', 'pointer508', 'pointerc8'] as const)
         if (property(initial, key) !== undefined) Object.assign(binding, {[key]: pointer(read(initial, key), key)});
+      if (property(initial, 'byte438') !== undefined) binding.byte438 = byte(initial, 'byte438');
       if (property(initial, 'byteD0') !== undefined) binding.byteD0 = byte(initial, 'byteD0');
       Object.seal(binding); e.extras = Object.freeze([binding]);
       check(); actors.set(id, e); records.forEach(value => assigned.add(value)); claimed.add(actual);

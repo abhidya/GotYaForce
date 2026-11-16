@@ -1,3 +1,6 @@
+import {runSelfTest as runActorVoiceRngSelfTests} from './actor-voice-rng.selftest.js';
+import {runActorMatrixSpringSelfTests} from './actor-matrix-spring.selftest.js';
+import {runBattleOrderedVoiceSelfTests} from './battle-ordered-voice.selftest.js';
 import {runBattleOrderedActorStageSelfTests} from './battle-ordered-actor-stage.selftest.js';
 import {runBattleOrderedActorPrefixSelfTests} from './battle-ordered-actor-prefix.selftest.js';
 import {runBattleSchedulerJoinSelfTests} from './battle-scheduler-join.selftest.js';
@@ -124,6 +127,7 @@ let projectileFixtureConstruction = false;
 /** Negative target fixtures omit a cell BEFORE its genuine sealed binding is
  * constructed. This scope never replaces a running owner or source getter. */
 let targetPreparationMissingCell: 'byte7d2'|'pointer508'|undefined;
+let orderedVoice438: number|undefined;
 function constructGenuineComposition<T>(build: () => T): T {
   const previous = genuineCompositionConstruction;
   genuineCompositionConstruction = true;
@@ -3452,7 +3456,7 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
     const initial=targetPreparationMissingCell==='pointer508'
       ? {...chargeHydration.commandAdmission.initial} : chargeHydration.commandAdmission.initial;
     if(targetPreparationMissingCell==='pointer508') delete initial.pointer508;
-    runtime.bindActor(x.actor, initial);
+    runtime.bindActor(x.actor, orderedVoice438===undefined?initial:{...initial,byte438:orderedVoice438});
     return runtime;
   })();
   const inputTesters = chargeHydration?.inputTesters === undefined ? undefined : (() => {
@@ -13638,6 +13642,11 @@ export function createBattleTargetPreparationTestFixture(omit?: 'byte7d2'|'point
     return Object.assign(x,{targetAction,targetPreparation});
   } finally {targetPreparationMissingCell=previous;}
 }
+/** Explicit extra voice cell only for the ordered normal-match witness. */
+export function createBattleTargetPreparationVoiceTestFixture() {
+  const previous=orderedVoice438;orderedVoice438=1;
+  try{return createBattleTargetPreparationTestFixture();}finally{orderedVoice438=previous;}
+}
 export function runBattleTargetPreparationHydratedCompositionTests(): void {
   runBattleTargetPreparationSelfTests(createBattleTargetPreparationTestFixture,createBattleMassOrderingTestFixture);
 }
@@ -13776,3 +13785,9 @@ export function runBattleOrderedActorPrefixHydratedCompositionTests():void{
 export function runBattleOrderedActorStageHydratedCompositionTests():void{
  runBattleOrderedActorStageSelfTests(createBattleTargetPreparationTestFixture);
 }
+
+export function runBattleOrderedVoiceHydratedCompositionTests():void {runBattleOrderedVoiceSelfTests(createBattleTargetPreparationVoiceTestFixture);}
+
+export function runActorMatrixSpringHydratedCompositionTests():void {runActorMatrixSpringSelfTests(createBattleTargetPreparationTestFixture);}
+
+export function runActorVoiceRngHydratedCompositionTests():void {runActorVoiceRngSelfTests();}

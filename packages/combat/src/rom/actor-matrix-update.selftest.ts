@@ -262,9 +262,9 @@ export function runActorMatrixUpdateSelfTests(): void {
     '80048be0', '80049f10', '8004a00c', '8004a0e0', '8004a1cc', '8004a2ec', '8004a41c', '8004a60c'];
   for (const selector of [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]) {
     const f = fixture(); f.actual.controlWord = 0; f.metadata.getActorBinding(f.id).byte1d98 = selector;
-    f.globals.maskD2 = NaN; rejects(f.update, `46e7c handler ${targets[selector]}`);
+    f.globals.maskD2 = NaN; rejects(f.update, selector === 0 ? 'descriptor byte requires an owned bound mapping descriptor' : `46e7c handler ${targets[selector]}`);
     check(f.state().count1d96 === 0 && f.state().count1d97 === 0 && f.state().field1d60 === 10 && f.output(1)[7] === 27,
-      `unsupported selector${selector} preserves first pass and clears, before damping/visibility`);
+      `selector${selector} preserves first pass and clears at its missing prerequisite, before spring/damping/visibility`);
     check(f.events.join(',') === 'prepare,rebuild:0', 'unsupported handler never fakes second pass');
   }
   {

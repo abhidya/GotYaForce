@@ -14,10 +14,11 @@ import {isSourceActorReadyTransitionsRuntime,type SourceActorReadyTransitionsRun
 import {isSourceActorCue0LifecycleRuntime,type SourceActorCue0LifecycleRuntime} from './actor-cue0-lifecycle.js';
 import {isSourceActorChargeEffectsRuntime,type SourceActorChargeEffectsRuntime} from './actor-charge-effects.js';
 import {isSourceActorMatrixUpdateRuntime,type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
+import {consumeSourceActorVoiceRngInvocation,checkSourceActorVoiceRngInvocation,type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {addSourceFloat32} from './source-float.js';
 import {markIncompleteSourceActorDoubleLifecycle,requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {enterSourceBattleOrderedActorInvocation,checkSourceBattleOrderedActorInvocation,
-  consumeSourceBattleOrderedActorDistances,requireSourceBattleOrderedActorMatrices,rejectSourceBattleOrderedActorReentry,type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
+  consumeSourceBattleOrderedActorDistances,requireSourceBattleOrderedActorMatrices,requireSourceBattleOrderedVoiceRng,rejectSourceBattleOrderedActorReentry,type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
 export interface SourceActorOrderedFrameBinding {
   field6dc:number;byte1ca:number;byte730:number;byte731:number;byte488:number;
   readonly vector724:{x:number;y:number;z:number};pointer7f0:number;
@@ -42,7 +43,10 @@ interface Authority {
   frame(frame:SourceActorFrameLifecycleRuntime,id:symbol,token:object):void;
   history(history:SourceActorTransformHistoryRuntime,id:symbol):void;
   historyCheck(history:SourceActorTransformHistoryRuntime,id:symbol):void;
-  frameCheck(frame:SourceActorFrameLifecycleRuntime,id:symbol,token:object):void;reject():void;
+  frameCheck(frame:SourceActorFrameLifecycleRuntime,id:symbol,token:object):void;
+  voicePosition(command:SourceActorCommandAdmissionRuntime,id:symbol,site:number):void;
+  voiceConsume(command:SourceActorCommandAdmissionRuntime,id:symbol,site:number):object;
+  voiceCheck(command:SourceActorCommandAdmissionRuntime,id:symbol,site:number,state:object):void;reject():void;
 }
 const authorities=new WeakMap<object,Authority>();
 export function isSourceActorOrderedFrameRuntime(value:unknown):value is SourceActorOrderedFrameRuntime {
@@ -69,6 +73,18 @@ export function checkSourceActorOrderedHistoryInvocation(stage:SourceActorOrdere
 export function rejectSourceActorOrderedFrameReentry(stage:SourceActorOrderedFrameRuntime):void {authorities.get(stage)?.reject();}
 export function invokeSourceActorOrderedFrameFromOuter(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol):void {
   const scope=authorities.get(stage);if(!scope)fail('genuine54070 runtime required');scope.run(outer,id);
+}
+const activeOrderedStages:SourceActorOrderedFrameRuntime[]=[];
+export function checkSourceActorOrderedVoicePosition(stage:SourceActorOrderedFrameRuntime,command:SourceActorCommandAdmissionRuntime,id:symbol,site:number):void {
+  const scope=authorities.get(stage);if(!scope)fail('private active55568 voice position required');scope.voicePosition(command,id,site);
+}
+export function consumeActiveSourceActorOrderedVoiceRng(command:SourceActorCommandAdmissionRuntime,id:symbol,callsite:number):object {
+  const active=activeOrderedStages[activeOrderedStages.length-1],scope=active&&authorities.get(active);
+  if(!scope)fail('800055fc requires private active source voice invocation');return scope.voiceConsume(command,id,callsite);
+}
+export function checkActiveSourceActorOrderedVoiceRng(command:SourceActorCommandAdmissionRuntime,id:symbol,callsite:number,state:object):void {
+  const active=activeOrderedStages[activeOrderedStages.length-1],scope=active&&authorities.get(active);
+  if(!scope)fail('800055fc requires private active source voice invocation');scope.voiceCheck(command,id,callsite,state);
 }
 const activeOrderedChecks:(()=>void)[]=[];
 let checkingOrderedParent=false;
@@ -246,14 +262,27 @@ export function createSourceActorOrderedFrameRuntime(sources:SourceActorOrderedF
       if(outer){reject();fail('same ordered runtime reentry');}if(incomplete)fail('permanently incomplete ordered stage');
       const actual=enterSourceBattleOrderedActorInvocation(selected,runtime,id);
       if(entry(id).actual!==actual)fail('outer ordered actual differs');outer=selected;activeId=id;poisoned=false;
-      activeOrderedChecks.push(check);
+      activeOrderedChecks.push(check);activeOrderedStages.push(runtime);
       try{body(id);check();}catch(error){incomplete=true;markIncompleteSourceActorDoubleLifecycle(actual);rejectSourceBattleOrderedActorReentry(selected);throw error;}
-      finally{activeOrderedChecks.pop();outer=undefined;activeId=undefined;historyActive=false;historyPending=false;framePending=undefined;}
+      finally{activeOrderedStages.pop();activeOrderedChecks.pop();outer=undefined;activeId=undefined;historyActive=false;historyPending=false;framePending=undefined;}
     },
     history(selected,id){if(!outer||activeId!==id||selected!==history||!historyPending){reject();fail('private exact5408c history invocation required');}historyPending=false;check();},
     frame(selected,id,token){const pending=framePending;if(!outer||activeId!==id||!pending||pending.frame!==selected||pending.token!==token||pending.entered){reject();fail('private exact single-use54ca8 invocation required');}pending.entered=true;check();},
     historyCheck(selected,id){if(!outer||activeId!==id||selected!==history||!historyActive||historyPending){reject();fail('private active5408c history invocation required');}check();},
     frameCheck(selected,id,token){const pending=framePending;if(!outer||activeId!==id||!pending||pending.frame!==selected||pending.token!==token||!pending.entered){reject();fail('private active54ca8 invocation required');}check();},
+    voicePosition(command,id,site){
+      if(!outer||activeId!==id||!framePending?.entered||command.getGlobal()!==globals){reject();fail('private exact active55568 voice RNG scope required');}
+      checkSourceActorVoiceRngInvocation(command,id,site);check();
+    },
+    voiceConsume(command,id,site){
+      if(!outer||activeId!==id||!framePending?.entered||command.getGlobal()!==globals){reject();fail('private exact active55568 voice RNG scope required');}
+      check();consumeSourceActorVoiceRngInvocation(command,id,site);check();
+      return requireSourceBattleOrderedVoiceRng(outer,runtime,id,command,site);
+    },
+    voiceCheck(command,id,site,state){
+      if(!outer||activeId!==id||!framePending?.entered||command.getGlobal()!==globals){reject();fail('private exact active55568 voice RNG scope required');}
+      checkSourceActorVoiceRngInvocation(command,id,site);check();requireSourceBattleOrderedVoiceRng(outer,runtime,id,command,site,state);
+    },
     reject,
   });
   runtimes.add(runtime);pendingHistories.set(runtime,history);

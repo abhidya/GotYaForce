@@ -3,6 +3,8 @@
  * 46e7c followed by 46bd0(mode1). 46e7c clears its actual scan counts and
  * admits 46ef4 damping (suppression or selector1), 47344 damping/addY, and
  * 47164 no-query exits, genuine query returns and explicit correction stores.
+ * 46f08 admits explicit sentinel/masked scans and exact mandatory spring stores;
+ * eligible nonempty contacts still refuse before their matrix load/query.
  * Other dispatch targets refuse after required argument reads. Without an
  * explicit query owner, 47164 refuses at a reached query. Correction storage
  * must be supplied explicitly; absent storage refuses before stackY/stores.
@@ -32,6 +34,8 @@
 import {checkActiveSourceActorOrderedInvocation} from './actor-ordered-frame.js';
 import type {SourceBattleOuterGlobalFields} from './battle-global-layout.js';
 import {addSourceFloat32, fusedMultiplyAddSourceFloat32} from './source-float.js';
+import {divideSourceAnimationFloat32} from './actor-animation-transition.js';
+import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import type {SourceActorTerrainQueryRuntime} from './actor-terrain-query.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorCorrectedTraversalState,
   SourceActorPrimaryTerrainCorrection, SourceActorSecondaryTerrainCorrection} from './actor-world-matrix.js';
@@ -67,10 +71,14 @@ export interface SourceActorMatrixUpdateSources {
   mapping: Pick<SourceActorJointMappingRuntime, 'getActor'>;
   /** Optional explicit source query owner. Unreached query paths do not need it. */
   terrain?: Pick<SourceActorTerrainQueryRuntime, 'query8003d6e4'>;
+  /** Optional genuine shared674 owner; required only when46f08 reaches its load. */
+  attributes?: SourceActorAttributeRefreshRuntime;
   /** The actual battle-global record, not a copied mask or a callback. */
   globals: SourceActorMatrixUpdateGlobals;
 }
 export interface SourceActorMatrixUpdateRuntime {
+  /** Once-only metadata join before execution, for later-constructed attribute owner. */
+  bindAttributesRuntime(attributes: SourceActorAttributeRefreshRuntime): void;
   bindActor(identity: symbol, initial: Readonly<SourceActorMatrixUpdateInitial>, storage?: SourceActorMatrixUpdateStorage): void;
   getActorBinding(identity: symbol): SourceActorMatrixUpdateBinding;
   /** Retained owner identities for source lifecycle composition; no scalar reads. */
@@ -118,7 +126,15 @@ function record(value: unknown, where: string): object {
   return value;
 }
 export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixUpdateSources): SourceActorMatrixUpdateRuntime {
-  let busy = false, poisoned = false;
+  let busy = false, poisoned = false, executed = false;
+  let attributes: SourceActorAttributeRefreshRuntime | undefined;
+  const attributeField = Reflect.getOwnPropertyDescriptor(sources, 'attributes');
+  if (attributeField !== undefined) {
+    const value = own(sources, 'attributes');
+    if (!isSourceActorAttributeRefreshRuntime(value)) fail('genuine attribute674 owner required');
+    attributes = value;
+  }
+  const nativeDescriptor = Reflect.getOwnPropertyDescriptor;
   const check = (): void => {if (poisoned) fail('caught same-runtime reentry');checkActiveSourceActorOrderedInvocation();};
   const read = (value: unknown, key: string): unknown => {const result = own(value, key); check(); return result;};
   const write = (value: unknown, key: string, next: number): void => {
@@ -157,7 +173,83 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
     if (actual !== expected) fail(`${name} owner changed its actual record`);
     return actual;
   };
+  const attributeRows = new Map<symbol, object>();
+  const springOwners = (id: symbol, actor: Entry): object[] => {
+    stable(getActual, id, actor.actual, 'actual'); stable(getWorld, id, actor.world, 'world');
+    stable(getMovement, id, actor.movement, 'movement'); stable(getMetadata, id, actor.metadata, 'metadata');
+    stable(getMapping, id, actor.mapping, 'mapping');
+    const owner = attributes;
+    if (!isSourceActorAttributeRefreshRuntime(owner)) fail('46f08 genuine shared attribute674 owner required');
+    if (attributeField !== undefined && read(sources, 'attributes') !== owner) fail('attribute674 runtime changed');
+    if (attributeField === undefined && Object.getOwnPropertyDescriptor(sources,'attributes') !== undefined) fail('competing attribute674 source owner');
+    check();
+    if (owner.getActualActor(id) !== actor.actual || owner.getMappingActor(id) !== actor.mapping ||
+        owner.getMovementBinding(id) !== actor.movement) fail('46f08 attribute674 canonical owner differs');
+    check();
+    const state = record(owner.getActorBinding(id), 'attribute674 binding'); check();
+    const previous = attributeRows.get(id); if (previous && previous !== state) fail('attribute674 binding changed');
+    attributeRows.set(id, state);
+    const records = [actor.actual, actor.world, actor.movement, actor.metadata, actor.mapping, actor.binding, state];
+    if (new Set(records).size !== records.length) fail('46f08 canonical source owner alias');
+    const aliases=(value:object):string[]=>[
+      ...(value===state?[]:['field674']), 'stepThreshold674','field674Alias','1652',
+      ...(value===actor.binding?[]:['field1d60']), 'spring1d60','field1d60Alias','7520',
+    ];
+    for (const value of records) for (const key of aliases(value)) {
+      if (Object.getOwnPropertyDescriptor(value,key) !== undefined) fail(`46f08 competing674 or spring owner:${key}`);check();
+    }
+    for (const value of records) for (const key of aliases(value))
+      if (nativeDescriptor(value,key) !== undefined) fail(`46f08 competing674 or spring owner:${key}`);
+    check(); return records;
+  };
+  const runSpringSentinel = (id: symbol, actor: Entry, descriptorId: symbol | null): void => {
+    // 46f08 entry operands precede even the first descriptor sentinel.
+    const bits = byte(stable(getMetadata,id,actor.metadata,'metadata'),'byte1d99');
+    const scale = float(read(stable(getActual,id,actor.actual,'actual'),'modelScale'),'modelScale');
+    const root = record(getMatrix(id,0),'root matrix8f0');
+    if (!Array.isArray(root) || read(root,'length') !== 12) fail('46f08 full root matrix required');
+    float(read(root,'7'),'root matrix8f0');
+    float(read(stable(getMovement,id,actor.movement,'movement'),'field670'),'field670');
+    // Selected constants0,2 and conversion-double are exact; nibble conversion
+    // is exact. Both multiplications remain separate source f32 round sites.
+    float(Math.fround(Math.fround(2 * (bits & 15)) * scale),'46f08 threshold');
+    let descriptor: object | undefined;
+    for (let i=0;i<4;i++) {
+      const current=record(getDescriptor(descriptorId),'46f08 movement descriptor');
+      if (descriptor !== undefined && descriptor !== current) fail('46f08 descriptor owner changed');
+      descriptor=current;
+      const first=byte(current,['joint22','joint2a','joint32','joint3a'][i]!);
+      if ((first<<24>>24)===-1) break;
+      const liveBits=byte(stable(getMetadata,id,actor.metadata,'metadata'),'byte1d99')<<24>>24;
+      if ((liveBits & (1 << (i+6))) !== 0) continue;
+      fail('46f08 reached unsupported nonempty contact matrix load before8003d6e4');
+    }
+    const records=springOwners(id,actor), attribute=records[6]!;
+    const limit=float(read(attribute,'field674'),'field674');springOwners(id,actor);
+    let adjustment=0;
+    if (adjustment < -limit) adjustment=-float(Math.fround(limit*0.125),'46f08 minimum');
+    const divisor=float(read(stable(getActual,id,actor.actual,'actual'),'modelScale'),'modelScale');
+    const division=divideSourceAnimationFloat32(adjustment,divisor);check();
+    const old=float(read(actor.binding,'field1d60'),'field1d60');
+    const next=float(Math.fround(fusedMultiplyAddSourceFloat32(3,old,division)*0.25),'46f08 spring result');
+    const store=(owner:object,key:string,value:number):void=>{
+      springOwners(id,actor);own(owner,key,true);check();springOwners(id,actor);
+      const field=nativeDescriptor(owner,key);
+      if (!field || !('value' in field) || !field.writable) fail(`${key}: live writable source cell required`);
+      (owner as Record<string,unknown>)[key]=value;check();
+    };
+    store(actor.binding,'field1d60',next);
+    const adjusted=record(read(stable(getWorld,id,actor.world,'world'),'adjusted1d54'),'adjusted1d54');
+    const y=float(read(adjusted,'y'),'adjusted1d54.y');
+    // Source keeps the newly stored spring value in f1; do not reload1d60.
+    store(adjusted,'y',addSourceFloat32(y,next));
+  };
   const runtime: SourceActorMatrixUpdateRuntime = {
+    bindAttributesRuntime(owner): void {guard(() => {
+      if (executed || attributes !== undefined) fail('attribute674 owner join must be once before execution');
+      if (!isSourceActorAttributeRefreshRuntime(owner)) fail('genuine attribute674 owner required');
+      attributes=owner;
+    });},
     bindActor(id: symbol, initial: Readonly<SourceActorMatrixUpdateInitial>, storage?: SourceActorMatrixUpdateStorage): void {guard(() => {
       if (typeof id !== 'symbol') fail('actual actor symbol required');
       if (actors.has(id)) fail('matrix-update actor already bound');
@@ -199,6 +291,7 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
     getMappingActor(id: symbol) {return entry(id).mapping;},
     getGlobals() {return globals as SourceActorMatrixUpdateGlobals;},
     updateActor(id: symbol): void {guard(() => {
+      executed = true;
       const actor = entry(id), state = actor.binding;
       if (byte(stable(getWorld, id, actor.world, 'world'), 'mode4a0') === 2) return;
       effect(prepare, id);
@@ -214,7 +307,8 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
         // The computed +22 pointer is not dereferenced by46ef4. Do not demand
         // descriptor storage or fabricate its contents for arithmetic alone.
         const handler = selector === null ? 0x80046ef4 : DISPATCH[selector]!;
-        if (handler !== 0x80046ef4 && handler !== 0x80047164 && handler !== 0x80047344) fail(`46e7c handler ${handler.toString(16)} is outside the bounded damping domain`);
+        if (handler !== 0x80046f08 && handler !== 0x80046ef4 && handler !== 0x80047164 && handler !== 0x80047344) fail(`46e7c handler ${handler.toString(16)} is outside the bounded damping domain`);
+        if (handler === 0x80046f08) runSpringSentinel(id,actor,descriptorId);
         if (handler === 0x80047164) {
           const initialBits = byte(stable(getMetadata, id, actor.metadata, 'metadata'), 'byte1d99');
           const clearance = float(read(stable(getMovement, id, actor.movement, 'movement'), 'field670'), 'field670');
@@ -296,6 +390,7 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
             }
           }
         }
+        if (handler !== 0x80046f08) {
         const old = float(read(state, 'field1d60'), 'field1d60');
         // A product of finite binary32 operands is exact in binary64 before
         // this one RN-even rounding, including signed zero and subnormals.
@@ -306,6 +401,7 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
           const y = float(read(adjusted, 'y'), 'adjusted1d54.y');
           const velocity = float(read(state, 'field1d60'), 'field1d60');
           write(adjusted, 'y', float(addSourceFloat32(y, velocity), 'adjustedY sum'));
+        }
         }
         effect(rebuild, id, 1);
       }

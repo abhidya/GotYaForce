@@ -48,6 +48,8 @@ export interface SourceActorAttributeDescriptorBinding {
   field44: number; field48: number; field4c: number; field50: number; field54: number;
 }
 export interface SourceActorAttributeParameterDescriptor {
+  /** Reached event2 speaker gate on the SAME actual4ac parameter owner. */
+  byte183: number;
   /** Signed-short extension of this SAME 4ac owner, consumed by 8005568c. */
   field04: number; field08: number;
   /** Signed yaw rate on this SAME4ac owner, consumed by800669d0 maskC1. */
@@ -220,7 +222,7 @@ export function createSourceActorAttributeRefreshRuntime(sources: SourceActorAtt
           binding[key] = value === 0 ? 0 : value;
         }
       }
-      for (const key of ['byteA3', 'byte9f'] as const) {
+      for (const key of ['byteA3', 'byte9f', 'byte183'] as const) {
         const p = Object.getOwnPropertyDescriptor(initial, key); check();
         if (p !== undefined) binding[key] = integer(read(initial, key), 255, key);
       }

@@ -26,7 +26,7 @@ return Object.assign(x,{actorFrame:frame,ordered,orderedState:ordered.getActorBi
 
 type Make=typeof createBattleTargetPreparationTestFixture;
 type Fixture=ReturnType<typeof createBattleOrderedActorStageTestFixture>;
-const MATRIX='46e7c handler 80046f08';
+const MATRIX='46f08 genuine shared attribute674 owner required';
 function check(ok:boolean,why:string):void{if(!ok)throw Error('[battle-ordered-actor-stage-test] '+why);}
 function refuses(f:()=>unknown,part:string):string{let message='';try{f();}catch(e){message=String(e);}check(message.includes(part),`expected ${part}, got ${message||'success'}`);return message;}
 function run(x:Fixture,expected:string,visit:(o:object,k:PropertyKey)=>void=()=>{}):void{
@@ -60,7 +60,7 @@ export function runBattleOrderedActorStageSelfTests(make:Make):void{
  }
  {
   const x=fresh();x.matchGlobals.byte45=0;
-  run(x,'800ea324 reached unsupported source800055fc RNG');
+  run(x,'byte438: own data property required');
   check(x.orderedState.field6dc===99,'ordinary audio refusal precedes suffix height store');
  }
  {

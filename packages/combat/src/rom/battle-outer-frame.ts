@@ -24,7 +24,8 @@
  * player and actor cells; after binding the fresh mode selects genuine wrappers
  * 89a94(40),89a94(32) or singles89898(58),89898(57). Normal returns
  * enter the bounded53a2c ordinary helper prefix or stop at89554 respectively.
- * The live ordered loop stops before54070; an empty signed count still runs
+ * A supplied genuine ordered owner executes54070; absent it the live loop stops.
+ * An empty signed count still runs
  * mandatory5b140 and the bounded5b2b8 clear/countdown paths before87cf0.
  * No success callback, skipped predecessor, source actor hydration, epoch,
  * complete frame or browser activation is manufactured.
@@ -52,7 +53,8 @@ import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} f
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
 import {isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
-import {isSourceActorOrderedFrameRuntime,invokeSourceActorOrderedFrameFromOuter,type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
+import {isSourceActorOrderedFrameRuntime,invokeSourceActorOrderedFrameFromOuter,checkSourceActorOrderedVoicePosition,type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
+import {stepSourceByteRng} from './source-byte-rng.js';
 import {claimSourceHelperStorage} from './source-storage-claims.js';
 import {requireSourceActorActionSlotStatusOwner} from './actor-action-request.js';
 import type {SourceBattleOuterGlobalFields, SourceBattleSystemGlobals} from './battle-global-layout.js';
@@ -154,6 +156,7 @@ interface OrderedActorInvocationScope {
   check(stage:SourceActorOrderedFrameRuntime,id:symbol):void;
   consume(stage:SourceActorOrderedFrameRuntime,id:symbol):object;
   matrices(stage:SourceActorOrderedFrameRuntime,id:symbol,owner:SourceActorMatrixUpdateRuntime):void;
+  rng(stage:SourceActorOrderedFrameRuntime,id:symbol,command:SourceActorCommandAdmissionRuntime,callsite:number,expected?:object):object;
   reject():void;
 }
 const orderedActorInvocations=new WeakMap<object,OrderedActorInvocationScope>();
@@ -168,6 +171,9 @@ export function consumeSourceBattleOrderedActorDistances(outer:SourceBattleOuter
 }
 export function requireSourceBattleOrderedActorMatrices(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol,owner:SourceActorMatrixUpdateRuntime):void {
   const scope=orderedActorInvocations.get(outer);if(!scope)fail('private ordered matrix owner required');scope.matrices(stage,id,owner);
+}
+export function requireSourceBattleOrderedVoiceRng(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol,command:SourceActorCommandAdmissionRuntime,callsite:number,expected?:object):object {
+  const scope=orderedActorInvocations.get(outer);if(!scope)fail('private source800055fc owner required');return scope.rng(stage,id,command,callsite,expected);
 }
 export function rejectSourceBattleOrderedActorReentry(outer:SourceBattleOuterFrameRuntime):void {orderedActorInvocations.get(outer)?.reject();}
 function fail(reason: string): never {
@@ -448,7 +454,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       'parameter4ac','pointer4ac','1196','24','517','518','519','521','522','523']);
     call(()=>requireCompleteSourceActorDoubleLifecycle(value));return value;
   };
-  const randomByte=(mass: object,where: string): number=>{
+  const rngOwner=(mass:object,where:string):{state:object;guard:()=>void}=>{
     const supplied=Object.getOwnPropertyDescriptor(mass,'rngState');check();
     if(supplied===undefined)fail(`${where} reached mandatory800055fc RNG predecessor`);
     if(read(sources,'massPreparation')!==mass || retained.get('massPreparation')!==mass)
@@ -462,17 +468,10 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       for(const key of aliases)if(primaryStoreDescriptor(state,key)!==undefined)fail(`${key}: competing source cell owner`);
       check();
     };
-    const load=(key:string):number=>{guard();const value=byte(state,key);guard();return value;};
-    const store=(key:string,value:number):void=>{
-      guard();own(state,key,true);guard();const destination=primaryStoreDescriptor(state,key);
-      if(!destination || !('value'in destination))fail(`${key}: live own data property required`);
-      if(!destination.writable)fail(`${key}: live non-writable field`);
-      (state as Record<string,unknown>)[key]=value;guard();
-    };
-    // Complete existing055fc: captured high/low, high store before low store.
-    const high=load('byte804360c7'),low=load('byte804360c6');
-    const nextHigh=(((high*256+low)*3)>>8)&255,nextLow=(low+nextHigh)&255;
-    store('byte804360c7',nextHigh);store('byte804360c6',nextLow);return nextLow;
+    return {state,guard};
+  };
+  const randomByte=(mass:object,where:string):number=>{
+    const {state,guard}=rngOwner(mass,where);return stepSourceByteRng(state,guard);
   };
   const prepareMass=(): void=>{
     const supplied=Object.getOwnPropertyDescriptor(sources,'massPreparation');check();
@@ -2347,6 +2346,12 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     matrices(selected,id,owner){
       orderedCheck(selected,id);const mass=retain('massPreparation',read(sources,'massPreparation'));
       if(read(mass,'matrices')!==owner)fail('54160 matrix owner differs from canonical mass4a4 owner');
+    },
+    rng(selected,id,command,callsite,expected){
+      orderedCheck(selected,id);checkSourceActorOrderedVoicePosition(selected,command,id,callsite);
+      if(command!==spawns.getAdmissionRuntime()||command.getGlobal()!==globals)fail('voice RNG canonical command/global owner differs');
+      const mass=retain('massPreparation',read(sources,'massPreparation')),{state,guard}=rngOwner(mass,'voice800055fc');
+      guard();if(expected!==undefined&&expected!==state)fail('voice RNG state owner changed');return state;
     },
     reject(){if(busy){poisoned=true;close();}},
   });
