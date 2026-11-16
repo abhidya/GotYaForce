@@ -1,3 +1,4 @@
+import {getSourceProjectileResourceJointPointer,completeSourceProjectileResourceDescriptor} from './source-object-allocation.js';
 import {createProjectileInitializerTailTestFixture} from './projectile-initializer-tail.selftest.js';
 import {createSourceProjectileResourceRuntime,invokeSourceProjectileResource,type SourceJObjClassFields,type SourceJObjMemoryEntry,type SourceJObjFreeBlock} from './projectile-resource.js';
 import type {createProjectileInitializerTailBaseTestFixture} from './attached-setup-animation.selftest.js';
@@ -203,6 +204,82 @@ export function runProjectileResourceSelfTests(make:Make):void{
   try{refuses(()=>x.frame.runFrame(),'8024f638 JObjLoad');}finally{Object.getOwnPropertyDescriptor=descriptor;Uint8Array.prototype.fill=fill;DataView.prototype.setUint32=uint;DataView.prototype.setFloat32=float;globalThis.DataView=View;}
   check(installed&&calls===0&&x.head[0]===x.classes.jobj,'captured '+target+' cannot become a post-check callback');
   check(new View(x.bytes.buffer).getUint32(0x14)===0x40,'actual native stores still execute');
+ }
+ const leafFixture=()=>{
+  const x=storageFixture(),descriptorBytes=new Uint8Array(64),view=new DataView(descriptorBytes.buffer);
+  for(const offset of [8,12,16,24,120,128,132])Object.defineProperty(x.head,offset,{value:null,writable:true,configurable:true,enumerable:true});
+  for(const [offset,value]of [[0x14,2],[0x18,3],[0x1c,4],[0x20,5],[0x24,6],[0x28,7],[0x2c,8],[0x30,9],[0x34,10]])view.setFloat32(offset!,value!,false);
+  Object.assign(x.jointDescriptor,{bytes:descriptorBytes,dobj10:null,robj3c:null,inverse38:null,child08:null,sibling0c:null,address32:0x1000});
+  const idEntry={0:null,4:0x1000,8:null as object|null},idTable={[4*(0x1000%101)]:idEntry};
+  Object.assign(x.resourceSources,{identityConstants:{float8043ca68:1,float8043ca6c:0},idTable803fa55c:idTable});
+  return Object.assign(x,{descriptorBytes,descriptorView:view,idEntry,idTable});
+ };
+ {
+  const x=leafFixture();refuses(()=>x.frame.runFrame(),'8007e150');const view=new DataView(x.bytes.buffer);
+  check([2,3,4,5,6,7,8,9,10].every((v,i)=>view.getFloat32([0x1c,0x20,0x24,0x2c,0x30,0x34,0x38,0x3c,0x40][i]!)===v),'source raw transform copies');
+  check(Array.from({length:12},(_,i)=>view.getFloat32(0x44+4*i)).every((v,i)=>v===(i===0||i===5||i===10?1:0)),'actual paired Identity order completes');
+  check((x.head as unknown as Record<number,unknown>)[24]===null&&(x.head as unknown as Record<number,unknown>)[128]===null,'real null-descriptor helper results stored');
+ }
+ {
+  const x=leafFixture();Object.assign(x.jointDescriptor,{dobj10:{}});refuses(()=>x.frame.runFrame(),'nonnull DObjLoadDesc');
+  check(new DataView(x.bytes.buffer).getFloat32(0x2c)===1,'mandatory nonnull helper not skipped and transforms not copied');
+ }
+ {
+  const x=leafFixture();Object.assign(x.jointDescriptor,{robj3c:{}});refuses(()=>x.frame.runFrame(),'nonnull RObjLoadDesc');
+  check(new DataView(x.bytes.buffer).getFloat32(0x2c)===1,'RObj boundary before transform writes');
+ }
+ {
+  const x=leafFixture();delete (x.jointDescriptor as {bytes?:Uint8Array}).bytes;refuses(()=>x.frame.runFrame(),'bytes: own data');
+  check((x.head as unknown as Record<number,unknown>)[16]===null&&new DataView(x.bytes.buffer).getUint32(0x14)===0x40,'missing descriptor bytes preserves earlier pointer clears/JObjInit');
+ }
+ {
+  const x=leafFixture(),native=Object.getOwnPropertyDescriptor;let changed=false;
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===x.jointDescriptor&&k==='robj3c'&&!changed){changed=true;x.normalizeProcessor.gqr0=1;}return native(o,k);})as typeof native;
+  try{refuses(()=>x.frame.runFrame(),'Identity explicit GQR0');}finally{Object.getOwnPropertyDescriptor=native;}
+  check(new DataView(x.bytes.buffer).getFloat32(0x40)===10&&new DataView(x.bytes.buffer).getUint32(0x44)===0,'invalid profile refuses only at Identity after transform copies');
+ }
+ {
+  const x=leafFixture();Object.defineProperty(x.idEntry,8,{writable:false});refuses(()=>x.frame.runFrame(),'writable source');
+  check(x.idEntry[4]===0x1000&&x.idEntry[8]===null&&(x.head as unknown as Record<number,unknown>)[132]===null,'ID key store precedes failed value store and descriptor84 remains unstored');
+ }
+ {
+  const x=leafFixture();(x.idTable as Record<number,object|null>)[4*(0x1000%101)]=null;refuses(()=>x.frame.runFrame(),'802572f0');
+  check((x.head as unknown as Record<number,unknown>)[132]===null,'fresh ID entry is not fabricated');
+ }
+ {
+  const x=leafFixture();Object.assign(x.jointDescriptor,{child08:{}});refuses(()=>x.frame.runFrame(),'child allocation unsupported');
+  check(x.idEntry[8]===x.head&&(x.head as unknown as Record<number,unknown>)[132]===x.jointDescriptor,'actual ID update and descriptor store precede unsupported child');
+ }
+ {
+  const x=leafFixture(),descriptor=x.allocator.readPointer(x.child,0xe0)!;
+  refuses(()=>getSourceProjectileResourceJointPointer(x.allocator,x.resource,x.head,{}),'private exact');
+  refuses(()=>getSourceProjectileResourceJointPointer({}as typeof x.allocator,x.resource,x.head,{}),'genuine resource');
+  refuses(()=>getSourceProjectileResourceJointPointer(x.allocator,x.resource,{},{}),'private exact');
+  refuses(()=>completeSourceProjectileResourceDescriptor(x.allocator,x.resource,x.head,Symbol('wrong descriptor'),{}),'private exact');
+  refuses(()=>x.frame.runFrame(),'8007e150');
+  const pointer=x.allocator.readPointer(descriptor,0xc)!;
+  check(pointer!==null&&x.allocator.getPointerTarget(pointer)===x.head,'actual6fb4 stores exact allocated JObj identity');
+  check(x.allocator.readU32(descriptor,0x14)===14&&x.allocator.readU8(descriptor,0xb)===0&&x.allocator.readU8(descriptor,0x10)===1,'actual6fb4 four stores complete in source widths');
+  refuses(()=>getSourceProjectileResourceJointPointer(x.allocator,x.resource,x.head,{}),'incomplete');
+ }
+ {
+  const x=leafFixture(),descriptor=x.allocator.readPointer(x.child,0xe0)!,bytes=x.allocator.getDescriptor(descriptor),native=Object.getOwnPropertyDescriptor;let injected=false;
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===bytes&&String(k)==='12'&&x.idEntry[8]===x.head&&!injected){injected=true;try{x.frame.runFrame();}catch{}}return native(o,k);})as typeof native;
+  try{refuses(()=>x.frame.runFrame(),'caught same-runtime reentry');}finally{Object.getOwnPropertyDescriptor=native;}
+  check(injected&&x.allocator.readPointer(descriptor,0xc)===null&&x.idEntry[8]===x.head,'caught late parent reentry preserves completed ID but prevents descriptor pointer store');
+ }
+ {
+  const x=leafFixture();delete (x.jointDescriptor as {sibling0c?:null}).sibling0c;refuses(()=>x.frame.runFrame(),'sibling0c: own data');
+  check(x.idEntry[8]===x.head,'Resolve reads descriptor sibling even when joint sibling null');
+ }
+ {
+  const x=leafFixture(),native=Object.getOwnPropertyDescriptor,freeze=Object.freeze;let armed=false,exposed=0;
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{
+   if(o===x.head&&k==='bytes'&&!armed){armed=true;Object.freeze=((value:object)=>{if(value!==null&&typeof value==='object'&&!Array.isArray(value)&&Reflect.ownKeys(value).length===0)exposed++;return freeze(value);})as typeof freeze;}
+   return native(o,k);
+  })as typeof native;
+  try{refuses(()=>x.frame.runFrame(),'8007e150');}finally{Object.getOwnPropertyDescriptor=native;Object.freeze=freeze;}
+  check(armed&&exposed===0,'private joint token never passes through replaceable freeze');
  }
  console.log(`[projectile-resource] PASS ${count}: genuine nonnull descriptor, source class initialization/inheritance, allocator barrier and failure prefixes`);
 }
