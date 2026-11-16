@@ -90,3 +90,24 @@ export function runBattleOrderedInputSamplerSelfTests(make:Make):void{
  }
  console.log(`[ordered-input-sampler] PASS: ${cases} genuine index2 compositions`);
 }
+
+/** Explicit supported source entry, not a retail-hydrated frame. The source
+ * sampler/tick may replace these initial selectors; no mid-call writes occur. */
+export function createBattleOrderedInputSamplerValidEntryTestFixture(make:Make){
+ const x=createBattleOrderedInputSamplerTestFixture(make);
+ x.actionTables.full36a8[0]=0x8005f238; // authenticated802d36a8[0], real bareBLR
+ Object.assign(x.sourceActor,{ubState:0,fbState:61,actionIndex:2,variantIndex:0,fbPhase:1});
+ Object.assign(x.pad,{word0:0,byte15:0,byte16:0,byte17:0,byte18:0,byte19:0,byte1a:0,byte1b:0});
+ x.normal.bindAttributesRuntime(x.attributes);x.normal.bindActiveCorrectionSources(x.stageBounds,x.commandAdmission);
+ return x;
+}
+export function runBattleOrderedInputSamplerValidEntrySelfTests(make:Make):void{
+ const x=createBattleOrderedInputSamplerValidEntryTestFixture(make);
+ check(x.sourceActor.fbState===61&&x.orderedReady.getActorBinding(x.actor).byte19===2&&x.matchGlobals.byte45===4,'explicit supported entry selectors/substate/phase');
+ refusal(()=>x.frame.runFrame(),'8002948c reached mandatory80087cf0');
+ check(x.sourceActor.fbState===0&&x.sourceActor.ubState===0,'real sampler/tick-produced selector0 uses authenticated dispatch');
+ check(x.orderedState.byte1ca===0&&x.orderedState.byte731===0&&Object.values(x.orderedState.vector724!).every(v=>v===0),'55568 returns and actual54070 suffix finishes');
+ check(x.massPreparation.teamCounts[0]===1&&x.teamRows103[0]!.charged&&x.status.getActualBorg(x.actor).burstArmFrames===0,'natural nonempty charged-team rejection/countdown finishes53a2c');
+ refusal(()=>x.frame.runFrame(),'incomplete');
+ console.log('[ordered-input-valid-entry] PASS: actual index2 sampler/frame/suffix and nonempty6fb0 scan, next87cf0; explicit entry only, not complete battle frame');
+}

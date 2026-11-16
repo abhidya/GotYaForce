@@ -1,4 +1,5 @@
-import {runBattleOrderedInputSamplerSelfTests} from './battle-ordered-input-sampler.selftest.js';
+import {runBattleTeamCandidatesSelfTests} from './battle-team-candidates.selftest.js';
+import {runBattleOrderedInputSamplerSelfTests,runBattleOrderedInputSamplerValidEntrySelfTests} from './battle-ordered-input-sampler.selftest.js';
 import {runActorMatrixActiveSelfTests} from './actor-matrix-active.selftest.js';
 import {runSelfTest as runActorVoiceRngSelfTests} from './actor-voice-rng.selftest.js';
 import {runActorMatrixSpringSelfTests} from './actor-matrix-spring.selftest.js';
@@ -13808,3 +13809,6 @@ export function runActorVoiceRngHydratedCompositionTests():void {runActorVoiceRn
 
 export function runBattleOrderedInputSamplerHydratedCompositionTests():void {runBattleOrderedInputSamplerSelfTests(createBattleTargetPreparationSamplerTestFixture);}
 export function runActorMatrixActiveHydratedCompositionTests():void {runActorMatrixActiveSelfTests(createBattleTargetPreparationMatrixActiveTestFixture,createBattleTargetPreparationTestFixture);}
+
+export function runBattleTeamCandidatesHydratedCompositionTests():void {runBattleTeamCandidatesSelfTests(createBattleTargetPreparationTestFixture);}
+export function runBattleOrderedInputValidEntryHydratedCompositionTests():void {runBattleOrderedInputSamplerValidEntrySelfTests(createBattleTargetPreparationSamplerTestFixture);}

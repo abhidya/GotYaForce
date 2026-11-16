@@ -74,10 +74,10 @@ export function runBattleOrderedActorStageSelfTests(make:Make):void{
  }
  {
   const x=fresh();x.matchGlobals.maskD2=255;x.sourceActor.visibilityBit=1;const marker=x.gates.marker578;
-  run(x,'8005b2b8 reached mandatory live candidate scan');
+  run(x,'8002948c reached mandatory80087cf0');
   check(x.gates.marker578===marker,'pause skips55568, not history or suffix');
   check(x.historyState.previousStepHeight6d4===0&&x.orderedState.field6dc===2,'pause still snapshots then stores actual position+height');
-  check(x.orderedState.byte1ca===0&&x.orderedState.byte730===0&&x.orderedState.byte731===0&&Object.values(x.orderedState.vector724!).every(v=>v===0),'all reached suffix clears precede genuine candidate boundary');
+  check(x.orderedState.byte1ca===0&&x.orderedState.byte730===0&&x.orderedState.byte731===0&&Object.values(x.orderedState.vector724!).every(v=>v===0),'all reached suffix clears precede real candidate rejection/countdown and next87cf0');
  }
  for(const lifecycle of [true,false]){
   const x=fresh();if(lifecycle)x.stageState.lifecycle18=0;else x.orderedReady.getActorBinding(x.actor).byte19=0;

@@ -2257,8 +2257,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       storeByte(owner,'byte6fc',0,()=>fieldGuard(id,actor,'byte6fc',owner));
       fail('8005b2b8 reached unsupported canonical actor8c4 load after6fc clear');
     }
-    //One captured team-row base; counts stay live. Candidate semantics are
-    //not manufactured when this bounded prefix reaches a nonempty scan.
+    //One captured team-row base; both the initial gate and each loop test
+    //reload signed counts. Rejected candidates need no later actor fields.
     const rows=teamTable(match());
     for(let index=0;index<4;index++) {
       if(s8(byte(massOwner('teamCounts'),String(index)))<=0)continue;
@@ -2266,7 +2266,30 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(s8(byte(row,'byte10'))!==0)continue;
       const charged=read(row,'charged');if(typeof charged!=='boolean')fail('charged: boolean source0/1 owner required');
       if(!charged)continue;
-      fail('8005b2b8 reached mandatory live candidate scan');
+      let accepted=0;
+      for(let candidate=0;candidate<s8(byte(massOwner('teamCounts'),String(index)));candidate++) {
+        const id=read(massOwner('teamPointers'),String(index*6+candidate));
+        if(typeof id!=='symbol')fail('5b2b8 candidate requires canonical actor pointer');
+        const actor=actual(id);
+        if(call(()=>status.getActualActor(id))!==actor)fail('5b2b8 candidate status actor differs');
+        const borg=record(call(()=>status.getActualBorg(id)),'5b2b8 candidate Borg6fb');
+        fieldGuard(id,actor,'burstArmFrames',borg);
+        const arm=byte(borg,'burstArmFrames');fieldGuard(id,actor,'burstArmFrames',borg);
+        if(s8(arm)===0)continue;
+        if(s8(byte(actor,'active0'))===0)continue;
+        if(life(id,actor)!==1)continue;
+        if(s8(byte(worldOwner(id,actor),'mode4a0'))!==0)continue;
+        if(s8(byte(worldOwner(id,actor),'mode4a1'))!==0)continue;
+        if(byte(match(),'byteEB')!==0) {
+          const current=match(),visibility=byte(actor,'visibilityBit'),mask=byte(current,'byteEB');
+          if((s8(visibility)&mask)===0)continue;
+        }
+        // Count each accepted source pointer, including repetitions. The
+        // scratch entries are not consumed before the unsupported callee.
+        accepted++;
+      }
+      const selector=s8(byte(team(teamTable(match()),index),'byte1'));
+      if(accepted>=(selector===1?1:2))fail('8005b2b8 reached mandatory8005b678 combination');
     }
     const countdown=physical();
     for(let i=0;i<6;i++) {
