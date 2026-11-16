@@ -2545,7 +2545,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       const count=(address:number):number=>{
         const key='half'+address.toString(16);
         for(const o of new Set([sources,globals,...retained.values(),...scheduler.getRetainedStorageOwners()]))
-          if(o!==counters)aliases(o,'__no_count',address,2);
+          if(o!==counters)aliases(o,'__no_count',address,2,true);
         const value=load(counters,key,address,2);
         const terminalOwners=new Set([sources,globals,...retained.values(),...scheduler.getRetainedStorageOwners()]);guard();
         for(const o of terminalOwners)if(o!==counters)aliases(o,'__no_count',address,2,true);
