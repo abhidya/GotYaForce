@@ -1,3 +1,4 @@
+import {isSourceProjectileResourceRuntime,invokeSourceProjectileResource,type SourceProjectileResourceRuntime} from './projectile-resource.js';
 import {claimSourceHelperStorage,isSourcePlayerTableAddressStorage} from './source-storage-claims.js';
 /** Bounded stored8007dcec callback and initial8007dd84 prefix, not a scheduler.
  * See projectile-callback/initialization-evidence-2026-11-14.md. Only source
@@ -36,6 +37,7 @@ export interface SourceProjectileDrawList {head?: symbol | null; tail?: symbol |
 export interface SourceProjectileInitializationStack {rotationX: symbol; rotationY: symbol}
 export interface SourceProjectileTargetStack {displacement: SourceJointVector}
 export interface SourceProjectileRootSources {
+  resources?:SourceProjectileResourceRuntime;
   spawns: SourceActorProjectileSpawnRuntime;
   stage: SourceActorStageBoundsRuntime;
   /** Actual separate DAT_80436288[0]/80436290[0] records, not copied group lists. */
@@ -100,6 +102,9 @@ export function invokeSourceProjectileScheduledRoot(root: SourceProjectileRootRu
 export function markIncompleteSourceProjectileScheduledRoot(root: SourceProjectileRootRuntime,scheduler: SourceObjectSchedulerRuntime): void {
   schedulerJoin(root).close(scheduler);
 }
+const resourceScopes=new WeakMap<object,(resource:SourceProjectileResourceRuntime,child:symbol,lifetime:symbol,consume:boolean)=>void>();
+export function requireSourceProjectileResourceInvocation(root:SourceProjectileRootRuntime,resource:SourceProjectileResourceRuntime,child:symbol,lifetime:symbol):void{const scope=resourceScopes.get(root);if(!scope)fail('private root resource invocation required');scope(resource,child,lifetime,true);}
+export function checkSourceProjectileResourceInvocation(root:SourceProjectileRootRuntime,resource:SourceProjectileResourceRuntime,child:symbol,lifetime:symbol):void{const scope=resourceScopes.get(root);if(!scope)fail('private root resource invocation required');scope(resource,child,lifetime,false);}
 const runtimes = new WeakSet<object>(), claimedChildren = new WeakSet<object>(), claimedDrawLists = new WeakSet<object>(),
   claimedStackMatrices = new WeakSet<object>(), claimedTargetStacks = new WeakSet<object>();
 const cleanupScopes = new WeakMap<object, (spawns: SourceActorProjectileSpawnRuntime, child: symbol) =>
@@ -146,6 +151,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
   const draw = list as SourceProjectileDrawList;
   let busy = false, poisoned = false, vectorProcessorOwner: object | undefined;
   let scheduledScope:{scheduler:SourceObjectSchedulerRuntime;child:symbol;stage:'prepare'|'callback';lifetime?:symbol}|undefined;
+  let resourcePending:{resource:SourceProjectileResourceRuntime;child:symbol;lifetime:symbol;entered:boolean}|undefined;
   let hitPending:{child:symbol;kind:number;entered:boolean}|undefined;
   let parentClaim:{scheduler:SourceObjectSchedulerRuntime;child:symbol;parent:symbol;actual:object;entered:boolean}|undefined;
   const check = (): void => {
@@ -155,7 +161,7 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
   const guard = (run: () => void): void => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;
-    try {run(); check();} finally {scheduledScope=undefined;parentClaim=undefined;hitPending=undefined;busy = false;}
+    try {run(); check();} finally {resourcePending=undefined;scheduledScope=undefined;parentClaim=undefined;hitPending=undefined;busy = false;}
   };
   const call = <T>(run: () => T): T => {const value = run(); check(); return value;};
   const read = (owner: unknown, key: string): unknown => {const value = own(owner, key); check(); return value;};
@@ -388,7 +394,11 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
     const field30=cell('field30',2);call(()=>allocator.writeF32(e.id,0x154,field30));
     const descriptor=cell('descriptor00',14); // signed lha; neither selected flag set
     if((descriptor&0xc000)!==0)fail('initializer descriptor branch differs from authenticated row1');
-    fail('8007e140 reached mandatory80006f78 resource owner before80006fb4 descriptor14; initializer remains incomplete');
+    const selected=Object.getOwnPropertyDescriptor(sources,'resources');check();
+    if(!selected||!('value'in selected)||selected.value===undefined)fail('8007e140 reached mandatory80006f78 resource owner before80006fb4 descriptor14; initializer remains incomplete');
+    if(!isSourceProjectileResourceRuntime(selected.value)||selected.value.getAllocatorRuntime()!==allocator)fail('genuine same-allocator resource runtime required');
+    resourcePending={resource:selected.value,child:e.id,lifetime:e.lifetime,entered:false};
+    try{return invokeSourceProjectileResource(selected.value,runtime,e.id,e.lifetime);}finally{resourcePending=undefined;}
   };
   const initialize = (e: Entry): void => {
     const variant = u8(e.id, 0x11), pointer = ptr(e.id, 0x90);
@@ -568,6 +578,12 @@ export function createSourceProjectileRootRuntime(sources: SourceProjectileRootS
       if(busy)poisoned=true;fail('private exact8007de04 HIT invocation required');
     }
     if(consume)pending.entered=true;check();
+  });
+  resourceScopes.set(runtime,(resource,child,lifetime,consume)=>{
+    const p=resourcePending,e=children.get(child);
+    if(!busy||poisoned||!p||!e||e.incomplete||e.released||e.lifetime!==lifetime||p.resource!==resource||p.child!==child||p.lifetime!==lifetime||p.entered===consume){if(busy)poisoned=true;fail('private exact single-use root resource lifetime required');}
+    if(consume)p.entered=true;check();
+    const d=nativeStoreDescriptor(sources,'resources');if(!d||!('value'in d)||d.value!==resource)fail('resource runtime owner changed');
   });
   frameParentClaims.set(runtime,(scheduler,child,parent,actual)=>{
     const pending=parentClaim;

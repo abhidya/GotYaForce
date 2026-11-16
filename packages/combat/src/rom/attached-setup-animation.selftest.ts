@@ -1,3 +1,4 @@
+import {runProjectileResourceSelfTests} from './projectile-resource.selftest.js';
 import {runBattleLateDrawSelfTests} from './battle-late-draw.selftest.js';
 import {runSourcePlayerContactSelfTests} from './source-player-contact.selftest.js';
 import {runProjectileInitializerTailSelfTests} from './projectile-initializer-tail.selftest.js';
@@ -2946,6 +2947,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleStageDispatchHydratedCompositionTests();
   runProjectileNormalizeOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runProjectileInitializerTailSelfTests(createProjectileInitializerTailBaseTestFixture);
+  runProjectileResourceSelfTests(createProjectileInitializerTailBaseTestFixture);
   runBattleDrawOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runSourceDrawCallbackSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runSourcePlayerContactSelfTests(createBattleTargetPreparationSamplerTestFixture);
@@ -13835,3 +13837,5 @@ export function runBattleTeamCandidatesHydratedCompositionTests():void {runBattl
 export function runBattleOrderedInputValidEntryHydratedCompositionTests():void {runBattleOrderedInputSamplerValidEntrySelfTests(createBattleTargetPreparationSamplerTestFixture);}
 
 export function runBattleStageDispatchHydratedCompositionTests():void {runBattleStageDispatchSelfTests(createBattleTargetPreparationSamplerTestFixture);}
+
+export function runProjectileResourceHydratedCompositionTests():void{runProjectileResourceSelfTests(createProjectileInitializerTailBaseTestFixture);}
