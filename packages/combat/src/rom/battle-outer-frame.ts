@@ -1,3 +1,4 @@
+import {executeSourcePlayerContact36e24} from './source-player-contact.js';
 import {executeSourceDrawCallback47aa4} from './source-draw-callback.js';
 import type {SourceObjectAllocationRuntime} from './source-object-allocation.js';
 import type {SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
@@ -55,7 +56,7 @@ import {readSourceShortTrig} from './source-short-trig.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
-import {isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
+import {checkSourcePlayerContactStorage,isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
 import {isSourceActorOrderedFrameRuntime,invokeSourceActorOrderedFrameFromOuter,checkSourceActorOrderedVoicePosition,checkSourceActorOrderedSamplerInvocation,type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
 import type {SourceActorInputSamplerRuntime} from './actor-input-sampler.js';
 import {stepSourceByteRng} from './source-byte-rng.js';
@@ -98,6 +99,7 @@ export interface SourceBattleTargetPreparationSources {
   targetDispatch?: SourceActorTargetDispatchRuntime;
 }
 export interface SourceBattleOuterFrameSources {
+  playerContact?:{constants?:{float80436f68?:number}};
   objectUpdates?: {roots36290:Record<number,symbol|null>;roots36280:Record<number,symbol|null>;roots6f54:Record<number,symbol|null>;draw:{constants:object;scratch?:Float32Array}};
   scheduler: SourceObjectSchedulerRuntime;
   /** Genuine54070, reached only at the actual ordered-list call. */
@@ -139,6 +141,20 @@ export function consumeSourceBattleOuterDrawInvocation(outer:SourceBattleOuterFr
 }
 export function checkSourceBattleOuterDrawInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):void {
  const scope=drawInvocations.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active outer draw invocation required');scope.check(node);
+}
+export interface SourceBattlePlayerContactContext {helper:SourceActorSlotStatusRuntime;root:SourceProjectileRootRuntime}
+const playerContacts=new WeakMap<object,{consume():SourceBattlePlayerContactContext;check(helper?:SourceActorSlotStatusRuntime):void;system():object;constant():unknown}>();
+export function consumeSourceBattlePlayerContactInvocation(outer:SourceBattleOuterFrameRuntime):SourceBattlePlayerContactContext {
+  const p=playerContacts.get(outer);if(!p)fail('private contact outer required');return p.consume();
+}
+export function checkSourceBattlePlayerContactInvocation(outer:SourceBattleOuterFrameRuntime,helper?:SourceActorSlotStatusRuntime):void {
+  const p=playerContacts.get(outer);if(!p)fail('private contact outer required');p.check(helper);
+}
+export function readSourceBattlePlayerContactSystem(outer:SourceBattleOuterFrameRuntime):object {
+  const p=playerContacts.get(outer);if(!p)fail('private contact outer required');p.check();return p.system();
+}
+export function readSourceBattlePlayerContactZero(outer:SourceBattleOuterFrameRuntime):unknown {
+  const p=playerContacts.get(outer);if(!p)fail('private contact outer required');p.check();return p.constant();
 }
 interface SchedulerInvocationScope {
   enter(scheduler:SourceObjectSchedulerRuntime,callsite:number,group:number):void;
@@ -240,6 +256,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   const completedOrderedActors=new Map<symbol,object>();
   let distancesPrepared=false;
   const producedDistances=new Map<symbol,{actor:object;fields:number;consumed:boolean}>();
+  let contactInvocation:{entered:boolean;helper:SourceActorSlotStatusRuntime}|undefined;
   let drawInvocation:{node:symbol;entered:boolean;context:SourceBattleOuterDrawContext;updates:object;draw:object;buffer?:ArrayBufferLike|undefined}|undefined;
   let checkingDraw=false;
   const drawOwners=new Map<string,unknown>();
@@ -2441,12 +2458,55 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         }
         invokeScheduler(0x800294bc,58);invokeScheduler(0x800294c4,57);
         runObjectUpdates();
-        fail('800294cc reached outer counter continuation after80089554');
+        const counterOwner=match();
+        noShadows(counterOwner,['wordb0','fieldb0','176','byteb0','byteb1','byteb2','byteb3']);
+        const ingress=Object.getOwnPropertyDescriptor(counterOwner,'wordB0');check();
+        if(!ingress||!('value'in ingress))fail('800294cc reached outer counter continuation after80089554: explicit wordB0 required');
+        const counter=unsigned(read(counterOwner,'wordB0'),0xffffffff,'wordB0');
+        const counterField=Object.getOwnPropertyDescriptor(counterOwner,'wordB0');check();
+        if(!counterField||!('value'in counterField)||!counterField.writable)fail('wordB0 writable own destination required');
+        schedulerGraph();check();
+        const finalCounter=primaryStoreDescriptor(counterOwner,'wordB0');
+        if(!finalCounter||!('value'in finalCounter)||!finalCounter.writable)fail('wordB0 destination changed');
+        for(const key of ['wordb0','fieldb0','176','byteb0','byteb1','byteb2','byteb3'])if(primaryStoreDescriptor(counterOwner,key))fail('wordB0: competing source cell owner');
+        (counterOwner as {wordB0:number}).wordB0=(counter+1)>>>0;check();
+        if(s8(byte(match(),'byte66'))===0)fail('800294ec reached required8008a28c before89aec/2bb14; normal contact predecessors unsupported');
+        const helper=call(()=>spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime());
+        if(!isSourceActorSlotStatusRuntime(helper))fail('36e24 canonical slot-status owner required');
+        contactInvocation={entered:false,helper};
+        try{executeSourcePlayerContact36e24(runtime);}finally{contactInvocation=undefined;}
+        fail('800294fc reached required8008972c after bounded36e24');
       } catch(error) {
         close();throw error;
-      } finally {drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
+      } finally {contactInvocation=undefined;drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
     },
   };
+  const contactCheck=(helper?:SourceActorSlotStatusRuntime):void=>{
+    const c=contactInvocation;
+    if(!busy||closing||incomplete||poisoned||!c?.entered||(helper!==undefined&&helper!==c.helper)){
+      rejectScheduler();fail('private exact active294f8 contact invocation required');
+    }
+    schedulerGraph();check();
+    if(spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime()!==c.helper||c.helper.getSchedulerRuntime()!==scheduler)
+      fail('canonical contact helper changed');
+    checkSourcePlayerContactStorage(c.helper);
+    const systemOwner=retained.get('systemGlobals');
+    if(systemOwner){const link=primaryStoreDescriptor(sources,'systemGlobals');
+      if(!link||!('value'in link)||link.value!==systemOwner)fail('contact system owner changed');}
+    const contactOwner=retained.get('playerContact'),constants=retained.get('contactConstants');
+    if(contactOwner){const link=primaryStoreDescriptor(sources,'playerContact');
+      if(!link||!('value'in link)||link.value!==contactOwner)fail('contact source owner changed');
+      if(constants){const cell=primaryStoreDescriptor(contactOwner,'constants');
+        if(!cell||!('value'in cell)||cell.value!==constants)fail('contact constants owner changed');}}
+
+  };
+  playerContacts.set(runtime,{
+    consume(){const c=contactInvocation;if(!c||c.entered){rejectScheduler();fail('private single-use294f8 contact invocation required');}c.entered=true;contactCheck();return{helper:c.helper,root};},
+    check:contactCheck,
+    system(){contactCheck();return system();},
+    constant(){contactCheck();const owner=retain('playerContact',read(sources,'playerContact'));
+      const constants=retain('contactConstants',read(owner,'constants'));const value=read(constants,'float80436f68');contactCheck();return value;},
+  });
   drawInvocations.set(runtime,{consume(node){const active=drawInvocation;if(!active||active.entered||active.node!==node){rejectScheduler();fail('private exact single-use draw invocation required');}active.entered=true;drawCheck(node);return active.context;},check:drawCheck});
   failures.set(runtime,selected=>{if(!busy || !closing || !incomplete || selected!==scheduler) fail('private exact active outer failure required');});
   schedulerInvocations.set(runtime,{

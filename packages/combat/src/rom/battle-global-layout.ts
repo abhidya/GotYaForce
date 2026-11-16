@@ -17,6 +17,8 @@ export interface SourceBattleTeamRow extends Pick<BurstMeterState, 'charged'> {
   meter?: number;
 }
 export interface SourceBattleOuterGlobalFields {
+  /** Actual post89554 counter, not host time or frame-entry tick. */
+  wordB0?:number;
   byteC0?:number;byteC1?:number;byteC2?:number;byteC3?:number;byte15db?:number;
   byte15d4?: number; byte66?: number; halfD6?: number;
   /** SAME unsigned80433934+d9 cell already used by actor-matrix/ceiling. */
