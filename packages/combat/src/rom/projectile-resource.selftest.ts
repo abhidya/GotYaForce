@@ -141,5 +141,68 @@ export function runProjectileResourceSelfTests(make:Make):void{
   try{refuses(()=>x.frame.runFrame(),'8025d0fc memset');}finally{Object.getOwnPropertyDescriptor=native;}
   check(currentReads===3&&x.classes.jobj[32]===9&&x.classes.jobj[36]===9,'class max compares freshly reloaded current');
  }
+ const storageFixture=()=>{const x=heapFixture(),bytes=new Uint8Array(136).fill(0xa5);x.head.bytes=bytes;return Object.assign(x,{bytes});};
+ {
+  const x=storageFixture();refuses(()=>x.frame.runFrame(),'8024f638 JObjLoad');
+  const data=new DataView(x.bytes.buffer);
+  check(x.head[0]===x.classes.jobj&&x.entry[12]===x.next,'same allocated identity receives real class pointer');
+  check(data.getUint32(0x14)===0x40&&[0x2c,0x30,0x34].every(k=>data.getFloat32(k)===1),'actual JObjInit flags/scales');
+  check(x.bytes.every((v,i)=>[0x17,0x2c,0x2d,0x30,0x31,0x34,0x35].includes(i)||v===0),'real memset clears original nonzero bytes');
+ }
+ {
+  const x=storageFixture();Object.defineProperty(x.head,0,{writable:false});refuses(()=>x.frame.runFrame(),'writable pointer overlay');
+  check(x.bytes.every(v=>v===0xa5)&&x.entry[12]===x.next&&x.classes.jobj[32]===1,'readonly overlay refuses logical clear after allocation');
+ }
+ {
+  const x=storageFixture();x.head.bytes=new Uint8Array(135);refuses(()=>x.frame.runFrame(),'exact136-byte');
+  check(x.bytes.every(v=>v===0xa5)&&x.entry[8]===1,'invalid bytes lazy after real allocation');
+ }
+ {
+  const x=storageFixture(),native=Object.getOwnPropertyDescriptor;let injected=false;
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===x.head&&k==='bytes'&&!injected){injected=true;try{x.frame.runFrame();}catch{}}return native(o,k);})as typeof native;
+  try{refuses(()=>x.frame.runFrame(),'private exact');}finally{Object.getOwnPropertyDescriptor=native;}
+  check(injected&&x.bytes.every(v=>v===0xa5)&&x.head[0]===x.next,'caught parent reentry before memset prevents clear');
+ }
+ {
+  const x=storageFixture(),native=Object.getOwnPropertyDescriptor;let changed=false;
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===x.head&&k==='bytes'&&!changed){changed=true;x.classes.parent[44]=0;}return native(o,k);})as typeof native;
+  try{refuses(()=>x.frame.runFrame(),'unselected class method2c');}finally{Object.getOwnPropertyDescriptor=native;}
+  check(x.head[0]===x.classes.jobj&&x.bytes.every(v=>v===0),'real clear/class store precedes live parent initializer refusal');
+ }
+ {
+  const x=storageFixture();Object.assign(x.head,{20:0});refuses(()=>x.frame.runFrame(),'scalar shadow');
+  check(x.bytes.every(v=>v===0xa5),'numeric shadows never become second scalar owners');
+ }
+ {
+  const x=storageFixture();x.head.bytes=new Uint8Array(new SharedArrayBuffer(136));refuses(()=>x.frame.runFrame(),'nonshared allocated buffer');
+  check(x.head[0]===x.next,'shared backing rejected before memset overlay');
+ }
+ {
+  const x=storageFixture();structuredClone(x.bytes.buffer,{transfer:[x.bytes.buffer]});refuses(()=>x.frame.runFrame(),'exact136-byte');
+  check(x.head[0]===x.next&&x.entry[8]===1,'detached storage rejected lazily after allocation');
+ }
+ {
+  const x=storageFixture(),native=Object.getOwnPropertyDescriptor;let changed=false;
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===x.classes.parent&&String(k)==='44'&&x.head[0]===x.classes.jobj&&!changed){changed=true;x.head.bytes=new Uint8Array(136);}return native(o,k);})as typeof native;
+  try{refuses(()=>x.frame.runFrame(),'storage changed');}finally{Object.getOwnPropertyDescriptor=native;}
+  check(changed&&x.bytes.every(v=>v===0),'late backing replacement blocks JObjInit after clear/class store');
+ }
+ for(const target of ['fill','setUint32','setFloat32','constructor']as const){
+  const x=storageFixture(),descriptor=Object.getOwnPropertyDescriptor,fill=Uint8Array.prototype.fill,uint=DataView.prototype.setUint32,float=DataView.prototype.setFloat32,View=DataView;
+  let installed=false,calls=0;
+  const attemptedReentry=()=>{calls++;try{x.frame.runFrame();}catch{}};
+  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{
+   if(o===x.head&&k==='bytes'&&!installed){installed=true;
+    if(target==='fill')Uint8Array.prototype.fill=function(value:number,start?:number,end?:number){attemptedReentry();return fill.call(this,value,start,end);};
+    if(target==='setUint32')DataView.prototype.setUint32=function(offset:number,value:number,little?:boolean){attemptedReentry();return uint.call(this,offset,value,little);};
+    if(target==='setFloat32')DataView.prototype.setFloat32=function(offset:number,value:number,little?:boolean){attemptedReentry();return float.call(this,offset,value,little);};
+    if(target==='constructor')globalThis.DataView=function(buffer:ArrayBufferLike,offset?:number,length?:number){attemptedReentry();return new View(buffer,offset,length);}as unknown as DataViewConstructor;
+   }
+   return descriptor(o,k);
+  })as typeof descriptor;
+  try{refuses(()=>x.frame.runFrame(),'8024f638 JObjLoad');}finally{Object.getOwnPropertyDescriptor=descriptor;Uint8Array.prototype.fill=fill;DataView.prototype.setUint32=uint;DataView.prototype.setFloat32=float;globalThis.DataView=View;}
+  check(installed&&calls===0&&x.head[0]===x.classes.jobj,'captured '+target+' cannot become a post-check callback');
+  check(new View(x.bytes.buffer).getUint32(0x14)===0x40,'actual native stores still execute');
+ }
  console.log(`[projectile-resource] PASS ${count}: genuine nonnull descriptor, source class initialization/inheritance, allocator barrier and failure prefixes`);
 }

@@ -4,7 +4,7 @@ import {isSourceObjectAllocationRuntime,type SourceObjectAllocationRuntime} from
 import {requireSourceProjectileResourceInvocation,checkSourceProjectileResourceInvocation,type SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
 import {claimSourceHelperStorage} from './source-storage-claims.js';
 export type SourceJObjClassFields=Record<number,unknown>;
-export interface SourceJObjFreeBlock {0:SourceJObjFreeBlock|null}
+export interface SourceJObjFreeBlock {0:SourceJObjFreeBlock|SourceJObjClassFields|null;bytes?:Uint8Array}
 export interface SourceJObjMemoryEntry {8:number;12:SourceJObjFreeBlock|null}
 export interface SourceJObjHeapGlobals {count80436a0c:number;table80436a08:Record<number,SourceJObjMemoryEntry|null>}
 export interface SourceProjectileResourceSources {
@@ -21,15 +21,23 @@ export function invokeSourceProjectileResource(runtime:SourceProjectileResourceR
  const run=entries.get(runtime);if(!run)fail('genuine private resource runtime required');return run(root,child,lifetime);
 }
 function fail(s:string):never{throw Error('[projectile-resource] '+s);}
-const native=Reflect.getOwnPropertyDescriptor;
+const native=Reflect.getOwnPropertyDescriptor,nativeKeys=Reflect.ownKeys;
+const NativeDataView=DataView,nativeFill=Uint8Array.prototype.fill;
+const nativeSetUint32=DataView.prototype.setUint32,nativeSetFloat32=DataView.prototype.setFloat32;
+const typedPrototype=Object.getPrototypeOf(Uint8Array.prototype);
+const typedBuffer=native(typedPrototype,'buffer')!.get!,typedLength=native(typedPrototype,'byteLength')!.get!,typedOffset=native(typedPrototype,'byteOffset')!.get!;
+const viewBuffer=native(DataView.prototype,'buffer')!.get!;
+const bufferLength=native(ArrayBuffer.prototype,'byteLength')!.get!,bufferResizable=native(ArrayBuffer.prototype,'resizable')?.get;
 export function createSourceProjectileResourceRuntime(sources:SourceProjectileResourceSources):SourceProjectileResourceRuntime{
  const allocationField=native(sources,'allocator');
  const allocator=allocationField&&'value'in allocationField?allocationField.value:undefined;if(!isSourceObjectAllocationRuntime(allocator))fail('genuine allocator required');
  let active:{root:SourceProjectileRootRuntime;child:symbol;lifetime:symbol}|undefined,poisoned=false,failed=false;
  const owners=new Map<string,object>();
+ let memory:{block:object;bytes:Uint8Array;buffer:ArrayBuffer}|undefined;
  const edges:{owner:object;key:PropertyKey;value:object}[]=[];
  const check=():void=>{if(poisoned||failed)fail('incomplete resource invocation');
   const a=native(sources,'allocator');if(!a||!('value'in a)||a.value!==allocator)fail('resource allocator owner changed');if(active)checkSourceProjectileResourceInvocation(active.root,runtime,active.child,active.lifetime);
+  if(memory){const d=native(memory.block,'bytes');if(!d||!('value'in d)||d.value!==memory.bytes||typedBuffer.call(memory.bytes)!==memory.buffer||typedLength.call(memory.bytes)!==136||bufferLength.call(memory.buffer)!==136)fail('allocated block storage changed');for(const key of nativeKeys(memory.block))if(typeof key==='string'&&/^(0|[1-9][0-9]*)$/.test(key)&&key!=='0')fail('allocated block scalar shadow');}
   for(const edge of edges){const d=native(edge.owner,edge.key);if(!d||!('value'in d)||d.value!==edge.value)fail('retained resource owner changed');}};
  const read=(o:unknown,key:PropertyKey):unknown=>{if(o===null||typeof o!=='object')fail(String(key)+': source owner required');const d=Object.getOwnPropertyDescriptor(o,key);check();if(!d||!('value'in d))fail(String(key)+': own data required');return d.value;};
  const write=(o:object,key:number,value:unknown):void=>{read(o,key);check();const d=native(o,key);if(!d||!('value'in d)||!d.writable)fail(String(key)+': writable source field required');(o as SourceJObjClassFields)[key]=value;check();};
@@ -97,7 +105,48 @@ export function createSourceProjectileResourceRuntime(sources:SourceProjectileRe
   if(current>maximum)write(c,36,current);
   return head;
  };
- const runtime:SourceProjectileResourceRuntime={getAllocatorRuntime:()=>allocator,getRetainedStorageOwners:()=>Object.freeze([sources,...owners.values()])};
+ const initializeBlock=(block:object,c:object,size:number):void=>{
+  if(!native(block,'bytes'))fail('actual8025d0fc memset requires explicit allocated block byte storage; nonnull LoadJoint incomplete');
+  const bytes=read(block,'bytes');
+  if(!(bytes instanceof Uint8Array)||Object.getPrototypeOf(bytes)!==Uint8Array.prototype||size!==136||typedOffset.call(bytes)!==0||typedLength.call(bytes)!==136)fail('explicit exact136-byte allocated storage required');
+  check();const buffer=typedBuffer.call(bytes) as ArrayBuffer;
+  if(!(buffer instanceof ArrayBuffer)||Object.getPrototypeOf(buffer)!==ArrayBuffer.prototype||bufferLength.call(buffer)!==136||bufferResizable?.call(buffer)===true)fail('fixed nonshared allocated buffer required');
+  check();
+  for(const owner of [sources,...owners.values(),...allocator.getRetainedStorageOwners(),...(active?.root.getRetainedStorageOwners()??[])]){
+   if(owner===bytes||owner===buffer||(ArrayBuffer.isView(owner)&&(owner instanceof NativeDataView?viewBuffer.call(owner):typedBuffer.call(owner))===buffer))fail('allocated block backing alias');
+  }
+  check();if(!claimSourceHelperStorage(bytes,runtime)||!claimSourceHelperStorage(buffer,runtime))fail('allocated block backing already claimed');
+  memory={block,bytes,buffer};check();
+  // Own canonical symbolic word0 overlays bytes0..3. No scalar field shadows.
+  for(const key of nativeKeys(block))if(typeof key==='string'&&/^(0|[1-9][0-9]*)$/.test(key)&&key!=='0')fail('allocated block scalar shadow');
+  read(block,0);check();const zero=native(block,0);
+  if(!zero||!('value'in zero)||!zero.writable)fail('logical memset requires writable pointer overlay');
+  // Logical nonalias memset: no libc internal store/fault-order claim. Admission
+  // completes before callback-free zeroing of real supplied bytes and overlay.
+  check();const finalZero=native(block,0);if(!finalZero||!('value'in finalZero)||!finalZero.writable)fail('logical memset pointer overlay changed');
+  nativeFill.call(bytes,0);(block as SourceJObjClassFields)[0]=null;
+  check();write(block,0,c); // actual8025d100, same returned free-block identity.
+  method(c,44,0x80251eb4);
+  // JObjInit reads the live canonical JObj class parent cell803acc24, not an
+  // assumed parent implementation or a host-created initialized object.
+  const parentPointer=read(jobj,20);
+  if(parentPointer===null)fail('actual JObjInit parent init dereference is null');
+  const actualParent=parentPointer===parent?parent:retain('jobjInitParent',parentPointer);
+  method(actualParent!,44,0x8025cf48); // authenticated actual parent init returns0.
+  // Immutable decoded source constant8043d308 = binary32 one.
+  const one=1;
+  const data=new NativeDataView(buffer);
+  const store=(offset:number,value:number,float=false):void=>{
+   check();if(float)nativeSetFloat32.call(data,offset,value,false);else nativeSetUint32.call(data,offset,value,false);check();
+  };
+  store(0x14,0x40);store(0x2c,one,true);store(0x30,one,true);store(0x34,one,true);
+  // hsdNew/JObjAlloc returned the exact allocated object. LoadJoint next reads
+  // that object's current class and dispatches its actual +3c load method.
+  const actualClass=read(block,0);if(actualClass!==c)fail('allocated class pointer changed');
+  method(c,60,0x8024f638);
+  fail('actual LoadJoint reached8024f638 JObjLoad; descriptor load body incomplete');
+ };
+ const runtime:SourceProjectileResourceRuntime={getAllocatorRuntime:()=>allocator,getRetainedStorageOwners:()=>Object.freeze([sources,...owners.values(),...(memory?[memory.bytes,memory.buffer]:[])])};
  entries.set(runtime,(root,child,lifetime)=>{
   if(active){poisoned=true;fail('same-runtime resource reentry');}if(failed)fail('permanently incomplete resource runtime');
   requireSourceProjectileResourceInvocation(root,runtime,child,lifetime);active={root,child,lifetime};
@@ -136,10 +185,8 @@ export function createSourceProjectileResourceRuntime(sources:SourceProjectileRe
    if(block===null)fail('actual JObjAlloc null result reaches assertion; nonnull LoadJoint incomplete');
    if((uint(read(jobj,4))&1)===0)initialize(jobj);
    const objectSize=uint(read(jobj,16),65535)<<16>>16;
-   // Allocation returned this exact head, but no byte-storage mapping has yet
-   // been admitted for real memset. Never substitute a constructed JObj.
-   void block;void objectSize;
-   fail('actual8025d0fc memset requires explicit allocated block byte storage; nonnull LoadJoint incomplete');
+   initializeBlock(block,jobj,objectSize);
+   fail('unreachable source JObj initialization continuation');
   }catch(error){failed=true;throw error;}finally{active=undefined;}
  });return Object.freeze(runtime);
 }
