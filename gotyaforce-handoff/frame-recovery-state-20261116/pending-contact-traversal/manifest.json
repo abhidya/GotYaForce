@@ -1,0 +1,33 @@
+{
+  "base_remote": "a61d09e87054b5acc21e1d2606d10c6115b72b80",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "48daba1bb61473349bb598a29bb993ed2853f0b5c4b62e627088b0a36843c5fb"
+    },
+    {
+      "path": "packages/combat/src/rom/actor-target-dispatch.ts",
+      "sha256": "745898d036e5d58149bd0747e204147b68d70e91757d55dd47924450e1516b42"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-count-reset.selftest.ts",
+      "sha256": "20024ab71e4fa4c4dd7165a428fb48dc69b489faf9be95c7e88cdb591264b089"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-callback-traversal.selftest.ts",
+      "sha256": "b92c63b729f7e4c8b675a426141592d921305677418f7bbb964b8781ce9ea567"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "a3894c311b005aae0bde6e36d575e71761e04ab49a71a2b41dde67aa0013f762"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_callback_traversal_evidence.py",
+      "sha256": "1beb59992e23b9bc8f022598e76e2dd363084689f899100b8510a67582ea1393"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_callback_traversal_evidence.py",
+      "sha256": "603aeb8ae23ce88b856de0143bfe673f8f9e03507c414749e46dd6c137f5d80f"
+    }
+  ]
+}

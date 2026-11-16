@@ -1,0 +1,659 @@
+{
+  "workspace_replaced": true,
+  "recovered_repo": "/workspace/scratch/c1b3e92d1266/gotyaforce-frame-recovered-20261116",
+  "verified_remote_latest": "0babe11caa2634c49ce148a20badc714f51d6670",
+  "local_latest": "6adc7a58cb7059f55d2d2922c62cbd87e07b7e67",
+  "tree": "29672fc7053ed6a6760f94dc3ca0b7d6837d1189",
+  "pr": 58,
+  "base": "feat/double-ninja-source-x",
+  "ci": {
+    "run": 43837440788,
+    "status": "in_progress"
+  },
+  "reset": {
+    "local": "c17f4ee6a6f96335378f97d8a2ff19a8840d108a",
+    "remote": "edf6417f1bc425110f38fc801f9ec4bff72e7e71",
+    "tree": "11287eb79f6e4982356435f6b5cec15a232f91a4",
+    "focused_exit": 0,
+    "fixtures": 54,
+    "strict_exit": 0
+  },
+  "allocator": {
+    "focused_session": 38274,
+    "focused_exit": 0,
+    "fixtures": 45,
+    "strict_session": 70454,
+    "strict_exit": 0,
+    "independent_probes": 5
+  },
+  "remaining": "actual80039f6c collision predicate after actual3a05c;8002d35c contact pairing is assessed but not implemented; later frame stages/provenance and flagged JObj restriction remain",
+  "same_block": {
+    "focused_session": 88889,
+    "focused_exit": 0,
+    "fixtures": 58,
+    "strict_session": 6769,
+    "strict_exit": 0,
+    "independent_probes": 5,
+    "source_sha256": "c2ef77a2a9d4d99963a7998882f207321e1febbe0e12885e1170a135dd0e4443",
+    "test_sha256": "d3c31d0963c7f738a2143a707ac9bfb55996ba3aba919f4956a60f833faf648e"
+  },
+  "leaf_evidence": {
+    "files": [
+      "research/tools/matching-decomp/read_archived_jobj_leaf_helpers_evidence.py",
+      "research/tools/matching-decomp/test_archived_jobj_leaf_helpers_evidence.py"
+    ],
+    "primary_tests": 7,
+    "new_body_bytes": 1912,
+    "new_instructions": 478,
+    "bit_trials_per_archive": 15296,
+    "accepted_variants_per_archive": 11771,
+    "null_path_cases_both_archives": 16,
+    "independent_review": "blocked by platform cybersecurity-risk flag; not retried or reassigned; NO approval",
+    "runtime_unchanged_from": "2f76de35f069bb2f70df370b743ed15bf0a7e273"
+  },
+  "snapshot_recovery_correction": "Fresh clone restored existing tracked db3/db4 baseline archives; last change993e0716. No continuation commit changes game files. Private generated proof folders were lost, not tracked snapshots. Windows inspection copied no original data out.",
+  "observed_utc": "2026-11-16T09:12:34.888900+00:00",
+  "blocked_runtime": {
+    "reason": "implementation worker platform cybersecurity-risk flag",
+    "action_stopped": "new nonnull JObjLoad/Resolve runtime implementation; no retry or reassignment",
+    "source_worktree": "/workspace/scratch/c1b3e92d1266/gotyaforce-resource-recovered-20261116",
+    "preserved_manifest": "blocked-leaf-preserved/source-manifest.json",
+    "published": true,
+    "node_test_processes": {
+      "90106": {
+        "observed_exit": 0,
+        "case_count_from_existing_log": 47
+      },
+      "18632": {
+        "observed_exit": 0,
+        "case_count_from_existing_log": 46
+      }
+    },
+    "process_status_source": "child queried only already-existing sessions after status-only authorization; no new test execution",
+    "strict_status": "NOT separately verified: tsc command newline-separated without set-e/and-chain; empty logs do not establish exit0",
+    "final_matching_manifest": "not supplied by implementation worker; coordinator preservation manifest only",
+    "runtime_review": "not started; awaiting final freeze; on hold",
+    "current_source_strings": "preserved in coordinator and main-author functions.store plus filesystem backup",
+    "published_commit": "f495525ef5b6c5e5c6b7f6cac5a95cf9196ced4a",
+    "publication_only": "exact preserved4files on explicit push request; neither flagged implementation nor review retried; strict status/final review still pending",
+    "exact_head_ci": {
+      "run": 43813385619,
+      "status": "completed",
+      "conclusion": "success"
+    }
+  },
+  "active_checkout_commit": "67c2be701f280a0ca7127f83017f1ebd308c2b6d",
+  "publication_method": "separate temporary Git index; no source bytes changed and original worktrees preserved",
+  "contact_counter_reset": {
+    "remote": "a61d09e87054b5acc21e1d2606d10c6115b72b80",
+    "local": "61662c25c75838aeca2ceaf5de5ae8e13b1dd595",
+    "tree": "6b1cf06a8eadbb89406e9484de021fdab14d0991",
+    "ci": {
+      "run": 43815437499,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "counts": 21,
+    "focused_total": 89,
+    "focused_session": 95602,
+    "focused_exit": 0,
+    "strict_session": 68406,
+    "strict_exit": 0,
+    "evidence_session": 68063,
+    "evidence_tests": 7,
+    "evidence_exit": 0,
+    "review": "approved corrected narrow counter lane; blocked JObj work excluded",
+    "baseline": "67c2be70 equivalent c233 runtime; latest f495 preserved files not compiled/reviewed again",
+    "files": [
+      {
+        "path": "packages/combat/src/rom/battle-outer-frame.ts",
+        "sha256": "09b4e0e8650786748c113eeb5ef750d460e1f48aacea3918c64f5adbe72e7cf6",
+        "blob": "8bd43d012c0cb39032229f63749403dd5568cf15"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-count-reset.selftest.ts",
+        "sha256": "a4f0c8f9ccd4e7b29266b7152addb6f79d5ea4f512b56653f6616980f49fd6e7",
+        "blob": "c05eff7e3e68150f923a466667dd8cfa21106c18"
+      },
+      {
+        "path": "research/tools/matching-decomp/read_archived_contact_count_reset_evidence.py",
+        "sha256": "eb557f3d63a53ca3f913e04c8d542b53010ba6eedc72d060818027bb4bc33016",
+        "blob": "752d36211c367b059cf2a31b6723aed9527cc4e8"
+      },
+      {
+        "path": "research/tools/matching-decomp/test_archived_contact_count_reset_evidence.py",
+        "sha256": "878c55db5187644f3e772f96afc23a2e43cc181e08caff584980e14af2fe33c0",
+        "blob": "deaa8e65d9d8ab40cb0eb3eb997c035824dfb60a"
+      },
+      {
+        "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+        "sha256": "3a2dc9cc8ca08ec9e37a95a54fa301dc08764d76c4ba46c5a169b2dc39e4d347",
+        "blob": "1af2cfe894598d15eae02dc3806b1a808804fb23"
+      }
+    ]
+  },
+  "contact_callback_traversal": {
+    "remote": "cc93c32589972c59ca66e6715862ff9872bb6fe5",
+    "local": "c4bbf4365b5f67e083f15eb1074acbb5a0718fcb",
+    "tree": "cf9c0ea29308e1325c95d6a4d3663f06e8c8b939",
+    "ci": {
+      "run": 43817635546,
+      "status": "in_progress"
+    },
+    "focused": {
+      "session": 44964,
+      "cases": 42,
+      "exit": 0
+    },
+    "regressions": {
+      "session": 36162,
+      "cases": 68,
+      "exit": 0
+    },
+    "strict": {
+      "session": 52549,
+      "exit": 0
+    },
+    "evidence": {
+      "session": 62546,
+      "tests": 14,
+      "exit": 0
+    },
+    "review": "approved exact seven files; independent19 traversal,7 evidence,two duplicate-half42 probes passed",
+    "local_validation_base": "67c2be70 equivalent c233; preserved f495 four-file snapshot not recompiled/reviewed",
+    "files": [
+      {
+        "path": "packages/combat/src/rom/battle-outer-frame.ts",
+        "sha256": "48daba1bb61473349bb598a29bb993ed2853f0b5c4b62e627088b0a36843c5fb",
+        "blob": "dfa7a63f304848b51e5b4da09e6cf1ecc028f543"
+      },
+      {
+        "path": "packages/combat/src/rom/actor-target-dispatch.ts",
+        "sha256": "745898d036e5d58149bd0747e204147b68d70e91757d55dd47924450e1516b42",
+        "blob": "d4624ccbc348e4bfd2743e7cca9e78d78bbb18b6"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-count-reset.selftest.ts",
+        "sha256": "20024ab71e4fa4c4dd7165a428fb48dc69b489faf9be95c7e88cdb591264b089",
+        "blob": "03faf38372e499cf46c06112ee4a24b9d7a16dbd"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-callback-traversal.selftest.ts",
+        "sha256": "b92c63b729f7e4c8b675a426141592d921305677418f7bbb964b8781ce9ea567",
+        "blob": "9da4ff11a7a39887dafad962145783ce4e801350"
+      },
+      {
+        "path": "research/tools/matching-decomp/read_archived_contact_callback_traversal_evidence.py",
+        "sha256": "1beb59992e23b9bc8f022598e76e2dd363084689f899100b8510a67582ea1393",
+        "blob": "d7aac5e17048720cbea34eb20a8d72fee36c9208"
+      },
+      {
+        "path": "research/tools/matching-decomp/test_archived_contact_callback_traversal_evidence.py",
+        "sha256": "603aeb8ae23ce88b856de0143bfe673f8f9e03507c414749e46dd6c137f5d80f",
+        "blob": "98116515c001a1df732ec0b913b1b4cb4d6b8130"
+      },
+      {
+        "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+        "sha256": "a3894c311b005aae0bde6e36d575e71761e04ab49a71a2b41dde67aa0013f762",
+        "blob": "1370b44847856ca5b2ce8dce6679049e7c6fb995"
+      }
+    ],
+    "remaining": "required8008a65c active contact callback, private candidate-half42 shared-writer join,2bb14 and later normal-frame paths; blocked JObj implementation/review remain stopped",
+    "remote_tree_verified": true,
+    "fetch_session": 73624,
+    "fetch_exit": 0,
+    "working_files_match_remote": true
+  },
+  "contact_callback_prefix": {
+    "remote": "37656e897a2b3ac5de4aeaf82d99c2e86dc7bbb1",
+    "base": "cc93c32589972c59ca66e6715862ff9872bb6fe5",
+    "local_commit": "9d676bcb2645d7aeb797397db38eceed50a8cb30",
+    "tree": "541b3794af43b2b67d9d0d3fa8e301a3d3298c01",
+    "message": "Implement bounded contact callback prefix with ordered effects",
+    "files": [
+      {
+        "path": "packages/combat/src/rom/battle-outer-frame.ts",
+        "sha256": "b420bea67428ee196bdbab80af74aad5afe1b8d9c9d770761f88c8cba6258482",
+        "size": 184460,
+        "blob": "bfbc33ff89bc8ae5270d631244e59dec164dac5a"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-callback-prefix.selftest.ts",
+        "sha256": "bae07fc51c9980f19c59ce1585aaa1d38aa9975de16cafbcd2900490ebe830d6",
+        "size": 6717,
+        "blob": "0bb8e00841a6f3e550699b08feeec28b41b1d72d"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-callback-traversal.selftest.ts",
+        "sha256": "79250243d0718ef4fab98d4b21d82b27d7168c1953a564eb1ab8aa8dc41d36fe",
+        "size": 6355,
+        "blob": "bba30f68d6947843d816ae88f0c4660ac748e0b9"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-count-reset.selftest.ts",
+        "sha256": "e6eecfcb990dc87dfd35f48cedc39da26daaf00cacc481c4757a8a6cbfdcea0f",
+        "size": 6887,
+        "blob": "60d9d7a34d67ad0ace55cf40b3ae09419a7e94aa"
+      },
+      {
+        "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+        "sha256": "8952fbe1d209045280258d3d64cf8489296c7dcd9f8742508249c30abb8bce11",
+        "size": 1099984,
+        "blob": "92224ae69e5d8c03074dbe701b719575db239b37"
+      },
+      {
+        "path": "research/tools/matching-decomp/read_archived_contact_callback_prefix_evidence.py",
+        "sha256": "59fdd0123ebbde5f5ecfbcdcdf46df7e1031a3c1235fdc38fcb4778f9f18753b",
+        "size": 8244,
+        "blob": "f7b19ecf6b50caf7820e1a77c478a530bfa1f9e9"
+      },
+      {
+        "path": "research/tools/matching-decomp/test_archived_contact_callback_prefix_evidence.py",
+        "sha256": "24f74920fbf847855cbb6a0e3025449e6dac8cd29982f6aadac88f86ac1884f3",
+        "size": 7475,
+        "blob": "be82f9e1ee8b61747d41a9896f35c3ce8356a444"
+      }
+    ],
+    "ci": {
+      "run": 43820187377,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "focused": {
+      "session": 26366,
+      "exit": 0,
+      "cases": 61
+    },
+    "regressions": {
+      "session": 92316,
+      "exit": 0,
+      "cases": 68
+    },
+    "strict": {
+      "session": 24952,
+      "exit": 0
+    },
+    "evidence": {
+      "exit": 0,
+      "tests": 9
+    },
+    "independent_review": "Approved frozen independent prefix only:19 cases, pair-capture/fresh-Z/stop-before-next probe and9evidence tests; blocked JObj work excluded",
+    "baseline": "Localc233 baseline plus contact increments, preservedf495 leaf not retested or reviewed",
+    "backup_sha256": "989080713dd5ce8c720d08a292aca55a6dbdc3ba11bf64e41b6f28ca298c4ac8"
+  },
+  "contact_transform": {
+    "base": "37656e897a2b3ac5de4aeaf82d99c2e86dc7bbb1",
+    "status": "published; exact-head CI pending",
+    "files": [
+      {
+        "path": "packages/combat/src/rom/battle-outer-frame.ts",
+        "sha256": "555b9c608d5cadcfea00b6d0d003a62d716bf05a4bb77c02ba2a19d816b56f4d",
+        "size": 187007,
+        "blob": "7da38fd40732330f5a6989e69f35aab9eebc4d1a"
+      },
+      {
+        "path": "packages/combat/src/rom/source-contact-transform.ts",
+        "sha256": "cc215a2049ea133b77b52e9aab876cd10a6a5683955f5f57d23860e5e81844e1",
+        "size": 6602,
+        "blob": "ebf16e2dc5da4a2058987fb1b3c25d9cef1ec58b"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-transform.selftest.ts",
+        "sha256": "0c74d667112a6e23be1963fbe2fc3733e3b06633a41de4bceb5b8968961e9fad",
+        "size": 9601,
+        "blob": "fbaf3e52abf7dca863e7cc72b6cad7098c3490a0"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-callback-prefix.selftest.ts",
+        "sha256": "b0f75b5353c0aa666c6b71d22859ce66d1ac010317ffa4a1926c61aa1b97256d",
+        "size": 6725,
+        "blob": "bd35e213a84d86edf2d3029bb5a7376e1d7180e4"
+      },
+      {
+        "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+        "sha256": "7a72d54ce68d6dde78690edd5c0d17e595eeb98f134459edcc2b0e914db0b73c",
+        "size": 1100162,
+        "blob": "bc726280400d657c79c3a2fdfa5a201fc61cbeac"
+      },
+      {
+        "path": "research/tools/matching-decomp/read_archived_contact_callback_prefix_evidence.py",
+        "sha256": "3ce7be1673746c69ece2406f4402c6db39423947009df56656a67d5c88927c6a",
+        "size": 9621,
+        "blob": "74b9b50a9aa243717185aa508fadcba808005954"
+      },
+      {
+        "path": "research/tools/matching-decomp/test_archived_contact_callback_prefix_evidence.py",
+        "sha256": "07503d12ff282cd899d456d6a58a55ed13bc521c218fdba1ff73df28d14520e0",
+        "size": 8746,
+        "blob": "b362567a92dc688fe9bd3b2c037d4ad92a52d51b"
+      }
+    ],
+    "tree": "0b16d8151033318f4472ab92098919e160a2bd56",
+    "message": "Execute contact matrix transforms through canonical byte owners",
+    "local_commit": "4faac7fbecfd67e8fd0c7a8fe817095ca48b51f0",
+    "backup_sha256": "ad60a9aceaebf0ba1b4dce66d1ef6f27770b54ba746896f706bcc81a55b1ae9a",
+    "remote": "9265370981fb705552a149e8b34afa35ae2a5e61",
+    "ci": {
+      "run": 43822803581,
+      "status": "in_progress"
+    },
+    "focused": {
+      "session": 75182,
+      "exit": 0,
+      "cases": 88
+    },
+    "regressions": {
+      "session": 3327,
+      "exit": 0,
+      "cases": 68
+    },
+    "strict": {
+      "session": 15211,
+      "exit": 0
+    },
+    "evidence": {
+      "tests": 9,
+      "exit": 0
+    },
+    "review": "Approved corrected exact hashes;27 independent fixtures, outside private-invocation probe and late-GQR probe passed; no blocked code reviewed",
+    "remote_tree_verified": true
+  },
+  "contact_timer": {
+    "base": "9265370981fb705552a149e8b34afa35ae2a5e61",
+    "status": "published; exact-head CI pending",
+    "files": [
+      {
+        "path": "packages/combat/src/rom/battle-outer-frame.ts",
+        "sha256": "1c1fb3367e82a3b3b8e4790f12a8ee0806a5240b3eab003052e08f634423f118",
+        "size": 187266,
+        "blob": "6ec2c5004b14fa88d58b46c876a71f268f660808"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-timer.selftest.ts",
+        "sha256": "ea65c82f531e26760b415a3fc12dea79c30be62bbe9c3d849befb224345fdda6",
+        "size": 6004,
+        "blob": "8bd41bfa46b6e91ec158b17368e979cbf24cb356"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-transform.selftest.ts",
+        "sha256": "ad9a4ce589a9b1a0b768b3e8c34e0854788a1ee233e0ac7d3211c1c019e8513d",
+        "size": 9813,
+        "blob": "3fd052466a9b01c4373c28ce18e18b1536095266"
+      },
+      {
+        "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+        "sha256": "55e29fa356983cf3320b59711aef3dd6076459b569b29caaa43a1a08a6a079af",
+        "size": 1100328,
+        "blob": "aec6dff7f0298cb06e68cd6a1ddcf68e7112c318"
+      },
+      {
+        "path": "research/tools/matching-decomp/read_archived_contact_callback_prefix_evidence.py",
+        "sha256": "d6040f5de6a9ac863b33cdbd4c075f81c0baad77315e9862fc1ef2c3c8c3bed8",
+        "size": 10663,
+        "blob": "13524130deeab6ee969eabdde95b3371690918d7"
+      },
+      {
+        "path": "research/tools/matching-decomp/test_archived_contact_callback_prefix_evidence.py",
+        "sha256": "8cae089105d3e4f0a2d28a7aac2b6d52e127423a9a7db09979b61d4a2fac2c5c",
+        "size": 9675,
+        "blob": "fe1c5d120603451d7e28806846d4499e70a3fb9a"
+      }
+    ],
+    "backup_sha256": "b178242393667998a722b280009535cf2728bf619d6e9fbc584fbdc2d2670295",
+    "tree": "5c6cf91f71bf6751f36f46bd229e6628be8d5833",
+    "message": "Complete bounded positive contact countdown and callback return",
+    "local_commit": "0f3dcc13a8956d77d4178fba470d80878c427927",
+    "remote": "c97bb5fc8d6e04e0c05ad2effbcffe7d7da03199",
+    "ci": {
+      "run": 43824323511,
+      "status": "in_progress"
+    },
+    "focused": {
+      "session": 67947,
+      "exit": 0,
+      "cases": 48
+    },
+    "regressions": [
+      {
+        "session": 13537,
+        "exit": 0,
+        "cases": 61
+      },
+      {
+        "session": 92189,
+        "exit": 0,
+        "cases": 68
+      }
+    ],
+    "strict": {
+      "session": 4302,
+      "exit": 0
+    },
+    "evidence": {
+      "tests": 9,
+      "exit": 0
+    },
+    "review": "Approved exact frozen timer lane;21 independent fixtures, nine evidence tests and256-to255 halfword/next8 probe passed; blocked code excluded",
+    "remote_tree_verified": true
+  },
+  "target_action_reset": {
+    "base": "c97bb5fc8d6e04e0c05ad2effbcffe7d7da03199",
+    "status": "published and exact tree verified; final204 runtime cases+strict+18 evidence exit0; independent review approved; exact-head CI43827013375 in_progress",
+    "files": [
+      {
+        "path": "packages/combat/src/rom/battle-outer-frame.ts",
+        "sha256": "5c81f8bae9d25580c008dcd4852690e02e675cd9fd5c516de8ae3161570d50b8",
+        "size": 197640,
+        "blob": "e7a616e99286e52c0c66a84f4bc3c0fad3a2cd2d"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-global-layout.ts",
+        "sha256": "a7e5854e5666cf0a6361a4fe42ad586864673f1f5084eebbdcb4bc680bc2c88b",
+        "size": 2165,
+        "blob": "8609ff6c32eddf62e38ff029f61fe9a26d3ddc2f"
+      },
+      {
+        "path": "packages/combat/src/rom/source-contact-reset.ts",
+        "sha256": "228ac26768b2d10f893d07d5d43dcd7569675c7321db42711ff4c9ed864b93c5",
+        "size": 12152,
+        "blob": "a889a17041be94c5afbcd1a2792eb5d56bdb195e"
+      },
+      {
+        "path": "packages/combat/src/rom/source-contact-reset.selftest.ts",
+        "sha256": "c8558865c1dc33fb610ffba36056daa4b79ab6f950b73743df186bcc75757d01",
+        "size": 9189,
+        "blob": "8a37e9409d0ff8fb10e390a1e579bf7840c962bc"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-target-action-reset.selftest.ts",
+        "sha256": "5699fd5f3f32ab9adbf8e85446f20014bf6937e0cd99a2e9932a5a8f36e2b4ec",
+        "size": 8788,
+        "blob": "e9b5cde8d56228ca5190d0a6f0e89debbc993f38"
+      },
+      {
+        "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+        "sha256": "e84a3a018b11e9b3736239ec69095e81e0ea9715bb2b481afffaa99785a8d2a6",
+        "size": 1100510,
+        "blob": "1bad7d81650a2217b8e50a1b5e3fa7e2f6cd6fe7"
+      },
+      {
+        "path": "research/tools/matching-decomp/read_archived_target_action_frame_evidence.py",
+        "sha256": "e46b59a33c09b50d823053c53142d10abc4d7d47a79606844b35b6c848a1e307",
+        "size": 14228,
+        "blob": "6f050c72b9bf7d8f0eb5190f3c30300415c6ac4a"
+      },
+      {
+        "path": "research/tools/matching-decomp/test_archived_target_action_frame_evidence.py",
+        "sha256": "f0bde4f0c41d364e03bdbdb55e595f94f56f432f2186a36b86f42ef6a3c13d5f",
+        "size": 20331,
+        "blob": "b353386796425acc7ac816a620eac4189edbff74"
+      }
+    ],
+    "backup_sha256": "7fbc6d714d40650858bd7d3097cf0fe52d48368ab18e4c1a94be1269485e577e",
+    "tree": "7a30b24d1a9d47465753743cde022a8af0e0d937",
+    "message": "Join bounded target-action caller to canonical contact resets",
+    "local_commit": "4874e3f8cf3720f77ba44a47c1c3dd2f5ac8d774",
+    "remote_commit": "a8b38ab4c70cf9aee81873852a15e25ed515c4ac",
+    "ci_run": 43827013375,
+    "remote_tree_verified": true,
+    "validation": {
+      "caller": 27,
+      "reset_player_draw": 68,
+      "prefix_traversal_counter": 61,
+      "timer_transform": 48,
+      "runtime_total": 204,
+      "strict_exit": 0,
+      "evidence_tests": 18,
+      "evidence_exit": 0,
+      "independent_review": "approved frozen hashes",
+      "sessions": [
+        18162,
+        41262,
+        89946,
+        65036,
+        54311,
+        77360
+      ]
+    }
+  },
+  "contact_height": {
+    "base": "a8b38ab4c70cf9aee81873852a15e25ed515c4ac",
+    "status": "published exact head/tree verified; strict44922 exit0;6 evidence exit0;204 unaffected regressions exit0;35 height55660 and independent83830 exit0; independent frozen-source review approved; exact-head CI43832004381 in_progress game/importer",
+    "files": [
+      {
+        "path": "packages/combat/src/rom/battle-outer-frame.ts",
+        "sha256": "ea09faf8162f66dbe2713e0f595e0f731d041429ca88b4b92cef610e8d9ec71b",
+        "size": 204580,
+        "blob": "7501c6c10b9c444f9642d8f44bf93241225f8438"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-target-action-reset.selftest.ts",
+        "sha256": "b49c498359fa4fce18716f876286ce7347d5a9e3caef512c6b704f67cea69dca",
+        "size": 8903,
+        "blob": "0792dfa58432afa2c2ee38f7704631e38dc7a865"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-height.selftest.ts",
+        "sha256": "79cb8cd18e4cd15686171632dbb93d6a3610f0cb38c7f3180d221827da4e7666",
+        "size": 11711,
+        "blob": "ea40268b09ed974635bcdd3fddd845ce893a99c7"
+      },
+      {
+        "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+        "sha256": "01717d798234b33f9de19e5e588f14036464d9f37f770d7a76edc30f328c0c90",
+        "size": 1100679,
+        "blob": "39b5780136b4e79c9d9d3e2e89e6830fc9b9de32"
+      },
+      {
+        "path": "research/tools/matching-decomp/read_archived_contact_height_evidence.py",
+        "sha256": "68c93316d695b19c97c20fc56d0ba47a007a4f8bad757cd308c3afd102d645f0",
+        "size": 5547,
+        "blob": "b38cde8f719b9681167db8cfd8eef71abe697bb5"
+      },
+      {
+        "path": "research/tools/matching-decomp/test_archived_contact_height_evidence.py",
+        "sha256": "f2006911dc9e1768de4022b19dc246a26854efc17d910b123bdaf6b7d4f1ea54",
+        "size": 3989,
+        "blob": "933b6521f4f010581c75c2209cc3a1b76d2617d0"
+      }
+    ],
+    "backup_sha256": "468541871575c69bdd9547e7031da8efca025a10014f4d360a5303a3b2a40e49",
+    "tree": "d246381747b4bfd02e263dc737988d80f28878db",
+    "message": "Continue target resets through bounded initial contact traversal",
+    "local_commit": "e8b1d86e7e5c77a9854679fe2f1c074c2e7a619c",
+    "remote_commit": "5b76a24add2469fa1da7968a76eac38b84a940df",
+    "ci_run": 43832004381
+  },
+  "contact_height_native_count": {
+    "base": "5b76a24add2469fa1da7968a76eac38b84a940df",
+    "status": "Published; PR exact head verified; runtime35 session92783 exit0; strict71065 exit0; independent static review approved; exact-head CI43834036906 in_progress",
+    "files": [
+      {
+        "path": "packages/combat/src/rom/battle-outer-frame.ts",
+        "sha256": "ce924ba87c8f0b2d13cca7269809ca432882460c5ff2cdd8fe9c4c7d2aba3c1e",
+        "size": 204585
+      }
+    ],
+    "backup_sha256": "a4ecab6fa03db088e21c2afe0a8bbb0b7baac127617b0d08d83866d501b89f9c",
+    "base_tree": "d246381747b4bfd02e263dc737988d80f28878db",
+    "tree": "ffff39a3dde9157c34b542afa2ce07780fe89534",
+    "local_commit": "cd78c70f9617f6ca4a37c4008ad8505ef9c1c29d",
+    "message": "Reduce redundant contact counter metadata scans within bounded admission",
+    "path": "packages/combat/src/rom/battle-outer-frame.ts",
+    "blob": "34d752f41b834f02c9cb0e4b9f2efc3eee29e398",
+    "sha256": "ce924ba87c8f0b2d13cca7269809ca432882460c5ff2cdd8fe9c4c7d2aba3c1e",
+    "remote_commit": "2c11965e09a080d2a0e5e99dcdb10c961dd5e778",
+    "ci_run": 43834036906,
+    "remote_tree_verified": true,
+    "validation": {
+      "runtime_cases": 35,
+      "runtime_session": 92783,
+      "runtime_exit": 0,
+      "strict_session": 71065,
+      "strict_exit": 0,
+      "independent_static_review": "approved exact source hash; prior snapshot independent35 replay passed"
+    }
+  },
+  "contact_adjust": {
+    "base": "2c11965e09a080d2a0e5e99dcdb10c961dd5e778",
+    "status": "Published;27 cases passed21+6 after assertion-only correction;35 height83927 and204 regressions23294/53651 exit0; strict60475 exit0;7 evidence tests exit0; independent21+6 review approved; exact-head CI43837440788 in_progress",
+    "files": [
+      {
+        "path": "packages/combat/src/rom/battle-outer-frame.ts",
+        "sha256": "d5b5c077984c8a66ba6bf5600e7762d2a7d64e744537d71223fa349d38e113f1",
+        "size": 207444,
+        "blob": "a1ca6fbe79750e07cc3f19c860f3e18bdd71cfc1"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-height.selftest.ts",
+        "sha256": "0afbbef72dd96807ebac8d0e42aa8ed38bf7185612c59886a66046cfbbd340bc",
+        "size": 11863,
+        "blob": "db616f25aa93cb4266d607bc6aa1e61330cc4d9b"
+      },
+      {
+        "path": "packages/combat/src/rom/battle-contact-adjust.selftest.ts",
+        "sha256": "46be6c32e63965cdcd25af84ef380456534e8c664bcc914ff886b22d806115ff",
+        "size": 7622,
+        "blob": "3d0739c4734690eb26f7b87ea07882b78ce00840"
+      },
+      {
+        "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+        "sha256": "82ce71058ad78d73a9ab2b0d7a38baa8a1449a5647606f7f18fa012b79c8bad5",
+        "size": 1100848,
+        "blob": "9a4dc6fcbb6f88c333c9a5ec8fb3e2e81b6c476c"
+      },
+      {
+        "path": "research/tools/matching-decomp/read_archived_contact_adjust_evidence.py",
+        "sha256": "4d6b475adbed7c6f1523a7435ba1a09d61829836dcda0e8ae72e29f0aa48ce5f",
+        "size": 5749,
+        "blob": "5b4d23d5ee8fd719142a50e3f12543e31497f1d2"
+      },
+      {
+        "path": "research/tools/matching-decomp/test_archived_contact_adjust_evidence.py",
+        "sha256": "66f6b3174cfaef1f8906fc42573813161402f3401839e8113d7c275a3c22f981",
+        "size": 5790,
+        "blob": "cd946ab5c056cf0ef4ad454e4477a8065cdbdd58"
+      }
+    ],
+    "backup_sha256": "8dc23e0baf59c4bb59990e09c938889bc09a22767ab9df1c5d5096e51e48644a",
+    "tree": "29672fc7053ed6a6760f94dc3ca0b7d6837d1189",
+    "base_tree": "ffff39a3dde9157c34b542afa2ce07780fe89534",
+    "message": "Execute genuine contact displacement adjustment before collision predicate",
+    "local_commit": "6adc7a58cb7059f55d2d2922c62cbd87e07b7e67",
+    "remote_commit": "0babe11caa2634c49ce148a20badc714f51d6670",
+    "ci_run": 43837440788,
+    "remote_tree_verified": true,
+    "validation": {
+      "new_cases": 27,
+      "segmented": "first21 pass before test-only message mismatch; final6 coordinator76912 and independent99364 exit0; assertion-only change independently verified",
+      "height_cases": 35,
+      "height_exit": 0,
+      "other_cases": 204,
+      "other_exit": 0,
+      "strict_exit": 0,
+      "evidence_tests": 7,
+      "evidence_exit": 0,
+      "review": "approved exact final frozen files"
+    }
+  }
+}

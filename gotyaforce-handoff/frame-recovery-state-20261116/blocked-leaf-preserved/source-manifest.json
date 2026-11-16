@@ -1,0 +1,18 @@
+[
+  {
+    "path": "packages/combat/src/rom/projectile-resource.ts",
+    "sha256": "7c06ff4ef6aa67151849bf51862f7f62c837ee6343a7c362047c215d67263fdc"
+  },
+  {
+    "path": "packages/combat/src/rom/projectile-resource.selftest.ts",
+    "sha256": "73ff182250c93747d95fd331186a467c957706395865c926be916f74807cabbd"
+  },
+  {
+    "path": "packages/combat/src/rom/source-object-allocation.ts",
+    "sha256": "6d59af17368136976ce7c2fefe5f5cca2dde451ea1626ecdd89a96cf9adf64eb"
+  },
+  {
+    "path": "packages/combat/src/rom/source-storage-claims.ts",
+    "sha256": "6cacb14d2ff86d45c1930b56bd1a5faffb4b688b35d770fd51f0819636deadb8"
+  }
+]

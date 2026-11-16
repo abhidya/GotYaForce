@@ -1,0 +1,727 @@
+From c17f4ee6a6f96335378f97d8a2ff19a8840d108a Mon Sep 17 00:00:00 2001
+From: "Manny (Abdulrehman) Bhidya" <32692463+abhidya@users.noreply.github.com>
+Date: Sun, 15 Nov 2026 19:23:15 -0800
+Subject: [PATCH 1/4] Implement canonical contact reset and group traversal
+
+---
+ .../rom/attached-setup-animation.selftest.ts  |   2 +
+ .../src/rom/source-contact-reset.selftest.ts  |  93 +++++++++++++++
+ .../combat/src/rom/source-contact-reset.ts    | 110 ++++++++++++++++++
+ 3 files changed, 205 insertions(+)
+ create mode 100644 packages/combat/src/rom/source-contact-reset.selftest.ts
+ create mode 100644 packages/combat/src/rom/source-contact-reset.ts
+
+diff --git a/packages/combat/src/rom/attached-setup-animation.selftest.ts b/packages/combat/src/rom/attached-setup-animation.selftest.ts
+index 36cc1226..1a2235d2 100644
+--- a/packages/combat/src/rom/attached-setup-animation.selftest.ts
++++ b/packages/combat/src/rom/attached-setup-animation.selftest.ts
+@@ -1,3 +1,4 @@
++import {runSourceContactResetSelfTests} from './source-contact-reset.selftest.js';
+ import {runProjectileResourceSelfTests} from './projectile-resource.selftest.js';
+ import {runBattleLateDrawSelfTests} from './battle-late-draw.selftest.js';
+ import {runSourcePlayerContactSelfTests} from './source-player-contact.selftest.js';
+@@ -2951,6 +2952,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
+   runBattleDrawOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
+   runSourceDrawCallbackSelfTests(createBattleTargetPreparationSamplerTestFixture);
+   runSourcePlayerContactSelfTests(createBattleTargetPreparationSamplerTestFixture);
++  runSourceContactResetSelfTests(createBattleTargetPreparationSamplerTestFixture);
+   runBattleLateDrawSelfTests(createBattleTargetPreparationSamplerTestFixture);
+   runActorThirdPassTarget83HydratedCompositionTests();
+   runActorAssociationScanHydratedCompositionTests();
+diff --git a/packages/combat/src/rom/source-contact-reset.selftest.ts b/packages/combat/src/rom/source-contact-reset.selftest.ts
+new file mode 100644
+index 00000000..1ac4c669
+--- /dev/null
++++ b/packages/combat/src/rom/source-contact-reset.selftest.ts
+@@ -0,0 +1,93 @@
++import {createSourceContactResetRuntime} from './source-contact-reset.js';
++import {createBattleDrawOuterTestFixture} from './battle-draw-outer.selftest.js';
++import type {createBattleTargetPreparationTestFixture} from './attached-setup-animation.selftest.js';
++type Make=typeof createBattleTargetPreparationTestFixture;
++function check(ok:boolean,s:string):void{if(!ok)throw Error('[source-contact-reset-test] '+s);}
++function refuses(f:()=>unknown,s:string):void{let m='';try{f();}catch(e){m=String(e);}check(m.includes(s),`expected ${s}, got ${m}`);}
++const byteOffsets=[0x1d9,0x1da,0x1db,0x1de,0x1dc,0x1dd,0x280,0x274,0x275,0x1df,0x2ae,0x2af,0x1e8];
++function fields():Record<string,number>{return Object.fromEntries([...byteOffsets.map(v=>['byte'+v.toString(16),77]),...[0x270,0x286].map(v=>['half'+v.toString(16),0xabcd]),...[0x1cc,0x1d0,0x1d4].map(v=>['float'+v.toString(16),42])]);}
++export function createSourceContactResetTestFixture(make:Make){
++ const x=createBattleDrawOuterTestFixture(make),actorFields=fields();delete actorFields.byte1d9;delete actorFields.byte1db;
++ Object.assign(x.sourceActor,actorFields,{supportContact1db:91,byte1df:255,byte2ae:128,byte2af:1,byte1e8:0});
++ if(!x.normalLifecycle)throw Error('explicit normal lifecycle required');x.normalLifecycle.getActorBinding(x.actor).byte1d9=67;
++ for(let i=0;i<13;i++)Object.assign(x.slotRecords[i]!,fields());
++ for(const offset of byteOffsets)x.objectBytes[offset]=77;
++ for(const offset of [0x1cc,0x1d0,0x1d4])x.allocator.writeF32(x.child,offset,42);
++ for(const offset of [0x270,0x286])x.allocator.writeU16(x.child,offset,0xabcd);
++ x.objectBytes[0]=1;x.objectBytes[0x86]=1;
++ const resetSources={scheduler:x.scheduler,normal:x.normalLifecycle,players:x.slotStatus,constants:{float80436f68:0}};
++ return Object.assign(x,{resetSources,resets:createSourceContactResetRuntime(resetSources)});
++}
++export function runSourceContactResetSelfTests(make:Make):void{
++ let count=0;const fresh=()=>{count++;return createSourceContactResetTestFixture(make);};
++ const observe=(run:()=>void,hook:(o:object,k:PropertyKey)=>void):void=>{const native=Object.getOwnPropertyDescriptor;Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{hook(o,k);return native(o,k);})as typeof native;try{run();}finally{Object.getOwnPropertyDescriptor=native;}};
++ {
++  const x=fresh();x.resets.resetActor(x.actor);const a=x.sourceActor as unknown as Record<string,number>;
++  check(a.float1cc===0&&a.float1d0===0&&a.float1d4===0,'actual three source float stores');check(x.normalLifecycle!.getActorBinding(x.actor).byte1d9===0&&a.supportContact1db===0&&a.byte1de===91,'same canonical lifecycle/support fields');
++  check(a.byte1df===254&&a.byte2ae===127&&a.byte2af===0&&a.byte1e8===0,'signed nonzero decrement is wrapped, not saturating');check(a.half270===0&&a.half286===0&&a.byte275===77&&a.byte274===0,'actual copied bytes and halfword clears');
++ }
++ {
++  const x=fresh();for(let i=0;i<12;i++)x.resets.resetPlayer(i);for(let i=0;i<12;i++){const r=x.slotRecords[i]!as unknown as Record<string,number>;check(r.byte1de===77&&r.byte1db===0&&r.byte1d9===0&&r.byte1df===76,'same canonical player reset rows');}
++  check((x.slotRecords[12] as unknown as Record<string,number>).byte1db===77,'twelfth-index row not reset by12-player caller');
++ }
++ {
++  const x=fresh();x.resets.runGroupReset(9);check(x.allocator.readF32(x.child,0x1cc)===0&&x.objectBytes[0x1de]===77&&x.objectBytes[0x1db]===0,'populated original group9 reset');check(x.groups[9]!.head===x.child,'no reset list removal');
++ }
++ {
++  const x=fresh(),seen:string[]=[];observe(()=>x.resets.runGroupReset(8),(o,k)=>{if(k==='head')for(const [id,g]of Object.entries(x.groups))if(o===g)seen.push(id);});
++  check(seen[0]==='8'&&seen.at(-1)==='15'&&seen.includes('9'),'base first, live active slot children, last sibling');
++  check(x.objectBytes[0x1db]===0,'paused match masks do not suppress genuine2cc78');
++ }
++ {
++  const x=fresh(),a=x.sourceActor as unknown as Record<string,number>,native=Object.getOwnPropertyDescriptor;let sampled=false;
++  Object.defineProperty(a,'byte1e8',{writable:false});
++  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{const d=native(o,k);if(!sampled&&o===a&&k==='supportContact1db'){sampled=true;a.supportContact1db=99;}return d;})as typeof native;
++  try{x.resets.resetActor(x.actor);}finally{Object.getOwnPropertyDescriptor=native;}
++  check(a.byte1de===91&&a.supportContact1db===0,'captured support byte copied before source clear, not reread');
++  check(a.byte1e8===0,'zero signed countdown needs no destination write');
++ }
++ for(const fault of ['readonly','lateAlias','supportMissing','negative','constantMissing','constantSwap','reentry','playerReplace','inactive','zero86','liveNext','nodeReadonly']as const){
++  const x=fresh(),a=x.sourceActor as unknown as Record<string,number>;let changed=false;
++  if(fault==='readonly')Object.defineProperty(a,'byte1da',{writable:false});
++  if(fault==='supportMissing')delete a.supportContact1db;
++  if(fault==='constantMissing')delete (x.resetSources as {constants?:object}).constants;
++  if(fault==='negative'){a.byte1df=128;a.byte2ae=255;}
++  if(fault==='inactive'){x.objectBytes[0]=0;Object.defineProperty(x.objectBytes,String(0x86),{get(){throw Error('inactive86 read');},configurable:true});}
++  if(fault==='zero86'){x.objectBytes[0x86]=0;delete (x.resetSources as {constants?:object}).constants;}
++  if(fault==='nodeReadonly')Object.defineProperty(x.objectBytes,String(0x1d0+3),{writable:false});
++  const run=()=>fault==='playerReplace'?x.resets.resetPlayer(0):['inactive','zero86','liveNext','nodeReadonly'].includes(fault)?x.resets.runGroupReset(9):x.resets.resetActor(x.actor);
++  observe(()=>{
++   if(['negative','inactive','zero86'].includes(fault))run();else refuses(run,fault==='readonly'||fault==='nodeReadonly'?'writable':fault==='lateAlias'?'competing':fault==='supportMissing'?'supportContact1db':fault==='constantMissing'?'constants':fault==='constantSwap'||fault==='playerReplace'?'changed':fault==='liveNext'?'cycle':'incomplete reset');
++  },(o,k)=>{
++   if(!changed&&fault==='lateAlias'&&o===a&&k==='byte1da'){changed=true;Object.assign(a,{field1da:2});}
++   if(!changed&&fault==='constantSwap'&&o===x.resetSources.constants&&k==='float80436f68'){changed=true;Object.assign(x.resetSources,{constants:{float80436f68:0}});}
++   if(!changed&&fault==='reentry'&&o===a&&k==='float1cc'){changed=true;try{x.resets.resetActor(x.actor);}catch{}}
++   if(!changed&&fault==='playerReplace'&&o===x.slotRecords[0]&&k==='float1cc'){changed=true;x.slotRecords[0]={...x.slotRecords[0]!};}
++   if(!changed&&fault==='liveNext'&&o===x.resetSources.constants&&k==='float80436f68'){changed=true;x.allocator.writePointer(x.child,8,x.child);}
++  });
++  if(fault==='readonly'||fault==='supportMissing'||fault==='lateAlias')check(a.float1d4===0&&x.normalLifecycle!.getActorBinding(x.actor).byte1d9===0&&a.byte1de===77,'partial writes before missing/wrong byte preserved');
++  if(fault==='constantSwap'||fault==='constantMissing')check(a.float1cc===42,'no writes before bad constant');
++  if(fault==='negative')check(a.byte1df===127&&a.byte2ae===254,'negative raw decrements');
++  if(!['negative','inactive','zero86'].includes(fault))refuses(()=>x.resets.resetActor(x.actor),'permanently incomplete');
++ }
++ {
++  const x=fresh();let changed=false;
++  observe(()=>refuses(()=>x.resets.resetPlayer(0),'alias'),(o,k)=>{if(!changed&&o===x.slotRecords[0]&&k==='float1cc'){changed=true;x.slotRecords[1]=x.slotRecords[0]!;}});
++  check((x.slotRecords[0] as unknown as Record<string,number>).float1cc===42,'late row alias refused before first store');
++ }
++ {
++  const x=fresh();Object.assign(x.sourceActor,{float80436f68:0});Object.assign(x.resetSources,{constants:x.sourceActor});
++  refuses(()=>x.resets.resetActor(x.actor),'alias');
++ }
++ for(const fault of ['nodeReentry','nodeLateReadonly','splitAlias','splitUpperAlias']as const){
++  const x=fresh(),binding=x.normalLifecycle!.getActorBinding(x.actor);let changed=false;
++  observe(()=>refuses(()=>fault.startsWith('node')?x.resets.runGroupReset(9):x.resets.resetActor(x.actor),fault==='nodeReentry'?'incomplete':fault==='nodeLateReadonly'?'destination changed':'competing'),(o,k)=>{
++   if(!changed&&fault==='nodeReentry'&&o===x.objectBytes&&k===String(0x1cc)){changed=true;try{x.resets.runGroupReset(9);}catch{}}
++   if(!changed&&fault==='nodeLateReadonly'&&o===x.objectBytes&&k===String(0x1cc+3)){changed=true;Object.defineProperty(x.objectBytes,String(0x1cc),{writable:false});}
++   if(!changed&&fault.startsWith('split')&&o===binding&&k==='byte1d9'){changed=true;Object.assign(x.sourceActor,{[fault==='splitAlias'?'half1d9':'byte1D9']:66});}
++  });
++  if(fault.startsWith('node'))check(x.allocator.readF32(x.child,0x1cc)===42,'poison/late readonly admits no partial scalar byte stores');
++  else check(x.normalLifecycle!.getActorBinding(x.actor).byte1d9===67,'split-owner alias preserves actual lifecycle byte');
++ }
++ console.log(`[source-contact-reset] PASS: ${count} standalone canonical-owner reset fixtures; no2bb14/outer-frame completion claim`);
++}
+diff --git a/packages/combat/src/rom/source-contact-reset.ts b/packages/combat/src/rom/source-contact-reset.ts
+new file mode 100644
+index 00000000..c5483bda
+--- /dev/null
++++ b/packages/combat/src/rom/source-contact-reset.ts
+@@ -0,0 +1,110 @@
++/** Authentic2cda4 stores and2cc78 list traversal. Standalone source helper only:
++ * no outer2bb14 admission, callback substitution, or completed-frame claim. */
++import {isSourceObjectSchedulerRuntime,type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
++import {isSourceActorNormalLifecycleRuntime,type SourceActorNormalLifecycleRuntime} from './actor-normal-lifecycle.js';
++import {isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
++import {isSourcePlayerTableStorage} from './source-storage-claims.js';
++export interface SourceContactResetSources {
++ scheduler:SourceObjectSchedulerRuntime;
++ normal?:SourceActorNormalLifecycleRuntime;
++ players?:SourceActorSlotStatusRuntime;
++ constants?:{float80436f68?:number};
++}
++export interface SourceContactResetRuntime {
++ resetActor(id:symbol):void;
++ resetPlayer(index:number):void;
++ runGroupReset(groupBits:number):void;
++}
++const native=Reflect.getOwnPropertyDescriptor;
++function fail(why:string):never{throw Error('[source-contact-reset] '+why);}
++function raw(v:unknown,max:number,label:string):number{if(typeof v!=='number'||!Number.isInteger(v)||v<0||v>max)fail(label+': explicit raw unsigned value required');return v;}
++export function createSourceContactResetRuntime(sources:SourceContactResetSources):SourceContactResetRuntime{
++ const field=native(sources,'scheduler'),scheduler=field&&'value'in field?field.value:undefined;
++ if(!isSourceObjectSchedulerRuntime(scheduler))fail('genuine scheduler required');
++ const allocator=scheduler.getAllocatorRuntime(),root=scheduler.getRootRuntime(),spawns=root.getSpawnRuntime();
++ let busy=false,poisoned=false,incomplete=false,validating=false;
++ let slotTable:object|undefined;
++ const edges:{o:object;k:PropertyKey;value:unknown}[]=[];
++ const live=new Map<string,object>(),actorOwners=new Map<symbol,{actual:object;binding:object}>(),groups=new Map<number,object>();
++ const exact=():void=>{
++  const f=native(sources,'scheduler');if(!f||!('value'in f)||f.value!==scheduler)fail('scheduler owner changed');
++  for(const e of edges){const d=native(e.o,e.k);if(!d||!('value'in d)||d.value!==e.value)fail('retained reset owner changed');}
++ };
++ const check=():void=>{if(poisoned||incomplete)fail('incomplete reset invocation');if(validating)return;validating=true;
++  try{if(scheduler.getAllocatorRuntime()!==allocator||scheduler.getRootRuntime()!==root||root.getSpawnRuntime()!==spawns||spawns.getAllocatorRuntime()!==allocator)fail('canonical reset graph changed');if(slotTable&&scheduler.getActorSlotTable()!==slotTable)fail('reset actor-slot owner changed');for(const [index,owner]of groups)if(allocator.getGroup(index)!==owner)fail('reset group owner changed');exact();if(poisoned)fail('caught reset reentry');}finally{validating=false;}
++ };
++ const own=(o:object,k:PropertyKey):unknown=>{const d=Object.getOwnPropertyDescriptor(o,k);check();if(!d||!('value'in d))fail(String(k)+': own data required');return d.value;};
++ const record=(v:unknown,label:string):object=>{if(v===null||typeof v!=='object'||Array.isArray(v)||ArrayBuffer.isView(v)||v instanceof Promise)fail(label+': source record required');return v;};
++ const keep=(name:string,o:object):object=>{const old=live.get(name);if(old&&old!==o)fail(name+': canonical owner changed');if([...live].some(([k,v])=>k!==name&&v===o)||o===sources)fail(name+': reset storage alias');if(name==='constants'&&[...actorOwners.values()].some(v=>v.actual===o||v.binding===o))fail('constants alias actor reset owner');live.set(name,o);return o;};
++ const link=(name:string,o:object,k:PropertyKey):object=>{const v=keep(name,record(own(o,k),name));if(!edges.some(e=>e.o===o&&e.k===k))edges.push({o,k,value:v});exact();return v;};
++ const aliases=(o:object,k:string,offset:number,terminal=false):void=>{
++  const hex=offset.toString(16),keys=[String(offset),...['field','byte','half','float','word'].flatMap(p=>[p+hex,p+hex.toUpperCase()])];
++  for(const key of new Set(keys))if(key!==k){const d=terminal?native(o,key):Object.getOwnPropertyDescriptor(o,key);if(!terminal)check();if(d)fail(k+': competing reset source field');}
++ };
++ type Cell={o:object;k:string;offset:number};
++ type Target={guard:()=>void;cell:(offset:number,width:number)=>Cell;node?:symbol};
++ const load=(t:Target,offset:number):number=>{
++  t.guard();if(t.node!==undefined){const v=allocator.readU8(t.node,offset);t.guard();return v;}
++  const c=t.cell(offset,1);aliases(c.o,c.k,offset);const v=own(c.o,c.k);t.guard();aliases(c.o,c.k,offset,true);return raw(v,255,c.k);
++ };
++ const store=(t:Target,offset:number,value:number,width:number):void=>{
++  t.guard();if(t.node!==undefined){
++   // Same original allocation bytes. Poll this helper's private operation after
++   // every observable admission, then commit the single scalar store atomically.
++   // Allocator's own closure alone cannot see a caught reset-parent reentry.
++   const bytes=allocator.getObject(t.node),buffer=new ArrayBuffer(width),view=new DataView(buffer);
++   if(width===1)view.setUint8(0,value);else if(width===2)view.setUint16(0,value,false);else view.setFloat32(0,value,false);
++   for(let i=0;i<width;i++){const d=Object.getOwnPropertyDescriptor(bytes,String(offset+i));t.guard();if(!d||!('value'in d)||!d.writable)fail('node scalar requires writable own bytes');}
++   t.guard();for(let i=0;i<width;i++){const d=native(bytes,String(offset+i));if(!d||!('value'in d)||!d.writable)fail('node scalar destination changed');}
++   exact();for(let i=0;i<width;i++)bytes[offset+i]=view.getUint8(i);check();return;
++  }
++  const c=t.cell(offset,width);aliases(c.o,c.k,offset);const d=Object.getOwnPropertyDescriptor(c.o,c.k);check();if(!d||!('value'in d)||!d.writable)fail(c.k+': writable own destination required');
++  t.guard();const last=native(c.o,c.k);if(!last||!('value'in last)||!last.writable)fail(c.k+': destination changed');aliases(c.o,c.k,offset,true);exact();
++  (c.o as Record<string,unknown>)[c.k]=value;check();
++ };
++ const zero=():number=>{const o=link('constants',sources,'constants'),v=own(o,'float80436f68');check();if(!Object.is(v,0))fail('authenticated float80436f68 +0 required');return 0;};
++ const reset=(t:Target):void=>{
++  const z=zero();for(const offset of [0x1cc,0x1d0,0x1d4])store(t,offset,z,4);
++  store(t,0x1d9,0,1);store(t,0x1da,0,1);const support=load(t,0x1db);store(t,0x1de,support,1);
++  for(const offset of [0x1db,0x1dc,0x1dd,0x280])store(t,offset,0,1);
++  const old274=load(t,0x274);store(t,0x275,old274,1);store(t,0x274,0,1);
++  const dec=(offset:number):void=>{const b=load(t,offset);if((b<<24>>24)!==0)store(t,offset,(b-1)&255,1);};
++  dec(0x1df);store(t,0x270,0,2);store(t,0x286,0,2);dec(0x2ae);dec(0x2af);dec(0x1e8);
++ };
++ const actor=(id:symbol):Target=>{
++  const normal=link('normal',sources,'normal') as SourceActorNormalLifecycleRuntime;if(!isSourceActorNormalLifecycleRuntime(normal))fail('genuine normal-lifecycle required');
++  const actual=normal.getActualActor(id),binding=normal.getActorBinding(id);check();const old=actorOwners.get(id);if(old&&(old.actual!==actual||old.binding!==binding))fail('actor owner changed');actorOwners.set(id,{actual,binding});
++  const guard=():void=>{check();if(normal.getActualActor(id)!==actual||normal.getActorBinding(id)!==binding||allocator.getPointerTarget(id)!==actual)fail('canonical actor reset owner changed');check();aliases(actual,'__no_actual_1d9_owner',0x1d9,true);aliases(actual,'supportContact1db',0x1db,true);};
++  guard();return{guard,cell:(offset,width)=>offset===0x1d9?{o:binding,k:'byte1d9',offset}:{o:actual,k:offset===0x1db?'supportContact1db':(width===4?'float':width===2?'half':'byte')+offset.toString(16),offset}};
++ };
++ const player=(index:number):Target=>{
++  raw(index,11,'reset player index');const status=link('players',sources,'players')as SourceActorSlotStatusRuntime;
++  if(!isSourceActorSlotStatusRuntime(status)||status.getSchedulerRuntime()!==scheduler||spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime()!==status)fail('canonical player status required');
++  const view=status.getViewPointer(index),address=allocator.getInteriorAddress(view);if(!address||address.byteOffset!==index*0x3e4+0x394)fail('canonical player address required');
++  const rows=allocator.getPointerTarget(address.base);if(!isSourcePlayerTableStorage(rows,status,allocator))fail('canonical player storage required');
++  const row=keep('player:'+index,record(own(rows,String(index)),'player row'));edges.push({o:rows,k:String(index),value:row});
++  const guard=():void=>{check();if(status.getSchedulerRuntime()!==scheduler||status.getViewPointer(index)!==view||allocator.getPointerTarget(address.base)!==rows)fail('player reset owner changed');check();for(let i=0;i<13;i++){if(i===index)continue;const d=native(rows,String(i));if(d&&'value'in d&&d.value===row)fail('player reset row alias');}};
++  guard();return{guard,cell:(offset,width)=>({o:row,k:(width===4?'float':width===2?'half':'byte')+offset.toString(16),offset})};
++ };
++ const node=(id:symbol):Target=>{const bytes=allocator.getObject(id);return{node:id,guard(){check();if(allocator.getObject(id)!==bytes)fail('node reset storage changed');check();},cell(){fail('node fields stay canonical bytes');}};};
++ const pointer=(v:unknown):symbol|null=>{if(v!==null&&typeof v!=='symbol')fail('explicit source list pointer required');return v;};
++ const walk=(groupBits:number):void=>{
++  const group=(groupBits&0x3fffffff)>>>0,owner=allocator.getGroup(group);check();keep('group:'+group,owner);groups.set(group,owner);check();
++  let current=pointer(own(owner,'head'));const visited=new Set<symbol>();
++  while(current!==null){if(visited.has(current))fail('source reset cycle unsupported');visited.add(current);
++   const enabled=allocator.readS8(current,0);check();if(enabled!==0){const resettable=allocator.readS8(current,0x86);check();if(resettable!==0)reset(node(current));}
++   current=allocator.readPointer(current,8);check();
++  }
++ };
++ const operation=(f:()=>void):void=>{if(busy){poisoned=true;fail('same-runtime reset reentry');}if(incomplete)fail('permanently incomplete reset');busy=true;try{check();f();check();}catch(e){incomplete=true;throw e;}finally{busy=false;}};
++ return Object.freeze({resetActor(id:symbol){operation(()=>reset(actor(id)));},resetPlayer(index:number){operation(()=>reset(player(index)));},runGroupReset(bits:number){operation(()=>{
++  raw(bits,0xffffffff,'group register');walk(bits);
++  if((bits|0)<56&&(bits&7)===0){
++   for(let i=0;i<6;i++){const table=scheduler.getActorSlotTable();if(slotTable&&slotTable!==table)fail('reset actor-slot owner changed');slotTable=table;check();const id=pointer(own(table,String(i)));if(id===null)fail('null actor slot at active0 load');
++    const a=allocator.getPointerTarget(id);check();aliases(a,'active0',0);const active=raw(own(a,'active0'),255,'actor active0');aliases(a,'active0',0,true);
++    if((active<<24>>24)!==0)walk((bits+i+1)>>>0);
++   }
++   walk((bits+7)>>>0);
++  }
++ });}});
++}
+-- 
+2.52.0
+
+
+From cb7f3fb29248935f866bd4e2a0b28abccef7f436 Mon Sep 17 00:00:00 2001
+From: "Manny (Abdulrehman) Bhidya" <32692463+abhidya@users.noreply.github.com>
+Date: Sun, 15 Nov 2026 19:26:31 -0800
+Subject: [PATCH 2/4] Execute bounded JObj free-list allocation and class
+ accounting
+
+---
+ .../src/rom/projectile-resource.selftest.ts   | 45 +++++++++++++++++-
+ .../combat/src/rom/projectile-resource.ts     | 47 +++++++++++++++++--
+ 2 files changed, 88 insertions(+), 4 deletions(-)
+
+diff --git a/packages/combat/src/rom/projectile-resource.selftest.ts b/packages/combat/src/rom/projectile-resource.selftest.ts
+index d4d6757d..e7bcdb24 100644
+--- a/packages/combat/src/rom/projectile-resource.selftest.ts
++++ b/packages/combat/src/rom/projectile-resource.selftest.ts
+@@ -1,5 +1,5 @@
+ import {createProjectileInitializerTailTestFixture} from './projectile-initializer-tail.selftest.js';
+-import {createSourceProjectileResourceRuntime,invokeSourceProjectileResource,type SourceJObjClassFields} from './projectile-resource.js';
++import {createSourceProjectileResourceRuntime,invokeSourceProjectileResource,type SourceJObjClassFields,type SourceJObjMemoryEntry,type SourceJObjFreeBlock} from './projectile-resource.js';
+ import type {createProjectileInitializerTailBaseTestFixture} from './attached-setup-animation.selftest.js';
+ type Make=typeof createProjectileInitializerTailBaseTestFixture;
+ function check(ok:boolean,why:string):void{if(!ok)throw Error('[resource-test] '+why);}
+@@ -98,5 +98,48 @@ export function runProjectileResourceSelfTests(make:Make):void{
+   refuses(()=>x.frame.runFrame(),nonnullOld?'8024fd74':'selected record pointer00 dereference is null');
+   check(x.classes.jobj[4]===0,'nullable selected record preserves oldjoint gate ordering');
+  }
++ const heapFixture=()=>{
++  const x=fresh(),next:SourceJObjFreeBlock={0:null},head:SourceJObjFreeBlock={0:next},entry:SourceJObjMemoryEntry={8:2,12:head};
++  const heap={count80436a0c:5,table80436a08:{4:entry}};
++  Object.assign(x.resourceSources,{heapGlobals:heap});return Object.assign(x,{heap,entry,head,next});
++ };
++ {
++  const x=heapFixture();refuses(()=>x.frame.runFrame(),'8025d0fc memset');
++  check(x.entry[12]===x.next&&x.entry[8]===1&&x.head[0]===x.next,'pop preserves original head contents');
++  check(x.classes.jobj[32]===1&&x.classes.jobj[36]===1,'real current/max accounting');
++ }
++ {
++  const x=heapFixture();Object.defineProperty(x.entry,8,{writable:false});refuses(()=>x.frame.runFrame(),'writable source');
++  check(x.entry[12]===x.next&&x.entry[8]===2&&x.classes.jobj[32]===0,'readonly count preserves prior head pop only');
++ }
++ {
++  const x=heapFixture();x.entry[8]=0;refuses(()=>x.frame.runFrame(),'8025d0fc memset');check(x.entry[8]===0xffffffff,'raw free count wraps');
++ }
++ {
++  const x=heapFixture(),secondHead={0:null},secondEntry={8:7,12:secondHead},secondTable={4:secondEntry};
++  const native=Object.getOwnPropertyDescriptor;let loads=0;
++  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===x.heap&&k==='table80436a08'&&++loads===2)(x.heap as {table80436a08:object}).table80436a08=secondTable;return native(o,k);})as typeof native;
++  try{refuses(()=>x.frame.runFrame(),'8025d0fc memset');}finally{Object.getOwnPropertyDescriptor=native;}
++  check(loads===2&&secondEntry[12]===null&&secondEntry[8]===6&&x.entry[12]===x.head,'fresh table reload selects actual returned entry');
++ }
++ {
++  const x=heapFixture(),native=Object.getOwnPropertyDescriptor;let caught=false;
++  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(!caught&&o===x.entry&&String(k)==='8'){caught=true;try{x.frame.runFrame();}catch{}}return native(o,k);})as typeof native;
++  try{refuses(()=>x.frame.runFrame(),'private exact');}finally{Object.getOwnPropertyDescriptor=native;}
++  check(caught&&x.entry[12]===x.next&&x.entry[8]===2,'caught parent reentry after pop prevents decrement');
++ }
++ {
++  const x=heapFixture();(x.entry as {12:object})[12]=x.classes.jobj;refuses(()=>x.frame.runFrame(),'alias');check(x.entry[8]===2,'heap block alias refuses before pop');
++ }
++ {
++  const x=heapFixture(),native=Object.getOwnPropertyDescriptor;let popped=false,currentReads=0;
++  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{
++   if(o===x.entry&&String(k)==='8')popped=true;
++   if(popped&&o===x.classes.jobj&&String(k)==='32'&&++currentReads===3)x.classes.jobj[32]=9;
++   return native(o,k);
++  })as typeof native;
++  try{refuses(()=>x.frame.runFrame(),'8025d0fc memset');}finally{Object.getOwnPropertyDescriptor=native;}
++  check(currentReads===3&&x.classes.jobj[32]===9&&x.classes.jobj[36]===9,'class max compares freshly reloaded current');
++ }
+  console.log(`[projectile-resource] PASS ${count}: genuine nonnull descriptor, source class initialization/inheritance, allocator barrier and failure prefixes`);
+ }
+diff --git a/packages/combat/src/rom/projectile-resource.ts b/packages/combat/src/rom/projectile-resource.ts
+index 19d0e42e..41dddd15 100644
+--- a/packages/combat/src/rom/projectile-resource.ts
++++ b/packages/combat/src/rom/projectile-resource.ts
+@@ -1,10 +1,14 @@
+-/** Authenticated6f78/6fb4 and real class initialization prefix. No allocation,
+- * LoadJoint success, retail resource hydration or libc internal fault order. */
++/** Authenticated6f78/6fb4, class initialization and bounded free-block allocation.
++ * No LoadJoint success, retail resource hydration or libc internal fault-order claim. */
+ import {isSourceObjectAllocationRuntime,type SourceObjectAllocationRuntime} from './source-object-allocation.js';
+ import {requireSourceProjectileResourceInvocation,checkSourceProjectileResourceInvocation,type SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
+ import {claimSourceHelperStorage} from './source-storage-claims.js';
+ export type SourceJObjClassFields=Record<number,unknown>;
++export interface SourceJObjFreeBlock {0:SourceJObjFreeBlock|null}
++export interface SourceJObjMemoryEntry {8:number;12:SourceJObjFreeBlock|null}
++export interface SourceJObjHeapGlobals {count80436a0c:number;table80436a08:Record<number,SourceJObjMemoryEntry|null>}
+ export interface SourceProjectileResourceSources {
++ heapGlobals?:SourceJObjHeapGlobals;
+  allocator:SourceObjectAllocationRuntime;
+  banks:Record<number,{pointer600:object|null}>;
+  loaderGlobals:{override80436980:SourceJObjClassFields|null};
+@@ -64,6 +68,35 @@ export function createSourceProjectileResourceRuntime(sources:SourceProjectileRe
+    for(const [k,v]of [[44,0x80251eb4],[48,0x802523ec],[56,0x80252484],[64,0x8024d224],[68,0x80253174],[72,0x80253380],[60,0x8024f638],[76,0x80251f18],[80,0x8024e120]])write(c,k!,v!);
+   }else fail('unselected class initializer owner');
+  };
++ // Only the authenticated size136/index4 path with an explicit existing free
++ // block is supported. No heap growth, splitting, zeroed memory or JObj result.
++ const allocateClass=(c:object):object|null=>{
++  const size=uint(read(c,16),65535)<<16>>16;
++  if(size!==136)fail('allocator8025cef0 unsupported signed object size');
++  const heap=bind('heapGlobals',sources,'heapGlobals');
++  const count=uint(read(heap,'count80436a0c'))|0;
++  if(4>=count)fail('actual GetMemoryEntry requires unsupported table growth');
++  const table1=retain('heapTableFirst',read(heap,'table80436a08'));
++  const first=read(table1,4);
++  if(first===null)fail('actual GetMemoryEntry requires unsupported entry creation');
++  const firstEntry=retain('heapEntryFirst',first);
++  // Source performs a fresh global/table load even on its existing-entry path.
++  // Mutable table pointer and entries are deliberately not retained edges.
++  const table2Value=read(heap,'table80436a08');
++  const table2=table2Value===table1?table1:retain('heapTableReload',table2Value);
++  const entryPointer=read(table2,4);
++  if(entryPointer===null)return null;
++  const entry=entryPointer===firstEntry?firstEntry:retain('heapEntryReload',entryPointer),headPointer=read(entry,12);
++  if(headPointer===null)fail('actual hsdAllocMemPiece requires unsupported empty free-list path');
++  const head=retain('allocatedBlock',headPointer),next=read(head,0);
++  if(next!==null){if(next===head)fail('cyclic free block');retain('nextFreeBlock',next);}
++  write(entry,12,next);
++  const freeCount=uint(read(entry,8));write(entry,8,(freeCount-1)>>>0);
++  const allocated=uint(read(c,32));write(c,32,(allocated+1)>>>0);
++  const current=uint(read(c,32)),maximum=uint(read(c,36));
++  if(current>maximum)write(c,36,current);
++  return head;
++ };
+  const runtime:SourceProjectileResourceRuntime={getAllocatorRuntime:()=>allocator,getRetainedStorageOwners:()=>Object.freeze([sources,...owners.values()])};
+  entries.set(runtime,(root,child,lifetime)=>{
+   if(active){poisoned=true;fail('same-runtime resource reentry');}if(failed)fail('permanently incomplete resource runtime');
+@@ -98,7 +131,15 @@ export function createSourceProjectileResourceRuntime(sources:SourceProjectileRe
+    if(override!==null&&override!==jobj)fail('unselected explicit JObj class override');
+    if((uint(read(jobj,4))&1)===0)initialize(jobj);
+    method(jobj,40,0x8025cef0);
+-   fail('actual8025d0c4 reached inherited allocator8025cef0; nonnull LoadJoint incomplete');
++   if(!native(sources,'heapGlobals'))fail('actual8025d0c4 reached inherited allocator8025cef0; nonnull LoadJoint incomplete');
++   const block=allocateClass(jobj);
++   if(block===null)fail('actual JObjAlloc null result reaches assertion; nonnull LoadJoint incomplete');
++   if((uint(read(jobj,4))&1)===0)initialize(jobj);
++   const objectSize=uint(read(jobj,16),65535)<<16>>16;
++   // Allocation returned this exact head, but no byte-storage mapping has yet
++   // been admitted for real memset. Never substitute a constructed JObj.
++   void block;void objectSize;
++   fail('actual8025d0fc memset requires explicit allocated block byte storage; nonnull LoadJoint incomplete');
+   }catch(error){failed=true;throw error;}finally{active=undefined;}
+  });return Object.freeze(runtime);
+ }
+-- 
+2.52.0
+
+
+From 076102d99eb7149b419acc541748128873df3a7a Mon Sep 17 00:00:00 2001
+From: "Manny (Abdulrehman) Bhidya" <32692463+abhidya@users.noreply.github.com>
+Date: Sun, 15 Nov 2026 19:36:31 -0800
+Subject: [PATCH 3/4] Initialize allocated JObj storage with source operations
+
+---
+ .../src/rom/projectile-resource.selftest.ts   | 63 +++++++++++++++++++
+ .../combat/src/rom/projectile-resource.ts     | 61 +++++++++++++++---
+ 2 files changed, 117 insertions(+), 7 deletions(-)
+
+diff --git a/packages/combat/src/rom/projectile-resource.selftest.ts b/packages/combat/src/rom/projectile-resource.selftest.ts
+index e7bcdb24..36fcfa30 100644
+--- a/packages/combat/src/rom/projectile-resource.selftest.ts
++++ b/packages/combat/src/rom/projectile-resource.selftest.ts
+@@ -141,5 +141,68 @@ export function runProjectileResourceSelfTests(make:Make):void{
+   try{refuses(()=>x.frame.runFrame(),'8025d0fc memset');}finally{Object.getOwnPropertyDescriptor=native;}
+   check(currentReads===3&&x.classes.jobj[32]===9&&x.classes.jobj[36]===9,'class max compares freshly reloaded current');
+  }
++ const storageFixture=()=>{const x=heapFixture(),bytes=new Uint8Array(136).fill(0xa5);x.head.bytes=bytes;return Object.assign(x,{bytes});};
++ {
++  const x=storageFixture();refuses(()=>x.frame.runFrame(),'8024f638 JObjLoad');
++  const data=new DataView(x.bytes.buffer);
++  check(x.head[0]===x.classes.jobj&&x.entry[12]===x.next,'same allocated identity receives real class pointer');
++  check(data.getUint32(0x14)===0x40&&[0x2c,0x30,0x34].every(k=>data.getFloat32(k)===1),'actual JObjInit flags/scales');
++  check(x.bytes.every((v,i)=>[0x17,0x2c,0x2d,0x30,0x31,0x34,0x35].includes(i)||v===0),'real memset clears original nonzero bytes');
++ }
++ {
++  const x=storageFixture();Object.defineProperty(x.head,0,{writable:false});refuses(()=>x.frame.runFrame(),'writable pointer overlay');
++  check(x.bytes.every(v=>v===0xa5)&&x.entry[12]===x.next&&x.classes.jobj[32]===1,'readonly overlay refuses logical clear after allocation');
++ }
++ {
++  const x=storageFixture();x.head.bytes=new Uint8Array(135);refuses(()=>x.frame.runFrame(),'exact136-byte');
++  check(x.bytes.every(v=>v===0xa5)&&x.entry[8]===1,'invalid bytes lazy after real allocation');
++ }
++ {
++  const x=storageFixture(),native=Object.getOwnPropertyDescriptor;let injected=false;
++  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===x.head&&k==='bytes'&&!injected){injected=true;try{x.frame.runFrame();}catch{}}return native(o,k);})as typeof native;
++  try{refuses(()=>x.frame.runFrame(),'private exact');}finally{Object.getOwnPropertyDescriptor=native;}
++  check(injected&&x.bytes.every(v=>v===0xa5)&&x.head[0]===x.next,'caught parent reentry before memset prevents clear');
++ }
++ {
++  const x=storageFixture(),native=Object.getOwnPropertyDescriptor;let changed=false;
++  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===x.head&&k==='bytes'&&!changed){changed=true;x.classes.parent[44]=0;}return native(o,k);})as typeof native;
++  try{refuses(()=>x.frame.runFrame(),'unselected class method2c');}finally{Object.getOwnPropertyDescriptor=native;}
++  check(x.head[0]===x.classes.jobj&&x.bytes.every(v=>v===0),'real clear/class store precedes live parent initializer refusal');
++ }
++ {
++  const x=storageFixture();Object.assign(x.head,{20:0});refuses(()=>x.frame.runFrame(),'scalar shadow');
++  check(x.bytes.every(v=>v===0xa5),'numeric shadows never become second scalar owners');
++ }
++ {
++  const x=storageFixture();x.head.bytes=new Uint8Array(new SharedArrayBuffer(136));refuses(()=>x.frame.runFrame(),'nonshared allocated buffer');
++  check(x.head[0]===x.next,'shared backing rejected before memset overlay');
++ }
++ {
++  const x=storageFixture();structuredClone(x.bytes.buffer,{transfer:[x.bytes.buffer]});refuses(()=>x.frame.runFrame(),'exact136-byte');
++  check(x.head[0]===x.next&&x.entry[8]===1,'detached storage rejected lazily after allocation');
++ }
++ {
++  const x=storageFixture(),native=Object.getOwnPropertyDescriptor;let changed=false;
++  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{if(o===x.classes.parent&&String(k)==='44'&&x.head[0]===x.classes.jobj&&!changed){changed=true;x.head.bytes=new Uint8Array(136);}return native(o,k);})as typeof native;
++  try{refuses(()=>x.frame.runFrame(),'storage changed');}finally{Object.getOwnPropertyDescriptor=native;}
++  check(changed&&x.bytes.every(v=>v===0),'late backing replacement blocks JObjInit after clear/class store');
++ }
++ for(const target of ['fill','setUint32','setFloat32','constructor']as const){
++  const x=storageFixture(),descriptor=Object.getOwnPropertyDescriptor,fill=Uint8Array.prototype.fill,uint=DataView.prototype.setUint32,float=DataView.prototype.setFloat32,View=DataView;
++  let installed=false,calls=0;
++  const attemptedReentry=()=>{calls++;try{x.frame.runFrame();}catch{}};
++  Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{
++   if(o===x.head&&k==='bytes'&&!installed){installed=true;
++    if(target==='fill')Uint8Array.prototype.fill=function(value:number,start?:number,end?:number){attemptedReentry();return fill.call(this,value,start,end);};
++    if(target==='setUint32')DataView.prototype.setUint32=function(offset:number,value:number,little?:boolean){attemptedReentry();return uint.call(this,offset,value,little);};
++    if(target==='setFloat32')DataView.prototype.setFloat32=function(offset:number,value:number,little?:boolean){attemptedReentry();return float.call(this,offset,value,little);};
++    if(target==='constructor')globalThis.DataView=function(buffer:ArrayBufferLike,offset?:number,length?:number){attemptedReentry();return new View(buffer,offset,length);}as unknown as DataViewConstructor;
++   }
++   return descriptor(o,k);
++  })as typeof descriptor;
++  try{refuses(()=>x.frame.runFrame(),'8024f638 JObjLoad');}finally{Object.getOwnPropertyDescriptor=descriptor;Uint8Array.prototype.fill=fill;DataView.prototype.setUint32=uint;DataView.prototype.setFloat32=float;globalThis.DataView=View;}
++  check(installed&&calls===0&&x.head[0]===x.classes.jobj,'captured '+target+' cannot become a post-check callback');
++  check(new View(x.bytes.buffer).getUint32(0x14)===0x40,'actual native stores still execute');
++ }
+  console.log(`[projectile-resource] PASS ${count}: genuine nonnull descriptor, source class initialization/inheritance, allocator barrier and failure prefixes`);
+ }
+diff --git a/packages/combat/src/rom/projectile-resource.ts b/packages/combat/src/rom/projectile-resource.ts
+index 41dddd15..afcb5a77 100644
+--- a/packages/combat/src/rom/projectile-resource.ts
++++ b/packages/combat/src/rom/projectile-resource.ts
+@@ -4,7 +4,7 @@ import {isSourceObjectAllocationRuntime,type SourceObjectAllocationRuntime} from
+ import {requireSourceProjectileResourceInvocation,checkSourceProjectileResourceInvocation,type SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
+ import {claimSourceHelperStorage} from './source-storage-claims.js';
+ export type SourceJObjClassFields=Record<number,unknown>;
+-export interface SourceJObjFreeBlock {0:SourceJObjFreeBlock|null}
++export interface SourceJObjFreeBlock {0:SourceJObjFreeBlock|SourceJObjClassFields|null;bytes?:Uint8Array}
+ export interface SourceJObjMemoryEntry {8:number;12:SourceJObjFreeBlock|null}
+ export interface SourceJObjHeapGlobals {count80436a0c:number;table80436a08:Record<number,SourceJObjMemoryEntry|null>}
+ export interface SourceProjectileResourceSources {
+@@ -21,15 +21,23 @@ export function invokeSourceProjectileResource(runtime:SourceProjectileResourceR
+  const run=entries.get(runtime);if(!run)fail('genuine private resource runtime required');return run(root,child,lifetime);
+ }
+ function fail(s:string):never{throw Error('[projectile-resource] '+s);}
+-const native=Reflect.getOwnPropertyDescriptor;
++const native=Reflect.getOwnPropertyDescriptor,nativeKeys=Reflect.ownKeys;
++const NativeDataView=DataView,nativeFill=Uint8Array.prototype.fill;
++const nativeSetUint32=DataView.prototype.setUint32,nativeSetFloat32=DataView.prototype.setFloat32;
++const typedPrototype=Object.getPrototypeOf(Uint8Array.prototype);
++const typedBuffer=native(typedPrototype,'buffer')!.get!,typedLength=native(typedPrototype,'byteLength')!.get!,typedOffset=native(typedPrototype,'byteOffset')!.get!;
++const viewBuffer=native(DataView.prototype,'buffer')!.get!;
++const bufferLength=native(ArrayBuffer.prototype,'byteLength')!.get!,bufferResizable=native(ArrayBuffer.prototype,'resizable')?.get;
+ export function createSourceProjectileResourceRuntime(sources:SourceProjectileResourceSources):SourceProjectileResourceRuntime{
+  const allocationField=native(sources,'allocator');
+  const allocator=allocationField&&'value'in allocationField?allocationField.value:undefined;if(!isSourceObjectAllocationRuntime(allocator))fail('genuine allocator required');
+  let active:{root:SourceProjectileRootRuntime;child:symbol;lifetime:symbol}|undefined,poisoned=false,failed=false;
+  const owners=new Map<string,object>();
++ let memory:{block:object;bytes:Uint8Array;buffer:ArrayBuffer}|undefined;
+  const edges:{owner:object;key:PropertyKey;value:object}[]=[];
+  const check=():void=>{if(poisoned||failed)fail('incomplete resource invocation');
+   const a=native(sources,'allocator');if(!a||!('value'in a)||a.value!==allocator)fail('resource allocator owner changed');if(active)checkSourceProjectileResourceInvocation(active.root,runtime,active.child,active.lifetime);
++  if(memory){const d=native(memory.block,'bytes');if(!d||!('value'in d)||d.value!==memory.bytes||typedBuffer.call(memory.bytes)!==memory.buffer||typedLength.call(memory.bytes)!==136||bufferLength.call(memory.buffer)!==136)fail('allocated block storage changed');for(const key of nativeKeys(memory.block))if(typeof key==='string'&&/^(0|[1-9][0-9]*)$/.test(key)&&key!=='0')fail('allocated block scalar shadow');}
+   for(const edge of edges){const d=native(edge.owner,edge.key);if(!d||!('value'in d)||d.value!==edge.value)fail('retained resource owner changed');}};
+  const read=(o:unknown,key:PropertyKey):unknown=>{if(o===null||typeof o!=='object')fail(String(key)+': source owner required');const d=Object.getOwnPropertyDescriptor(o,key);check();if(!d||!('value'in d))fail(String(key)+': own data required');return d.value;};
+  const write=(o:object,key:number,value:unknown):void=>{read(o,key);check();const d=native(o,key);if(!d||!('value'in d)||!d.writable)fail(String(key)+': writable source field required');(o as SourceJObjClassFields)[key]=value;check();};
+@@ -97,7 +105,48 @@ export function createSourceProjectileResourceRuntime(sources:SourceProjectileRe
+   if(current>maximum)write(c,36,current);
+   return head;
+  };
+- const runtime:SourceProjectileResourceRuntime={getAllocatorRuntime:()=>allocator,getRetainedStorageOwners:()=>Object.freeze([sources,...owners.values()])};
++ const initializeBlock=(block:object,c:object,size:number):void=>{
++  if(!native(block,'bytes'))fail('actual8025d0fc memset requires explicit allocated block byte storage; nonnull LoadJoint incomplete');
++  const bytes=read(block,'bytes');
++  if(!(bytes instanceof Uint8Array)||Object.getPrototypeOf(bytes)!==Uint8Array.prototype||size!==136||typedOffset.call(bytes)!==0||typedLength.call(bytes)!==136)fail('explicit exact136-byte allocated storage required');
++  check();const buffer=typedBuffer.call(bytes) as ArrayBuffer;
++  if(!(buffer instanceof ArrayBuffer)||Object.getPrototypeOf(buffer)!==ArrayBuffer.prototype||bufferLength.call(buffer)!==136||bufferResizable?.call(buffer)===true)fail('fixed nonshared allocated buffer required');
++  check();
++  for(const owner of [sources,...owners.values(),...allocator.getRetainedStorageOwners(),...(active?.root.getRetainedStorageOwners()??[])]){
++   if(owner===bytes||owner===buffer||(ArrayBuffer.isView(owner)&&(owner instanceof NativeDataView?viewBuffer.call(owner):typedBuffer.call(owner))===buffer))fail('allocated block backing alias');
++  }
++  check();if(!claimSourceHelperStorage(bytes,runtime)||!claimSourceHelperStorage(buffer,runtime))fail('allocated block backing already claimed');
++  memory={block,bytes,buffer};check();
++  // Own canonical symbolic word0 overlays bytes0..3. No scalar field shadows.
++  for(const key of nativeKeys(block))if(typeof key==='string'&&/^(0|[1-9][0-9]*)$/.test(key)&&key!=='0')fail('allocated block scalar shadow');
++  read(block,0);check();const zero=native(block,0);
++  if(!zero||!('value'in zero)||!zero.writable)fail('logical memset requires writable pointer overlay');
++  // Logical nonalias memset: no libc internal store/fault-order claim. Admission
++  // completes before callback-free zeroing of real supplied bytes and overlay.
++  check();const finalZero=native(block,0);if(!finalZero||!('value'in finalZero)||!finalZero.writable)fail('logical memset pointer overlay changed');
++  nativeFill.call(bytes,0);(block as SourceJObjClassFields)[0]=null;
++  check();write(block,0,c); // actual8025d100, same returned free-block identity.
++  method(c,44,0x80251eb4);
++  // JObjInit reads the live canonical JObj class parent cell803acc24, not an
++  // assumed parent implementation or a host-created initialized object.
++  const parentPointer=read(jobj,20);
++  if(parentPointer===null)fail('actual JObjInit parent init dereference is null');
++  const actualParent=parentPointer===parent?parent:retain('jobjInitParent',parentPointer);
++  method(actualParent!,44,0x8025cf48); // authenticated actual parent init returns0.
++  // Immutable decoded source constant8043d308 = binary32 one.
++  const one=1;
++  const data=new NativeDataView(buffer);
++  const store=(offset:number,value:number,float=false):void=>{
++   check();if(float)nativeSetFloat32.call(data,offset,value,false);else nativeSetUint32.call(data,offset,value,false);check();
++  };
++  store(0x14,0x40);store(0x2c,one,true);store(0x30,one,true);store(0x34,one,true);
++  // hsdNew/JObjAlloc returned the exact allocated object. LoadJoint next reads
++  // that object's current class and dispatches its actual +3c load method.
++  const actualClass=read(block,0);if(actualClass!==c)fail('allocated class pointer changed');
++  method(c,60,0x8024f638);
++  fail('actual LoadJoint reached8024f638 JObjLoad; descriptor load body incomplete');
++ };
++ const runtime:SourceProjectileResourceRuntime={getAllocatorRuntime:()=>allocator,getRetainedStorageOwners:()=>Object.freeze([sources,...owners.values(),...(memory?[memory.bytes,memory.buffer]:[])])};
+  entries.set(runtime,(root,child,lifetime)=>{
+   if(active){poisoned=true;fail('same-runtime resource reentry');}if(failed)fail('permanently incomplete resource runtime');
+   requireSourceProjectileResourceInvocation(root,runtime,child,lifetime);active={root,child,lifetime};
+@@ -136,10 +185,8 @@ export function createSourceProjectileResourceRuntime(sources:SourceProjectileRe
+    if(block===null)fail('actual JObjAlloc null result reaches assertion; nonnull LoadJoint incomplete');
+    if((uint(read(jobj,4))&1)===0)initialize(jobj);
+    const objectSize=uint(read(jobj,16),65535)<<16>>16;
+-   // Allocation returned this exact head, but no byte-storage mapping has yet
+-   // been admitted for real memset. Never substitute a constructed JObj.
+-   void block;void objectSize;
+-   fail('actual8025d0fc memset requires explicit allocated block byte storage; nonnull LoadJoint incomplete');
++   initializeBlock(block,jobj,objectSize);
++   fail('unreachable source JObj initialization continuation');
+   }catch(error){failed=true;throw error;}finally{active=undefined;}
+  });return Object.freeze(runtime);
+ }
+-- 
+2.52.0
+
+
+From 67c2be701f280a0ca7127f83017f1ebd308c2b6d Mon Sep 17 00:00:00 2001
+From: "Manny (Abdulrehman) Bhidya" <32692463+abhidya@users.noreply.github.com>
+Date: Sun, 15 Nov 2026 19:52:38 -0800
+Subject: [PATCH 4/4] Authenticate bounded JObj leaf helper evidence
+
+---
+ ...ead_archived_jobj_leaf_helpers_evidence.py | 51 +++++++++++++++
+ ...est_archived_jobj_leaf_helpers_evidence.py | 63 +++++++++++++++++++
+ 2 files changed, 114 insertions(+)
+ create mode 100644 research/tools/matching-decomp/read_archived_jobj_leaf_helpers_evidence.py
+ create mode 100644 research/tools/matching-decomp/test_archived_jobj_leaf_helpers_evidence.py
+
+diff --git a/research/tools/matching-decomp/read_archived_jobj_leaf_helpers_evidence.py b/research/tools/matching-decomp/read_archived_jobj_leaf_helpers_evidence.py
+new file mode 100644
+index 00000000..8509e228
+--- /dev/null
++++ b/research/tools/matching-decomp/read_archived_jobj_leaf_helpers_evidence.py
+@@ -0,0 +1,51 @@
++#!/usr/bin/env python3
++"""Five fixed nonnull-JObj leaf helper bodies,1912 bytes. Original data stays local.
++No arbitrary selection, payload reads, pointer following or raw instruction output.
++"""
++import argparse,hashlib,json,sys
++from pathlib import Path
++import read_archived_loadjoint_foundation_evidence as f
++c=f.c
++TEXT_MAPPING=f.TEXT_MAPPING
++RANGES = ((2149833444, 152, '475bac2ae34eaa5ede6911882d00f547ecad9e2279484ef69c2097b0fe8826af'), (2149943436, 1140, '6604fea69c349a70f0d77f4b8c5f03d344f12fe5460039490668fd22e519f0c9'), (2149947044, 236, '9f75beffa64470d01074a0e5ea8df4c65f352857791e4dca41ce7b565b80dba2'), (2149943160, 276, '7120c565d10c34b9e22c4d1879c96d4981fa6185384c7f2aad4d6c9c64db530e'), (2149833804, 108, 'd66ec94a1738b0f4851123362f10910365967aea99bd68692c4c4995a5303520'))
++OPERAND_DIGESTS = {2149833444: '40ab9e92f48f03c4c03aacb99cd0e06a2f91a59b220e47529f1dd4b14dd07cea', 2149943436: '1ff9d28700a0958b1a39573fda49a6d289ed1a98350cf34f7a4ff0ce035b596a', 2149947044: 'd7d447898fd665df4c77f085bbbef37328460f7cfd40eb4efd7cafb71812799e', 2149943160: '3a22d25c30652e42e861ebd5cc3bc130590675e6c0877174ea970dc0327f8674', 2149833804: 'c18433f23c9e29ce02e35ca87b26c09e3a5397140edbac728d8a1eef18c31046'}
++FLOW_DIGESTS = {2149833444: (12, '0ec5fcbeba31308065448770259b0494659bde9bef822868c3f5e5a0d1a15dcb'), 2149943436: (100, '4b15a71f1f57c2310ae763b92e39a82284b46897da6ab63a2d21bef8a6d6568d'), 2149947044: (13, 'caf771fb4a825cc6f31c3b4c42ad940055eebe7bdc2f053022a910234cd6689e'), 2149943160: (19, 'ae62b9def0f0605cd08d66092a0c3ef94df70af18d9a4cfa8fa985aa0a9c2c7f'), 2149833804: (7, 'b96ed5a4ca8508734fb51844e3f13c0e8ef8e7a04c3be35bb4d18884524f8fea')}
++CALLS = {2149833444: (('8023db14', '8025d4e8'), ('8023db20', '8023dbf0'), ('8023db2c', '8025d088'), ('8023db44', '80264290')), 2149943436: (('8025889c', '80232a9c'), ('802588a8', '80258d9c'), ('802588bc', '80258d9c'), ('802588d0', '80258d9c'), ('802588e4', '80258d9c'), ('802588f0', '8025888c'), ('80258994', '80259338'), ('802589a4', '8025942c'), ('802589e4', '802642ec'), ('80258a90', '80259338'), ('80258aa0', '8025942c'), ('80258ae0', '802642ec'), ('80258b8c', '80259338'), ('80258b9c', '8025942c'), ('80258bdc', '802642ec'), ('80258c88', '80259338'), ('80258c98', '8025942c'), ('80258cd8', '802642ec'), ('80258cec', '80232ae8')), 2149947044: (('802596b4', '80232aa8'), ('80259738', '802572f0'), ('80259750', '80264290'), ('80259760', '8000540c'), ('8025977c', '80232af4')), 2149943160: (('802587dc', '8024febc'), ('802587ec', '8025983c'), ('8025880c', '80264290'), ('80258840', '80264290'), ('80258854', '80259524')), 2149833804: (('8023dc84', '8024aaac'),)}
++INDIRECT = {2149833444: ('8023db5c',), 2149943436: (), 2149947044: (), 2149943160: (), 2149833804: ()}
++
++def decode_selected(word,pc):
++ c.require(type(word)is int and 0<=word<=0xffffffff,'word bounds')
++ c.require(type(pc)is int and 0<=pc<=0xfffffffc and pc%4==0,'PC bounds')
++ if word>>26==31 and ((word>>1)&1023)==11:return f.mass.decode_selected(word,pc)
++ return f.decode_selected(word,pc)
++def range_evidence(db,mapping,pc,size):
++ c.require(type(pc)is int and type(size)is int,'range integers')
++ selected=[r for r in RANGES if r[:2]==(pc,size)];c.require(len(selected)==1,'range not allowlisted')
++ f.normal.require_mapping(mapping,TEXT_MAPPING)
++ c.require(pc%4==size%4==0 and mapping[0]<=pc<pc+size<=mapping[1],'range bounds')
++ raw,spans=db.chain(mapping[-1],pc-mapping[0],size,mapping[-2]);c.require(len(raw)==size,'range byte width')
++ digest=hashlib.sha256(raw).hexdigest();c.require(digest==selected[0][2],'range digest mismatch')
++ rows=[]
++ for off in range(0,size,4):
++  at=pc+off;decoded=decode_selected(c.integer(raw,off,'I'),at);c.require(decoded is not None,'unselected instruction');rows.append(dict(address=f'{at:08x}',**decoded))
++ flow=[r for r in rows if r['mnemonic']in('b','bc','bl','blr','bctrl')]
++ c.require(f.semantic_digest(rows)==OPERAND_DIGESTS[pc],'operand mismatch')
++ c.require((len(flow),f.semantic_digest(flow))==FLOW_DIGESTS[pc],'flow mismatch')
++ calls=tuple((r['address'],r['target'])for r in flow if r['mnemonic']=='bl');c.require(calls==CALLS[pc],'call schedule mismatch')
++ indirect=tuple(r['address']for r in flow if r['mnemonic']=='bctrl');c.require(indirect==INDIRECT[pc],'indirect mismatch')
++ c.require(all(pc<=int(r['target'],16)<pc+size for r in flow if r['mnemonic']in('b','bc')),'branch outside body')
++ c.require(rows[-1]==dict(address=f'{pc+size-4:08x}',mnemonic='blr',BO=20,BI=0,BH=0,LK=0),'terminal return mismatch')
++ return dict(address=f'{pc:08x}',width=size,sha256=digest,represented_instructions=len(rows),unrepresented_instructions=0,operand_sha256=OPERAND_DIGESTS[pc],control_flow_sha256=FLOW_DIGESTS[pc][1],calls=[dict(site=s,target=t)for s,t in calls],indirect_calls=list(indirect),spans=spans)
++def inspect(data,digest):
++ auth=c.inspect(data,digest);db=c.GBF(data);tables=db.tables();blocks=db.rows(tables['Memory Blocks']);subs=db.rows(tables['Sub Memory Blocks']);image=int(auth['image_offset'],16)
++ f.command.mappings(blocks,subs,image);mapping,fact=f.normal.mapping_evidence(blocks,subs,image,TEXT_MAPPING)
++ return dict(snapshot_sha256=digest,mapping=fact,ranges=[range_evidence(db,mapping,pc,n)for pc,n,_ in RANGES],selection_basis=dict(reads=5,bytes=1912,data_cells=0,pointer_following=False,global_payloads_read=False,raw_output=False),caveat='Authenticated static body evidence only, not execution, live owner provenance or complete LoadJoint/frame.')
++def main():
++ p=argparse.ArgumentParser(description=__doc__);p.add_argument('snapshot',type=Path);a=p.parse_args()
++ try:
++  c.require(a.snapshot.is_file()and 32<=a.snapshot.stat().st_size<=c.MAX_FILE,'snapshot file bounds')
++  with a.snapshot.open('rb')as stream:data=stream.read(c.MAX_FILE+1)
++  c.require(len(data)<=c.MAX_FILE,'snapshot size');print(json.dumps(inspect(data,hashlib.sha256(data).hexdigest()),indent=2))
++ except(OSError,c.FormatError)as e:print(json.dumps(dict(error=str(e))),file=sys.stderr);return 1
++ return 0
++if __name__=='__main__':sys.exit(main())
+diff --git a/research/tools/matching-decomp/test_archived_jobj_leaf_helpers_evidence.py b/research/tools/matching-decomp/test_archived_jobj_leaf_helpers_evidence.py
+new file mode 100644
+index 00000000..44b87a0f
+--- /dev/null
++++ b/research/tools/matching-decomp/test_archived_jobj_leaf_helpers_evidence.py
+@@ -0,0 +1,63 @@
++"""Fixed-scope synthetic controls and optional same-snapshot inverse validation. No original words embedded."""
++import hashlib,json,re,unittest
++from pathlib import Path
++import read_archived_jobj_leaf_helpers_evidence as a
++from test_archived_loadjoint_foundation_evidence import encode as prior_encode
++from test_archived_mass_preparation_evidence import encode as mass_encode
++ROOT=Path(__file__).resolve().parents[3]
++SNAPS=ROOT/'research/decomp/GotchaForce.rep.before_force_create/idata/00/~00000000.db'
++def encode(row,pc):return mass_encode(row,pc)if row['mnemonic']=='mulhwu'else prior_encode(row,pc)
++class FakeDB:
++ def __init__(self,raw=b''):self.raw=raw;self.calls=[]
++ def chain(self,*args):self.calls.append(args);return self.raw,[]
++class Tests(unittest.TestCase):
++ def test_exact_scope_independent_bounds(self):
++  self.assertEqual([(hex(p),n)for p,n,_ in a.RANGES],[('0x8023dae4',152),('0x8025888c',1140),('0x802596a4',236),('0x80258778',276),('0x8023dc4c',108)])
++  self.assertEqual(sum(n for _,n,_ in a.RANGES),1912)
++  lines=(ROOT/'research/decomp/ghidra-export/_index.tsv').read_text().splitlines();symbols=(ROOT/'research/symbols/GG4E-CSM-20220412.map').read_text()
++  for pc,n,_ in a.RANGES:
++   i=next(i for i,s in enumerate(lines)if s.startswith(f'{pc:08x}\t'));self.assertTrue(lines[i+1].startswith(f'{pc+n:08x}\t'))
++   c=(ROOT/'research/decomp/ghidra-export'/lines[i].split('\t')[2]).read_text();self.assertTrue(c.split(f'// ==== {pc:08x} ',1)[1].split('// ==== ',1)[1].startswith(f'{pc+n:08x} '));self.assertRegex(symbols,rf'(?m)^{pc:08x} {n:08x} {pc:08x} 0 ')
++ def test_unlisted_before_io(self):
++  for pc,n,_ in a.RANGES:
++   for pp,nn in [(pc+4,n),(pc,n+4),(float(pc),n),(pc,True)]:
++    db=FakeDB()
++    with self.assertRaises(a.c.FormatError):a.range_evidence(db,a.TEXT_MAPPING,pp,nn)
++    self.assertEqual(db.calls,[])
++ def test_mapping_before_io(self):
++  db=FakeDB();m=list(a.TEXT_MAPPING);m[0]+=4
++  with self.assertRaises(a.c.FormatError):a.range_evidence(db,tuple(m),*a.RANGES[0][:2])
++  self.assertEqual(db.calls,[])
++ def test_short_and_wrong_digest(self):
++  for raw in [b'',bytes(a.RANGES[0][1])]:
++   db=FakeDB(raw)
++   with self.assertRaises(a.c.FormatError):a.range_evidence(db,a.TEXT_MAPPING,*a.RANGES[0][:2])
++   self.assertEqual(len(db.calls),1)
++ def test_mulhwu_inverse_and_bit_controls(self):
++  for r in [dict(mnemonic='mulhwu',rD=7,rA=13,rB=29,Rc=0),dict(mnemonic='mulhwu',rD=31,rA=2,rB=11,Rc=1)]:
++   w=encode(r,0x10000000);self.assertEqual(a.decode_selected(w,0x10000000),r)
++   for bit in range(32):
++    v=w^(1<<bit)
++    try:d=a.decode_selected(v,0x10000000)
++    except a.c.FormatError:continue
++    if d is not None:self.assertEqual(encode(d,0x10000000),v)
++ def test_decoder_types(self):
++  for w,pc in [(True,0),(-1,0),(1<<32,0),(0,1),(0,True)]:
++   with self.assertRaises(a.c.FormatError):a.decode_selected(w,pc)
++ @unittest.skipUnless((SNAPS/'db.3.gbf').is_file()and(SNAPS/'db.4.gbf').is_file(),'original snapshots remain local; never fetch')
++ def test_both_authenticated_snapshots(self):
++  common=[]
++  for name in ['db.3.gbf','db.4.gbf']:
++   data=(SNAPS/name).read_bytes();result=a.inspect(data,hashlib.sha256(data).hexdigest());self.assertEqual(sum(r['represented_instructions']for r in result['ranges']),478);common.append([(r['sha256'],r['operand_sha256'])for r in result['ranges']])
++   db=a.c.GBF(data)
++   for pc,n,_ in a.RANGES:
++    raw,_=db.chain(a.TEXT_MAPPING[-1],pc-a.TEXT_MAPPING[0],n,a.TEXT_MAPPING[-2])
++    for off in range(0,n,4):
++     word=a.c.integer(raw,off,'I');row=a.decode_selected(word,pc+off);self.assertEqual(encode(row,pc+off),word)
++     for bit in range(32):
++      changed=word^(1<<bit)
++      try:d=a.decode_selected(changed,pc+off)
++      except a.c.FormatError:continue
++      if d is not None:self.assertEqual(encode(d,pc+off),changed)
++  self.assertEqual(common[0],common[1])
++if __name__=='__main__':unittest.main()
+-- 
+2.52.0
+

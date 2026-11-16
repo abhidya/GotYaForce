@@ -1,0 +1,68 @@
+{
+  "remote": "cc93c32589972c59ca66e6715862ff9872bb6fe5",
+  "local": "c4bbf4365b5f67e083f15eb1074acbb5a0718fcb",
+  "tree": "cf9c0ea29308e1325c95d6a4d3663f06e8c8b939",
+  "ci": {
+    "run": 43817635546,
+    "status": "in_progress"
+  },
+  "focused": {
+    "session": 44964,
+    "cases": 42,
+    "exit": 0
+  },
+  "regressions": {
+    "session": 36162,
+    "cases": 68,
+    "exit": 0
+  },
+  "strict": {
+    "session": 52549,
+    "exit": 0
+  },
+  "evidence": {
+    "session": 62546,
+    "tests": 14,
+    "exit": 0
+  },
+  "review": "approved exact seven files; independent19 traversal,7 evidence,two duplicate-half42 probes passed",
+  "local_validation_base": "67c2be70 equivalent c233; preserved f495 four-file snapshot not recompiled/reviewed",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "48daba1bb61473349bb598a29bb993ed2853f0b5c4b62e627088b0a36843c5fb",
+      "blob": "dfa7a63f304848b51e5b4da09e6cf1ecc028f543"
+    },
+    {
+      "path": "packages/combat/src/rom/actor-target-dispatch.ts",
+      "sha256": "745898d036e5d58149bd0747e204147b68d70e91757d55dd47924450e1516b42",
+      "blob": "d4624ccbc348e4bfd2743e7cca9e78d78bbb18b6"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-count-reset.selftest.ts",
+      "sha256": "20024ab71e4fa4c4dd7165a428fb48dc69b489faf9be95c7e88cdb591264b089",
+      "blob": "03faf38372e499cf46c06112ee4a24b9d7a16dbd"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-callback-traversal.selftest.ts",
+      "sha256": "b92c63b729f7e4c8b675a426141592d921305677418f7bbb964b8781ce9ea567",
+      "blob": "9da4ff11a7a39887dafad962145783ce4e801350"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_callback_traversal_evidence.py",
+      "sha256": "1beb59992e23b9bc8f022598e76e2dd363084689f899100b8510a67582ea1393",
+      "blob": "d7aac5e17048720cbea34eb20a8d72fee36c9208"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_callback_traversal_evidence.py",
+      "sha256": "603aeb8ae23ce88b856de0143bfe673f8f9e03507c414749e46dd6c137f5d80f",
+      "blob": "98116515c001a1df732ec0b913b1b4cb4d6b8130"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "a3894c311b005aae0bde6e36d575e71761e04ab49a71a2b41dde67aa0013f762",
+      "blob": "1370b44847856ca5b2ce8dce6679049e7c6fb995"
+    }
+  ],
+  "remaining": "required8008a65c active contact callback, private candidate-half42 shared-writer join,2bb14 and later normal-frame paths; blocked JObj implementation/review remain stopped"
+}

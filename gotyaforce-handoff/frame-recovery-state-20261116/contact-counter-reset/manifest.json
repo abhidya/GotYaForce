@@ -1,0 +1,47 @@
+{
+  "remote": "a61d09e87054b5acc21e1d2606d10c6115b72b80",
+  "local": "61662c25c75838aeca2ceaf5de5ae8e13b1dd595",
+  "tree": "6b1cf06a8eadbb89406e9484de021fdab14d0991",
+  "ci": {
+    "run": 43815437499,
+    "status": "in_progress"
+  },
+  "counts": 21,
+  "focused_total": 89,
+  "focused_session": 95602,
+  "focused_exit": 0,
+  "strict_session": 68406,
+  "strict_exit": 0,
+  "evidence_session": 68063,
+  "evidence_tests": 7,
+  "evidence_exit": 0,
+  "review": "approved corrected narrow counter lane; blocked JObj work excluded",
+  "baseline": "67c2be70 equivalent c233 runtime; latest f495 preserved files not compiled/reviewed again",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "09b4e0e8650786748c113eeb5ef750d460e1f48aacea3918c64f5adbe72e7cf6",
+      "blob": "8bd43d012c0cb39032229f63749403dd5568cf15"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-count-reset.selftest.ts",
+      "sha256": "a4f0c8f9ccd4e7b29266b7152addb6f79d5ea4f512b56653f6616980f49fd6e7",
+      "blob": "c05eff7e3e68150f923a466667dd8cfa21106c18"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_count_reset_evidence.py",
+      "sha256": "eb557f3d63a53ca3f913e04c8d542b53010ba6eedc72d060818027bb4bc33016",
+      "blob": "752d36211c367b059cf2a31b6723aed9527cc4e8"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_count_reset_evidence.py",
+      "sha256": "878c55db5187644f3e772f96afc23a2e43cc181e08caff584980e14af2fe33c0",
+      "blob": "deaa8e65d9d8ab40cb0eb3eb997c035824dfb60a"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "3a2dc9cc8ca08ec9e37a95a54fa301dc08764d76c4ba46c5a169b2dc39e4d347",
+      "blob": "1af2cfe894598d15eae02dc3806b1a808804fb23"
+    }
+  ]
+}

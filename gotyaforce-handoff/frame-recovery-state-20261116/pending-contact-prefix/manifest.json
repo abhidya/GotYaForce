@@ -1,0 +1,41 @@
+{
+  "base": "cc93c32589972c59ca66e6715862ff9872bb6fe5",
+  "status": "unpublished; prefix19 passes; focused traversal/counter, strict and independent review pending",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "b420bea67428ee196bdbab80af74aad5afe1b8d9c9d770761f88c8cba6258482",
+      "size": 184460
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-callback-prefix.selftest.ts",
+      "sha256": "bae07fc51c9980f19c59ce1585aaa1d38aa9975de16cafbcd2900490ebe830d6",
+      "size": 6717
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-callback-traversal.selftest.ts",
+      "sha256": "79250243d0718ef4fab98d4b21d82b27d7168c1953a564eb1ab8aa8dc41d36fe",
+      "size": 6355
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-count-reset.selftest.ts",
+      "sha256": "e6eecfcb990dc87dfd35f48cedc39da26daaf00cacc481c4757a8a6cbfdcea0f",
+      "size": 6887
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "8952fbe1d209045280258d3d64cf8489296c7dcd9f8742508249c30abb8bce11",
+      "size": 1099984
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_callback_prefix_evidence.py",
+      "sha256": "59fdd0123ebbde5f5ecfbcdcdf46df7e1031a3c1235fdc38fcb4778f9f18753b",
+      "size": 8244
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_callback_prefix_evidence.py",
+      "sha256": "24f74920fbf847855cbb6a0e3025449e6dac8cd29982f6aadac88f86ac1884f3",
+      "size": 7475
+    }
+  ]
+}

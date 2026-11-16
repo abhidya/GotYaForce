@@ -1,0 +1,83 @@
+{
+  "base": "0babe11caa2634c49ce148a20badc714f51d6670",
+  "status": "UNPUBLISHED;30model/13evidence/finalstrict1447/204regression passed; final27 integration48896,35height78120,27adjust52416 pending; obsolete23714 stopped; independentreview7077/probe71970 tracked separately",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "2a3d476822cf64b248136332431e203147bacd45db742aede0b219b482cd9044",
+      "size": 211443,
+      "blob": "8f890cecb393ff99191809d1e9ec9af0cf4da337"
+    },
+    {
+      "path": "packages/combat/src/rom/source-contact-predicate.ts",
+      "sha256": "456c43005ea43fcadfdc7cb1a22dc5d0aa51dac7aceddec25499c95b9ac74ef2",
+      "size": 5594,
+      "blob": "37910a1def87976da4b21f6ee2a4eba648f174db"
+    },
+    {
+      "path": "packages/combat/src/rom/source-contact-predicate.selftest.ts",
+      "sha256": "ba94ca62adaef0b0b8b6933a18b081477a7f341af36d4a0edc92a04f7619a1dd",
+      "size": 5918,
+      "blob": "c59c06e456731bb14e985d4889dee83564911648"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-pairing.selftest.ts",
+      "sha256": "6c4310de4e4065cec77d1eb62cd2b57d4895e4e91704f926b30da357b5a4ed0d",
+      "size": 7359,
+      "blob": "45c625b5c9b2849581016eaec2bc6a60f5e80ce5"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "9ed9046b494f77067c0c67623c3adf123815956337e7eb6aadb1c695aea7cd1e",
+      "size": 1101151,
+      "blob": "bbf02ac06c5eeb53a0f38f14a6a854e37132b1e6"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-adjust.selftest.ts",
+      "sha256": "77d98f24341b36ac862dd988c466a808a1d6af9a48d344db892f6ab5b916d825",
+      "size": 7629,
+      "blob": "0732987dc31cdfc31321eab8b2b9e3b378ff4dfb"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-height.selftest.ts",
+      "sha256": "a41ae79079182c1b6b7b780187a897a4deffb1664f3307ab9395ce2a95efbbdb",
+      "size": 11863,
+      "blob": "72e032a9f15bff21282d146a3e1cb10e47469a53"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-target-action-reset.selftest.ts",
+      "sha256": "99a530c563e457fd85f84fd0710b6828d8aae1805d55e61853f01a4c3d169332",
+      "size": 8903,
+      "blob": "548a5dd1db4b8cb54870a8c9c025e07116077689"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_predicate_evidence.py",
+      "sha256": "c084ac461b1946b5721c359a08aa1d430529ff04997c0bf67360d9339f52962d",
+      "size": 5693,
+      "blob": "8820d3621cc01846f9fa8d8d38e7adf3bdb3393d"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_predicate_evidence.py",
+      "sha256": "539c4f64c0b2548d80af2eab4a7b2a363ceaa6df5d87edd13968ec339dae81f4",
+      "size": 4214,
+      "blob": "c15933fc382cdcbed357132e14b250e8af8552dd"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_pairing_evidence.py",
+      "sha256": "7339f5cbfa79432db60543b1d7f3bc123e16816da2b5d615e76bdf1c539a1d28",
+      "size": 5461,
+      "blob": "f9df71ecbd519f81ced3c7b59fe7951506cfd79c"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_pairing_evidence.py",
+      "sha256": "d26bad52a0172a4ba8b76bdf542590c6e19713a3aa564c459d23b33e46f0f6ac",
+      "size": 4492,
+      "blob": "224d470ea7879fbe7c6ec64ee4fe2738a3539612"
+    }
+  ],
+  "backup_sha256": "d514e7d6cacc8f320b0238a72420a0268dda84abda5f92de221a64b9f277a0a9",
+  "base_tree": "29672fc7053ed6a6760f94dc3ca0b7d6837d1189",
+  "tree": "ab534ea7018a1af76dd25d8ea6ba69042cc00d1b",
+  "message": "Execute bounded collision predicate and ordered contact pairing pass",
+  "local_commit": "208e120a9183f1779a98d4913460f7c4c01b726a"
+}

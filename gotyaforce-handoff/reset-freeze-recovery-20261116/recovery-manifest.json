@@ -1,0 +1,9 @@
+{
+  "files": {
+    "source-contact-reset.ts": "6864fa35426c0749d3fe17dddffce1fe499fb1a8893f62e1e0229d91e7802e82",
+    "source-contact-reset.selftest.ts": "2c9b2262572b28f1e87e94371103bb4b1fba82ebb50c5ce0c71871a13541c797"
+  },
+  "recovery": "exact authored tool inputs and recorded edits; both match prior approved freeze",
+  "prior_validation": "23 focused cases, strict typecheck and independent reviewer approved before environment reset",
+  "new_validation": "SHA256 exact recovery only; no fresh code tests run"
+}

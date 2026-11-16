@@ -1,0 +1,30 @@
+{
+  "base": "5b76a24add2469fa1da7968a76eac38b84a940df",
+  "status": "Published; PR exact head verified; runtime35 session92783 exit0; strict71065 exit0; independent static review approved; exact-head CI43834036906 in_progress",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "ce924ba87c8f0b2d13cca7269809ca432882460c5ff2cdd8fe9c4c7d2aba3c1e",
+      "size": 204585
+    }
+  ],
+  "backup_sha256": "a4ecab6fa03db088e21c2afe0a8bbb0b7baac127617b0d08d83866d501b89f9c",
+  "base_tree": "d246381747b4bfd02e263dc737988d80f28878db",
+  "tree": "ffff39a3dde9157c34b542afa2ce07780fe89534",
+  "local_commit": "cd78c70f9617f6ca4a37c4008ad8505ef9c1c29d",
+  "message": "Reduce redundant contact counter metadata scans within bounded admission",
+  "path": "packages/combat/src/rom/battle-outer-frame.ts",
+  "blob": "34d752f41b834f02c9cb0e4b9f2efc3eee29e398",
+  "sha256": "ce924ba87c8f0b2d13cca7269809ca432882460c5ff2cdd8fe9c4c7d2aba3c1e",
+  "remote_commit": "2c11965e09a080d2a0e5e99dcdb10c961dd5e778",
+  "ci_run": 43834036906,
+  "remote_tree_verified": true,
+  "validation": {
+    "runtime_cases": 35,
+    "runtime_session": 92783,
+    "runtime_exit": 0,
+    "strict_session": 71065,
+    "strict_exit": 0,
+    "independent_static_review": "approved exact source hash; prior snapshot independent35 replay passed"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "remote": "37656e897a2b3ac5de4aeaf82d99c2e86dc7bbb1",
+  "base": "cc93c32589972c59ca66e6715862ff9872bb6fe5",
+  "local_commit": "9d676bcb2645d7aeb797397db38eceed50a8cb30",
+  "tree": "541b3794af43b2b67d9d0d3fa8e301a3d3298c01",
+  "message": "Implement bounded contact callback prefix with ordered effects",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "b420bea67428ee196bdbab80af74aad5afe1b8d9c9d770761f88c8cba6258482",
+      "size": 184460,
+      "blob": "bfbc33ff89bc8ae5270d631244e59dec164dac5a"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-callback-prefix.selftest.ts",
+      "sha256": "bae07fc51c9980f19c59ce1585aaa1d38aa9975de16cafbcd2900490ebe830d6",
+      "size": 6717,
+      "blob": "0bb8e00841a6f3e550699b08feeec28b41b1d72d"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-callback-traversal.selftest.ts",
+      "sha256": "79250243d0718ef4fab98d4b21d82b27d7168c1953a564eb1ab8aa8dc41d36fe",
+      "size": 6355,
+      "blob": "bba30f68d6947843d816ae88f0c4660ac748e0b9"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-count-reset.selftest.ts",
+      "sha256": "e6eecfcb990dc87dfd35f48cedc39da26daaf00cacc481c4757a8a6cbfdcea0f",
+      "size": 6887,
+      "blob": "60d9d7a34d67ad0ace55cf40b3ae09419a7e94aa"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "8952fbe1d209045280258d3d64cf8489296c7dcd9f8742508249c30abb8bce11",
+      "size": 1099984,
+      "blob": "92224ae69e5d8c03074dbe701b719575db239b37"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_callback_prefix_evidence.py",
+      "sha256": "59fdd0123ebbde5f5ecfbcdcdf46df7e1031a3c1235fdc38fcb4778f9f18753b",
+      "size": 8244,
+      "blob": "f7b19ecf6b50caf7820e1a77c478a530bfa1f9e9"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_callback_prefix_evidence.py",
+      "sha256": "24f74920fbf847855cbb6a0e3025449e6dac8cd29982f6aadac88f86ac1884f3",
+      "size": 7475,
+      "blob": "be82f9e1ee8b61747d41a9896f35c3ce8356a444"
+    }
+  ],
+  "ci": {
+    "run": 43820187377,
+    "status": "in_progress"
+  },
+  "focused": {
+    "session": 26366,
+    "exit": 0,
+    "cases": 61
+  },
+  "regressions": {
+    "session": 92316,
+    "exit": 0,
+    "cases": 68
+  },
+  "strict": {
+    "session": 24952,
+    "exit": 0
+  },
+  "evidence": {
+    "exit": 0,
+    "tests": 9
+  },
+  "independent_review": "Approved frozen independent prefix only:19 cases, pair-capture/fresh-Z/stop-before-next probe and9evidence tests; blocked JObj work excluded",
+  "baseline": "Localc233 baseline plus contact increments, preservedf495 leaf not retested or reviewed",
+  "backup_sha256": "989080713dd5ce8c720d08a292aca55a6dbdc3ba11bf64e41b6f28ca298c4ac8"
+}

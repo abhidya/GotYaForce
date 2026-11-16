@@ -1,0 +1,42 @@
+{
+  "base": "9265370981fb705552a149e8b34afa35ae2a5e61",
+  "status": "unpublished; strict4302 exit0, evidence9 exit0; focused48, regressions61+68 and narrow review pending",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "1c1fb3367e82a3b3b8e4790f12a8ee0806a5240b3eab003052e08f634423f118",
+      "size": 187266,
+      "blob": "6ec2c5004b14fa88d58b46c876a71f268f660808"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-timer.selftest.ts",
+      "sha256": "ea65c82f531e26760b415a3fc12dea79c30be62bbe9c3d849befb224345fdda6",
+      "size": 6004,
+      "blob": "8bd41bfa46b6e91ec158b17368e979cbf24cb356"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-transform.selftest.ts",
+      "sha256": "ad9a4ce589a9b1a0b768b3e8c34e0854788a1ee233e0ac7d3211c1c019e8513d",
+      "size": 9813,
+      "blob": "3fd052466a9b01c4373c28ce18e18b1536095266"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "55e29fa356983cf3320b59711aef3dd6076459b569b29caaa43a1a08a6a079af",
+      "size": 1100328,
+      "blob": "aec6dff7f0298cb06e68cd6a1ddcf68e7112c318"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_callback_prefix_evidence.py",
+      "sha256": "d6040f5de6a9ac863b33cdbd4c075f81c0baad77315e9862fc1ef2c3c8c3bed8",
+      "size": 10663,
+      "blob": "13524130deeab6ee969eabdde95b3371690918d7"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_callback_prefix_evidence.py",
+      "sha256": "8cae089105d3e4f0a2d28a7aac2b6d52e127423a9a7db09979b61d4a2fac2c5c",
+      "size": 9675,
+      "blob": "fe1c5d120603451d7e28806846d4499e70a3fb9a"
+    }
+  ]
+}

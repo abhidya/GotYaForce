@@ -1,0 +1,76 @@
+{
+  "base": "37656e897a2b3ac5de4aeaf82d99c2e86dc7bbb1",
+  "status": "published; exact-head CI pending",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "555b9c608d5cadcfea00b6d0d003a62d716bf05a4bb77c02ba2a19d816b56f4d",
+      "size": 187007,
+      "blob": "7da38fd40732330f5a6989e69f35aab9eebc4d1a"
+    },
+    {
+      "path": "packages/combat/src/rom/source-contact-transform.ts",
+      "sha256": "cc215a2049ea133b77b52e9aab876cd10a6a5683955f5f57d23860e5e81844e1",
+      "size": 6602,
+      "blob": "ebf16e2dc5da4a2058987fb1b3c25d9cef1ec58b"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-transform.selftest.ts",
+      "sha256": "0c74d667112a6e23be1963fbe2fc3733e3b06633a41de4bceb5b8968961e9fad",
+      "size": 9601,
+      "blob": "fbaf3e52abf7dca863e7cc72b6cad7098c3490a0"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-callback-prefix.selftest.ts",
+      "sha256": "b0f75b5353c0aa666c6b71d22859ce66d1ac010317ffa4a1926c61aa1b97256d",
+      "size": 6725,
+      "blob": "bd35e213a84d86edf2d3029bb5a7376e1d7180e4"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "7a72d54ce68d6dde78690edd5c0d17e595eeb98f134459edcc2b0e914db0b73c",
+      "size": 1100162,
+      "blob": "bc726280400d657c79c3a2fdfa5a201fc61cbeac"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_callback_prefix_evidence.py",
+      "sha256": "3ce7be1673746c69ece2406f4402c6db39423947009df56656a67d5c88927c6a",
+      "size": 9621,
+      "blob": "74b9b50a9aa243717185aa508fadcba808005954"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_callback_prefix_evidence.py",
+      "sha256": "07503d12ff282cd899d456d6a58a55ed13bc521c218fdba1ff73df28d14520e0",
+      "size": 8746,
+      "blob": "b362567a92dc688fe9bd3b2c037d4ad92a52d51b"
+    }
+  ],
+  "tree": "0b16d8151033318f4472ab92098919e160a2bd56",
+  "message": "Execute contact matrix transforms through canonical byte owners",
+  "local_commit": "4faac7fbecfd67e8fd0c7a8fe817095ca48b51f0",
+  "backup_sha256": "ad60a9aceaebf0ba1b4dce66d1ef6f27770b54ba746896f706bcc81a55b1ae9a",
+  "remote": "9265370981fb705552a149e8b34afa35ae2a5e61",
+  "ci": {
+    "run": 43822803581,
+    "status": "in_progress"
+  },
+  "focused": {
+    "session": 75182,
+    "exit": 0,
+    "cases": 88
+  },
+  "regressions": {
+    "session": 3327,
+    "exit": 0,
+    "cases": 68
+  },
+  "strict": {
+    "session": 15211,
+    "exit": 0
+  },
+  "evidence": {
+    "tests": 9,
+    "exit": 0
+  },
+  "review": "Approved corrected exact hashes;27 independent fixtures, outside private-invocation probe and late-GQR probe passed; no blocked code reviewed"
+}

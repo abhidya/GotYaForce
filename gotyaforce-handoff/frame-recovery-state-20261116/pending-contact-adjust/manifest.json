@@ -1,0 +1,47 @@
+{
+  "base": "2c11965e09a080d2a0e5e99dcdb10c961dd5e778",
+  "status": "UNPUBLISHED;204 regressions exit0; strict/evidence/static review pass; new27 first21 passed before test-only error message mismatch; final6 rerun76912/independent47911 pending;35 height83927 pending",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "d5b5c077984c8a66ba6bf5600e7762d2a7d64e744537d71223fa349d38e113f1",
+      "size": 207444,
+      "blob": "a1ca6fbe79750e07cc3f19c860f3e18bdd71cfc1"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-height.selftest.ts",
+      "sha256": "0afbbef72dd96807ebac8d0e42aa8ed38bf7185612c59886a66046cfbbd340bc",
+      "size": 11863,
+      "blob": "db616f25aa93cb4266d607bc6aa1e61330cc4d9b"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-adjust.selftest.ts",
+      "sha256": "46be6c32e63965cdcd25af84ef380456534e8c664bcc914ff886b22d806115ff",
+      "size": 7622,
+      "blob": "3d0739c4734690eb26f7b87ea07882b78ce00840"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "82ce71058ad78d73a9ab2b0d7a38baa8a1449a5647606f7f18fa012b79c8bad5",
+      "size": 1100848,
+      "blob": "9a4dc6fcbb6f88c333c9a5ec8fb3e2e81b6c476c"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_adjust_evidence.py",
+      "sha256": "4d6b475adbed7c6f1523a7435ba1a09d61829836dcda0e8ae72e29f0aa48ce5f",
+      "size": 5749,
+      "blob": "5b4d23d5ee8fd719142a50e3f12543e31497f1d2"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_adjust_evidence.py",
+      "sha256": "66f6b3174cfaef1f8906fc42573813161402f3401839e8113d7c275a3c22f981",
+      "size": 5790,
+      "blob": "cd946ab5c056cf0ef4ad454e4477a8065cdbdd58"
+    }
+  ],
+  "backup_sha256": "8dc23e0baf59c4bb59990e09c938889bc09a22767ab9df1c5d5096e51e48644a",
+  "tree": "29672fc7053ed6a6760f94dc3ca0b7d6837d1189",
+  "base_tree": "ffff39a3dde9157c34b542afa2ce07780fe89534",
+  "message": "Execute genuine contact displacement adjustment before collision predicate",
+  "local_commit": "6adc7a58cb7059f55d2d2922c62cbd87e07b7e67"
+}

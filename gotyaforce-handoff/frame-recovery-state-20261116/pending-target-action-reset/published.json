@@ -1,0 +1,80 @@
+{
+  "base": "c97bb5fc8d6e04e0c05ad2effbcffe7d7da03199",
+  "status": "published and exact tree verified; final204 runtime cases+strict+18 evidence exit0; independent review approved; exact-head CI43827013375 in_progress",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "5c81f8bae9d25580c008dcd4852690e02e675cd9fd5c516de8ae3161570d50b8",
+      "size": 197640,
+      "blob": "e7a616e99286e52c0c66a84f4bc3c0fad3a2cd2d"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-global-layout.ts",
+      "sha256": "a7e5854e5666cf0a6361a4fe42ad586864673f1f5084eebbdcb4bc680bc2c88b",
+      "size": 2165,
+      "blob": "8609ff6c32eddf62e38ff029f61fe9a26d3ddc2f"
+    },
+    {
+      "path": "packages/combat/src/rom/source-contact-reset.ts",
+      "sha256": "228ac26768b2d10f893d07d5d43dcd7569675c7321db42711ff4c9ed864b93c5",
+      "size": 12152,
+      "blob": "a889a17041be94c5afbcd1a2792eb5d56bdb195e"
+    },
+    {
+      "path": "packages/combat/src/rom/source-contact-reset.selftest.ts",
+      "sha256": "c8558865c1dc33fb610ffba36056daa4b79ab6f950b73743df186bcc75757d01",
+      "size": 9189,
+      "blob": "8a37e9409d0ff8fb10e390a1e579bf7840c962bc"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-target-action-reset.selftest.ts",
+      "sha256": "5699fd5f3f32ab9adbf8e85446f20014bf6937e0cd99a2e9932a5a8f36e2b4ec",
+      "size": 8788,
+      "blob": "e9b5cde8d56228ca5190d0a6f0e89debbc993f38"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "e84a3a018b11e9b3736239ec69095e81e0ea9715bb2b481afffaa99785a8d2a6",
+      "size": 1100510,
+      "blob": "1bad7d81650a2217b8e50a1b5e3fa7e2f6cd6fe7"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_target_action_frame_evidence.py",
+      "sha256": "e46b59a33c09b50d823053c53142d10abc4d7d47a79606844b35b6c848a1e307",
+      "size": 14228,
+      "blob": "6f050c72b9bf7d8f0eb5190f3c30300415c6ac4a"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_target_action_frame_evidence.py",
+      "sha256": "f0bde4f0c41d364e03bdbdb55e595f94f56f432f2186a36b86f42ef6a3c13d5f",
+      "size": 20331,
+      "blob": "b353386796425acc7ac816a620eac4189edbff74"
+    }
+  ],
+  "backup_sha256": "7fbc6d714d40650858bd7d3097cf0fe52d48368ab18e4c1a94be1269485e577e",
+  "tree": "7a30b24d1a9d47465753743cde022a8af0e0d937",
+  "message": "Join bounded target-action caller to canonical contact resets",
+  "local_commit": "4874e3f8cf3720f77ba44a47c1c3dd2f5ac8d774",
+  "remote_commit": "a8b38ab4c70cf9aee81873852a15e25ed515c4ac",
+  "ci_run": 43827013375,
+  "remote_tree_verified": true,
+  "validation": {
+    "caller": 27,
+    "reset_player_draw": 68,
+    "prefix_traversal_counter": 61,
+    "timer_transform": 48,
+    "runtime_total": 204,
+    "strict_exit": 0,
+    "evidence_tests": 18,
+    "evidence_exit": 0,
+    "independent_review": "approved frozen hashes",
+    "sessions": [
+      18162,
+      41262,
+      89946,
+      65036,
+      54311,
+      77360
+    ]
+  }
+}

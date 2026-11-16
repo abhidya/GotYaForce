@@ -1,0 +1,46 @@
+{
+  "base": "a8b38ab4c70cf9aee81873852a15e25ed515c4ac",
+  "status": "unpublished;204 unaffected regressions and6 evidence exit0; final strict44922 and35 height55660/review awaiting recorded outcomes",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "ea09faf8162f66dbe2713e0f595e0f731d041429ca88b4b92cef610e8d9ec71b",
+      "size": 204580,
+      "blob": "7501c6c10b9c444f9642d8f44bf93241225f8438"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-target-action-reset.selftest.ts",
+      "sha256": "b49c498359fa4fce18716f876286ce7347d5a9e3caef512c6b704f67cea69dca",
+      "size": 8903,
+      "blob": "0792dfa58432afa2c2ee38f7704631e38dc7a865"
+    },
+    {
+      "path": "packages/combat/src/rom/battle-contact-height.selftest.ts",
+      "sha256": "79cb8cd18e4cd15686171632dbb93d6a3610f0cb38c7f3180d221827da4e7666",
+      "size": 11711,
+      "blob": "ea40268b09ed974635bcdd3fddd845ce893a99c7"
+    },
+    {
+      "path": "packages/combat/src/rom/attached-setup-animation.selftest.ts",
+      "sha256": "01717d798234b33f9de19e5e588f14036464d9f37f770d7a76edc30f328c0c90",
+      "size": 1100679,
+      "blob": "39b5780136b4e79c9d9d3e2e89e6830fc9b9de32"
+    },
+    {
+      "path": "research/tools/matching-decomp/read_archived_contact_height_evidence.py",
+      "sha256": "68c93316d695b19c97c20fc56d0ba47a007a4f8bad757cd308c3afd102d645f0",
+      "size": 5547,
+      "blob": "b38cde8f719b9681167db8cfd8eef71abe697bb5"
+    },
+    {
+      "path": "research/tools/matching-decomp/test_archived_contact_height_evidence.py",
+      "sha256": "f2006911dc9e1768de4022b19dc246a26854efc17d910b123bdaf6b7d4f1ea54",
+      "size": 3989,
+      "blob": "933b6521f4f010581c75c2209cc3a1b76d2617d0"
+    }
+  ],
+  "backup_sha256": "468541871575c69bdd9547e7031da8efca025a10014f4d360a5303a3b2a40e49",
+  "tree": "d246381747b4bfd02e263dc737988d80f28878db",
+  "message": "Continue target resets through bounded initial contact traversal",
+  "local_commit": "e8b1d86e7e5c77a9854679fe2f1c074c2e7a619c"
+}

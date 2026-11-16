@@ -1,0 +1,12 @@
+{
+  "base": "5b76a24add2469fa1da7968a76eac38b84a940df",
+  "status": "UNPUBLISHED one-line initial counter alias metadata optimization; static independent review approved; strict71065 exit0; new35 runtime92783 pending",
+  "files": [
+    {
+      "path": "packages/combat/src/rom/battle-outer-frame.ts",
+      "sha256": "ce924ba87c8f0b2d13cca7269809ca432882460c5ff2cdd8fe9c4c7d2aba3c1e",
+      "size": 204585
+    }
+  ],
+  "backup_sha256": "a4ecab6fa03db088e21c2afe0a8bbb0b7baac127617b0d08d83866d501b89f9c"
+}

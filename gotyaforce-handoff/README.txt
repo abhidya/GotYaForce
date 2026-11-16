@@ -1,0 +1,1 @@
+Contains local changed and untracked source snapshots, patches for local commits, and recovery snapshots. Logs and token-named files, dependencies, generated dist, and original game assets excluded. Not a complete environment backup. PR #58 base: 0babe11c. Local checkpoint e3f338c. No tests were run for this archive.
