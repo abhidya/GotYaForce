@@ -18,7 +18,7 @@ export function runBattleContactCountResetSelfTests(make:Make):void{
   })as typeof native;
   try{run();}finally{Object.getOwnPropertyDescriptor=native;}
  };
- const stop='required contact callback0c 8008a65c';
+ const stop='8008a680 requires registered object-byte contact owner';
  {
   const x=fresh(),seen:string[]=[];
   observe(x,()=>refuses(()=>x.frame.runFrame(),stop),(o,k)=>{if(o===x.counters&&keys.includes(String(k))){check(keys.slice(0,seen.length).every(key=>x.counters[key]===0),'previous stores complete before fresh destination');seen.push(String(k));}});

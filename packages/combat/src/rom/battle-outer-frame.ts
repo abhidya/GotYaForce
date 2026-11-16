@@ -2507,6 +2507,50 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     };
     const checked=<T>(f:()=>T):T=>{const value=call(f);guard();return value;};
     const pointer=(value:unknown):symbol|null=>{if(value!==null&&typeof value!=='symbol')fail('89aec explicit source pointer required');return value;};
+    const contactPrefix=(hit:symbol):void=>{
+      const bytes=checked(()=>allocator.getObject(hit));
+      const owner=pointer(checked(()=>allocator.readPointer(hit,0x20)));
+      if(owner===null)fail('8008a680 null contact owner at1d8 load');
+      // Existing projectile HITs point to real object bytes. External actor
+      // records need a separate canonical field-owner join, never byte shadows.
+      try{allocator.getObject(owner);}catch{fail('8008a680 requires registered object-byte contact owner; external actor owner unsupported');}
+      guard();
+      const load8=(id:symbol,offset:number):number=>checked(()=>allocator.readU8(id,offset));
+      const load16=(id:symbol,offset:number):number=>checked(()=>allocator.readS16(id,offset));
+      const load32=(offset:number):number=>checked(()=>allocator.readU32(hit,offset));
+      const store=(offset:number,value:number,width:1|4):void=>{
+        for(let i=0;i<width;i++){
+          const d=Object.getOwnPropertyDescriptor(bytes,String(offset+i));guard();
+          if(!d||!('value'in d)||!d.writable)fail('8a65c writable scalar bytes required');
+        }
+        guard();if(allocator.getObject(hit)!==bytes)fail('8a65c hit byte owner changed');
+        for(let i=0;i<width;i++){
+          const d=primaryStoreDescriptor(bytes,String(offset+i));
+          if(!d||!('value'in d)||!d.writable)fail('8a65c scalar destination changed');
+        }
+        check();for(let i=0;i<width;i++)bytes[offset+i]=(value>>>(8*(width-1-i)))&255;check();
+      };
+      if(s8(load8(owner,0x1d8))!==0)fail('8008a69c reached required80088e50 contact release');
+      if(s8(load8(owner,0))===0)fail('8008a69c reached required80088e50 contact release');
+      if(s8(load8(owner,0x83))===0&&load16(hit,0x4a)!==-1){
+        const group=s8(load8(owner,0x1cec)),action=s8(load8(owner,0x1ced)),saved=load16(hit,0x4c);
+        if(saved!==group*0x1000+action)fail('8008a6e0 reached required80088e50 contact release');
+      }
+      store(0x13,0,1);
+      const state=load8(hit,0x10);
+      checked(()=>allocator.readPointer(hit,0x28)); // Always loaded, even on the>=3 return.
+      if(state>=3)return;
+      if(state===2){
+        if(s8(load8(owner,0x281))===0)store(0x10,1,1);
+        fail('8008aa0c reached required8008aa40 contact matrix validity');
+      }
+      if(state===1){
+        const x=load32(0x30),y=load32(0x34);store(0x3c,x,4);store(0x40,y,4);
+        const z=load32(0x38);store(0x44,z,4);
+      }
+      checked(()=>allocator.readPointer(hit,0x60));
+      fail((state===0?'8008a728':'8008a888')+' reached required8020b7a8 contact transform');
+    };
     const walk=(index:number,site:0x80089b30|0x80089b84|0x80089bd0):void=>{
       let owner:object;
       try{owner=call(()=>allocator.getGroup(index));}catch(error){fail('800294f0 reached required80089aec group'+index+': '+String(error));}
@@ -2518,8 +2562,9 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(checked(()=>allocator.readS8(current,0))!==0){
           const callback=checked(()=>allocator.readU32(current,0xc));
           // Active bctrl is unconditional. Even callback0 is not a no-op.
-          // None of these contact callbacks is the ordinary7dcec scheduler.
-          fail(site.toString(16)+' reached required contact callback0c '+callback.toString(16)+'; callee unsupported');
+          // This is not the ordinary7dcec scheduler or its snapshot suffix.
+          if(callback!==0x8008a65c)fail(site.toString(16)+' reached required contact callback0c '+callback.toString(16)+'; callee unsupported');
+          contactPrefix(current);guard();
         }
         node=pointer(checked(()=>allocator.readPointer(current,8)));
       }

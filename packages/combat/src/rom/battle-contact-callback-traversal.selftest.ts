@@ -52,7 +52,7 @@ export function runBattleContactCallbackTraversalSelfTests(make:Make):void{
   run(x,stop,(o,k)=>{if(k==='head')for(let i=48;i<56;i++)if(o===x.groups[i])heads.push(i);if(k==='0'){const i=x.contactBytes.indexOf(o as Record<number,number>);if(i>=0)visits.push(i);}});
   check(heads.join(',')==='48,49,50,51,52,53,54,55'&&visits.join(',')==='0,1,2,3,4,5,6,7','real populated inactive lists traverse in source order');
  }
- for(const [index,active,callback,site]of [[0,1,0x8008a65c,'80089b30'],[2,1,0x8008a65c,'80089b84'],[7,1,0x8008a65c,'80089bd0'],[0,128,0x8008a65c,'80089b30'],[0,1,0,'80089b30']]as const){
+ for(const [index,active,callback,site]of [[0,1,0x8008a65d,'80089b30'],[2,1,0x8008a65d,'80089b84'],[7,1,0x8008a65d,'80089bd0'],[0,128,0x8008a65d,'80089b30'],[0,1,0,'80089b30']]as const){
   const x=fresh();x.contactBytes[index]![0]=active;x.allocator.writeU32(x.contactNodes[index]!,0xc,callback);let nextRead=false;
   run(x,site+' reached required contact callback0c '+callback.toString(16),(o,k)=>{if(o===x.contactBytes[index]&&k==='8')nextRead=true;});
   check(!nextRead,'active mandatory callback refuses before next8');
