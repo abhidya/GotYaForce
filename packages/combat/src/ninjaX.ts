@@ -17,11 +17,28 @@ export interface DoubleNinjaOwnerState {arm7c8:number;offset7b0:Vec3}
 // action cleanup must not own their lifetime. A fresh RomActor gets an unarmed
 // record on first ordinary-X use; this is not a charged producer or reset policy.
 const doubleOwners=new WeakMap<RomActor,DoubleNinjaOwnerState>();
+const assignedDoubleOwners=new WeakSet<object>();
 export function getDoubleNinjaOwnerState(a:RomActor):DoubleNinjaOwnerState|undefined{return doubleOwners.get(a);}
+/** Explicit offline owner ingress. Retains the actual record, never copies or
+ * initializes clone state, and never replaces an existing persistent owner. */
+export function bindDoubleNinjaOwnerState(a:RomActor,owner:DoubleNinjaOwnerState):void{
+  if(a===null||typeof a!=='object'||a instanceof Promise||owner===null||typeof owner!=='object'||owner instanceof Promise)
+    throw Error('[double-ninja-owner] actual actor and explicit synchronous owner required');
+  if(doubleOwners.has(a))throw Error('[double-ninja-owner] persistent owner already bound');
+  if(a===owner as unknown||assignedDoubleOwners.has(owner))throw Error('[double-ninja-owner] owner already assigned or aliases actual actor');
+  const arm=Object.getOwnPropertyDescriptor(owner,'arm7c8'),offset=Object.getOwnPropertyDescriptor(owner,'offset7b0');
+  if(!arm||!('value'in arm)||!Number.isInteger(arm.value)||arm.value<0||arm.value>255||
+    !offset||!('value'in offset)||offset.value===null||typeof offset.value!=='object'||offset.value instanceof Promise)
+    throw Error('[double-ninja-owner] explicit own-data byte7c8 and vector7b0 required');
+  // Recheck after property inspection so caught reentry cannot replace an
+  // owner established during that inspection, even at an unsupported proxy.
+  if(doubleOwners.has(a)||assignedDoubleOwners.has(owner))throw Error('[double-ninja-owner] persistent owner already bound or assigned');
+  doubleOwners.set(a,owner);assignedDoubleOwners.add(owner);
+}
 function doubleOwner(a:RomActor):DoubleNinjaOwnerState|null{
   if(a.borgNumber!==3)return null;
   let owner=doubleOwners.get(a);
-  if(!owner){owner={arm7c8:0,offset7b0:{x:0,y:0,z:0}};doubleOwners.set(a,owner);}
+  if(!owner){owner={arm7c8:0,offset7b0:{x:0,y:0,z:0}};doubleOwners.set(a,owner);assignedDoubleOwners.add(owner);}
   return owner;
 }
 export interface NinjaXState {

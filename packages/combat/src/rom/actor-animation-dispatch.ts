@@ -1,7 +1,8 @@
-/** Bounded 48648 setup gates, 49e58 dispatch and 49f10 mode0 continuation.
+/** Bounded48648 setup gates,49e58 dispatch and49f10/mode1 continuation.
  * Setup source: chunk_0005.c:4232–4257. Actual setup gates retain source
- * order. Optional once-bound mode0 setup must perform real archive and
- * mapping work. Other modes and blocked4a41c refuse. Part1 must complete its
+ * order. Optional once-bound setup performs real archive and mapping work.
+ * Mode1 additionally requires the matched transition runtime and canonical
+ * setup graph; modes2+ and blocked4a41c refuse. Part1 must complete its
  * actual postamble or refuse after preserved effects; no playback substitution.
  * Source: chunk_0006.c:1–68; mode-table provenance is documented in
  * double-source-owned-dispatch-plan-2026-11-12.md and the recorded retail DOL
@@ -9,8 +10,12 @@
  * not bundled here. The decompiler loses the handler part-number convention;
  * this is bounded semantic reconstruction, not an exact ABI claim. Readiness
  * pointers mean symbolic presence only, without pointee ownership/dereference.
- * This is not linked-mode
+ * Mode1 copy/blend arithmetic uses the bounded archived mode1 evidence and
+ * retains the linear-only8020bf08/8023cc8c boundary. This is not linked-mode
  * setup, other modes, source RAM aliasing, original replay or live wiring.
+ * Lower animation effects remain explicit contracts: object brands do not
+ * prove every transitive dependency. Failed mode1 work consumes the canonical
+ * mapping actor before a changed mode or readiness gate can replay it.
  *
  * Gate pointers precede marker gates, part resolution and snapshots. Snapshots
  * copy finite f32 values (including signed zero), without arithmetic. Mode0
@@ -25,7 +30,9 @@
  * deferred effects. Unsupported paths refuse when reached, preserving all prior
  * writes/effects. Caught same-runtime mutation reentry poisons the outer call.
  */
-import type {SourceActorAnimationSetupRuntime} from './actor-animation-setup.js';
+import {isSourceActorAnimationSetupRuntime, type SourceActorAnimationSetupRuntime} from './actor-animation-setup.js';
+import {isSourceActorAnimationTransitionRuntime, markIncompleteSourceActorAnimationTransition,
+  requireCompleteSourceActorAnimationTransition, type SourceActorAnimationTransitionRuntime} from './actor-animation-transition.js';
 import type {SourceActorJointMappingRuntime, SourceActorJointMappingHeader, SourceActorJointLayout} from './actor-joint-mapping.js';
 import type {SourceJointAnimationFeedbackRuntime, SourceJointAnimationPart} from './joint-animation-feedback.js';
 
@@ -50,7 +57,14 @@ export interface SourceActorAnimationSetupRequest {
   readonly mode: number;
 }
 export interface SourceActorAnimationDispatchRuntime {
+  getActualMapping(): SourceActorJointMappingRuntime;
+  /** Exact bound setup table; absence stays absent. */
+  getSetupRuntime(): object | undefined;
+  getActualFeedback(): SourceJointAnimationFeedbackRuntime;
+  /** Same mapping header bound to this actor, never a snapshot. */
+  getSourceActor(actor: symbol): SourceActorJointMappingHeader;
   bindSetupRuntime(setup: Pick<SourceActorAnimationSetupRuntime, 'setupModeZero' | 'finishPartOneSetup'>): void;
+  bindTransitionRuntime(transition: SourceActorAnimationTransitionRuntime): void;
   bindActor(actor: symbol, initial: SourceActorAnimationDispatchBinding): void;
   bindPart(part: symbol, initial: SourceActorAnimationDispatchPartBinding): void;
   getActorBinding(actor: symbol): SourceActorAnimationDispatchBinding;
@@ -58,6 +72,10 @@ export interface SourceActorAnimationDispatchRuntime {
   setupPart(actor: symbol, partNumber: number, blockedSource: {readonly blockedMask1d9a: number},
     request: SourceActorAnimationSetupRequest): void;
   updatePart(actor: symbol, partNumber: number): number;
+}
+const sourceDispatchRuntimes = new WeakSet<object>();
+export function isSourceActorAnimationDispatchRuntime(value: unknown): value is SourceActorAnimationDispatchRuntime {
+  return value !== null && typeof value === 'object' && sourceDispatchRuntimes.has(value);
 }
 function fail(reason: string): never {
   throw Error(`[actor-animation-dispatch] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -93,7 +111,9 @@ export function createSourceActorAnimationDispatchRuntime(mapping: SourceActorJo
   const partGet = method(feedback, 'getPart');
   const actors = new Map<symbol, {binding: SourceActorAnimationDispatchBinding; source: SourceActorJointMappingHeader}>();
   const parts = new Map<symbol, {binding: SourceActorAnimationDispatchPartBinding; source: SourceJointAnimationPart}>();
-  let readySetup: {table: object; mode0: (...args: never[]) => unknown; post: (...args: never[]) => unknown} | null = null;
+  let readySetup: {table: object; mode0: (...args: never[]) => unknown; mode1: ((...args: never[]) => unknown) | undefined;
+    post: (...args: never[]) => unknown; post1: ((...args: never[]) => unknown) | undefined} | null = null;
+  let transition: {table: SourceActorAnimationTransitionRuntime; update: (...args: never[]) => unknown} | null = null;
   let busy = false, reentered = false;
   const enter = (): void => {if (busy) {reentered = true; fail('same-runtime reentry is unsupported');} busy = true; reentered = false;};
   const invoke = (fn: (...args: never[]) => unknown, receiver: object, args: unknown[]): unknown => {
@@ -103,13 +123,29 @@ export function createSourceActorAnimationDispatchRuntime(mapping: SourceActorJo
   };
   const actorRecord = (id: symbol) => {const value = actors.get(id); if (!value) fail('unknown/non-owned actor binding'); return value;};
   const partRecord = (id: symbol) => {const value = parts.get(id); if (!value) fail('unknown/non-owned part binding'); return value;};
-  return Object.freeze({
+  const runtime: SourceActorAnimationDispatchRuntime = Object.freeze({
+    getActualMapping() {return mapping;},
+    getSetupRuntime() {return readySetup?.table;},
+    getActualFeedback() {return feedback;},
+    bindTransitionRuntime(value: SourceActorAnimationTransitionRuntime): void {
+      enter(); try {
+        if (transition !== null) fail('transition runtime already bound');
+        if (!isSourceActorAnimationTransitionRuntime(value) || value.getActualDispatch() !== runtime ||
+          value.getActualMapping() !== mapping || value.getActualFeedback() !== feedback) fail('matched actual transition owners required');
+        transition = {table: value, update: method(value, 'updateModeOne')};
+      } finally {busy = false;}
+    },
     bindSetupRuntime(setup: Pick<SourceActorAnimationSetupRuntime, 'setupModeZero' | 'finishPartOneSetup'>): void {
       enter(); try {
         if (readySetup !== null) fail('ready setup runtime already bound');
         const mode0 = method(setup, 'setupModeZero'), post = method(setup, 'finishPartOneSetup');
         if (reentered) fail('same-runtime reentry was caught inside an adapter');
-        readySetup = {table: setup, mode0, post};
+        const actual = isSourceActorAnimationSetupRuntime(setup);
+        const mode1 = actual ? method(setup, 'setupModeOne') : undefined;
+        if (actual && (setup.getActualDispatch() !== runtime || setup.getActualMapping() !== mapping ||
+          setup.getActualFeedback() !== feedback)) fail('matched actual setup owners required');
+        const post1 = actual ? method(setup, 'finishPartOneModeOneSetup') : undefined;
+        readySetup = {table: setup, mode0, mode1, post, post1};
       } finally {busy = false;}
     },
     bindActor(id: symbol, initial: SourceActorAnimationDispatchBinding): void {
@@ -136,10 +172,13 @@ export function createSourceActorAnimationDispatchRuntime(mapping: SourceActorJo
       } finally {busy = false;}
     },
     getActorBinding(id: symbol) {return actorRecord(id).binding;},
+    getSourceActor(id: symbol) {return actorRecord(id).source;},
     getPartBinding(id: symbol) {return partRecord(id).binding;},
     setupPart(id: symbol, partNumber: number, blockedSource: {readonly blockedMask1d9a: number},
       request: SourceActorAnimationSetupRequest): void {
+      let modeOne = false;
       enter(); try {
+        requireCompleteSourceActorAnimationTransition(actorRecord(id).source);
         const gates = actorRecord(id).binding;
         // Setup only reads these operands; do not relax playback's existing
         // writable-field contract. No part/layout/request is read on no-op paths.
@@ -164,20 +203,26 @@ export function createSourceActorAnimationDispatchRuntime(mapping: SourceActorJo
         }
         if (readySetup === null) fail('48648 unblocked setup requires unsupported setup table/4871c');
         const mode = own(request, 'mode', false); integer(mode, 0xffffffff, 'setup mode');
-        if (mode !== 0) fail('unsupported setup mode');
+        if (mode !== 0 && (mode !== 1 || readySetup.mode1 === undefined)) fail('unsupported setup mode');
+        modeOne = mode === 1;
         // Archived slot0 is 8004871c. Complete the actual handler before the
         // source part1 postamble; neither path may fabricate a void success.
-        const result = invoke(readySetup.mode0, readySetup.table, [id, partNumber, request]);
+        const result = invoke(mode === 0 ? readySetup.mode0 : readySetup.mode1!, readySetup.table, [id, partNumber, request]);
         if (result !== undefined) fail('setupModeZero must synchronously return undefined');
         if (partNumber === 1) {
-          const post = invoke(readySetup.post, readySetup.table, [id]);
+          const post = invoke(modeOne ? readySetup.post1! : readySetup.post, readySetup.table, [id]);
           if (post !== undefined) fail('finishPartOneSetup must synchronously return undefined');
         }
+      } catch (error) {
+        if (modeOne) markIncompleteSourceActorAnimationTransition(actorRecord(id).source);
+        throw error;
       } finally {busy = false;}
     },
     updatePart(id: symbol, partNumber: number): number {
+      let attemptedPart: SourceJointAnimationPart | undefined;
       enter(); try {
         const actor = actorRecord(id), gates = actor.binding;
+        requireCompleteSourceActorAnimationTransition(actor.source);
         if (readLink(gates, 'family1d88') === null) return 1;
         if (readLink(gates, 'shared1d8c') === null) return 1;
         if (partNumber === 1 && byte(gates, 'marker578') === 1 && byte(gates, 'marker1db3') === 1) return 0;
@@ -188,9 +233,16 @@ export function createSourceActorAnimationDispatchRuntime(mapping: SourceActorJo
         const partId = own(row, String(partNumber), false);
         if (typeof partId !== 'symbol') fail('part: owned identity required');
         const {source: part, binding} = partRecord(partId);
+        attemptedPart = part;
         write(binding, 'previous10', readFloat(binding, 'elapsed08'));
         write(binding, 'previous14', readFloat(part, 'frame0c'));
         const mode = (byte(part, 'mode2f') << 24) >> 24;
+        if (mode === 1) {
+          if (transition === null) fail('unsupported signed animation mode 1 without actual transition runtime/4a00c');
+          const result = invoke(transition.update, transition.table, [id, partNumber]);
+          if (result !== undefined) fail('mode1 continuation must synchronously return undefined');
+          return (byte(part, 'complete2e') << 24) >> 24;
+        }
         if (mode !== 0) fail(`unsupported signed animation mode ${mode}`);
         const elapsed = Math.fround(readFloat(binding, 'elapsed08') + readFloat(actor.source, 'timestep1dc8'));
         f32(elapsed, 'elapsed08 result'); write(binding, 'elapsed08', elapsed);
@@ -200,7 +252,16 @@ export function createSourceActorAnimationDispatchRuntime(mapping: SourceActorJo
         const result = invoke(animate, mapping, [id, 0, 0, partNumber, 2]);
         if (result !== undefined) fail('animatePart must complete synchronously and return undefined');
         return (byte(part, 'complete2e') << 24) >> 24;
+      } catch (error) {
+        // Failure bookkeeping is not a source operand read. Observe only an own
+        // data descriptor, never a getter, so partial mode1 snapshots consume
+        // the actor too. A later manually changed mode cannot resume it.
+        if (attemptedPart && Object.getOwnPropertyDescriptor(attemptedPart, 'mode2f')?.value === 1)
+          markIncompleteSourceActorAnimationTransition(actorRecord(id).source);
+        throw error;
       } finally {busy = false;}
     },
   });
+  sourceDispatchRuntimes.add(runtime);
+  return runtime;
 }

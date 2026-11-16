@@ -1,5 +1,5 @@
 import {createRomActor} from './actor.js';
-import {createSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateBinding} from './actor-matrix-update.js';
+import {createSourceActorMatrixUpdateRuntime, isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateBinding} from './actor-matrix-update.js';
 import {createSourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {createSourceActorJointMappingRuntime} from './actor-joint-mapping.js';
 import {createSourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
@@ -102,6 +102,17 @@ function fixture(deferBind = false) {
     state: () => runtime.getActorBinding(source.id), update: () => runtime.updateActor(source.id)};
 }
 export function runActorMatrixUpdateSelfTests(): void {
+  {
+    const f = fixture();
+    check(isSourceActorMatrixUpdateRuntime(f.runtime) && Object.isFrozen(f.runtime), 'genuine frozen matrix owner');
+    check(!isSourceActorMatrixUpdateRuntime({...f.runtime}), 'copied methods do not copy matrix provenance');
+    check(f.runtime.getActualActor(f.id) === f.actual && f.runtime.getWorldBinding(f.id) === f.worldState &&
+      f.runtime.getMappingActor(f.id) === f.mapping.getActor(f.id), 'retained canonical identities are shared with rate lifecycle');
+    check(f.runtime.getGlobals() === f.globals && Reflect.ownKeys(f.globals).join() === 'maskD2',
+      'match global identity is borrowed without hydrating D9 or1829 defaults');
+    check(f.events.length === 0, 'identity reads never perform source matrix effects');
+    rejects(() => f.runtime.getActualActor(Symbol('unknown')), 'unknown/non-owned');
+  }
   {
     const f = fixture(); f.update();
     check(f.events.join(',') === 'prepare,rebuild:0,rebuild:1', 'one preparation and two actual root rebuilds');
@@ -251,9 +262,9 @@ export function runActorMatrixUpdateSelfTests(): void {
     '80048be0', '80049f10', '8004a00c', '8004a0e0', '8004a1cc', '8004a2ec', '8004a41c', '8004a60c'];
   for (const selector of [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]) {
     const f = fixture(); f.actual.controlWord = 0; f.metadata.getActorBinding(f.id).byte1d98 = selector;
-    f.globals.maskD2 = NaN; rejects(f.update, `46e7c handler ${targets[selector]}`);
+    f.globals.maskD2 = NaN; rejects(f.update, selector === 0 ? 'descriptor byte requires an owned bound mapping descriptor' : `46e7c handler ${targets[selector]}`);
     check(f.state().count1d96 === 0 && f.state().count1d97 === 0 && f.state().field1d60 === 10 && f.output(1)[7] === 27,
-      `unsupported selector${selector} preserves first pass and clears, before damping/visibility`);
+      `selector${selector} preserves first pass and clears at its missing prerequisite, before spring/damping/visibility`);
     check(f.events.join(',') === 'prepare,rebuild:0', 'unsupported handler never fakes second pass');
   }
   {

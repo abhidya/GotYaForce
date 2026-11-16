@@ -1,6 +1,7 @@
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {createRomActor} from './actor.js';
-import {createSourceActorTerrainQueryRuntime, type SourceActorTerrainGlobals} from './actor-terrain-query.js';
+import {createSourceActorTerrainNormalOutput, createSourceActorTerrainQueryRuntime, isSourceActorTerrainQueryRuntime,
+  type SourceActorTerrainGlobals, type SourceActorTerrainNormalOutput} from './actor-terrain-query.js';
 import {createSourceActorTransformHistoryRuntime} from './actor-transform-history.js';
 import {createSourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {createSourceActorJointMappingRuntime} from './actor-joint-mapping.js';
@@ -126,7 +127,15 @@ export function runActorTerrainQuerySelfTests(): void {
     f.point.y = 5;
     check(f.actual.pos.y === 0 && f.actual.savedGroundPos.y === 0 && f.actual.stepHeight === 0 && f.prior.previousStepHeight6d4 === 0,
       'query never writes actual current/history fields');
-    check(Object.keys(f.runtime).join(',') === 'bindActor,query8003d6e4,queryNormal8003de80', 'no persistent result/normal/height surface');
+    check(Object.keys(f.runtime).join(',') === 'getActualActor,getHistoryBinding,getTerrainGlobals,bindActor,query8003d6e4,queryNormal8003de80,queryHeightNormal8003e0a8', 'no persistent result/normal/height surface');
+    check(f.runtime.getTerrainGlobals() === f.terrain, 'read-only accessor returns the same actual global owner');
+    check(isSourceActorTerrainQueryRuntime(f.runtime) && Object.isFrozen(f.runtime), 'genuine terrain identity is frozen');
+    for (const fake of [null, undefined, {}, {...f.runtime}, Object.create(f.runtime)])
+      check(!isSourceActorTerrainQueryRuntime(fake), 'terrain brand cannot be copied or inherited');
+    check(f.runtime.getActualActor(f.id) === f.actual && f.runtime.getHistoryBinding(f.id) === f.prior,
+      'metadata accessors retain actual/history owners without a copied result surface');
+    rejects(() => f.runtime.getActualActor(Symbol()), 'unknown/non-owned');
+    rejects(() => f.runtime.getHistoryBinding(Symbol()), 'unknown/non-owned');
   }
   for (const heights of [[], [-200], [100]]) {
     const f = fixture(heights); check(f.query() === (heights[0] === -200 ? -200 : -100), 'source sentinel fallback and below-lower minimum');
@@ -240,9 +249,9 @@ export function runActorTerrainQuerySelfTests(): void {
     Object.defineProperty(f.ceiling24.grid.triangles[0]!, 'vertices', {get() {called = true; throw Error('ceiling body getter');}});
     rejects(f.query, 'nonempty ceiling24'); check(!called, 'ceiling body refusal does not inspect triangle owner');
   }
-  for (const [axis, value] of [['x', 1], ['z', 1], ['y', 0], ['y', -1], ['x', NaN]] as const) {
+  for (const [axis, value] of [['y', 0], ['y', -0], ['x', NaN], ['z', Infinity], ['y', NaN]] as const) {
     const bad = triangle(2); bad.normal[axis] = value;
-    const f = fixture([], {floor: layer(0x1c, [bad])}); rejects(f.query, Number.isNaN(value) ? 'finite exact source' : 'nonflat source normal');
+    const f = fixture([], {floor: layer(0x1c, [bad])}); rejects(f.query, value === 0 ? 'fdivs zero divisor' : 'finite exact source');
   }
   {
     const flat = triangle(-0), f = fixture([], {floor: layer(0x1c, [flat])});
@@ -296,10 +305,10 @@ export function runActorTerrainQuerySelfTests(): void {
     check(f.query(100) === 7, 'floor cell uses reloaded caller X while edge scan uses saved stack X');
   }
   {
-    const bad = triangle(2); bad.normal.x = 1;
+    const bad = triangle(2); bad.normal.x = NaN;
     const f = fixture([], {floor: layer(0x1c, [bad])});
     f.floor.view.setUint32(f.floor.source.cells[0]!.list.sentinelOffset, 0, false);
-    rejects(f.query, 'nonflat source normal X');
+    rejects(f.query, 'finite exact source');
   }
   {
     const f = fixture(); f.floor.view.setUint32(f.floor.source.cells[3]!.list.sentinelOffset, 0, false);
@@ -370,7 +379,9 @@ export function runActorTerrainQuerySelfTests(): void {
     const f = fixture(); f.floor.view.setUint32(f.floor.source.cells[0]!.list.sentinelOffset, 0, false);
     rejects(f.query, 'source word changed');
   }
+  runActorTerrainNonflatSiblingQuerySelfTests();
   runActorTerrainNormalQuerySelfTests();
+  runActorTerrainHeightNormalQuerySelfTests();
 }
 
 export function runActorTerrainNormalQuerySelfTests(): void {
@@ -524,15 +535,15 @@ export function runActorTerrainNormalQuerySelfTests(): void {
     outputIs(output, 0, 'reached ceiling refusal preserves earlier default stores and precedes later clearance/floor loads');
   }
   {
-    const bad = marked(3, 0); bad.normal.x = 1;
+    const bad = marked(3, 0); bad.normal.x = NaN;
     const f = withFloors([marked(2, 3), bad]);
-    rejects(f.normal, 'nonflat source normal X');
+    rejects(f.normal, 'finite exact source');
     outputIs(f.output, 3, 'later unsupported triangle preserves the earlier real selected normal');
   }
-  for (const [axis, value] of [['x', 1], ['z', 1], ['y', 0], ['y', -1], ['x', NaN]] as const) {
+  for (const [axis, value] of [['y', 0], ['y', -0], ['x', NaN], ['z', Infinity], ['y', NaN]] as const) {
     const bad = marked(200, 0); bad.normal[axis] = value;
     const f = withFloors([bad]);
-    rejects(f.normal, Number.isNaN(value) ? 'finite exact source' : 'nonflat source normal');
+    rejects(f.normal, value === 0 ? 'fdivs zero divisor' : 'finite exact source');
     outputIs(f.output, 0, 'reached unsupported normal refuses before height filtering and retains default');
   }
   {
@@ -600,5 +611,685 @@ export function runActorTerrainNormalQuerySelfTests(): void {
     rejects(f.normal, 'caught same-runtime reentry'); check(caught, 'nested normal query refused');
     outputIs(f.output, 0, 'caught reentry leaves only prior source stores');
     delete f.hooks.history; f.normal(); outputIs(f.output, 3, 'normal query guard recovers on next independent call');
+  }
+}
+
+export function runActorTerrainHeightNormalQuerySelfTests(): void {
+  runActorTerrainNonflatHeightNormalQuerySelfTests();
+  const marked = (height: number, bits: number, x = 0, z = 0): TriangleInput => {
+    const value = triangle(height, x, z); value.normal = vec(bits & 1 ? -0 : 0, 1, bits & 2 ? -0 : 0); return value;
+  };
+  const outputIs = (output: SourceActorTerrainNormalOutput, bits: number, why: string): void => {
+    check(Object.is(output.x, bits & 1 ? -0 : 0) && output.y === 1 && Object.is(output.z, bits & 2 ? -0 : 0), why);
+  };
+  const withFloors = (triangles: TriangleInput[], upper = 100, lower = -100) => {
+    const f = fixture([], {floor: layer(0x1c, triangles), upper, lower}), output = createSourceActorTerrainNormalOutput();
+    Object.assign(output, vec(71, 72, 73));
+    return {...f, output, heightNormal: (clearance = 0) => f.runtime.queryHeightNormal8003e0a8(f.id, f.point, clearance, output)};
+  };
+  {
+    const scratch = createSourceActorTerrainNormalOutput();
+    check(Number.isNaN(scratch.x) && Number.isNaN(scratch.y) && Number.isNaN(scratch.z),
+      'new output is uninitialized scratch, not a default successful normal');
+    check(scratch !== createSourceActorTerrainNormalOutput(), 'each caller receives a distinct fresh output owner');
+  }
+  {
+    const f = withFloors([marked(4, 1), marked(2, 2), marked(8, 3)]);
+    check(f.heightNormal() === 4, 'height-normal returns eligible best height');
+    outputIs(f.output, 1, 'height-normal retains eligible best normal, not last triangle');
+    check(f.heightNormal(-10) === 2, 'height-normal returns minimum fallback');
+    outputIs(f.output, 2, 'minimum fallback copies its own normal unlike normal-only query');
+    check(f.heightNormal(100) === 8, 'height-normal selects maximum on initial clearance equality');
+    outputIs(f.output, 3, 'maximum fallback copies its own normal');
+    const other = createSourceActorTerrainNormalOutput(); f.point.y = 3;
+    check(f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, other) === 2, 'new caller-local output accepted');
+    outputIs(other, 2, 'new caller owns its selected normal'); outputIs(f.output, 3, 'earlier output is not overwritten or retained');
+    check(f.actual.pos.y === 0 && f.actual.savedGroundPos.y === 0 && f.actual.stepHeight === 0 && f.prior.previousStepHeight6d4 === 0,
+      'height-normal only writes the explicit caller output');
+  }
+  for (const clearance of [0, -10, 100]) {
+    const f = withFloors([marked(4, 1), marked(4, 2)]);
+    check(f.heightNormal(clearance) === 4, 'all height-normal accumulation modes preserve equal heights');
+    outputIs(f.output, 2, 'eligible/minimum/maximum ties replace with later normal');
+  }
+  for (const test of [
+    {triangles: [] as TriangleInput[], clearance: 0, height: -100, bits: 0},
+    {triangles: [], clearance: 100, height: -100, bits: 0},
+    {triangles: [marked(-200, 3)], clearance: 0, height: -200, bits: 3},
+    {triangles: [marked(-200, 3)], clearance: 100, height: -100, bits: 0},
+    {triangles: [marked(100, 3)], clearance: 0, height: -100, bits: 3},
+    {triangles: [marked(120, 3)], clearance: 0, height: -100, bits: 0},
+    {triangles: [marked(-100, 3)], clearance: 0, height: -100, bits: 3},
+  ]) {
+    const f = withFloors(test.triangles);
+    check(f.heightNormal(test.clearance) === test.height, 'sentinel and unfiltered fallback heights match source');
+    outputIs(f.output, test.bits, 'fallback normal copied even if selected height equals a source sentinel');
+  }
+  {
+    const f = withFloors([marked(2, 1), marked(5, 2), marked(100, 3), marked(120, 3)]);
+    check(f.heightNormal() === 2, 'eligible height limit excludes equality'); outputIs(f.output, 1, 'equality does not replace best normal');
+    f.point.y = 200;
+    check(f.heightNormal() === 5, 'eligible ceiling excludes equal and higher floors'); outputIs(f.output, 2, 'ceiling filtering retains lower normal');
+    check(f.heightNormal(100) === 120, 'maximum is independent of query and ceiling limits'); outputIs(f.output, 3, 'maximum normal passes no eligibility filter');
+  }
+  {
+    const f = withFloors([marked(2, 1), marked(7, 2), marked(15, 3)]);
+    f.actual.pos.y = 1; f.actual.savedGroundPos.y = 6;
+    check(f.heightNormal() === 7, 'positive previous-current top increases local clearance'); outputIs(f.output, 2, 'adjusted best normal follows height');
+    f.actual.savedGroundPos.y = -1;
+    check(f.heightNormal() === 2, 'negative displacement leaves clearance unchanged'); outputIs(f.output, 1, 'negative delta does not alter output selection');
+    f.actual.savedGroundPos.y = 1; f.prior.previousStepHeight6d4 = 10;
+    check(f.heightNormal() === 7, 'actual history step is consumed');
+    f.actual.stepHeight = 10; check(f.heightNormal() === 2, 'actual current step subtracts from previous top');
+  }
+  {
+    const f = withFloors([marked(2, 1), marked(8, 2), marked(15, 3)], 10);
+    f.actual.savedGroundPos.y = 20;
+    check(f.heightNormal() === 8, 'maximum flag uses entry clearance, not adjusted local limit');
+    outputIs(f.output, 2, 'large positive delta does not turn eligible best into maximum');
+  }
+  {
+    const f = withFloors([marked(4, 1), marked(5, 2)]);
+    f.actual.savedGroundPos.y = 2 ** 24; f.prior.previousStepHeight6d4 = 1; f.actual.pos.y = 2 ** 24;
+    check(f.heightNormal() === 4, 'previous top rounds before subtraction');
+    f.actual.savedGroundPos.y = 2 ** 24 + 2; f.prior.previousStepHeight6d4 = 0; f.actual.stepHeight = 1; f.point.y = 4;
+    check(f.heightNormal() === 5, 'current top rounds before subtraction'); outputIs(f.output, 2, 'rounding affects normal selection');
+  }
+  {
+    const f = withFloors([marked(-1, 1), marked(0, 2)], 2 ** 25);
+    f.actual.savedGroundPos.y = 1; f.point.y = -(2 ** 24);
+    check(f.heightNormal(2 ** 24) === -1, 'clearance adjustment rounds before caller-Y sum'); outputIs(f.output, 1, 'rounded limit excludes zero');
+  }
+  for (const height of [2 ** -149, -(2 ** -149), -0]) {
+    const f = withFloors([marked(height, 0)]);
+    check(Object.is(f.heightNormal(), height), 'separate plane operations retain subnormal and signed-zero result');
+    if (Object.is(height, -0)) {
+      f.point.x = 0; f.point.z = 0;
+      check(Object.is(f.heightNormal(), 0), 'plane zero comes from real multiply/add/divide rather than vertex Y shortcut');
+    }
+  }
+  {
+    const f = withFloors([marked(2, 1), marked(7, 2)]); let histories = 0;
+    f.hooks.history = () => {
+      outputIs(f.output, 0, 'default source stores precede both history reads');
+      if (++histories === 2) f.prior.previousStepHeight6d4 = 10;
+    };
+    check(f.heightNormal() === 7 && histories === 2, 'post-ceiling history step is freshly read'); outputIs(f.output, 2, 'fresh history affects selected normal');
+  }
+  {
+    const f = fixture([], {floor: layer(0x1c, [marked(2, 1), marked(7, 2)], [[0], [], [1], []])});
+    const output = createSourceActorTerrainNormalOutput(); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) {f.point.x = 600; f.point.y = 8;}};
+    check(f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, output) === 7,
+      'cell and limit reload caller point while edges retain original local X/Z'); outputIs(output, 2, 'second cell normal is selected');
+  }
+  {
+    const f = withFloors([marked(4, 3)]); Object.assign(f.actual.pos, f.point);
+    check(f.runtime.queryHeightNormal8003e0a8(f.id, f.actual.pos, 0, f.output) === 4,
+      'actual actor.pos is an admitted point owner, as passed by 677b0'); outputIs(f.output, 3, 'actual point query writes separate local output');
+  }
+  for (const axis of ['x', 'z'] as const) for (const bound of [-7500, 7500, -8000, 8000]) {
+    const f = withFloors([marked(2, 3)]); f.point[axis] = bound;
+    f.point.y = NaN; if (axis === 'x') f.point.z = NaN;
+    f.actual.pos.y = NaN; f.actual.stepHeight = NaN; f.actual.savedGroundPos.y = NaN;
+    f.prior.previousStepHeight6d4 = NaN; f.terrain.upper34 = NaN; f.terrain.lower68 = NaN;
+    check(f.heightNormal(NaN) === -5000 && !f.events.includes('history'),
+      'outside height-normal returns authenticated -5000 before caller Y/clearance/terrain/history');
+    outputIs(f.output, 0, 'outside return still performs genuine default stores');
+  }
+  for (const support of [1, 127, 128, 255]) {
+    const f = withFloors([]); f.actual.supportContact1db = support; f.point.x = NaN;
+    rejects(f.heightNormal, 'nonzero supporting contact height-normal transform');
+    check(f.output.x === 71 && f.output.y === 72 && f.output.z === 73, 'support refusal precedes zero-support output stores');
+  }
+  for (const key of ['ceiling24', 'ceiling20'] as const) {
+    const f = fixture([], {[key]: layer(key === 'ceiling24' ? 0x24 : 0x20, [triangle(1)])}), output = createSourceActorTerrainNormalOutput();
+    f.actual.pos.y = NaN;
+    Object.defineProperty(f.terrain, 'floor1c', {get() {throw Error('unreached floor getter');}});
+    if (key === 'ceiling24') Object.defineProperty(f.terrain, 'ceiling20', {get() {throw Error('unreached ceiling getter');}});
+    rejects(() => f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, output), `nonempty ${key}`);
+    outputIs(output, 0, 'ceiling refusal retains default and skips later floor/current-position loads');
+  }
+  {
+    const f = withFloors([]); f.terrain.upper34 = NaN; f.actual.stepHeight = NaN;
+    rejects(() => f.heightNormal(NaN), 'upper34'); outputIs(f.output, 0, 'initial global upper read precedes clearance comparison');
+    f.terrain.upper34 = 100; rejects(() => f.heightNormal(NaN), 'saved clearance');
+    check(!f.events.includes('history'), 'height-normal validates original clearance before ceiling arguments, unlike 3de80');
+  }
+  {
+    const skipped = marked(88, 0, 700, 700); skipped.normal.x = NaN; skipped.vertices[0].y = NaN;
+    const f = withFloors([skipped, marked(2, 3)]);
+    check(f.heightNormal() === 2, 'edge-rejected malformed triangle is not a normal/height fallback candidate'); outputIs(f.output, 3, 'scan continues to real eligible pointer');
+  }
+  {
+    const bad = marked(3, 0); bad.normal.x = NaN;
+    const f = withFloors([marked(2, 3), bad]); rejects(f.heightNormal, 'finite exact source');
+    outputIs(f.output, 3, 'later nonfinite normal retains earlier completed candidate stores');
+  }
+  for (const axis of ['x', 'z', 'y'] as const) for (const value of [NaN, Infinity, -Infinity]) {
+    const bad = marked(200, 0); bad.normal[axis] = value;
+    const f = withFloors([bad]); rejects(f.heightNormal, 'finite exact source');
+    outputIs(f.output, 0, 'nonfinite normal refuses before height-based eligibility filtering');
+  }
+  {
+    const f = withFloors([marked(2, 3)]);
+    f.floor.view.setUint32(f.floor.recordBase + 0x10, 0xffffffff, false);
+    f.floor.view.setUint32(f.floor.recordBase + 0x0c, 0xffffffff, false);
+    rejects(f.heightNormal, `source word changed at 0x${(f.floor.recordBase + 0x0c).toString(16)}`);
+    outputIs(f.output, 0, 'height-normal loads v1Z before v2X, unlike normal-only query');
+  }
+  {
+    const bad = marked(2, 0); bad.normal.x = 1;
+    const f = withFloors([bad]); f.floor.view.setUint32(f.floor.recordBase + 0x2c, 0xffffffff, false);
+    rejects(f.heightNormal, `source word changed at 0x${(f.floor.recordBase + 0x2c).toString(16)}`);
+    outputIs(f.output, 0, 'normal X/Z/Y captures precede first normal arithmetic');
+  }
+  for (const axis of ['x', 'y', 'z'] as const) {
+    const f = withFloors([]); Object.defineProperty(f.output, axis, {writable: false}); f.point.x = NaN;
+    rejects(f.heightNormal, `normal output ${axis}: non-writable`);
+    check(Object.is(f.output.x, axis === 'x' ? 71 : 0) && f.output.y === (axis === 'z' ? 1 : 72) && f.output.z === 73,
+      'initial height-normal stores retain exact X/Y/Z refusal prefix before bounds');
+  }
+  for (const clearance of [0, -10, 100]) {
+    const f = withFloors([marked(clearance === 100 ? 120 : 4, 3)]); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) Object.defineProperty(f.output, 'y', {writable: false});};
+    rejects(() => f.heightNormal(clearance), 'normal output y: non-writable');
+    check(Object.is(f.output.x, -0) && f.output.y === 1 && Object.is(f.output.z, 0),
+      'candidate/minimum/maximum output X survives a Y refusal, with Z left at default');
+  }
+  {
+    const f = withFloors([]); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) Object.defineProperty(f.output, 'x', {writable: false});};
+    rejects(f.heightNormal, 'normal output x: non-writable');
+    outputIs(f.output, 0, 'empty minimum fallback performs real stores instead of returning default success');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); let getterCalled = false;
+    Object.defineProperty(f.output, 'y', {get() {getterCalled = true; return 72;}});
+    rejects(f.heightNormal, 'normal output y: own data property');
+    check(!getterCalled && Object.is(f.output.x, 0) && f.output.z === 73, 'output accessor refuses without invoking it after X prefix');
+  }
+  {
+    const f = withFloors([marked(2, 3)]);
+    for (const output of [vec(1), {...f.output}, Object.create(f.output), f.floor.grid.triangles[0]!.normal])
+      rejects(() => f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, output as SourceActorTerrainNormalOutput), 'fresh branded');
+    for (const output of [f.point, f.actual.pos, f.actual.savedGroundPos])
+      rejects(() => f.runtime.queryHeightNormal8003e0a8(f.id, f.point, 0, output as SourceActorTerrainNormalOutput), 'aliased caller-local');
+    rejects(() => f.runtime.queryHeightNormal8003e0a8(f.id, f.output, 0, f.output), 'aliased caller-local');
+    check(f.point.x === 100 && f.actual.pos.y === 0 && Object.is(f.floor.grid.triangles[0]!.normal.x, -0),
+      'unbranded/known aliases refuse before corrupting source or caller input');
+  }
+  for (const key of ['motion', 'targetCache5e8', 'pos', 'savedGroundPos'] as const) {
+    const f = withFloors([]); f.actual[key] = f.output; f.point.x = 7500;
+    rejects(f.heightNormal, 'aliased caller-local height-normal output adopted');
+    check(f.output.x === 71 && f.output.y === 72 && f.output.z === 73,
+      'branded output adopted as actual vector is rejected before even outside default stores');
+  }
+  for (const where of ['history', 'terrain'] as const) {
+    const f = withFloors([]); f.point.x = 7500;
+    // The canonical history record is sealed, but its scalar storage remains
+    // writable. An object adopted into that slot is an alias, not a scalar read.
+    if (where === 'history') Object.defineProperty(f.prior, 'previousStepHeight6d4', {value: f.output});
+    else Object.defineProperty(f.terrain, 'adoptedOutput', {value: f.output});
+    rejects(f.heightNormal, 'aliased caller-local height-normal output adopted');
+    check(f.output.x === 71 && f.output.y === 72 && f.output.z === 73, 'output adopted by known history/global owner is rejected before stores');
+  }
+  for (const key of ['pos', 'savedGroundPos'] as const) {
+    const f = withFloors([]); f.actual[key] = vec(NaN); f.point.x = 7500;
+    rejects(f.heightNormal, `${key} owner changed`);
+    check(f.output.x === 71 && f.output.y === 72 && f.output.z === 73,
+      'replacement vector identity is reconciled before outside stores without inspecting its numeric fields');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); let getterCalled = false;
+    for (const owner of [f.actual, f.terrain]) Object.defineProperty(owner, 'unreadOwner', {
+      get() {getterCalled = true; throw Error('metadata scan invoked getter');},
+    });
+    check(f.heightNormal() === 2 && !getterCalled, 'output ownership admission reads descriptors without invoking unrelated owner accessors');
+    outputIs(f.output, 3, 'metadata-only ownership check leaves source arithmetic intact');
+  }
+  for (const clearance of [0, -10, 100]) {
+    const f = withFloors([marked(clearance === 100 ? 120 : 4, 3)]); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) f.actual.motion = f.output;};
+    rejects(() => f.heightNormal(clearance), 'aliased caller-local height-normal output adopted');
+    outputIs(f.output, 0, 'adoption after default is rejected before subsequent candidate/minimum/maximum normal stores');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); f.floor.view.setUint32(f.floor.source.cells[0]!.list.sentinelOffset, 0, false);
+    rejects(f.heightNormal, 'source word changed'); outputIs(f.output, 3, 'sentinel refusal retains completed candidate stores');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); f.hooks.replaceActual = true;
+    rejects(f.heightNormal, 'actual RomActor owner changed'); check(f.output.x === 71, 'actual owner refusal precedes output default');
+    f.hooks.replaceActual = false; f.hooks.replaceHistory = true;
+    rejects(f.heightNormal, 'transform history owner changed'); outputIs(f.output, 0, 'history replacement keeps prior default stores');
+    rejects(() => f.runtime.queryHeightNormal8003e0a8(Symbol(), f.point, 0, f.output), 'unknown/non-owned');
+  }
+  {
+    const f = withFloors([marked(2, 3)]); let caught = false;
+    f.hooks.history = () => {try {f.heightNormal();} catch {caught = true;}};
+    rejects(f.heightNormal, 'caught same-runtime reentry'); check(caught, 'nested height-normal query refused');
+    outputIs(f.output, 0, 'caught reentry leaves prior default, never reports success');
+    delete f.hooks.history; check(f.heightNormal() === 2, 'height-normal guard recovers for independent call'); outputIs(f.output, 3, 'independent result succeeds');
+  }
+}
+
+/** Explicit synthetic planes exercise only3e0a8's finite normal domain.
+ * Expected witnesses are fixed binary32 values, not calls to its arithmetic. */
+export function runActorTerrainNonflatHeightNormalQuerySelfTests(): void {
+  const plane = (height: number, nx: number, ny: number, nz: number): TriangleInput =>
+    ({...triangle(height), normal: vec(nx, ny, nz)});
+  const normalIs = (output: SourceActorTerrainNormalOutput, expected: hitBin.StageHitVec3, why: string): void =>
+    check(['x', 'y', 'z'].every(key => Object.is(Reflect.get(output, key), Reflect.get(expected, key))), why);
+  const setup = (triangles: TriangleInput[], upper = 100, lower = -100) => {
+    const f = fixture([], {floor: layer(0x1c, triangles), upper, lower}), output = createSourceActorTerrainNormalOutput();
+    return {...f, output, run: (clearance = 0) => f.runtime.queryHeightNormal8003e0a8(f.id, f.point, clearance, output)};
+  };
+  const defaultNormal = vec(0, 1, 0), tiny = 2 ** -149, largest = Math.fround(3.4028235e38);
+  for (const [nx, ny, nz, expected] of [
+    [1 / 64, 1, 0, 2.4375], [0, 1, 1 / 32, 0.875], [1 / 32, 2, -0, 2.4375],
+    [1 / 32, -2, 0, 5.5625], [1 / 16, -2, -1 / 32, 5.5625],
+    [-0, 2, -0, 4], [-0, -2, 0, 4],
+  ]) {
+    const record = plane(4, nx!, ny!, nz!), f = setup([record]);
+    check(Object.is(f.run(), expected), 'finite X/Z slopes and nonunit/negative Y use the actual plane equation');
+    normalIs(f.output, record.normal, 'normal words are returned unchanged, never normalized or inferred from vertices');
+    check(f.actual.pos.y === 0 && f.actual.savedGroundPos.y === 0 && f.actual.stepHeight === 0 && f.prior.previousStepHeight6d4 === 0,
+      'non-flat query writes no actual/history fields');
+  }
+  {
+    const record = plane(1, 1 - 2 ** -24, 1, 0), f = setup([record]);
+    f.point.x = 1 + 2 ** -23; f.point.z = 0;
+    check(Object.is(f.run(), 0), 'product rounds to -1 before cancellation with vertexY, rather than fusing multiply/add');
+    normalIs(f.output, record.normal, 'cancellation retains the captured non-flat normal');
+  }
+  {
+    const record = plane(1, 2 ** 24, 1, -(2 ** 24)), f = setup([record]);
+    check(f.run() === 1, 'opposite X/Z products cancel before adding the Y product');
+  }
+  for (const test of [
+    {nx: -tiny, ny: 1, x: 1, z: 0, y: 0, result: tiny},
+    {nx: tiny, ny: 1, x: 0.5, z: 0.5, y: -0, result: -0},
+    {nx: 3 * tiny, ny: 1, x: 0.5, z: 0.5, y: -0, result: -2 * tiny},
+    {nx: -tiny, ny: 2, x: 1, z: 0, y: 0, result: 0},
+    {nx: -3 * tiny, ny: 2, x: 1, z: 0, y: 0, result: 2 * tiny},
+    {nx: -tiny, ny: -2, x: 1, z: 0, y: -0, result: -0},
+    {nx: tiny, ny: tiny, x: 1, z: 0, y: 0, result: -1},
+    {nx: -1, ny: 3, x: 1, z: 0, y: 0, result: 0.3333333432674408},
+  ]) {
+    const record = plane(test.y, test.nx, test.ny, 0), f = setup([record]);
+    f.point.x = test.x; f.point.z = test.z;
+    check(Object.is(f.run(), test.result), 'non-flat product/division preserve gradual underflow, ties-even and signed zero');
+    normalIs(f.output, record.normal, 'subnormal normal words remain unchanged');
+  }
+  {
+    // Exact dyadic coefficients give independent plane results4,2,8.
+    const best = plane(5.5625, 1 / 64, 1, 0), min = plane(3.5625, 0, 2, 1 / 32), max = plane(6.4375, 1 / 32, -2, 0);
+    const f = setup([best, min, max]);
+    for (const [clearance, height, normal] of [[0, 4, best.normal], [-10, 2, min.normal], [100, 8, max.normal]] as const) {
+      check(f.run(clearance) === height, 'best/minimum/maximum heights are independent with non-flat normals');
+      normalIs(f.output, normal, 'each accumulator retains its own non-flat normal');
+    }
+  }
+  for (const clearance of [0, -10, 100]) {
+    const first = plane(5.5625, 1 / 64, 1, 0), last = plane(2.4375, 0, -2, 1 / 32), f = setup([first, last]);
+    check(f.run(clearance) === 4, 'equal non-flat plane heights preserve all accumulator modes');
+    normalIs(f.output, last.normal, 'best/minimum/maximum equal heights use the later distinct normal');
+  }
+  for (const [normal, height, expected] of [
+    [vec(largest, 1, 0), 0, 'fmuls result'], [vec(0, 1, largest), 0, 'fmuls result'],
+    [vec(-(2 ** 121), 1, -(2 ** 121)), 0, 'overflow float32'],
+    [vec(1, 2, 0), largest, 'fmuls result'],
+    [vec(-(2 ** 121), 1, 0), largest, 'overflow float32'],
+    [vec(-1, tiny, 0), 0, 'fdivs result'],
+  ] as const) {
+    const prior = plane(2, -0, 1, -0), f = setup([prior, {...triangle(height), normal}]);
+    rejects(f.run, expected);
+    normalIs(f.output, prior.normal, 'later non-flat arithmetic overflow preserves completed earlier candidate stores');
+  }
+  for (const ny of [0, -0]) {
+    const f = setup([plane(200, 1, ny, 1)]);
+    rejects(f.run, 'fdivs zero divisor'); normalIs(f.output, defaultNormal, 'zero Y refuses at division before eligibility');
+    const malformed = setup([plane(0, 1, ny, 1)]);
+    malformed.floor.view.setUint32(malformed.floor.recordBase + 8, 0xffffffff, false);
+    rejects(malformed.run, `source word changed at 0x${(malformed.floor.recordBase + 8).toString(16)}`);
+    const overflow = setup([plane(0, largest, ny, 0)]);
+    rejects(overflow.run, 'fmuls result');
+    check(overflow.output.y === 1, 'prior product overflow precedes zero-denominator refusal');
+  }
+  {
+    const f = setup([plane(0, -(2 ** 121), 1, -(2 ** 121))]);
+    f.floor.view.setUint32(f.floor.recordBase + 8, 0xffffffff, false);
+    rejects(f.run, `source word changed at 0x${(f.floor.recordBase + 8).toString(16)}`);
+    normalIs(f.output, defaultNormal, 'vertexY is loaded before the overflowing XZ addition');
+  }
+  for (const corrupt of [0x30, 0x2c]) {
+    const f = setup([plane(0, largest, 1, 0)]);
+    f.floor.view.setUint32(f.floor.recordBase + corrupt, 0xffffffff, false);
+    rejects(f.run, `source word changed at 0x${(f.floor.recordBase + corrupt).toString(16)}`);
+    normalIs(f.output, defaultNormal, 'all normal captures precede even an overflowing X product');
+  }
+  {
+    const record = plane(4, 1 / 64, -2, -0), f = setup([record]), original = Object.getOwnPropertyDescriptor;
+    const parsed = f.floor.grid.triangles[0]!; let changed = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (owner === parsed.vertices[0] && key === 'y') {
+        changed = true; Object.assign(parsed.normal, vec(NaN));
+        for (const at of [0x28, 0x2c, 0x30]) f.floor.view.setUint32(f.floor.recordBase + at, 0x7fc00000, false);
+      }
+      return original(owner, key);
+    }) as typeof original;
+    try {check(f.run() === 4.78125, 'height uses captured Y even after the original normal storage changes');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(changed, 'normal storage changed only at the later vertexY load');
+    normalIs(f.output, record.normal, 'output reuses captured raw X/Y/Z rather than rereading changed normal storage');
+    rejects(f.run, 'source word changed'); normalIs(f.output, defaultNormal, 'next independent query freshly validates changed source words');
+  }
+  for (const clearance of [0, -10, 100]) for (const axis of ['x', 'y', 'z'] as const) {
+    const record = plane(4, 1 / 64, 2, -1 / 32), f = setup([record]); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) Object.defineProperty(f.output, axis, {writable: false});};
+    rejects(() => f.run(clearance), `normal output ${axis}: non-writable`);
+    normalIs(f.output, vec(axis === 'x' ? 0 : record.normal.x, axis === 'z' ? record.normal.y : 1, 0),
+      'non-flat best/minimum/maximum per-store refusal preserves exact XYZ output prefix');
+  }
+  for (const clearance of [0, -10, 100]) {
+    const record = plane(4, 1 / 64, 2, -1 / 32), f = setup([record]); let histories = 0;
+    f.hooks.history = () => {if (++histories === 2) f.actual.motion = f.output;};
+    rejects(() => f.run(clearance), 'adopted by source owner');
+    normalIs(f.output, defaultNormal, 'adopted non-flat output refuses before later stores');
+  }
+  for (const mode of ['default', 'best', 'minimum', 'maximum'] as const)
+    for (const axis of ['x', 'y', 'z'] as const)
+      for (const fault of ['accessor', 'readonly', 'adoption', 'position'] as const) {
+        const record = plane(mode === 'maximum' ? 120 : 4, 1 / 64, 2, -1 / 32), f = setup([record]);
+        Object.assign(f.output, vec(71, 72, 73));
+        const original = Object.getOwnPropertyDescriptor, position = f.actual.pos, motion = f.actual.motion;
+        let observations = 0, injected = false, setters = 0;
+        Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+          const descriptor = original(owner, key);
+          if (owner === f.output && key === axis && ++observations === (mode === 'default' ? 1 : 2)) {
+            injected = true;
+            if (fault === 'accessor') Object.defineProperty(f.output, axis, {set() {setters++;}, configurable: true});
+            else if (fault === 'readonly') Object.defineProperty(f.output, axis, {writable: false});
+            else if (fault === 'adoption') f.actual.motion = f.output;
+            else f.actual.pos = vec(0);
+          }
+          return descriptor; // Deliberately stale, previously writable data.
+        }) as typeof original;
+        const clearance = mode === 'maximum' ? 100 : mode === 'minimum' ? -10 : 0;
+        try {rejects(() => f.run(clearance), fault === 'accessor' ? 'own data property' : fault === 'readonly' ?
+          'non-writable' : fault === 'adoption' ? 'adopted by source owner' : 'pos owner changed');}
+        finally {Object.getOwnPropertyDescriptor = original;}
+        check(injected && setters === 0, 'late stale-descriptor mutation cannot invoke a setter or hide owner adoption/replacement');
+        const previous = mode === 'default' ? vec(71, 72, 73) : defaultNormal;
+        const expected = mode === 'default' ? defaultNormal : record.normal;
+        for (const key of ['x', 'y', 'z'] as const) {
+          if (fault === 'accessor' && key === axis) continue;
+          const written = ['x', 'y', 'z'].indexOf(key) < ['x', 'y', 'z'].indexOf(axis);
+          check(Object.is(f.output[key], written ? expected[key] : previous[key]),
+            'late output/owner failure retains only the genuine XYZ prefix, including final Z refusal');
+        }
+        f.actual.pos = position; f.actual.motion = motion;
+        Object.defineProperty(f.output, axis, {value: 0, writable: true, configurable: true, enumerable: true});
+        check(Number.isFinite(f.run(clearance)), 'direct query remains usable after repaired independent destination/owner failure');
+        normalIs(f.output, record.normal, 'independent retry freshly captures and writes all normal words');
+      }
+  for (const fault of ['position', 'adoption'] as const) {
+    const record = plane(4, 1 / 64, 2, -1 / 32), f = setup([record]), original = Object.getOwnPropertyDescriptor;
+    let stores = 0, armed = false, injected = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      const descriptor = original(owner, key);
+      if (owner === f.output && key === 'z' && ++stores === 2) armed = true;
+      if (armed && owner === f.actual && key === (fault === 'position' ? 'pos' : 'savedGroundPos')) {
+        armed = false; injected = true;
+        if (fault === 'position') f.actual.pos = vec(0); else f.actual.motion = f.output;
+      }
+      return descriptor;
+    }) as typeof original;
+    try {rejects(f.run, fault === 'position' ? 'pos owner changed' : 'adopted by source owner');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(injected && f.output.x === record.normal.x && f.output.y === record.normal.y && f.output.z === 0,
+      'late mutation inside final owner metadata observation is rechecked intrinsically before the final Z store');
+  }
+  {
+    const record = plane(4, 1 / 64, -2, -0), f = setup([record]); let caught = false;
+    f.hooks.history = () => {try {f.run();} catch {caught = true;}};
+    rejects(f.run, 'caught same-runtime reentry'); check(caught, 'non-flat nested invocation refuses');
+    normalIs(f.output, defaultNormal, 'caught reentry preserves only completed default stores');
+    delete f.hooks.history;
+    check(f.run() === 4.78125, 'direct query remains reusable on an independent invocation');
+    normalIs(f.output, record.normal, 'independent invocation after failure returns genuine non-flat result');
+  }
+  for (const normal of [vec(1 / 64, 1, 0), vec(0, 1, 1 / 64), vec(0, -2, 0)]) {
+    const f = setup([{...triangle(4), normal}]);
+    check(Number.isFinite(f.query()), 'height sibling admits finite non-flat arithmetic independently');
+    check(f.runtime.queryNormal8003de80(f.id, f.point, 0, vec(0)) === 1, 'normal sibling remains a distinct in-range query');
+    check(Number.isFinite(f.run()), 'height-normal non-flat regression remains admitted');
+  }
+}
+
+/** Fixed-report-backed finite siblings. Expected values are explicit synthetic
+ * dyadic witnesses, not calls into the production arithmetic or3e0a8. */
+export function runActorTerrainNonflatSiblingQuerySelfTests(): void {
+  const plane = (height: number, nx: number, ny: number, nz: number): TriangleInput =>
+    ({...triangle(height), normal: vec(nx, ny, nz)});
+  const normalIs = (output: hitBin.StageHitVec3, expected: hitBin.StageHitVec3, why: string): void =>
+    check(['x', 'y', 'z'].every(key => Object.is(Reflect.get(output, key), Reflect.get(expected, key))), why);
+  const setup = (triangles: TriangleInput[], upper = 100, lower = -100) => {
+    const f = fixture([], {floor: layer(0x1c, triangles), upper, lower}), output = vec(71, 72, 73);
+    return {...f, output, normal: (clearance = 0) => f.runtime.queryNormal8003de80(f.id, f.point, clearance, output)};
+  };
+  const defaultNormal = vec(0, 1, 0), tiny = 2 ** -149, largest = Math.fround(3.4028235e38);
+  const nextUp = (value: number): number => {
+    if (value === 0) return tiny;
+    const bytes = new DataView(new ArrayBuffer(4)); bytes.setFloat32(0, value, false);
+    bytes.setUint32(0, bytes.getUint32(0, false) + (value > 0 ? 1 : -1), false);
+    return bytes.getFloat32(0, false);
+  };
+  const numeric = [
+    {y: 4, nx: 1 / 64, ny: 1, nz: 0, x: 100, z: 100, result: 2.4375},
+    {y: 4, nx: 0, ny: 1, nz: 1 / 32, x: 100, z: 100, result: 0.875},
+    {y: 4, nx: 1 / 32, ny: 2, nz: -0, x: 100, z: 100, result: 2.4375},
+    {y: 4, nx: 1 / 32, ny: -2, nz: 0, x: 100, z: 100, result: 5.5625},
+    {y: 4, nx: 1 / 16, ny: -2, nz: -1 / 32, x: 100, z: 100, result: 5.5625},
+    {y: 4, nx: -0, ny: 2, nz: -0, x: 100, z: 100, result: 4},
+    {y: 1, nx: 1 - 2 ** -24, ny: 1, nz: 0, x: 1 + 2 ** -23, z: 0, result: 0},
+    {y: 1, nx: 2 ** 24, ny: 1, nz: -(2 ** 24), x: 100, z: 100, result: 1},
+    {y: 0, nx: -tiny, ny: 1, nz: 0, x: 1, z: 0, result: tiny},
+    {y: -0, nx: tiny, ny: 1, nz: 0, x: 0.5, z: 0.5, result: -0},
+    {y: -0, nx: 3 * tiny, ny: 1, nz: 0, x: 0.5, z: 0.5, result: -2 * tiny},
+    {y: 0, nx: -tiny, ny: 2, nz: 0, x: 1, z: 0, result: 0},
+    {y: 0, nx: -3 * tiny, ny: 2, nz: 0, x: 1, z: 0, result: 2 * tiny},
+    {y: -0, nx: -tiny, ny: -2, nz: 0, x: 1, z: 0, result: -0},
+    {y: 0, nx: tiny, ny: tiny, nz: 0, x: 1, z: 0, result: -1},
+    {y: 0, nx: -1, ny: 3, nz: 0, x: 1, z: 0, result: 0.3333333432674408},
+  ];
+  for (const test of numeric) {
+    const record = plane(test.y, test.nx, test.ny, test.nz), f = setup([record]);
+    f.point.x = test.x; f.point.z = test.z;
+    check(Object.is(f.query(), test.result), '3d6e4 finite slopes/separate rounding/cancellation/underflow/ties/signed zero');
+    f.point.y = test.result; check(f.normal() === 1, '3de80 equal threshold still returns in-range one');
+    normalIs(f.output, defaultNormal, '3de80 strict height threshold excludes exact result, with no minimum fallback');
+    f.point.y = nextUp(test.result); check(f.normal() === 1, '3de80 admits the next binary32 threshold');
+    normalIs(f.output, record.normal, '3de80 returns the unnormalized captured normal above the exact separately rounded result');
+    check(f.actual.pos.y === 0 && f.actual.savedGroundPos.y === 0 && f.actual.stepHeight === 0 && f.prior.previousStepHeight6d4 === 0,
+      'neither sibling creates actor/history state or a persistent result');
+  }
+  {
+    const best = plane(5.5625, 1 / 64, 1, 0), min = plane(3.5625, 0, 2, 1 / 32), max = plane(6.4375, 1 / 32, -2, 0);
+    const f = setup([best, min, max]);
+    for (const [clearance, height, normal] of [[0, 4, best.normal], [-10, 2, defaultNormal], [100, 8, max.normal]] as const) {
+      check(f.query(clearance) === height, '3d6e4 retains independent best/minimum/maximum nonflat heights');
+      f.normal(clearance); normalIs(f.output, normal, '3de80 selects only eligible best and never copies a minimum fallback');
+    }
+  }
+  {
+    const first = plane(5.5625, 1 / 64, 1, 0), last = plane(2.4375, 0, -2, 1 / 32), f = setup([first, last]);
+    for (const clearance of [0, -10, 100]) check(f.query(clearance) === 4, '3d6e4 equal sloped heights keep each accumulator');
+    f.normal(); normalIs(f.output, last.normal, '3de80 later equal-height normal replaces the prior normal');
+    const zeroFirst = plane(-0, tiny, 1, 0), zeroLast = plane(0, -tiny, 2, 0), z = setup([zeroFirst, zeroLast]);
+    z.point.x = 0.5; z.point.z = 0.5;
+    for (const clearance of [0, -10, 100]) check(Object.is(z.query(clearance), 0), '3d6e4 later +0 tie replaces earlier -0 in best/min/max');
+  }
+  {
+    const a = plane(3.5625, 1 / 64, 1, 0), b = plane(11.5625, 1 / 64, 1, 0), c = plane(13.5625, 1 / 64, 1, 0);
+    const f = setup([a, b, c], 10); f.point.y = 20;
+    check(f.query() === 2 && f.query(10) === 12, '3d6e4 strict ceiling excludes equality but original clearance equality selects unfiltered maximum');
+    f.normal(100); normalIs(f.output, a.normal, '3de80 does not acquire the height-query maximum selector');
+  }
+  for (const [upper, lower, clearance, expected] of [[4, -100, -10, -100], [100, 4, 0, 4], [100, 4, -10, 4]] as const) {
+    const record = plane(5.5625, 1 / 64, 1, 0), f = setup([record], upper, lower);
+    check(f.query(clearance) === expected, '3d6e4 nonflat sentinel equality retains its original fallback behavior');
+    f.normal(clearance); normalIs(f.output, clearance === 0 ? record.normal : defaultNormal,
+      '3de80 lower equality is eligible but upper/limit equality has no fallback');
+  }
+  for (const query of ['query', 'normal'] as const) {
+    for (const [normal, height, expected] of [
+      [vec(largest, 1, 0), 0, 'fmuls result'], [vec(0, 1, largest), 0, 'fmuls result'],
+      [vec(-(2 ** 121), 1, -(2 ** 121)), 0, 'overflow float32'],
+      [vec(1, 2, 0), largest, 'fmuls result'], [vec(-(2 ** 121), 1, 0), largest, 'overflow float32'],
+      [vec(-1, tiny, 0), 0, 'fdivs result'],
+    ] as const) {
+      const prior = plane(2, -0, 1, -0), f = setup([prior, {...triangle(height), normal}]);
+      rejects(f[query], expected);
+      if (query === 'normal') normalIs(f.output, prior.normal, 'later arithmetic overflow retains completed earlier candidate stores');
+      check(f.actual.pos.y === 0 && f.actual.savedGroundPos.y === 0, 'arithmetic refusal cannot fabricate actor corrections');
+    }
+    for (const ny of [0, -0]) {
+      const f = setup([plane(200, 1, ny, 1)]); rejects(f[query], 'fdivs zero divisor');
+      if (query === 'normal') normalIs(f.output, defaultNormal, 'zero divisor is reached after defaults and before eligibility');
+      const malformed = setup([plane(0, 1, ny, 1)]);
+      malformed.floor.view.setUint32(malformed.floor.recordBase + 8, 0xffffffff, false);
+      rejects(malformed[query], `source word changed at 0x${(malformed.floor.recordBase + 8).toString(16)}`);
+      const overflow = setup([plane(0, largest, ny, 0)]); rejects(overflow[query], 'fmuls result');
+    }
+    {
+      const f = setup([plane(0, -(2 ** 121), 1, -(2 ** 121))]);
+      f.floor.view.setUint32(f.floor.recordBase + 8, 0xffffffff, false);
+      rejects(f[query], `source word changed at 0x${(f.floor.recordBase + 8).toString(16)}`);
+    }
+    for (const corrupt of [0x30, 0x2c]) {
+      const f = setup([plane(0, largest, 1, 0)]);
+      f.floor.view.setUint32(f.floor.recordBase + corrupt, 0xffffffff, false);
+      rejects(f[query], `source word changed at 0x${(f.floor.recordBase + corrupt).toString(16)}`);
+    }
+    for (const [axis, value] of [['x', NaN], ['z', Infinity], ['y', -Infinity]] as const) {
+      const record = plane(0, 1, 1, 1); record.normal[axis] = value;
+      const f = setup([record]); rejects(f[query], 'finite exact source');
+    }
+    {
+      const f = setup([plane(2, 1 / 64, 1, 0)]);
+      for (const at of [0x0c, 0x10]) f.floor.view.setUint32(f.floor.recordBase + at, 0xffffffff, false);
+      rejects(f[query], `source word changed at 0x${(f.floor.recordBase + (query === 'query' ? 0x0c : 0x10)).toString(16)}`);
+    }
+    {
+      const skipped = {...triangle(88, 700, 700), normal: vec(NaN)}; skipped.vertices[0].y = NaN;
+      const selected = plane(4, 1 / 64, 1, 0), f = setup([skipped, selected]);
+      check(f[query]() === (query === 'query' ? 2.4375 : 1), 'earlier edge rejection leaves malformed nonflat words unread');
+      if (query === 'normal') normalIs(f.output, selected.normal, 'normal scan continues to the real second pointer');
+    }
+    {
+      const record = plane(4, 1 / 64, -2, -0), f = setup([record]), original = Object.getOwnPropertyDescriptor;
+      const parsed = f.floor.grid.triangles[0]!; let changed = false;
+      Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+        if (owner === parsed.vertices[0] && key === 'y') {
+          changed = true; Object.assign(parsed.normal, vec(NaN));
+          for (const at of [0x28, 0x2c, 0x30]) f.floor.view.setUint32(f.floor.recordBase + at, 0x7fc00000, false);
+        }
+        return original(owner, key);
+      }) as typeof original;
+      try {check(f[query]() === (query === 'query' ? 4.78125 : 1), 'both siblings use captured normal words after later vertexY load');}
+      finally {Object.getOwnPropertyDescriptor = original;}
+      check(changed, 'normal mutation occurs at the later vertex-Y load, not before capture');
+      if (query === 'normal') normalIs(f.output, record.normal, '3de80 output never rereads changed normal storage');
+      rejects(f[query], 'source word changed');
+    }
+  }
+  for (const field of ['lower68', 'upper34'] as const) {
+    const f = setup([plane(5.5625, 1 / 64, 1, 0)]), original = Object.getOwnPropertyDescriptor;
+    let reads = 0;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      if (owner === f.terrain && key === field && ++reads === (field === 'lower68' ? 2 : 4))
+        f.terrain[field] = field === 'lower68' ? -99 : 4;
+      return original(owner, key);
+    }) as typeof original;
+    try {check(f.query(-10) === -100, '3d6e4 fallback compares freshly reloaded bounds after scanning, not cached initialization');}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(reads === (field === 'lower68' ? 2 : 4), 'exact reached final lower/upper load count');
+  }
+  for (const query of ['query', 'normal'] as const) for (const firstEdge of [true, false]) {
+    const skipped: TriangleInput = {vertices: firstEdge ? [vec(1, NaN, 1), vec(2, NaN, 3), vec(largest, NaN, largest)] :
+      [vec(largest, NaN, 1), vec(1, NaN, 0), vec(0, NaN, largest)], normal: vec(NaN)};
+    const chosen = plane(4, 1 / 64, 2, 1 / 32), f = setup([skipped, chosen]);
+    f.point.x = 0; f.point.z = 0;
+    check(f[query]() === (query === 'query' ? 4 : 1), 'edge rejection skips later overflowing edge products, as well as malformed plane operands');
+    if (query === 'normal') normalIs(f.output, chosen.normal, 'lazy rejected-edge path still reaches the next actual triangle');
+  }
+  // All six caller stores are separate: defaults precede bounds; candidate
+  // X precedes best-height update, then Y/Z. No new output brand is required.
+  for (const mode of ['default', 'best'] as const) for (const axis of ['x', 'y', 'z'] as const)
+    for (const fault of ['accessor', 'readonly', 'deletion', 'adoption', 'position', 'savedPosition'] as const) {
+      const record = plane(4, 1 / 64, 2, 1 / 32), f = setup([record]);
+      const original = Object.getOwnPropertyDescriptor, position = f.actual.pos, savedPosition = f.actual.savedGroundPos, motion = f.actual.motion;
+      let observations = 0, injected = false, setters = 0;
+      Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+        const descriptor = original(owner, key);
+        if (owner === f.output && key === axis && ++observations === (mode === 'default' ? 1 : 2)) {
+          injected = true;
+          if (fault === 'accessor') Object.defineProperty(f.output, axis, {set() {setters++;}, configurable: true});
+          else if (fault === 'readonly') Object.defineProperty(f.output, axis, {writable: false});
+          else if (fault === 'deletion') Reflect.deleteProperty(f.output, axis);
+          else if (fault === 'adoption') f.actual.motion = f.output;
+          else if (fault === 'position') f.actual.pos = vec(0);
+          else f.actual.savedGroundPos = vec(0);
+        }
+        return descriptor;
+      }) as typeof original;
+      try {rejects(f.normal, fault === 'accessor' || fault === 'deletion' ? 'own data property' : fault === 'readonly' ?
+        'non-writable' : fault === 'adoption' ? 'adopted by source owner' : `${fault === 'position' ? 'pos' : 'savedGroundPos'} owner changed`);}
+      finally {Object.getOwnPropertyDescriptor = original;}
+      check(injected && setters === 0, 'stale destination check cannot conceal changed storage or invoke setter');
+      const previous = mode === 'default' ? vec(71, 72, 73) : defaultNormal, expected = mode === 'default' ? defaultNormal : record.normal;
+      for (const key of ['x', 'y', 'z'] as const) {
+        if ((fault === 'accessor' || fault === 'deletion') && key === axis) continue;
+        const written = ['x', 'y', 'z'].indexOf(key) < ['x', 'y', 'z'].indexOf(axis);
+        check(Object.is(f.output[key], written ? expected[key] : previous[key]), 'late refusal preserves exact XYZ prefix including final Z');
+      }
+      f.actual.pos = position; f.actual.savedGroundPos = savedPosition; f.actual.motion = motion;
+      Object.defineProperty(f.output, axis, {value: 0, writable: true, configurable: true, enumerable: true});
+      check(f.normal() === 1, 'repaired direct normal query admits a later independent invocation');
+      normalIs(f.output, record.normal, 'independent invocation captures and writes the complete genuine normal');
+    }
+  for (const fault of ['position', 'savedPosition', 'adoption'] as const) {
+    const record = plane(4, 1 / 64, 2, 1 / 32), f = setup([record]), original = Object.getOwnPropertyDescriptor;
+    let stores = 0, armed = false, injected = false;
+    Object.getOwnPropertyDescriptor = ((owner: object, key: PropertyKey) => {
+      const descriptor = original(owner, key);
+      if (owner === f.output && key === 'z' && ++stores === 2) armed = true;
+      if (armed && owner === f.actual && key === (fault === 'position' ? 'pos' : 'savedGroundPos')) {
+        armed = false; injected = true;
+        if (fault === 'position') f.actual.pos = vec(0);
+        else if (fault === 'savedPosition') f.actual.savedGroundPos = vec(0);
+        else f.actual.motion = f.output;
+      }
+      return descriptor;
+    }) as typeof original;
+    try {rejects(f.normal, fault === 'adoption' ? 'adopted by source owner' : `${fault === 'position' ? 'pos' : 'savedGroundPos'} owner changed`);}
+    finally {Object.getOwnPropertyDescriptor = original;}
+    check(injected && f.output.x === record.normal.x && f.output.y === record.normal.y && f.output.z === 0,
+      'intrinsic final owner pass catches mutation inside final observed canonical-vector check');
+  }
+  for (const owner of ['actor', 'history', 'terrain'] as const) {
+    const f = setup([]); f.point.x = 7500;
+    if (owner === 'actor') f.actual.motion = f.output;
+    else Object.defineProperty(owner === 'history' ? f.prior : f.terrain, owner === 'history' ? 'previousStepHeight6d4' : 'adopted', {value: f.output});
+    rejects(f.normal, 'adopted by source owner'); normalIs(f.output, vec(71, 72, 73), 'outside normal query still rejects adopted output before defaults');
+  }
+  {
+    const f = setup([plane(4, 1 / 64, 2, 1 / 32)]); let caught = false;
+    f.hooks.history = () => {try {f.normal();} catch {caught = true;}};
+    rejects(f.normal, 'caught same-runtime reentry'); check(caught, 'nonflat normal reentry is poisoned even when caught');
+    normalIs(f.output, defaultNormal, 'reentry retains completed default stores only');
+    delete f.hooks.history; check(f.normal() === 1, 'independent later direct query remains supported');
   }
 }

@@ -1,3 +1,5 @@
+import {flatHalfPrimaryMode0, flatHalfPrimaryWitnesses} from './actor-primary-flat-half-witness.selftest.js';
+import {slopedPrimaryWitnesses, slopedPrimaryOrientation} from './actor-primary-sloped-witness.selftest.js';
 import {hitBin, sourceTerrainGrid} from '@gf/formats';
 import {createRomActor} from './actor.js';
 import {createSourceActorWorldMatrixRuntime, type SourceActorWorldMatrixBinding,
@@ -122,7 +124,7 @@ function copyTarget(f: ReturnType<typeof fixture>, count = 6) {
 }
 // Explicit source cells, including one actual flat floor triangle. The helper
 // owns synthetic source bytes; no StageCollision or normal-success callback.
-function correctionLayer(offset: sourceTerrainGrid.SourceTerrainLayerOffset, floor: boolean) {
+function correctionLayer(offset: sourceTerrainGrid.SourceTerrainLayerOffset, floor: boolean, normal = {x: 0, y: 1, z: 0}) {
   const recordBase = 0x54, bytes = new Uint8Array(recordBase + (floor ? 0x38 : 0));
   const view = new DataView(bytes.buffer), word = (at: number, value: number) => view.setUint32(at, value, false);
   word(0, 0x53544948); word(4, bytes.length); word(8, 500); word(12, 500); word(16, 2); word(20, 2);
@@ -131,11 +133,11 @@ function correctionLayer(offset: sourceTerrainGrid.SourceTerrainLayerOffset, flo
   word(0x38, floor ? 0 : 0xffffffff); word(0x3c, 0xffffffff);
   if (floor) {
     word(recordBase, 7);
-    [0, 0, 0, 0, 0, 500, 500, 0, 0, 0, 1, 0, NaN].forEach((value, i) => view.setFloat32(recordBase + 4 + i * 4, value, false));
+    [0, 0, 0, 0, -500 * normal.z / normal.y, 500, 500, -500 * normal.x / normal.y, 0, normal.x, normal.y, normal.z, NaN].forEach((value, i) => view.setFloat32(recordBase + 4 + i * 4, value, false));
   }
   return sourceTerrainGrid.createSourceTerrainGrid(bytes, hitBin.parseStageHitGrid(bytes), offset);
 }
-function terrainCorrectionFixture(f: ReturnType<typeof fixture>, bind = true) {
+function terrainCorrectionFixture(f: ReturnType<typeof fixture>, bind = true, normal = {x: 0, y: 1, z: 0}) {
   const unsupported = (): never => {throw Error('unrelated animation/setup effect was reached');};
   const dispatch = createSourceActorAnimationDispatchRuntime(f.mapping, f.feedback);
   dispatch.bindActor(f.id, {family1d88: null, shared1d8c: null, marker578: 0, marker1db3: 0});
@@ -155,7 +157,7 @@ function terrainCorrectionFixture(f: ReturnType<typeof fixture>, bind = true) {
   const history = createSourceActorTransformHistoryRuntime({world: f.runtime});
   history.bindActor(f.id, {rotation76: zero(), preRotation1d6a: zero(), previousStepHeight6d4: 0, aimOrigin524: zero()});
   const terrain = createSourceActorTerrainQueryRuntime({world: f.runtime, history,
-    terrain: {floor1c: correctionLayer(0x1c, true), ceiling20: correctionLayer(0x20, false),
+    terrain: {floor1c: correctionLayer(0x1c, true, normal), ceiling20: correctionLayer(0x20, false),
       ceiling24: correctionLayer(0x24, false), upper34: 100, lower68: -100}});
   terrain.bindActor(f.id);
   const hooks: {movement?: () => void; normal?: () => void; replaceMovement?: boolean; result?: unknown} = {};
@@ -201,6 +203,9 @@ function primaryFixture(maxVisits = 4096) {
   return {...f, counts, placement: counts.primary1a14[0]!};
 }
 export function runActorWorldMatrixSelfTests(): void {
+  runActorWorldSlopedPrimaryPlacementSelfTests();
+  runActorWorldFlatHalfPrimaryPlacementSelfTests();
+  runActorWorldSlopedTerrainContinuationSelfTests();
   {
     const f = fixture();
     check(f.runtime.getWorldMatrix(f.id, 0) === f.output(0), 'world lookup returns actual full record without copying');
@@ -396,7 +401,12 @@ export function runActorWorldMatrixSelfTests(): void {
     check(f.output(0)[3] === 0 && f.output(0)[7] === 0 && f.output(0)[11] === -30, 'identity destination store prefix remains actual owner behavior');
   }
   {
-    const f = fixture(); f.actual.pos = {x: 1, y: 2, z: 3};
+    const f = fixture(),original=f.actual.pos;
+    check(f.runtime.getPositionOwner(f.id)===original,'position query returns the already bound canonical owner');
+    const actors=f.runtime.getRetainedActorOwners();
+    check(Object.isFrozen(actors) && actors.includes(f.actual),'actor inventory retains actual actor identities without scalar reads');
+    f.actual.pos = {x: 1, y: 2, z: 3};
+    check(f.runtime.getPositionOwner(f.id)===original,'position ownership query never adopts a replacement');
     rejects(f.update, 'position record changed'); check(f.output(0)[7] === 0, 'replacement of fixed position record refuses after identity');
   }
   {
@@ -1027,5 +1037,381 @@ export function runActorWorldMatrixSelfTests(): void {
     rejects(() => f.runtime.copyActorMatrices(f.id, target.id), 'caught same-runtime reentry');
     check(target.output(0)[7] === -20 && f.state.adjusted1d54.y === 82, 'outer copy keeps completed copy and blocks nested preparation');
     delete f.hooks.copied; f.runtime.copyActorMatrices(f.id, target.id);
+  }
+}
+
+
+/** Compatibility entry point for callers of the former flat-only boundary suite. */
+export function runActorWorldNonflatTerrainBoundarySelfTests(): void {
+  runActorWorldSlopedTerrainContinuationSelfTests();
+}
+
+/** Genuine 4784c -> 3de80 -> 45918 and its descendant continuation. These are
+ * synthetic, explicit source cells, not retail hydration or a normal callback. */
+export function runActorWorldSlopedTerrainContinuationSelfTests(): void {
+  const word = new DataView(new ArrayBuffer(4));
+  const fromBits = (bits: number): number => {word.setUint32(0, bits); return word.getFloat32(0);};
+  const bits = (value: number): number => {word.setFloat32(0, value); return word.getUint32(0);};
+  const normal = {x: 0, y: fromBits(0x3f199999), z: fromBits(0x3f4ccccd)};
+  const prefix = 'identity,translate,correct,scale,copy114,copy1aa4,transform:0,movement,normal:0,orient:1:2:1';
+  const suffix = ',joint:3:0,joint:4:3,joint:2:1,joint:5:1';
+  const finalBits = [0x3f7ffffe, 0, 0, 0x41300000, 0, 0x3f199997, 0xbf4ccccb, 0x41b00000,
+    0, 0x3f4ccccb, 0x3f199997, 0x42040000];
+  const normalizedBits = [0x3f7fffff, 0, 0, 0x41300000, 0x80000000, 0x3f199998, 0xbf4ccccc, 0x41b00000,
+    0x80000000, 0x3f4ccccc, 0x3f199998, 0x42040000];
+  const sameBits = (matrix: number[], expected: number[]): boolean => matrix.every((v, i) => bits(v) === expected[i]);
+  const translated = (initial: number[]): number[] => initial.map((v, i) => i === 3 ? 11 : i === 7 ? 22 : i === 11 ? 33 : v);
+  const unchanged = (a: number[], b: number[]): boolean => a.every((v, i) => Object.is(v, b[i]));
+  {
+    const f = fixture(), g = terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    const matrix = f.output(1), globals = g.terrain.getTerrainGlobals();
+    const queried = {x: 71, y: 72, z: 73};
+    check(g.terrain.queryNormal8003de80(f.id, {x: 11, y: 22, z: 33}, 0, queried) === 1 &&
+      bits(queried.x) === 0 && bits(queried.y) === 0x3f199999 && bits(queried.z) === 0x3f4ccccd,
+      'genuine 3de80 loads the viable raw slope from the owned triangle');
+    f.events.length = 0; f.runtime.rebuildActor(f.id, 1);
+    check(sameBits(matrix, finalBits), 'sloped secondary final basis, translation and Concat zero signs match independent bit witness');
+    check(f.events.join(',') === prefix + suffix, 'sloped secondary completes exactly once before both genuine descendant branches');
+    check(f.output(3)[3] === 13 && f.output(3)[7] === 26 && f.output(3)[11] === 39 && f.output(4)[7] === 34,
+      'sloped current does not replace incoming parent for the side branch');
+    check(sameBits(f.output(2), [0x3f7ffffe, 0, 0, 0x41500000, 0, 0x3f199997, 0xbf4ccccb, 0x419ccccd,
+      0, 0x3f4ccccb, 0x3f199997, 0x421f3333]) &&
+      sameBits(f.output(5), [0x3f7ffffe, 0, 0, 0x41800000, 0, 0x3f199997, 0xbf4ccccb, 0x41800000,
+        0, 0x3f4ccccb, 0x3f199997, 0x4247ffff]),
+      'both continuation matrices consume the actual slope with independently rounded descendant bit witnesses');
+    check(f.runtime.getWorldMatrix(f.id, 1) === matrix && f.runtime.getActualActor(f.id) === f.actual &&
+      g.terrain.getTerrainGlobals() === globals, 'sloped continuation retains actual world, actor, matrix and terrain owners');
+    const before = matrix.slice(), descendants = [f.output(2).slice(), f.output(3).slice()];
+    f.events.length = 0;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'finite estimate proof domain');
+    check(unchanged(matrix, before) && unchanged(f.output(2), descendants[0]!) && unchanged(f.output(3), descendants[1]!) &&
+      f.events.join(',') === prefix, 'a second orientation refuses its reached shrunken incoming norm without replaying descendants');
+  }
+  let accepted = 0;
+  for (const sy of [-1, 1]) for (const sz of [-1, 1]) for (const scale of [0.5, 1, 2, 4, 8]) {
+    const f = fixture(); terrainCorrectionFixture(f, true, {x: 0, y: sy * normal.y, z: sz * normal.z}); bindSecondary(f);
+    f.actual.pos.y = 100; // Keep all signed planes below the real normal-query point.
+    f.output(1)[0] = scale; f.output(1)[5] = scale; f.output(1)[10] = scale;
+    f.runtime.rebuildActor(f.id, 1);
+    const expected = finalBits.map(fromBits); expected[7] = 102;
+    expected[0] = fromBits(0x3f7ffffe) * scale;
+    expected[5] = sy * fromBits(0x3f199997) * scale; expected[6] = -sz * fromBits(0x3f4ccccb) * scale;
+    expected[9] = sz * fromBits(0x3f4ccccb) * scale; expected[10] = sy * fromBits(0x3f199997) * scale;
+    check(unchanged(f.output(1), expected) && f.events.join(',') === prefix + suffix,
+      `signed sloped normal and incoming scale ${sy}/${sz}/${scale} retain genuine continuation`);
+    accepted++;
+  }
+  check(accepted === 20, 'all four slope signs and five positive incoming scales were executed');
+  for (const doubled of [false, true]) {
+    const f = fixture(); terrainCorrectionFixture(f, true, doubled ? {x: 0, y: 2 * normal.y, z: 2 * normal.z} : normal); bindSecondary(f);
+    if (!doubled) {f.output(1)[0] = -1; f.output(1)[5] = -1; f.output(1)[10] = -1;}
+    f.runtime.rebuildActor(f.id, 1);
+    const expected = finalBits.slice();
+    if (!doubled) {expected[0] = 0xbf7ffffe; expected[6] = 0x3f4ccccb; expected[10] = 0xbf199997;}
+    check(sameBits(f.output(1), expected) && f.events.join(',') === prefix + suffix,
+      doubled ? 'doubled raw normal reaches norms 16/4/4 and real descendants' : 'negative incoming basis restores actual positive magnitudes and reference sign');
+  }
+  for (const rejected of [{x: 0, y: Math.fround(0.6), z: Math.fround(0.8)},
+    {x: 1 / 64, y: 1, z: 0}, {x: 0, y: -2, z: 1 / 32},
+    {x: 0, y: normal.y / 2, z: normal.z / 2}, {x: 0, y: normal.y * 4, z: normal.z * 4}]) {
+    const f = fixture(), g = terrainCorrectionFixture(f, true, rejected); bindSecondary(f);
+    const before = translated(f.output(1)), descendant = f.output(3).slice(), globals = g.terrain.getTerrainGlobals();
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'finite estimate proof domain');
+    check(unchanged(f.output(1), before) && unchanged(f.output(3), descendant) && f.events.join(',') === prefix,
+      'unsupported actual computed normalization norm preserves translation only, without guessed normalization or replay');
+    check(g.terrain.getTerrainGlobals() === globals && f.runtime.getActualActor(f.id) === f.actual,
+      'unsupported sloped norm retains actual terrain and actor owners');
+  }
+  {
+    const f = fixture(); terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    // A retained reference parallel to the raw nonflat normal reaches a
+    // near-zero first cross below the authenticated constructor threshold.
+    f.output(1)[0] = 0; f.output(1)[4] = normal.y; f.output(1)[8] = normal.z;
+    const before = translated(f.output(1));
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'fallback construction');
+    check(unchanged(f.output(1), before) && f.events.join(',') === prefix,
+      'degenerate first construction retains only translation and never synthesizes another reference');
+  }
+  {
+    const f = fixture(); terrainCorrectionFixture(f, true, {x: 0, y: normal.y * 2 ** 65, z: normal.z * 2 ** 65}); bindSecondary(f);
+    const before = translated(f.output(1));
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'single product: expected finite source float32');
+    check(unchanged(f.output(1), before) && f.events.join(',') === prefix,
+      'constructor arithmetic overflow is lazy after genuine terrain and translation, with no basis or descendant output');
+  }
+  const order = [0, 4, 8, 1, 5, 9, 2, 6, 10];
+  for (let stop = 0; stop < order.length; stop++) {
+    const f = fixture(); terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    const expected = translated(f.output(1));
+    Object.defineProperty(f.output(1), String(order[stop]), {writable: false});
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'non-writable');
+    for (const index of order.slice(0, stop)) expected[index] = fromBits(normalizedBits[index]!);
+    check(unchanged(f.output(1), expected) && f.events.join(',') === prefix && f.output(3)[7] === -23,
+      `sloped secondary non-writable basis store ${stop} retains exactly its signed-zero column-major prefix`);
+  }
+  for (const index of [3, 7, 11]) {
+    const f = fixture(); terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    Object.defineProperty(f.output(1), String(index), {writable: false});
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'non-writable');
+    check(f.output(1)[3] === (index === 3 ? -11 : 11) && f.output(1)[7] === (index <= 7 ? -21 : 22) &&
+      f.output(1)[11] === -31 && !f.events.includes('movement'),
+      'sloped secondary translation refusal stops before terrain query and retains only earlier stores');
+  }
+  {
+    const f = fixture(); terrainCorrectionFixture(f, true, normal); bindSecondary(f);
+    f.hooks.oriented = () => {try {f.runtime.rebuildActor(f.id, 1);} catch { /* deliberately caught */ }};
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'caught same-runtime reentry');
+    check(sameBits(f.output(1), finalBits) && f.events.join(',') === prefix && f.output(3)[7] === -23,
+      'completed real sloped orientation remains visible while reentry poison prevents any descendant replay');
+  }
+}
+
+// Zero origin is deliberate: RN32(target - MultVec(parent, rawPose)) is the
+// exact independent witness, with no assumed reversibility of target+offset.
+function slopedPrimaryFixture(firstLength = 2) {
+  const f = primaryFixture(), secondLength = firstLength === 2 ? .5 : 1;
+  Object.assign(f.actual.pos, zero()); Object.assign(f.state.offset1dbc, zero());
+  Object.assign(f.pose(1).translation, zero());
+  f.pose(2).translation.y = firstLength; f.pose(3).translation.y = secondLength;
+  f.runtime.prepareActor(f.id); f.runtime.rebuildActor(f.id, 0);
+  // Verify mode0 produced the exact incoming basis too; no fixture reseeding
+  // hides quaternion/Concat signed zeros or substitutes retained world data.
+  for (const i of [1, 2, 3]) {
+    const matrix = f.output(i);
+    check(matrix[3] === 0 && matrix[7] === (i === 1 ? 0 : i === 2 ? firstLength : firstLength + secondLength) && matrix[11] === 0,
+      'real mode0 retained positions provide the measured bone pair');
+    for (const k of [0, 1, 2, 4, 5, 6, 8, 9, 10]) check(Object.is(matrix[k], k % 5 === 0 ? 1 : 0),
+      'mode0 retained basis matches exact independent incoming identity');
+  }
+  const word = new DataView(new ArrayBuffer(4));
+  word.setUint32(0, 0x3f199999); f.placement.y = word.getFloat32(0);
+  word.setUint32(0, 0x3f4ccccd); f.placement.z = word.getFloat32(0); f.placement.x = 0;
+  f.events.length = 0;
+  return f;
+}
+export function runActorWorldSlopedPrimaryPlacementSelfTests(): void {
+  const word = new DataView(new ArrayBuffer(4));
+  const bits = (v: number): number => {word.setFloat32(0, v); return word.getUint32(0);};
+  const same = (matrix: readonly number[], words: readonly number[]) => matrix.every((v, i) => bits(v) === words[i]);
+  const prefix = 'identity,translate,correct,scale,copy114,copy1aa4,primary:1:0';
+  const suffix = ',joint:4:0,joint:5:4,joint:6:1,joint:7:6,joint:3:2';
+  for (const witness of slopedPrimaryWitnesses) {
+    const f = slopedPrimaryFixture(witness.firstLength); f.placement.bend0f = witness.bend;
+    const ownedCurrent = f.runtime.getWorldMatrix(f.id, 1), ownedNext = f.output(2), ownedEnd = f.output(3);
+    let placementCalls = 0;
+    f.hooks.placed = () => {
+      placementCalls++;
+      check(same(ownedCurrent, witness.current) && same(ownedNext, witness.adjacent), 'real world placement exact two Concat matrices');
+      check(same(ownedEnd, witness.retainedEnd), 'retained end unchanged at placement boundary');
+    };
+    f.runtime.rebuildActor(f.id, 1);
+    check(placementCalls === 1 && f.events.join(',') === prefix + suffix, 'sloped primary completes once before genuine branches and skipped-next continuation');
+    check(f.runtime.getWorldMatrix(f.id, 1) === ownedCurrent && f.output(2) === ownedNext && f.output(3) === ownedEnd,
+      'actual live matrix records and handles remain owned');
+    check(f.output(4)[7] === 4 && f.output(5)[7] === 9, 'current side branch retains incoming root parent');
+    check(!same(ownedEnd, witness.retainedEnd), 'later ordinary end traversal really writes end, unlike placement boundary');
+  }
+  {
+    const f = slopedPrimaryFixture();
+    // Physical adjacent matrix2 remains the placement destination, even though
+    // current byte0 selects a different skipped node and raw pose4 is invalid.
+    f.topology(1)[0] = 4; f.topology(1)[1] = 255;
+    f.topology(4)[0] = 255; f.topology(4)[1] = 255;
+    f.pose(4).translation.y = NaN;
+    f.runtime.rebuildActor(f.id, 1);
+    check(f.events.join(',') === prefix && same(f.output(2), slopedPrimaryWitnesses[3]!.adjacent),
+      'physical current+0x30 and raw pose current+1 are independent of topology-selected skipped node');
+  }
+  {
+    const f = slopedPrimaryFixture(1), witness = slopedPrimaryWitnesses.find(w => w.firstLength === 1 && w.bend === 254)!;
+    let changed = false;
+    f.placement.axis0d = 0; f.placement.axis0e = 0; f.placement.bend0f = 0;
+    f.hooks.matrix = id => {
+      if (!changed && id === f.matrixIds[1]) {
+        changed = true;
+        // Current raw pose was captured before destination lookup. Adjacent raw
+        // pose and axes/bend are later live reads, never cached during scan.
+        f.pose(1).translation.y = 99; f.pose(2).translation.y = 1;
+        f.placement.axis0d = 2; f.placement.axis0e = 1; f.placement.bend0f = 254;
+      }
+    };
+    f.hooks.placed = () => {
+      check(same(f.output(1), witness.current) && same(f.output(2), witness.adjacent), 'captured current raw pose and fresh axes/bend survive live callback mutation');
+      f.counts.count1d96 = 0; f.topology(1)[1] = 255; f.topology(2)[0] = 255; f.topology(2)[1] = 255;
+    };
+    f.runtime.rebuildActor(f.id, 1);
+    check(changed && f.events.join(',') === prefix, 'post-placement topology and correction counts are read live');
+  }
+  {
+    const f = slopedPrimaryFixture();
+    f.hooks.matrix = id => {if (id === f.matrixIds[1]) f.pose(2).translation.z = NaN;};
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'primary next.z');
+    check(f.output(1)[0] === 1 && f.output(2)[7] === 2, 'adjacent raw pose failure precedes current translation and basis work');
+  }
+  for (const stop of [0, 4, 8, 1, 5, 9, 2, 6, 10]) {
+    const f = slopedPrimaryFixture(); Object.defineProperty(f.output(1), String(stop), {writable: false});
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'non-writable');
+    check(f.events.join(',') === prefix && f.output(2)[7] === 2, 'world orientation partial-store refusal does not traverse later branches');
+  }
+  {
+    const f = slopedPrimaryFixture(); f.placement.y = Math.fround(.6);
+    f.output(1)[3] = f.output(2)[3] = f.output(3)[3] = 9;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'finite estimate proof domain');
+    check(f.output(1)[3] === 0 && f.output(1)[5] === 1 && f.output(2)[3] === 9 && f.events.join(',') === prefix,
+      'literal .6/.8 refuses reached normalization after raw translation, before basis or traversal');
+    // Standalone world retry is allowed, but restore valid explicit retained
+    // geometry rather than pretending a failed call rolls its stores back.
+    f.output(2)[3] = f.output(3)[3] = 0; word.setUint32(0, 0x3f199999); f.placement.y = word.getFloat32(0);
+    f.events.length = 0; f.runtime.rebuildActor(f.id, 1);
+    check(f.events.join(',') === prefix + suffix, 'fresh world call retries after input repair, without invented frame poison');
+  }
+  for (const stage of ['reentry', 'promise'] as const) {
+    const f = slopedPrimaryFixture();
+    f.hooks.placed = () => {
+      if (stage === 'promise') return Promise.resolve();
+      try {f.runtime.rebuildActor(f.id, 1);} catch { /* deliberately swallowed */ }
+      return undefined;
+    };
+    rejects(() => f.runtime.rebuildActor(f.id, 1), stage === 'reentry' ? 'caught same-runtime reentry' : 'synchronously');
+    check(same(f.output(1), slopedPrimaryOrientation) && same(f.output(2), slopedPrimaryWitnesses[3]!.adjacent) &&
+      same(f.output(3), slopedPrimaryWitnesses[3]!.retainedEnd) && f.events.join(',') === prefix,
+      'same-call poison preserves real completed placement and blocks traversal');
+  }
+  for (const change of ['array', 'record'] as const) {
+    const f = slopedPrimaryFixture(); f.runtime.rebuildActor(f.id, 1);
+    if (change === 'array') f.counts.primary1a14 = [f.placement];
+    else f.counts.primary1a14[0] = {...f.placement};
+    f.events.length = 0;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), change === 'array' ? 'correction storage owner changed' : 'correction slot owner changed');
+    check(!f.events.some(e => e.startsWith('primary:')), 'replaced live correction owner cannot enter placement');
+  }
+  {
+    const f = slopedPrimaryFixture(); f.counts.count1d96 = 2; f.counts.primary1a14.push(f.placement); f.placement.joint0c = 255;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'aliased correction slots');
+    check(!f.events.some(e => e.startsWith('primary:')), 'duplicate record aliases refuse at reached scan slot');
+  }
+  for (const owner of ['mapping', 'pose', 'matrix'] as const) {
+    const f = slopedPrimaryFixture(); let changed = false;
+    const sources = {...f.sources};
+    if (owner === 'mapping') sources.mapping = {getActor: f.mapping.getActor, getLayout(id: symbol) {
+      const original = f.mapping.getLayout(id); return changed ? {...original} : original;
+    }};
+    if (owner === 'pose') sources.feedback = {getPose(id: symbol) {
+      const original = f.feedback.getPose(id); return changed ? {...original} : original;
+    }};
+    if (owner === 'matrix') sources.matrices = {...f.sources.matrices, getMatrix(id: symbol) {
+      const original = f.matrices.getMatrix(id); return changed ? original.slice() : original;
+    }};
+    const runtime = createSourceActorWorldMatrixRuntime(sources);
+    runtime.bindActor(f.id, f.actual, f.state, f.storageInput); runtime.bindCorrectedTraversalState(f.id, f.counts);
+    changed = true;
+    rejects(() => runtime.rebuildActor(f.id, 1), `${owner} owner changed`);
+    check(!f.events.some(e => e.startsWith('primary:')), 'mapping/pose/matrix identity refusal precedes sloped placement');
+  }
+}
+
+function flatHalfPrimaryFixture() {
+  const f = primaryFixture();
+  // The owned mode0 scale produces the basis. Never reseed any matrix.
+  (f.storage.scales15d4[1] as {x: number}).x = 2;
+  f.runtime.prepareActor(f.id); f.runtime.rebuildActor(f.id, 0);
+  const word = new DataView(new ArrayBuffer(4));
+  for (const i of [1, 2, 3]) check(f.output(i).every((v, k) => {
+    word.setFloat32(0, v); return word.getUint32(0) === flatHalfPrimaryMode0[i - 1]![k];
+  }), 'owned X2 mode0 produces exact retained basis/translations without reseeding');
+  check(f.state.adjusted1d54.y === 8 && f.pose(1).translation.y === 10 && f.state.flags48a === 0,
+    'adjusted1d54 differs from raw bank-zero pose with flags48a&6 clear');
+  f.placement.y = 30.5; f.events.length = 0; return f;
+}
+export function runActorWorldFlatHalfPrimaryPlacementSelfTests(): void {
+  const word = new DataView(new ArrayBuffer(4));
+  const bits = (v: number) => {word.setFloat32(0, v); return word.getUint32(0);};
+  const same = (m: readonly number[], w: readonly number[]) => m.every((v, i) => bits(v) === w[i]);
+  const prefix = 'identity,translate,correct,scale,copy114,copy1aa4,primary:1:0';
+  const suffix = ',joint:4:0,joint:5:4,joint:6:1,joint:7:6,joint:3:2';
+  for (const witness of flatHalfPrimaryWitnesses) {
+    const f = flatHalfPrimaryFixture(); f.placement.bend0f = witness.bend;
+    const owned = [f.output(1), f.output(2), f.output(3)]; let calls = 0;
+    f.hooks.placed = () => {
+      calls++;
+      check(same(f.output(1), witness.current) && same(f.output(2), witness.adjacent) && same(f.output(3), witness.retainedEnd),
+        'genuine half world mode0-to-mode1 six-bend exact placement boundary');
+    };
+    f.runtime.rebuildActor(f.id, 1);
+    check(calls === 1 && f.events.join(',') === prefix + suffix, 'half placement followed once by genuine world continuation');
+    check(owned.every((m, i) => m === f.output(i + 1)) && !same(f.output(3), witness.retainedEnd),
+      'world owners persist but continuation really rebuilds end after placement');
+  }
+  {
+    const f = flatHalfPrimaryFixture(); f.topology(1)[0] = 4; f.topology(1)[1] = 255;
+    f.topology(4)[0] = 255; f.topology(4)[1] = 255; f.pose(4).translation.y = NaN;
+    f.runtime.rebuildActor(f.id, 1);
+    check(f.events.join(',') === prefix && same(f.output(2), flatHalfPrimaryWitnesses[3]!.adjacent),
+      'half uses physical adjacency and raw pose2, not skipped topology node4');
+  }
+  {
+    const f = flatHalfPrimaryFixture(); let changed = false;
+    f.placement.axis0d = 0; f.placement.axis0e = 0; f.placement.bend0f = 0; f.placement.y = 99;
+    f.hooks.matrix = id => {if (!changed && id === f.matrixIds[1]) {
+      changed = true; f.pose(1).translation.y = 99;
+      Object.assign(f.placement, {axis0d: 2, axis0e: 1, bend0f: 254, y: 30.5});
+    }};
+    f.hooks.placed = () => {
+      const witness = flatHalfPrimaryWitnesses[1]!;
+      check(same(f.output(1), witness.current) && same(f.output(2), witness.adjacent), 'captured raw current and fresh correction survive late observer mutation');
+      f.counts.count1d96 = 0; f.topology(1)[1] = 255; f.topology(2)[0] = 255; f.topology(2)[1] = 255;
+    };
+    f.runtime.rebuildActor(f.id, 1); check(changed && f.events.join(',') === prefix, 'post-placement topology/counts remain live');
+  }
+  for (const stage of ['reentry', 'promise'] as const) {
+    const f = flatHalfPrimaryFixture();
+    f.hooks.placed = () => {if (stage === 'promise') return Promise.resolve();
+      try {f.runtime.rebuildActor(f.id, 1);} catch { /* deliberately swallowed */ } return undefined;};
+    rejects(() => f.runtime.rebuildActor(f.id, 1), stage === 'reentry' ? 'caught same-runtime reentry' : 'synchronously');
+    check(f.events.join(',') === prefix && same(f.output(1), flatHalfPrimaryWitnesses[3]!.current) &&
+      same(f.output(2), flatHalfPrimaryWitnesses[3]!.adjacent) && same(f.output(3), flatHalfPrimaryMode0[2]!),
+      'half observer poison retains completed placement but prevents continuation');
+    // Fresh genuine mode0 rebuild explicitly restores retained operands.
+    delete f.hooks.placed; f.runtime.rebuildActor(f.id, 0); f.events.length = 0;
+    f.runtime.rebuildActor(f.id, 1); check(f.events.join(',') === prefix + suffix, 'fresh mode0 rebuild supports explicit retry, not frame closure');
+  }
+  for (const scale of [1, 2]) {
+    const f = flatHalfPrimaryFixture();
+    if (scale === 1) {(f.storage.scales15d4[1] as {x: number}).x = 1; f.runtime.rebuildActor(f.id, 0);}
+    else f.placement.y = 32;
+    f.events.length = 0;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), scale === 1 ? 'finite estimate proof domain' : 'positive sine square');
+    check(f.events.join(',') === prefix && f.output(1)[7] === 30 && f.output(2)[7] === 30 && f.output(3)[7] === 30.5,
+      'half negative witnesses stop at reached operation after translation without continuation');
+    check(bits(f.output(1)[0]!) === (scale === 1 ? 0x3f800000 : 0x3ffffffe), 'identity fails before basis while Y2 preserves completed basis');
+  }
+  for (const stop of [0, 4, 8, 1, 5, 9, 2, 6, 10]) {
+    const f = flatHalfPrimaryFixture(); Object.defineProperty(f.output(1), String(stop), {writable: false});
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'non-writable');
+    check(f.events.join(',') === prefix && same(f.output(2), flatHalfPrimaryMode0[1]!), 'half world basis fault blocks next/traversal');
+  }
+  for (const change of ['array', 'record'] as const) {
+    const f = flatHalfPrimaryFixture(); f.runtime.rebuildActor(f.id, 1);
+    if (change === 'array') f.counts.primary1a14 = [f.placement]; else f.counts.primary1a14[0] = {...f.placement};
+    f.events.length = 0;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), change === 'array' ? 'correction storage owner changed' : 'correction slot owner changed');
+    check(!f.events.some(e => e.startsWith('primary:')), 'half replacement correction owner refuses before placement');
+  }
+  {
+    const f = flatHalfPrimaryFixture(); f.counts.count1d96 = 2; f.counts.primary1a14.push(f.placement); f.placement.joint0c = 255;
+    rejects(() => f.runtime.rebuildActor(f.id, 1), 'aliased correction slots');
+  }
+  for (const owner of ['mapping', 'pose', 'matrix'] as const) {
+    const f = flatHalfPrimaryFixture(); let changed = false; const sources = {...f.sources};
+    if (owner === 'mapping') sources.mapping = {getActor: f.mapping.getActor, getLayout(id: symbol) {
+      const original = f.mapping.getLayout(id); return changed ? {...original} : original;}};
+    if (owner === 'pose') sources.feedback = {getPose(id: symbol) {
+      const original = f.feedback.getPose(id); return changed ? {...original} : original;}};
+    if (owner === 'matrix') sources.matrices = {...f.sources.matrices, getMatrix(id: symbol) {
+      const original = f.matrices.getMatrix(id); return changed ? original.slice() : original;}};
+    const runtime = createSourceActorWorldMatrixRuntime(sources);
+    runtime.bindActor(f.id, f.actual, f.state, f.storageInput); runtime.bindCorrectedTraversalState(f.id, f.counts); changed = true;
+    rejects(() => runtime.rebuildActor(f.id, 1), `${owner} owner changed`);
+    check(!f.events.some(e => e.startsWith('primary:')), 'half ownership identity failure before placement');
   }
 }

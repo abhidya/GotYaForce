@@ -8,13 +8,19 @@
  * Index multiplication wraps modulo32; pointer coordinates do not wrap. Negative
  * or overflowing coordinates refuse. Owned canonical cursors can be outside the
  * backing until read. Copies are private and limited to 16MiB (a host bound).
+ * Explicit decoded windows preserve missing coverage rather than zero-filling;
+ * their logical uint32 coordinates may span more than the copied-byte budget.
  * No user getters/iterators are invoked by byte copying. Same-runtime reentry,
  * including caught reentry from a proxy trap, poisons the outer operation. Proxy
  * objects and modified platform intrinsics are outside the host contract. This
  * is offline synthetic-source coverage, not production asset or replay evidence.
  */
+import {copyDecodedByteWindows, readDecodedByteWindow, type OwnedDecodedByteWindow,
+  type SourceDecodedByteWindow, type SourceDecodedByteWindowLimits} from './bounded-byte-windows.js';
+
 export interface SourceAnimationDescriptorBankRuntime {
   createBytes(bytes: Uint8Array): symbol;
+  createByteWindows(windows: readonly SourceDecodedByteWindow[], limits?: SourceDecodedByteWindowLimits): symbol;
   cursorAt(rootBase: symbol, offset: number): symbol;
   cursorOffset(rootBase: symbol, cursor: symbol): number;
   readByte(cursor: symbol, delta?: number): number;
@@ -27,7 +33,8 @@ function integer(value: unknown, min: number, max: number, label: string): numbe
   return value;
 }
 export function createSourceAnimationDescriptorBankRuntime(): SourceAnimationDescriptorBankRuntime {
-  type Backing = {bytes: Uint8Array; cursors: Map<number, symbol>};
+  type Backing = {bytes: Uint8Array; windows?: never; cursors: Map<number, symbol>} |
+    {bytes?: never; windows: readonly OwnedDecodedByteWindow[]; cursors: Map<number, symbol>};
   const roots = new Map<symbol, Backing>();
   const cursors = new Map<symbol, {backing: Backing; offset: number}>();
   let busy = false, poisoned = false;
@@ -61,6 +68,11 @@ export function createSourceAnimationDescriptorBankRuntime(): SourceAnimationDes
   function read(id: unknown, delta: number): number {
     const found = cursor(id), at = found.offset + delta;
     integer(at, 0, 0xffffffff, 'read coordinate');
+    if (found.backing.windows !== undefined) {
+      const value = readDecodedByteWindow(found.backing.windows, at);
+      if (value === undefined) fail(`byte${at}: uncovered decoded byte window`);
+      return value;
+    }
     if (at >= found.backing.bytes.length) fail('byte read out of bounds');
     return found.backing.bytes[at]!;
   }
@@ -80,6 +92,13 @@ export function createSourceAnimationDescriptorBankRuntime(): SourceAnimationDes
       if (length > 16 * 1024 * 1024) fail('16MiB host copy cap exceeded');
       const copy = new Uint8Array(length); Reflect.apply(Uint8Array.prototype.set, copy, [bytes]);
       const backing: Backing = {bytes: copy, cursors: new Map()};
+      const root = intern(backing, 0); roots.set(root, backing); return root;
+    });},
+    createByteWindows(windows: readonly SourceDecodedByteWindow[], limits: SourceDecodedByteWindowLimits = {}): symbol {return guarded(() => {
+      const copies = copyDecodedByteWindows(windows, limits, fail, () => {
+        if (poisoned) fail('caught same-runtime reentry');
+      });
+      const backing: Backing = {windows: copies, cursors: new Map()};
       const root = intern(backing, 0); roots.set(root, backing); return root;
     });},
     cursorAt(rootBase: symbol, offset: number): symbol {return guarded(() => {

@@ -696,3 +696,579 @@ The existing `NeoGredMeleeState.targetDistance760` accessor is also constructed
 over the same actual actor before the prefix and reads its normalized760
 after each input epoch, with no copied distance property or family dispatch.
 This is a concrete existing consumer witness, not activation of that family.
+
+### Bounded stage-boundary lifecycle after the tick prefix
+
+The optional genuine59e58 stage runtime now closes its early-return,
+in-bounds reset and subthreshold signed-counter paths on the existing owner
+graph. The source stage rectangle is explicit on the same DAT_8043625c terrain
+record, independent of collision-grid extents. Actual noClamp6cb remains shared
+with physics extras, world4a1/status272 retain their existing identities, and
+only absent18/6cc receive explicit storage. See
+[stage-boundary evidence](actor-stage-bounds-evidence-2026-11-13.md).
+
+A transition retains reset6cc, actual6cb and conditional272 writes before
+refusing at unimplemented6a750; it does not call approximate cue dispatch.
+A genuine helper return advances the bounded59068 prefix to unsupported685c0.
+Earlier distance/gauge/contact effects and consumed epochs are retained on
+both refusals. Unbound historical59e58 behavior is unchanged.
+
+This does not close source stage hydration, raw-distance production,
+nonzero-support handling, cue/input helpers, the enclosing lifecycle or
+exclusive production activation. Live Battle behavior remains unchanged.
+
+### Genuine cue-reset pair for exclusive stage transitions
+
+The stage helper can now explicitly bind real6a750/6a6fc reset implementations.
+They preserve their independent sentinels and ordered cue/state/phase stores,
+including callback754 null then the existing dispatch1db3 clear. Upper9 is
+always followed by full9 when it genuinely returns, even with sentinel0. A
+complete stage transition reaches685c0 refusal rather than a fabricated tick.
+Late faults retain previous writes and the consumed epoch.
+
+This requires a deliberately exclusive actor: legacy fbPhaseSlots conflates
+full-body phase storage, shotByte1db3 competes with the actual dispatch marker,
+and animState competes with588. Those properties must be absent before binding;
+the runtime never silently migrates them. Normal host/family actors remain
+unchanged and cannot be admitted as though ownership were resolved. The new
+source mapping getters preserve real world/dispatch identity, and tests prove
+the actual marker gate is observed by later explicit setup/playback.
+[Evidence and domain](actor-cue-reset-evidence-2026-11-13.md) remain bounded;
+source input processing, retail table hydration and complete live ownership
+are still required before any production route can be enabled.
+
+### Bounded source input preprocessing after stage/cues
+
+A genuine optional685c0 prefix now advances real68980 through its direction-zero
+or already-latched domain, updates direction-history timers, computes actual
+5bc masked popcount into the retained Borg749 owner, clears actual5d4, and
+refuses the first68b8c input machine. Active direction refuses earlier at the
+first unsupported paired-load/GQR operation. No fake callee or approximate
+browser input adapter closes either boundary.
+
+The actual5d8 field is a halfword, and its annotation/map now avoid overlapping
+cue states5da/5db. Existing actor5b4/5bc/5d4 and Borg749 owners are preserved;
+missing input-history cells require explicit binding. Legacy duplicate fields
+are refused and the browser mash producer is excluded for claimed Borgs.
+[Input evidence and bounds](actor-input-prefix-evidence-2026-11-13.md) document
+source order, retained failures, real graph composition and remaining active
+input machines/charge/hydration/full-lifecycle/production gaps. An absent input
+runtime retains the historical685c0 refusal; ordinary live behavior is not
+activated by these offline bindings.
+
+### First input descriptor machine and explicit GQR4 conversion
+
+The input prefix now accepts an optional genuine first-machine runtime. After
+real preprocessing and5d4 clear it executes68b8c with all three authenticated
+handlers, including the separately callable68c84 leaf omitted from the C
+export. It preserves source timer, mask, state and output-counter ordering,
+then refuses second68b8c at68610. The first descriptor and three dispatch
+addresses are authenticated, but runtime records remain explicit decoded
+owners, not automatic live hydration. See
+[first-machine evidence](actor-input-machine-evidence-2026-11-13.md).
+
+An explicit retained processor record can admit signed8/scale0 GQR4 loads on
+active-direction paths. Both exact conversions then reach unsupported452a0;
+no angle or direction-table result is synthesized. The source initializer is
+now authenticated separately, but it proves neither current register state nor
+HID2/MSR invariance. [GQR evidence](actor-input-gqr-evidence-2026-11-13.md)
+records processor-domain bounds. Absent options preserve historical refusals.
+Full input machines, charge, angle/table hydration, complete lifecycle and
+exclusive production activation remain unfinished.
+
+### Second input machine and bounded axis direction returns
+
+The same genuine machine runtime can now retain a distinct explicit
+`descriptor3904` owner and separate actor bytes618..61b. It executes the existing
+three authenticated handlers with output mask40, preserving first-machine
+state and any earlier mask20. Both real return values advance to the explicit
+third-call refusal at80068628 (descriptor3910, actor+61c, mask80). Missing
+second descriptor preserves the historical80068610 refusal. Equal archived
+first/second descriptor values do not make their owners interchangeable. See
+[second-machine evidence](actor-second-input-machine-evidence-2026-11-13.md).
+
+An additional genuine angular runtime can close only the signed-byte axis
+paths of452a0/8023cb78/80239984 and the actual8b73c direction-table lookup.
+It uses retained explicit constants, direction table and the same processor
+record as the input prefix. Reached GQR0 float spill/load profiles, FPSCR
+rounding/nontrapping control profile and GQR5 signed16/scale0 store profile
+are required, not defaulted. The positive32768 left-axis product saturates
+to32767 before the source low16/index calculation. The runtime then performs
+the actual68980 first/second direction-latch, repeated halfword and timer
+stores, including the second gate's retained-H AND expression. See
+[angular-axis evidence](actor-input-angular-axis-evidence-2026-11-13.md).
+
+This is an offline actor/return projection: opaque FPR/stack and FPSCR status
+updates are excluded, live processor state is not established, and source
+input capture remains absent. The x==1 fast atan call and general non-axis
+atan2 continuation still refuse. Third and later machines, charge, complete
+lifecycle, stage/input/table hydration and exclusive live activation remain
+unfinished. Real graph tests retain consumed epochs, partial writes and
+separate animation/matrix/movement/history cadence; no playable acceptance is
+claimed by these bounded tests.
+
+### Third machine and finite signed-byte diagonal continuation
+
+A distinct optional descriptor3910 and explicit bytes61c..61f now support the
+third genuine68b8c call. Its handler input mask400 is independent of the first
+two descriptors'200; its wrapper ORs80 into the same canonical5d4 after those
+calls. Real return0/1 both reach the fourth-call refusal at80068640,
+descriptor391c, actor+624, mask200. No fourth state or table is defaulted.
+[Third-machine evidence](actor-third-input-machine-evidence-2026-11-13.md)
+authenticates both source snapshots and the discarded return.
+
+The angular runtime additionally accepts an explicit genuine atanRuntime.
+This closes the remaining atan2/atan arithmetic for canonical signed-byte X/Y,
+including the x==1 fast path, all non-axis quadrants and the reached zero
+special case. It uses exact single-rounded binary64 fused operations plus the
+source's separate double divisions/additions/subtractions and interleaved
+constant/table loads. It then performs the existing single-precision rounding,
+GQR5 quantization and direction-table lookup. No host atan/atan2 substitutes
+for these operations. [Finite angular evidence](actor-input-angular-finite-evidence-2026-11-13.md)
+records complete selected source coverage, operand order and the bounded domain.
+
+Atan data, its three numeric tables and processor remain explicit retained
+owners. The joined input graph rejects aliases with actor, Borg, input-machine
+storage and angular tables without preloading unused numeric entries. Missing
+atanRuntime retains the older axis-only refusals. All65536 signed-byte pairs
+are within the new arithmetic projection; arbitrary floating inputs, NaN/Inf,
+negative-zero inputs, full FPSCR/FPR/stack effects and live hardware provenance
+remain excluded. Fourth and later machines, charge, complete lifecycle and
+exclusive production activation are still unfinished. This is source-backed
+offline composition, not a new playable or console-parity claim.
+
+### Fourth input machine and fifth-call boundary
+
+A distinct optional descriptor391c now admits the fourth genuine68b8c call at
+80068640, using explicit actor bytes624..627. The noncontiguous source pointer
+is624, not620; this extension supplies no owner or behavior for620..623.
+[Fourth-machine evidence](actor-fourth-input-machine-evidence-2026-11-14.md)
+authenticates six u16 cells `[1,0,0,1,0x800,0]` and the full selected caller
+span in both existing snapshots. Input mask800 is independent of wrapper
+output mask200. The unchanged three-handler runtime preserves signed timer
+expiry, phase/index/tail stores, lazy selected reads and the existing edge
+bits from the first three calls.
+
+Both actual return0 and return1 advance directly to the fifth-call refusal at
+80068658, descriptor3928, actor+600, mask1. There is no intercall edge clear,
+store or return-dependent branch. Missing descriptor391c retains the earlier
+fourth refusal, and supplying it cannot skip a missing earlier machine. Its
+record remains distinct from every other table and actor/Borg/input/global
+owner, including when aliases are introduced after binding.
+
+The real joined offline setup/animation/world/stage/cue/gauge/input graph now
+reaches this boundary while retaining prior stores and consuming the tick
+epoch on a late failure. The extension does not hydrate runtime tables from
+archives, install defaults or activate Battle. Six later machines, charge,
+source input capture, complete lifecycle and exclusive production activation
+remain unfinished. Passing these checks establishes bounded source-backed
+offline composition, not live gameplay, playability or console parity.
+
+### Fifth input machine and retained sixteen-call pulse
+
+The same genuine machine runtime can now retain a distinct optional
+`descriptor3928` with explicit actor bytes600..603. The
+[fifth-machine evidence](actor-fifth-input-machine-evidence-2026-11-14.md)
+authenticates `[1,0,0,16,0x100,0]` in both existing snapshots: its flags0 handler
+matches canonical5bc input100, while the wrapper ORs output1 into canonical5d4.
+Duration16 is a reached descriptor load, not a new runtime constant or default.
+A fresh successful match leaves tail603 at15 after the actual wrapper decrement.
+Without another match, the next15 calls still contribute output1, then the
+following call contributes none. A new match reloads16 before decrementing.
+Timer/phase expiry and wrapper tail handling remain separate, source-ordered
+operations; no synthesized one-call pulse replaces the retained state.
+
+The actual fifth call at80068658 follows the completed first four wrappers,
+without another edge clear. Either real return reaches the sixth refusal at
+80068670, descriptor3934, actor+604, mask2. Missing fifth retains the former
+fifth refusal; providing it cannot skip an earlier missing machine. Its retained
+array participates in the same cross-owner exclusions without preloading
+unreached descriptor cells. Missing/read-only reached fields retain prior
+machine, preprocessing, stage, cue and gauge stores and consume the tick epoch.
+
+Direct genuine offline graph coverage now includes all16 combinations of the
+four distinct input bits, pulse expiration/retriggering across explicit epochs,
+canonical input negative controls, representative angular/atan paths and
+separate downstream setup/matrix/history cadence. Five later machines, charge,
+source input/global hydration, complete lifecycle and production activation
+remain unfinished. This advances bounded source-backed offline composition;
+it does not establish original-game execution, playable acceptance or parity.
+
+### Sixth input machine and control-gated matching
+
+A distinct optional descriptor3934 and explicit604..607 cells now admit the
+sixth genuine68b8c call at80068670. The
+[sixth-machine evidence](actor-sixth-input-machine-evidence-2026-11-14.md)
+authenticates `[1,4,0,1,0x100,0]` in both snapshots. It shares input100 with the
+fifth descriptor, but flags4 requires canonical controlWord bit40 to be set
+before a new phase2 match. Duration1 produces wrapper output2 and leaves tail607
+at0 after a successful match; fifth duration16 and tail603 remain independent.
+
+The actual handler decrements/stores the timer and tests signed expiry before
+loading flags and control. A clear control40 gate skips5bc, index and mask
+reads. Passing it loads canonical5bc, then the index, then the selected mask.
+The wrapper still consumes a preexisting nonzero tail after either a gated
+handler return or timer expiry, so the control gate must not be incorrectly
+applied to the wrapper output. All earlier stores survive reached failures.
+
+Both sixth returns advance directly to the seventh refusal at80068688,
+descriptor3940, actor+608, mask4. Earlier optional refusals remain in order;
+there is no extra edge clear, seventh state hydration or fabricated success.
+The retained sixth descriptor joins the existing global/actor/Borg/input/
+processor/angle ownership checks. Genuine offline graph tests distinguish the
+fifth retained pulse from sixth control transitions, preserve partial writes
+and consumed epochs, and leave downstream cadence explicit.
+
+Four later input machines, charge, source input/global hydration, complete
+lifecycle and production activation remain unfinished. The new source-backed
+offline composition does not prove live input mapping, original-game execution,
+playability or console parity.
+
+### Seventh input machine and independent input20
+
+A distinct optional descriptor3940 and explicit608..60b cells now admit the
+seventh genuine68b8c call at80068688. The
+[seventh-machine evidence](actor-seventh-input-machine-evidence-2026-11-14.md)
+authenticates `[1,0,0,1,0x20,0]` in both existing snapshots. Flags0 selects
+canonical5bc and performs no control5e0 or status5b4 gate. Input20 is independent
+of fifth/sixth input100 and of the held direction word. A new phase2 match
+clears the phase before loading duration1 and leaves tail60b at0 after the
+wrapper consumes it and ORs output4. No default descriptor, copied sixth gate or physical-button mapping is
+introduced.
+
+Timer decrement/signed expiry, phase1 any-bit progression and retained-tail
+handling still use the same genuine handlers. Existing nonzero tails contribute
+output4 even when the handler expires. Earlier output bits and the fifth long
+tail remain independent. Either seventh return is discarded at80068690 and
+reaches exact eighth refusal800686a0, descriptor394c, actor+60c, mask8, without
+inter-call loads/stores/conditional branches or another edge clear.
+
+The optional record joins actor/Borg/input/processor/angular ownership exclusions
+without eager numeric reads; missing earlier options still refuse in source
+order. Genuine graph tests include all32 combinations of the five distinct
+input bits under both control40 states, canonical-owner negative controls,
+angular/finite-atan routes, independent state and pulse lifetime, partial stores,
+consumed epochs and explicit downstream cadence. Three later input machines,
+charge, source input/global hydration, full lifecycle and production activation
+remain unfinished. This is bounded offline composition, not original execution,
+console parity, physical input capture or playable acceptance.
+
+### Eighth input machine and canonical input40
+
+An optional distinct descriptor394c and explicit60c..60f state now support the
+eighth genuine68b8c call at800686a0. The
+[eighth-machine evidence](actor-eighth-input-machine-evidence-2026-11-14.md)
+authenticates `[1,0,0,1,0x40,0]` in both existing snapshots. Flags0 selects
+canonical5bc40 and performs no controlWord5e0 or status5b4 read. The same numeric
+bit in the control word or held direction word is not interchangeable with
+canonical input40. Seventh input20 and fifth/sixth input100 stay independent.
+
+The genuine handler preserves phase0 entry, signed timer expiry and phase1
+progression. A phase2 match clears the phase before loading duration1, then
+the wrapper consumes tail60f to0 and ORs output8. Existing tails still contribute
+output8 after no-match or expiry. No copied sixth gate, default descriptor,
+eager unrelated word read or physical button mapping is introduced.
+
+Either eighth return is discarded before the exact ninth refusal at800686b8,
+descriptor3958, actor+610, mask10 (hex). There are no inter-call loads, stores or
+conditional branches, and no repeated edge clear. The distinct retained eighth
+array participates in existing actor/Borg/input/processor/angular ownership
+checks. Earlier missing options and failures still stop in source order;
+reached writes survive and the genuine source tick epoch remains consumed.
+
+Offline real-owner graph tests cover all64 combinations of six canonical input
+bits under both control40 states, separate seven/eight low-bit conditions,
+angular paths, independent states/tails, lazy failures, aliases and explicit
+downstream cadence. Two later input machines, charge, original input/global
+hydration, full lifecycle and production activation remain unfinished. This is
+bounded source-backed offline composition, not live input capture, original
+execution, console parity or playable acceptance.
+
+### Ninth input machine and distinct input/output roles
+
+A distinct optional descriptor3958 and explicit610..613 cells now admit the
+ninth genuine68b8c call at800686b8. The
+[ninth-machine evidence](actor-ninth-input-machine-evidence-2026-11-14.md)
+authenticates `[1,0,0,1,0x10,0]` in both existing snapshots. Canonical5bc input10
+and caller output10 are numerically equal here but remain different source
+roles. Matching still reads the retained descriptor mask; changing that supplied
+mask must not change the caller's output10. Held direction10, status5b4 and the
+control word cannot replace canonical5bc. Flags0 reaches no control/status gate.
+
+Ninth uses the unchanged genuine phase handlers, signed timer expiry and
+wrapper suffix. A match clears phase before loading duration1; the wrapper
+consumes tail613 to0 before OR10. Preexisting tails still contribute after
+no-match or expiry. All preceding machine states and outputs remain independent,
+including fifth duration16 and sixth control-gated input100.
+
+Both ninth returns are discarded before exact tenth refusal800686d0,
+descriptor3964, actor+628, mask2000 (hex). The tenth state is noncontiguous:
+caller arguments prove628, not a guessed614 immediately after ninth610..613.
+There are no inter-call loads/stores/conditional branches or additional edge
+clears. No tenth descriptor bytes, state defaults or charge result are supplied.
+
+The ninth record participates in the same retained owner exclusions. Missing
+predecessors, lazy read failures and consumed epochs preserve source order and
+prior effects. Genuine offline graph tests cover all128 canonical input-bit
+combinations under both control40 states, independent nine-machine state/output
+ownership, angular routes, retained partial stores and explicit downstream
+cadence. The tenth machine, charge, original input/global hydration, full
+lifecycle and production activation remain unfinished. This is bounded offline
+composition, not original execution, console parity or playable acceptance.
+
+### Tenth input machine and charge boundary
+
+A distinct optional descriptor3964 and explicit actor bytes628..62b now admit
+the tenth genuine68b8c call at800686d0. The
+[tenth-machine evidence](actor-tenth-input-machine-evidence-2026-11-14.md)
+authenticates `[1,0x10,0,1,0x0f,0]` in both existing snapshots. Flags0x10
+selects **any-bit** matching against canonical5bc, unlike the preceding
+flags0 all-bit machines. Any of the four low input bits suffices; index1's
+zero mask never matches. Flags1/2/4/8 are clear, so the canonical path neither
+substitutes status5b4 nor reads unrelated control/status gates. The caller's
+fixed output0x2000 remains distinct from the retained input mask0x0f.
+
+The unchanged genuine phase handlers preserve signed timer expiry, phase1
+ordering, lazy descriptor reads and partial writes. A phase2 match clears
+phase628 before loading duration1; the wrapper consumes tail62b before ORing
+output2000 into the canonical edge word. Existing tails emit after a miss or
+expiry. All ten state groups and outputs remain independent, including fifth
+duration16 and sixth control-gated input100. State628 is explicit, not a stride
+inference that aliases first-machine614.
+
+Either tenth return is discarded. Without any intervening data loads/stores,
+conditional branch or repeated edge clear, the source calls charge800686f0 at
+800686d8. This is now the precise unsupported boundary. No charge tables,
+clock fields, global gate, sound/effect calls or successful charge result are
+supplied by this checkpoint. Descriptor storage remains bounded to six u16
+cells; the charge helper's independently formed table pointer802d3970 marks
+the next data owner without admitting its contents.
+
+Genuine offline graph tests cover all2048 combinations of predecessor input
+bits and the low nibble under both control40 states, plus any/all mutations,
+zero-mask behavior, independent states/tails, angular paths, reached failures,
+ownership exclusions, consumed epochs and explicit downstream cadence. All ten
+input wrappers are now bounded source-backed components; input/global
+hydration, charge, full actor lifecycle and production activation remain open.
+This is not original execution, console parity or browser-playable acceptance.
+
+### Bounded charge body and genuine input-helper return
+
+The optional genuine `actor-input-charge` runtime now executes the authenticated
+800686f0 global skip and three-slot reset/release/warmup body. Its
+[charge-helper evidence](actor-charge-helper-evidence-2026-11-14.md) represents
+all164 instructions, four constants and two mask tables from both existing
+snapshots, including paired stack save/restore that the C export mislabeled.
+This source-model closure still refuses required sound/effect calls.
+
+Existing owners are borrowed rather than copied: actual actor768/5e0/584/5b4/5d4,
+status6fc, the mapping descriptor4b0 raw8c bytes at indices2f/30/31, and the same
+attribute parameter4ac owner with explicit fields184/188/18c. New status getters
+expose its already-retained mapping and attribute records; charge verifies those
+identities against world, mapping and attribute owners. Only absent58e, six
+warmup/bank floats and654/655 receive explicit copied/sealed actor cells. The
+shared global1829, fixed constants and two three-entry mask arrays are explicit
+borrowed inputs, not inferred runtime hydration. Missing fields remain absent.
+
+Global1829 nonzero genuinely returns before charge scalar reads or writes.
+Otherwise6fc is loaded before768; the optionally multiplied rate is retained.
+Each slot reloads4b0 and its signed move byte. Disabled slots preserve their
+prior state. The action gate precedes58e, resets preserve store order, and a
+release compares readiness before decay. Release reloads unscaled768 after the
+warmup-zero store and uses single-rounded **fnmsubs**, not rounded multiplication
+followed by subtraction. Intermediate negative zero is preserved until the later
+bank reload and +0 clamp, after654 is cleared. Warmup reloads after its increment;
+strict overshoot computes the excess before loading the bank. Constants require
+the authenticated10/+0/1/2 bits only at reached loads. Table words remain live.
+
+Mature-held charging retains the bank increment and654 bit before refusing at
+80068838→800f0104(actor,1,4). No later threshold read/clamp,655 bit or later slot is
+fabricated. A reachable old655 nonzero→zero transition refuses at
+80068960→800061cc(actor,0x14). The source's rising transition at80068944 is
+represented but normally unreachable in this no-effect closure: only stores
+after the refused mature call can set655. No permissive callback supplies it.
+
+The input prefix accepts only the genuine charge runtime with the same actual
+actor, mapping and status records. Charge bindings, global/data/table owners
+join its existing alias checks without preloading source scalar fields.
+Historical no-charge fixtures still refuse at800686d8. With all ten wrappers
+and an admitted charge return,800685c0 now genuinely returns. The outer59068
+prefix then refuses at its exact next call, **800590bc→8005a190**, retaining all
+preceding distance, gauge, cue, input and charge writes and consuming that epoch.
+It does not report a complete tick or implicitly advance animation, movement,
+matrices, history or setup. Raw-input/global hydration, required effects and the
+remaining actor lifecycle still block production and playable acceptance.
+
+### Bounded actor control and real charge-effect continuations
+
+The next optional genuine `actor-control-lifecycle` runtime implements the
+returned-zero domain of8005a190 and both complete readiness leaves8006ab9c/
+8006abb8. The [control/effect evidence](actor-control-effect-evidence-2026-11-14.md)
+authenticates175 instructions across six functions, selected color pointers,
++0, and the sound cue1 pointer/head in both existing snapshots. Anonymous
+function extents are distinguished from explicit symbol-map extents.
+
+Control borrows world.mode4a1/mode4a0/flags48a, status.byte6fc and actual
+controlWord. The status runtime exposes its retained world binding so this
+identity is checked rather than inferred from a matching actor. Only missing
+byte490 and signed shorts49a/49c receive explicit sealed storage. The ordered
+zero gates stay lazy. flags48a==2 takes priority: positive49c decrements and
+returns even when1 becomes0; only a later invocation tests mask91001003.
+The alternate positive49a path decrements before testing readiness with
+mask91001000 when it reaches0; blocked readiness restores1. Bits0/1 distinguish
+the masks. Ready paths stop at8005a204→8006aab0 or8005a25c→8006a980, preserving
+completed timer stores without fabricating transitions, byte489/19 writes or
+returned1. A known incomplete transition prevents later invocations from
+mistaking its partial state for a completed lifecycle. This is an explicit
+model-admission guard, not an added source actor flag or implicit recovery.
+
+After genuine0, the outer tick loads actual ubCue at800590c8, sign-extends and
+scales it by4, then refuses the unresolved802d3300 indexed load at800590e0,
+before indirect dispatch800590e8. It neither guesses a table target nor skips
+to4c8 or5a298. Missing actorControl retains the previous590bc refusal.
+
+The separate optional genuine `actor-charge-effects` runtime implements the
+actual61cc→61f0 channel0 initializer for ready-color indices13/14. It writes
+7df before the constant/table loads, then7ec,7e4,7f7,7f4,7f5,7f6 in source
+order. Explicit pointer words802c36b0/802c36e0 are stored without reading or
+inventing script bodies. This initializes a color script; it does not render
+color, animate the script or perform matrix/voice work.
+
+Its sound operation is the bounded f0104(actor,1,4) keepalive, using actual
+carriedSlot96 with signed-byte interpretation and explicitly shared scheduler
+records. Equal first signed16 values, including different script pointers,
+refresh the actual owner then countdown2, preserving timestamp and script.
+The fixed cue1 pointer is8031b454; the archive's first signed16 is126. Runtime
+script heads are explicitly supplied live source-model records, not an
+assertion that arbitrary overlays were observed in the archive. No active
+record is seeded automatically. A differing head stops at800f0180→800f02d0.
+A null record stores its selected pointer, then stops at800f01a4→80207058;
+no host clock, audio callback or timestamp is substituted. A module-wide
+known-incomplete-record guard prevents that retained pointer from becoming a
+false successful keepalive on a later actor/call. Independent supplied rows
+remain usable; recovery and activation completion are outside this closure.
+
+Only after a genuine sound return does charge reload4ac, bank and threshold,
+clamp a ready bank, then read/OR/store655. It can proceed through all three
+slots and genuinely initialize rising13 or falling14 color transitions.
+Without the effects runtime, historical charge refusals remain unchanged.
+Effect bindings and shared containers/records join input ownership checks
+without scalar preloads; selected parameter/descriptor identities are checked
+only when reached, then retained against later aliases. Prior writes and
+consumed epochs survive every refusal. Cold sound startup, replacement, full
+scheduler/audio lifecycle, color playback, actor transitions, source hydration,
+indirect actor dispatch and production/browser acceptance remain unfinished.
+
+## Bounded ready transitions and post-ready action request (2026-11-14)
+
+The optional genuine ready-transition runtime advances the actual `5a190`
+control caller, rather than installing a host action callback. It borrows the
+same stage `lifecycle18`, world `4a0/4a1/48a`, status `272`, control `490`, and
+actual Borg `hp/maxHp/colorVariant` owners. New partial storage covers only
+otherwise absent transition cells. MaxHP remains raw unsigned16 in its existing
+Borg owner and is sign-extended at the source `lha`; HP is decoded signed16.
+There is no palette or health fallback when a reached input is absent.
+
+The reached `490` transition performs the ordered `6a980` prefix, freshly reads
+`4a0`, and completes only its zero-mode branch. The caller then writes `489=4`
+and `19=3` and genuinely returns1. A nonzero fresh mode preserves the preceding
+writes and refuses at `6aa00 -> 66198`, before ratio arithmetic. The `48a`
+transition executes the straight-line `6aab0` leaf, then the caller reads and
+sign-extends actual team before refusing at `5a218 -> 176ec0`. No allocation or
+sound success is fabricated. Known-incomplete helper/caller guards prevent a
+partial transition from silently turning into a successful later gate return.
+The shared read-only guard also covers direct helper failures before or after
+the helper is attached to control; changing a gate cannot bypass known failure.
+They are model admission checks, not original actor fields or recovery logic.
+
+A genuine returned1 skips the two indirect calls and `59f5c/5a144`, as the
+archived caller requires. It reaches `59110 -> 5a298`. An optional genuine
+action-request runtime implements that helper's special-request branch and
+ordinary early returns using actual `5b4/73f` and world `4a1`, with explicit
+missing `7d2/73c` storage. Its zero-mode active path reads signed actual slot
+and refuses at `5a300 -> 10514`, before input-edge selection. Nonzero mode
+refuses before the `5a34c` pointer508 load: the existing target UID and matrix
+link symbol are not silently compared as if they were one pointer domain.
+A genuine action-request return reaches `59118 -> 5a378` and stops there.
+
+Absent opt-ins preserve earlier refusal boundaries. A genuine returned0 still
+reaches the unresolved signed-cue table load at `590e0`; no table entry or
+indirect target is guessed. The tick wrapper verifies the ready helper's actual
+actor, Borg, stage, world, status, control and transition binding identities
+against the existing graph before consuming source scalar operations. It does
+not permit a new ready runtime to be attached after tick admission.
+
+Fixed instruction evidence and scope are recorded in
+`actor-ready-lifecycle-evidence-2026-11-14.md`. This remains bounded offline
+composition with supplied owners, not original execution, console parity,
+audio/color playback, a complete tick, browser acceptance or playable release.
+
+## Rate lifecycle continuation, 2026-11-14
+
+The optional genuine `actorRates` stage now follows the ready-return branch's
+real `5a298` return in `actor-tick-prefix.ts`. It performs `5a378` on the same
+actor, Borg, world, status and joint-mapping identities. A supported return
+reaches the exact next call `59120 → 68030`, where the bounded caller refuses.
+It does not run the unrelated next C-export function `5a580`, skip the unresolved
+zero-control indirect dispatch, or report a complete tick.
+
+`actor-rate-lifecycle.ts` writes existing `actual.aimRateScale` (+768),
+`actual.timescale` (+5f4) and mapping `timestep1dc8`. The existing Borg owns the
+slow/haste hit timers and aura/hit levels. Status already owns burst byte6fc,
+freeze byte71c and field1dcc. The one new explicit partial cell is field1dd0.
+Legacy actual.dt and Borg.freezeFrames are not fallback sources. Missing
+reached source cells refuse rather than acquire host defaults.
+
+The genuine matrix-update runtime exposes its retained actor/world/mapping
+identities without reading scalar state. Its existing link4a4 is the only
+linked-rate pointer owner. The optional mode2 path resolves it only to an actor
+already admitted to the same rate runtime, then copies the three fields in
+source order. This introduces no browser UID conversion or generic resolver.
+
+The [fixed rate evidence](actor-rate-lifecycle-evidence-2026-11-14.md) covers
+all 130 instructions and only seven selected float cells: the three direct
+constants and positive indices1/2 in each multiplier table. Other nonzero
+signed indices refuse at their actual lookup. This is a supported subset, not
+a proven whole-table extent. Signed timer wrap, byte countdown and two distinct
+single-precision multiplications follow the instructions, including the final
+`(1dcc * 768)` rounding before `1dd0 * product`.
+
+This remains an offline source-owned composition. Existing source status,
+charge and animation consumers can observe these same cells on their next
+explicit invocation; the helper does not move those calls across the source
+schedule. Production still lacks source-owner construction and exclusive
+lifecycle selection. In particular, field1dd0's source producer is the selected
+parameter-tier row in `8006826c`, not a universal multiplier1 or legacy snapshot.
+The bridge's rejection of source-claimed actors remains intact.
+
+## Completed bounded ready branch, 2026-11-14
+
+The optional genuine `ceiling` tail implements `68030` and its three-instruction
+`8b290` callee. It uses the actual actor's support byte, position, `hoverOffset668`
+(already produced by `55dcc`), vertical velocity and saved position; its ceiling
+is the same stage `upper34` used by the existing terrain graph. No floor callback,
+terrain-grid extent, airborne alias or implicit default is substituted.
+
+The newly completed path also reconciles a previously disconnected owner:
+`PTR_DAT_80433934` supplies matrix visibility byte+d2, ceiling gate+d9 and charge
+gate+1829. The matrix runtime exposes its retained global record; the input prefix
+exposes its retained genuine charge runtime. This opt-in path requires strict
+identity agreement between their global records at admission and invocation.
+Equal-valued copies are insufficient. Its fixture explicitly supplies missing
+global fields on that one record before charge construction. Historical paths
+without the ceiling tail retain their previous boundaries and input shape.
+
+`59068` ignores the helper's native0/1 result and returns void at `59134`. The
+bounded ready-return branch now does exactly that when every earlier genuine
+stage and the ceiling tail completes. Its pre59068 raw input epoch is consumed
+on success as well as failure. A subsequent call still follows current source
+control state: it cannot reuse the prior ready decision to skip unresolved
+zero-control dispatch. The optional tail's absence retains the `59120 → 68030`
+refusal. The [ceiling evidence](actor-ceiling-lifecycle-evidence-2026-11-14.md)
+authenticates all44 helper instructions and the exact positive-zero constant.
+
+This is completion of one admitted source function branch, not the surrounding
+actor frame. The caller `55568` still has position snapshot, actor4bc,
+upper/full dispatch, actor4c0, `55ee4` and `5b880` work. No outer work is inserted
+inside `59068` or claimed to have run. Source input production, source-tier row
+hydration (`6826c`), production ownership and browser acceptance remain open.

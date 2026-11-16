@@ -46,6 +46,8 @@ export interface SourceActorJointLayout {
   readonly poses: readonly (readonly symbol[])[];
 }
 export interface SourceActorJointMappingRuntime {
+  getActualFeedback(): SourceJointAnimationFeedbackRuntime;
+  getActualSetup(): Pick<SourceArchiveJointSetupRuntime, 'setupActorJoint'> | undefined;
   createDescriptor(jointMap8c: readonly number[]): symbol;
   getDescriptor(identity: symbol): number[];
   createJointBank(joints: readonly (symbol | null)[]): symbol;
@@ -62,6 +64,10 @@ export interface SourceActorJointMappingRuntime {
   /** 4a754 continuation: caller has already stored poseBuffer35. */
   mapPreparedPart(actor: symbol, partBank: number, partNumber: number, operationFlags: number): void;
   animatePart(actor: symbol, partBank: number, poseBuffer: number, partNumber: number, operationFlags: number): void;
+}
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceActorJointMappingRuntime(value: unknown): value is SourceActorJointMappingRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
 }
 function fail(reason: string): never {
   throw Error(`[actor-joint-mapping] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -221,7 +227,9 @@ export function createSourceActorJointMappingRuntime(joints: SourceJObjAnimation
         }
       } finally {busy = false;}
   };
-  return Object.freeze({
+  const runtime: SourceActorJointMappingRuntime = Object.freeze({
+    getActualFeedback() {return feedback;},
+    getActualSetup() {return setupBinding?.receiver;},
     createDescriptor(initial: readonly number[]): symbol {
       const value = arrayCopy(initial, 128, (v, key) => integer(v, 255, key)), id = Symbol('owned actor descriptor');
       descriptors.set(id, value); return id;
@@ -296,4 +304,5 @@ export function createSourceActorJointMappingRuntime(joints: SourceJObjAnimation
       mapPart(actor, partBank, partNumber, operationFlags, poseBuffer);
     },
   });
+  genuineRuntimes.add(runtime); return runtime;
 }

@@ -8,7 +8,7 @@
  * normal-actor-matrix-evidence-2026-11-13.md / read_archived_normal_matrix_evidence.py
  * and chunk_0005.c:2986–3310,3696–3716. Secondary4784c follows the
  * authenticated read_archived_terrain_orientation_evidence.py span. Its
- * orientation domain is the matrix owner's explicit flat-normal (2,1) subset,
+ * orientation domain is the matrix owner's (2,1), five-computed-norm subset,
  * with no idealized normalization shortcut. Primary47368 follows
  * primary-terrain-placement-evidence-2026-11-13.md and
  * primary-positive-bending-evidence-2026-11-13.md: retained pairs2/.5 or1/1,
@@ -37,6 +37,8 @@
  * cross-actor aliases. Per-access validation and caught-reentry poison are
  * host admission bounds. Failures preserve completed writes, never roll back.
  */
+import {checkActiveSourceActorOrderedInvocation} from './actor-ordered-frame.js';
+import {reserveSourcePointerStorage} from './source-storage-claims.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorJointMappingRuntime} from './actor-joint-mapping.js';
 import type {SourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
@@ -107,10 +109,24 @@ export interface SourceActorWorldMatrixRuntime {
   bindActor(identity: symbol, actual: RomActor, initial: Readonly<SourceActorWorldMatrixBinding>,
     storage: SourceActorWorldMatrixStorage): void;
   getActualActor(identity: symbol): RomActor;
+  /** Retained source matrix runtime, not a replacement transform adapter. */
+  getMatricesRuntime(): SourceActorJointMatrixRuntime;
+  /** Read-only ownership query; source temporary matrices must not alias these. */
+  ownsActorMatrix(identity: symbol): boolean;
+  /** Actual bound matrix records only; no matrix values or source pointers read. */
+  getRetainedMatrixOwners(): readonly object[];
+  /** Same retained mapping header, for identity-preserving composition. */
+  getMappingActor(identity: symbol): object;
   getActorBinding(identity: symbol): SourceActorWorldMatrixBinding;
+  /** Identity-only actual actor inventory, for actor-scoped inline storage. */
+  getRetainedActorOwners(): readonly object[];
+  /** Canonical inline20 vector already retained at binding; no scalar reads. */
+  getPositionOwner(identity: symbol): object;
   /** Live owned record, with lazy element reads left to the caller. */
   getWorldMatrix(identity: symbol, index: number): readonly number[];
   getStorage(identity: symbol): SourceActorWorldMatrixStorage;
+  /** Already retained canonical correction owner, without scalar reads. */
+  getCorrectedTraversalState(identity: symbol): SourceActorCorrectedTraversalState | undefined;
   /** Once-only binding to the actual controller owner; no default scan state. */
   bindCorrectedTraversalState(identity: symbol, actualState: SourceActorCorrectedTraversalState): void;
   /** Once-only late binding, after real movement/terrain owners exist. */
@@ -123,6 +139,10 @@ export interface SourceActorWorldMatrixRuntime {
   copyActorMatrices(sourceIdentity: symbol, targetIdentity: symbol | null): void;
   /** The explicit 46698 caller only; no per-frame deduplication or auto-refresh. */
   updateActor(identity: symbol): void;
+}
+const sourceWorldMatrixRuntimes = new WeakSet<object>();
+export function isSourceActorWorldMatrixRuntime(value: unknown): value is SourceActorWorldMatrixRuntime {
+  return value !== null && typeof value === 'object' && sourceWorldMatrixRuntimes.has(value);
 }
 function fail(reason: string): never {
   throw Error(`[actor-world-matrix] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -148,8 +168,9 @@ function symbol(value: unknown, where: string): symbol {
 export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMatrixSources,
   maxVisits = 4096): SourceActorWorldMatrixRuntime {
   if (!Number.isSafeInteger(maxVisits) || maxVisits < 1) fail('positive safe traversal budget required');
+  const matricesRuntime = own(sources, 'matrices') as SourceActorJointMatrixRuntime;
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');checkActiveSourceActorOrderedInvocation();};
   const read = (record: unknown, key: string): unknown => {const value = own(record, key); check(); return value;};
   const write = (record: unknown, key: string, value: number): void => {
     own(record, key, true); check(); (record as Record<string, unknown>)[key] = value; check();
@@ -262,6 +283,10 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
     // physical matrix base and independently of either topology byte.
     poseId(actor, id, current + 1);
     const nextTranslation = read(actor.poseRecords[current + 1], 'translation');
+    // Primary orientation consumes correction target minus this transformed
+    // RAW pose, including bounded sloped displacement. It never queries the
+    // secondary terrain normal. End is retained only for the second length;
+    // later ordinary traversal may still rebuild it after placement returns.
     effect(primaryPlacement, parent, destination, next, end, local, nextTranslation, correction);
   }
   function secondaryCorrection(actor: Entry, id: symbol, current: number, parentIndex: number, index: number): void {
@@ -400,7 +425,9 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       if (branch >= 0) stack.push({current: branch, parent: frame.parent, afterBranch: false, skipNext: false});
     }
   }
-  return Object.freeze({
+  const runtime: SourceActorWorldMatrixRuntime = Object.freeze({
+    getMatricesRuntime() {return matricesRuntime;},
+    ownsActorMatrix(id: symbol) {return assignedMatrixIds.has(id);},
     bindActor(id: symbol, actual: RomActor, initial: Readonly<SourceActorWorldMatrixBinding>, storage: SourceActorWorldMatrixStorage): void {guard(() => {
       symbol(id, 'actor'); record(actual, 'actual RomActor');
       if (actors.has(id)) fail('world-matrix actor already bound');
@@ -453,6 +480,8 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       const ownedStorage: SourceActorWorldMatrixStorage = Object.freeze({matrices8d4: Object.freeze(matrixIds), copy114, copy1aa4, scratch,
         topology1994: Object.freeze(rows), corrections18d4: Object.freeze(corrections), scales15d4: Object.freeze(scales)});
       const position = record(read(actual, 'pos'), 'actual position');
+      for(const value of matrices.values()) if(!reserveSourcePointerStorage(value))
+        fail('world matrix source storage already claimed');
       actors.set(id, {actual, position, mapping, layout, binding, storage: ownedStorage, matrices,
         poses: Object.freeze(poses), poseRecords: Object.freeze(poseRecords),
         correctionArrays: new Map(), correctionRecords: new Map()});
@@ -460,6 +489,8 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       for (const [matrixId, value] of matrices) {assignedMatrixIds.add(matrixId); assignedMatrixRecords.add(value);}
     });},
     getActorBinding(id: symbol): SourceActorWorldMatrixBinding {return entry(id).binding;},
+    getRetainedActorOwners() {return Object.freeze([...actors.values()].map(e=>e.actual));},
+    getPositionOwner(id: symbol): object {return entry(id).position;},
     getWorldMatrix(id: symbol, index: number): readonly number[] {
       let result!: readonly number[];
       guard(() => {
@@ -469,7 +500,10 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       return result;
     },
     getStorage(id: symbol): SourceActorWorldMatrixStorage {return entry(id).storage;},
+    getRetainedMatrixOwners() {return Object.freeze([...new Set([...actors.values()].flatMap(e=>[...e.matrices.values()]))]);},
+    getCorrectedTraversalState(id: symbol): SourceActorCorrectedTraversalState | undefined {return entry(id).corrected;},
     getActualActor(id: symbol): RomActor {return entry(id).actual;},
+    getMappingActor(id: symbol): object {return entry(id).mapping;},
     bindCorrectedTraversalState(id: symbol, actualState: SourceActorCorrectedTraversalState): void {guard(() => {
       const actor = entry(id);
       if (actor.corrected !== undefined) fail('corrected traversal state already bound');
@@ -515,4 +549,5 @@ export function createSourceActorWorldMatrixRuntime(sources: SourceActorWorldMat
       prepare(actor, id); rebuild(actor, id, 0);
     });},
   });
+  sourceWorldMatrixRuntimes.add(runtime); return runtime;
 }

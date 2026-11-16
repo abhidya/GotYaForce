@@ -3,6 +3,8 @@
  * 46e7c followed by 46bd0(mode1). 46e7c clears its actual scan counts and
  * admits 46ef4 damping (suppression or selector1), 47344 damping/addY, and
  * 47164 no-query exits, genuine query returns and explicit correction stores.
+ * 46f08 admits explicit sentinel/masked scans and exact mandatory spring stores;
+ * eligible nonempty contacts still refuse before their matrix load/query.
  * Other dispatch targets refuse after required argument reads. Without an
  * explicit query owner, 47164 refuses at a reached query. Correction storage
  * must be supplied explicitly; absent storage refuses before stackY/stores.
@@ -13,7 +15,8 @@
  * its base may be null or unbound; selector2 dereferences the actual binding.
  *
  * 47904 admits only its sequential flyer741, byte660 and metadata-high-nibble
- * early returns. Its active body refuses before lifecycle18 or joint12 stores.
+ * early returns. Active47904 admits genuine lifecycle/control clears and null508
+ * heading/damping through shared correction row12; nonnull geometry still refuses.
  * The explicit shared global mask is retained by reference, never defaulted.
  * Mode1's final link invokes the actual 47a2c copy, not target recomputation.
  * Evidence: read_archived_normal_matrix_evidence.py and
@@ -29,7 +32,14 @@
  * checked at each store. Caught reentry poisons the call. Prior work survives
  * refusal, including count clears, damping, matrix rebuilds and partial copies.
  */
+import {isSourceActorStageBoundsRuntime,type SourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
+import {isSourceActorCommandAdmissionRuntime,type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
+import {isSourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
+import {checkActiveSourceActorOrderedInvocation} from './actor-ordered-frame.js';
+import type {SourceBattleOuterGlobalFields} from './battle-global-layout.js';
 import {addSourceFloat32, fusedMultiplyAddSourceFloat32} from './source-float.js';
+import {divideSourceAnimationFloat32} from './actor-animation-transition.js';
+import {isSourceActorAttributeRefreshRuntime, type SourceActorAttributeRefreshRuntime} from './actor-attribute-refresh.js';
 import type {SourceActorTerrainQueryRuntime} from './actor-terrain-query.js';
 import type {SourceActorWorldMatrixRuntime, SourceActorCorrectedTraversalState,
   SourceActorPrimaryTerrainCorrection, SourceActorSecondaryTerrainCorrection} from './actor-world-matrix.js';
@@ -50,7 +60,13 @@ export interface SourceActorMatrixUpdateStorage {
   readonly primary1a14?: readonly Readonly<SourceActorPrimaryTerrainCorrection>[];
   readonly secondary1a94?: readonly Readonly<SourceActorSecondaryTerrainCorrection>[];
 }
-export interface SourceActorMatrixUpdateGlobals {maskD2: number}
+/** The same retained PTR_DAT_80433934 record. Optional cells are established
+ * only by an explicit source-input boundary, never by this constructor. */
+export interface SourceActorMatrixUpdateGlobals extends SourceBattleOuterGlobalFields {
+  /** Explicit scheduler high-group mask on this same global owner. */
+  maskD1?: number;
+  maskD2: number; byteD9?: number; byte1829?: number; byte1f?: number; byte45?: number;
+}
 export interface SourceActorMatrixUpdateSources {
   world: Pick<SourceActorWorldMatrixRuntime, 'getActualActor' | 'getActorBinding' |
     'getWorldMatrix' | 'bindCorrectedTraversalState' | 'prepareActor' | 'rebuildActor' | 'copyActorMatrices'>;
@@ -59,13 +75,28 @@ export interface SourceActorMatrixUpdateSources {
   mapping: Pick<SourceActorJointMappingRuntime, 'getActor'>;
   /** Optional explicit source query owner. Unreached query paths do not need it. */
   terrain?: Pick<SourceActorTerrainQueryRuntime, 'query8003d6e4'>;
+  /** Optional genuine shared674 owner; required only when46f08 reaches its load. */
+  attributes?: SourceActorAttributeRefreshRuntime;
   /** The actual battle-global record, not a copied mask or a callback. */
   globals: SourceActorMatrixUpdateGlobals;
 }
 export interface SourceActorMatrixUpdateRuntime {
+  /** Once-only metadata join before execution, for later-constructed attribute owner. */
+  bindAttributesRuntime(attributes: SourceActorAttributeRefreshRuntime): void;
+  /** Genuine shared18/508 owners; metadata-only once before execution. */
+  bindActiveCorrectionSources(stage: SourceActorStageBoundsRuntime, commands?: SourceActorCommandAdmissionRuntime): void;
   bindActor(identity: symbol, initial: Readonly<SourceActorMatrixUpdateInitial>, storage?: SourceActorMatrixUpdateStorage): void;
   getActorBinding(identity: symbol): SourceActorMatrixUpdateBinding;
+  /** Retained owner identities for source lifecycle composition; no scalar reads. */
+  getActualActor(identity: symbol): object;
+  getWorldBinding(identity: symbol): object;
+  getMappingActor(identity: symbol): object;
+  getGlobals(): SourceActorMatrixUpdateGlobals;
   updateActor(identity: symbol): void;
+}
+const runtimes = new WeakSet<object>();
+export function isSourceActorMatrixUpdateRuntime(value: unknown): value is SourceActorMatrixUpdateRuntime {
+  return value !== null && typeof value === 'object' && runtimes.has(value);
 }
 // Archived ProgramDB bytes at802d0d60, all16 entries reachable by selector&15.
 const DISPATCH = Object.freeze([
@@ -101,8 +132,18 @@ function record(value: unknown, where: string): object {
   return value;
 }
 export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixUpdateSources): SourceActorMatrixUpdateRuntime {
-  let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  let busy = false, poisoned = false, executed = false;
+  let attributes: SourceActorAttributeRefreshRuntime | undefined;
+  let activeStageRuntime: SourceActorStageBoundsRuntime | undefined, activeCommands: SourceActorCommandAdmissionRuntime | undefined;
+  const worldSource=own(sources,'world');
+  const attributeField = Reflect.getOwnPropertyDescriptor(sources, 'attributes');
+  if (attributeField !== undefined) {
+    const value = own(sources, 'attributes');
+    if (!isSourceActorAttributeRefreshRuntime(value)) fail('genuine attribute674 owner required');
+    attributes = value;
+  }
+  const nativeDescriptor = Reflect.getOwnPropertyDescriptor;
+  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');checkActiveSourceActorOrderedInvocation();};
   const read = (value: unknown, key: string): unknown => {const result = own(value, key); check(); return result;};
   const write = (value: unknown, key: string, next: number): void => {
     own(value, key, true); check(); (value as Record<string, unknown>)[key] = next; check();
@@ -140,7 +181,156 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
     if (actual !== expected) fail(`${name} owner changed its actual record`);
     return actual;
   };
-  return Object.freeze({
+  const attributeRows = new Map<symbol, object>();
+  const springOwners = (id: symbol, actor: Entry): object[] => {
+    stable(getActual, id, actor.actual, 'actual'); stable(getWorld, id, actor.world, 'world');
+    stable(getMovement, id, actor.movement, 'movement'); stable(getMetadata, id, actor.metadata, 'metadata');
+    stable(getMapping, id, actor.mapping, 'mapping');
+    const owner = attributes;
+    if (!isSourceActorAttributeRefreshRuntime(owner)) fail('46f08 genuine shared attribute674 owner required');
+    if (attributeField !== undefined && read(sources, 'attributes') !== owner) fail('attribute674 runtime changed');
+    if (attributeField === undefined && Object.getOwnPropertyDescriptor(sources,'attributes') !== undefined) fail('competing attribute674 source owner');
+    check();
+    if (owner.getActualActor(id) !== actor.actual || owner.getMappingActor(id) !== actor.mapping ||
+        owner.getMovementBinding(id) !== actor.movement) fail('46f08 attribute674 canonical owner differs');
+    check();
+    const state = record(owner.getActorBinding(id), 'attribute674 binding'); check();
+    const previous = attributeRows.get(id); if (previous && previous !== state) fail('attribute674 binding changed');
+    attributeRows.set(id, state);
+    const records = [actor.actual, actor.world, actor.movement, actor.metadata, actor.mapping, actor.binding, state];
+    if (new Set(records).size !== records.length) fail('46f08 canonical source owner alias');
+    const aliases=(value:object):string[]=>[
+      ...(value===state?[]:['field674']), 'stepThreshold674','field674Alias','1652',
+      ...(value===actor.binding?[]:['field1d60']), 'spring1d60','field1d60Alias','7520',
+    ];
+    for (const value of records) for (const key of aliases(value)) {
+      if (Object.getOwnPropertyDescriptor(value,key) !== undefined) fail(`46f08 competing674 or spring owner:${key}`);check();
+    }
+    for (const value of records) for (const key of aliases(value))
+      if (nativeDescriptor(value,key) !== undefined) fail(`46f08 competing674 or spring owner:${key}`);
+    check(); return records;
+  };
+  const runSpringSentinel = (id: symbol, actor: Entry, descriptorId: symbol | null): void => {
+    // 46f08 entry operands precede even the first descriptor sentinel.
+    const bits = byte(stable(getMetadata,id,actor.metadata,'metadata'),'byte1d99');
+    const scale = float(read(stable(getActual,id,actor.actual,'actual'),'modelScale'),'modelScale');
+    const root = record(getMatrix(id,0),'root matrix8f0');
+    if (!Array.isArray(root) || read(root,'length') !== 12) fail('46f08 full root matrix required');
+    float(read(root,'7'),'root matrix8f0');
+    float(read(stable(getMovement,id,actor.movement,'movement'),'field670'),'field670');
+    // Selected constants0,2 and conversion-double are exact; nibble conversion
+    // is exact. Both multiplications remain separate source f32 round sites.
+    float(Math.fround(Math.fround(2 * (bits & 15)) * scale),'46f08 threshold');
+    let descriptor: object | undefined;
+    for (let i=0;i<4;i++) {
+      const current=record(getDescriptor(descriptorId),'46f08 movement descriptor');
+      if (descriptor !== undefined && descriptor !== current) fail('46f08 descriptor owner changed');
+      descriptor=current;
+      const first=byte(current,['joint22','joint2a','joint32','joint3a'][i]!);
+      if ((first<<24>>24)===-1) break;
+      const liveBits=byte(stable(getMetadata,id,actor.metadata,'metadata'),'byte1d99')<<24>>24;
+      if ((liveBits & (1 << (i+6))) !== 0) continue;
+      fail('46f08 reached unsupported nonempty contact matrix load before8003d6e4');
+    }
+    const records=springOwners(id,actor), attribute=records[6]!;
+    const limit=float(read(attribute,'field674'),'field674');springOwners(id,actor);
+    let adjustment=0;
+    if (adjustment < -limit) adjustment=-float(Math.fround(limit*0.125),'46f08 minimum');
+    const divisor=float(read(stable(getActual,id,actor.actual,'actual'),'modelScale'),'modelScale');
+    const division=divideSourceAnimationFloat32(adjustment,divisor);check();
+    const old=float(read(actor.binding,'field1d60'),'field1d60');
+    const next=float(Math.fround(fusedMultiplyAddSourceFloat32(3,old,division)*0.25),'46f08 spring result');
+    const store=(owner:object,key:string,value:number):void=>{
+      springOwners(id,actor);own(owner,key,true);check();springOwners(id,actor);
+      const field=nativeDescriptor(owner,key);
+      if (!field || !('value' in field) || !field.writable) fail(`${key}: live writable source cell required`);
+      (owner as Record<string,unknown>)[key]=value;check();
+    };
+    store(actor.binding,'field1d60',next);
+    const adjusted=record(read(stable(getWorld,id,actor.world,'world'),'adjusted1d54'),'adjusted1d54');
+    const y=float(read(adjusted,'y'),'adjusted1d54.y');
+    // Source keeps the newly stored spring value in f1; do not reload1d60.
+    store(adjusted,'y',addSourceFloat32(y,next));
+  };
+  const activeStages=new Map<symbol,object>(),activeCommandRows=new Map<symbol,object>();
+  const activeStorage=new Map<symbol,object>(),activeRows=new Map<symbol,object>();
+  const stage18=(id:symbol,actor:Entry):object=>{
+    const stage=activeStageRuntime;
+    if(!isSourceActorStageBoundsRuntime(stage))fail('47904 active body requires genuine lifecycle18 owner');
+    if(stage.getActualActor(id)!==actor.actual||stage.getWorldBinding(id)!==actor.world)fail('47904 lifecycle18 canonical owner differs');
+    check();const row=record(stage.getActorBinding(id),'47904 stage owner');check();
+    if(activeStages.has(id)&&activeStages.get(id)!==row)fail('47904 stage binding changed');activeStages.set(id,row);return row;
+  };
+  const command508=(id:symbol,actor:Entry):object=>{
+    const commands=activeCommands;
+    if(!isSourceActorCommandAdmissionRuntime(commands))fail('66580 genuine shared command508 owner required');
+    if(commands.getActualActor(id)!==actor.actual||commands.getWorldBinding(id)!==actor.world||commands.getMappingActor(id)!==actor.mapping)
+      fail('66580 command508 canonical owner differs');check();
+    const row=record(commands.getActorBinding(id),'command508 binding');check();
+    if(activeCommandRows.has(id)&&activeCommandRows.get(id)!==row)fail('command508 owner changed');activeCommandRows.set(id,row);return row;
+  };
+  const correctionGuard=(id:symbol,actor:Entry):void=>{
+    stable(getActual,id,actor.actual,'actual');stable(getWorld,id,actor.world,'world');
+    stable(getMovement,id,actor.movement,'movement');stable(getMapping,id,actor.mapping,'mapping');stable(getMetadata,id,actor.metadata,'metadata');
+    const stage=stage18(id,actor),command=activeCommandRows.get(id);
+    if(command&&command508(id,actor)!==command)fail('command508 binding changed');
+    const records=[actor.actual,actor.world,actor.movement,actor.mapping,actor.metadata,actor.binding,stage,...(command?[command]:[])];
+    const row=activeRows.get(id);if(row)records.push(row);
+    if(new Set(records).size!==records.length)fail('47904 canonical source owner alias');
+    const aliases=(o:object):string[]=>['field191c','field191e','short191c','short191e','6430','6428',
+      ...(o===stage?[]:['lifecycle18']),...(o===command?[]:['pointer508'])];
+    for(const o of records)for(const key of aliases(o)){if(Object.getOwnPropertyDescriptor(o,key)!==undefined)fail(`47904 competing source cell:${key}`);check();}
+    for(const o of records)for(const key of aliases(o))if(nativeDescriptor(o,key)!==undefined)fail(`47904 competing source cell:${key}`);
+    check();
+  };
+  const correction12=(id:symbol,actor:Entry):object=>{
+    if(read(sources,'world')!==worldSource||!isSourceActorWorldMatrixRuntime(worldSource))fail('47904 genuine world correction storage required');
+    if(worldSource.getActualActor(id)!==actor.actual||worldSource.getActorBinding(id)!==actor.world)fail('47904 actual world differs');check();
+    const storage=record(worldSource.getStorage(id),'47904 world storage');check();
+    if(activeStorage.has(id)&&activeStorage.get(id)!==storage)fail('47904 correction storage changed');activeStorage.set(id,storage);
+    const rows=read(storage,'corrections18d4');if(!Array.isArray(rows)||integer(read(rows,'length'),32,'correction count')<=12)fail('47904 explicit canonical correction row12 required');
+    const row=record(read(rows,'12'),'47904 correction12');
+    if(activeRows.has(id)&&activeRows.get(id)!==row)fail('47904 correction12 changed');activeRows.set(id,row);correctionGuard(id,actor);return row;
+  };
+  const runActiveCorrection=(id:symbol,actor:Entry):void=>{
+    const signedHalf=(o:object,key:string):number=>{const n=read(o,key);if(typeof n!=='number'||!Number.isInteger(n)||n < -32768||n>32767)fail(`${key}: signed correction halfword required`);return n;};
+    const heading=():number=>(integer(read(stable(getActual,id,actor.actual,'actual'),'heading'),65535,'heading')<<16)>>16;
+    const store=(key:'x'|'y',value:number):void=>{
+      const row=correction12(id,actor);own(row,key,true);check();
+      if(correction12(id,actor)!==row)fail('47904 destination changed');
+      const field=nativeDescriptor(row,key);if(!field||!('value'in field)||!field.writable)fail(`${key}: live writable correction required`);
+      (row as Record<string,unknown>)[key]=value;check();
+    };
+    const life=byte(stage18(id,actor),'lifecycle18');correctionGuard(id,actor);
+    if(life!==1||(integer(read(actor.actual,'controlWord'),0xffffffff,'controlWord')&0x01000000)!==0){store('y',0);store('x',0);}
+    const target=read(command508(id,actor),'pointer508');correctionGuard(id,actor);
+    if(target!==null){record(target,'pointer508');fail('66580 nonnull508 target position50c/514 path remains unsupported');}
+    const result=heading(),delta=((result-heading())<<16)>>16;
+    if(delta<0x5000&&delta>-0x5000&&(integer(read(actor.actual,'controlWord'),0xffffffff,'controlWord')&3)===0){
+      // Exact6c728(actor,0,12,3,2,1). Its own fresh508 load is mandatory.
+      const next=read(command508(id,actor),'pointer508');correctionGuard(id,actor);
+      if(next!==null){record(next,'pointer508');fail('6c728 reached unsupported nonnull508 geometry at8006c7c0');}
+    }
+    // Both branches use separately authenticated equal f32 constants; only
+    // the helper branch performs the extra508 load above. Source converts each
+    // signed halfword to f32, fmuls, fctiwz, then stores before reading next.
+    const x=signedHalf(correction12(id,actor),'x');correctionGuard(id,actor);
+    store('x',Math.trunc(Math.fround(x*0.9599999785423279))|0);
+    const y=signedHalf(correction12(id,actor),'y');correctionGuard(id,actor);
+    store('y',Math.trunc(Math.fround(y*0.9599999785423279))|0);
+  };
+  const runtime: SourceActorMatrixUpdateRuntime = {
+    bindActiveCorrectionSources(stage,commands):void {guard(()=>{
+      if(executed||activeStageRuntime!==undefined)fail('47904 source join must be once before execution');
+      if(!isSourceActorStageBoundsRuntime(stage))fail('47904 genuine stage runtime required');
+      if(commands!==undefined&&!isSourceActorCommandAdmissionRuntime(commands))fail('47904 genuine command runtime required');
+      activeStageRuntime=stage;activeCommands=commands;
+    });},
+    bindAttributesRuntime(owner): void {guard(() => {
+      if (executed || attributes !== undefined) fail('attribute674 owner join must be once before execution');
+      if (!isSourceActorAttributeRefreshRuntime(owner)) fail('genuine attribute674 owner required');
+      attributes=owner;
+    });},
     bindActor(id: symbol, initial: Readonly<SourceActorMatrixUpdateInitial>, storage?: SourceActorMatrixUpdateStorage): void {guard(() => {
       if (typeof id !== 'symbol') fail('actual actor symbol required');
       if (actors.has(id)) fail('matrix-update actor already bound');
@@ -177,7 +367,12 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
       actors.set(id, {actual, position, world, movement, metadata, mapping, binding}); assignedActors.add(actual);
     });},
     getActorBinding(id: symbol): SourceActorMatrixUpdateBinding {return entry(id).binding;},
+    getActualActor(id: symbol) {return entry(id).actual;},
+    getWorldBinding(id: symbol) {return entry(id).world;},
+    getMappingActor(id: symbol) {return entry(id).mapping;},
+    getGlobals() {return globals as SourceActorMatrixUpdateGlobals;},
     updateActor(id: symbol): void {guard(() => {
+      executed = true;
       const actor = entry(id), state = actor.binding;
       if (byte(stable(getWorld, id, actor.world, 'world'), 'mode4a0') === 2) return;
       effect(prepare, id);
@@ -193,7 +388,8 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
         // The computed +22 pointer is not dereferenced by46ef4. Do not demand
         // descriptor storage or fabricate its contents for arithmetic alone.
         const handler = selector === null ? 0x80046ef4 : DISPATCH[selector]!;
-        if (handler !== 0x80046ef4 && handler !== 0x80047164 && handler !== 0x80047344) fail(`46e7c handler ${handler.toString(16)} is outside the bounded damping domain`);
+        if (handler !== 0x80046f08 && handler !== 0x80046ef4 && handler !== 0x80047164 && handler !== 0x80047344) fail(`46e7c handler ${handler.toString(16)} is outside the bounded damping domain`);
+        if (handler === 0x80046f08) runSpringSentinel(id,actor,descriptorId);
         if (handler === 0x80047164) {
           const initialBits = byte(stable(getMetadata, id, actor.metadata, 'metadata'), 'byte1d99');
           const clearance = float(read(stable(getMovement, id, actor.movement, 'movement'), 'field670'), 'field670');
@@ -275,6 +471,7 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
             }
           }
         }
+        if (handler !== 0x80046f08) {
         const old = float(read(state, 'field1d60'), 'field1d60');
         // A product of finite binary32 operands is exact in binary64 before
         // this one RN-even rounding, including signed zero and subnormals.
@@ -286,13 +483,14 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
           const velocity = float(read(state, 'field1d60'), 'field1d60');
           write(adjusted, 'y', float(addSourceFloat32(y, velocity), 'adjustedY sum'));
         }
+        }
         effect(rebuild, id, 1);
       }
       const actual = stable(getActual, id, actor.actual, 'actual RomActor');
       const visibility = byte(actual, 'visibilityBit'), mask = byte(globals, 'maskD2');
       if ((visibility & mask) === 0 && byte(actual, 'flyer741') === 0 && byte(state, 'byte660') === 0 &&
           (byte(stable(getMetadata, id, actor.metadata, 'metadata'), 'byte1d98') & 0xf0) !== 0x10) {
-        fail('47904 active body is unsupported before lifecycle18 and joint12 correction stores');
+        runActiveCorrection(id,actor);
       }
       if (byte(stable(getWorld, id, actor.world, 'world'), 'mode4a0') === 1) {
         // 47a2c resolves the target only if a signed source-count test reaches
@@ -300,5 +498,6 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
         effect(copy, id, pointer(read(state, 'link4a4'), 'link4a4'));
       }
     });},
-  });
+  };
+  runtimes.add(runtime); return Object.freeze(runtime);
 }

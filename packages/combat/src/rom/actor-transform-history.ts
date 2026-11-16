@@ -26,6 +26,8 @@
  */
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import type {SourceJointVector} from './joint-animation-feedback.js';
+import {isPendingSourceActorOrderedHistoryClaim,requireSourceActorOrderedHistoryInvocation,checkSourceActorOrderedHistoryInvocation,
+  rejectSourceActorOrderedFrameReentry,type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
 
 export interface SourceActorTransformHistoryBinding {
   /** Decoded signed shorts at +76/+78/+7a, preserving current BAM16 bits. */
@@ -41,8 +43,26 @@ export interface SourceActorTransformHistorySources {
 export interface SourceActorTransformHistoryRuntime {
   bindActor(identity: symbol, initial: Readonly<SourceActorTransformHistoryBinding>): void;
   getActorBinding(identity: symbol): SourceActorTransformHistoryBinding;
+  getActualActor(identity:symbol):object;
+  getWorldBinding(identity:symbol):object;
+  getWorldRuntime():SourceActorTransformHistorySources['world'];
   /** Explicit ungated 8005685c, independent of normal/mode1 matrix updates. */
   snapshotActor(identity: symbol): void;
+}
+const genuineHistories=new WeakSet<object>();
+const orderedHistories=new WeakMap<object,{claim(owner:SourceActorOrderedFrameRuntime):void;
+  invoke(owner:SourceActorOrderedFrameRuntime,id:symbol):void}>();
+export function isSourceActorTransformHistoryRuntime(value:unknown):value is SourceActorTransformHistoryRuntime {
+  return value!==null&&typeof value==='object'&&genuineHistories.has(value);
+}
+export function claimSourceActorTransformHistoryForOrdered(owner:SourceActorOrderedFrameRuntime,history:SourceActorTransformHistoryRuntime):void {
+  if(!isSourceActorTransformHistoryRuntime(history)||!isPendingSourceActorOrderedHistoryClaim(owner,history))
+    fail('private genuine ordered history claim required');
+  orderedHistories.get(history)!.claim(owner);
+}
+export function invokeSourceActorTransformHistoryFromOrdered(owner:SourceActorOrderedFrameRuntime,history:SourceActorTransformHistoryRuntime,id:symbol):void {
+  if(!isSourceActorTransformHistoryRuntime(history))fail('genuine ordered history required');
+  orderedHistories.get(history)!.invoke(owner,id);
 }
 function fail(reason: string): never {
   throw Error(`[actor-transform-history] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -68,7 +88,8 @@ function float(value: unknown, where: string): number {
 }
 export function createSourceActorTransformHistoryRuntime(sources: SourceActorTransformHistorySources): SourceActorTransformHistoryRuntime {
   let busy = false, poisoned = false;
-  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');};
+  const check = (): void => {if (poisoned) fail('caught same-runtime reentry');
+    if(orderedOwner&&activeOrderedId!==undefined)checkSourceActorOrderedHistoryInvocation(orderedOwner,runtime,activeOrderedId);};
   const read = (value: unknown, key: string): unknown => {const result = own(value, key); check(); return result;};
   const writable = (value: unknown, key: string): void => {own(value, key, true); check();};
   const store = (value: object, key: string, next: number): void => {
@@ -127,8 +148,32 @@ export function createSourceActorTransformHistoryRuntime(sources: SourceActorTra
     write(to(), 'x', x); write(to(), 'y', y);
     const z = f(from(), 'z'); write(to(), 'z', z);
   };
-  return Object.freeze({
-    bindActor(id: symbol, initial: Readonly<SourceActorTransformHistoryBinding>): void {guard(() => {
+  let orderedOwner:SourceActorOrderedFrameRuntime|undefined,activeOrderedId:symbol|undefined;
+  const publicEntry=():void=>{if(orderedOwner){rejectSourceActorOrderedFrameReentry(orderedOwner);fail('history exclusively ordered-owned');}};
+  const snapshot=(id:symbol):void=>{guard(()=>{
+      const actor = entry(id), state = actor.binding;
+      copyVector(() => actualVector(actor, id, 'savedGroundPos'), () => actualVector(actor, id, 'targetCache5e8'));
+      copyVector(() => actualVector(actor, id, 'pos'), () => actualVector(actor, id, 'savedGroundPos'));
+      const actual = stable(getActual, id, actor.actual, 'actual RomActor');
+      const pitch = bam(actual, 'bodyPitch'), heading = bam(actual, 'heading');
+      writeShortPair(state.rotation76, pitch, heading);
+      write(state.rotation76, 'z', short(stable(getWorld, id, actor.world, 'world'), 'roll74'));
+      const pre = preRotation(actor, id), x = short(pre, 'x'), y = short(pre, 'y');
+      writeShortPair(state.preRotation1d6a, x, y);
+      write(state.preRotation1d6a, 'z', short(preRotation(actor, id), 'z'));
+      write(state, 'previousStepHeight6d4', f(stable(getActual, id, actor.actual, 'actual RomActor'), 'stepHeight'));
+      const target = read(stable(getActual, id, actor.actual, 'actual RomActor'), 'visibilityTarget');
+      if (target === null) return;
+      record(target, 'actual visibility target');
+      if (byte(target, 'eligibility83') === 0) {
+        const mask = byte(target, 'visibilityMask5e6');
+        const visibility = byte(stable(getActual, id, actor.actual, 'actual RomActor'), 'visibilityBit');
+        if ((mask & visibility) === 0) return;
+      }
+      copyVector(() => actualVector(actor, id, 'aimOrigin518'), () => state.aimOrigin524);
+    });};
+  const runtime:SourceActorTransformHistoryRuntime={
+    bindActor(id: symbol, initial: Readonly<SourceActorTransformHistoryBinding>): void {publicEntry();guard(() => {
       if (typeof id !== 'symbol') fail('actual actor symbol required');
       if (actors.has(id)) fail('transform-history actor already bound');
       const actual = record(getActual(id), 'actual RomActor'), world = record(getWorld(id), 'world');
@@ -155,27 +200,19 @@ export function createSourceActorTransformHistoryRuntime(sources: SourceActorTra
       for (const value of [...records, binding, binding.rotation76, binding.preRotation1d6a, binding.aimOrigin524]) assignedRecords.add(value);
     });},
     getActorBinding(id: symbol): SourceActorTransformHistoryBinding {return entry(id).binding;},
-    snapshotActor(id: symbol): void {guard(() => {
-      const actor = entry(id), state = actor.binding;
-      copyVector(() => actualVector(actor, id, 'savedGroundPos'), () => actualVector(actor, id, 'targetCache5e8'));
-      copyVector(() => actualVector(actor, id, 'pos'), () => actualVector(actor, id, 'savedGroundPos'));
-      const actual = stable(getActual, id, actor.actual, 'actual RomActor');
-      const pitch = bam(actual, 'bodyPitch'), heading = bam(actual, 'heading');
-      writeShortPair(state.rotation76, pitch, heading);
-      write(state.rotation76, 'z', short(stable(getWorld, id, actor.world, 'world'), 'roll74'));
-      const pre = preRotation(actor, id), x = short(pre, 'x'), y = short(pre, 'y');
-      writeShortPair(state.preRotation1d6a, x, y);
-      write(state.preRotation1d6a, 'z', short(preRotation(actor, id), 'z'));
-      write(state, 'previousStepHeight6d4', f(stable(getActual, id, actor.actual, 'actual RomActor'), 'stepHeight'));
-      const target = read(stable(getActual, id, actor.actual, 'actual RomActor'), 'visibilityTarget');
-      if (target === null) return;
-      record(target, 'actual visibility target');
-      if (byte(target, 'eligibility83') === 0) {
-        const mask = byte(target, 'visibilityMask5e6');
-        const visibility = byte(stable(getActual, id, actor.actual, 'actual RomActor'), 'visibilityBit');
-        if ((mask & visibility) === 0) return;
-      }
-      copyVector(() => actualVector(actor, id, 'aimOrigin518'), () => state.aimOrigin524);
-    });},
+    getActualActor(id:symbol):object{return entry(id).actual;},
+    getWorldBinding(id:symbol):object{return entry(id).world;},
+    getWorldRuntime(){return receiver as SourceActorTransformHistorySources['world'];},
+    snapshotActor(id:symbol):void{publicEntry();snapshot(id);},
+  };
+  genuineHistories.add(runtime);
+  orderedHistories.set(runtime,{
+    claim(owner){if(busy||orderedOwner)fail('history already active or ordered-owned');orderedOwner=owner;},
+    invoke(owner,id){
+      if(orderedOwner!==owner)fail('exact ordered history owner required');
+      requireSourceActorOrderedHistoryInvocation(owner,runtime,id);activeOrderedId=id;
+      try{snapshot(id);}finally{activeOrderedId=undefined;}
+    },
   });
+  return Object.freeze(runtime);
 }

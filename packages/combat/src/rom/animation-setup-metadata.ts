@@ -30,6 +30,9 @@ export interface SourceAnimationSetupMetadataSources {
   attached: Pick<SourceAttachedJointSetupRuntime, 'getPartBinding'>;
 }
 export interface SourceAnimationSetupMetadataRuntime {
+  getActualAttached(): SourceAnimationSetupMetadataSources['attached'];
+  getActualFeedback(): SourceAnimationSetupMetadataSources['feedback'];
+  getActualMapping(): SourceAnimationSetupMetadataSources['actors'];
   bindActor(identity: symbol, initial: SourceAnimationSetupMetadataActor): void;
   getActorBinding(identity: symbol): SourceAnimationSetupMetadataActor;
   bindPart(identity: symbol, initial: SourceAnimationSetupMetadataPart): void;
@@ -37,6 +40,10 @@ export interface SourceAnimationSetupMetadataRuntime {
   bindDescriptorDefaults(identity: symbol, initial: SourceAnimationSetupDescriptorDefaults): void;
   getDescriptorDefaults(identity: symbol): SourceAnimationSetupDescriptorDefaults;
   applyMetadata(actor: symbol, part: symbol, channel: number, cursor: symbol): void;
+}
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceAnimationSetupMetadataRuntime(value: unknown): value is SourceAnimationSetupMetadataRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
 }
 function fail(reason: string): never {
   throw Error(`[animation-setup-metadata] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
@@ -88,7 +95,10 @@ export function createSourceAnimationSetupMetadataRuntime(sources: SourceAnimati
     if (!entry.layout.parts.some(row => row.includes(part))) fail('part does not belong to actor layout');
     return entry;
   };
-  return Object.freeze({
+  const runtime: SourceAnimationSetupMetadataRuntime = Object.freeze({
+    getActualAttached() {return attached as SourceAnimationSetupMetadataSources['attached'];},
+    getActualFeedback() {return feedback as SourceAnimationSetupMetadataSources['feedback'];},
+    getActualMapping() {return actors as SourceAnimationSetupMetadataSources['actors'];},
     bindActor(id: symbol, initial: SourceAnimationSetupMetadataActor): void {
       enter(); try {
         if (actorBindings.has(id)) fail('actor already bound');
@@ -171,4 +181,5 @@ export function createSourceAnimationSetupMetadataRuntime(sources: SourceAnimati
       } finally {busy = false;}
     },
   });
+  genuineRuntimes.add(runtime); return runtime;
 }

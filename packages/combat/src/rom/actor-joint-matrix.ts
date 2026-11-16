@@ -9,6 +9,9 @@
  * selecting 80045838's PSMTXCopy branch, never an approximation of source trig.
  * 800457d4 zero-short wrappers retain RotRad and Concat semantics: audited zero
  * sin/cos return +0/1, and X/Y/Z rotation matrices have -0 at [6]/[8]/[1].
+ * Standalone RotRad admits exactly radians +0/-0: kernel_sin returns its
+ * unchanged signed argument, kernel_cos returns +1. RotTrig's actual store
+ * order and sine negation execute; this is not a zero-short wrapper or Copy.
  * The wrapper additionally assumes GQR5 signed-short loads with scale 0; live
  * register initialization/invariance has not been established.
  * PSMTXConcat uses audited paired-single multiply/FMA order including the +0
@@ -16,13 +19,15 @@
  * types with no quantization; initialization/live invariance is not established.
  * RN=00/NI=0 finite-f32 bounds are assumptions,
  * not original-runtime parity. No arbitrary quaternion/fres emulation is claimed.
- * Terrain 45918 admits only axes (2,1), flat (±0,1,±0), and nondegenerate
- * signed-axis columns with magnitudes .5,1,2,4,8; the first construction must
- * succeed. Mag/Normalize use the real SDK refinement of a separately derived
+ * Secondary terrain 45918 admits axes (2,1) and computed paired squared
+ * norms .25,1,4,16,64 at every Mag/Normalize; the first construction must
+ * succeed. Primary non-axis-Y displacement uses the same bounded norm arithmetic
+ * through a separately selected lane; its old flat signed-axis lane is unchanged.
+ * Mag/Normalize use the real SDK refinement of a separately derived
  * finite reciprocal-estimate specialization, not sqrt or an identity shortcut.
  * This specialization is canonical Dolphin-model-backed, not a hardware capture.
  * Primary47368 additionally admits measured signed-axis length pairs (2,.5)
- * and (1,1), and target displacement (±0,1,±0). Its historical folded name
+ * and (1,1), and flat or bounded sloped target displacement. Its historical folded name
  * now covers minimum-reach folding and one positive-sine case. Three-step
  * binary64 refinements, cosines, sine branches, RotTrig and both Concats really
  * execute. This is not general IK or a promise that the endpoint hits.
@@ -32,6 +37,7 @@
  * overflow refusal is host admission policy, not source FP exception behavior.
  * Symbols are local ownership handles, not emulated source addresses. Matrix capacity is host policy.
  */
+import {checkActiveSourceActorOrderedInvocation} from './actor-ordered-frame.js';
 import type {SourceJointAnimationFeedbackRuntime, SourceJointVector} from './joint-animation-feedback.js';
 import {addSourceFloat32, fusedMultiplyAddSourceFloat32 as fma} from './source-float.js';
 import {primarySineCorrection} from './actor-primary-float.js';
@@ -51,8 +57,15 @@ export interface SourceActorJointMatrixRuntime {
   correctShort(matrix: symbol, correction: Readonly<SourceJointVector>): void;
   scale(matrix: symbol, scaling: Readonly<SourceJointVector>): void;
   copy(source: symbol, destination: symbol): void;
+  /** SDK 8020af5c; all three matrices are explicitly owned. Either input may alias output. */
+  concat(left: symbol, right: symbol, destination: symbol): void;
+  /** SDK 8020b238/8020b2a8 only, with actual +0 or -0 radians. No wrapper/Concat. */
+  rotateRadiansZero(axis: 'x' | 'y' | 'z', destination: symbol, angle: number): void;
   /** SDK 8020b7a8; caller owns the explicit output vector, which may alias input. */
   transformPoint(matrix: symbol, input: Readonly<SourceJointVector>, output: SourceJointVector): void;
+  /** Same8020b7a8 schedule into canonical BE object bytes; no temporary vector. */
+  transformPointBytes(matrix: symbol, input: Readonly<SourceJointVector>,
+    output: Partial<Record<number, number>>, byteOffset: number): void;
   /** Bounded 45918 path; no general terrain orientation/estimate implementation. */
   orientTerrainMatrix(matrix: symbol, normal: Readonly<SourceJointVector>, axisA: number, axisB: number): void;
   /** Historical name: 47368 (2,.5) folded and (1,1) positive-sine subsets only.
@@ -70,12 +83,16 @@ export interface SourceActorJointMatrixRuntime {
     correction: Readonly<SourceJointVector>, scale: Readonly<SourceJointVector>,
     translationOverride?: Readonly<SourceJointVector>): void;
 }
+const sourceJointMatrixRuntimes = new WeakSet<object>();
+export function isSourceActorJointMatrixRuntime(value: unknown): value is SourceActorJointMatrixRuntime {
+  return value !== null && typeof value === 'object' && sourceJointMatrixRuntimes.has(value);
+}
 function fail(reason: string): never {
   throw Error(`[actor-joint-matrix] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);
 }
 function own(record: unknown, key: string, writable = false): unknown {
   if (record === null || typeof record !== 'object') fail(`${key}: data record required`);
-  const p = Object.getOwnPropertyDescriptor(record, key);
+  const p = Object.getOwnPropertyDescriptor(record, key);checkActiveSourceActorOrderedInvocation();
   if (!p || !('value' in p)) fail(`${key}: own data property required`);
   if (writable && !p.writable) fail(`${key}: non-writable field is unsupported`);
   return p.value;
@@ -84,21 +101,19 @@ function float(value: unknown, where: string): number {
   if (typeof value !== 'number' || !Number.isFinite(value) || !Object.is(value, Math.fround(value))) fail(`${where}: expected finite source float32`);
   return value;
 }
-function snapshot(matrix: readonly number[]): number[] {
+function snapshot(matrix: readonly number[], check: () => void = () => {}): number[] {
   if (!Array.isArray(matrix) || own(matrix, 'length') !== 12) fail('matrix must contain exactly 12 entries');
-  return Array.from({length: 12}, (_, i) => float(own(matrix, String(i)), `matrix[${i}]`));
+  check();
+  return Array.from({length: 12}, (_, i) => load(matrix, i, check));
 }
-function store(matrix: number[], i: number, value: number): void {
-  own(matrix, String(i), true); matrix[i] = value;
+function store(matrix: number[], i: number, value: number, check: () => void = () => {}): void {
+  own(matrix, String(i), true); check(); matrix[i] = value; check();
 }
-function load(matrix: number[], i: number): number {
-  return float(own(matrix, String(i)), `matrix[${i}]`);
+function load(matrix: readonly number[], i: number, check: () => void = () => {}): number {
+  const value = own(matrix, String(i)); check(); return float(value, `matrix[${i}]`);
 }
-function vectorLoad(vector: Readonly<SourceJointVector>, key: 'x' | 'y' | 'z', where: string): number {
-  return float(own(vector, key), `${where}.${key}`);
-}
-function vectorStore(vector: SourceJointVector, key: 'x' | 'y' | 'z', value: number): void {
-  own(vector, key, true); vector[key] = value;
+function vectorLoad(vector: Readonly<SourceJointVector>, key: 'x' | 'y' | 'z', where: string, check: () => void = () => {}): number {
+  const value = own(vector, key); check(); return float(value, `${where}.${key}`);
 }
 function multiply(a: number, b: number): number {
   return float(Math.fround(a * b), 'single product');
@@ -106,30 +121,42 @@ function multiply(a: number, b: number): number {
 function add(a: number, b: number): number {
   return float(Math.fround(a + b), 'single sum');
 }
-function transformPoint(matrix: number[], input: Readonly<SourceJointVector>, output: SourceJointVector): void {
+/** Internal writer is constructed only by genuine methods below, never supplied
+ * as a host callback. All routes share this one authenticated arithmetic tree. */
+function transformPointStores(matrix: number[], input: Readonly<SourceJointVector>,
+  writeOutput: (axis: 'x' | 'y' | 'z', value: number) => void, check: () => void): void {
+  const readVector = (key: 'x' | 'y' | 'z'): number => {const v = vectorLoad(input, key, 'point'); check(); return v;};
+  const readMatrix = (index: number): number => {const v = load(matrix, index); check(); return v;};
   // 8020b7a8..b7f4: each paired row accumulates Z into X's product and
   // translation into Y's product, THEN sums the lanes. Reassociating the
   // dot product (or using Concat's ordering) loses real rounding/zero behavior.
-  const x = vectorLoad(input, 'x', 'point'), y = vectorLoad(input, 'y', 'point');
-  const m0 = load(matrix, 0), m1 = load(matrix, 1);
-  const z = vectorLoad(input, 'z', 'point'); // W=1 supplies exactly +1.
+  const x = readVector('x'), y = readVector('y');
+  const m0 = readMatrix(0), m1 = readMatrix(1);
+  const z = readVector('z'); // W=1 supplies exactly +1.
   const p0 = multiply(m0, x), p1 = multiply(m1, y);
-  const m2 = load(matrix, 2), m3 = load(matrix, 3);
+  const m2 = readMatrix(2), m3 = readMatrix(3);
   const q0 = fma(m2, z, p0), q1 = fma(m3, 1, p1);
-  const m4 = load(matrix, 4), m5 = load(matrix, 5);
+  const m4 = readMatrix(4), m5 = readMatrix(5);
   const resultX = add(q0, q1);
-  const m6 = load(matrix, 6), m7 = load(matrix, 7);
+  const m6 = readMatrix(6), m7 = readMatrix(7);
   const p4 = multiply(m4, x), p5 = multiply(m5, y);
-  vectorStore(output, 'x', resultX);
+  writeOutput('x', resultX);
   const q4 = fma(m6, z, p4), q5 = fma(m7, 1, p5);
-  const m8 = load(matrix, 8), m9 = load(matrix, 9);
+  const m8 = readMatrix(8), m9 = readMatrix(9);
   const resultY = add(q4, q5);
-  const m10 = load(matrix, 10), m11 = load(matrix, 11);
+  const m10 = readMatrix(10), m11 = readMatrix(11);
   const p8 = multiply(m8, x), p9 = multiply(m9, y);
-  vectorStore(output, 'y', resultY);
+  writeOutput('y', resultY);
   const q8 = fma(m10, z, p8), q9 = fma(m11, 1, p9);
-  vectorStore(output, 'z', add(q8, q9));
+  writeOutput('z', add(q8, q9));
 }
+function transformPoint(matrix: number[], input: Readonly<SourceJointVector>, output: SourceJointVector,
+  check: () => void = () => {}): void {
+  transformPointStores(matrix, input, (axis, value) => {
+    own(output, axis, true); check(); output[axis] = value; check();
+  }, check);
+}
+
 function short(value: unknown, where: string): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || value < -32768 || value > 32767) fail(`${where}: signed short required`);
   return value;
@@ -149,11 +176,11 @@ function correctShort(matrix: number[], correction: Readonly<SourceJointVector>)
   // 80045838's zero Z branch still copies; zero Y and X skip their rotations.
   copy(matrix, matrix);
 }
-function scale(matrix: number[], scaling: Readonly<SourceJointVector>): void {
-  const x = float(own(scaling, 'x'), 'scale.x'), y = float(own(scaling, 'y'), 'scale.y'), z = float(own(scaling, 'z'), 'scale.z');
+function scale(matrix: number[], scaling: Readonly<SourceJointVector>, check: () => void = () => {}): void {
+  const x = vectorLoad(scaling, 'x', 'scale', check), y = vectorLoad(scaling, 'y', 'scale', check), z = vectorLoad(scaling, 'z', 'scale', check);
   // PSMTXScale 8020b4f8 temporary; the caller still performs PSMTXConcat
   // for unit scales. The temporary's stores are not externally observable.
-  concat(matrix, [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0], matrix);
+  concat(matrix, [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0], matrix, check);
 }
 function translate(matrix: number[], translation: Readonly<SourceJointVector>): void {
   // The caller loads XYZ arguments before TransApply. Its frsp instructions
@@ -180,8 +207,8 @@ function translate(matrix: number[], translation: Readonly<SourceJointVector>): 
 }
 // PSMTXConcat psq_st order, not naive row-major host assignment.
 const concatStores = [0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 10, 11] as const;
-function concat(aInput: number[], bInput: number[], destination: number[]): void {
-  const a = snapshot(aInput), b = snapshot(bInput);
+function concat(aInput: number[], bInput: number[], destination: number[], check: () => void = () => {}): void {
+  const a = snapshot(aInput, check), b = snapshot(bInput, check);
   const compute = (i: number): number => {
     const row = i - i % 4, col = i % 4;
     let value = float(Math.fround(b[col]! * a[row]!), 'concat product');
@@ -193,7 +220,7 @@ function concat(aInput: number[], bInput: number[], destination: number[]): void
   for (let pair = 0; pair < concatStores.length; pair += 2) {
     const i = concatStores[pair]!, j = concatStores[pair + 1]!;
     const first = compute(i), second = compute(j);
-    store(destination, i, first); store(destination, j, second);
+    store(destination, i, first, check); store(destination, j, second, check);
   }
 }
 type LocalVector = [number, number, number];
@@ -204,11 +231,30 @@ function finiteAxisMagnitude(vector: LocalVector): number {
   if (![0.5, 1, 2, 4, 8].includes(magnitude)) fail('terrain magnitude outside finite estimate proof domain');
   return magnitude;
 }
-function squareMagnitude(vector: LocalVector): number {
+function secondaryNormal(value: number): number {
+  if (value !== 0 && Math.abs(value) < 2 ** -126) fail('terrain denormal arithmetic outside proof domain');
+  return value;
+}
+function secondaryMultiply(a: number, b: number): number {
+  secondaryNormal(a); secondaryNormal(b);
+  const result = secondaryNormal(multiply(a, b));
+  if (result === 0 && a !== 0 && b !== 0) fail('terrain denormal arithmetic outside proof domain');
+  return result;
+}
+function secondaryFma(a: number, b: number, c: number): number {
+  secondaryNormal(a); secondaryNormal(b); secondaryNormal(c);
+  const result = secondaryNormal(fma(a, b, c));
+  if (result === 0 && a * b + c !== 0) fail('terrain denormal arithmetic outside proof domain');
+  return result;
+}
+function squareMagnitude(vector: LocalVector, secondary = false): number {
+  const mul = secondary ? secondaryMultiply : multiply;
+  const madd = secondary ? secondaryFma : fma;
   // Both SDK sites use ps_mul XY, ps_madd Z, then ps_sum0. Even though
-  // only one axis is nonzero in this domain, retain that exact operation tree.
-  const xSquared = multiply(vector[0], vector[0]), ySquared = multiply(vector[1], vector[1]);
-  return add(fma(vector[2], vector[2], xSquared), ySquared);
+  // the secondary domain can have multiple components, retain that exact tree.
+  const xSquared = mul(vector[0], vector[0]), ySquared = mul(vector[1], vector[1]);
+  const squared = add(madd(vector[2], vector[2], xSquared), ySquared);
+  return secondary ? secondaryNormal(squared) : squared;
 }
 function refinedAxisReciprocal(magnitude: number, squared: number): number {
   // Independently derived finite facts, not copied emulator code/table:
@@ -238,55 +284,86 @@ function normalizeAxis(vector: LocalVector): LocalVector {
   const x = multiply(vector[0], reciprocal), y = multiply(vector[1], reciprocal);
   return [x, y, multiply(vector[2], reciprocal)];
 }
-function cross(a: LocalVector, b: LocalVector): LocalVector {
+/** Select only the five proven seeds by the ACTUAL rounded SDK operand.
+ * No sqrt, ideal vector length, or input normal classification substitutes for it. */
+function pairedNormMagnitude(squared: number): number {
+  switch (squared) {
+    case 0.25: return 0.5;
+    case 1: return 1;
+    case 4: return 2;
+    case 16: return 4;
+    case 64: return 8;
+    default: return fail('terrain squared norm outside finite estimate proof domain');
+  }
+}
+function secondaryMagnitude(vector: LocalVector): number {
+  const squared = squareMagnitude(vector, true);
+  return multiply(squared, refinedAxisReciprocal(pairedNormMagnitude(squared), squared));
+}
+function secondaryNormalize(vector: LocalVector): LocalVector {
+  const squared = squareMagnitude(vector, true);
+  const reciprocal = refinedAxisReciprocal(pairedNormMagnitude(squared), squared);
+  const x = secondaryMultiply(vector[0], reciprocal), y = secondaryMultiply(vector[1], reciprocal);
+  return [x, y, secondaryMultiply(vector[2], reciprocal)];
+}
+function cross(a: LocalVector, b: LocalVector, secondary = false): LocalVector {
+  const mul = secondary ? secondaryMultiply : multiply;
+  const madd = secondary ? secondaryFma : fma;
   // 8020bb78: ps_msub subtracts a separately rounded product. Y and Z are
   // explicitly negated AFTER that fused subtraction, including zero results.
   const bx = b[0], by = b[1], az = a[2], ax = a[0], ay = a[1], bz = b[2];
-  const bxAz = multiply(bx, az), byAz = multiply(by, az);
-  const bxAx = multiply(bx, ax), byAx = multiply(by, ax);
-  const negativeY = fma(ax, bz, -bxAz), x = fma(ay, bz, -byAz);
+  const bxAz = mul(bx, az), byAz = mul(by, az);
+  const bxAx = mul(bx, ax), byAx = mul(by, ax);
+  const negativeY = madd(ax, bz, -bxAz), x = madd(ay, bz, -byAz);
   // Both lanes execute even though the first is not stored by this routine.
-  fma(ax, by, -bxAx);
-  const negativeZ = fma(ay, bx, -byAx);
+  madd(ax, by, -bxAx);
+  const negativeZ = madd(ay, bx, -byAx);
   return [x, -negativeY, -negativeZ];
 }
-function orientTerrainMatrix(matrix: number[], normal: Readonly<SourceJointVector>, axisA: number, axisB: number): void {
+function orientTerrainMatrix(matrix: number[], normal: Readonly<SourceJointVector>, axisA: number, axisB: number, domain: 'axis' | 'secondary' | 'primary-sloped' | 'primary-flat-positive' = 'axis', check: () => void = () => {}): void {
+  const secondary = domain !== 'axis'; // Shared arithmetic, separate caller admission.
+  const magnitude = secondary ? secondaryMagnitude : axisMagnitude;
+  const normalize = secondary ? secondaryNormalize : normalizeAxis;
   // 45954..459a0 load ALL three columns, column-major, before the three
   // Mag calls at459a8/b4/c0. Translation is first read by final Concat.
-  const oldX: LocalVector = [load(matrix, 0), load(matrix, 4), load(matrix, 8)];
-  const oldY: LocalVector = [load(matrix, 1), load(matrix, 5), load(matrix, 9)];
-  const oldZ: LocalVector = [load(matrix, 2), load(matrix, 6), load(matrix, 10)];
-  const magnitudeX = axisMagnitude(oldX), magnitudeY = axisMagnitude(oldY), magnitudeZ = axisMagnitude(oldZ);
-  const y: LocalVector = [vectorLoad(normal, 'x', 'normal'), vectorLoad(normal, 'y', 'normal'),
-    vectorLoad(normal, 'z', 'normal')];
-  if (y[0] !== 0 || y[1] !== 1 || y[2] !== 0) fail('only flat (±0,1,±0) terrain normal is supported');
+  const oldX: LocalVector = [load(matrix, 0, check), load(matrix, 4, check), load(matrix, 8, check)];
+  const oldY: LocalVector = [load(matrix, 1, check), load(matrix, 5, check), load(matrix, 9, check)];
+  const oldZ: LocalVector = [load(matrix, 2, check), load(matrix, 6, check), load(matrix, 10, check)];
+  const magnitudeX = magnitude(oldX), magnitudeY = magnitude(oldY), magnitudeZ = magnitude(oldZ);
+  const y: LocalVector = [vectorLoad(normal, 'x', 'normal', check), vectorLoad(normal, 'y', 'normal', check),
+    vectorLoad(normal, 'z', 'normal', check)];
+  if (!secondary && (y[0] !== 0 || y[1] !== 1 || y[2] !== 0)) fail('only flat (±0,1,±0) terrain normal is supported');
   if (axisA !== 2 || axisB !== 1) fail('only positive terrain axes (2,1) are supported');
   // 45a10/18/20 freshly load the selected reference column. The authenticated
   // lookup at802d0d34+7 selects2; dispatch cell802d0d4c selects80046158.
-  let x: LocalVector = [load(matrix, 0), load(matrix, 4), load(matrix, 8)];
-  if (new Set([oldX, oldY, oldZ].map(column => column.findIndex(value => value !== 0))).size !== 3) {
+  let x: LocalVector = [load(matrix, 0, check), load(matrix, 4, check), load(matrix, 8, check)];
+  if (!secondary && new Set([oldX, oldY, oldZ].map(column => column.findIndex(value => value !== 0))).size !== 3) {
     fail('terrain basis must have three distinct signed axes');
   }
-  const z = cross(x, y);
+  const z = cross(x, y, secondary);
   // 461c4/cc/d4 separately square XYZ, then add X+Y and that sum+Z.
-  const zx2 = multiply(z[0], z[0]), zy2 = multiply(z[1], z[1]), zz2 = multiply(z[2], z[2]);
-  const lengthSquared = add(zz2, add(zx2, zy2));
+  const mul = secondary ? secondaryMultiply : multiply;
+  const zx2 = mul(z[0], z[0]), zy2 = mul(z[1], z[1]), zz2 = mul(z[2], z[2]);
+  const xySquared = add(zx2, zy2);
+  if (secondary) secondaryNormal(xySquared);
+  const lengthSquared = add(zz2, xySquared);
+  if (secondary) secondaryNormal(lengthSquared);
   // Authenticated 80437080 bits2edbe6fe. A failed first construction would
   // select another reference/dispatch entry; none is silently synthesized.
   if (!(lengthSquared > 9.999999439624929e-11)) fail('terrain fallback construction is unsupported');
-  x = cross(y, z);
-  const normalizedX = normalizeAxis(x), normalizedY = normalizeAxis(y), normalizedZ = normalizeAxis(z);
+  x = cross(y, z, secondary);
+  const normalizedX = normalize(x), normalizedY = normalize(y), normalizedZ = normalize(z);
   // 45f70..45fb0 stores column-major, only after all three normalizations.
   // Per-store host refusals preserve precisely the completed output prefix.
   for (const [column, values] of [[0, normalizedX], [1, normalizedY], [2, normalizedZ]] as const) {
-    store(matrix, column, values[0]); store(matrix, 4 + column, values[1]); store(matrix, 8 + column, values[2]);
+    store(matrix, column, values[0], check); store(matrix, 4 + column, values[1], check); store(matrix, 8 + column, values[2], check);
   }
   // 45b7c/45b8c really restore the SAVED source magnitudes through Scale and
   // Concat. Unit-axis inputs therefore finish below one, not as an identity.
-  scale(matrix, {x: magnitudeX, y: magnitudeY, z: magnitudeZ});
+  scale(matrix, {x: magnitudeX, y: magnitudeY, z: magnitudeZ}, check);
 }
-function primarySignedByte(record: Readonly<SourcePrimaryFoldedPlacement>, key: 'axis0d' | 'axis0e' | 'bend0f'): number {
-  const value = own(record, key);
+function primarySignedByte(record: Readonly<SourcePrimaryFoldedPlacement>, key: 'axis0d' | 'axis0e' | 'bend0f', check: () => void): number {
+  const value = own(record, key); check();
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 255) fail(`${key}: raw byte required`);
   return (value << 24) >> 24;
 }
@@ -366,41 +443,81 @@ function primarySine(cosine: number): number {
 }
 function primaryRotation(axis: 'x' | 'y' | 'z', sine: number, cosine: number): number[] {
   // 8020b2a8's actual paired merges, not the misleading decompiled Y/Z
-  // assignments. All stores target the private source-stack temporary.
+  // assignments. Primary placement uses a private source-stack temporary;
+  // standalone RotRad separately applies the observable source store order.
   if (axis === 'x') return [1, 0, 0, 0, 0, cosine, -sine, 0, 0, sine, cosine, 0];
   if (axis === 'y') return [cosine, 0, sine, 0, 0, 1, 0, 0, -sine, 0, cosine, 0];
   return [cosine, -sine, 0, 0, sine, cosine, 0, 0, 0, 0, 1, 0];
 }
+/** Actual RotTrig stores, including X's unaligned pairs and W=1 singles.
+ * Existing traversal reader's fixed 8020b2a8 span (SHA256 832e4fbd...b19a8d7)
+ * and actor-matrix-traversal-evidence-2026-11-13.md establish these merges.
+ * X: b2dc[0],b2e0[1,2],b2e8[3,4],b2f0[7,8],b2f4[11],b2f8[9,10],b2fc[5,6].
+ * Y: b30c[6,7],b310[0,1],b31c[10,11],b320[4,5],b324[2,3],b328[8,9].
+ * Z: b330[2,3],b33c[6,7],b340[8,9],b348[4,5],b34c[0,1],b350[10,11].
+ * Retain this runtime's existing per-lane host store-fault contract, not a
+ * claim about original machine memory faults or atomic paired stores. */
+const rotationStores = {
+  x: [0, 1, 2, 3, 4, 7, 8, 11, 9, 10, 5, 6],
+  y: [6, 7, 0, 1, 10, 11, 4, 5, 2, 3, 8, 9],
+  z: [2, 3, 6, 7, 8, 9, 4, 5, 0, 1, 10, 11],
+} as const;
+function zeroRadiansRotation(axis: 'x' | 'y' | 'z', angle: number): number[] {
+  const radians = float(angle, 'radians');
+  // RotRad first calls sinf at8020b260, before any destination access/store.
+  // This boundary deliberately admits no nonzero value, even one that might
+  // round to zero or share a kernel's early-return branch. No host trig runs.
+  if (radians !== 0) fail('PSMTXRotRad 8020b260 sinf: nonzero radians are unsupported');
+  // sinf8023cc44 -> sin8023c9e8 masks the high word's sign for its branch.
+  // kernel_sin8023bf8c masks it again, fctiwz(±0) is integer0, and bfbc
+  // returns f1 UNCHANGED. Thus both +0 and -0 survive sinf's frsp atcc58.
+  const sine = Math.fround(radians);
+  // cosf8023cc68 -> cos8023c480 takes the same magnitude-only branch.
+  // kernel_cos8023b044 loads authenticated f64+1 atb074 (8043d030),
+  // without using the sign of zero; cosf frsp atcc7c keeps exact+1.
+  const cosine = Math.fround(1);
+  // RotTrig frsp b2a8/b2ac and ps_neg b2bc preserve/toggle sine's sign.
+  // Reuse the authenticated paired-merge values, not an Identity shortcut.
+  return primaryRotation(axis, Math.fround(sine), Math.fround(cosine));
+}
 function primaryFoldedPlacement(parent: number[], current: number[], next: number[], end: number[],
   translation: Readonly<SourceJointVector>, nextTranslation: Readonly<SourceJointVector>,
-  correction: Readonly<SourcePrimaryFoldedPlacement>): void {
+  correction: Readonly<SourcePrimaryFoldedPlacement>, check: () => void): void {
   // World has captured raw current X, then the fresh entry joint, then Y/Z.
   // These are that source-stack local, not an adjusted joint1 translation.
-  const local = {x: vectorLoad(translation, 'x', 'primary current'),
-    y: vectorLoad(translation, 'y', 'primary current'), z: vectorLoad(translation, 'z', 'primary current')};
+  const local = {x: vectorLoad(translation, 'x', 'primary current', check),
+    y: vectorLoad(translation, 'y', 'primary current', check), z: vectorLoad(translation, 'z', 'primary current', check)};
   // 473d8/dc/e0 save the adjacent RAW pose, not the next topology-linked pose.
-  const nextX = vectorLoad(nextTranslation, 'x', 'primary next');
-  const nextY = vectorLoad(nextTranslation, 'y', 'primary next');
-  const nextZ = vectorLoad(nextTranslation, 'z', 'primary next');
+  const nextX = vectorLoad(nextTranslation, 'x', 'primary next', check);
+  const nextY = vectorLoad(nextTranslation, 'y', 'primary next', check);
+  const nextZ = vectorLoad(nextTranslation, 'z', 'primary next', check);
   // All nine retained coordinates are loaded before either distance call.
-  const oldCurrent: LocalVector = [load(current, 3), load(current, 7), load(current, 11)];
-  const oldNext: LocalVector = [load(next, 3), load(next, 7), load(next, 11)];
-  const oldEnd: LocalVector = [load(end, 3), load(end, 7), load(end, 11)];
+  const oldCurrent: LocalVector = [load(current, 3, check), load(current, 7, check), load(current, 11, check)];
+  const oldNext: LocalVector = [load(next, 3, check), load(next, 7, check), load(next, 11, check)];
+  const oldEnd: LocalVector = [load(end, 3, check), load(end, 7, check), load(end, 11, check)];
   const firstLength = primaryLength(oldCurrent, oldNext, [2, 1]);
   // Admit only these PAIRS, not the Cartesian product of the five axis powers.
   // The second distance/refinement is still reached after the first completes.
   const secondLength = primaryLength(oldNext, oldEnd, [firstLength === 2 ? 0.5 : 1]);
-  transformPoint(parent, local, local);
-  store(current, 3, local.x); store(current, 7, local.y); store(current, 11, local.z);
+  transformPoint(parent, local, local, check);
+  store(current, 3, local.x, check); store(current, 7, local.y, check); store(current, 11, local.z, check);
   // 8020ba78's subtraction stores its private XY before loading target Z.
   // Entry axes are fresh later reads, never preflighted before translation.
-  const targetX = vectorLoad(correction, 'x', 'primary target'), targetY = vectorLoad(correction, 'y', 'primary target');
+  const targetX = vectorLoad(correction, 'x', 'primary target', check), targetY = vectorLoad(correction, 'y', 'primary target', check);
   const delta = {x: addSourceFloat32(targetX, -local.x), y: addSourceFloat32(targetY, -local.y), z: NaN};
-  delta.z = addSourceFloat32(vectorLoad(correction, 'z', 'primary target'), -local.z);
-  const axisA = primarySignedByte(correction, 'axis0d'), axisB = primarySignedByte(correction, 'axis0e');
-  orientTerrainMatrix(current, delta, axisA, axisB);
+  delta.z = addSourceFloat32(vectorLoad(correction, 'z', 'primary target', check), -local.z);
+  const axisA = primarySignedByte(correction, 'axis0d', check), axisB = primarySignedByte(correction, 'axis0e', check);
+  // Keep unit and nonpositive flat displacement on the original axis lane.
+  // Positive nonunit flat placement uses the same five ACTUAL rounded norm
+  // operands as the sloped lane, not an ideal-length/fixture-bit preflight.
+  // In particular identity/+Y.5 reaches the second-cross norm refusal, and
+  // X2/+Y2 reaches the later sine refusal after completed orientation writes.
+  const sloped = delta.x !== 0 || delta.z !== 0;
+  const positiveFlat = !sloped && delta.y > 0 && delta.y !== 1;
+  orientTerrainMatrix(current, delta, axisA, axisB, sloped ? 'primary-sloped' :
+    positiveFlat ? 'primary-flat-positive' : 'axis', check);
   // 47560 follows the completed orientation (including its Scale/Concat).
-  let distance = axisMagnitude([delta.x, delta.y, delta.z]);
+  let distance = ((sloped || positiveFlat) ? secondaryMagnitude : axisMagnitude)([delta.x, delta.y, delta.z]);
   const reach = multiply(0.9990000128746033, add(firstLength, secondLength)); // 804370d0=3f7fbe77
   if (reach < distance) distance = reach;
   // Exact instruction ordering at47584..475c4. In particular both rounded
@@ -420,22 +537,22 @@ function primaryFoldedPlacement(parent: number[], current: number[], next: numbe
   if (firstAtMostOne) {cosineFirst = rawCosineFirst; if (cosineFirst < -1) cosineFirst = -1;}
   let cosineSecond = 1;
   if (rawCosineSecond <= 1) {cosineSecond = rawCosineSecond; if (cosineSecond < -1) cosineSecond = -1;}
-  const negativeBend = primarySignedByte(correction, 'bend0f') < 0;
+  const negativeBend = primarySignedByte(correction, 'bend0f', check) < 0;
   let sineFirst = primarySine(cosineFirst);
   if (!negativeBend) sineFirst = -sineFirst;
   let sineSecond = primarySine(cosineSecond);
   // 476d8 or477b8 reloads bend before the authenticated table lookup. Only
   // indices1..3 (x/y/z) are admitted; zero/-128 never invent a table entry.
-  const reloadedBend = primarySignedByte(correction, 'bend0f');
+  const reloadedBend = primarySignedByte(correction, 'bend0f', check);
   if (negativeBend) sineSecond = -sineSecond; // 476e0 follows the byte reload.
   const axisIndex = negativeBend ? -reloadedBend : reloadedBend;
   if (axisIndex < 1 || axisIndex > 3) fail('primary bend axis must be signed 1, 2 or 3');
   const axis = (['x', 'y', 'z'] as const)[axisIndex - 1]!;
   const firstRotation = primaryRotation(axis, sineFirst, cosineFirst);
-  concat(current, firstRotation, current);
+  concat(current, firstRotation, current, check);
   const secondRotation = primaryRotation(axis, sineSecond, cosineSecond);
   secondRotation[3] = nextX; secondRotation[7] = nextY; secondRotation[11] = nextZ;
-  concat(current, secondRotation, next);
+  concat(current, secondRotation, next, check);
 }
 export function createSourceActorJointMatrixRuntime(
   feedback: Pick<SourceJointAnimationFeedbackRuntime, 'getPose'>, maxMatrices = 128,
@@ -474,7 +591,7 @@ export function createSourceActorJointMatrixRuntime(
     concat(getMatrix(parent), local, output);
     return output;
   }
-  return Object.freeze({
+  const runtime: SourceActorJointMatrixRuntime = Object.freeze({
     createMatrix(initial: readonly number[]): symbol {
       enter();
       try {
@@ -511,13 +628,44 @@ export function createSourceActorJointMatrixRuntime(
       enter();
       try {copy(getMatrix(source), getMatrix(destination));} finally {busy = false;}
     },
+    concat(left: symbol, right: symbol, destination: symbol): void {
+      enter();
+      try {concat(getMatrix(left), getMatrix(right), getMatrix(destination));} finally {busy = false;}
+    },
+    rotateRadiansZero(axis: 'x' | 'y' | 'z', destination: symbol, angle: number): void {
+      enter();
+      try {
+        if (axis !== 'x' && axis !== 'y' && axis !== 'z') fail('rotation axis must be x, y or z');
+        const rotation = zeroRadiansRotation(axis, angle), output = getMatrix(destination);
+        for (const i of rotationStores[axis]) store(output, i, rotation[i]!);
+      } finally {busy = false;}
+    },
     transformPoint(matrix: symbol, input: Readonly<SourceJointVector>, output: SourceJointVector): void {
       enter();
-      try {transformPoint(getMatrix(matrix), input, output);} finally {busy = false;}
+      try {transformPoint(getMatrix(matrix), input, output, () => {if (reentered) fail('caught same-runtime reentry');});} finally {busy = false;}
+    },
+    transformPointBytes(matrix: symbol, input: Readonly<SourceJointVector>,
+      output: Partial<Record<number, number>>, byteOffset: number): void {
+      enter();
+      const check = (): void => {if (reentered) fail('caught same-runtime reentry');};
+      try {
+        if (!Number.isSafeInteger(byteOffset) || byteOffset < 0 || byteOffset > 0xfffffff4 || byteOffset % 4 !== 0)
+          fail('matrix byte destination requires aligned uint32 range');
+        const encoding = new DataView(new ArrayBuffer(4));
+        transformPointStores(getMatrix(matrix), input, (axis, value) => {
+          const offset = byteOffset + (axis === 'x' ? 0 : axis === 'y' ? 4 : 8);
+          // One stfs: validate all four ordinary own-data destinations before
+          // any store. This host fault rule does not emulate memory bus faults.
+          for (let i = 0; i < 4; i++) {own(output, String(offset + i), true); check();}
+          encoding.setFloat32(0, value, false);
+          for (let i = 0; i < 4; i++) output[offset + i] = encoding.getUint8(i);
+          check();
+        }, check);
+      } finally {busy = false;}
     },
     orientTerrainMatrix(matrix: symbol, normal: Readonly<SourceJointVector>, axisA: number, axisB: number): void {
       enter();
-      try {orientTerrainMatrix(getMatrix(matrix), normal, axisA, axisB);} finally {busy = false;}
+      try {orientTerrainMatrix(getMatrix(matrix), normal, axisA, axisB, 'secondary');} finally {busy = false;}
     },
     primaryFoldedPlacement(parent: symbol, current: symbol, next: symbol, end: symbol,
       translation: Readonly<SourceJointVector>, nextTranslation: Readonly<SourceJointVector>,
@@ -526,7 +674,9 @@ export function createSourceActorJointMatrixRuntime(
       try {
         if (current === next || current === end || next === end) fail('primary retained matrix slots must be distinct');
         primaryFoldedPlacement(getMatrix(parent), getMatrix(current), getMatrix(next), getMatrix(end),
-          translation, nextTranslation, correction);
+          translation, nextTranslation, correction, () => {
+            if (reentered) fail('caught same-runtime reentry during primary placement');
+          });
       } finally {busy = false;}
     },
     rotateShort(axis: 'x' | 'y' | 'z', parent: symbol, destination: symbol, angle: number): void {
@@ -561,4 +711,5 @@ export function createSourceActorJointMatrixRuntime(
       } finally {busy = false;}
     },
   });
+  sourceJointMatrixRuntimes.add(runtime); return runtime;
 }

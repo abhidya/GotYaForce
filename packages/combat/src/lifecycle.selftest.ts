@@ -1,3 +1,29 @@
+import {runActorSoundTableSelfTests} from './rom/actor-sound-table.selftest.js';
+import {runActorFrameSuffixSelfTests} from './rom/actor-frame-suffix.selftest.js';
+import {runActorAnimationTransitionSelfTests} from './rom/actor-animation-transition.selftest.js';
+import {runActorFrameLifecycleSelfTests} from './rom/actor-frame-lifecycle.selftest.js';
+import {runActorDoublePrehookSelfTests} from './rom/actor-double-prehook.selftest.js';
+import {runActorDoubleActionSelfTests} from './rom/actor-double-action.selftest.js';
+import {runSourceInputAtanSelfTests} from './rom/source-input-atan.selftest.js';
+import {runSourceFloat64SelfTests} from './rom/source-float64.selftest.js';
+import {runSourceInputAngleSelfTests} from './rom/source-input-angle.selftest.js';
+import {runActorInputAxisSelfTests} from './rom/actor-input-axis.selftest.js';
+import {runActorInputMachineSelfTests} from './rom/actor-input-machine.selftest.js';
+import {runActorInputChargeSelfTests} from './rom/actor-input-charge.selftest.js';
+import {runActorControlLifecycleSelfTests} from './rom/actor-control-lifecycle.selftest.js';
+import {runActorReadyTransitionsSelfTests} from './rom/actor-ready-transitions.selftest.js';
+import {runActorInputTestersSelfTests} from './rom/actor-input-testers.selftest.js';
+import {runActorCue0LifecycleSelfTests} from './rom/actor-cue0-lifecycle.selftest.js';
+import {runActorCue0TailSelfTests} from './rom/actor-cue0-tail.selftest.js';
+import {runActorCommandAdmissionSelfTests} from './rom/actor-command-admission.selftest.js';
+import {runActorRotationDampingSelfTests} from './rom/actor-rotation-damping.selftest.js';
+import {runActorNormalLifecycleSelfTests} from './rom/actor-normal-lifecycle.selftest.js';
+import {runActorTierLifecycleSelfTests} from './rom/actor-tier-lifecycle.selftest.js';
+import {runActorCeilingLifecycleSelfTests} from './rom/actor-ceiling-lifecycle.selftest.js';
+import {runActorRateLifecycleSelfTests} from './rom/actor-rate-lifecycle.selftest.js';
+import {runActorActionRequestSelfTests} from './rom/actor-action-request.selftest.js';
+import {runActorChargeEffectsSelfTests} from './rom/actor-charge-effects.selftest.js';
+import {runActorInputPrefixSelfTests} from './rom/actor-input-prefix.selftest.js';
 import {runActorTerrainQuerySelfTests} from './rom/actor-terrain-query.selftest.js';
 import {runActorTransformHistorySelfTests} from './rom/actor-transform-history.selftest.js';
 import {runActorMatrixUpdateSelfTests} from './rom/actor-matrix-update.selftest.js';
@@ -10,6 +36,7 @@ import {runActorMovementFollowupSelfTests} from './rom/actor-movement-followup.s
 import {runActorAttributeRefreshSelfTests} from './rom/actor-attribute-refresh.selftest.js';
 import {runActorStatusTimersSelfTests} from './rom/actor-status-timers.selftest.js';
 import {runActorGaugeScaleSelfTests} from './rom/actor-gauge-scale.selftest.js';
+import {runActorStageBoundsSelfTests} from './rom/actor-stage-bounds.selftest.js';
 import {runActorTickPrefixSelfTests} from './rom/actor-tick-prefix.selftest.js';
 import {runAnimationArchiveBankSelfTests} from './rom/animation-archive-bank.selftest.js';
 import {runActorAnimationSetupSelfTests} from './rom/actor-animation-setup.selftest.js';
@@ -52,7 +79,16 @@ import {runFObjDescriptorSelfTest} from './rom/fobj-descriptor.selftest.js';
 import {runAnimationRequestSelfTest} from './rom/animation-request.selftest.js';
 import {runRequestedAnimationSelfTest} from './rom/requested-animation.selftest.js';
 import {runAttachedJointSetupSelfTest} from './rom/attached-joint-setup.selftest.js';
-import {runAttachedSetupAnimationSelfTest} from './rom/attached-setup-animation.selftest.js';
+import {
+  runAttachedSetupAnimationSelfTest,
+  runBattleOrderedVoiceHydratedCompositionTests,
+  runActorMatrixSpringHydratedCompositionTests,
+  runActorVoiceRngHydratedCompositionTests,
+  runBattleOrderedInputSamplerHydratedCompositionTests,
+  runActorMatrixActiveHydratedCompositionTests,
+  runBattleTeamCandidatesHydratedCompositionTests,
+  runBattleOrderedInputValidEntryHydratedCompositionTests,
+} from './rom/attached-setup-animation.selftest.js';
 import {runFObjCallbackSelfTest} from './rom/fobj-callback.selftest.js';
 import {runFObjLinearSelfTest} from './rom/fobj-linear.selftest.js';
 import {runFObjTimingSelfTest} from './rom/fobj-timing.selftest.js';
@@ -375,6 +411,15 @@ export function runSelfTest(): void {
   runRequestedAnimationSelfTest();
   runAttachedJointSetupSelfTest();
   runAttachedSetupAnimationSelfTest();
+  // Keep the observed-input/voice/matrix suites in the ordinary CI aggregate.
+  // Ordered-prefix and ordered-stage suites already run inside attached setup.
+  runBattleOrderedVoiceHydratedCompositionTests();
+  runActorMatrixSpringHydratedCompositionTests();
+  runActorVoiceRngHydratedCompositionTests();
+  runBattleOrderedInputSamplerHydratedCompositionTests();
+  runActorMatrixActiveHydratedCompositionTests();
+  runBattleTeamCandidatesHydratedCompositionTests();
+  runBattleOrderedInputValidEntryHydratedCompositionTests();
   runActorAnimationDispatchSelfTest();
   runSourceStreamWaitSelfTest();
   runStreamWaitTargetSelfTest();
@@ -387,6 +432,12 @@ export function runSelfTest(): void {
   runAllocatedAObjDescriptorSelfTest();
   runAnimationArchiveBankSelfTests();
   runActorAnimationSetupSelfTests();
+  runActorAnimationTransitionSelfTests();
+  runActorFrameLifecycleSelfTests();
+  runActorDoublePrehookSelfTests();
+  runActorDoubleActionSelfTests();
+  runActorFrameSuffixSelfTests();
+  runActorSoundTableSelfTests();
   runActorMovementFollowupSelfTests();
   runActorAttributeRefreshSelfTests();
   runAnimationArchiveHydrationSelfTest();
@@ -506,9 +557,33 @@ runGredRangedProjectileSelfTest();
   runActorStatusTimersSelfTests();
   runActorGaugeScaleSelfTests();
   runActorTickPrefixSelfTests();
+  runActorStageBoundsSelfTests();
+  runActorCueResetSelfTests();
+  runActorInputPrefixSelfTests();
+  runActorInputMachineSelfTests();
+  runActorInputChargeSelfTests();
+  runActorControlLifecycleSelfTests();
+  runActorReadyTransitionsSelfTests();
+  runActorActionRequestSelfTests();
+  runActorRateLifecycleSelfTests();
+  runActorCeilingLifecycleSelfTests();
+  runActorTierLifecycleSelfTests();
+  runActorNormalLifecycleSelfTests();
+  runActorRotationDampingSelfTests();
+  runActorCue0LifecycleSelfTests();
+  runActorCue0TailSelfTests();
+  runActorCommandAdmissionSelfTests();
+  runActorInputTestersSelfTests();
+  runActorChargeEffectsSelfTests();
+  runActorInputAxisSelfTests();
+  runSourceInputAngleSelfTests();
+  runSourceInputAtanSelfTests();
+  runSourceFloat64SelfTests();
   console.log("[lifecycle.selftest] PASS: lethal ROM ownership interruption, deployment, accounting, and result settlement");
 }
 
 if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith("lifecycle.selftest.js")) {
   runSelfTest();
 }
+
+import {runActorCueResetSelfTests} from './rom/actor-cue-reset.selftest.js';

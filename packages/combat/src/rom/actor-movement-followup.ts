@@ -20,6 +20,7 @@
  * at binding; readonly inputs are allowed, destinations checked at each store.
  * Caught same-runtime mutation reentry poisons the enclosing operation.
  */
+import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
 import type {SourceActorJointMappingRuntime} from './actor-joint-mapping.js';
@@ -53,6 +54,10 @@ export interface SourceActorMovementFollowupRuntime {
   bindActor(identity: symbol, actor: RomActor, initial: Readonly<SourceActorMovementFollowupBinding>): void;
   /** Actual bound owner, never a copy; supports composition identity checks. */
   getActualActor(identity: symbol): RomActor;
+  /** Retained source records for exact setup/postamble composition, never copies. */
+  getMappingActor(identity: symbol): object;
+  getSetupBinding(identity: symbol): object;
+  getWaitBinding(identity: symbol): object;
   getActorBinding(identity: symbol): SourceActorMovementFollowupBinding;
   bindDescriptor(identity: symbol, initial: Readonly<SourceActorMovementDescriptorBinding>): void;
   getDescriptorBinding(identity: symbol): SourceActorMovementDescriptorBinding;
@@ -63,6 +68,10 @@ export interface SourceActorMovementFollowupRuntime {
    * copying Ys or recomputing matrices. Cannot coexist with decoded Y storage. */
   bindWorldMatrices(identity: symbol, matrices: readonly symbol[]): void;
   updateActor(identity: symbol): void;
+}
+const genuineRuntimes = new WeakSet<object>();
+export function isSourceActorMovementFollowupRuntime(value: unknown): value is SourceActorMovementFollowupRuntime {
+  return value !== null && typeof value === 'object' && genuineRuntimes.has(value);
 }
 function fail(reason: string): never {throw Error(`[actor-movement-followup] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);}
 function own(record: unknown, key: string, writable = false): unknown {
@@ -92,24 +101,24 @@ function product(a: number, b: number): number {
 export function createSourceActorMovementFollowupRuntime(sources: SourceActorMovementFollowupSources): SourceActorMovementFollowupRuntime {
   let busy = false, poisoned = false;
   const read = (record: unknown, key: string): unknown => {
-    const value = own(record, key); if (poisoned) fail('caught same-runtime reentry'); return value;
+    const value = own(record, key); if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation(); return value;
   };
   const write = (record: unknown, key: string, value: number): void => {
-    own(record, key, true); if (poisoned) fail('caught same-runtime reentry');
+    own(record, key, true); if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation();
     (record as Record<string, unknown>)[key] = value;
-    if (poisoned) fail('caught same-runtime reentry');
+    if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation();
   };
   const guard = (run: () => void): void => {
     if (busy) {poisoned = true; fail('same-runtime reentry unsupported');}
     busy = true; poisoned = false;
-    try {run(); if (poisoned) fail('caught same-runtime reentry');} finally {busy = false;}
+    try {run(); if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation();} finally {busy = false;}
   };
   const capture = (name: keyof SourceActorMovementFollowupSources, key: string) => {
     const receiver = own(sources, name), fn = own(receiver, key);
     if (typeof fn !== 'function') fail(`${name}.${key}: own data-function required`);
     return (id: symbol): unknown => {
       const result = Reflect.apply(fn, receiver, [id]);
-      if (poisoned) fail('caught same-runtime reentry');
+      if (poisoned) fail('caught same-runtime reentry'); checkActiveSourceActorFrameInvocation();
       if (result instanceof Promise) fail('adapter must complete synchronously');
       if (result === null || typeof result !== 'object') fail('adapter must return an actual owned record');
       return result;
@@ -145,7 +154,7 @@ export function createSourceActorMovementFollowupRuntime(sources: SourceActorMov
     if (index >= length) fail('world-matrix addressing outside explicitly owned storage');
     return f(table, String(index));
   };
-  return Object.freeze({
+  const runtime: SourceActorMovementFollowupRuntime = {
     bindActor(id: symbol, actual: RomActor, initial: Readonly<SourceActorMovementFollowupBinding>): void {guard(() => {
       if (actors.has(id)) fail('actor already bound');
       if (actual === null || typeof actual !== 'object') fail('actual RomActor data record required');
@@ -156,6 +165,9 @@ export function createSourceActorMovementFollowupRuntime(sources: SourceActorMov
       assignedActors.add(actual);
     });},
     getActualActor(id: symbol) {return actorEntry(id).actual;},
+    getMappingActor(id: symbol) {return actorEntry(id).mapping as object;},
+    getSetupBinding(id: symbol) {return actorEntry(id).setup as object;},
+    getWaitBinding(id: symbol) {return actorEntry(id).wait as object;},
     getActorBinding(id: symbol) {return actorEntry(id).binding;},
     bindDescriptor(id: symbol, initial: Readonly<SourceActorMovementDescriptorBinding>): void {guard(() => {
       if (descriptors.has(id)) fail('descriptor already bound');
@@ -233,5 +245,7 @@ export function createSourceActorMovementFollowupRuntime(sources: SourceActorMov
       write(actual, 'stepHeight', product(relative, product(0.699999988079071, movement)));
       if (f(actual, 'stepHeight') < 0) write(actual, 'stepHeight', 0);
     });},
-  });
+  };
+  genuineRuntimes.add(runtime);
+  return Object.freeze(runtime);
 }

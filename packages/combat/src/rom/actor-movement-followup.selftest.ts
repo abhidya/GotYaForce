@@ -68,6 +68,19 @@ function fixture(deferBind = false, fullMatrices = false) {
 export function runActorMovementFollowupSelfTests(): void {
   {
     const x = fixture();
+    check(x.runtime.getMappingActor(x.actor) === x.mapping.getActor(x.actor), 'retains exact canonical mapping header');
+    check(x.runtime.getSetupBinding(x.actor) === x.setup.getActorBinding(x.actor), 'retains exact canonical setup binding');
+    check(x.runtime.getWaitBinding(x.actor) === x.waits.getActorBinding(x.actor), 'retains exact canonical wait binding');
+    let reads = 0;
+    x.hooks.mapping = () => {reads++;}; x.hooks.setup = () => {reads++;}; x.hooks.wait = () => {reads++;};
+    x.runtime.getMappingActor(x.actor); x.runtime.getSetupBinding(x.actor); x.runtime.getWaitBinding(x.actor);
+    equal(reads, 0, 'retained getters never rehydrate through source adapters');
+    for (const read of [() => x.runtime.getMappingActor(Symbol()), () => x.runtime.getSetupBinding(Symbol()),
+      () => x.runtime.getWaitBinding(Symbol())]) rejects(read, 'unknown/non-owned movement actor');
+  }
+
+  {
+    const x = fixture();
     const input: SourceActorMovementDescriptorBinding = {joint0f: 255, joint22: 1, joint2a: 2, joint32: 3, joint3a: 4,
       byte23: 255, byte24: 254, byte25: 253, byte26: 2, byte27: 1, byte2b: 251, byte2c: 250, byte2d: 249,
       byte2e: 248, byte2f: 247, byte33: 246, byte34: 245, byte35: 244, byte36: 243, byte37: 242,

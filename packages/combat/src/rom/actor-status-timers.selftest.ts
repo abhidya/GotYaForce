@@ -101,6 +101,27 @@ function fixture(defer = false) {
 
 export function runActorStatusTimersSelfTests(): void {
   {
+    const x = fixture();
+    equal(x.runtime.getStartBinding(x.id), x.streams.getStartActorBinding(x.id), 'canonical stream-start metadata is the retained709 owner');
+    for (let i = 0; i < 3; i++) {
+      equal(x.runtime.getAmmoSlot(x.id, i), x.slots[i], 'ammo getter returns retained slot');
+      equal(x.runtime.getAmmoSlot(x.id, i).cell, x.cells[i], 'ammo getter returns existing source cell');
+    }
+    for (const index of [-1, 3, 0.5, NaN, Infinity]) rejects(() => x.runtime.getAmmoSlot(x.id, index), 'slot index');
+    rejects(() => x.runtime.getAmmoSlot(Symbol('unknown'), 0), 'unknown');
+    let reads = 0;
+    Object.defineProperty(x.cells[0]!, 'max', {get() {reads++; throw Error('must stay lazy');}});
+    equal(x.runtime.getAmmoSlot(x.id, 0), x.slots[0], 'metadata getter does not read ammo values');
+    equal(reads, 0, 'unreached ammo max accessor untouched');
+    const old = x.slots[1]; x.slots[1] = {cell: x.cells[1]!};
+    rejects(() => x.runtime.getAmmoSlot(x.id, 1), 'owner changed'); x.slots[1] = old;
+    const cell = x.slots[2].cell;
+    (x.slots[2] as {cell: typeof cell}).cell = {...cell};
+    rejects(() => x.runtime.getAmmoSlot(x.id, 2), 'owner changed');
+    (x.slots[2] as {cell: typeof cell}).cell = cell;
+    equal(x.runtime.getAmmoSlot(x.id, 2), x.slots[2], 'restored exact cell identity is accepted');
+  }
+  {
     const x = fixture(); x.run(); const s = x.state();
     equal(x.actual.stateTimer, 0, 'source timestep expires state timer'); equal(x.actual.dt, 99, 'legacy dt untouched');
     equal(x.actual.housekeeping73f, 0, 'state timer clears housekeeping'); equal(s.field690, 0, 'negative result clamps');

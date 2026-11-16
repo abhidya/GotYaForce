@@ -72,8 +72,7 @@ export interface RomPhysicsExtrasScratch {
   collisionDisabled7c9?: number;
   /** +0x741: flyer / no-vertical-clamp flag (FUN_80067310:3815). */
   flyer741?: number;
-  /** +0x6cb: second no-clamp flag OR'd with +0x741 (FUN_80067310:3815). */
-  noClamp6cb?: number;
+  // +0x6cb is the canonical optional RomActor.noClamp6cb owner.
   /** +0x754: touchdown callback invoked by zz_00677b0_'s land branch (line 4042-4044). */
   onLand754?: ((actor: RomActor) => void) | null;
 }
