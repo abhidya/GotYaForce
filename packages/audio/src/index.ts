@@ -117,13 +117,12 @@ export class GotchaAudioManager {
     const audio = this.createElement(entry, typeVolume);
     audio.loop = false;
     this.activeSfx.add(audio);
-    audio.addEventListener("ended", () => this.activeSfx.delete(audio), { once: true });
+    audio.addEventListener("ended", this.onSfxFinished);
+    audio.addEventListener("error", this.onSfxFinished);
     try {
       await audio.play();
     } catch (error) {
-      this.activeSfx.delete(audio);
-      audio.src = "";
-      audio.load();
+      this.releaseSfx(audio);
       throw error;
     }
     return audio;
@@ -154,11 +153,23 @@ export class GotchaAudioManager {
   dispose(): void {
     this.stopBgm();
     for (const audio of this.activeSfx) {
-      audio.pause();
-      audio.src = "";
-      audio.load();
+      this.releaseSfx(audio);
     }
-    this.activeSfx.clear();
+  }
+
+  private readonly onSfxFinished = (event: Event): void => {
+    this.releaseSfx(event.currentTarget as HTMLAudioElement);
+  };
+
+  private releaseSfx(audio: HTMLAudioElement): void {
+    // Remove ownership/listeners before load(), which can abort pending playback
+    // and queue further media events. Late rejection and dispose are idempotent.
+    if (!this.activeSfx.delete(audio)) return;
+    audio.removeEventListener("ended", this.onSfxFinished);
+    audio.removeEventListener("error", this.onSfxFinished);
+    audio.pause();
+    audio.src = "";
+    audio.load();
   }
 
   private indexManifest(manifest: AudioManifest): void {
