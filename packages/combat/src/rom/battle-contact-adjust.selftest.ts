@@ -7,7 +7,7 @@ function refuses(f:()=>unknown,want:string):void{let got='';try{f();}catch(e){go
  * a skipped preceding stage. The actual timer/reset/copy path reaches3a05c. */
 export function runBattleContactAdjustSelfTests(make:Make):void{
  let count=0;
- const end='8002d0cc reached required80039f6c';
+ const end='float80437004: own data required';
  for(const mode of ['zero','first','second','both','signed','freshSecond','capturedSecond','lazyZero','liveZ','height','freshSlot','nullSecond','missingFlag','missingY','missingZ','readonlyY','lateReadonlyY','readonlyZ','lateGqrXY','lateGqrZ','lateFpscrZ','lateProcessor','reentryXY','aliasXY','nan','overflowY','negativeZero']as const){
   count++;const x=createBattleContactHeightTestFixture(make),other=Symbol('collision contact'),otherOwner=Symbol('collision owner');
   const hit:Record<number,number>={},owner:Record<number,number>={};
@@ -75,5 +75,5 @@ export function runBattleContactAdjustSelfTests(make:Make):void{
   check(Object.values(x.slotRecords).every(r=>r.contact26f===77),'later frame stage not fabricated');
   refuses(()=>x.frame.runFrame(),'permanently incomplete');
  }
- console.log(`[battle-contact-adjust] PASS: ${count} genuine contact displacement/paired-add cases; collision predicate remains unsupported`);
+ console.log(`[battle-contact-adjust] PASS: ${count} genuine contact displacement/paired-add cases; new predicate constant ingress remains explicit`);
 }

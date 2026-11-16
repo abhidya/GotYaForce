@@ -1,3 +1,4 @@
+import {readSourceContactPredicate} from './source-contact-predicate.js';
 import {invokeSourceContactResetOuter,type SourceContactResetSources} from './source-contact-reset.js';
 import {isSourceActorNormalLifecycleRuntime,type SourceActorNormalLifecycleRuntime} from './actor-normal-lifecycle.js';
 import {executeSourceContactTransform} from './source-contact-transform.js';
@@ -103,7 +104,7 @@ export interface SourceBattleTargetPreparationSources {
 }
 export interface SourceBattleOuterFrameSources {
   /** Genuine2bb14 prefix. Explicit source globals, not generated defaults. */
-  targetAction?:{normal?:SourceActorNormalLifecycleRuntime;constants?:{float80436f68?:number;float80436f6c?:number};cells?:Record<string,number>;contactPointers46?:Record<number,symbol|null>;contactPointers44?:Record<number,symbol|null>};
+  targetAction?:{normal?:SourceActorNormalLifecycleRuntime;constants?:{float80436f68?:number;float80436f6c?:number;float80437004?:number;double80436fd0?:number;double80436fd8?:number};cells?:Record<string,number>;contactPointers4c?:Record<number,symbol|null>;contactPointers46?:Record<number,symbol|null>;contactPointers44?:Record<number,symbol|null>};
   /** Same ten global halfword destinations used by8008a28c, not copied lists.
    * Reached only at294ec after the fresh mode selects the normal suffix. */
   contactCounters?: Partial<Record<`half804362${'50'|'4e'|'4c'|'4a'|'48'|'46'|'44'|'42'|'40'|'3e'}`,number>>;
@@ -271,6 +272,7 @@ const s16=(value: number): number=>value<<16>>16;
 // setter call after the observable ownership checks have completed.
 const primaryStoreDescriptor=Reflect.getOwnPropertyDescriptor;
 const primaryStoreDescriptors=Object.getOwnPropertyDescriptors;
+const primaryStoreKeys=Reflect.ownKeys;
 export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFrameSources): SourceBattleOuterFrameRuntime {
   const scheduler=own(sources,'scheduler');
   if(!isSourceObjectSchedulerRuntime(scheduler)) fail('genuine source scheduler required');
@@ -2540,7 +2542,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       try{invokeSourceContactResetOuter(runtime,kind,value);}finally{targetResetInvocation=undefined;}
       guard();
     };
-    const initialContact=():void=>{
+    const initialContactPasses=():void=>{
       const counters=retain('contactCounters',get(sources,'contactCounters'));edge(sources,'contactCounters',counters);
       const count=(address:number):number=>{
         const key='half'+address.toString(16);
@@ -2568,10 +2570,10 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         const o=bytes(id);byteAliases(o,offset,width);
         const value=width===1?allocator.readU8(id!,offset):allocator.readU32(id!,offset);guard();byteAliases(o,offset,width,true);return value;
       };
-      const pointer20=(id:symbol|null):symbol|null=>{
-        const o=bytes(id);byteAliases(o,0x20,4);const value=allocator.readPointer(id!,0x20);guard();byteAliases(o,0x20,4,true);return value;
+      const pointer=(id:symbol|null,offset=0x20):symbol|null=>{
+        const o=bytes(id);byteAliases(o,offset,4);const value=allocator.readPointer(id!,offset);guard();byteAliases(o,offset,4,true);return value;
       };
-      const contact=(name:'contactPointers46'|'contactPointers44',index:number):symbol|null=>{
+      const contact=(name:'contactPointers46'|'contactPointers44'|'contactPointers4c',index:number):symbol|null=>{
         const table=retain('targetAction '+name,get(input,name));edge(input,name,table);
         const id=get(table,String(index));if(id!==null&&typeof id!=='symbol')fail('2cf80 explicit contact pointer required');return id;
       };
@@ -2634,9 +2636,17 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           vectorStore(destination+8,[addSourceFloat32(az,bz)]);
         }
       };
+      const copyContacts=(first:symbol|null,second:symbol|null):void=>{
+        for(const [source,destination]of [[first,0x803b04d0],[second,0x803b0368]]as const)
+          for(let pair=0;pair<45;pair++){
+            const a=raw(source,0x58+8*pair,4),b=raw(source,0x5c+8*pair,4);
+            copyWord(destination+8*pair,a);copyWord(destination+8*pair+4,b);
+          }
+      };
+      const predicate=():boolean=>readSourceContactPredicate(cells,constants(),root,guard);
       let visits=0;
       for(let outer=0;outer<count(0x80436246);outer++){
-        const hit=contact('contactPointers46',outer),owner=pointer20(hit);
+        const hit=contact('contactPointers46',outer),owner=pointer(hit);
         if((raw(owner,0x83,1)<<24>>24)===0){
           const high=asFloat(raw(hit,0x68,4)),low=asFloat(raw(hit,0x88,4));
           const slot=raw(owner,0x3e4,1);const height=subtract(high,low);
@@ -2644,20 +2654,67 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         }
         for(let inner=0;inner<count(0x80436244);inner++){
           if(++visits>65536)fail('2cf80 finite comparison budget exceeded');
-          const other=contact('contactPointers44',inner),freshOwner=pointer20(hit),otherOwner=pointer20(other);
+          const other=contact('contactPointers44',inner),freshOwner=pointer(hit),otherOwner=pointer(other);
           if(freshOwner===otherOwner||owner===otherOwner)continue;
-          for(const [source,destination]of [[hit,0x803b04d0],[other,0x803b0368]]as const)
-            for(let pair=0;pair<45;pair++){
-              const first=raw(source,0x58+8*pair,4),second=raw(source,0x5c+8*pair,4);
-              copyWord(destination+8*pair,first);copyWord(destination+8*pair+4,second);
-            }
+          copyContacts(hit,other);
           adjustContact(owner,otherOwner);
           if((raw(owner,0x83,1)<<24>>24)===0){
             const slot=raw(owner,0x3e4,1);scalarControls();
             const high=cellFloat(0x803b04e0),low=cellFloat(0x803b0500);
             globalFloatStore(0x803b0708+(slot<<24>>24)*4,subtract(high,low),terminalScalar);
           }
-          fail('8002d0cc reached required80039f6c after actual3a05c; collision predicate unsupported');
+          if(!predicate())continue;
+          if((raw(owner,0x1de,1)<<24>>24)!==0&&pointer(owner,0x1e0)===other){
+            asFloat(raw(owner,0x48,4));
+            fail('8002d0f4 requires unselected support-height constant80436f94');
+          }
+          raw(hit,0x58,4);raw(other,0x58,4);
+          fail('8002d134 reached required80030348 after positive39f6c; collision dispatch unsupported');
+        }
+      }
+      guard(); // actual2cf80 return, then actual2bd9c→2d35c.
+      const descriptorOwners=new Map<symbol,{base:symbol;offset:number;owner:object}>();
+      ownerChecks.push(()=>{for(const [id,a]of descriptorOwners){
+        const now=allocator.getInteriorAddress(id);
+        if((now?.base??id)!==a.base||(now?.byteOffset??0)!==a.offset||allocator.getPointerTarget(a.base)!==a.owner)fail('2d35c descriptor owner changed');
+      }});
+      const descriptorFlags=(id:symbol|null):number=>{
+        if(id===null)fail('2d35c null descriptor at half2 load');
+        const interior=allocator.getInteriorAddress(id);guard();const base=interior?.base??id,offset=interior?.byteOffset??0;
+        const o=allocator.getPointerTarget(base);guard();
+        if(o===cells||edges.some(e=>e.value===o))fail('2d35c descriptor aliases retained global owner');
+        const old=descriptorOwners.get(id);if(old&&(old.base!==base||old.offset!==offset||old.owner!==o))fail('2d35c descriptor owner changed');
+        descriptorOwners.set(id,{base,offset,owner:o});
+        const shape=():void=>{
+          if(Array.isArray(o)||ArrayBuffer.isView(o))fail('2d35c ordinary descriptor byte record required');
+          const fields=primaryStoreDescriptors(o);
+          for(const key of primaryStoreKeys(fields)){
+            if(typeof key!=='string')fail('2d35c descriptor symbol overlay unsupported');const d=fields[key]!;
+            if(!/^(0|[1-9][0-9]*)$/.test(key)||Number(key)>65535||!('value'in d)||typeof d.value!=='number'||!Number.isInteger(d.value)||d.value<0||d.value>255)fail('2d35c canonical descriptor bytes required');
+          }
+        };
+        if(!Number.isInteger(offset)||offset<0||offset>65532||offset%2)fail('2d35c aligned descriptor halfword required');
+        shape();const high=unsigned(get(o,String(offset+2)),255,'descriptor byte'),low=unsigned(get(o,String(offset+3)),255,'descriptor byte');guard();shape();return high*256+low;
+      };
+      for(let outer=0;outer<count(0x8043624c)-1;outer++){
+        const hit=contact('contactPointers4c',outer);
+        if(descriptorFlags(pointer(hit,0x28))&0x800)continue;
+        const owner=pointer(hit);
+        if((raw(owner,0x281,1)<<24>>24)!==0||raw(owner,0x83,1)===23)continue;
+        for(let inner=outer+1;inner<count(0x8043624c);inner++){
+          if(++visits>65536)fail('2d35c finite comparison budget exceeded');
+          const other=contact('contactPointers4c',inner),freshOwner=pointer(hit),otherOwner=pointer(other);
+          if(freshOwner===otherOwner)continue;
+          if(descriptorFlags(pointer(other,0x28))&0x800)continue;
+          if((raw(otherOwner,0x281,1)<<24>>24)!==0||raw(otherOwner,0x83,1)===23)continue;
+          if(owner===otherOwner)continue;
+          if((raw(owner,0x1db,1)<<24>>24)!==0&&pointer(owner,0x1e0)===other)continue;
+          if((raw(otherOwner,0x1db,1)<<24>>24)!==0&&pointer(otherOwner,0x1e0)===hit)continue;
+          copyContacts(hit,other);adjustContact(owner,otherOwner);
+          if(!predicate())continue;
+          // True predicate reaches the actual type loads before30348.
+          raw(hit,0x58,4);raw(other,0x58,4);
+          fail('8002d4ec reached required80030348 after positive39f6c; collision dispatch unsupported');
         }
       }
       guard();
@@ -2707,8 +2764,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     }
     for(const group of [40,32,0,16,8,24])reset('group',group);
     for(let i=0;i<12;i++)reset('player',i);
-    initialContact();
-    fail('8002bd9c reached required8002d35c; next target/action contact pass unsupported');
+    initialContactPasses();
+    fail('8002bda0 reached required8002d58c; next target/action contact pass unsupported');
   };
   const resetContactCounts=():void=>{
     const supplied=Object.getOwnPropertyDescriptor(sources,'contactCounters');check();

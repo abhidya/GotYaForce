@@ -16,7 +16,7 @@ export function runBattleContactHeightSelfTests(make:Make):void{
  let count=0;
  const fresh=()=>{count++;return createBattleContactHeightTestFixture(make);};
  type Fixture=ReturnType<typeof fresh>;
- const end='8002bd9c reached required8002d35c',pairEnd='2cf80 null pointer at reached dereference';
+ const end='8002bda0 reached required8002d58c',pairEnd='2cf80 null pointer at reached dereference';
  const run=(x:Fixture,want=end,hook:(o:object,k:PropertyKey)=>void=()=>{},inactivePhysical=false):void=>{
   const native=Object.getOwnPropertyDescriptor;let selected=false,entered=false;
   Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{

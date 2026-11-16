@@ -1,3 +1,5 @@
+import {runBattleContactPairingSelfTests} from './battle-contact-pairing.selftest.js';
+import {runSourceContactPredicateSelfTests} from './source-contact-predicate.selftest.js';
 import {runBattleContactAdjustSelfTests} from './battle-contact-adjust.selftest.js';
 import {runBattleContactHeightSelfTests} from './battle-contact-height.selftest.js';
 import {runBattleTargetActionResetSelfTests} from './battle-target-action-reset.selftest.js';
@@ -2970,6 +2972,8 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleTargetActionResetSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runBattleContactHeightSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runBattleContactAdjustSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runSourceContactPredicateSelfTests();
+  runBattleContactPairingSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();
