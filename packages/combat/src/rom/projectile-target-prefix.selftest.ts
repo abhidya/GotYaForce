@@ -386,17 +386,25 @@ export function runProjectileTargetPrefixSelfTests(make: () => SourceProjectileT
   }
 
   for(const mode of ['null','zeroHit'] as const) for(const kind of ['missing','accessor','malformed'] as const) {
-    const x=make(),direction=words(x,DIRECTION),keep=retained(x.targetStack.displacement);let reads=0,getterRan=false;
+    const x=make(),direction=words(x,DIRECTION),keep=retained(x.targetStack.displacement);let stackReads=0,processorReads=0,getterRan=false;
     if(kind==='missing') {delete x.rootSources.targetStack;delete x.rootSources.processor;}
     else if(kind==='accessor') {
       Object.defineProperty(x.rootSources,'targetStack',{get(){getterRan=true;throw Error('unreached stack');}});
       Object.defineProperty(x.rootSources,'processor',{get(){getterRan=true;throw Error('unreached processor');}});
     } else {Reflect.set(x.rootSources,'targetStack',null);Reflect.set(x.rootSources,'processor',null);}
     if(mode==='zeroHit') {syntheticTarget(x);x.hitPool.head=null;}
-    observe(()=>mode==='null'?dispatch(x,NORMALIZE):x.root.dispatchStoredRoot(x.child),(owner,key)=>{
-      if(owner===x.rootSources && (key==='targetStack'||key==='processor')) reads++;
+    // Null target skips targetPrefix, not the mandatory later Normalize.
+    // Zero HIT returns before both helpers. Neither path touches targetStack.
+    const boundary=kind==='missing'?NORMALIZE:kind==='accessor'?'processor: own data profile required':'processor: ordinary own-data profile required';
+    observe(()=>mode==='null'?dispatch(x,boundary):x.root.dispatchStoredRoot(x.child),(owner,key)=>{
+      if(owner===x.rootSources && key==='targetStack') stackReads++;
+      if(owner===x.rootSources && key==='processor') {
+        processorReads++;
+        sameWords(x,DIRECTION,[0,0,0x3f800000],'Normalize profile follows actual direction stores');
+      }
     });
-    check(!getterRan && reads===0,`${mode} skips unavailable target stack and processor`);keep();
+    check(!getterRan && stackReads===0,`${mode} skips unavailable target stack without getters`);
+    equal(processorReads,mode==='null'?1:0,`${mode} reaches only its actual processor load`);keep();
     if(mode==='null') {sameWords(x,DIRECTION,[0,0,0x3f800000],'old actual null-target flight behavior');closed(x);}
     else {
       equal(x.allocator.readU8(x.child,0x18),2,'actual zero HIT returns after state2 store');
