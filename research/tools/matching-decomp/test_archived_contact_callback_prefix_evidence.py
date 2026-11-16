@@ -89,6 +89,10 @@ class ArchiveTests(unittest.TestCase):
             self.assertEqual(len(selected),1)
             facts=result['ranges'][0];self.assertEqual(facts['represented_instructions'],249)
             self.assertTrue(facts['semantics']['state_ge3_returns'])
+            self.assertEqual(facts['semantics']['state0_countdown'],dict(signed_timer_offset=0x48,
+                positive_fresh_owner_byte=0x83,nonpositive_boundary='8008a788',
+                zero_owner_float_boundary='8008a75c',decrement_store='8008a780',
+                return_branch='8008a784',return_target='8008aa20'))
             self.assertEqual(facts['semantics']['transform_arguments'],dict(matrix_hit_offset=0x60,
                 captured_descriptor_hit_offset=0x28,input_descriptor_offset=0x0c,output_hit_offset=0x30))
             self.assertEqual(facts['semantics']['state0_copy_order'],['load30','load34','store3c','store40','load38','store44'])
@@ -126,6 +130,13 @@ class ArchiveTests(unittest.TestCase):
                              ('8008a714','target','8008a71c'),('8008aa04','displacement',19),
                              ('8008a6c4','mnemonic','or'),('8008a6d0','SH',11),
                              ('8008a9fc','BI',0),
+                             ('8008a748','Rc',0),('8008a74c','BO',12),('8008a74c','BI',0),
+                             ('8008a74c','target','8008a750'),('8008a750','displacement',0x84),
+                             ('8008a754','mnemonic','extsh'),('8008a758','BO',12),
+                             ('8008a758','target','8008a75c'),('8008a75c','displacement',0x1ce0),
+                             ('8008a77c','immediate',1),('8008a77c','rA',0),
+                             ('8008a780','mnemonic','stw'),('8008a780','displacement',0x4a),
+                             ('8008a784','target','8008a788'),
                              ('8008a720','immediate',0),('8008a720','rA',29),
                              ('8008a724','immediate',0x3c),('8008a724','rD',4),
                              ('8008a868','immediate',0),('8008a868','rA',29),

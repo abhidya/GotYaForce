@@ -6,10 +6,8 @@ function check(ok:boolean,s:string):void{if(!ok)throw Error('[battle-contact-tra
 function refuses(f:()=>unknown,want:string):void{let got='';try{f();}catch(e){got=String(e);}check(got.includes(want),`expected ${want}, got ${got}`);}
 /** Actual existing HIT/descriptor/matrix owners, with explicit synthetic finite
  * vector inputs. This neither completes initialization nor a normal frame. */
-export function runBattleContactTransformSelfTests(make:Make):void{
- let count=0;
- const fresh=(mode=0)=>{
-  count++;const x=createSourcePlayerContactTestFixture(make),id=x.groups[49]!.head!;
+export function createSourceContactTransformTestFixture(make:Make,mode=0){
+  const x=createSourcePlayerContactTestFixture(make),id=x.groups[49]!.head!;
   const bytes=x.allocator.getObject(id)as Record<number,number>;
   x.allocator.writePointer(id,0x20,x.child);bytes[0x10]=mode;bytes[0x13]=77;
   const descriptor=x.allocator.readPointer(id,0x28)!,a=x.allocator.getInteriorAddress(descriptor)!;
@@ -24,7 +22,9 @@ export function runBattleContactTransformSelfTests(make:Make):void{
   check(m?.base===x.child&&m.byteOffset===0x114,'real HIT60 points into existing child114');
   return Object.assign(x,{transformId:id,transformBytes:bytes,transformData:data,transformDescriptor:descriptor,transformOffset:a.byteOffset,
    transformMatrixBytes:x.allocator.getObject(x.child)as Record<number,number>,float,word,transformMode:mode});
- };
+}
+export function runBattleContactTransformSelfTests(make:Make):void{
+ let count=0;const fresh=(mode=0)=>{count++;return createSourceContactTransformTestFixture(make,mode);};
  type Fixture=ReturnType<typeof fresh>;
  const run=(x:Fixture,want:string,hook:(o:object,k:PropertyKey)=>void=()=>{}):void=>{
   const native=Object.getOwnPropertyDescriptor;let selected=false;
@@ -37,11 +37,11 @@ export function runBattleContactTransformSelfTests(make:Make):void{
   check(Object.values(x.slotRecords).every(r=>r.contact26f===77),'later player contact work not skipped');
   refuses(()=>x.frame.runFrame(),'permanently incomplete');
  };
- const boundary=(mode:number)=>(mode===0?'8008a744':'8008a88c')+' reached contact timer continuation';
+ const boundary=(mode:number)=>mode===0?'8008a788 reached contact initialization dispatch':'8008a88c reached contact timer continuation';
  const vector=(x:Fixture,offset:number)=>[0,4,8].map(i=>x.allocator.readF32(x.transformId,offset+i)).join(',');
  {const x=fresh();refuses(()=>executeSourceContactTransform(x.frame,x.transformId),'private');check(vector(x,0x30)==='77,78,79','outside private invocation cannot transform');}
  for(const mode of [0,1]){
-  const x=fresh(mode);delete x.transformBytes[mode===0?0x48:0x4a];
+  const x=fresh(mode);if(mode===0)x.allocator.writeU16(x.transformId,0x48,0);else delete x.transformBytes[0x4a];
   run(x,boundary(mode));check(vector(x,0x30)==='3,5,7','captured descriptor+0c transformed through genuine child114');
   check(vector(x,0x3c)===(mode===0?'3,5,7':'77,78,79'),'mode-specific raw copy order');
  }

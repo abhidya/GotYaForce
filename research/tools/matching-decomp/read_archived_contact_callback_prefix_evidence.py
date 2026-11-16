@@ -38,7 +38,7 @@ def summarize(rows):
     c.require(rows[-1]==dict(address='8008aa3c',mnemonic='blr',BO=20,BI=0,BH=0,LK=0),'terminal return')
     by_pc={int(r['address'],16):r for r in rows}
     def memory(pc,name,base,offset,reg):
-        r=by_pc[pc];register='rS'if name in('stw','stb','sth')else'rD'
+        r=by_pc[pc];register='rS'if name in('stw','stb','sth')else'fD'if name=='lfs'else'rD'
         c.require(r['mnemonic']==name and r['rA']==base and r['displacement']==offset and r[register]==reg,'prefix memory schedule')
     # A narrow derived load/store schedule, not a full original instruction fixture.
     for args in ((0x8008a67c,'lwz',3,0x20,30),(0x8008a680,'lbz',30,0x1d8,0),
@@ -66,6 +66,20 @@ def summarize(rows):
         r=by_pc[pc]
         c.require(r['mnemonic']=='addi'and (r['rD'],r['rA'],r['immediate'])==
                   (destination,base_register,offset),'transform argument provenance')
+    # Positive mode0 countdown returns without reaching a table or helper.
+    memory(0x8008a750,'lbz',30,0x83,0)
+    memory(0x8008a780,'sth',29,0x48,0)
+    memory(0x8008a75c,'lfs',30,0x1cdc,0)
+    for pc,name,fields in (
+        (0x8008a748,'extsh',dict(rS=3,rA=0,Rc=1)),
+        (0x8008a74c,'bc',dict(BO=4,BI=1,LK=0,AA=0,target='8008a788')),
+        (0x8008a754,'extsb',dict(rS=0,rA=0,Rc=1)),
+        (0x8008a758,'bc',dict(BO=4,BI=2,LK=0,AA=0,target='8008a77c')),
+        (0x8008a77c,'addi',dict(rD=0,rA=3,immediate=-1)),
+        (0x8008a784,'b',dict(LK=0,AA=0,target='8008aa20'))):
+        r=by_pc[pc]
+        c.require(r['mnemonic']==name and all(r.get(k)==v for k,v in fields.items()),
+                  'mode0 countdown control')
     state=by_pc[0x8008a6f0];c.require(state['mnemonic']=='lbz','unsigned state byte')
     cmp=by_pc[0x8008a710];branch=by_pc[0x8008a714]
     c.require(cmp['mnemonic']=='cmpi'and cmp['rA']==0 and cmp['immediate']==3,'state upper branch')
@@ -85,6 +99,9 @@ def summarize(rows):
                 timer_compare=dict(hit_signed_half=74,owner_signed_bytes=[7404,7405],saved_hit_signed_half=76),
                 common_prefix=['clear hit13','load unsigned hit10','load hit28'],
                 state_ge3_returns=True,state0_transform_site='8008a728',
+                state0_countdown=dict(signed_timer_offset=0x48,positive_fresh_owner_byte=0x83,
+                    nonpositive_boundary='8008a788',zero_owner_float_boundary='8008a75c',
+                    decrement_store='8008a780',return_branch='8008a784',return_target='8008aa20'),
                 transform_arguments=dict(matrix_hit_offset=0x60,captured_descriptor_hit_offset=0x28,
                                          input_descriptor_offset=0x0c,output_hit_offset=0x30),
                 state0_copy_order=['load30','load34','store3c','store40','load38','store44'],

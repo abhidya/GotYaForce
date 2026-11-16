@@ -2528,7 +2528,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       const load8=(id:symbol,offset:number):number=>checked(()=>allocator.readU8(id,offset));
       const load16=(id:symbol,offset:number):number=>checked(()=>allocator.readS16(id,offset));
       const load32=(offset:number):number=>checked(()=>allocator.readU32(hit,offset));
-      const store=(offset:number,value:number,width:1|4):void=>{
+      const store=(offset:number,value:number,width:1|2|4):void=>{
         for(let i=0;i<width;i++){
           const d=Object.getOwnPropertyDescriptor(bytes,String(offset+i));guard();
           if(!d||!('value'in d)||!d.writable)fail('8a65c writable scalar bytes required');
@@ -2564,8 +2564,12 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(state===0){
         const x=load32(0x30),y=load32(0x34);store(0x3c,x,4);store(0x40,y,4);
         const z=load32(0x38);store(0x44,z,4);
+        const timer=load16(hit,0x48);
+        if(timer<=0)fail('8008a788 reached contact initialization dispatch');
+        if(s8(load8(owner,0x83))===0)fail('8008a75c reached owner1cdc conversion');
+        store(0x48,timer-1,2);return; // Actual positive countdown branch returns.
       }
-      fail((state===0?'8008a744':'8008a88c')+' reached contact timer continuation');
+      fail('8008a88c reached contact timer continuation');
     };
     const walk=(index:number,site:0x80089b30|0x80089b84|0x80089bd0):void=>{
       let owner:object;
