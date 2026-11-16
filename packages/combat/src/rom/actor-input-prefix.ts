@@ -1,7 +1,8 @@
 /** Bounded source800685c0 -> real68980 + real6de44, offline only.
  * Actual actor owns5b4/5bc/5d4 and HALFWORD5d8, independent of states5da/5db.
  * The same actual Borg as the gauge/tick graph owns sourceArrowMash749.
- * Only absent5b8/5ca/5cb/5fc..5ff get explicit cells, without defaults.
+ * Only absent5b8/high+5ba/low,5ca/5cb/5fc..5ff get explicit cells, without defaults.
+ * The downstream685c0 lhz still reads only5b8, never requiring the low half.
  * 8b73c retains its genuine integer-radius zero return. Reached psq_l at8b778
  * requires an explicit signed8/scale0 processor profile. An optional genuine
  * angular runtime closes axis paths and table lookup; its optional genuine atan
@@ -21,6 +22,7 @@
  * the legacy browser mash producer for this Borg, without implicit migration.
  */
 import {checkActiveSourceActorFrameInvocation} from './actor-frame-lifecycle.js';
+import {checkActiveSourceActorOrderedInvocation} from './actor-ordered-frame.js';
 import type {BorgRuntime} from '../types.js';
 import type {RomActor} from './actor.js';
 import type {SourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
@@ -32,6 +34,8 @@ import {isSourceInputAngleRuntime, type SourceInputAngleRuntime, type SourceInpu
 export interface SourceActorInputPrefixBinding {
   /** Actual lhz at5b8: high half of a big-endian prior word, not low16. */
   ushort5b8: number;
+  /** Low half of the SAME big-endian5b8 word. Required only by the producer. */
+  ushort5ba?: number;
   stickX5ca: number; stickY5cb: number;
   byte5fc: number; byte5fd: number; byte5fe: number; byte5ff: number;
 }
@@ -81,11 +85,13 @@ function integer(value: unknown, min: number, max: number, where: string): numbe
     fail(`${where}: integer out of bounds`);
   return value === 0 ? 0 : value;
 }
-const fields = ['ushort5b8', 'stickX5ca', 'stickY5cb', 'byte5fc', 'byte5fd', 'byte5fe', 'byte5ff'] as const;
+const inputWordAliases = ['word5b8','field5b8','inputWord5b8','priorWord5b8','half5ba','short5ba','field5ba','byte5ba','byte5bb','1464','1466','1467'] as const;
+const fields = ['ushort5b8', 'ushort5ba', 'stickX5ca', 'stickY5cb', 'byte5fc', 'byte5fd', 'byte5fe', 'byte5ff'] as const;
 export function createSourceActorInputPrefixRuntime(sources: SourceActorInputPrefixSources): SourceActorInputPrefixRuntime {
   let busy = false, poisoned = false;
   const check = (): void => {
     if (poisoned) fail('caught same-runtime reentry');
+    checkActiveSourceActorOrderedInvocation();
     checkActiveSourceActorFrameInvocation();
   };
   const guard = <T>(run: () => T): T => {
@@ -174,7 +180,7 @@ export function createSourceActorInputPrefixRuntime(sources: SourceActorInputPre
   const u16 = (r: unknown, key: string): number => integer(read(r, key), 0, 65535, key);
   const u32 = (r: unknown, key: string): number => integer(read(r, key), 0, 0xffffffff, key);
   const exclusive = (actual: object): void => {
-    for (const key of ['inputFlags5d4', 'inputFlags5d8', 'inputEdges5bc', 'sourceArrowMash749', 'byte749', ...fields]) {
+    for (const key of ['inputFlags5d4', 'inputFlags5d8', 'inputEdges5bc', 'sourceArrowMash749', 'byte749', ...fields, ...inputWordAliases]) {
       if (Object.getOwnPropertyDescriptor(actual, key) !== undefined) fail(`${key}: competing source owner present`);
       check();
     }
@@ -207,6 +213,10 @@ export function createSourceActorInputPrefixRuntime(sources: SourceActorInputPre
       present(atanData, 'atanHi802b5168'), present(atanData, 'atanLo802b5188'), present(atanData, 'coefficients802b51a8')]
       .filter((owner): owner is object => owner !== undefined);
     if (new Set(owners).size !== owners.length) fail('retained input/global/processor storage owner alias');
+    for (const owner of owners) for (const key of owner === binding ? inputWordAliases : ['ushort5ba', ...inputWordAliases]) {
+      if (Object.getOwnPropertyDescriptor(owner, key) !== undefined) fail(`${key}: competing input5b8 word owner`);
+      check();
+    }
   };
   interface Entry {actual: RomActor; borg: SourceActorInputBorgOwner; machine?: object; charge?: ChargeOwners; binding: Partial<SourceActorInputPrefixBinding>}
   const actors = new Map<symbol, Entry>(), assigned = new WeakSet<object>();
@@ -256,9 +266,13 @@ export function createSourceActorInputPrefixRuntime(sources: SourceActorInputPre
       if (processor && (processor === actual || processor === borg || processor === machineOwner)) fail('processor record aliases mutable source owner');
       if (angleData && (angleData === actual || angleData === borg || angleData === machineOwner)) fail('angular data aliases mutable source owner');
       record(initial, 'initial input binding');
+      for (const key of inputWordAliases) {
+        if (Object.getOwnPropertyDescriptor(initial, key) !== undefined) fail(`${key}: competing input5b8 word owner`);
+        check();
+      }
       const binding: Partial<SourceActorInputPrefixBinding> = {};
       for (const key of fields) if (Object.getOwnPropertyDescriptor(initial, key) !== undefined)
-        binding[key] = key === 'ushort5b8' ? u16(initial, key) : key.startsWith('stick') ? s8(initial, key) : u8(initial, key);
+        binding[key] = (key === 'ushort5b8' || key === 'ushort5ba') ? u16(initial, key) : key.startsWith('stick') ? s8(initial, key) : u8(initial, key);
       independentOwners(actual, borg, machineOwner, binding, chargeOwners);
       check(); actors.set(id, {actual, borg, ...(machineOwner === undefined ? {} : {machine: machineOwner}),
         ...(chargeOwners === undefined ? {} : {charge: chargeOwners}), binding: Object.seal(binding)});

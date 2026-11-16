@@ -119,7 +119,7 @@ export function runBattleMassOrderingSelfTests(make: ()=>Fixture): void {
   }
   for(const [key,nth,low,high] of [[HIGH,2,195,1],[LOW,2,195,5],[HIGH,4,200,5],[LOW,4,200,17]] as const) {
     const x=make(),{scheduler,outer}=setup(x);let visits=0;
-    observe(()=>rejects(()=>outer.runFrame(),'non-writable'),(owner,field)=>{
+    observe(()=>rejects(()=>outer.runFrame(),`${key}: writable own byte required`),(owner,field)=>{
       if(owner===x.massPreparation.rngState && field===key && ++visits===nth)
         Object.defineProperty(owner,key,{writable:false});
     });
@@ -130,7 +130,7 @@ export function runBattleMassOrderingSelfTests(make: ()=>Fixture): void {
   }
   for(const key of [HIGH,LOW] as const) for(const value of [-1,256,1.5,NaN,Infinity]) {
     const x=make();x.massPreparation.rngState[key]=value;
-    const {outer}=setup(x);rejects(()=>outer.runFrame(),'raw unsigned source integer');
+    const {outer}=setup(x);rejects(()=>outer.runFrame(),`${key}: own raw byte required`);
     equal(x.massPreparation.orderCount[COUNT],77,'bad raw RNG byte refuses before count reset');
   }
   for(const fault of ['rng','count','constant','664','pointers','pointer0'] as const) {

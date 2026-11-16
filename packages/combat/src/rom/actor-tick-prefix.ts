@@ -118,6 +118,8 @@ export interface SourceActorTickPrefixRuntime {
   getActualBorg(identity: symbol): SourceActorGaugeBorgOwner;
   /** Retained genuine normal child, for the private frame join only. */
   getNormalLifecycleRuntime(): SourceActorNormalLifecycleRuntime | undefined;
+  /** Same retained genuine685c0 child; no source scalar read or owner copy. */
+  getInputRuntime(): SourceActorInputPrefixRuntime | undefined;
   getActorBinding(identity: symbol): Partial<SourceActorTickPrefixBinding>;
   /** A fully admitted ready or normal branch returns source void; other reached gaps refuse.
    * This does not execute the enclosing actor frame or produce raw target inputs. */
@@ -256,7 +258,8 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
   const stageBinding = stage === undefined ? undefined : capture('stageBounds', 'getActorBinding');
   const updateStage = stage === undefined ? undefined : capture('stageBounds', 'updateActor');
   const input = Object.getOwnPropertyDescriptor(sources, 'inputPrefix');
-  if (input !== undefined && !isSourceActorInputPrefixRuntime(read(sources, 'inputPrefix')))
+  const inputRuntime = input === undefined ? undefined : read(sources, 'inputPrefix');
+  if (input !== undefined && !isSourceActorInputPrefixRuntime(inputRuntime))
     fail('input prefix requires the genuine source runtime, not callback effects');
   const inputActor = input === undefined ? undefined : capture('inputPrefix', 'getActualActor');
   const inputBorg = input === undefined ? undefined : capture('inputPrefix', 'getActualBorg');
@@ -1055,6 +1058,7 @@ export function createSourceActorTickPrefixRuntime(sources: SourceActorTickPrefi
     getActualActor(id: symbol) {return entry(id).actual;},
     getActualBorg(id: symbol) {return entry(id).borg;},
     getNormalLifecycleRuntime() {return normalRuntime as SourceActorNormalLifecycleRuntime | undefined;},
+    getInputRuntime() {return inputRuntime as SourceActorInputPrefixRuntime | undefined;},
     getActorBinding(id: symbol) {return entry(id).binding;},
     ingestRawDistancesAndRun(id: symbol, epoch: number, raw: SourceActorTickRawDistances): void {return guard(() => {
       const actor = entry(id);

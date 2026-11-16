@@ -1,3 +1,5 @@
+import {runBattleOrderedInputSamplerSelfTests} from './battle-ordered-input-sampler.selftest.js';
+import {runActorMatrixActiveSelfTests} from './actor-matrix-active.selftest.js';
 import {runSelfTest as runActorVoiceRngSelfTests} from './actor-voice-rng.selftest.js';
 import {runActorMatrixSpringSelfTests} from './actor-matrix-spring.selftest.js';
 import {runBattleOrderedVoiceSelfTests} from './battle-ordered-voice.selftest.js';
@@ -128,6 +130,8 @@ let projectileFixtureConstruction = false;
  * constructed. This scope never replaces a running owner or source getter. */
 let targetPreparationMissingCell: 'byte7d2'|'pointer508'|undefined;
 let orderedVoice438: number|undefined;
+let orderedSamplerLowHalf:number|undefined;
+let orderedMatrixCorrections:readonly SourceActorWorldMatrixCorrection[]|undefined;
 function constructGenuineComposition<T>(build: () => T): T {
   const previous = genuineCompositionConstruction;
   genuineCompositionConstruction = true;
@@ -522,7 +526,7 @@ function worldMatrixHydratedControlFixture(correctionDescriptor = false, primary
     scale58: {x: 2, y: 3, z: 4}, offset1dbc: {x: 3, y: 4, z: 5},
     adjusted1d54: {x: -1, y: -2, z: -3}, preRotation1d64: {x: 0, y: 0, z: 0},
   }, {matrices8d4, copy114, copy1aa4, scratch, topology1994: primaryChain ? [[1, 255, 255, 0], [2, 255, 0, 1], [3, 255, 0, 2], [255, 255, 0, 3]] : [[1, 255, 255, 0], [255, 255, 0, 1]],
-    corrections18d4: rotationCorrections ?? Array.from({length: capacity}, () => ({x: 0, y: 0, z: 0})),
+    corrections18d4: orderedMatrixCorrections ?? rotationCorrections ?? Array.from({length: capacity}, () => ({x: 0, y: 0, z: 0})),
     scales15d4: Array.from({length: capacity}, (_, i) => ({x: 1, y: !primaryChain && i === 1 ? 2 : 1, z: 1}))});
   const header = world.getActorBinding(x.actor), worldStorage = world.getStorage(x.actor);
   const rebuild = () => world.updateActor(x.actor); rebuild();
@@ -1810,18 +1814,18 @@ export function runAttachedSetupAnimationSelfTest(): void {
   {
     const x = normalMatrixHydratedControlFixture(), retained = [...x.targetMatrices[1]!];
     x.metadata.getActorBinding(x.actor).byte1d98 = 0x10; x.sourceActor.pos.y = 12;
-    rejects(x.updateNormal, '46e7c');
+    rejects(x.updateNormal, '46f08 genuine shared attribute674 owner required');
     check(x.normalState.count1d96 === 0 && x.normalState.count1d97 === 0 && x.normalState.field1d60 === 10 &&
       x.rootMatrix[7] === 12 && x.worldMatrix[7] === 105 && x.targetMatrices[1]!.every((v, i) => Object.is(v, retained[i])),
-      'unsupported selected terrain handler refuses after completed first pass and zero stores, before invented damping, corrected output or linked copy');
+      'selected46f08 requires its genuine shared attribute674 owner after completed first pass and count clears; missing ownership preserves spring, corrected output and linked copy');
   }
   {
     const x = normalMatrixHydratedControlFixture(), retained = [...x.targetMatrices[1]!];
     x.metadata.getActorBinding(x.actor).byte1d98 = 1; x.sourceActor.pos.y = 12;
-    rejects(x.updateNormal, '47904');
+    rejects(x.updateNormal, '47904 active body requires genuine lifecycle18 owner');
     check(x.normalState.field1d60 === 8 && x.normalState.count1d96 === 0 && x.normalState.count1d97 === 0 &&
       x.rootMatrix[7] === 12 && x.worldMatrix[7] === 105 && x.targetMatrices[1]!.every((v, i) => Object.is(v, retained[i])),
-      'active unsupported postprocess retains real damping and both passes but refuses before any linked copy or fabricated IK output');
+      'active47904 requires its genuine lifecycle18 owner after real damping and both passes; missing ownership preserves linked copy and correction output');
   }
   {
     const x = normalMatrixHydratedControlFixture(), retained = [...x.targetMatrices[1]!];
@@ -3423,7 +3427,7 @@ function inputPrefixHydratedControlFixture(withMachine = false, processor?: Sour
     ...(chargeOwners === undefined ? {} : {charge: chargeOwners.charge}),
     ...(firstMachine === undefined ? {} : {firstMachine}), ...(processor === undefined ? {} : {processor}),
     ...(angular === undefined ? {} : {angular})});
-  inputPrefix.bindActor(x.actor, {ushort5b8: 0x123a, stickX5ca: 0, stickY5cb: 0,
+  inputPrefix.bindActor(x.actor, {ushort5b8: 0x123a,...(orderedSamplerLowHalf===undefined?{}:{ushort5ba:orderedSamplerLowHalf}), stickX5ca: 0, stickY5cb: 0,
     byte5fc: 3, byte5fd: 1, byte5fe: 1, byte5ff: 9});
   const actorControl = chargeHydration?.actorControl === undefined ? undefined :
     createSourceActorControlLifecycleRuntime({world: x.world, status: x.status});
@@ -8744,10 +8748,10 @@ export function runCeilingLifecycleHydratedCompositionTests(): void {
     x.header.mode4a0 = 1; x.metadata.getActorBinding(x.actor).byte1d98 = 1; a.visibilityBit = 2; match.maskD2 = 2;
     x.updateNormal();
     const copied = [...x.targetMatrices[1]!]; match.maskD2 = 0;
-    rejects(x.updateNormal, '47904 active body is unsupported');
+    rejects(x.updateNormal, '47904 active body requires genuine lifecycle18 owner');
     check(x.targetMatrices[1]!.every((value, index) => Object.is(value, copied[index])) &&
       x.normal.getGlobals() === match && x.charge.getGlobal() === match && x.ceiling.getMatchGlobals() === match,
-      'later explicit matrix reads changedD2 from that very80433934 owner and refuses before linked-copy suffix, without replacing match records');
+      'later explicit matrix reads changedD2 from that very80433934 owner and requires genuine lifecycle18 before linked-copy suffix, retaining completed matrix passes and match identities');
   }
   for (const fault of ['missingD9', 'missingHover', 'readonlyVelocity', 'invalidSaved', 'readonlyY'] as const) {
     const x = ceilingLifecycleHydratedControlFixture(fault === 'missingD9' ? {} : {byteD9: 0}), a = x.sourceActor;
@@ -13647,6 +13651,16 @@ export function createBattleTargetPreparationVoiceTestFixture() {
   const previous=orderedVoice438;orderedVoice438=1;
   try{return createBattleTargetPreparationTestFixture();}finally{orderedVoice438=previous;}
 }
+/** Explicit fixed correction storage, not extra bones or a fabricated source branch. */
+export function createBattleTargetPreparationMatrixActiveTestFixture() {
+  const previous=orderedMatrixCorrections;
+  orderedMatrixCorrections=Array.from({length:13},(_,i)=>({x:i===12?100:0,y:i===12?-100:0,z:0}));
+  try{return createBattleTargetPreparationTestFixture();}finally{orderedMatrixCorrections=previous;}
+}
+export function createBattleTargetPreparationSamplerTestFixture() {
+  const previous=orderedSamplerLowHalf;orderedSamplerLowHalf=0;
+  try{return createBattleTargetPreparationMatrixActiveTestFixture();}finally{orderedSamplerLowHalf=previous;}
+}
 export function runBattleTargetPreparationHydratedCompositionTests(): void {
   runBattleTargetPreparationSelfTests(createBattleTargetPreparationTestFixture,createBattleMassOrderingTestFixture);
 }
@@ -13791,3 +13805,6 @@ export function runBattleOrderedVoiceHydratedCompositionTests():void {runBattleO
 export function runActorMatrixSpringHydratedCompositionTests():void {runActorMatrixSpringSelfTests(createBattleTargetPreparationTestFixture);}
 
 export function runActorVoiceRngHydratedCompositionTests():void {runActorVoiceRngSelfTests();}
+
+export function runBattleOrderedInputSamplerHydratedCompositionTests():void {runBattleOrderedInputSamplerSelfTests(createBattleTargetPreparationSamplerTestFixture);}
+export function runActorMatrixActiveHydratedCompositionTests():void {runActorMatrixActiveSelfTests(createBattleTargetPreparationMatrixActiveTestFixture,createBattleTargetPreparationTestFixture);}

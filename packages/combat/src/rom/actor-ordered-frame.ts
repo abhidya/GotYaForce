@@ -1,5 +1,5 @@
 /** Bounded actual54070 ->5475c ->54c78 ->55568, never a scheduler callback.
- * Authenticated dispatch cells select lifecycle1/substate1 only. Source history
+ * Authenticated dispatch cells select lifecycle1/substates1 and2. Source history
  * precedes pause; suffix calls and partial writes are never skipped. Explicit
  * current bindings are not retail initialization or a completed battle frame.
  */
@@ -15,10 +15,11 @@ import {isSourceActorCue0LifecycleRuntime,type SourceActorCue0LifecycleRuntime} 
 import {isSourceActorChargeEffectsRuntime,type SourceActorChargeEffectsRuntime} from './actor-charge-effects.js';
 import {isSourceActorMatrixUpdateRuntime,type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import {consumeSourceActorVoiceRngInvocation,checkSourceActorVoiceRngInvocation,type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
+import {isSourceActorInputSamplerRuntime,claimSourceActorInputSamplerForOrdered,invokeSourceActorInputSamplerFromOrdered,type SourceActorInputSamplerRuntime} from './actor-input-sampler.js';
 import {addSourceFloat32} from './source-float.js';
 import {markIncompleteSourceActorDoubleLifecycle,requireCompleteSourceActorDoubleLifecycle} from './actor-double-prehook.js';
 import {enterSourceBattleOrderedActorInvocation,checkSourceBattleOrderedActorInvocation,
-  consumeSourceBattleOrderedActorDistances,requireSourceBattleOrderedActorMatrices,requireSourceBattleOrderedVoiceRng,rejectSourceBattleOrderedActorReentry,type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
+  consumeSourceBattleOrderedActorDistances,requireSourceBattleOrderedActorMatrices,requireSourceBattleOrderedVoiceRng,requireSourceBattleOrderedInputOwners,rejectSourceBattleOrderedActorReentry,type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
 export interface SourceActorOrderedFrameBinding {
   field6dc:number;byte1ca:number;byte730:number;byte731:number;byte488:number;
   readonly vector724:{x:number;y:number;z:number};pointer7f0:number;
@@ -26,6 +27,7 @@ export interface SourceActorOrderedFrameBinding {
 export interface SourceActorOrderedFrameSources {
   world:SourceActorWorldMatrixRuntime;stage:SourceActorStageBoundsRuntime;status:SourceActorStatusTimersRuntime;
   history:SourceActorTransformHistoryRuntime;globals:object;
+  sampler?:SourceActorInputSamplerRuntime;
   frame?:SourceActorFrameLifecycleRuntime;ready?:SourceActorReadyTransitionsRuntime;
   cue0?:SourceActorCue0LifecycleRuntime;effects?:SourceActorChargeEffectsRuntime;matrices?:SourceActorMatrixUpdateRuntime;
   data?:{float804373e0?:number;float80437250?:number};
@@ -37,6 +39,7 @@ export interface SourceActorOrderedFrameRuntime {
   getStatusRuntime():SourceActorStatusTimersRuntime;getMatchGlobals():object;
 }
 const runtimes=new WeakSet<object>();
+const pendingSamplers=new WeakMap<object,SourceActorInputSamplerRuntime>();
 const pendingFrames=new WeakMap<object,SourceActorFrameLifecycleRuntime>(),pendingHistories=new WeakMap<object,SourceActorTransformHistoryRuntime>();
 interface Authority {
   run(outer:SourceBattleOuterFrameRuntime,id:symbol):void;
@@ -44,6 +47,8 @@ interface Authority {
   history(history:SourceActorTransformHistoryRuntime,id:symbol):void;
   historyCheck(history:SourceActorTransformHistoryRuntime,id:symbol):void;
   frameCheck(frame:SourceActorFrameLifecycleRuntime,id:symbol,token:object):void;
+  sampler(sampler:SourceActorInputSamplerRuntime,id:symbol):void;
+  samplerCheck(sampler:SourceActorInputSamplerRuntime,id:symbol):void;
   voicePosition(command:SourceActorCommandAdmissionRuntime,id:symbol,site:number):void;
   voiceConsume(command:SourceActorCommandAdmissionRuntime,id:symbol,site:number):object;
   voiceCheck(command:SourceActorCommandAdmissionRuntime,id:symbol,site:number,state:object):void;reject():void;
@@ -54,6 +59,15 @@ export function isSourceActorOrderedFrameRuntime(value:unknown):value is SourceA
 }
 export function isPendingSourceActorOrderedFrameClaim(stage:SourceActorOrderedFrameRuntime,frame:SourceActorFrameLifecycleRuntime):boolean {
   return isSourceActorOrderedFrameRuntime(stage)&&pendingFrames.get(stage)===frame;
+}
+export function isPendingSourceActorOrderedSamplerClaim(stage:SourceActorOrderedFrameRuntime,sampler:SourceActorInputSamplerRuntime):boolean {
+  return isSourceActorOrderedFrameRuntime(stage)&&pendingSamplers.get(stage)===sampler;
+}
+export function requireSourceActorOrderedSamplerInvocation(stage:SourceActorOrderedFrameRuntime,sampler:SourceActorInputSamplerRuntime,id:symbol):void {
+  const scope=authorities.get(stage);if(!scope)fail('private54cd0 sampler invocation required');scope.sampler(sampler,id);
+}
+export function checkSourceActorOrderedSamplerInvocation(stage:SourceActorOrderedFrameRuntime,sampler:SourceActorInputSamplerRuntime,id:symbol):void {
+  const scope=authorities.get(stage);if(!scope)fail('private54cd0 sampler invocation required');scope.samplerCheck(sampler,id);
 }
 export function isPendingSourceActorOrderedHistoryClaim(stage:SourceActorOrderedFrameRuntime,history:SourceActorTransformHistoryRuntime):boolean {
   return isSourceActorOrderedFrameRuntime(stage)&&pendingHistories.get(stage)===history;
@@ -115,7 +129,8 @@ export function createSourceActorOrderedFrameRuntime(sources:SourceActorOrderedF
     !isSourceActorTransformHistoryRuntime(history)||history.getWorldRuntime()!==world)fail('genuine canonical ordered owner graph required');
   const actors=new Map<symbol,{actual:object;world:object;stage:object;status:object;binding:Partial<SourceActorOrderedFrameBinding>}>();
   let outer:SourceBattleOuterFrameRuntime|undefined,activeId:symbol|undefined,poisoned=false,incomplete=false;
-  let historyActive=false,historyPending=false,framePending:{frame:SourceActorFrameLifecycleRuntime;token:object;entered:boolean}|undefined;
+  let samplerPending:{sampler:SourceActorInputSamplerRuntime;entered:boolean}|undefined;
+  let historyActive=false,historyPending=false,framePending:{frame:SourceActorFrameLifecycleRuntime;token:object;entered:boolean;site:0x80054ca8|0x80054cd8}|undefined;
   const check=():void=>{
     if(poisoned||incomplete)fail('incomplete ordered actor stage');
     if(outer&&activeId!==undefined)checkSourceBattleOrderedActorInvocation(outer,runtime,activeId);
@@ -203,12 +218,23 @@ export function createSourceActorOrderedFrameRuntime(sources:SourceActorOrderedF
       if((substate===1||substate===2)&&s8(byte(match(),'byte1f'))!==0) {
         write(id,binding,'byte19',3);write(id,binding,'byte1b',0);write(id,binding,'byte1a',0);write(id,e.binding,'byte488',2);
       }
-      if(s8(byte(binding,'byte19'))!==1)fail('5475c reached unselected substate table802d3274 entry');
-      if(byte(match(),'byte45')===4) {write(id,binding,'byte19',(byte(binding,'byte19')+1)&255);write(id,e.status,'short272',0);}
+      const selected=s8(byte(binding,'byte19'));
+      if(selected!==1&&selected!==2)fail('5475c reached unselected substate table802d3274 entry');
+      if(selected===1) {
+        if(byte(match(),'byte45')===4) {write(id,binding,'byte19',(byte(binding,'byte19')+1)&255);write(id,e.status,'short272',0);}
+      } else {
+        const sampler=read(sources,'sampler');if(!isSourceActorInputSamplerRuntime(sampler))fail('54cd0 genuine56900 input sampler required');
+        if(sampler.getWorldRuntime()!==world||sampler.getMatchGlobals()!==globals)fail('54cd0 sampler canonical world/global differs');
+        const suppliedFrame=native(sources,'frame');
+        if(suppliedFrame&&'value'in suppliedFrame&&isSourceActorFrameLifecycleRuntime(suppliedFrame.value)&&
+          suppliedFrame.value.getTickRuntime().getInputRuntime()!==sampler.getInputRuntime())fail('56900 sampler input differs from55568 canonical input');
+        samplerPending={sampler,entered:false};
+        try{invokeSourceActorInputSamplerFromOrdered(runtime,sampler,id);}finally{samplerPending=undefined;}
+      }
       const frame=read(sources,'frame');if(!isSourceActorFrameLifecycleRuntime(frame))fail('54ca8 genuine55568 owner required');
       if(frame.getActualActor(id)!==e.actual||frame.getStatusRuntime()!==status)fail('54ca8 canonical55568 owner differs');
       const token=consumeSourceBattleOrderedActorDistances(outer!,runtime,id);
-      framePending={frame,token,entered:false};
+      framePending={frame,token,entered:false,site:selected===1?0x80054ca8:0x80054cd8};
       try{invokeSourceActorFrameFromOrdered(runtime,frame,id,token);}finally{framePending=undefined;}
     }
     const position=record(read(e.actual,'pos'),'position20');
@@ -264,12 +290,19 @@ export function createSourceActorOrderedFrameRuntime(sources:SourceActorOrderedF
       if(entry(id).actual!==actual)fail('outer ordered actual differs');outer=selected;activeId=id;poisoned=false;
       activeOrderedChecks.push(check);activeOrderedStages.push(runtime);
       try{body(id);check();}catch(error){incomplete=true;markIncompleteSourceActorDoubleLifecycle(actual);rejectSourceBattleOrderedActorReentry(selected);throw error;}
-      finally{activeOrderedStages.pop();activeOrderedChecks.pop();outer=undefined;activeId=undefined;historyActive=false;historyPending=false;framePending=undefined;}
+      finally{activeOrderedStages.pop();activeOrderedChecks.pop();outer=undefined;activeId=undefined;historyActive=false;historyPending=false;framePending=undefined;samplerPending=undefined;}
     },
     history(selected,id){if(!outer||activeId!==id||selected!==history||!historyPending){reject();fail('private exact5408c history invocation required');}historyPending=false;check();},
     frame(selected,id,token){const pending=framePending;if(!outer||activeId!==id||!pending||pending.frame!==selected||pending.token!==token||pending.entered){reject();fail('private exact single-use54ca8 invocation required');}pending.entered=true;check();},
     historyCheck(selected,id){if(!outer||activeId!==id||selected!==history||!historyActive||historyPending){reject();fail('private active5408c history invocation required');}check();},
     frameCheck(selected,id,token){const pending=framePending;if(!outer||activeId!==id||!pending||pending.frame!==selected||pending.token!==token||!pending.entered){reject();fail('private active54ca8 invocation required');}check();},
+    sampler(selected,id){
+      const pending=samplerPending;if(!outer||activeId!==id||!pending||pending.sampler!==selected||pending.entered){reject();fail('private exact single-use54cd0 invocation required');}
+      pending.entered=true;check();requireSourceBattleOrderedInputOwners(outer,runtime,id,selected);
+    },
+    samplerCheck(selected,id){
+      const pending=samplerPending;if(!outer||activeId!==id||!pending||pending.sampler!==selected||!pending.entered){reject();fail('private active54cd0 invocation required');}check();
+    },
     voicePosition(command,id,site){
       if(!outer||activeId!==id||!framePending?.entered||command.getGlobal()!==globals){reject();fail('private exact active55568 voice RNG scope required');}
       checkSourceActorVoiceRngInvocation(command,id,site);check();
@@ -291,6 +324,11 @@ export function createSourceActorOrderedFrameRuntime(sources:SourceActorOrderedF
   if(frameField&&'value' in frameField&&frameField.value!==undefined) {
     const frame=frameField.value;if(!isSourceActorFrameLifecycleRuntime(frame))fail('genuine ordered55568 runtime required');
     pendingFrames.set(runtime,frame);try{claimSourceActorFrameForOrdered(runtime,frame);}finally{pendingFrames.delete(runtime);}
+  }
+  const samplerField=native(sources,'sampler');
+  if(samplerField&&'value'in samplerField&&samplerField.value!==undefined) {
+    const sampler=samplerField.value;if(!isSourceActorInputSamplerRuntime(sampler))fail('genuine ordered56900 runtime required');
+    pendingSamplers.set(runtime,sampler);try{claimSourceActorInputSamplerForOrdered(runtime,sampler);}finally{pendingSamplers.delete(runtime);}
   }
   return Object.freeze(runtime);
 }

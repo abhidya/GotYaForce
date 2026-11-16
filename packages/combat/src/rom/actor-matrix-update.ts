@@ -15,7 +15,8 @@
  * its base may be null or unbound; selector2 dereferences the actual binding.
  *
  * 47904 admits only its sequential flyer741, byte660 and metadata-high-nibble
- * early returns. Its active body refuses before lifecycle18 or joint12 stores.
+ * early returns. Active47904 admits genuine lifecycle/control clears and null508
+ * heading/damping through shared correction row12; nonnull geometry still refuses.
  * The explicit shared global mask is retained by reference, never defaulted.
  * Mode1's final link invokes the actual 47a2c copy, not target recomputation.
  * Evidence: read_archived_normal_matrix_evidence.py and
@@ -31,6 +32,9 @@
  * checked at each store. Caught reentry poisons the call. Prior work survives
  * refusal, including count clears, damping, matrix rebuilds and partial copies.
  */
+import {isSourceActorStageBoundsRuntime,type SourceActorStageBoundsRuntime} from './actor-stage-bounds.js';
+import {isSourceActorCommandAdmissionRuntime,type SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
+import {isSourceActorWorldMatrixRuntime} from './actor-world-matrix.js';
 import {checkActiveSourceActorOrderedInvocation} from './actor-ordered-frame.js';
 import type {SourceBattleOuterGlobalFields} from './battle-global-layout.js';
 import {addSourceFloat32, fusedMultiplyAddSourceFloat32} from './source-float.js';
@@ -79,6 +83,8 @@ export interface SourceActorMatrixUpdateSources {
 export interface SourceActorMatrixUpdateRuntime {
   /** Once-only metadata join before execution, for later-constructed attribute owner. */
   bindAttributesRuntime(attributes: SourceActorAttributeRefreshRuntime): void;
+  /** Genuine shared18/508 owners; metadata-only once before execution. */
+  bindActiveCorrectionSources(stage: SourceActorStageBoundsRuntime, commands?: SourceActorCommandAdmissionRuntime): void;
   bindActor(identity: symbol, initial: Readonly<SourceActorMatrixUpdateInitial>, storage?: SourceActorMatrixUpdateStorage): void;
   getActorBinding(identity: symbol): SourceActorMatrixUpdateBinding;
   /** Retained owner identities for source lifecycle composition; no scalar reads. */
@@ -128,6 +134,8 @@ function record(value: unknown, where: string): object {
 export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixUpdateSources): SourceActorMatrixUpdateRuntime {
   let busy = false, poisoned = false, executed = false;
   let attributes: SourceActorAttributeRefreshRuntime | undefined;
+  let activeStageRuntime: SourceActorStageBoundsRuntime | undefined, activeCommands: SourceActorCommandAdmissionRuntime | undefined;
+  const worldSource=own(sources,'world');
   const attributeField = Reflect.getOwnPropertyDescriptor(sources, 'attributes');
   if (attributeField !== undefined) {
     const value = own(sources, 'attributes');
@@ -244,7 +252,80 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
     // Source keeps the newly stored spring value in f1; do not reload1d60.
     store(adjusted,'y',addSourceFloat32(y,next));
   };
+  const activeStages=new Map<symbol,object>(),activeCommandRows=new Map<symbol,object>();
+  const activeStorage=new Map<symbol,object>(),activeRows=new Map<symbol,object>();
+  const stage18=(id:symbol,actor:Entry):object=>{
+    const stage=activeStageRuntime;
+    if(!isSourceActorStageBoundsRuntime(stage))fail('47904 active body requires genuine lifecycle18 owner');
+    if(stage.getActualActor(id)!==actor.actual||stage.getWorldBinding(id)!==actor.world)fail('47904 lifecycle18 canonical owner differs');
+    check();const row=record(stage.getActorBinding(id),'47904 stage owner');check();
+    if(activeStages.has(id)&&activeStages.get(id)!==row)fail('47904 stage binding changed');activeStages.set(id,row);return row;
+  };
+  const command508=(id:symbol,actor:Entry):object=>{
+    const commands=activeCommands;
+    if(!isSourceActorCommandAdmissionRuntime(commands))fail('66580 genuine shared command508 owner required');
+    if(commands.getActualActor(id)!==actor.actual||commands.getWorldBinding(id)!==actor.world||commands.getMappingActor(id)!==actor.mapping)
+      fail('66580 command508 canonical owner differs');check();
+    const row=record(commands.getActorBinding(id),'command508 binding');check();
+    if(activeCommandRows.has(id)&&activeCommandRows.get(id)!==row)fail('command508 owner changed');activeCommandRows.set(id,row);return row;
+  };
+  const correctionGuard=(id:symbol,actor:Entry):void=>{
+    stable(getActual,id,actor.actual,'actual');stable(getWorld,id,actor.world,'world');
+    stable(getMovement,id,actor.movement,'movement');stable(getMapping,id,actor.mapping,'mapping');stable(getMetadata,id,actor.metadata,'metadata');
+    const stage=stage18(id,actor),command=activeCommandRows.get(id);
+    if(command&&command508(id,actor)!==command)fail('command508 binding changed');
+    const records=[actor.actual,actor.world,actor.movement,actor.mapping,actor.metadata,actor.binding,stage,...(command?[command]:[])];
+    const row=activeRows.get(id);if(row)records.push(row);
+    if(new Set(records).size!==records.length)fail('47904 canonical source owner alias');
+    const aliases=(o:object):string[]=>['field191c','field191e','short191c','short191e','6430','6428',
+      ...(o===stage?[]:['lifecycle18']),...(o===command?[]:['pointer508'])];
+    for(const o of records)for(const key of aliases(o)){if(Object.getOwnPropertyDescriptor(o,key)!==undefined)fail(`47904 competing source cell:${key}`);check();}
+    for(const o of records)for(const key of aliases(o))if(nativeDescriptor(o,key)!==undefined)fail(`47904 competing source cell:${key}`);
+    check();
+  };
+  const correction12=(id:symbol,actor:Entry):object=>{
+    if(read(sources,'world')!==worldSource||!isSourceActorWorldMatrixRuntime(worldSource))fail('47904 genuine world correction storage required');
+    if(worldSource.getActualActor(id)!==actor.actual||worldSource.getActorBinding(id)!==actor.world)fail('47904 actual world differs');check();
+    const storage=record(worldSource.getStorage(id),'47904 world storage');check();
+    if(activeStorage.has(id)&&activeStorage.get(id)!==storage)fail('47904 correction storage changed');activeStorage.set(id,storage);
+    const rows=read(storage,'corrections18d4');if(!Array.isArray(rows)||integer(read(rows,'length'),32,'correction count')<=12)fail('47904 explicit canonical correction row12 required');
+    const row=record(read(rows,'12'),'47904 correction12');
+    if(activeRows.has(id)&&activeRows.get(id)!==row)fail('47904 correction12 changed');activeRows.set(id,row);correctionGuard(id,actor);return row;
+  };
+  const runActiveCorrection=(id:symbol,actor:Entry):void=>{
+    const signedHalf=(o:object,key:string):number=>{const n=read(o,key);if(typeof n!=='number'||!Number.isInteger(n)||n < -32768||n>32767)fail(`${key}: signed correction halfword required`);return n;};
+    const heading=():number=>(integer(read(stable(getActual,id,actor.actual,'actual'),'heading'),65535,'heading')<<16)>>16;
+    const store=(key:'x'|'y',value:number):void=>{
+      const row=correction12(id,actor);own(row,key,true);check();
+      if(correction12(id,actor)!==row)fail('47904 destination changed');
+      const field=nativeDescriptor(row,key);if(!field||!('value'in field)||!field.writable)fail(`${key}: live writable correction required`);
+      (row as Record<string,unknown>)[key]=value;check();
+    };
+    const life=byte(stage18(id,actor),'lifecycle18');correctionGuard(id,actor);
+    if(life!==1||(integer(read(actor.actual,'controlWord'),0xffffffff,'controlWord')&0x01000000)!==0){store('y',0);store('x',0);}
+    const target=read(command508(id,actor),'pointer508');correctionGuard(id,actor);
+    if(target!==null){record(target,'pointer508');fail('66580 nonnull508 target position50c/514 path remains unsupported');}
+    const result=heading(),delta=((result-heading())<<16)>>16;
+    if(delta<0x5000&&delta>-0x5000&&(integer(read(actor.actual,'controlWord'),0xffffffff,'controlWord')&3)===0){
+      // Exact6c728(actor,0,12,3,2,1). Its own fresh508 load is mandatory.
+      const next=read(command508(id,actor),'pointer508');correctionGuard(id,actor);
+      if(next!==null){record(next,'pointer508');fail('6c728 reached unsupported nonnull508 geometry at8006c7c0');}
+    }
+    // Both branches use separately authenticated equal f32 constants; only
+    // the helper branch performs the extra508 load above. Source converts each
+    // signed halfword to f32, fmuls, fctiwz, then stores before reading next.
+    const x=signedHalf(correction12(id,actor),'x');correctionGuard(id,actor);
+    store('x',Math.trunc(Math.fround(x*0.9599999785423279))|0);
+    const y=signedHalf(correction12(id,actor),'y');correctionGuard(id,actor);
+    store('y',Math.trunc(Math.fround(y*0.9599999785423279))|0);
+  };
   const runtime: SourceActorMatrixUpdateRuntime = {
+    bindActiveCorrectionSources(stage,commands):void {guard(()=>{
+      if(executed||activeStageRuntime!==undefined)fail('47904 source join must be once before execution');
+      if(!isSourceActorStageBoundsRuntime(stage))fail('47904 genuine stage runtime required');
+      if(commands!==undefined&&!isSourceActorCommandAdmissionRuntime(commands))fail('47904 genuine command runtime required');
+      activeStageRuntime=stage;activeCommands=commands;
+    });},
     bindAttributesRuntime(owner): void {guard(() => {
       if (executed || attributes !== undefined) fail('attribute674 owner join must be once before execution');
       if (!isSourceActorAttributeRefreshRuntime(owner)) fail('genuine attribute674 owner required');
@@ -409,7 +490,7 @@ export function createSourceActorMatrixUpdateRuntime(sources: SourceActorMatrixU
       const visibility = byte(actual, 'visibilityBit'), mask = byte(globals, 'maskD2');
       if ((visibility & mask) === 0 && byte(actual, 'flyer741') === 0 && byte(state, 'byte660') === 0 &&
           (byte(stable(getMetadata, id, actor.metadata, 'metadata'), 'byte1d98') & 0xf0) !== 0x10) {
-        fail('47904 active body is unsupported before lifecycle18 and joint12 correction stores');
+        runActiveCorrection(id,actor);
       }
       if (byte(stable(getWorld, id, actor.world, 'world'), 'mode4a0') === 1) {
         // 47a2c resolves the target only if a signed source-count test reaches

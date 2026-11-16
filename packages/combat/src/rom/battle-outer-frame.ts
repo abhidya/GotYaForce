@@ -53,7 +53,8 @@ import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} f
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
 import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
 import {isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
-import {isSourceActorOrderedFrameRuntime,invokeSourceActorOrderedFrameFromOuter,checkSourceActorOrderedVoicePosition,type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
+import {isSourceActorOrderedFrameRuntime,invokeSourceActorOrderedFrameFromOuter,checkSourceActorOrderedVoicePosition,checkSourceActorOrderedSamplerInvocation,type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
+import type {SourceActorInputSamplerRuntime} from './actor-input-sampler.js';
 import {stepSourceByteRng} from './source-byte-rng.js';
 import {claimSourceHelperStorage} from './source-storage-claims.js';
 import {requireSourceActorActionSlotStatusOwner} from './actor-action-request.js';
@@ -156,6 +157,7 @@ interface OrderedActorInvocationScope {
   check(stage:SourceActorOrderedFrameRuntime,id:symbol):void;
   consume(stage:SourceActorOrderedFrameRuntime,id:symbol):object;
   matrices(stage:SourceActorOrderedFrameRuntime,id:symbol,owner:SourceActorMatrixUpdateRuntime):void;
+  sampler(stage:SourceActorOrderedFrameRuntime,id:symbol,sampler:SourceActorInputSamplerRuntime):void;
   rng(stage:SourceActorOrderedFrameRuntime,id:symbol,command:SourceActorCommandAdmissionRuntime,callsite:number,expected?:object):object;
   reject():void;
 }
@@ -171,6 +173,9 @@ export function consumeSourceBattleOrderedActorDistances(outer:SourceBattleOuter
 }
 export function requireSourceBattleOrderedActorMatrices(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol,owner:SourceActorMatrixUpdateRuntime):void {
   const scope=orderedActorInvocations.get(outer);if(!scope)fail('private ordered matrix owner required');scope.matrices(stage,id,owner);
+}
+export function requireSourceBattleOrderedInputOwners(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol,sampler:SourceActorInputSamplerRuntime):void {
+  const scope=orderedActorInvocations.get(outer);if(!scope)fail('private56900 owner join required');scope.sampler(stage,id,sampler);
 }
 export function requireSourceBattleOrderedVoiceRng(outer:SourceBattleOuterFrameRuntime,stage:SourceActorOrderedFrameRuntime,id:symbol,command:SourceActorCommandAdmissionRuntime,callsite:number,expected?:object):object {
   const scope=orderedActorInvocations.get(outer);if(!scope)fail('private source800055fc owner required');return scope.rng(stage,id,command,callsite,expected);
@@ -2346,6 +2351,11 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     matrices(selected,id,owner){
       orderedCheck(selected,id);const mass=retain('massPreparation',read(sources,'massPreparation'));
       if(read(mass,'matrices')!==owner)fail('54160 matrix owner differs from canonical mass4a4 owner');
+    },
+    sampler(selected,id,sampler){
+      orderedCheck(selected,id);checkSourceActorOrderedSamplerInvocation(selected,sampler,id);
+      if(sampler.getViewGlobals()!==retain('systemGlobals',read(sources,'systemGlobals'))||sampler.getMatchGlobals()!==globals)
+        fail('56900 requires same retained view/match owners');
     },
     rng(selected,id,command,callsite,expected){
       orderedCheck(selected,id);checkSourceActorOrderedVoicePosition(selected,command,id,callsite);

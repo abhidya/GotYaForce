@@ -135,7 +135,7 @@ function failures(make:Make):void {
  }
  for(const field of [HIGH,LOW]) {
   const x=createBattleLeaderSelectionTestFixture(make),before=afterDraws(x,2),after3=afterDraws(x,3);let accesses=0;
-  run(x,field+': non-writable',(owner,key)=>{if(owner===x.massPreparation.rngState&&key===field&&++accesses===2)Object.defineProperty(owner,key,{writable:false});});
+  run(x,field+': writable own byte required',(owner,key)=>{if(owner===x.massPreparation.rngState&&key===field&&++accesses===2)Object.defineProperty(owner,key,{writable:false});});
   equal(x.massPreparation.rngState[LOW],before[0],'failed third RNG keeps low before store');equal(x.massPreparation.rngState[HIGH],field===LOW?after3[1]:before[1],'high store precedes low failure');
   check(typeof Reflect.get(x.teamRows103[0]!,'pointer38')==='symbol','failed RNG precedes row copy');equal(x.actors[0]!.byte335,77,'failed RNG precedes actor writes');
  }
