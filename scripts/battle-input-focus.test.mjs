@@ -41,8 +41,10 @@ function setup() {
   const window = new EventTarget();
   const document = Object.assign(new EventTarget(), { hidden: false });
   class Input {}
+  class Select {}
+  class Textarea {}
   const context = vm.createContext({
-    window, document, HTMLInputElement: Input, HTMLSelectElement: class {}, HTMLTextAreaElement: class {},
+    window, document, HTMLInputElement: Input, HTMLSelectElement: Select, HTMLTextAreaElement: Textarea,
     playPendingBgm() {}, challengeSession: { snapshot: () => ({ screen: "battle" }) },
     debugOverlay: { visible: false, setVisible() {} },
   });
@@ -63,7 +65,14 @@ function setup() {
       document.hidden = hidden;
       document.dispatchEvent(new Event("visibilitychange"));
     },
+    focusIn(target) {
+      const event = new Event("focusin");
+      Object.defineProperty(event, "target", { value: target });
+      document.dispatchEvent(event);
+    },
     textInput: new Input(),
+    select: new Select(),
+    textarea: new Textarea(),
   };
 }
 const neutral = inputFromKeys(new Set());
@@ -132,4 +141,28 @@ test("focus loss releases a consumed pause key without synthesizing a pause pres
   assert.equal(poll(), false);
   app.key("keydown", "Escape");
   assert.equal(poll(), true);
+});
+
+for (const control of ["textInput", "select", "textarea"]) {
+  test(`focusing ${control} releases held battle controls before the next frame`, () => {
+    const app = setup();
+    for (const key of ["KeyW", "KeyK", "Space", "Tab", "Enter"]) app.key("keydown", key);
+    app.focusIn(app[control]);
+    assert.equal(app.keys.size, 0);
+    assert.deepEqual(app.input(), neutral);
+    assert.equal(app.key("keydown", "Tab", app[control]).defaultPrevented, false);
+    app.key("keydown", "KeyK", app[control]);
+    assert.deepEqual(app.input(), neutral, "typing must not resume battle controls");
+    app.focusIn(new EventTarget());
+    assert.deepEqual(app.input(), neutral, "returning to game must not revive held keys");
+    app.key("keydown", "KeyK");
+    assert.equal(app.input().attack, true, "new presses work after returning");
+  });
+}
+
+test("focus moving between non-text game elements preserves held controls", () => {
+  const app = setup();
+  app.key("keydown", "KeyW");
+  app.focusIn(new EventTarget());
+  assert.equal(app.input().moveZ, 1);
 });
