@@ -5,10 +5,8 @@ import type {createBattleTargetPreparationTestFixture} from './attached-setup-an
 type Make=typeof createBattleTargetPreparationTestFixture;
 function check(ok:boolean,s:string):void{if(!ok)throw Error('[battle-target-action-reset-test] '+s);}
 function refuses(f:()=>unknown,want:string):void{let got='';try{f();}catch(e){got=String(e);}check(got.includes(want),`expected ${want}, got ${got}`);}
-export function runBattleTargetActionResetSelfTests(make:Make):void{
- let count=0;
- const fresh=()=>{
-  count++;const x=populateSourceContactResetTestFixture(createSourceContactTransformTestFixture(make));
+export function createBattleTargetActionResetTestFixture(make:Make){
+  const x=populateSourceContactResetTestFixture(createSourceContactTransformTestFixture(make));
   x.allocator.writeU16(x.transformId,0x48,5);
   for(let i=0;i<48;i++)if(x.groups[i]===undefined)x.groups[i]={head:null,tail:null};
   const cells:Record<string,number>={byte80436128:77};
@@ -22,9 +20,11 @@ export function runBattleTargetActionResetSelfTests(make:Make):void{
   state.byte6fd=9;state.byte7d4=8;borg.slowAuraLevel=3;borg.hasteAuraLevel=2;
   const targetAction={cells,normal:x.normalLifecycle!,constants:{float80436f68:0}};Object.assign(x.outerSources,{targetAction});
   return Object.assign(x,{cells,targetAction,targetState:state,targetBorg:borg});
- };
+}
+export function runBattleTargetActionResetSelfTests(make:Make):void{
+ let count=0;const fresh=()=>{count++;return createBattleTargetActionResetTestFixture(make);};
  type Fixture=ReturnType<typeof fresh>;
- const end='8002bcb0 reached unauthenticated',inactiveEnd='8002bd98 reached required8002cf80';
+ const end='8002bcb0 requires explicit',inactiveEnd='8002bd9c reached required8002d35c';
  const run=(x:Fixture,want=end,hook:(o:object,k:PropertyKey)=>void=()=>{},inactive=false):void=>{
   const native=Object.getOwnPropertyDescriptor;let selected=false,entered=false;
   Object.getOwnPropertyDescriptor=((o:object,k:PropertyKey)=>{
