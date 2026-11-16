@@ -1,3 +1,4 @@
+import {runBattleContactCountResetSelfTests} from './battle-contact-count-reset.selftest.js';
 import {runSourceContactResetSelfTests} from './source-contact-reset.selftest.js';
 import {runProjectileResourceSelfTests} from './projectile-resource.selftest.js';
 import {runBattleLateDrawSelfTests} from './battle-late-draw.selftest.js';
@@ -2954,6 +2955,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runSourcePlayerContactSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runSourceContactResetSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runBattleLateDrawSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleContactCountResetSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();

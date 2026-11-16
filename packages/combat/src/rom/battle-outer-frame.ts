@@ -99,6 +99,9 @@ export interface SourceBattleTargetPreparationSources {
   targetDispatch?: SourceActorTargetDispatchRuntime;
 }
 export interface SourceBattleOuterFrameSources {
+  /** Same ten global halfword destinations used by8008a28c, not copied lists.
+   * Reached only at294ec after the fresh mode selects the normal suffix. */
+  contactCounters?: Partial<Record<`half804362${'50'|'4e'|'4c'|'4a'|'48'|'46'|'44'|'42'|'40'|'3e'}`,number>>;
   playerContact?:{constants?:{float80436f68?:number}};
   objectUpdates?: {roots36290:Record<number,symbol|null>;roots36280:Record<number,symbol|null>;roots36270?:Record<number,symbol|null>;roots6f54:Record<number,symbol|null>;draw:{constants:object;scratch?:Float32Array}};
   scheduler: SourceObjectSchedulerRuntime;
@@ -2450,6 +2453,42 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
     else family('roots36270',2);
     }finally{drawCallsite=undefined;}
   };
+  const resetContactCounts=():void=>{
+    const supplied=Object.getOwnPropertyDescriptor(sources,'contactCounters');check();
+    if(!supplied||!('value'in supplied)||supplied.value===undefined)
+      fail('800294ec reached required8008a28c: explicit contactCounters required');
+    const owner=retain('contactCounters',supplied.value);
+    if(!claimSourceHelperStorage(owner,runtime))fail('contact counter storage already claimed');
+    // Complete48-byte8a28c: ten descending halfword stores of literal zero.
+    // Previous counter values and pointed-to contact lists are never loaded.
+    for(const suffix of ['50','4e','4c','4a','48','46','44','42','40','3e']){
+      const address='804362'+suffix,key='half'+address;
+      const start=Number.parseInt(address,16),aliases:string[]=[];
+      // Both bytes, misaligned halfwords, and wider overlapping cells can
+      // shadow this store. Adjacent nonoverlapping canonical halves may coexist.
+      for(const [prefix,width]of [['byte',1],['half',2],['word',4],['field',4]]as const)
+        for(let offset=1-width;offset<2;offset++){
+          const hex=(start+offset).toString(16);aliases.push(prefix+hex,prefix+hex.toUpperCase());
+        }
+      for(let offset=-3;offset<2;offset++){
+        const n=start+offset,hex=n.toString(16);aliases.push(hex,hex.toUpperCase(),'0x'+hex,'0x'+hex.toUpperCase(),String(n));
+      }
+      const records=[sources,globals,...retained.values(),...call(()=>scheduler.getRetainedStorageOwners())];
+      for(const record of new Set(records))noShadows(record,[...new Set(aliases)].filter(k=>record!==owner||k!==key));
+      const destination=Object.getOwnPropertyDescriptor(owner,key);check();
+      if(!destination||!('value'in destination)||!destination.writable)fail(key+': writable own counter destination required');
+      schedulerGraph();check();
+      // Terminal native checks follow the last observable descriptor hook.
+      const terminalRecords=[...new Set([...records,...call(()=>scheduler.getRetainedStorageOwners())])];
+      const link=primaryStoreDescriptor(sources,'contactCounters');
+      if(!link||!('value'in link)||link.value!==owner)fail('contact counter owner changed');
+      const live=primaryStoreDescriptor(owner,key);
+      if(!live||!('value'in live)||!live.writable)fail(key+': counter destination changed');
+      for(const record of terminalRecords)
+        for(const alias of new Set(aliases))if((record!==owner||alias!==key)&&primaryStoreDescriptor(record,alias))fail(alias+': competing counter cell owner');
+      check();(owner as Record<string,number>)[key]=0;check();
+    }
+  };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
     runFrame(): never {
@@ -2490,7 +2529,10 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(!finalCounter||!('value'in finalCounter)||!finalCounter.writable)fail('wordB0 destination changed');
         for(const key of ['wordb0','fieldb0','176','byteb0','byteb1','byteb2','byteb3'])if(primaryStoreDescriptor(counterOwner,key))fail('wordB0: competing source cell owner');
         (counterOwner as {wordB0:number}).wordB0=(counter+1)>>>0;check();
-        if(s8(byte(match(),'byte66'))===0)fail('800294ec reached required8008a28c before89aec/2bb14; normal contact predecessors unsupported');
+        if(s8(byte(match(),'byte66'))===0){
+          resetContactCounts();
+          fail('800294f0 reached required80089aec before2bb14; contact callback traversal unsupported');
+        }
         const helper=call(()=>spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime());
         if(!isSourceActorSlotStatusRuntime(helper))fail('36e24 canonical slot-status owner required');
         contactInvocation={entered:false,helper};
