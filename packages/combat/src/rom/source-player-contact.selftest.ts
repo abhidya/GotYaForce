@@ -16,7 +16,7 @@ export function createSourcePlayerContactTestFixture(make:Make){
 }
 export function runSourcePlayerContactSelfTests(make:Make):void{
  let count=0;const fresh=()=>{count++;return createSourcePlayerContactTestFixture(make);};
- const stop='800294fc reached required8008972c';
+ const stop='80029500 reached required80089658';
  {
   const x=fresh();refuses(()=>executeSourcePlayerContact36e24(x.frame),'private');
   refuses(()=>getSourcePlayerContactRow(x.slotStatus,x.frame,0),'private');

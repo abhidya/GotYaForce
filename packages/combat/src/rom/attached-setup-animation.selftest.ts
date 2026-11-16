@@ -1,3 +1,4 @@
+import {runBattleLateDrawSelfTests} from './battle-late-draw.selftest.js';
 import {runSourcePlayerContactSelfTests} from './source-player-contact.selftest.js';
 import {runProjectileInitializerTailSelfTests} from './projectile-initializer-tail.selftest.js';
 import {runSourceDrawCallbackSelfTests} from './source-draw-callback.selftest.js';
@@ -2948,6 +2949,7 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleDrawOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runSourceDrawCallbackSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runSourcePlayerContactSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleLateDrawSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();

@@ -100,7 +100,7 @@ export interface SourceBattleTargetPreparationSources {
 }
 export interface SourceBattleOuterFrameSources {
   playerContact?:{constants?:{float80436f68?:number}};
-  objectUpdates?: {roots36290:Record<number,symbol|null>;roots36280:Record<number,symbol|null>;roots6f54:Record<number,symbol|null>;draw:{constants:object;scratch?:Float32Array}};
+  objectUpdates?: {roots36290:Record<number,symbol|null>;roots36280:Record<number,symbol|null>;roots36270?:Record<number,symbol|null>;roots6f54:Record<number,symbol|null>;draw:{constants:object;scratch?:Float32Array}};
   scheduler: SourceObjectSchedulerRuntime;
   /** Genuine54070, reached only at the actual ordered-list call. */
   orderedActors?:SourceActorOrderedFrameRuntime;
@@ -257,7 +257,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   let distancesPrepared=false;
   const producedDistances=new Map<symbol,{actor:object;fields:number;consumed:boolean}>();
   let contactInvocation:{entered:boolean;helper:SourceActorSlotStatusRuntime}|undefined;
-  let drawInvocation:{node:symbol;entered:boolean;context:SourceBattleOuterDrawContext;updates:object;draw:object;buffer?:ArrayBufferLike|undefined}|undefined;
+  let drawCallsite:0x800294c8|0x800294fc|0x80029500|undefined;
+  let drawInvocation:{callsite:0x800294c8|0x800294fc|0x80029500;node:symbol;entered:boolean;context:SourceBattleOuterDrawContext;updates:object;draw:object;buffer?:ArrayBufferLike|undefined}|undefined;
   let checkingDraw=false;
   const drawOwners=new Map<string,unknown>();
   let schedulerInvocation:{callsite:number;group:number;entered:boolean}|undefined;
@@ -2372,7 +2373,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   };
   const drawCheck=(node:symbol):void=>{
     const active=drawInvocation;
-    if(!busy||closing||incomplete||poisoned||!active||active.node!==node||!active.entered){rejectScheduler();fail('private exact active outer draw invocation required');}
+    if(!busy||closing||incomplete||poisoned||!active||active.callsite!==drawCallsite||active.node!==node||!active.entered){rejectScheduler();fail('private exact active outer draw invocation required');}
     if(checkingDraw)return;
     checkingDraw=true;
     try{
@@ -2380,8 +2381,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(root.getVectorProcessorProfile()!==active.context.processor)fail('draw processor owner changed');
       check();
       const exact=(o:object,k:string,v:unknown):void=>{const d=primaryStoreDescriptor(o,k);if(!d||!('value'in d)||d.value!==v)fail('draw context owner changed: '+k);};
-      exact(sources,'objectUpdates',active.updates);exact(active.updates,'draw',active.draw);
-      for(const key of ['roots36290','roots36280','roots6f54']){const d=primaryStoreDescriptor(active.updates,key);if(d&&'value'in d&&d.value!==undefined&&[active.draw,active.context.constants,active.context.scratch,active.context.processor].includes(d.value))fail('draw helper aliases root table');}
+      drawStorageCheck(active.updates);exact(active.updates,'draw',active.draw);
+      for(const key of ['roots36290','roots36280','roots36270','roots6f54']){const d=primaryStoreDescriptor(active.updates,key);if(d&&'value'in d&&d.value!==undefined&&[active.draw,active.context.constants,active.context.scratch,active.context.processor].includes(d.value))fail('draw helper aliases root table');}
       const cd=primaryStoreDescriptor(active.draw,'constants');if((cd&&!('value'in cd))||cd?.value!==active.context.constants)fail('draw constants owner changed');
       const sd=primaryStoreDescriptor(active.draw,'scratch');
       if((sd && !('value'in sd))||sd?.value!==active.context.scratch)fail('draw scratch owner changed');
@@ -2389,16 +2390,31 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       check();
     }finally{checkingDraw=false;}
   };
-  const runObjectUpdates=():void=>{
+  // Reached root tables retain their identities across all three source calls.
+  // Native checks follow metadata observers; scalar heads are never reread.
+  const drawStorageCheck=(updates:object):void=>{
+    const exact=(o:object,k:string,v:unknown):void=>{const d=primaryStoreDescriptor(o,k);if(!d||!('value'in d)||d.value!==v)fail('draw source owner changed: '+k);};
+    exact(sources,'objectUpdates',updates);
+    for(const name of ['roots36290','roots36280','roots36270','roots6f54']){
+      const rows=retained.get('objectUpdates.'+name);if(!rows)continue;
+      exact(updates,name,rows);
+      for(const alias of [name.slice(5),'0x804'+name.slice(5),'804'+name.slice(5)])if(primaryStoreDescriptor(updates,alias))fail('competing draw root owner');
+    }
+  };
+  const runObjectUpdates=(callsite:0x800294c8|0x800294fc|0x80029500):void=>{
+    if(drawCallsite!==undefined)fail('nested outer draw traversal');
+    drawCallsite=callsite;
+    try{
     const supplied=Object.getOwnPropertyDescriptor(sources,'objectUpdates');check();
-    if(!supplied||!('value'in supplied)||supplied.value===undefined)fail('800294c8 reached mandatory80089554');
-    const updates=retain('objectUpdates',supplied.value);
+    if(!supplied||!('value'in supplied)||supplied.value===undefined)fail(callsite===0x800294c8?'800294c8 reached mandatory80089554':callsite.toString(16)+' reached mandatory draw traversal');
+    const updates=retain('objectUpdates',supplied.value);drawStorageCheck(updates);
+    const checked=<T>(f:()=>T):T=>{const value=call(f);drawStorageCheck(updates);return value;};
     const link=(v:unknown):symbol|null=>{if(v!==null&&typeof v!=='symbol')fail('89554 explicit object pointer required');return v;};
     const walk=(first:symbol|null):void=>{
       let node=first;const visited=new Set<symbol>();
       while(node!==null){
         if(visited.has(node))fail('89554 cyclic source list unsupported');visited.add(node);
-        const callback=call(()=>allocator.readU32(node!,0x100));
+        const callback=checked(()=>allocator.readU32(node!,0x100));
         if(callback!==0){
           if(callback!==0x80047aa4)fail('89554 reached unsupported callback100 '+callback.toString(16));
           const draw=record(read(updates,'draw'),'draw context');
@@ -2409,26 +2425,30 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           if(sd&&!('value'in sd))fail('draw scratch own data required');
           const scratch=sd?.value as Float32Array|undefined;
           const processor=call(()=>root.getVectorProcessorProfile());
-          const tableOwners=['roots36290','roots36280','roots6f54'].map(k=>primaryStoreDescriptor(updates,k)).filter(d=>d&&'value'in d).map(d=>d!.value);
+          const tableOwners=['roots36290','roots36280','roots36270','roots6f54'].map(k=>primaryStoreDescriptor(updates,k)).filter(d=>d&&'value'in d).map(d=>d!.value);
           const owners=[sources,globals,updates,...tableOwners,root.getDrawList(),...retained.values(),...call(()=>root.getRetainedStorageOwners()),...call(()=>allocator.getRetainedStorageOwners())];
           if(draw===constants||draw===processor||(constants!==undefined&&constants===processor)||owners.includes(draw)||(constants!==undefined&&owners.includes(constants))||
              (scratch!==undefined&&(owners.includes(scratch)||scratch===processor||(ArrayBuffer.isView(scratch)&&owners.some(o=>ArrayBuffer.isView(o)&&o.buffer===scratch.buffer)))))fail('draw helper storage aliases retained owner');
           for(const [key,value]of [['draw',draw],['constants',constants],['scratch',scratch]]as const){if(drawOwners.has(key)&&drawOwners.get(key)!==value)fail('draw retained owner changed: '+key);drawOwners.set(key,value);}
           for(const o of [draw,constants,scratch,...(scratch instanceof Float32Array?[scratch.buffer]:[])])if(o!==null&&typeof o==='object'&&!claimSourceHelperStorage(o,runtime))fail('draw helper storage already claimed');
-          drawInvocation={node,entered:false,updates,draw,buffer:scratch instanceof Float32Array?scratch.buffer:undefined,context:Object.freeze({allocator,root,processor,constants,scratch})};
+          drawInvocation={callsite,node,entered:false,updates,draw,buffer:scratch instanceof Float32Array?scratch.buffer:undefined,context:Object.freeze({allocator,root,processor,constants,scratch})};
           try{call(()=>executeSourceDrawCallback47aa4(runtime,node!));}finally{drawInvocation=undefined;}
         }
-        node=link(call(()=>allocator.readPointer(node!,0x108)));
+        node=link(checked(()=>allocator.readPointer(node!,0x108)));
       }
     };
     // Each later root family is loaded only after the preceding callbacks return.
-    walk(link(read(call(()=>root.getDrawList()),'tail')));
+    if(callsite===0x800294c8)walk(link(read(call(()=>root.getDrawList()),'tail')));
     const family=(name:string,count:number,start=0):void=>{
-      const rows=retain('objectUpdates.'+name,read(updates,name));
+      if(name==='roots36270'&&!primaryStoreDescriptor(updates,name))fail('80029500 reached required80089658: explicit roots36270 required');
+      const rows=retain('objectUpdates.'+name,read(updates,name));drawStorageCheck(updates);
       if(name==='roots36290')noShadows(rows,['0']);
-      for(let i=start;i<count;i++)walk(link(read(rows,String(i))));
+      for(let i=start;i<count;i++)walk(link(checked(()=>read(rows,String(i)))));
     };
-    family('roots36290',2,1);family('roots36280',2);family('roots6f54',6);
+    if(callsite===0x800294c8){family('roots36290',2,1);family('roots36280',2);family('roots6f54',6);}
+    else if(callsite===0x800294fc)family('roots36280',2);
+    else family('roots36270',2);
+    }finally{drawCallsite=undefined;}
   };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
@@ -2457,7 +2477,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           invokeScheduler(0x800294b4,56);
         }
         invokeScheduler(0x800294bc,58);invokeScheduler(0x800294c4,57);
-        runObjectUpdates();
+        runObjectUpdates(0x800294c8);
         const counterOwner=match();
         noShadows(counterOwner,['wordb0','fieldb0','176','byteb0','byteb1','byteb2','byteb3']);
         const ingress=Object.getOwnPropertyDescriptor(counterOwner,'wordB0');check();
@@ -2475,7 +2495,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
         if(!isSourceActorSlotStatusRuntime(helper))fail('36e24 canonical slot-status owner required');
         contactInvocation={entered:false,helper};
         try{executeSourcePlayerContact36e24(runtime);}finally{contactInvocation=undefined;}
-        fail('800294fc reached required8008972c after bounded36e24');
+        runObjectUpdates(0x800294fc);runObjectUpdates(0x80029500);
+        fail('80029504 reached outer post-draw continuation');
       } catch(error) {
         close();throw error;
       } finally {contactInvocation=undefined;drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
