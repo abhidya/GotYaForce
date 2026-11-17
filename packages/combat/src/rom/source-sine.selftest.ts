@@ -1,5 +1,21 @@
 import {sourceSineKernel, sourceSineKernelTail, sourceSineFloatBounded} from './source-sine.js';
 export function runSourceSineKernelSelfTest(): void {
+  // GG4E 8023cc44 controlled calls in Dolphin 2606-97, not hardware captures.
+  const captures: Array<[number, string]> = [
+    [-1.5707963705062866, 'bff0000000000000'], [-1.2000000476837158, 'bfedd343a0000000'],
+    [-0.7853981852531433, 'bfe6a09e60000000'], [-0.5, 'bfdeaee880000000'],
+    [-0.10000000149011612, 'bfb98eaee0000000'], [-0, '8000000000000000'],
+    [0, '0000000000000000'], [9.999999717180685e-10, '3e112e0be0000000'],
+    [0.10000000149011612, '3fb98eaee0000000'], [0.5, '3fdeaee880000000'],
+    [0.7853981852531433, '3fe6a09e60000000'], [0.800000011920929, '3fe6f494c0000000'],
+    [1, '3feaed5480000000'], [1.2000000476837158, '3fedd343a0000000'],
+    [1.5707963705062866, '3ff0000000000000'],
+  ];
+  const view = new DataView(new ArrayBuffer(8));
+  for (const [x, expected] of captures) {
+    view.setFloat64(0, sourceSineFloatBounded(x));
+    if (view.getBigUint64(0) !== BigInt(`0x${expected}`)) throw Error(`Dolphin sine mismatch at ${x}`);
+  }
   for (let i = -7853; i <= 7853; i++) {
     const x = i / 10000;
     if (Math.abs(sourceSineKernel(x) - Math.sin(x)) > 2e-16) throw Error(`sine candidate differs at ${x}`);
