@@ -1,3 +1,4 @@
+import {sourceReciprocalSqrtEstimate} from './source-reciprocal-sqrt-estimate.js';
 import {createSourceActorAnimationTransitionRuntime, divideSourceAnimationFloat32,
   hasIncompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
 import {createSourceActorAnimationSetupRuntime} from './actor-animation-setup.js';
@@ -166,6 +167,17 @@ export function runActorAnimationTransitionSelfTests(): void {
     x.transition.blendPart(x.actor, 0, 0.5);
     check(Math.abs(x.current.quaternion.x - Math.SQRT1_2) < 3e-7 && Math.abs(x.current.quaternion.w - Math.SQRT1_2) < 3e-7,
       'explicit experimental estimate executes nonlinear slerp');
+  }
+  {
+    // C_QUATSlerp capture using identity and (0,0,.6,.8), weight .3.
+    // This checks the composed offline owner against one emulator capture;
+    // it does not establish original actor-transition execution parity.
+    const x = fixture(1, sourceReciprocalSqrtEstimate);
+    x.previous.quaternion.z = Math.fround(.6); x.previous.quaternion.w = Math.fround(.8);
+    x.transition.blendPart(x.actor, 0, Math.fround(.3));
+    const view = new DataView(new ArrayBuffer(4));
+    view.setFloat32(0, x.current.quaternion.z); check(view.getUint32(0) === 0x3e44753c, 'captured nonlinear quaternion z');
+    view.setFloat32(0, x.current.quaternion.w); check(view.getUint32(0) === 0x3f7b3e94, 'captured nonlinear quaternion w');
   }
   {
     const x = fixture(1, () => {throw Error('estimate failed');});
