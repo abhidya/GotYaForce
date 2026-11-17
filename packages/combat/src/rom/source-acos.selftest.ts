@@ -1,9 +1,14 @@
+import {sourceTargetDistanceSeed} from './source-target-distance.js';
 import {sourceAcosSmall, sourceAcosUpper, sourceAcosFloatNonnegative} from './source-acos.js';
 export function runSourceAcosSmallSelfTest(): void {
   for (let i = -4999; i <= 4999; i++) {
     const x = i / 10000;
     if (Math.abs(sourceAcosSmall(x) - Math.acos(x)) > 5e-16) throw Error(`acos candidate differs at ${x}`);
   }
+  // Existing model-backed Dolphin seed covers z=.25 when x=.5. This is not
+  // an independently authenticated physical Gekko measurement.
+  const seed = sourceTargetDistanceSeed(0.25);
+  if (seed === undefined || Math.abs(sourceAcosUpper(0.5, () => seed) - Math.acos(0.5)) > 5e-16) throw Error('model-backed .25 estimate');
   // This mathematical estimate is a test fixture, not a retail frsqrte oracle.
   for (let i = 5000; i < 10000; i++) {
     const x = i / 10000;
