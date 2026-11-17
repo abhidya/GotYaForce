@@ -1,3 +1,4 @@
+import {runSourceCosineKernelSelfTest} from './source-cosine.selftest.js';
 import {runSourceSineKernelSelfTest} from './source-sine.selftest.js';
 import {runSourceAcosSmallSelfTest} from './source-acos.selftest.js';
 import {runReactionStreamSelfTest} from './reaction-stream.selftest.js';
@@ -210,6 +211,7 @@ function assert(cond: boolean, msg: string): void {
 export function runSelfTest(): number {
   runSourceAcosSmallSelfTest();
   runSourceSineKernelSelfTest();
+  runSourceCosineKernelSelfTest();
   failures = 0;
   runStreamFlagsSelfTest();
   runStreamBankSelfTest();
