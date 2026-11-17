@@ -31,3 +31,12 @@ export function sourceAcosUpper(x: number, reciprocalSqrtEstimate: (value: numbe
   const q = 1 + z * (-2.403394911734414 + z * (2.0209457602335057 + z * (-0.6882839716054533 + z * 0.07703815055590194)));
   return 2 * (highRoot + ((p / q) * root + -(highRoot * highRoot - z) / (root + highRoot)));
 }
+
+/** 8023cc8c wrapper, restricted to the nonnegative finite float32 dot-product
+ * domain used by quaternion blending. The upper path requires an frsqrte owner.
+ * This is not yet an execution-verified retail implementation. */
+export function sourceAcosFloatNonnegative(x: number, reciprocalSqrtEstimate: (value: number) => number): number {
+  if (!Number.isFinite(x) || !Object.is(x, Math.fround(x)) || x < 0 || x > 1) throw new RangeError('float32 dot product in [0, 1] required');
+  if (x === 1) return 0;
+  return Math.fround(x < 0.5 ? sourceAcosSmall(x) : sourceAcosUpper(x, reciprocalSqrtEstimate));
+}
