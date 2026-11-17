@@ -12,11 +12,15 @@ export interface SourceBattleTeamRow extends Pick<BurstMeterState, 'charged'> {
   /** Source row+38 pointer word.80027764 copies live slots2/1 then null/null;
    * this is NOT a leader table. Canonical pointer identities, no dereference. */
   pointer38?: symbol | null;
+  /** Same row+24 raw word copied by8002bb14, not a flat global shadow. */
+  word24?: number;
   threshold30?: number;
   /** Existing BurstMeterState owner for row+32, not a new raw halfword. */
   meter?: number;
 }
 export interface SourceBattleOuterGlobalFields {
+  /** Actual post89554 counter, not host time or frame-entry tick. */
+  wordB0?:number;
   byteC0?:number;byteC1?:number;byteC2?:number;byteC3?:number;byte15db?:number;
   byte15d4?: number; byte66?: number; halfD6?: number;
   /** SAME unsigned80433934+d9 cell already used by actor-matrix/ceiling. */

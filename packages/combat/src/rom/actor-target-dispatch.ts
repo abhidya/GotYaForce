@@ -44,6 +44,12 @@ const runtimes=new WeakSet<object>(),claims=new WeakMap<object,SourceActorTarget
 export function isSourceActorTargetDispatchRuntime(value: unknown): value is SourceActorTargetDispatchRuntime {
   return value!==null && typeof value==='object' && runtimes.has(value);
 }
+/** Identity-only canonical owner lookup. Does not enter dispatch, load its
+ * candidate globals, or grant permission to mutate helper-owned storage. */
+export function getSourceActorTargetDispatchForScheduler(scheduler:SourceObjectSchedulerRuntime):SourceActorTargetDispatchRuntime|undefined {
+  if(!isSourceObjectSchedulerRuntime(scheduler))fail('genuine scheduler required');
+  return claims.get(scheduler);
+}
 function fail(reason: string): never {throw Error(`[actor-target-dispatch] ${reason}; offline execution aborted, prior writes/effects are not rolled back`);}
 function own(owner: unknown,key: string,writable=false): unknown {
   if(owner===null || typeof owner!=='object') fail(`${key}: own data record required`);

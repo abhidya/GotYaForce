@@ -1,3 +1,4 @@
+import {checkSourceBattlePlayerContactInvocation,type SourceBattleOuterFrameRuntime} from './battle-outer-frame.js';
 /** Genuine80010514 over the SAME live803c4e84 owner as the scheduler.
  * New slot records represent803c73b0 + slot*3e4; state18 is the byte at+18.
  * Explicit current bytes only, not a source constructor/default initializer.
@@ -12,7 +13,11 @@ import {claimSourceHelperStorage,isSourcePlayerTableStorage} from './source-stor
 import {isSourceObjectSchedulerRuntime,type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import {getSourceActorPlayerTablePointer,type SourceObjectAllocationRuntime} from './source-object-allocation.js';
 import {requireSourceActorActionSlotStatusOwner} from './actor-action-request.js';
-export interface SourceActorPlayerSlotRecord {state18?: number;byte10?:number}
+export interface SourceActorPlayerSlotRecord {state18?: number;byte10?:number;
+  /** Same physical player record; raw endpoint words are copied before float admission. */
+  active0?:number;contact26f?:number;word2e8?:number;word2ec?:number;word2f0?:number;
+  word300?:number;word304?:number;word308?:number;
+}
 export interface SourceActorSlotStatusSources {
   scheduler: SourceObjectSchedulerRuntime;
   slotRecords?: Readonly<Record<number,SourceActorPlayerSlotRecord>>;
@@ -30,6 +35,15 @@ export interface SourceActorSlotStatusRuntime {
   getViewPointer(recordIndex:number):symbol;
   /** Fresh canonical row+10 read through a genuine retained view identity. */
   readViewMetadata(pointer:symbol):number;
+}
+const contactChecks=new WeakMap<object,()=>void>();
+/** Read-only retained identity check, not an execution capability or row accessor. */
+export function checkSourcePlayerContactStorage(helper:SourceActorSlotStatusRuntime):void {contactChecks.get(helper)?.();}
+const contactRows=new WeakMap<object,(outer:SourceBattleOuterFrameRuntime,index:number)=>object>();
+export function getSourcePlayerContactRow(helper:SourceActorSlotStatusRuntime,outer:SourceBattleOuterFrameRuntime,index:number):object {
+  checkSourceBattlePlayerContactInvocation(outer,helper);
+  const access=contactRows.get(helper);if(!access)fail('canonical contact player helper required');
+  return access(outer,index);
 }
 const runtimes=new WeakSet<object>(),claims=new WeakMap<object,SourceActorSlotStatusRuntime>();
 const addressScopes=new WeakMap<object,(allocator:SourceObjectAllocationRuntime,table:object)=>void>();
@@ -214,6 +228,25 @@ export function createSourceActorSlotStatusRuntime(sources: SourceActorSlotStatu
       } finally {busy=false;}
     },
   };
+  const contactSelected=new Map<number,object>();
+  contactChecks.set(runtime,()=>{
+    if(contactSelected.size===0)return;
+    const table=terminalDescriptor(sources,'slotRecords'),rows=retained.get('slotRecords');
+    if(!table||!('value'in table)||table.value!==rows||!rows)fail('canonical contact table changed');
+    for(const [index,row]of contactSelected){const p=terminalDescriptor(rows,String(index));
+      if(!p||!('value'in p)||p.value!==row)fail('canonical contact row changed');}
+  });
+  contactRows.set(runtime,(outer,index)=>viewOperation(()=>{
+    checkSourceBattlePlayerContactInvocation(outer,runtime);
+    if(!Number.isInteger(index)||index<0||index>=13)fail('contact player outside physical13-record domain');
+    graph();const rows=retain('slotRecords',read(sources,'slotRecords'));
+    const row=retain(`slotRecord${index}`,read(rows,String(index)));
+    for(let i=0;i<13;i++)if(i!==index){const d=terminalDescriptor(rows,String(i));if(d&&'value'in d&&d.value===row)fail('contact player aliases another row');}
+    contactSelected.set(index,row);graph();checkSourceBattlePlayerContactInvocation(outer,runtime);
+    const a=terminalDescriptor(sources,'slotRecords'),b=terminalDescriptor(rows,String(index));
+    if(!a||!('value'in a)||a.value!==rows||!b||!('value'in b)||b.value!==row)fail('canonical contact row changed');
+    return row;
+  }));
   addressScopes.set(runtime,(selected,table)=>{
     if(!busy||poisoned||addressTable!==table||selected!==allocator||retained.get('slotRecords')!==table)
       fail('private active player-table addressability required');

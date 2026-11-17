@@ -30,7 +30,8 @@
  * close actors whose subsequent spawn initialization was incomplete.
  */
 import {requireSourceProjectileHitAllocatorInvocation,checkSourceProjectileHitAllocatorInvocation,type SourceActorProjectileSpawnRuntime} from './actor-projectile-spawn.js';
-import {reserveSourcePointerStorage,reserveSourcePlayerTableStorage,isSourceHelperStorageClaimed} from './source-storage-claims.js';
+import {reserveSourcePointerStorage,reserveSourcePlayerTableStorage,reserveSourceProjectileResourceJointStorage,isSourceProjectileResourceJointStorage,isSourceHelperStorageClaimed} from './source-storage-claims.js';
+import {consumeSourceProjectileResourceJointAddressability,checkSourceProjectileResourceJointAddressability,type SourceProjectileResourceRuntime} from './projectile-resource.js';
 import {requireSourceActorPlayerTableAddressability,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
 import {requireSourceObjectSchedulerSnapshot, type SourceObjectSchedulerRuntime} from './source-object-scheduler.js';
 import type {RomActor} from './actor.js';
@@ -109,6 +110,20 @@ export interface SourceObjectAllocationRuntime {
   writePointer(identity: symbol, offset: number, value: symbol | null): void;
 }
 const schedulerIncomplete = new WeakSet<object>();
+const resourceJointJoins=new WeakMap<object,(resource:SourceProjectileResourceRuntime,block:object,token:object)=>symbol>();
+const resourceDescriptorJoins=new WeakMap<object,(resource:SourceProjectileResourceRuntime,block:object,descriptor:symbol,token:object)=>void>();
+/** Private one-use completed-LoadJoint addressability. No source allocation. */
+export function getSourceProjectileResourceJointPointer(allocator:SourceObjectAllocationRuntime,
+ resource:SourceProjectileResourceRuntime,block:object,token:object):symbol {
+ const join=resourceJointJoins.get(allocator);if(!join||!isSourceObjectAllocationRuntime(allocator))fail('genuine resource joint allocator required');
+ return join(resource,block,token);
+}
+/** Exact6fb4 stores under the same private resource continuation. */
+export function completeSourceProjectileResourceDescriptor(allocator:SourceObjectAllocationRuntime,
+ resource:SourceProjectileResourceRuntime,block:object,descriptor:symbol,token:object):void {
+ const join=resourceDescriptorJoins.get(allocator);if(!join||!isSourceObjectAllocationRuntime(allocator))fail('genuine resource descriptor allocator required');
+ join(resource,block,descriptor,token);
+}
 const playerTableJoins=new WeakMap<object,(helper:SourceActorSlotStatusRuntime,table:object)=>symbol>();
 /** Private synchronous addressability, not generic external registration. */
 export function getSourceActorPlayerTablePointer(allocator:SourceObjectAllocationRuntime,
@@ -154,9 +169,11 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
   let busy = false, poisoned = false, incomplete = false, allocating = false, dirty = false;
   let activeHitAllocation:{spawn:SourceActorProjectileSpawnRuntime;child:symbol;id:symbol;caller:symbol}|undefined;
   let checkingHitParent=false, activeMutation=false;
+  let activeResource:{resource:SourceProjectileResourceRuntime;block:object;token:object;descriptor?:symbol}|undefined,checkingResource=false;
   const check = (): void => {
     if (poisoned) fail('caught same-runtime reentry');
     if(activeMutation && (incomplete || schedulerIncomplete.has(runtime))) fail('permanently incomplete allocation owner');
+    if(activeResource&&!checkingResource){checkingResource=true;try{checkSourceProjectileResourceJointAddressability(activeResource.resource,runtime,activeResource.block,activeResource.token,activeResource.descriptor);}finally{checkingResource=false;}}
     if(activeHitAllocation&&!checkingHitParent) {
       checkingHitParent=true;
       try{checkSourceProjectileHitAllocatorInvocation(activeHitAllocation.spawn,runtime,activeHitAllocation.child,activeHitAllocation.id,activeHitAllocation.caller);}
@@ -169,7 +186,7 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     busy = true; poisoned = false; activeMutation=mutation;
     try {const result = run(); check(); return result;}
     catch (error) {if (allocating && dirty) incomplete = true; throw error;}
-    finally {activeHitAllocation=undefined;activeMutation=false;busy = false; allocating = false;}
+    finally {activeResource=undefined;activeHitAllocation=undefined;activeMutation=false;busy = false; allocating = false;}
   };
   const read = (r: unknown, key: string): unknown => {const v = own(r, key); check(); return v;};
   const write = (r: unknown, key: string, v: unknown): void => {
@@ -208,15 +225,16 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
   const interiorIds = new Map<symbol, Map<number, symbol>>(), interiorAddresses = new Map<symbol, Readonly<SourceObjectInteriorAddress>>();
   const handles = new Map<symbol, number>(), identities = new Map<number, symbol>();
   let nextHandle = 1;
-  const identify = (id: symbol, target: object,playerHelper?:SourceActorSlotStatusRuntime): void => {
-    if(!playerHelper&&isSourceHelperStorageClaimed(target))fail('pointer target source storage already claimed');
+  const identify = (id: symbol, target: object,playerHelper?:SourceActorSlotStatusRuntime,resourceHelper?:{resource:SourceProjectileResourceRuntime;token:object}): void => {
+    if(!playerHelper&&!resourceHelper&&isSourceHelperStorageClaimed(target))fail('pointer target source storage already claimed');
     if (typeof id !== 'symbol') fail('symbol identity required');
     const prior = targets.get(id), priorId = targetIds.get(target);
     if (prior !== undefined && prior !== target) fail('pointer identity changed its actual owner');
     if (priorId !== undefined && priorId !== id) fail('actual pointer owner already has a different identity');
     if (prior === undefined) {
-      if(!(playerHelper?reserveSourcePlayerTableStorage(target,playerHelper,runtime):reserveSourcePointerStorage(target)))
+      if(!(resourceHelper?reserveSourceProjectileResourceJointStorage(target,resourceHelper.resource,runtime,resourceHelper.token):playerHelper?reserveSourcePlayerTableStorage(target,playerHelper,runtime):reserveSourcePointerStorage(target)))
         fail('pointer target source storage already claimed');
+      check();
       if (nextHandle > 0xffffffff) fail('opaque pointer handle capacity exhausted');
       targets.set(id, target); targetIds.set(target, id); handles.set(id, nextHandle); identities.set(nextHandle++, id);
     }
@@ -525,6 +543,20 @@ export function createSourceObjectAllocationRuntime(sources: SourceObjectAllocat
     }, true);},
     writePointer(id, offset, value) {guard(() => putPointer(id, offset, value), true);},
   };
+  resourceJointJoins.set(runtime,(resource,block,token)=>guard(()=>{
+    consumeSourceProjectileResourceJointAddressability(resource,runtime,block,token);
+    activeResource={resource,block,token};check();
+    const old=targetIds.get(block);
+    if(old!==undefined){if(!reserveSourceProjectileResourceJointStorage(block,resource,runtime,token))fail('resource joint owner differs');check();return old;}
+    const id=Symbol('source allocated JObj');identify(id,block,undefined,{resource,token});check();return id;
+  },true));
+  resourceDescriptorJoins.set(runtime,(resource,block,descriptor,token)=>guard(()=>{
+    activeResource={resource,block,descriptor,token};check();
+    if(!isSourceProjectileResourceJointStorage(block,resource,runtime))fail('resource joint not privately registered');
+    const id=targetIds.get(block);if(id===undefined||targets.get(id)!==block)fail('resource joint identity changed');
+    // Exact store width/order confirmed by selected6fb4: pointer0c,word14,byte0b,byte10.
+    putPointer(descriptor,0x0c,id);store(descriptor,0x14,4,14);store(descriptor,0x0b,1,0);store(descriptor,0x10,1,1);check();
+  },true));
   playerTableJoins.set(runtime,(helper,table)=>guard(()=>{
     requireSourceActorPlayerTableAddressability(helper,runtime,table);
     const old=targetIds.get(table);

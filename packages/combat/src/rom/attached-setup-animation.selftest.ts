@@ -1,3 +1,16 @@
+import {runBattleContactAdjustSelfTests} from './battle-contact-adjust.selftest.js';
+import {runBattleContactHeightSelfTests} from './battle-contact-height.selftest.js';
+import {runBattleTargetActionResetSelfTests} from './battle-target-action-reset.selftest.js';
+import {runBattleContactTimerSelfTests} from './battle-contact-timer.selftest.js';
+import {runBattleContactTransformSelfTests} from './battle-contact-transform.selftest.js';
+import {runBattleContactCallbackPrefixSelfTests} from './battle-contact-callback-prefix.selftest.js';
+import {runBattleContactCallbackTraversalSelfTests} from './battle-contact-callback-traversal.selftest.js';
+import {runBattleContactCountResetSelfTests} from './battle-contact-count-reset.selftest.js';
+import {runSourceContactResetSelfTests} from './source-contact-reset.selftest.js';
+import {runProjectileResourceSelfTests} from './projectile-resource.selftest.js';
+import {runBattleLateDrawSelfTests} from './battle-late-draw.selftest.js';
+import {runSourcePlayerContactSelfTests} from './source-player-contact.selftest.js';
+import {runProjectileInitializerTailSelfTests} from './projectile-initializer-tail.selftest.js';
 import {runSourceDrawCallbackSelfTests} from './source-draw-callback.selftest.js';
 import {runBattleDrawOuterSelfTests} from './battle-draw-outer.selftest.js';
 import {runProjectileNormalizeOuterSelfTests} from './projectile-normalize-outer.selftest.js';
@@ -136,6 +149,7 @@ let projectileFixtureConstruction = false;
 let targetPreparationMissingCell: 'byte7d2'|'pointer508'|undefined;
 let orderedVoice438: number|undefined;
 let orderedSamplerLowHalf:number|undefined;
+let initializerRowTail:Readonly<Partial<Record<'speed10'|'word14'|'field28'|'field30'|'descriptor00',number>>>|undefined;
 let orderedMatrixCorrections:readonly SourceActorWorldMatrixCorrection[]|undefined;
 function constructGenuineComposition<T>(build: () => T): T {
   const previous = genuineCompositionConstruction;
@@ -2941,8 +2955,21 @@ export function runAttachedSetupAnimationSelfTest(): void {
   runBattleOrderedActorStageHydratedCompositionTests();
   runBattleStageDispatchHydratedCompositionTests();
   runProjectileNormalizeOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runProjectileInitializerTailSelfTests(createProjectileInitializerTailBaseTestFixture);
+  runProjectileResourceSelfTests(createProjectileInitializerTailBaseTestFixture);
   runBattleDrawOuterSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runSourceDrawCallbackSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runSourcePlayerContactSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runSourceContactResetSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleLateDrawSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleContactCountResetSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleContactCallbackTraversalSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleContactCallbackPrefixSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleContactTransformSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleContactTimerSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleTargetActionResetSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleContactHeightSelfTests(createBattleTargetPreparationSamplerTestFixture);
+  runBattleContactAdjustSelfTests(createBattleTargetPreparationSamplerTestFixture);
   runActorThirdPassTarget83HydratedCompositionTests();
   runActorAssociationScanHydratedCompositionTests();
   runActorAssociationGuardsHydratedCompositionTests();
@@ -11718,7 +11745,7 @@ function doubleFrameHydratedCompositionFixture(bind = true, withGround: boolean 
     hitIds.forEach((id,i)=>{allocator.writeU8(id,2,4);
       allocator.writePointer(id,4,hitIds[i+1]??null);});
     allocator.bindActor(x.actor, {byte83: 0});
-    const row1 = {family2e: 3, joint02: 11, local04: {x: 55, y: 0, z: 0}, offset2c: 0};
+    const row1 = {family2e: 3, joint02: 11, local04: {x: 55, y: 0, z: 0}, offset2c: 0,...initializerRowTail};
     const projectileSources = {prehook, world: x.world, admission: x.commandAdmission, gauges: x.gauges, setup: x.ready, allocator, row1};
     const projectiles = createSourceActorProjectileSpawnRuntime(projectileSources);
     const projectileInitial = {pointer90: a as object | null};
@@ -13670,6 +13697,12 @@ export function createBattleTargetPreparationSamplerTestFixture() {
   const previous=orderedSamplerLowHalf;orderedSamplerLowHalf=0;
   try{return createBattleTargetPreparationMatrixActiveTestFixture();}finally{orderedSamplerLowHalf=previous;}
 }
+/** Explicit decoded initializer row cells supplied before the real spawn runtime
+ * copies its canonical row. Existing factories retain their missing-tail inputs. */
+export function createProjectileInitializerTailBaseTestFixture(tail: NonNullable<typeof initializerRowTail>) {
+  const previous=initializerRowTail;initializerRowTail=tail;
+  try{return createBattleTargetPreparationSamplerTestFixture();}finally{initializerRowTail=previous;}
+}
 export function runBattleTargetPreparationHydratedCompositionTests(): void {
   runBattleTargetPreparationSelfTests(createBattleTargetPreparationTestFixture,createBattleMassOrderingTestFixture);
 }
@@ -13822,3 +13855,5 @@ export function runBattleTeamCandidatesHydratedCompositionTests():void {runBattl
 export function runBattleOrderedInputValidEntryHydratedCompositionTests():void {runBattleOrderedInputSamplerValidEntrySelfTests(createBattleTargetPreparationSamplerTestFixture);}
 
 export function runBattleStageDispatchHydratedCompositionTests():void {runBattleStageDispatchSelfTests(createBattleTargetPreparationSamplerTestFixture);}
+
+export function runProjectileResourceHydratedCompositionTests():void{runProjectileResourceSelfTests(createProjectileInitializerTailBaseTestFixture);}

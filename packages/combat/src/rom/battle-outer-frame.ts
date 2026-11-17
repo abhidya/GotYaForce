@@ -1,3 +1,7 @@
+import {invokeSourceContactResetOuter,type SourceContactResetSources} from './source-contact-reset.js';
+import {isSourceActorNormalLifecycleRuntime,type SourceActorNormalLifecycleRuntime} from './actor-normal-lifecycle.js';
+import {executeSourceContactTransform} from './source-contact-transform.js';
+import {executeSourcePlayerContact36e24} from './source-player-contact.js';
 import {executeSourceDrawCallback47aa4} from './source-draw-callback.js';
 import type {SourceObjectAllocationRuntime} from './source-object-allocation.js';
 import type {SourceProjectileRootRuntime} from './projectile-root-lifecycle.js';
@@ -54,8 +58,8 @@ import {readSourceTargetDistance} from './source-target-distance.js';
 import {readSourceShortTrig} from './source-short-trig.js';
 import {isSourceActorMatrixUpdateRuntime, type SourceActorMatrixUpdateRuntime} from './actor-matrix-update.js';
 import type {SourceActorCommandAdmissionRuntime} from './actor-command-admission.js';
-import {isSourceActorTargetDispatchRuntime,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
-import {isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
+import {isSourceActorTargetDispatchRuntime,getSourceActorTargetDispatchForScheduler,type SourceActorTargetDispatchRuntime} from './actor-target-dispatch.js';
+import {checkSourcePlayerContactStorage,isSourceActorSlotStatusRuntime,type SourceActorSlotStatusRuntime} from './actor-slot-status.js';
 import {isSourceActorOrderedFrameRuntime,invokeSourceActorOrderedFrameFromOuter,checkSourceActorOrderedVoicePosition,checkSourceActorOrderedSamplerInvocation,type SourceActorOrderedFrameRuntime} from './actor-ordered-frame.js';
 import type {SourceActorInputSamplerRuntime} from './actor-input-sampler.js';
 import {stepSourceByteRng} from './source-byte-rng.js';
@@ -98,7 +102,13 @@ export interface SourceBattleTargetPreparationSources {
   targetDispatch?: SourceActorTargetDispatchRuntime;
 }
 export interface SourceBattleOuterFrameSources {
-  objectUpdates?: {roots36290:Record<number,symbol|null>;roots36280:Record<number,symbol|null>;roots6f54:Record<number,symbol|null>;draw:{constants:object;scratch?:Float32Array}};
+  /** Genuine2bb14 prefix. Explicit source globals, not generated defaults. */
+  targetAction?:{normal?:SourceActorNormalLifecycleRuntime;constants?:{float80436f68?:number;float80436f6c?:number};cells?:Record<string,number>;contactPointers46?:Record<number,symbol|null>;contactPointers44?:Record<number,symbol|null>};
+  /** Same ten global halfword destinations used by8008a28c, not copied lists.
+   * Reached only at294ec after the fresh mode selects the normal suffix. */
+  contactCounters?: Partial<Record<`half804362${'50'|'4e'|'4c'|'4a'|'48'|'46'|'44'|'42'|'40'|'3e'}`,number>>;
+  playerContact?:{constants?:{float80436f68?:number}};
+  objectUpdates?: {roots36290:Record<number,symbol|null>;roots36280:Record<number,symbol|null>;roots36270?:Record<number,symbol|null>;roots6f54:Record<number,symbol|null>;draw:{constants:object;scratch?:Float32Array}};
   scheduler: SourceObjectSchedulerRuntime;
   /** Genuine54070, reached only at the actual ordered-list call. */
   orderedActors?:SourceActorOrderedFrameRuntime;
@@ -132,6 +142,25 @@ export function requireSourceBattleOuterFrameFailure(outer: SourceBattleOuterFra
   if(!isSourceBattleOuterFrameRuntime(outer) || !scope) fail('private active outer failure required');
   scope(scheduler);
 }
+type TargetResetKind='actor'|'player'|'group';
+const targetResets=new WeakMap<object,{consume(kind:TargetResetKind,value:symbol|number):SourceContactResetSources;check():void;constants():object}>();
+export function consumeSourceBattleTargetResetInvocation(outer:SourceBattleOuterFrameRuntime,kind:TargetResetKind,value:symbol|number):SourceContactResetSources{
+ const scope=targetResets.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private exact target/reset invocation required');return scope.consume(kind,value);
+}
+export function checkSourceBattleTargetResetInvocation(outer:SourceBattleOuterFrameRuntime):void{
+ const scope=targetResets.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private target/reset invocation required');scope.check();
+}
+export function readSourceBattleTargetResetConstants(outer:SourceBattleOuterFrameRuntime):object{
+ const scope=targetResets.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private target/reset constants required');scope.check();return scope.constants();
+}
+export interface SourceBattleOuterContactTransformContext {allocator:SourceObjectAllocationRuntime;root:SourceProjectileRootRuntime;matrix:symbol|null;input:symbol|null;output:symbol}
+const contactTransforms=new WeakMap<object,{consume(node:symbol):SourceBattleOuterContactTransformContext;check(node:symbol):void}>();
+export function consumeSourceBattleOuterContactTransformInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):SourceBattleOuterContactTransformContext {
+ const scope=contactTransforms.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active contact transform invocation required');return scope.consume(node);
+}
+export function checkSourceBattleOuterContactTransformInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):void {
+ const scope=contactTransforms.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active contact transform invocation required');scope.check(node);
+}
 export interface SourceBattleOuterDrawContext {allocator:SourceObjectAllocationRuntime;root:SourceProjectileRootRuntime;processor?:object|undefined;constants:object|undefined;scratch?:Float32Array|undefined}
 const drawInvocations=new WeakMap<object,{consume(node:symbol):SourceBattleOuterDrawContext;check(node:symbol):void}>();
 export function consumeSourceBattleOuterDrawInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):SourceBattleOuterDrawContext {
@@ -139,6 +168,20 @@ export function consumeSourceBattleOuterDrawInvocation(outer:SourceBattleOuterFr
 }
 export function checkSourceBattleOuterDrawInvocation(outer:SourceBattleOuterFrameRuntime,node:symbol):void {
  const scope=drawInvocations.get(outer);if(!isSourceBattleOuterFrameRuntime(outer)||!scope)fail('private active outer draw invocation required');scope.check(node);
+}
+export interface SourceBattlePlayerContactContext {helper:SourceActorSlotStatusRuntime;root:SourceProjectileRootRuntime}
+const playerContacts=new WeakMap<object,{consume():SourceBattlePlayerContactContext;check(helper?:SourceActorSlotStatusRuntime):void;system():object;constant():unknown}>();
+export function consumeSourceBattlePlayerContactInvocation(outer:SourceBattleOuterFrameRuntime):SourceBattlePlayerContactContext {
+  const p=playerContacts.get(outer);if(!p)fail('private contact outer required');return p.consume();
+}
+export function checkSourceBattlePlayerContactInvocation(outer:SourceBattleOuterFrameRuntime,helper?:SourceActorSlotStatusRuntime):void {
+  const p=playerContacts.get(outer);if(!p)fail('private contact outer required');p.check(helper);
+}
+export function readSourceBattlePlayerContactSystem(outer:SourceBattleOuterFrameRuntime):object {
+  const p=playerContacts.get(outer);if(!p)fail('private contact outer required');p.check();return p.system();
+}
+export function readSourceBattlePlayerContactZero(outer:SourceBattleOuterFrameRuntime):unknown {
+  const p=playerContacts.get(outer);if(!p)fail('private contact outer required');p.check();return p.constant();
 }
 interface SchedulerInvocationScope {
   enter(scheduler:SourceObjectSchedulerRuntime,callsite:number,group:number):void;
@@ -240,7 +283,11 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   const completedOrderedActors=new Map<symbol,object>();
   let distancesPrepared=false;
   const producedDistances=new Map<symbol,{actor:object;fields:number;consumed:boolean}>();
-  let drawInvocation:{node:symbol;entered:boolean;context:SourceBattleOuterDrawContext;updates:object;draw:object;buffer?:ArrayBufferLike|undefined}|undefined;
+  let targetResetInvocation:{kind:TargetResetKind;value:symbol|number;entered:boolean;sources:SourceContactResetSources;guard():void;constants():object}|undefined;
+  let contactInvocation:{entered:boolean;helper:SourceActorSlotStatusRuntime}|undefined;
+  let contactTransformInvocation:{node:symbol;site:0x8008a728|0x8008a888;entered:boolean;checking:boolean;context:SourceBattleOuterContactTransformContext;guard():void}|undefined;
+  let drawCallsite:0x800294c8|0x800294fc|0x80029500|undefined;
+  let drawInvocation:{callsite:0x800294c8|0x800294fc|0x80029500;node:symbol;entered:boolean;context:SourceBattleOuterDrawContext;updates:object;draw:object;buffer?:ArrayBufferLike|undefined}|undefined;
   let checkingDraw=false;
   const drawOwners=new Map<string,unknown>();
   let schedulerInvocation:{callsite:number;group:number;entered:boolean}|undefined;
@@ -2355,7 +2402,7 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
   };
   const drawCheck=(node:symbol):void=>{
     const active=drawInvocation;
-    if(!busy||closing||incomplete||poisoned||!active||active.node!==node||!active.entered){rejectScheduler();fail('private exact active outer draw invocation required');}
+    if(!busy||closing||incomplete||poisoned||!active||active.callsite!==drawCallsite||active.node!==node||!active.entered){rejectScheduler();fail('private exact active outer draw invocation required');}
     if(checkingDraw)return;
     checkingDraw=true;
     try{
@@ -2363,8 +2410,8 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       if(root.getVectorProcessorProfile()!==active.context.processor)fail('draw processor owner changed');
       check();
       const exact=(o:object,k:string,v:unknown):void=>{const d=primaryStoreDescriptor(o,k);if(!d||!('value'in d)||d.value!==v)fail('draw context owner changed: '+k);};
-      exact(sources,'objectUpdates',active.updates);exact(active.updates,'draw',active.draw);
-      for(const key of ['roots36290','roots36280','roots6f54']){const d=primaryStoreDescriptor(active.updates,key);if(d&&'value'in d&&d.value!==undefined&&[active.draw,active.context.constants,active.context.scratch,active.context.processor].includes(d.value))fail('draw helper aliases root table');}
+      drawStorageCheck(active.updates);exact(active.updates,'draw',active.draw);
+      for(const key of ['roots36290','roots36280','roots36270','roots6f54']){const d=primaryStoreDescriptor(active.updates,key);if(d&&'value'in d&&d.value!==undefined&&[active.draw,active.context.constants,active.context.scratch,active.context.processor].includes(d.value))fail('draw helper aliases root table');}
       const cd=primaryStoreDescriptor(active.draw,'constants');if((cd&&!('value'in cd))||cd?.value!==active.context.constants)fail('draw constants owner changed');
       const sd=primaryStoreDescriptor(active.draw,'scratch');
       if((sd && !('value'in sd))||sd?.value!==active.context.scratch)fail('draw scratch owner changed');
@@ -2372,16 +2419,31 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
       check();
     }finally{checkingDraw=false;}
   };
-  const runObjectUpdates=():void=>{
+  // Reached root tables retain their identities across all three source calls.
+  // Native checks follow metadata observers; scalar heads are never reread.
+  const drawStorageCheck=(updates:object):void=>{
+    const exact=(o:object,k:string,v:unknown):void=>{const d=primaryStoreDescriptor(o,k);if(!d||!('value'in d)||d.value!==v)fail('draw source owner changed: '+k);};
+    exact(sources,'objectUpdates',updates);
+    for(const name of ['roots36290','roots36280','roots36270','roots6f54']){
+      const rows=retained.get('objectUpdates.'+name);if(!rows)continue;
+      exact(updates,name,rows);
+      for(const alias of [name.slice(5),'0x804'+name.slice(5),'804'+name.slice(5)])if(primaryStoreDescriptor(updates,alias))fail('competing draw root owner');
+    }
+  };
+  const runObjectUpdates=(callsite:0x800294c8|0x800294fc|0x80029500):void=>{
+    if(drawCallsite!==undefined)fail('nested outer draw traversal');
+    drawCallsite=callsite;
+    try{
     const supplied=Object.getOwnPropertyDescriptor(sources,'objectUpdates');check();
-    if(!supplied||!('value'in supplied)||supplied.value===undefined)fail('800294c8 reached mandatory80089554');
-    const updates=retain('objectUpdates',supplied.value);
+    if(!supplied||!('value'in supplied)||supplied.value===undefined)fail(callsite===0x800294c8?'800294c8 reached mandatory80089554':callsite.toString(16)+' reached mandatory draw traversal');
+    const updates=retain('objectUpdates',supplied.value);drawStorageCheck(updates);
+    const checked=<T>(f:()=>T):T=>{const value=call(f);drawStorageCheck(updates);return value;};
     const link=(v:unknown):symbol|null=>{if(v!==null&&typeof v!=='symbol')fail('89554 explicit object pointer required');return v;};
     const walk=(first:symbol|null):void=>{
       let node=first;const visited=new Set<symbol>();
       while(node!==null){
         if(visited.has(node))fail('89554 cyclic source list unsupported');visited.add(node);
-        const callback=call(()=>allocator.readU32(node!,0x100));
+        const callback=checked(()=>allocator.readU32(node!,0x100));
         if(callback!==0){
           if(callback!==0x80047aa4)fail('89554 reached unsupported callback100 '+callback.toString(16));
           const draw=record(read(updates,'draw'),'draw context');
@@ -2392,26 +2454,400 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           if(sd&&!('value'in sd))fail('draw scratch own data required');
           const scratch=sd?.value as Float32Array|undefined;
           const processor=call(()=>root.getVectorProcessorProfile());
-          const tableOwners=['roots36290','roots36280','roots6f54'].map(k=>primaryStoreDescriptor(updates,k)).filter(d=>d&&'value'in d).map(d=>d!.value);
+          const tableOwners=['roots36290','roots36280','roots36270','roots6f54'].map(k=>primaryStoreDescriptor(updates,k)).filter(d=>d&&'value'in d).map(d=>d!.value);
           const owners=[sources,globals,updates,...tableOwners,root.getDrawList(),...retained.values(),...call(()=>root.getRetainedStorageOwners()),...call(()=>allocator.getRetainedStorageOwners())];
           if(draw===constants||draw===processor||(constants!==undefined&&constants===processor)||owners.includes(draw)||(constants!==undefined&&owners.includes(constants))||
              (scratch!==undefined&&(owners.includes(scratch)||scratch===processor||(ArrayBuffer.isView(scratch)&&owners.some(o=>ArrayBuffer.isView(o)&&o.buffer===scratch.buffer)))))fail('draw helper storage aliases retained owner');
           for(const [key,value]of [['draw',draw],['constants',constants],['scratch',scratch]]as const){if(drawOwners.has(key)&&drawOwners.get(key)!==value)fail('draw retained owner changed: '+key);drawOwners.set(key,value);}
           for(const o of [draw,constants,scratch,...(scratch instanceof Float32Array?[scratch.buffer]:[])])if(o!==null&&typeof o==='object'&&!claimSourceHelperStorage(o,runtime))fail('draw helper storage already claimed');
-          drawInvocation={node,entered:false,updates,draw,buffer:scratch instanceof Float32Array?scratch.buffer:undefined,context:Object.freeze({allocator,root,processor,constants,scratch})};
+          drawInvocation={callsite,node,entered:false,updates,draw,buffer:scratch instanceof Float32Array?scratch.buffer:undefined,context:Object.freeze({allocator,root,processor,constants,scratch})};
           try{call(()=>executeSourceDrawCallback47aa4(runtime,node!));}finally{drawInvocation=undefined;}
         }
-        node=link(call(()=>allocator.readPointer(node!,0x108)));
+        node=link(checked(()=>allocator.readPointer(node!,0x108)));
       }
     };
     // Each later root family is loaded only after the preceding callbacks return.
-    walk(link(read(call(()=>root.getDrawList()),'tail')));
+    if(callsite===0x800294c8)walk(link(read(call(()=>root.getDrawList()),'tail')));
     const family=(name:string,count:number,start=0):void=>{
-      const rows=retain('objectUpdates.'+name,read(updates,name));
+      if(name==='roots36270'&&!primaryStoreDescriptor(updates,name))fail('80029500 reached required80089658: explicit roots36270 required');
+      const rows=retain('objectUpdates.'+name,read(updates,name));drawStorageCheck(updates);
       if(name==='roots36290')noShadows(rows,['0']);
-      for(let i=start;i<count;i++)walk(link(read(rows,String(i))));
+      for(let i=start;i<count;i++)walk(link(checked(()=>read(rows,String(i)))));
     };
-    family('roots36290',2,1);family('roots36280',2);family('roots6f54',6);
+    if(callsite===0x800294c8){family('roots36290',2,1);family('roots36280',2);family('roots6f54',6);}
+    else if(callsite===0x800294fc)family('roots36280',2);
+    else family('roots36270',2);
+    }finally{drawCallsite=undefined;}
+  };
+  /** Bounded2bb14 caller and2cf80 prefix on canonical owners. Authenticated
+   * -10000 permits the remaining indexed stores. Actual3a05c performs bounded
+   * owner displacement additions; mandatory39f6c remains an honest boundary. */
+  const runTargetActionPrefix=():never=>{
+    const supplied=Object.getOwnPropertyDescriptor(sources,'targetAction');check();
+    if(!supplied)fail('800294f4 reached required8002bb14; target/action frame helper unsupported');
+    const input=retain('targetAction',read(sources,'targetAction'));
+    const cells=retain('targetAction cells',read(input,'cells'));
+    const edges:{o:object;k:string;value:unknown}[]=[{o:sources,k:'targetAction',value:input},{o:input,k:'cells',value:cells}];
+    const resetSources:SourceContactResetSources={scheduler};
+    const actors=new Map<symbol,object>(),ownerChecks:(()=>void)[]=[];
+    const guard=():void=>{
+      schedulerGraph();check();
+      for(const e of edges){const d=primaryStoreDescriptor(e.o,e.k);if(!d||!('value'in d)||d.value!==e.value)fail('2bb14 retained owner changed');}
+      for(const [id,a]of actors)if(allocator.getPointerTarget(id)!==a)fail('2bb14 actual owner changed');
+      for(const validate of ownerChecks)validate();
+      check();
+    };
+    const edge=(o:object,k:string,value:unknown):void=>{const old=edges.find(e=>e.o===o&&e.k===k);if(old&&old.value!==value)fail('2bb14 retained owner changed');if(!old)edges.push({o,k,value});guard();};
+    const get=(o:object,k:string):unknown=>{const v=read(o,k);guard();return v;};
+    const aliases=(o:object,k:string,address:number,width:number,terminal=false):void=>{
+      const names=new Set<string>();
+      for(const [prefix,size]of [['byte',1],['half',2],['short',2],['word',4],['float',4],['field',4]]as const)
+        for(let start=address-size+1;start<address+width;start++){if(start<0)continue;const h=start.toString(16);names.add(prefix+h);names.add(prefix+h.toUpperCase());}
+      for(let i=0;i<width;i++)names.add(String(address+i));
+      for(const n of names)if(n!==k){const p=terminal?primaryStoreDescriptor(o,n):Object.getOwnPropertyDescriptor(o,n);if(!terminal)guard();if(p)fail(k+': competing2bb14 cell');}
+    };
+    const load=(o:object,k:string,address:number,width:number):number=>{aliases(o,k,address,width);const v=unsigned(get(o,k),width===1?255:width===2?65535:0xffffffff,k);aliases(o,k,address,width,true);return v;};
+    const put=(o:object,k:string,address:number,width:number,v:number,extra=()=>{},terminal=()=>{}):void=>{
+      aliases(o,k,address,width);extra();const d=Object.getOwnPropertyDescriptor(o,k);guard();if(!d||!('value'in d)||!d.writable)fail(k+': writable2bb14 destination required');
+      extra();guard();const last=primaryStoreDescriptor(o,k);if(!last||!('value'in last)||!last.writable)fail(k+':2bb14 destination changed');aliases(o,k,address,width,true);terminal();
+      (o as Record<string,number>)[k]=v;guard();
+    };
+    const globalStore=(address:number,width:1|2|4,v:number):void=>put(cells,(width===1?'byte':width===2?'half':'word')+address.toString(16),address,width,v);
+    const globalFloatStore=(address:number,v:number,terminal=()=>{}):void=>put(cells,'float'+address.toString(16),address,4,v,()=>{},terminal);
+    const owner=match(),rows=teamTable(owner);edge(owner,'teamRows103',rows);
+    const matchWord=(i:number):number=>{
+      const row=team(rows,i);edge(rows,String(i),row);const address=0x118+0x3c*i;
+      aliases(owner,'__no_flat_match_word',address,4);const v=load(row,'word24',0x24,4);aliases(owner,'__no_flat_match_word',address,4,true);return v;
+    };
+    globalStore(0x803b068c,4,matchWord(0));
+    const base=slotPointer(0); // Captured once at8002bb64, not each actor.
+    const mass=retain('massPreparation',read(sources,'massPreparation'));edge(sources,'massPreparation',mass);
+    const block=retain('mass physicalBlock',read(mass,'physicalBlock'));edge(mass,'physicalBlock',block);
+    const ids=retain('mass physical identities',read(block,'identities'));edge(block,'identities',ids);
+    if(!Object.isFrozen(block)||get(block,'base')!==base||!Array.isArray(ids)||!Object.isFrozen(ids)||get(ids,'length')!==6)fail('2bb14 six frozen physical identities required');
+    const identities=ids as readonly unknown[];
+    if(identities.some(id=>typeof id!=='symbol')||new Set(identities).size!==6||identities[0]!==base)fail('2bb14 distinct physical base identities required');
+    globalStore(0x80436154,2,0);
+    for(let i=1;i<4;i++){globalStore(0x803b068c+i*4,4,matchWord(i));globalStore(0x80436154+i*2,2,0);}
+    globalStore(0x80436128,1,0);
+    const constants=():object=>{const c=retain('targetAction constants',get(input,'constants'));edge(input,'constants',c);resetSources.constants=c;return c;};
+    const zero=():number=>{const c=constants(),v=get(c,'float80436f68');if(!Object.is(v,0))fail('authenticated float80436f68 +0 required');return 0;};
+    const reset=(kind:TargetResetKind,value:symbol|number):void=>{
+      // Bind only the reached real callee's owners. No public helper or caller
+      // supplied success callback grants this exact source-position scope.
+      if(kind==='player'){const p=spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime();guard();if(!isSourceActorSlotStatusRuntime(p))fail('2bb14 canonical players required');resetSources.players=p;}
+      targetResetInvocation={kind,value,entered:false,sources:resetSources,guard,constants};
+      try{invokeSourceContactResetOuter(runtime,kind,value);}finally{targetResetInvocation=undefined;}
+      guard();
+    };
+    const initialContact=():void=>{
+      const counters=retain('contactCounters',get(sources,'contactCounters'));edge(sources,'contactCounters',counters);
+      const count=(address:number):number=>{
+        const key='half'+address.toString(16);
+        for(const o of new Set([sources,globals,...retained.values(),...scheduler.getRetainedStorageOwners()]))
+          if(o!==counters)aliases(o,'__no_count',address,2,true);
+        const value=load(counters,key,address,2);
+        const terminalOwners=new Set([sources,globals,...retained.values(),...scheduler.getRetainedStorageOwners()]);guard();
+        for(const o of terminalOwners)if(o!==counters)aliases(o,'__no_count',address,2,true);
+        aliases(counters,key,address,2,true);return value;
+      };
+      const byteOwners=new Map<symbol,object>();
+      ownerChecks.push(()=>{for(const [id,o]of byteOwners)if(allocator.getObject(id)!==o)fail('2cf80 byte owner changed');});
+      const bytes=(id:symbol|null):object=>{
+        if(id===null)fail('2cf80 null pointer at reached dereference');
+        let o:object;try{o=allocator.getObject(id);}catch{check();fail('2cf80 requires registered object-byte owner; external actor owner unsupported');}
+        guard();if(edges.some(e=>e.value===o)||o===cells)fail('2cf80 byte/global storage alias');
+        const old=byteOwners.get(id);if(old&&old!==o)fail('2cf80 byte owner changed');byteOwners.set(id,o);return o;
+      };
+      const byteAliases=(o:object,offset:number,width:number,_terminal=false):void=>{
+        // Nonproxy own-byte admission: native metadata inspection cannot invoke
+        // host observers. Actual source reads remain observable and guarded.
+        for(let i=0;i<width;i++)aliases(o,String(offset+i),offset+i,1,true);
+      };
+      const raw=(id:symbol|null,offset:number,width:1|4):number=>{
+        const o=bytes(id);byteAliases(o,offset,width);
+        const value=width===1?allocator.readU8(id!,offset):allocator.readU32(id!,offset);guard();byteAliases(o,offset,width,true);return value;
+      };
+      const pointer20=(id:symbol|null):symbol|null=>{
+        const o=bytes(id);byteAliases(o,0x20,4);const value=allocator.readPointer(id!,0x20);guard();byteAliases(o,0x20,4,true);return value;
+      };
+      const contact=(name:'contactPointers46'|'contactPointers44',index:number):symbol|null=>{
+        const table=retain('targetAction '+name,get(input,name));edge(input,name,table);
+        const id=get(table,String(index));if(id!==null&&typeof id!=='symbol')fail('2cf80 explicit contact pointer required');return id;
+      };
+      const asFloat=(bits:number):number=>{const d=new DataView(new ArrayBuffer(4));d.setUint32(0,bits,false);const v=d.getFloat32(0,false);if(!Number.isFinite(v))fail('2cf80 finite source float required');return v;};
+      let processor:object|undefined,processorDeclaration:object|undefined;
+      const terminalScalar=(paired=false):void=>{
+        if(!processor||!processorDeclaration)fail('2cf80 scalar context required');
+        const p=primaryStoreDescriptor(processorDeclaration,'processor');if(!p||!('value'in p)||p.value!==processor)fail('2cf80 processor changed');
+        const d=primaryStoreDescriptor(processor,'fpscrControl');
+        if(!d||!('value'in d)||typeof d.value!=='number'||!Number.isInteger(d.value)||d.value<0||d.value>0xffffffff||(d.value&255)!==0)fail('2cf80 FPSCR RN00/NI0 and disabled exceptions required');
+        if(paired){const g=primaryStoreDescriptor(processor,'gqr0');if(!g||!('value'in g)||g.value!==0)fail('3a05c explicit GQR0 float scale0 required');}
+      };
+      const scalarControls=(paired=false):void=>{
+        const current=root.getVectorProcessorProfile();guard();if(!current)fail('2cf80 explicit scalar processor required');
+        if(processor&&processor!==current)fail('2cf80 processor changed');processor=current;
+        const declarations=root.getRetainedStorageOwners().filter(o=>{const d=primaryStoreDescriptor(o,'processor');return d&&'value'in d&&d.value===processor;});guard();
+        if(declarations.length!==1)fail('2cf80 canonical scalar declaration required');
+        if(processorDeclaration&&processorDeclaration!==declarations[0])fail('2cf80 scalar declaration changed');processorDeclaration=declarations[0];
+        get(processor,'fpscrControl');if(paired)get(processor,'gqr0');guard();terminalScalar(paired);
+      };
+      const subtract=(a:number,b:number):number=>{scalarControls();return addSourceFloat32(a,-b);};
+      const copyWord=(address:number,value:number):void=>{
+        const key='word'+address.toString(16);aliases(cells,key,address,4,true);
+        const d=Object.getOwnPropertyDescriptor(cells,key);guard();if(!d||!('value'in d)||!d.writable)fail(key+': writable2bb14 destination required');
+        const last=primaryStoreDescriptor(cells,key);if(!last||!('value'in last)||!last.writable)fail(key+':2bb14 destination changed');
+        aliases(cells,key,address,4,true);(cells as Record<string,number>)[key]=value;guard();
+      };
+      const cellFloat=(address:number,paired=false):number=>{
+        const value=asFloat(load(cells,'word'+address.toString(16),address,4));terminalScalar(paired);return value;
+      };
+      const vectorStore=(address:number,values:readonly number[]):void=>{
+        // One psq_st commits its XY pair together within nonproxy admission.
+        // Later Z is a different instruction; it may fail after the XY pair.
+        const words=values.map(value=>{const d=new DataView(new ArrayBuffer(4));d.setFloat32(0,value,false);return d.getUint32(0,false);});
+        for(let i=0;i<words.length;i++){
+          const a=address+4*i,k='word'+a.toString(16);aliases(cells,k,a,4,true);
+          const d=Object.getOwnPropertyDescriptor(cells,k);guard();if(!d||!('value'in d)||!d.writable)fail('3a05c writable paired destination required');
+        }
+        scalarControls(true);guard();
+        for(let i=0;i<words.length;i++){
+          const a=address+4*i,k='word'+a.toString(16),d=primaryStoreDescriptor(cells,k);
+          if(!d||!('value'in d)||!d.writable)fail('3a05c paired destination changed');aliases(cells,k,a,4,true);
+        }
+        terminalScalar(true);
+        for(let i=0;i<words.length;i++)(cells as Record<string,number>)['word'+(address+4*i).toString(16)]=words[i]!;
+        guard();
+      };
+      const adjustContact=(firstOwner:symbol|null,secondOwner:symbol|null):void=>{
+        // Complete112-byte3a05c; reused36-byte8020ba54 Add. The second
+        // signed1dd byte is loaded only after the first optional call returns.
+        for(const [id,destination]of [[firstOwner,0x803b04dc],[secondOwner,0x803b0374]]as const){
+          if((raw(id,0x1dd,1)<<24>>24)===0)continue;
+          scalarControls(true);
+          const ax=asFloat(raw(id,0x1cc,4)),ay=asFloat(raw(id,0x1d0,4));terminalScalar(true);
+          const bx=cellFloat(destination,true),by=cellFloat(destination+4,true);
+          scalarControls();const x=addSourceFloat32(ax,bx),y=addSourceFloat32(ay,by);
+          vectorStore(destination,[x,y]);
+          scalarControls(true);const az=asFloat(raw(id,0x1d4,4));terminalScalar(true);
+          const bz=cellFloat(destination+8,true);scalarControls();
+          vectorStore(destination+8,[addSourceFloat32(az,bz)]);
+        }
+      };
+      let visits=0;
+      for(let outer=0;outer<count(0x80436246);outer++){
+        const hit=contact('contactPointers46',outer),owner=pointer20(hit);
+        if((raw(owner,0x83,1)<<24>>24)===0){
+          const high=asFloat(raw(hit,0x68,4)),low=asFloat(raw(hit,0x88,4));
+          const slot=raw(owner,0x3e4,1);const height=subtract(high,low);
+          globalFloatStore(0x803b0708+(slot<<24>>24)*4,height,terminalScalar);
+        }
+        for(let inner=0;inner<count(0x80436244);inner++){
+          if(++visits>65536)fail('2cf80 finite comparison budget exceeded');
+          const other=contact('contactPointers44',inner),freshOwner=pointer20(hit),otherOwner=pointer20(other);
+          if(freshOwner===otherOwner||owner===otherOwner)continue;
+          for(const [source,destination]of [[hit,0x803b04d0],[other,0x803b0368]]as const)
+            for(let pair=0;pair<45;pair++){
+              const first=raw(source,0x58+8*pair,4),second=raw(source,0x5c+8*pair,4);
+              copyWord(destination+8*pair,first);copyWord(destination+8*pair+4,second);
+            }
+          adjustContact(owner,otherOwner);
+          if((raw(owner,0x83,1)<<24>>24)===0){
+            const slot=raw(owner,0x3e4,1);scalarControls();
+            const high=cellFloat(0x803b04e0),low=cellFloat(0x803b0500);
+            globalFloatStore(0x803b0708+(slot<<24>>24)*4,subtract(high,low),terminalScalar);
+          }
+          fail('8002d0cc reached required80039f6c after actual3a05c; collision predicate unsupported');
+        }
+      }
+      guard();
+    };
+    for(let i=0;i<6;i++){
+      const id=identities[i] as symbol,a=actual(id);guard();if([...actors.values()].includes(a))fail('2bb14 physical actor storage overlap');actors.set(id,a);
+      if((load(a,'active0',0,1)<<24>>24)===0)continue;
+      const timer=load(a,'byte7d1',0x7d1,1)<<24>>24;
+      if(timer>0)put(a,'byte7d1',0x7d1,1,timer-1);else{put(a,'byte7d1',0x7d1,1,0);put(a,'byte7d0',0x7d0,1,255);}
+      const slot=load(a,'slot',0x3e4,1)<<24>>24;globalStore(0x8043614c+slot,1,0);
+      const normal=get(input,'normal');if(!isSourceActorNormalLifecycleRuntime(normal))fail('2bb14 genuine normal lifecycle required');edge(input,'normal',normal);
+      const status=spawns.getPrehookRuntime().getStatusRuntime(),world=spawns.getWorldRuntime();
+      const statusOwner=normal.getStatusBinding(id),borg=status.getActualBorg(id);
+      const verifyActor=():void=>{
+        if(normal.getActualActor(id)!==a||status.getActualActor(id)!==a||normal.getStatusBinding(id)!==statusOwner||status.getActorBinding(id)!==statusOwner||status.getActualBorg(id)!==borg||normal.getWorldBinding(id)!==world.getActorBinding(id)||normal.getMappingActor(id)!==world.getMappingActor(id))fail('2bb14 canonical lifecycle owners differ');
+        normal.assertActorComplete(id);check();
+      };
+      ownerChecks.push(verifyActor);const actorGuard=guard;
+      actorGuard();resetSources.normal=normal;reset('actor',id);
+      globalStore(0x803b069c+i*2,2,load(a,'half1c6',0x1c6,2));
+      if(load(a,'byte436',0x436,1)!==0)globalStore(0x80436128,1,1);
+      for(const [current,maximum,countdown]of [[0x4f4,0x4fc,0x4f8],[0x4f6,0x4fe,0x4fa]]as const){
+        const value=load(a,'half'+current.toString(16),current,2),old=load(a,'half'+maximum.toString(16),maximum,2);
+        if(value>=old)put(a,'half'+maximum.toString(16),maximum,2,value);
+        const n=load(a,'half'+countdown.toString(16),countdown,2);
+        if((n<<16>>16)!==0)put(a,'half'+countdown.toString(16),countdown,2,(n-1)&65535);else put(a,'half'+current.toString(16),current,2,0);
+      }
+      const split=(o:object,k:string,offset:number):void=>{
+        const cross=():void=>{actorGuard();for(const other of [a,statusOwner,borg])if(other!==o){aliases(other,'__no_split_'+k,offset,1,true);if(primaryStoreDescriptor(other,k))fail(k+': competing2bb14 split owner');}};
+        put(o,k,offset,1,0,cross);
+      };
+      split(statusOwner,'byte6fd',0x6fd);split(borg,'slowAuraLevel',0x70c);split(borg,'hasteAuraLevel',0x70d);
+      const first=zero();split(statusOwner,'byte7d4',0x7d4);
+      const c=constants(),d=Object.getOwnPropertyDescriptor(c,'float80436f6c');guard();
+      if(!d||!('value'in d))fail('8002bcb0 requires explicit authenticated float80436f6c');
+      const second=get(c,'float80436f6c');if(!Object.is(second,-10000))fail('float80436f6c authenticated -10000 required');
+      put(a,'byte599',0x599,1,0);
+      const index=():number=>load(a,'slot',0x3e4,1)<<24>>24;
+      globalStore(0x80436144+index(),1,0);
+      globalStore(0x803b06a8+index()*4,4,0);
+      globalStore(0x8043613c+index(),1,0);
+      globalStore(0x80436134+index(),1,0);
+      globalFloatStore(0x803b0644+index()*4,first);
+      globalStore(0x8043612c+index(),1,0);
+      globalStore(0x803b0638+index()*2,2,0);
+      globalFloatStore(0x803b0708+index()*4,second as number);
+    }
+    for(const group of [40,32,0,16,8,24])reset('group',group);
+    for(let i=0;i<12;i++)reset('player',i);
+    initialContact();
+    fail('8002bd9c reached required8002d35c; next target/action contact pass unsupported');
+  };
+  const resetContactCounts=():void=>{
+    const supplied=Object.getOwnPropertyDescriptor(sources,'contactCounters');check();
+    if(!supplied||!('value'in supplied)||supplied.value===undefined)
+      fail('800294ec reached required8008a28c: explicit contactCounters required');
+    const owner=retain('contactCounters',supplied.value);
+    if(!claimSourceHelperStorage(owner,runtime))fail('contact counter storage already claimed');
+    // Complete48-byte8a28c: ten descending halfword stores of literal zero.
+    // Previous counter values and pointed-to contact lists are never loaded.
+    for(const suffix of ['50','4e','4c','4a','48','46','44','42','40','3e']){
+      const address='804362'+suffix,key='half'+address;
+      const start=Number.parseInt(address,16),aliases:string[]=[];
+      // Both bytes, misaligned halfwords, and wider overlapping cells can
+      // shadow this store. Adjacent nonoverlapping canonical halves may coexist.
+      for(const [prefix,width]of [['byte',1],['half',2],['word',4],['field',4]]as const)
+        for(let offset=1-width;offset<2;offset++){
+          const hex=(start+offset).toString(16);aliases.push(prefix+hex,prefix+hex.toUpperCase());
+        }
+      for(let offset=-3;offset<2;offset++){
+        const n=start+offset,hex=n.toString(16);aliases.push(hex,hex.toUpperCase(),'0x'+hex,'0x'+hex.toUpperCase(),String(n));
+      }
+      // Already-consumed candidate half42 must not silently gain a second
+      // representation. Sharing its writer needs a future explicit private join.
+      const candidateOwners=():readonly object[]=>{
+        const dispatch=getSourceActorTargetDispatchForScheduler(scheduler);
+        return dispatch?call(()=>dispatch.getRetainedStorageOwners()):[];
+      };
+      const records=[sources,globals,...retained.values(),...call(()=>scheduler.getRetainedStorageOwners()),...candidateOwners()];
+      for(const record of new Set(records))noShadows(record,[...new Set(aliases)].filter(k=>record!==owner||k!==key));
+      const destination=Object.getOwnPropertyDescriptor(owner,key);check();
+      if(!destination||!('value'in destination)||!destination.writable)fail(key+': writable own counter destination required');
+      schedulerGraph();check();
+      // Terminal native checks follow the last observable descriptor hook.
+      const terminalRecords=[...new Set([...records,...call(()=>scheduler.getRetainedStorageOwners()),...candidateOwners()])];
+      const link=primaryStoreDescriptor(sources,'contactCounters');
+      if(!link||!('value'in link)||link.value!==owner)fail('contact counter owner changed');
+      const live=primaryStoreDescriptor(owner,key);
+      if(!live||!('value'in live)||!live.writable)fail(key+': counter destination changed');
+      for(const record of terminalRecords)
+        for(const alias of new Set(aliases))if((record!==owner||alias!==key)&&primaryStoreDescriptor(record,alias))fail(alias+': competing counter cell owner');
+      check();(owner as Record<string,number>)[key]=0;check();
+    }
+  };
+  const runContactCallbacks=():void=>{
+    // Actual89aec, not89a94: group48, six live active actor gates49..54,
+    // then55. No pause-mask/snapshot/cleanup suffix belongs to this traversal.
+    const groups=new Map<number,object>();let slots:object|undefined,visits=0;
+    const guard=():void=>{
+      schedulerGraph();check();
+      for(const [index,owner]of groups)if(call(()=>allocator.getGroup(index))!==owner)fail('89aec group owner changed');
+      if(slots&&call(()=>scheduler.getActorSlotTable())!==slots)fail('89aec actor-slot owner changed');
+      check();
+    };
+    const checked=<T>(f:()=>T):T=>{const value=call(f);guard();return value;};
+    const pointer=(value:unknown):symbol|null=>{if(value!==null&&typeof value!=='symbol')fail('89aec explicit source pointer required');return value;};
+    const contactPrefix=(hit:symbol):void=>{
+      const bytes=checked(()=>allocator.getObject(hit));
+      const owner=pointer(checked(()=>allocator.readPointer(hit,0x20)));
+      if(owner===null)fail('8008a680 null contact owner at1d8 load');
+      // Existing projectile HITs point to real object bytes. External actor
+      // records need a separate canonical field-owner join, never byte shadows.
+      try{allocator.getObject(owner);}catch{fail('8008a680 requires registered object-byte contact owner; external actor owner unsupported');}
+      guard();
+      const load8=(id:symbol,offset:number):number=>checked(()=>allocator.readU8(id,offset));
+      const load16=(id:symbol,offset:number):number=>checked(()=>allocator.readS16(id,offset));
+      const load32=(offset:number):number=>checked(()=>allocator.readU32(hit,offset));
+      const store=(offset:number,value:number,width:1|2|4):void=>{
+        for(let i=0;i<width;i++){
+          const d=Object.getOwnPropertyDescriptor(bytes,String(offset+i));guard();
+          if(!d||!('value'in d)||!d.writable)fail('8a65c writable scalar bytes required');
+        }
+        guard();if(allocator.getObject(hit)!==bytes)fail('8a65c hit byte owner changed');
+        for(let i=0;i<width;i++){
+          const d=primaryStoreDescriptor(bytes,String(offset+i));
+          if(!d||!('value'in d)||!d.writable)fail('8a65c scalar destination changed');
+        }
+        check();for(let i=0;i<width;i++)bytes[offset+i]=(value>>>(8*(width-1-i)))&255;check();
+      };
+      if(s8(load8(owner,0x1d8))!==0)fail('8008a69c reached required80088e50 contact release');
+      if(s8(load8(owner,0))===0)fail('8008a69c reached required80088e50 contact release');
+      if(s8(load8(owner,0x83))===0&&load16(hit,0x4a)!==-1){
+        const group=s8(load8(owner,0x1cec)),action=s8(load8(owner,0x1ced)),saved=load16(hit,0x4c);
+        if(saved!==group*0x1000+action)fail('8008a6e0 reached required80088e50 contact release');
+      }
+      store(0x13,0,1);
+      const state=load8(hit,0x10);
+      const descriptor=pointer(checked(()=>allocator.readPointer(hit,0x28))); // Captured even on the>=3 return.
+      if(state>=3)return;
+      if(state===2){
+        if(s8(load8(owner,0x281))===0)store(0x10,1,1);
+        fail('8008aa0c reached required8008aa40 contact matrix validity');
+      }
+      if(state===1){
+        const x=load32(0x30),y=load32(0x34);store(0x3c,x,4);store(0x40,y,4);
+        const z=load32(0x38);store(0x44,z,4);
+      }
+      const matrix=pointer(checked(()=>allocator.readPointer(hit,0x60)));
+      contactTransformInvocation={node:hit,site:state===0?0x8008a728:0x8008a888,entered:false,checking:false,context:Object.freeze({allocator,root,matrix,input:descriptor,output:hit}),guard};
+      try{checked(()=>executeSourceContactTransform(runtime,hit));}finally{contactTransformInvocation=undefined;}
+      if(state===0){
+        const x=load32(0x30),y=load32(0x34);store(0x3c,x,4);store(0x40,y,4);
+        const z=load32(0x38);store(0x44,z,4);
+        const timer=load16(hit,0x48);
+        if(timer<=0)fail('8008a788 reached contact initialization dispatch');
+        if(s8(load8(owner,0x83))===0)fail('8008a75c reached owner1cdc conversion');
+        store(0x48,timer-1,2);return; // Actual positive countdown branch returns.
+      }
+      fail('8008a88c reached contact timer continuation');
+    };
+    const walk=(index:number,site:0x80089b30|0x80089b84|0x80089bd0):void=>{
+      let owner:object;
+      try{owner=call(()=>allocator.getGroup(index));}catch(error){fail('800294f0 reached required80089aec group'+index+': '+String(error));}
+      groups.set(index,owner);guard();
+      let node=pointer(checked(()=>read(owner,'head')));const seen=new Set<symbol>();
+      while(node!==null){
+        if(++visits>4096||seen.has(node))fail('89aec cyclic/over-budget source list unsupported');seen.add(node);
+        const current=node;
+        if(checked(()=>allocator.readS8(current,0))!==0){
+          const callback=checked(()=>allocator.readU32(current,0xc));
+          // Active bctrl is unconditional. Even callback0 is not a no-op.
+          // This is not the ordinary7dcec scheduler or its snapshot suffix.
+          if(callback!==0x8008a65c)fail(site.toString(16)+' reached required contact callback0c '+callback.toString(16)+'; callee unsupported');
+          contactPrefix(current);guard();
+        }
+        node=pointer(checked(()=>allocator.readPointer(current,8)));
+      }
+    };
+    walk(48,0x80089b30);
+    slots=call(()=>scheduler.getActorSlotTable());guard();
+    for(let index=0;index<6;index++){
+      const id=pointer(checked(()=>read(slots!,String(index))));
+      if(id===null)fail('89aec null actor slot at active0 load');
+      const actor=checked(()=>allocator.getPointerTarget(id));
+      noShadows(actor,['0','byte0','half0','word0','field0']);guard();
+      const active=checked(()=>byte(actor,'active0'));
+      for(const alias of ['0','byte0','half0','word0','field0'])if(primaryStoreDescriptor(actor,alias))fail(alias+': competing89aec active cell');
+      if(s8(active)!==0)walk(49+index,0x80089b84);
+    }
+    walk(55,0x80089bd0);
   };
   const runtime: SourceBattleOuterFrameRuntime={
     getSchedulerRuntime() {return scheduler;},getMatchGlobals() {return globals;},
@@ -2440,13 +2876,78 @@ export function createSourceBattleOuterFrameRuntime(sources: SourceBattleOuterFr
           invokeScheduler(0x800294b4,56);
         }
         invokeScheduler(0x800294bc,58);invokeScheduler(0x800294c4,57);
-        runObjectUpdates();
-        fail('800294cc reached outer counter continuation after80089554');
+        runObjectUpdates(0x800294c8);
+        const counterOwner=match();
+        noShadows(counterOwner,['wordb0','fieldb0','176','byteb0','byteb1','byteb2','byteb3']);
+        const ingress=Object.getOwnPropertyDescriptor(counterOwner,'wordB0');check();
+        if(!ingress||!('value'in ingress))fail('800294cc reached outer counter continuation after80089554: explicit wordB0 required');
+        const counter=unsigned(read(counterOwner,'wordB0'),0xffffffff,'wordB0');
+        const counterField=Object.getOwnPropertyDescriptor(counterOwner,'wordB0');check();
+        if(!counterField||!('value'in counterField)||!counterField.writable)fail('wordB0 writable own destination required');
+        schedulerGraph();check();
+        const finalCounter=primaryStoreDescriptor(counterOwner,'wordB0');
+        if(!finalCounter||!('value'in finalCounter)||!finalCounter.writable)fail('wordB0 destination changed');
+        for(const key of ['wordb0','fieldb0','176','byteb0','byteb1','byteb2','byteb3'])if(primaryStoreDescriptor(counterOwner,key))fail('wordB0: competing source cell owner');
+        (counterOwner as {wordB0:number}).wordB0=(counter+1)>>>0;check();
+        if(s8(byte(match(),'byte66'))===0){
+          resetContactCounts();
+          runContactCallbacks();
+          runTargetActionPrefix();
+        }
+        const helper=call(()=>spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime());
+        if(!isSourceActorSlotStatusRuntime(helper))fail('36e24 canonical slot-status owner required');
+        contactInvocation={entered:false,helper};
+        try{executeSourcePlayerContact36e24(runtime);}finally{contactInvocation=undefined;}
+        runObjectUpdates(0x800294fc);runObjectUpdates(0x80029500);
+        fail('80029504 reached outer post-draw continuation');
       } catch(error) {
         close();throw error;
-      } finally {drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
+      } finally {targetResetInvocation=undefined;contactInvocation=undefined;contactTransformInvocation=undefined;drawInvocation=undefined;orderedInvocation=undefined;schedulerInvocation=undefined;busy=false;}
     },
   };
+  targetResets.set(runtime,{
+    consume(kind,value){const c=targetResetInvocation;if(!c||c.entered||c.kind!==kind||c.value!==value){rejectScheduler();fail('private exact single-use2bb14 reset invocation required');}c.entered=true;this.check();return c.sources;},
+    check(){const c=targetResetInvocation;if(!busy||closing||incomplete||poisoned||!c?.entered){rejectScheduler();fail('private active2bb14 reset invocation required');}c.guard();check();},
+    constants(){this.check();return targetResetInvocation!.constants();},
+  });
+  const contactCheck=(helper?:SourceActorSlotStatusRuntime):void=>{
+    const c=contactInvocation;
+    if(!busy||closing||incomplete||poisoned||!c?.entered||(helper!==undefined&&helper!==c.helper)){
+      rejectScheduler();fail('private exact active294f8 contact invocation required');
+    }
+    schedulerGraph();check();
+    if(spawns.getAdmissionRuntime().getActionRuntime().getSlotStatusRuntime()!==c.helper||c.helper.getSchedulerRuntime()!==scheduler)
+      fail('canonical contact helper changed');
+    checkSourcePlayerContactStorage(c.helper);
+    const systemOwner=retained.get('systemGlobals');
+    if(systemOwner){const link=primaryStoreDescriptor(sources,'systemGlobals');
+      if(!link||!('value'in link)||link.value!==systemOwner)fail('contact system owner changed');}
+    const contactOwner=retained.get('playerContact'),constants=retained.get('contactConstants');
+    if(contactOwner){const link=primaryStoreDescriptor(sources,'playerContact');
+      if(!link||!('value'in link)||link.value!==contactOwner)fail('contact source owner changed');
+      if(constants){const cell=primaryStoreDescriptor(contactOwner,'constants');
+        if(!cell||!('value'in cell)||cell.value!==constants)fail('contact constants owner changed');}}
+
+  };
+  playerContacts.set(runtime,{
+    consume(){const c=contactInvocation;if(!c||c.entered){rejectScheduler();fail('private single-use294f8 contact invocation required');}c.entered=true;contactCheck();return{helper:c.helper,root};},
+    check:contactCheck,
+    system(){contactCheck();return system();},
+    constant(){contactCheck();const owner=retain('playerContact',read(sources,'playerContact'));
+      const constants=retain('contactConstants',read(owner,'constants'));const value=read(constants,'float80436f68');contactCheck();return value;},
+  });
+  const contactTransformCheck=(node:symbol):void=>{
+    const active=contactTransformInvocation;
+    if(!busy||closing||incomplete||poisoned||!active||!active.entered||active.node!==node||(active.site!==0x8008a728&&active.site!==0x8008a888)){
+      rejectScheduler();fail('private exact active contact transform invocation required');
+    }
+    if(active.checking)return;active.checking=true;
+    try{active.guard();check();}finally{active.checking=false;}
+  };
+  contactTransforms.set(runtime,{consume(node){const active=contactTransformInvocation;
+    if(!active||active.entered||active.node!==node){rejectScheduler();fail('private exact single-use contact transform invocation required');}
+    active.entered=true;contactTransformCheck(node);return active.context;
+  },check:contactTransformCheck});
   drawInvocations.set(runtime,{consume(node){const active=drawInvocation;if(!active||active.entered||active.node!==node){rejectScheduler();fail('private exact single-use draw invocation required');}active.entered=true;drawCheck(node);return active.context;},check:drawCheck});
   failures.set(runtime,selected=>{if(!busy || !closing || !incomplete || selected!==scheduler) fail('private exact active outer failure required');});
   schedulerInvocations.set(runtime,{
