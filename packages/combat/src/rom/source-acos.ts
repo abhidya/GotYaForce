@@ -1,7 +1,21 @@
+import {fusedMultiplyAddSourceFloat64 as fma, negatedFusedMultiplySubtractSourceFloat64 as fnmsub} from './source-float64.js';
+// Horner order and fused instructions from GG4E 80239494..802394e0.
+function sourceAcosRatio(z: number): number {
+  let p = fma(0.00003479331075960212, z, 0.0007915349942898145);
+  p = fma(z, p, -0.04005553450067941);
+  p = fma(z, p, 0.20121253213486293);
+  p = fma(z, p, -0.3255658186224009);
+  p = fma(z, p, 0.16666666666666666);
+  let q = fma(0.07703815055590194, z, -0.6882839716054533);
+  q = fma(z, q, 2.0209457602335057);
+  q = fma(z, q, -2.403394911734414);
+  q = fma(z, q, 1);
+  return (z * p) / q;
+}
 /** Bounded transcription of gnt4-__ieee754_acos @ 80239410.
  * Coefficients are binary64 values read from the supplied GG4E DOL data5.
  * Only |x| < 0.5 is transcribed here; the square-root paths remain to port.
- * JavaScript arithmetic has not yet been compared to retail PowerPC execution,
+ * Fused binary64 steps follow the original instruction order, but output has not yet been compared to retail execution,
  * so this is not a bit-exact or production-parity claim.
  */
 export function sourceAcosSmall(x: number): number {
@@ -9,9 +23,8 @@ export function sourceAcosSmall(x: number): number {
   const pio2 = 1.5707963267948966;
   if (Math.abs(x) < 2 ** -57) return pio2;
   const z = x * x;
-  const p = z * (0.16666666666666666 + z * (-0.3255658186224009 + z * (0.20121253213486293 + z * (-0.04005553450067941 + z * (0.0007915349942898145 + z * 0.00003479331075960212)))));
-  const q = 1 + z * (-2.403394911734414 + z * (2.0209457602335057 + z * (-0.6882839716054533 + z * 0.07703815055590194)));
-  return pio2 - (x - (6.123233995736766e-17 - x * (p / q)));
+  const ratio = sourceAcosRatio(z);
+  return pio2 - (x - fnmsub(x, ratio, 6.123233995736766e-17));
 }
 
 /** Positive upper-domain 80239410 candidate. The caller must supply the real
@@ -22,14 +35,16 @@ export function sourceAcosUpper(x: number, reciprocalSqrtEstimate: (value: numbe
   const z = 0.5 * (1 - x);
   let estimate = reciprocalSqrtEstimate(z);
   if (!Number.isFinite(estimate) || estimate <= 0) throw new RangeError('positive finite frsqrte estimate required');
-  for (let i = 0; i < 3; i++) estimate = 0.5 * estimate * -(z * estimate * estimate - 3);
-  const root = z * 0.5 * estimate * -(z * estimate * estimate - 3);
+  for (let i = 0; i < 4; i++) {
+    const squared = estimate * estimate, half = 0.5 * estimate;
+    estimate = half * fnmsub(z, squared, 3);
+  }
+  const root = z * estimate;
   const bits = new DataView(new ArrayBuffer(8));
   bits.setFloat64(0, root, false); bits.setUint32(4, 0, false);
   const highRoot = bits.getFloat64(0, false);
-  const p = z * (0.16666666666666666 + z * (-0.3255658186224009 + z * (0.20121253213486293 + z * (-0.04005553450067941 + z * (0.0007915349942898145 + z * 0.00003479331075960212)))));
-  const q = 1 + z * (-2.403394911734414 + z * (2.0209457602335057 + z * (-0.6882839716054533 + z * 0.07703815055590194)));
-  return 2 * (highRoot + ((p / q) * root + -(highRoot * highRoot - z) / (root + highRoot)));
+  const correction = fnmsub(highRoot, highRoot, z) / (root + highRoot);
+  return 2 * (highRoot + fma(sourceAcosRatio(z), root, correction));
 }
 
 /** 8023cc8c wrapper, restricted to the nonnegative finite float32 dot-product
