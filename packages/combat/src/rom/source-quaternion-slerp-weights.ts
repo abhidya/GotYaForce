@@ -1,4 +1,4 @@
-import {divideSourceAnimationFloat32} from './actor-animation-transition.js';
+import {divideSourceAnimationFloat32} from './source-float32-divide.js';
 import {sourceAcosFloatNonnegative} from './source-acos.js';
 import {sourceSineFloatBounded} from './source-sine.js';
 
