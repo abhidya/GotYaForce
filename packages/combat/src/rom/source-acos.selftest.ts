@@ -1,3 +1,4 @@
+import {sourceReciprocalSqrtEstimate} from './source-reciprocal-sqrt-estimate.js';
 import {sourceTargetDistanceSeed} from './source-target-distance.js';
 import {sourceAcosSmall, sourceAcosUpper, sourceAcosFloatNonnegative} from './source-acos.js';
 export function runSourceAcosSmallSelfTest(): void {
@@ -20,6 +21,18 @@ export function runSourceAcosSmallSelfTest(): void {
     });
     bits.setFloat64(0, actual);
     if (bits.getBigUint64(0) !== BigInt(`0x${expected}`)) throw Error(`Dolphin acos mismatch at ${x}`);
+    const modelResult = sourceAcosFloatNonnegative(x, sourceReciprocalSqrtEstimate);
+    bits.setFloat64(0, modelResult);
+    if (bits.getBigUint64(0) !== BigInt(`0x${expected}`)) throw Error(`model-backed Dolphin acos mismatch at ${x}`);
+  }
+  for (const [value, expected] of [
+    [0.25, '3ffffe8000000000'], [0.5, '3ff69fa000000000'], [1, '3feffe8000000000'],
+    [2, '3fe69fa000000000'], [0.1875, '4002794000000000'], [0.125, '40069fa000000000'],
+    [0.050000011920928955, '4011e3c900000000'], [0.004999995231628418, '402c498890000000'],
+    [0.000050008296966552734, '4061ad2800000000'],
+  ] as const) {
+    bits.setFloat64(0, sourceReciprocalSqrtEstimate(value));
+    if (bits.getBigUint64(0) !== BigInt(`0x${expected}`)) throw Error(`Dolphin frsqrte mismatch at ${value}`);
   }
   for (let i = -4999; i <= 4999; i++) {
     const x = i / 10000;
