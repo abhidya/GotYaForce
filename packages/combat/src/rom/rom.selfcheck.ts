@@ -1,3 +1,4 @@
+import {runSourceSlerpWeightsSelfTest} from './source-quaternion-slerp-weights.selftest.js';
 import {runSourceAngleReductionSelfTest} from './source-angle-reduction.selftest.js';
 import {runSourceCosineKernelSelfTest} from './source-cosine.selftest.js';
 import {runSourceSineKernelSelfTest} from './source-sine.selftest.js';
@@ -214,6 +215,7 @@ export function runSelfTest(): number {
   runSourceSineKernelSelfTest();
   runSourceCosineKernelSelfTest();
   runSourceAngleReductionSelfTest();
+  runSourceSlerpWeightsSelfTest();
   failures = 0;
   runStreamFlagsSelfTest();
   runStreamBankSelfTest();
