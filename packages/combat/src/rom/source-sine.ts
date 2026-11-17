@@ -1,3 +1,5 @@
+import {sourceReduceHalfPi} from './source-angle-reduction.js';
+import {sourceCosineKernel} from './source-cosine.js';
 /** Bounded transcription of gnt4-__kernel_sin @ 8023bf8c, direct (iy=0)
  * path. Coefficients are binary64 values from the user-supplied GG4E DOL.
  * Only finite reduced arguments are admitted. PowerPC rounding/retail output
@@ -18,4 +20,14 @@ export function sourceSineKernelTail(x: number, y: number): number {
   const z = x * x, v = z * x;
   const r = 0.00833333333332249 + z * (-0.0001984126982985795 + z * (0.0000027557313707070068 + z * (-0.000000025050760253406863 + z * 1.58969099521155e-10)));
   return x + (-0.16666666666666632 * v - (z * (0.5 * y - v * r) - y));
+}
+
+/** 8023cc44/8023c9e8 bounded to the admitted half-pi reduction.
+ * Input/output are float32 at the wrapper boundary. Still a candidate until
+ * its operations are compared with the retail execution environment. */
+export function sourceSineFloatBounded(x: number): number {
+  if (!Number.isFinite(x) || !Object.is(x, Math.fround(x))) throw new RangeError('finite float32 input required');
+  const reduced = sourceReduceHalfPi(x);
+  const value = reduced.quadrant === 0 ? sourceSineKernel(reduced.head) : reduced.quadrant * sourceCosineKernel(reduced.head, reduced.tail);
+  return Math.fround(value);
 }
