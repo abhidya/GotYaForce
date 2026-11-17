@@ -4,6 +4,7 @@
 import type { BorgRuntime, Projectile, PlayerInput } from './types.js';
 import type { Vec3 } from '@gf/physics';
 import type { RomActor } from './rom/actor.js';
+import { isSourceActorInputPrefixClaimedBorg } from './rom/actor-input-prefix.js';
 import { actorAimTarget, livingAttackTarget } from './sourceAttackTarget.js';
 import { activeSourceTarget } from './targetLock.js';
 import { attackHitRecordsForKind } from './attackHitData.js';
@@ -27,6 +28,7 @@ export function stepArrowInput(owner:BorgRuntime,held:boolean){
 /** +749 = popcount(+5bc & 0xf0f00), not held duration or cumulative presses.
  * Same bounded browser-axis quantization as Beam's raw input adapter. */
 export function stepArrowMashInput(owner:BorgRuntime,input:PlayerInput):void{
+  if(isSourceActorInputPrefixClaimedBorg(owner))throw Error('[arrow-input] Borg claimed by source input prefix; legacy mash producer excluded');
   const x=Math.trunc(Math.max(-1,Math.min(1,-input.moveX))*127);
   const y=Math.trunc(Math.max(-1,Math.min(1,input.moveZ))*127);
   const angle=Math.trunc(Math.fround(Math.fround(Math.atan2(y,x))*10430.3779296875))&0xffff;

@@ -10,6 +10,9 @@
       ],
       "@gf/camera-math": [
         "../camera-math/dist/index.d.ts"
+      ],
+      "@gf/formats": [
+        "../formats/dist/index.d.ts"
       ]
     }
   },
@@ -19,6 +22,9 @@
     },
     {
       "path": "../camera-math"
+    },
+    {
+      "path": "../formats"
     }
   ],
   "include": [

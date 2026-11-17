@@ -17,6 +17,11 @@
 
 import type { RomActor, RomPartState } from "./actor.js";
 
+// Source4c050 stores an absolute script pointer on each part. The port represents
+// that pointer as (byte backing, offset), not an offset into today's actor bank.
+// Unbound/manual offsets fail closed; decoded hosts retain their existing hook.
+const streamBanks = new WeakMap<RomPartState, Uint8Array>();
+
 /** Stream record sizes per opcode (DERIVED — every handler's `addi r0, r6, <size>`
  *  confirmed in the disasm). Index by opcode 0x00..0x11. */
 const OP_SIZE: ReadonlyArray<number> = [
@@ -97,6 +102,8 @@ export function resolveStreamOffset(actor: RomActor, group: number, slot: number
   const bank = useShared ? actor.sharedStreamBank : actor.familyStreamBank;
   if (!bank || bank.length === 0) return -1;
   const groupIndex = useShared ? group & 0x7f : group === 0 ? actor.defaultGroup : group;
+  if (!Number.isInteger(groupIndex) || groupIndex < 0 || groupIndex * 2 + 2 > bank.length ||
+      !Number.isInteger(slot) || slot < 0) return -1;
   // s16 group-offset table at bank start.
   const groupOffset = readS16(bank, groupIndex * 2);
   const groupBase = groupOffset;
@@ -127,6 +134,7 @@ export function startStream(
   const hostScheduled = (actor as RomActor & {
     onStartStream?: (group: number, slot: number, mask: number) => boolean;
   }).onStartStream?.(group, slot, mask) === true;
+  const bank = (group & 0x80) !== 0 ? actor.sharedStreamBank : actor.familyStreamBank;
   const streamStart = resolveStreamOffset(actor, group, slot);
   if (streamStart < 0) {
     for (let i = 0; i < actor.parts.length; i++) {
@@ -149,6 +157,7 @@ export function startStream(
       (part as RomPartState & { group: number; slot: number }).group = group;
       (part as RomPartState & { slot: number }).slot = slot;
       resetPart(part);
+      streamBanks.set(part, bank!);
       part.streamPtr = streamStart;
       part.active = 1;
       if (i === 0) actor.wallContact = 0;
@@ -157,8 +166,43 @@ export function startStream(
   }
 }
 
+/** Original f32 values at804374e4/804374b0/80437464, verified2026-11-12. */
+export const REACTION_STREAM_LIMITS = Object.freeze({light:2, other:5, rate:-1});
+
+/** Bounded zz_005f188_ reaction wrapper for shared groups80/81/82. Reads
+ * part1's stored group/slot and source+1cfc (=part1+8, prevTarget), not animTime
+ * or the synthetic VM frame clock. Callers must supply valid source+1cfc; the
+ * generic VM does not currently reconstruct that source accumulator.
+ * Stored identity accepts signed8 or unsigned8 representations only.
+ * Unknown identity is unsupported, including decoded-only starts without raw
+ * source metadata. Restart delegates existing absent-bank/host-hook behavior.
+ * Return value describes the selected operation, not completion or admission. */
+export function updateReactionStream(actor: RomActor, group: number, slot: number,
+  ctx: StreamContext = {}): "continued" | "restarted" {
+  if (!Number.isInteger(group) || ![128,129,130,-128,-127,-126].includes(group) ||
+      !Number.isInteger(slot) || slot < 0 || slot > 127)
+    throw new RangeError('5f188 supports shared reaction groups80/81/82 and nonnegative signed-byte slots');
+  const part = actor.parts[1] as RomPartState & {group?:number;slot?:number};
+  const sourceTarget = Math.fround(part?.prevTarget ?? NaN);
+  if (!part || !Number.isInteger(part.group) || part.group! < -128 || part.group! > 255 ||
+      !Number.isInteger(part.slot) || part.slot! < -128 || part.slot! > 255 ||
+      !Number.isFinite(sourceTarget))
+    throw new RangeError('5f188 requires known source part1 identity and finite source1cfc');
+  const byteGroup = group & 255;
+  const threshold = byteGroup === 128 ? REACTION_STREAM_LIMITS.light : REACTION_STREAM_LIMITS.other;
+  if ((part.group! & 255) === byteGroup && (part.slot! & 255) === slot && sourceTarget <= threshold) {
+    tickStream(actor, 15, ctx);
+    return "continued";
+  }
+  startStream(actor, 15, byteGroup, slot, REACTION_STREAM_LIMITS.rate);
+  return "restarted";
+}
+
 function resetPart(part: RomPartState): void {
   // zz_004c020_ @ chunk_0006.c:1498.
+  streamBanks.delete(part);
+  // Source4c020 clears continuation state; this cache represents the active wait.
+  delete (part as RomPartState & { waitRemaining?: number }).waitRemaining;
   part.streamPtr = -1;
   part.frameClock = 0;
   part.prevTarget = 0;
@@ -213,11 +257,7 @@ export function tickStream(actor: RomActor, mask: number, ctx: StreamContext = {
 }
 
 function tickPart(actor: RomActor, part: RomPartState, ctx: StreamContext): void {
-  const bank = actor.familyStreamBank; // shared-bank streams carry group bit7 set and
-                                       // resolve the same way; the active bank is whichever
-                                       // the startStream resolved. For simplicity the host
-                                       // stamps the resolved bank onto the part; here we
-                                       // fall back to the family bank.
+  const bank = streamBanks.get(part);
   if (!bank) return;
   // Advance the part's frame clock by dt (the integrator's tick).
   part.frameClock += actor.dt;

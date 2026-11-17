@@ -1,7 +1,7 @@
 // Shared low-level actor helpers recovered from chunk_0008.c/chunk_0009.c.
 // These keep family ports on the actual ROM contracts instead of host booleans.
 
-import type { RomActor, Vec3 } from "./actor.js";
+import type { RomActor } from "./actor.js";
 import type { StreamContext } from "./stream-vm.js";
 
 /**
@@ -14,8 +14,7 @@ import type { StreamContext } from "./stream-vm.js";
  */
 const TARGET_LOSS_DECAY = 0.8999999761581421;
 
-export interface RomHelperScratch {
-  lockTarget?: Vec3 | null;
+export interface RomHelperScratch extends Pick<RomActor, "lockTarget"> {
   /** +0x18e0/+0x18e2: dual-axis aim accumulators used by zz_006ea9c_. */
   aimPitch18e0?: number;
   aimYaw18e2?: number;
@@ -274,4 +273,40 @@ export function isStreamTickEnabled(actor: RomActor): boolean {
 
 export function partState(actor: RomActor, part: number): number {
   return actor.parts[part]?.stateByte ?? 0;
+}
+
+/** zz_0066ec0_: seed the signed per-update yaw step (+7e) from remaining
+ * turn5aa / duration. Zero duration preserves the existing step. Reaction6 and
+ * recovery11 use this helper; it does not choose a target or alter activeYaw. */
+export function seedReactionTurn(actor: RomActor, duration: number): void {
+  if (!Number.isInteger(duration) || duration < -0x80000000 || duration > 0x7fffffff)
+    throw new RangeError('66ec0 duration must be a signed32 integer');
+  if (duration === 0) return;
+  actor.poseAccum7e = toS16(Math.trunc(toS16(actor.turnErrorYaw) / duration));
+}
+
+/** zz_0066f1c_: consume signed yaw step7e scaled by source delta1dc8.
+ * Uses existing actor fields, including short wrap before sign/crossing tests.
+ * Returns true when settled. This is not the target-seeking66a30 helper.
+ * Numeric scope excludes nonfinite or out-of-int32 float-to-integer conversion;
+ * those PPC conversion results are not established by this port. */
+export function stepReactionTurn(actor: RomActor): boolean {
+  const velocity = toS16(actor.poseAccum7e);
+  if (velocity === 0) {
+    actor.turnErrorYaw = 0;
+    return true;
+  }
+  const scaled = Math.fround(velocity * Math.fround(actor.dt));
+  if (!Number.isFinite(scaled) || scaled < -0x80000000 || scaled >= 0x80000000)
+    throw new RangeError('66f1c step is outside the supported PPC conversion range');
+  const step = toS16(Math.trunc(scaled));
+  actor.heading = toS16(actor.heading + step);
+  actor.turnErrorYaw = toS16(actor.turnErrorYaw - step);
+  if (step < 1 ? actor.turnErrorYaw >= 0 : actor.turnErrorYaw < 1) {
+    actor.heading = toS16(actor.heading + actor.turnErrorYaw);
+    actor.poseAccum7e = 0;
+    actor.turnErrorYaw = 0;
+    return true;
+  }
+  return false;
 }

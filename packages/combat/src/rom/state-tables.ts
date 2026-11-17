@@ -226,7 +226,7 @@ function buildUpperBodyTable(): StateHandler[] {
   // assertRomStateTableCoverage(), so it is counted rather than merely commented.
   t[44] = transitionHandler(0xd);
   t[60] = tickStreamHandler(0xf, 0, 0, 1);
-  // [62] zz_005c694_ (camera/lock update) and [63] zz_005bccc_ (death state) — NOT PORTED.
+  // [62] zz_005c694_ (reaction dispatcher) and [63] zz_005bccc_ (death state) — NOT PORTED.
   // These were `(a, _c) => { void a; }` closures: functionally the noop, but distinct object
   // identities, so the table read as "handler present" while doing nothing. Assigned the shared
   // noopHandler so UNPORTED_UPPER_BODY_STATES / assertRomStateTableCoverage can see them.
@@ -253,14 +253,14 @@ function buildUpperBodyTable(): StateHandler[] {
 // ============================================================================
 
 /** Upper-body slots whose ROM handler is not ported: 32-43 and 45-59 (the partner/phase
- *  machines), plus 62 (zz_005c694_, the camera/lock-update helper) and 63 (zz_005bccc_, the
+ *  machines), plus 62 (zz_005c694_, the reaction dispatcher) and 63 (zz_005bccc_, the
  *  death-state handler) — both named in the corpus but with untranscribed bodies. Slots
  *  64-70 sit inside the FUN_80060864 range and are unverifiable from the corpus at all. */
 export const UNPORTED_UPPER_BODY_STATES: readonly number[] = Object.freeze([
   ...Array.from({ length: 12 }, (_, i) => 32 + i), // 32..43
   ...Array.from({ length: 15 }, (_, i) => 45 + i), // 45..59
   61,                                              // no PTR_LAB_802d37a8 entry ported
-  62,                                              // zz_005c694_ camera/lock update
+  62,                                              // zz_005c694_ reaction dispatcher
   63,                                              // zz_005bccc_ death state
   ...Array.from({ length: 7 }, (_, i) => 64 + i),  // 64..70 unverifiable from corpus
 ]);
@@ -307,9 +307,12 @@ export function createRomStateTables(): { fullBody: StateHandler[]; upperBody: S
 /** Re-export of the stepActor signature with the ROM state tables wired. */
 export function stepRomActor(actor: RomActor, tables: ReturnType<typeof createRomStateTables>, ctx: StreamContext): void {
   actor.preState?.(actor);
+  // 80055568 snapshots +5da after +4bc, before the upper-body handler.
+  // Only the selection is saved; the full-body handler sees live actor fields.
+  const fullBodyState = actor.fbState;
   const ub = tables.upperBody[actor.ubState];
   if (ub) ub(actor, ctx);
-  const fb = tables.fullBody[actor.fbState];
+  const fb = tables.fullBody[fullBodyState];
   if (fb) fb(actor, ctx);
   actor.postState?.(actor);
 }

@@ -33,6 +33,22 @@ test("field map carries the damage-core RomActor fields with correct offsets", (
   assert.equal(f.controlWord.kind, "u32");
 });
 
+test("normal lifecycle flag bytes retain separate canonical actor offsets", () => {
+  const f = fieldMap.byInterface.RomActor;
+  assert.equal(f.stateFlagA.offset, 0x57a);
+  assert.equal(f.stateFlagB.offset, 0x57b);
+  assert.equal(f.stateFlagA.kind, "u8");
+  assert.equal(f.stateFlagB.kind, "u8");
+  const { codec, u8 } = makeCodec();
+  codec.beginCase();
+  codec.encodeField(BASE, "stateFlagA", 0x25);
+  codec.encodeField(BASE, "stateFlagB", 0x81);
+  assert.equal(u8[BASE + 0x579], 0xa5);
+  assert.equal(u8[BASE + 0x57a], 0x25);
+  assert.equal(u8[BASE + 0x57b], 0x81);
+  assert.equal(u8[BASE + 0x57c], 0xa5);
+});
+
 test("u16be preserves big-endian byte order at the data boundary", () => {
   const { codec, u8 } = makeCodec();
   codec.beginCase();
@@ -126,4 +142,130 @@ test("struct-kind fields are refused by the scalar encoder (no invented layouts)
   const { codec } = makeCodec();
   codec.beginCase();
   assert.throws(() => codec.encodeField(BASE, "parts", []), BlockedCodecError);
+});
+
+
+test("synthetic part clock has no source pointer mapping and cannot overwrite continuation bytes", () => {
+  const rec = fieldMap.byInterface.RomPartState.frameClock;
+  assert.equal(rec.kind, "port_side");
+  assert.equal(Object.hasOwn(rec, "offset"), false);
+  assert.equal(Object.hasOwn(rec, "width"), false);
+  // There is no field-hydration API: decode primitives are explicit post-state
+  // assertions only. No mapped field may reinterpret source part+04 as a clock.
+  const mapped = Object.values(fieldMap.byInterface.RomPartState)
+    .filter(field => Number.isInteger(field.offset));
+  assert.equal(mapped.some(field => field.offset <= 4 && field.offset + field.width > 4), false);
+  const { codec, u8 } = makeCodec();
+  codec.beginCase();
+  codec.wU32(BASE + 4, 0x802bc084);
+  const before = u8.slice(BASE, BASE + 0x20);
+  const writesBefore = codec.writes.length;
+  assert.throws(() => codec.encodeField(BASE, "frameClock", 1.5, "RomPartState"),
+    error => error instanceof BlockedCodecError && /port_side/.test(error.message));
+  assert.deepEqual(u8.slice(BASE, BASE + 0x20), before);
+  assert.equal(codec.writes.length, writesBefore);
+});
+
+test("host stream cursors and active flags cannot overwrite source wait pointers or completion", () => {
+  for (const field of ["streamPtr", "active"]) {
+    const record = fieldMap.byInterface.RomPartState[field];
+    assert.equal(record.kind, "port_side");
+    assert.equal(Object.hasOwn(record, "offset"), false);
+    assert.equal(Object.hasOwn(record, "width"), false);
+  }
+  const mapped = Object.values(fieldMap.byInterface.RomPartState)
+    .filter(field => Number.isInteger(field.offset));
+  for (const offset of [0, 0x1a]) {
+    assert.equal(mapped.some(field => field.offset <= offset && field.offset + field.width > offset), false);
+  }
+  const { codec, u8 } = makeCodec();
+  for (const completion of [0, 1]) {
+    codec.beginCase();
+    codec.wU32(BASE, 0x802bc080);
+    codec.wU32(BASE + 4, 0x802bc084);
+    codec.wU8(BASE + 0x1a, completion);
+    const before = u8.slice(BASE, BASE + 0x20);
+    const writesBefore = codec.writes.length;
+    for (const [field, values] of [
+      ["streamPtr", [-1, 0, 48, Number.MAX_SAFE_INTEGER]],
+      ["active", [0, 1]],
+    ]) {
+      for (const value of values) {
+        assert.throws(() => codec.encodeField(BASE, field, value, "RomPartState"),
+          error => error instanceof BlockedCodecError && /port_side/.test(error.message));
+        assert.deepEqual(u8.slice(BASE, BASE + 0x20), before);
+        assert.equal(codec.writes.length, writesBefore);
+      }
+    }
+  }
+});
+
+
+test("source held5d8 is a halfword and never overwrites adjacent cue states5da/5db", () => {
+  const rec = fieldMap.byInterface.RomActor.inputHeld5d8;
+  assert.equal(rec.kind, "u16"); assert.equal(rec.offset, 0x5d8); assert.equal(rec.width, 2);
+  const { codec, u8 } = makeCodec(); codec.beginCase();
+  codec.encodeField(BASE, "fbState", -128); codec.encodeField(BASE, "ubState", 127);
+  const before = u8.slice(BASE + 0x5da, BASE + 0x5dc);
+  codec.encodeField(BASE, "inputHeld5d8", 0xabcd);
+  assert.deepEqual(u8.slice(BASE + 0x5d8, BASE + 0x5da), Uint8Array.of(0xcd, 0xab));
+  assert.deepEqual(u8.slice(BASE + 0x5da, BASE + 0x5dc), before);
+});
+
+test("actual linkedOwner1e4 needs an explicit arena address, never object-to-zero coercion", () => {
+  const field = fieldMap.byInterface.RomActor.linkedOwner1e4;
+  assert.equal(field.offset, 0x1e4); assert.equal(field.kind, "ptr");
+  const { codec, u8 } = makeCodec();
+  let coercions = 0;
+  const tricky = { valueOf() { coercions++; return 0x1234; } };
+  for (const value of [{}, tricky, [], new Number(12), Symbol("pointer"), undefined, "123", NaN, Infinity, -1, 1.5, 0x100000000]) {
+    codec.beginCase();
+    assert.throws(() => codec.encodeField(BASE, "linkedOwner1e4", value), BlockedCodecError);
+    assert.deepEqual([...u8.slice(BASE + 0x1e4, BASE + 0x1e8)], [0xa5, 0xa5, 0xa5, 0xa5]);
+    assert.equal(codec.writes.length, 0);
+  }
+  assert.equal(coercions, 0);
+  for (const value of [null, 0, 0x12345678, 0xffffffff]) {
+    codec.beginCase(); codec.encodeField(BASE, "linkedOwner1e4", value);
+    assert.equal(codec.rU32(BASE + 0x1e4), value ?? 0);
+    assert.deepEqual(codec.writes, [[BASE + 0x1e4, 4]]);
+    assert.equal(u8[BASE + 0x1e3], 0xa5); assert.equal(u8[BASE + 0x1e8], 0xa5);
+  }
+});
+
+
+test("leader pointer330 is an atomic word requiring an explicit arena address", () => {
+  const f = fieldMap.byInterface.RomActor;
+  assert.equal(f.pointer330.offset, 0x330); assert.equal(f.pointer330.kind, "ptr");
+  assert.equal(f.pointer330.width, 4);
+  assert.equal(f.byte334.offset, 0x334); assert.equal(f.byte334.width, 1);
+  assert.equal(f.byte335.offset, 0x335); assert.equal(f.byte335.width, 1);
+  const { codec, u8 } = makeCodec();
+  for (const value of [Symbol("leader"), {}, undefined, -1, 1.5, "12", NaN, Infinity, 0x100000000]) {
+    codec.beginCase();
+    assert.throws(() => codec.encodeField(BASE, "pointer330", value), BlockedCodecError);
+    assert.equal(codec.writes.length, 0);
+    assert.deepEqual([...u8.slice(BASE + 0x330, BASE + 0x336)], Array(6).fill(0xa5));
+  }
+  for (const value of [null, 0, 0x12345678, 0xffffffff]) {
+    codec.beginCase(); codec.encodeField(BASE, "pointer330", value);
+    assert.equal(codec.rU32(BASE + 0x330), value ?? 0);
+    assert.deepEqual(codec.writes, [[BASE + 0x330, 4]]);
+    assert.equal(u8[BASE + 0x334], 0xa5); assert.equal(u8[BASE + 0x335], 0xa5);
+  }
+});
+
+test("participant actor487 is one byte; system view pointers have no implicit arena codec", () => {
+  const field=fieldMap.byInterface.RomActor.byte487;
+  assert.equal(field.offset,0x487);assert.equal(field.kind,"u8");assert.equal(field.width,1);
+  const {codec,u8}=makeCodec();
+  for(const value of [0,1,2,3,255]) {
+    codec.beginCase();codec.encodeField(BASE,"byte487",value);
+    assert.deepEqual(codec.writes,[[BASE+0x487,1]]);assert.equal(u8[BASE+0x487],value);
+    assert.equal(u8[BASE+0x486],0xa5);assert.equal(u8[BASE+0x488],0xa5);
+  }
+  for(const field of ["pointer14","pointer18","pointer1c","pointer20"]) {
+    codec.beginCase();assert.throws(()=>codec.encodeField(BASE,field,Symbol("player interior")),BlockedCodecError);
+    assert.equal(codec.writes.length,0);
+  }
 });

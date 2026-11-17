@@ -14,7 +14,7 @@ const fail = (message: string): never => { throw new Error(message); };
 
 /** Source-order and negative controls, with no Battle/actor/ROM asset dependency. */
 export function runSelfTest(): void {
-  for (const row of [0, 3] as const) {
+  for (const row of [0, 1, 2, 3] as const) {
     const seed = createNinjaShurikenFlight(row, { origin, yaw: 0, ownerScale: 3, collisionScale: 4, collisionScaleRatio: .75 });
     check(seed.phase === 'pending' && !seed.hitActive && !seed.visible, 'allocation remains pending');
     near(seed.life, 0, 'life not initialized at allocation'); near(seed.pos.z, 0, 'allocation has no movement');
@@ -43,7 +43,18 @@ export function runSelfTest(): void {
   }
   let unsupportedRowRejected = false;
   try { createNinjaShurikenFlight(4 as NinjaShurikenRow, { origin, yaw: 0 }); } catch { unsupportedRowRejected = true; }
-  check(unsupportedRowRejected, 'Powered row4 cannot enter scoped rows0/3 engine');
+  check(unsupportedRowRejected, 'Powered row4 cannot enter scoped rows0–3 engine');
+
+  // Row2 alone adds the current owner offset. Reinitialization replaces the
+  // allocation position, rather than adding the offset twice or banking it.
+  for (const row of [0,1,2,3] as const) {
+    const seed=createNinjaShurikenFlight(row,{origin:{x:10,y:20,z:30},yaw:0,ownerOffset7b0:{x:150,y:1,z:2}});
+    near(seed.pos.x,row===2?160:10,'row2 allocation offset gate');
+    const next=stepNinjaShurikenFlight(seed,{initPose:()=>({origin:{x:11,y:22,z:33},yaw:0,ownerOffset7b0:{x:-70,y:3,z:4}})}).state;
+    near(next.previousPos.x,row===2?-59:11,'init samples new offset rather than old allocation offset');
+    near(next.previousPos.y,row===2?25:22,'full three-axis offset at phase0');
+    near(next.previousPos.z,row===2?37:33,'offset remains world-space rather than yaw transformed');
+  }
 
   // Pose is recomputed at phase0, but saved launch aim can differ from live target.
   {
@@ -135,7 +146,7 @@ export function runSelfTest(): void {
   }
 
   // Exactly599 moves across600 active invocations; first active is init's call.
-  for (const row of [0, 3] as const) {
+  for (const row of [0, 1, 2, 3] as const) {
     let state = pending(row), calls = 0, changes = 0, impactCount = 0;
     while (state.phase === 'pending' || state.phase === 'active') {
       const result = stepNinjaShurikenFlight(state); calls++;

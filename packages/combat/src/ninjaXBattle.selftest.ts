@@ -417,7 +417,7 @@ function testOwnerDeathAndFamilyIsolation(): void {
       'following source dispatch frees owner-dead child before replacement can inherit it');
     assert(shots(t).length === 0, 'owner cleanup cannot turn flight into a damaging impact');
   }
-  for (const id of ['pl0001', 'pl0003', 'pl0002', 'pl000b', 'pl0102', 'pl0101', 'pl0005', 'pl0008', 'pl0615']) {
+  for (const id of ['pl0001', 'pl0002', 'pl000b', 'pl0102', 'pl0101', 'pl0005', 'pl0008', 'pl0615']) {
     const t = setup({ id }); t.press();
     assert(t.owner.command?.type === 2, `${id}: control executes a real X command`);
     if (['pl0001', 'pl0002', 'pl000b', 'pl0101', 'pl0102', 'pl0615'].includes(id)) {

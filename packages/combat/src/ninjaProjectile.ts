@@ -1,4 +1,4 @@
-/** Normal Ninja/Sasuke715f8 ->7db5c rows0/3 ->85e00 row0.
+/** Normal/Sasuke/Double Ninja715f8 ->7db5c rows0–3 ->85e00 row0.
  * Source phases and identities are separate from this bounded host adapter:
  * static joint11 bind, target roots, swept spheres and triangle terrain are not
  * original animated HIT/attachment parity. Incoming833a4/833ec/83610/83714
@@ -11,7 +11,7 @@ import {livingAttackTarget,actorAimTarget} from './sourceAttackTarget.js';
 import {attackHitRecordsForKind} from './attackHitData.js';
 import {familyDamageRecordForBorg} from './familyDamageData.js';
 import {stepGatlingExplosion,type GatlingExplosionState} from './gatlingProjectile.js';
-import {createNinjaShurikenFlight,stepNinjaShurikenFlight,type NinjaShurikenFlightState} from './ninjaShurikenFlight.js';
+import {createNinjaShurikenFlight,stepNinjaShurikenFlight,type NinjaShurikenFlightState,type NinjaShurikenRow} from './ninjaShurikenFlight.js';
 export interface NinjaPrimarySource {
   kind:'primary';flight:NinjaShurikenFlightState;ownerBorgId:string;ownerFormId:string;
   hitUids:string[];contactPending:boolean;
@@ -26,26 +26,34 @@ export const NINJA_IMPACT_DAMAGE:DamageRecord&{knockbackDirMode:number}={index:1
   hitStrength:0,impactEffectId:0,reactionFlags:2,reactionAnimVariant:4,knockbackDirMode:1,
   flagsA:0x20,flagsB:0,knockbackYawTrim:0,knockbackPitchTrim:56,rehitIntervalFrames:0};
 const f=Math.fround;
-export function ninjaMuzzle(pos:Vec3,yaw:number,scale:number):Vec3{
-  const [x,y,z]=NINJA_PROJECTILE_SOURCE.muzzle,c=Math.cos(yaw),s=Math.sin(yaw);
+// Double's original static joint11 differs from Normal/Sasuke. Animated joint
+// transforms remain a host seam. Row2 exists only through explicit source fixtures.
+const DOUBLE_NINJA_MUZZLE=[116,118,.00000251267192652449] as const;
+const doubleInitOffsets=new WeakMap<Projectile,()=>Vec3>();
+export function ninjaMuzzle(pos:Vec3,yaw:number,scale:number,borgId='pl0000'):Vec3{
+  const [x,y,z]=borgId==='pl0003'?DOUBLE_NINJA_MUZZLE:NINJA_PROJECTILE_SOURCE.muzzle,c=Math.cos(yaw),s=Math.sin(yaw);
   return {x:f(pos.x+(x*c+z*s)*scale),y:f(pos.y+y*scale),z:f(pos.z+(-x*s+z*c)*scale)};
 }
 let serial=0;
 export function spawnNinjaSource(owner:BorgRuntime,actor:RomActor,address:number,row:number,all:readonly BorgRuntime[]):Projectile[]|null{
-  if(!isSourceNinjaX(owner.borgId)||address!==0x8007db5c||row!==(owner.borgId==='pl000a'?3:0))return null;
+  if(!isSourceNinjaX(owner.borgId)||address!==0x8007db5c||!(owner.borgId==='pl0003'?(row===1||row===2):row===(owner.borgId==='pl000a'?3:0)))return null;
   const state=getNinjaXState(actor);if(!state||actor.actionIndex!==2)return null;
+  if(row===2&&!(state.doubleClone?.arm7c8))return null;
   const target=actorAimTarget(state.targetUid?all.find(b=>b.uid===state.targetUid):null);
   const yaw=actor.heading*Math.PI*2/65536,scale=actor.modelScale;
-  const flight=createNinjaShurikenFlight(row as 0|3,{origin:ninjaMuzzle(actor.pos,yaw,scale),yaw,
+  const flight=createNinjaShurikenFlight(row as NinjaShurikenRow,{origin:ninjaMuzzle(actor.pos,yaw,scale,owner.borgId),yaw,
+    ...(row===2&&state.doubleClone?{ownerOffset7b0:state.doubleClone.offset7b0}:{}),
     ownerScale:scale,collisionScale:actor.collisionScale??scale,
     initialAimPoint:state.targetPoint,targetUid:target?.uid??null,targetPoint:target?.pos??null});
   const hit=attackHitRecordsForKind(owner.borgId,1)[0],record=hit&&familyDamageRecordForBorg(owner.borgId,hit.damageRecordIndex);
   if(!hit||!record)throw Error('Verified Ninja HIT1/family damage1 missing');
-  return [{uid:`ninja-shuriken-${++serial}`,ownerUid:owner.uid,team:owner.team,pos:{...flight.pos},vel:{...flight.velocity},
+  const projectile:Projectile={uid:`ninja-shuriken-${++serial}`,ownerUid:owner.uid,team:owner.team,pos:{...flight.pos},vel:{...flight.velocity},
     damage:1,hitstun:0,knockback:1,damageRecord:record,homingTurn:0,homingTarget:null,
     aimedTargetUid:target?.uid??null,life:flight.life,hitRadius:10*flight.collisionScale,visualKind:'energy',romShotKind:1,
     sourceHitCollisionFlags:hit.collisionFlags,consumeOnHit:false,romScale:[0,0,0],
-    ninjaSource:{kind:'primary',flight,ownerBorgId:owner.borgId,ownerFormId:owner.combatFormId??owner.borgId,hitUids:[],contactPending:false}}];
+    ninjaSource:{kind:'primary',flight,ownerBorgId:owner.borgId,ownerFormId:owner.combatFormId??owner.borgId,hitUids:[],contactPending:false}};
+  if(row===2&&state.doubleClone){const clone=state.doubleClone;doubleInitOffsets.set(projectile,()=>({...clone.offset7b0}));}
+  return [projectile];
 }
 export function createNinjaImpact(parent:Projectile,pos:Vec3,scale:number):Projectile{
   const s:NinjaImpactSource={kind:'impact',phase:'expand',age:0,tailAge:0,ownerScale:scale,scale:f(.01)*scale,
@@ -72,12 +80,14 @@ export function advanceNinjaSource(pr:Projectile,byUid:Map<string,BorgRuntime>,c
   const result=stepNinjaShurikenFlight(s.flight,{
     ...(invalid?{ownerInvalid:invalid}:{}),priorContact:s.contactPending,
     currentTarget:target?{uid:target.uid,point:target.pos,valid:true}:null,
-    ...(owner?{initPose:()=>({origin:ninjaMuzzle(owner.pos,owner.rotY,s.flight.ownerScale),yaw:owner.rotY,
+    ...(owner?{initPose:()=>({origin:ninjaMuzzle(owner.pos,owner.rotY,s.flight.ownerScale,s.ownerBorgId),yaw:owner.rotY,
+      ...(s.flight.row===2?{ownerOffset7b0:doubleInitOffsets.get(pr)?.()??{x:0,y:0,z:0}}:{}),
       initialAimEnabled:!!target})}:{}),
     ...(ctx.outsideBounds?{outsideBounds:ctx.outsideBounds}:{}),
     terrain84170:state=>ctx.terrainImpact?.(state.previousPos,state.pos)??null,
   });
   s.flight=result.state;s.contactPending=false;
+  if(result.state.phase!=='pending')doubleInitOffsets.delete(pr);
   const children:Projectile[]=[];
   for(const e of result.events)if(e.kind==='impact'){children.push(createNinjaImpact(pr,e.pos,result.state.modelScale));ctx.onCue?.(12);}
   const state=result.state;

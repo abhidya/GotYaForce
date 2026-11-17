@@ -1,4 +1,5 @@
 import {isSourceSwitchingX,getSwitchingXState,prepareSwitchingX,clearSwitchingX,startSwitchingXStream,tickSwitchingXStreamPart} from './switchingX.js';
+import {isSourceActorTickPrefixClaimedActor} from './rom/actor-tick-prefix.js';
 import {isSourceTeleportX,getTeleportXState,prepareTeleportX,clearTeleportX} from './teleportX.js';
 import {spawnNinjaSource} from './ninjaProjectile.js';
 import {isSourceNinjaX,getNinjaXState,prepareNinjaX,clearNinjaX,startNinjaXStream,tickNinjaXStreamPart} from './ninjaX.js';
@@ -2299,6 +2300,8 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  velocity is NOT synced — the ROM handler owns it (syncIn would overwrite the
    *  phase machine's impulses with stale BorgRuntime.vel from before the special). */
   syncIn(runtime: BorgRuntime, all: readonly BorgRuntime[]): void {
+    if (isSourceActorTickPrefixClaimedActor(this.actor))
+      throw Error('[bridge] syncIn refuses an actor claimed by source tick-prefix before any legacy writes; no fallback after partial source execution');
     this.arrowRoster = all;
     const a = this.actor;
     const slot = Math.max(0, all.indexOf(runtime));
@@ -2569,6 +2572,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       (runtime.grounded ? variantIndex===0 : variantIndex===4 && runtime.command.subtype===4);
     const admittedNinja=isSourceNinjaX(runtime.borgId)&&runtime.command?.exact===true&&runtime.command.type===2&&actionIndex===2&&
       (runtime.grounded?variantIndex===0:variantIndex===4&&runtime.command.subtype===4);
+    if(runtime.borgId==='pl0003'&&!admittedNinja)return false;
     const admittedSwitching=isSourceSwitchingX(runtime.borgId)&&runtime.command?.exact===true&&runtime.command.type===2&&actionIndex===2&&
       (runtime.grounded?variantIndex===0:variantIndex===4&&runtime.command.subtype===4);
     if(isSourceSwitchingX(runtime.borgId)&&!admittedSwitching)return false;

@@ -270,7 +270,10 @@ export async function runBattleSceneDiverAuraSelfcheck(): Promise<void> {
   }
   // Isolate the generic fallback producer using real Battle actors but no ROM driver.
   // The profile belongs only to this fixture; custom radius does not alter catalog data.
-  const charged = (borgs.borgs as BorgStats[]).find((b) => xChargeMoveForBorgId(b.id) !== null)!;
+  // Keep this generic-path fixture stable as earlier catalog borgs gain source
+  // input clocks. Double Ninja is no longer governed by generic xChargeFrames.
+  const charged = (borgs.borgs as BorgStats[]).find((b) => b.id === "pl0504")!;
+  assert(xChargeMoveForBorgId(charged.id) !== null, "Black Hole remains a charged generic fallback reference");
   for (const [stats, charge] of [[(borgs.borgs as BorgStats[]).find((b) => b.id === "pl0804")!, false], [charged, true]] as const) {
     const battle = createBattle({ stageId: "st00", forces: [
       { team: 0, ownerPlayer: "p1", borgIds: [stats.id] },

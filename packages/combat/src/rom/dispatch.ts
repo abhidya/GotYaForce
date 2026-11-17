@@ -107,8 +107,8 @@ export function dispatchCommandRecord(actor: RomActor, rec: CommandRecord): bool
  * The per-frame state dispatch — port of `FUN_80055568` @ chunk_0006.c:7778. Each frame:
  *   1. status pass (zz_0059068_), input pass (zz_0055dcc_/zz_005568c_)
  *   2. call preState virtual (+0x4bc)
- *   3. dispatch PTR_LAB_802d37a8[+0x5db](actor)  — upper-body state handler
- *   4. dispatch PTR_LAB_802d36a8[+0x5da](actor)  — full-body state handler
+ *   3. snapshot +0x5da, then dispatch PTR_LAB_802d37a8[+0x5db](actor)  — upper-body state handler
+ *   4. dispatch PTR_LAB_802d36a8[saved +0x5da](actor)  — full-body state handler
  *   5. call postState virtual (+0x4c0)
  *   6. anim-sound pass (zz_005b880_)
  *
@@ -140,9 +140,12 @@ export function stepActor(actor: RomActor, table: StateTable): void {
   // (status tick, lock-on, anim-sound) and compose around this dispatcher; the ROM
   // runtime owns ONLY the state-table dispatch here.
   actor.preState?.(actor);
+  // 80055568 snapshots +5da after +4bc, before the upper-body handler.
+  // Only the selection is saved; the full-body handler sees live actor fields.
+  const fullBodyState = actor.fbState;
   const ub = table.upperBody[actor.ubState];
   if (ub) ub(actor);
-  const fb = table.fullBody[actor.fbState];
+  const fb = table.fullBody[fullBodyState];
   if (fb) fb(actor);
   actor.postState?.(actor);
 }

@@ -110,11 +110,22 @@ exactly the human weapon pipeline.
 ## 4. Call graph (battle loop → AI)
 
 `zz_00527d8_` main loop (chunk_0006.c:5790) → pad ingest `zz_010d450_` each iteration;
-battle frame `zz_0029434_` → `zz_0053a2c_` → per-actor `FUN_80054070` → phase table
-`PTR_FUN_802d3264` @0x802d3264 = {800541ac, 8005475c, 80054d54, 8005514c, 800547dc,
-80054c78, 80054cbc, 80054cf0}; phases 6/7 (`FUN_80054cbc`/`FUN_80054cf0`) call
-`FUN_80056900` (input refresh → AI) then `FUN_80055568` (state-machine step consuming the
-virtual pad).
+battle frame `zz_0029434_` → `zz_0053a2c_` → per-actor `FUN_80054070`.
+The latter indexes outer lifecycle table `802d3264` with actor `+18`:
+`{800541ac,8005475c,80054d54,8005514c}`. Outer state1 enters `FUN_8005475c`,
+which indexes the separate active-substate table `802d3274` with actor `+19`:
+`{800547dc,80054c78,80054cbc,80054cf0}`. Thus outer1/inner2 or3 selects
+`FUN_80054cbc`/`FUN_80054cf0`, which call `FUN_80056900` (input refresh → AI)
+then `FUN_80055568` (state-machine step consuming the virtual pad).
+
+Correction verified statically on 2026-11-12: original pointer reads confirm the
+adjacent words, while the two index sites and source writers establish their distinct
+selectors. `541ac` writes18=1/19=0; `547dc` advances19 to1; `54c78` advances it to2;
+`58244` explicitly writes18=1/19=2. `5475c` can redirect19=1/2 to3; `5bbc0`
+writes18=2/19=0, `54d54` exits to18=3, and `5514c` can reset18 to0 for redeployment.
+The earlier description of outer “phases6/7” incorrectly combined two tables.
+Neither index site checks bounds. This is a verified static mapping, not an original
+runtime trace or lifecycle replay; those remain pending.
 
 ## 5. Dolphin confirmation plan (for the future trace session — Priority 8)
 
