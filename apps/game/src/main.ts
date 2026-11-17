@@ -830,6 +830,10 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("keyup", (e) => keys.delete(e.code));
 // A release outside this page may never deliver keyup; do not retain held controls.
 window.addEventListener("blur", () => keys.clear());
+// In-page editing also relinquishes battle controls without a window blur.
+document.addEventListener("focusin", (e) => {
+  if (isTextInputTarget(e.target)) keys.clear();
+});
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) keys.clear();
 });
