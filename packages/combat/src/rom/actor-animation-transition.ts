@@ -1,3 +1,4 @@
+import {sourceSlerpWeights} from './source-quaternion-slerp-weights.js';
 /** Bounded source 4b94c part/pose copy, 4a8cc blending and 4a00c mode1.
  * All existing fields are borrowed from their canonical owners. Only the eight
  * absent bytes of the 0x40 part and descriptor42/43 have explicit sidecars.
@@ -5,8 +6,9 @@
  *
  * research/decomp/actor-mode1-envelope-evidence-2026-11-14.md authenticates
  * every selected instruction and
- * constants. 8020bf08 admits ONLY its finite linear branch, strictly above
- * 3f7fff58; the nonlinear branch refuses at real 8023cc8c. Quaternion weights
+ * constants. 8020bf08 admits its finite linear branch, strictly above 3f7fff58. The
+ * nonlinear candidate requires an explicitly supplied frsqrte estimate and is
+ * not retail-verified; without it the branch refuses at real 8023cc8c. Quaternion weights
  * are not clamped/normalized, and arithmetic is not fused. Paired vector scale
  * requires GQR0 float/scale0, RN00/NI0; these are host preconditions, not live
  * register observations. Two part/pose banks, four channels, finite f32 and
@@ -40,6 +42,8 @@ export interface SourceActorAnimationTransitionSources {
   attached: Pick<SourceAttachedJointSetupRuntime, 'getPartBinding'>;
   metadata: Pick<SourceAnimationSetupMetadataRuntime, 'getPartBinding' | 'getActorBinding'>;
   archives: Pick<SourceArchiveJointSetupRuntime, 'getPartBinding'>;
+  /** Explicit experimental frsqrte owner; absence retains the nonlinear refusal. */
+  reciprocalSqrtEstimate?: (value: number) => number;
 }
 export interface SourceActorAnimationTransitionRuntime {
   getActualMapping(): SourceActorJointMappingRuntime;
@@ -122,6 +126,9 @@ const WORDS: readonly (readonly Field[])[] = [
 ];
 const RAW = ['byte34', 'byte39', 'byte3a', 'byte3b', 'byte3c', 'byte3d', 'byte3e', 'byte3f'] as const;
 export function createSourceActorAnimationTransitionRuntime(sources: SourceActorAnimationTransitionSources): SourceActorAnimationTransitionRuntime {
+  const estimateProperty = Object.getOwnPropertyDescriptor(sources, 'reciprocalSqrtEstimate');
+  if (estimateProperty && (!('value' in estimateProperty) || typeof estimateProperty.value !== 'function')) fail('reciprocalSqrtEstimate must be an own data function');
+  const estimate = estimateProperty?.value as ((value: number) => number) | undefined;
   const mapping = own(sources, 'mapping') as SourceActorJointMappingRuntime;
   const feedback = own(sources, 'feedback') as SourceJointAnimationFeedbackRuntime;
   const dispatch = own(sources, 'dispatch'), setup = own(sources, 'setup');
@@ -267,8 +274,16 @@ export function createSourceActorAnimationTransitionRuntime(sources: SourceActor
       const xy = addSourceFloat32(px, py), pw = mul(a[3]!, b[3]!), xyz = addSourceFloat32(pz, xy);
       let dot = addSourceFloat32(pw, xyz), sign = 1;
       if (dot < 0) {dot = -dot; sign = -1;}
-      if (!(dot > 0.9999899864196777)) fail('8020bf08 nonlinear branch requires unsupported callee8023cc8c');
-      const signedWeight = mul(sign, weight), remaining = sub(1, weight);
+      let signedWeight: number, remaining: number;
+      if (dot > 0.9999899864196777) {
+        signedWeight = mul(sign, weight); remaining = sub(1, weight);
+      } else {
+        if (estimate === undefined) fail('8020bf08 nonlinear branch requires unsupported callee8023cc8c');
+        // Explicit opt-in only. The supplied estimate is not assumed to be a
+        // verified Gekko result; failures retain the prior translation stores.
+        const weights = sourceSlerpWeights(dot, weight, sign as 1 | -1, value => {const result = estimate(value); check(); return result;});
+        check(); remaining = weights.first; signedWeight = weights.second;
+      }
       for (let i = 0; i < 4; i++) write(currentQ, ['x', 'y', 'z', 'w'][i]!, addSourceFloat32(mul(remaining, a[i]!), mul(signedWeight, b[i]!)));
       for (let i = 0; i < 2; i++) {
         const descriptor = identity(read(getActor(id), 'descriptor4b0'), 'descriptor4b0'); getDescriptor(descriptor);
