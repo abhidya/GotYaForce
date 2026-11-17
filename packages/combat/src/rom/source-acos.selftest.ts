@@ -1,6 +1,26 @@
 import {sourceTargetDistanceSeed} from './source-target-distance.js';
 import {sourceAcosSmall, sourceAcosUpper, sourceAcosFloatNonnegative} from './source-acos.js';
 export function runSourceAcosSmallSelfTest(): void {
+  // Controlled calls to GG4E 8023cc8c in Dolphin, with frsqrte values
+  // captured from 8023961c. These are emulator samples, not console proof.
+  const captures: Array<[number, string | null, string]> = [
+    [0, null, '3ff921fb60000000'], [0.10000000149011612, null, '3ff787b220000000'],
+    [0.25, null, '3ff51700e0000000'], [0.49900001287460327, null, '3ff0c60ca0000000'],
+    [0.5, '3ffffe8000000000', '3ff0c15240000000'], [0.5000010132789612, '400000082c000000', '3ff0c15100000000'],
+    [0.625, '4002794000000000', '3feca94940000000'], [0.75, '40069fa000000000', '3fe720a3a0000000'],
+    [0.8999999761581421, '4011e3c900000000', '3fdcdd9fc0000000'], [0.9900000095367432, '402c498890000000', '3fc21df6a0000000'],
+    [0.9998999834060669, '4061ad2800000000', '3f8cf73aa0000000'], [1, null, '0000000000000000'],
+  ];
+  const bits = new DataView(new ArrayBuffer(8));
+  for (const [x, seed, expected] of captures) {
+    const actual = sourceAcosFloatNonnegative(x, () => {
+      if (seed === null) throw Error(`unexpected frsqrte at ${x}`);
+      bits.setBigUint64(0, BigInt(`0x${seed}`));
+      return bits.getFloat64(0);
+    });
+    bits.setFloat64(0, actual);
+    if (bits.getBigUint64(0) !== BigInt(`0x${expected}`)) throw Error(`Dolphin acos mismatch at ${x}`);
+  }
   for (let i = -4999; i <= 4999; i++) {
     const x = i / 10000;
     if (Math.abs(sourceAcosSmall(x) - Math.acos(x)) > 5e-16) throw Error(`acos candidate differs at ${x}`);
