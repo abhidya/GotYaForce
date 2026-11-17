@@ -34,6 +34,52 @@ export function runSourceAcosSmallSelfTest(): void {
     bits.setFloat64(0, sourceReciprocalSqrtEstimate(value));
     if (bits.getBigUint64(0) !== BigInt(`0x${expected}`)) throw Error(`Dolphin frsqrte mismatch at ${value}`);
   }
+  // Separate midpoint/end captures exercise the interpolation in all 32
+  // segments, not only the two samples used to derive each segment.
+  const segmentCaptures = [
+    ['3fef845e90000000', '3fef0a1e90000000'],
+    ['3fee9a5c00000000', '3fee2a5c00000000'],
+    ['3fedc399c0000000', '3fed5c99c0000000'],
+    ['3fecfd77c8000000', '3fec9e57c8000000'],
+    ['3fec461610000000', '3febedd610000000'],
+    ['3feb9b9490000000', '3feb495490000000'],
+    ['3feafcd330000000', '3feab01330000000'],
+    ['3fea6831f8000000', '3fea2051f8000000'],
+    ['3fe9dcb0e8000000', '3fe99910e8000000'],
+    ['3fe959afe8000000', '3fe91a0fe8000000'],
+    ['3fe8ddef08000000', '3fe8a1cf08000000'],
+    ['3fe868ee38000000', '3fe8300e38000000'],
+    ['3fe7fa6d78000000', '3fe7c48d78000000'],
+    ['3fe7916cc8000000', '3fe75e4cc8000000'],
+    ['3fe72dac28000000', '3fe6fd0c28000000'],
+    ['3fe6ceab98000000', '3fe6a04b98000000'],
+    ['3fe64935a0000000', '3fe5f2b5a0000000'],
+    ['3fe5a3c3cc000000', '3fe55493cc000000'],
+    ['3fe50be234000000', '3fe4c31234000000'],
+    ['3fe47fc0d4000000', '3fe43c70d4000000'],
+    ['3fe3fe1f9c000000', '3fe3bfaf9c000000'],
+    ['3fe385ae88000000', '3fe34b8e88000000'],
+    ['3fe3153d94000000', '3fe2deed94000000'],
+    ['3fe2ac2cb8000000', '3fe2794cb8000000'],
+    ['3fe2498bf0000000', '3fe219cbf0000000'],
+    ['3fe1eccb40000000', '3fe1bfcb40000000'],
+    ['3fe1954aa0000000', '3fe16acaa0000000'],
+    ['3fe142ba0c000000', '3fe11a8a0c000000'],
+    ['3fe0f47984000000', '3fe0ce6984000000'],
+    ['3fe0aa390c000000', '3fe086090c000000'],
+    ['3fe063c898000000', '3fe0416898000000'],
+    ['3fe020b82c000000', '3fe000082c000000'],
+  ];
+  for (let segment = 0; segment < segmentCaptures.length; segment++) {
+    for (let j = 0; j < 2; j++) {
+      const exponent = segment < 16 ? 1023n : 1024n;
+      const input = (exponent << 52n) | (BigInt(segment % 16) << 48n) | (BigInt(j ? 2047 : 1023) << 37n);
+      bits.setBigUint64(0, input);
+      const result = sourceReciprocalSqrtEstimate(bits.getFloat64(0));
+      bits.setFloat64(0, result);
+      if (bits.getBigUint64(0) !== BigInt(`0x${segmentCaptures[segment]![j]!}`)) throw Error(`Dolphin frsqrte segment ${segment}/${j}`);
+    }
+  }
   for (let i = -4999; i <= 4999; i++) {
     const x = i / 10000;
     if (Math.abs(sourceAcosSmall(x) - Math.acos(x)) > 5e-16) throw Error(`acos candidate differs at ${x}`);
