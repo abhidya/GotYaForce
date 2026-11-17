@@ -55,6 +55,15 @@ const clonedOwner = mirror.root.children[0];
 const clonedSkin = clonedOwner.children[0];
 const clonedWeapon = clonedOwner.children[1];
 assert.notEqual(clonedSkin.geometry, geometry);
+// Shared source resources stay shared inside one mirror, but never with the owner.
+assert.equal(clonedSkin.geometry, clonedWeapon.geometry);
+assert.equal(clonedSkin.material[0], clonedSkin.material[1]);
+assert.equal(clonedSkin.material[0], clonedWeapon.material);
+const secondMirror = createDoubleCloneMirror(owner);
+const secondSkin = secondMirror.root.children[0].children[0];
+assert.notEqual(secondSkin.geometry, clonedSkin.geometry, "separate mirrors own separate snapshots");
+assert.notEqual(secondSkin.material[0], clonedSkin.material[0]);
+secondMirror.dispose();
 assert.notEqual(clonedSkin.material[0], material);
 assert.equal(clonedSkin.material[0].map, texture);
 assert.notEqual(clonedSkin.skeleton, skin.skeleton);
@@ -125,6 +134,7 @@ const resourceCounts = new Map();
 clonedOwner.traverse((node) => {
   if (!node.isMesh) return;
   for (const resource of [node.geometry, ...[].concat(node.material)]) {
+    if (resourceCounts.has(resource)) continue;
     resourceCounts.set(resource, 0);
     resource.addEventListener("dispose", () => resourceCounts.set(resource, resourceCounts.get(resource) + 1));
   }
