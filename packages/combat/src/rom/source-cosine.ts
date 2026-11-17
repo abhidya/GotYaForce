@@ -3,7 +3,7 @@
  * not been compared with retail PowerPC arithmetic and is not wired to gameplay.
  */
 export function sourceCosineKernel(x: number, y: number): number {
-  if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > Math.PI / 4) throw new RangeError('finite reduced inputs required');
+  if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 0.78539825) throw new RangeError('finite reduced inputs required');
   if (Math.abs(x) < 2 ** -27) return 1;
   const z = x * x;
   const r = z * (0.0416666666666666 + z * (-0.001388888888887411 + z * (0.00002480158728947673 + z * (-0.00000027557314351390663 + z * (2.087572321298175e-9 + z * -1.1359647557788195e-11)))));
