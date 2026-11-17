@@ -1,3 +1,4 @@
+import {runSourceAngleReductionSelfTest} from './source-angle-reduction.selftest.js';
 import {runSourceCosineKernelSelfTest} from './source-cosine.selftest.js';
 import {runSourceSineKernelSelfTest} from './source-sine.selftest.js';
 import {runSourceAcosSmallSelfTest} from './source-acos.selftest.js';
@@ -212,6 +213,7 @@ export function runSelfTest(): number {
   runSourceAcosSmallSelfTest();
   runSourceSineKernelSelfTest();
   runSourceCosineKernelSelfTest();
+  runSourceAngleReductionSelfTest();
   failures = 0;
   runStreamFlagsSelfTest();
   runStreamBankSelfTest();
