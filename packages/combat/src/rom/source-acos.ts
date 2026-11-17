@@ -14,7 +14,7 @@ function sourceAcosRatio(z: number): number {
 }
 /** Bounded transcription of gnt4-__ieee754_acos @ 80239410.
  * Coefficients are binary64 values read from the supplied GG4E DOL data5.
- * Only |x| < 0.5 is transcribed here; the square-root paths remain to port.
+ * This entry covers only |x| < 0.5; the positive upper domain is separate.
  * Fused binary64 steps follow the original instruction order, but output has not yet been compared to retail execution,
  * so this is not a bit-exact or production-parity claim.
  */
