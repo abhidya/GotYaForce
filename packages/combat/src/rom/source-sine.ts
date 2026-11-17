@@ -10,3 +10,12 @@ export function sourceSineKernel(x: number): number {
   const r = 0.00833333333332249 + z * (-0.0001984126982985795 + z * (0.0000027557313707070068 + z * (-0.000000025050760253406863 + z * 1.58969099521155e-10)));
   return x + v * (-0.16666666666666632 + z * r);
 }
+
+/** The same kernel's iy=1 path for an angle-reduction tail. */
+export function sourceSineKernelTail(x: number, y: number): number {
+  if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > Math.PI / 4) throw new RangeError('finite reduced inputs required');
+  if (Math.abs(x) < 2 ** -27) return x;
+  const z = x * x, v = z * x;
+  const r = 0.00833333333332249 + z * (-0.0001984126982985795 + z * (0.0000027557313707070068 + z * (-0.000000025050760253406863 + z * 1.58969099521155e-10)));
+  return x + (-0.16666666666666632 * v - (z * (0.5 * y - v * r) - y));
+}
