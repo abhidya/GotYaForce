@@ -1,3 +1,4 @@
+import {divideSourceAnimationFloat32} from './actor-animation-transition.js';
 import {sourceAcosFloatNonnegative} from './source-acos.js';
 import {sourceSineFloatBounded} from './source-sine.js';
 
@@ -18,7 +19,7 @@ export function sourceSlerpWeights(dot: number, weight: number, sign: 1 | -1,
   if (denom === 0) throw new RangeError('zero sine denominator');
   const firstArg = Math.fround(Math.fround(1 - weight) * theta);
   const secondArg = Math.fround(weight * theta);
-  const first = Math.fround(sourceSineFloatBounded(firstArg) / denom);
-  const second = Math.fround(sign * Math.fround(sourceSineFloatBounded(secondArg) / denom));
+  const first = divideSourceAnimationFloat32(sourceSineFloatBounded(firstArg), denom);
+  const second = Math.fround(sign * divideSourceAnimationFloat32(sourceSineFloatBounded(secondArg), denom));
   return {first, second};
 }
