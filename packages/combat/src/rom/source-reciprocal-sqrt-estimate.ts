@@ -1,4 +1,4 @@
-/** Experimental Dolphin-observed frsqrte model for positive normal inputs.
+/** Experimental Dolphin-observed frsqrte model for positive finite inputs.
  * 32 segment starts and adjacent output differences were sampled by executing
  * GG4E instruction 8023961c in Dolphin 2606-97 (JIT64), 2026-11-17.
  * Interpolation and exponent scaling are a model, not hardware proof.
@@ -80,7 +80,9 @@ export function sourceReciprocalSqrtEstimate(value: number): number {
   view.setFloat64(0, value);
   const input = view.getBigUint64(0);
   const exponent = Number((input >> 52n) & 0x7ffn);
-  if (exponent === 0) throw new RangeError('subnormal estimate is not implemented');
+  // Normalize exactly by an even power of two, then undo that scaling on
+  // the reciprocal root. This keeps all intermediate numbers normal.
+  if (exponent === 0) return sourceReciprocalSqrtEstimate(value * 2 ** 52) * 2 ** 26;
   const referenceExponent = exponent % 2 === 1 ? 1023 : 1024;
   const segment = Number((input >> 48n) & 15n) + (referenceExponent === 1024 ? 16 : 0);
   const offset = (input >> 37n) & 2047n;
