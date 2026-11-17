@@ -75,7 +75,7 @@ const increments = [
 ];
 
 export function sourceReciprocalSqrtEstimate(value: number): number {
-  if (!(value > 0) || !Number.isFinite(value)) throw new RangeError('positive finite normal value required');
+  if (!(value > 0) || !Number.isFinite(value)) throw new RangeError('positive finite value required');
   const view = new DataView(new ArrayBuffer(8));
   view.setFloat64(0, value);
   const input = view.getBigUint64(0);
