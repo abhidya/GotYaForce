@@ -34,6 +34,23 @@ export function runSourceAcosSmallSelfTest(): void {
     bits.setFloat64(0, sourceReciprocalSqrtEstimate(value));
     if (bits.getBigUint64(0) !== BigInt(`0x${expected}`)) throw Error(`Dolphin frsqrte mismatch at ${value}`);
   }
+  // Positive subnormal, exponent-boundary and distant exponent captures.
+  const extremeCaptures = [
+    ['0000000000000001', '617ffe8000000000'], ['0000000000000002', '61769fa000000000'],
+    ['0000000000000003', '6172794000000000'], ['0000000000000100', '613ffe8000000000'],
+    ['0000010000000000', '603ffe8000000000'], ['0007ffffffffffff', '5fe6a04b98000000'],
+    ['0008000000000000', '5fe69fa000000000'], ['000fffffffffffff', '5fe000082c000000'],
+    ['0010000000000000', '5fdffe8000000000'], ['0010000000000001', '5fdffe8000000000'],
+    ['0123456789abcdef', '5f549e8464000000'], ['123456789abcdef0', '56cc62b2d0000000'],
+    ['2000000000000000', '4fe69fa000000000'], ['3e40000000000000', '40c69fa000000000'],
+    ['3e50000000000000', '40bffe8000000000'], ['7fefffffffffffff', '1ff000082c000000'],
+  ];
+  for (const [input, expected] of extremeCaptures) {
+    bits.setBigUint64(0, BigInt(`0x${input}`));
+    const result = sourceReciprocalSqrtEstimate(bits.getFloat64(0));
+    bits.setFloat64(0, result);
+    if (bits.getBigUint64(0) !== BigInt(`0x${expected}`)) throw Error(`Dolphin frsqrte extreme ${input}`);
+  }
   // Separate midpoint/end captures exercise the interpolation in all 32
   // segments, not only the two samples used to derive each segment.
   const segmentCaptures = [
