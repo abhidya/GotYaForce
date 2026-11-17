@@ -1,3 +1,5 @@
+import {divideSourceAnimationFloat32} from './source-float32-divide.js';
+export {divideSourceAnimationFloat32} from './source-float32-divide.js';
 import {sourceSlerpWeights} from './source-quaternion-slerp-weights.js';
 /** Bounded source 4b94c part/pose copy, 4a8cc blending and 4a00c mode1.
  * All existing fields are borrowed from their canonical owners. Only the eight
@@ -86,28 +88,6 @@ function float(value: unknown, where: string): number {
 }
 const mul = (a: number, b: number): number => float(Math.fround(a * b), 'fmuls result');
 const sub = (a: number, b: number): number => addSourceFloat32(a, -b);
-const bits = new DataView(new ArrayBuffer(4));
-function dyadic(value: number): {mantissa: bigint; exponent: number; negative: boolean} {
-  float(value, 'fdivs operand'); bits.setFloat32(0, value, false);
-  const raw = bits.getUint32(0, false), e = (raw >>> 23) & 255;
-  return {mantissa: BigInt((raw & 0x7fffff) | (e === 0 ? 0 : 0x800000)),
-    exponent: e === 0 ? -149 : e - 150, negative: (raw >>> 31) !== 0};
-}
-/** Internal exact rational RN00/NI0 fdivs shared with mode1 setup. */
-export function divideSourceAnimationFloat32(a: number, b: number): number {
-  const x = dyadic(a), y = dyadic(b), negative = x.negative !== y.negative;
-  if (y.mantissa === 0n) fail('fdivs zero divisor outside finite domain');
-  if (x.mantissa === 0n) return negative ? -0 : 0;
-  let power = x.mantissa.toString(2).length - y.mantissa.toString(2).length;
-  if (power >= 0 ? x.mantissa < (y.mantissa << BigInt(power)) : (x.mantissa << BigInt(-power)) < y.mantissa) power--;
-  const exponent = x.exponent - y.exponent, quantum = Math.max(-149, power + exponent - 23), shift = exponent - quantum;
-  const numerator = shift >= 0 ? x.mantissa << BigInt(shift) : x.mantissa;
-  const denominator = shift < 0 ? y.mantissa << BigInt(-shift) : y.mantissa;
-  let rounded = numerator / denominator;
-  const twice = (numerator % denominator) * 2n;
-  if (twice > denominator || (twice === denominator && (rounded & 1n) !== 0n)) rounded++;
-  return float((negative ? -1 : 1) * Number(rounded) * 2 ** quantum, 'fdivs result');
-}
 type Owner = 'mapping' | 'feedback' | 'dispatch' | 'setup' | 'attached' | 'metadata' | 'archives' | 'raw';
 type Field = readonly [Owner, string, 'byte' | 'short' | 'float' | 'link'];
 // Each row is one source BE word. No word or padding byte is omitted.
