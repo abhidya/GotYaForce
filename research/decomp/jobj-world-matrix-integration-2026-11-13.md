@@ -346,3 +346,16 @@ This sparse sweep is not enough to infer every interpolation interval or to
 replace the explicit estimate dependency. At norm 1 the observed estimate is
 `0.9998779296875`, not the result of host division. No table or implementation
 was copied from Dolphin source.
+
+### Interval grid
+
+A further isolated Dolphin JIT64 run sampled four interior values in each of
+32 equal intervals spanning norms `[1,2)`. For each point, a float32 quaternion
+`(sqrt(target),0,0,0)` was temporarily injected and restored on return. The
+actual rounded norm and resulting `fres` estimate, as IEEE-754 binary32 hex
+pairs, are in `fres-dolphin-grid-2026-11-18.json`. The target fractions within
+intervals were 0.1, 0.35, 0.65 and 0.9; the file records actual reached norms,
+not those ideal targets. All 128 samples were captured; the separate test
+instance was stopped and the existing Dolphin instance was left untouched.
+These points alone do not establish interpolation boundaries or behavior outside
+this interval, and no estimate implementation is inferred from them yet.
