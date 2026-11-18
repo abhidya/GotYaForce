@@ -193,7 +193,7 @@ import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
 import { HERO_X_BUFF, MELEE } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
-import { spawnRomProjectile } from "./projectiles.js";
+import { isKnownEmptyFireChild, spawnRomProjectile } from "./projectiles.js";
 import { movementPhysicsForBorgId } from "./movementData.js";
 import { sourceStatsForBorgId } from "./sourceBorgStats.js";
 import { tierSizeScale } from "./timescale.js";
@@ -3265,6 +3265,11 @@ export class RomDriverBridge implements RomFamilyDriver {
     const proj = spawnRomProjectile(this.runtime, variant, yawRad);
     if (proj) {
       this.pendingProjectiles.push(proj);
+      this.specialHadEffect = true;
+    } else if (isKnownEmptyFireChild(this.runtime, variant)) {
+      // The source deliberately executed this child opcode but armed no HIT.
+      // Treat it as handled so the host does not latch xImpotent and invent a
+      // generic fallback on later presses. No projectile is created.
       this.specialHadEffect = true;
     }
   }
