@@ -174,6 +174,9 @@ export function runRomCollisionSelfTest(): void {
     t.inputs.p1.attack = true; t.tick(); t.inputs.p1.attack = false;
     assert(t.borg.command?.recordAddress === "0x802d6210" && t.borg.cooldowns["romSpecialActive"] === 1,
       "Kung-Fu Master grounded close-B enters source action1/v0");
+    t.tick();
+    assert(t.borg.anim === "melee" && t.borg.meleeAnimStream !== null,
+      "KFM source stream remains in the renderer's melee-ref lane");
     for (let i = 0; i < 40 && variant < 0; i++) t.tick();
     assert(variant === 16 && emittedKind === 0,
       "real Battle input reaches source slot1 variant16 and creates its kind0 child");
@@ -218,6 +221,8 @@ export function runRomCollisionSelfTest(): void {
     assert(t.borg.command?.recordAddress === "0x802f7b88" && t.borg.cooldowns["romSpecialActive"] === 1,
       "Tao grounded close-B enters source action1/v0");
     t.tick();
+    assert(t.borg.anim === "melee" && t.borg.meleeAnimStream !== null,
+      "Tao source stream remains in the renderer's melee-ref lane");
     assert((t.driver.actor.inputEdge5d4 & 0x40) === 0, "held Tao B is not a retap");
     t.inputs.p1.attack = false;
     for (let i = 0; i < 30 && t.driver.actor.fbPhaseSlots[0] !== 3; i++) t.tick();

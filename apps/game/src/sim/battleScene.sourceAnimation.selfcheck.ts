@@ -73,6 +73,20 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
     const scene = new BattleScene(new THREE.Group(), assets); scenes.push(scene); return scene;
   };
   try {
+    // The martial B route must request its stream clip, not generic attack fallback.
+    for (const id of ["pl0800", "pl0801"]) {
+      const requests: string[] = [];
+      const scene = create({
+        async loadModel() { return model(); },
+        async loadClip() { return clip("fallback"); },
+        async loadClipByStreamRef(borg, ref) { requests.push(`${borg}:g${ref.group}s${ref.slot}`); return clip("source-melee"); },
+      });
+      const melee: BattleActorView = { ...view(0, 0, id), state: "attack", anim: "melee",
+        meleeAnimStream: { group: 3, slot: 1 }, sourceAnimSample: undefined };
+      await enter(scene, melee);
+      assert(requests.includes(`${id}:g3s1`), `${id} melee lane requests its source stream clip`);
+      scene.clear();
+    }
     // The source exporter bakes the part root's bind matrix into mesh coordinates.
     // Synthetic points prove the inverse is applied once and follows the target.
     {

@@ -3201,7 +3201,11 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  borgs and the 24 hand-tuned borgs). */
   private onPlayAnim(group: number, slot: number): void {
     if (this.runtime) {
-      this.runtime.anim = "special";
+      // Grounded KFM/Tao B is melee, not X. The renderer only consumes the
+      // source stream ref for melee/charge/special slots, not generic "attack".
+      const martialMelee = this.specialKind === "b" && this.actor.actionIndex === 1 &&
+        (this.runtime.borgId === "pl0800" || this.runtime.borgId === "pl0801");
+      this.runtime.anim = martialMelee ? "melee" : "special";
       const remapped = this.runtime.borgId
         ? resolveAnimMetaHop(this.runtime.borgId, group, slot)
         : null;
