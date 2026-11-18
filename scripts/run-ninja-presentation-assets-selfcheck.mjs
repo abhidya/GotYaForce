@@ -87,8 +87,7 @@ try {
         const bind = scene.getObjectByName('JOBJ_0');
         let mesh; scene.traverse(node => { if (!mesh && node.isMesh) mesh = node; });
         if (!bind || !mesh) throw Error('Part must contain a root and a mesh');
-        const vertex = new THREE.Vector3().fromBufferAttribute(mesh.geometry.attributes.position, 0).applyMatrix4(mesh.matrixWorld);
-        originalParts.set(String(url), {name: mesh.name, vertex, inverseBind: bind.matrixWorld.clone().invert()});
+        originalParts.set(String(url), {name: mesh.name, meshWorld: mesh.matrixWorld.clone(), inverseBind: bind.matrixWorld.clone().invert()});
         return scene;
       },
       cloneModel(source) { return source.clone(true); },
@@ -105,7 +104,7 @@ try {
     await waitUntil(() => actor()?.actions.idle);
     await waitUntil(() => actor()?.sourceDrawParts?.length === 2);
     if (actor().sourceDrawParts.some(part => !part.visible)) throw Error(`${id}: verified idle parts hidden`);
-    // Compare a real mesh vertex with the exported scene transformed through the
+    // Compare real mesh vertices with the exported scene transformed through the
     // independently calculated bind inverse and the current animated joint.
     // This tests attachment arithmetic, not equality to the original game's matrix.
     const checkAttachment = () => {
@@ -115,9 +114,14 @@ try {
         if (!original) throw Error(`${id}: original part snapshot missing`);
         const mesh = part.getObjectByName(original.name);
         if (!mesh?.isMesh) throw Error(`${id}: attached mesh missing`);
-        const actual = new THREE.Vector3().fromBufferAttribute(mesh.geometry.attributes.position, 0).applyMatrix4(mesh.matrixWorld);
-        const expected = original.vertex.clone().applyMatrix4(original.inverseBind).applyMatrix4(part.parent.matrixWorld);
-        if (actual.distanceTo(expected) > 1e-4) throw Error(`${id}: part ${index} bind attachment mismatch`);
+        const positions = mesh.geometry.attributes.position;
+        const expectedMatrix = part.parent.matrixWorld.clone().multiply(original.inverseBind).multiply(original.meshWorld);
+        const actual = new THREE.Vector3(), expected = new THREE.Vector3();
+        for (let vertex = 0; vertex < positions.count; vertex++) {
+          actual.fromBufferAttribute(positions, vertex).applyMatrix4(mesh.matrixWorld);
+          expected.fromBufferAttribute(positions, vertex).applyMatrix4(expectedMatrix);
+          if (actual.distanceTo(expected) > 1e-4) throw Error(`${id}: part ${index} vertex ${vertex} bind attachment mismatch`);
+        }
       }
     };
     checkAttachment();
@@ -125,6 +129,7 @@ try {
     const movement = {...neutral, state:'move', anim:'move'}; scene.sync([movement]);
     await waitUntil(() => actor()?.actions.move); scene.sync([movement]);
     if (actor().sourceDrawParts.some(part => !part.visible)) throw Error(`${id}: group-0 movement parts hidden`);
+    checkAttachment();
     scene.sync([neutral]); scene.update(.1);
     const jointOrder = [2,3,4,5,6,7,8,9,10,11,12,0,1,13,14,15,16,17,18,19];
     for (const slot of [0, 1]) {
