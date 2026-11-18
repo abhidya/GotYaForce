@@ -62,6 +62,18 @@ export function runRomCollisionSelfTest(): void {
     assert(children.length === 2 && children.every(p => p.romShotKind === 0 && p.life <= 120),
       "source callback creates two decoded-variant children");
   }
+  // An empty source weapon cell must not create the callback's children.
+  {
+    const t = setup(geometry());
+    const cell = t.borg.weaponCells?.[0]; assert(cell, "primary weapon cell exists");
+    Object.assign(cell, {max: 1, cur: 0, refillType: 0, refillParam: 1000, timer: 0});
+    t.borg.ammo = 0;
+    t.inputs.p1.attack = true; t.tick(); t.inputs.p1.attack = false;
+    for (let i = 0; i < 20; i++) t.tick();
+    assert(cell.cur === 0 && t.borg.ammo === 0, "empty weapon stays empty");
+    assert(battleStateForSelfcheck(t.battle).projectiles.every(p => p.ownerUid !== t.borg.uid),
+      "empty Battle input emits no source children");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));
