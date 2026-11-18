@@ -73,6 +73,24 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
     const scene = new BattleScene(new THREE.Group(), assets); scenes.push(scene); return scene;
   };
   try {
+    // Presentation-only fallback: source frame and epoch, not render ticks,
+    // control the temporary G Red fire. It cannot leak into other moves/forms.
+    {
+      const scene = create({ async loadModel() { return model(); }, async loadClip() { return null; } });
+      const fx = () => (scene as unknown as { impactActors: unknown[] }).impactActors.length;
+      const crash = (serial: number, frame: number): BattleActorView => ({
+        ...view(serial, frame, 'pl0615'), meleeAnimStream: {group:4, slot:0},
+      });
+      scene.sync([crash(1, 39)]); const base = fx();
+      scene.sync([crash(1, 40)]); assert(fx() === base + 1, 'G Crash emits fire at active frame');
+      scene.sync([crash(1, 40)]); scene.sync([crash(1, 43)]);
+      assert(fx() === base + 1, 'same held frame/bucket cannot duplicate fire');
+      scene.sync([crash(1, 44)]); assert(fx() === base + 2, 'later source frame emits next fire');
+      scene.sync([crash(2, 40)]); assert(fx() === base + 3, 'new action epoch emits again');
+      scene.sync([{...crash(2, 48), borgId:'pl0000'}]);
+      assert(fx() === base + 3, 'other Borg does not emit G Red fire');
+      scene.sync([crash(2, 64)]); assert(fx() === base + 3, 'fire stops after active window');
+    }
     // The martial B route must request its stream clip, not generic attack fallback.
     for (const id of ["pl0800", "pl0801"]) {
       const requests: string[] = [];
