@@ -2512,6 +2512,10 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.actor.statusWord5b4 = held ? 0x200 : 0;
     if (!getSwitchingXState(this.actor) && !getTeleportXState(this.actor) && !getNinjaXState(this.actor) && !getGRedAirShotState(this.actor) && !getGRedShotState(this.actor) && !getGBlackChargeState(this.actor) && !getGRedChargeState(this.actor) && !getGRedCrashState(this.actor) && !getGRedAirMeleeState(this.actor) && !getNeoGredMeleeState(this.actor) && (this.runtime?.borgId !== "pl0106" || this.actor.actionIndex !== 0))
       this.actor.streamHold1b03 = 0;
+    if (this.runtime?.borgId === "pl0800" && this.specialKind === "b" && this.actor.actionIndex === 1) {
+      // KFM's +5d4 bit40 is a B press edge, not a held button or X.
+      this.actor.inputEdge5d4 = this.neoBPressed ? 0x40 : 0;
+    }
     if (getNeoGredMeleeState(this.actor) || getGRedAirMeleeState(this.actor)) {
       // Descriptor802d3904 count1/flags0/duration1/mask0200 consumes B's
       // rising edge, emitting5d4bit40 in this same update. Holding never retaps.
@@ -2989,7 +2993,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     input: PlayerInput | null = null,
     onMineReceiverMelee?: (attack: MineReceiverMeleeAttack) => void,
   ): boolean {
-    if (runtime.borgId === "pl0615" || runtime.borgId === "pl0629" || runtime.borgId === "pl062a") {
+    if (runtime.borgId === "pl0615" || runtime.borgId === "pl0629" || runtime.borgId === "pl062a" || runtime.borgId === "pl0800") {
       const held = input?.attack ?? false;
       this.neoBPressed = held && !this.neoBWasHeld;
       this.neoBWasHeld = held;
