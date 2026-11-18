@@ -379,8 +379,8 @@ export interface BorgRuntime {
   sourceAnimSample?: { serial: number; frame: number;
     /** Ninja X/recovery target models only, not the previous or active draw state. */
     targetDrawModels?: readonly [number, number];
-    /** Only Ninja's admitted mode-1 clock is published here. This is source
-     * timing, not a claim that the renderer owns or blends source poses. */
+    /** Ninja's admitted mode-1 clock drives a rendered-pose blend. The renderer
+     * does not own the original source pose banks or claim visual parity. */
     blend?: { mode: 1; elapsed: number; duration: number;
       /** Source fsubs(1, fdivs(elapsed, duration)): weight of saved pose. */
       previousWeight: number;

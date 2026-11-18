@@ -93,7 +93,10 @@ try {
     const neutral = view(id); scene.sync([neutral]);
     const actor = () => scene.actors.get('actor');
     await waitUntil(() => actor()?.ready); scene.sync([neutral]);
-    await waitUntil(() => actor()?.actions.idle); scene.update(.1);
+    await waitUntil(() => actor()?.actions.idle);
+    await waitUntil(() => actor()?.sourceDrawParts?.length === 2);
+    if (actor().sourceDrawParts.some(part => !part.visible)) throw Error(`${id}: verified idle parts hidden`);
+    scene.update(.1);
     const jointOrder = [2,3,4,5,6,7,8,9,10,11,12,0,1,13,14,15,16,17,18,19];
     for (const slot of [0, 1]) {
       for (let elapsed = 1; elapsed < 7; elapsed++) {
@@ -104,7 +107,7 @@ try {
         await waitUntil(() => actor()?.sourceAnimAction?.getClip().name === `${id}mot_g4s${slot}_m0`);
         scene.update(1/60);
         await waitUntil(() => actor()?.sourceDrawParts?.length === 2);
-        if (actor().sourceDrawParts.some(part => part.visible !== (slot > 0 || elapsed >= 4))) throw Error(`${id}: wrong source part threshold`);
+        if (actor().sourceDrawParts.some(part => part.visible !== true)) throw Error(`${id}: verified idle parts should remain through X`);
         for (const part of actor().sourceDrawParts) {const bounds = new THREE.Box3().setFromObject(part); if (bounds.isEmpty() || ![bounds.min.x,bounds.min.y,bounds.min.z,bounds.max.x,bounds.max.y,bounds.max.z].every(Number.isFinite)) throw Error(`${id}: invalid part geometry bounds`);}
         if (actor().sourceBlendPose?.length !== 20) throw Error(`${id} slot ${slot}: saved pose missing`);
         for (const joint of actor().sourceBlendPose) {
