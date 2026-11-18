@@ -1,3 +1,4 @@
+import {createSourceAnimationPoseRuntime} from './animation-pose-runtime.js';
 import {createSourceAnimationArchiveHydrationRuntime, type SourceAnimationArchiveHydrationLimits, type SourceAnimationArchiveHydrationRuntime} from './animation-archive-hydration.js';
 import {createSourceArchivePublicRuntime} from './archive-public.js';
 import {createSourceArchiveJointSetupRuntime} from './archive-joint-setup.js';
@@ -74,6 +75,20 @@ function owners(limits: SourceAnimationArchiveHydrationLimits = {}) {
     sources, archiveAdapter, dataAdapter, setupAdapter};
 }
 export function runAnimationArchiveHydrationSelfTest(): void {
+  // Exercise the composed production owners from bare DAT to joint scalars.
+  {const p = createSourceAnimationPoseRuntime(), d = dat();
+    d.dataWord(0x3c, 5); d.dataWord(0x50, 5); // Both tracks share a complete linear stream.
+    d.bytes.set([2, 10, 4, 2, 18], 0x80);
+    d.bytes[0x65] = d.bytes[0x66] = d.bytes[0x79] = d.bytes[0x7a] = 0x80;
+    const imported = p.hydrate(d.bytes, [0]);
+    const joint = p.createJoint({sibling08: null, child10: null, flags14: 0,
+      rotation1c: 0, rotation20: 0, rotation24: 0, scale2c: 1, scale30: 1, scale34: 1,
+      translation38: 0, translation3c: 0, translation40: 0},
+      {parent0c: null, aobj7c: null, robj80: null, dobj18: null, classUpdate50: null});
+    p.attach(joint, imported.roots[0]!.descriptor); p.request(joint, 2); p.animate(joint);
+    check(p.getJoint(joint).translation38 === 14 && p.getJoint(joint).translation3c === 14,
+      'composed DAT playback routes both decoded tracks to their owned joint');
+  }
   {const x = owners(), d = dat(), result = x.runtime.hydrateAnimationArchive(d.bytes, [0, 1, 2]);
     check(Object.isFrozen(result) && Object.isFrozen(result.roots) && Object.isFrozen(result.roots[0]), 'frozen import report');
     check(result.roots.length === 3 && result.aobjDescriptors.length === 1 && result.fobjDescriptors.length === 2 && result.packedData.length === 1, 'actual counts and exact aliases');
