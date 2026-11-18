@@ -122,3 +122,25 @@ test("running battle retains delta clamp and supports absent session during tran
   const f = fixture(); f.frame(2); close(f.action.time, 0.05);
   f.context.session = null; f.frame(); close(f.action.time, 0.05 + 1 / 60);
 });
+
+test("audio snapshot reads one coherent battle observation per step", () => {
+  const file = parse("../apps/game/src/sim/presentation.ts");
+  const fn = file.statements.find(n => ts.isFunctionDeclaration(n) && n.name?.text === "snapshotBattleAudio");
+  assert.ok(fn, "production snapshotBattleAudio must exist");
+  const js = ts.transpileModule(`const LOW_ENERGY_ALERT_FRACTION = 0.25;\n${fn.getText(file).replace(/^export\s+/, "")}\nglobalThis.snapshot = snapshotBattleAudio;`, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
+  }).outputText;
+  const context = {}; vm.createContext(context); vm.runInContext(js, context);
+  let calls = 0;
+  const battle = { observe() { calls++; return {
+    actors: [{ uid: "p1", borgId: "pl0615", hp: 10, alive: true, state: "idle", anim: "idle", lockTarget: null, allyLockTarget: null, cooldowns: { chargeFrames: 8 } }],
+    energy: { 0: 20 }, activeUidByPlayer: { player: "p1" },
+  }; } };
+  const result = context.snapshot(battle, "player", 100, () => ({ shot: { chargeable: true, chargeTier1Frames: 10, chargeTier2Frames: 20 } }));
+  assert.equal(calls, 1);
+  assert.equal(result.localActiveUid, "p1"); assert.equal(result.allyAlert, true);
+  assert.equal(result.borgs.get("p1").chargeFrames, 8);
+  assert.equal(result.localChargeTier1, 10); assert.equal(result.localChargeTier2, 20);
+  const noLocal = context.snapshot(battle, "missing", 100);
+  assert.equal(calls, 2); assert.equal(noLocal.localActiveUid, null); assert.equal(noLocal.localChargeTier1, 0);
+});
