@@ -12,6 +12,7 @@
 
 import * as THREE from "three";
 import { hsdJointsInTraversalOrder } from "@gf/render";
+import { attachSourceDrawPart } from "./sourceDrawPart.js";
 import type {
   Battle,
   BattleProjectileObservation,
@@ -20,7 +21,7 @@ import type {
   RevolverLaunchFlashObservation,
   ProjectileVisualKind,
 } from "@gf/combat";
-import { MUZZLE_OFFSET, SHOT } from "@gf/combat";
+import { MUZZLE_OFFSET, SHOT, sourceBlendQuaternion, sourceReciprocalSqrtEstimate, addSourceFloat32 } from "@gf/combat";
 import {
   ARROW_MDL_BOUNDS,
   ARROW_MDL_INDICES,
@@ -41,6 +42,8 @@ import {
 export interface BorgAssets {
   /** Resolve a cloneable source model for a borg id (cached upstream). */
   loadModel(borgId: string): Promise<THREE.Object3D>;
+  /** Optional exact-source part export, currently limited to Ninja model 1/7. */
+  loadSourceDrawPart?(borgId: string, index: number): Promise<THREE.Object3D>;
   /** Resolve a baked AnimationClip for (borgId, slot). Null if unavailable. */
   loadClip(borgId: string, slot: AnimSlot): Promise<THREE.AnimationClip | null>;
   /**
@@ -89,6 +92,8 @@ export type AnimSlot =
   | "spawn"
   | "victory";
 
+type SavedBlendJoint = { node: THREE.Object3D; position: THREE.Vector3; quaternion: THREE.Quaternion; rawPosition: THREE.Vector3; rawQuaternion: THREE.Quaternion };
+
 interface Actor {
   group: THREE.Group;
   borgId: string;
@@ -128,6 +133,12 @@ interface Actor {
   sourceAnimSample: BattleActorView["sourceAnimSample"];
   /** Only an exact stream action can be owned by the simulation playhead. */
   sourceAnimAction: THREE.AnimationAction | null;
+  /** Render-pose snapshot, not the original source pose bank. */
+  sourceBlendPose: SavedBlendJoint[] | null;
+  sourcePoseTracks: Array<{ binding: ReturnType<typeof THREE.PropertyBinding.create>; interpolant: THREE.Interpolant }> | null;
+  sourceDrawParts: THREE.Group[] | null;
+  sourceDrawPending: boolean;
+  sourceDrawTargetKnown: boolean;
   /** True once the (async) model has been attached. */
   ready: boolean;
   isPlaceholder: boolean;
@@ -961,7 +972,9 @@ export class BattleScene {
   /** Advance all per-actor animation mixers. */
   update(dt: number): void {
     for (const actor of this.actors.values()) {
+      this.restoreUnblendedSourcePose(actor);
       actor.mixer?.update(dt);
+      this.applySavedSourcePose(actor);
       // Spin the charge aura spiral in the view plane so the swirl reads as building energy.
       if (actor.chargeGlow?.sprite.visible) {
         actor.chargeGlow.material.rotation += dt * CHARGE_GLOW_SPIN_RAD_PER_S;
@@ -1075,6 +1088,11 @@ export class BattleScene {
       animationRevision: 0,
       sourceAnimSample: null,
       sourceAnimAction: null,
+      sourceBlendPose: null,
+      sourcePoseTracks: null,
+      sourceDrawParts: null,
+      sourceDrawPending: false,
+      sourceDrawTargetKnown: false,
       ready: false,
       isPlaceholder: true,
       chargeGlow: null,
@@ -1222,6 +1240,11 @@ export class BattleScene {
     actor.animationRevision += 1;
     actor.sourceAnimSample = null;
     actor.sourceAnimAction = null;
+    actor.sourceBlendPose = null;
+    actor.sourcePoseTracks = null;
+    actor.sourceDrawParts = null;
+    actor.sourceDrawPending = false;
+    actor.sourceDrawTargetKnown = false;
     actor.ready = false;
     actor.isPlaceholder = true;
   }
@@ -1275,10 +1298,24 @@ export class BattleScene {
     const clipKey = streamKey ?? slot;
     const sample = streamKey && sourceAnimSample ? sourceAnimSample : null;
     const sameEpoch = actor.sourceAnimSample?.serial === sample?.serial;
+    if (!sameEpoch) {
+      // Capture before changing actions; interrupted transitions capture the displayed pose.
+      const joints = actor.model && sample?.blend ? hsdJointsInTraversalOrder(actor.model) : [];
+      const selected = sample?.blend?.jointIndices;
+      actor.sourceBlendPose = selected && selected.every(index => joints[index])
+        ? selected.map(index => ({ node: joints[index]!, position: joints[index]!.position.clone(),
+            quaternion: joints[index]!.quaternion.clone(), rawPosition: joints[index]!.position.clone(),
+            rawQuaternion: joints[index]!.quaternion.clone() })) : null;
+    } else if (!sample?.blend) {
+      this.restoreUnblendedSourcePose(actor);
+      actor.sourceBlendPose = null;
+      actor.sourcePoseTracks = null;
+    }
     // Copy the newest sample even when this clip is cached or still loading. A held
     // source frame must never inherit mixer/render time, and a repeated same-clip
     // animation start must bypass the ordinary unchanged-slot short circuit.
-    actor.sourceAnimSample = sample ? { serial: sample.serial, frame: sample.frame } : null;
+    actor.sourceAnimSample = sample ? { ...sample, ...(sample.targetDrawModels ? { targetDrawModels: [...sample.targetDrawModels] as const } : {}), ...(sample.blend ? { blend: { ...sample.blend, jointIndices: [...sample.blend.jointIndices] } } : {}) } : null;
+    this.syncSourceDrawParts(actor, sample, slot);
     if (actor.current === slot && actor.lastMeleeClipKey === clipKey && sameEpoch) {
       this.applySourceAnimSample(actor);
       return;
@@ -1297,7 +1334,7 @@ export class BattleScene {
     if (streamKey) {
       const existingStream = actor.streamActions[streamKey];
       if (existingStream) {
-        this.crossfadeTo(actor, existingStream, slot);
+        this.crossfadeTo(actor, existingStream, slot, true);
         this.ownSourceAnimAction(actor, existingStream);
         return;
       }
@@ -1309,7 +1346,7 @@ export class BattleScene {
           if (clip) {
             const action = mixer.clipAction(clip);
             actor.streamActions[streamKey] = action;
-            this.crossfadeTo(actor, action, slot);
+            this.crossfadeTo(actor, action, slot, true);
             this.ownSourceAnimAction(actor, action);
             return;
           }
@@ -1357,6 +1394,51 @@ export class BattleScene {
       const action = mixer.clipAction(clip);
       actor.actions[slot] = action;
       this.crossfadeTo(actor, action, slot);
+      this.syncSourceDrawParts(actor, actor.sourceAnimSample, slot);
+    });
+  }
+
+  /** Ninja X/recovery target parts only. Previous unknown selections stay hidden
+   * until the source threshold reaches the known target; masks and source matrix
+   * parity remain unmodeled. Late loads cannot revive a retired presentation. */
+  private syncSourceDrawParts(actor: Actor, sample: BattleActorView["sourceAnimSample"], slot: AnimSlot): void {
+    // All 26 verified group-0 metadata entries request the same defaults.
+    // Only use a loaded exact group-0 baked clip when no source stream owns it.
+    const clipName = actor.actions[slot]?.getClip().name ?? "";
+    const match = !sample && clipName.match(new RegExp(`^${actor.borgId}mot_g0s(\\d+)_m0$`));
+    const knownGroupZero = !!match && Number(match[1]) <= 25;
+    const requested = sample?.targetDrawModels ?? (knownGroupZero ? [1, 7] as const : undefined);
+    const models = (actor.borgId === "pl0000" || actor.borgId === "pl000a") && requested?.[0] === 1 && requested[1] === 7 ? requested : undefined;
+    // The verified ground recovery enters the same default idle target.
+    const knownIdle = !models && slot === "idle" && actor.sourceDrawTargetKnown;
+    if (!models && !knownIdle) actor.sourceDrawTargetKnown = false;
+    else if (models) {
+      if (knownGroupZero || !sample?.blend || sample.blend.previousWeight <= 0.5) actor.sourceDrawTargetKnown = true;
+    }
+    for (const part of actor.sourceDrawParts ?? []) part.visible = (!!models || knownIdle) && actor.sourceDrawTargetKnown;
+    const load = this.assets.loadSourceDrawPart, model = actor.model;
+    if (!models || !load || !model || actor.sourceDrawParts || actor.sourceDrawPending) return;
+    const revision = actor.modelRevision, joints = hsdJointsInTraversalOrder(model);
+    if (joints.length !== 20 || !joints[7] || !joints[11]) return;
+    actor.sourceDrawPending = true;
+    void Promise.allSettled(models.map(index => load.call(this.assets, actor.borgId, index))).then(results => {
+      const values = results.filter((r): r is PromiseFulfilledResult<THREE.Object3D> => r.status === 'fulfilled').map(r => r.value);
+      if (actor.modelRevision !== revision || actor.model !== model) { values.forEach(disposeMesh); return; }
+      actor.sourceDrawPending = false;
+      const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+      if (failed || values.length !== 2) { values.forEach(disposeMesh); throw failed?.reason ?? new Error('Source draw part load incomplete'); }
+      const attached: THREE.Group[] = [];
+      try {
+        attached.push(attachSourceDrawPart(joints[7]!, values[0]!));
+        attached.push(attachSourceDrawPart(joints[11]!, values[1]!));
+      } catch (error) {
+        attached.forEach(part => part.removeFromParent()); values.forEach(disposeMesh); throw error;
+      }
+      actor.sourceDrawParts = attached;
+      // The actor may have changed clips while the parts loaded. Re-evaluate the
+      // current selection, including verified group-zero movement clips.
+      if (actor.current) this.syncSourceDrawParts(actor, actor.sourceAnimSample, actor.current);
+      else attached.forEach(part => { part.visible = false; });
     });
   }
 
@@ -1364,6 +1446,9 @@ export class BattleScene {
   private ownSourceAnimAction(actor: Actor, action: THREE.AnimationAction): void {
     if (!actor.sourceAnimSample) return;
     actor.sourceAnimAction = action;
+    actor.sourcePoseTracks = actor.sourceBlendPose && actor.model
+      ? action.getClip().tracks.map(track => ({ binding: THREE.PropertyBinding.create(actor.model!, track.name), interpolant: track.createInterpolant() }))
+      : null;
     this.applySourceAnimSample(actor);
   }
 
@@ -1381,13 +1466,46 @@ export class BattleScene {
     const lower = Math.floor(frame);
     const upper = Math.min(lower + 1, times.length - 1);
     action.time = times[lower]! + (times[upper]! - times[lower]!) * (frame - lower);
-    // Pausing this action preserves its sampled pose while allowing the existing
-    // cosmetic mixer crossfade to finish. This is not original bone-blend parity.
+    // Pause the action at the source frame. Ninja may use a saved rendered pose;
+    // other actions retain the cosmetic mixer crossfade. Neither is source-bank parity.
     action.paused = true;
+    this.restoreUnblendedSourcePose(actor);
     actor.mixer?.update(0);
+    this.applySavedSourcePose(actor);
   }
 
-  private crossfadeTo(actor: Actor, action: THREE.AnimationAction, slot: AnimSlot): void {
+  private restoreUnblendedSourcePose(actor: Actor): void {
+    if (!actor.sourceAnimAction || !actor.sourceBlendPose) return;
+    for (const joint of actor.sourceBlendPose) {
+      joint.node.position.copy(joint.rawPosition);
+      joint.node.quaternion.copy(joint.rawQuaternion);
+    }
+  }
+
+  /** Apply source-timed math to baked/rendered poses. These are not original
+   * source banks, and visibility and baked/root-motion differences remain. */
+  private applySavedSourcePose(actor: Actor): void {
+    const weight = actor.sourceAnimSample?.blend?.previousWeight;
+    if (!actor.sourceAnimAction || !actor.sourceBlendPose || weight === undefined) return;
+    // PropertyMixer skips unchanged cached values, even if our previous blend
+    // changed the actual node. Re-evaluate the exact clip into its bindings.
+    for (const track of actor.sourcePoseTracks ?? [])
+      track.binding.setValue(track.interpolant.evaluate(actor.sourceAnimAction.time), 0);
+    const f = Math.fround, other = addSourceFloat32(1, -weight);
+    for (const { node, position, quaternion, rawPosition, rawQuaternion } of actor.sourceBlendPose) {
+      rawPosition.copy(node.position); rawQuaternion.copy(node.quaternion);
+      const current = node.position;
+      current.set(addSourceFloat32(f(f(current.x) * other), f(f(position.x) * weight)),
+        addSourceFloat32(f(f(current.y) * other), f(f(position.y) * weight)),
+        addSourceFloat32(f(f(current.z) * other), f(f(position.z) * weight)));
+      const q = node.quaternion;
+      const blended = sourceBlendQuaternion([f(q.x), f(q.y), f(q.z), f(q.w)],
+        [f(quaternion.x), f(quaternion.y), f(quaternion.z), f(quaternion.w)], weight, sourceReciprocalSqrtEstimate);
+      q.set(...blended);
+    }
+  }
+
+  private crossfadeTo(actor: Actor, action: THREE.AnimationAction, slot: AnimSlot, exactStream = false): void {
     const looping = slot === "idle" || slot === "move" || slot === "fly";
     action
       .reset()
@@ -1406,7 +1524,9 @@ export class BattleScene {
     // static bind/end-pose blend ("T-posing"). fadeOut works on paused actions (the weight
     // interpolant advances on mixer time), and three.js disables the action once the fade
     // reaches 0.
+    const useSavedPose = exactStream && actor.sourceBlendPose && actor.sourceAnimSample?.blend;
     const fadeOther = (a: THREE.AnimationAction): void => {
+      if (useSavedPose) { a.stop(); return; }
       if (a.isRunning()) a.crossFadeTo(action, SLOT_CROSSFADE_SECONDS, false);
       else if (a.getEffectiveWeight() > 0) a.fadeOut(SLOT_CROSSFADE_SECONDS);
     };

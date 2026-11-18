@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { attachSourceDrawPart } from "./sourceDrawPart.js";
 import { BattleScene, type BorgAssets } from "./battleScene.js";
 import type { BattleActorView } from "./battleView.js";
 
@@ -44,6 +45,7 @@ type ActorState = {
   streamActions: Record<string, THREE.AnimationAction>;
   sourceAnimSample: BattleActorView["sourceAnimSample"];
   sourceAnimAction: THREE.AnimationAction | null;
+  sourceDrawParts: THREE.Group[] | null;
 };
 
 function actors(scene: BattleScene): Map<string, ActorState> {
@@ -71,6 +73,173 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
     const scene = new BattleScene(new THREE.Group(), assets); scenes.push(scene); return scene;
   };
   try {
+    // The source exporter bakes the part root's bind matrix into mesh coordinates.
+    // Synthetic points prove the inverse is applied once and follows the target.
+    {
+      const target = new THREE.Group(); target.position.set(10, 20, 0);
+      const part = new THREE.Group(); const bind = new THREE.Group(); bind.name = 'JOBJ_0'; bind.position.set(5, 2, 0);
+      const vertex = new THREE.Object3D(); vertex.position.set(7, 3, 0); part.add(bind, vertex);
+      const attached = attachSourceDrawPart(target, part); target.updateMatrixWorld(true);
+      const world = new THREE.Vector3(); vertex.getWorldPosition(world);
+      near(world.x, 12, 'attachment removes exported bind translation');
+      near(world.y, 21, 'attachment keeps local geometry offset');
+      target.position.x = 30; target.updateMatrixWorld(true); vertex.getWorldPosition(world);
+      near(world.x, 32, 'attachment follows animated target');
+      target.rotation.z = Math.PI / 2; target.updateMatrixWorld(true); vertex.getWorldPosition(world);
+      near(world.x, 29, 'attachment follows target rotation x');
+      near(world.y, 22, 'attachment follows target rotation y');
+      target.remove(attached);
+      const invalid = new THREE.Group();
+      let refused = false; try { attachSourceDrawPart(target, invalid); } catch { refused = true; }
+      assert(refused && invalid.parent === null, 'invalid part is rejected without reparenting');
+      const singular = new THREE.Group(), root = new THREE.Group(); root.name = 'JOBJ_0'; root.scale.x = 0; singular.add(root);
+      refused = false; try { attachSourceDrawPart(target, singular); } catch { refused = true; }
+      assert(refused && singular.parent === null, 'singular bind is rejected without reparenting');
+    }
+    // The live presentation retains (but does not yet render from) the Ninja
+    // source-owned mode-1 clock and does not alias the caller's mutable sample.
+    {
+      const scene = create({
+        async loadModel() { return model(); },
+        async loadClip() { return clip('generic'); },
+        async loadClipByStreamRef() { return clip('ninja'); },
+      });
+      const blend = { mode: 1 as const, elapsed: 2, duration: 7, previousWeight: Math.fround(5 / 7), jointIndices: [2, 3, 0] };
+      const sample: BattleActorView = { ...view(99, 0, 'pl0000'),
+        sourceAnimSample: { serial: 99, frame: 0, blend, targetDrawModels: [1, 7] } };
+      await enter(scene, sample);
+      assert(actor(scene).sourceAnimSample?.blend?.elapsed === 2, 'source blend clock reaches the live actor');
+      assert(actor(scene).sourceAnimSample?.targetDrawModels?.join(',') === '1,7', 'target models reach presentation');
+      blend.elapsed = 5;
+      blend.jointIndices[0] = 99;
+      assert(actor(scene).sourceAnimSample?.blend?.jointIndices[0] === 2, 'live actor copies the selected joints');
+      assert(actor(scene).sourceAnimSample?.blend?.elapsed === 2, 'live actor copies the blend sample');
+      scene.clear();
+    }
+
+    // Source-timed pose blending uses a saved rendered pose, not the original
+    // source pose bank. Synthetic hierarchy tests non-accumulation and exit.
+    {
+      let releaseClip: ((value: THREE.AnimationClip) => void) | undefined;
+      const scene = create({
+        async loadModel() {
+          const root = new THREE.Group(), joint0 = new THREE.Group(); joint0.name = 'JOBJ_0'; root.add(joint0);
+          for (let i = 1; i < 20; i++) { const joint = new THREE.Group(); joint.name = `JOBJ_${i}`; joint0.add(joint); }
+          return root;
+        },
+        async loadClip() { return clip('idle'); },
+        async loadClipByStreamRef(_id, ref) {
+          if (ref.slot === 1) return new Promise<THREE.AnimationClip>(resolve => { releaseClip = resolve; });
+          const result = clip('ninja');
+          result.tracks.push(new THREE.QuaternionKeyframeTrack('JOBJ_1.quaternion', [0, 1], [0, 0, 1, 0, 0, 0, 1, 0]));
+          return result;
+        },
+      });
+      const neutral: BattleActorView = { ...view(1, 0, 'pl0000'), state: 'idle', anim: 'idle', meleeAnimStream: null, sourceAnimSample: null };
+      await enter(scene, neutral);
+      const modelRoot = actor(scene).model!;
+      const moving = modelRoot.getObjectByName('JOBJ_1')!, untouched = modelRoot.getObjectByName('JOBJ_2')!;
+      moving.position.x = 10; untouched.position.x = 7;
+      const joints = [2,3,4,5,6,7,8,9,10,11,12,0,1,13,14,15,16,17,18,19];
+      const make = (weight: number): BattleActorView => ({ ...view(8, 0, 'pl0000', 0),
+        sourceAnimSample: { serial: 8, frame: 0, blend: {mode: 1, elapsed: 1, duration: 2,
+          previousWeight: weight, jointIndices: joints} } });
+      await enter(scene, make(.5));
+      near(moving.position.x, 5, 'source weight blends saved and sampled poses');
+      near(moving.quaternion.z, Math.SQRT1_2, 'source blend interpolates rotation');
+      near(moving.quaternion.w, Math.SQRT1_2, 'source blend preserves quaternion hemisphere');
+      near(untouched.position.x, 7, 'unanimated joint stays fixed');
+      for (let i = 0; i < 4; i++) { scene.update(.1); near(moving.position.x, 5, 'render ticks do not accumulate'); }
+      scene.sync([make(.25)]); near(moving.position.x, 2.5, 'new source weight replaces previous blend');
+      const prior = make(.5);
+      const interrupted: BattleActorView = { ...prior, sourceAnimSample: { ...prior.sourceAnimSample!, serial: 9 } };
+      scene.sync([interrupted]); near(moving.position.x, 1.25, 'new epoch captures interrupted visible pose');
+      scene.sync([{ ...interrupted, sourceAnimSample: {serial: 9, frame: 0, blend: null} }]);
+      near(moving.position.x, 0, 'blend completion restores current sample');
+      moving.position.x = 8;
+      const delayed = make(.5);
+      scene.sync([{...delayed, meleeAnimStream: {group: 0, slot: 1},
+        sourceAnimSample: {...delayed.sourceAnimSample!, serial: 10}}]);
+      assert(releaseClip, 'new exact clip is pending');
+      moving.position.x = 20; // Rendering continued while the new clip loaded.
+      releaseClip(clip('delayed')); await flush();
+      near(moving.position.x, 4, 'deferred load uses pose captured at transition start');
+      scene.clear();
+    }
+
+    // Two source-selected Ninja parts attach only after the known-target
+    // threshold, remain across a same-target restart, and hide on source exit.
+    {
+      const pending: Array<(part: THREE.Object3D) => void> = [];
+      const scene = create({
+        async loadModel() {
+          const model = new THREE.Group(), root = new THREE.Group(); root.name = 'JOBJ_0'; model.add(root);
+          for (let i = 1; i < 20; i++) { const joint = new THREE.Group(); joint.name = `JOBJ_${i}`; root.add(joint); }
+          return model;
+        },
+        async loadClip() { return clip('idle'); },
+        async loadClipByStreamRef() { return clip('ninja'); },
+        loadSourceDrawPart() { return new Promise(resolve => pending.push(resolve)); },
+      });
+      const neutral: BattleActorView = {...view(1, 0, 'pl0000'), state: 'idle', anim: 'idle', meleeAnimStream: null, sourceAnimSample: null};
+      await enter(scene, neutral);
+      const joints = [2,3,4,5,6,7,8,9,10,11,12,0,1,13,14,15,16,17,18,19];
+      const sample = (serial: number, previousWeight: number): BattleActorView => ({...view(serial, 0, 'pl0000', 0),
+        sourceAnimSample: {serial, frame: 0, targetDrawModels: [1,7], blend: {mode:1, elapsed: 1, duration: 7, previousWeight, jointIndices: joints}}});
+      scene.sync([sample(9, .75)]); await flush();
+      assert(pending.length === 2, 'source parts load once');
+      for (const resolve of pending) { const part = new THREE.Group(), root = new THREE.Group(); root.name = 'JOBJ_0'; part.add(root); resolve(part); }
+      await flush(); await flush();
+      const parts = actor(scene).sourceDrawParts;
+      assert(parts?.length === 2 && parts.every(part => !part.visible), 'unknown previous selection stays hidden');
+      assert(parts[0]!.parent?.name === 'JOBJ_7' && parts[1]!.parent?.name === 'JOBJ_11', 'parts attach to source-selected joints');
+      scene.sync([sample(9, .5)]);
+      assert(parts.every(part => part.visible), 'target parts appear at source threshold');
+      scene.sync([sample(10, .75)]);
+      assert(parts.every(part => part.visible), 'known same target survives recovery transition');
+      scene.sync([neutral]);
+      assert(parts.every(part => part.visible), 'known recovery target remains through idle');
+      scene.sync([{...neutral, state: 'hit', anim: 'hit'}]);
+      assert(parts.every(part => !part.visible), 'parts hide when source target is no longer known');
+      scene.clear();
+    }
+    // A part load completing during verified movement must use the current clip,
+    // not the idle/source-only state that existed when the request began.
+    {
+      const pending: Array<(part: THREE.Object3D) => void> = [];
+      const scene = create({
+        async loadModel() { const m = new THREE.Group(), r = new THREE.Group(); r.name = 'JOBJ_0'; m.add(r); for (let i=1;i<20;i++){const n=new THREE.Group(); n.name=`JOBJ_${i}`; r.add(n);} return m; },
+        async loadClip(_id, slot) { return clip(`pl0000mot_g0s${slot === 'move' ? 1 : 0}_m0`); },
+        loadSourceDrawPart() { return new Promise(resolve => pending.push(resolve)); },
+      });
+      const neutral: BattleActorView = {...view(1, 0, 'pl0000'), state:'idle', anim:'idle', meleeAnimStream:null, sourceAnimSample:null};
+      await enter(scene, neutral);
+      const movement: BattleActorView = {...neutral, state:'move', anim:'move'};
+      scene.sync([movement]); await flush();
+      assert(pending.length === 2, 'movement part loads started');
+      for (const resolve of pending) {const p=new THREE.Group(), r=new THREE.Group(); r.name='JOBJ_0'; p.add(r); resolve(p);}
+      await flush(); await flush();
+      assert(actor(scene).sourceDrawParts?.every(part => part.visible), 'late parts appear immediately during verified movement');
+      scene.clear();
+    }
+    // Stale async part loads cannot attach to a cleared presentation.
+    {
+      const pending: Array<(part: THREE.Object3D) => void> = [];
+      let disposed = 0;
+      const scene = create({
+        async loadModel() { const m = new THREE.Group(), r = new THREE.Group(); r.name = 'JOBJ_0'; m.add(r); for (let i=1;i<20;i++){const n=new THREE.Group(); n.name=`JOBJ_${i}`; r.add(n);} return m; },
+        async loadClip() { return clip('idle'); }, async loadClipByStreamRef() { return clip('ninja'); },
+        loadSourceDrawPart() { return new Promise(resolve => pending.push(resolve)); },
+      });
+      const neutral: BattleActorView = {...view(1, 0, 'pl0000'), state:'idle', anim:'idle', meleeAnimStream:null, sourceAnimSample:null};
+      await enter(scene, neutral);
+      scene.sync([{...view(11, 0, 'pl0000', 0), sourceAnimSample:{serial:11,frame:0,targetDrawModels:[1,7],blend:null}}]);
+      assert(pending.length === 2, 'stale part loads started'); scene.clear();
+      for (const resolve of pending) {const p=new THREE.Group(), r=new THREE.Group();r.name='JOBJ_0';p.add(r);const geo=new THREE.BufferGeometry();geo.addEventListener('dispose',()=>disposed++);p.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial()));resolve(p);}
+      await flush(); await flush();
+      assert(disposed === 2 && actors(scene).size === 0, 'stale part resources are disposed');
+    }
+
     // Neutral-combo and family airborne B refs after the metadata hop. Synthetic clips
     // test pose ownership, not original asset fidelity or crossfade equivalence.
     for (const [id, slots] of [

@@ -17,6 +17,8 @@ const result = await build({
   },
   bundle: true,
   platform: "node",
+  // Workspace packages expose their TypeScript sources under this condition.
+  conditions: ["development"],
   format: "esm",
   write: false,
   logLevel: "warning",

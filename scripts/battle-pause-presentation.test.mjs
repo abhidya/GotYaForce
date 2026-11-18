@@ -19,6 +19,11 @@ const sceneFile = parse("../apps/game/src/sim/battleScene.ts");
 const sceneClass = sceneFile.statements.find(n => ts.isClassDeclaration(n) && n.name?.text === "BattleScene");
 const update = sceneClass?.members.find(n => ts.isMethodDeclaration(n) && n.name.getText(sceneFile) === "update");
 assert.ok(update, "production BattleScene.update must exist");
+const blendHelpers = ["restoreUnblendedSourcePose", "applySavedSourcePose"].map(name => {
+  const method = sceneClass?.members.find(n => ts.isMethodDeclaration(n) && n.name.getText(sceneFile) === name);
+  assert.ok(method, `production ${name} must exist`);
+  return method.getText(sceneFile);
+});
 function constant(file, name) {
   const declaration = file.statements.flatMap(n => ts.isVariableStatement(n) ? [...n.declarationList.declarations] : [])
     .find(n => n.name.getText(file) === name);
@@ -28,7 +33,7 @@ function constant(file, name) {
 const constants = [constant(main, "RENDER_MAX_DELTA_SECONDS"),
   ...["CHARGE_GLOW_SPIN_RAD_PER_S", "ENEMY_RETICLE_SPIN_RAD_PER_S", "ALLY_MARKER_SPIN_RAD_PER_S"]
     .map(name => constant(sceneFile, name))].join("\n");
-const emitted = ts.transpileModule(`${constants}\n${tick.getText(main)}\nclass SceneClock { ${update.getText(sceneFile)} }\nglobalThis.SceneClock = SceneClock;`, {
+const emitted = ts.transpileModule(`${constants}\n${tick.getText(main)}\nclass SceneClock { ${update.getText(sceneFile)} ${blendHelpers.join("\n")} }\nglobalThis.SceneClock = SceneClock;`, {
   compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None }, reportDiagnostics: true,
 });
 assert.deepEqual(emitted.diagnostics, []);

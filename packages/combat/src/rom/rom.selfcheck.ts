@@ -1,3 +1,11 @@
+import {runSourceQuaternionSlerpSelfTest} from './source-quaternion-slerp.selftest.js';
+import {runSourceSlerpWeightsSelfTest} from './source-quaternion-slerp-weights.selftest.js';
+import {runSourceAngleReductionSelfTest} from './source-angle-reduction.selftest.js';
+import {runSourceCosineKernelSelfTest} from './source-cosine.selftest.js';
+import {runSourceSineKernelSelfTest} from './source-sine.selftest.js';
+import {runJObjAddAnimationSelfTest} from './jobj-add-animation.selftest.js';
+import {runAnimationArchiveHydrationSelfTest} from './animation-archive-hydration.selftest.js';
+import {runSourceAcosSmallSelfTest} from './source-acos.selftest.js';
 import {runReactionStreamSelfTest} from './reaction-stream.selftest.js';
 import {runReactionTurnSelfTest} from './reaction-turn.selftest.js';
 import { runStreamBankSelfTest } from './stream-bank.selftest.js';
@@ -206,6 +214,14 @@ function assert(cond: boolean, msg: string): void {
 }
 
 export function runSelfTest(): number {
+  runJObjAddAnimationSelfTest();
+  runAnimationArchiveHydrationSelfTest();
+  runSourceAcosSmallSelfTest();
+  runSourceSineKernelSelfTest();
+  runSourceCosineKernelSelfTest();
+  runSourceAngleReductionSelfTest();
+  runSourceSlerpWeightsSelfTest();
+  runSourceQuaternionSlerpSelfTest();
   failures = 0;
   runStreamFlagsSelfTest();
   runStreamBankSelfTest();

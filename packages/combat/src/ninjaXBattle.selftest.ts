@@ -1,3 +1,4 @@
+import {divideSourceAnimationFloat32} from './rom/source-float32-divide.js';
 /** Real Battle input regressions for Normal Ninja/Sasuke source action2.
  * Projectile timing/data are source-backed. Natural contacts deliberately exercise
  * the host sweep and static-bind muzzle adapters, not original joint/HIT geometry.
@@ -129,11 +130,31 @@ function testAdmissionAndRelease(): void {
       t.driver.actor.variantIndex === (air ? 4 : 0) && t.driver.actor.fbCue === (air ? 45 : 44),
       `${id}: actual ground/air command and cue survive admission`);
     assert(getNinjaXState(t.driver.actor)?.stream?.slot === (air ? 1 : 0), 'ground/air source g4 stream');
+    const checkSourceBlend = () => {
+      const stream = getNinjaXState(t.driver.actor)?.stream, sample = t.owner.sourceAnimSample;
+      assert(stream && sample, 'Ninja stream publishes a source animation sample');
+      assert(sample.frame === stream.frame, 'sample frame follows the source stream');
+      assert(sample.targetDrawModels?.[0] === 1 && sample.targetDrawModels?.[1] === 7, 'Ninja target draw models survive start and recovery');
+      if (stream.blendMode === 1) {
+        assert(sample.blend?.mode === 1 && sample.blend.elapsed === stream.blendElapsed &&
+          sample.blend.duration === stream.blendTotal && sample.blend.previousWeight ===
+          Math.fround(1 - divideSourceAnimationFloat32(stream.blendElapsed, stream.blendTotal)),
+          'sample preserves source mode-1 clock and saved-pose weight');
+        assert(sample.blend.jointIndices.join(',') === '2,3,4,5,6,7,8,9,10,11,12,0,1,13,14,15,16,17,18,19',
+          'sample preserves Ninja source descriptor joint order');
+        if (stream.blendTotal === 7 && Number.isInteger(stream.blendElapsed) && stream.blendElapsed >= 1 && stream.blendElapsed <= 6) {
+          const expected = [0, 0x3f5b6db7, 0x3f36db6e, 0x3f124924, 0x3edb6db6, 0x3e924924, 0x3e124924];
+          const bits = new DataView(new ArrayBuffer(4)); bits.setFloat32(0, sample.blend.previousWeight);
+          assert(bits.getUint32(0) === expected[stream.blendElapsed], 'seven-frame source weight bits');
+        }
+      } else assert(sample.blend === null, 'completed source blend clears the published clock');
+    };
+    checkSourceBlend();
     if (!air) same(t.owner.pos, before, 'stationary X does not teleport away by target distance');
     assert(Number(t.events.length) === 0 && Number(t.allocations.length) === 0 && cell.cur === 5 && shots(t).length === 0,
       'admission has no premature source allocation or generic child');
     for (let tick = 1; tick < 21; tick++) {
-      t.tick();
+      t.tick(); checkSourceBlend();
       assert(Number(t.events.length) === 0 && Number(t.allocations.length) === 0 && shots(t).length === 0 && cell.cur === 5,
         `source frame14 plus source blend6 gate remains closed at relative tick${tick}`);
     }

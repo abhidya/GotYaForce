@@ -200,3 +200,60 @@ normal465fc caller replacement, retail replay or complete gameplay parity is
 proved. A host refusal may retain an already completed write prefix; it is not
 the original machine's exception behavior. Snapshot executable-SHA metadata is
 not proof these bytes are unchanged original DOL bytes.
+
+## Bounded cosine follow-up, 2026-11-18
+
+An isolated Dolphin JIT64 session running an original GG4E battle captured
+160 `cosf` calls at `8023cc68` and their results at `8023cc80`; 148 had
+finite float32 inputs within the candidate reduction range, representing 15
+unique input/output pairs. The offline `sourceCosineFloatBounded` wrapper
+uses the source half-pi reduction and cosine/sine kernels, and matches all 15
+unique observed results bit-for-bit. A mathematical sweep also checks the
+bounded domain, but does not establish PowerPC rounding for every input.
+This is sampled emulator evidence, not physical-console or gameplay parity.
+The isolated instance was stopped and the pre-existing emulator left untouched.
+
+### Opt-in short rotations
+
+The offline actor-joint matrix owner now accepts a synchronous explicit sine and
+cosine provider for nonzero short rotations. Without it, the prior nonzero
+refusal remains. `457d4` converts the signed short using the recorded float32
+factor and applies the requested axis rotation followed by the existing paired
+Concat; `45838` applies Z, Y, X, retaining the zero-Z copy. An isolated Dolphin
+JIT64 battle temporarily set actor wrapper shorts to Z=2048, X=8192, Y=-4096.
+Nine reached wrapper calls supplied captured parent matrices and output matrices.
+Using the bounded source sine/cosine candidates, all 108 output float32 words
+matched those captures bit-for-bit. These were injected test inputs, not naturally
+observed actor behavior. The isolated instance was stopped and the unrelated
+existing emulator left untouched. This does not prove all angles, hardware,
+source pose-bank integration, or playable-game parity.
+
+### Short-angle reduction extension, 2026-11-18
+
+The experimental reduction now includes the `n=2` medium branch through the
+positive-pi high-word boundary, including the source's cancellation refinements.
+Its split constants were read from the authenticated archived GG4E ProgramDB.
+All 65,536 signed short inputs, after the source float32 angle multiplier, are
+covered by host-math sine and cosine sanity checks. Those checks do not establish
+bit-exact emulator or hardware behavior. A subsequent isolated Dolphin JIT64
+session directly called the original sine and cosine wrappers with 52 controlled
+signed-short inputs, including both sides of the reduction boundary and values
+near the signed endpoints. All 104 returned float32 results match the offline
+candidate bit-for-bit. These are sampled calls, not exhaustive emulator or
+physical-console evidence. The isolated instance was stopped; the previously
+running emulator was left untouched. This remains an explicitly supplied
+offline provider, not a playable-renderer integration.
+
+### Offline animation-tree attachment
+
+The bounded `8024dd44` null-material/null-shape lane now traverses actual JObj
+child/sibling links alongside actual AnimJoint child/next links, delegating each
+visited joint to the existing single-joint animation owner. A `0x1000` JObj
+flag skips descendants; missing animation descriptors still traverse joints.
+The regression exercises real owners, including multiple siblings and a
+grandchild. The bounded archive hydrator now builds acyclic AnimJoint child/next
+graphs, preserves shared descriptor identity, and rejects cycles before owner
+effects. A synthetic DAT tree was hydrated and attached through the actual
+archive, descriptor and JObj owners. Neither original archive loading nor this
+tree traversal has been compared directly with Dolphin, and it is not connected
+to the playable renderer. Visit budgets and error handling are host-only bounds.

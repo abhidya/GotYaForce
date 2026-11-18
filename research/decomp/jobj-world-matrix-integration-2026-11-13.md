@@ -289,3 +289,101 @@ and first-Concat retention on correction refusal. Shared-matrix movement tests
 verify joint 1-before-root reads, captured owner method/receiver, actual mutable
 record reads, early-gate avoidance and caught reentry refusal. No new review
 finding; execution checks were run separately from this read-only review.
+
+### Explicit-estimate quaternion matrix lane (2026-11-18)
+
+The offline `actor-joint-matrix` owner now admits non-identity finite
+quaternions only when its caller supplies the `fres` result for the reached
+positive normal squared norm. It follows the archived `8020b578..8020b61c`
+paired-single operation schedule and retains the existing identity-only refusal
+when no estimate is supplied. The implementation does not substitute host
+`1 / norm` for the processor estimate. The estimate is explicit, finite and
+positive; GQR0 floating loads and RN00/NI0 remain assumptions. Intermediate
+non-finite arithmetic refuses under the host boundary. Synthetic dyadic tests
+exercise a quarter turn, a four-component rotation, the estimate input, zero
+norm, invalid estimate, and caught reentry. They are not Dolphin traces or
+physical-hardware verification, and this offline owner is not connected to the
+playable renderer or a complete source pose bank.
+
+An isolated Dolphin JIT64 run of the original GG4E battle on 2026-11-18
+captured 18 calls at `8020b578`, the `fres` result at `8020b5a8`, and matrix
+stores at `8020b618`. Three non-identity captures with both observed estimates
+are now regression cases. With their observed estimates explicitly supplied,
+the offline implementation's nonzero matrix values after identity-parent
+concatenation match all 27 captured nonzero values bit-for-bit. This is bounded
+emulator evidence for the captured inputs, not an exhaustive estimate model,
+physical-console proof, source pose-bank integration, or a playable visual
+comparison. The separate emulator was stopped; the pre-existing instance was
+not touched.
+
+### Controlled `fres` sweep (2026-11-18)
+
+A second isolated Dolphin JIT64 run used the same original battle savestate.
+At each of 65 calls to `8020b578`, the quaternion was temporarily changed to
+`(1 + i/64, 0, 0, 0)` for i=0..64, and restored before returning to the game.
+At `8020b5a8`, `f3` and `f11` yielded the norm `(1+i/64)^2` and the estimate
+below, respectively. The norm values are exactly representable in float32.
+The test instance was stopped afterward; the pre-existing instance was not
+changed. These are Dolphin observations, not independent hardware captures.
+
+```text
+0.9998779296875 0.96938157081604 0.9402303695678711 0.9123992919921875 0.8857917785644531
+0.8603301048278809 0.8359642028808594 0.8125839233398438 0.7901763916015625 0.768665075302124
+0.7479887008666992 0.7281584739685059 0.7091255187988281 0.6908767223358154 0.6732778549194336
+0.6563115119934082 0.639984130859375 0.6243031024932861 0.6091957092285156 0.594597339630127
+0.5805854797363281 0.5669605731964111 0.5537919998168945 0.5412299633026123 0.528961181640625
+0.5170607566833496 0.5057468414306641 0.4946712851524353 0.48391056060791016 0.47360044717788696
+0.4636037349700928 0.4538688659667969 0.44439697265625 0.43534356355667114 0.42651891708374023
+0.4179399013519287 0.409576416015625 0.40152549743652344 0.39371705055236816 0.38611119985580444
+0.3787040710449219 0.37150895595550537 0.36454153060913086 0.35777270793914795 0.3511781692504883
+0.34477347135543823 0.33852362632751465 0.3324357271194458 0.326507568359375 0.3207676410675049
+0.31519055366516113 0.3097265362739563 0.3044166564941406 0.29924023151397705 0.29418110847473145
+0.2892792820930481 0.2844429016113281 0.2798030972480774 0.27517199516296387 0.2707764506340027
+0.26636314392089844 0.26217782497406006 0.2579631805419922 0.25398218631744385 0.249969482421875
+```
+
+This sparse sweep is not enough to infer every interpolation interval or to
+replace the explicit estimate dependency. At norm 1 the observed estimate is
+`0.9998779296875`, not the result of host division. No table or implementation
+was copied from Dolphin source.
+
+### Interval grid
+
+A further isolated Dolphin JIT64 run sampled four interior values in each of
+32 equal intervals spanning norms `[1,2)`. For each point, a float32 quaternion
+`(sqrt(target),0,0,0)` was temporarily injected and restored on return. The
+actual rounded norm and resulting `fres` estimate, as IEEE-754 binary32 hex
+pairs, are in `fres-dolphin-grid-2026-11-18.json`. The target fractions within
+intervals were 0.1, 0.35, 0.65 and 0.9; the file records actual reached norms,
+not those ideal targets. All 128 samples were captured; the separate test
+instance was stopped and the existing Dolphin instance was left untouched.
+These points alone do not establish interpolation boundaries or behavior outside
+this interval, and no estimate implementation is inferred from them yet.
+
+A separate 128-point fine sweep, in `fres-dolphin-fine-2026-11-18.json`,
+sampled actual rounded norms near 1 after temporary quaternion injection and
+restoration in another isolated Dolphin JIT64 run. Independently fitting the
+interval-grid samples produced a 32-segment candidate with a step of 256 float32 bit patterns.
+The opt-in `sourceReciprocalEstimateBounded` admits only float32 `[1,4]`; it
+matches all 128 grid, 128 fine and 65 earlier sweep observations. The 65-point
+sweep provides an independent check of the candidate across the second exponent.
+These finite samples do not prove unobserved boundaries, physical hardware,
+exceptional values or `[0.5,1)`, and the candidate is not enabled in gameplay.
+
+A separate isolated Dolphin run sampled four interior points in each of 32
+intervals for norms in `(0.5,1)`; actual float32 norm/estimate bit pairs are in
+`fres-dolphin-half-2026-11-18.json`. All 128 agree with the candidate's
+exponent scaling. The candidate now admits `(0.5,4]`; exactly 0.5 remains
+excluded because this sweep did not measure that endpoint. Using the candidate
+instead of injected observed estimates also matches the 27 nonzero output
+values in the three captured rotations, including the two norms below 1.
+This is still a bounded experimental emulator model, not full hardware or
+playable-game parity. The isolated instance was stopped and the unrelated
+existing emulator was left untouched.
+
+A separate isolated Dolphin run sampled four points immediately around each
+of the 32 normalized interval boundaries. Actual rounded norm and estimate
+bits are saved in `fres-dolphin-edge-2026-11-18.json`. All 128 match the
+bounded candidate, including values straddling 1. Inputs were restored, the
+isolated instance stopped, and the existing Dolphin process left untouched.
+This is still finite emulator evidence, not physical-console validation.

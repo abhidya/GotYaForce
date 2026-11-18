@@ -21,7 +21,11 @@ import type {SourceDisplayAnimationAttachmentRuntime} from './display-animation-
 import type {SourceJObjAnimationRuntime} from './jobj-animation.js';
 import type {SourceJObjTrackOrderRuntime} from './jobj-track-order.js';
 import type {SourceAObjLifecycleRuntime} from './aobj-lifecycle.js';
-export interface SourceJObjAddAnimationDescriptor {aobj08: symbol | null; robj0c: symbol | null; flags10: number}
+export interface SourceJObjAddAnimationDescriptor {
+  /** AnimJoint links. Omitted for existing explicitly single-joint callers. */
+  child00?: symbol | null; next04?: symbol | null;
+  aobj08: symbol | null; robj0c: symbol | null; flags10: number;
+}
 export interface SourceJObjAddAnimationSources {
   joints: Pick<SourceJObjAnimationRuntime, 'getBinding' | 'getJoint' | 'setFlags' | 'clearFlags'>;
   lifecycle: Pick<SourceAObjLifecycleRuntime, 'removeAObj' | 'loadDescriptor'>;
@@ -80,7 +84,9 @@ export function createSourceJObjAddAnimationRuntime(sources: SourceJObjAddAnimat
       enter(); try {
         const aobj08 = link(initial, 'aobj08'), robj0c = link(initial, 'robj0c');
         const flags10 = uint(own(initial, 'flags10'), 'flags10');
-        const id = Symbol('owned AnimJoint descriptor'); descriptors.set(id, Object.seal({aobj08, robj0c, flags10})); return id;
+        const child00 = Object.hasOwn(initial, 'child00') ? link(initial, 'child00') : null;
+        const next04 = Object.hasOwn(initial, 'next04') ? link(initial, 'next04') : null;
+        const id = Symbol('owned AnimJoint descriptor'); descriptors.set(id, Object.seal({child00, next04, aobj08, robj0c, flags10})); return id;
       } finally {busy = false;}
     }, getDescriptor,
     addAnimation(joint: symbol | null, descriptor: symbol | null): void {

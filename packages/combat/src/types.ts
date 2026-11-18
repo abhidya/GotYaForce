@@ -376,7 +376,18 @@ export interface BorgRuntime {
    *  is the current source animation frame, including held frames. Applies only to the
    *  exact resolved meleeAnimStream, never a slot-label fallback. Cleared on source exit,
    *  interruption, or morph; other actions retain ordinary presentation playback. */
-  sourceAnimSample?: { serial: number; frame: number } | null;
+  sourceAnimSample?: { serial: number; frame: number;
+    /** Ninja X/recovery target models only, not the previous or active draw state. */
+    targetDrawModels?: readonly [number, number];
+    /** Ninja's admitted mode-1 clock drives a rendered-pose blend. The renderer
+     * does not own the original source pose banks or claim visual parity. */
+    blend?: { mode: 1; elapsed: number; duration: number;
+      /** Source fsubs(1, fdivs(elapsed, duration)): weight of saved pose. */
+      previousWeight: number;
+      /** Source descriptor order for the selected Ninja joints. */
+      jointIndices: readonly number[];
+    } | null;
+  } | null;
   /** The CURRENT melee swing's (or charged release's) PATH-B authored sound events (DERIVED —
    *  the per-anim sound-event table at ROM actor+0x4e8 joined through the anim-descriptor
    *  banks; actionStreamData.ts AuthoredSoundEvent, research/decomp/

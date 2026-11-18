@@ -1,3 +1,5 @@
+import {NINJA_X_TRANSITION_JOINTS, NINJA_X_TARGET_DRAW_MODELS} from './ninjaXStream.js';
+import {divideSourceAnimationFloat32} from './rom/source-float32-divide.js';
 import {isSourceSwitchingX,getSwitchingXState,prepareSwitchingX,clearSwitchingX,startSwitchingXStream,tickSwitchingXStreamPart} from './switchingX.js';
 import {isSourceActorTickPrefixClaimedActor} from './rom/actor-tick-prefix.js';
 import {isSourceTeleportX,getTeleportXState,prepareTeleportX,clearTeleportX} from './teleportX.js';
@@ -2509,7 +2511,10 @@ export class RomDriverBridge implements RomFamilyDriver {
     if(switching||teleport||ninja||(airShot&&!preserveLower)||blackCharge || charge || crash || airMelee)runtime.grounded=(a as RomActor&{grounded?:boolean}).grounded===true;
     const sourceStream=switching?.stream ?? teleport?.stream ?? ninja?.stream ?? airShot?.stream ?? getGRedShotState(a)?.stream ?? blackCharge?.stream ?? charge?.stream ?? crash?.stream ?? airMelee?.stream ?? getNeoGredMeleeState(a)?.stream;
     if(sourceStream && runtime.sourceAnimSample)
-      runtime.sourceAnimSample={serial:runtime.sourceAnimSample.serial,frame:sourceStream.frame};
+      runtime.sourceAnimSample={serial:runtime.sourceAnimSample.serial,frame:sourceStream.frame,
+        ...(ninja?.stream===sourceStream ? {targetDrawModels:NINJA_X_TARGET_DRAW_MODELS,blend:ninja.stream.blendMode===1 ?
+          {mode:1 as const,elapsed:ninja.stream.blendElapsed,duration:ninja.stream.blendTotal,
+            jointIndices:NINJA_X_TRANSITION_JOINTS,previousWeight:Math.fround(1-divideSourceAnimationFloat32(ninja.stream.blendElapsed,ninja.stream.blendTotal))} : null} : {})};
     const nurse = this.specialActive ? getNurseXState(a) : undefined;
     if (nurse && !nurse.close && (a.fbPhaseSlots[0] ?? 0) >= 2 && (a.fbPhaseSlots[0] ?? 0) < 7) {
       Object.assign(runtime.vel, a.motion);
@@ -3136,8 +3141,12 @@ export class RomDriverBridge implements RomFamilyDriver {
       // authored pauses and recovery resets. Only actual playAnim allocates an
       // epoch; later syncOut samples the same clock without advancing it.
       const sourceStream=getSwitchingXState(this.actor)?.stream ?? getTeleportXState(this.actor)?.stream ?? getNinjaXState(this.actor)?.stream ?? getGRedAirShotState(this.actor)?.stream ?? getGRedShotState(this.actor)?.stream ?? getGBlackChargeState(this.actor)?.stream ?? getGRedChargeState(this.actor)?.stream ?? getGRedCrashState(this.actor)?.stream ?? getGRedAirMeleeState(this.actor)?.stream ?? getNeoGredMeleeState(this.actor)?.stream;
+      const ninjaStream=getNinjaXState(this.actor)?.stream;
       if(sourceStream)
-        this.runtime.sourceAnimSample={serial:++sourceAnimationSerial,frame:sourceStream.frame};
+        this.runtime.sourceAnimSample={serial:++sourceAnimationSerial,frame:sourceStream.frame,
+          ...(ninjaStream && ninjaStream===sourceStream ? {targetDrawModels:NINJA_X_TARGET_DRAW_MODELS,blend:ninjaStream.blendMode===1 ?
+            {mode:1 as const,elapsed:ninjaStream.blendElapsed,duration:ninjaStream.blendTotal,
+              jointIndices:NINJA_X_TRANSITION_JOINTS,previousWeight:Math.fround(1-divideSourceAnimationFloat32(ninjaStream.blendElapsed,ninjaStream.blendTotal))} : null} : {})};
     }
   }
 

@@ -1,3 +1,5 @@
+import {sourceBlendQuaternion} from './source-quaternion-slerp.js';
+import {sourceReciprocalSqrtEstimate} from './source-reciprocal-sqrt-estimate.js';
 import {createSourceActorAnimationTransitionRuntime, divideSourceAnimationFloat32,
   hasIncompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
 import {createSourceActorAnimationSetupRuntime} from './actor-animation-setup.js';
@@ -16,7 +18,7 @@ function check(value: boolean, message: string): void {if (!value) throw Error(`
 function rejects(run: () => unknown, expected: string): void {
   let error = ''; try {run();} catch (e) {error = String(e);} check(error.includes(expected), `expected ${expected}, got ${error || 'success'}`);
 }
-function fixture(count = 1) {
+function fixture(count = 1, reciprocalSqrtEstimate?: (value: number) => number) {
   const unsupported = (): never => {throw Error('unreached actual dependency');};
   const joints = createSourceJObjAnimationRuntime(), feedback = createSourceJointAnimationFeedbackRuntime(joints);
   const effects = {interpretAObj: unsupported, animateRObjs: unsupported, animateDObjs: unsupported};
@@ -59,7 +61,7 @@ function fixture(count = 1) {
     setup.bindPart(id, {group28: bank ? 32 : 33, action29: bank ? 34 : 35, bank31: bank, status38: bank ? 36 : 37,
       field18: bank ? 40 : 41, field1c: bank ? 42 : 43, field20: bank ? 44 : 45});
   }
-  const transition = createSourceActorAnimationTransitionRuntime({mapping, feedback, dispatch, setup, attached, metadata, archives});
+  const transition = createSourceActorAnimationTransitionRuntime({mapping, feedback, dispatch, setup, attached, metadata, archives, ...(reciprocalSqrtEstimate ? {reciprocalSqrtEstimate} : {})});
   for (const [bank, row] of parts.entries()) for (const id of row) transition.bindPartRaw(id,
     {byte34: 80 + bank, byte39: 81 + bank, byte3a: 82 + bank, byte3b: 83 + bank, byte3c: 84 + bank,
       byte3d: 85 + bank, byte3e: 86 + bank, byte3f: 87 + bank});
@@ -136,6 +138,22 @@ export function runActorAnimationTransitionSelfTests(): void {
     rejects(() => x.transition.copyPart(x.actor, 0, 0, 0), 'non-writable');
     check(x.previous.quaternion.x === 0.25 && x.previous.translation.x === 30, 'each quaternion word store retains prefix');
   }
+  // The presentation helper must match the existing source owner, including its
+  // hemisphere choice and float32 rounding. It is not a live-game parity test.
+  for (const [current, previous, weight] of [
+    [[0,0,0,1], [0,0,.6,.8], .3],
+    [[0,0,0,1], [0,0,-.6,-.8], .7],
+    [[.5,.5,.5,.5], [-.5,.5,.5,.5], .4],
+    [[0,0,0,1], [0,0,0,-1], .75],
+    [[0,0,0,1.0000001192092896], [0,0,0,1], .5],
+  ] as Array<[number[], number[], number]>) {
+    const x = fixture(1, sourceReciprocalSqrtEstimate), keys = ['x','y','z','w'] as const;
+    const a = current.map(Math.fround), b = previous.map(Math.fround), w = Math.fround(weight);
+    keys.forEach((key, i) => { x.current.quaternion[key] = a[i]!; x.previous.quaternion[key] = b[i]!; });
+    const expected = sourceBlendQuaternion(a, b, w, sourceReciprocalSqrtEstimate);
+    x.transition.blendPart(x.actor, 0, w);
+    keys.forEach((key, i) => check(Object.is(x.current.quaternion[key], expected[i]), `pure blend matches source owner ${key}`));
+  }
   for (const [weight, expected, visibility] of [[0, 10, 11], [0.5, 20, 11], [1, 30, 21], [-1, -10, 11], [2, 50, 21]]) {
     const x = fixture(); x.transition.blendPart(x.actor, 0, weight!);
     check(x.current.translation.x === expected && x.current.quaternion.w === 1, 'real linear pose blend without clamp');
@@ -159,6 +177,30 @@ export function runActorAnimationTransitionSelfTests(): void {
     const x = fixture(); Object.defineProperty(x.current.quaternion, 'x', {writable: false});
     rejects(() => x.transition.blendPart(x.actor, 0, 0), 'non-writable');
     check(x.visibility.byte1d94 === 31, 'mandatory equal quaternion store is not elided');
+  }
+  {
+    const x = fixture(1, z => 1 / Math.sqrt(z)); // synthetic estimate, not retail evidence
+    x.previous.quaternion.w = 0; x.previous.quaternion.x = 1;
+    x.transition.blendPart(x.actor, 0, 0.5);
+    check(Math.abs(x.current.quaternion.x - Math.SQRT1_2) < 3e-7 && Math.abs(x.current.quaternion.w - Math.SQRT1_2) < 3e-7,
+      'explicit experimental estimate executes nonlinear slerp');
+  }
+  {
+    // C_QUATSlerp capture using identity and (0,0,.6,.8), weight .3.
+    // This checks the composed offline owner against one emulator capture;
+    // it does not establish original actor-transition execution parity.
+    const x = fixture(1, sourceReciprocalSqrtEstimate);
+    x.previous.quaternion.z = Math.fround(.6); x.previous.quaternion.w = Math.fround(.8);
+    x.transition.blendPart(x.actor, 0, Math.fround(.3));
+    const view = new DataView(new ArrayBuffer(4));
+    view.setFloat32(0, x.current.quaternion.z); check(view.getUint32(0) === 0x3e44753c, 'captured nonlinear quaternion z');
+    view.setFloat32(0, x.current.quaternion.w); check(view.getUint32(0) === 0x3f7b3e94, 'captured nonlinear quaternion w');
+  }
+  {
+    const x = fixture(1, () => {throw Error('estimate failed');});
+    x.previous.quaternion.w = Math.fround(0.75); x.previous.quaternion.x = Math.fround(Math.sqrt(1 - 0.75 ** 2));
+    rejects(() => x.transition.blendPart(x.actor, 0, 0.5), 'estimate failed');
+    check(x.current.translation.x === 20 && x.current.quaternion.w === 1, 'estimate failure preserves completed translation and leaves quaternion');
   }
   for (const value of [0.9999899864196777, 0.9999900460243225]) {
     const x = fixture(); x.previous.quaternion.w = value;
@@ -230,5 +272,5 @@ export function runActorAnimationTransitionSelfTests(): void {
   }
   check(Object.is(divideSourceAnimationFloat32(-0, 3), -0) && divideSourceAnimationFloat32(1, 7) === Math.fround(1 / 7), 'exact division zero and ordinary ratio');
   rejects(() => divideSourceAnimationFloat32(1, 0), 'zero divisor');
-  console.log('[animation-transition] PASS: complete canonical part/pose copy, real linear pose blending, mode1 setup/playback and retained consumed failure prefixes; nonlinear/retail hydration remain unsupported');
+  console.log('[animation-transition] PASS: complete canonical part/pose copy, linear and explicit experimental nonlinear pose blending, mode1 setup/playback and retained consumed failure prefixes; retail parity and hydration remain unverified');
 }
