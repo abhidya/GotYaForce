@@ -205,6 +205,42 @@ function runActorJointStandaloneMatrixSelfTests(): void {
   }
 }
 export function runActorJointMatrixSelfTests(): void {
+  // Explicit synthetic fres dependency admits a non-identity source lane.
+  // Dyadic input and estimate make these expected values exact; this does not
+  // validate Dolphin or physical hardware's estimate for arbitrary norms.
+  {
+    const feedback = createSourceJointAnimationFeedbackRuntime(createSourceJObjAnimationRuntime());
+    const pose = feedback.createPose({translation: {...zero}, quaternion: {x: 0, y: 0, z: .5, w: .5}});
+    let seen = 0;
+    const matrix = createSourceActorJointMatrixRuntime(feedback, 128, norm => {seen = norm; return 2;});
+    const parent = matrix.createMatrix(identity), destination = matrix.createMatrix(identity);
+    matrix.composePose(parent, destination, pose);
+    const out = matrix.getMatrix(destination);
+    check(seen === .5, 'non-identity fres receives squared norm');
+    check(out[0] === 0 && out[1] === -1 && out[4] === 1 && out[5] === 0 && out[10] === 1,
+      'source quaternion matrix produces expected dyadic quarter turn');
+    const q = feedback.getPose(pose).quaternion;
+    q.x = .5; q.y = .5; q.z = .5; q.w = .5;
+    const unitMatrix = createSourceActorJointMatrixRuntime(feedback, 128, norm => {check(norm === 1, 'four-component norm'); return 1;});
+    const unitParent = unitMatrix.createMatrix(identity), unitOut = unitMatrix.createMatrix(identity);
+    unitMatrix.composePose(unitParent, unitOut, pose);
+    check(unitMatrix.getMatrix(unitOut).every((v, i) => v === [0,0,1,0,1,0,0,0,0,1,0,0][i]),
+      'four-component quaternion uses all off-diagonal terms');
+    q.x = 0; q.y = 0; q.z = 0; q.w = 0;
+    rejects(() => matrix.composePose(parent, destination, pose), 'norm must be positive');
+    q.w = 1;
+    let calls = 0;
+    const invalidEstimate = createSourceActorJointMatrixRuntime(feedback, 128, () => {calls++; return 0;});
+    const invalidParent = invalidEstimate.createMatrix(identity), invalidOut = invalidEstimate.createMatrix(Array(12).fill(19));
+    rejects(() => invalidEstimate.composePose(invalidParent, invalidOut, pose), 'fres estimate must be positive');
+    check(calls === 1 && invalidEstimate.getMatrix(invalidOut).every(v => v === 19), 'explicit fres is reached for identity before destination writes');
+    let reentrant!: ReturnType<typeof createSourceActorJointMatrixRuntime>, nested!: symbol;
+    reentrant = createSourceActorJointMatrixRuntime(feedback, 128, () => {
+      try { reentrant.identity(nested); } catch {} return 1;
+    });
+    const rParent = reentrant.createMatrix(identity), rOut = reentrant.createMatrix(identity); nested = rOut;
+    rejects(() => reentrant.composePose(rParent, rOut, pose), 'reentry');
+  }
   runActorJointMatrixBytesSelfTests();
   runActorJointStandaloneMatrixSelfTests();
   runActorJointSlopedOrientationSelfTests();

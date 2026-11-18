@@ -4,7 +4,9 @@
  * Primary: research/decomp/primary-terrain-placement-evidence-2026-11-13.md.
  * Parent and actual translation are already resolved by the caller. Owned matrices
  * have row-major 3x4 storage; no default matrix or pose association is invented.
- * The admitted PSMTXQuat input is exactly (+0,+0,+0,1), including zero signs.
+ * PSMTXQuat admits exact identity, or finite positive norms with an explicitly
+ * supplied fres estimate. The latter is an experimental numeric lane, not
+ * original hardware parity; without the estimate non-identity still refuses.
  * Its audited output has -0 at [6] and [8]. Corrections admit only zero shorts,
  * selecting 80045838's PSMTXCopy branch, never an approximation of source trig.
  * 800457d4 zero-short wrappers retain RotRad and Concat semantics: audited zero
@@ -18,7 +20,7 @@
  * translation lane in column 2. Paired loads/stores require GQR0 floating-point
  * types with no quantization; initialization/live invariance is not established.
  * RN=00/NI=0 finite-f32 bounds are assumptions,
- * not original-runtime parity. No arbitrary quaternion/fres emulation is claimed.
+ * not original-runtime parity. The reciprocal estimate is externally supplied, not emulated.
  * Secondary terrain 45918 admits axes (2,1) and computed paired squared
  * norms .25,1,4,16,64 at every Mag/Normalize; the first construction must
  * succeed. Primary non-axis-Y displacement uses the same bounded norm arithmetic
@@ -554,9 +556,35 @@ function primaryFoldedPlacement(parent: number[], current: number[], next: numbe
   secondRotation[3] = nextX; secondRotation[7] = nextY; secondRotation[11] = nextZ;
   concat(current, secondRotation, next, check);
 }
+/** PSMTXQuat's finite normal-input lane. The caller explicitly supplies the
+ * PowerPC fres estimate; this is not a host-division or hardware-parity claim. */
+function quaternionMatrix(x: number, y: number, z: number, w: number, estimate: (norm: number) => number): number[] {
+  const xx = multiply(x, x), yy = multiply(y, y), zz = multiply(z, z);
+  const zx = fma(z, z, xx), wy = fma(w, w, yy);
+  // The paired square also computes w*w, even though its lane is discarded.
+  multiply(w, w);
+  const norm = add(zx, wy);
+  if (!(norm >= 2 ** -126)) fail('quaternion norm must be positive normal float32');
+  const reciprocal = float(estimate(norm), 'fres estimate');
+  if (!(reciprocal > 0)) fail('fres estimate must be positive');
+  const correction = -fma(norm, reciprocal, -2);
+  const factor = multiply(multiply(reciprocal, correction), 2);
+  const xyPlusZw = fma(x, y, multiply(z, w));
+  const xyMinusZw = fma(x, y, -multiply(z, w));
+  const yw = multiply(y, w), xw = multiply(x, w);
+  const xzPlusYw = fma(x, z, yw), yzPlusXw = fma(y, z, xw);
+  const xzMinusYw = -fma(yw, 2, -xzPlusYw), yzMinusXw = -fma(xw, 2, -yzPlusXw);
+  const diagonal = (sum: number): number => -fma(sum, factor, -1);
+  return [diagonal(add(zz, yy)), multiply(xyMinusZw, factor), multiply(xzPlusYw, factor), 0,
+    multiply(xyPlusZw, factor), diagonal(zx), multiply(yzMinusXw, factor), 0,
+    multiply(xzMinusYw, factor), multiply(yzPlusXw, factor), diagonal(add(xx, yy)), 0];
+}
+
 export function createSourceActorJointMatrixRuntime(
   feedback: Pick<SourceJointAnimationFeedbackRuntime, 'getPose'>, maxMatrices = 128,
+  reciprocalEstimate?: (norm: number) => number,
 ): SourceActorJointMatrixRuntime {
+  if (reciprocalEstimate !== undefined && typeof reciprocalEstimate !== 'function') fail('reciprocal estimate must be a function');
   if (!Number.isSafeInteger(maxMatrices) || maxMatrices < 1) fail('positive safe matrix capacity required');
   const poseMethod = own(feedback, 'getPose');
   if (typeof poseMethod !== 'function') fail('getPose: own data-function required');
@@ -576,11 +604,21 @@ export function createSourceActorJointMatrixRuntime(
     if (reentered) fail('same-runtime reentry was caught inside getPose');
     // Own records reject promises/thenables without reading any accessors.
     const q = own(resolved, 'quaternion');
-    for (const key of ['x', 'y', 'z', 'w'] as const) {
-      const value = float(own(q, key), `quaternion.${key}`);
-      if (!Object.is(value, key === 'w' ? 1 : 0)) fail('only exact (+0,+0,+0,1) quaternion is supported');
+    let local: number[];
+    if (!reciprocalEstimate) {
+      for (const key of ['x', 'y', 'z', 'w'] as const) {
+        const value = float(own(q, key), `quaternion.${key}`);
+        if (!Object.is(value, key === 'w' ? 1 : 0)) fail('only exact (+0,+0,+0,1) quaternion is supported without fres estimate');
+      }
+      local = [1, 0, 0, 0, 0, 1, -0, 0, -0, 0, 1, 0];
+    } else {
+      const [x, y, z, w] = (['x', 'y', 'z', 'w'] as const).map(key => float(own(q, key), `quaternion.${key}`));
+      local = quaternionMatrix(x!, y!, z!, w!, norm => {
+        const value = reciprocalEstimate(norm);
+        if (reentered) fail('same-runtime reentry was caught inside fres estimate');
+        return value;
+      });
     }
-    const local = [1, 0, 0, 0, 0, 1, -0, 0, -0, 0, 1, 0];
     // 4679c joint 1 supplies actor+1d54 while retaining its ordinary pose
     // quaternion. Do not read unused pose translation on that branch.
     const translation = translationOverride === undefined ? own(resolved, 'translation') : translationOverride;

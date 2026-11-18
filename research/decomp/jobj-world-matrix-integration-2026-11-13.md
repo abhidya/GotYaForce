@@ -289,3 +289,18 @@ and first-Concat retention on correction refusal. Shared-matrix movement tests
 verify joint 1-before-root reads, captured owner method/receiver, actual mutable
 record reads, early-gate avoidance and caught reentry refusal. No new review
 finding; execution checks were run separately from this read-only review.
+
+### Explicit-estimate quaternion matrix lane (2026-11-18)
+
+The offline `actor-joint-matrix` owner now admits non-identity finite
+quaternions only when its caller supplies the `fres` result for the reached
+positive normal squared norm. It follows the archived `8020b578..8020b61c`
+paired-single operation schedule and retains the existing identity-only refusal
+when no estimate is supplied. The implementation does not substitute host
+`1 / norm` for the processor estimate. The estimate is explicit, finite and
+positive; GQR0 floating loads and RN00/NI0 remain assumptions. Intermediate
+non-finite arithmetic refuses under the host boundary. Synthetic dyadic tests
+exercise a quarter turn, a four-component rotation, the estimate input, zero
+norm, invalid estimate, and caught reentry. They are not Dolphin traces or
+physical-hardware verification, and this offline owner is not connected to the
+playable renderer or a complete source pose bank.
