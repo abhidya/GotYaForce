@@ -359,3 +359,13 @@ not those ideal targets. All 128 samples were captured; the separate test
 instance was stopped and the existing Dolphin instance was left untouched.
 These points alone do not establish interpolation boundaries or behavior outside
 this interval, and no estimate implementation is inferred from them yet.
+
+A separate 128-point fine sweep, in `fres-dolphin-fine-2026-11-18.json`,
+sampled actual rounded norms near 1 after temporary quaternion injection and
+restoration in another isolated Dolphin JIT64 run. Independently fitting the
+interval-grid samples produced a 32-segment candidate with a step of 256 float32 bit patterns.
+The opt-in `sourceReciprocalEstimateBounded` admits only float32 `[1,4]`; it
+matches all 128 grid, 128 fine and 65 earlier sweep observations. The 65-point
+sweep provides an independent check of the candidate across the second exponent.
+These finite samples do not prove unobserved boundaries, physical hardware,
+exceptional values or `[0.5,1)`, and the candidate is not enabled in gameplay.
