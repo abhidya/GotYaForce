@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import {emitInlineModuleGraph} from './lib/ts-inline-module.mjs';
+const graph=emitInlineModuleGraph({label:'force-model-lookup',entry:path.resolve('apps/game/src/ui/screens/forceModelLookup.ts'),outDir:path.resolve('.tmp/force-model-lookup')});
+const {createForceModelLookup}=await import(graph.url);
+let attempts=0;
+const models=new Map([['pl0000','model.glb']]);
+const get=createForceModelLookup(async()=>{if(++attempts===1)throw Error('transient');return models;});
+const first=get();assert.equal(get(),first,'concurrent fetches share one promise');
+await assert.rejects(first,/transient/);
+assert.equal(await get(),models,'failure permits later retry');
+assert.equal(await get(),models,'success stays cached');
+assert.equal(attempts,2);
+console.log('force model lookup selfcheck PASS');
