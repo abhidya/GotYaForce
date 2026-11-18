@@ -50,7 +50,7 @@ export function runPrimaryAmmoSelfTest(): void {
     meter.meter = 5; f.step();
     assert(!f.owner.burstActive && !f.owner.burstPaired, "burst flags did not clear on expiry");
     f.shoot();
-    assert(f.cell.cur === 4, "G Red B is usable after burst expires");
+    assert(Number(f.cell.cur) === 4, "G Red B is usable after burst expires");
   }
   {
     const f = fixture("pl0615");
