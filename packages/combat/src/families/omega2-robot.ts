@@ -158,13 +158,10 @@ function omega2Phase0(actor: RomActor, cfg: Omega2XConfig, ctx: Omega2FamilyCtx)
   // zz_006e514_(actor, 0xc0, &pitch) — compute aim pitch
   computeAimPitch(actor);
 
-  // Blink reposition: motion = pos - target; motion *= 0.95; pos += motion
-  const target = effLockTarget(actor);
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(OMEGA2_X.REPOSITION_SCALE, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // FUN_800f3d04 carries the actor's own +0x5e8 history, even without a target.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(OMEGA2_X.REPOSITION_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
 
   const slot = actor.streamSlot;
   actor.streamSlot = slot + 1;

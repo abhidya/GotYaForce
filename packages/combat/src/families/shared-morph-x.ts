@@ -5,8 +5,8 @@
 // Third shared machine after zz_00ff2bc_ (shared-x-special.ts) and zz_00fed6c_
 // (shared-melee-lunge.ts).
 //
-// This is the Machine-Borg line's TRANSFORM: the borg blinks away from its lock
-// target (phase 0), plays the transform stream, and on stream end (phase 1) SWAPS
+// This is the Machine-Borg line's TRANSFORM: the borg carries its own recent
+// motion (phase 0), plays the transform stream, and on stream end (phase 1) SWAPS
 // ITS BORG NUMBER (+0x3e8) to the config's target form via zz_006a8c0_, wipes the
 // line's fifteen gun-state accumulators (zz_017a608_) + re-inits weapon/ammo from
 // the new form's descriptor (FUN_800562b8), then exits via upper-body cue 0x1b
@@ -186,12 +186,6 @@ export function halveGunHeat18e0(actor: RomActor): void {
   s.gun18e2 = halveS16(s.gun18e2 ?? 0);
 }
 
-/** The lock-target position the phase handlers read at actor+0x5e8 (bridge-synced). */
-function lockTargetPos(actor: RomActor): { x: number; y: number; z: number } | null {
-  const t = (actor as RomActor & MorphScratch).lockTarget;
-  return t ?? null;
-}
-
 /** Grounded test — the engine branches on zz_00677b0_'s (ground check/snap) nonzero
  *  return. The bridge mirrors BorgRuntime.grounded onto the actor. */
 function isGrounded(actor: RomActor): boolean {
@@ -206,18 +200,10 @@ function isGrounded(actor: RomActor): boolean {
 function morphXPhase0(actor: RomActor, cfg: SharedMorphXConfig, ctx: StreamContext): void {
   actor.fbPhaseSlots[0] = 1; // +0x540++ (lbz/addi/stb @0x8017a3d8-dc)
 
-  // Blink-away reposition: motion(+0x38) = pos(+0x20) − lockTargetPos(+0x5e8) via
-  // PSVECSubtract; motion ×= cfg.repositionScale (lfs 8(r31) @0x8017a3e8 — 0.98,
-  // NOT the shared-x machine's 0.95); pos += motion via PSVECAdd. NOTE the negative
-  // finding: unlike zz_00ff2bc_, this machine does NOT zero +0x44..+0x50 here.
-  // Port approximation: skipped when no lock target is synced (the ROM would use
-  // whatever +0x5e8 holds; the bridge only populates it while locked).
-  const target = lockTargetPos(actor);
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(cfg.repositionScale, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // FUN_8017a3ac carries own older +0x5e8 position unconditionally.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(cfg.repositionScale, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
 
   // zz_00f036c_(actor, 0xb2) — morph-windup SFX (li r4,0xb2 @0x8017a408).
   ctx.onPlayCue?.(actor, SHARED_MORPH_X.MORPH_SFX);

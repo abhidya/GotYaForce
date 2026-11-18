@@ -14,6 +14,12 @@ import {createMeleeSamurai,SAMURAI_MELEE_DEFAULT_CONFIG} from './families/melee-
 import {createSharedCharge,GRED_CHARGE_CONFIG} from './families/shared-charge.js';
 import {createSharedCharge3,FAMILY1_CHARGE3_CONFIG} from './families/shared-charge3.js';
 import {createKnightMeleeTable28,knightMeleeEntry00,knightMeleeEntry14} from './families/shared-knight-melee.js';
+import {createSharedMorphXSpecial,TITAN_MORPH_CONFIG} from './families/shared-morph-x.js';
+import {createSwordKnightRootAction} from './families/sword-knight.js';
+import {createRobotRootAction} from './families/robot.js';
+import {createOmega2RootAction} from './families/omega2-robot.js';
+import {createHammerRootAction} from './families/hammer-robot.js';
+import {createMagnetRobotRootAction} from './families/magnet-robot.js';
 function assert(v:unknown,m:string):asserts v {if(!v) throw Error(`[sharedFlightOrigin] ${m}`);}
 export function runSharedFlightOriginSelfTest():void {
  const run=createSharedFlightX(FLIGHT_X_FAMILY4_CONFIG,{});
@@ -22,6 +28,21 @@ export function runSharedFlightOriginSelfTest():void {
   run(a);
   assert(Math.abs(a.pos.x-109.5)<1e-5 && Math.abs(a.pos.y-219)<1e-5 && Math.abs(a.pos.z-328.5)<1e-5,
    'entry carries own previous-motion delta regardless of target');
+ }
+ for(const [name,run,scale] of [
+  ['morph',createSharedMorphXSpecial(TITAN_MORPH_CONFIG,{}),TITAN_MORPH_CONFIG.repositionScale],
+  ['sword knight',createSwordKnightRootAction({}),0.95],
+  ['build robot',createRobotRootAction({}),0.95],
+  ['omega robot',createOmega2RootAction({}),0.95],
+  ['hammer robot',createHammerRootAction({}),0.95],
+  ['magnet robot',createMagnetRobotRootAction({}),0.95],
+ ] as const) {
+  for(const target of [{x:-4000,y:-9000,z:6000},null]) {
+   const b=createRomActor();b.actionIndex=2;b.pos={x:100,y:200,z:300};b.targetCache5e8={x:90,y:180,z:270};b.lockTarget=target;
+   run(b);
+   assert(Math.abs(b.pos.x-(100+10*scale))<1e-4 && Math.abs(b.pos.y-(200+20*scale))<1e-4 &&
+    Math.abs(b.pos.z-(300+30*scale))<1e-4,`${name} uses own history regardless of target`);
+  }
  }
  const a=createRomActor();a.pos={x:0,y:100,z:0};a.lockTarget={x:0,y:-10000,z:0};
  for(let i=0;i<100;i++){a.fbPhaseSlots[0]=0;a.targetCache5e8={...a.pos};run(a);}

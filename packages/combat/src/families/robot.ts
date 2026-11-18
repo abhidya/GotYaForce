@@ -14,7 +14,7 @@
 //   chunk_0053.c:2818 (MEGATON spawner FUN_801b8b6c — pl0407 path)
 //
 // The X-special is a 3-phase "dive-bomb deploy": the borg blinks away from its lock
-// target (phase 0), dives forward ticking its group-4 stream (phase 1); on the
+// own position history (phase 0), dives forward ticking its group-4 stream (phase 1); on the
 // stream's part-0 contact byte (+0x1cef) going positive it deducts 1 ammo from slot 2
 // and spawns a borg-switched child (the "build"/"deploy"), then continues the dive.
 // On grounding it advances to recovery (phase 2); recovery ticks until a second
@@ -100,12 +100,6 @@ function spawnForBorg(borgNumber: number): { addr: number; type: number } {
   }
 }
 
-/** The lock-target position the phase handlers read at actor+0x5e8 (bridge-synced). */
-function lockTargetPos(actor: RomActor): { x: number; y: number; z: number } | null {
-  const t = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
-  return t ?? null;
-}
-
 /** Airborne test — the ROM reads +0x5e0 & 0x40 (position-frozen/air control bit). The
  *  bridge mirrors BorgRuntime.grounded onto the actor; prefer that live value. */
 function isAirborne(actor: RomActor): boolean {
@@ -133,15 +127,10 @@ function robotXPhase0(actor: RomActor, _ctx: RobotFamilyCtx): void {
   actor.gravityCoeff = ROBOT_X.ZERO;
   (actor as RomActor & { [ROBOT_X.MEGATON_LATCH_FIELD]?: number })[ROBOT_X.MEGATON_LATCH_FIELD] = 0;
 
-  // Blink-reposition: motion = pos − lockTargetPos; motion ×= 0.95; pos += motion —
-  // the signature "blink away to double distance" windup (identical shape to G Crash
-  // and the shared X-special). chunk_0031.c:1274-1277 via gnt4_PSVECSubtract/Scale/Add.
-  const target = lockTargetPos(actor);
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(ROBOT_X.REPOSITION_SCALE, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // FUN_80113334 carries the actor's older own +0x5e8 position, not the target.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(ROBOT_X.REPOSITION_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
 
   // zz_00677b0_(actor) — ground/wall collide runs in the ROM right after the reposition;
   // the bridge applies the host's bounds clamp + off-mesh revert in tryStartXSpecial,

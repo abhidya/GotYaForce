@@ -40,7 +40,7 @@ const SWORD_KNIGHT_X = {
   /** FLOAT_804377e8 — phase-0 windup timer seed (copied into +0x558; phase 1 ticks it
    *  down by +0x1dc8 per frame). */
   WINDUP_TIMER: 20.0,
-  /** FLOAT_804377ec — motion-scale for the PSVEC reposition (motion = (pos − target) ×
+  /** FLOAT_804377ec — motion-scale for the PSVEC carry (motion = (pos − own history) ×
    *  0.95; pos += motion). Same value as G RED's G_CRASH RELPOS_SCALE. */
   REPOSITION_SCALE: 0.95,
   /** FLOAT_804377f0 — motion-magnitude threshold above which phase 2 calls the drift-
@@ -59,13 +59,6 @@ const SWORD_KNIGHT_X = {
   /** Air stream slot (controlWord & 0x40 set → slot 1, kind 18). */
   AIR_SLOT: 1,
 } as const;
-
-/** The lock-target position the family handler reads at actor+0x5e8 (same field G RED's
- *  *  + Star Hero's handlers consume). */
-function lockTargetPos(actor: RomActor): { x: number; y: number; z: number } | null {
-  const t = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
-  return t ?? null;
-}
 
 // ============================================================================
 // Phase 0 — zz_007454c_ @ chunk_0010.c:1664. Windup: zero velocity, reposition ×0.95
@@ -91,15 +84,10 @@ function swordKnightXPhase0(actor: RomActor, ctx: StreamContext): void {
   // Zero the yaw accumulators +0x80/+0x7e/+0x7c (chunk_0010.c:1679-1681). These aren't
   // surfaced as RomActor fields; they live in the family-local scratch the host streams.
 
-  // Reposition: motion = (pos − lockTarget); motion ×= 0.95; pos += motion
-  // (chunk_0010.c:1682-1685: PSVECSubtract → PSQUATScale → PSVECAdd). The 5% pull-back
-  // from the target is the windup spacing shared with G RED's G Crash + Star Hero's dash.
-  const target = lockTargetPos(actor);
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(SWORD_KNIGHT_X.REPOSITION_SCALE, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // zz_007454c_ carries the actor's older own position at +0x5e8, not the target.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(SWORD_KNIGHT_X.REPOSITION_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
 
   // zz_00679d0_(actor) — pre-step the velocity integrator once with the zeroed scalars
   // (chunk_0010.c:1686). No-op when all four scalars are 0; skipped.
