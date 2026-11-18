@@ -44,7 +44,7 @@ function setup(collision: StageCollision, id = "pl0004") {
 
 export function runRomCollisionSelfTest(): void {
   // Source 8034cfce op11 reaches the production Battle ammo owner, while
-  // 80099e70 effect triggers must not become generic damaging projectiles.
+  // 80099e70 children use their original variant rows, not generic shot kinds.
   {
     const t = setup(geometry());
     const cell = t.borg.weaponCells?.[0]; assert(cell, "primary weapon cell exists");
@@ -58,8 +58,9 @@ export function runRomCollisionSelfTest(): void {
     for (let i = 0; i < 20; i++) t.tick();
     assert(allocations === 1 && cell.cur === 0 && t.borg.ammo === 0,
       "source action consumes one real Battle weapon charge");
-    assert(battleStateForSelfcheck(t.battle).projectiles.filter(p => p.ownerUid === t.borg.uid).length === 0,
-      "source effect triggers do not create generic damaging projectiles");
+    const children = battleStateForSelfcheck(t.battle).projectiles.filter(p => p.ownerUid === t.borg.uid);
+    assert(children.length === 2 && children.every(p => p.romShotKind === 0 && p.life <= 120),
+      "source callback creates two decoded-variant children");
   }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
