@@ -159,6 +159,25 @@ export function runRomCollisionSelfTest(): void {
     bridge.dispatchEvent(frame);
     assert(spawned === expected, `${id} fireChild obeys source wait and part mask`);
   }
+  // Grounded close-B must reach Kung-Fu Master's source action and its slot1 child.
+  {
+    const t = setup(geometry(), "pl0800");
+    const enemy = t.actors.find(b => b.team === 1)!;
+    enemy.pos = { x: 0, y: 10, z: 50 }; t.borg.lockTarget = enemy.uid;
+    let variant = -1; let emittedKind = -1;
+    const original = t.driver.ctx.onFireChild!;
+    t.driver.ctx.onFireChild = (actor, id) => {
+      original(actor, id); variant = id;
+      const internal = t.driver as unknown as { pendingProjectiles: {romShotKind?: number}[] };
+      emittedKind = internal.pendingProjectiles.at(-1)?.romShotKind ?? -1;
+    };
+    t.inputs.p1.attack = true; t.tick(); t.inputs.p1.attack = false;
+    assert(t.borg.command?.recordAddress === "0x802d6210" && t.borg.cooldowns["romSpecialActive"] === 1,
+      "Kung-Fu Master grounded close-B enters source action1/v0");
+    for (let i = 0; i < 40 && variant < 0; i++) t.tick();
+    assert(variant === 16 && emittedKind === 0,
+      "real Battle input reaches source slot1 variant16 and creates its kind0 child");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));
