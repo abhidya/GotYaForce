@@ -149,6 +149,9 @@ interface Actor {
   /** Last zz_00b22f4_ edge consumed for this actor. */
   afterimageSerial: number;
   fallbackSpecialBurstSerial: number;
+  /** Render-only fallback G Crash fire; keyed by source animation epoch/frame. */
+  crashFireSerial: number;
+  crashFireBucket: number;
 }
 
 /**
@@ -941,6 +944,7 @@ export class BattleScene {
         this.spawnSpecialBurst(burst.pos, burst.radius);
       }
       if ((slot === "shoot" || slot === "charge_shot") && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY, b.team);
+      this.syncGRedCrashFire(actor, b);
       this.syncChargeGlow(actor, b);
       this.syncStatusFx(actor, b);
       if (b.romAfterimage && b.romAfterimage.serial !== actor.afterimageSerial) {
@@ -1099,6 +1103,8 @@ export class BattleScene {
       statusFx: { slow: null, haste: null },
       afterimageSerial: 0,
       fallbackSpecialBurstSerial: 0,
+      crashFireSerial: -1,
+      crashFireBucket: -1,
     };
     const revision = actor.modelRevision;
     void this.attachModel(b.uid, actor, presentationId, placeholder, revision).catch((error: unknown) => {
@@ -2595,6 +2601,30 @@ export class BattleScene {
       endScale: 170,
       opacity: 0.8,
     });
+  }
+
+  /** Temporary visual approximation: reuse the extracted flame texture during
+   * G Red's admitted G Crash contact/hold frames. The real effect child and its
+   * transforms remain unported; neither visuals nor exact timing are claimed
+   * as retail parity. Animation epochs prevent duplicate emission on render
+   * resyncs or a held source frame. */
+  private syncGRedCrashFire(actor: Actor, b: BattleActorView): void {
+    const sample = b.sourceAnimSample;
+    const ref = b.meleeAnimStream;
+    const texture = this.projectileTextures.get("flame");
+    if (!texture || !b.alive || (b.combatFormId ?? b.borgId) !== "pl0615" ||
+        b.anim !== "special" || ref?.group !== 4 || ref.slot !== 0 ||
+        !sample || sample.frame < 40 || sample.frame >= 64) return;
+    const bucket = Math.floor((sample.frame - 40) / 4);
+    if (actor.crashFireSerial !== sample.serial) {
+      actor.crashFireSerial = sample.serial;
+      actor.crashFireBucket = -1;
+    }
+    if (bucket <= actor.crashFireBucket) return;
+    actor.crashFireBucket = bucket;
+    const at = new THREE.Vector3(b.pos.x, b.pos.y + ACTOR_CHEST_Y, b.pos.z);
+    this.spawnBurstSprite(texture, at, { ttl: 0.3, startScale: 90, endScale: 150,
+      opacity: 0.8, blending: THREE.AdditiveBlending });
   }
 
   /** Dash/boost burst: ptcl00.txg#0 wispy white star, edge-triggered on dash entry. */
