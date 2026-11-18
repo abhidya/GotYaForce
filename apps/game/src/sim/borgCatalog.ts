@@ -16,6 +16,13 @@ const DEFAULT_FORCE_SLOT_SEEDS: ForceSlot[] = [
   { no: 1, name: "G RED FORCE", borgIds: [DEFAULT_LEAD] },
   { no: 2, name: "DEATH BORG FORCE", borgIds: ["pl0008", "pl000c"] },
   { no: 3, name: "GUN BORG FORCE", borgIds: ["pl0102", "pl0104"] },
+  // Browser starter presets, not a claim about the retail memory-card contents.
+  // Each full roster fits Challenge's lowest (1500) energy budget. Existing
+  // saved slots take precedence when syncForceSlots restores them.
+  { no: 4, name: "G RED ALL STARS", borgIds: ["pl0615", "pl0000", "pl0100", "pl0200", "pl0300", "pl0103"] },
+  { no: 5, name: "NINJA SQUAD", borgIds: ["pl0000", "pl0001", "pl0002", "pl0004", "pl0307"] },
+  { no: 6, name: "GUNNER SQUAD", borgIds: ["pl0100", "pl0101", "pl0102", "pl0103", "pl0107"] },
+  { no: 7, name: "KNIGHT AND ROBOT", borgIds: ["pl0200", "pl0201", "pl0400", "pl0407"] },
 ];
 
 export interface GameBorgCatalog {
