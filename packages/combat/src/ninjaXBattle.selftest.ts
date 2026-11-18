@@ -139,6 +139,11 @@ function testAdmissionAndRelease(): void {
           sample.blend.duration === stream.blendTotal && sample.blend.previousWeight ===
           Math.fround(1 - divideSourceAnimationFloat32(stream.blendElapsed, stream.blendTotal)),
           'sample preserves source mode-1 clock and saved-pose weight');
+        if (stream.blendTotal === 7 && Number.isInteger(stream.blendElapsed) && stream.blendElapsed >= 1 && stream.blendElapsed <= 6) {
+          const expected = [0, 0x3f5b6db7, 0x3f36db6e, 0x3f124924, 0x3edb6db6, 0x3e924924, 0x3e124924];
+          const bits = new DataView(new ArrayBuffer(4)); bits.setFloat32(0, sample.blend.previousWeight);
+          assert(bits.getUint32(0) === expected[stream.blendElapsed], 'seven-frame source weight bits');
+        }
       } else assert(sample.blend === null, 'completed source blend clears the published clock');
     };
     checkSourceBlend();
