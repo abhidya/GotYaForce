@@ -51,6 +51,20 @@ function release(t:Fixture){
  assert(t.hitArms.some(a=>a.join(',')==='0,14,255'),'source forwards HIT0/status14/255 metadata without inventing an attack');
  checkSample(t);return t.charge;
 }
+function testSoloBurstAcceleratesHeldB(){
+ const normal=setup(), boosted=setup();
+ bank(normal,10);bank(boosted,10);
+ const meter=boosted.state.burstMeterByPlayer.p1!;
+ meter.meter=3000;meter.unclamped=3000;meter.charged=true;
+ boosted.input.p1.hyper=true;boosted.tick();boosted.input.p1.hyper=false;
+ normal.tick();
+ assert(boosted.owner.burstPaired,'solo Y reaches source burst flag');
+ for(let i=0;i<3;i++){normal.tick();boosted.tick();}
+ assert((boosted.owner.cooldowns['chargeFrames']??0)>(normal.owner.cooldowns['chargeFrames']??0),
+  'actual held G Red B advances faster during solo Y burst');
+ boosted.input.p1.attack=false;boosted.tick();
+ assert(boosted.charge,'boosted real B release enters charged source action');
+}
 function testSourceReleaseAndLifecycle(){
  for(const id of ids){
   const t=setup(id);bank(t);const s=release(t),initialSerial=checkSample(t);
@@ -129,4 +143,4 @@ function testInterruptionAndIsolation(){
  const black=setup('pl062a');bank(black);black.input.p1.attack=false;black.tick();assert(!black.charge,'BLACK separate charge engine remains outside this lane');
  const beam=setup('pl0104');beam.input.p1.special=true;beam.tick();until(beam,()=>beam.state.projectiles.some(p=>p.ownerUid===beam.owner.uid&&p.beamSource),'Beam Gunman original X startup reaches row1 beam');assert(beam.state.projectiles.some(p=>p.ownerUid===beam.owner.uid&&p.beamSource&&p.beamSource.sourceRow!==15),'Beam Gunman X retains its separate row1 beam');
 }
-export function runGredChargeBattleSelfTest(){testSourceReleaseAndLifecycle();testIndependentPulsesAndDeathTail();testFreshEdgeExtension();testAmmoAndReleaseEdges();testInterruptionAndIsolation();console.log('[gredChargeBattle] PASS: real banked release, source callback/beam, ammo, lifecycle and isolation');}
+export function runGredChargeBattleSelfTest(){testSoloBurstAcceleratesHeldB();testSourceReleaseAndLifecycle();testIndependentPulsesAndDeathTail();testFreshEdgeExtension();testAmmoAndReleaseEdges();testInterruptionAndIsolation();console.log('[gredChargeBattle] PASS: real banked release, burst charge, source callback/beam, ammo, lifecycle and isolation');}

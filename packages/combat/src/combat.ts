@@ -2817,10 +2817,15 @@ export function stepAttacks(
         if (shotDef.chargeable) {
           if (attackHeld) {
             // Hold-to-charge: accumulate (capped) and consume the button for this frame.
-            b.cooldowns["chargeFrames"] = Math.min(
-              shotDef.chargeTier2Frames,
-              (b.cooldowns["chargeFrames"] ?? 0) + 1,
-            );
+            const heldFrames = b.cooldowns["chargeFrames"] ?? 0;
+            // G Red's host hold bank remains an approximation, but the source
+            // charge helper (800686f0) scales mature charge by 10 * actor+768
+            // when +6fc is active, after a 10-frame warmup. The bank is not the
+            // original actor's separate warmup/charge fields, so this does not
+            // claim exact threshold or release parity.
+            const gRedBurstRate = b.borgId === "pl0615" && b.burstPaired && heldFrames >= 10
+              ? Math.fround((b.sourceAmmoRefillRate ?? 1) * 10) : 1;
+            b.cooldowns["chargeFrames"] = Math.min(shotDef.chargeTier2Frames, heldFrames + gRedBurstRate);
             break;
           }
           if (releasedAttack && (b.cooldowns["chargeFrames"] ?? 0) > 0) {
