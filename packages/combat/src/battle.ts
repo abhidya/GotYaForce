@@ -85,7 +85,7 @@ import {
   attackHitRecordsForKind,
 } from "./attackHitData.js";
 import { challengeSideRanksForMode } from "./damageFormula.js";
-import { nextRomProjectileUid, resetRomProjectileCounter } from "./projectiles.js";
+import { nextRomProjectileUid, resetRomProjectileCounter, spawnRomProjectile, projectileVariant } from "./projectiles.js";
 import { setBootConfigByte } from "./bootGlobals.js";
 import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
@@ -805,6 +805,15 @@ class BattleImpl implements Battle {
     *  the variant table (DAT_802f3dda) via findVariantByKind, and finally the SHOT.* tuned
     *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number, actor?: RomActor): void {
+    // Acceleration Ninja's 80099e70 rows 0x21–0x24 are source child
+    // variants, not arbitrary HIT kinds. Reuse the existing decoded variant
+    // spawner. Its muzzle, target and generic rendering remain approximations.
+    if (b.borgId === "pl0004" && spawnerAddr === 0x80099e70 && kind >= 0x21 && kind <= 0x24) {
+      const child = spawnRomProjectile(b, kind, b.rotY);
+      const variant = projectileVariant(kind);
+      if (child && variant) {child.romShotKind = variant.kind; child.drop = -variant.drop; this.state.projectiles.push(child);}
+      return;
+    }
     if (actor) {
       const switching=spawnSwitchingSource(b,actor,spawnerAddr,kind);
       if(switching!==null){this.state.projectiles.push(...switching);return;}

@@ -44,7 +44,7 @@ function setup(collision: StageCollision, id = "pl0004") {
 
 export function runRomCollisionSelfTest(): void {
   // Source 8034cfce op11 reaches the production Battle ammo owner, while
-  // 80099e70 effect triggers must not become generic damaging projectiles.
+  // 80099e70 children use their original variant rows, not generic shot kinds.
   {
     const t = setup(geometry());
     const cell = t.borg.weaponCells?.[0]; assert(cell, "primary weapon cell exists");
@@ -58,8 +58,28 @@ export function runRomCollisionSelfTest(): void {
     for (let i = 0; i < 20; i++) t.tick();
     assert(allocations === 1 && cell.cur === 0 && t.borg.ammo === 0,
       "source action consumes one real Battle weapon charge");
-    assert(battleStateForSelfcheck(t.battle).projectiles.filter(p => p.ownerUid === t.borg.uid).length === 0,
-      "source effect triggers do not create generic damaging projectiles");
+    const children = battleStateForSelfcheck(t.battle).projectiles.filter(p => p.ownerUid === t.borg.uid);
+    assert(children.length === 2 && children.every(p => p.romShotKind === 0 && p.life <= 120),
+      "source callback creates two decoded-variant children");
+  }
+  // An empty source weapon cell must not create the callback's children.
+  {
+    const t = setup(geometry());
+    const cell = t.borg.weaponCells?.[0]; assert(cell, "primary weapon cell exists");
+    Object.assign(cell, {max: 1, cur: 0, refillType: 0, refillParam: 1000, timer: 0});
+    t.borg.ammo = 0;
+    t.inputs.p1.attack = true; t.tick(); t.inputs.p1.attack = false;
+    for (let i = 0; i < 20; i++) t.tick();
+    assert(cell.cur === 0 && t.borg.ammo === 0, "empty weapon stays empty");
+    assert(battleStateForSelfcheck(t.battle).projectiles.every(p => p.ownerUid !== t.borg.uid),
+      "empty Battle input emits no source children");
+  }
+  // Dash row 0x23 has a +1 upward source velocity delta: Projectile.drop is positive down.
+  {
+    const t = setup(geometry());
+    t.driver.ctx.onFamilyProjectile!(t.driver.actor, 0x80099e70, 0x23);
+    const child = battleStateForSelfcheck(t.battle).projectiles.find(p => p.ownerUid === t.borg.uid);
+    assert(child?.drop === -1, "source child upward acceleration has the correct host sign");
   }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {

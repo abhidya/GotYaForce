@@ -142,7 +142,7 @@ import { configureVehicleFamily } from "./families/vehicle-borg.js";
 import { configureVictoryJetFamily } from "./families/victory-jet.js";
 import { configureVictoryKingFamily } from "./families/victory-king.js";
 import { configurePantherVehicleFamily } from "./families/panther-vehicle.js";
-import { configureAccelerationNinjaFamily, accelerationNinjaChargeArm, ACCELERATION_NINJA_EFFECT_TRIGGER } from "./families/acceleration-ninja.js";
+import { configureAccelerationNinjaFamily, accelerationNinjaChargeArm } from "./families/acceleration-ninja.js";
 import { configureWingSoldierFamily } from "./families/wing-soldier.js";
 import { configureCosmicDragonFamily } from "./families/cosmic-dragon.js";
 import { configureGoldHeroFamily } from "./families/gold-hero.js";
@@ -2099,12 +2099,8 @@ export class RomDriverBridge implements RomFamilyDriver {
       onReturnResource: (_actor, cell) => battleRuntime.returnResource?.(runtime, cell),
       onAllocateResource: (_actor, type, count, mode) =>
         battleRuntime.allocateResource(runtime, type, count, (mode ?? 0) !== 0),
-      onFamilyProjectile: (actor, addr, kind) => {
-        // 80099e70 allocates source children. Rows 21–24 are not yet
-        // represented by this adapter; don't substitute generic damaging shots.
-        if (runtime.borgId === "pl0004" && addr === ACCELERATION_NINJA_EFFECT_TRIGGER) return;
-        battleRuntime.spawnProjectile(runtime, addr, kind, actor);
-      },
+      onFamilyProjectile: (actor, addr, kind) =>
+        battleRuntime.spawnProjectile(runtime, addr, kind, actor),
       onSpawnChild: (_actor, childId) => {
         battleRuntime.spawnProjectile(runtime, 0, childId);
         return true;
