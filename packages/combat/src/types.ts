@@ -382,6 +382,8 @@ export interface BorgRuntime {
     blend?: { mode: 1; elapsed: number; duration: number;
       /** Source fsubs(1, fdivs(elapsed, duration)): weight of saved pose. */
       previousWeight: number;
+      /** Source descriptor order for the selected Ninja joints. */
+      jointIndices: readonly number[];
     } | null;
   } | null;
   /** The CURRENT melee swing's (or charged release's) PATH-B authored sound events (DERIVED —

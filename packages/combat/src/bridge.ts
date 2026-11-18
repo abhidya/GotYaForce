@@ -1,3 +1,4 @@
+import {NINJA_X_TRANSITION_JOINTS} from './ninjaXStream.js';
 import {divideSourceAnimationFloat32} from './rom/source-float32-divide.js';
 import {isSourceSwitchingX,getSwitchingXState,prepareSwitchingX,clearSwitchingX,startSwitchingXStream,tickSwitchingXStreamPart} from './switchingX.js';
 import {isSourceActorTickPrefixClaimedActor} from './rom/actor-tick-prefix.js';
@@ -2513,7 +2514,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       runtime.sourceAnimSample={serial:runtime.sourceAnimSample.serial,frame:sourceStream.frame,
         ...(ninja?.stream===sourceStream ? {blend:ninja.stream.blendMode===1 ?
           {mode:1 as const,elapsed:ninja.stream.blendElapsed,duration:ninja.stream.blendTotal,
-            previousWeight:Math.fround(1-divideSourceAnimationFloat32(ninja.stream.blendElapsed,ninja.stream.blendTotal))} : null} : {})};
+            jointIndices:NINJA_X_TRANSITION_JOINTS,previousWeight:Math.fround(1-divideSourceAnimationFloat32(ninja.stream.blendElapsed,ninja.stream.blendTotal))} : null} : {})};
     const nurse = this.specialActive ? getNurseXState(a) : undefined;
     if (nurse && !nurse.close && (a.fbPhaseSlots[0] ?? 0) >= 2 && (a.fbPhaseSlots[0] ?? 0) < 7) {
       Object.assign(runtime.vel, a.motion);
@@ -3145,7 +3146,7 @@ export class RomDriverBridge implements RomFamilyDriver {
         this.runtime.sourceAnimSample={serial:++sourceAnimationSerial,frame:sourceStream.frame,
           ...(ninjaStream && ninjaStream===sourceStream ? {blend:ninjaStream.blendMode===1 ?
             {mode:1 as const,elapsed:ninjaStream.blendElapsed,duration:ninjaStream.blendTotal,
-              previousWeight:Math.fround(1-divideSourceAnimationFloat32(ninjaStream.blendElapsed,ninjaStream.blendTotal))} : null} : {})};
+              jointIndices:NINJA_X_TRANSITION_JOINTS,previousWeight:Math.fround(1-divideSourceAnimationFloat32(ninjaStream.blendElapsed,ninjaStream.blendTotal))} : null} : {})};
     }
   }
 

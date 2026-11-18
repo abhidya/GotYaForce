@@ -25,18 +25,18 @@ JOBJ traversal. On 2026-11-18, the original AFS members 485 (Normal Ninja) and 4
 was decompressed locally and parsed with the repository's HSDRaw library;
 each `JOBJDescs` model index 0 has 20 nodes in its `RootJoint.TreeList`.
 The temporary archive files were deleted after inspection. This independently
-agrees with the 20 named JOBJ nodes in each checked-in GLB. It is a parse of
-original assets, not a live actor measurement. The existing
+agrees with the 20 named JOBJ nodes in each checked-in GLB. This archive parse alone is not a live actor measurement. The existing
 `research/format-specs/mot-animation-format.md` additionally notes 23
 AnimJoint nodes in Ninja's b00 animation tree.
 
 `8005380c` resets its counter between two `80067e18` walks and stores the
 second count. `800419ec` creates both `+708` and `+788` banks by calling
 `80007030` with the same model index; `80007030` loads a JOBJ root from that
-model descriptor. This supports the two roots having the same topology, but
-the identity of the runtime-selected model and the effects of subsequent
-setup must still be verified. Do not yet treat 20 as a captured `+1d90` value
-or assume the fourth range is empty.
+model descriptor. In a separate Dolphin JIT64 session of GG4E, a native roster reload into a
+Ninja versus Sasuke battle produced four active actors (two per ID). Each
+had `+1d90..1d93` equal to `[20,11,20,20]`, and the expected descriptor
+address for its ID. Thus the fourth selected range is empty for those
+observed actors. This is emulator evidence, not physical-console validation.
 
 The play instruction for Ninja ground/air X uses part mask `0xf` according to
 `ninja-source-x-2026-11-12.md`; this requests all four channels, not an

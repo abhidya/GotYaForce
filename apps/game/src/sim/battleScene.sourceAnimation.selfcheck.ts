@@ -79,12 +79,14 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
         async loadClip() { return clip('generic'); },
         async loadClipByStreamRef() { return clip('ninja'); },
       });
-      const blend = { mode: 1 as const, elapsed: 2, duration: 7, previousWeight: Math.fround(5 / 7) };
+      const blend = { mode: 1 as const, elapsed: 2, duration: 7, previousWeight: Math.fround(5 / 7), jointIndices: [2, 3, 0] };
       const sample: BattleActorView = { ...view(99, 0, 'pl0000'),
         sourceAnimSample: { serial: 99, frame: 0, blend } };
       await enter(scene, sample);
       assert(actor(scene).sourceAnimSample?.blend?.elapsed === 2, 'source blend clock reaches the live actor');
       blend.elapsed = 5;
+      blend.jointIndices[0] = 99;
+      assert(actor(scene).sourceAnimSample?.blend?.jointIndices[0] === 2, 'live actor copies the selected joints');
       assert(actor(scene).sourceAnimSample?.blend?.elapsed === 2, 'live actor copies the blend sample');
       scene.clear();
     }

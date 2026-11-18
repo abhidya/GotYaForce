@@ -1,3 +1,5 @@
+/** Selected joint order for Ninja mode-1 transitions with source part mask 0xf. */
+export const NINJA_X_TRANSITION_JOINTS: readonly number[] = Object.freeze([2,3,4,5,6,7,8,9,10,11,12,0,1,13,14,15,16,17,18,19]);
 /** Original Ninja g4s0/1 at802be5ee/802be656. Main raw AOBJ ends45/40,
  * descriptor rate is1. Recovery0/0 end120 flags5 loops;0/14 end1 flags1 does
  * not. The descriptor05 byte is flags, never a five-times playback rate.
