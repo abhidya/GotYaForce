@@ -1,6 +1,7 @@
 import {createSourceDObjAnimationRuntime} from './dobj-animation.js';
 import {createSourceDisplayAnimationAttachmentRuntime} from './display-animation-attachment.js';
 import {createSourceJObjAddAnimationRuntime} from './jobj-add-animation.js';
+import {createSourceJObjAddAnimationTreeRuntime} from './jobj-add-animation-tree.js';
 import {createSourceJObjAnimationRuntime} from './jobj-animation.js';
 import {createSourceJointAnimationFeedbackRuntime} from './joint-animation-feedback.js';
 import {createSourceFObjRuntime} from './fobj-list.js';
@@ -50,6 +51,37 @@ function fixture() {
   return {j, feedback, joint, fobjs, loader, descriptors, life, runtime, joints, lifecycle, order, hooks, events, nodes, allocations, input, id, d, ad, binding, scalar, run};
 }
 export function runJObjAddAnimationSelfTest(): void {
+  {const x = fixture();
+    const make = () => x.j.createJoint({sibling08: null, child10: null, flags14: 0,
+      rotation1c: 0, rotation20: 0, rotation24: 0, scale2c: 1, scale30: 1, scale34: 1,
+      translation38: 0, translation3c: 0, translation40: 0},
+    {parent0c: null, aobj7c: null, robj80: null, dobj18: null, classUpdate50: null});
+    const a = make(), b = make(), c = make(), grandchild = make();
+    x.j.getJoint(x.joint).child10 = a; x.j.getJoint(a).sibling08 = b; x.j.getJoint(b).sibling08 = c;
+    x.j.getJoint(a).child10 = grandchild;
+    const dGrandchild = x.runtime.createDescriptor({...x.d, flags10: 0});
+    const dC = x.runtime.createDescriptor(x.d);
+    const dB = x.runtime.createDescriptor({...x.d, flags10: 0, next04: dC});
+    const dA = x.runtime.createDescriptor({...x.d, child00: dGrandchild, next04: dB});
+    const rootDesc = x.runtime.createDescriptor({...x.d, flags10: 0, child00: dA});
+    const seen: symbol[] = [];
+    const adapter = {getDescriptor: x.runtime.getDescriptor, addAnimation(id: symbol | null, desc: symbol | null) {
+      if (id !== null) seen.push(id); x.runtime.addAnimation(id, desc);
+    }};
+    const tree = createSourceJObjAddAnimationTreeRuntime(x.j, adapter);
+    tree.addAnimationTree(x.joint, rootDesc);
+    check(seen.length === 5 && seen.every((id,i) => id === [x.joint,a,grandchild,b,c][i]), 'real owners attach in child/sibling depth-first order');
+    check([x.joint,a,grandchild,b,c].every(id => x.j.getBinding(id).aobj7c !== null), 'each reached joint owns actual loaded animation');
+    check([x.joint,a,grandchild,b,c].every((id,i) => Boolean(x.j.getJoint(id).flags14 & 8) === [false,true,false,false,true][i]),
+      'child/next descriptor identity selects the expected flag on each real joint');
+    seen.length = 0; x.j.getJoint(a).flags14 |= 0x1000;
+    tree.addAnimationTree(x.joint, rootDesc);
+    check(seen.length === 4 && seen.every((id,i) => id === [x.joint,a,b,c][i]), 'flag1000 skips descendants, not siblings');
+    seen.length = 0; x.j.getJoint(a).flags14 &= ~0x1000;
+    tree.addAnimationTree(x.joint, null);
+    check(seen.length === 5 && seen.every((id,i) => id === [x.joint,a,grandchild,b,c][i]), 'null descriptor still traverses all real joints');
+    tree.addAnimationTree(null, null);
+  }
   {const x = fixture(); check(Object.isFrozen(x.runtime) && Object.isSealed(x.d) && x.d !== x.input, 'owned descriptor');
     x.input.aobj08 = Symbol('unused'); x.input.flags10 = 0;
     x.run(); const old = x.binding.aobj7c!, oldRecord = x.feedback.getAObj(old), oldNodes = x.nodes.slice();

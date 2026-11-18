@@ -3,6 +3,7 @@ import {runSourceSlerpWeightsSelfTest} from './source-quaternion-slerp-weights.s
 import {runSourceAngleReductionSelfTest} from './source-angle-reduction.selftest.js';
 import {runSourceCosineKernelSelfTest} from './source-cosine.selftest.js';
 import {runSourceSineKernelSelfTest} from './source-sine.selftest.js';
+import {runJObjAddAnimationSelfTest} from './jobj-add-animation.selftest.js';
 import {runSourceAcosSmallSelfTest} from './source-acos.selftest.js';
 import {runReactionStreamSelfTest} from './reaction-stream.selftest.js';
 import {runReactionTurnSelfTest} from './reaction-turn.selftest.js';
@@ -212,6 +213,7 @@ function assert(cond: boolean, msg: string): void {
 }
 
 export function runSelfTest(): number {
+  runJObjAddAnimationSelfTest();
   runSourceAcosSmallSelfTest();
   runSourceSineKernelSelfTest();
   runSourceCosineKernelSelfTest();

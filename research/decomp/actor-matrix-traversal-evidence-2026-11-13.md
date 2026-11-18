@@ -243,3 +243,14 @@ candidate bit-for-bit. These are sampled calls, not exhaustive emulator or
 physical-console evidence. The isolated instance was stopped; the previously
 running emulator was left untouched. This remains an explicitly supplied
 offline provider, not a playable-renderer integration.
+
+### Offline animation-tree attachment
+
+The bounded `8024dd44` null-material/null-shape lane now traverses actual JObj
+child/sibling links alongside actual AnimJoint child/next links, delegating each
+visited joint to the existing single-joint animation owner. A `0x1000` JObj
+flag skips descendants; missing animation descriptors still traverse joints.
+The regression exercises real owners, including multiple siblings and a
+grandchild. The archive hydrator still rejects tree descriptors, this traversal
+has not been compared directly with Dolphin, and it is not connected to the
+playable renderer. Visit budgets and error handling are host-only bounds.
