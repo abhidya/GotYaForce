@@ -1,3 +1,4 @@
+import {divideSourceAnimationFloat32} from './rom/source-float32-divide.js';
 /** Real Battle input regressions for Normal Ninja/Sasuke source action2.
  * Projectile timing/data are source-backed. Natural contacts deliberately exercise
  * the host sweep and static-bind muzzle adapters, not original joint/HIT geometry.
@@ -135,7 +136,9 @@ function testAdmissionAndRelease(): void {
       assert(sample.frame === stream.frame, 'sample frame follows the source stream');
       if (stream.blendMode === 1) {
         assert(sample.blend?.mode === 1 && sample.blend.elapsed === stream.blendElapsed &&
-          sample.blend.duration === stream.blendTotal, 'sample preserves source mode-1 blend clock');
+          sample.blend.duration === stream.blendTotal && sample.blend.previousWeight ===
+          Math.fround(1 - divideSourceAnimationFloat32(stream.blendElapsed, stream.blendTotal)),
+          'sample preserves source mode-1 clock and saved-pose weight');
       } else assert(sample.blend === null, 'completed source blend clears the published clock');
     };
     checkSourceBlend();
