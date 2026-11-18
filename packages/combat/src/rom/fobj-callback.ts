@@ -1,9 +1,9 @@
 /** Bounded offline scalar callback slice of FObjInterpretAnim (80249ac4).
  * Source: chunk_0071.c:869–1207; audited DOL call sites 80249d28 (state6),
  * 80249eb8 (state3), 8024a134 (state4). Uses the actual loader/wait/timing core,
- * not decoded-key sampling. Only eligible constant1, linear2 and key6 callbacks
- * are supported; all other eligible opcodes fail rather than synthesizing a
- * value or calling the unaudited spline. No full FObj, JObj or live integration.
+ * not decoded-key sampling. Eligible constant1, linear2, spline3–5 and key6
+ * callbacks are supported; other eligible opcodes fail. The spline instruction
+ * schedule is an offline candidate, not yet verified on physical hardware.
  *
  * Explicit factory binding supplies the owner absent from SourceAObjEffects.
  * Owner/callback symbols are identities, never RAM pointers. The scalar is a
@@ -16,6 +16,7 @@
  * NI=1, pending raw-capture provenance reconciliation; no parity for that mode.
  */
 import {evaluateSourceFObjLinearValue} from './fobj-linear.js';
+import {sourceHermite} from './source-hermite.js';
 import {createSourceFObjTimingRuntime, type SourceFObjTimingRuntime} from './fobj-timing-core.js';
 
 export type SourceFObjCallbackOwner = symbol | null;
@@ -43,6 +44,10 @@ export function createSourceFObjScalarCallbackRuntime(owner: SourceFObjCallbackO
       switch (n.byte12) {
         case 1: value = n.frame1c < n.half1a ? n.value20 : n.value24; break;
         case 2: value = evaluateSourceFObjLinearValue(r, n); break;
+        case 3: case 4: case 5:
+          value = n.half1a === 0 ? n.value24 : sourceHermite(Math.fround(1 / n.half1a), n.frame1c,
+            n.value20, n.value24, n.value28, n.value2c);
+          break;
         case 6:
           if ((n.flags10 & 0x80) === 0) return;
           value = n.value20;

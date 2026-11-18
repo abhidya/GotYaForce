@@ -225,13 +225,23 @@ export function runFObjCallbackSelfTest(): void {
     check(f.n.frame1c === 2, 'null identities and direct state0 preserve their early-return contracts');
   }
   for (const phase of [3, 4, 6]) {
-    for (const op of [0, 3, 4, 5, 7, 15, 255]) {
+    for (const op of [0, 7, 15, 255]) {
       const f = fixture([1], {flags10: 0xa0 | phase, byte12: op}); const c = record(f);
       rejects(() => c.run(1), `unsupported eligible opcode ${op}`);
       check(c.calls.length === 0 && f.n.frame1c === 3 && f.n.flags10 === (0xa0 | phase) && f.offset() === 0,
         'unsupported eligible interpolation refuses with completed clock but no callback or invented zero');
       const skip = fixture([10, 0], {flags10: 3, byte12: op}); const s = record(skip); s.run();
       check(s.calls.length === 0, 'unsupported but ineligible state3 opcode is not prematurely rejected');
+    }
+  }
+  for (const phase of [3, 4, 6]) for (const op of [3, 4, 5]) {
+    const f = fixture([10,0], {flags10: 0x80 | phase, byte12: op, frame1c: 2,
+      value20: 10, value24: 18, value28: 30, value2c: 40});
+    const c = record(f); c.run();
+    check(c.calls.length === 1 && c.calls[0]!.value === 9, 'spline midpoint evaluated at every eligible callback phase');
+    if (phase !== 4) {
+      const zero = fixture([10,0], {flags10: 0x80 | phase, byte12: op, half1a: 0});
+      const z = record(zero); z.run(); check(z.calls[0]!.value === 18, 'zero-duration spline returns endpoint');
     }
   }
   {
@@ -303,5 +313,5 @@ export function runFObjCallbackSelfTest(): void {
     rejects(() => interpretSourceAObj(x, e.cb, reenter.r.effects, createSourceAObjCounters()), 'same-AObj reentry');
     check(x.frame === 1 && reenter.n.flags10 === 6, 'AObj reentry retains preceding clocks and key clear');
   }
-  console.log('[fobj-callback] PASS: bounded scalar1/2/6 callbacks through actual loader/timing and AObj effects; synthetic coverage, no full FObj or live integration');
+  console.log('[fobj-callback] PASS: bounded scalar1–6 callbacks through actual loader/timing and AObj effects; synthetic coverage, no full FObj or live integration');
 }
