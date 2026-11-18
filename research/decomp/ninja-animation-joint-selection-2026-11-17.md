@@ -20,10 +20,15 @@ Their first 20 signed joint-map bytes at `+8c` are:
 Original setup copies the boundary bytes to actor `+1d91..1d93`.
 `8004b8f4` uses those values for the first three channel boundaries; the
 fourth range ends at actor `+1d90`. `8005380c` sets that count from archive
-JOBJ traversal. `research/format-specs/mot-animation-format.md` records 20 JOBJ nodes in
-`pl0000` model_00, and 23 AnimJoint nodes in its b00 animation tree. The
-checked-in GLBs for `pl0000` and `pl000a` each have 20 named JOBJ nodes; this
-is evidence about exported models, not a live actor measurement.
+JOBJ traversal. On 2026-11-18, the original AFS members 485 (Normal Ninja) and 495
+(Sasuke) were read from the user-supplied GG4E disc. Member 5 of each PZZ
+was decompressed locally and parsed with the repository's HSDRaw library;
+each `JOBJDescs` model index 0 has 20 nodes in its `RootJoint.TreeList`.
+The temporary archive files were deleted after inspection. This independently
+agrees with the 20 named JOBJ nodes in each checked-in GLB. It is a parse of
+original assets, not a live actor measurement. The existing
+`research/format-specs/mot-animation-format.md` additionally notes 23
+AnimJoint nodes in Ninja's b00 animation tree.
 
 `8005380c` resets its counter between two `80067e18` walks and stores the
 second count. `800419ec` creates both `+708` and `+788` banks by calling
