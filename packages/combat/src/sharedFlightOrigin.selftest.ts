@@ -10,6 +10,9 @@ import {createMeleeGirlLunge} from './families/melee-girl-lunge.js';
 import {createBarrierGirlX} from './families/girl-cluster.js';
 import {createEagleRobotAction0} from './families/eagle-robot.js';
 import {createStarHeroRootAction} from './families/star-hero.js';
+import {createMeleeSamurai,SAMURAI_MELEE_DEFAULT_CONFIG} from './families/melee-samurai.js';
+import {createSharedCharge,GRED_CHARGE_CONFIG} from './families/shared-charge.js';
+import {createSharedCharge3,FAMILY1_CHARGE3_CONFIG} from './families/shared-charge3.js';
 function assert(v:unknown,m:string):asserts v {if(!v) throw Error(`[sharedFlightOrigin] ${m}`);}
 export function runSharedFlightOriginSelfTest():void {
  const run=createSharedFlightX(FLIGHT_X_FAMILY4_CONFIG,{});
@@ -65,6 +68,18 @@ export function runSharedFlightOriginSelfTest():void {
    b.actionIndex=action;b.variantIndex=0;make({})(b);
    assert(Math.abs(b.motion.x-9.5)<1e-4 && Math.abs(b.motion.y-19)<1e-4 && Math.abs(b.motion.z-28.5)<1e-4,
     `${name} derives scaled carry from own history independently of target`);
+  }
+ }
+ for(const [name,run,scale] of [
+  ['samurai melee',createMeleeSamurai({}, {...SAMURAI_MELEE_DEFAULT_CONFIG,repositionScale:0.95}),0.95],
+  ['shared charge',createSharedCharge({...GRED_CHARGE_CONFIG,onSetup:null},{}),GRED_CHARGE_CONFIG.repositionScale],
+  ['shared charge3',createSharedCharge3(FAMILY1_CHARGE3_CONFIG,{}),FAMILY1_CHARGE3_CONFIG.repositionScale],
+ ] as const) {
+  for(const target of [{x:-4000,y:-9000,z:6000},null]) {
+   const b=createRomActor();b.pos={x:100,y:200,z:300};b.targetCache5e8={x:90,y:180,z:270};b.lockTarget=target;
+   run(b);
+   assert(Math.abs(b.pos.x-(100+10*scale))<1e-4 && Math.abs(b.pos.y-(200+20*scale))<1e-4 &&
+    Math.abs(b.pos.z-(300+30*scale))<1e-4,`${name} uses own history regardless of target`);
   }
  }
  console.log('[sharedFlightOrigin] PASS: own-position history and no-target entry');
