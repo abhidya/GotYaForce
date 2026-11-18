@@ -294,11 +294,11 @@ function flightPhase0(actor: RomActor, cfg: SharedFlightXConfig, ctx: StreamCont
   // subtraction is unconditional in FUN_80149758, including no-target entry.
   // Using the target repeatedly amplifies separation and can fling combatants
   // to astronomical heights during Challenge battles.
+  const previous = {...actor.pos};
   vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
   vecScale(cfg.reposScale, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
-  // Commit zz_00679d0_ — ground-probe + position commit; the port's integrator/bridge
-  // ground clamp covers it (no separate call needed here).
+  probeFlightCarry(actor, previous); // source 679d0 invokes terrain collision
 
   // zz_004beb8_(−1.0 = FLOAT_8043a37c, actor, partMask 0xf, group 4, slot = +0x6ea
   // then +0x6ea++, −1, −1).
@@ -311,10 +311,22 @@ function flightPhase0(actor: RomActor, cfg: SharedFlightXConfig, ctx: StreamCont
 // ============================================================================
 // Phase 1 — FUN_8014989c @0x8014989c. Reposition tail + face-target budget.
 // ============================================================================
+/** Host approximation of 679d0 -> 677b0 terrain collision. */
+function probeFlightCarry(actor: RomActor, previous: Vec3): void {
+  const floor = actor.physicsRuntime;
+  if (!floor) return;
+  const result = floor.probeMotion ? floor.probeMotion(previous, actor.pos, actor.yVel) : floor.clampToGround(actor.pos, actor.yVel);
+  if ('y' in result && typeof result.y === 'number') actor.pos.y = result.y;
+  actor.yVel = result.velY;
+  (actor as RomActor & { grounded?: boolean }).grounded = result.grounded;
+}
+
 function flightPhase1(actor: RomActor, cfg: SharedFlightXConfig, ctx: StreamContext): void {
   // Reposition continuation: motion ×= reposScale; pos += motion; commit.
+  const previous = {...actor.pos};
   vecScale(cfg.reposScale, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
+  probeFlightCarry(actor, previous);
 
   // ROM gates the tick on s8 +0x1b03 != 0 (part-anim-hold byte, not surfaced by the
   // VM) — PORT APPROXIMATION: tick unconditionally (the shared-x/ninja precedent).
@@ -345,8 +357,10 @@ function flightPhase2(actor: RomActor, cfg: SharedFlightXConfig, ctx: StreamCont
   steerPitchTowardTarget(actor); // zz_006e1ac_(actor, 0xc0, 1)
 
   // Reposition continue: motion ×= reposScale; pos += motion; commit.
+  const previous = {...actor.pos};
   vecScale(cfg.reposScale, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
+  probeFlightCarry(actor, previous);
 
   // LAUNCH on s8 +0x1cee != 0 (actor.wallContact) — the stream-raised launch signal
   // set during the windup anim. PORT APPROXIMATION (labeled per launchFrames): the

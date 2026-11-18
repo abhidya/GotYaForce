@@ -56,6 +56,17 @@ export function runSharedFlightOriginSelfTest():void {
     Math.abs(b.pos.z-(300+30*scale))<1e-4,`${name} uses own history regardless of target`);
   }
  }
+ // Source flight phases 0-2 each invoke terrain collision after carrying motion.
+ {
+  const b=createRomActor(); b.pos={x:0,y:10,z:0}; b.targetCache5e8={x:0,y:10,z:-20};
+  const calls:number[]=[];
+  b.physicsRuntime={
+   clampToGround:(pos,velY)=>({y:pos.y,velY,grounded:true}),
+   probeMotion:(previous,pos,velY)=>{calls.push(previous.z); pos.z=Math.min(pos.z,10);return {velY,grounded:true};}};
+  run(b); assert(b.pos.z===10 && calls[0]===0,'flight entry terrain blocks wall crossing');
+  b.fbPhaseSlots[0]=1;run(b);b.fbPhaseSlots[0]=2;run(b);
+  assert(calls.length===3 && calls[1]===10 && calls[2]===10 && b.pos.z===10,'each windup phase probes once from prior point');
+ }
  const a=createRomActor();a.pos={x:0,y:100,z:0};a.lockTarget={x:0,y:-10000,z:0};
  for(let i=0;i<100;i++){a.fbPhaseSlots[0]=0;a.targetCache5e8={...a.pos};run(a);}
  assert(a.pos.y===100,'repeated zero-motion entries cannot amplify distance to target');
