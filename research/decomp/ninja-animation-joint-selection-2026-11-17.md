@@ -70,3 +70,22 @@ bound at `+c13`. Both pass the selected object to `zz_00076d0_`, then call
 addresses. The exact mapping from those original archive/model entries to the
 exported GLB meshes remains unverified, so setting `Object3D.visible` from
 these bytes would not be a supported port of this behavior.
+
+## Ninja draw descriptor candidates
+
+Read-only inspection of the user-supplied GG4E DOL on 2026-11-18 resolves
+`PTR_PTR_802d2564[0]` to `802d14b4`. Variant 0 points to `802d1334` and
+variant 10 to `802d146c`. The Normal descriptor's first drawable row is
+`[1,7,0,0]`, followed by candidates with first bytes 2 through 5 and type
+byte `ff`; its second drawable row is `[6,11,1,0]`, followed by candidates
+7 through 9 with type `ff`. Sasuke has the same rows and one additional
+candidate with first byte 10. Each list ends in `ff`.
+
+Together with the `8004fcfc` dispatch and `8004fdf0/8004fe60` consumers,
+this identifies descriptor bases 1 and 6 and the source joint-mask bits 7
+and 11. It does not by itself establish which exported mesh corresponds to
+any archive pointer or whether each selector value is valid for each variant.
+The currently checked-in character model directories contain only
+`model_00.glb`; the selected additional source objects have not yet been
+traced to equivalent rendered geometry. Do not infer a Boolean visibility map
+or claim complete Ninja appearance from these descriptor rows alone.
