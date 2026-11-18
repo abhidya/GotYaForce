@@ -262,6 +262,14 @@ export function createForceBuilder(
     return totalCost() + (byId.get(id)?.energy ?? 0) <= opts.limit;
   }
 
+  // Native buttons synthesize their own click for Enter/Space. Keep those
+  // keystrokes from also dispatching a confirm through the global menu bus.
+  function isolateNativeActivation(button: HTMLElement): void {
+    button.addEventListener("keydown", (event) => {
+      if (event.code === "Enter" || event.code === "Space") event.stopPropagation();
+    });
+  }
+
   function renderGrid(): void {
     clear(grid);
     filteredCatalog().forEach((borg, index) => {
@@ -287,6 +295,7 @@ export function createForceBuilder(
           },
         },
       );
+      isolateNativeActivation(cell);
       if (borg.isNew) {
         const badge = bitmapText("gf-new-badge");
         setBitmapText(badge, "NEW", { bold: true, scale: 1 });
@@ -348,6 +357,7 @@ export function createForceBuilder(
           },
         },
       );
+      isolateNativeActivation(slot);
       const hexTile = captureCropImg(CAPTURE, CAPTURE_W, HEX_TILE_CROP);
       hexTile.className = "gf-hexcell-hex-tile";
       slot.appendChild(hexTile);

@@ -117,6 +117,24 @@ for (const code of ["Enter", "Space"]) {
   assert.equal(focused.saved.length, 1, "held key does not repeat commit");
   focused.handle.destroy();
 }
+// Focused roster/slot buttons use native activation; Enter/Space must not also
+// dispatch a global confirm against a different menu cursor.
+for (const code of ['Enter','Space']) {
+  const roster=mount({initialForce:['pl0004'],limit:2000});
+  const cell=roster.container.querySelectorAll('.gf-borg-cell')[1];let stopped=false;
+  cell.listeners.keydown?.({code,stopPropagation(){stopped=true;}});
+  if(!stopped) roster.action('confirm');
+  cell.click(); // native click after key activation
+  assert.equal(stopped,true,'focused roster button isolates '+code);
+  assert.deepEqual(roster.handle.getForce(),['pl0004','other'],'only clicked roster Borg toggles once');
+  const ring=mount({initialForce:['pl0004','other'],limit:2000});
+  const slot=ring.container.querySelectorAll('.gf-hexcell')[1];stopped=false;
+  slot.listeners.keydown?.({code,stopPropagation(){stopped=true;}});
+  if(!stopped) ring.action('confirm');
+  slot.click();
+  assert.equal(stopped,true,'focused force slot isolates '+code);
+  assert.deepEqual(ring.handle.getForce(),['pl0004'],'only clicked force slot is removed');
+}
 const over = mount({initialForce:["pl0004", "other"]});
 over.action("start");
 assert.equal(over.container.querySelector(".gf-force-save").disabled, true);
