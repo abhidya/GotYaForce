@@ -55,3 +55,14 @@ test("HTML shows loading before the guarded game module evaluates", () => {
   assert.doesNotMatch(html, /src="\/src\/main.ts"/);
   assert.match(bootstrap, /import\("\.\/main"\)\.catch\(showStartupFailure\)/);
 });
+
+test("title startup does not load a battle stage before it is selected", () => {
+  const main = fs.readFileSync(path.join(root, "apps/game/src/main.ts"), "utf8");
+  const session = fs.readFileSync(path.join(root, "apps/game/src/gameSession.ts"), "utf8");
+  const boot = main.match(/async function loadInitialAssets\(\): Promise<void> \{([\s\S]*?)\n\}/)?.[1];
+  assert.ok(boot);
+  assert.match(boot, /loadModelManifest\(\)/);
+  assert.doesNotMatch(boot, /loadStage\(/);
+  assert.match(main, /loadStageAssets: loadStage/);
+  assert.match(session, /await dependencies\.loadStageAssets\(stageId\)/);
+});

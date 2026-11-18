@@ -79,7 +79,6 @@ import {
 import {
   EXPORTED_STAGE_CATALOG_ADAPTER,
   inputFromKeys,
-  DEFAULT_ARENA_STAGE,
   EXPORTED_STAGE_CATALOG,
   isExportedStageId,
 } from "./sim/adapter.js";
@@ -707,7 +706,6 @@ async function loadStage(stageId: string): Promise<StageAssets<StageRenderState>
 async function loadInitialAssets(): Promise<void> {
   const manifest = await assetCatalog.loadModelManifest();
   borgPresentationAssets.setModelManifest(manifest);
-  await loadStage(DEFAULT_ARENA_STAGE);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1742,7 +1740,7 @@ initTouchControls();
 // ------------------------------------------------------------------------------------------
 
 ensureStyles();
-showLoadingMessage("Loading extracted stage + model assets…");
+showLoadingMessage("Loading model catalog…");
 document.documentElement.dataset.gfRuntime = "booting";
 
 void loadInitialAssets()
