@@ -71,6 +71,9 @@ export function runSelfTest(): void {
   assert(shot.vel.x > 0, "generic shot actually flies toward ally bearing, not enemy");
   const romShot = spawnRomProjectile(self, 0, self.rotY);
   assert(romShot?.aimedTargetUid === ally.uid, "fireChild copies active attack target");
+  assert(Math.abs(romShot.vel.x - Math.sin(self.rotY) * 50) < 1e-6 &&
+    Math.abs(romShot.vel.z - Math.cos(self.rotY) * 50) < 1e-6,
+    "generic fireChild visual spin does not rotate owner-forward travel");
   const beforeSpeed = Math.hypot(romShot.vel.x, romShot.vel.y, romShot.vel.z);
   const moving = stepProjectiles([romShot], [], new Map(), new Map());
   assert(moving.length === 1 && Math.abs(Math.hypot(romShot.vel.x, romShot.vel.y, romShot.vel.z) - (beforeSpeed - 1.5)) < 1e-6,

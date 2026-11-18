@@ -43,7 +43,7 @@ export interface ProjectileVariant {
   drop: number;
   /** +0x1a/+0x1e/+0x22: f32 ×3 — visual scale [X, Y, Z]. */
   scale: [number, number, number];
-  /** +0x26: s16 — BAM16 angle offset from the shooter's yaw (spread/cone). */
+  /** +0x26: s16 — source child visual spin (+0x74/+0x158), not travel yaw. */
   angleBAM: number;
   /** +0x28: u16 — flags. bit 0 = normal, bit 1 = homing?, bit 2 = add muzzle offset,
    *  bit 3 = energy beam (no drop, different physics model). */
@@ -125,8 +125,10 @@ export function spawnRomProjectile(
 ): Projectile | null {
   const variant = projectileVariant(variantByte);
   if (!variant) return null;
-  // Velocity direction: the shooter's yaw + the variant's BAM angle offset.
-  const totalYaw = yawRadians + (variant.angleBAM / 0x10000) * Math.PI * 2;
+  // 80099e70 passes zero extra yaw; 80099e94 derives direction from the
+  // source bone matrix. Owner yaw is a host approximation, not the row's
+  // visual spin at +0x26 (stored separately by the original child).
+  const totalYaw = yawRadians;
   const dirX = Math.sin(totalYaw);
   const dirZ = Math.cos(totalYaw);
   return {
