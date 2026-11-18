@@ -46,7 +46,7 @@ export function runPrimaryAmmoSelfTest(): void {
     assert(f.owner.burstActive && f.owner.burstPaired, "solo Y did not enable the source refill flag");
     let elapsed = 1;
     while (f.cell.cur === 0 && elapsed < 180) { f.step(); elapsed++; }
-    assert(f.cell.cur === 5 && elapsed < 180, `solo Y did not accelerate G Red B refill (${elapsed} frames)`);
+    assert(Number(f.cell.cur) === 5 && elapsed < 180, `solo Y did not accelerate G Red B refill (${elapsed} frames)`);
     meter.meter = 5; f.step();
     assert(!f.owner.burstActive && !f.owner.burstPaired, "burst flags did not clear on expiry");
     f.shoot();
