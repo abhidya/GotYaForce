@@ -82,6 +82,24 @@ for (const input of ["keyboard", "click", "gamepad"]) {
 }
 
 
+test("title leaves browser shortcuts and modifier keys alone while ordinary keys continue", t => {
+  const warn=console.warn; console.warn=()=>{}; t.after(()=>{console.warn=warn;});
+  const screen=createTitleIntro(new Element(),{onEnter:()=>entered++,onSound(){}}); let entered=0;
+  const handler=listeners.get('keydown'); assert.ok(handler);
+  for(const event of [
+    {key:'Control',ctrlKey:true}, {key:'Shift'}, {key:'r',ctrlKey:true},
+    {key:'r',metaKey:true}, {key:'ArrowLeft',altKey:true}, {key:'Process',isComposing:true},
+  ]) {
+    let prevented=false,stopped=false;
+    handler({...event,preventDefault(){prevented=true;},stopImmediatePropagation(){stopped=true;}});
+    assert.equal(entered,0); assert.equal(prevented,false); assert.equal(stopped,false);
+  }
+  let prevented=false,stopped=false;
+  handler({key:'Enter',preventDefault(){prevented=true;},stopImmediatePropagation(){stopped=true;}});
+  assert.equal(entered,1); assert.equal(prevented,true); assert.equal(stopped,true);
+  screen.destroy();
+});
+
 test("failed camera asset releases its renderer and permits continuation", async t => {
   globalThis.titleFailureMode = "asset";
   globalThis.titleDisposals = 0;
