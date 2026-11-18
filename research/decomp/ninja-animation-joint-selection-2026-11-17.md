@@ -20,10 +20,14 @@ Their first 20 signed joint-map bytes at `+8c` are:
 Original setup copies the boundary bytes to actor `+1d91..1d93`.
 `8004b8f4` uses those values for the first three channel boundaries; the
 fourth range ends at actor `+1d90`. `8005380c` sets that count from archive
-JOBJ traversal. The emitted `pl0000` animation has 20 indexed tracks, but
-that fact alone does **not** prove the original hydrated count. Until the
-archive traversal is verified for each model, do not assume the fourth range
-is empty or apply the first 20 joints as a complete runtime selection.
+JOBJ traversal. `research/format-specs/mot-animation-format.md` records 20 JOBJ nodes in
+`pl0000` model_00, and 23 AnimJoint nodes in its b00 animation tree. This is
+stronger evidence than merely counting baked tracks, but it does **not** yet
+prove the value stored in `+1d90`: `8005380c` resets the counter between its
+two `80067e18` walks, and stores the count from the second root loaded via
+the `+788` owner. Until that root is identified for each model, do not assume
+the fourth range is empty or apply the first 20 joints as a complete runtime
+selection.
 
 The play instruction for Ninja ground/air X uses part mask `0xf` according to
 `ninja-source-x-2026-11-12.md`; this requests all four channels, not an
