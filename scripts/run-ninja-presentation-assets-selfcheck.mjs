@@ -55,6 +55,7 @@ try {
     for (const i of ids) if (!childIds.has(i)) skeleton.add(nodes.get(i));
     // Production part loader uses GLB node graphs and POSITION attributes.
     // Materials are test doubles; no WebGL or visual parity is claimed.
+    const originalParts = new Map();
     const assetLoader = {
       async loadGlbScene(url) {
         const bytes = await readFile(path.join(root, 'apps/game/public', String(url).replace(/^\//, '')));
@@ -81,12 +82,20 @@ try {
         });
         const children = new Set();
         doc.nodes.forEach((n, i) => { for (const c of n.children ?? []) { objects[i].add(objects[c]); children.add(c); } });
-        const scene = new THREE.Group(); objects.forEach((o, i) => { if (!children.has(i)) scene.add(o); }); return scene;
+        const scene = new THREE.Group(); objects.forEach((o, i) => { if (!children.has(i)) scene.add(o); });
+        scene.updateMatrixWorld(true);
+        const bind = scene.getObjectByName('JOBJ_0');
+        let mesh; scene.traverse(node => { if (!mesh && node.isMesh) mesh = node; });
+        if (!bind || !mesh) throw Error('Part must contain a root and a mesh');
+        const vertex = new THREE.Vector3().fromBufferAttribute(mesh.geometry.attributes.position, 0).applyMatrix4(mesh.matrixWorld);
+        originalParts.set(String(url), {name: mesh.name, vertex, inverseBind: bind.matrixWorld.clone().invert()});
+        return scene;
       },
       cloneModel(source) { return source.clone(true); },
     };
     const production = createBorgPresentationAssets({assetLoader, defaultLeadId: id});
-    const scene = new BattleScene(new THREE.Group(), {
+    const world = new THREE.Group();
+    const scene = new BattleScene(world, {
       loadModel: async () => skeleton.clone(true), loadClip: production.loadClip,
       loadClipByStreamRef: production.loadClipByStreamRef, loadSourceDrawPart: production.loadSourceDrawPart,
     });
@@ -96,6 +105,22 @@ try {
     await waitUntil(() => actor()?.actions.idle);
     await waitUntil(() => actor()?.sourceDrawParts?.length === 2);
     if (actor().sourceDrawParts.some(part => !part.visible)) throw Error(`${id}: verified idle parts hidden`);
+    // Compare a real mesh vertex with the exported scene transformed through the
+    // independently calculated bind inverse and the current animated joint.
+    // This tests attachment arithmetic, not equality to the original game's matrix.
+    const checkAttachment = () => {
+      world.updateMatrixWorld(true);
+      for (const [i, part] of actor().sourceDrawParts.entries()) {
+        const index = [1, 7][i], original = originalParts.get(`/models/${id}/parts/model_${String(index).padStart(2, '0')}.glb`);
+        if (!original) throw Error(`${id}: original part snapshot missing`);
+        const mesh = part.getObjectByName(original.name);
+        if (!mesh?.isMesh) throw Error(`${id}: attached mesh missing`);
+        const actual = new THREE.Vector3().fromBufferAttribute(mesh.geometry.attributes.position, 0).applyMatrix4(mesh.matrixWorld);
+        const expected = original.vertex.clone().applyMatrix4(original.inverseBind).applyMatrix4(part.parent.matrixWorld);
+        if (actual.distanceTo(expected) > 1e-4) throw Error(`${id}: part ${index} bind attachment mismatch`);
+      }
+    };
+    checkAttachment();
     scene.update(.1);
     const movement = {...neutral, state:'move', anim:'move'}; scene.sync([movement]);
     await waitUntil(() => actor()?.actions.move); scene.sync([movement]);
@@ -112,6 +137,7 @@ try {
         scene.update(1/60);
         await waitUntil(() => actor()?.sourceDrawParts?.length === 2);
         if (actor().sourceDrawParts.some(part => part.visible !== true)) throw Error(`${id}: verified idle parts should remain through X`);
+        checkAttachment();
         for (const part of actor().sourceDrawParts) {const bounds = new THREE.Box3().setFromObject(part); if (bounds.isEmpty() || ![bounds.min.x,bounds.min.y,bounds.min.z,bounds.max.x,bounds.max.y,bounds.max.z].every(Number.isFinite)) throw Error(`${id}: invalid part geometry bounds`);}
         if (actor().sourceBlendPose?.length !== 20) throw Error(`${id} slot ${slot}: saved pose missing`);
         for (const joint of actor().sourceBlendPose) {
