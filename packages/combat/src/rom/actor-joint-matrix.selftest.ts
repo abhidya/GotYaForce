@@ -1,3 +1,4 @@
+import {sourceReciprocalEstimateBounded} from './source-reciprocal-estimate.js';
 import {flatHalfPrimaryMode0, flatHalfPrimaryWitnesses, flatHalfPrimaryNormalized} from './actor-primary-flat-half-witness.selftest.js';
 import {slopedPrimaryWitnesses, slopedPrimaryOrientation, slopedPrimaryNormalized} from './actor-primary-sloped-witness.selftest.js';
 import {createSourceActorJointMatrixRuntime} from './actor-joint-matrix.js';
@@ -226,6 +227,15 @@ export function runActorJointMatrixSelfTests(): void {
       matrix.composePose(parent, output, pose);
       for (let i=0;i<12;i++) if (sample.matrix[i] !== 0)
         check(bits(matrix.getMatrix(output)[i]!) === bits(sample.matrix[i]!), `Dolphin matrix nonzero mismatch at ${i}`);
+      if (sample === cases[0]) {
+        // This captured norm is exactly 1, inside the candidate's admitted
+        // range. Other captured norms are below 1 and still require injection.
+        const candidate = createSourceActorJointMatrixRuntime(feedback, 128, sourceReciprocalEstimateBounded);
+        const candidateParent = candidate.createMatrix(identity), candidateOut = candidate.createMatrix(identity);
+        candidate.composePose(candidateParent, candidateOut, pose);
+        for (let i=0;i<12;i++) if (sample.matrix[i] !== 0)
+          check(bits(candidate.getMatrix(candidateOut)[i]!) === bits(sample.matrix[i]!), `bounded estimate integration mismatch at ${i}`);
+      }
     }
   }
   // Explicit synthetic fres dependency admits a non-identity source lane.
