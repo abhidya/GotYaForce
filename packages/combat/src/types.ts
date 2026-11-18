@@ -376,7 +376,11 @@ export interface BorgRuntime {
    *  is the current source animation frame, including held frames. Applies only to the
    *  exact resolved meleeAnimStream, never a slot-label fallback. Cleared on source exit,
    *  interruption, or morph; other actions retain ordinary presentation playback. */
-  sourceAnimSample?: { serial: number; frame: number } | null;
+  sourceAnimSample?: { serial: number; frame: number;
+    /** Only Ninja's admitted mode-1 clock is published here. This is source
+     * timing, not a claim that the renderer owns or blends source poses. */
+    blend?: { mode: 1; elapsed: number; duration: number } | null;
+  } | null;
   /** The CURRENT melee swing's (or charged release's) PATH-B authored sound events (DERIVED —
    *  the per-anim sound-event table at ROM actor+0x4e8 joined through the anim-descriptor
    *  banks; actionStreamData.ts AuthoredSoundEvent, research/decomp/
