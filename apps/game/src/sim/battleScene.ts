@@ -1394,7 +1394,7 @@ export class BattleScene {
       const action = mixer.clipAction(clip);
       actor.actions[slot] = action;
       this.crossfadeTo(actor, action, slot);
-      if (slot === "idle") this.syncSourceDrawParts(actor, null, slot);
+      this.syncSourceDrawParts(actor, actor.sourceAnimSample, slot);
     });
   }
 
@@ -1402,15 +1402,18 @@ export class BattleScene {
    * until the source threshold reaches the known target; masks and source matrix
    * parity remain unmodeled. Late loads cannot revive a retired presentation. */
   private syncSourceDrawParts(actor: Actor, sample: BattleActorView["sourceAnimSample"], slot: AnimSlot): void {
-    const idleName = `${actor.borgId}mot_g0s0_m0`;
-    const exactIdle = slot === "idle" && actor.actions.idle?.getClip().name === idleName;
-    const requested = sample?.targetDrawModels ?? (exactIdle ? [1, 7] as const : undefined);
+    // All 26 verified group-0 metadata entries request the same defaults.
+    // Only use a loaded exact group-0 baked clip when no source stream owns it.
+    const clipName = actor.actions[slot]?.getClip().name ?? "";
+    const match = !sample && clipName.match(new RegExp(`^${actor.borgId}mot_g0s(\\d+)_m0$`));
+    const knownGroupZero = !!match && Number(match[1]) <= 25;
+    const requested = sample?.targetDrawModels ?? (knownGroupZero ? [1, 7] as const : undefined);
     const models = (actor.borgId === "pl0000" || actor.borgId === "pl000a") && requested?.[0] === 1 && requested[1] === 7 ? requested : undefined;
     // The verified ground recovery enters the same default idle target.
     const knownIdle = !models && slot === "idle" && actor.sourceDrawTargetKnown;
     if (!models && !knownIdle) actor.sourceDrawTargetKnown = false;
     else if (models) {
-      if (exactIdle || !sample?.blend || sample.blend.previousWeight <= 0.5) actor.sourceDrawTargetKnown = true;
+      if (knownGroupZero || !sample?.blend || sample.blend.previousWeight <= 0.5) actor.sourceDrawTargetKnown = true;
     }
     for (const part of actor.sourceDrawParts ?? []) part.visible = (!!models || knownIdle) && actor.sourceDrawTargetKnown;
     const load = this.assets.loadSourceDrawPart, model = actor.model;

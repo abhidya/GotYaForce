@@ -97,6 +97,10 @@ try {
     await waitUntil(() => actor()?.sourceDrawParts?.length === 2);
     if (actor().sourceDrawParts.some(part => !part.visible)) throw Error(`${id}: verified idle parts hidden`);
     scene.update(.1);
+    const movement = {...neutral, state:'move', anim:'move'}; scene.sync([movement]);
+    await waitUntil(() => actor()?.actions.move); scene.sync([movement]);
+    if (actor().sourceDrawParts.some(part => !part.visible)) throw Error(`${id}: group-0 movement parts hidden`);
+    scene.sync([neutral]); scene.update(.1);
     const jointOrder = [2,3,4,5,6,7,8,9,10,11,12,0,1,13,14,15,16,17,18,19];
     for (const slot of [0, 1]) {
       for (let elapsed = 1; elapsed < 7; elapsed++) {
