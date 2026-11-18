@@ -553,7 +553,7 @@ function beamPhase1(actor: GunmanActor, ctx: GunmanFamilyCtx): void {
     if (actor.wallContact === 0) {
       return; // no wall contact → stay.
     }
-    // zz_00f036c_(actor, 0xc3) — TODO(host): effect hook @0x800f036c (unsurfaced).
+    ctx.onPlayCue?.(actor, 0xc3); // zz_00f036c_: emitted before the consuming ammo check.
     // zz_006dbe0_(actor, 2, 1, 1) — consume gate; fire zz_00e19a8_(1, +0x6f7).
     if (allocateWeapon(actor, ctx, 2, 1, true)) {
       ctx.onFamilyProjectile?.(actor, BEAM_FIRE_SPAWNER, 1);
@@ -1059,9 +1059,11 @@ export function runGunmanClusterSelfTests(assert: AssertFn): void {
   // --- ph1 contact → beam fire via zz_00e19a8_. ---
   {
     const shots: ShotEvent[] = [];
+    const cues: number[] = [];
     const a = createRomActorScratch();
     configureBeamGunnerFamily(a, makeCtx({
       onAllocateResource: () => true,
+      onPlayCue: cue => cues.push(cue),
       onFamilyProjectile: (addr, type) => shots.push({ addr, type }),
     }));
     const root = a.rootAction!;
@@ -1074,6 +1076,20 @@ export function runGunmanClusterSelfTests(assert: AssertFn): void {
     assert(shots.length === 1 && shots[0]!.addr === BEAM_FIRE_SPAWNER,
       `beam ph1 contact fires zz_00e19a8_ (got ${JSON.stringify(shots)})`);
     assert(a.fbPhaseSlots[0] === 2, "beam ph1 contact → advance to ph2");
+    assert(cues.length === 1 && cues[0] === 0xc3, "beam wall contact emits source cue 0xc3");
+  }
+
+  // Source emits cue before trying to consume ammo, even when consumption fails.
+  {
+    const events: string[] = [];
+    const a = createRomActorScratch();
+    configureBeamGunnerFamily(a, makeCtx({
+      onAllocateResource: () => { events.push("allocate"); return false; },
+      onPlayCue: cue => events.push(`cue:${cue}`),
+    }));
+    a.actionIndex = 2; a.fbPhaseSlots[0] = 1; a.contactP0 = 0; a.wallContact = 1;
+    a.rootAction!(a);
+    assert(events.join(",") === "cue:195,allocate", "beam cue precedes failed allocation");
   }
 
   // ==========================================================================
