@@ -65,7 +65,7 @@ export interface MeleeSamuraiConfig {
   velocityScale?: number;
   /** +0x10: float decel (phase 3 zz_006ed8c_ scale). Default 1.0. */
   decel?: number;
-  /** +0x14: float reposition scale (phase 0 + phase 1 "blink from target"). */
+  /** +0x14: float scale for the actor's own position-history carry. */
   repositionScale?: number;
 }
 
@@ -93,14 +93,11 @@ function phase0(actor: RomActor & MeleeScratch, cfg: MeleeSamuraiConfig): void {
   actor.streamSlot = cfg.seedSlot;
   // Zero velocity scalars (+0x50/+0x48/+0x4c/+0x44 = FLOAT_8043a374 = 0).
   actor.hSpeed = 0; actor.yVel = 0; actor.hDecel = 0; actor.gravityCoeff = 0;
-  // Reposition: motion = (pos - lockTarget); motion *= scale; pos += motion.
-  const target = actor.lockTarget;
+  // FUN_801491c8 subtracts the actor's own older +0x5e8 unconditionally.
   const scale = cfg.repositionScale ?? 0;
-  if (target && scale !== 0) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(scale, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(scale, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
   const slot = actor.streamSlot;
   actor.streamSlot = slot + 1;
   startStream(

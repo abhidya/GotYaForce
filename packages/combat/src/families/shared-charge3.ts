@@ -130,13 +130,10 @@ function charge3Phase0(actor: RomActor, cfg: SharedCharge3Config, ctx: StreamCon
   actor.hDecel = 0;
   actor.hSpeed = 0;
 
-  // REPOSITION (blink AWAY): motion = pos − lockTargetPos(+0x5e8); motion ×= cfg
-  // scale 0.98 (lfs f1,4(r31) @0x80177b24); pos += motion → ~1.98× target distance.
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(cfg.repositionScale, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // FUN_80177a8c carries the actor's own +0x5e8 history unconditionally.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(cfg.repositionScale, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
 
   // zz_00679d0_ ground snap (port stands in with the registered ground clamp; the
   // ROM helper's airborne ledge-guard pos revert is unported — labeled approximation).

@@ -7,7 +7,7 @@
 // MACHINE SHAPE (decomp ground truth, every value read from boot.dol this session):
 //   Phase 0 FUN_80179850 (entry/windup): +0x540++; seed +0x560/+0x54e timers from cfg;
 //     zero physics (+0x50/+0x48/+0x4c/+0x44 = FLOAT_8043ae10 = 0.0) + turn rates;
-//     cfg+0x10 onSetup; reposition leap `motion = (pos-target) × cfg+0x8`; ground snap;
+//     cfg+0x10 onSetup; carry own position-history delta scaled by cfg+0x8; ground snap;
 //     streamSlot = (controlWord & 0x40) ? cfg air slot : cfg ground slot; slot++;
 //     startStream(rate FLOAT_8043ae04 = -1.0, mask 0xf, GROUP 4, slot, -1, -1).
 //   Phase 1 FUN_801799bc (hold): tick stream; face target (0xc1); reposition glide
@@ -90,7 +90,7 @@ export interface SharedChargeConfig {
    *  phase 2's stream-event exit gate only fires once this reaches 0. NOT the release trigger
    *  (that's the +0x1cef stream event in phase 1). */
   chargeFrames: number;
-  /** cfg f32[+0x8] — reposition scale: phase-0 leap `motion = (pos-target) × scale; pos += motion`
+  /** cfg f32[+0x8] — position-history carry scale: phase-0 `motion = (pos-ownHistory) × scale; pos += motion`
    *  AND phase-1/2 per-tick glide `motion ×= scale; pos += motion`. */
   repositionScale: number;
   /** Descriptor+0x6c gravityCoeff — reloaded in phase 2 on the +0x1d0f stream event and used
@@ -162,14 +162,10 @@ function chargePhase0(actor: RomActor, cfg: SharedChargeConfig, ctx: StreamConte
   // cfg+0x10 onSetup (chunk_0044.c:3951-3953): fired AFTER the physics zero, BEFORE the leap.
   cfg.onSetup?.(actor, ctx);
 
-  // REPOSITION LEAP (chunk_0044.c:3954-3958): motion = pos − lockTargetPos; motion ×= cfg+0x8;
-  // pos += motion. The "leaps away then dashes in" windup spacing.
-  const target = lockTargetPos(actor);
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(cfg.repositionScale, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // FUN_80179850 subtracts own older +0x5e8, not the target, even when unlocked.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(cfg.repositionScale, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
   // zz_00677b0_ ground snap (chunk_0044.c:3959).
   groundClamp(actor);
 
