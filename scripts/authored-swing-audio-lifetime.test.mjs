@@ -33,7 +33,7 @@ const code = ts.transpileModule(nodes.map(n => n.getText(main)).join('\n') + `\n
 const flush = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
 const sounds = [{ frame: 12, id: 103 }, { frame: 24, id: 103 }]; // Decoded pl0000 g0s0.
 function harness({ deferred = false } = {}) {
-  let now = 0, resolve, reject, result = 'ongoing';
+  let now = 0, resolve, reject, result = 'ongoing', syncs = 0;
   const calls = [], timers = [], actors = new Map(), pendingSlots = [];
   const readiness = new Promise((a, b) => { resolve = a; reject = b; });
   const audio = { playSfx: async key => { calls.push({ key, at: now }); } };
@@ -44,6 +44,7 @@ function harness({ deferred = false } = {}) {
     session: null, currentBattlePresentation: () => null, localFocusBorg: () => null,
     battleSceneState: () => ({ actors: [...actors.values()], projectiles: [], projectileDespawns: [] }),
     battleScene: { clear: () => actors.clear(), sync: () => {
+      syncs++;
       for (const args of pendingSlots.splice(0)) context.slotEnter(...args);
     } }, updateHud() {}, closePauseMenu() {},
     playCombatSfx() {}, collectLocalInputs: () => ({}), stepSimOnce() {},
@@ -60,7 +61,7 @@ function harness({ deferred = false } = {}) {
     }
     now = end; await flush();
   };
-  return { calls, context, wall, freshBattle, ready: () => resolve(audio), nullReady: () => resolve(null),
+  return { calls, context, wall, freshBattle, syncCount: () => syncs, ready: () => resolve(audio), nullReady: () => resolve(null),
     fail: () => reject(new Error('audio unavailable')),
     enter(uid = 'a', events = sounds, slot = 'melee') {
       actors.set(uid, { uid }); context.slotEnter('pl0000', slot, uid, events);
@@ -72,6 +73,15 @@ function harness({ deferred = false } = {}) {
     async steps(count) { for (let i = 0; i < count; i++) { await wall(1000 / 60); context.stepBattle(1 / 60); await flush(); } },
   };
 }
+
+test('no-step callbacks skip scene reconciliation but still flush due audio', async () => {
+  const h=harness(); h.enter('a',[{frame:0,id:103}]);
+  h.context.stepBattle(0.008); await flush();
+  assert.equal(h.syncCount(),0,'unchanged simulation does not rebuild scene');
+  assert.deepEqual(h.calls.map(c=>c.key),['se_067'],'due audio still flushes');
+  h.context.stepBattle(0.009); await flush();
+  assert.equal(h.syncCount(),1,'first actual simulation step reconciles scene');
+});
 
 test('future authored cues freeze during pause and retain remaining delay on repeated resume', async () => {
   const h = harness(); h.enter(); await h.steps(6);

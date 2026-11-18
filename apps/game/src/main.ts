@@ -1499,7 +1499,10 @@ function stepBattle(dt: number): void {
   }
 
   authoredSwingTimeMs += steps * SIM_DT * 1000;
-  syncBattlePresentation(live);
+  // The initial scene is primed at battle start. If the fixed-step accumulator
+  // did not advance, the sim snapshot is unchanged and another scene/HUD
+  // reconciliation only repeats work. Rendering and audio flushing still run.
+  if (steps > 0) syncBattlePresentation(live);
   if (live.battle.observe().result !== "ongoing") resolveBattle();
   flushAuthoredSwingSounds();
 }
