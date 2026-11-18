@@ -35,7 +35,7 @@
 // (de)arms, sound cues, and effect triggers are ported 1:1. The following are host-
 // renderer / unsurfaced deps, marked TODO and left as no-ops (faithful behavior with
 // no host bound):
-//   FUN_80067310  — action 2 integrates scalar motion; actions 0/3 remain TODO.
+//   FUN_80067310  — action 0 and 2 integrate scalar motion; action 3 remains TODO.
 //                   Collision/aim and original host entry timing remain partial.
 //   zz_00677b0_   — action-2 phase-1 uses the host stage-motion probe; other sites
 //                   retain scratch grounded77b0. Full ROM slope parity is pending.
@@ -164,6 +164,18 @@ function exitClearActionMode(actor: NinjaActor): void {
 //        negative contact → clear + dispatchUpperBodyCue(7) + +0x694 = 1.0 + dt;
 //        else on contact-or-input (wall==0) → clear speeds + exitClearActionMode.
 // ============================================================================
+/** Action 0 calls FUN_80067310 followed by the source ground probe in every phase.
+ * The host probe uses the existing stage policy; original collision parity remains partial. */
+function stepAction0Motion(actor: NinjaActor): void {
+  const previous = { ...actor.pos };
+  integratePhysicsPrimary(AN.PHYSICS_RATE, actor, actor.ninjaScratch54a ?? 0);
+  const contact = actor.physicsRuntime?.probeMotion?.(previous, actor.pos, actor.yVel);
+  if (contact) {
+    actor.yVel = contact.velY;
+    actor.grounded77b0 = contact.grounded;
+  }
+}
+
 function action0(actor: NinjaActor, ctx: StreamContext): void {
   const phase = actor.fbPhaseSlots[0] ?? 0;
   switch (phase) {
@@ -179,8 +191,7 @@ function action0(actor: NinjaActor, ctx: StreamContext): void {
       actor.ninjaStreamFlag746 = 0;                           // +0x746 = 0
       // zz_006d144_(actor, 0xc1) — lock-yaw rebuild; TODO(host) aim.
       stepPartTargetPitch(actor, 0xc1);                       // zz_006e1ac_(actor, 0xc1, 1)
-      // FUN_80067310(1.0, actor, +0x54a) — TODO(host) physics integrator.
-      // zz_00677b0_(actor) — TODO(host) ground snap.
+      stepAction0Motion(actor);
       startStream(actor, 0xf, 2, 0, AN.STREAM_RATE);          // zz_004beb8_(-1, actor, 0xf, 2, 0)
       return;
     }
@@ -188,8 +199,7 @@ function action0(actor: NinjaActor, ctx: StreamContext): void {
       if ((actor.ninjaFlag1d9 ?? 0) !== 0) actor.ninjaStreamFlag746 = 1;
       // zz_006d144_(actor, 0xc1) — TODO(host) aim.
       stepPartTargetPitch(actor, 0xc1);                       // zz_006e1ac_(actor, 0xc1, 1)
-      // FUN_80067310(1.0, actor, +0x54a) — TODO.
-      // zz_00677b0_(actor) — TODO.
+      stepAction0Motion(actor);
       tickStream(actor, 0xf, ctx);                            // zz_004cd24_(actor, 0xf)
       if (actor.contactP0 !== 0) {                            // +0x1cef != 0
         actor.fbPhaseSlots[0] = 2;                            // +0x540++
@@ -205,7 +215,7 @@ function action0(actor: NinjaActor, ctx: StreamContext): void {
       actor.ninjaYaw18da = toS16(Math.trunc(Math.fround(cur18da * AN.A0_YAW_DECAY)));
       tickStream(actor, 0xf, ctx);                            // zz_004cd24_(actor, 0xf)
       // zz_006ed8c_(0.97, actor) — TODO(host) aim helper.
-      // FUN_80067310(1.0, actor, +0x54a) — TODO.
+      stepAction0Motion(actor);
       const grounded = actor.grounded77b0 ?? false;           // iVar2 = zz_00677b0_(actor)
       if (grounded && actor.contactP0 < 0) {                  // collision AND +0x1cef < 0
         actor.ninjaYaw18da = 0;                               // +0x18da = 0
@@ -582,6 +592,18 @@ export function runAccelerationNinjaSelfTests(assert: AssertFn): void {
     assert(a.ninjaScratch54a === 0x1234, "a0 ph0 copies +0x5ae→+0x54a");
     assert(a.ninjaStreamFlag746 === 0, "a0 ph0 clears +0x746");
     // NOTE: a0 ph0 does NOT inline ph1 (only a2 ph0 does), so no drain here.
+  }
+
+  // Source uses the captured +0x54a yaw in all three phases, not live lockYaw.
+  for (const phase of [0, 1, 2]) {
+    const a = createRomActor() as NinjaActor;
+    configureAccelerationNinjaFamily(a, {});
+    a.actionIndex = 0; a.fbPhaseSlots[0] = phase; a.variantIndex = 1;
+    a.lockYaw = phase === 0 ? 0x4000 : 0;
+    a.ninjaScratch54a = 0x4000; a.hSpeed = 10; a.hDecel = 0;
+    a.rootAction!(a);
+    assert(Math.abs(a.pos.x - 10) < 1e-9 && Math.abs(a.pos.z) < 1e-9,
+      `a0 phase ${phase} integrates once using captured yaw`);
   }
 
   // --- a0 ph1: no contact stays; contactP0 > 0 → ph2 + gravity copy. ---
