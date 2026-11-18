@@ -277,14 +277,11 @@ function aimedShotPhase0(actor: RomActor, cfg: SharedAimedShotConfig, ctx: Strea
   cfg.onSetup?.(actor);
   cfg.onSteer?.(actor);
 
-  // Blink-away windup: motion = pos − lockTargetPos(+0x5e8); motion ×= cfg+0x04
-  // (0.95); pos += motion. Scale comes from CONFIG, not a global (unlike zz_00ff2bc_).
-  const target = lockTargetPos(actor);
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(cfg.repositionScale, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // FUN_8017a008 subtracts the actor's own older +0x5e8 position,
+  // unconditionally; it is not the lock target. Scale remains config-owned.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(cfg.repositionScale, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
 
   // zz_00679d0_ ground snap (probe zz_00677b0_ + airborne position revert when
   // +0x5e0&0x40 clear). PORT APPROXIMATION: the host ground clamp models the snap;

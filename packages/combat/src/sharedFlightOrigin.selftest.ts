@@ -4,6 +4,7 @@
 import {createRomActor} from './rom/actor.js';
 import {createSharedFlightX, FLIGHT_X_FAMILY4_CONFIG} from './families/shared-flight-x.js';
 import {createSonicXSpecial,createShogunXSpecial} from './families/samurai.js';
+import {configureMachineBlueFamily,configureMachineRedFamily} from './families/machine-red-blue.js';
 function assert(v:unknown,m:string):asserts v {if(!v) throw Error(`[sharedFlightOrigin] ${m}`);}
 export function runSharedFlightOriginSelfTest():void {
  const run=createSharedFlightX(FLIGHT_X_FAMILY4_CONFIG,{});
@@ -21,6 +22,19 @@ export function runSharedFlightOriginSelfTest():void {
    const b=createRomActor();b.pos={x:100,y:200,z:300};b.targetCache5e8={x:90,y:180,z:270};b.lockTarget=target;
    make({})(b);
    assert(Math.abs(b.pos.x-109.5)<1e-5 && Math.abs(b.pos.y-219)<1e-5 && Math.abs(b.pos.z-328.5)<1e-5,
+    `${name} carries own history independently of target`);
+  }
+ }
+ for(const [name,action] of [
+  ['red X',2],
+  ['blue aimed X',2],
+  ['blue deploy',4],
+ ] as const) {
+  for(const target of [{x:-4000,y:-9000,z:6000},null]) {
+   const b=createRomActor();b.pos={x:100,y:200,z:300};b.targetCache5e8={x:90,y:180,z:270};b.lockTarget=target;
+   if(name==='red X') configureMachineRedFamily(b,'pl0600',{}); else configureMachineBlueFamily(b,'pl0609',{});
+   b.actionIndex=action;b.variantIndex=0;b.rootAction!(b);
+   assert(Math.abs(b.pos.x-109.5)<1e-4 && Math.abs(b.pos.y-219)<1e-4 && Math.abs(b.pos.z-328.5)<1e-4,
     `${name} carries own history independently of target`);
   }
  }
