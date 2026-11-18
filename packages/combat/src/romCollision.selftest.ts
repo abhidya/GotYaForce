@@ -3,6 +3,8 @@ import { RomDriverBridge } from "./bridge.js";
 import { createSharedFlightX, FLIGHT_X_FAMILY4_CONFIG } from "./families/shared-flight-x.js";
 import { configureArrowNinjaFamily } from "./families/arrow-ninja.js";
 import { createSharedEngineRootAction } from "./families/shared-engine.js";
+import { createSharedMorphXSpecial, TITAN_MORPH_CONFIG } from "./families/shared-morph-x.js";
+import { createOmega2RootAction } from "./families/omega2-robot.js";
 import { STATE } from "./constants.js";
 import type { AccelerationNinjaScratch } from "./families/acceleration-ninja.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
@@ -110,6 +112,22 @@ export function runRomCollisionSelfTest(): void {
     a.physicsRuntime!.probeMotion=(...args)=>{count++; return probe(...args);};
     for (const phase of [1,2,3,4]) {a.fbPhaseSlots[0]=phase; run(a);}
     assert(count===4, 'all continuation phases invoke terrain exactly once');
+  }
+  // Source morph and Omega II call 677b0 during both carried-motion phases.
+  for (const [name, run] of [
+    ['morph', createSharedMorphXSpecial(TITAN_MORPH_CONFIG,{})],
+    ['omega', createOmega2RootAction({})],
+  ] as const) {
+    const withWall=setup(geometry(10),'pl0705'), withoutProbe=setup(geometry(10),'pl0705');
+    for(const t of [withWall,withoutProbe]) {
+      const a=t.driver.actor; a.actionIndex=2; a.pos=v(0,10,0); a.targetCache5e8=v(0,10,-20); a.fbPhaseSlots[0]=0;
+    }
+    delete withoutProbe.driver.actor.physicsRuntime!.probeMotion;
+    run(withWall.driver.actor); run(withoutProbe.driver.actor);
+    assert(withWall.driver.actor.pos.z<10, `${name} entry stopped at wall`);
+    assert(withoutProbe.driver.actor.pos.z>10, `${name} no-probe control crossed wall`);
+    withWall.driver.actor.fbPhaseSlots[0]=1; run(withWall.driver.actor);
+    assert(withWall.driver.actor.pos.z<10, `${name} continuation stopped at wall`);
   }
   // The production ROM-motion probe used to leave the host's floor edge
   // guard behind. Exercise the real Battle bridge rather than only a helper.

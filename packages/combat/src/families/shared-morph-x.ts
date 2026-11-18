@@ -197,10 +197,21 @@ function isGrounded(actor: RomActor): boolean {
 // ============================================================================
 // Phase 0 — 0x8017a3ac. Windup: blink-away + SFX + slot/form select + stream start.
 // ============================================================================
+/** Host approximation for the source terrain probe after motion. */
+function probeCarriedMotion(actor: RomActor, previous: {x:number;y:number;z:number}): void {
+  const floor=actor.physicsRuntime;
+  if (!floor) return;
+  const result=floor.probeMotion ? floor.probeMotion(previous,actor.pos,actor.yVel) : floor.clampToGround(actor.pos,actor.yVel);
+  if ('y' in result && typeof result.y==='number') actor.pos.y=result.y;
+  actor.yVel=result.velY;
+  (actor as RomActor & {grounded?:boolean}).grounded=result.grounded;
+}
+
 function morphXPhase0(actor: RomActor, cfg: SharedMorphXConfig, ctx: StreamContext): void {
   actor.fbPhaseSlots[0] = 1; // +0x540++ (lbz/addi/stb @0x8017a3d8-dc)
 
   // FUN_8017a3ac carries own older +0x5e8 position unconditionally.
+  const previous = {...actor.pos};
   vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
   vecScale(cfg.repositionScale, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
@@ -215,6 +226,7 @@ function morphXPhase0(actor: RomActor, cfg: SharedMorphXConfig, ctx: StreamConte
   //   GROUNDED: +0x548 = cfg s16@+2, slot = cfg s8@+0, +0x709 = 1
   //   AIRBORNE: +0x548 = cfg s16@+4, slot = cfg s8@+1 (no +0x709 write)
   // +0x709 (contact-slow flag) isn't surfaced on RomActor — documented no-op.
+  probeCarriedMotion(actor, previous);
   const grounded = isGrounded(actor);
   const scratch = actor as RomActor & MorphScratch;
   scratch.morphPendingForm = grounded ? cfg.groundForm : cfg.airForm;
@@ -253,8 +265,10 @@ function morphXPhase1(
 
   // (c) Reposition continuation: motion ×= cfg.repositionScale (lfs 8(r31)
   // @0x8017a544); pos += motion (decaying slide-away).
+  const previous = {...actor.pos};
   vecScale(cfg.repositionScale, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
+  probeCarriedMotion(actor, previous);
 
   // (d) zz_00677b0_ ground check; if grounded → +0x709 = 1 (flag not surfaced —
   // documented no-op, same as phase 0).
