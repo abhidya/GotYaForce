@@ -153,18 +153,18 @@ function testActivationRequiresChargedMeter(): void {
 
   const charged: BurstMeterState = { meter: BURST.METER_MAX, unclamped: BURST.METER_MAX, charged: true };
   assertEqual(canActivateBurst(b, charged), true, "armed + charged full meter can activate");
-  assertEqual(tryActivateBurst(b, charged, false), true, "tryActivateBurst succeeds when gate holds");
+  assertEqual(tryActivateBurst(b, charged), true, "tryActivateBurst succeeds when gate holds");
   assertEqual(b.burstActive, true, "activation sets burstActive");
-  assertEqual(b.burstPaired, false, "solo activation leaves burstPaired false");
+  assertEqual(b.burstPaired, true, "solo activation sets source team-burst flag");
   assertEqual(charged.charged, false, "activation consumes the charged flag");
-  assertEqual(tryActivateBurst(b, charged, false), false, "already-active burst cannot re-activate");
+  assertEqual(tryActivateBurst(b, charged), false, "already-active burst cannot re-activate");
 }
 
 function testPairedActivationFlag(): void {
   const b = makeBorg();
   const meter: BurstMeterState = { meter: BURST.METER_MAX, unclamped: BURST.METER_MAX, charged: true };
   stepBurst(b, true);
-  assertEqual(tryActivateBurst(b, meter, true), true, "paired activation succeeds when gate holds");
+  assertEqual(tryActivateBurst(b, meter), true, "paired activation succeeds when gate holds");
   assertEqual(b.burstActive, true, "paired activation sets burstActive");
   assertEqual(b.burstPaired, true, "paired activation records the simultaneous-team shape");
 }
@@ -267,7 +267,7 @@ function testBattleStepActivatesAndDrainsBurst(): void {
   for (let i = 0; i < 10; i++) battle.step(1 / 60, { p1: input });
 
   assertEqual(player.burstActive, true, "Battle.step activates Power Burst from charged Y input");
-  assertEqual(player.burstPaired, false, "single-human battle activation is solo, not paired");
+  assertEqual(player.burstPaired, true, "solo Y sets source burst flag");
   assertEqual(meter.meter, BURST.METER_MAX - BURST.DRAIN_PER_FRAME * 10, "Battle.step drains active burst each frame");
   assertEqual(meter.charged, false, "Battle.step clears charged during active burst");
   // 12 u/f DERIVED run speed (raw migration, see testBurstSpeedMultiplierAffectsMovement) x1.5.

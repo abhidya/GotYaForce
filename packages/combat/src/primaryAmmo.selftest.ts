@@ -38,6 +38,22 @@ function fixture(id: string) {
 export function runPrimaryAmmoSelfTest(): void {
   {
     const f = fixture("pl0615");
+    for (let i = 0; i < 5; i++) f.shoot();
+    assert(f.cell.cur === 0 && f.cell.timer === 180, "G Red B ammo must be empty before solo Y");
+    const meter = f.state.burstMeterByPlayer.p1!;
+    meter.meter = 3000; meter.unclamped = 3000; meter.charged = true;
+    f.inputs.p1.hyper = true; f.step(); f.inputs.p1.hyper = false;
+    assert(f.owner.burstActive && f.owner.burstPaired, "solo Y did not enable the source refill flag");
+    let elapsed = 1;
+    while (f.cell.cur === 0 && elapsed < 180) { f.step(); elapsed++; }
+    assert(f.cell.cur === 5 && elapsed < 180, `solo Y did not accelerate G Red B refill (${elapsed} frames)`);
+    meter.meter = 5; f.step();
+    assert(!f.owner.burstActive && !f.owner.burstPaired, "burst flags did not clear on expiry");
+    f.shoot();
+    assert(f.cell.cur === 4, "G Red B is usable after burst expires");
+  }
+  {
+    const f = fixture("pl0615");
     assert(f.cell.timer === 0, "full type0 magazine must start with zero timer");
     f.shoot();
     assert(f.cell.cur === 4 && f.cell.timer === 0, "partial magazine armed reload");

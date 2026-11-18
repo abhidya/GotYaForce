@@ -1071,7 +1071,7 @@ class BattleImpl implements Battle {
       if (teamBorgs.length === 1) {
         const b = teamBorgs[0];
         if (!b) continue;
-        if (tryActivateBurst(b, this.burstMeterFor(b), false)) {
+        if (tryActivateBurst(b, this.burstMeterFor(b))) {
           this.activateSideWideBurst(team);
         }
         continue;
@@ -1081,7 +1081,7 @@ class BattleImpl implements Battle {
       if (!ready) continue;
       let activated = false;
       for (const b of teamBorgs) {
-        if (tryActivateBurst(b, this.burstMeterFor(b), true)) activated = true;
+        if (tryActivateBurst(b, this.burstMeterFor(b))) activated = true;
       }
       if (activated) this.activateSideWideBurst(team);
     }
