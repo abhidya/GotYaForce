@@ -74,6 +74,13 @@ export function runRomCollisionSelfTest(): void {
     assert(battleStateForSelfcheck(t.battle).projectiles.every(p => p.ownerUid !== t.borg.uid),
       "empty Battle input emits no source children");
   }
+  // Dash row 0x23 has a +1 upward source velocity delta: Projectile.drop is positive down.
+  {
+    const t = setup(geometry());
+    t.driver.ctx.onFamilyProjectile!(t.driver.actor, 0x80099e70, 0x23);
+    const child = battleStateForSelfcheck(t.battle).projectiles.find(p => p.ownerUid === t.borg.uid);
+    assert(child?.drop === -1, "source child upward acceleration has the correct host sign");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));

@@ -811,7 +811,7 @@ class BattleImpl implements Battle {
     if (b.borgId === "pl0004" && spawnerAddr === 0x80099e70 && kind >= 0x21 && kind <= 0x24) {
       const child = spawnRomProjectile(b, kind, b.rotY);
       const variant = projectileVariant(kind);
-      if (child && variant) {child.romShotKind = variant.kind; this.state.projectiles.push(child);}
+      if (child && variant) {child.romShotKind = variant.kind; child.drop = -variant.drop; this.state.projectiles.push(child);}
       return;
     }
     if (actor) {
