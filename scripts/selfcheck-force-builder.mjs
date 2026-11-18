@@ -12,7 +12,7 @@ class Element {
   append(...nodes) { for (const n of nodes) { n.parent = this; this.children.push(n); } }
   appendChild(n) { this.append(n); return n; }
   get firstChild() { return this.children[0]; }
-  removeChild(n) { this.children.splice(this.children.indexOf(n), 1); }
+  removeChild(n) { this.children.splice(this.children.indexOf(n), 1); if (document.activeElement === n) document.activeElement = null; }
   remove() { this.parent?.removeChild(this); }
   setAttribute(k, v) { this.attrs[k] = v; }
   addEventListener(k, f) { this.listeners[k] = f; }
@@ -24,6 +24,7 @@ class Element {
   }
   querySelector(s) { return this.querySelectorAll(s)[0]; }
   scrollIntoView() {}
+  focus() { document.activeElement = this; }
   click() { if (!this.disabled) this.listeners.click?.({}); }
 }
 globalThis.document = { createElement: () => new Element() };
@@ -134,6 +135,18 @@ for (const code of ['Enter','Space']) {
   slot.click();
   assert.equal(stopped,true,'focused force slot isolates '+code);
   assert.deepEqual(ring.handle.getForce(),['pl0004'],'only clicked force slot is removed');
+}
+// Rerendering the roster/slots after a native click must not discard focus.
+{
+  const f=mount({initialForce:['pl0004'],limit:2000});
+  f.container.querySelectorAll('.gf-borg-cell')[1].focus();
+  f.container.querySelectorAll('.gf-borg-cell')[1].click();
+  assert.equal(document.activeElement,f.container.querySelectorAll('.gf-borg-cell')[1],'roster focus retained after toggle');
+  f.container.querySelectorAll('.gf-hexcell')[1].focus();
+  f.container.querySelectorAll('.gf-hexcell')[1].click();
+  assert.equal(document.activeElement,f.container.querySelectorAll('.gf-hexcell')[1],'slot focus retained after removal');
+  const search=f.container.querySelector('.gf-force-search'); search.focus(); search.value='other'; search.listeners.input();
+  assert.equal(document.activeElement,search,'search retains focus while filtering');
 }
 const over = mount({initialForce:["pl0004", "other"]});
 over.action("start");
