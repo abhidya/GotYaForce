@@ -89,6 +89,7 @@ test("title leaves browser shortcuts and modifier keys alone while ordinary keys
   for(const event of [
     {key:'Control',ctrlKey:true}, {key:'Shift'}, {key:'r',ctrlKey:true},
     {key:'r',metaKey:true}, {key:'ArrowLeft',altKey:true}, {key:'Process',isComposing:true},
+    {key:'F5'}, {key:'F11'}, {key:'F12'}, {key:'Tab'},
   ]) {
     let prevented=false,stopped=false;
     handler({...event,preventDefault(){prevented=true;},stopImmediatePropagation(){stopped=true;}});

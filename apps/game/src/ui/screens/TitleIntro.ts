@@ -760,7 +760,8 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     // Let browser/OS shortcuts and composition work normally. The original
     // "any key" behavior applies to unmodified game input, not modifier keys.
     if (ev.ctrlKey || ev.metaKey || ev.altKey || ev.isComposing ||
-        ev.key === "Control" || ev.key === "Meta" || ev.key === "Alt" || ev.key === "Shift") return;
+        ev.key === "Control" || ev.key === "Meta" || ev.key === "Alt" || ev.key === "Shift" ||
+        ev.key === "Tab" || /^F(?:[1-9]|1[0-9]|2[0-4])$/.test(ev.key)) return;
     enter();
     ev.preventDefault();
     ev.stopImmediatePropagation();
