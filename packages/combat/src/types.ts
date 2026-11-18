@@ -711,6 +711,8 @@ export interface Projectile {
   drop?: number;
   /** Acceleration Ninja child table +0x16: change in scalar travel speed per frame. */
   accelerationNinjaSpeedDelta?: number;
+  /** Child entered its ten-frame, non-damaging source expiry tail. */
+  accelerationNinjaTail?: boolean;
   /** Damage-record index into gauges.ts DAMAGE_RECORDS for the gauge/stagger model
    *  (DERIVED mapping — see gauges.ts DAMAGE_RECORD_INDEX). Absent = normal shot (record 0). */
   damageRecordIndex?: number;

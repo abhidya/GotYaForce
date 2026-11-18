@@ -89,6 +89,26 @@ export function runRomCollisionSelfTest(): void {
     assert(Math.abs(Math.hypot(child.vel.x, child.vel.y, child.vel.z) - 11) < 1e-6 && child.vel.y === 0,
       "source child speed increases along its existing direction");
   }
+  // Expiry retains a non-damaging source tail instead of disappearing instantly.
+  {
+    const t = setup(geometry());
+    t.driver.ctx.onFamilyProjectile!(t.driver.actor, 0x80099e70, 0x23);
+    const state = battleStateForSelfcheck(t.battle);
+    const child = state.projectiles.find(p => p.ownerUid === t.borg.uid)!;
+    child.life = 1;
+    const enemy = t.actors.find(b => b.team === 1)!;
+    enemy.pos = { ...child.pos }; enemy.invincTimer = 0;
+    const hp = enemy.hp;
+    t.tick();
+    assert(enemy.hp === hp, "expired child cannot damage an overlapping enemy");
+    assert(child.accelerationNinjaTail === true && child.life === 10 && state.projectiles.includes(child),
+      "expired source child enters a ten-frame tail");
+    for (let i = 0; i < 9; i++) t.tick();
+    assert(Number(child.life) === 1 && battleStateForSelfcheck(t.battle).projectiles.includes(child),
+      "tail survives nine ticks");
+    t.tick();
+    assert(!battleStateForSelfcheck(t.battle).projectiles.includes(child), "tail expires on tick ten");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));

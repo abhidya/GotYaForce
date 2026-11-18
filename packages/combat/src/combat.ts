@@ -3854,6 +3854,7 @@ export function stepProjectiles(
     return advancePoweredSource(pr, byUid, ctx?.onPoweredLaunch);
   });
   stepSourceCollision(all, profiles, damageContext, projectiles.filter(pr =>
+    !(pr.accelerationNinjaSpeedDelta !== undefined && (pr.accelerationNinjaTail || pr.life <= 1)) &&
     !pr.switchingSource && !pr.ninjaSource && !pr.gredRangedSource && !pr.gblackChargeSource && !pr.gblackGroundWaveSource && !pr.arrowSource && !pr.beamSource && (pr.timeBomberSource?.kind!=="mine" || isLiveTimeBomberMine(pr)) && poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail") && !(pr.timeBomberSource?.kind === "explosion" && pr.timeBomberSource.phase === "tail")));
 
   // Actor attacks were staged earlier; mine movement/lifecycle MUST finish first.
@@ -4101,6 +4102,19 @@ export function stepProjectiles(
       survivors.push(pr);continue;
     }
     if (pr.poweredSource && !poweredCanCollide(pr)) { survivors.push(pr); continue; }
+    // FUN_8009a2ac switches an expired child to a ten-frame non-hit tail.
+    // The generic host presentation retains the object and fades by life; the
+    // exact source model/scale tracks and collision geometry remain separate.
+    if (pr.accelerationNinjaSpeedDelta !== undefined && (pr.accelerationNinjaTail || pr.life <= 1)) {
+      const owner = byUid.get(pr.ownerUid);
+      if (owner && !owner.alive) { pr.despawnReason = "owner-dead"; continue; }
+      if (!pr.accelerationNinjaTail) { pr.accelerationNinjaTail = true; pr.life = 10; }
+      else pr.life -= 1;
+      pr.pos = add(pr.pos, pr.vel as Vec3);
+      if (pr.life > 0) survivors.push(pr);
+      else pr.despawnReason = "expired";
+      continue;
+    }
     if (!pr.arrowSource && !pr.poweredSource && !pr.gatlingSource && !pr.timeBomberSource && !pr.revolverSource) pr.life -= 1;
     if (!pr.arrowSource && !pr.poweredSource && !pr.gatlingSource && !pr.timeBomberSource && !pr.revolverSource && pr.life <= 0) {
       pr.despawnReason = "expired"; // life seed: FUN_8006f11c, 600 frames (chunk_0009.c:3907)
