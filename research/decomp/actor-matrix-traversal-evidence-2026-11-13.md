@@ -200,3 +200,15 @@ normal465fc caller replacement, retail replay or complete gameplay parity is
 proved. A host refusal may retain an already completed write prefix; it is not
 the original machine's exception behavior. Snapshot executable-SHA metadata is
 not proof these bytes are unchanged original DOL bytes.
+
+## Bounded cosine follow-up, 2026-11-18
+
+An isolated Dolphin JIT64 session running an original GG4E battle captured
+160 `cosf` calls at `8023cc68` and their results at `8023cc80`; 148 had
+finite float32 inputs within the candidate reduction range, representing 15
+unique input/output pairs. The offline `sourceCosineFloatBounded` wrapper
+uses the source half-pi reduction and cosine/sine kernels, and matches all 15
+unique observed results bit-for-bit. A mathematical sweep also checks the
+bounded domain, but does not establish PowerPC rounding for every input.
+This is sampled emulator evidence, not physical-console or gameplay parity.
+The isolated instance was stopped and the pre-existing emulator left untouched.
