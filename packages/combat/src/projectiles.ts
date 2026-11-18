@@ -38,8 +38,8 @@ export interface ProjectileVariant {
    *  (FUN_8009a12c line 1513: PSQUATScale(hSpeed, vel, vel)). The REAL projectile
    *  speed, NOT the TUNED SHOT.SPEED constant. */
   hSpeed: number;
-  /** +0x16: f32 — per-frame gravity (projectile drop). Beams = -1.5, bullets = -3.0,
-   *  energy beams = 0.0, rising effects = +1.0. */
+  /** +0x16: f32 — scalar speed delta per frame in FUN_8009a2ac.
+   * The generated JSON key remains `drop` for compatibility; it is not gravity. */
   drop: number;
   /** +0x1a/+0x1e/+0x22: f32 ×3 — visual scale [X, Y, Z]. */
   scale: [number, number, number];
@@ -152,6 +152,7 @@ export function spawnRomProjectile(
     homingTarget: null,
     aimedTargetUid: activeSourceTargetUid(shooter),
     life: variant.lifetimeFrames,
+    sourceVariantSpeedDelta: variant.drop,
     hitRadius: SHOT.HIT_RADIUS,
     visualKind: variant.flags & VARIANT_FLAG_ENERGY_BEAM ? "energy" : "muzzle",
     damageRecordIndex: 0,
