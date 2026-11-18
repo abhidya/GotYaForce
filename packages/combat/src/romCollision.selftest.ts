@@ -96,7 +96,11 @@ export function runRomCollisionSelfTest(): void {
     const state = battleStateForSelfcheck(t.battle);
     const child = state.projectiles.find(p => p.ownerUid === t.borg.uid)!;
     child.life = 1;
+    const enemy = t.actors.find(b => b.team === 1)!;
+    enemy.pos = { ...child.pos }; enemy.invincTimer = 0;
+    const hp = enemy.hp;
     t.tick();
+    assert(enemy.hp === hp, "expired child cannot damage an overlapping enemy");
     assert(child.accelerationNinjaTail === true && child.life === 10 && state.projectiles.includes(child),
       "expired source child enters a ten-frame tail");
     for (let i = 0; i < 9; i++) t.tick();
