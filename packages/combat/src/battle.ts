@@ -809,8 +809,12 @@ class BattleImpl implements Battle {
     // variants, not arbitrary HIT kinds. Reuse the existing decoded variant
     // spawner. Its muzzle, target and generic rendering remain approximations.
     if (b.borgId === "pl0004" && spawnerAddr === 0x80099e70 && kind >= 0x21 && kind <= 0x24) {
-      const child = spawnRomProjectile(b, kind, b.rotY);
       const variant = projectileVariant(kind);
+      // zz_0099e70_ passes zero extra yaw; the row angle is stored for the
+      // child visual, not applied to its travel vector. The generic spawner
+      // adds that angle, so cancel it while bone-forward remains unavailable.
+      const yaw = variant ? b.rotY - (variant.angleBAM / 0x10000) * Math.PI * 2 : b.rotY;
+      const child = spawnRomProjectile(b, kind, yaw);
       if (child && variant) {child.romShotKind = variant.kind; child.accelerationNinjaSpeedDelta = variant.drop; this.state.projectiles.push(child);}
       return;
     }
