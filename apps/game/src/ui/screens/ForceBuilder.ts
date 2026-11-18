@@ -148,6 +148,7 @@ export function createForceBuilder(
     focusSide = "grid";
     renderGrid();
     renderRing();
+    renderPanel();
   });
   left.appendChild(search);
   const grid = el("div", { class: "gf-borg-grid", attrs: { role: "listbox", "aria-label": "Borg roster" } });
@@ -229,6 +230,18 @@ export function createForceBuilder(
     if (!event.repeat) save();
   });
   panel.appendChild(saveButton);
+  // The roster toggle removes an existing entry; a separate action allows
+  // multiple copies of one Borg without changing that established control.
+  const addCopyButton = el("button", {
+    class: "gf-force-add-copy", text: "ADD SELECTED BORG", attrs: { type: "button" },
+    onClick: () => addSelected(),
+  });
+  addCopyButton.addEventListener("keydown", (event) => {
+    if (event.code !== "Enter" && event.code !== "Space") return;
+    event.preventDefault(); event.stopPropagation();
+    if (!event.repeat) addSelected();
+  });
+  panel.appendChild(addCopyButton);
 
   function save(): void {
     if (force.length > 0 && force.length <= maxSlots && totalCost() <= opts.limit) {
@@ -331,7 +344,7 @@ export function createForceBuilder(
           onClick: () => {
             focusSide = "ring";
             ringCursor = i;
-            if (id !== undefined) toggle(id);
+            if (id !== undefined) removeAt(i);
           },
         },
       );
@@ -373,6 +386,8 @@ export function createForceBuilder(
     else setBitmapText(remainVal, String(rem), { bold: true, scale: 2 });
     panel.classList.toggle("gf-over", rem < 0);
     saveButton.disabled = force.length === 0 || rem < 0;
+    const selected = filteredCatalog()[gridCursor];
+    addCopyButton.disabled = !selected || force.length >= maxSlots || total + selected.energy > opts.limit;
   }
 
   function renderAll(): void {
@@ -391,6 +406,21 @@ export function createForceBuilder(
     } else {
       return; // can't add (budget/slots)
     }
+    renderAll();
+    opts.onChange?.([...force], totalCost(), remain());
+  }
+
+  function removeAt(index: number): void {
+    if (index < 0 || index >= force.length) return;
+    force.splice(index, 1);
+    renderAll();
+    opts.onChange?.([...force], totalCost(), remain());
+  }
+
+  function addSelected(): void {
+    const selected = filteredCatalog()[gridCursor];
+    if (!selected || force.length >= maxSlots || totalCost() + selected.energy > opts.limit) return;
+    force.push(selected.id);
     renderAll();
     opts.onChange?.([...force], totalCost(), remain());
   }
@@ -422,9 +452,11 @@ export function createForceBuilder(
       if (action === "down" || action === "right") {
         gridCursor = (gridCursor + 1) % count;
         renderGrid();
+        renderPanel();
       } else if (action === "up" || action === "left") {
         gridCursor = (gridCursor - 1 + count) % count;
         renderGrid();
+        renderPanel();
       } else if (action === "confirm") {
         const borg = visible[gridCursor];
         if (borg) toggle(borg.id);
@@ -440,7 +472,7 @@ export function createForceBuilder(
       renderRing();
     } else if (action === "confirm") {
       const id = force[ringCursor];
-      if (id !== undefined) toggle(id);
+      if (id !== undefined) removeAt(ringCursor);
     }
   }
 
