@@ -78,16 +78,16 @@ export function canActivateBurst(b: BorgRuntime, meter: BurstMeterState | undefi
   );
 }
 
-/** Activate Power Burst if `canActivateBurst` holds. `paired` records the same-team
- *  simultaneous activation shape; it does not yet imply fusion. */
+/** Ordinary non-fusion activation sets both source +0x6fc and +0x6fa even
+ * for a solo presser (zz_005b2b8_, chunk_0007.c:3439-3442). The historical
+ * `burstPaired` name represents +0x6fc; it is not a co-op-only flag. */
 export function tryActivateBurst(
   b: BorgRuntime,
   meter: BurstMeterState | undefined,
-  paired: boolean,
 ): boolean {
   if (!meter || !canActivateBurst(b, meter)) return false;
   b.burstActive = true;
-  b.burstPaired = paired;
+  b.burstPaired = true;
   meter.charged = false;
   return true;
 }
