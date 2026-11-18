@@ -369,3 +369,14 @@ matches all 128 grid, 128 fine and 65 earlier sweep observations. The 65-point
 sweep provides an independent check of the candidate across the second exponent.
 These finite samples do not prove unobserved boundaries, physical hardware,
 exceptional values or `[0.5,1)`, and the candidate is not enabled in gameplay.
+
+A separate isolated Dolphin run sampled four interior points in each of 32
+intervals for norms in `(0.5,1)`; actual float32 norm/estimate bit pairs are in
+`fres-dolphin-half-2026-11-18.json`. All 128 agree with the candidate's
+exponent scaling. The candidate now admits `(0.5,4]`; exactly 0.5 remains
+excluded because this sweep did not measure that endpoint. Using the candidate
+instead of injected observed estimates also matches the 27 nonzero output
+values in the three captured rotations, including the two norms below 1.
+This is still a bounded experimental emulator model, not full hardware or
+playable-game parity. The isolated instance was stopped and the unrelated
+existing emulator was left untouched.

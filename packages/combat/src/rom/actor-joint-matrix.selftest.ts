@@ -227,9 +227,8 @@ export function runActorJointMatrixSelfTests(): void {
       matrix.composePose(parent, output, pose);
       for (let i=0;i<12;i++) if (sample.matrix[i] !== 0)
         check(bits(matrix.getMatrix(output)[i]!) === bits(sample.matrix[i]!), `Dolphin matrix nonzero mismatch at ${i}`);
-      if (sample === cases[0]) {
-        // This captured norm is exactly 1, inside the candidate's admitted
-        // range. Other captured norms are below 1 and still require injection.
+      {
+        // All three observed norms are now in the candidate's bounded domain.
         const candidate = createSourceActorJointMatrixRuntime(feedback, 128, sourceReciprocalEstimateBounded);
         const candidateParent = candidate.createMatrix(identity), candidateOut = candidate.createMatrix(identity);
         candidate.composePose(candidateParent, candidateOut, pose);
