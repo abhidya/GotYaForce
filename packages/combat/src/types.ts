@@ -379,7 +379,10 @@ export interface BorgRuntime {
   sourceAnimSample?: { serial: number; frame: number;
     /** Only Ninja's admitted mode-1 clock is published here. This is source
      * timing, not a claim that the renderer owns or blends source poses. */
-    blend?: { mode: 1; elapsed: number; duration: number } | null;
+    blend?: { mode: 1; elapsed: number; duration: number;
+      /** Source fsubs(1, fdivs(elapsed, duration)): weight of saved pose. */
+      previousWeight: number;
+    } | null;
   } | null;
   /** The CURRENT melee swing's (or charged release's) PATH-B authored sound events (DERIVED —
    *  the per-anim sound-event table at ROM actor+0x4e8 joined through the anim-descriptor
