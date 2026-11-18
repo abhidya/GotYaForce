@@ -61,6 +61,10 @@ export function runRomCollisionSelfTest(): void {
     const children = battleStateForSelfcheck(t.battle).projectiles.filter(p => p.ownerUid === t.borg.uid);
     assert(children.length === 2 && children.every(p => p.romShotKind === 0 && p.life <= 120),
       "source callback creates two decoded-variant children");
+    // Rows 0x21/0x22 have opposite render angles, but both travel along the
+    // same source bone-forward vector. The host approximates that as owner-forward.
+    assert(Math.abs(children[0]!.vel.x) < 1e-6 && Math.abs(children[1]!.vel.x) < 1e-6 &&
+      children.every(p => p.vel.z > 0), "render angle is not added to child travel yaw");
   }
   // An empty source weapon cell must not create the callback's children.
   {
