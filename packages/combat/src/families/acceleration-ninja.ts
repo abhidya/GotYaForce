@@ -37,8 +37,8 @@
 // no host bound):
 //   FUN_80067310  — scalar motion is integrated in all source call sites.
 //                   Collision/aim and original host entry timing remain partial.
-//   zz_00677b0_   — action-2 phase-1 uses the host stage-motion probe; other sites
-//                   retain scratch grounded77b0. Full ROM slope parity is pending.
+//   zz_00677b0_   — action-0, action-2 phase-1 and action-3 use host collision/floor approximations.
+//                   Full ROM slope and collision parity is pending.
 //   zz_006d144_   — lock-yaw rebuild from +0x5ac (distinct from helpers' stepTargetYaw)
 //   zz_0066ac0_ / zz_0066e40_ / zz_006ed8c_ — aim helpers
 //   zz_00b2544_ / zz_00f0104_ / zz_00b2190_ / FUN_800061a8 — trail / afterimage-arm
@@ -410,6 +410,16 @@ function stepAction3Offset(actor: NinjaActor): void {
   }
 }
 
+/** Approximate the post-offset ground probe without sweeping a source reposition. */
+function probeAction3Floor(actor: NinjaActor): void {
+  const result = actor.physicsRuntime?.clampToGround(actor.pos, actor.yVel);
+  if (result) {
+    actor.pos.y = result.y;
+    actor.yVel = result.velY;
+    actor.grounded77b0 = result.grounded;
+  }
+}
+
 function action3(actor: NinjaActor, ctx: StreamContext): void {
   const phase = actor.fbPhaseSlots[0] ?? 0;
   switch (phase) {
@@ -432,7 +442,7 @@ function action3(actor: NinjaActor, ctx: StreamContext): void {
       actor.motion.y = Math.fround(actor.pos.y - actor.targetCache5e8.y);
       actor.motion.z = Math.fround(actor.pos.z - actor.targetCache5e8.z);
       stepAction3Offset(actor);
-      // zz_00677b0_(actor) — TODO(host) ground snap.
+      probeAction3Floor(actor); // host approximation of zz_00677b0_ after reposition
       startStream(actor, 0xf, 2, 1, AN.STREAM_RATE);          // zz_004beb8_(-1, actor, 0xf, 2, 1)
       return;
     }
@@ -462,7 +472,7 @@ function action3(actor: NinjaActor, ctx: StreamContext): void {
       }
       integratePhysicsPrimary(AN.PHYSICS_RATE, actor, actor.activeYaw);
       stepAction3Offset(actor);
-      // zz_00677b0_(actor) — TODO.
+      probeAction3Floor(actor); // host approximation after the damped offset
       if (actor.contactP0 < 0) {                              // +0x1cef < 0 → advance
         actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
         actor.handlerTimer = AN.A3_PH2_TIMER;                 // +0x558 = 180 (FLOAT_8043a914)
@@ -759,6 +769,22 @@ export function runAccelerationNinjaSelfTests(assert: AssertFn): void {
 
   // ------------------------------------------------------------------------
   console.log("\n[acceleration-ninja.selfcheck] ACTION 3 — hover dash strike (3-phase):");
+
+  // The host ground probe runs after each source position offset, not before it.
+  for (const phase of [0, 1]) {
+    const a = createRomActor() as NinjaActor;
+    configureAccelerationNinjaFamily(a, {});
+    a.actionIndex = 3; a.fbPhaseSlots[0] = phase; a.pos.y = 10;
+    a.targetCache5e8.y = 0; a.motion.y = 10;
+    let calls = 0; let observedY = 0;
+    a.physicsRuntime = { clampToGround: (pos, velY) => {
+      calls++; observedY = pos.y;
+      return { y: 7, velY, grounded: true };
+    }};
+    a.rootAction!(a);
+    assert(calls >= 1 && observedY > 7 && a.pos.y === 7 && a.grounded77b0 === true,
+      `a3 phase ${phase} probes ground after displacement`);
+  }
 
   // Source offset is current position minus older own position, retained and damped each frame.
   {
