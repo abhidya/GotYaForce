@@ -4137,6 +4137,15 @@ export function stepProjectiles(
     // ROM gravity would not transfer across the port's ~4x world rescale anyway
     // (behavior-notes.md section (bc)).
     if (pr.drop) pr.vel.y -= pr.drop;
+    // FUN_8009a2ac: this child's +0x4c changes scalar speed, not y gravity.
+    if (pr.accelerationNinjaSpeedDelta !== undefined) {
+      const speed = Math.hypot(pr.vel.x, pr.vel.y, pr.vel.z);
+      const nextSpeed = Math.max(0, speed + pr.accelerationNinjaSpeedDelta);
+      if (speed > 0) {
+        const factor = nextSpeed / speed;
+        pr.vel.x *= factor; pr.vel.y *= factor; pr.vel.z *= factor;
+      }
+    }
 
     const prevPos = pr.arrowSource || pr.poweredSource || pr.gatlingSource || pr.timeBomberSource || pr.revolverSource ? poweredPrevious.get(pr) ?? pr.pos : pr.pos;
     if (!pr.arrowSource && !pr.poweredSource && !pr.gatlingSource && !pr.timeBomberSource && !pr.revolverSource) pr.pos = add(pr.pos, pr.vel as Vec3);
