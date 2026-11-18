@@ -88,14 +88,10 @@ function setupLockGate(a: MActor, row: number, activeFrom: "heading" | "lockYaw"
 }
 
 function blinkReposition(a: MActor, scale: number): void {
-  if (a.lockTarget) { vecSubtract(a.pos, a.lockTarget, a.motion); vecScale(scale, a.motion, a.motion); vecAdd(a.pos, a.motion, a.pos); }
-  else { a.motion.x = 0; a.motion.y = 0; a.motion.z = 0; }
-}
-
-function prelude(a: MActor): void {
-  if ((a.fbPhaseSlots[0] ?? 0) === 0) (a as any)._80c = KNIGHT_MELEE.ZERO;
-  vecSubtract(a.pos, a.lockTarget ?? a.pos, a.motion);
-  if (Math.hypot(a.motion.x, a.motion.y, a.motion.z) > KNIGHT_MELEE.DRIFT_THRESHOLD) { }
+  // FUN_80158ae4 carries own +0x5e8 history even without a target.
+  vecSubtract(a.pos, a.targetCache5e8, a.motion);
+  vecScale(scale, a.motion, a.motion);
+  vecAdd(a.pos, a.motion, a.pos);
 }
 
 function meleeExitWall(a: MActor): void {
@@ -329,22 +325,10 @@ function divePhase3(a: MActor, ctx: StreamContext): void {
   if (a.wallContact !== 0) meleeExitWall(a);
 }
 
-/** zz_0159100_ — shared melee setup: clear gravity override if phase 0, drift-correct if
- *  target distance exceeds PROXIMITY. */
+/** zz_0159100_ measures own history delta in a local vector for an optional
+ *  afterimage callback. That effect is not connected here; it does not move the actor. */
 function sharedMeleeSetup(a: MActor): void {
-  if ((a.fbPhaseSlots[0] ?? 0) === 0) (a as any)._80c = KNIGHT_MELEE.ZERO;
-  const t = a.lockTarget;
-  if (t) {
-    const dx = t.x - a.pos.x;
-    const dy = t.y - a.pos.y;
-    const dz = t.z - a.pos.z;
-    if (Math.hypot(dx, dy, dz) > KNIGHT_MELEE.PROXIMITY) {
-      // zz_00b22f4_ — drift correction (approximated by repositioning toward target)
-      vecSubtract(a.pos, t, a.motion);
-      vecScale(KNIGHT_MELEE.DT_MOD, a.motion, a.motion);
-      vecAdd(a.pos, a.motion, a.pos);
-    }
-  }
+  if ((a.fbPhaseSlots[0] ?? 0) === 0) a.accumulator80c = KNIGHT_MELEE.ZERO;
 }
 
 /** zz_015809c_ — entry point for knight melee table 0x80343c00. Clears +0xcc if +0x541
@@ -377,7 +361,6 @@ export function createKnightMeleeTable00(ctx: StreamContext, seedSlot = 0): (act
   return (actor: RomActor) => {
     const a = actor as MActor;
     if ((a.fbPhaseSlots[1] ?? 0) !== 0) a.lockTarget = null;
-    prelude(a);
     switch (a.fbPhaseSlots[0] ?? 0) {
       case 0: meleePhase0(a, seedSlot); break;
       case 1: meleePhase1(a, ctx); break;
@@ -393,7 +376,6 @@ export function createKnightMeleeTable14(ctx: StreamContext, seedSlot = 0): (act
   return (actor: RomActor) => {
     const a = actor as MActor;
     if ((a.fbPhaseSlots[1] ?? 0) !== 0) a.lockTarget = null;
-    prelude(a);
     switch (a.fbPhaseSlots[0] ?? 0) {
       case 0: meleePhase0(a, seedSlot); break;
       case 1: meleePhase1b(a, ctx); break;

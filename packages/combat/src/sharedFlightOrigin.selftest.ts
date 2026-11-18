@@ -13,6 +13,7 @@ import {createStarHeroRootAction} from './families/star-hero.js';
 import {createMeleeSamurai,SAMURAI_MELEE_DEFAULT_CONFIG} from './families/melee-samurai.js';
 import {createSharedCharge,GRED_CHARGE_CONFIG} from './families/shared-charge.js';
 import {createSharedCharge3,FAMILY1_CHARGE3_CONFIG} from './families/shared-charge3.js';
+import {createKnightMeleeTable28,knightMeleeEntry00,knightMeleeEntry14} from './families/shared-knight-melee.js';
 function assert(v:unknown,m:string):asserts v {if(!v) throw Error(`[sharedFlightOrigin] ${m}`);}
 export function runSharedFlightOriginSelfTest():void {
  const run=createSharedFlightX(FLIGHT_X_FAMILY4_CONFIG,{});
@@ -80,6 +81,20 @@ export function runSharedFlightOriginSelfTest():void {
    run(b);
    assert(Math.abs(b.pos.x-(100+10*scale))<1e-4 && Math.abs(b.pos.y-(200+20*scale))<1e-4 &&
     Math.abs(b.pos.z-(300+30*scale))<1e-4,`${name} uses own history regardless of target`);
+  }
+ }
+ for(const target of [{x:-4000,y:-9000,z:6000},null]) {
+  const b=createRomActor();b.borgNumber=0x208;b.pos={x:100,y:200,z:300};
+  b.targetCache5e8={x:90,y:180,z:270};b.lockTarget=target;
+  createKnightMeleeTable28({})(b);
+  assert(Math.abs(b.pos.x-109.5)<1e-4 && Math.abs(b.pos.y-219)<1e-4 && Math.abs(b.pos.z-328.5)<1e-4,
+   'knight dive carries own history regardless of target');
+  for(const entry of [knightMeleeEntry00,knightMeleeEntry14]) {
+   const c=createRomActor();c.pos={x:100,y:200,z:300};c.targetCache5e8={x:90,y:180,z:270};c.lockTarget=target;
+   c.motion={x:3,y:4,z:5};c.accumulator80c=42;entry(c,()=>{});
+   assert(c.pos.x===100&&c.pos.y===200&&c.pos.z===300&&c.motion.x===3&&c.motion.y===4&&c.motion.z===5,
+    'knight entry visual prelude does not teleport or overwrite motion');
+   assert(c.accumulator80c===0,'phase-zero source accumulator is cleared');
   }
  }
  console.log('[sharedFlightOrigin] PASS: own-position history and no-target entry');
