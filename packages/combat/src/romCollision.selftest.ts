@@ -109,6 +109,19 @@ export function runRomCollisionSelfTest(): void {
     t.tick();
     assert(!battleStateForSelfcheck(t.battle).projectiles.includes(child), "tail expires on tick ten");
   }
+  // A source child retires on in-place owner morph, before a collision pass.
+  {
+    const t = setup(geometry());
+    t.driver.ctx.onFamilyProjectile!(t.driver.actor, 0x80099e70, 0x23);
+    const child = battleStateForSelfcheck(t.battle).projectiles.find(p => p.ownerUid === t.borg.uid)!;
+    const enemy = t.actors.find(b => b.team === 1)!;
+    enemy.pos = { ...child.pos }; enemy.invincTimer = 0;
+    const hp = enemy.hp;
+    t.borg.combatFormId = "pl0005";
+    t.tick();
+    assert(enemy.hp === hp, "stale child cannot hit after owner form change");
+    assert(!battleStateForSelfcheck(t.battle).projectiles.includes(child), "owner form change retires source child");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));

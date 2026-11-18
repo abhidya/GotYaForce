@@ -3853,8 +3853,13 @@ export function stepProjectiles(
     delete pr.poweredInitialPosition;
     return advancePoweredSource(pr, byUid, ctx?.onPoweredLaunch);
   });
+  const accelerationOwnerInvalid = (pr: Projectile): boolean => {
+    const owner = byUid.get(pr.ownerUid);
+    return !!owner && (!owner.alive || (owner.combatFormId ?? owner.borgId) !== "pl0004");
+  };
   stepSourceCollision(all, profiles, damageContext, projectiles.filter(pr =>
-    !(pr.accelerationNinjaSpeedDelta !== undefined && (pr.accelerationNinjaTail || pr.life <= 1)) &&
+    !(pr.accelerationNinjaSpeedDelta !== undefined &&
+      (pr.accelerationNinjaTail || pr.life <= 1 || accelerationOwnerInvalid(pr))) &&
     !pr.switchingSource && !pr.ninjaSource && !pr.gredRangedSource && !pr.gblackChargeSource && !pr.gblackGroundWaveSource && !pr.arrowSource && !pr.beamSource && (pr.timeBomberSource?.kind!=="mine" || isLiveTimeBomberMine(pr)) && poweredCanCollide(pr) && !(pr.gatlingSource?.kind === "explosion" && pr.gatlingSource.phase === "tail") && !(pr.timeBomberSource?.kind === "explosion" && pr.timeBomberSource.phase === "tail")));
 
   // Actor attacks were staged earlier; mine movement/lifecycle MUST finish first.
@@ -4102,6 +4107,13 @@ export function stepProjectiles(
       survivors.push(pr);continue;
     }
     if (pr.poweredSource && !poweredCanCollide(pr)) { survivors.push(pr); continue; }
+    // zz_0084000_ invalidates this source child when the owner changes form.
+    if (pr.accelerationNinjaSpeedDelta !== undefined) {
+      if (accelerationOwnerInvalid(pr)) {
+        pr.despawnReason = "owner-dead";
+        continue;
+      }
+    }
     // FUN_8009a2ac switches an expired child to a ten-frame non-hit tail.
     // The generic host presentation retains the object and fades by life; the
     // exact source model/scale tracks and collision geometry remain separate.
