@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import {emitInlineModuleGraph} from './lib/ts-inline-module.mjs';
-const graph=emitInlineModuleGraph({label:'force-model-lookup',entry:path.resolve('apps/game/src/ui/screens/forceModelLookup.ts'),outDir:path.resolve('.tmp/force-model-lookup')});
+const graph=emitInlineModuleGraph({label:'force-model-lookup',entry:path.resolve('apps/game/src/ui/forceModelLookup.ts'),outDir:path.resolve('.tmp/force-model-lookup')});
 const {createForceModelLookup}=await import(graph.url);
 let attempts=0;
 const models=new Map([['pl0000','model.glb']]);
