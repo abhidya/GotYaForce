@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Exercise the live scene with repo-baked clips and the actual GLB joint tree.
-// No renderer, meshes, original-game comparison, or source pose bank is claimed.
+// No WebGL rendering, original-game comparison, or source pose bank is claimed.
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -53,14 +53,30 @@ try {
     }
     const skeleton = new THREE.Group();
     for (const i of ids) if (!childIds.has(i)) skeleton.add(nodes.get(i));
-    // Production part loader and hierarchy reconstruction use the actual GLB
-    // node graph. Geometry is a test double: no WebGL or visual parity claim.
+    // Production part loader uses GLB node graphs and POSITION attributes.
+    // Materials are test doubles; no WebGL or visual parity is claimed.
     const assetLoader = {
       async loadGlbScene(url) {
         const bytes = await readFile(path.join(root, 'apps/game/public', String(url).replace(/^\//, '')));
         const doc = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString('utf8'));
+        const jsonEnd = 20 + bytes.readUInt32LE(12);
+        if (bytes.toString('ascii', jsonEnd + 4, jsonEnd + 8) !== 'BIN\0') throw Error('GLB binary chunk missing');
+        const binaryStart = jsonEnd + 8;
         const objects = doc.nodes.map(n => {
-          const o = n.mesh === undefined ? new THREE.Group() : new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial());
+          let o;
+          if (n.mesh === undefined) o = new THREE.Group();
+          else {
+            const primitives = doc.meshes[n.mesh].primitives;
+            if (primitives.length !== 1) throw Error('Unexpected part primitive count');
+            const a = doc.accessors[primitives[0].attributes.POSITION], b = doc.bufferViews[a.bufferView];
+            if (a.componentType !== 5126 || a.type !== 'VEC3' || a.count < 1) throw Error('Unexpected part position format');
+            const stride = b.byteStride ?? 12, offset = binaryStart + (b.byteOffset ?? 0) + (a.byteOffset ?? 0);
+            const values = new Float32Array(a.count * 3);
+            for (let i=0;i<a.count;i++) for (let k=0;k<3;k++) values[i*3+k] = bytes.readFloatLE(offset+i*stride+k*4);
+            if (!values.every(Number.isFinite)) throw Error('Non-finite part geometry');
+            const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.BufferAttribute(values, 3));
+            o = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
+          }
           o.name = n.name ?? ''; if (n.translation) o.position.fromArray(n.translation); if (n.rotation) o.quaternion.fromArray(n.rotation); if (n.scale) o.scale.fromArray(n.scale); return o;
         });
         const children = new Set();
@@ -89,6 +105,7 @@ try {
         scene.update(1/60);
         await waitUntil(() => actor()?.sourceDrawParts?.length === 2);
         if (actor().sourceDrawParts.some(part => part.visible !== (slot > 0 || elapsed >= 4))) throw Error(`${id}: wrong source part threshold`);
+        for (const part of actor().sourceDrawParts) {const bounds = new THREE.Box3().setFromObject(part); if (bounds.isEmpty() || ![bounds.min.x,bounds.min.y,bounds.min.z,bounds.max.x,bounds.max.y,bounds.max.z].every(Number.isFinite)) throw Error(`${id}: invalid part geometry bounds`);}
         if (actor().sourceBlendPose?.length !== 20) throw Error(`${id} slot ${slot}: saved pose missing`);
         for (const joint of actor().sourceBlendPose) {
           const {position:p, quaternion:q} = joint.node;
@@ -97,6 +114,6 @@ try {
       }
     }
     scene.clear();
-    console.log(`[ninja-presentation-assets] PASS ${id}: actual baked special clips and GLB node trees, including part attachments, in BattleScene; geometry and source-game parity not asserted`);
+    console.log(`[ninja-presentation-assets] PASS ${id}: actual baked special clips, GLB node trees and part positions in BattleScene; no WebGL or source-game parity asserted`);
   }
 } finally { globalThis.fetch = previousFetch; }
