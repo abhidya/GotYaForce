@@ -1844,10 +1844,10 @@ export class RomDriverBridge implements RomFamilyDriver {
       }
     }
     if (!events) return false;
-    // KFM group3 re-arms the same parts between windup, strikes and recovery.
+    // KFM/Tao group3 re-arms the same parts between windup, strikes and recovery.
     // Cancel prior host schedules and clear the part-0 completion byte, just
     // as a real zz_004beb8_ start replaces the old stream.
-    if (this.runtime.borgId === "pl0800" && this.actor.actionIndex === 1 && group === 3) {
+    if ((this.runtime.borgId === "pl0800" || this.runtime.borgId === "pl0801") && this.actor.actionIndex === 1 && group === 3) {
       for (const schedule of this.streamSchedules) {
         schedule.mask &= ~effective;
         if (schedule.mask === 0) schedule.completed = true;
@@ -2527,8 +2527,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.actor.statusWord5b4 = held ? 0x200 : 0;
     if (!getSwitchingXState(this.actor) && !getTeleportXState(this.actor) && !getNinjaXState(this.actor) && !getGRedAirShotState(this.actor) && !getGRedShotState(this.actor) && !getGBlackChargeState(this.actor) && !getGRedChargeState(this.actor) && !getGRedCrashState(this.actor) && !getGRedAirMeleeState(this.actor) && !getNeoGredMeleeState(this.actor) && (this.runtime?.borgId !== "pl0106" || this.actor.actionIndex !== 0))
       this.actor.streamHold1b03 = 0;
-    if (this.runtime?.borgId === "pl0800" && this.specialKind === "b" && this.actor.actionIndex === 1) {
-      // KFM's +5d4 bit40 is a B press edge, not a held button or X.
+    if ((this.runtime?.borgId === "pl0800" || this.runtime?.borgId === "pl0801") && this.specialKind === "b" && this.actor.actionIndex === 1) {
+      // KFM/Tao +5d4 bit40 is a B press edge, not a held button or X.
       this.actor.inputEdge5d4 = this.neoBPressed ? 0x40 : 0;
     }
     if (getNeoGredMeleeState(this.actor) || getGRedAirMeleeState(this.actor)) {
@@ -2818,12 +2818,13 @@ export class RomDriverBridge implements RomFamilyDriver {
     const accelerationNeutral = runtime.borgId === "pl0004" && runtime.grounded &&
       runtime.command.button === "B Shot" && runtime.command.subtype === 0 &&
       runtime.command.actionIndex === 0 && runtime.command.variantIndex === 0;
-    // GG4E 802d6210 is the grounded Kung-Fu Master close-B action1/v0.
+    // GG4E 802d6210/802f7b88 are grounded Kung-Fu/Tao close-B action1/v0.
     // Other contexts retain their existing path until individually traced.
-    const kungFuGroundMelee = runtime.borgId === "pl0800" && runtime.grounded &&
-      runtime.command.type === 1 && runtime.command.subtype === 0 && runtime.command.recordAddress === "0x802d6210" &&
+    const martialRecord = runtime.borgId === "pl0800" ? "0x802d6210" : runtime.borgId === "pl0801" ? "0x802f7b88" : null;
+    const martialGroundMelee = martialRecord !== null && runtime.grounded &&
+      runtime.command.type === 1 && runtime.command.subtype === 0 && runtime.command.recordAddress === martialRecord &&
       runtime.command.actionIndex === 1 && runtime.command.variantIndex === 0;
-    if (!this.actor.hasBCharge && !accelerationNeutral && !kungFuGroundMelee) return false;
+    if (!this.actor.hasBCharge && !accelerationNeutral && !martialGroundMelee) return false;
     const actionIndex = runtime.command.actionIndex;
     const variantIndex = runtime.command?.variantIndex ?? 0;
     const admittedAirShot=(runtime.borgId==='pl0615'||runtime.borgId==='pl0629'||runtime.borgId==='pl062a')&&!runtime.grounded&&runtime.command.button==='B Shot'&&runtime.command.subtype===4&&actionIndex===0&&variantIndex===3;
@@ -2855,7 +2856,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     // slotForBorg selects the charge slot AND playSlot routes through
     // loadClipByStreamRef (the charge_shot slot is in the stream-ref allow-list).
     runtime.state = "attack";
-    runtime.anim = kungFuGroundMelee ? "melee" : "charge_shot";
+    runtime.anim = martialGroundMelee ? "melee" : "charge_shot";
     this.specialActive = true;
     this.syncActionInput(null, true);
     // Arm the action-mode bits so the phase-3 exit (controlWord &= ~0x3) can signal
@@ -2895,7 +2896,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       this.flushVisibilityState(this.actor);
     }
     // Original G RED-family close-air row80365dc8=[45,3,1,4]. Other B routes unchanged.
-    if (kungFuGroundMelee) { this.actor.cmdButton = 1; this.actor.cmdSubtype = 0; this.actor.cmdChargedRanged = 0; }
+    if (martialGroundMelee) { this.actor.cmdButton = 1; this.actor.cmdSubtype = 0; this.actor.cmdChargedRanged = 0; }
     dispatchCommandRecord(this.actor, { cueId: admittedAirMelee||admittedAirShot?45:44, stateMode: admittedAirShot?1:3, actionIndex, variantIndex });
     clearNeoGredMelee(this.actor);
     clearGRedAirMelee(this.actor);
@@ -3008,7 +3009,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     input: PlayerInput | null = null,
     onMineReceiverMelee?: (attack: MineReceiverMeleeAttack) => void,
   ): boolean {
-    if (runtime.borgId === "pl0615" || runtime.borgId === "pl0629" || runtime.borgId === "pl062a" || runtime.borgId === "pl0800") {
+    if (runtime.borgId === "pl0615" || runtime.borgId === "pl0629" || runtime.borgId === "pl062a" || runtime.borgId === "pl0800" || runtime.borgId === "pl0801") {
       const held = input?.attack ?? false;
       this.neoBPressed = held && !this.neoBWasHeld;
       this.neoBWasHeld = held;
