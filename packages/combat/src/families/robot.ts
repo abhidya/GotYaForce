@@ -113,6 +113,16 @@ export interface RobotFamilyCtx extends StreamContext {}
 // ============================================================================
 // Phase 0 — FUN_80113334 @ chunk_0031.c:1258. Setup + blink-reposition + stream start.
 // ============================================================================
+/** Host approximation at the source robot 677b0 terrain calls. */
+function probeRobotMotion(actor: RomActor, previous: {x:number;y:number;z:number}): void {
+  const floor=actor.physicsRuntime;
+  if (!floor) return;
+  const result=floor.probeMotion ? floor.probeMotion(previous,actor.pos,actor.yVel) : floor.clampToGround(actor.pos,actor.yVel);
+  if ('y' in result && typeof result.y==='number') actor.pos.y=result.y;
+  actor.yVel=result.velY;
+  (actor as RomActor & {grounded?:boolean}).grounded=result.grounded;
+}
+
 function robotXPhase0(actor: RomActor, _ctx: RobotFamilyCtx): void {
   // +0x540++ (chunk_0031.c:1266) — enter phase 1 for the next frame.
   actor.fbPhaseSlots[0] = 1;
@@ -128,13 +138,12 @@ function robotXPhase0(actor: RomActor, _ctx: RobotFamilyCtx): void {
   (actor as RomActor & { [ROBOT_X.MEGATON_LATCH_FIELD]?: number })[ROBOT_X.MEGATON_LATCH_FIELD] = 0;
 
   // FUN_80113334 carries the actor's older own +0x5e8 position, not the target.
+  const previous = {...actor.pos};
   vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
   vecScale(ROBOT_X.REPOSITION_SCALE, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
 
-  // zz_00677b0_(actor) — ground/wall collide runs in the ROM right after the reposition;
-  // the bridge applies the host's bounds clamp + off-mesh revert in tryStartXSpecial,
-  // so the wall/walk collision itself is the host's responsibility (skipped here).
+  probeRobotMotion(actor, previous); // source 677b0
 
   // Stream slot select (chunk_0031.c:1279-1285): +0x6ea = 0 grounded / 1 airborne
   // (+0x5e0 & 0x40); the cursor then ++'s for the combo follow-up convention.
@@ -191,12 +200,14 @@ function robotXPhase1(actor: RomActor, ctx: RobotFamilyCtx): void {
   }
 
   // FUN_80067310_(gravity 1.0, actor, +0x5ae) — integrate physics (chunk_0031.c:1329).
+  const previous = {...actor.pos};
   integratePhysics(ROBOT_X.GRAVITY, actor, actor.lockYaw);
 
   // Reposition continuation (chunk_0031.c:1330-1331): motion ×= 0.95; pos += motion
   // (decaying slide-away — same shape as phase 0 + the shared X-special).
   vecScale(ROBOT_X.REPOSITION_SCALE, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
+  probeRobotMotion(actor, previous);
 
   // Ground/wall contact check (chunk_0031.c:1332-1348). +0x1cee is the wall/ground
   // contact flag; zz_00677b0_ returns 0 when airborne (no ground under the borg).
@@ -228,11 +239,13 @@ function robotXPhase2(actor: RomActor, ctx: RobotFamilyCtx): void {
   tickStream(actor, 0xf, ctx);
 
   // FUN_80067310_(gravity 1.0, actor, +0x5ae) — integrate physics (chunk_0031.c:1364).
+  const previous = {...actor.pos};
   integratePhysics(ROBOT_X.GRAVITY, actor, actor.lockYaw);
 
   // Reposition continuation (chunk_0031.c:1365-1366).
   vecScale(ROBOT_X.REPOSITION_SCALE, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
+  probeRobotMotion(actor, previous);
 
   // Exit check (chunk_0031.c:1367-1384). zz_00677b0_ returns 0 when still airborne.
   const grounded = (actor as RomActor & { grounded?: boolean }).grounded === true;
