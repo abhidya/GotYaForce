@@ -73,6 +73,18 @@ assert.equal(edit.saved.length, 1);
 const clicked = mount({ initialForce: ["pl0004"] });
 clicked.container.querySelector(".gf-force-save").click();
 assert.deepEqual(clicked.saved, [["pl0004"]], "visible button commits");
+const searched = mount({limit: 1000});
+const search = searched.container.querySelector('.gf-force-search');
+search.value = 'OtHeR'; search.listeners.input();
+assert.equal(searched.container.querySelectorAll('.gf-borg-cell').length, 1, 'search filters roster case-insensitively');
+searched.action('confirm');
+assert.deepEqual(searched.handle.getForce(), ['other'], 'controller selects filtered Borg, not original first entry');
+search.value = 'missing'; search.listeners.input(); searched.action('confirm');
+assert.deepEqual(searched.handle.getForce(), ['other'], 'empty search cannot mutate force');
+search.value = ''; search.listeners.input();
+assert.equal(searched.container.querySelectorAll('.gf-borg-cell').length, 2, 'clearing search restores catalog');
+let stopped = false; search.listeners.keydown({stopPropagation(){stopped=true;}});
+assert.equal(stopped, true, 'typing cannot reach menu bus');
 // Model the actual DOM propagation boundary: target listener runs before the
 // window menu bus, which converts Enter/Space into confirm unless stopped.
 for (const code of ["Enter", "Space"]) {
@@ -108,5 +120,5 @@ assert.equal(empty.quits(), 1, "empty catalog remains cancellable");
 const capped = mount({maxSlots:1, limit:1000});
 capped.action("confirm"); capped.action("right"); capped.action("confirm");
 assert.deepEqual(capped.handle.getForce(), ["pl0004"], "slot cap preserved");
-for (const test of [edit, clicked, over, empty, capped]) test.handle.destroy();
+for (const test of [edit, clicked, searched, over, empty, capped]) test.handle.destroy();
 console.log("force-builder selfcheck PASS: commit button/START, cancellation, snapshot, budget, capacity");
