@@ -157,3 +157,16 @@ verified actor-descriptor defaults `[0,1]` when the observed default group is
 0. This establishes metadata target selections for those descriptor slots,
 not that every host-selected animation, source draw mask, or transition has
 been proven equivalent. The group-0 descriptors can alias each other.
+
+### Draw mask observation with X handler confirmed
+
+A second isolated Dolphin JIT64 run staged two Normal Ninjas and two
+Sasukes and injected a repeating X press/release cycle for 120 pad frames.
+A breakpoint at `800715d4` fired 113 times for the first Normal Ninja,
+confirming that its X-family handler actually ran. At sampled entries to
+`8004fcfc`, all four active actors retained draw-enable `+76c = ffffffff`,
+draw-suppress `+810 = 00000000`, and output selectors `+1d94,+1d95 = [0,1]`;
+no changes were observed at those entries. This supports drawing the two
+selected models during this particular observed run, but is not an exhaustive
+mask, action-variant, or physical-console test. The dedicated emulator was
+stopped and the unrelated pre-existing emulator was left untouched.
