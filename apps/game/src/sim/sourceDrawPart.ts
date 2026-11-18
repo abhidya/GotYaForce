@@ -18,6 +18,8 @@ export function attachSourceDrawPart(targetJoint: THREE.Object3D, part: THREE.Ob
   correction.name = 'source-draw-part';
   correction.matrixAutoUpdate = false;
   correction.matrix.copy(bind).invert();
+  // Keep this independent model out of the actor's JOBJ traversal/clip bindings.
+  joints[0]!.name = 'SOURCE_DRAW_ROOT';
   correction.add(part);
   targetJoint.add(correction);
   return correction;

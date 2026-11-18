@@ -12,6 +12,7 @@
 
 import * as THREE from "three";
 import { hsdJointsInTraversalOrder } from "@gf/render";
+import { attachSourceDrawPart } from "./sourceDrawPart.js";
 import type {
   Battle,
   BattleProjectileObservation,
@@ -41,6 +42,8 @@ import {
 export interface BorgAssets {
   /** Resolve a cloneable source model for a borg id (cached upstream). */
   loadModel(borgId: string): Promise<THREE.Object3D>;
+  /** Optional exact-source part export, currently limited to Ninja model 1/7. */
+  loadSourceDrawPart?(borgId: string, index: number): Promise<THREE.Object3D>;
   /** Resolve a baked AnimationClip for (borgId, slot). Null if unavailable. */
   loadClip(borgId: string, slot: AnimSlot): Promise<THREE.AnimationClip | null>;
   /**
@@ -133,6 +136,9 @@ interface Actor {
   /** Render-pose snapshot, not the original source pose bank. */
   sourceBlendPose: SavedBlendJoint[] | null;
   sourcePoseTracks: Array<{ binding: ReturnType<typeof THREE.PropertyBinding.create>; interpolant: THREE.Interpolant }> | null;
+  sourceDrawParts: THREE.Group[] | null;
+  sourceDrawPending: boolean;
+  sourceDrawTargetKnown: boolean;
   /** True once the (async) model has been attached. */
   ready: boolean;
   isPlaceholder: boolean;
@@ -1084,6 +1090,9 @@ export class BattleScene {
       sourceAnimAction: null,
       sourceBlendPose: null,
       sourcePoseTracks: null,
+      sourceDrawParts: null,
+      sourceDrawPending: false,
+      sourceDrawTargetKnown: false,
       ready: false,
       isPlaceholder: true,
       chargeGlow: null,
@@ -1233,6 +1242,9 @@ export class BattleScene {
     actor.sourceAnimAction = null;
     actor.sourceBlendPose = null;
     actor.sourcePoseTracks = null;
+    actor.sourceDrawParts = null;
+    actor.sourceDrawPending = false;
+    actor.sourceDrawTargetKnown = false;
     actor.ready = false;
     actor.isPlaceholder = true;
   }
@@ -1303,6 +1315,7 @@ export class BattleScene {
     // source frame must never inherit mixer/render time, and a repeated same-clip
     // animation start must bypass the ordinary unchanged-slot short circuit.
     actor.sourceAnimSample = sample ? { ...sample, ...(sample.targetDrawModels ? { targetDrawModels: [...sample.targetDrawModels] as const } : {}), ...(sample.blend ? { blend: { ...sample.blend, jointIndices: [...sample.blend.jointIndices] } } : {}) } : null;
+    this.syncSourceDrawParts(actor, sample, slot);
     if (actor.current === slot && actor.lastMeleeClipKey === clipKey && sameEpoch) {
       this.applySourceAnimSample(actor);
       return;
@@ -1381,6 +1394,42 @@ export class BattleScene {
       const action = mixer.clipAction(clip);
       actor.actions[slot] = action;
       this.crossfadeTo(actor, action, slot);
+    });
+  }
+
+  /** Ninja X/recovery target parts only. Previous unknown selections stay hidden
+   * until the source threshold reaches the known target; masks and source matrix
+   * parity remain unmodeled. Late loads cannot revive a retired presentation. */
+  private syncSourceDrawParts(actor: Actor, sample: BattleActorView["sourceAnimSample"], slot: AnimSlot): void {
+    const requested = sample?.targetDrawModels;
+    const models = (actor.borgId === "pl0000" || actor.borgId === "pl000a") && requested?.[0] === 1 && requested[1] === 7 ? requested : undefined;
+    // The verified ground recovery enters the same default idle target.
+    const knownIdle = !models && slot === "idle" && actor.sourceDrawTargetKnown;
+    if (!models && !knownIdle) actor.sourceDrawTargetKnown = false;
+    else if (models) {
+      if (!sample?.blend || sample.blend.previousWeight <= 0.5) actor.sourceDrawTargetKnown = true;
+    }
+    for (const part of actor.sourceDrawParts ?? []) part.visible = (!!models || knownIdle) && actor.sourceDrawTargetKnown;
+    const load = this.assets.loadSourceDrawPart, model = actor.model;
+    if (!models || !load || !model || actor.sourceDrawParts || actor.sourceDrawPending) return;
+    const revision = actor.modelRevision, joints = hsdJointsInTraversalOrder(model);
+    if (joints.length !== 20 || !joints[7] || !joints[11]) return;
+    actor.sourceDrawPending = true;
+    void Promise.allSettled(models.map(index => load.call(this.assets, actor.borgId, index))).then(results => {
+      const values = results.filter((r): r is PromiseFulfilledResult<THREE.Object3D> => r.status === 'fulfilled').map(r => r.value);
+      if (actor.modelRevision !== revision || actor.model !== model) { values.forEach(disposeMesh); return; }
+      actor.sourceDrawPending = false;
+      const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+      if (failed || values.length !== 2) { values.forEach(disposeMesh); throw failed?.reason ?? new Error('Source draw part load incomplete'); }
+      const attached: THREE.Group[] = [];
+      try {
+        attached.push(attachSourceDrawPart(joints[7]!, values[0]!));
+        attached.push(attachSourceDrawPart(joints[11]!, values[1]!));
+      } catch (error) {
+        attached.forEach(part => part.removeFromParent()); values.forEach(disposeMesh); throw error;
+      }
+      actor.sourceDrawParts = attached;
+      for (const part of attached) part.visible = (!!actor.sourceAnimSample?.targetDrawModels || actor.current === "idle") && actor.sourceDrawTargetKnown;
     });
   }
 

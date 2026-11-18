@@ -45,6 +45,7 @@ type ActorState = {
   streamActions: Record<string, THREE.AnimationAction>;
   sourceAnimSample: BattleActorView["sourceAnimSample"];
   sourceAnimAction: THREE.AnimationAction | null;
+  sourceDrawParts: THREE.Group[] | null;
 };
 
 function actors(scene: BattleScene): Map<string, ActorState> {
@@ -164,6 +165,60 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
       releaseClip(clip('delayed')); await flush();
       near(moving.position.x, 4, 'deferred load uses pose captured at transition start');
       scene.clear();
+    }
+
+    // Two source-selected Ninja parts attach only after the known-target
+    // threshold, remain across a same-target restart, and hide on source exit.
+    {
+      const pending: Array<(part: THREE.Object3D) => void> = [];
+      const scene = create({
+        async loadModel() {
+          const model = new THREE.Group(), root = new THREE.Group(); root.name = 'JOBJ_0'; model.add(root);
+          for (let i = 1; i < 20; i++) { const joint = new THREE.Group(); joint.name = `JOBJ_${i}`; root.add(joint); }
+          return model;
+        },
+        async loadClip() { return clip('idle'); },
+        async loadClipByStreamRef() { return clip('ninja'); },
+        loadSourceDrawPart() { return new Promise(resolve => pending.push(resolve)); },
+      });
+      const neutral: BattleActorView = {...view(1, 0, 'pl0000'), state: 'idle', anim: 'idle', meleeAnimStream: null, sourceAnimSample: null};
+      await enter(scene, neutral);
+      const joints = [2,3,4,5,6,7,8,9,10,11,12,0,1,13,14,15,16,17,18,19];
+      const sample = (serial: number, previousWeight: number): BattleActorView => ({...view(serial, 0, 'pl0000', 0),
+        sourceAnimSample: {serial, frame: 0, targetDrawModels: [1,7], blend: {mode:1, elapsed: 1, duration: 7, previousWeight, jointIndices: joints}}});
+      scene.sync([sample(9, .75)]); await flush();
+      assert(pending.length === 2, 'source parts load once');
+      for (const resolve of pending) { const part = new THREE.Group(), root = new THREE.Group(); root.name = 'JOBJ_0'; part.add(root); resolve(part); }
+      await flush(); await flush();
+      const parts = actor(scene).sourceDrawParts;
+      assert(parts?.length === 2 && parts.every(part => !part.visible), 'unknown previous selection stays hidden');
+      assert(parts[0]!.parent?.name === 'JOBJ_7' && parts[1]!.parent?.name === 'JOBJ_11', 'parts attach to source-selected joints');
+      scene.sync([sample(9, .5)]);
+      assert(parts.every(part => part.visible), 'target parts appear at source threshold');
+      scene.sync([sample(10, .75)]);
+      assert(parts.every(part => part.visible), 'known same target survives recovery transition');
+      scene.sync([neutral]);
+      assert(parts.every(part => part.visible), 'known recovery target remains through idle');
+      scene.sync([{...neutral, state: 'hit', anim: 'hit'}]);
+      assert(parts.every(part => !part.visible), 'parts hide when source target is no longer known');
+      scene.clear();
+    }
+    // Stale async part loads cannot attach to a cleared presentation.
+    {
+      const pending: Array<(part: THREE.Object3D) => void> = [];
+      let disposed = 0;
+      const scene = create({
+        async loadModel() { const m = new THREE.Group(), r = new THREE.Group(); r.name = 'JOBJ_0'; m.add(r); for (let i=1;i<20;i++){const n=new THREE.Group(); n.name=`JOBJ_${i}`; r.add(n);} return m; },
+        async loadClip() { return clip('idle'); }, async loadClipByStreamRef() { return clip('ninja'); },
+        loadSourceDrawPart() { return new Promise(resolve => pending.push(resolve)); },
+      });
+      const neutral: BattleActorView = {...view(1, 0, 'pl0000'), state:'idle', anim:'idle', meleeAnimStream:null, sourceAnimSample:null};
+      await enter(scene, neutral);
+      scene.sync([{...view(11, 0, 'pl0000', 0), sourceAnimSample:{serial:11,frame:0,targetDrawModels:[1,7],blend:null}}]);
+      assert(pending.length === 2, 'stale part loads started'); scene.clear();
+      for (const resolve of pending) {const p=new THREE.Group(), r=new THREE.Group();r.name='JOBJ_0';p.add(r);const geo=new THREE.BufferGeometry();geo.addEventListener('dispose',()=>disposed++);p.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial()));resolve(p);}
+      await flush(); await flush();
+      assert(disposed === 2 && actors(scene).size === 0, 'stale part resources are disposed');
     }
 
     // Neutral-combo and family airborne B refs after the metadata hop. Synthetic clips

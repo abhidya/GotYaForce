@@ -53,10 +53,26 @@ try {
     }
     const skeleton = new THREE.Group();
     for (const i of ids) if (!childIds.has(i)) skeleton.add(nodes.get(i));
-    const production = createBorgPresentationAssets({assetLoader: {}, defaultLeadId: id});
+    // Production part loader and hierarchy reconstruction use the actual GLB
+    // node graph. Geometry is a test double: no WebGL or visual parity claim.
+    const assetLoader = {
+      async loadGlbScene(url) {
+        const bytes = await readFile(path.join(root, 'apps/game/public', String(url).replace(/^\//, '')));
+        const doc = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString('utf8'));
+        const objects = doc.nodes.map(n => {
+          const o = n.mesh === undefined ? new THREE.Group() : new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial());
+          o.name = n.name ?? ''; if (n.translation) o.position.fromArray(n.translation); if (n.rotation) o.quaternion.fromArray(n.rotation); if (n.scale) o.scale.fromArray(n.scale); return o;
+        });
+        const children = new Set();
+        doc.nodes.forEach((n, i) => { for (const c of n.children ?? []) { objects[i].add(objects[c]); children.add(c); } });
+        const scene = new THREE.Group(); objects.forEach((o, i) => { if (!children.has(i)) scene.add(o); }); return scene;
+      },
+      cloneModel(source) { return source.clone(true); },
+    };
+    const production = createBorgPresentationAssets({assetLoader, defaultLeadId: id});
     const scene = new BattleScene(new THREE.Group(), {
       loadModel: async () => skeleton.clone(true), loadClip: production.loadClip,
-      loadClipByStreamRef: production.loadClipByStreamRef,
+      loadClipByStreamRef: production.loadClipByStreamRef, loadSourceDrawPart: production.loadSourceDrawPart,
     });
     const neutral = view(id); scene.sync([neutral]);
     const actor = () => scene.actors.get('actor');
@@ -66,11 +82,13 @@ try {
     for (const slot of [0, 1]) {
       for (let elapsed = 1; elapsed < 7; elapsed++) {
         const sample = {...neutral, state: 'special', anim: 'special', meleeAnimStream: {group:4, slot},
-          sourceAnimSample: {serial: slot + 1, frame: 0, blend: {mode:1, elapsed, duration:7,
+          sourceAnimSample: {serial: slot + 1, frame: 0, targetDrawModels:[1,7], blend: {mode:1, elapsed, duration:7,
             previousWeight: Math.fround(1 - divideSourceAnimationFloat32(elapsed, 7)), jointIndices: jointOrder}}};
         scene.sync([sample]);
         await waitUntil(() => actor()?.sourceAnimAction?.getClip().name === `${id}mot_g4s${slot}_m0`);
         scene.update(1/60);
+        await waitUntil(() => actor()?.sourceDrawParts?.length === 2);
+        if (actor().sourceDrawParts.some(part => part.visible !== (slot > 0 || elapsed >= 4))) throw Error(`${id}: wrong source part threshold`);
         if (actor().sourceBlendPose?.length !== 20) throw Error(`${id} slot ${slot}: saved pose missing`);
         for (const joint of actor().sourceBlendPose) {
           const {position:p, quaternion:q} = joint.node;
@@ -79,6 +97,6 @@ try {
       }
     }
     scene.clear();
-    console.log(`[ninja-presentation-assets] PASS ${id}: actual baked special clips and GLB joint tree in BattleScene; no source-game parity asserted`);
+    console.log(`[ninja-presentation-assets] PASS ${id}: actual baked special clips and GLB node trees, including part attachments, in BattleScene; geometry and source-game parity not asserted`);
   }
 } finally { globalThis.fetch = previousFetch; }

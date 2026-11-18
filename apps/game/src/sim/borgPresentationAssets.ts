@@ -48,6 +48,7 @@ export function createBorgPresentationAssets(options: BorgPresentationAssetsOpti
 
   // --- model + clip caches (reused by the BattleScene via the asset hooks) ---
   const sourceModels = new Map<string, Promise<THREE.Object3D>>();
+  const sourceDrawModels = new Map<string, Promise<THREE.Object3D>>();
   const clipCache = new Map<string, Promise<THREE.AnimationClip | null>>();
 
   type BakedClip = {
@@ -161,6 +162,23 @@ export function createBorgPresentationAssets(options: BorgPresentationAssetsOpti
     }
     const source = await sourceP;
     return cloneDisposableModel(assetLoader, source);
+  }
+
+  async function loadSourceDrawPart(id: string, index: number): Promise<THREE.Object3D> {
+    if ((id !== 'pl0000' && id !== 'pl000a') || (index !== 1 && index !== 7)) throw new Error('Unsupported source draw part');
+    const key = `${id}:${index}`;
+    let source = sourceDrawModels.get(key);
+    if (!source) {
+      const url = publicUrl(`/models/${id}/parts/model_${String(index).padStart(2, '0')}.glb`);
+      source = assetLoader.loadGlbScene(url).then(model => {
+        // Preserve exporter coordinates; unlike whole characters, never center or ground parts.
+        prepareImportedModel(model, {materialSide: THREE.DoubleSide, metalness: 0, culling: 'skinned-disabled'});
+        return model;
+      });
+      sourceDrawModels.set(key, source);
+      source.catch(() => { if (sourceDrawModels.get(key) === source) sourceDrawModels.delete(key); });
+    }
+    return cloneDisposableModel(assetLoader, await source);
   }
 
   const animIndexCache = new Map<string, Promise<AnimIndex | null>>();
@@ -595,6 +613,7 @@ export function createBorgPresentationAssets(options: BorgPresentationAssetsOpti
 
   return {
     loadModel: loadBorgModel,
+    loadSourceDrawPart,
     loadClip: loadBorgClip,
     loadClipByStreamRef: loadBorgClipByStreamRef,
     setModelManifest(manifest: readonly ModelManifestEntry[]): void {

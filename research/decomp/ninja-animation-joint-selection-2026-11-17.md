@@ -108,8 +108,9 @@ rendered appearance against the original game.
 Using temporary extracts of the same original member-5 archives, the existing
 HSDRawViewer exporter successfully produced textured Collada for roots 1 and 7
 of each character, and the existing runtime converter successfully converted
-all four to validated GLBs. These test exports remain local; the experiment
-has not published or integrated them. Exporting each root into a separate
+all four to validated GLBs. The first experiment remained local. Subsequently, the four validated GLBs
+were added to the draft port branch and wired into the limited Ninja X/recovery
+rendering path; they are not a visual parity claim. Exporting each root into a separate
 directory avoids collisions between the exporter's texture filenames.
 
 The two draw consumers pass `actor+a24` and `actor+ae4` respectively to
@@ -119,7 +120,10 @@ selected object's JOBJ matrix. The existing exporter bakes parent transforms
 into vertex positions (see `tools/HSDLib/HSDRawViewer/IO/ModelExporter.cs`,
 position transform near line 576), so directly parenting its exported scene
 under a joint without removing the export bind transform can misplace geometry.
-This establishes a testable attachment approach, not yet a visual parity proof.
+The renderer applies the inverse exported bind transform when attaching each
+part. The live adapter is limited to the observed target models, retains a
+known target through idle, and hides it for other unmodeled actions; source
+draw masks, source matrix equivalence, and visual parity remain unverified.
 
 ### X and recovery target selectors
 
