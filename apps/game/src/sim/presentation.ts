@@ -73,8 +73,9 @@ export function snapshotBattleAudio(
   allyMax: number,
   actionProfileFor?: (borgId: string) => BorgActionProfile | null,
 ): BattleAudioSnapshot {
+  const observation = battle.observe();
   const borgs = new Map<string, BattleAudioBorgSnapshot>();
-  for (const b of battle.observe().actors) {
+  for (const b of observation.actors) {
     borgs.set(b.uid, {
       borgId: b.borgId,
       hp: b.hp,
@@ -86,12 +87,12 @@ export function snapshotBattleAudio(
       chargeFrames: b.cooldowns?.["chargeFrames"] ?? 0,
     });
   }
-  const allyEnergy = battle.observe().energy[0] ?? 0;
-  const localActiveUid = battle.observe().activeUidByPlayer[localPlayerId] ?? null;
+  const allyEnergy = observation.energy[0] ?? 0;
+  const localActiveUid = observation.activeUidByPlayer[localPlayerId] ?? null;
   // Resolve charge tier thresholds for the LOCAL borg only (the only borg whose charge cues
   // are audible, mirroring the charge_release scoping below). actionProfileForProfile caches
   // per profile upstream, so this per-step lookup is cheap and allocation-free.
-  const localBorg = localActiveUid ? battle.observe().actors.find((b) => b.uid === localActiveUid) ?? null : null;
+  const localBorg = localActiveUid ? observation.actors.find((b) => b.uid === localActiveUid) ?? null : null;
   const localShot = localBorg && actionProfileFor ? actionProfileFor(localBorg.borgId)?.shot ?? null : null;
   const localChargeable = localShot?.chargeable === true;
   return {
