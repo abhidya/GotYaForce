@@ -5,6 +5,7 @@ import { configureArrowNinjaFamily } from "./families/arrow-ninja.js";
 import { createSharedEngineRootAction } from "./families/shared-engine.js";
 import { createSharedMorphXSpecial, TITAN_MORPH_CONFIG } from "./families/shared-morph-x.js";
 import { createOmega2RootAction } from "./families/omega2-robot.js";
+import { createRobotRootAction } from "./families/robot.js";
 import { STATE } from "./constants.js";
 import type { AccelerationNinjaScratch } from "./families/acceleration-ninja.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
@@ -128,6 +129,22 @@ export function runRomCollisionSelfTest(): void {
     assert(withoutProbe.driver.actor.pos.z>10, `${name} no-probe control crossed wall`);
     withWall.driver.actor.fbPhaseSlots[0]=1; run(withWall.driver.actor);
     assert(withWall.driver.actor.pos.z<10, `${name} continuation stopped at wall`);
+  }
+  // Build Robot's source X calls terrain after entry, active, and recovery motion.
+  {
+    const withWall=setup(geometry(10),'pl0705'), withoutProbe=setup(geometry(10),'pl0705');
+    const run=createRobotRootAction({});
+    for(const t of [withWall,withoutProbe]) {
+      const a=t.driver.actor; a.actionIndex=2; a.pos=v(0,10,0); a.targetCache5e8=v(0,10,-20); a.fbPhaseSlots[0]=0;
+    }
+    delete withoutProbe.driver.actor.physicsRuntime!.probeMotion;
+    run(withWall.driver.actor); run(withoutProbe.driver.actor);
+    assert(withWall.driver.actor.pos.z<10,'Build Robot entry stopped at wall');
+    assert(withoutProbe.driver.actor.pos.z>10,'Build Robot no-probe control crossed wall');
+    const a=withWall.driver.actor, probe=a.physicsRuntime!.probeMotion!;let count=0;
+    a.physicsRuntime!.probeMotion=(...args)=>{count++;return probe(...args);};
+    for(const phase of [1,2]) {a.fbPhaseSlots[0]=phase;run(a);}
+    assert(count===2,'Build Robot continuation probes once per phase');
   }
   // The production ROM-motion probe used to leave the host's floor edge
   // guard behind. Exercise the real Battle bridge rather than only a helper.
