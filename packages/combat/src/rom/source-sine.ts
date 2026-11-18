@@ -38,6 +38,8 @@ export function sourceSineKernelTail(x: number, y: number): number {
 export function sourceSineFloatBounded(x: number): number {
   if (!Number.isFinite(x) || !Object.is(x, Math.fround(x))) throw new RangeError('finite float32 input required');
   const reduced = sourceReduceHalfPi(x);
-  const value = reduced.quadrant === 0 ? sourceSineKernel(reduced.head) : reduced.quadrant * sourceCosineKernel(reduced.head, reduced.tail);
+  const value = reduced.quadrant === 0 ? sourceSineKernel(reduced.head)
+    : Math.abs(reduced.quadrant) === 2 ? -sourceSineKernelTail(reduced.head, reduced.tail)
+    : reduced.quadrant * sourceCosineKernel(reduced.head, reduced.tail);
   return Math.fround(value);
 }

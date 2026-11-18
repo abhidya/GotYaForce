@@ -12,13 +12,18 @@ export function runSourceCosineKernelSelfTest(): void {
       if (view.getUint32(0) !== parseInt(expected,16)) throw Error(`Dolphin cosine mismatch at ${input}`);
     }
   }
-  for (let i = -23561; i <= 23561; i++) {
+  for (let i = -31415; i <= 31415; i++) {
     const x = Math.fround(i / 10000);
     if (Math.abs(sourceCosineFloatBounded(x) - Math.fround(Math.cos(x))) > 1.2e-7)
       throw Error(`bounded float cosine differs at ${x}`);
   }
   if (sourceCosineFloatBounded(-0) !== 1) throw Error('negative zero cosine');
-  for (const x of [NaN, Infinity, 1 + 2 ** -30, Math.fround(2.4)]) {
+  for (let short = -32768; short <= 32767; short++) {
+    const radians = Math.fround(short * Math.fround(0.0000958738019107841));
+    if (Math.abs(sourceCosineFloatBounded(radians) - Math.fround(Math.cos(radians))) > 1.2e-7)
+      throw Error(`short-angle cosine differs at ${short}`);
+  }
+  for (const x of [NaN, Infinity, 1 + 2 ** -30, Math.fround(4)]) {
     let rejected = false; try {sourceCosineFloatBounded(x);} catch {rejected = true;}
     if (!rejected) throw Error(`bounded cosine accepted ${x}`);
   }

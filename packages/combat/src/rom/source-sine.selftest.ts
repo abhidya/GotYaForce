@@ -21,9 +21,20 @@ export function runSourceSineKernelSelfTest(): void {
     if (Math.abs(sourceSineKernel(x) - Math.sin(x)) > 2e-16) throw Error(`sine candidate differs at ${x}`);
     if (Math.abs(sourceSineKernelTail(x, 1e-17) - Math.sin(x + 1e-17)) > 2e-16) throw Error(`sine tail differs at ${x}`);
   }
-  for (let i = -23561; i <= 23561; i++) {
+  for (let i = -31415; i <= 31415; i++) {
     const x = Math.fround(i / 10000);
     if (Math.abs(sourceSineFloatBounded(x) - Math.fround(Math.sin(x))) > 1.2e-7) throw Error(`float sine differs at ${x}`);
+  }
+  for (const x of [Math.fround(Math.PI), Math.fround(-Math.PI), Math.fround(3 * Math.PI / 4), Math.fround(-3 * Math.PI / 4)]) {
+    if (Math.abs(sourceSineFloatBounded(x) - Math.fround(Math.sin(x))) > 1.2e-7)
+      throw Error(`float sine boundary differs at ${x}`);
+  }
+  // Every signed short passed through the source's float32 angle multiplier.
+  // Host trig is only a mathematical sanity check, not an emulator oracle.
+  for (let short = -32768; short <= 32767; short++) {
+    const radians = Math.fround(short * Math.fround(0.0000958738019107841));
+    if (Math.abs(sourceSineFloatBounded(radians) - Math.fround(Math.sin(radians))) > 1.2e-7)
+      throw Error(`short-angle sine differs at ${short}`);
   }
   if (!Object.is(sourceSineFloatBounded(-0), -0)) throw Error('float negative zero lost');
   if (!Object.is(sourceSineKernel(-0), -0)) throw Error('negative zero lost');

@@ -227,3 +227,14 @@ matched those captures bit-for-bit. These were injected test inputs, not natural
 observed actor behavior. The isolated instance was stopped and the unrelated
 existing emulator left untouched. This does not prove all angles, hardware,
 source pose-bank integration, or playable-game parity.
+
+### Short-angle reduction extension, 2026-11-18
+
+The experimental reduction now includes the `n=2` medium branch through the
+positive-pi high-word boundary, including the source's cancellation refinements.
+Its split constants were read from the authenticated archived GG4E ProgramDB.
+All 65,536 signed short inputs, after the source float32 angle multiplier, are
+covered by host-math sine and cosine sanity checks. Those checks do not establish
+bit-exact emulator or hardware behavior; the newly admitted range still needs
+direct Dolphin comparisons. It remains an explicitly supplied offline provider,
+not a playable-renderer integration.
