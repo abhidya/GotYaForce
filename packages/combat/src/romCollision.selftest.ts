@@ -178,6 +178,20 @@ export function runRomCollisionSelfTest(): void {
     assert(variant === 16 && emittedKind === 0,
       "real Battle input reaches source slot1 variant16 and creates its kind0 child");
   }
+  // Holding B is not a second combo press; a release/new press is an edge.
+  {
+    const t = setup(geometry(), "pl0800");
+    t.actors.find(b => b.team === 1)!.pos = { x: 0, y: 10, z: 50 };
+    t.inputs.p1.attack = true; t.tick(); // admit the source action
+    t.tick();
+    assert((t.driver.actor.inputEdge5d4 & 0x40) === 0, "held B is not a KFM retap");
+    t.inputs.p1.attack = false; t.tick();
+    assert((t.driver.actor.inputEdge5d4 & 0x40) === 0, "released B has no press edge");
+    t.inputs.p1.attack = true; t.tick();
+    assert((t.driver.actor.inputEdge5d4 & 0x40) !== 0, "new B press generates KFM retap edge");
+    t.tick();
+    assert((t.driver.actor.inputEdge5d4 & 0x40) === 0, "retap edge lasts one tick");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));
