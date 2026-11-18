@@ -1435,7 +1435,10 @@ export class BattleScene {
         attached.forEach(part => part.removeFromParent()); values.forEach(disposeMesh); throw error;
       }
       actor.sourceDrawParts = attached;
-      for (const part of attached) part.visible = (!!actor.sourceAnimSample?.targetDrawModels || actor.current === "idle") && actor.sourceDrawTargetKnown;
+      // The actor may have changed clips while the parts loaded. Re-evaluate the
+      // current selection, including verified group-zero movement clips.
+      if (actor.current) this.syncSourceDrawParts(actor, actor.sourceAnimSample, actor.current);
+      else attached.forEach(part => { part.visible = false; });
     });
   }
 

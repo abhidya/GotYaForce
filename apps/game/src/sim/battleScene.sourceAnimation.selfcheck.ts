@@ -203,6 +203,25 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
       assert(parts.every(part => !part.visible), 'parts hide when source target is no longer known');
       scene.clear();
     }
+    // A part load completing during verified movement must use the current clip,
+    // not the idle/source-only state that existed when the request began.
+    {
+      const pending: Array<(part: THREE.Object3D) => void> = [];
+      const scene = create({
+        async loadModel() { const m = new THREE.Group(), r = new THREE.Group(); r.name = 'JOBJ_0'; m.add(r); for (let i=1;i<20;i++){const n=new THREE.Group(); n.name=`JOBJ_${i}`; r.add(n);} return m; },
+        async loadClip(_id, slot) { return clip(`pl0000mot_g0s${slot === 'move' ? 1 : 0}_m0`); },
+        loadSourceDrawPart() { return new Promise(resolve => pending.push(resolve)); },
+      });
+      const neutral: BattleActorView = {...view(1, 0, 'pl0000'), state:'idle', anim:'idle', meleeAnimStream:null, sourceAnimSample:null};
+      await enter(scene, neutral);
+      const movement: BattleActorView = {...neutral, state:'move', anim:'move'};
+      scene.sync([movement]); await flush();
+      assert(pending.length === 2, 'movement part loads started');
+      for (const resolve of pending) {const p=new THREE.Group(), r=new THREE.Group(); r.name='JOBJ_0'; p.add(r); resolve(p);}
+      await flush(); await flush();
+      assert(actor(scene).sourceDrawParts?.every(part => part.visible), 'late parts appear immediately during verified movement');
+      scene.clear();
+    }
     // Stale async part loads cannot attach to a cleared presentation.
     {
       const pending: Array<(part: THREE.Object3D) => void> = [];
