@@ -133,6 +133,16 @@ function targetInRange(actor: RomActor, range: number): boolean {
 export interface Omega2FamilyCtx extends StreamContext {}
 
 // Phase 0 — FUN_800f3d04 @ chunk_0026.c:3237. Setup + range gate + blink + stream.
+/** Host approximation for the source terrain probe after motion. */
+function probeCarriedMotion(actor: RomActor, previous: {x:number;y:number;z:number}): void {
+  const floor=actor.physicsRuntime;
+  if (!floor) return;
+  const result=floor.probeMotion ? floor.probeMotion(previous,actor.pos,actor.yVel) : floor.clampToGround(actor.pos,actor.yVel);
+  if ('y' in result && typeof result.y==='number') actor.pos.y=result.y;
+  actor.yVel=result.velY;
+  (actor as RomActor & {grounded?:boolean}).grounded=result.grounded;
+}
+
 function omega2Phase0(actor: RomActor, cfg: Omega2XConfig, ctx: Omega2FamilyCtx): void {
   const s = scratchOf(actor);
   actor.fbPhaseSlots[0] = 1;
@@ -159,9 +169,11 @@ function omega2Phase0(actor: RomActor, cfg: Omega2XConfig, ctx: Omega2FamilyCtx)
   computeAimPitch(actor);
 
   // FUN_800f3d04 carries the actor's own +0x5e8 history, even without a target.
+  const previous = {...actor.pos};
   vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
   vecScale(OMEGA2_X.REPOSITION_SCALE, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
+  probeCarriedMotion(actor, previous);
 
   const slot = actor.streamSlot;
   actor.streamSlot = slot + 1;
@@ -170,8 +182,10 @@ function omega2Phase0(actor: RomActor, cfg: Omega2XConfig, ctx: Omega2FamilyCtx)
 
 // Phase 1 — FUN_800f3e3c @ chunk_0026.c:3279. Reposition + timer/face + advance.
 function omega2Phase1(actor: RomActor, _cfg: Omega2XConfig, ctx: Omega2FamilyCtx): void {
+  const previous = {...actor.pos};
   vecScale(OMEGA2_X.REPOSITION_SCALE, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
+  probeCarriedMotion(actor, previous);
 
   // Conditional stream tick (gated on +0x1b03 != 0)
   tickStream(actor, 0xf, ctx);
