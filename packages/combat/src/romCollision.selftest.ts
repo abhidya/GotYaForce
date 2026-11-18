@@ -1,5 +1,6 @@
 import { battleStateForSelfcheck, createBattle } from "./battle.js";
 import { RomDriverBridge } from "./bridge.js";
+import { createSharedFlightX, FLIGHT_X_FAMILY4_CONFIG } from "./families/shared-flight-x.js";
 import { STATE } from "./constants.js";
 import type { AccelerationNinjaScratch } from "./families/acceleration-ninja.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
@@ -56,6 +57,22 @@ export function runRomCollisionSelfTest(): void {
     t.press();
     assert(t.borg.cooldowns.romSpecialActive === 1, 'actual X entered source action');
     assert(Math.abs(t.borg.pos.y - before) < 100, 'flight X entry amplified distance to target height');
+  }
+  // A live Battle adapter owns actual triangle collision; exercise the source
+  // flight handler with a carry that crosses an interior wall and compare the
+  // same geometry without its probe. This is not a browser/input playthrough.
+  {
+    const withWall = setup(geometry(10), 'pl0705');
+    const withoutProbe = setup(geometry(10), 'pl0705');
+    const run = createSharedFlightX(FLIGHT_X_FAMILY4_CONFIG, {});
+    for (const t of [withWall, withoutProbe]) {
+      t.driver.actor.pos = v(0,10,0); t.driver.actor.targetCache5e8 = v(0,10,-20);
+      t.driver.actor.fbPhaseSlots[0] = 0;
+    }
+    delete withoutProbe.driver.actor.physicsRuntime!.probeMotion;
+    run(withWall.driver.actor); run(withoutProbe.driver.actor);
+    assert(withWall.driver.actor.pos.z < 10, 'flight carry stopped at interior wall using Battle terrain');
+    assert(withoutProbe.driver.actor.pos.z > 10, 'negative control crosses same wall without probe');
   }
   // The production ROM-motion probe used to leave the host's floor edge
   // guard behind. Exercise the real Battle bridge rather than only a helper.
