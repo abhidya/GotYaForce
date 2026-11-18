@@ -39,7 +39,7 @@
     "selfcheck:double-clone-mirror": "node scripts/run-double-clone-mirror-selfcheck.mjs",
     "selfcheck:ninja-projectiles": "node scripts/run-battle-scene-ninja-selfcheck.mjs",
     "selfcheck:gred-ranged": "node scripts/run-battle-scene-gred-ranged-selfcheck.mjs",
-    "selfcheck:source-animation": "node scripts/run-battle-scene-source-animation-selfcheck.mjs",
+    "selfcheck:source-animation": "node scripts/run-battle-scene-source-animation-selfcheck.mjs && node scripts/run-ninja-source-blend-assets-selfcheck.mjs",
     "selfcheck:gblack-wave": "node scripts/run-battle-scene-gblack-wave-selfcheck.mjs",
     "selfcheck:time-bomber-projectiles": "node scripts/run-battle-scene-time-bomber-selfcheck.mjs",
     "selfcheck:powered-launch-flashes": "node scripts/run-battle-scene-powered-flash-selfcheck.mjs",
