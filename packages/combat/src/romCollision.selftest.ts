@@ -44,6 +44,19 @@ function setup(collision: StageCollision, id = "pl0004") {
 }
 
 export function runRomCollisionSelfTest(): void {
+  {
+    // Real input/bridge path for Death Borg Zeta: the opponent's height must
+    // not be mistaken for the attacker's previous-position vector.
+    const t = setup(geometry(), 'pl0705');
+    const target = t.actors.find(b => b.team === 1)!;
+    t.borg.pos = v(0, 1000, 0); t.borg.vel = v(0, 0, 0);
+    target.pos = v(0, 10, 800);
+    t.tick(); t.tick();
+    const before = t.borg.pos.y;
+    t.press();
+    assert(t.borg.cooldowns.romSpecialActive === 1, 'actual X entered source action');
+    assert(Math.abs(t.borg.pos.y - before) < 100, 'flight X entry amplified distance to target height');
+  }
   // The production ROM-motion probe used to leave the host's floor edge
   // guard behind. Exercise the real Battle bridge rather than only a helper.
   {
