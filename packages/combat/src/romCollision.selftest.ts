@@ -2,6 +2,7 @@ import { battleStateForSelfcheck, createBattle } from "./battle.js";
 import { RomDriverBridge } from "./bridge.js";
 import { STATE } from "./constants.js";
 import type { AccelerationNinjaScratch } from "./families/acceleration-ninja.js";
+import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { emptyInput, type StageCollision, type StageCollisionTriangle } from "./types.js";
 import type { BorgStats } from "./stats.js";
 import borgsData from "../../assets/data/borgs.json" with { type: "json" };
@@ -65,6 +66,8 @@ export function runRomCollisionSelfTest(): void {
     // same source bone-forward vector. The host approximates that as owner-forward.
     assert(Math.abs(children[0]!.vel.x) < 1e-6 && Math.abs(children[1]!.vel.x) < 1e-6 &&
       children.every(p => p.vel.z > 0), "render angle is not added to child travel yaw");
+    assert(children.every(p => p.damageRecord === familyDamageRecordForBorg("pl0004", 0)),
+      "source children use the kind-0 per-family damage record");
   }
   // An empty source weapon cell must not create the callback's children.
   {
