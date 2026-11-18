@@ -149,16 +149,10 @@ function phase0(a: MActor, seedSlot: number): void {
   resetPoseHousekeeping(a);
   faceComplete(a);                               // zz_006d144_(actor, 0xc0)
   seekAimPitch(a);
-  // Blink: motion = pos − target(+0x5e8); ×0.95 (FLOAT_8043955c); pos += motion.
-  if (a.lockTarget) {
-    vecSubtract(a.pos, a.lockTarget, a.motion);
-    vecScale(MELEE_GIRL_LUNGE.REPOSITION, a.motion, a.motion);
-    vecAdd(a.pos, a.motion, a.pos);
-  } else {
-    // The ROM reads the +0x5e8 target cache unconditionally; with no lock zero the
-    // motion so phases 1-3 don't drift along a stale vector (blink rule, labeled).
-    a.motion.x = 0; a.motion.y = 0; a.motion.z = 0;
-  }
+  // FUN_8010b7fc uses own older +0x5e8 position, including without a target.
+  vecSubtract(a.pos, a.targetCache5e8, a.motion);
+  vecScale(MELEE_GIRL_LUNGE.REPOSITION, a.motion, a.motion);
+  vecAdd(a.pos, a.motion, a.pos);
   groundClamp(a);
   const slot = a.streamSlot;                     // cVar1 = +0x6ea
   a.streamSlot = slot + 1;                       // +0x6ea++

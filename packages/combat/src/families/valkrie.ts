@@ -653,13 +653,10 @@ function airMeleePhase0(a: VActor, seedSlot: number): void {
   }
   // zz_006d144_(actor, 0xc0) face + zz_006e1ac_(actor, 0xc0, 1) pitch seek — the
   // bridge pre-aims lockYaw; the pitch channel (+0x18da) is seeded by the dive.
-  // Reposition (chunk_0038.c:3261-3264): motion = (pos − target@+0x5e8) × 0.95;
-  // pos += motion (the ninja-style blink-away).
-  if (a.lockTarget) {
-    vecSubtract(a.pos, a.lockTarget, a.motion);
-    vecScale(VALKRIE.DRAG, a.motion, a.motion);      // FLOAT_8043a3c8 (0.95)
-    vecAdd(a.pos, a.motion, a.pos);
-  }
+  // FUN_8014ade4 carries older OWN position +0x5e8 unconditionally.
+  vecSubtract(a.pos, a.targetCache5e8, a.motion);
+  vecScale(VALKRIE.DRAG, a.motion, a.motion);
+  vecAdd(a.pos, a.motion, a.pos);
   // zz_00677b0_(actor) — ground collide (bridge clamp).
   const slot = a.streamSlot;                 // cVar1 = +0x6ea
   a.streamSlot = slot + 1;                   // +0x6ea++
@@ -788,13 +785,10 @@ function xPhase0(a: VActor, seedSlot: number): void {
   a.hDecel = VALKRIE.TIMER_FLOOR;            // +0x4c = 0
   a.hSpeed = VALKRIE.TIMER_FLOOR;            // +0x44 = 0
   // +0x80 = +0x7e = +0x7c = 0 — aim-rate accumulators (renderer-side; not surfaced).
-  // Reposition (chunk_0038.c:3431-3434): motion = (pos − target@+0x5e8) × 0.98;
-  // pos += motion.
-  if (a.lockTarget) {
-    vecSubtract(a.pos, a.lockTarget, a.motion);
-    vecScale(VALKRIE.X_REPOSITION, a.motion, a.motion); // FLOAT_8043a3e4 (0.98)
-    vecAdd(a.pos, a.motion, a.pos);
-  }
+  // FUN_8014b278 uses the same own-position history, not the lock target.
+  vecSubtract(a.pos, a.targetCache5e8, a.motion);
+  vecScale(VALKRIE.X_REPOSITION, a.motion, a.motion);
+  vecAdd(a.pos, a.motion, a.pos);
   // zz_0067a28_(actor) — ground collide + airborne-bit upkeep (bridge clamp).
   const slot = a.streamSlot;                 // cVar1 = +0x6ea
   a.streamSlot = slot + 1;                   // +0x6ea++
