@@ -147,3 +147,13 @@ pose's selectors; a transition may continue drawing the previous selector
 while its saved-pose weight exceeds 0.5. Do not replace unknown previous
 selectors with these target values. The dedicated emulator was stopped after
 the read; the unrelated existing Dolphin instance was not touched.
+
+### Group-0 metadata coverage
+
+A separate read-only DOL table walk resolved group 0 slots 0 through 25
+through the signed-short metadata tables rooted at `802bd780`. Every one
+has selector bytes 9 and 10 equal to `ff,ff`; each therefore requests the
+verified actor-descriptor defaults `[0,1]` when the observed default group is
+0. This establishes metadata target selections for those descriptor slots,
+not that every host-selected animation, source draw mask, or transition has
+been proven equivalent. The group-0 descriptors can alias each other.
