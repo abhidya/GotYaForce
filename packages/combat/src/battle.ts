@@ -813,12 +813,7 @@ class BattleImpl implements Battle {
       // The generic source-variant spawner approximates bone-forward with owner yaw.
       const child = spawnRomProjectile(b, kind, b.rotY);
       if (child && variant) {
-        child.romShotKind = variant.kind;
         child.accelerationNinjaSpeedDelta = variant.drop;
-        // zz_008ac80_ copies the owner's table and arms this row's HIT kind.
-        const hit = attackHitRecordsForKind(b.borgId, variant.kind)[0];
-        const damage = hit && familyDamageRecordForBorg(b.borgId, hit.damageRecordIndex);
-        if (hit && damage) { child.damageRecordIndex = hit.damageRecordIndex; child.damageRecord = damage; }
         this.state.projectiles.push(child);
       }
       return;
