@@ -212,3 +212,18 @@ unique observed results bit-for-bit. A mathematical sweep also checks the
 bounded domain, but does not establish PowerPC rounding for every input.
 This is sampled emulator evidence, not physical-console or gameplay parity.
 The isolated instance was stopped and the pre-existing emulator left untouched.
+
+### Opt-in short rotations
+
+The offline actor-joint matrix owner now accepts a synchronous explicit sine and
+cosine provider for nonzero short rotations. Without it, the prior nonzero
+refusal remains. `457d4` converts the signed short using the recorded float32
+factor and applies the requested axis rotation followed by the existing paired
+Concat; `45838` applies Z, Y, X, retaining the zero-Z copy. An isolated Dolphin
+JIT64 battle temporarily set actor wrapper shorts to Z=2048, X=8192, Y=-4096.
+Nine reached wrapper calls supplied captured parent matrices and output matrices.
+Using the bounded source sine/cosine candidates, all 108 output float32 words
+matched those captures bit-for-bit. These were injected test inputs, not naturally
+observed actor behavior. The isolated instance was stopped and the unrelated
+existing emulator left untouched. This does not prove all angles, hardware,
+source pose-bank integration, or playable-game parity.

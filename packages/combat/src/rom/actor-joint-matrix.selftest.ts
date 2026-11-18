@@ -1,3 +1,5 @@
+import {sourceCosineFloatBounded} from './source-cosine-float.js';
+import {sourceSineFloatBounded} from './source-sine.js';
 import {sourceReciprocalEstimateBounded} from './source-reciprocal-estimate.js';
 import {flatHalfPrimaryMode0, flatHalfPrimaryWitnesses, flatHalfPrimaryNormalized} from './actor-primary-flat-half-witness.selftest.js';
 import {slopedPrimaryWitnesses, slopedPrimaryOrientation, slopedPrimaryNormalized} from './actor-primary-sloped-witness.selftest.js';
@@ -206,6 +208,47 @@ function runActorJointStandaloneMatrixSelfTests(): void {
   }
 }
 export function runActorJointMatrixSelfTests(): void {
+  // GG4E Dolphin JIT64 with test shorts injected into an isolated actor.
+  // Parent and output are captured binary32 words; not a hardware proof.
+  {
+    const captures: Array<{axis:'x'|'y'|'z';angle:number;parent:number[];output:number[]}> = [{"axis":"z","angle":2048,"parent":[3210626263,0,3204319006,1145569280,0,1065353216,0,0,1056835358,0,3210626263,1152319488],"output":[3210346369,1043166007,3204319006,1145569280,1044891074,1065030846,0,0,1056515472,3183885252,3210626263,1152319488]},{"axis":"x","angle":8192,"parent":[3210346369,1043166007,3204319006,1145569280,1044891074,1065030846,0,0,1056515472,3183885252,3210626263,1152319488],"output":[3210346369,3194788370,3203461850,1145569280,1044891074,1060211333,3207694981,0,1056515472,3207508091,3205211509,1152319488]},{"axis":"y","angle":-4096,"parent":[3210346369,3194788370,3203461850,1145569280,1044891074,1060211333,3207694981,0,1056515472,3207508091,3205211509,1152319488],"output":[3212280298,3194788370,3185510711,1145569280,3182323624,1060211333,3208061844,0,1047960077,3207508091,3207639108,1152319488]},{"axis":"z","angle":2048,"parent":[3210626263,0,3204319006,1145569280,0,1065353216,0,0,1056835358,0,3210626263,1152319488],"output":[3210346369,1043166007,3204319006,1145569280,1044891074,1065030846,0,0,1056515472,3183885252,3210626263,1152319488]},{"axis":"x","angle":8192,"parent":[3210346369,1043166007,3204319006,1145569280,1044891074,1065030846,0,0,1056515472,3183885252,3210626263,1152319488],"output":[3210346369,3194788370,3203461850,1145569280,1044891074,1060211333,3207694981,0,1056515472,3207508091,3205211509,1152319488]},{"axis":"y","angle":-4096,"parent":[3210346369,3194788370,3203461850,1145569280,1044891074,1060211333,3207694981,0,1056515472,3207508091,3205211509,1152319488],"output":[3212280298,3194788370,3185510711,1145569280,3182323624,1060211333,3208061844,0,1047960077,3207508091,3207639108,1152319488]},{"axis":"z","angle":2048,"parent":[3204316214,0,3210627061,1152319488,0,1065353216,0,0,1063143413,0,3204316214,1145569280],"output":[3203996381,1036399426,3210627061,1152319488,1044891074,1065030846,0,0,1062863504,3190650277,3204316214,1145569280]},{"axis":"x","angle":8192,"parent":[3203996381,1036399426,3210627061,1152319488,1044891074,1065030846,0,0,1062863504,3190650277,3204316214,1145569280],"output":[3203996381,3205212266,3207508463,1152319488,1044891074,1060211333,3207694981,0,1062863504,3203460095,3194783982,1145569280]},{"axis":"y","angle":-4096,"parent":[3203996381,3205212266,3207508463,1152319488,1044891074,1060211333,3207694981,0,1062863504,3203460095,3194783982,1145569280],"output":[3207982244,3205212266,3202578253,1152319488,3182323624,1060211333,3208061844,0,1060292885,3203460095,3205107631,1145569280]}];
+    const feedback = createSourceJointAnimationFeedbackRuntime(createSourceJObjAnimationRuntime());
+    const owner = createSourceActorJointMatrixRuntime(feedback, 128, undefined,
+      angle => ({sin:sourceSineFloatBounded(angle),cos:sourceCosineFloatBounded(angle)}));
+    for (const capture of captures) {
+      const parent = owner.createMatrix(capture.parent.map(fromBits)), out = owner.createMatrix(identity);
+      owner.rotateShort(capture.axis,parent,out,capture.angle);
+      for(let i=0;i<12;i++) check(bits(owner.getMatrix(out)[i]!) === capture.output[i],
+        `Dolphin short rotation ${capture.axis}/${capture.angle} mismatch at ${i}`);
+    }
+  }
+  // Opt-in source short rotations use actual bounded sine/cosine candidates;
+  // default execution still refuses nonzero shorts. Not full hardware parity.
+  {
+    const feedback = createSourceJointAnimationFeedbackRuntime(createSourceJObjAnimationRuntime());
+    const seen: number[] = [];
+    const owner = createSourceActorJointMatrixRuntime(feedback, 128, undefined, angle => {
+      seen.push(angle); return {sin: sourceSineFloatBounded(angle), cos: sourceCosineFloatBounded(angle)};
+    });
+    const parent = owner.createMatrix(identity), out = owner.createMatrix(identity);
+    owner.rotateShort('z', parent, out, 8192);
+    const result = owner.getMatrix(out), c = Math.fround(Math.SQRT1_2);
+    check(result[0] === c && result[1] === -c && result[4] === c && result[5] === c, 'opt-in short Z rotation');
+    check(seen.length === 1 && seen[0] === Math.fround(8192 * Math.fround(0.0000958738019107841)), 'source short conversion reaches trig');
+    owner.rotateShort('x', parent, out, 0);
+    check(seen.length === 2 && seen[1] === 0, 'zero-angle wrapper still reaches source trig');
+    seen.length = 0;
+    owner.correctShort(out, {x: 4096, y: -8192, z: 8192});
+    check(seen.length === 3 && seen[0]! > 0 && seen[1] === -seen[0]! && seen[2] === Math.fround(seen[0]! / 2), 'correction applies Z, Y, X order');
+    const defaultOwner = createSourceActorJointMatrixRuntime(feedback), p = defaultOwner.createMatrix(identity), d = defaultOwner.createMatrix(identity);
+    rejects(() => defaultOwner.rotateShort('z', p, d, 1), 'nonzero short rotation is unsupported');
+    let reentrant!: ReturnType<typeof createSourceActorJointMatrixRuntime>, slot!: symbol;
+    reentrant = createSourceActorJointMatrixRuntime(feedback, 128, undefined, () => {
+      try {reentrant.identity(slot);} catch {} return {sin:0,cos:1};
+    });
+    const rp = reentrant.createMatrix(identity), rd = reentrant.createMatrix(identity); slot = rd;
+    rejects(() => reentrant.rotateShort('z',rp,rd,8192), 'reentry');
+  }
   // Live GG4E PSMTXQuat calls sampled in isolated Dolphin JIT64. The estimate
   // was read immediately after fres; an identity parent exposes the matrix's
   // nonzero elements. Signed zeros may change in the subsequent Concat.

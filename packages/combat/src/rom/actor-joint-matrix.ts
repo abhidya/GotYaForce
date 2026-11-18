@@ -7,8 +7,8 @@
  * PSMTXQuat admits exact identity, or finite positive norms with an explicitly
  * supplied fres estimate. The latter is an experimental numeric lane, not
  * original hardware parity; without the estimate non-identity still refuses.
- * Its audited output has -0 at [6] and [8]. Corrections admit only zero shorts,
- * selecting 80045838's PSMTXCopy branch, never an approximation of source trig.
+ * Its audited identity output has -0 at [6] and [8]. Nonzero short rotations
+ * require an explicit trigonometry provider; without one they still refuse.
  * 800457d4 zero-short wrappers retain RotRad and Concat semantics: audited zero
  * sin/cos return +0/1, and X/Y/Z rotation matrices have -0 at [6]/[8]/[1].
  * Standalone RotRad admits exactly radians +0/-0: kernel_sin returns its
@@ -171,12 +171,32 @@ function copy(source: number[], destination: number[]): void {
     store(destination, i, first); store(destination, i + 1, second);
   }
 }
-function correctShort(matrix: number[], correction: Readonly<SourceJointVector>): void {
-  for (const key of ['x', 'y', 'z'] as const) {
-    if (short(own(correction, key), key) !== 0) fail('nonzero short correction is unsupported');
+type RotationTrig = (angle: number) => Readonly<{sin: number; cos: number}>;
+function shortRotation(axis: 'x'|'y'|'z', angle: number, trig?: RotationTrig): number[] {
+  if (angle === 0 && !trig) {
+    const rotation = [1,0,0,0, 0,1,0,0, 0,0,1,0];
+    rotation[axis === 'x' ? 6 : axis === 'y' ? 8 : 1] = -0;
+    return rotation;
   }
-  // 80045838's zero Z branch still copies; zero Y and X skip their rotations.
-  copy(matrix, matrix);
+  if (!trig) fail('nonzero short rotation is unsupported');
+  const radians = multiply(angle, 0.0000958738019107841);
+  const result = trig(radians), sine = float(own(result, 'sin'), 'rotation sine'), cosine = float(own(result, 'cos'), 'rotation cosine');
+  if (axis === 'x') return [1,0,0,0, 0,cosine,-sine,0, 0,sine,cosine,0];
+  if (axis === 'y') return [cosine,0,sine,0, 0,1,0,0, -sine,0,cosine,0];
+  return [cosine,-sine,0,0, sine,cosine,0,0, 0,0,1,0];
+}
+function correctShort(matrix: number[], correction: Readonly<SourceJointVector>, trig?: RotationTrig): void {
+  if (!trig) {
+    for (const key of ['x', 'y', 'z'] as const) {
+      if (short(own(correction, key), key) !== 0) fail('nonzero short correction is unsupported');
+    }
+    copy(matrix, matrix); return;
+  }
+  // Caller loads all short arguments before 45838; that callee then applies Z,Y,X.
+  const x = short(own(correction, 'x'), 'x'), y = short(own(correction, 'y'), 'y'), z = short(own(correction, 'z'), 'z');
+  if (z === 0) copy(matrix, matrix); else concat(matrix, shortRotation('z', z, trig), matrix);
+  if (y !== 0) concat(matrix, shortRotation('y', y, trig), matrix);
+  if (x !== 0) concat(matrix, shortRotation('x', x, trig), matrix);
 }
 function scale(matrix: number[], scaling: Readonly<SourceJointVector>, check: () => void = () => {}): void {
   const x = vectorLoad(scaling, 'x', 'scale', check), y = vectorLoad(scaling, 'y', 'scale', check), z = vectorLoad(scaling, 'z', 'scale', check);
@@ -582,8 +602,9 @@ function quaternionMatrix(x: number, y: number, z: number, w: number, estimate: 
 
 export function createSourceActorJointMatrixRuntime(
   feedback: Pick<SourceJointAnimationFeedbackRuntime, 'getPose'>, maxMatrices = 128,
-  reciprocalEstimate?: (norm: number) => number,
+  reciprocalEstimate?: (norm: number) => number, rotationTrig?: RotationTrig,
 ): SourceActorJointMatrixRuntime {
+  if (rotationTrig !== undefined && typeof rotationTrig !== 'function') fail('rotation trig must be a function');
   if (reciprocalEstimate !== undefined && typeof reciprocalEstimate !== 'function') fail('reciprocal estimate must be a function');
   if (!Number.isSafeInteger(maxMatrices) || maxMatrices < 1) fail('positive safe matrix capacity required');
   const poseMethod = own(feedback, 'getPose');
@@ -595,6 +616,15 @@ export function createSourceActorJointMatrixRuntime(
     if (busy) {reentered = true; fail('same-runtime reentry is unsupported');}
     busy = true; reentered = false;
   }
+  const checkedTrig: RotationTrig | undefined = rotationTrig && (angle => {
+    const result = rotationTrig(angle);
+    if (reentered) fail('same-runtime reentry was caught inside rotation trig');
+    const sine = float(own(result, 'sin'), 'rotation sine');
+    if (reentered) fail('same-runtime reentry was caught inside rotation trig');
+    const cosine = float(own(result, 'cos'), 'rotation cosine');
+    if (reentered) fail('same-runtime reentry was caught inside rotation trig');
+    return {sin: sine, cos: cosine};
+  });
   function getMatrix(id: symbol): number[] {
     const value = matrices.get(id); if (!value) fail('unknown/non-owned matrix'); return value;
   }
@@ -656,7 +686,7 @@ export function createSourceActorJointMatrixRuntime(
     },
     correctShort(matrix: symbol, correction: Readonly<SourceJointVector>): void {
       enter();
-      try {correctShort(getMatrix(matrix), correction);} finally {busy = false;}
+      try {correctShort(getMatrix(matrix), correction, checkedTrig);} finally {busy = false;}
     },
     scale(matrix: symbol, scaling: Readonly<SourceJointVector>): void {
       enter();
@@ -721,15 +751,11 @@ export function createSourceActorJointMatrixRuntime(
       enter();
       try {
         if (axis !== 'x' && axis !== 'y' && axis !== 'z') fail('rotation axis must be x, y or z');
-        if (short(angle, 'angle') !== 0) fail('nonzero short rotation is unsupported');
-        // Authenticated 800457d4 / 8020b238 / 8020b2a8 and zero sin/cos paths:
-        // source signed short 0 (including a host -0) loads as +0 and multiplies
-        // positive 80437078=0x38c90fdb. sin returns +0 and cos returns 1.
-        // RotTrig's paired merges put -sin in an axis-specific position.
-        // See read_archived_actor_traversal_evidence.py. No identity shortcut:
-        // every wrapper performs its own source Concat, even for zero angles.
-        const rotation = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
-        rotation[axis === 'x' ? 6 : axis === 'y' ? 8 : 1] = -0;
+        const value = short(angle, 'angle');
+        // Source wrapper converts signed short with 80437078 and always calls
+        // RotRad, then Concat. The opt-in provider owns nonzero sin/cos; with
+        // no provider only the audited zero result is admitted.
+        const rotation = shortRotation(axis, value, checkedTrig);
         concat(getMatrix(parent), rotation, getMatrix(destination));
       } finally {busy = false;}
     },
@@ -744,7 +770,7 @@ export function createSourceActorJointMatrixRuntime(
       enter();
       try {
         const output = composePose(parent, destination, pose, translationOverride);
-        correctShort(output, correction);
+        correctShort(output, correction, checkedTrig);
         scale(output, scaling);
       } finally {busy = false;}
     },
