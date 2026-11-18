@@ -93,7 +93,7 @@ import { stepStatus } from "./status.js";
 import { DEFAULT_BOUNDS, JUMP, MUZZLE_OFFSET, SHOT, SIM } from "./constants.js";
 import shotMuzzleSpeedData from "./data/shotMuzzleSpeed.generated.json" with { type: "json" };
 import { floorSurfaceYAt } from "@gf/physics";
-import { clearJumpLatch, resolveStageMotionCollision, stepMovement, type MoveContext } from "./movement.js";
+import { clearJumpLatch, keepOnStageFloor, resolveStageMotionCollision, stepMovement, type MoveContext } from "./movement.js";
 import { resetActorParamTier } from "./paramTier.js";
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 import {
@@ -428,6 +428,15 @@ class BattleImpl implements Battle {
         probeMotion: (previous, pos, velY) => {
           const velocity = { x: pos.x - previous.x, y: velY, z: pos.z - previous.z };
           resolveStageMotionCollision(this.collision, previous, pos, velocity);
+          // Match the existing host ground-edge guard for source-owned motion
+          // only when it begins on a floor and is not rising. Airborne actions
+          // remain free to travel beyond an edge. This is a host policy, not a
+          // claim that the retail character collision capsule is decoded.
+          const previousFloor = floorSurfaceYAt(this.collision, previous.x, previous.z,
+            previous.y - JUMP.GROUND_Y + JUMP.GROUND_SNAP_UP);
+          if (previousFloor != null && previous.y <= previousFloor + JUMP.GROUND_Y + 1 && velY <= 0) {
+            keepOnStageFloor(this.collision, previous, pos, velocity);
+          }
           const floor = this.clampRomToGround(pos, velocity.y);
           pos.y = floor.y;
           return { velY: floor.velY, grounded: floor.grounded };
