@@ -2,6 +2,7 @@ import { battleStateForSelfcheck, createBattle } from "./battle.js";
 import { RomDriverBridge } from "./bridge.js";
 import { activeSourceTargetUid, homingTargetForSpawn, stepAttacks, stepProjectiles } from "./combat.js";
 import { spawnRomProjectile } from "./projectiles.js";
+import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { STATE } from "./constants.js";
 import { buildProfile, type BorgStats } from "./stats.js";
 import { emptyInput } from "./types.js";
@@ -71,6 +72,9 @@ export function runSelfTest(): void {
   assert(shot.vel.x > 0, "generic shot actually flies toward ally bearing, not enemy");
   const romShot = spawnRomProjectile(self, 0, self.rotY);
   assert(romShot?.aimedTargetUid === ally.uid, "fireChild copies active attack target");
+  assert(romShot.romShotKind === 10 && romShot.damageRecordIndex === 9 &&
+    romShot.damageRecord === familyDamageRecordForBorg("pl0000", 9),
+    "generic fireChild resolves kind-10 to the owning borg's family damage record");
   assert(Math.abs(romShot.vel.x - Math.sin(self.rotY) * 50) < 1e-6 &&
     Math.abs(romShot.vel.z - Math.cos(self.rotY) * 50) < 1e-6,
     "generic fireChild visual spin does not rotate owner-forward travel");

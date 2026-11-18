@@ -10,6 +10,8 @@
 // specific variant determined by its action-script stream data.
 
 import { activeSourceTargetUid } from "./targetLock.js";
+import { attackHitRecordsForKind } from "./attackHitData.js";
+import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import type { BorgRuntime, Projectile } from "./types.js";
 import { MUZZLE_OFFSET, SHOT } from "./constants.js";
 import projectileVariantData from "./data/projectileVariants.json" with { type: "json" };
@@ -131,6 +133,9 @@ export function spawnRomProjectile(
   const totalYaw = yawRadians;
   const dirX = Math.sin(totalYaw);
   const dirZ = Math.cos(totalYaw);
+  // zz_008ac80_ copies the owner's family table, then arms this row's HIT kind.
+  const hit = attackHitRecordsForKind(shooter.combatFormId ?? shooter.borgId, variant.kind)[0];
+  const damage = hit && familyDamageRecordForBorg(shooter.combatFormId ?? shooter.borgId, hit.damageRecordIndex);
   return {
     uid: nextRomProjectileUid(),
     ownerUid: shooter.uid,
@@ -157,7 +162,9 @@ export function spawnRomProjectile(
     sourceVariantSpeedDelta: variant.drop,
     hitRadius: SHOT.HIT_RADIUS,
     visualKind: variant.flags & VARIANT_FLAG_ENERGY_BEAM ? "energy" : "muzzle",
-    damageRecordIndex: 0,
+    damageRecordIndex: hit?.damageRecordIndex ?? 0,
+    ...(damage ? { damageRecord: damage } : {}),
+    romShotKind: variant.kind,
     romScale: variant.scale,
   };
 }
