@@ -142,7 +142,7 @@ import { configureVehicleFamily } from "./families/vehicle-borg.js";
 import { configureVictoryJetFamily } from "./families/victory-jet.js";
 import { configureVictoryKingFamily } from "./families/victory-king.js";
 import { configurePantherVehicleFamily } from "./families/panther-vehicle.js";
-import { configureAccelerationNinjaFamily } from "./families/acceleration-ninja.js";
+import { configureAccelerationNinjaFamily, accelerationNinjaChargeArm, ACCELERATION_NINJA_EFFECT_TRIGGER } from "./families/acceleration-ninja.js";
 import { configureWingSoldierFamily } from "./families/wing-soldier.js";
 import { configureCosmicDragonFamily } from "./families/cosmic-dragon.js";
 import { configureGoldHeroFamily } from "./families/gold-hero.js";
@@ -273,6 +273,8 @@ interface StreamEvent {
   state?: number;
   aux?: number;
   variant?: number;
+  indirectSelector?: number;
+  indirectArg?: number;
 }
 
 const ACTION_STREAM_DATA = actionStreamTablesData as unknown as {
@@ -344,7 +346,20 @@ function streamEventsForSlot(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const group = bank.groups?.["g" + groupIndex] as any;
   const slot = group?.["s" + slotIndex] as { events?: StreamEvent[] } | undefined;
-  return slot?.events ?? null;
+  const events = slot?.events;
+  if (!events) return null;
+  // The existing generated schedule omits op11. GG4E 8034cfce is part0,
+  // selector2/arg0 after the group2 slot0 absolute-frame-9 wait.
+  if (borgId === "pl0004" && bankAddress === "0x8034cc80" && groupIndex === 2 && slotIndex === 0) {
+    const event: StreamEvent = {op: "indirect", part: 0, indirectSelector: 2, indirectArg: 0, frame: 9};
+    // The decoder follows a wait-0/-1 into adjacent bytes for static discovery;
+    // the runtime stream ends there and must not schedule the next stream's start.
+    const end = events.findIndex(e => e.op === "wait" && e.mode === 0 && (e as StreamEvent & {val?: number}).val === -1);
+    const current = end < 0 ? events : events.slice(0, end + 1);
+    const at = current.findIndex(e => e.op === "wait" && (e as StreamEvent & {val?: number}).val === 21);
+    return at < 0 ? [...current, event] : [...current.slice(0, at), event, ...current.slice(at)];
+  }
+  return events;
 }
 
 /** BorgRuntime.rotY is in radians (atan2(x,z) convention, +Z forward); RomActor.heading
@@ -1827,7 +1842,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.streamSchedules.push({
       startFrame,
       endFrame: startFrame + maxFrame + 1,
-      mask,
+      mask: this.runtime.borgId === "pl0004" && group === 2 && slot === 0 ? effective : mask,
       events,
       completed: false,
     });
@@ -2084,8 +2099,12 @@ export class RomDriverBridge implements RomFamilyDriver {
       onReturnResource: (_actor, cell) => battleRuntime.returnResource?.(runtime, cell),
       onAllocateResource: (_actor, type, count, mode) =>
         battleRuntime.allocateResource(runtime, type, count, (mode ?? 0) !== 0),
-      onFamilyProjectile: (actor, addr, kind) =>
-        battleRuntime.spawnProjectile(runtime, addr, kind, actor),
+      onFamilyProjectile: (actor, addr, kind) => {
+        // 80099e70 is an effect trigger, not a projectile constructor. Its
+        // authored visual remains unsupported rather than spawning a fake shot.
+        if (runtime.borgId === "pl0004" && addr === ACCELERATION_NINJA_EFFECT_TRIGGER) return;
+        battleRuntime.spawnProjectile(runtime, addr, kind, actor);
+      },
       onSpawnChild: (_actor, childId) => {
         battleRuntime.spawnProjectile(runtime, 0, childId);
         return true;
@@ -2207,6 +2226,13 @@ export class RomDriverBridge implements RomFamilyDriver {
       const bridge = this;
       host.onFireChild = (a, variant) => { bridge.onFireChild(variant); void a; };
     }
+    const indirectObserver = host.onIndirect;
+    host.onIndirect = (actor, selector, arg) => {
+      // Live GG4E pl0004 actor+4d8 = 8016234c; table 8034c720[2]
+      // resolves to the existing 801623c0 weapon-allocation/effect owner.
+      if (runtime.borgId === "pl0004" && selector === 2) accelerationNinjaChargeArm(actor, this.ctx);
+      indirectObserver?.(actor, selector, arg);
+    };
     if (host.onParamTierDelta) {
       const orig = host.onParamTierDelta;
       host.onParamTierDelta = (a, delta) => {
@@ -2755,8 +2781,13 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  calls advance the 4-phase machine each frame (ROM owns motion until recovery). */
   tryStartBAttack(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean {
     if (this.specialActive) return false;
-    if (!this.actor.hasBCharge) return false;
     if (!runtime.command?.exact || runtime.command.actionIndex === null) return false;
+    // Bounded source command 8034ca18: grounded B Shot subtype0 action0/variant0.
+    // Other Acceleration Ninja B variants keep their prior route.
+    const accelerationNeutral = runtime.borgId === "pl0004" && runtime.grounded &&
+      runtime.command.button === "B Shot" && runtime.command.subtype === 0 &&
+      runtime.command.actionIndex === 0 && runtime.command.variantIndex === 0;
+    if (!this.actor.hasBCharge && !accelerationNeutral) return false;
     const actionIndex = runtime.command.actionIndex;
     const variantIndex = runtime.command?.variantIndex ?? 0;
     const admittedAirShot=(runtime.borgId==='pl0615'||runtime.borgId==='pl0629'||runtime.borgId==='pl062a')&&!runtime.grounded&&runtime.command.button==='B Shot'&&runtime.command.subtype===4&&actionIndex===0&&variantIndex===3;
@@ -3266,7 +3297,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     for (const schedule of this.streamSchedules) {
       if (schedule.knightClocks || schedule.mask === 0) continue;
       const localFrame = frame - schedule.startFrame;
-      if (localFrame >= 0) this.dispatchEventList(schedule.events, localFrame);
+      if (localFrame >= 0) this.dispatchEventList(schedule.events, localFrame, schedule.mask);
       if (!schedule.completed && frame >= schedule.endFrame) {
         schedule.completed = true;
         for (let partIndex = 0; partIndex < this.actor.parts.length; partIndex++) {
@@ -3288,7 +3319,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     }
   }
 
-  private dispatchEventList(events: readonly StreamEvent[], frame: number): void {
+  private dispatchEventList(events: readonly StreamEvent[], frame: number, mask = 0x0f): void {
     for (const ev of events) {
       const evFrame = ev.frame ?? 0;
       if (evFrame !== frame) continue;
@@ -3306,6 +3337,10 @@ export class RomDriverBridge implements RomFamilyDriver {
           break;
         case "fireChild":
           if (ev.variant !== undefined) this.ctx.onFireChild?.(this.actor, ev.variant);
+          break;
+        case "indirect":
+          if (ev.part !== undefined && (mask & (1 << ev.part)) !== 0 && ev.indirectSelector !== undefined && ev.indirectArg !== undefined)
+            this.ctx.onIndirect?.(this.actor, ev.indirectSelector, ev.indirectArg);
           break;
         case "partState": {
           const partIndex = ev.part ?? 0;

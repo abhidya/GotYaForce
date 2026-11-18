@@ -39,10 +39,28 @@ function setup(collision: StageCollision, id = "pl0004") {
   const driver = borg.romDriver;
   const press = () => { inputs.p1.special = true; battle.step(1 / 60, inputs); inputs.p1.special = false; };
   const tick = () => battle.step(1 / 60, inputs);
-  return { battle, borg, driver, press, tick, actors: state.borgs };
+  return { battle, borg, driver, press, tick, inputs, actors: state.borgs };
 }
 
 export function runRomCollisionSelfTest(): void {
+  // Source 8034cfce op11 reaches the production Battle ammo owner, while
+  // 80099e70 effect triggers must not become generic damaging projectiles.
+  {
+    const t = setup(geometry());
+    const cell = t.borg.weaponCells?.[0]; assert(cell, "primary weapon cell exists");
+    Object.assign(cell, {max: 1, cur: 1, refillType: 0, refillParam: 1000, timer: 0});
+    t.borg.ammo = 1;
+    let allocations = 0; const allocate = t.driver.ctx.onAllocateResource!;
+    t.driver.ctx.onAllocateResource = (actor, slot, count, mode) => {allocations++; return allocate(actor, slot, count, mode);};
+    t.inputs.p1.attack = true; t.tick(); t.inputs.p1.attack = false;
+    assert(t.borg.command?.recordAddress === "0x8034ca18" && t.borg.cooldowns["romSpecialActive"] === 1,
+      "player B input enters the verified source action");
+    for (let i = 0; i < 20; i++) t.tick();
+    assert(allocations === 1 && cell.cur === 0 && t.borg.ammo === 0,
+      "source action consumes one real Battle weapon charge");
+    assert(battleStateForSelfcheck(t.battle).projectiles.filter(p => p.ownerUid === t.borg.uid).length === 0,
+      "source effect triggers do not create generic damaging projectiles");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));
