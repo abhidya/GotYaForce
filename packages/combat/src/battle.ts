@@ -432,10 +432,12 @@ class BattleImpl implements Battle {
           // only when it begins on a floor and is not rising. Airborne actions
           // remain free to travel beyond an edge. This is a host policy, not a
           // claim that the retail character collision capsule is decoded.
-          const previousFloor = floorSurfaceYAt(this.collision, previous.x, previous.z,
-            previous.y - JUMP.GROUND_Y + JUMP.GROUND_SNAP_UP);
-          if (previousFloor != null && previous.y <= previousFloor + JUMP.GROUND_Y + 1 && velY <= 0) {
-            keepOnStageFloor(this.collision, previous, pos, velocity);
+          if (velY <= 0) {
+            const previousFloor = floorSurfaceYAt(this.collision, previous.x, previous.z,
+              previous.y - JUMP.GROUND_Y + JUMP.GROUND_SNAP_UP);
+            if (previousFloor != null && previous.y <= previousFloor + JUMP.GROUND_Y + 1) {
+              keepOnStageFloor(this.collision, previous, pos, velocity);
+            }
           }
           const floor = this.clampRomToGround(pos, velocity.y);
           pos.y = floor.y;
