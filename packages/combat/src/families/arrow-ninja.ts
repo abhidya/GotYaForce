@@ -107,6 +107,16 @@ function rangeRow(actor: RomActor & ArrowNinjaScratch, offset = 0): number {
     (offset === 0 ? ARROW_NINJA_ACTION1.RANGE : ARROW_NINJA_ACTION1.DIVE_RANGE);
 }
 
+/** Approximate source 677b0 terrain collision using the Battle host adapter. */
+function probeGroundCarry(actor: RomActor, previous: {x:number;y:number;z:number}): void {
+  const floor = actor.physicsRuntime;
+  if (!floor) return;
+  const result = floor.probeMotion ? floor.probeMotion(previous, actor.pos, actor.yVel) : floor.clampToGround(actor.pos, actor.yVel);
+  if ('y' in result && typeof result.y === 'number') actor.pos.y = result.y;
+  actor.yVel = result.velY;
+  (actor as RomActor & {grounded?: boolean}).grounded = result.grounded;
+}
+
 function groundChain(ctx: StreamContext): (actor: RomActor) => void {
   return (base: RomActor): void => {
     const actor = base as RomActor & ArrowNinjaScratch;
@@ -119,9 +129,11 @@ function groundChain(ctx: StreamContext): (actor: RomActor) => void {
           actor.activeYaw = actor.lockYaw;
         }
         stepTargetYaw(actor, 0xc0);
+        const previous = {...actor.pos};
         vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
         vecScale(ARROW_NINJA_ACTION1.REPOSITION, actor.motion, actor.motion);
         vecAdd(actor.pos, actor.motion, actor.pos);
+        probeGroundCarry(actor, previous);
         const slot = actor.streamSlot++;
         startStream(actor, 0xf, ARROW_NINJA_ACTION1.STREAM_GROUP, slot,
           ARROW_NINJA_ACTION1.STREAM_RATE);
@@ -129,8 +141,10 @@ function groundChain(ctx: StreamContext): (actor: RomActor) => void {
       }
       case 1: { // FUN_800d0e7c
         if (isStreamTickEnabled(actor)) tickStream(actor, 0xf, ctx);
+        const previous = {...actor.pos};
         vecScale(ARROW_NINJA_ACTION1.REPOSITION, actor.motion, actor.motion);
         vecAdd(actor.pos, actor.motion, actor.pos);
+        probeGroundCarry(actor, previous);
         actor.handlerTimer -= actor.dt;
         const facingReady = stepTargetYaw(actor, 0xc0);
         if (actor.handlerTimer <= 0 || facingReady) {
