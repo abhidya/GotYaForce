@@ -2799,7 +2799,12 @@ export class RomDriverBridge implements RomFamilyDriver {
     const accelerationNeutral = runtime.borgId === "pl0004" && runtime.grounded &&
       runtime.command.button === "B Shot" && runtime.command.subtype === 0 &&
       runtime.command.actionIndex === 0 && runtime.command.variantIndex === 0;
-    if (!this.actor.hasBCharge && !accelerationNeutral) return false;
+    // GG4E 802d6210 is the grounded Kung-Fu Master close-B action1/v0.
+    // Other contexts retain their existing path until individually traced.
+    const kungFuGroundMelee = runtime.borgId === "pl0800" && runtime.grounded &&
+      runtime.command.type === 1 && runtime.command.subtype === 0 && runtime.command.recordAddress === "0x802d6210" &&
+      runtime.command.actionIndex === 1 && runtime.command.variantIndex === 0;
+    if (!this.actor.hasBCharge && !accelerationNeutral && !kungFuGroundMelee) return false;
     const actionIndex = runtime.command.actionIndex;
     const variantIndex = runtime.command?.variantIndex ?? 0;
     const admittedAirShot=(runtime.borgId==='pl0615'||runtime.borgId==='pl0629'||runtime.borgId==='pl062a')&&!runtime.grounded&&runtime.command.button==='B Shot'&&runtime.command.subtype===4&&actionIndex===0&&variantIndex===3;
@@ -2831,7 +2836,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     // slotForBorg selects the charge slot AND playSlot routes through
     // loadClipByStreamRef (the charge_shot slot is in the stream-ref allow-list).
     runtime.state = "attack";
-    runtime.anim = "charge_shot";
+    runtime.anim = kungFuGroundMelee ? "melee" : "charge_shot";
     this.specialActive = true;
     this.syncActionInput(null, true);
     // Arm the action-mode bits so the phase-3 exit (controlWord &= ~0x3) can signal
@@ -2871,6 +2876,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       this.flushVisibilityState(this.actor);
     }
     // Original G RED-family close-air row80365dc8=[45,3,1,4]. Other B routes unchanged.
+    if (kungFuGroundMelee) { this.actor.cmdButton = 1; this.actor.cmdSubtype = 0; this.actor.cmdChargedRanged = 0; }
     dispatchCommandRecord(this.actor, { cueId: admittedAirMelee||admittedAirShot?45:44, stateMode: admittedAirShot?1:3, actionIndex, variantIndex });
     clearNeoGredMelee(this.actor);
     clearGRedAirMelee(this.actor);
