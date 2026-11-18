@@ -119,11 +119,9 @@ function groundChain(ctx: StreamContext): (actor: RomActor) => void {
           actor.activeYaw = actor.lockYaw;
         }
         stepTargetYaw(actor, 0xc0);
-        if (actor.lockTarget) {
-          vecSubtract(actor.pos, actor.lockTarget, actor.motion);
-          vecScale(ARROW_NINJA_ACTION1.REPOSITION, actor.motion, actor.motion);
-          vecAdd(actor.pos, actor.motion, actor.pos);
-        }
+        vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+        vecScale(ARROW_NINJA_ACTION1.REPOSITION, actor.motion, actor.motion);
+        vecAdd(actor.pos, actor.motion, actor.pos);
         const slot = actor.streamSlot++;
         startStream(actor, 0xf, ARROW_NINJA_ACTION1.STREAM_GROUP, slot,
           ARROW_NINJA_ACTION1.STREAM_RATE);

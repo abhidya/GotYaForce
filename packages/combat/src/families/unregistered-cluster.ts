@@ -1373,11 +1373,9 @@ function jetA2(a: UA, ctx: UnregFamilyCtx): void {
     a.poseAccum7c = 0;
     a.poseAccum7e = 0;
     a.poseAccum80 = 0;
-    if (a.lockTarget) {
-      vecSubtract(a.pos, a.lockTarget, a.motion);
-      vecScale(0.949999988079071, a.motion, a.motion); // FLOAT_8043a350
-      vecAdd(a.pos, a.motion, a.pos);
-    }
+    vecSubtract(a.pos, a.targetCache5e8, a.motion);
+    vecScale(0.949999988079071, a.motion, a.motion); // FLOAT_8043a350
+    vecAdd(a.pos, a.motion, a.pos);
     groundSnapRevert(a); // zz_0067a28_
     const slot = a.unregSlot6ea ?? 0;
     a.unregSlot6ea = slot + 1;

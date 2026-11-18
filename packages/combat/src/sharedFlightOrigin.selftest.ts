@@ -2,6 +2,9 @@
  * the target. This prevents repeated lance-flight entry from amplifying the
  * distance between fighters. Synthetic fixtures test the source-owned inputs. */
 import {createRomActor} from './rom/actor.js';
+import {createSharedEngineRootAction} from './families/shared-engine.js';
+import {configureArrowNinjaFamily} from './families/arrow-ninja.js';
+import {configureJetHeroFamily} from './families/unregistered-cluster.js';
 import {createSharedFlightX, FLIGHT_X_FAMILY4_CONFIG} from './families/shared-flight-x.js';
 import {createSonicXSpecial,createShogunXSpecial} from './families/samurai.js';
 import {configureMachineBlueFamily,configureMachineRedFamily} from './families/machine-red-blue.js';
@@ -22,6 +25,15 @@ import {createHammerRootAction} from './families/hammer-robot.js';
 import {createMagnetRobotRootAction} from './families/magnet-robot.js';
 function assert(v:unknown,m:string):asserts v {if(!v) throw Error(`[sharedFlightOrigin] ${m}`);}
 export function runSharedFlightOriginSelfTest():void {
+ for(const target of [{x:-4000,y:-9000,z:6000},null]) {
+  for(const name of ['engine','ninja','jet'] as const) {
+   const b=createRomActor(); b.pos={x:100,y:200,z:300}; b.targetCache5e8={x:90,y:180,z:270}; b.lockTarget=target;
+   if(name==='engine') { b.actionIndex=0; createSharedEngineRootAction({dash:{seedSlot:0,proximityRange:100,timerFrames:20,repositionScale:0.95}})(b); }
+   else if(name==='ninja') { configureArrowNinjaFamily(b,'pl0002',{}); b.actionIndex=1; b.variantIndex=1; b.rootAction!(b); }
+   else { configureJetHeroFamily(b,{}); b.actionIndex=2; b.rootAction!(b); }
+   assert(Math.abs(b.pos.x-109.5)<1e-4 && Math.abs(b.pos.y-219)<1e-4 && Math.abs(b.pos.z-328.5)<1e-4,`${name} carries own history regardless of target`);
+  }
+ }
  const run=createSharedFlightX(FLIGHT_X_FAMILY4_CONFIG,{});
  for(const target of [{x:-4000,y:-9000,z:6000},null]) {
   const a=createRomActor();a.pos={x:100,y:200,z:300};a.targetCache5e8={x:90,y:180,z:270};a.lockTarget=target;

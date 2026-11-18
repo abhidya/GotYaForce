@@ -165,7 +165,7 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
     actor.yVel -= actor.yVel * amount;
   };
   return [
-    // Phase 0: setup (zz_01783e4_) — zero velocity, reposition from target, start stream.
+    // Phase 0: setup (zz_01783e4_) — zero velocity, carry prior motion, start stream.
     (actor, ctx) => {
       actor.fbPhaseSlots[0]++;
       actor.handlerTimer = ENG.LUNGE_TIMER; // FLOAT_8043ae00 = 30
@@ -177,13 +177,10 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       actor.activeYaw = actor.heading;
       actor.lockYaw = actor.heading;
       actor.streamSlot = cfg.seedSlot;
-      // Reposition: motion = (pos - target) × scale; pos += motion.
-      const target = scratch(actor).lockTarget;
-      if (target && cfg.repositionScale !== 0) {
-        vecSubtract(actor.pos, target, actor.motion);
-        vecScale(cfg.repositionScale, actor.motion, actor.motion);
-        vecAdd(actor.pos, actor.motion, actor.pos);
-      }
+      // +0x5e8 is this actor's previous position, not the locked target.
+      vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+      vecScale(cfg.repositionScale, actor.motion, actor.motion);
+      vecAdd(actor.pos, actor.motion, actor.pos);
       startStream(actor, 0xf, 3, actor.streamSlot, ENG.STREAM_RATE);
       actor.streamSlot++;
       // zz_006e514_/zz_006e1ac_ populate +0x54e. The bridge's +0x18da pitch
