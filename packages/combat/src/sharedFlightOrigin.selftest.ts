@@ -7,6 +7,9 @@ import {createSonicXSpecial,createShogunXSpecial} from './families/samurai.js';
 import {configureMachineBlueFamily,configureMachineRedFamily} from './families/machine-red-blue.js';
 import {createValkrieAirMelee,createValkrieXSpecial} from './families/valkrie.js';
 import {createMeleeGirlLunge} from './families/melee-girl-lunge.js';
+import {createBarrierGirlX} from './families/girl-cluster.js';
+import {createEagleRobotAction0} from './families/eagle-robot.js';
+import {createStarHeroRootAction} from './families/star-hero.js';
 function assert(v:unknown,m:string):asserts v {if(!v) throw Error(`[sharedFlightOrigin] ${m}`);}
 export function runSharedFlightOriginSelfTest():void {
  const run=createSharedFlightX(FLIGHT_X_FAMILY4_CONFIG,{});
@@ -50,6 +53,18 @@ export function runSharedFlightOriginSelfTest():void {
    make({})(b);
    assert(Math.abs(b.pos.x-(100+10*scale))<1e-4 && Math.abs(b.pos.y-(200+20*scale))<1e-4 &&
     Math.abs(b.pos.z-(300+30*scale))<1e-4,`${name} carries own history independently of target`);
+  }
+ }
+ for(const [name,make,action] of [
+  ['Barrier Girl X',createBarrierGirlX,2],
+  ['Eagle Robot burst',createEagleRobotAction0,0],
+  ['Star Hero X',createStarHeroRootAction,2],
+ ] as const) {
+  for(const target of [{x:-4000,y:-9000,z:6000},null]) {
+   const b=createRomActor();b.pos={x:100,y:200,z:300};b.targetCache5e8={x:90,y:180,z:270};b.lockTarget=target;
+   b.actionIndex=action;b.variantIndex=0;make({})(b);
+   assert(Math.abs(b.motion.x-9.5)<1e-4 && Math.abs(b.motion.y-19)<1e-4 && Math.abs(b.motion.z-28.5)<1e-4,
+    `${name} derives scaled carry from own history independently of target`);
   }
  }
  console.log('[sharedFlightOrigin] PASS: own-position history and no-target entry');

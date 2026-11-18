@@ -56,16 +56,9 @@ export interface HeroBuffExt {
   heroBuffTailFrames?: number;
 }
 
-/** The lock-target position the family handler reads at actor+0x5e8 (same field the
- *  bridge adapter copies from BorgRuntime.lockTarget each frame). */
-function lockTargetPos(actor: RomActor): { x: number; y: number; z: number } | null {
-  const t = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
-  return t ?? null;
-}
-
 // ============================================================================
 // Phase 0 — FUN_80112278 @ chunk_0031.c:549. Startup: advance the phase cursor, pick the
-// ground/air stream slot, compute motion = pos − lockTarget, arm the kind-0xf dash hitbox,
+// ground/air stream slot, compute motion from own history, arm the kind-0xf dash hitbox,
 // then fall through to phase 1 immediately (the ROM tail-calls zz_011230c_).
 // ============================================================================
 function starHeroXPhase0(actor: RomActor, ctx: StreamContext): void {
@@ -74,9 +67,8 @@ function starHeroXPhase0(actor: RomActor, ctx: StreamContext): void {
   // Stream slot select: +0x5e0 & 0x40 → air slot 1, else ground slot 0 (chunk_0031.c:558-561).
   const slot = (actor.controlWord & 0x40) !== 0 ? STAR_HERO_X.AIR_SLOT : STAR_HERO_X.GROUND_SLOT;
 
-  // motion = pos − lockTarget (chunk_0031.c:562-563, gnt4_PSVECSubtract_bl).
-  const target = lockTargetPos(actor);
-  if (target) vecSubtract(actor.pos, target, actor.motion);
+  // FUN_80112278 unconditionally subtracts actor's own older +0x5e8 position.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
 
   // Arm the kind-0xf dash hitbox: zz_004beb8_(STREAM_RATE, actor, 0xf, 4, slot, -1, -1).
   // The pre-increment slot is the stream slot; +0x6ea becomes slot+1 after (chunk_0031.c:566-567).

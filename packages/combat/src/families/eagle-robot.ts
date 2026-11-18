@@ -91,11 +91,10 @@ function fullBodyBurst(ctx: StreamContext): (actor: RomActor) => void {
           actor.eagleStreamSeed ?? 0, EAGLE_ROBOT_ACTION0.STREAM_RATE);
         actor.controlWord &= ~0xb0;
         actor.hSpeed = actor.yVel = actor.hDecel = actor.gravityCoeff = 0;
-        if (actor.lockTarget) {
-          vecSubtract(actor.pos, actor.lockTarget, actor.motion);
-          vecScale(EAGLE_ROBOT_ACTION0.REPOSITION, actor.motion, actor.motion);
-          vecAdd(actor.pos, actor.motion, actor.pos);
-        }
+        // FUN_801299e4 uses own older +0x5e8 position regardless of target.
+        vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+        vecScale(EAGLE_ROBOT_ACTION0.REPOSITION, actor.motion, actor.motion);
+        vecAdd(actor.pos, actor.motion, actor.pos);
         return;
       }
       case 1: // FUN_80129ac4
