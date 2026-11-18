@@ -91,6 +91,56 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
       scene.clear();
     }
 
+    // Source-timed pose blending uses a saved rendered pose, not the original
+    // source pose bank. Synthetic hierarchy tests non-accumulation and exit.
+    {
+      let releaseClip: ((value: THREE.AnimationClip) => void) | undefined;
+      const scene = create({
+        async loadModel() {
+          const root = new THREE.Group(), joint0 = new THREE.Group(); joint0.name = 'JOBJ_0'; root.add(joint0);
+          for (let i = 1; i < 20; i++) { const joint = new THREE.Group(); joint.name = `JOBJ_${i}`; joint0.add(joint); }
+          return root;
+        },
+        async loadClip() { return clip('idle'); },
+        async loadClipByStreamRef(_id, ref) {
+          if (ref.slot === 1) return new Promise<THREE.AnimationClip>(resolve => { releaseClip = resolve; });
+          const result = clip('ninja');
+          result.tracks.push(new THREE.QuaternionKeyframeTrack('JOBJ_1.quaternion', [0, 1], [0, 0, 1, 0, 0, 0, 1, 0]));
+          return result;
+        },
+      });
+      const neutral: BattleActorView = { ...view(1, 0, 'pl0000'), state: 'idle', anim: 'idle', meleeAnimStream: null, sourceAnimSample: null };
+      await enter(scene, neutral);
+      const modelRoot = actor(scene).model!;
+      const moving = modelRoot.getObjectByName('JOBJ_1')!, untouched = modelRoot.getObjectByName('JOBJ_2')!;
+      moving.position.x = 10; untouched.position.x = 7;
+      const joints = [2,3,4,5,6,7,8,9,10,11,12,0,1,13,14,15,16,17,18,19];
+      const make = (weight: number): BattleActorView => ({ ...view(8, 0, 'pl0000', 0),
+        sourceAnimSample: { serial: 8, frame: 0, blend: {mode: 1, elapsed: 1, duration: 2,
+          previousWeight: weight, jointIndices: joints} } });
+      await enter(scene, make(.5));
+      near(moving.position.x, 5, 'source weight blends saved and sampled poses');
+      near(moving.quaternion.z, Math.SQRT1_2, 'source blend interpolates rotation');
+      near(moving.quaternion.w, Math.SQRT1_2, 'source blend preserves quaternion hemisphere');
+      near(untouched.position.x, 7, 'unanimated joint stays fixed');
+      for (let i = 0; i < 4; i++) { scene.update(.1); near(moving.position.x, 5, 'render ticks do not accumulate'); }
+      scene.sync([make(.25)]); near(moving.position.x, 2.5, 'new source weight replaces previous blend');
+      const prior = make(.5);
+      const interrupted: BattleActorView = { ...prior, sourceAnimSample: { ...prior.sourceAnimSample!, serial: 9 } };
+      scene.sync([interrupted]); near(moving.position.x, 1.25, 'new epoch captures interrupted visible pose');
+      scene.sync([{ ...interrupted, sourceAnimSample: {serial: 9, frame: 0, blend: null} }]);
+      near(moving.position.x, 0, 'blend completion restores current sample');
+      moving.position.x = 8;
+      const delayed = make(.5);
+      scene.sync([{...delayed, meleeAnimStream: {group: 0, slot: 1},
+        sourceAnimSample: {...delayed.sourceAnimSample!, serial: 10}}]);
+      assert(releaseClip, 'new exact clip is pending');
+      moving.position.x = 20; // Rendering continued while the new clip loaded.
+      releaseClip(clip('delayed')); await flush();
+      near(moving.position.x, 4, 'deferred load uses pose captured at transition start');
+      scene.clear();
+    }
+
     // Neutral-combo and family airborne B refs after the metadata hop. Synthetic clips
     // test pose ownership, not original asset fidelity or crossfade equivalence.
     for (const [id, slots] of [

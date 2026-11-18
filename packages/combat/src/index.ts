@@ -260,3 +260,8 @@ export {
   type RomDamageMemoryInfo,
   type ArenaJson,
 } from "./rom/wasmDamageCore.js";
+
+// Experimental source-derived quaternion path for sampled presentation poses.
+export {sourceBlendQuaternion} from './rom/source-quaternion-slerp.js';
+export {sourceReciprocalSqrtEstimate} from './rom/source-reciprocal-sqrt-estimate.js';
+export {addSourceFloat32} from './rom/source-float.js';
