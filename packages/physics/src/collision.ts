@@ -231,39 +231,32 @@ export function isFiniteVec(v: Vec3): boolean {
   return Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z);
 }
 
-function addNeighborCellTriangles(out: Set<number>, collision: StageCollision, x: number, z: number): void {
-  const grid = collision.grid;
-  if (!grid) return;
-  const cell = cellCoords(collision, x, z);
-  if (!cell) return;
-  addNeighborCellTrianglesByCell(out, collision, cell.cx, cell.cz);
-}
-
 function addSegmentCellTriangles(out: Set<number>, collision: StageCollision, a: Vec3, b: Vec3): void {
   const grid = collision.grid;
   if (!grid || grid.cellSize.x <= 0 || grid.cellSize.z <= 0) return;
-  const start = cellCoords(collision, a.x, a.z);
-  const end = cellCoords(collision, b.x, b.z);
-  if (!start || !end) {
-    addNeighborCellTriangles(out, collision, a.x, a.z);
-    addNeighborCellTriangles(out, collision, b.x, b.z);
-    return;
-  }
+  // Clip to the grid before walking cells. Looking only at in-grid endpoints
+  // misses intermediate triangles when a segment enters or leaves the grid.
+  const clipped = clipSegmentToGrid(grid, a, b);
+  if (!clipped) return;
+  const [from, to] = clipped;
+  const start = cellCoords(collision, from.x, from.z);
+  const end = cellCoords(collision, to.x, to.z);
+  if (!start || !end) return;
 
   let cx = start.cx;
   let cz = start.cz;
   const endCx = end.cx;
   const endCz = end.cz;
-  const dx = b.x - a.x;
-  const dz = b.z - a.z;
+  const dx = to.x - from.x;
+  const dz = to.z - from.z;
   const stepX = dx > 0 ? 1 : dx < 0 ? -1 : 0;
   const stepZ = dz > 0 ? 1 : dz < 0 ? -1 : 0;
   const tDeltaX = stepX === 0 ? Infinity : grid.cellSize.x / Math.abs(dx);
   const tDeltaZ = stepZ === 0 ? Infinity : grid.cellSize.z / Math.abs(dz);
   let tMaxX =
-    stepX === 0 ? Infinity : (grid.origin.x + (stepX > 0 ? cx + 1 : cx) * grid.cellSize.x - a.x) / dx;
+    stepX === 0 ? Infinity : (grid.origin.x + (stepX > 0 ? cx + 1 : cx) * grid.cellSize.x - from.x) / dx;
   let tMaxZ =
-    stepZ === 0 ? Infinity : (grid.origin.z + (stepZ > 0 ? cz + 1 : cz) * grid.cellSize.z - a.z) / dz;
+    stepZ === 0 ? Infinity : (grid.origin.z + (stepZ > 0 ? cz + 1 : cz) * grid.cellSize.z - from.z) / dz;
   const maxSteps = grid.gridCells.x + grid.gridCells.z + 4;
 
   for (let steps = 0; steps <= maxSteps; steps += 1) {
@@ -283,6 +276,27 @@ function addSegmentCellTriangles(out: Set<number>, collision: StageCollision, a:
     }
     if (cx < 0 || cz < 0 || cx >= grid.gridCells.x || cz >= grid.gridCells.z) return;
   }
+}
+
+/** Clip an XZ segment to the finite grid; nudge exact upper bounds inward
+ * because cell indices are half-open. This is broad phase only. */
+function clipSegmentToGrid(grid: NonNullable<StageCollision["grid"]>, a: Vec3, b: Vec3): [Vec3, Vec3] | null {
+  let enter = 0, exit = 1;
+  const dx = b.x - a.x, dz = b.z - a.z;
+  const maxX = grid.origin.x + grid.cellSize.x * grid.gridCells.x;
+  const maxZ = grid.origin.z + grid.cellSize.z * grid.gridCells.z;
+  for (const [start, delta, lo, hi] of [[a.x, dx, grid.origin.x, maxX], [a.z, dz, grid.origin.z, maxZ]] as const) {
+    if (delta === 0) { if (start < lo || start >= hi) return null; continue; }
+    const t1 = (lo - start) / delta, t2 = (hi - start) / delta;
+    enter = Math.max(enter, Math.min(t1, t2)); exit = Math.min(exit, Math.max(t1, t2));
+    if (enter > exit) return null;
+  }
+  const point = (t: number): Vec3 => ({
+    x: Math.max(grid.origin.x, Math.min(maxX - grid.cellSize.x * 1e-9, a.x + dx * t)),
+    y: a.y + (b.y - a.y) * t,
+    z: Math.max(grid.origin.z, Math.min(maxZ - grid.cellSize.z * 1e-9, a.z + dz * t)),
+  });
+  return [point(enter), point(exit)];
 }
 
 function cellCoords(collision: StageCollision, x: number, z: number): { cx: number; cz: number } | null {
