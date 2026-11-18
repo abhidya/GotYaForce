@@ -57,3 +57,16 @@ move was admitted, and it did not capture Sasuke's blend calls. It therefore
 cannot establish general visibility behavior, an exhaustive transition trace,
 or rendered geometry parity. The separately launched instance was stopped;
 an unrelated pre-existing Dolphin process was left running.
+
+## What the two output bytes select
+
+The output bytes should not be treated as simple per-bone booleans. In the
+original decompilation, `8004fdf0` reads `actor+1d94`, checks it against a
+signed bound at the model record's `+c0f`, adds it to the draw descriptor's
+first byte, and selects an entry from the model record's `+708` pointer table.
+`8004fe60` performs the corresponding operation for `actor+1d95`, using the
+bound at `+c13`. Both pass the selected object to `zz_00076d0_`, then call
+`zz_00097b4_`. See `research/decomp/ghidra-export/chunk_0006.c` at those
+addresses. The exact mapping from those original archive/model entries to the
+exported GLB meshes remains unverified, so setting `Object3D.visible` from
+these bytes would not be a supported port of this behavior.
