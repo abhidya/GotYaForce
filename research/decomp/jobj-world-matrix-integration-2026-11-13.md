@@ -380,3 +380,10 @@ values in the three captured rotations, including the two norms below 1.
 This is still a bounded experimental emulator model, not full hardware or
 playable-game parity. The isolated instance was stopped and the unrelated
 existing emulator was left untouched.
+
+A separate isolated Dolphin run sampled four points immediately around each
+of the 32 normalized interval boundaries. Actual rounded norm and estimate
+bits are saved in `fres-dolphin-edge-2026-11-18.json`. All 128 match the
+bounded candidate, including values straddling 1. Inputs were restored, the
+isolated instance stopped, and the existing Dolphin process left untouched.
+This is still finite emulator evidence, not physical-console validation.

@@ -13,7 +13,7 @@ const bytes=new DataView(new ArrayBuffer(4));
 const fromBits=n=>{bytes.setUint32(0,n,false);return bytes.getFloat32(0,false);};
 const bits=n=>{bytes.setFloat32(0,n,false);return bytes.getUint32(0,false);};
 let count=0;
-for(const file of ['fres-dolphin-grid-2026-11-18.json','fres-dolphin-fine-2026-11-18.json','fres-dolphin-half-2026-11-18.json']) {
+for(const file of ['fres-dolphin-grid-2026-11-18.json','fres-dolphin-fine-2026-11-18.json','fres-dolphin-half-2026-11-18.json','fres-dolphin-edge-2026-11-18.json']) {
   const samples=JSON.parse(await readFile(path.join(root,'research/decomp',file),'utf8'));
   if(samples.length!==128) throw Error(`${file}: incomplete sample set`);
   for(const [input,expected] of samples){if(bits(estimate(fromBits(parseInt(input,16))))!==parseInt(expected,16)) throw Error(`${file}: mismatch at ${input}`);count++;}
