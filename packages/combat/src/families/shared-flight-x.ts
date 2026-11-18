@@ -30,7 +30,7 @@
 //   s32 +0x04 airSlot      (P0: override when airborne, +0x5e0 & 0x40)
 //   s32 +0x08 landSlot     (P4 ground exit landing stream; −1 = none — all 5 shipped
 //                           configs are −1)
-//   f32 +0x0c reposScale   (P0/P1/P2 PSQUATScale on motion +0x38 — the blink-away)
+//   f32 +0x0c reposScale   (P0/P1/P2 PSQUATScale on actor motion +0x38)
 //   s16 +0x10 flightTime   (P2: +0x548 = cfg×10; drains −10 per +0x1b01 frame in P3)
 //   s16 +0x12 extendBudget (P2: +0x54a = cfg×10 — the button-extension pool)
 //   u16 +0x14 extendRate   (P2: +0x54c = cfg; decays −1 per input frame in P3)
@@ -148,7 +148,7 @@ const PITCH_STEP_BAM = 0x400;
 /** Scratch fields the machine keeps on the actor (ROM offsets in comments). The
  *  lockTarget/grounded/extendInput fields are host-synced by the bridge each frame. */
 interface FlightScratch {
-  /** Bridge-synced lock-target position (the +0x5e8/+0x518 lock block pos). */
+  /** Bridge-synced lock-target position used for aiming, not own +0x5e8 history. */
   lockTarget?: Vec3 | null;
   /** Bridge-synced ground flag (zz_00677b0_ returns 1 on land-snap — NOTE the
    *  decompile's sense; gred.ts:177's old comment is inverted). */
@@ -290,13 +290,13 @@ function flightPhase0(actor: RomActor, cfg: SharedFlightXConfig, ctx: StreamCont
   actor.handlerTimer = FLIGHT_X.WINDUP_TIMER; // +0x558 = 60.0 (FLOAT_8043a384)
   steerPitchTowardTarget(actor); // zz_006e1ac_(actor, 0xc0, 1)
 
-  // Reposition: motion(+0x38) = pos(+0x20) − lockTargetPos(+0x5e8); motion ×= cfg
-  // reposScale; pos += motion — the blink-away windup (PSVECSubtract dst = a − b).
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(cfg.reposScale, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // +0x5e8 is the actor's older OWN position, not the lock target. The
+  // subtraction is unconditional in FUN_80149758, including no-target entry.
+  // Using the target repeatedly amplifies separation and can fling combatants
+  // to astronomical heights during Challenge battles.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(cfg.reposScale, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
   // Commit zz_00679d0_ — ground-probe + position commit; the port's integrator/bridge
   // ground clamp covers it (no separate call needed here).
 

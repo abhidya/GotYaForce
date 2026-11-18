@@ -103,7 +103,7 @@ export interface RomActor {
    *  @romfield pos +0x20 vec3 */
   pos: Vec3;
   /** +0x38: motion delta / accumulator (vec3). Used by family handlers (e.g. G Crash
-   *  phase 0 writes `pos -= target; pos *= 0.95`; phase 2 uses +0x38 as a magnitude).
+   *  phase 0 derives motion from the actor's own position history; phase 2 uses +0x38 as a magnitude).
    *  @romfield motion +0x38 vec3 */
   motion: Vec3;
   /** +0x5e8: older OWN position, copied from +0x2c before +0x2c receives current
