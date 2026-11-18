@@ -17,6 +17,7 @@ const sha = createHash('sha256').update(bytes).digest('hex');
 const clips = {
   '78208675afecbddd89dd9b506d2bf43b31a6539e3aaa58ce517b44a7f293271b': {frames: 121, first: 1, name: /mot_g0s0_m0$/},
   'eb07929cb4294682c08a79c61e99309fefee22cbe9d695d242dd28ae7a4ad18f': {frames: 46, first: 0, name: /mot_g4s0_m0$/},
+  'ca3d836c4ee9c5b40afa290edd967e70d9241b8ad071aa08db042b12635e6c3f': {frames: 31, first: 1, name: /mot_g0s2_m0$/},
 };
 const clip = clips[sha];
 if (!clip) throw Error('unsupported animation archive hash');
