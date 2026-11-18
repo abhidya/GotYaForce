@@ -132,7 +132,9 @@ function keyToAction(ev: KeyboardEvent): { action: MenuAction; dir?: -1 | 1 } | 
 }
 
 function onWindowKeydown(ev: KeyboardEvent): void {
-  if (isTextInputTarget(ev.target)) return;
+  // Browser/OS shortcuts and IME composition are not game input. TitleIntro
+  // has its own guard, but the shared bus can receive the same event too.
+  if (ev.ctrlKey || ev.metaKey || ev.altKey || ev.isComposing || isTextInputTarget(ev.target)) return;
   const mapped = keyToAction(ev);
   if (!mapped) return;
   ev.preventDefault();
