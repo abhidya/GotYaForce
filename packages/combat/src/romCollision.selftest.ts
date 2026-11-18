@@ -44,6 +44,24 @@ function setup(collision: StageCollision, id = "pl0004") {
 }
 
 export function runRomCollisionSelfTest(): void {
+  // The production ROM-motion probe used to leave the host's floor edge
+  // guard behind. Exercise the real Battle bridge rather than only a helper.
+  {
+    const t = setup(geometry());
+    const probe = t.driver.actor.physicsRuntime!.probeMotion!;
+    const grounded = v(990, 10, 0), beyond = v(1010, 10, 0);
+    probe(grounded, beyond, 0);
+    assert(beyond.x === 990, "grounded source motion walked off the supported floor");
+    const supported = v(980, 10, 0);
+    probe(grounded, supported, 0);
+    assert(supported.x === 980, "supported source motion was blocked");
+    const airborne = v(1010, 100, 0);
+    probe(v(990, 100, 0), airborne, -1);
+    assert(airborne.x === 1010, "airborne source motion was incorrectly held at edge");
+    const rising = v(1010, 20, 0);
+    probe(grounded, rising, 10);
+    assert(rising.x === 1010, "rising source motion was incorrectly held at edge");
+  }
   // Source 8034cfce op11 reaches the production Battle ammo owner, while
   // 80099e70 children use their original variant rows, not generic shot kinds.
   {

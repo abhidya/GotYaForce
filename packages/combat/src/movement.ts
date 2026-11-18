@@ -425,7 +425,7 @@ function groundYAt(collision: StageCollision | null, x: number, z: number, curre
   return surfaceY == null ? JUMP.GROUND_Y : surfaceY + JUMP.GROUND_Y;
 }
 
-function keepOnStageFloor(
+export function keepOnStageFloor(
   collision: StageCollision | null,
   previous: Vec3,
   current: Vec3,
