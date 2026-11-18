@@ -11,11 +11,6 @@ export const MAGNET_ROBOT_X = {
   CHILD_SPAWNER_ADDR: 0x800dd47c,
 } as const;
 
-function lockTargetPos(actor: RomActor): { x: number; y: number; z: number } | null {
-  const t = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
-  return t ?? null;
-}
-
 export interface MagnetRobotFamilyCtx extends StreamContext {}
 
 // Phase 0 — FUN_800dafb4 @ chunk_0023.c:1746. Setup + reposition + stream start.
@@ -30,13 +25,10 @@ function magnetXPhase0(actor: RomActor, ctx: MagnetRobotFamilyCtx): void {
   actor.activeYaw = actor.lockYaw;
   ctx.onPlayCue?.(actor, 0xc1);
 
-  // Blink-reposition: motion = pos − target; motion ×= 0.95; pos += motion
-  const target = lockTargetPos(actor);
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(MAGNET_ROBOT_X.REPOSITION_SCALE, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // FUN_800dafb4 carries own older +0x5e8 position unconditionally.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(MAGNET_ROBOT_X.REPOSITION_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
 
   actor.streamSlot = slot + 1;
   startStream(actor, 0xf, 4, slot, MAGNET_ROBOT_X.STREAM_RATE);

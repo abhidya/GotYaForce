@@ -123,13 +123,10 @@ function hammerPhase0(actor: RomActor, cfg: HammerXConfig, ctx: HammerFamilyCtx)
   faceLockTarget(actor);
   computeAimPitch(actor);
 
-  // Reposition: motion = pos - target; motion *= 0.95; pos += motion
-  const target = s.lockTarget;
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(HAMMER_X.REPOSITION_SCALE, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  // FUN_800e5a5c carries own older +0x5e8 position unconditionally.
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(HAMMER_X.REPOSITION_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
 
   ctx.onPlayCue?.(actor, HAMMER_X.SOUND_CUE);
   s.hammerHitCount = 1;
