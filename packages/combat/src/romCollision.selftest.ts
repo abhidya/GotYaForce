@@ -125,6 +125,15 @@ export function runRomCollisionSelfTest(): void {
     assert(enemy.hp === hp, "stale child cannot hit after owner form change");
     assert(!battleStateForSelfcheck(t.battle).projectiles.includes(child), "owner form change retires source child");
   }
+  // A proven empty fireChild remains source-owned, without poisoning the host fallback latch.
+  {
+    const t = setup(geometry(), "pl0001");
+    const internal = t.driver as unknown as { specialHadEffect: boolean };
+    assert(internal.specialHadEffect === false, "empty source test starts without an effect");
+    t.driver.ctx.onFireChild!(t.driver.actor, 0); // row 0 → kind10 absent in pl0001 remap
+    assert(Boolean(internal.specialHadEffect) && t.driver.drainProjectiles().length === 0,
+      "known-empty source fireChild is handled without fabricating a projectile");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));

@@ -113,6 +113,13 @@ export function projectileVariant(variantByte: number): ProjectileVariant | null
   return VARIANTS[variantByte] ?? null;
 }
 
+/** True only when a decoded owner remap proves this source kind has no hitbox. */
+export function isKnownEmptyFireChild(shooter: BorgRuntime, variantByte: number): boolean {
+  const variant = projectileVariant(variantByte);
+  const table = attackHitTableForBorgId(shooter.combatFormId ?? shooter.borgId);
+  return !!variant && !!table && (table.kinds[String(variant.kind)]?.length ?? 0) === 0;
+}
+
 /** Port of zz_0099e70_ → FUN_80099e94 spawn — creates a ROM-data-driven projectile
  *  from the shooter's position/yaw + the variant's decoded parameters. This replaces
  *  the fake TUNED spawnSpecialProjectiles.
@@ -135,11 +142,9 @@ export function spawnRomProjectile(
   const dirZ = Math.cos(totalYaw);
   // zz_008ac80_ copies the owner's family table, then arms this row's HIT kind.
   const ownerForm = shooter.combatFormId ?? shooter.borgId;
-  const table = attackHitTableForBorgId(ownerForm);
-  // 8009a12c drops the source child when zz_008ac80_ cannot arm any
-  // hitbox. Only reject a known-empty decoded remap; unknown tables retain
-  // the existing host fallback rather than inventing source evidence.
-  if (table && (table.kinds[String(variant.kind)]?.length ?? 0) === 0) return null;
+  // 8009a12c removes a child when zz_008ac80_ cannot arm a hitbox.
+  // Unknown tables retain the existing host fallback.
+  if (isKnownEmptyFireChild(shooter, variantByte)) return null;
   const hit = attackHitRecordsForKind(ownerForm, variant.kind)[0];
   const damage = hit && familyDamageRecordForBorg(ownerForm, hit.damageRecordIndex);
   return {
