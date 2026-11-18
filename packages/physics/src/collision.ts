@@ -203,10 +203,12 @@ export function bestFloorFromCandidates(
   let best: number | null = null;
   for (const tri of triangles) {
     if (tri.marker !== 0xcccccccc) continue;
+    // Bounding rejection is cheap and preserves the same eligibility test. It
+    // avoids validating every vertex of distant triangles on scan-all fallback.
+    if (x < tri.bounds2d.minX || x > tri.bounds2d.maxX || z < tri.bounds2d.minZ || z > tri.bounds2d.maxZ) continue;
     if (!isFiniteVec(tri.normal)) continue;
     if (tri.normal.y < 0.5) continue;
     if (!tri.vertices.every(isFiniteVec)) continue;
-    if (x < tri.bounds2d.minX || x > tri.bounds2d.maxX || z < tri.bounds2d.minZ || z > tri.bounds2d.maxZ) continue;
     const y = yAtTriangleXZ(tri, x, z);
     if (y == null || y > maxSurfaceY) continue;
     if (best == null || y > best) best = y;
