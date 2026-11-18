@@ -1,3 +1,4 @@
+import {sourceBlendQuaternion} from './source-quaternion-slerp.js';
 import {sourceReciprocalSqrtEstimate} from './source-reciprocal-sqrt-estimate.js';
 import {createSourceActorAnimationTransitionRuntime, divideSourceAnimationFloat32,
   hasIncompleteSourceActorAnimationTransition} from './actor-animation-transition.js';
@@ -136,6 +137,22 @@ export function runActorAnimationTransitionSelfTests(): void {
     x.current.quaternion.x = 0.25;
     rejects(() => x.transition.copyPart(x.actor, 0, 0, 0), 'non-writable');
     check(x.previous.quaternion.x === 0.25 && x.previous.translation.x === 30, 'each quaternion word store retains prefix');
+  }
+  // The presentation helper must match the existing source owner, including its
+  // hemisphere choice and float32 rounding. It is not a live-game parity test.
+  for (const [current, previous, weight] of [
+    [[0,0,0,1], [0,0,.6,.8], .3],
+    [[0,0,0,1], [0,0,-.6,-.8], .7],
+    [[.5,.5,.5,.5], [-.5,.5,.5,.5], .4],
+    [[0,0,0,1], [0,0,0,-1], .75],
+    [[0,0,0,1.0000001192092896], [0,0,0,1], .5],
+  ] as Array<[number[], number[], number]>) {
+    const x = fixture(1, sourceReciprocalSqrtEstimate), keys = ['x','y','z','w'] as const;
+    const a = current.map(Math.fround), b = previous.map(Math.fround), w = Math.fround(weight);
+    keys.forEach((key, i) => { x.current.quaternion[key] = a[i]!; x.previous.quaternion[key] = b[i]!; });
+    const expected = sourceBlendQuaternion(a, b, w, sourceReciprocalSqrtEstimate);
+    x.transition.blendPart(x.actor, 0, w);
+    keys.forEach((key, i) => check(Object.is(x.current.quaternion[key], expected[i]), `pure blend matches source owner ${key}`));
   }
   for (const [weight, expected, visibility] of [[0, 10, 11], [0.5, 20, 11], [1, 30, 21], [-1, -10, 11], [2, 50, 21]]) {
     const x = fixture(); x.transition.blendPart(x.actor, 0, weight!);
