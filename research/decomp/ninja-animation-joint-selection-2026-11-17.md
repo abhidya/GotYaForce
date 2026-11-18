@@ -89,3 +89,16 @@ The currently checked-in character model directories contain only
 `model_00.glb`; the selected additional source objects have not yet been
 traced to equivalent rendered geometry. Do not infer a Boolean visibility map
 or claim complete Ninja appearance from these descriptor rows alone.
+
+### Original archive model inventory
+
+On 2026-11-18, original PZZ member 5 from AFS entries 485 and 495 was
+decompressed locally and read with HSDRaw. Normal Ninja's model archive has
+16 non-null JOBJ roots (indices 0–15); Sasuke's has 19 (indices 0–18). In
+both, root 0 has 20 joints with seven joints carrying display objects. Each
+additional root has one joint carrying a display object. The draw-descriptor
+candidate indices above therefore correspond to populated extra model roots,
+not additional joints inside model 0. Temporary extracted archives were
+removed after inspection. This identifies a concrete source-to-export gap,
+but it does not yet map meshes, prove animation selector ranges, or validate
+rendered appearance against the original game.
