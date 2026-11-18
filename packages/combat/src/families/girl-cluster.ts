@@ -1285,13 +1285,9 @@ function barrierXPhase0(a: GActor, ctx: GirlFamilyCtx): void {
   a.hDecel = BARRIER_X.ZERO;                      // +0x4c = 0
   a.hSpeed = BARRIER_X.ZERO;                      // +0x44 = 0
   resetPoseHousekeeping(a);
-  // motion = pos − target(+0x5e8) — SUBTRACT ONLY (no scale/apply in phase 0; the
+  // motion = pos − own history(+0x5e8) — SUBTRACT ONLY (no scale/apply in phase 0; the
   // vector feeds phase 1's ×0.95 drift). No lock → zero motion (blink rule).
-  if (a.lockTarget) {
-    vecSubtract(a.pos, a.lockTarget, a.motion);
-  } else {
-    a.motion.x = 0; a.motion.y = 0; a.motion.z = 0;
-  }
+  vecSubtract(a.pos, a.targetCache5e8, a.motion);
   a.streamSlot = (a.controlWord & 0x40) !== 0 ? 1 : 0; // +0x6ea = 0 / 1 air
   // zz_004beb8_(-1.0 FLOAT_804394ec, actor, 0xf, 4, (s8)+0x6ea, -1, -1).
   startStream(a, GIRL.PART_MASK, GIRL.X_GROUP, a.streamSlot, BARRIER_X.RATE);
