@@ -81,13 +81,19 @@ export function runAnimationArchiveHydrationSelfTest(): void {
     d.bytes.set([2, 10, 4, 2, 18], 0x80);
     d.bytes[0x65] = d.bytes[0x66] = d.bytes[0x79] = d.bytes[0x7a] = 0x80;
     const imported = p.hydrate(d.bytes, [0]);
-    const joint = p.createJoint({sibling08: null, child10: null, flags14: 0,
+    const make = () => p.createJoint({sibling08: null, child10: null, flags14: 0,
       rotation1c: 0, rotation20: 0, rotation24: 0, scale2c: 1, scale30: 1, scale34: 1,
       translation38: 0, translation3c: 0, translation40: 0},
       {parent0c: null, aobj7c: null, robj80: null, dobj18: null, classUpdate50: null});
-    p.attach(joint, imported.roots[0]!.descriptor); p.request(joint, 2); p.animate(joint);
-    check(p.getJoint(joint).translation38 === 14 && p.getJoint(joint).translation3c === 14,
-      'composed DAT playback routes both decoded tracks to their owned joint');
+    const joint = make(), other = make(), root = imported.roots[0]!.descriptor;
+    p.attach(joint, root); p.attach(other, root);
+    p.request(joint, 2); p.animate(joint); p.request(other, 1); p.animate(other);
+    check(p.getJoint(joint).translation38 === 14 && p.getJoint(joint).translation3c === 14 &&
+      p.getJoint(other).translation38 === 12 && p.getJoint(other).translation3c === 12,
+      'shared DAT descriptor allocates independent clocks and routes callbacks to the correct joint');
+    p.attach(joint, root); p.request(joint, 0); p.animate(joint);
+    check(p.getJoint(joint).translation38 === 10 && p.getJoint(other).translation38 === 12,
+      'reattaching replaces only the selected joint playback');
   }
   {const x = owners(), d = dat(), result = x.runtime.hydrateAnimationArchive(d.bytes, [0, 1, 2]);
     check(Object.isFrozen(result) && Object.isFrozen(result.roots) && Object.isFrozen(result.roots[0]), 'frozen import report');
