@@ -304,3 +304,14 @@ exercise a quarter turn, a four-component rotation, the estimate input, zero
 norm, invalid estimate, and caught reentry. They are not Dolphin traces or
 physical-hardware verification, and this offline owner is not connected to the
 playable renderer or a complete source pose bank.
+
+An isolated Dolphin JIT64 run of the original GG4E battle on 2026-11-18
+captured 18 calls at `8020b578`, the `fres` result at `8020b5a8`, and matrix
+stores at `8020b618`. Three non-identity captures with both observed estimates
+are now regression cases. With their observed estimates explicitly supplied,
+the offline implementation's nonzero matrix values after identity-parent
+concatenation match all 27 captured nonzero values bit-for-bit. This is bounded
+emulator evidence for the captured inputs, not an exhaustive estimate model,
+physical-console proof, source pose-bank integration, or a playable visual
+comparison. The separate emulator was stopped; the pre-existing instance was
+not touched.

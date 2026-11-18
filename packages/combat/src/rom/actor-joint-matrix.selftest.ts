@@ -205,6 +205,29 @@ function runActorJointStandaloneMatrixSelfTests(): void {
   }
 }
 export function runActorJointMatrixSelfTests(): void {
+  // Live GG4E PSMTXQuat calls sampled in isolated Dolphin JIT64. The estimate
+  // was read immediately after fres; an identity parent exposes the matrix's
+  // nonzero elements. Signed zeros may change in the subsequent Concat.
+  {
+    const cases = [
+      {q:[0.04218132421374321,-0.08001406490802765,0.0019067111425101757,0.9958990216255188], estimate:0.9998779296875,
+        matrix:[0.9871882200241089,-0.010547981597483158,-0.15921099483966827,0,-0.002952414797618985,0.996434211730957,-0.08432181179523468,0,0.15953271090984344,0.08371154963970184,0.9836369752883911,0]},
+      {q:[0.05172273516654968,0.04221288114786148,-0.06832173466682434,0.9954269528388977], estimate:1.0000156164169312,
+        matrix:[0.9871004223823547,0.14038532972335815,0.0769721120595932,0,-0.1316518783569336,0.9853137731552124,-0.10874053835868835,0,-0.09110726416110992,0.0972043126821518,0.9910856485366821,0]},
+      {q:[0.017392560839653015,-0.1704060435295105,-0.5465066432952881,0.8197497725486755], estimate:1.0000156164169312,
+        matrix:[0.34458452463150024,0.8900697827339172,-0.2983909249305725,0,-0.9019250273704529,0.4020559787750244,0.157740980386734,0,0.26037031412124634,0.21477116644382477,0.9413185715675354,0]},
+    ];
+    for (const sample of cases) {
+      const feedback = createSourceJointAnimationFeedbackRuntime(createSourceJObjAnimationRuntime());
+      const [x,y,z,w] = sample.q;
+      const pose = feedback.createPose({translation: {...zero}, quaternion: {x:x!,y:y!,z:z!,w:w!}});
+      const matrix = createSourceActorJointMatrixRuntime(feedback, 128, () => sample.estimate);
+      const parent = matrix.createMatrix(identity), output = matrix.createMatrix(identity);
+      matrix.composePose(parent, output, pose);
+      for (let i=0;i<12;i++) if (sample.matrix[i] !== 0)
+        check(bits(matrix.getMatrix(output)[i]!) === bits(sample.matrix[i]!), `Dolphin matrix nonzero mismatch at ${i}`);
+    }
+  }
   // Explicit synthetic fres dependency admits a non-identity source lane.
   // Dyadic input and estimate make these expected values exact; this does not
   // validate Dolphin or physical hardware's estimate for arbitrary norms.
