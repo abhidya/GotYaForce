@@ -709,6 +709,8 @@ export interface Projectile {
   visualKind: ProjectileVisualKind;
   /** Ballistic drop subtracted from vel.y each frame (bullet kinds only). Optional; 0/absent = none. */
   drop?: number;
+  /** Acceleration Ninja child table +0x16: change in scalar travel speed per frame. */
+  accelerationNinjaSpeedDelta?: number;
   /** Damage-record index into gauges.ts DAMAGE_RECORDS for the gauge/stagger model
    *  (DERIVED mapping — see gauges.ts DAMAGE_RECORD_INDEX). Absent = normal shot (record 0). */
   damageRecordIndex?: number;
