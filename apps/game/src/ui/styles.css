@@ -851,6 +851,7 @@
   filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.4));
 }
 .gf-force-left { position: relative; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.gf-force-search { width: 100%; box-sizing: border-box; padding: 7px 10px; border: 2px solid #2f5e96; border-radius: 6px; background: #eef4ff; color: #17243a; font: inherit; }
 .gf-force-floor-crop {
   position: relative;
   flex: 1;

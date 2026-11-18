@@ -110,6 +110,9 @@ export function createForceBuilder(
   let focusSide: FocusSide = "grid";
   let gridCursor = 0;
   let ringCursor = 0;
+  let searchTerm = "";
+  const filteredCatalog = () => opts.catalog.filter((borg) =>
+    `${borg.name} ${borg.id}`.toLowerCase().includes(searchTerm));
 
   const root = el("div", { class: "gf-screen gf-force-screen" });
   const unitAllScene = createUiSceneHost("gf-ui-scene gf-force-unitall-scene");
@@ -133,6 +136,20 @@ export function createForceBuilder(
     [captureCropImg(CAPTURE, CAPTURE_W, EDIT_TAB_CROP)],
   );
   left.appendChild(editTab);
+  const search = el("input", {
+    class: "gf-force-search",
+    attrs: { type: "search", placeholder: "Find a Borg by name", "aria-label": "Find a Borg by name" },
+  }) as HTMLInputElement;
+  // Typing must not also trigger the window-level gamepad/keyboard menu bus.
+  search.addEventListener("keydown", (event) => event.stopPropagation());
+  search.addEventListener("input", () => {
+    searchTerm = search.value.trim().toLowerCase();
+    gridCursor = 0;
+    focusSide = "grid";
+    renderGrid();
+    renderRing();
+  });
+  left.appendChild(search);
   const grid = el("div", { class: "gf-borg-grid", attrs: { role: "listbox", "aria-label": "Borg roster" } });
   const floorBackdrop = el(
     "div",
@@ -234,7 +251,7 @@ export function createForceBuilder(
 
   function renderGrid(): void {
     clear(grid);
-    opts.catalog.forEach((borg, index) => {
+    filteredCatalog().forEach((borg, index) => {
       const inForce = force.includes(borg.id);
       const disabled = !inForce && !canAdd(borg.id);
       const focused = focusSide === "grid" && index === gridCursor;
@@ -399,7 +416,8 @@ export function createForceBuilder(
       return;
     }
     if (focusSide === "grid") {
-      const count = opts.catalog.length;
+      const visible = filteredCatalog();
+      const count = visible.length;
       if (count === 0) return;
       if (action === "down" || action === "right") {
         gridCursor = (gridCursor + 1) % count;
@@ -408,7 +426,7 @@ export function createForceBuilder(
         gridCursor = (gridCursor - 1 + count) % count;
         renderGrid();
       } else if (action === "confirm") {
-        const borg = opts.catalog[gridCursor];
+        const borg = visible[gridCursor];
         if (borg) toggle(borg.id);
       }
       return;
