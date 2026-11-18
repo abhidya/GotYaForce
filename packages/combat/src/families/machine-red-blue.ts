@@ -113,12 +113,10 @@ function machineRedX(actor: MachineActor, ctx: MachineFamilyCtx): void {
     stepPartTargetPitch(actor, 0xc1);
     actor.hSpeed = actor.yVel = actor.hDecel = actor.gravityCoeff = 0;
     machineRedXSetupCallback(actor, ctx);
-    const target = actor.lockTarget;
-    if (target) {
-      vecSubtract(actor.pos, target, actor.motion);
-      vecScale(MACHINE_RED_X.REPOSITION_SCALE, actor.motion, actor.motion);
-      vecAdd(actor.pos, actor.motion, actor.pos);
-    }
+    // FUN_80179d58 uses the actor's own +0x5e8 history, not its target.
+    vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+    vecScale(MACHINE_RED_X.REPOSITION_SCALE, actor.motion, actor.motion);
+    vecAdd(actor.pos, actor.motion, actor.pos);
     groundClamp(actor);
     startStream(actor, 0xf, 4, actor.streamSlot, MACHINE_RED_X.STREAM_RATE);
     actor.streamSlot++;
@@ -196,8 +194,8 @@ function machineBlueAction4(actor: MachineActor, ctx: MachineFamilyCtx): void {
     actor.fbPhaseSlots[0] = 1;
     if (!actor.lockTarget) actor.activeYaw = actor.heading;
     machineBlueXOnSteer(actor);
-    const target = actor.lockTarget;
-    if (target) vecSubtract(actor.pos, target, actor.motion);
+    // FUN_800cfc74 calculates this unconditionally from own history.
+    vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
     actor.streamSlot = MACHINE_BLUE_DEPLOY.STREAM_SLOT;
     startStream(actor, 0xf, 4, actor.streamSlot, MACHINE_BLUE_DEPLOY.STREAM_RATE);
     actor.accumulator80c = 0;
