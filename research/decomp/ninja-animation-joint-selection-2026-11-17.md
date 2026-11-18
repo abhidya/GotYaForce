@@ -102,3 +102,21 @@ not additional joints inside model 0. Temporary extracted archives were
 removed after inspection. This identifies a concrete source-to-export gap,
 but it does not yet map meshes, prove animation selector ranges, or validate
 rendered appearance against the original game.
+
+### Export and attachment experiment
+
+Using temporary extracts of the same original member-5 archives, the existing
+HSDRawViewer exporter successfully produced textured Collada for roots 1 and 7
+of each character, and the existing runtime converter successfully converted
+all four to validated GLBs. These test exports remain local; the experiment
+has not published or integrated them. Exporting each root into a separate
+directory avoids collisions between the exporter's texture filenames.
+
+The two draw consumers pass `actor+a24` and `actor+ae4` respectively to
+`800076d0`; these offsets equal `actor+8d4 + 7*0x30` and
+`actor+8d4 + 11*0x30`. `800076d0` copies its matrix argument into the
+selected object's JOBJ matrix. The existing exporter bakes parent transforms
+into vertex positions (see `tools/HSDLib/HSDRawViewer/IO/ModelExporter.cs`,
+position transform near line 576), so directly parenting its exported scene
+under a joint without removing the export bind transform can misplace geometry.
+This establishes a testable attachment approach, not yet a visual parity proof.
