@@ -120,3 +120,26 @@ into vertex positions (see `tools/HSDLib/HSDRawViewer/IO/ModelExporter.cs`,
 position transform near line 576), so directly parenting its exported scene
 under a joint without removing the export bind transform can misplace geometry.
 This establishes a testable attachment approach, not yet a visual parity proof.
+
+### X and recovery target selectors
+
+An isolated GG4E Dolphin JIT64 battle with Normal Ninja and Sasuke was loaded
+on 2026-11-18. All four active actors pointed to family animation metadata
+bank `802bd780`, had default group 0, and had descriptor defaults
+`+be,+bf = [0,1]`. Resolving the original signed-short tables gave:
+
+| Group / slot | Descriptor | Bytes 9, 10 |
+|---|---|---|
+| 4 / 0 | `802bdd60` | `ff,ff` |
+| 4 / 1 | `802bdd74` | `ff,ff` |
+| 0 / 0 | `802bd8c4` | `ff,ff` |
+| 0 / 14 | `802bd950` | `ff,ff` |
+
+The original setup treats each `ff` as a request for its descriptor default,
+so those four target animations select values `[0,1]`: draw-descriptor bases
+1 and 6 therefore resolve to model indices 1 and 7, subject to the original
+range checks and draw masks. This observes descriptor inputs, not the previous
+pose's selectors; a transition may continue drawing the previous selector
+while its saved-pose weight exceeds 0.5. Do not replace unknown previous
+selectors with these target values. The dedicated emulator was stopped after
+the read; the unrelated existing Dolphin instance was not touched.
