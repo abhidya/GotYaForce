@@ -810,11 +810,8 @@ class BattleImpl implements Battle {
     // spawner. Its muzzle, target and generic rendering remain approximations.
     if (b.borgId === "pl0004" && spawnerAddr === 0x80099e70 && kind >= 0x21 && kind <= 0x24) {
       const variant = projectileVariant(kind);
-      // zz_0099e70_ passes zero extra yaw; the row angle is stored for the
-      // child visual, not applied to its travel vector. Approximate bone-forward
-      // with owner-forward while the animated bone matrix is unavailable.
-      const yaw = variant ? b.rotY - (variant.angleBAM / 0x10000) * Math.PI * 2 : b.rotY;
-      const child = spawnRomProjectile(b, kind, yaw);
+      // The generic source-variant spawner approximates bone-forward with owner yaw.
+      const child = spawnRomProjectile(b, kind, b.rotY);
       if (child && variant) {
         child.romShotKind = variant.kind;
         child.accelerationNinjaSpeedDelta = variant.drop;
