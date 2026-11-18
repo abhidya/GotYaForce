@@ -757,6 +757,10 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
   // window keydown is kept (broader than the bus's mapped vocabulary), stopImmediatePropagation
   // prevents a double-advance, and the host-routed target covers gamepad confirm/start.
   function onKey(ev: KeyboardEvent): void {
+    // Let browser/OS shortcuts and composition work normally. The original
+    // "any key" behavior applies to unmodified game input, not modifier keys.
+    if (ev.ctrlKey || ev.metaKey || ev.altKey || ev.isComposing ||
+        ev.key === "Control" || ev.key === "Meta" || ev.key === "Alt" || ev.key === "Shift") return;
     enter();
     ev.preventDefault();
     ev.stopImmediatePropagation();
