@@ -711,6 +711,8 @@ export interface Projectile {
   drop?: number;
   /** Acceleration Ninja child table +0x16: change in scalar travel speed per frame. */
   accelerationNinjaSpeedDelta?: number;
+  /** Source 80099e70 variant table +0x16 scalar speed delta per frame. */
+  sourceVariantSpeedDelta?: number;
   /** Child entered its ten-frame, non-damaging source expiry tail. */
   accelerationNinjaTail?: boolean;
   /** Damage-record index into gauges.ts DAMAGE_RECORDS for the gauge/stagger model

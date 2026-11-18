@@ -4164,9 +4164,10 @@ export function stepProjectiles(
     // (behavior-notes.md section (bc)).
     if (pr.drop) pr.vel.y -= pr.drop;
     // FUN_8009a2ac: this child's +0x4c changes scalar speed, not y gravity.
-    if (pr.accelerationNinjaSpeedDelta !== undefined) {
+    const sourceSpeedDelta = pr.accelerationNinjaSpeedDelta ?? pr.sourceVariantSpeedDelta;
+    if (sourceSpeedDelta !== undefined) {
       const speed = Math.hypot(pr.vel.x, pr.vel.y, pr.vel.z);
-      const nextSpeed = Math.max(0, speed + pr.accelerationNinjaSpeedDelta);
+      const nextSpeed = Math.max(0, speed + sourceSpeedDelta);
       if (speed > 0) {
         const factor = nextSpeed / speed;
         pr.vel.x *= factor; pr.vel.y *= factor; pr.vel.z *= factor;
