@@ -369,6 +369,11 @@ function streamEventsForSlot(
     return events.map(event => {
       if (event.op === "wait") {
         target = event.mode === 2 && typeof event.val === "number" && event.val >= 0 ? event.val : null;
+        // A positive mode-1 terminal wait still owns its target clock. The
+        // static schedule otherwise completes the KFM windup at frame zero.
+        if ((bankAddress === "0x802c1c40" || bankAddress === "0x802f72a0") &&
+            event.mode === 1 && typeof event.val === "number" && event.val >= 0)
+          return { ...event, frame: event.val };
       }
       if (event.op === "fireChild" && event.frame === undefined && target !== null)
         return { ...event, frame: target };
@@ -1839,6 +1844,16 @@ export class RomDriverBridge implements RomFamilyDriver {
       }
     }
     if (!events) return false;
+    // KFM group3 re-arms the same parts between windup, strikes and recovery.
+    // Cancel prior host schedules and clear the part-0 completion byte, just
+    // as a real zz_004beb8_ start replaces the old stream.
+    if (this.runtime.borgId === "pl0800" && this.actor.actionIndex === 1 && group === 3) {
+      for (const schedule of this.streamSchedules) {
+        schedule.mask &= ~effective;
+        if (schedule.mask === 0) schedule.completed = true;
+      }
+      if ((effective & 1) !== 0) this.actor.wallContact = 0;
+    }
     if (knightWindup && effective !== 0) {
       const clocks = new Map<number, KnightWindupClock>();
       for (let i = 0; i < this.actor.parts.length; i++) {

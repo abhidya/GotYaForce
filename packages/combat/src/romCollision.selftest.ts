@@ -192,6 +192,21 @@ export function runRomCollisionSelfTest(): void {
     t.tick();
     assert((t.driver.actor.inputEdge5d4 & 0x40) === 0, "retap edge lasts one tick");
   }
+  // Real KFM retap reaches its next authored strike, rather than inheriting
+  // the completed windup's stale part-0 completion byte.
+  {
+    const t = setup(geometry(), "pl0800");
+    t.actors.find(b => b.team === 1)!.pos = { x: 0, y: 10, z: 50 };
+    let fired = 0;
+    const original = t.driver.ctx.onFireChild!;
+    t.driver.ctx.onFireChild = (a, variant) => { if (variant === 16) fired++; original(a, variant); };
+    t.inputs.p1.attack = true; t.tick(); t.inputs.p1.attack = false;
+    for (let i = 0; i < 30 && t.driver.actor.fbPhaseSlots[0] !== 3; i++) t.tick();
+    assert(t.driver.actor.fbPhaseSlots[0] === 3, "KFM reaches first strike phase");
+    t.inputs.p1.attack = true; t.tick(); t.inputs.p1.attack = false;
+    for (let i = 0; i < 25 && fired < 2; i++) t.tick();
+    assert(fired >= 2, "KFM retap advances to next strike and creates its child");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));
