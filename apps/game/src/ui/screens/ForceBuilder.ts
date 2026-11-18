@@ -271,6 +271,8 @@ export function createForceBuilder(
   }
 
   function renderGrid(): void {
+    const previousFocus = Array.from(grid.querySelectorAll<HTMLButtonElement>(".gf-borg-cell"))
+      .indexOf(document.activeElement as HTMLButtonElement);
     clear(grid);
     filteredCatalog().forEach((borg, index) => {
       const inForce = force.includes(borg.id);
@@ -320,9 +322,15 @@ export function createForceBuilder(
     if (focusSide === "grid") {
       grid.querySelector(".gf-cursor")?.scrollIntoView({ block: "nearest" });
     }
+    if (previousFocus >= 0) {
+      const index = focusSide === "grid" ? gridCursor : previousFocus;
+      grid.querySelectorAll<HTMLButtonElement>(".gf-borg-cell")[index]?.focus({preventScroll:true});
+    }
   }
 
   function renderRing(): void {
+    const previousFocus = Array.from(ring.querySelectorAll<HTMLButtonElement>(".gf-hexcell"))
+      .indexOf(document.activeElement as HTMLButtonElement);
     // keep the panel, rebuild only slots
     for (const old of Array.from(ring.querySelectorAll(".gf-hexcell"))) old.remove();
     const cx = 50;
@@ -372,6 +380,10 @@ export function createForceBuilder(
         slot.appendChild(img);
       }
       ring.appendChild(slot);
+    }
+    if (previousFocus >= 0) {
+      const index = focusSide === "ring" ? ringCursor : previousFocus;
+      ring.querySelectorAll<HTMLButtonElement>(".gf-hexcell")[index]?.focus({preventScroll:true});
     }
   }
 
