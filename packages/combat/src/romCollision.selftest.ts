@@ -134,6 +134,31 @@ export function runRomCollisionSelfTest(): void {
     assert(Boolean(internal.specialHadEffect) && t.driver.drainProjectiles().length === 0,
       "known-empty source fireChild is handled without fabricating a projectile");
   }
+  // Decoded fireChild records inherit the preceding positive animation wait and
+  // run only on effective part 0 (FUN_8004c67c). Check real shipped stream data.
+  for (const [id, slot, frame, mask, partMask, expected] of [
+    ["pl0800", 1, 1, 15, 15, 1],
+    ["pl0800", 6, 9, 15, 15, 1],
+    ["pl0105", 1, 9, 15, 15, 1],
+    ["pl0800", 1, 1, 2, 15, 0],
+    ["pl0800", 1, 1, 15, 2, 0],
+  ] as const) {
+    const t = setup(geometry(), id);
+    t.driver.actor.actionIndex = 1; t.driver.actor.variantIndex = 0;
+    t.driver.actor.weaponPartMask = partMask;
+    let spawned = 0;
+    t.driver.ctx.onFireChild = () => { spawned++; };
+    const bridge = t.driver as unknown as {
+      streamFrame: number; onStartStream(group: number, slot: number, mask: number): boolean;
+      dispatchEvent(frame: number): void;
+    };
+    bridge.streamFrame = 0;
+    assert(bridge.onStartStream(3, slot, mask), `${id} decoded group3 slot${slot} exists`);
+    for (let i = 0; i < frame; i++) bridge.dispatchEvent(i);
+    assert(spawned === 0, `${id} fireChild does not fire before source wait`);
+    bridge.dispatchEvent(frame);
+    assert(spawned === expected, `${id} fireChild obeys source wait and part mask`);
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));

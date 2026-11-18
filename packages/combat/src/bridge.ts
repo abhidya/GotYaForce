@@ -268,6 +268,7 @@ interface StreamEvent {
   group?: number;
   slot?: number;
   mode?: number;
+  val?: number;
   blend?: boolean;
   part?: number;
   state?: number;
@@ -358,6 +359,21 @@ function streamEventsForSlot(
     const current = end < 0 ? events : events.slice(0, end + 1);
     const at = current.findIndex(e => e.op === "wait" && (e as StreamEvent & {val?: number}).val === 21);
     return at < 0 ? [...current, event] : [...current.slice(0, at), event, ...current.slice(at)];
+  }
+  // The generator records fireChild without a frame, although the preceding
+  // positive mode-2 wait is an animation-frame target. Recover only the
+  // decoded family/group shapes whose source waits were checked; unverified
+  // wait kinds keep the old schedule rather than being silently reinterpreted.
+  if (groupIndex === 3 && ["0x803700c0", "0x802c1c40", "0x802f72a0"].includes(bankAddress)) {
+    let target: number | null = 0;
+    return events.map(event => {
+      if (event.op === "wait") {
+        target = event.mode === 2 && typeof event.val === "number" && event.val >= 0 ? event.val : null;
+      }
+      if (event.op === "fireChild" && event.frame === undefined && target !== null)
+        return { ...event, frame: target };
+      return event;
+    });
   }
   return events;
 }
@@ -3337,7 +3353,9 @@ export class RomDriverBridge implements RomFamilyDriver {
           }
           break;
         case "fireChild":
-          if (ev.variant !== undefined) this.ctx.onFireChild?.(this.actor, ev.variant);
+          // FUN_8004c67c only spawns on effective part 0.
+          if ((mask & this.actor.weaponPartMask & 1) !== 0 && ev.variant !== undefined)
+            this.ctx.onFireChild?.(this.actor, ev.variant);
           break;
         case "indirect":
           if (ev.part !== undefined && (mask & (1 << ev.part)) !== 0 && ev.indirectSelector !== undefined && ev.indirectArg !== undefined)
