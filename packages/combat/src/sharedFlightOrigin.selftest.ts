@@ -3,6 +3,7 @@
  * distance between fighters. Synthetic fixtures test the source-owned inputs. */
 import {createRomActor} from './rom/actor.js';
 import {createSharedFlightX, FLIGHT_X_FAMILY4_CONFIG} from './families/shared-flight-x.js';
+import {createSonicXSpecial,createShogunXSpecial} from './families/samurai.js';
 function assert(v:unknown,m:string):asserts v {if(!v) throw Error(`[sharedFlightOrigin] ${m}`);}
 export function runSharedFlightOriginSelfTest():void {
  const run=createSharedFlightX(FLIGHT_X_FAMILY4_CONFIG,{});
@@ -15,5 +16,13 @@ export function runSharedFlightOriginSelfTest():void {
  const a=createRomActor();a.pos={x:0,y:100,z:0};a.lockTarget={x:0,y:-10000,z:0};
  for(let i=0;i<100;i++){a.fbPhaseSlots[0]=0;a.targetCache5e8={...a.pos};run(a);}
  assert(a.pos.y===100,'repeated zero-motion entries cannot amplify distance to target');
+ for(const [name,make] of [['sonic',createSonicXSpecial],['shogun',createShogunXSpecial]] as const) {
+  for(const target of [{x:-4000,y:-9000,z:6000},null]) {
+   const b=createRomActor();b.pos={x:100,y:200,z:300};b.targetCache5e8={x:90,y:180,z:270};b.lockTarget=target;
+   make({})(b);
+   assert(Math.abs(b.pos.x-109.5)<1e-5 && Math.abs(b.pos.y-219)<1e-5 && Math.abs(b.pos.z-328.5)<1e-5,
+    `${name} carries own history independently of target`);
+  }
+ }
  console.log('[sharedFlightOrigin] PASS: own-position history and no-target entry');
 }

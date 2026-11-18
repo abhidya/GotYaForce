@@ -1169,18 +1169,10 @@ function sonicXPhase0(a: SActor): void {
   a.hDecel = SONIC.ZERO;                     // +0x4c = 0
   a.hSpeed = SONIC.ZERO;                     // +0x44 = 0
   // +0x80/+0x7e/+0x7c = 0 — aim-rate accumulators (not surfaced; no-ops).
-  if (a.lockTarget) {
-    // Reposition: motion = (pos − target@+0x5e8) × 0.95; pos += motion.
-    vecSubtract(a.pos, a.lockTarget, a.motion);
-    vecScale(SONIC.X_REPOS, a.motion, a.motion); // FLOAT_8043a9a8
-    vecAdd(a.pos, a.motion, a.pos);
-  } else {
-    // The ROM blinks UNCONDITIONALLY from the +0x5e8 target cache (which holds the
-    // last aimed point even lockless — cache re-seed unmodeled). Zero the motion so
-    // phases 1-2 don't drift along the PREVIOUS move's vector (stands in for the
-    // cache re-seed; labeled approximation).
-    a.motion.x = 0; a.motion.y = 0; a.motion.z = 0;
-  }
+  // FUN_80164b9c subtracts older OWN position +0x5e8 unconditionally.
+  vecSubtract(a.pos, a.targetCache5e8, a.motion);
+  vecScale(SONIC.X_REPOS, a.motion, a.motion);
+  vecAdd(a.pos, a.motion, a.pos);
   // zz_00677b0_(actor) — bridge clamp.
   const slot = a.streamSlot;                 // cVar1 = +0x6ea
   a.streamSlot = slot + 1;                   // +0x6ea++
@@ -1530,18 +1522,10 @@ function shogunXPhase0(a: SActor, ctx: SamuraiFamilyCtx): void {
   a.hDecel = SHOGUN.ZERO;                    // +0x4c = 0
   a.hSpeed = SHOGUN.ZERO;                    // +0x44 = 0
   // +0x80/+0x7e/+0x7c = 0 — aim-rate accumulators (not surfaced; no-ops).
-  if (a.lockTarget) {
-    // Reposition: motion = (pos − target@+0x5e8) × 0.95; pos += motion.
-    vecSubtract(a.pos, a.lockTarget, a.motion);
-    vecScale(SHOGUN.DASH_DRAG, a.motion, a.motion); // FLOAT_8043adb0 (0.95)
-    vecAdd(a.pos, a.motion, a.pos);
-  } else {
-    // The ROM blinks UNCONDITIONALLY from the +0x5e8 target cache (chunk_0044.c:
-    // 1709-1712 — cache re-seed unmodeled). Zero the motion so phases 1-2 don't
-    // drift along the PREVIOUS move's vector (stands in for the cache re-seed;
-    // labeled approximation).
-    a.motion.x = 0; a.motion.y = 0; a.motion.z = 0;
-  }
+  // FUN_80175ee8 likewise carries own +0x5e8 history, even with no target.
+  vecSubtract(a.pos, a.targetCache5e8, a.motion);
+  vecScale(SHOGUN.DASH_DRAG, a.motion, a.motion);
+  vecAdd(a.pos, a.motion, a.pos);
   // zz_00677b0_(actor) — bridge clamp.
   const slot = a.streamSlot;                 // cVar1 = +0x6ea
   a.streamSlot = slot + 1;                   // +0x6ea++
