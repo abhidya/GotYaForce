@@ -393,7 +393,7 @@ function advanceAction2ToPhase2(actor: NinjaActor): void {
 // ============================================================================
 // Action 3 — hover dash strike (table @0x8034c7a8, 3 phases).
 //   ph0 FUN_80162c6c (:912): setup — +0x540++; +0x558=4, +0x54a=5; zero speeds
-//        (+0x48=10 unless position-frozen); position lerp toward +0x5e8; ground;
+//        (+0x48=10 unless position-frozen); position offset from own +0x5e8 history; ground;
 //        startStream(0xf, g2, s1).
 //   ph1 FUN_80162d40 (:946): hover — tickStream; if contactP0 >= 1 decay turn +
 //        drain +0x558, on expire re-seed 4 + cue 10 + decrement +0x54a + FX
@@ -427,7 +427,7 @@ function action3(actor: NinjaActor, ctx: StreamContext): void {
       if ((actor.controlWord & 0x40) === 0) {                 // not position-frozen
         actor.yVel = AN.A2_APPROACH_CAP;                      // +0x48 = 10.0 (FLOAT_8043a900)
       }
-      // gnt4_PSVECSubtract(pos, target, motion): source moves AWAY from +0x5e8.
+      // gnt4_PSVECSubtract(pos, target, motion): source offsets from the actor’s own older position at +0x5e8.
       actor.motion.x = Math.fround(actor.pos.x - actor.targetCache5e8.x);
       actor.motion.y = Math.fround(actor.pos.y - actor.targetCache5e8.y);
       actor.motion.z = Math.fround(actor.pos.z - actor.targetCache5e8.z);
@@ -760,14 +760,14 @@ export function runAccelerationNinjaSelfTests(assert: AssertFn): void {
   // ------------------------------------------------------------------------
   console.log("\n[acceleration-ninja.selfcheck] ACTION 3 — hover dash strike (3-phase):");
 
-  // Source offset is position minus cached target, retained and damped each frame.
+  // Source offset is current position minus older own position, retained and damped each frame.
   {
     const a = createRomActor() as NinjaActor;
     configureAccelerationNinjaFamily(a, {});
     a.actionIndex = 3; a.pos.x = 20; a.targetCache5e8.x = 10;
     a.rootAction!(a);
     assert(Math.abs(a.motion.x - 9.5) < 1e-5 && Math.abs(a.pos.x - 29.5) < 1e-5,
-      "a3 entry initializes and applies the source away-from-target offset");
+      "a3 entry initializes and applies the source position-history offset");
     a.rootAction!(a);
     assert(Math.abs(a.motion.x - 9.025) < 1e-4 && Math.abs(a.pos.x - 38.525) < 1e-4,
       "a3 hover damps and reapplies the saved offset");
