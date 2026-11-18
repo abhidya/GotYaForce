@@ -44,3 +44,16 @@ unconditional assertion that the displayed GLB skeleton is an equivalent
 source pose bank. Descriptor bytes `+42,+43` are `7,11`; their original
 visibility stores occur after slerp. No physical-console validation or live
 pose/geometry parity is implied by these static observations.
+
+## Bounded runtime visibility observation
+
+On 2026-11-18, an isolated Dolphin JIT64 session reloaded a Ninja/Sasuke
+roster from the user-supplied GG4E image. A synthetic X-button press cycle ran
+for 160 pad frames while the source `8004a8cc` entry was monitored. At 76
+sampled calls for the first Normal Ninja actor, the four bytes `+1d74..1d77`
+were `[0,1,0,1]`, and `+1d94..1d95` were `[0,1]`. They did not change at
+those sampled entries. The experiment did not establish that the intended X
+move was admitted, and it did not capture Sasuke's blend calls. It therefore
+cannot establish general visibility behavior, an exhaustive transition trace,
+or rendered geometry parity. The separately launched instance was stopped;
+an unrelated pre-existing Dolphin process was left running.
