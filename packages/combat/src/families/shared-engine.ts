@@ -152,6 +152,16 @@ function createMeleePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
 // Lunge / dash-attack engine (zz_0178394_) — zero velocity + reposition + stream.
 // ============================================================================
 
+/** Host terrain adapter at the lunge machine's source 677b0 call sites. */
+function probeLungeMotion(actor: RomActor, previous: {x:number;y:number;z:number}): void {
+  const floor = actor.physicsRuntime;
+  if (!floor) return;
+  const result = floor.probeMotion ? floor.probeMotion(previous, actor.pos, actor.yVel) : floor.clampToGround(actor.pos, actor.yVel);
+  if ('y' in result && typeof result.y === 'number') actor.pos.y = result.y;
+  actor.yVel = result.velY;
+  (actor as RomActor & {grounded?: boolean}).grounded = result.grounded;
+}
+
 function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: StreamContext) => void> {
   const scratch = (actor: RomActor) => actor as RomActor & {
     lockTarget?: { x: number; y: number; z: number } | null;
@@ -178,9 +188,11 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       actor.lockYaw = actor.heading;
       actor.streamSlot = cfg.seedSlot;
       // +0x5e8 is this actor's previous position, not the locked target.
+      const previous = {...actor.pos};
       vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
       vecScale(cfg.repositionScale, actor.motion, actor.motion);
       vecAdd(actor.pos, actor.motion, actor.pos);
+      probeLungeMotion(actor, previous);
       startStream(actor, 0xf, 3, actor.streamSlot, ENG.STREAM_RATE);
       actor.streamSlot++;
       // zz_006e514_/zz_006e1ac_ populate +0x54e. The bridge's +0x18da pitch
@@ -192,10 +204,10 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
     //   Calls zz_01782dc_ at the transition to set the forward-dash velocity.
     (actor, ctx) => {
       if (scratch(actor).streamTickGate !== false) tickStream(actor, 0xf, ctx);
-      if (cfg.repositionScale !== 0) {
-        vecScale(cfg.repositionScale, actor.motion, actor.motion);
-        vecAdd(actor.pos, actor.motion, actor.pos);
-      }
+      const previous = {...actor.pos};
+      vecScale(cfg.repositionScale, actor.motion, actor.motion);
+      vecAdd(actor.pos, actor.motion, actor.pos);
+      probeLungeMotion(actor, previous);
       actor.handlerTimer -= actor.dt;
       if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
         actor.fbPhaseSlots[0]++;
@@ -210,7 +222,9 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       const velocity = cfg.launchVelocity ?? 0;
       actor.hSpeed = velocity * Math.cos(rad);
       actor.yVel = -velocity * Math.sin(rad);
+      const previous = {...actor.pos};
       integratePhysics(1, actor, actor.lockYaw);
+      probeLungeMotion(actor, previous);
       actor.handlerTimer -= actor.dt;
       const target = scratch(actor).lockTarget;
       const inRange = target ? Math.hypot(target.x - actor.pos.x, target.z - actor.pos.z) <= cfg.proximityRange : false;
@@ -228,7 +242,9 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
     (actor, ctx) => {
       tickStream(actor, 0xf, ctx);
       damp(actor, cfg.recoveryDamping ?? 1);
+      const previous = {...actor.pos};
       integratePhysics(1, actor, actor.lockYaw);
+      probeLungeMotion(actor, previous);
       actor.handlerTimer -= actor.dt;
       if (actor.handlerTimer <= 0) actor.fbPhaseSlots[0]++;
     },
@@ -237,7 +253,9 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       tickStream(actor, 0xf, ctx);
       if (actor.contactP0 < 0) actor.steerYaw = actor.steerYaw >> 1;
       damp(actor, cfg.recoveryDamping ?? 1);
+      const previous = {...actor.pos};
       integratePhysics(1, actor, actor.lockYaw);
+      probeLungeMotion(actor, previous);
       if (scratch(actor).grounded === true && actor.contactP0 < 0) {
         actor.controlWord &= ~0x3;
         dispatchUpperBodyCue(actor, 7);
