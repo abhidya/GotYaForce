@@ -1,1 +1,22 @@
-{"main":"src/index.ts","name":"@gf/camera-math","private":true,"scripts":{"build":"tsc -b","typecheck":"tsc -b --noEmit"},"type":"module","types":"src/index.ts","version":"0.0.0"}
+{
+  "main": "src/index.ts",
+  "name": "@gf/camera-math",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "type": "module",
+  "types": "src/index.ts",
+  "version": "0.0.0",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "browser": "./src/index.ts",
+      "development": "./src/index.ts",
+      "node": "./dist/index.js",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  }
+}
