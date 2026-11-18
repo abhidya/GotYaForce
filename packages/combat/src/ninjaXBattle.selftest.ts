@@ -129,11 +129,21 @@ function testAdmissionAndRelease(): void {
       t.driver.actor.variantIndex === (air ? 4 : 0) && t.driver.actor.fbCue === (air ? 45 : 44),
       `${id}: actual ground/air command and cue survive admission`);
     assert(getNinjaXState(t.driver.actor)?.stream?.slot === (air ? 1 : 0), 'ground/air source g4 stream');
+    const checkSourceBlend = () => {
+      const stream = getNinjaXState(t.driver.actor)?.stream, sample = t.owner.sourceAnimSample;
+      assert(stream && sample, 'Ninja stream publishes a source animation sample');
+      assert(sample.frame === stream.frame, 'sample frame follows the source stream');
+      if (stream.blendMode === 1) {
+        assert(sample.blend?.mode === 1 && sample.blend.elapsed === stream.blendElapsed &&
+          sample.blend.duration === stream.blendTotal, 'sample preserves source mode-1 blend clock');
+      } else assert(sample.blend === null, 'completed source blend clears the published clock');
+    };
+    checkSourceBlend();
     if (!air) same(t.owner.pos, before, 'stationary X does not teleport away by target distance');
     assert(Number(t.events.length) === 0 && Number(t.allocations.length) === 0 && cell.cur === 5 && shots(t).length === 0,
       'admission has no premature source allocation or generic child');
     for (let tick = 1; tick < 21; tick++) {
-      t.tick();
+      t.tick(); checkSourceBlend();
       assert(Number(t.events.length) === 0 && Number(t.allocations.length) === 0 && shots(t).length === 0 && cell.cur === 5,
         `source frame14 plus source blend6 gate remains closed at relative tick${tick}`);
     }
