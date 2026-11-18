@@ -207,6 +207,25 @@ export function runRomCollisionSelfTest(): void {
     for (let i = 0; i < 25 && fired < 2; i++) t.tick();
     assert(fired >= 2, "KFM retap advances to next strike and creates its child");
   }
+  // Tao Master's independently addressed close-B shares the source combo shape.
+  {
+    const t = setup(geometry(), "pl0801");
+    t.actors.find(b => b.team === 1)!.pos = { x: 0, y: 10, z: 50 };
+    let fired = 0;
+    const original = t.driver.ctx.onFireChild!;
+    t.driver.ctx.onFireChild = (a, variant) => { if (variant === 16) fired++; original(a, variant); };
+    t.inputs.p1.attack = true; t.tick();
+    assert(t.borg.command?.recordAddress === "0x802f7b88" && t.borg.cooldowns["romSpecialActive"] === 1,
+      "Tao grounded close-B enters source action1/v0");
+    t.tick();
+    assert((t.driver.actor.inputEdge5d4 & 0x40) === 0, "held Tao B is not a retap");
+    t.inputs.p1.attack = false;
+    for (let i = 0; i < 30 && t.driver.actor.fbPhaseSlots[0] !== 3; i++) t.tick();
+    assert(t.driver.actor.fbPhaseSlots[0] === 3, "Tao reaches first source strike phase");
+    t.inputs.p1.attack = true; t.tick(); t.inputs.p1.attack = false;
+    for (let i = 0; i < 25 && fired < 2; i++) t.tick();
+    assert(fired >= 2, "Tao retap reaches next authored strike and emits child");
+  }
   // Real Battle input and shipped action routing, not an injected phase/handler.
   for (const wall of [10, 50]) {
     const t = setup(geometry(wall));
