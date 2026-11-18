@@ -75,6 +75,12 @@ export function runSelfTest(): void {
   assert(romShot.romShotKind === 10 && romShot.damageRecordIndex === 9 &&
     romShot.damageRecord === familyDamageRecordForBorg("pl0000", 9),
     "generic fireChild resolves kind-10 to the owning borg's family damage record");
+  const noKind = { ...self, borgId: "pl0001", combatFormId: "pl0001" };
+  assert(spawnRomProjectile(noKind, 0, 0) === null,
+    "known-empty owner remap does not fabricate a damaging fireChild");
+  const unknown = { ...self, borgId: "plffff", combatFormId: "plffff" };
+  assert(spawnRomProjectile(unknown, 0, 0) !== null,
+    "unknown owner remap retains the existing host fallback");
   assert(Math.abs(romShot.vel.x - Math.sin(self.rotY) * 50) < 1e-6 &&
     Math.abs(romShot.vel.z - Math.cos(self.rotY) * 50) < 1e-6,
     "generic fireChild visual spin does not rotate owner-forward travel");

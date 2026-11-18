@@ -10,7 +10,7 @@
 // specific variant determined by its action-script stream data.
 
 import { activeSourceTargetUid } from "./targetLock.js";
-import { attackHitRecordsForKind } from "./attackHitData.js";
+import { attackHitRecordsForKind, attackHitTableForBorgId } from "./attackHitData.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import type { BorgRuntime, Projectile } from "./types.js";
 import { MUZZLE_OFFSET, SHOT } from "./constants.js";
@@ -134,8 +134,14 @@ export function spawnRomProjectile(
   const dirX = Math.sin(totalYaw);
   const dirZ = Math.cos(totalYaw);
   // zz_008ac80_ copies the owner's family table, then arms this row's HIT kind.
-  const hit = attackHitRecordsForKind(shooter.combatFormId ?? shooter.borgId, variant.kind)[0];
-  const damage = hit && familyDamageRecordForBorg(shooter.combatFormId ?? shooter.borgId, hit.damageRecordIndex);
+  const ownerForm = shooter.combatFormId ?? shooter.borgId;
+  const table = attackHitTableForBorgId(ownerForm);
+  // 8009a12c drops the source child when zz_008ac80_ cannot arm any
+  // hitbox. Only reject a known-empty decoded remap; unknown tables retain
+  // the existing host fallback rather than inventing source evidence.
+  if (table && (table.kinds[String(variant.kind)]?.length ?? 0) === 0) return null;
+  const hit = attackHitRecordsForKind(ownerForm, variant.kind)[0];
+  const damage = hit && familyDamageRecordForBorg(ownerForm, hit.damageRecordIndex);
   return {
     uid: nextRomProjectileUid(),
     ownerUid: shooter.uid,
