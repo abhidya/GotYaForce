@@ -512,12 +512,13 @@ class BattleImpl implements Battle {
   }
 
   private deployNext(force: ForceRuntime, spawn: { pos: Vec3; rotY: number }, rom?: RomActor): void {
-    // W17: an exhausted force with a fighting ally deploys the husk instead of going dark;
+    // W17: an exhausted human-controlled force with a fighting ally deploys the husk;
     // the husk's own deaths land back here, so it respawns until the ally falls
     // (owner-observed live behavior; identity/stats live-verified — see HUSK_BORG_ID).
     const entry =
       force.queue.shift() ??
-      (this.allyForceStillFighting(force) ? { borgId: HUSK_BORG_ID, profile: buildHuskProfile() } : undefined);
+      (force.ownerPlayer !== null && this.allyForceStillFighting(force)
+        ? { borgId: HUSK_BORG_ID, profile: buildHuskProfile() } : undefined);
     if (!entry) {
       force.activeUid = null;
       delete this.state.activeUidByPlayer[force.controlKey];
