@@ -71,6 +71,24 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
     const scene = new BattleScene(new THREE.Group(), assets); scenes.push(scene); return scene;
   };
   try {
+    // The live presentation retains (but does not yet render from) the Ninja
+    // source-owned mode-1 clock and does not alias the caller's mutable sample.
+    {
+      const scene = create({
+        async loadModel() { return model(); },
+        async loadClip() { return clip('generic'); },
+        async loadClipByStreamRef() { return clip('ninja'); },
+      });
+      const blend = { mode: 1 as const, elapsed: 2, duration: 7 };
+      const sample: BattleActorView = { ...view(99, 0, 'pl0000'),
+        sourceAnimSample: { serial: 99, frame: 0, blend } };
+      await enter(scene, sample);
+      assert(actor(scene).sourceAnimSample?.blend?.elapsed === 2, 'source blend clock reaches the live actor');
+      blend.elapsed = 5;
+      assert(actor(scene).sourceAnimSample?.blend?.elapsed === 2, 'live actor copies the blend sample');
+      scene.clear();
+    }
+
     // Neutral-combo and family airborne B refs after the metadata hop. Synthetic clips
     // test pose ownership, not original asset fidelity or crossfade equivalence.
     for (const [id, slots] of [
