@@ -1302,7 +1302,7 @@ export class BattleScene {
     // Copy the newest sample even when this clip is cached or still loading. A held
     // source frame must never inherit mixer/render time, and a repeated same-clip
     // animation start must bypass the ordinary unchanged-slot short circuit.
-    actor.sourceAnimSample = sample ? { ...sample, ...(sample.blend ? { blend: { ...sample.blend, jointIndices: [...sample.blend.jointIndices] } } : {}) } : null;
+    actor.sourceAnimSample = sample ? { ...sample, ...(sample.targetDrawModels ? { targetDrawModels: [...sample.targetDrawModels] as const } : {}), ...(sample.blend ? { blend: { ...sample.blend, jointIndices: [...sample.blend.jointIndices] } } : {}) } : null;
     if (actor.current === slot && actor.lastMeleeClipKey === clipKey && sameEpoch) {
       this.applySourceAnimSample(actor);
       return;

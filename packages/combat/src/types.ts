@@ -377,6 +377,8 @@ export interface BorgRuntime {
    *  exact resolved meleeAnimStream, never a slot-label fallback. Cleared on source exit,
    *  interruption, or morph; other actions retain ordinary presentation playback. */
   sourceAnimSample?: { serial: number; frame: number;
+    /** Ninja X/recovery target models only, not the previous or active draw state. */
+    targetDrawModels?: readonly [number, number];
     /** Only Ninja's admitted mode-1 clock is published here. This is source
      * timing, not a claim that the renderer owns or blends source poses. */
     blend?: { mode: 1; elapsed: number; duration: number;

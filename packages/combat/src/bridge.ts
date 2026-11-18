@@ -1,4 +1,4 @@
-import {NINJA_X_TRANSITION_JOINTS} from './ninjaXStream.js';
+import {NINJA_X_TRANSITION_JOINTS, NINJA_X_TARGET_DRAW_MODELS} from './ninjaXStream.js';
 import {divideSourceAnimationFloat32} from './rom/source-float32-divide.js';
 import {isSourceSwitchingX,getSwitchingXState,prepareSwitchingX,clearSwitchingX,startSwitchingXStream,tickSwitchingXStreamPart} from './switchingX.js';
 import {isSourceActorTickPrefixClaimedActor} from './rom/actor-tick-prefix.js';
@@ -2512,7 +2512,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     const sourceStream=switching?.stream ?? teleport?.stream ?? ninja?.stream ?? airShot?.stream ?? getGRedShotState(a)?.stream ?? blackCharge?.stream ?? charge?.stream ?? crash?.stream ?? airMelee?.stream ?? getNeoGredMeleeState(a)?.stream;
     if(sourceStream && runtime.sourceAnimSample)
       runtime.sourceAnimSample={serial:runtime.sourceAnimSample.serial,frame:sourceStream.frame,
-        ...(ninja?.stream===sourceStream ? {blend:ninja.stream.blendMode===1 ?
+        ...(ninja?.stream===sourceStream ? {targetDrawModels:NINJA_X_TARGET_DRAW_MODELS,blend:ninja.stream.blendMode===1 ?
           {mode:1 as const,elapsed:ninja.stream.blendElapsed,duration:ninja.stream.blendTotal,
             jointIndices:NINJA_X_TRANSITION_JOINTS,previousWeight:Math.fround(1-divideSourceAnimationFloat32(ninja.stream.blendElapsed,ninja.stream.blendTotal))} : null} : {})};
     const nurse = this.specialActive ? getNurseXState(a) : undefined;
@@ -3144,7 +3144,7 @@ export class RomDriverBridge implements RomFamilyDriver {
       const ninjaStream=getNinjaXState(this.actor)?.stream;
       if(sourceStream)
         this.runtime.sourceAnimSample={serial:++sourceAnimationSerial,frame:sourceStream.frame,
-          ...(ninjaStream && ninjaStream===sourceStream ? {blend:ninjaStream.blendMode===1 ?
+          ...(ninjaStream && ninjaStream===sourceStream ? {targetDrawModels:NINJA_X_TARGET_DRAW_MODELS,blend:ninjaStream.blendMode===1 ?
             {mode:1 as const,elapsed:ninjaStream.blendElapsed,duration:ninjaStream.blendTotal,
               jointIndices:NINJA_X_TRANSITION_JOINTS,previousWeight:Math.fround(1-divideSourceAnimationFloat32(ninjaStream.blendElapsed,ninjaStream.blendTotal))} : null} : {})};
     }

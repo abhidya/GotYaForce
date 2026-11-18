@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { attachSourceDrawPart } from "./sourceDrawPart.js";
 import { BattleScene, type BorgAssets } from "./battleScene.js";
 import type { BattleActorView } from "./battleView.js";
 
@@ -71,6 +72,29 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
     const scene = new BattleScene(new THREE.Group(), assets); scenes.push(scene); return scene;
   };
   try {
+    // The source exporter bakes the part root's bind matrix into mesh coordinates.
+    // Synthetic points prove the inverse is applied once and follows the target.
+    {
+      const target = new THREE.Group(); target.position.set(10, 20, 0);
+      const part = new THREE.Group(); const bind = new THREE.Group(); bind.name = 'JOBJ_0'; bind.position.set(5, 2, 0);
+      const vertex = new THREE.Object3D(); vertex.position.set(7, 3, 0); part.add(bind, vertex);
+      const attached = attachSourceDrawPart(target, part); target.updateMatrixWorld(true);
+      const world = new THREE.Vector3(); vertex.getWorldPosition(world);
+      near(world.x, 12, 'attachment removes exported bind translation');
+      near(world.y, 21, 'attachment keeps local geometry offset');
+      target.position.x = 30; target.updateMatrixWorld(true); vertex.getWorldPosition(world);
+      near(world.x, 32, 'attachment follows animated target');
+      target.rotation.z = Math.PI / 2; target.updateMatrixWorld(true); vertex.getWorldPosition(world);
+      near(world.x, 29, 'attachment follows target rotation x');
+      near(world.y, 22, 'attachment follows target rotation y');
+      target.remove(attached);
+      const invalid = new THREE.Group();
+      let refused = false; try { attachSourceDrawPart(target, invalid); } catch { refused = true; }
+      assert(refused && invalid.parent === null, 'invalid part is rejected without reparenting');
+      const singular = new THREE.Group(), root = new THREE.Group(); root.name = 'JOBJ_0'; root.scale.x = 0; singular.add(root);
+      refused = false; try { attachSourceDrawPart(target, singular); } catch { refused = true; }
+      assert(refused && singular.parent === null, 'singular bind is rejected without reparenting');
+    }
     // The live presentation retains (but does not yet render from) the Ninja
     // source-owned mode-1 clock and does not alias the caller's mutable sample.
     {
@@ -81,9 +105,10 @@ export async function runSourceAnimationPlayheadSelfcheck(): Promise<void> {
       });
       const blend = { mode: 1 as const, elapsed: 2, duration: 7, previousWeight: Math.fround(5 / 7), jointIndices: [2, 3, 0] };
       const sample: BattleActorView = { ...view(99, 0, 'pl0000'),
-        sourceAnimSample: { serial: 99, frame: 0, blend } };
+        sourceAnimSample: { serial: 99, frame: 0, blend, targetDrawModels: [1, 7] } };
       await enter(scene, sample);
       assert(actor(scene).sourceAnimSample?.blend?.elapsed === 2, 'source blend clock reaches the live actor');
+      assert(actor(scene).sourceAnimSample?.targetDrawModels?.join(',') === '1,7', 'target models reach presentation');
       blend.elapsed = 5;
       blend.jointIndices[0] = 99;
       assert(actor(scene).sourceAnimSample?.blend?.jointIndices[0] === 2, 'live actor copies the selected joints');

@@ -134,6 +134,7 @@ function testAdmissionAndRelease(): void {
       const stream = getNinjaXState(t.driver.actor)?.stream, sample = t.owner.sourceAnimSample;
       assert(stream && sample, 'Ninja stream publishes a source animation sample');
       assert(sample.frame === stream.frame, 'sample frame follows the source stream');
+      assert(sample.targetDrawModels?.[0] === 1 && sample.targetDrawModels?.[1] === 7, 'Ninja target draw models survive start and recovery');
       if (stream.blendMode === 1) {
         assert(sample.blend?.mode === 1 && sample.blend.elapsed === stream.blendElapsed &&
           sample.blend.duration === stream.blendTotal && sample.blend.previousWeight ===
