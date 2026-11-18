@@ -4216,6 +4216,40 @@ function runAccelerationNinjaMotionBridgeTest(): void {
   const previousZ = b.pos.z;
   assert(driver.tick(b, 1, [b]), "Acceleration Ninja ongoing dash owns the host frame");
   assert(approxEq(b.pos.z - previousZ, speed), "Acceleration Ninja owned frame publishes movement instead of standing still");
+
+  // Original 8034cfce op11 invokes 8016234c table slot2 at the frame-9
+  // boundary. Exercise the actual bridge schedule, not a direct handler call.
+  for (const accepted of [true, false]) {
+    const owner = makeMinimalGRedBorg(); owner.borgId = "pl0004"; owner.grounded = true;
+    owner.command = {word: 0, type: 1, button: "B Shot", recordAddress: "0x8034ca18",
+      subtype: 0, actionIndex: 0, variantIndex: 0, exact: true};
+    const allocations: number[][] = [], effects: number[] = [];
+    const live = RomDriverBridge.attach(owner, {
+      onAllocateResource: (_actor, slot, count, mode) => {allocations.push([slot, count, mode ?? 0]); return accepted;},
+      onFamilyProjectile: (_actor, address, effect) => {if (address === 0x80099e70) effects.push(effect);},
+    });
+    assert(live !== null, "Acceleration Ninja callback test attaches");
+    if (!live) continue;
+    assert(live.tryStartBAttack(owner, [owner]), "verified neutral B command enters the source family action");
+    for (let i = 0; i < 20; i++) live.tick(owner, 1, [owner]);
+    assert(allocations.length === 1 && allocations[0]!.join() === "0,1,1",
+      "source stream dispatches one real slot-0 allocation");
+    assert(effects.join() === (accepted ? "33,34" : ""), "source effect triggers obey the allocation result");
+  }
+  {
+    const owner = makeMinimalGRedBorg(); owner.borgId = "pl0004"; owner.grounded = true;
+    owner.command = {word: 0, type: 1, button: "B Shot", recordAddress: "0x8034ca18",
+      subtype: 0, actionIndex: 0, variantIndex: 0, exact: true};
+    let allocations = 0;
+    const live = RomDriverBridge.attach(owner, {onAllocateResource: () => {allocations++; return true;}});
+    assert(live !== null, "masked Acceleration Ninja callback test attaches");
+    if (live) {
+      live.actor.weaponPartMask = 2;
+      assert(live.tryStartBAttack(owner, [owner]), "part-1-only source action starts");
+      for (let i = 0; i < 20; i++) live.tick(owner, 1, [owner]);
+      assert(allocations === 0, "masked-out part0 cannot dispatch its indirect callback");
+    }
+  }
 }
 
 function runBridgeTest(): void {
