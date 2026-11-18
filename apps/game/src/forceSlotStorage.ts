@@ -80,6 +80,15 @@ export function syncForceSlots(slots: ForceSlot[]): void {
         const saved = stored.find((s) => s.no === slots[i]!.no);
         if (saved) slots[i] = { ...slots[i]!, name: saved.name, borgIds: [...saved.borgIds] };
       }
+      // Saved force numbers not present among this build's starter slots must
+      // survive restoration and the next save. Keep one entry per number, in
+      // its original order, without replacing the built-in starter slots.
+      const restoredNumbers = new Set(slots.map((slot) => slot.no));
+      for (const saved of stored) {
+        if (restoredNumbers.has(saved.no)) continue;
+        slots.push({ ...saved, borgIds: [...saved.borgIds] });
+        restoredNumbers.add(saved.no);
+      }
       return;
     }
   }

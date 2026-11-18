@@ -22,7 +22,7 @@ for (const slot of presets) {
   assert.ok(total <= 1500, `${slot.name} costs ${total}, over the smallest challenge budget`);
 }
 const storage = emitInlineModuleGraph({label:'preset-storage',entry:path.join(root,'apps/game/src/forceSlotStorage.ts'),outDir:path.join(root,'.tmp/preset-storage'),stubs:{'./ui/screens/SelectForce.js':'export {};'}});
-const values=new Map([['gf-force-slots-v1',JSON.stringify([{no:1,name:'MY FORCE',borgIds:['pl0004']},{no:4,name:'MY FOURTH',borgIds:['pl0615']}])]]);
+const values=new Map([['gf-force-slots-v1',JSON.stringify([{no:1,name:'MY FORCE',borgIds:['pl0004']},{no:4,name:'MY FOURTH',borgIds:['pl0615']},{no:17,name:'EXTRA SAVED',borgIds:['pl0200']}])]]);
 globalThis.window={localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)}};
 const {syncForceSlots}=await import(storage.url);
 const slots=BORG_CATALOG.defaultForceSlots.map(s=>({...s,borgIds:[...s.borgIds]}));
@@ -30,4 +30,7 @@ syncForceSlots(slots);
 assert.deepEqual(slots[0],{no:1,name:'MY FORCE',borgIds:['pl0004']});
 assert.deepEqual(slots[3],{no:4,name:'MY FOURTH',borgIds:['pl0615']});
 assert.deepEqual(slots[4],presets[1], 'new presets appear to existing saves');
+assert.deepEqual(slots.at(-1),{no:17,name:'EXTRA SAVED',borgIds:['pl0200']}, 'saved slots beyond presets remain selectable');
+syncForceSlots(slots);
+assert.deepEqual(JSON.parse(values.get('gf-force-slots-v1')).at(-1),slots.at(-1), 'later save retains extra slot');
 console.log('challenge presets PASS: four multi-Borg teams fit 1500, saved edits take precedence');
