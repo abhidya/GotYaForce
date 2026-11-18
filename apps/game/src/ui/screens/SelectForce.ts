@@ -22,6 +22,7 @@
  */
 
 import { deriveForceDeployment } from "../../forceDeployment.js";
+import { createForceModelLookup } from "./forceModelLookup.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { borgBannerPath, borgMiniPath } from "../assets.js";
 import { captureCropImg } from "../captureCrop.js";
@@ -60,14 +61,7 @@ export { FORCE_SLOTS_UNREADABLE_KEY } from "../../forceSlotStorage.js";
 // its real model on the platform (not just the pl0615 special path).
 // ---------------------------------------------------------------------------
 
-let modelManifestPromise: Promise<ReadonlyMap<string, string>> | null = null;
-
-function libraryModelPaths(): Promise<ReadonlyMap<string, string>> {
-  if (!modelManifestPromise) {
-    modelManifestPromise = assetCatalog.loadModelLibraryPaths();
-  }
-  return modelManifestPromise;
-}
+const libraryModelPaths = createForceModelLookup(() => assetCatalog.loadModelLibraryPaths());
 
 export interface SelectForceOptions {
   catalog: readonly ForceBorg[];
@@ -214,6 +208,8 @@ export function createSelectForce(
         if (!modelPath || token !== leadModelToken) return;
         clear(platform);
         mountLeadModel(modelPath);
+      }).catch(() => {
+        // Keep the already-mounted name plate; a later selection can retry.
       });
     }
 
