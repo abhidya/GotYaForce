@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
+import { challengeSmokeOutcome } from "./lib/challenge-smoke-outcome.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -75,9 +76,9 @@ if (battle.observe().timeRemainingFrames !== 18000) {
   );
 }
 const enemyAttrition = (startEnergy[1] ?? 0) - (battle.observe().energy[1] ?? 0);
-if (resolvedFrame < 0 && enemyAttrition <= 0) {
-  throw new Error("1P Challenge smoke failed: battle neither resolved nor produced enemy attrition");
-}
+const outcome = challengeSmokeOutcome(
+  battle.observe().result, enemyAttrition, process.argv.includes("--require-player-victory"),
+);
 
 console.log(
   [
@@ -89,6 +90,7 @@ console.log(
     `firstEnergyChangeFrame=${firstEnergyChangeFrame}`,
     `resolvedFrame=${resolvedFrame}`,
     `result=${battle.observe().result}`,
+    `coverage=${outcome}`,
     `finalEnergy=${JSON.stringify(battle.observe().energy)}`,
   ].join(" "),
 );
