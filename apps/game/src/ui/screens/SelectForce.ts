@@ -136,6 +136,26 @@ export function createSelectForce(
     ]),
   );
 
+  // The extracted legend alone is not interactive. Expose the same actions
+  // to mouse/touch players so the other saved/preset forces are discoverable.
+  const controls = el("div", {class: "gf-select-controls"});
+  const button = (label: string, className: string, action: MenuAction) => {
+    const node = el("button", {class: className, text: label, attrs: {type: "button"},
+      onClick: () => onMenuAction(action)});
+    // Native button activation will generate click; do not also feed the
+    // same Enter/Space keydown to the window-level menu bus.
+    node.addEventListener("keydown", (event) => {
+      if (event.code === "Enter" || event.code === "Space") event.stopPropagation();
+    });
+    return node;
+  };
+  const previous = button("Previous", "gf-select-previous", "left");
+  const next = button("Next", "gf-select-next", "right");
+  const edit = button("Edit force", "gf-select-edit", "edit");
+  const confirm = button("Choose force", "gf-select-confirm", "confirm");
+  controls.append(previous, next, edit, confirm);
+  root.appendChild(controls);
+
   function onMenuAction(action: MenuAction, dir?: -1 | 1): void {
     if (action === "left") {
       selectSlot(selectedSlot - 1);
@@ -172,6 +192,7 @@ export function createSelectForce(
   function renderSlot(): void {
     const slot = currentSlot();
     const previews = deployments();
+    confirm.disabled = previews.some((deployment) => deployment.borgIds.length === 0);
     const { borgIds: force, cost } = previews[0]!;
     const lead = force[0] ?? "";
     const leadBorg = byId.get(lead);

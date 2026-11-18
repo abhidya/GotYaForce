@@ -699,6 +699,9 @@
 .gf-select-force-name { grid-area: force; }
 .gf-select-limit { grid-area: limit; justify-self: end; }
 .gf-select-deployment { grid-column: 1 / -1; font-size: clamp(12px, 1.4vw, 18px); color: white; text-shadow: 0 1px 3px black; }
+.gf-select-controls { position: absolute; z-index: 5; left: 50%; bottom: 10%; transform: translateX(-50%); display: flex; justify-content: center; gap: 6px; width: 96%; flex-wrap: wrap; }
+.gf-select-controls button { min-height: 36px; padding: 5px 10px; border: 1px solid #9ed4ff; border-radius: 6px; background: #173b66; color: white; font: inherit; cursor: pointer; }
+.gf-select-controls button:disabled { opacity: .5; cursor: not-allowed; }
 
 /* ============================ BATTLE INTRO ============================ */
 /*

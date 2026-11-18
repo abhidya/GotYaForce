@@ -195,6 +195,18 @@ function mount(slots,playerCount=1,callbacks={}) {
     onConfirm:s=>{confirmed=s;callbacks.onConfirm?.(s);},onEdit:s=>{edited=s;},...callbacks});
   return {container,handle,get confirmed(){return confirmed;},get edited(){return edited;}};
 }
+test('mouse/touch force controls select, edit and confirm the displayed force', () => {
+  const slots=[slot(['c']),slot(['a','d'],2)]; const ui=mount(slots);
+  const click=name=>ui.container.querySelector(name).listeners.click({});
+  click('.gf-select-next'); click('.gf-select-edit');
+  assert.equal(ui.edited.no,2);
+  click('.gf-select-confirm'); assert.equal(ui.confirmed.no,2);
+  click('.gf-select-previous'); click('.gf-select-confirm'); assert.equal(ui.confirmed.no,1);
+  let stopped=false;
+  ui.container.querySelector('.gf-select-next').listeners.keydown({code:'Enter',stopPropagation(){stopped=true;}});
+  assert.equal(stopped,true,'focused button does not also reach global menu bus');
+  ui.handle.destroy();
+});
 test('UI preview uses affordable count/cost/remain; confirm and edit retain full saved roster', () => {
   stored.clear(); const slots=[slot(['a','b','c'])]; const ui=mount(slots);
   assert.equal(ui.container.querySelector('.gf-select-cost-value').textContent,'1000');
