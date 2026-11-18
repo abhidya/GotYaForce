@@ -23,7 +23,7 @@ function rejects(run: () => void, text: string): void {
   check(message.includes(text), `expected ${text}, got ${message}`);
 }
 const zero = () => ({x: 0, y: 0, z: 0}), unit = () => ({x: 1, y: 1, z: 1});
-function fixture(count = 6, maxVisits = 4096) {
+function fixture(count = 6, maxVisits = 4096, reciprocalEstimate?: (norm: number) => number) {
   const joints = createSourceJObjAnimationRuntime(), feedback = createSourceJointAnimationFeedbackRuntime(joints);
   const unexpected = (): never => {throw Error('fixture does not animate or convert poses during matrix refresh');};
   const mapping = createSourceActorJointMappingRuntime(joints, feedback,
@@ -39,7 +39,7 @@ function fixture(count = 6, maxVisits = 4096) {
   })));
   const id = mapping.createActor({descriptor4b0: null, jointCount1d90: count, boundary1d91: 0,
     boundary1d92: 0, boundary1d93: 0, jointBank1db4: null, jointBank1db8: null, timestep1dc8: 1}, {parts, poses});
-  const matrices = createSourceActorJointMatrixRuntime(feedback), actual = createRomActor();
+  const matrices = createSourceActorJointMatrixRuntime(feedback, 128, reciprocalEstimate), actual = createRomActor();
   actual.pos.x = 10; actual.pos.y = 20; actual.pos.z = 30; actual.stepHeight = 7;
   const matrixIds = Array.from({length: count}, (_, j) => matrices.createMatrix(
     [1, 0, 0, -10 - j, 0, 1, 0, -20 - j, 0, 0, 1, -30 - j]));
@@ -203,6 +203,20 @@ function primaryFixture(maxVisits = 4096) {
   return {...f, counts, placement: counts.primary1a14[0]!};
 }
 export function runActorWorldMatrixSelfTests(): void {
+  // Real world traversal consumes the explicit-estimate quaternion lane from
+  // the same live pose bank. This synthetic dyadic estimate is not hardware.
+  {
+    const norms: number[] = [];
+    const f = fixture(3, 4096, norm => {norms.push(norm); return norm === .5 ? 2 : 1;});
+    f.topology(0)[0] = 1; f.topology(1)[0] = 2;
+    Object.assign(f.pose(1).quaternion, {x: 0, y: 0, z: .5, w: .5});
+    Object.assign(f.pose(2).translation, {x: 1, y: 0, z: 0});
+    f.update();
+    const joint = f.output(1), child = f.output(2);
+    check(norms.join(',') === '0.5,1', 'world traversal reaches estimate for both actual poses');
+    check(joint[0] === 0 && joint[1] === -1 && joint[4] === 1 && joint[5] === 0, 'world joint retains non-identity rotation');
+    check(child[3] === 15 && child[7] === 28 && child[11] === 39, 'child translation follows source parent rotation');
+  }
   runActorWorldSlopedPrimaryPlacementSelfTests();
   runActorWorldFlatHalfPrimaryPlacementSelfTests();
   runActorWorldSlopedTerrainContinuationSelfTests();
