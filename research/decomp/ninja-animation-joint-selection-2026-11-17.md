@@ -21,13 +21,17 @@ Original setup copies the boundary bytes to actor `+1d91..1d93`.
 `8004b8f4` uses those values for the first three channel boundaries; the
 fourth range ends at actor `+1d90`. `8005380c` sets that count from archive
 JOBJ traversal. `research/format-specs/mot-animation-format.md` records 20 JOBJ nodes in
-`pl0000` model_00, and 23 AnimJoint nodes in its b00 animation tree. This is
-stronger evidence than merely counting baked tracks, but it does **not** yet
-prove the value stored in `+1d90`: `8005380c` resets the counter between its
-two `80067e18` walks, and stores the count from the second root loaded via
-the `+788` owner. Until that root is identified for each model, do not assume
-the fourth range is empty or apply the first 20 joints as a complete runtime
-selection.
+`pl0000` model_00, and 23 AnimJoint nodes in its b00 animation tree. The
+checked-in GLBs for `pl0000` and `pl000a` each have 20 named JOBJ nodes; this
+is evidence about exported models, not a live actor measurement.
+
+`8005380c` resets its counter between two `80067e18` walks and stores the
+second count. `800419ec` creates both `+708` and `+788` banks by calling
+`80007030` with the same model index; `80007030` loads a JOBJ root from that
+model descriptor. This supports the two roots having the same topology, but
+the identity of the runtime-selected model and the effects of subsequent
+setup must still be verified. Do not yet treat 20 as a captured `+1d90` value
+or assume the fourth range is empty.
 
 The play instruction for Ninja ground/air X uses part mask `0xf` according to
 `ninja-source-x-2026-11-12.md`; this requests all four channels, not an
