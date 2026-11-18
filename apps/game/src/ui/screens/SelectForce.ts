@@ -22,7 +22,7 @@
  */
 
 import { deriveForceDeployment } from "../../forceDeployment.js";
-import { createForceModelLookup } from "./forceModelLookup.js";
+import { createForceModelLookup } from "../forceModelLookup.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { borgBannerPath, borgMiniPath } from "../assets.js";
 import { captureCropImg } from "../captureCrop.js";
