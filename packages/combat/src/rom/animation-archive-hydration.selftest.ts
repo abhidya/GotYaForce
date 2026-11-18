@@ -5,6 +5,7 @@ import {createSourceFObjRuntime} from './fobj-list.js';
 import {createSourceFObjDescriptorRuntime} from './fobj-descriptor.js';
 import {createSourceAllocatedAObjDescriptorRuntime} from './allocated-aobj-descriptor.js';
 import {createSourceJObjAddAnimationRuntime} from './jobj-add-animation.js';
+import {createSourceJObjAddAnimationTreeRuntime} from './jobj-add-animation-tree.js';
 import {createSourceJObjAnimationRuntime} from './jobj-animation.js';
 import {createSourceJointAnimationFeedbackRuntime} from './joint-animation-feedback.js';
 import {createSourceAObjLifecycleRuntime} from './aobj-lifecycle.js';
@@ -154,7 +155,41 @@ export function runAnimationArchiveHydrationSelfTest(): void {
     const a = x.attachment.getDescriptor(r.roots[0]!.descriptor).aobj08;
     check(a !== null && r.aobjDescriptors[0]!.dataOffset === 0 && x.aobjDescs.getDescriptor(a!).end04 === 7, 'relocated offset zero is actual AObj owner');
     v.setUint32(0x60, 0x24); // Unrelated relocation on null next becomes non-null child/next.
-    rejects(() => x.runtime.hydrateAnimationArchive(bytes, [0]), 'child/next');
+    rejects(() => x.runtime.hydrateAnimationArchive(bytes, [0]), 'unrelocated nonzero pointer');
+  }
+  // Synthetic DAT tree, connected through the actual archive, descriptor,
+  // attachment and JObj owners. It is not original-asset evidence.
+  {const x = owners(), size = 0x50, slots = [0, 0x14, 0x18];
+    const reloc = 0x20 + size, table = reloc + slots.length * 4, strings = table + 8;
+    const bytes = new Uint8Array(strings + 2), v = new DataView(bytes.buffer);
+    const w = (at: number, value: number) => v.setUint32(at, value, false);
+    w(0, bytes.length); w(4, size); w(8, slots.length); w(12, 1);
+    w(0x20, 0x14); w(0x20 + 0x14, 0x3c); w(0x20 + 0x18, 0x28);
+    w(0x20 + 0x24, 1); w(0x20 + 0x4c, 1);
+    slots.forEach((slot,i) => w(reloc + 4*i, slot)); w(table, 0); bytes.set([120,0],strings);
+    const result = x.runtime.hydrateAnimationArchive(bytes, [0]);
+    const root = x.attachment.getDescriptor(result.roots[0]!.descriptor);
+    const child = x.attachment.getDescriptor(root.child00!);
+    check(child.next04 != null && child.child00 != null, 'child and sibling links hydrate into real descriptors');
+    const make = () => x.joints.createJoint({sibling08: null, child10: null, flags14: 0,
+      rotation1c: 0, rotation20: 0, rotation24: 0, scale2c: 1, scale30: 1, scale34: 1,
+      translation38: 0, translation3c: 0, translation40: 0},
+    {parent0c: null, aobj7c: null, robj80: null, dobj18: null, classUpdate50: null});
+    const a = make(), b = make(), grand = make();
+    x.joints.getJoint(x.joint).child10 = a; x.joints.getJoint(a).sibling08 = b; x.joints.getJoint(a).child10 = grand;
+    createSourceJObjAddAnimationTreeRuntime(x.joints, x.attachment).addAnimationTree(x.joint, result.roots[0]!.descriptor);
+    check([x.joint,a,b,grand].every((id,i) => Boolean(x.joints.getJoint(id).flags14 & 8) === [false,true,false,true][i]),
+      'hydrated graph attaches matching descriptors to actual joint tree');
+    w(0x20 + 0x18, 0x3c);
+    const aliasOwner = owners(), aliasResult = aliasOwner.runtime.hydrateAnimationArchive(bytes, [0]);
+    const aliasRoot = aliasOwner.attachment.getDescriptor(aliasResult.roots[0]!.descriptor);
+    const aliasChild = aliasOwner.attachment.getDescriptor(aliasRoot.child00!);
+    check(aliasChild.child00 === aliasChild.next04, 'shared graph target retains one actual descriptor identity');
+    const limited = owners({maxDescriptors: 2}); rejects(() => limited.runtime.hydrateAnimationArchive(bytes, [0]), 'descriptor budget');
+    check(limited.events.length === 0, 'tree descriptor budget fails before owner effects');
+    w(0x20 + 0x18, 0); w(0x20 + 0x3c, 0); w(reloc + 8, 0x3c); // Grandchild points back to root.
+    const cyclic = owners(); rejects(() => cyclic.runtime.hydrateAnimationArchive(bytes, [0]), 'cycle');
+    check(cyclic.events.length === 0, 'cycle rejected before owner effects');
   }
   const malformed: [string, (d: ReturnType<typeof dat>) => void][] = [
     ['file size', d => d.word(0, d.bytes.length + 1)],
@@ -170,7 +205,7 @@ export function runAnimationArchiveHydrationSelfTest(): void {
     ['name offset', d => d.word(d.publicStart + 4, 0xffffffff)],
     ['unterminated', d => d.bytes[d.bytes.length - 1] = 65],
     ['unrelocated nonzero', d => d.dataWord(0, 0x14)],
-    ['child/next', d => {d.word(d.relocStart + 4, 0); d.dataWord(0, 0);}],
+    ['cycle', d => {d.word(d.relocStart + 4, 0); d.dataWord(0, 0);}],
     ['RObj', d => {d.word(d.relocStart + 4, 12); d.dataWord(12, 0);}],
     ['joint reference', d => {d.word(d.relocStart + 4, 0x34); d.dataWord(0x34, 0);}],
     ['finite float32', d => d.view.setFloat32(0x20 + 0x2c, Infinity)],

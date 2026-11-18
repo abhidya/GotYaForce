@@ -251,6 +251,9 @@ child/sibling links alongside actual AnimJoint child/next links, delegating each
 visited joint to the existing single-joint animation owner. A `0x1000` JObj
 flag skips descendants; missing animation descriptors still traverse joints.
 The regression exercises real owners, including multiple siblings and a
-grandchild. The archive hydrator still rejects tree descriptors, this traversal
-has not been compared directly with Dolphin, and it is not connected to the
-playable renderer. Visit budgets and error handling are host-only bounds.
+grandchild. The bounded archive hydrator now builds acyclic AnimJoint child/next
+graphs, preserves shared descriptor identity, and rejects cycles before owner
+effects. A synthetic DAT tree was hydrated and attached through the actual
+archive, descriptor and JObj owners. Neither original archive loading nor this
+tree traversal has been compared directly with Dolphin, and it is not connected
+to the playable renderer. Visit budgets and error handling are host-only bounds.

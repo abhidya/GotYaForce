@@ -3,10 +3,10 @@
  * public lookup: :3684–3723. AnimJoint: chunk_0071.c:4000–4030,4167–4174;
  * AObjDesc: chunk_0070.c:2691–2713; FObjDesc: chunk_0071.c:1328–1335.
  *
- * Callers explicitly identify public indices containing single-joint AnimJoint
+ * Callers explicitly identify public indices containing AnimJoint
  * roots. No scene-root inference, tagged4d548 allocation/cache, retail RAM
  * relocation, native fault order, live Battle ownership or asset provenance is
- * claimed. Child/next, RObj, external tables and AObj joint references refuse.
+ * claimed. Child/next DAGs are hydrated; RObj, external tables and AObj joint references refuse.
  * Unselected publics remain in the real public table but are not hydrated.
  * Duplicate names retain first-match lookup; a selected name's first target
  * must also be explicitly selected (aliases by target need no extra selection).
@@ -28,7 +28,7 @@
  * an aggregate byte budget: physical RAM aliasing is NOT modeled. An interior
  * fobjData.cursorAt is not a valid stream base and is deliberately never used.
  *
- * The immutable private input copy, 16MiB ceiling, selected leaf-root domain,
+ * The immutable private input copy, 16MiB ceiling, selected acyclic graph domain,
  * aligned/nonoverlapping descriptor extents, finite scalars, bounds/budgets,
  * stable non-proxy own-data adapters, captured receivers, synchronous owned
  * results and caught-reentry poison are host limits. Source owner mutations or
@@ -219,7 +219,8 @@ export function createSourceAnimationArchiveHydrationRuntime(
           if (!Number.isFinite(value)) fail(`${field}: finite float32 required`);
           return value;
         };
-        const anims = new Map<number, {aobj: number | null; flags: number}>();
+        const anims = new Map<number, {child: number | null; next: number | null; aobj: number | null; flags: number}>();
+        const animOrder: number[] = [], animState = new Map<number, 1 | 2>();
         const aobjPlans = new Map<number, {flags: number; end: number; fobj: number | null}>();
         const fobjPlans = new Map<number, {next: number | null; length: number; start: number; track: number; format0d: number; format0e: number; data: number | null}>();
         const packedLengths = new Map<number, number>();
@@ -241,16 +242,25 @@ export function createSourceAnimationArchiveHydrationRuntime(
           }
         };
         for (const index of selected) {
-          const at = publics[index]!.offset;
-          if (!claim(at, 'AnimJoint', 0x14, [0, 4, 8, 12])) continue;
-          if (pointer(at) !== null || pointer(at + 4) !== null) fail('AnimJoint child/next graph unsupported by single-joint import');
-          if (pointer(at + 12) !== null) fail('AnimJoint RObj animation unsupported');
-          const aobj = pointer(at + 8); anims.set(at, {aobj, flags: word(dataStart + at + 16)});
-          if (aobj !== null && claim(aobj, 'AObj', 0x10, [8, 12])) {
-            if (pointer(aobj + 12) !== null) fail('AObj joint reference unsupported');
-            const fobj = pointer(aobj + 8);
-            aobjPlans.set(aobj, {flags: word(dataStart + aobj), end: finite(aobj + 4, 'AObj end04'), fobj});
-            parseFobjs(fobj);
+          const pending: {at: number; exit: boolean}[] = [{at: publics[index]!.offset, exit: false}];
+          while (pending.length) {
+            const {at, exit} = pending.pop()!;
+            if (exit) {animState.set(at, 2); animOrder.push(at); continue;}
+            if (animState.get(at) === 1) fail('AnimJoint descriptor cycle unsupported');
+            if (animState.get(at) === 2) continue;
+            claim(at, 'AnimJoint', 0x14, [0, 4, 8, 12]);
+            const child = pointer(at), next = pointer(at + 4);
+            if (pointer(at + 12) !== null) fail('AnimJoint RObj animation unsupported');
+            const aobj = pointer(at + 8); anims.set(at, {child, next, aobj, flags: word(dataStart + at + 16)});
+            if (aobj !== null && claim(aobj, 'AObj', 0x10, [8, 12])) {
+              if (pointer(aobj + 12) !== null) fail('AObj joint reference unsupported');
+              const fobj = pointer(aobj + 8);
+              aobjPlans.set(aobj, {flags: word(dataStart + aobj), end: finite(aobj + 4, 'AObj end04'), fobj});
+              parseFobjs(fobj);
+            }
+            animState.set(at, 1); pending.push({at, exit: true});
+            if (next !== null) pending.push({at: next, exit: false});
+            if (child !== null) pending.push({at: child, exit: false});
           }
         }
         let packedBytes = 0;
@@ -296,7 +306,11 @@ export function createSourceAnimationArchiveHydrationRuntime(
         }
         for (const [at, plan] of aobjPlans) aobjIds.set(at, symbolCall(aobjs, aobjFactory, [{flags00: plan.flags, end04: plan.end,
           fobj08: plan.fobj === null ? null : fobjIds.get(plan.fobj)!, joint0c: null}]));
-        for (const [at, plan] of anims) animIds.set(at, symbolCall(joints, jointFactory, [{aobj08: plan.aobj === null ? null : aobjIds.get(plan.aobj)!, robj0c: null, flags10: plan.flags}]));
+        for (const at of animOrder) {
+          const plan = anims.get(at)!;
+          animIds.set(at, symbolCall(joints, jointFactory, [{child00: plan.child === null ? null : animIds.get(plan.child)!,
+            next04: plan.next === null ? null : animIds.get(plan.next)!, aobj08: plan.aobj === null ? null : aobjIds.get(plan.aobj)!, robj0c: null, flags10: plan.flags}]));
+        }
         for (const [at, descriptor] of animIds) {
           if (invoke(setup, bindAddress, [byteBase, cursor(dataStart + at), descriptor]) !== undefined) fail('bindAddress must synchronously return void');
         }
