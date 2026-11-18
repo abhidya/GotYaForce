@@ -35,7 +35,7 @@
 // (de)arms, sound cues, and effect triggers are ported 1:1. The following are host-
 // renderer / unsurfaced deps, marked TODO and left as no-ops (faithful behavior with
 // no host bound):
-//   FUN_80067310  — action 0 and 2 integrate scalar motion; action 3 remains TODO.
+//   FUN_80067310  — scalar motion is integrated in all source call sites.
 //                   Collision/aim and original host entry timing remain partial.
 //   zz_00677b0_   — action-2 phase-1 uses the host stage-motion probe; other sites
 //                   retain scratch grounded77b0. Full ROM slope parity is pending.
@@ -402,6 +402,14 @@ function advanceAction2ToPhase2(actor: NinjaActor): void {
 //        drain +0x558, on <= 0 clear + exit (+0x694 = 4.0 + dt); else clear +
 //        dispatchUpperBodyCue(7) + +0x694 = 1.0 + dt.
 // ============================================================================
+/** The source preserves +0x38 between frames and damps it before adding to position. */
+function stepAction3Offset(actor: NinjaActor): void {
+  for (const axis of ["x", "y", "z"] as const) {
+    actor.motion[axis] = Math.fround(actor.motion[axis] * AN.A3_QUAT_SCALE);
+    actor.pos[axis] = Math.fround(actor.pos[axis] + actor.motion[axis]);
+  }
+}
+
 function action3(actor: NinjaActor, ctx: StreamContext): void {
   const phase = actor.fbPhaseSlots[0] ?? 0;
   switch (phase) {
@@ -419,8 +427,11 @@ function action3(actor: NinjaActor, ctx: StreamContext): void {
       if ((actor.controlWord & 0x40) === 0) {                 // not position-frozen
         actor.yVel = AN.A2_APPROACH_CAP;                      // +0x48 = 10.0 (FLOAT_8043a900)
       }
-      // gnt4_PSVECSubtract(+0x20, +0x5e8, +0x38) + PSQUATScale(0.95) + PSVECAdd →
-      // position lerp toward cached target; TODO(host) renderer vector math.
+      // gnt4_PSVECSubtract(pos, target, motion): source moves AWAY from +0x5e8.
+      actor.motion.x = Math.fround(actor.pos.x - actor.targetCache5e8.x);
+      actor.motion.y = Math.fround(actor.pos.y - actor.targetCache5e8.y);
+      actor.motion.z = Math.fround(actor.pos.z - actor.targetCache5e8.z);
+      stepAction3Offset(actor);
       // zz_00677b0_(actor) — TODO(host) ground snap.
       startStream(actor, 0xf, 2, 1, AN.STREAM_RATE);          // zz_004beb8_(-1, actor, 0xf, 2, 1)
       return;
@@ -449,8 +460,8 @@ function action3(actor: NinjaActor, ctx: StreamContext): void {
         actor.dashStrength1d0f = 0;                           // +0x1d0f = 0
         actor.gravityCoeff = actor.descriptor?.handlerData6c ?? actor.gravityCoeff; // +0x50 = desc+0x6c
       }
-      // FUN_80067310(1.0, actor, +0x5ac) — TODO.
-      // PSQUATScale(0.95, +0x38, +0x38) + PSVECAdd(+0x20, +0x38, +0x20) — TODO vector math.
+      integratePhysicsPrimary(AN.PHYSICS_RATE, actor, actor.activeYaw);
+      stepAction3Offset(actor);
       // zz_00677b0_(actor) — TODO.
       if (actor.contactP0 < 0) {                              // +0x1cef < 0 → advance
         actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1; // +0x540++
@@ -460,7 +471,10 @@ function action3(actor: NinjaActor, ctx: StreamContext): void {
     }
     case 2: { // FUN_80162e9c — exit
       tickStream(actor, 0xf, ctx);                            // zz_004cd24_(actor, 0xf)
-      // FUN_80067310(1.0, actor, +0x5ac) — TODO.
+      const previous = { ...actor.pos };
+      integratePhysicsPrimary(AN.PHYSICS_RATE, actor, actor.activeYaw);
+      const contact = actor.physicsRuntime?.probeMotion?.(previous, actor.pos, actor.yVel);
+      if (contact) { actor.yVel = contact.velY; actor.grounded77b0 = contact.grounded; }
       const grounded = actor.grounded77b0 ?? false;           // iVar3 = zz_00677b0_(actor)
       if (!grounded || actor.contactP0 >= 0) {                // !grounded OR +0x1cef >= 0
         const mainRem = actor.handlerTimer - actor.dt;        // fVar1 = +0x558 - dt
@@ -745,6 +759,19 @@ export function runAccelerationNinjaSelfTests(assert: AssertFn): void {
 
   // ------------------------------------------------------------------------
   console.log("\n[acceleration-ninja.selfcheck] ACTION 3 — hover dash strike (3-phase):");
+
+  // Source offset is position minus cached target, retained and damped each frame.
+  {
+    const a = createRomActor() as NinjaActor;
+    configureAccelerationNinjaFamily(a, {});
+    a.actionIndex = 3; a.pos.x = 20; a.targetCache5e8.x = 10;
+    a.rootAction!(a);
+    assert(Math.abs(a.motion.x - 9.5) < 1e-5 && Math.abs(a.pos.x - 29.5) < 1e-5,
+      "a3 entry initializes and applies the source away-from-target offset");
+    a.rootAction!(a);
+    assert(Math.abs(a.motion.x - 9.025) < 1e-4 && Math.abs(a.pos.x - 38.525) < 1e-4,
+      "a3 hover damps and reapplies the saved offset");
+  }
 
   // --- a3 ph0: setup → ph1. +0x558=4, +0x54a=5, +0x48=10 (not frozen). ---
   {
