@@ -729,11 +729,11 @@ class BattleImpl implements Battle {
     if (this.observationCache) return this.observationCache;
     const state = this.state;
     this.observationCache = {
-      revolverLaunchFlashes: structuredClone(this.revolverLaunchFlashes),
-      poweredLaunchFlashes: structuredClone(this.poweredLaunchFlashes),
+      revolverLaunchFlashes: snapshotList(this.revolverLaunchFlashes),
+      poweredLaunchFlashes: snapshotList(this.poweredLaunchFlashes),
       actors: state.borgs.map(snapshotActor),
-      diverAuras: structuredClone(state.diverAuras ?? []),
-      diverAuraTails: structuredClone(state.diverAuraTails ?? []),
+      diverAuras: snapshotList(state.diverAuras),
+      diverAuraTails: snapshotList(state.diverAuraTails),
       // Groundwave emitters are invisible; pending/released pulse objects have no model.
       // Active pulses use the generic procedural flame, not source visual parity.
       projectiles: state.projectiles.filter(p=>p.ninjaSource?.kind!=='primary'||p.ninjaSource.flight.visible).filter(p=>(!p.gblackGroundWaveSource||(p.gblackGroundWaveSource.kind==='child'&&p.gblackGroundWaveSource.phase==='active'))).filter(p=>p.timeBomberSource?.kind!=='mine'||p.timeBomberSource.phase==='active').map(snapshotProjectile),
@@ -1677,6 +1677,12 @@ class BattleImpl implements Battle {
   private hasPendingDeathLifecycle(): boolean {
     return this.state.borgs.some((b) => b.alive && (b.hp <= 0 || b.state === "death"));
   }
+}
+
+/** Empty lists need a fresh caller-owned array, not a structured-clone pass.
+ * Nonempty lists retain the existing deep-snapshot behavior. */
+function snapshotList<T>(source: T[] | undefined): T[] {
+  return source?.length ? structuredClone(source) : [];
 }
 
 function snapshotActor(actor: BorgRuntime): BattleActorObservation {

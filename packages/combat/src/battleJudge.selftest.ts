@@ -284,12 +284,35 @@ function testAllCpuEnemyWipeIsWin(): void {
   assertEqual(battle.observe().result, "win", "all-CPU: lone survivor -> 'win'");
 }
 
+function testEmptyEffectSnapshotsAreIndependent(): void {
+  const battle = makeBattle({team0Human:true,team1Human:false});
+  const first = battle.observe();
+  const lists = [first.revolverLaunchFlashes, first.poweredLaunchFlashes, first.diverAuras, first.diverAuraTails];
+  assertEqual(new Set(lists).size, 4, "empty effect lists are distinct caller-owned arrays");
+  (first.diverAuras as unknown as unknown[]).push({sentinel:true});
+  assertEqual((battleStateForSelfcheck(battle).diverAuras ?? []).length,0,"mutating empty snapshot does not mutate simulation");
+  const second = battle.step(1/60,idle);
+  assertEqual(second.diverAuras.length,0,"next snapshot is fresh after caller mutation");
+  assertEqual(first.poweredLaunchFlashes === second.poweredLaunchFlashes,false,"empty lists are distinct across boundaries");
+
+  const populated = makeBattle({team0Human:true,team1Human:false});
+  const state = battleStateForSelfcheck(populated);
+  const effect = {particles:[{offset:{x:12}}]};
+  state.diverAuras = [effect] as unknown as NonNullable<typeof state.diverAuras>;
+  const view = populated.observe().diverAuras as unknown as typeof effect[];
+  effect.particles[0]!.offset.x = 42;
+  assertEqual(view[0]!.particles[0]!.offset.x,12,"nonempty effect snapshot is deeply detached");
+  view[0]!.particles[0]!.offset.x = 99;
+  assertEqual(effect.particles[0]!.offset.x,42,"mutating nonempty snapshot cannot mutate simulation");
+}
+
 // --- Runner ------------------------------------------------------------------------------
 
 export function runSelfTest(): number {
   failures = 0;
   checks = 0;
 
+  testEmptyEffectSnapshotsAreIndependent();
   testEnemyWipeIsPlayerWin();
   testProjectileObservationAndDespawnFacts();
   testPlayerWipeIsLose();
