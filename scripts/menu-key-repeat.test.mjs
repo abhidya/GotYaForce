@@ -62,6 +62,21 @@ function key(code, repeat = false, target = null) {
   listeners.get("keydown")({ code, repeat, target, preventDefault() { prevented = true; } });
   return prevented;
 }
+test("modified shortcuts and composition do not trigger menu actions", t => {
+  const {host}=mount(t); const received=[];
+  host.set({handleMenuInput:e=>received.push(e.action),destroy(){}});
+  for (const event of [
+    {code:'KeyA',ctrlKey:true}, {code:'KeyP',metaKey:true},
+    {code:'ArrowLeft',altKey:true}, {code:'Enter',isComposing:true},
+  ]) {
+    let prevented=false;
+    listeners.get('keydown')({...event,target:null,repeat:false,preventDefault(){prevented=true;}});
+    assert.equal(prevented,false,`${event.code} browser shortcut must pass`);
+  }
+  assert.deepEqual(received,[]);
+  assert.equal(key('KeyA'),true,'ordinary A remains menu confirm');
+  assert.deepEqual(received,['confirm']);
+});
 function mount(t, options = {}) {
   const host = createMenuScreenHost(new Element());
   t.after(() => host.destroy());
