@@ -1,7 +1,9 @@
 import {sourceReduceHalfPi} from './source-angle-reduction.js';
 import {sourceSineKernel, sourceSineKernelTail} from './source-sine.js';
 import {sourceCosineKernel} from './source-cosine.js';
+import {runSourceShortTrigDolphinSelfTest} from './source-short-trig-dolphin.selftest.js';
 export function runSourceAngleReductionSelfTest(): void {
+  runSourceShortTrigDolphinSelfTest();
   for (let i = -31415; i <= 31415; i++) {
     const x = i / 10000, reduced = sourceReduceHalfPi(x);
     const result = reduced.quadrant === 0 ? sourceSineKernel(reduced.head)

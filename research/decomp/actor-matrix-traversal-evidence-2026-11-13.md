@@ -235,6 +235,11 @@ positive-pi high-word boundary, including the source's cancellation refinements.
 Its split constants were read from the authenticated archived GG4E ProgramDB.
 All 65,536 signed short inputs, after the source float32 angle multiplier, are
 covered by host-math sine and cosine sanity checks. Those checks do not establish
-bit-exact emulator or hardware behavior; the newly admitted range still needs
-direct Dolphin comparisons. It remains an explicitly supplied offline provider,
-not a playable-renderer integration.
+bit-exact emulator or hardware behavior. A subsequent isolated Dolphin JIT64
+session directly called the original sine and cosine wrappers with 52 controlled
+signed-short inputs, including both sides of the reduction boundary and values
+near the signed endpoints. All 104 returned float32 results match the offline
+candidate bit-for-bit. These are sampled calls, not exhaustive emulator or
+physical-console evidence. The isolated instance was stopped; the previously
+running emulator was left untouched. This remains an explicitly supplied
+offline provider, not a playable-renderer integration.
